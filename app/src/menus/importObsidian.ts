@@ -2,6 +2,7 @@ import {Dialog} from "../dialog";
 import {showMessage} from "../dialog/message";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {fetchSyncPost} from "../util/fetch";
+import {getHostCapabilities} from "../util/hostCapabilities";
 
 interface IObsidianAnalysis {
     vaultName: string;
@@ -233,6 +234,9 @@ const showConfirmation = (taskID: string, analysis: IObsidianAnalysis, onComplet
 };
 
 export const importObsidianVault = async (localPath: string, onComplete?: () => void) => {
+    if (!getHostCapabilities().importExport) {
+        return;
+    }
     const response = await fetchSyncPost("/api/import/startObsidianVaultAnalysis", {localPath});
     if (response.code !== 0) {
         return;

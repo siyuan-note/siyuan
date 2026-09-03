@@ -8,6 +8,7 @@ import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {fetchPost} from "../util/fetch";
 import {pathPosix} from "../util/pathName";
+import {getHostCapabilities} from "../util/hostCapabilities";
 import * as dayjs from "dayjs";
 
 interface IRepoFile {
@@ -36,7 +37,7 @@ export const renderRepoFileList = (files: IRepoFile[], element: Element, showPat
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="saveAs" aria-label="${window.siyuan.languages.saveAs}">
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w${getHostCapabilities().importExport ? "" : " fn__none"}" data-type="saveAs" aria-label="${window.siyuan.languages.saveAs}">
         <svg><use xlink:href="#iconDownload"></use></svg>
     </span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="selectVersion" aria-pressed="false" aria-label="${window.siyuan.languages.compare}">
@@ -57,7 +58,7 @@ export const renderRepoFileList = (files: IRepoFile[], element: Element, showPat
         </div>
         <div class="fn__flex" style="height: 26px">
             <span class="fn__flex-1"></span>
-            <span class="b3-list-item__action" data-type="saveAs">
+            <span class="b3-list-item__action${getHostCapabilities().importExport ? "" : " fn__none"}" data-type="saveAs">
                 <svg><use xlink:href="#iconDownload"></use></svg>
                 <span class="fn__space"></span>${window.siyuan.languages.saveAs}
             </span>
@@ -79,7 +80,7 @@ export const renderRepoFileList = (files: IRepoFile[], element: Element, showPat
             ${dayjs(item.updated).format("YYYY-MM-DD HH:mm:ss")}
         </div>
     </div>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="saveAs" aria-label="${window.siyuan.languages.saveAs}">
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w${getHostCapabilities().importExport ? "" : " fn__none"}" data-type="saveAs" aria-label="${window.siyuan.languages.saveAs}">
         <svg><use xlink:href="#iconDownload"></use></svg>
     </span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
@@ -108,6 +109,9 @@ export const rollbackRepoFile = (element: Element) => {
 };
 
 export const saveRepoFile = (element: Element) => {
+    if (!getHostCapabilities().importExport) {
+        return;
+    }
     fetchPost("/api/repo/exportRepoFile", {
         id: element.getAttribute("data-id")
     }, (response) => {

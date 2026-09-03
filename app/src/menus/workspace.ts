@@ -38,6 +38,7 @@ import {upDownHint} from "../util/upDownHint";
 import {openDataMigration} from "./dataMigration";
 import {openLink} from "../editor/openLink";
 import {adjustEditorFontSize} from "../util/editorFontSize";
+import {getHostCapabilities} from "../util/hostCapabilities";
 
 const editLayout = (layoutName?: string) => {
     const dialog = new Dialog({
@@ -248,7 +249,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
         window.siyuan.menus.menu.remove();
         return;
     }
-    fetchPost("/api/system/getWorkspaces", {}, (response) => {
+    const renderMenu = (workspaces: IWorkspace[]) => {
         window.siyuan.menus.menu.remove();
         window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BAR_WORKSPACE);
         if (!window.siyuan.config.readonly) {
@@ -287,7 +288,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             type: "submenu",
             submenu: dockMenu
         }).element);
-        if (!window.siyuan.config.readonly) {
+        if (!window.siyuan.config.readonly && getHostCapabilities().workspaces) {
             let workspaceSubMenu: IMenu[];
             /// #if !BROWSER
             workspaceSubMenu = [{
@@ -315,7 +316,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 }
             }];
             workspaceSubMenu.push({id: "separator_1", type: "separator"});
-            response.data.forEach((item: IWorkspace) => {
+            workspaces.forEach((item: IWorkspace) => {
                 workspaceSubMenu.push(workspaceItem(item) as IMenu);
             });
             /// #else
@@ -394,7 +395,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 }
             }];
             workspaceSubMenu.push({id: "separator_1", type: "separator"});
-            response.data.forEach((item: IWorkspace) => {
+            workspaces.forEach((item: IWorkspace) => {
                 workspaceSubMenu.push({
                     iconHTML: "",
                     action: "iconCloseRound",
@@ -650,7 +651,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     openHistory(app);
                 }
             }).element);
-            if (!window.siyuan.config.readonly) {
+            if (!window.siyuan.config.readonly && getHostCapabilities().importExport) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "dataMigration",
                     label: window.siyuan.languages.dataMigration,
@@ -709,10 +710,18 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             }).element);
         }
         window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom});
-    });
+    };
+    if (getHostCapabilities().workspaces) {
+        fetchPost("/api/system/getWorkspaces", {}, (response) => renderMenu(response.data));
+    } else {
+        renderMenu([]);
+    }
 };
 
 const openWorkspace = (workspace: string) => {
+    if (!getHostCapabilities().workspaces) {
+        return;
+    }
     /// #if !BROWSER
     if (workspace === window.siyuan.config.system.workspaceDir) {
         return;

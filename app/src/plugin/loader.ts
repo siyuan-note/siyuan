@@ -23,6 +23,7 @@ import {
     activateCustomBlockPlugin,
     deactivateCustomBlockPlugin,
 } from "./customBlockRender";
+import {getHostCapabilities} from "../util/hostCapabilities";
 
 const requireFunc = (key: string) => {
     const modules = {
@@ -126,6 +127,9 @@ const createPluginDataLoader = () => {
 };
 
 export const loadPlugins = async (app: App, names?: string[], init = true) => {
+    if (!getHostCapabilities().plugins) {
+        return;
+    }
     const manager = getLifecycleManager(app);
     let tasks: Promise<void>[];
     let shouldStart = true;
@@ -169,6 +173,9 @@ const insertPluginCSS = (item: IPluginData, pluginsStyle: HTMLElement) => {
 
 // 启用插件
 export const loadPlugin = async (app: App, item: IPluginData) => {
+    if (!getHostCapabilities().plugins) {
+        return;
+    }
     const manager = getLifecycleManager(app);
     manager.start();
     await manager.requestLoad(item.name, async () => item);
@@ -335,6 +342,9 @@ export interface IPluginReloadData {
 }
 
 export const reloadPlugin = async (app: App, data: IPluginReloadData = {}) => {
+    if (!getHostCapabilities().plugins) {
+        return;
+    }
     const manager = getLifecycleManager(app);
     const uninstallNames = new Set(data.uninstallPlugins || []);
     const unloadNames = new Set((data.unloadPlugins || []).filter(name => !uninstallNames.has(name)));

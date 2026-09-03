@@ -11,6 +11,7 @@ import {openSetting} from "../config";
 import type {App} from "../index";
 import {Constants} from "../constants";
 import {getCloudURL} from "../config/util/about";
+import {sanitizeKernelHTML} from "../util/hostCapabilities";
 
 const openSyncSetting = (app?: App) => {
     if (!app) {
@@ -102,7 +103,7 @@ export const renderSyncCloudList = (cloudListElement: Element, reload = false, c
         if (response.code === 1) {
             syncListHTML = `<ul>
     <li class="b3-list--empty ft__error">
-        ${response.msg}
+        ${sanitizeKernelHTML(response.msg)}
     </li>
     <li class="b3-list--empty">
         ${window.siyuan.languages.cloudConfigTip}

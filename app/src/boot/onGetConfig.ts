@@ -38,15 +38,19 @@ import {openDesktopOnboarding} from "../onboarding";
 import {ensureUILayout} from "../util/ensureUILayout";
 import {dispatchPluginGlobalShortcut} from "../plugin/globalShortcut";
 import {requestResponsiveDockLayout} from "../layout/dock/responsive";
+import {getHostCapabilities, setHostConnection, type TKernelConnection} from "../util/hostCapabilities";
 
 export const onGetConfig = (isStart: boolean, app: App) => {
     correctHotkey(app);
     document.body.classList.toggle("body--windows", isWindows());
     /// #if !BROWSER
-    ipcRenderer.invoke(Constants.SIYUAN_INIT, {
+    void ipcRenderer.invoke(Constants.SIYUAN_INIT, {
         languages: window.siyuan.languages["_trayMenu"],
-        workspaceDir: window.siyuan.config.system.workspaceDir,
-        port: location.port
+        workspaceDir: getHostCapabilities().workspaces ? window.siyuan.config.system.workspaceDir : "",
+        port: location.port,
+        remote: getHostCapabilities().remoteKernel,
+    }).then((connection: TKernelConnection | undefined) => setHostConnection(connection)).catch((error) => {
+        console.error("initialize desktop host failed:", error);
     });
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
     const position = Constants.SIZE_ZOOM.find((item) => item.zoom === window.siyuan.storage[Constants.LOCAL_ZOOM]).position;
@@ -215,6 +219,9 @@ export const initWindow = async (app: App) => {
         }
     });
     ipcRenderer.on(Constants.SIYUAN_EXPORT_PDF, async (e, ipcData) => {
+        if (!getHostCapabilities().importExport) {
+            return;
+        }
         const msgId = showMessage(window.siyuan.languages.exporting, -1);
         window.siyuan.storage[Constants.LOCAL_EXPORTPDF] = {
             removeAssets: ipcData.removeAssets,

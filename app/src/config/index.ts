@@ -19,6 +19,7 @@ import {clearSyncTabElement} from "./tabs/syncRuntime";
 import type {TSettingTab} from "./setting/tabs";
 import type {App} from "../index";
 import {unmountAssetsTab} from "./assets";
+import {getHostCapabilities} from "../util/hostCapabilities";
 
 /// #if !MOBILE
 const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
@@ -92,6 +93,9 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
 
 export const openSetting = (app: App, tab?: TSettingTab) => {
     if (tab === "bazaar" && !isBazaarAvailable()) {
+        return;
+    }
+    if (tab === "export" && !getHostCapabilities().importExport) {
         return;
     }
     /// #if MOBILE

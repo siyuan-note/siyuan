@@ -24,6 +24,7 @@ import {
 } from "./cancelSuperBlock";
 import {shouldFocusJumpTarget, shouldFocusParentDocumentTitle} from "./jumpToParent";
 import {getHorizontalSuperBlockChild} from "./superBlock";
+import {normalizeHTMLAssetIFrameBlockDOM} from "../asset/html";
 
 export const getCancelSBOperations = async (nodeElement: Element, options: {
     notebookID?: string,
@@ -45,7 +46,7 @@ export const getCancelSBOperations = async (nodeElement: Element, options: {
             notebook: options.notebookID,
         });
         const template = document.createElement("template");
-        template.innerHTML = response.data?.dom || "";
+        template.innerHTML = normalizeHTMLAssetIFrameBlockDOM(response.data?.dom || "");
         const fullSuperBlockElement = template.content.querySelector(`[data-node-id="${id}"]`);
         if (!fullSuperBlockElement) {
             return {

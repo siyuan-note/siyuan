@@ -37,6 +37,7 @@ import {
 } from "./flashcardMode";
 import {setFold} from "../protyle/util/blockFold";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
+import {appendRemoteQuery} from "../util/hostCapabilities";
 
 const genCardCount = (cardsData: ICardData, allIndex = 0) => {
     let newIndex = 0;
@@ -595,10 +596,10 @@ export const bindCardEvent = async (options: {
                                 }
                             }
                         }];
-                        ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
-                            // 需要 encode， 否则 https://github.com/siyuan-note/siyuan/issues/9343
-                            url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify(json))}`
-                        });
+                        const url = new URL("/stage/build/app/window.html", window.location.origin);
+                        url.searchParams.set("v", Constants.SIYUAN_VERSION);
+                        url.searchParams.set("json", JSON.stringify(json));
+                        ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {url: appendRemoteQuery(url).href});
                         options.dialog.destroy();
                     }
                 });

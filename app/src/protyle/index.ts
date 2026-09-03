@@ -53,6 +53,7 @@ import {
     refreshSearchPathAfterRename,
 } from "../search/path";
 import {syncSearchConfigHPath} from "../search/config";
+import {sanitizeKernelHTML} from "../util/hostCapabilities";
 /// #endif
 import {isSupportCSSHL} from "./render/searchMarkRender";
 import {renderAVAttribute} from "./render/av/blockAttr";
@@ -320,7 +321,7 @@ export class Protyle {
                             this.protyle.wysiwyg.element.querySelectorAll(`[data-type~="block-ref"][data-id="${data.data.id}"]`).forEach(item => {
                                 if (item.getAttribute("data-subtype") === "d") {
                                     // 同 updateRef 一样处理 https://github.com/siyuan-note/siyuan/issues/10458
-                                    item.innerHTML = data.data.refText;
+                                    item.innerHTML = sanitizeKernelHTML(data.data.refText);
                                 }
                             });
                             /// #if !MOBILE

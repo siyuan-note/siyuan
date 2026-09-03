@@ -2,6 +2,9 @@ import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
 import {genIconHTML} from "./util";
 import {hasClosestByClassName} from "../util/hasClosest";
+import {getHostCapabilities} from "../../util/hostCapabilities";
+import {MERMAID_SANITIZE_OPTIONS} from "./mermaidSanitize";
+import {escapeHtml} from "../../util/escape";
 
 export const graphvizRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
     let graphvizElements: Element[] | NodeListOf<Element> = [];
@@ -28,9 +31,12 @@ export const graphvizRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
             try {
                 Viz.instance().then((viz) => {
                     const svgElement = viz.renderSVGElement(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")));
-                    renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div contenteditable="false">${svgElement.outerHTML}</div>`;
+                    const svgHTML = getHostCapabilities().remoteKernel ?
+                        window.DOMPurify.sanitize(svgElement.outerHTML, MERMAID_SANITIZE_OPTIONS) :
+                        svgElement.outerHTML;
+                    renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div contenteditable="false">${svgHTML}</div>`;
                 }).catch((error) => {
-                    renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div class="ft__error" contenteditable="false">graphviz render error: <br>${error}</div>`;
+                    renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div class="ft__error" contenteditable="false">graphviz render error: <br>${escapeHtml(String(error))}</div>`;
                 });
             } catch (e) {
                 console.error("Graphviz error", e);

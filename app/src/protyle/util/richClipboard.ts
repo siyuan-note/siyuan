@@ -1,5 +1,6 @@
 import {Constants} from "../../constants";
 import {looseJsonParse} from "../../util/functions";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -537,6 +538,9 @@ export const hasRichClipboardImages = (html: string) => {
 };
 
 export const enhanceRichClipboard = (text: string, html: string, notebookID: string, options: IRichClipboardOptions = {}) => {
+    if (!getHostCapabilities().localFileSystem) {
+        return;
+    }
     /// #if !BROWSER
     window.setTimeout(async () => {
         const template = document.createElement("template");

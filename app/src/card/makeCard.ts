@@ -11,10 +11,10 @@ import {transaction} from "../protyle/wysiwyg/transaction";
 import type {App} from "../index";
 
 export const genCardItem = (item: ICardPackage) => {
-    return `<li data-id="${item.id}" data-name="${escapeAttr(item.name)}" class="b3-list-item b3-list-item--narrow${isMobile() ? "" : " b3-list-item--hide-action"}">
+    return `<li data-id="${escapeAttr(item.id)}" data-name="${escapeAttr(item.name)}" class="b3-list-item b3-list-item--narrow${isMobile() ? "" : " b3-list-item--hide-action"}">
 <span class="b3-list-item__text">
     <span>${escapeHtml(item.name)}</span>
-    <span class="b3-list-item__meta">${item.size}</span>
+    <span class="b3-list-item__meta">${escapeHtml(String(item.size))}</span>
 </span>
 <span data-type="rename" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.rename}">
     <svg><use xlink:href="#iconEdit"></use></svg>
@@ -31,7 +31,7 @@ export const genCardItem = (item: ICardPackage) => {
 <span data-type="add" style="display: flex" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.addDeck}">
     <svg><use xlink:href="#iconAdd"></use></svg>
 </span>
-<span class="b3-list-item__meta${isMobile() ? " fn__none" : ""}">${item.updated}</span>
+<span class="b3-list-item__meta${isMobile() ? " fn__none" : ""}">${escapeHtml(String(item.updated))}</span>
 </li>`;
 };
 

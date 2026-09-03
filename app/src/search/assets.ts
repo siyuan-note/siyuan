@@ -9,6 +9,7 @@ import {Dialog} from "../dialog";
 import {addClearButton} from "../util/addClearButton";
 import {saveAssetKeyList} from "./toggleHistory";
 import {genAssetSearchResultItemHTML, IAssetSearchResultItem} from "./assetsResult";
+import {getHostCapabilities} from "../util/hostCapabilities";
 
 export const openSearchAsset = (element: HTMLElement, isStick: boolean) => {
     /// #if !MOBILE
@@ -25,7 +26,9 @@ export const openSearchAsset = (element: HTMLElement, isStick: boolean) => {
     loadingElement.style.top = "84px";
     let enterTip = "";
     /// #if !BROWSER
-    enterTip = `<kbd>${window.siyuan.languages.enterKey}/${window.siyuan.languages.doubleClick}</kbd> ${window.siyuan.languages.showInFolder}`;
+    if (getHostCapabilities().localFileSystem) {
+        enterTip = `<kbd>${window.siyuan.languages.enterKey}/${window.siyuan.languages.doubleClick}</kbd> ${window.siyuan.languages.showInFolder}`;
+    }
     /// #endif
     element.innerHTML = `<div class="block__icons">
     <span data-type="assetPrevious" class="block__icon block__icon--show ariaLabel" data-position="9south" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>

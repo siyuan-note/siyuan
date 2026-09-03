@@ -20,6 +20,7 @@ import {saveScroll} from "../protyle/scroll/saveScroll";
 import {isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../protyle/util/compatibility";
 import {emitToPlugins} from "../plugin/EventBusCore";
 import {createHostQuitGuard} from "./hostQuit";
+import {getHostCapabilities, sanitizeKernelHTML} from "../util/hostCapabilities";
 
 export const processBacklinkIndexCommit = (data: {
     rootIDs?: string[],
@@ -46,7 +47,7 @@ export const setRefDynamicText = (data: {
     getAllEditor().forEach(editor => {
         // 不能对比 rootId，否则嵌入块中的锚文本无法更新
         editor.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.blockID}"] span[data-type~="block-ref"][data-subtype="d"][data-id="${data.defBlockID}"]`).forEach(item => {
-            item.innerHTML = data.refText;
+            item.innerHTML = sanitizeKernelHTML(data.refText);
         });
     });
 };
@@ -171,6 +172,9 @@ export const forceQuit = () => {
 };
 
 const installNewVersion = (installPkgPath: string, setCurrentWorkspace: boolean) => {
+    if (!getHostCapabilities().ownsKernel) {
+        return;
+    }
     if (!installPkgPath) {
         showMessage(window.siyuan.languages._kernel[104], 7000, "error");
         return;
@@ -202,6 +206,10 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
         await saveScroll(window.siyuan.mobile.editor.protyle);
     }
     /// #endif
+    if (!getHostCapabilities().ownsKernel) {
+        forceQuit();
+        return;
+    }
     fetchPost("/api/system/exit", {force: false, setCurrentWorkspace}, (response) => {
         if (response.code === 1) { // 同步执行失败
             const msgId = showMessage(response.msg, response.data.closeTimeout, "error");
@@ -290,7 +298,7 @@ export const progressStatus = (data: IWebSocketData) => {
     const msgElement = document.querySelector("#status .status__msg");
     if (msgElement) {
         clearTimeout(statusTimeout);
-        msgElement.innerHTML = data.msg;
+        msgElement.innerHTML = sanitizeKernelHTML(data.msg);
         statusTimeout = window.setTimeout(() => {
             msgElement.innerHTML = "";
         }, 12000);
@@ -309,10 +317,14 @@ export const progressLoading = (data: IWebSocketData) => {
         return;
     }
     if (data.code === 0) {
+        const current = Number(data.data.current);
+        const total = Number(data.data.total);
+        const safeCurrent = Number.isFinite(current) ? current : 0;
+        const safeTotal = Number.isFinite(total) && total > 0 ? total : 1;
         progressElement.innerHTML = `<div class="b3-dialog__scrim" style="opacity: 1"></div>
 <div class="b3-dialog__loading">
-    <div style="text-align: right">${data.data.current}/${data.data.total}</div>
-    <div style="margin: 8px 0;height: 8px;border-radius: var(--b3-border-radius);overflow: hidden;background-color:#fff;"><div style="width: ${data.data.current / data.data.total * 100}%;transition: var(--b3-transition);background-color: var(--b3-theme-primary);height: 8px;"></div></div>
+    <div style="text-align: right">${safeCurrent}/${safeTotal}</div>
+    <div style="margin: 8px 0;height: 8px;border-radius: var(--b3-border-radius);overflow: hidden;background-color:#fff;"><div style="width: ${safeCurrent / safeTotal * 100}%;transition: var(--b3-transition);background-color: var(--b3-theme-primary);height: 8px;"></div></div>
     <div class="ft__breakword">${escapeHtml(data.msg)}</div>
 </div>`;
     } else if (data.code === 1) {
@@ -340,9 +352,13 @@ export const progressBackgroundTask = (tasks: { action: string }[]) => {
             window.siyuan.menus.menu.remove();
         }
     } else {
+        const safeTasks = tasks.map((item) => ({
+            ...item,
+            action: sanitizeKernelHTML(item.action),
+        }));
         backgroundTaskElement.classList.remove("fn__none");
-        backgroundTaskElement.setAttribute("data-tasks", JSON.stringify(tasks));
-        backgroundTaskElement.innerHTML = tasks[0].action + '<div class="fn__progress"><div></div></div>';
+        backgroundTaskElement.setAttribute("data-tasks", JSON.stringify(safeTasks));
+        backgroundTaskElement.innerHTML = safeTasks[0].action + '<div class="fn__progress"><div></div></div>';
     }
 };
 
@@ -352,7 +368,7 @@ export const bootSync = () => {
             const dialog = new Dialog({
                 width: isMobile() ? "92vw" : "50vw",
                 title: "🌩️ " + window.siyuan.languages.bootSyncFailed,
-                content: `<div class="b3-dialog__content">${response.msg}</div>
+                content: `<div class="b3-dialog__content">${sanitizeKernelHTML(response.msg)}</div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.syncNow}</button>

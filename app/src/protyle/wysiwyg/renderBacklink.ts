@@ -16,6 +16,7 @@ import {
     clearViewFoldOccurrenceState,
     markViewFoldDefault,
 } from "../util/viewFold";
+import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 
 interface IBacklinkData {
     id?: string,
@@ -209,7 +210,8 @@ export const loadBreadcrumb = (protyle: IProtyle, element: HTMLElement) => {
             nextElement = nextElement.nextElementSibling;
             tempElement.remove();
         }
-        element.parentElement.insertAdjacentHTML("afterend", setBacklinkFold(getResponse.data.content, true));
+        element.parentElement.insertAdjacentHTML("afterend",
+            normalizeHTMLAssetIFrameBlockDOM(setBacklinkFold(getResponse.data.content, true)));
         clearViewFoldDefaults(protyle, element.parentElement.getAttribute("data-backlink-id"));
         processRender(element.parentElement.parentElement);
         avRender(element.parentElement.parentElement, protyle);

@@ -15,6 +15,7 @@ import {isInMobileApp} from "../../protyle/util/compatibility";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openLink} from "../../editor/openLink";
 import {openSnippets} from "../util/snippets";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {Dialog} from "../../dialog";
 import {Menu} from "../../plugin/Menu";
@@ -101,19 +102,21 @@ const genFontConfigHtml = (configKey: FontFamiliesConfigKey, title: string, desc
 const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("content", window.siyuan.languages.configGroupContent);
 
-    group.slot({
-        key: "fontFamilies",
-        keywords: [window.siyuan.languages.font, window.siyuan.languages.font1],
-        html: () => genFontConfigHtml("fontFamilies", window.siyuan.languages.font, window.siyuan.languages.font1),
-        afterMount: (root) => mountAppearanceFontFamily(root, "fontFamilies"),
-    });
-    group.slot({
-        key: "codeFontFamilies",
-        keywords: [window.siyuan.languages.monospaceFont, window.siyuan.languages.monospaceFontTip],
-        html: () => genFontConfigHtml("codeFontFamilies", window.siyuan.languages.monospaceFont,
-            window.siyuan.languages.monospaceFontTip),
-        afterMount: (root) => mountAppearanceFontFamily(root, "codeFontFamilies"),
-    });
+    if (getHostCapabilities().customAppearance) {
+        group.slot({
+            key: "fontFamilies",
+            keywords: [window.siyuan.languages.font, window.siyuan.languages.font1],
+            html: () => genFontConfigHtml("fontFamilies", window.siyuan.languages.font, window.siyuan.languages.font1),
+            afterMount: (root) => mountAppearanceFontFamily(root, "fontFamilies"),
+        });
+        group.slot({
+            key: "codeFontFamilies",
+            keywords: [window.siyuan.languages.monospaceFont, window.siyuan.languages.monospaceFontTip],
+            html: () => genFontConfigHtml("codeFontFamilies", window.siyuan.languages.monospaceFont,
+                window.siyuan.languages.monospaceFontTip),
+            afterMount: (root) => mountAppearanceFontFamily(root, "codeFontFamilies"),
+        });
+    }
     group.range("editor.fontSize", {
         title: window.siyuan.languages.editorFontSize,
         desc: window.siyuan.languages.fontSizeTip,
@@ -752,78 +755,80 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
         afterMount: mountBootAppearance,
     });
     /// #endif
-    group.stack({
-        key: "theme",
-        keywords: [
-            window.siyuan.languages.theme,
-            window.siyuan.languages.theme11,
-            window.siyuan.languages.theme12,
-            window.siyuan.languages.appearance9,
-        ],
-        afterMount: (root) => {
+    if (getHostCapabilities().customAppearance) {
+        group.stack({
+            key: "theme",
+            keywords: [
+                window.siyuan.languages.theme,
+                window.siyuan.languages.theme11,
+                window.siyuan.languages.theme12,
+                window.siyuan.languages.appearance9,
+            ],
+            afterMount: (root) => {
+                /// #if !BROWSER
+                root.querySelector("#appearanceOpenTheme")?.addEventListener("click", () => {
+                    useShell("openPath", path.join(window.siyuan.config.system.confDir, "appearance", "themes"));
+                });
+                /// #endif
+            },
+        }, (stack) => {
+            stack.title(window.siyuan.languages.theme);
             /// #if !BROWSER
-            root.querySelector("#appearanceOpenTheme")?.addEventListener("click", () => {
-                useShell("openPath", path.join(window.siyuan.config.system.confDir, "appearance", "themes"));
+            stack.button({
+                id: "appearanceOpenTheme",
+                label: window.siyuan.languages.appearance9,
+                icon: "iconFolder",
             });
             /// #endif
-        },
-    }, (stack) => {
-        stack.title(window.siyuan.languages.theme);
-        /// #if !BROWSER
-        stack.button({
-            id: "appearanceOpenTheme",
-            label: window.siyuan.languages.appearance9,
-            icon: "iconFolder",
+            stack.select("appearance.themeLight", {
+                desc: window.siyuan.languages.theme11,
+                options: window.siyuan.config.appearance.lightThemes.filter((item) =>
+                    isThemeFrontendSupported(item.frontends, getFrontend())).map((item) => ({
+                    value: item.name,
+                    label: item.label,
+                })),
+            });
+            stack.select("appearance.themeDark", {
+                desc: window.siyuan.languages.theme12,
+                options: window.siyuan.config.appearance.darkThemes.filter((item) =>
+                    isThemeFrontendSupported(item.frontends, getFrontend())).map((item) => ({
+                    value: item.name,
+                    label: item.label,
+                })),
+            });
         });
-        /// #endif
-        stack.select("appearance.themeLight", {
-            desc: window.siyuan.languages.theme11,
-            options: window.siyuan.config.appearance.lightThemes.filter((item) =>
-                isThemeFrontendSupported(item.frontends, getFrontend())).map((item) => ({
-                value: item.name,
-                label: item.label,
-            })),
-        });
-        stack.select("appearance.themeDark", {
-            desc: window.siyuan.languages.theme12,
-            options: window.siyuan.config.appearance.darkThemes.filter((item) =>
-                isThemeFrontendSupported(item.frontends, getFrontend())).map((item) => ({
-                value: item.name,
-                label: item.label,
-            })),
-        });
-    });
-    group.stack({
-        key: "icon",
-        keywords: [
-            window.siyuan.languages.icon,
-            window.siyuan.languages.theme2,
-            window.siyuan.languages.appearance8,
-        ],
-        afterMount: (root) => {
+        group.stack({
+            key: "icon",
+            keywords: [
+                window.siyuan.languages.icon,
+                window.siyuan.languages.theme2,
+                window.siyuan.languages.appearance8,
+            ],
+            afterMount: (root) => {
+                /// #if !BROWSER
+                root.querySelector("#appearanceOpenIcon")?.addEventListener("click", () => {
+                    useShell("openPath", path.join(window.siyuan.config.system.confDir, "appearance", "icons"));
+                });
+                /// #endif
+            },
+        }, (stack) => {
+            stack.title(window.siyuan.languages.icon);
             /// #if !BROWSER
-            root.querySelector("#appearanceOpenIcon")?.addEventListener("click", () => {
-                useShell("openPath", path.join(window.siyuan.config.system.confDir, "appearance", "icons"));
+            stack.button({
+                id: "appearanceOpenIcon",
+                label: window.siyuan.languages.appearance8,
+                icon: "iconFolder",
             });
             /// #endif
-        },
-    }, (stack) => {
-        stack.title(window.siyuan.languages.icon);
-        /// #if !BROWSER
-        stack.button({
-            id: "appearanceOpenIcon",
-            label: window.siyuan.languages.appearance8,
-            icon: "iconFolder",
+            stack.select("appearance.icon", {
+                desc: window.siyuan.languages.theme2,
+                options: window.siyuan.config.appearance.icons.map((item) => ({
+                    value: item.name,
+                    label: item.label,
+                })),
+            });
         });
-        /// #endif
-        stack.select("appearance.icon", {
-            desc: window.siyuan.languages.theme2,
-            options: window.siyuan.config.appearance.icons.map((item) => ({
-                value: item.name,
-                label: item.label,
-            })),
-        });
-    });
+    }
     group.stack({
         key: "codeBlockTheme",
         keywords: [
@@ -1160,6 +1165,9 @@ const mountAppearanceSetNotifications = (root: HTMLElement) => {
 };
 
 const registerAppearancePersonalizationGroup = (tab: SettingTabBuilder) => {
+    if (!getHostCapabilities().customAppearance) {
+        return;
+    }
     const group = tab.group("personalization", window.siyuan.languages.configGroupPersonalization);
 
     /// #if !BROWSER

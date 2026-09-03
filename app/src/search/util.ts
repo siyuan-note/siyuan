@@ -49,6 +49,7 @@ import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRend
 import {saveKeyList, toggleAssetHistory, toggleReplaceHistory, toggleSearchHistory} from "./toggleHistory";
 import {highlightById} from "../util/highlightById";
 import {getSelectionOffset} from "../protyle/util/selection";
+import {getHostCapabilities} from "../util/hostCapabilities";
 import {electronUndo} from "../protyle/undo";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 import {IDatabaseItemOpenData, openDatabaseItem} from "../protyle/render/av/openDatabaseItem";
@@ -920,7 +921,9 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                         clearTimeout(clickTimeout);
                         if (searchType === "asset") {
                             /// #if !BROWSER
-                            useShell("showItemInFolder", path.join(window.siyuan.config.system.dataDir, target.lastElementChild.getAttribute("aria-label")));
+                            if (getHostCapabilities().localFileSystem) {
+                                useShell("showItemInFolder", path.join(window.siyuan.config.system.dataDir, target.lastElementChild.getAttribute("aria-label")));
+                            }
                             /// #endif
                         } else {
                             openSearchEditor({

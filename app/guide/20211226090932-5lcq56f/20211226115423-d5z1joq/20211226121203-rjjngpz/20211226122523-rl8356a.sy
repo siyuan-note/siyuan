@@ -6,7 +6,7 @@
 		"id": "20211226122523-rl8356a",
 		"title": "在瀏覽器上使用",
 		"type": "doc",
-		"updated": "20260804193000"
+		"updated": "20260903150000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122545-a65v8e1",
-				"updated": "20260804165002"
+				"updated": "20260903150000"
 			},
 			"Children": [
 				{
@@ -183,6 +183,31 @@
 				{
 					"Type": "NodeText",
 					"Data": "開始。"
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-c65oi4q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260903150000-c65oi4q",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如需使用桌面端連線至遠端內核，請參閱 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260903150000-3qa6edk",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "連線至遠端內核"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},

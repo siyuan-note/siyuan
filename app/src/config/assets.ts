@@ -17,6 +17,7 @@ import type {App} from "../index";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import {removeLoading} from "../protyle/ui/initUI";
 import {switchSettingPanelSubTab} from "./setting/mount";
+import {getHostCapabilities} from "../util/hostCapabilities";
 /// #if MOBILE
 import {openMobileFileById} from "../mobile/editor";
 /// #else
@@ -343,7 +344,7 @@ const assets = {
     }[], element: Element, type: "unRefAV" | "unrefAssets" | "lostAssets") => {
         let html = "";
         let boxOpenHTML = "";
-        if (!isBrowser() && type !== "lostAssets") {
+        if (!isBrowser() && getHostCapabilities().localFileSystem && type !== "lostAssets") {
             boxOpenHTML = `<span data-type="open" class="ariaLabel b3-list-item__action" aria-label="${window.siyuan.languages.showInFolder}">
     <svg><use xlink:href="#iconFolder"></use></svg>
 </span>`;

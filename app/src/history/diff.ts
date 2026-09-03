@@ -523,13 +523,13 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct: string, fi
         const headElement = dialog.element.querySelector(".b3-dialog__header");
         headElement.innerHTML = `<div style="padding: 0;min-height: auto;" class="block__icons">
     <span class="fn__flex-1"></span>
-    <code class="fn__code${isPhone ? " fn__none" : ""}" data-snapshot="${left}" data-created="${response.data.left.created}">${left.substring(0, 7)}</code>
+    <code class="fn__code${isPhone ? " fn__none" : ""}" data-snapshot="${escapeAttr(left)}" data-created="${escapeAttr(String(response.data.left.created))}">${escapeHtml(left.substring(0, 7))}</code>
     ${isPhone ? "" : '<span class="fn__space"></span>'}
     ${dayjs(response.data.left.created).format("YYYY-MM-DD HH:mm")}
     <span class="fn__space"></span>
     <span class="block__icon block__icon--show b3-tooltips b3-tooltips__s" aria-label="${window.siyuan.languages.switchDirect}" data-direct="${direct}"><svg><use xlink:href="#iconScrollHoriz"></use></svg></span>
     <span class="fn__space"></span>
-    <code class="fn__code${isPhone ? " fn__none" : ""}" data-snapshot="${right}" data-created="${response.data.right.created}">${right.substring(0, 7)}</code>
+    <code class="fn__code${isPhone ? " fn__none" : ""}" data-snapshot="${escapeAttr(right)}" data-created="${escapeAttr(String(response.data.right.created))}">${escapeHtml(right.substring(0, 7))}</code>
     ${isPhone ? "" : '<span class="fn__space"></span>'}
     ${dayjs(response.data.right.created).format("YYYY-MM-DD HH:mm")}
     <span class="fn__flex-1"></span>
@@ -540,14 +540,14 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct: string, fi
     <div class="fn__flex-1 fn__flex" data-type="editors">
         <div class="fn__none fn__flex-1 fn__flex-column">
             <div class="history__date">${dayjs(response.data.left.created).format("YYYY-MM-DD HH:mm")}</div>
-            <div class="protyle-title__input ft__center ft__breakword">${response.data.left.title}</div>
+            <div class="protyle-title__input ft__center ft__breakword">${escapeHtml(response.data.left.title)}</div>
             <div class="ft__center"></div>
             <textarea class="history__text fn__none fn__flex-1" readonly></textarea>
             <div class="fn__flex-1"></div>
         </div>
         <div class="fn__none fn__flex-1 fn__flex-column" style="border-left: 1px solid var(--b3-border-color);">
-            <div class="history__date">${response.data.right.title} ${dayjs(response.data.right.created).format("YYYY-MM-DD HH:mm")}</div>
-            <div class="protyle-title__input ft__center ft__breakword">${response.data.right.title}</div>
+            <div class="history__date">${escapeHtml(response.data.right.title)} ${dayjs(response.data.right.created).format("YYYY-MM-DD HH:mm")}</div>
+            <div class="protyle-title__input ft__center ft__breakword">${escapeHtml(response.data.right.title)}</div>
             <div class="ft__center"></div>
             <textarea class="history__text fn__none fn__flex-1" readonly></textarea>
             <div class="fn__flex-1"></div>

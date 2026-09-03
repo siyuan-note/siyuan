@@ -28,6 +28,7 @@ import {
     loadInlineStyles
 } from "../protyle/toolbar/inlineStyle";
 import {refreshChartTheme} from "../protyle/render/chartRender";
+import {getHostCapabilities} from "./hostCapabilities";
 
 let headingNumberMeasurementRefreshTimer: number;
 const DEJAVU_EMOJI_PRESENTATION_UNICODE_RANGE = "U+25fd-25fe, U+2614-2615, U+2648-2653, U+267f, U+2693, U+26a1, " +
@@ -81,6 +82,9 @@ export const unloadThemeScript = async () => {
 };
 
 export const refreshThemeStyle = (themeAddress: string) => {
+    if (!getHostCapabilities().customAppearance) {
+        return;
+    }
     const appearance = window.siyuan.config.appearance;
     if (!isCurrentThemeSupported(appearance, getFrontend())) {
         return;
@@ -93,7 +97,14 @@ export const refreshThemeStyle = (themeAddress: string) => {
     }
 };
 
-export const loadAssets = (data: Config.IAppearance) => {
+export const loadAssets = (appearance: Config.IAppearance) => {
+    const data = getHostCapabilities().customAppearance ? appearance : {
+        ...appearance,
+        themeLight: "daylight",
+        themeDark: "midnight",
+        icon: "litheness",
+        themeJS: false,
+    };
     const changedThemeStyleElements: HTMLLinkElement[] = [];
     let themeStylesChanged = false;
     const htmlElement = document.getElementsByTagName("html")[0];
@@ -103,8 +114,8 @@ export const loadAssets = (data: Config.IAppearance) => {
     htmlElement.setAttribute("data-frontend", getFrontend()); // https://github.com/siyuan-note/siyuan/issues/12549
     htmlElement.setAttribute("data-backend", getBackend());
     htmlElement.setAttribute("data-theme-mode", themeMode);
-    htmlElement.setAttribute("data-light-theme", window.siyuan.config.appearance.themeLight);
-    htmlElement.setAttribute("data-dark-theme", window.siyuan.config.appearance.themeDark);
+    htmlElement.setAttribute("data-light-theme", data.themeLight);
+    htmlElement.setAttribute("data-dark-theme", data.themeDark);
     const OSTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     if (window.siyuan.config.appearance.modeOS && (
         (window.siyuan.config.appearance.mode === 1 && OSTheme === "light") ||
@@ -281,17 +292,20 @@ export const initAssets = () => {
 };
 
 export const setInlineStyle = async (set = true, servePath = "../../../") => {
-    const editorFonts = window.siyuan.config.editor.fontFamilies || [];
-    const codeFonts = window.siyuan.config.editor.codeFontFamilies || [];
+    const allowCustomAppearance = getHostCapabilities().customAppearance;
+    const editorFonts = allowCustomAppearance ? window.siyuan.config.editor.fontFamilies || [] : [];
+    const codeFonts = allowCustomAppearance ? window.siyuan.config.editor.codeFontFamilies || [] : [];
     let inlineStylesCSS = "";
-    try {
-        const inlineStyles = await loadInlineStyles();
-        inlineStylesCSS = getInlineStylesCSS(inlineStyles);
-    } catch (error) {
-        console.error("load inline styles error: " + error);
-        inlineStylesCSS = getInlineStylesCSS();
+    if (allowCustomAppearance) {
+        try {
+            const inlineStyles = await loadInlineStyles();
+            inlineStylesCSS = getInlineStylesCSS(inlineStyles);
+        } catch (error) {
+            console.error("load inline styles error: " + error);
+            inlineStylesCSS = getInlineStylesCSS();
+        }
     }
-    if (set) {
+    if (set && allowCustomAppearance) {
         await ensureSelectedCustomFonts([...editorFonts, ...codeFonts]);
     }
     let style;
@@ -407,6 +421,9 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
 };
 
 export const reloadInlineStyles = async () => {
+    if (!getHostCapabilities().customAppearance) {
+        return;
+    }
     try {
         await loadInlineStyles(true);
     } catch (error) {

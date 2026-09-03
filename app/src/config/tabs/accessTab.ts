@@ -20,6 +20,7 @@ import {
 } from "./accessRuntime";
 import {sendAppSetting} from "./appRuntime";
 import zxcvbn = require("zxcvbn");
+import {canOpenExternalURL, getHostCapabilities} from "../../util/hostCapabilities";
 
 const getPasswordStrength = (password: string) => {
     const score = zxcvbn(password).score;
@@ -72,7 +73,7 @@ const registerAccessAuthGroup = (tab: SettingTabBuilder) => {
             save: (value) => sendAppSetting("system.lockScreenMode", value),
         });
     }
-    if (!window.siyuan.config.readonly) {
+    if (!window.siyuan.config.readonly && getHostCapabilities().oidcAuthentication) {
         group.button({
             id: "oidcConfig",
             title: window.siyuan.languages.oidcLogin,
@@ -91,6 +92,9 @@ const registerAccessAuthGroup = (tab: SettingTabBuilder) => {
 };
 
 const mountOIDCButton = (root: HTMLElement) => {
+    if (!getHostCapabilities().oidcAuthentication) {
+        return;
+    }
     root.querySelector("#oidcConfig")?.addEventListener("click", () => {
         const config = window.siyuan.config.oidc;
         const escape = (value: string) => Lute.EscapeHTMLStr(value);
@@ -272,6 +276,10 @@ const mountOIDCButton = (root: HTMLElement) => {
             window.handleOIDCAuthError = (message: string) => validationFailed(message, attempt);
         };
         const openValidationURL = (url: string, attempt: number) => {
+            if (!canOpenExternalURL(url)) {
+                validationFailed(window.siyuan.languages.oidcVerificationFailed, attempt);
+                return;
+            }
             if (validationWindow) {
                 validationWindow.location.href = url;
                 return;
@@ -458,7 +466,7 @@ const bindApiTokenInput = (root: HTMLElement) => {
 
 const registerAccessServerGroup = (tab: SettingTabBuilder) => {
     const hideOnWeb = isBrowser() && !isInMobileApp();
-    if (hideOnWeb) {
+    if (hideOnWeb || !getHostCapabilities().ownsKernel) {
         return;
     }
     const group = tab.group("server", window.siyuan.languages.configGroupServer);
@@ -466,16 +474,25 @@ const registerAccessServerGroup = (tab: SettingTabBuilder) => {
     group.switch("system.networkServe", {
         title: window.siyuan.languages.about11,
         desc: window.siyuan.languages.about12,
-        save: (value) => sendAppSetting("system.networkServe", value),
+        save: (value) => {
+            if (getHostCapabilities().ownsKernel) {
+                sendAppSetting("system.networkServe", value);
+            }
+        },
     });
     if (window.siyuan.config.system.networkServe) {
         group.switch("system.networkServeTLS", {
             title: window.siyuan.languages.networkServeTLS,
             desc: `${window.siyuan.languages.networkServeTLSTip}<div class="fn__hr--small"></div>${window.siyuan.languages.networkServeTLSTip2}`,
-            save: (value) => sendAppSetting("system.networkServeTLS", value),
+            save: (value) => {
+                if (getHostCapabilities().ownsKernel) {
+                    sendAppSetting("system.networkServeTLS", value);
+                }
+            },
         });
     }
-    if (window.siyuan.config.system.networkServe && window.siyuan.config.system.networkServeTLS) {
+    if (window.siyuan.config.system.networkServe && window.siyuan.config.system.networkServeTLS &&
+        getHostCapabilities().importExport) {
         group.button({
             id: "exportCACert",
             title: window.siyuan.languages.exportCACert,
@@ -536,31 +553,36 @@ const registerAccessServerGroup = (tab: SettingTabBuilder) => {
             },
         });
     }
-    group.stack({
-        key: "localServer",
-        keywords: [
-            window.siyuan.languages.about2,
-            window.siyuan.languages.about3,
-            window.siyuan.languages.about4,
-            window.siyuan.languages.about18,
-        ],
-        afterMount: (root) => {
-            root.querySelector("#openLocalServer")?.addEventListener("click", () => {
-                const url = `http://127.0.0.1:${location.port}`;
-                openLink(window.siyuan.ws.app, url);
+    if (getHostCapabilities().localFileSystem) {
+        group.stack({
+            key: "localServer",
+            keywords: [
+                window.siyuan.languages.about2,
+                window.siyuan.languages.about3,
+                window.siyuan.languages.about4,
+                window.siyuan.languages.about18,
+            ],
+            afterMount: (root) => {
+                root.querySelector("#openLocalServer")?.addEventListener("click", () => {
+                    if (!getHostCapabilities().localFileSystem) {
+                        return;
+                    }
+                    const url = `http://127.0.0.1:${location.port}`;
+                    openLink(window.siyuan.ws.app, url);
+                });
+            },
+        }, (stack) => {
+            stack.title(window.siyuan.languages.about2);
+            stack.button({
+                id: "openLocalServer",
+                label: window.siyuan.languages.about4,
+                icon: "iconLink",
             });
-        },
-    }, (stack) => {
-        stack.title(window.siyuan.languages.about2);
-        stack.button({
-            id: "openLocalServer",
-            label: window.siyuan.languages.about4,
-            icon: "iconLink",
+            stack.desc(window.siyuan.languages.about3.replace("${port}", location.port));
+            stack.desc(`<span id="serverAddresses">${genServerAddressesHTML(window.siyuan.config.serverAddrs)}</span>`);
+            stack.desc(window.siyuan.languages.about18);
         });
-        stack.desc(window.siyuan.languages.about3.replace("${port}", location.port));
-        stack.desc(`<span id="serverAddresses">${genServerAddressesHTML(window.siyuan.config.serverAddrs)}</span>`);
-        stack.desc(window.siyuan.languages.about18);
-    });
+    }
 };
 
 const registerAccessPublishGroup = (tab: SettingTabBuilder) => {
@@ -679,6 +701,7 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
     if (window.siyuan.config.readonly) {
         return;
     }
+    const disableImportExport = !getHostCapabilities().importExport;
     const group = tab.group("encryptedNotebook", window.siyuan.languages.encryptedNotebook);
     group.slot({
         key: "encryptedNotebookStatus",
@@ -707,13 +730,13 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
                 ${window.siyuan.languages.changeMasterPassword}
             </button>
             <span class="fn__space"></span>
-            <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="exportCryptoBackupBtn">
+            <button class="b3-button b3-button--outline fn__flex-center fn__size200${disableImportExport ? " fn__none" : ""}" id="exportCryptoBackupBtn">
                 <svg class="svg"><use xlink:href="#iconDownload"></use></svg>
                 ${window.siyuan.languages.exportNotebookCryptoBackup}
             </button>
             <span class="fn__space"></span>
         </div>
-        <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="importCryptoBackupBtn">
+        <button class="b3-button b3-button--outline fn__flex-center fn__size200${disableImportExport ? " fn__none" : ""}" id="importCryptoBackupBtn">
             <svg class="svg"><use xlink:href="#iconUpload"></use></svg>
             ${window.siyuan.languages.importNotebookCryptoBackup}
         </button>
@@ -744,7 +767,7 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
             window.siyuan.config.notebookCrypto.enabled = enabled;
             // 修改主密码和导出密钥仅在配置完整时可见；Disabled 或 RecoveryRequired 状态提供导入恢复入口。
             enabledActionsElement.classList.toggle("fn__none", !enabled);
-            importCryptoBackupBtnElement.classList.toggle("fn__none", enabled);
+            importCryptoBackupBtnElement.classList.toggle("fn__none", enabled || !getHostCapabilities().importExport);
             actionsElement.classList.remove("fn__none");
             migrationAlertElement.classList.toggle("fn__none", !response.data.migrationPending);
         });
@@ -756,6 +779,9 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
     });
 
     actionsElement.querySelector("#exportCryptoBackupBtn")?.addEventListener("click", () => {
+        if (!getHostCapabilities().importExport) {
+            return;
+        }
         fetchPost("/api/notebook/exportNotebookCryptoBackup", {}, async (response) => {
             if (response.code === -1) {
                 showMessage(response.msg, 6000, "error");
@@ -769,6 +795,9 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
     });
 
     actionsElement.querySelector("#importCryptoBackupBtn")?.addEventListener("click", () => {
+        if (!getHostCapabilities().importExport) {
+            return;
+        }
         // 用隐藏 file input 选备份文件，multipart 上传导入
         const fileInput = document.createElement("input");
         fileInput.type = "file";

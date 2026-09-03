@@ -6,7 +6,7 @@
 		"id": "20201004184819-nj8ibyg",
 		"title": "在浏览器上使用",
 		"type": "doc",
-		"updated": "20260804193000"
+		"updated": "20260903150000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090909-6pyfjgx",
-				"updated": "20260804165001"
+				"updated": "20260903150000"
 			},
 			"Children": [
 				{
@@ -194,6 +194,31 @@
 				{
 					"Type": "NodeText",
 					"Data": "开始。"
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-l2tjvej",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260903150000-l2tjvej",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如需使用桌面端连接远程内核，请参阅 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260903150000-u4065fm",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "连接远程内核"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},

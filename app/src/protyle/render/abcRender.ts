@@ -3,6 +3,8 @@ import {Constants} from "../../constants";
 import {genIconHTML} from "./util";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {looseJsonParse} from "../../util/functions";
+import {getHostCapabilities} from "../../util/hostCapabilities";
+import {MERMAID_SANITIZE_OPTIONS} from "./mermaidSanitize";
 
 const ABCJS_PARAMS_KEY = "%%params";
 
@@ -45,6 +47,10 @@ export const abcRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
             renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div contenteditable="false"></div>`;
             const abcString = Lute.UnEscapeHTMLStr(e.getAttribute("data-content"));
             window.ABCJS.renderAbc(renderElement.lastElementChild, abcString, getAbcParams(abcString));
+            if (getHostCapabilities().remoteKernel) {
+                renderElement.lastElementChild.innerHTML = window.DOMPurify.sanitize(
+                    renderElement.lastElementChild.innerHTML, MERMAID_SANITIZE_OPTIONS);
+            }
         });
     });
 };

@@ -20,6 +20,7 @@ import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
 import {bindThinkingCardToggle} from "./thinkingCard";
 import {BLOCK_SELECTION_MODE_CLASS} from "../protyle/wysiwyg/blockSelection";
+import {normalizeHTMLAssetIFrameBlockDOM} from "../asset/html";
 
 type TAIEditorSourceKind = "selection" | "blocks" | "writing";
 type TAIEditorTaskStatus = "streaming" | "done" | "stopped" | "error";
@@ -364,7 +365,7 @@ const renderTaskPreview = (task: IAIEditorTask, rich = false) => {
         return;
     }
     task.body.classList.remove("ai-editor-panel__body--streaming");
-    task.body.innerHTML = task.protyle.lute.Md2BlockDOM(task.content);
+    task.body.innerHTML = normalizeHTMLAssetIFrameBlockDOM(task.protyle.lute.Md2BlockDOM(task.content));
     blockRender(task.protyle, task.body);
     processRender(task.body);
     highlightRender(task.body);

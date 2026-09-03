@@ -14,11 +14,13 @@ import type {App} from "../index";
 import {isBrowserRenderableImagePath} from "../util/imageURL";
 import {
     DEFAULT_ASSET_OPEN,
+    resolveAvailableAssetOpenAction,
     resolveAssetOpenAction,
     resolveExecutableAssetOpenAction,
 } from "./assetOpen";
 import {emitOpenAsset, emitOpenLink, resolveOpenLinkEvent} from "./openLinkEvent";
 import {resolvePdfAssetLink} from "./pdfAssetLink";
+import {canOpenExternalURL, getHostCapabilities} from "../util/hostCapabilities";
 /// #if !MOBILE
 import {openAssetNewWindow} from "../window/openNewWindow";
 /// #endif
@@ -42,10 +44,10 @@ export const openAssetByAction = (
     /// #if MOBILE
     openByMobile(assetPath);
     /// #else
-    const resolvedAction = resolveExecutableAssetOpenAction(action, {
+    const resolvedAction = resolveAvailableAssetOpenAction(resolveExecutableAssetOpenAction(action, {
         previewable: isPreviewableAsset(assetPath),
         noSplitScreen: window.siyuan.config.fileTree.noSplitScreenWhenOpenTab,
-    });
+    }), getHostCapabilities().localFileSystem);
     if (resolvedAction === "current") {
         openAsset(app, assetPath, page);
     } else if (resolvedAction === "right") {
@@ -103,10 +105,10 @@ export const openLink = (app: App, aLink: string, event?: MouseEvent, ctrlIsPres
             ctrlKey: ctrlIsPressed,
         },
     );
-    let action = resolveExecutableAssetOpenAction(configuredAction, {
+    let action = resolveAvailableAssetOpenAction(resolveExecutableAssetOpenAction(configuredAction, {
         previewable: isPreviewableAsset(linkAddress),
         noSplitScreen: window.siyuan.config.fileTree.noSplitScreenWhenOpenTab,
-    });
+    }), getHostCapabilities().localFileSystem);
     /// #if BROWSER
     if (action === "folder" || action === "new-window") {
         action = "app";
@@ -148,6 +150,9 @@ export const openLink = (app: App, aLink: string, event?: MouseEvent, ctrlIsPres
         openAssetByAction(app, linkAddress, pdfParams, action);
     } else if (linkAddress) {
         /// #if !BROWSER
+        if (!canOpenExternalURL(linkAddress)) {
+            return;
+        }
         shell.openExternal(linkAddress).catch((e) => {
             showMessage(e);
         });
@@ -163,6 +168,9 @@ export const openByMobile = (uri: string) => {
         return;
     }
     if (processSiYuanUri(window.siyuan.ws.app, uri)) {
+        return;
+    }
+    if (!canOpenExternalURL(uri)) {
         return;
     }
     if (isInIOS()) {

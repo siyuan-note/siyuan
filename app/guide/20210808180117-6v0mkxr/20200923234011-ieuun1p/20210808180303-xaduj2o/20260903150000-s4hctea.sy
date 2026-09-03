@@ -1,0 +1,37 @@
+{
+	"ID": "20260903150000-s4hctea",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260903150000-s4hctea",
+		"title": "Connect to a Remote Kernel",
+		"type": "doc",
+		"updated": "20260903150000"
+	},
+	"Children": [
+		{"ID": "20260903150000-mz3r596", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-mz3r596", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "Overview"}]},
+		{"ID": "20260903150000-dood0bb", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-dood0bb", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "The desktop app can connect to a SiYuan kernel running on another device and use the local desktop interface for editing. Remote mode only connects to an existing kernel and does not start a kernel on the local device."}]},
+		{"ID": "20260903150000-c2oh8cr", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-c2oh8cr", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "Start"}]},
+		{"ID": "20260903150000-601s61t", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-601s61t", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "After completely exiting the SiYuan desktop client, start the desktop app from a command line and append "}, {"Type": "NodeTextMark", "TextMarkType": "code", "TextMarkTextContent": "--remote=https://host[:port]"}, {"Type": "NodeText", "Data": ". If an instance is already running, the single-instance mechanism does not switch its current connection."}]},
+		{"ID": "20260903150000-rir445a", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-rir445a", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "Security and Version"}]},
+		{"ID": "20260903150000-0ekr8rg", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-0ekr8rg", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "Only HTTPS remote addresses are supported, and the client operating system must trust the TLS certificate used by the server. Connect only to a server you trust. The desktop client and remote kernel versions must match exactly; otherwise, the connection is rejected. The desktop client loads only the frontend bundled with the installation package and does not load executable frontend resources such as HTML or scripts from the remote server. Consequently, same-origin remote HTML embeds are also unavailable."}]},
+		{"ID": "20260903150000-knpctlf", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-knpctlf", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "Limitations"}]},
+		{"ID": "20260903150000-lazpxpz", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-lazpxpz", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "The initial version of remote mode does not support the following features. Local mode is not affected:"}]},
+		{
+			"ID": "20260903150000-x3th06t",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {"id": "20260903150000-x3th06t", "updated": "20260903150000"},
+			"Children": [
+				{"ID": "20260903150000-b45enwi", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-b45enwi", "updated": "20260903150000"}, "Children": [{"ID": "20260903150000-gbt9mdf", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-gbt9mdf", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "Import and export"}]}]},
+				{"ID": "20260903150000-mzhpk4r", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-mzhpk4r", "updated": "20260903150000"}, "Children": [{"ID": "20260903150000-88q1701", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-88q1701", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "File clipboard operations"}]}]},
+				{"ID": "20260903150000-5amb0yu", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-5amb0yu", "updated": "20260903150000"}, "Children": [{"ID": "20260903150000-j9eobwv", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-j9eobwv", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "Operations that depend on a client-local path or a server absolute path, such as showing a file in the file manager or dragging in or opening a file by path; normal asset uploads through a file picker remain available"}]}]},
+				{"ID": "20260903150000-hxh4cr0", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-hxh4cr0", "updated": "20260903150000"}, "Children": [{"ID": "20260903150000-1f4zzal", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-1f4zzal", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "Desktop plugins, Bazaar, and widgets are unavailable. Only the client's built-in appearance is used; remote custom themes, icon sets, fonts, and code snippets are not loaded"}]}]},
+				{"ID": "20260903150000-88njhnb", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-88njhnb", "updated": "20260903150000"}, "Children": [{"ID": "20260903150000-p2n9ukv", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-p2n9ukv", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "Scripts in HTML and SVG blocks, database templates, and JavaScript query embeds are not executed; iframe blocks are unavailable. Chart, diagram, and math rendering results are sanitized"}]}]},
+				{"ID": "20260903150000-ckttrsj", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-ckttrsj", "updated": "20260903150000"}, "Children": [{"ID": "20260903150000-8lxisgw", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-8lxisgw", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "Access authorization code sign-in only; OIDC sign-in is not supported"}]}]}
+			]
+		},
+		{"ID": "20260903150000-jx7db7j", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-jx7db7j", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "Lifecycle"}]},
+		{"ID": "20260903150000-1uxmuev", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-1uxmuev", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "Start, stop, restart, upgrade, and switch the workspace of the remote kernel on the server. Closing the desktop client does not stop the remote kernel."}]}
+	]
+}

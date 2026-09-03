@@ -27,6 +27,7 @@ import {getPadding} from "../ui/initUI";
 import {hasTopClosestByAttribute} from "../util/hasClosest";
 import {addScriptSync} from "../util/addScript";
 import {prepareWechatCopy, prepareZhihuCopy} from "./platformCopy";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 
 export class Preview {
     public element: HTMLElement;
@@ -239,7 +240,8 @@ export class Preview {
                 id: protyle.block.id || protyle.options.blockId || protyle.block.parentID,
             }, response => {
                 const oldScrollTop = protyle.preview.previewElement.scrollTop;
-                protyle.preview.previewElement.innerHTML = response.data.html;
+                protyle.preview.previewElement.innerHTML = getHostCapabilities().remoteKernel ?
+                    window.DOMPurify.sanitize(response.data.html) : response.data.html;
                 /// #if MOBILE
                 protyle.preview.previewElement.querySelector(`#${CSS.escape(protyle.block.rootID)}`)
                     ?.classList.add("protyle-preview__title");

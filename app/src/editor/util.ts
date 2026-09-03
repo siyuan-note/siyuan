@@ -36,6 +36,7 @@ import {Model} from "../layout/Model";
 import {hideElements} from "../protyle/ui/hideElements";
 import {isBrowserRenderableImagePath} from "../util/imageURL";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
+import {getHostCapabilities} from "../util/hostCapabilities";
 
 const isSameCustomTab = (type: string, data: any, options: IOpenFileOptions) => {
     if (!options.custom || (options.custom.id && options.custom.id !== type)) {
@@ -809,6 +810,9 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
 };
 
 export const openBy = (url: string, type: "folder" | "app") => {
+    if (!getHostCapabilities().localFileSystem) {
+        return;
+    }
     /// #if !BROWSER
     if (url.startsWith("assets/")) {
         fetchPost("/api/asset/resolveAssetPath", {path: url.replace(/\.pdf\?page=\d{1,}$/, ".pdf")}, (response) => {

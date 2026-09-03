@@ -8,6 +8,7 @@ import {
     clearViewFoldDefaultsForOccurrence,
     clearViewFoldOccurrenceRuntimeState,
 } from "./viewFoldRuntimeState";
+import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 
 const VIEW_FOLD_SOURCE = "data-view-fold-source";
 const VIEW_FOLD_VALUE = "data-view-fold";
@@ -208,7 +209,7 @@ const ensureHeadingChildren = async (protyle: IProtyle, heading: Element, stateK
             return;
         }
         const template = document.createElement("template");
-        template.innerHTML = response.data;
+        template.innerHTML = normalizeHTMLAssetIFrameBlockDOM(response.data);
         const elements = Array.from(template.content.children);
         if (!elements[0] || elements[0].getAttribute("data-node-id") !== heading.getAttribute("data-node-id")) {
             return;

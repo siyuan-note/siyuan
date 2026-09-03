@@ -70,6 +70,7 @@ import {setPosition} from "../util/setPosition";
 import {setFold} from "../protyle/util/blockFold";
 import {isEncryptedBox} from "../util/pathName";
 import {getHTMLAssetIFrameSrc} from "../asset/html";
+import {getHostCapabilities, sanitizeKernelHTML} from "../util/hostCapabilities";
 import {
     getDistributedTableColumnWidth,
     isDefaultTableColumnWidth,
@@ -388,7 +389,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                         element.innerHTML = Lute.EscapeHTMLStr(inputElement.value).trim() || refBlockId;
                     } else {
                         fetchPost("/api/block/getRefText", {id: refBlockId}, (response) => {
-                            element.innerHTML = response.data;
+                            element.innerHTML = sanitizeKernelHTML(response.data);
                         });
                     }
                     element.setAttribute("data-subtype", inputElement.value ? "s" : "d");
@@ -528,7 +529,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 click() {
                     element.setAttribute("data-subtype", "d");
                     fetchPost("/api/block/getRefText", {id: refBlockId}, (response) => {
-                        element.innerHTML = response.data;
+                        element.innerHTML = sanitizeKernelHTML(response.data);
                         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                         updateTransaction(protyle, nodeElement, oldHTML);
                         oldHTML = nodeElement.outerHTML;
@@ -2109,6 +2110,9 @@ const genImageHeightMenu = (label: string, imgElement: HTMLElement, protyle: IPr
 };
 
 export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
+    if (getHostCapabilities().remoteKernel) {
+        return [];
+    }
     const iframeElement = nodeElement.querySelector("iframe");
     let html = nodeElement.outerHTML;
     const subMenus: IMenu[] = [{

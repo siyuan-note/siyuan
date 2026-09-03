@@ -24,6 +24,7 @@ import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
 import {showMessage} from "../../dialog/message";
 import {activateTrackedRangeInsertion, type ITrackedRangeInsertion} from "../util/trackedRange";
+import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 
 const getLastChildBlock = (element: Element) => {
     if (!element || !element.lastElementChild) {
@@ -179,7 +180,7 @@ const getListElementByID = async (protyle: IProtyle, listID: string) => {
         notebook: protyle.notebookId,
     });
     const template = document.createElement("template");
-    template.innerHTML = response.data?.dom || "";
+    template.innerHTML = normalizeHTMLAssetIFrameBlockDOM(response.data?.dom || "");
     const listElement = template.content.firstElementChild as HTMLElement;
     if (listElement?.getAttribute("data-type") !== "NodeList") {
         return;

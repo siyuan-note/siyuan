@@ -71,6 +71,7 @@ import {
     updateFileTreeSortMode
 } from "../../util/fileTreeSort";
 import {clearDocumentTabMovePreview} from "../tabDrag";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -2048,20 +2049,22 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
                     }
                 }).element);
             }
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: "importNotebook",
-                icon: "iconDownload",
-                label: `${window.siyuan.languages.importNotebook}<input class="b3-form__upload" type="file" accept="application/zip">`,
-                bind: (element) => {
-                    element.querySelector<HTMLInputElement>(".b3-form__upload").addEventListener("change", (event) => {
-                        const file = (event.target as HTMLInputElement).files?.[0];
-                        if (file) {
-                            window.siyuan.menus.menu.remove();
-                            importNotebook(file);
-                        }
-                    });
-                },
-            }).element);
+            if (getHostCapabilities().importExport) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "importNotebook",
+                    icon: "iconDownload",
+                    label: `${window.siyuan.languages.importNotebook}<input class="b3-form__upload" type="file" accept="application/zip">`,
+                    bind: (element) => {
+                        element.querySelector<HTMLInputElement>(".b3-form__upload").addEventListener("change", (event) => {
+                            const file = (event.target as HTMLInputElement).files?.[0];
+                            if (file) {
+                                window.siyuan.menus.menu.remove();
+                                importNotebook(file);
+                            }
+                        });
+                    },
+                }).element);
+            }
         }
         window.siyuan.menus.menu.append(new MenuItem({
             id: "rebuildDataIndex",

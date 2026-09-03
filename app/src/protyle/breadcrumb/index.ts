@@ -39,6 +39,7 @@ import {refreshUndoButtons} from "../undo/globalUndo";
 import {getAllEditor} from "../../layout/getAll";
 import {genEmbedStatTip, type IBlockStat, type IEmbedStat} from "../../layout/status";
 import {mountBreadcrumbButtons} from "../../plugin/breadcrumbButton";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 
 const genDocumentStatLabel = (stat: IBlockStat, statWithEmbed?: IBlockStat, embedStat?: IEmbedStat) => {
     const runeEmbedAttrs = statWithEmbed ? ` class="ariaLabel" data-position="north" aria-label="${escapeAriaLabel(genEmbedStatTip(window.siyuan.languages.runeCountWithEmbed, statWithEmbed.runeCount, embedStat))}"` : "";
@@ -718,25 +719,27 @@ ${padHTML}
                     window.siyuan.menus.menu.remove();
                 });
                 window.siyuan.menus.menu.append(uploadMenu);
-                const htmlUploadMenu = new MenuItem({
-                    id: "insertHTMLFile",
-                    icon: "iconHTML5",
-                    label: `${window.siyuan.languages.insertHTMLFile}<input class="b3-form__upload" type="file" multiple="multiple" accept=".html,.htm">`,
-                }).element;
-                htmlUploadMenu.querySelector("input").addEventListener("change", (event: InputEvent & {
-                    target: HTMLInputElement
-                }) => {
-                    if (event.target.files.length === 0) {
-                        return;
-                    }
-                    uploadFiles(protyle, event.target.files, event.target, undefined, undefined, {
-                        htmlAsIframe: true,
-                        source: "file-picker",
-                        target: "editor",
+                if (getHostCapabilities().localFileSystem) {
+                    const htmlUploadMenu = new MenuItem({
+                        id: "insertHTMLFile",
+                        icon: "iconHTML5",
+                        label: `${window.siyuan.languages.insertHTMLFile}<input class="b3-form__upload" type="file" multiple="multiple" accept=".html,.htm">`,
+                    }).element;
+                    htmlUploadMenu.querySelector("input").addEventListener("change", (event: InputEvent & {
+                        target: HTMLInputElement
+                    }) => {
+                        if (event.target.files.length === 0) {
+                            return;
+                        }
+                        uploadFiles(protyle, event.target.files, event.target, undefined, undefined, {
+                            htmlAsIframe: true,
+                            source: "file-picker",
+                            target: "editor",
+                        });
+                        window.siyuan.menus.menu.remove();
                     });
-                    window.siyuan.menus.menu.remove();
-                });
-                window.siyuan.menus.menu.append(htmlUploadMenu);
+                    window.siyuan.menus.menu.append(htmlUploadMenu);
+                }
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: this.mediaRecorder?.isRecording ? "endRecord" : "startRecord",
                     current: this.mediaRecorder && this.mediaRecorder.isRecording,
@@ -823,12 +826,15 @@ ${padHTML}
                         }
                     }
                 }).element);
-                if (window.siyuan.user) { // 登录链滴账号后即可使用 `分享到链滴` https://github.com/siyuan-note/siyuan/issues/7392
+                if (window.siyuan.user && getHostCapabilities().importExport) { // 登录链滴账号后即可使用 `分享到链滴` https://github.com/siyuan-note/siyuan/issues/7392
                     window.siyuan.menus.menu.append(new MenuItem({
                         id: "share2Liandi",
                         label: window.siyuan.languages.share2Liandi,
                         icon: "iconLiandi",
                         click() {
+                            if (!getHostCapabilities().importExport) {
+                                return;
+                            }
                             confirmDialog("🤩 " + window.siyuan.languages.share2Liandi,
                                 window.siyuan.languages.share2LiandiConfirmTip.replace("${accountServer}", getCloudURL("")), () => {
                                     fetchPost("/api/export/export2Liandi", {id: protyle.block.parentID});

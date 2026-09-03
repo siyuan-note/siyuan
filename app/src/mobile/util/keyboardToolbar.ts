@@ -45,6 +45,7 @@ import {
 } from "../../protyle/toolbar/inlineStyle";
 import {openInlineStyleDialog} from "../../protyle/toolbar/inlineStyleDialog";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 import {
     getKeyboardHideResult,
     getMovingSelectionEndpoint,
@@ -641,7 +642,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     utilElement.innerHTML = `<div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">
     ${getSlashItem(Constants.ZWSP, "iconMarkdown", window.siyuan.languages.template)}
-    ${getSlashItem(Constants.ZWSP + 1, "iconBoth", window.siyuan.languages.widget)}
+    ${getHostCapabilities().widgets ? getSlashItem(Constants.ZWSP + 1, "iconBoth", window.siyuan.languages.widget) : ""}
     ${getSlashItem(Constants.ZWSP + 2, "iconImage", window.siyuan.languages.assets)}
     ${getSlashItem("((", "iconRef", window.siyuan.languages.ref, "true")}
     ${getSlashItem("{{", "iconSQL", window.siyuan.languages.blockEmbed, "true")}
@@ -654,7 +655,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${isInAndroid() ? getSlashItem(Constants.ZWSP + 3, "iconImage", window.siyuan.languages.insertImage + '<input class="b3-form__upload" type="file" multiple="multiple" accept="image/*,application/x-siyuan-image-picker"/>', "true") : ""}
     ${isInAndroid() ? getSlashItem(Constants.ZWSP + 3, "iconCamera", window.siyuan.languages.insertPhoto + '<input class="b3-form__upload" capture="user" type="file"' + (protyle.options.upload.accept ? (' multiple="' + protyle.options.upload.accept + '"') : "") + "/>", "true") : ""}
     ${getSlashItem(Constants.ZWSP + 3, "iconDownload", window.siyuan.languages.insertAsset + '<input class="b3-form__upload" type="file" multiple="multiple"' + (protyle.options.upload.accept ? (' accept="' + protyle.options.upload.accept + '"') : "") + "/>", "true")}
-    ${getSlashItem('<iframe sandbox="allow-forms allow-presentation allow-same-origin allow-scripts allow-modals allow-popups allow-storage-access-by-user-activation" src="" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>', "iconGlobe", window.siyuan.languages.insertIframeURL, "true")}
+    ${getHostCapabilities().remoteKernel ? "" : getSlashItem('<iframe sandbox="allow-forms allow-presentation allow-same-origin allow-scripts allow-modals allow-popups allow-storage-access-by-user-activation" src="" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>', "iconGlobe", window.siyuan.languages.insertIframeURL, "true")}
     ${getSlashItem("![]()", "iconImage", window.siyuan.languages.insertImgURL, "true")}
     ${getSlashItem('<video controls="controls" src=""></video>', "iconVideo", window.siyuan.languages.insertVideoURL, "true")}
     ${getSlashItem('<audio controls="controls" src=""></audio>', "iconRecord", window.siyuan.languages.insertAudioURL, "true")}

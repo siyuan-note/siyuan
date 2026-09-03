@@ -4,6 +4,7 @@ import {fetchPost} from "../../util/fetch";
 import {getCloudURL} from "../util/about";
 import {openLink} from "../../editor/openLink";
 import {sendAppSetting} from "./appRuntime";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 
 const registerAboutVersionGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("version", "");
@@ -21,7 +22,7 @@ const registerAboutVersionGroup = (tab: SettingTabBuilder) => {
         html: genAboutVersionHtml,
         afterMount: mountAboutVersionSlot,
     });
-    if (!window.siyuan.config.system.isMicrosoftStore) {
+    if (!window.siyuan.config.system.isMicrosoftStore && getHostCapabilities().ownsKernel) {
         group.select("system.updateChannel", {
             title: window.siyuan.languages.updateChannel,
             desc: window.siyuan.languages.updateChannelTip,
@@ -34,7 +35,8 @@ const registerAboutVersionGroup = (tab: SettingTabBuilder) => {
         });
     }
     /// #if !BROWSER
-    if (!window.siyuan.config.system.isMicrosoftStore && window.siyuan.config.system.container === "std" && window.siyuan.config.system.os !== "linux") {
+    if (!window.siyuan.config.system.isMicrosoftStore && getHostCapabilities().ownsKernel &&
+        window.siyuan.config.system.container === "std" && window.siyuan.config.system.os !== "linux") {
         group.switch("system.downloadInstallPkg", {
             title: window.siyuan.languages.autoDownloadUpdatePkg,
             desc: window.siyuan.languages.autoDownloadUpdatePkgTip,
@@ -45,6 +47,13 @@ const registerAboutVersionGroup = (tab: SettingTabBuilder) => {
 };
 
 const genAboutVersionHtml = (): string => {
+    if (!getHostCapabilities().ownsKernel) {
+        return `<div class="fn__flex b3-label config-item config-wrap">
+    <div class="fn__flex-1">
+        <div class="config-name">${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}</div>
+    </div>
+</div>`;
+    }
     if (window.siyuan.config.system.isMicrosoftStore) {
         return `<div class="fn__flex b3-label config-item config-wrap">
     <div class="fn__flex-1">

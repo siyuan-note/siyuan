@@ -1,3 +1,6 @@
+import {getHostCapabilities} from "../../util/hostCapabilities";
+import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
+
 export const addWidgetCacheVersion = (src: string, version: string) => {
     if (!src.startsWith("/widgets/")) {
         return src;
@@ -16,6 +19,10 @@ export const addWidgetCacheVersion = (src: string, version: string) => {
 };
 
 export const updateWidgetCacheVersion = (root: ParentNode, version: string) => {
+    if (!getHostCapabilities().widgets) {
+        normalizeHTMLAssetIFrameSources(root, true);
+        return;
+    }
     root.querySelectorAll<HTMLIFrameElement>('[data-type="NodeWidget"] iframe').forEach(item => {
         const src = item.getAttribute("src");
         if (src) {

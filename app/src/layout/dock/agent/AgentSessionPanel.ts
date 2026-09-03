@@ -9,6 +9,7 @@ import * as path from "path";
 import {useShell} from "../../../util/pathName";
 
 /// #endif
+import {getHostCapabilities} from "../../../util/hostCapabilities";
 
 export class AgentSessionPanel {
     private popup: HTMLElement | null = null;
@@ -202,7 +203,7 @@ export class AgentSessionPanel {
                         '<svg><use xlink:href="#iconMore"></use></svg>' +
                         '<div class="b3-menu__submenu">' +
                             '<div class="b3-menu__items">' +
-                            (isDesktop ? '<button class="b3-menu__item" data-action="folder"><svg class="b3-menu__icon"><use xlink:href="#iconFolder"></use></svg><span class="b3-menu__label">' + escapeHtml(L.showInFolder) + "</span></button>" : "") +
+                            (isDesktop && getHostCapabilities().localFileSystem ? '<button class="b3-menu__item" data-action="folder"><svg class="b3-menu__icon"><use xlink:href="#iconFolder"></use></svg><span class="b3-menu__label">' + escapeHtml(L.showInFolder) + "</span></button>" : "") +
                             '<button class="b3-menu__item b3-menu__item--warning" data-action="delete"><svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg><span class="b3-menu__label">' + escapeHtml(L.delete) + "</span></button>" +
                             "</div>" +
                         "</div>" +

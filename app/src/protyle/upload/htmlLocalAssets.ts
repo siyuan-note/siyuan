@@ -36,3 +36,7 @@ export const applyHTMLLocalAssetPaths = (assets: IHTMLLocalAsset[], paths: Array
         }
     });
 };
+
+export const removeHTMLLocalAssetPaths = (assets: IHTMLLocalAsset[]) => {
+    assets.forEach((asset) => asset.element.removeAttribute(asset.attribute));
+};

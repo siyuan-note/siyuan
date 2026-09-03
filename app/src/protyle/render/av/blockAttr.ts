@@ -29,6 +29,7 @@ import {isLastPointerMouse} from "../../../util/touchDragBridge";
 import {getLocalDropFiles, hasDataTransferFiles} from "../../upload/localDropFiles";
 import {cloneAVCellValueSnapshot} from "./cellValue";
 import {getEditorFocusRange, restoreEditorFocusRange} from "../../util/editorFocus";
+import {getHostCapabilities} from "../../../util/hostCapabilities";
 
 interface IAVAttributeTableData {
     avID: string;
@@ -207,7 +208,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     const cellElement = element.querySelector(".custom-attr__avvalue--active") as HTMLElement;
                     if (cellElement) {
                         const position = {x: event.clientX, y: event.clientY};
-                        if (!isBrowser()) {
+                        if (!isBrowser() && getHostCapabilities().localFileSystem) {
                             /// #if !BROWSER
                             const files = getLocalDropFiles(event.dataTransfer.files,
                                 file => webUtils.getPathForFile(file));

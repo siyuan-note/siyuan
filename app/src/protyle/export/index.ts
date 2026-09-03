@@ -14,6 +14,7 @@ import {replaceLocalPath} from "../../editor/rename";
 import {getScreenWidth, isInMobileApp, saveExportFile, setStorageVal} from "../util/compatibility";
 import {getFrontend} from "../../util/functions";
 import {isEncryptedBox} from "../../util/pathName";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 
 const getPluginStyle = async () => {
     const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
@@ -32,6 +33,9 @@ const getIconScript = (servePath: string) => {
 };
 
 export const saveExport = (option: IExportOptions) => {
+    if (!getHostCapabilities().importExport) {
+        return;
+    }
     /// #if BROWSER
     if (["html", "htmlmd"].includes(option.type)) {
         const startExport = () => {

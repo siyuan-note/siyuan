@@ -2,6 +2,8 @@ import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {genIconHTML} from "./util";
+import {escapeHtml} from "../../util/escape";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 
 export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
     let mindmapElements: Element[] | NodeListOf<Element> = [];
@@ -73,6 +75,7 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                         },
                     ],
                     tooltip: {
+                        ...(getHostCapabilities().remoteKernel ? {renderMode: "richText"} : {}),
                         trigger: "item",
                         triggerOn: "mousemove",
                     },
@@ -80,7 +83,7 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                 });
             } catch (error) {
                 window.echarts.dispose(renderElement.lastElementChild);
-                renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div class="ft__error" style="height:${e.style.height || "420px"}" contenteditable="false">Mindmap render error: <br>${error}</div>`;
+                renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div class="ft__error" style="height:${e.style.height || "420px"}" contenteditable="false">Mindmap render error: <br>${escapeHtml(String(error))}</div>`;
             }
         });
     });

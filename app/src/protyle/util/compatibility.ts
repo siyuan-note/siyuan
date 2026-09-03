@@ -14,6 +14,7 @@ import {buildBlockDOMClipboardData} from "./blockDOMClipboard";
 import {buildWebClipboardHTML, getTextSiyuanFromTextHTML} from "./clipboardData";
 import {prepareExternalClipboardHTML} from "./richClipboard";
 import {isIOSPlatform, isIPadOSPlatform} from "./browserCompatibility";
+import {canOpenExternalURL, getHostCapabilities} from "../../util/hostCapabilities";
 
 export {encodeBase64, getTextSiyuanFromTextHTML} from "./clipboardData";
 
@@ -62,6 +63,12 @@ export const isPhablet = () => {
 };
 
 export const saveExportFile = async (uri: string, msgId?: string): Promise<TSaveExportFileResult> => {
+    if (!getHostCapabilities().importExport) {
+        if (msgId) {
+            hideMessage(msgId);
+        }
+        return {status: "error"};
+    }
     if (!uri) {
         return {status: "error"};
     }
@@ -210,6 +217,9 @@ export const readText = () => {
 export const getLocalFiles = async () => {
     // 不再支持 PC 浏览器 https://github.com/siyuan-note/siyuan/issues/7206
     let localFiles: ILocalFiles[] = [];
+    if (!getHostCapabilities().localFileSystem) {
+        return localFiles;
+    }
     if ("darwin" === window.siyuan.config.system.os) {
         const xmlString = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
             cmd: "clipboardRead",
@@ -930,6 +940,9 @@ export const initWindowOpenOverride = (app: App, openExternal?: (url: string) =>
         const urlStr = typeof url === "string" ? url : (url ? String(url) : "");
         if (isSiYuanUriProtocol(urlStr) && (!isBrowser() || isInMobileApp() || target !== "_blank")) {
             void import("../../util/uri").then(({processSiYuanUri}) => processSiYuanUri(app, urlStr));
+            return null;
+        }
+        if (!canOpenExternalURL(urlStr)) {
             return null;
         }
         if (isInMobileApp() && urlStr && openExternal) {

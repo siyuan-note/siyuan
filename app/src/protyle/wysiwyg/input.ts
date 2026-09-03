@@ -30,6 +30,7 @@ import {
     removeEmptySemanticInlineElement
 } from "../util/inlineElementMarker";
 import {normalizeInlineFontFamilyStyle} from "../toolbar/fontFamilyCore";
+import {sanitizeKernelHTML} from "../../util/hostCapabilities";
 
 interface IInputOperations {
     doOperations: IOperation[];
@@ -231,7 +232,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             blockElement.querySelectorAll('[data-type~="block-ref"][data-subtype="d"]').forEach(refItem => {
                 if (refItem.textContent === "") {
                     fetchPost("/api/block/getRefText", {id: refItem.getAttribute("data-id")}, (response) => {
-                        refItem.innerHTML = response.data;
+                        refItem.innerHTML = sanitizeKernelHTML(response.data);
                     });
                 }
             });
@@ -512,7 +513,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
                 realElement.querySelectorAll('[data-type~="block-ref"][data-subtype="d"]').forEach(refItem => {
                     if (refItem.textContent === "") {
                         fetchPost("/api/block/getRefText", {id: refItem.getAttribute("data-id")}, (response) => {
-                            refItem.innerHTML = response.data;
+                            refItem.innerHTML = sanitizeKernelHTML(response.data);
                         });
                     }
                 });

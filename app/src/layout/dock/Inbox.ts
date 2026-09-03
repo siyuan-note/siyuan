@@ -16,6 +16,7 @@ import {getCloudURL} from "../../config/util/about";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {escapeHtml} from "../../util/escape";
 import {emitOpenMenu} from "../../plugin/EventBus";
+import {sanitizeKernelHTML} from "../../util/hostCapabilities";
 
 export class Inbox extends Model {
     private element: Element;
@@ -190,21 +191,21 @@ export class Inbox extends Model {
         <svg class="toolbar__icon" style="float: left"><use xlink:href="#iconLink"></use></svg>
     </a>`;
         }
-        return `<div class="toolbar">
+        return sanitizeKernelHTML(`<div class="toolbar">
     <svg data-type="back" class="toolbar__icon"><use xlink:href="#iconLeft"></use></svg>
     <span data-type="back" class="toolbar__text fn__flex-1">${data.shorthandTitle}</span>
     ${linkHTML}
 </div>
 <div class="b3-typography b3-typography--default" style="padding: 0 8px 8px">
 ${data.shorthandContent}
-</div>`;
+</div>`);
         /// #else
         if (data.shorthandURL) {
             linkHTML = `<span class="fn__space"></span><a href="${data.shorthandURL}" target="_blank" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.link}">
         <svg><use xlink:href="#iconLink"></use></svg>
     </a>`;
         }
-        return `<div class="block__icons">
+        return sanitizeKernelHTML(`<div class="block__icons">
     <div class="block__logo fn__pointer fn__flex-1" data-type="back">
         <svg class="block__logoicon"><use xlink:href="#iconLeft"></use></svg><span class="ft__breakword">${data.shorthandTitle}</span>
     </div>
@@ -212,19 +213,19 @@ ${data.shorthandContent}
 </div>
 <div class="b3-typography b3-typography--default" style="padding: 0 8px 8px;user-select: text" data-type="textMenu">
 ${data.shorthandContent}
-</div>`;
+</div>`);
         /// #endif
     }
 
     private genItemHTML(item: IInbox) {
-        return `<li style="padding-left: 0" data-id="${item.oId}" class="b3-list-item">
+        return sanitizeKernelHTML(`<li style="padding-left: 0" data-id="${item.oId}" class="b3-list-item">
     <span data-type="select" class="b3-list-item__action">
         <svg><use xlink:href="#icon${this.selectIds.includes(item.oId) ? "Check" : "Uncheck"}"></use></svg> 
     </span>
     <span class="fn__space--small"></span>
     <span class="b3-list-item__text" title="${item.shorthandTitle}${item.shorthandTitle === item.shorthandDesc ? "" : "\n" + item.shorthandDesc}">${item.shorthandTitle}</span>
     <span class="b3-list-item__meta">${item.hCreated}</span>
-</li>`;
+</li>`);
     }
 
     private more(event: MouseEvent, itemElement?: HTMLElement) {

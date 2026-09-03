@@ -1,0 +1,346 @@
+{
+	"ID": "20260903150000-u4065fm",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260903150000-u4065fm",
+		"title": "连接远程内核",
+		"type": "doc",
+		"updated": "20260903150000"
+	},
+	"Children": [
+		{
+			"ID": "20260903150000-7adxewf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260903150000-7adxewf",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-f38iwpd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260903150000-f38iwpd",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端可以连接运行在其他设备上的思源内核，并使用本地桌面界面进行编辑。远程模式仅用于连接现有内核，不会在本机启动内核。"
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-15zokfv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260903150000-15zokfv",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "启动方式"
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-y92771v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260903150000-y92771v",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "完全退出思源桌面客户端后，从命令行启动桌面端并添加参数 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--remote=https://host[:port]"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。如果已有实例正在运行，单实例机制不会切换当前连接。"
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-fjznin7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260903150000-fjznin7",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "安全与版本"
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-54fwkfr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260903150000-54fwkfr",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "仅支持 HTTPS 远程地址，客户端操作系统必须信任服务器使用的 TLS 证书。请只连接你信任的服务器；桌面客户端与远程内核的版本必须完全一致，否则无法连接。桌面客户端只加载安装包内置前端，不加载远端服务器提供的 HTML、脚本等可执行前端资源，因此同源的远端 HTML 嵌入内容也不可用。"
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-bh8cy8d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260903150000-bh8cy8d",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "功能限制"
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-w1kgmix",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260903150000-w1kgmix",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "首版远程模式暂不支持以下功能，本地模式不受影响："
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-kvy0i58",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260903150000-kvy0i58",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"ID": "20260903150000-1g1xw92",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260903150000-1g1xw92",
+						"updated": "20260903150000"
+					},
+					"Children": [
+						{
+							"ID": "20260903150000-zljclps",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260903150000-zljclps",
+								"updated": "20260903150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "导入和导出"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260903150000-mxw5obc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260903150000-mxw5obc",
+						"updated": "20260903150000"
+					},
+					"Children": [
+						{
+							"ID": "20260903150000-em9ib37",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260903150000-em9ib37",
+								"updated": "20260903150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文件剪贴板"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260903150000-dir6dv4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260903150000-dir6dv4",
+						"updated": "20260903150000"
+					},
+					"Children": [
+						{
+							"ID": "20260903150000-z98z7dm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260903150000-z98z7dm",
+								"updated": "20260903150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "依赖客户端本地路径或服务器绝对路径的操作，例如在文件管理器中显示，以及按路径拖入或打开文件；通过文件选择器进行普通资源上传仍可用"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260903150000-5k7d57t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260903150000-5k7d57t",
+						"updated": "20260903150000"
+					},
+					"Children": [
+						{
+							"ID": "20260903150000-4p58ioe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260903150000-4p58ioe",
+								"updated": "20260903150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "桌面端插件、集市和挂件不可用；仅使用客户端内置外观，不加载远端自定义主题、图标、字体和代码片段"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260903150000-c5tbiz0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260903150000-c5tbiz0",
+						"updated": "20260903150000"
+					},
+					"Children": [
+						{
+							"ID": "20260903150000-0ptz2p4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260903150000-0ptz2p4",
+								"updated": "20260903150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "HTML 和 SVG 块、数据库模板及 JavaScript 查询嵌入块中的脚本不会执行，iframe 块不可用；图表、图形和数学公式等渲染结果会进行安全净化"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260903150000-up6xjxo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260903150000-up6xjxo",
+						"updated": "20260903150000"
+					},
+					"Children": [
+						{
+							"ID": "20260903150000-zblcgsf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260903150000-zblcgsf",
+								"updated": "20260903150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "仅支持访问授权码登录，不支持 OIDC 登录"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-ia08la1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260903150000-ia08la1",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "生命周期"
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-xv2k13i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260903150000-xv2k13i",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "远程内核的启动、停止、重启、升级和工作空间切换均需在服务器端完成。关闭桌面客户端不会关闭远程内核。"
+				}
+			]
+		}
+	]
+}

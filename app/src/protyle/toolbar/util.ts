@@ -13,6 +13,7 @@ import {
     setSemanticInlineElementMarker,
     stripSemanticInternalMarkerPrefix
 } from "../util/inlineElementMarker";
+import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 
 export const previewTemplate = (pathString: string, element: Element, parentId: string) => {
     if (!pathString) {
@@ -25,7 +26,8 @@ export const previewTemplate = (pathString: string, element: Element, parentId: 
         mode: "preview",
         preview: true
     }, (response) => {
-        element.innerHTML = `<div class="protyle-wysiwyg" style="padding: 8px">${response.data.content.replace(/contenteditable="true"/g, "")}</div>`;
+        const content = normalizeHTMLAssetIFrameBlockDOM(response.data.content.replace(/contenteditable="true"/g, ""));
+        element.innerHTML = `<div class="protyle-wysiwyg" style="padding: 8px">${content}</div>`;
     });
 };
 

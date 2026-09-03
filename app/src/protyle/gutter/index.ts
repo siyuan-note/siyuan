@@ -86,6 +86,7 @@ import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {genCellValueByElement} from "../render/av/cell";
 import {getPlainText} from "../util/paste";
 import {CODE_TAB_SPACE_VALUES} from "../wysiwyg/codeBlockUtil";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 import {getEditorFocusRangeOutsideElement, restoreEditorFocusRange} from "../util/editorFocus";
 import {
     getCrossBlockTextSelectionTarget,
@@ -2282,7 +2283,7 @@ export class Gutter {
                             window.siyuan.menus.menu.remove();
                         });
                     }
-                }, {
+                }, ...(getHostCapabilities().importExport ? [{
                     id: "saveCodeBlockAsFile",
                     iconHTML: "",
                     label: window.siyuan.languages.saveCodeBlockAsFile,
@@ -2292,7 +2293,7 @@ export class Gutter {
                             saveExportFile(response.data.path, msgId);
                         });
                     }
-                }]
+                }] : [])]
             }).element);
         } else if (type === "NodeCodeBlock" && !protyle.disabled && ["echarts", "mindmap"].includes(nodeElement.getAttribute("data-subtype"))) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_chart", type: "separator"}).element);
@@ -2353,35 +2354,39 @@ export class Gutter {
                 }).element);
             }
         } else if (type === "NodeAttributeView") {
-            window.siyuan.menus.menu.append(new MenuItem({id: "separator_exportCSV", type: "separator"}).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: "exportCSV",
-                icon: "iconDatabase",
-                label: window.siyuan.languages.export + " CSV",
-                click() {
-                    fetchPost("/api/export/exportAttributeView", {
-                        id: nodeElement.getAttribute("data-av-id"),
-                        blockID: id,
-                    }, response => {
-                        saveExportFile(response.data.zip);
-                    });
-                }
-            }).element);
+            if (getHostCapabilities().importExport) {
+                window.siyuan.menus.menu.append(new MenuItem({id: "separator_exportCSV", type: "separator"}).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "exportCSV",
+                    icon: "iconDatabase",
+                    label: window.siyuan.languages.export + " CSV",
+                    click() {
+                        fetchPost("/api/export/exportAttributeView", {
+                            id: nodeElement.getAttribute("data-av-id"),
+                            blockID: id,
+                        }, response => {
+                            saveExportFile(response.data.zip);
+                        });
+                    }
+                }).element);
+            }
             /// #if !BROWSER
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: "showDatabaseInFolder",
-                icon: "iconFolder",
-                label: window.siyuan.languages.showInFolder,
-                click() {
-                    const avId = nodeElement.getAttribute("data-av-id");
-                    const notebookId = protyle.notebookId;
-                    // 加密笔记本的 AV 定义存笔记本级路径
-                    const avDir = isEncryptedBox(notebookId)
-                        ? path.join(window.siyuan.config.system.dataDir, notebookId, "storage", "av")
-                        : path.join(window.siyuan.config.system.dataDir, "storage", "av");
-                    useShell("showItemInFolder", path.join(avDir, avId) + ".json");
-                }
-            }).element);
+            if (getHostCapabilities().localFileSystem) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "showDatabaseInFolder",
+                    icon: "iconFolder",
+                    label: window.siyuan.languages.showInFolder,
+                    click() {
+                        const avId = nodeElement.getAttribute("data-av-id");
+                        const notebookId = protyle.notebookId;
+                        // 加密笔记本的 AV 定义存笔记本级路径
+                        const avDir = isEncryptedBox(notebookId)
+                            ? path.join(window.siyuan.config.system.dataDir, notebookId, "storage", "av")
+                            : path.join(window.siyuan.config.system.dataDir, "storage", "av");
+                        useShell("showItemInFolder", path.join(avDir, avId) + ".json");
+                    }
+                }).element);
+            }
             /// #endif
         } else if ((type === "NodeVideo" || type === "NodeAudio") && !protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_VideoOrAudio", type: "separator"}).element);
@@ -2392,7 +2397,7 @@ export class Gutter {
                 label: window.siyuan.languages.assets,
                 submenu: videoMenu(protyle, nodeElement, type)
             }).element);
-        } else if (type === "NodeIFrame" && !protyle.disabled) {
+        } else if (type === "NodeIFrame" && !protyle.disabled && !getHostCapabilities().remoteKernel) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_IFrame", type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "assetIFrame",
@@ -3440,6 +3445,7 @@ export class Gutter {
             id: "copyAsPNG",
             iconHTML: "",
             label: window.siyuan.languages.copyAsPNG,
+            ignore: !getHostCapabilities().importExport,
             click() {
                 exportImage(id, true);
             }

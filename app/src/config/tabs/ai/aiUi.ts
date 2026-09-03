@@ -7,6 +7,7 @@ import {fetchPost} from "../../../util/fetch";
 import {escapeHtml} from "../../../util/escape";
 import {aiConfigApi} from "./aiRuntime";
 import {openByMobile} from "../../../editor/openLink";
+import {canOpenExternalURL} from "../../../util/hostCapabilities";
 /// #if !BROWSER
 import {shell} from "electron";
 /// #endif
@@ -423,7 +424,8 @@ export const mountMcpServersBlock = (root: HTMLElement) => {
                     connectedCount++;
                     totalTools += item.tools;
                 }
-                if (item.authorizationURL && openedMcpOAuthURLs.get(item.id) !== item.authorizationURL) {
+                if (item.authorizationURL && canOpenExternalURL(item.authorizationURL) &&
+                    openedMcpOAuthURLs.get(item.id) !== item.authorizationURL) {
                     openedMcpOAuthURLs.set(item.id, item.authorizationURL);
                     /// #if !BROWSER
                     void shell.openExternal(item.authorizationURL).catch((error: Error) => {

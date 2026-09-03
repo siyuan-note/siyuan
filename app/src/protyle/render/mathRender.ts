@@ -5,6 +5,7 @@ import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {hasClosestBlock} from "../util/hasClosest";
 import {looseJsonParse} from "../../util/functions";
 import {genRenderFrame} from "./util";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 
 const fitMathWidth = (mathElement: HTMLElement, blockElement: HTMLElement | false, isBlock: boolean) => {
     return new Promise<void>((resolve) => {
@@ -46,14 +47,18 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                     console.warn("KaTex macros is not JSON", e);
                 }
                 const isBlock = mathElement.tagName === "DIV";
+                const remoteKernel = getHostCapabilities().remoteKernel;
                 try {
-                    const mathHTML = window.katex.renderToString(Lute.UnEscapeHTMLStr(mathElement.getAttribute("data-content")), {
+                    let mathHTML = window.katex.renderToString(Lute.UnEscapeHTMLStr(mathElement.getAttribute("data-content")), {
                         displayMode: isBlock,
                         output: "html",
                         macros,
-                        trust: true, // REF: https://katex.org/docs/supported#html
+                        trust: !remoteKernel, // REF: https://katex.org/docs/supported#html
                         strict: (errorCode) => errorCode === "unicodeTextInMathMode" ? "ignore" : "warn",
                     });
+                    if (remoteKernel) {
+                        mathHTML = window.DOMPurify.sanitize(mathHTML);
+                    }
                     const blockElement = hasClosestBlock(mathElement);
                     if (isBlock) {
                         genRenderFrame(mathElement);
@@ -127,10 +132,10 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                     if (isBlock) {
                         genRenderFrame(mathElement);
                         mathElement.firstElementChild.firstElementChild.setAttribute("contenteditable", "false");
-                        mathElement.firstElementChild.firstElementChild.innerHTML = e.message;
+                        mathElement.firstElementChild.firstElementChild.textContent = e.message;
                         mathElement.firstElementChild.firstElementChild.classList.add("ft__error");
                     } else {
-                        mathElement.innerHTML = e.message;
+                        mathElement.textContent = e.message;
                         mathElement.classList.add("ft__error");
                     }
                 }

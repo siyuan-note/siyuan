@@ -4,8 +4,12 @@ import {isMobile, objEquals} from "../../util/functions";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {Constants} from "../../constants";
 import {refreshHeadingNumberMeasurements} from "../../util/assets";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 
 export const renderSnippet = (timeout = 0) => {
+    if (!getHostCapabilities().customAppearance) {
+        return Promise.resolve();
+    }
     const abortController = timeout > 0 ? new AbortController() : undefined;
     const timeoutId = abortController ? window.setTimeout(() => {
         abortController.abort();

@@ -70,6 +70,7 @@ import {activeBlur, updateMobilePluginToolbar} from "../../mobile/util/keyboardT
 import {FormatPainter} from "./FormatPainter";
 import {IFormatPainterSnapshot} from "./formatPainterCore";
 import {clearDisallowedTextInputHotkey} from "../../util/hotKeyPolicy";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 import {closeSubElement, SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE} from "./subElementLifecycle";
 import {getDefaultToolbar, getToolbarEntryId, markPluginToolbarEntries} from "./defaults";
 import {applyToolbarEntryVisibility} from "../../config/entryVisibility/runtime";
@@ -1477,8 +1478,8 @@ export class Toolbar {
     <span class="fn__space${protyle.disabled ? " fn__none" : ""}"></span>
     <button data-type="after" class="block__icon block__icon--show b3-tooltips b3-tooltips__nw${protyle.disabled ? " fn__none" : ""}" aria-label="${window.siyuan.languages.insertAfter}"><svg><use xlink:href="#iconAfter"></use></svg></button>
     <span class="fn__space${protyle.disabled ? " fn__none" : ""}"></span>
-    <button data-type="export" class="block__icon block__icon--show b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.export} ${window.siyuan.languages.image}"><svg><use xlink:href="#iconImage"></use></svg></button>
-    <span class="fn__space"></span>
+    <button data-type="export" class="block__icon block__icon--show b3-tooltips b3-tooltips__nw${getHostCapabilities().importExport ? "" : " fn__none"}" aria-label="${window.siyuan.languages.export} ${window.siyuan.languages.image}"><svg><use xlink:href="#iconImage"></use></svg></button>
+    <span class="fn__space${getHostCapabilities().importExport ? "" : " fn__none"}"></span>
     <button data-type="pin" class="block__icon block__icon--show b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.pin}"><svg><use xlink:href="#iconPin"></use></svg></button>
     <span class="fn__space"></span>
     <button data-type="close" class="block__icon block__icon--show b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.close}"><svg><use xlink:href="#iconClose"></use></svg></button>
@@ -1596,6 +1597,9 @@ export class Toolbar {
             }
         });
         const exportImg = () => {
+            if (!getHostCapabilities().importExport) {
+                return;
+            }
             const msgId = showMessage(window.siyuan.languages.exporting, 0);
             if (renderElement.getAttribute("data-subtype") === "plantuml") {
                 fetch(renderElement.querySelector("object").getAttribute("data")).then(function (response) {
@@ -2124,9 +2128,11 @@ export class Toolbar {
                     searchHTML += `<div data-value="${item.path}" class="b3-list-item--hide-action b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
 <span class="b3-list-item__text">${item.content}</span>`;
                     /// #if !BROWSER
-                    searchHTML += `<span data-type="open" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.showInFolder}">
+                    if (getHostCapabilities().localFileSystem) {
+                        searchHTML += `<span data-type="open" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.showInFolder}">
     <svg><use xlink:href="#iconFolder"></use></svg>
 </span>`;
+                    }
                     /// #endif
                     searchHTML += `<span data-type="remove" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>

@@ -43,6 +43,7 @@ import {
 } from "../toolbar/inlineStyle";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {buildSemanticInlineHTML} from "../util/inlineElementMarker";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 import {
     getBlockSelectionModeElement,
     getBlockSelectionStatusIDs,
@@ -105,12 +106,12 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         id: "template",
         value: Constants.ZWSP,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconMarkdown"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.template}</span></div>`,
-    }, {
+    }, ...(getHostCapabilities().widgets ? [{
         filter: [window.siyuan.languages.widget, "widget", "挂件", "guajian", "gj"],
         id: "widget",
         value: Constants.ZWSP + 1,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconBoth"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.widget}</span></div>`,
-    }, {
+    }] : []), {
         filter: [window.siyuan.languages.assets, "assets", "资源", "ziyuan", "zy"],
         id: "assets",
         value: Constants.ZWSP + 2,
@@ -343,18 +344,18 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         value: Constants.ZWSP + 3,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconDownload"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.insertAsset}</span>
 <input class="b3-form__upload" type="file" multiple="multiple"${protyle.options.upload.accept ? ' accept="' + protyle.options.upload.accept + '"' : ""}></div>`,
-    }, {
+    }, ...(getHostCapabilities().localFileSystem ? [{
         filter: [window.siyuan.languages.insertHTMLFile, "embed html file", "iframe", "嵌入 html 文件", "qianruhtmlwenjian", "qrhtmlwj"],
         id: "insertHTMLFile",
         value: Constants.ZWSP + 3,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconHTML5"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.insertHTMLFile}</span>
 <input class="b3-form__upload" data-upload-mode="html-iframe" type="file" multiple="multiple" accept=".html,.htm"></div>`,
-    }, {
+    }] : []), ...(getHostCapabilities().remoteKernel ? [] : [{
         filter: [window.siyuan.languages.insertIframeURL, "insert iframe link", "插入 iframe 链接", "charuiframelianjie", "criframelj"],
         id: "insertIframeURL",
         value: '<iframe sandbox="allow-forms allow-presentation allow-same-origin allow-scripts allow-modals allow-popups allow-storage-access-by-user-activation" src="" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>',
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconGlobe"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.insertIframeURL}</span></div>`,
-    }, {
+    }]), {
         filter: [window.siyuan.languages.insertImgURL, "insert image link", "image", "img", "插入图片链接", "charutupianlianjie", "crtplj"],
         id: "insertImgURL",
         value: "![]()",
@@ -711,6 +712,9 @@ export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement
 };
 
 export const hintRenderWidget = (value: string, protyle: IProtyle) => {
+    if (!getHostCapabilities().widgets) {
+        return;
+    }
     focusByRange(protyle.toolbar.range);
     // src 地址以 / 结尾
     // Use the path ending with `/` when loading the widget https://github.com/siyuan-note/siyuan/issues/10520

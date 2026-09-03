@@ -6,7 +6,7 @@
 		"id": "20211226122459-08mi5cq",
 		"title": "Docker 伺服",
 		"type": "doc",
-		"updated": "20250926110600"
+		"updated": "20260903150000"
 	},
 	"Children": [
 		{
@@ -761,7 +761,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230406105213-yoyn08w",
-				"updated": "20250926110600"
+				"updated": "20260903150000"
 			},
 			"Children": [
 				{
@@ -776,7 +776,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230406105213-899tzed",
-				"updated": "20250926110600"
+				"updated": "20260903150000"
 			},
 			"Children": [
 				{
@@ -788,7 +788,7 @@
 					},
 					"Properties": {
 						"id": "20230406105213-n1iq0nk",
-						"updated": "20230406105213"
+						"updated": "20260903150000"
 					},
 					"Children": [
 						{
@@ -796,12 +796,23 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230406105213-8dbq6l2",
-								"updated": "20230406105213"
+								"updated": "20260903150000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "不支持桌面端和移動端應用連接，僅支持在瀏覽器上使用"
+									"Data": "行動端應用仍不支援連線。桌面端可以透過遠端模式連線，詳見 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260903150000-3qa6edk",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "連線至遠端內核"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。"
 								}
 							]
 						}

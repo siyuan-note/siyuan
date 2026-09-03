@@ -12,6 +12,7 @@ import {highlightRender, lineNumberRender} from "../render/highlightRender";
 import {processRender} from "../util/processCode";
 import {isInAndroid, isIPad, isIPhone, isSafari, saveExportFile, setStorageVal} from "../util/compatibility";
 import {useShell} from "../../util/pathName";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 import {copyPNGByLink, writePNGBlob} from "../../menus/util";
 
 // WebKit/Chromium 会拒绝宽度或高度超过此限制的 canvas，导致生成空白图像。
@@ -34,6 +35,9 @@ export const afterExport = (exportPath: string, msgId: string) => {
 };
 
 export const exportImage = (id: string, copyOnly = false) => {
+    if (!getHostCapabilities().importExport) {
+        return;
+    }
     const exportDialog = new Dialog({
         disableAnimation: true,
         title: copyOnly ? window.siyuan.languages.copyAsPNG : window.siyuan.languages.exportAsImage,

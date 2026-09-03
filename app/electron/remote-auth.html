@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+    <title>SiYuan</title>
+    <style>
+        :root {
+            color-scheme: light dark;
+            font-family: "Helvetica Neue", "Microsoft Yahei", sans-serif;
+        }
+
+        body {
+            align-items: center;
+            background: #fff;
+            color: #202124;
+            display: flex;
+            height: 100%;
+            justify-content: center;
+            margin: 0;
+        }
+
+        #windowBar {
+            -webkit-app-region: drag;
+            height: 32px;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+        }
+
+        #closeWindow {
+            -webkit-app-region: no-drag;
+            background: transparent;
+            color: inherit;
+            font-size: 20px;
+            height: 32px;
+            line-height: 32px;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 44px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #1e1e1e;
+                color: #c9d1d9;
+            }
+        }
+
+        main {
+            text-align: center;
+            width: 280px;
+        }
+
+        #origin {
+            font-size: 12px;
+            opacity: .7;
+            overflow-wrap: anywhere;
+        }
+
+        input[type="password"], input[type="text"] {
+            border: 1px solid rgba(127, 127, 127, .6);
+            border-radius: 4px;
+            box-sizing: border-box;
+            line-height: 28px;
+            padding: 0 8px;
+            width: 100%;
+        }
+
+        #captchaRow {
+            display: none;
+            margin-top: 8px;
+            position: relative;
+        }
+
+        #captchaImg {
+            cursor: pointer;
+            height: 26px;
+            position: absolute;
+            right: 1px;
+            top: 1px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            margin: 12px 0;
+            text-align: left;
+        }
+
+        button {
+            background: #3573f0;
+            border: 0;
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+            line-height: 28px;
+            width: 100%;
+        }
+
+        #message {
+            color: #d23f31;
+            font-size: 12px;
+            min-height: 18px;
+        }
+    </style>
+</head>
+<body>
+<div id="windowBar"><button id="closeWindow" type="button">×</button></div>
+<main hidden>
+    <h1 id="title">SiYuan</h1>
+    <p id="origin"></p>
+    <form id="authForm">
+        <input id="authCode" type="password" autocomplete="current-password">
+        <div id="captchaRow">
+            <img id="captchaImg">
+            <input id="captcha" type="text" autocomplete="off">
+        </div>
+        <label><input id="rememberMe" type="checkbox"><span id="rememberLabel"></span></label>
+        <button id="submit" type="submit"></button>
+    </form>
+    <p id="message" role="alert"></p>
+</main>
+<script>
+    (() => {
+        const params = new URLSearchParams(window.location.search);
+        const allowedPaths = ["/stage/build/app/", "/stage/build/app/window.html"];
+        let targetURL;
+        try {
+            targetURL = new URL(params.get("to") || "/stage/build/app/", window.location.origin);
+        } catch (error) {
+            targetURL = new URL("/stage/build/app/", window.location.origin);
+        }
+        if (targetURL.origin !== window.location.origin || !allowedPaths.includes(targetURL.pathname)) {
+            targetURL = new URL("/stage/build/app/", window.location.origin);
+        }
+        targetURL.searchParams.set("remote", "1");
+
+        const browserLanguage = navigator.language || "en";
+        let language = params.get("lang");
+        if (!language) {
+            if (/^zh-(TW|HK|MO)|Hant/i.test(browserLanguage)) {
+                language = "zh-TW";
+            } else if (/^zh/i.test(browserLanguage)) {
+                language = "zh-CN";
+            } else if (/^pt-BR/i.test(browserLanguage)) {
+                language = "pt-BR";
+            } else {
+                language = browserLanguage.split("-")[0];
+            }
+        }
+        const authCodeElement = document.getElementById("authCode");
+        const captchaElement = document.getElementById("captcha");
+        const captchaRowElement = document.getElementById("captchaRow");
+        const captchaImageElement = document.getElementById("captchaImg");
+        const messageElement = document.getElementById("message");
+        const submitElement = document.getElementById("submit");
+
+        const authSocket = new WebSocket("wss://" + window.location.host + "/ws?app=siyuan" +
+            Math.random().toString(36).substring(8) + "&id=auth&type=auth");
+        authSocket.addEventListener("message", (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.cmd === "loginAuth") {
+                    window.location.href = targetURL.href;
+                }
+            } catch (error) {
+                // 忽略无法识别的鉴权广播。
+            }
+        });
+
+        let ipcRenderer;
+        try {
+            ({ipcRenderer} = require("electron"));
+            ipcRenderer.on("siyuan-save-close", () => ipcRenderer.send("siyuan-quit", window.location.port));
+        } catch (error) {
+            // 远程访问授权页仅在 Electron 主窗口中启用宿主关闭通知。
+        }
+        document.getElementById("closeWindow").addEventListener("click", () => {
+            if (ipcRenderer) {
+                ipcRenderer.send("siyuan-quit", window.location.port);
+            }
+        });
+
+        const refreshCaptcha = () => {
+            captchaImageElement.src = "/api/system/getCaptcha?v=" + Date.now();
+        };
+        captchaImageElement.addEventListener("click", refreshCaptcha);
+
+        document.getElementById("authForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const authCode = authCodeElement.value.trim();
+            if (!authCode) {
+                authCodeElement.focus();
+                return;
+            }
+            submitElement.disabled = true;
+            messageElement.textContent = "";
+            try {
+                const response = await fetch("/api/system/loginAuth", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        authCode,
+                        captcha: captchaElement.value,
+                        rememberMe: document.getElementById("rememberMe").checked,
+                    }),
+                });
+                const result = await response.json();
+                if (result.code === 0) {
+                    window.location.href = targetURL.href;
+                    return;
+                }
+                messageElement.textContent = result.msg || response.statusText;
+                authCodeElement.value = "";
+                captchaElement.value = "";
+                if (result.code === 1) {
+                    captchaRowElement.style.display = "block";
+                    refreshCaptcha();
+                } else {
+                    captchaRowElement.style.display = "none";
+                }
+                authCodeElement.focus();
+            } catch (error) {
+                messageElement.textContent = String(error.message || error);
+            } finally {
+                submitElement.disabled = false;
+            }
+        });
+
+        fetch("/appearance/langs/" + encodeURIComponent(language) + ".json", {cache: "no-store"})
+            .then((response) => response.json())
+            .catch(() => fetch("/appearance/langs/en.json", {cache: "no-store"}).then((response) => response.json()))
+            .then((languages) => {
+                document.title = languages._kernel["178"];
+                document.getElementById("closeWindow").ariaLabel = languages._kernel["177"];
+                document.getElementById("title").textContent = languages._kernel["176"];
+                document.getElementById("origin").textContent = window.location.origin;
+                authCodeElement.placeholder = languages._kernel["173"];
+                captchaElement.placeholder = languages._kernel["175"];
+                document.getElementById("rememberLabel").textContent = languages._kernel["257"];
+                submitElement.textContent = languages._kernel["174"];
+                document.querySelector("main").hidden = false;
+                authCodeElement.focus();
+            });
+    })();
+</script>
+</body>
+</html>

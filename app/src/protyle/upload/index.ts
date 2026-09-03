@@ -26,6 +26,7 @@ import {
 } from "./pluginEvent";
 import {getAssetUploadResult, getAssetUploadSuccesses} from "./uploadResult";
 import {AssetUploadHandlerTimeoutError, waitForUploadHandler} from "./uploadHandler";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 
 interface FileWithPath extends File {
     path: string;
@@ -177,7 +178,8 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle, options
             content: success.path,
             name: name
         });
-        successFileText += genAssetHTML(type, success.path, name, filename, options?.htmlAsIframe);
+        successFileText += genAssetHTML(type, success.path, name, filename,
+            getHostCapabilities().localFileSystem && options?.htmlAsIframe);
         if (!Constants.SIYUAN_ASSETS_AUDIO.includes(type) && !Constants.SIYUAN_ASSETS_VIDEO.includes(type) &&
             successes.length - 1 !== index) {
             if (nodeElement && nodeElement.classList.contains("table")) {
@@ -412,6 +414,10 @@ const finishSuccessfulUpload = (task: IAssetUploadTask | undefined, callbacks: I
 const uploadPreparedLocalFiles = (input: Extract<IAssetUploadInput, { kind: "local-files" }>,
                                   protyle: IProtyle, isUpload: boolean, callbacks: IAssetUploadCallbacks,
                                   task?: IAssetUploadTask, options?: IUploadInsertOptions) => {
+    if (!getHostCapabilities().localFileSystem) {
+        finishUpload(task, callbacks, {status: "canceled"});
+        return;
+    }
     let msg = "";
     const assetPaths: string[] = [];
     input.files.forEach(item => {

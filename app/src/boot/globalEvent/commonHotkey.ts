@@ -8,6 +8,7 @@ import type {App} from "../../index";
 import {isMac, isNotCtrl, isOnlyMeta} from "../../protyle/util/compatibility";
 import {showPopover} from "../../block/popover";
 import {clearDisallowedKeymapItems} from "../../util/hotKeyPolicy";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 
 const matchKeymap = (keymap: Config.IKeys, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -182,7 +183,7 @@ export const syncAppMenuShortcuts = () => {
     }
     lastHotkeys = {...hotkey};
     ipcRenderer.send(Constants.SIYUAN_SYNC_APP_MENU, {
-        workspaceDir: window.siyuan.config.system.workspaceDir,
+        workspaceDir: getHostCapabilities().workspaces ? window.siyuan.config.system.workspaceDir : "",
         lang: window.siyuan.config.lang,
         readonly: window.siyuan.config.readonly,
         hotkey,

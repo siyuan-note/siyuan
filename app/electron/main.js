@@ -46,6 +46,22 @@ const {
     shouldDownloadAppleSilicon,
     shouldShowAppleSiliconWarning,
 } = require("./appleSilicon");
+const {
+    createRemoteDocumentContentSecurityPolicy,
+    getArgFrom,
+    getRemoteKernelRedirectDecision,
+    getRemoteKernelRequestPolicy,
+    getRemoteKernelWebRequestDestination,
+    getRemoteKernelVersionStatus,
+    getUnsafeRemoteChromiumSwitchName,
+    isAllowedRemoteExternalURL,
+    normalizeRemoteKernelOrigin,
+    remoteKernelActiveStorageTypes,
+    shouldBlockRemoteFrameNavigation,
+    shouldForwardRemoteDeepLink,
+    shouldTrustLocalKernelCertificate,
+    unsafeRemoteChromiumSwitchNames,
+} = require("./remoteKernel");
 
 process.noAsar = true;
 const appDir = path.dirname(app.getAppPath());
@@ -73,6 +89,16 @@ let bootAppearanceFallback = false;
 let latestActiveWindow;
 let firstOpen = false;
 let workspaces = []; // workspaceDir, id, port, webContentsId, browserWindow, tray, hideShortcut
+const windowKernelTargets = new Map();
+const initializedWindowIds = new Set();
+const pendingRemoteOpenURLs = [];
+
+const flushPendingRemoteOpenURLs = (window) => {
+    if (!window || window.isDestroyed()) {
+        return;
+    }
+    pendingRemoteOpenURLs.splice(0).forEach((url) => window.webContents.send("siyuan-open-url", url));
+};
 
 const getGlobalShortcutWorkspace = (fallbackWorkspace) => {
     const focusedWorkspace = workspaces.find(item => item.browserWindow &&
@@ -105,9 +131,66 @@ const pendingSpellcheckRequests = new Map();
 const pendingNativeContextMenuRequests = new Map();
 const spellcheckContextMenuContents = new Set();
 const normalizeClipboardText = (text) => text.replace(/\r\n?/g, "\n");
+const escapeHTML = (value) => String(value).replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;",
+})[character]);
 const isOpenAsHidden = function () {
     return 1 === workspaces.length && openAsHidden;
 };
+
+const getArg = (name) => getArgFrom(process.argv, name);
+
+const createLocalKernelTarget = (port = kernelPort) => ({
+    mode: "local",
+    origin: "https://127.0.0.1:" + port,
+    ownsKernel: true,
+    port: port.toString(),
+});
+
+let remoteKernelTarget;
+let remoteKernelArgError;
+const remoteKernelArg = getArg("--remote");
+if (remoteKernelArg !== undefined) {
+    try {
+        const origin = normalizeRemoteKernelOrigin(remoteKernelArg);
+        remoteKernelTarget = {
+            mode: "remote",
+            origin,
+            ownsKernel: false,
+            port: "",
+        };
+    } catch (error) {
+        remoteKernelArgError = error;
+    }
+}
+
+if (remoteKernelTarget) {
+    const configuredUnsafeSwitchNames = new Set(process.argv.map(getUnsafeRemoteChromiumSwitchName).filter(Boolean));
+    unsafeRemoteChromiumSwitchNames.forEach((switchName) => {
+        if (app.commandLine.hasSwitch(switchName)) {
+            configuredUnsafeSwitchNames.add(switchName);
+        }
+    });
+    const disabledFeatures = app.commandLine.getSwitchValue("disable-features");
+    if (getUnsafeRemoteChromiumSwitchName("--disable-features=" + disabledFeatures)) {
+        configuredUnsafeSwitchNames.add("disable-features");
+    }
+    if (configuredUnsafeSwitchNames.size > 0) {
+        configuredUnsafeSwitchNames.forEach((switchName) => app.commandLine.removeSwitch(switchName));
+        remoteKernelArgError = new Error("--remote cannot be combined with switches that weaken web security: " +
+            Array.from(configuredUnsafeSwitchNames).join(", "));
+        remoteKernelArgError.code = "ERR_REMOTE_UNSAFE_CHROMIUM_SWITCH";
+    }
+}
+
+const initialSiYuanOpenURL = process.argv.find((arg) => arg.startsWith("siyuan://"));
+if (remoteKernelTarget && !remoteKernelArgError && initialSiYuanOpenURL) {
+    pendingRemoteOpenURLs.push(initialSiYuanOpenURL);
+}
 
 const isMatchingContextMenuRequest = (context, request) => {
     return Number.isFinite(request.requestedAt) &&
@@ -249,9 +332,11 @@ if (isDevEnv && process.defaultApp && process.argv.length >= 2) {
     app.setAsDefaultProtocolClient("siyuan");
 }
 
-app.commandLine.appendSwitch("disable-web-security");
 app.commandLine.appendSwitch("auto-detect", "false");
-app.commandLine.appendSwitch("no-proxy-server");
+if (!remoteKernelTarget) {
+    app.commandLine.appendSwitch("disable-web-security");
+    app.commandLine.appendSwitch("no-proxy-server");
+}
 app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport");
 app.commandLine.appendSwitch("xdg-portal-required-version", "4");
 // 本地 HTTPS 页面加载 HTTP 外链图时，禁止自动升级为 HTTPS
@@ -266,7 +351,10 @@ if (!app.isPackaged) {
 
 for (let i = argStart; i < process.argv.length; i++) {
     let arg = process.argv[i];
-    if (arg.startsWith("--workspace=") || arg.startsWith("--openAsHidden") || arg.startsWith("--port=") || arg.startsWith("--safe-mode=") || arg.startsWith("--lang=") || arg.startsWith("siyuan://")) {
+    if (arg.startsWith("--workspace=") || arg.startsWith("--openAsHidden") || arg.startsWith("--port=") ||
+        arg.startsWith("--safe-mode=") || arg.startsWith("--lang=") || arg === "--remote" ||
+        arg.startsWith("--remote=") ||
+        arg.startsWith("siyuan://")) {
         // 跳过内置参数
         if (arg.startsWith("--openAsHidden")) {
             openAsHidden = true;
@@ -275,12 +363,16 @@ for (let i = argStart; i < process.argv.length; i++) {
         continue;
     }
 
+    if (remoteKernelTarget && getUnsafeRemoteChromiumSwitchName(arg)) {
+        continue;
+    }
+
     app.commandLine.appendSwitch(arg);
     writeLog("command line switch [" + arg + "]");
 }
 
 try {
-    firstOpen = !fs.existsSync(path.join(confDir, "workspace.json"));
+    firstOpen = !remoteKernelTarget && !fs.existsSync(path.join(confDir, "workspace.json"));
     if (!fs.existsSync(confDir)) {
         fs.mkdirSync(confDir, {mode: 0o755, recursive: true});
     }
@@ -290,20 +382,11 @@ try {
     app.exit();
 }
 
-// 解析命令行参数，参数需以 `name=value` 形式传入 https://github.com/siyuan-note/siyuan/issues/14748
-const getArg = (name) => {
-    for (let i = 0; i < process.argv.length; i++) {
-        if (process.argv[i].startsWith(name)) {
-            return process.argv[i].split("=")[1];
-        }
-    }
-};
-
 // 检测上次打开的工作空间是否丢失 https://github.com/siyuan-note/siyuan/issues/14748
 let lastWorkspaceMissing = false;
 let missingWorkspacePath = "";
 let availableWorkspaces = [];
-if (!firstOpen && !getArg("--workspace")) {
+if (!remoteKernelTarget && !firstOpen && !getArg("--workspace")) {
     // 显式通过命令行指定工作空间时尊重用户参数，跳过检测
     try {
         const wsFile = path.join(confDir, "workspace.json");
@@ -326,7 +409,7 @@ if (!firstOpen && !getArg("--workspace")) {
 
 // 读取上次打开的工作空间路径，用于崩溃恢复时默认选中该工作空间
 let lastWorkspacePath = "";
-if (!firstOpen && !getArg("--workspace")) {
+if (!remoteKernelTarget && !firstOpen && !getArg("--workspace")) {
     try {
         const wsFile = path.join(confDir, "workspace.json");
         if (fs.existsSync(wsFile)) {
@@ -340,25 +423,44 @@ if (!firstOpen && !getArg("--workspace")) {
     }
 }
 
-const windowNavigate = (currentWindow, windowType) => {
+const openExternalURL = (url, remoteMode = false) => {
+    if (remoteMode && !isAllowedRemoteExternalURL(url)) {
+        writeLog("blocked external protocol in remote kernel mode [url=" + url + "]");
+        return;
+    }
+    shell.openExternal(url);
+};
+
+const windowNavigate = (currentWindow, windowType, kernelOrigin, remoteMode = false) => {
     currentWindow.webContents.on("will-navigate", (event) => {
-        const url = event.url;
-        if (url.startsWith(localServer)) {
-            try {
-                const pathname = new URL(url).pathname;
-                if (windowType === "app" && ["/", "/stage/build/app/", "/check-auth"].includes(pathname) ||
-                    (windowType === "window" && ["/stage/build/app/window.html", "/check-auth"].includes(pathname)) ||
-                    (windowType === "export" && pathname.startsWith("/export/temp/"))) {
-                    return;
-                }
-            } catch (e) {
+        try {
+            const targetURL = new URL(event.url);
+            if (targetURL.origin === kernelOrigin && (
+                windowType === "app" && ["/stage/build/app/", "/check-auth"].includes(targetURL.pathname) ||
+                windowType === "app" && !remoteMode && targetURL.pathname === "/" ||
+                windowType === "window" && ["/stage/build/app/window.html", "/check-auth"].includes(targetURL.pathname) ||
+                windowType === "export" && targetURL.pathname.startsWith("/export/temp/")
+            )) {
                 return;
             }
+        } catch (e) {
+            // 无效链接交给系统浏览器处理。
         }
         // 其他链接使用浏览器打开
         event.preventDefault();
-        shell.openExternal(url);
+        openExternalURL(event.url, remoteMode);
     });
+};
+
+const getWindowPathname = (window) => {
+    if (!window || window.isDestroyed() || window.webContents.isDestroyed()) {
+        return "";
+    }
+    try {
+        return new URL(window.webContents.getURL()).pathname;
+    } catch (error) {
+        return "";
+    }
 };
 
 const setProxy = (proxyURL, webContents, proxyMode) => {
@@ -679,17 +781,20 @@ const markExpectedRendererExit = (window) => {
     }
 };
 
-const exitApp = (port, errorWindowId) => {
-    const workspaceIndex = workspaces.findIndex((item) => port.toString() === item.port.toString());
-    const workspace = -1 < workspaceIndex ? workspaces[workspaceIndex] : undefined;
-    const mainWindow = workspace ? workspace.browserWindow : undefined;
-    const tray = workspace ? workspace.tray : undefined;
+const exitWorkspace = (workspace, errorWindowId) => {
+    if (!workspace) {
+        return;
+    }
+    const workspaceIndex = workspaces.indexOf(workspace);
+    const mainWindow = workspace.browserWindow;
+    const tray = workspace.tray;
+    const kernelOrigin = workspace.kernelTarget?.origin;
 
-    // 关闭端口相同的所有非主窗口
+    // 关闭连接同一内核的所有非主窗口。
     BrowserWindow.getAllWindows().forEach((item) => {
         try {
             const currentURL = new URL(item.getURL());
-            if (port.toString() === currentURL.port.toString()) {
+            if (kernelOrigin && kernelOrigin === currentURL.origin) {
                 if (!mainWindow || mainWindow.id !== item.id) {
                     item.destroy();
                 }
@@ -698,7 +803,7 @@ const exitApp = (port, errorWindowId) => {
             // load file is not a url
         }
     });
-    if (workspace) {
+    if (workspaceIndex > -1) {
         if (workspaces.length > 1 && mainWindow && !mainWindow.isDestroyed()) {
             markExpectedRendererExit(mainWindow);
             mainWindow.destroy();
@@ -752,10 +857,313 @@ const exitApp = (port, errorWindowId) => {
     }
 };
 
+const exitApp = (port, errorWindowId) => {
+    if (port === undefined || port === null) {
+        return;
+    }
+    const workspace = workspaces.find((item) => item.ownsKernel && port.toString() === item.port.toString());
+    exitWorkspace(workspace, errorWindowId);
+};
+
 const localServer = "https://127.0.0.1";
 
 const getServer = (port = kernelPort) => {
     return localServer + ":" + port;
+};
+
+const getKernelTarget = (target = kernelPort) => {
+    if (target && typeof target === "object" && target.origin) {
+        return target;
+    }
+    return createLocalKernelTarget(target);
+};
+
+const rememberWindowKernelTarget = (window, target) => {
+    const webContentsId = window.webContents.id;
+    windowKernelTargets.set(webContentsId, target);
+    if (target.mode === "remote") {
+        window.webContents.on("will-frame-navigate", (event) => {
+            if (shouldBlockRemoteFrameNavigation({isMainFrame: event.isMainFrame})) {
+                event.preventDefault();
+                writeLog("blocked subframe navigation in remote kernel mode [url=" + event.url + "]");
+            }
+        });
+        window.webContents.on("will-attach-webview", (event) => {
+            event.preventDefault();
+            writeLog("blocked webview creation in remote kernel mode");
+        });
+    }
+    window.webContents.on("did-start-navigation", (details) => {
+        if (details.isMainFrame && !details.isSameDocument) {
+            initializedWindowIds.delete(webContentsId);
+        }
+    });
+    window.webContents.once("destroyed", () => {
+        initializedWindowIds.delete(webContentsId);
+        windowKernelTargets.delete(webContentsId);
+    });
+};
+
+const getWindowKernelTarget = (webContentsId) => windowKernelTargets.get(webContentsId);
+
+const getLocalRemoteResource = (pathname) => {
+    let decodedPath;
+    try {
+        decodedPath = decodeURIComponent(pathname);
+    } catch (error) {
+        return;
+    }
+    if (decodedPath.includes("\0")) {
+        return;
+    }
+
+    if (decodedPath === "/check-auth") {
+        return isDevEnv
+            ? path.join(appDir, "electron", "remote-auth.html")
+            : path.join(appDir, "app", "electron", "remote-auth.html");
+    }
+
+    let resourceRoot;
+    let relativePath;
+    if (decodedPath.startsWith("/stage/")) {
+        resourceRoot = path.join(appDir, "stage");
+        relativePath = decodedPath.slice("/stage/".length);
+    } else if (decodedPath.startsWith("/appearance/")) {
+        resourceRoot = path.join(appDir, "appearance");
+        relativePath = decodedPath.slice("/appearance/".length);
+    } else {
+        return;
+    }
+
+    let resourcePath = path.resolve(resourceRoot, relativePath);
+    const relative = path.relative(resourceRoot, resourcePath);
+    if (!relative || path.isAbsolute(relative) || relative === ".." || relative.startsWith(".." + path.sep)) {
+        if (!relative && decodedPath.endsWith("/")) {
+            resourcePath = path.join(resourcePath, "index.html");
+        } else {
+            return;
+        }
+    }
+    try {
+        if (fs.statSync(resourcePath).isDirectory()) {
+            resourcePath = path.join(resourcePath, "index.html");
+        }
+        if (fs.statSync(resourcePath).isFile()) {
+            return resourcePath;
+        }
+    } catch (error) {
+        return;
+    }
+};
+
+let remoteProtocolInstalled = false;
+const installRemoteFrontendProtocol = (target) => {
+    if (remoteProtocolInstalled) {
+        return;
+    }
+    const scheme = new URL(target.origin).protocol.slice(0, -1);
+    session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
+        const destination = getRemoteKernelWebRequestDestination(details.resourceType);
+        let requestPolicy = "remote";
+        if (destination) {
+            try {
+                const requestURL = new URL(details.url);
+                const isTargetOrigin = requestURL.origin === target.origin;
+                const localResource = isTargetOrigin ? getLocalRemoteResource(requestURL.pathname) : undefined;
+                requestPolicy = getRemoteKernelRequestPolicy({
+                    method: details.method,
+                    pathname: requestURL.pathname,
+                    destination,
+                    localResourceAvailable: Boolean(localResource),
+                    isTargetOrigin,
+                });
+            } catch (error) {
+                requestPolicy = "deny-active-content";
+            }
+        }
+        callback({
+            cancel: shouldBlockRemoteFrameNavigation({resourceType: details.resourceType}) ||
+                requestPolicy === "deny-active-content",
+        });
+    });
+    session.defaultSession.protocol.handle(scheme, async (request) => {
+        const forwardRequest = (includeCredentials = false) => session.defaultSession.fetch(request, {
+            bypassCustomProtocolHandlers: true,
+            redirect: "manual",
+            ...(includeCredentials ? {credentials: "include"} : {}),
+        });
+        let requestURL;
+        try {
+            requestURL = new URL(request.url);
+        } catch (error) {
+            requestURL = undefined;
+        }
+
+        const isTargetOrigin = requestURL?.origin === target.origin;
+        const requestPathname = requestURL?.pathname || "/";
+        const localDocumentRequest = isTargetOrigin && (request.method === "GET" || request.method === "HEAD") &&
+            ["/check-auth", "/stage/build/app/", "/stage/build/app/window.html"].includes(requestURL.pathname);
+        const localResource = isTargetOrigin && (request.method === "GET" || request.method === "HEAD")
+            ? getLocalRemoteResource(requestURL.pathname)
+            : undefined;
+        const requestDestination = request.headers.get("sec-fetch-dest") || request.destination;
+        const requestPolicy = getRemoteKernelRequestPolicy({
+            method: request.method,
+            pathname: requestPathname,
+            destination: requestDestination,
+            localResourceAvailable: Boolean(localResource),
+            isTargetOrigin,
+        });
+        if (requestPolicy === "deny-api") {
+            writeLog("blocked remote kernel lifecycle request [path=" + requestPathname + "]");
+            return new Response(JSON.stringify({
+                code: -1,
+                msg: "This operation is unavailable in remote kernel mode.",
+            }), {
+                status: 403,
+                headers: {"Content-Type": "application/json; charset=utf-8"},
+            });
+        }
+        if (requestPolicy === "deny-active-content") {
+            return new Response("Forbidden", {
+                status: 403,
+                headers: {"Content-Type": "text/plain; charset=utf-8"},
+            });
+        }
+        if (!isTargetOrigin) {
+            return forwardRequest();
+        }
+        if (requestPolicy === "local") {
+            if (localDocumentRequest) {
+                let versionData;
+                try {
+                    versionData = await requestRemoteKernelVersion(target);
+                } catch (error) {
+                    writeLog("verify remote kernel version before loading local UI failed: " + error.message);
+                    return new Response("Unable to verify the remote kernel version.", {
+                        status: 502,
+                        headers: {
+                            "Cache-Control": "no-store",
+                            "Content-Type": "text/plain; charset=utf-8",
+                        },
+                    });
+                }
+                const versionStatus = getRemoteKernelVersionStatus(versionData, appVer);
+                if (versionStatus !== "compatible") {
+                    writeLog("blocked local UI for an incompatible remote kernel [status=" + versionStatus + "]");
+                    return new Response("The remote kernel version does not match this client.", {
+                        status: 409,
+                        headers: {
+                            "Cache-Control": "no-store",
+                            "Content-Type": "text/plain; charset=utf-8",
+                        },
+                    });
+                }
+            }
+            if (localDocumentRequest &&
+                ["/stage/build/app/", "/stage/build/app/window.html"].includes(requestURL.pathname)) {
+                const authenticationResponse = await session.defaultSession.fetch(request, {
+                    bypassCustomProtocolHandlers: true,
+                    credentials: "include",
+                    redirect: "manual",
+                });
+                await authenticationResponse.body?.cancel();
+                if (!authenticationResponse.ok) {
+                    const responseLocation = authenticationResponse.headers.get("location");
+                    let authenticationRequired = authenticationResponse.status === 401;
+                    if (responseLocation && authenticationResponse.status >= 300 && authenticationResponse.status < 400) {
+                        try {
+                            const redirectURL = new URL(responseLocation, target.origin);
+                            authenticationRequired = redirectURL.origin === target.origin &&
+                                redirectURL.pathname === "/check-auth";
+                        } catch (error) {
+                            authenticationRequired = false;
+                        }
+                    }
+                    if (authenticationRequired) {
+                        const authURL = new URL("/check-auth", target.origin);
+                        authURL.searchParams.set("to", requestURL.pathname + requestURL.search);
+                        authURL.searchParams.set("lang", resolveAppLanguage(app.getPreferredSystemLanguages()));
+                        authURL.searchParams.set("remote", "1");
+                        return new Response(null, {
+                            status: 302,
+                            headers: {
+                                "Cache-Control": "no-store",
+                                Location: authURL.href,
+                            },
+                        });
+                    }
+                    return new Response("Remote kernel UI probe failed.", {
+                        status: authenticationResponse.status >= 400 ? authenticationResponse.status : 502,
+                        headers: {
+                            "Cache-Control": "no-store",
+                            "Content-Type": "text/plain; charset=utf-8",
+                        },
+                    });
+                }
+            }
+            const localResponse = await net.fetch(pathToFileURL(localResource).toString());
+            if (localDocumentRequest) {
+                const responseHeaders = new Headers(localResponse.headers);
+                responseHeaders.set("Cache-Control", "no-store");
+                responseHeaders.set("Content-Security-Policy",
+                    createRemoteDocumentContentSecurityPolicy(fs.readFileSync(localResource, "utf8"), target.origin));
+                return new Response(localResponse.body, {
+                    status: localResponse.status,
+                    statusText: localResponse.statusText,
+                    headers: responseHeaders,
+                });
+            }
+            return localResponse;
+        }
+        if (requestPolicy === "not-found") {
+            return new Response("Not Found", {
+                status: 404,
+                headers: {"Content-Type": "text/plain; charset=utf-8"},
+            });
+        }
+        const response = await forwardRequest(true);
+        const redirectDecision = getRemoteKernelRedirectDecision({
+            status: response.status,
+            location: response.headers.get("location"),
+            origin: target.origin,
+            method: request.method,
+        });
+        if (redirectDecision.action === "none") {
+            return response;
+        }
+        if (redirectDecision.action === "deny") {
+            await response.body?.cancel();
+            writeLog("blocked remote kernel redirect outside the configured origin [path=" + requestURL.pathname + "]");
+            return new Response("Forbidden redirect", {
+                status: 403,
+                headers: {"Content-Type": "text/plain; charset=utf-8"},
+            });
+        }
+        const redirectLocalResource = redirectDecision.method === "GET" || redirectDecision.method === "HEAD"
+            ? getLocalRemoteResource(redirectDecision.url.pathname)
+            : undefined;
+        const redirectPolicy = getRemoteKernelRequestPolicy({
+            method: redirectDecision.method,
+            pathname: redirectDecision.url.pathname,
+            destination: requestDestination,
+            localResourceAvailable: Boolean(redirectLocalResource),
+            isTargetOrigin: true,
+        });
+        if (redirectPolicy === "deny-api" || redirectPolicy === "deny-active-content" ||
+            redirectPolicy === "not-found") {
+            await response.body?.cancel();
+            writeLog("blocked unsafe remote kernel redirect [path=" + redirectDecision.url.pathname +
+                ", policy=" + redirectPolicy + "]");
+            return new Response(redirectPolicy === "not-found" ? "Not Found" : "Forbidden redirect", {
+                status: redirectPolicy === "not-found" ? 404 : 403,
+                headers: {"Content-Type": "text/plain; charset=utf-8"},
+            });
+        }
+        return response;
+    });
+    remoteProtocolInstalled = true;
+    writeLog("installed local frontend handler for remote kernel [origin=" + target.origin + "]");
 };
 
 const requestKernelExit = (port, options = {}, signal) => {
@@ -844,7 +1252,7 @@ const closeKernelForUpdate = async (port, initiatingPort, setCurrentWorkspace) =
 
 const validateUpdateInstallRequest = (event, data) => {
     const workspace = workspaces.find((item) => item.webContentsId === event.sender.id);
-    if (!workspace || !workspace.workspaceDir || !data || !data.port ||
+    if (!workspace || !workspace.ownsKernel || !workspace.workspaceDir || !data || !data.port ||
         workspace.port.toString() !== data.port.toString()) {
         writeLog("rejected update install request from an unknown workspace");
         return;
@@ -1015,11 +1423,11 @@ const beginUpdateInstall = (event, data) => {
 const getSystemShutdownPorts = () => {
     const ports = new Set();
     workspaces.forEach((workspaceItem) => {
-        if (workspaceItem.port) {
+        if (workspaceItem.ownsKernel && workspaceItem.port) {
             ports.add(workspaceItem.port);
         }
     });
-    if (bootWindow && !bootWindow.isDestroyed() && kernelPort) {
+    if (!remoteKernelTarget && bootWindow && !bootWindow.isDestroyed() && kernelPort) {
         ports.add(kernelPort);
     }
     return Array.from(ports);
@@ -1179,11 +1587,13 @@ const showErrorWindow = (titleZh, titleEn, content, emoji = "⚠️", logPath = 
     return errWindow.id;
 };
 
-const initMainWindow = (currentKernelPort = kernelPort) => {
+const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
     if (!app.isReady()) {
         writeLog("initMainWindow: app not ready, skipping");
         return;
     }
+    const kernelTarget = getKernelTarget(kernel);
+    const currentKernelPort = kernelTarget.port;
 
     // 恢复主窗体状态
     let oldWindowState = {};
@@ -1269,8 +1679,10 @@ const initMainWindow = (currentKernelPort = kernelPort) => {
         trafficLightPosition: {x: 8, y: 8},
         webPreferences: {
             nodeIntegration: true,
-            webviewTag: true,
-            webSecurity: false,
+            nodeIntegrationInSubFrames: false,
+            nodeIntegrationInWorker: false,
+            webviewTag: kernelTarget.mode !== "remote",
+            webSecurity: kernelTarget.mode === "remote",
             contextIsolation: false,
             autoplayPolicy: "user-gesture-required" // 桌面端禁止自动播放多媒体 https://github.com/siyuan-note/siyuan/issues/7587
         },
@@ -1280,6 +1692,7 @@ const initMainWindow = (currentKernelPort = kernelPort) => {
     });
     remote.enable(currentWindow.webContents);
     bindSpellcheckContextMenu(currentWindow.webContents);
+    rememberWindowKernelTarget(currentWindow, kernelTarget);
 
     if (resetToCenter) {
         currentWindow.center();
@@ -1293,26 +1706,43 @@ const initMainWindow = (currentKernelPort = kernelPort) => {
     // pending（既不 resolve 也不 reject），会导致 loadURL 永不执行，主窗口卡在启动页无法显示。
     // 这里无论 setProxy 是否完成，最多等待 5 秒后强制加载主界面。
     const loadMainURL = () => {
-        currentWindow.loadURL(getServer(currentKernelPort) + "/stage/build/app/?v=" + Date.now());
+        const appURL = new URL("/stage/build/app/", kernelTarget.origin);
+        appURL.searchParams.set("v", Date.now().toString());
+        if (kernelTarget.mode === "remote") {
+            appURL.searchParams.set("remote", "1");
+        }
+        if (kernelTarget.mode === "remote" && !remoteAuthenticated) {
+            const authURL = new URL("/check-auth", kernelTarget.origin);
+            authURL.searchParams.set("to", appURL.pathname + appURL.search);
+            authURL.searchParams.set("lang", resolveAppLanguage(app.getPreferredSystemLanguages()));
+            authURL.searchParams.set("remote", "1");
+            currentWindow.loadURL(authURL.href);
+        } else {
+            currentWindow.loadURL(appURL.href);
+        }
     };
-    net.fetch(getServer(currentKernelPort) + "/api/system/getNetwork", {method: "POST"}).then((response) => {
-        return response.json();
-    }).then((response) => {
-        const proxyMode = response.data.proxy.scheme === "system" ? "system" : response.data.proxy.scheme === "" ? "direct" : "fixed_servers";
-        const setProxyDone = setProxy(`${response.data.proxy.scheme}://${response.data.proxy.host}:${response.data.proxy.port}`,
-            currentWindow.webContents, proxyMode);
-        Promise.race([
-            Promise.resolve(setProxyDone),
-            new Promise((resolve) => setTimeout(resolve, 5000)), // setProxy 永久 pending 时的超时兜底
-        ]).then(loadMainURL).catch(() => {
-            writeLog("setProxy failed, load main UI without proxy");
+    if (kernelTarget.mode === "remote") {
+        loadMainURL();
+    } else {
+        net.fetch(getServer(currentKernelPort) + "/api/system/getNetwork", {method: "POST"}).then((response) => {
+            return response.json();
+        }).then((response) => {
+            const proxyMode = response.data.proxy.scheme === "system" ? "system" : response.data.proxy.scheme === "" ? "direct" : "fixed_servers";
+            const setProxyDone = setProxy(`${response.data.proxy.scheme}://${response.data.proxy.host}:${response.data.proxy.port}`,
+                currentWindow.webContents, proxyMode);
+            Promise.race([
+                Promise.resolve(setProxyDone),
+                new Promise((resolve) => setTimeout(resolve, 5000)), // setProxy 永久 pending 时的超时兜底
+            ]).then(loadMainURL).catch(() => {
+                writeLog("setProxy failed, load main UI without proxy");
+                loadMainURL();
+            });
+        }).catch((e) => {
+            // getNetwork 失败也要继续加载主界面，避免主窗口不加载导致卡在启动页
+            writeLog("getNetwork failed, load main UI without proxy: " + e.message);
             loadMainURL();
         });
-    }).catch((e) => {
-        // getNetwork 失败也要继续加载主界面，避免主窗口不加载导致卡在启动页
-        writeLog("getNetwork failed, load main UI without proxy: " + e.message);
-        loadMainURL();
-    });
+    }
 
     // 发起互联网服务请求时绕过安全策略 https://github.com/siyuan-note/siyuan/issues/5516
     currentWindow.webContents.session.webRequest.onBeforeSendHeaders((details, cb) => {
@@ -1343,11 +1773,23 @@ const initMainWindow = (currentKernelPort = kernelPort) => {
         cb({requestHeaders: details.requestHeaders});
     });
     currentWindow.webContents.session.webRequest.onHeadersReceived((details, cb) => {
+        let preserveRemoteDocumentCSP = false;
+        if (kernelTarget.mode === "remote") {
+            try {
+                const responseURL = new URL(details.url);
+                preserveRemoteDocumentCSP = responseURL.origin === kernelTarget.origin &&
+                    ["/check-auth", "/stage/build/app/", "/stage/build/app/window.html"].includes(responseURL.pathname);
+            } catch (error) {
+                preserveRemoteDocumentCSP = false;
+            }
+        }
         for (let key in details.responseHeaders) {
             if ("x-frame-options" === key.toLowerCase()) {
                 delete details.responseHeaders[key];
             } else if ("content-security-policy" === key.toLowerCase()) {
-                delete details.responseHeaders[key];
+                if (!preserveRemoteDocumentCSP) {
+                    delete details.responseHeaders[key];
+                }
             } else if ("access-control-allow-origin" === key.toLowerCase()) {
                 delete details.responseHeaders[key];
             }
@@ -1356,6 +1798,15 @@ const initMainWindow = (currentKernelPort = kernelPort) => {
     });
 
     currentWindow.webContents.on("did-finish-load", () => {
+        if (kernelTarget.mode === "remote") {
+            if (getWindowPathname(currentWindow) === "/check-auth") {
+                currentWindow.show();
+                if (bootWindow && !bootWindow.isDestroyed()) {
+                    bootWindow.destroy();
+                }
+            }
+            return;
+        }
         let siyuanOpenURL = process.argv.find((arg) => arg.startsWith("siyuan://"));
         if (siyuanOpenURL) {
             if (currentWindow.isMinimized()) {
@@ -1373,8 +1824,14 @@ const initMainWindow = (currentKernelPort = kernelPort) => {
         setNonDarwinApplicationMenu();
     }
     // 当前页面链接使用浏览器打开
-    windowNavigate(currentWindow, "app");
+    windowNavigate(currentWindow, "app", kernelTarget.origin, kernelTarget.mode === "remote");
     currentWindow.on("close", (event) => {
+        if (kernelTarget.mode === "remote" && (getWindowPathname(currentWindow) !== "/stage/build/app/" ||
+            !initializedWindowIds.has(currentWindow.webContents.id))) {
+            event.preventDefault();
+            exitWorkspace(workspaces.find((item) => item.webContentsId === currentWindow.webContents.id));
+            return;
+        }
         if (currentWindow && !currentWindow.isDestroyed()) {
             currentWindow.webContents.send("siyuan-save-close", false);
         }
@@ -1384,6 +1841,8 @@ const initMainWindow = (currentKernelPort = kernelPort) => {
         browserWindow: currentWindow,
         webContentsId: currentWindow.webContents.id,
         port: currentKernelPort,
+        ownsKernel: kernelTarget.ownsKernel,
+        kernelTarget,
     });
     // loadURL 后设置超时兜底：前端 app bundle 加载或初始化异常导致 siyuan-ready-to-show 迟迟不发时，
     // 强制销毁 boot 窗口并显示主窗口，避免永久卡在启动页
@@ -1500,11 +1959,41 @@ const loadBootWindow = (disableAppearance = false) => {
         bootAppearanceFallback = true;
     }
     const query = {v: appVer, port: kernelPort};
+    if (remoteKernelTarget) {
+        query.remote = remoteKernelTarget.origin;
+        query.appearance = "0";
+    }
     if (bootAppearanceFallback) {
         query.appearance = "0";
     }
     bootWindow.loadFile(bootIndexPath, {query}).catch((error) => {
         writeLog("load boot window failed: " + error);
+    });
+};
+
+const createBootWindow = () => {
+    bootWindow = new BrowserWindow({
+        show: false,
+        width: Math.floor(screen.getPrimaryDisplay().size.width / 2),
+        height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height / 2),
+        frame: false,
+        backgroundColor: "#1e1e1e",
+        resizable: false,
+        icon: path.join(appDir, "stage", "icon-large.png"),
+        webPreferences: {
+            webSecurity: false,
+        },
+    });
+    bootAppearanceFallback = false;
+    bootIndexPath = path.join(appDir, "app", "electron", "boot.html");
+    if (isDevEnv) {
+        bootIndexPath = path.join(appDir, "electron", "boot.html");
+    }
+    bootWindow.on("unresponsive", () => {
+        if (!bootAppearanceFallback) {
+            writeLog("boot window is unresponsive, reload without custom appearance");
+            loadBootWindow(true);
+        }
     });
 };
 
@@ -1515,29 +2004,7 @@ const initKernel = (workspace, port, lang, safeMode) => {
         const workspaceLogPath = currentWorkspace ? path.resolve(currentWorkspace, "temp", "siyuan.log") : "";
         const kernelLogPath = path.join(confDir, "kernel.log");
         // 必须在首次异步等待前创建窗口，避免工作空间选择窗口关闭后因无窗口触发应用退出。
-        bootWindow = new BrowserWindow({
-            show: false,
-            width: Math.floor(screen.getPrimaryDisplay().size.width / 2),
-            height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height / 2),
-            frame: false,
-            backgroundColor: "#1e1e1e",
-            resizable: false,
-            icon: path.join(appDir, "stage", "icon-large.png"),
-            webPreferences: {
-                webSecurity: false,
-            },
-        });
-        bootAppearanceFallback = false;
-        bootIndexPath = path.join(appDir, "app", "electron", "boot.html");
-        if (isDevEnv) {
-            bootIndexPath = path.join(appDir, "electron", "boot.html");
-        }
-        bootWindow.on("unresponsive", () => {
-            if (!bootAppearanceFallback) {
-                writeLog("boot window is unresponsive, reload without custom appearance");
-                loadBootWindow(true);
-            }
-        });
+        createBootWindow();
         if (!await showAppleSiliconWarning(lang)) {
             bootWindow.destroy();
             app.quit();
@@ -1734,18 +2201,156 @@ const initKernel = (workspace, port, lang, safeMode) => {
     });
 };
 
+const fetchWithTimeout = async (url, options = {}, timeout = 5000) => {
+    const abortController = new AbortController();
+    const timer = setTimeout(() => abortController.abort(), timeout);
+    try {
+        return await session.defaultSession.fetch(url, Object.assign({
+            credentials: "include",
+            bypassCustomProtocolHandlers: true,
+            redirect: "manual",
+        }, options, {signal: abortController.signal}));
+    } finally {
+        clearTimeout(timer);
+    }
+};
+
+const requestRemoteKernelVersion = async (target) => {
+    const response = await fetchWithTimeout(target.origin + "/api/system/version", {method: "GET"});
+    if (!response.ok) {
+        await response.body?.cancel();
+        throw new Error("version request returned HTTP " + response.status);
+    }
+    return response.json();
+};
+
+const isRemoteKernelAuthenticated = async (target) => {
+    const response = await fetchWithTimeout(target.origin + "/stage/build/app/", {
+        method: "GET",
+        redirect: "manual",
+    });
+    if (response.status === 401 || response.status >= 300 && response.status < 400) {
+        await response.body?.cancel();
+        return false;
+    }
+    if (!response.ok) {
+        await response.body?.cancel();
+        throw new Error("authentication probe returned HTTP " + response.status);
+    }
+    await response.body?.cancel();
+    return true;
+};
+
+const initRemoteKernel = async (target) => {
+    createBootWindow();
+    if (!await showAppleSiliconWarning(getArg("--lang") || "")) {
+        bootWindow.destroy();
+        app.quit();
+        return;
+    }
+    loadBootWindow();
+    if (openAsHidden) {
+        bootWindow.minimize();
+    } else {
+        bootWindow.show();
+    }
+
+    try {
+        await session.defaultSession.clearStorageData({
+            origin: target.origin,
+            storages: remoteKernelActiveStorageTypes,
+        });
+    } catch (error) {
+        throw new Error("failed to clear remote kernel active storage: " + error.message);
+    }
+
+    writeLog("connecting to remote kernel [origin=" + target.origin + "]");
+    let versionData;
+    for (let count = 0; count < 5; count++) {
+        try {
+            versionData = await requestRemoteKernelVersion(target);
+            break;
+        } catch (error) {
+            writeLog("get remote kernel version failed: " + error.message);
+            if (count < 4) {
+                await sleep(500);
+            }
+        }
+    }
+    const versionStatus = getRemoteKernelVersionStatus(versionData, appVer);
+    if (versionStatus === "invalid") {
+        showErrorWindow("连接远程内核失败", "Failed to connect to the remote kernel",
+            "<div>无法连接远程内核，请检查地址、网络和 TLS 证书。</div>" +
+            "<div>Unable to connect to the remote kernel. Check the address, network, and TLS certificate.</div>");
+        bootWindow.destroy();
+        return;
+    }
+    writeLog("got remote kernel version [" + versionData.data + "]");
+    if (versionStatus === "mismatch") {
+        const remoteVersion = escapeHTML(versionData.data);
+        showErrorWindow("远程内核版本不匹配", "Remote kernel version mismatch",
+            "<div>客户端版本 " + appVer + " 与远程内核版本 " + remoteVersion + " 不一致。</div>" +
+            "<div>Client version " + appVer + " does not match remote kernel version " + remoteVersion + ".</div>");
+        bootWindow.destroy();
+        return;
+    }
+
+    const bootShowStart = Date.now();
+    let booted = false;
+    while (Date.now() - bootShowStart <= 300000) {
+        try {
+            const response = await fetchWithTimeout(target.origin + "/api/system/bootProgress");
+            if (!response.ok) {
+                await response.body?.cancel();
+                throw new Error("boot progress request returned HTTP " + response.status);
+            }
+            const progressData = await response.json();
+            if (progressData?.data?.progress >= 100) {
+                booted = true;
+                break;
+            }
+        } catch (error) {
+            writeLog("get remote boot progress failed: " + error.message);
+        }
+        await sleep(500);
+    }
+    if (!booted) {
+        showErrorWindow("连接远程内核超时", "Remote kernel connection timed out",
+            "<div>等待远程内核完成启动超时。</div><div>Timed out waiting for the remote kernel to finish booting.</div>");
+        bootWindow.destroy();
+        return;
+    }
+
+    let authenticated;
+    try {
+        authenticated = await isRemoteKernelAuthenticated(target);
+    } catch (error) {
+        writeLog("probe remote kernel authentication failed: " + error.message);
+        showErrorWindow("检查远程内核鉴权失败", "Failed to check remote kernel authentication",
+            "<div>无法检查远程内核的鉴权状态。</div><div>Unable to check the remote kernel authentication state.</div>");
+        bootWindow.destroy();
+        return;
+    }
+    installRemoteFrontendProtocol(target);
+    return {
+        target,
+        authenticated,
+    };
+};
+
 app.whenReady().then(() => {
     if ("darwin" === process.platform) {
         Menu.setApplicationMenu(Menu.buildFromTemplate([{role: "appMenu"}]));
     } else {
         setNonDarwinApplicationMenu();
     }
-    // Trust self-signed TLS certificates for local HTTPS server
+    // 仅本进程启动的本地内核允许自签名证书，远程内核始终使用系统信任链。
     session.defaultSession.setCertificateVerifyProc((request, callback) => {
-        if (request.hostname === "127.0.0.1" || request.hostname === "localhost") {
-            callback(0); // VERIFY_OK
+        const kernelMode = remoteKernelTarget ? "remote" : "local";
+        if (shouldTrustLocalKernelCertificate(kernelMode, request.hostname)) {
+            callback(0); // 验证通过
         } else {
-            callback(-3); // default Chromium handling
+            callback(-3); // 交由 Chromium 默认处理
         }
     });
 
@@ -1787,6 +2392,12 @@ app.whenReady().then(() => {
         }
 
         handledCrashWebContents.add(webContents.id);
+        if (!workspace.ownsKernel) {
+            writeLog("remote renderer exited without stopping the remote kernel [origin=" +
+                workspace.kernelTarget.origin + "]");
+            exitWorkspace(workspace);
+            return;
+        }
         writeAppCrashMarker(workspace, details);
         requestKernelExit(workspace.port, {
             force: true,
@@ -1863,9 +2474,12 @@ app.whenReady().then(() => {
         if (!sync || !sync.i18n || typeof sync.i18n !== "object" || !sync.hotkey || typeof sync.hotkey !== "object") {
             return;
         }
-        const workspaceDir = (typeof sync.workspaceDir === "string" && sync.workspaceDir)
-            ? sync.workspaceDir
-            : ("webContents:" + event.sender.id);
+        const kernelTarget = getWindowKernelTarget(event.sender.id);
+        const workspaceDir = kernelTarget?.mode === "remote"
+            ? "remote:" + kernelTarget.origin
+            : (typeof sync.workspaceDir === "string" && sync.workspaceDir)
+                ? sync.workspaceDir
+                : ("webContents:" + event.sender.id);
         appMenuByWorkspaceDir.set(workspaceDir, sync);
         appMenuWorkspaceByWebContentsId.set(event.sender.id, workspaceDir);
         if (shouldApplyAppMenuFrom(event.sender.id, workspaceDir)) {
@@ -1931,6 +2545,28 @@ app.whenReady().then(() => {
         app.exit();
     });
     ipcMain.handle("siyuan-get", (event, data) => {
+        const remoteSender = getWindowKernelTarget(event.sender.id)?.mode === "remote";
+        if (remoteSender && ["beginRichClipboard", "completeRichClipboard", "cancelRichClipboard", "clipboardRead"]
+            .includes(data.cmd)) {
+            writeLog("ignored local file clipboard processing in remote kernel mode");
+            return false;
+        }
+        if (remoteSender && data.cmd === "showOpenDialog") {
+            writeLog("ignored local open dialog in remote kernel mode");
+            return {canceled: true, filePaths: []};
+        }
+        if (remoteSender && data.cmd === "showSaveDialog") {
+            writeLog("ignored local save dialog in remote kernel mode");
+            return {canceled: true, filePath: ""};
+        }
+        if (remoteSender && data.cmd === "printToPDF") {
+            writeLog("ignored local PDF export in remote kernel mode");
+            return;
+        }
+        if (remoteSender && data.cmd === "setProxy") {
+            writeLog("ignored applying a server proxy to the remote client");
+            return false;
+        }
         if (data.cmd === "clipboardRead") {
             return clipboard.read(data.format);
         }
@@ -2199,8 +2835,13 @@ app.whenReady().then(() => {
             }
         }
         const currentWindow = getWindowByContentId(webContentsId);
+        const remoteSender = getWindowKernelTarget(event.sender.id)?.mode === "remote";
         switch (cmd) {
             case "showItemInFolder":
+                if (remoteSender) {
+                    writeLog("ignored showing a server path in remote kernel mode");
+                    break;
+                }
                 shell.showItemInFolder(data.filePath);
                 break;
             case "notification": {
@@ -2222,6 +2863,10 @@ app.whenReady().then(() => {
                 });
                 break;
             case "openPath":
+                if (remoteSender) {
+                    writeLog("ignored opening a server path in remote kernel mode");
+                    break;
+                }
                 shell.openPath(data.filePath);
                 break;
             case "openDevTools": {
@@ -2376,10 +3021,19 @@ app.whenReady().then(() => {
         });
     });
     ipcMain.on("siyuan-export-pdf", (event, data) => {
+        if (getWindowKernelTarget(event.sender.id)?.mode === "remote") {
+            writeLog("ignored local PDF export in remote kernel mode");
+            return;
+        }
         data.webContentsId = event.sender.id;
         getWindowByContentId(data.parentWindowId).send("siyuan-export-pdf", data);
     });
     ipcMain.on("siyuan-export-newwindow", (event, data) => {
+        const kernelTarget = getWindowKernelTarget(event.sender.id);
+        if (kernelTarget?.mode === "remote") {
+            writeLog("ignored local PDF export window for remote kernel");
+            return;
+        }
         // The PDF/Word export preview window automatically adjusts according to the size of the main window https://github.com/siyuan-note/siyuan/issues/10554
         const wndBounds = getWindowByContentId(event.sender.id).getBounds();
         const wndScreen = screen.getDisplayNearestPoint({x: wndBounds.x, y: wndBounds.y});
@@ -2401,11 +3055,24 @@ app.whenReady().then(() => {
             },
         });
         printWin.center();
+        rememberWindowKernelTarget(printWin, kernelTarget || createLocalKernelTarget());
         printWin.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + printWin.webContents.userAgent;
         printWin.loadURL(data);
-        windowNavigate(printWin, "export");
+        windowNavigate(printWin, "export", (kernelTarget || createLocalKernelTarget()).origin);
     });
     ipcMain.on("siyuan-quit", (event, port) => {
+        const kernelTarget = getWindowKernelTarget(event.sender.id);
+        const workspace = workspaces.find((item) => item.webContentsId === event.sender.id);
+        if (kernelTarget?.mode === "remote") {
+            if (workspace) {
+                exitWorkspace(workspace);
+            } else {
+                const senderWindow = BrowserWindow.fromWebContents(event.sender);
+                markExpectedRendererExit(senderWindow);
+                senderWindow?.destroy();
+            }
+            return;
+        }
         exitApp(port);
     });
     ipcMain.handle("siyuan-install-update", (event, data) => {
@@ -2423,6 +3090,25 @@ app.whenReady().then(() => {
         mainWindow.show();
     });
     ipcMain.on("siyuan-open-window", (event, data) => {
+        const kernelTarget = getWindowKernelTarget(event.sender.id);
+        if (!kernelTarget) {
+            writeLog("ignored opening a window without a kernel target");
+            return;
+        }
+        let windowURL;
+        try {
+            windowURL = new URL(data.url);
+        } catch (error) {
+            writeLog("ignored opening a window with an invalid URL");
+            return;
+        }
+        if (windowURL.origin !== kernelTarget.origin || windowURL.pathname !== "/stage/build/app/window.html") {
+            writeLog("ignored opening a window outside the kernel origin");
+            return;
+        }
+        if (kernelTarget.mode === "remote") {
+            windowURL.searchParams.set("remote", "1");
+        }
         const mainWindow = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
         const mainBounds = mainWindow.getBounds();
         const mainScreen = screen.getDisplayNearestPoint({x: mainBounds.x, y: mainBounds.y});
@@ -2441,13 +3127,16 @@ app.whenReady().then(() => {
             webPreferences: {
                 contextIsolation: false,
                 nodeIntegration: true,
-                webviewTag: true,
-                webSecurity: false,
+                nodeIntegrationInSubFrames: false,
+                nodeIntegrationInWorker: false,
+                webviewTag: kernelTarget.mode !== "remote",
+                webSecurity: kernelTarget.mode === "remote",
                 autoplayPolicy: "user-gesture-required" // 桌面端禁止自动播放多媒体 https://github.com/siyuan-note/siyuan/issues/7587
             },
         });
         remote.enable(win.webContents);
         bindSpellcheckContextMenu(win.webContents);
+        rememberWindowKernelTarget(win, kernelTarget);
 
         if (data.position) {
             win.setPosition(data.position.x, data.position.y);
@@ -2457,9 +3146,16 @@ app.whenReady().then(() => {
         win.setAlwaysOnTop(data.alwaysOnTop);
         win.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + win.webContents.userAgent;
         win.webContents.session.setSpellCheckerLanguages(["en-US"]);
-        win.loadURL(data.url);
-        windowNavigate(win, "window");
+        win.loadURL(windowURL.href);
+        windowNavigate(win, "window", kernelTarget.origin, kernelTarget.mode === "remote");
         win.on("close", (event) => {
+            if (kernelTarget.mode === "remote" && (getWindowPathname(win) !== "/stage/build/app/window.html" ||
+                !initializedWindowIds.has(win.webContents.id))) {
+                event.preventDefault();
+                markExpectedRendererExit(win);
+                win.destroy();
+                return;
+            }
             if (win && !win.isDestroyed()) {
                 win.webContents.send("siyuan-save-close");
             }
@@ -2471,6 +3167,10 @@ app.whenReady().then(() => {
         }
     });
     ipcMain.on("siyuan-open-workspace", (event, data) => {
+        if (getWindowKernelTarget(event.sender.id)?.mode === "remote") {
+            writeLog("ignored opening a local workspace in remote kernel mode");
+            return;
+        }
         if (updateInstallPromise) {
             writeLog("ignored opening workspace while installing update");
             return;
@@ -2490,8 +3190,17 @@ app.whenReady().then(() => {
         }
     });
     ipcMain.handle("siyuan-init", async (event, data) => {
+        const kernelTarget = getWindowKernelTarget(event.sender.id);
+        if (kernelTarget) {
+            initializedWindowIds.add(event.sender.id);
+        }
+        const capabilities = kernelTarget ? {
+            kernelMode: kernelTarget.mode,
+            ownsKernel: kernelTarget.ownsKernel,
+            kernelOrigin: kernelTarget.origin,
+        } : undefined;
         const exitWS = workspaces.find(item => {
-            if (event.sender.id === item.webContentsId && item.workspaceDir) {
+            if (event.sender.id === item.webContentsId && item.initialized) {
                 if (item.tray && ("win32" === process.platform || "linux" === process.platform)) {
                     // Tray menu text does not change with the appearance language https://github.com/siyuan-note/siyuan/issues/7935
                     resetTrayMenu(item.tray, data.languages, item.browserWindow);
@@ -2500,17 +3209,23 @@ app.whenReady().then(() => {
             }
         });
         if (exitWS) {
-            return;
+            if (!exitWS.ownsKernel) {
+                setTimeout(() => flushPendingRemoteOpenURLs(exitWS.browserWindow), 100);
+            }
+            return capabilities;
         }
 
         const workspaceItem = workspaces.find((item) => event.sender.id === item.webContentsId);
         if (workspaceItem) {
-            workspaceItem.workspaceDir = data.workspaceDir;
+            workspaceItem.initialized = true;
+            workspaceItem.workspaceDir = workspaceItem.ownsKernel ? data.workspaceDir : "";
             let tray;
             if ("win32" === process.platform || "linux" === process.platform) {
                 // 系统托盘
                 tray = new Tray(path.join(appDir, "stage", "icon-large.png"));
-                tray.setToolTip(`${path.basename(data.workspaceDir)} - SiYuan v${appVer}`);
+                const trayName = workspaceItem.ownsKernel ? path.basename(data.workspaceDir) :
+                    new URL(workspaceItem.kernelTarget.origin).host;
+                tray.setToolTip(`${trayName} - SiYuan v${appVer}`);
                 const mainWindow = getWindowByContentId(event.sender.id);
                 if (!mainWindow || mainWindow.isDestroyed()) {
                     tray.destroy();
@@ -2524,7 +3239,12 @@ app.whenReady().then(() => {
             }
             workspaceItem.tray = tray;
         }
-        await net.fetch(getServer(data.port) + "/api/system/uiproc?pid=" + process.pid, {method: "POST"});
+        if (workspaceItem?.ownsKernel) {
+            await net.fetch(workspaceItem.kernelTarget.origin + "/api/system/uiproc?pid=" + process.pid, {method: "POST"});
+        } else if (workspaceItem) {
+            setTimeout(() => flushPendingRemoteOpenURLs(workspaceItem.browserWindow), 100);
+        }
+        return capabilities;
     });
     ipcMain.on("siyuan-hotkey", (event, data) => {
         if (!data.hotkeys || data.hotkeys.length === 0) {
@@ -2589,13 +3309,44 @@ app.whenReady().then(() => {
         });
     });
     ipcMain.on("siyuan-auto-launch", (event, data) => {
+        const kernelTarget = getWindowKernelTarget(event.sender.id);
+        const args = [];
+        if (kernelTarget?.mode === "remote") {
+            args.push("--remote=" + kernelTarget.origin);
+        }
+        if (data.openAsHidden) {
+            args.push("--openAsHidden");
+        }
         app.setLoginItemSettings({
             openAtLogin: data.openAtLogin,
-            args: data.openAsHidden ? ["--openAsHidden"] : ""
+            args,
         });
     });
     const appCrashInfo = readAppCrashInfo();
-    if (firstOpen) {
+    if (remoteKernelArgError) {
+        if (remoteKernelArgError.code === "ERR_REMOTE_UNSAFE_CHROMIUM_SWITCH") {
+            showErrorWindow("远程内核启动参数不安全", "Unsafe remote kernel arguments",
+                "<div>远程内核模式不能与弱化网页或 TLS 安全的参数同时使用。</div>" +
+                "<div>Remote kernel mode cannot be used with arguments that weaken web or TLS security.</div>");
+        } else {
+            showErrorWindow("远程内核地址无效", "Invalid remote kernel address",
+                "<div>--remote 仅接受不带路径、查询或凭据的 HTTPS origin。</div>" +
+                "<div>--remote only accepts an HTTPS origin without a path, query, or credentials.</div>");
+        }
+    } else if (remoteKernelTarget) {
+        initRemoteKernel(remoteKernelTarget).then((result) => {
+            if (result) {
+                initMainWindow(result.target, result.authenticated);
+            }
+        }).catch((error) => {
+            writeLog("initialize remote kernel failed: " + error);
+            if (bootWindow && !bootWindow.isDestroyed()) {
+                bootWindow.destroy();
+            }
+            showErrorWindow("连接远程内核失败", "Failed to connect to the remote kernel",
+                "<div>连接远程内核时发生意外错误。</div><div>An unexpected error occurred while connecting to the remote kernel.</div>");
+        });
+    } else if (firstOpen) {
         const firstOpenWindow = new BrowserWindow({
             width: Math.floor(screen.getPrimaryDisplay().size.width * 0.6),
             height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height * 0.8),
@@ -2779,10 +3530,14 @@ app.whenReady().then(() => {
         }
 
         workspaces.forEach(item => {
-            const currentURL = new URL(item.browserWindow.getURL());
-            const server = getServer(currentURL.port);
+            const server = item.kernelTarget.origin;
             writeLog("sync after system resume [" + server + "/api/sync/performSync" + "]");
-            net.fetch(server + "/api/sync/performSync", {method: "POST"});
+            session.defaultSession.fetch(server + "/api/sync/performSync", {
+                method: "POST",
+                credentials: item.ownsKernel ? "omit" : "include",
+                bypassCustomProtocolHandlers: !item.ownsKernel,
+                redirect: item.ownsKernel ? "follow" : "manual",
+            });
         });
     });
     powerMonitor.on("shutdown", () => {
@@ -2803,6 +3558,17 @@ app.on("open-url", async (event, url) => { // for macOS
         return;
     }
     if (url.startsWith("siyuan://")) {
+        if (remoteKernelTarget) {
+            const mainWorkspace = workspaces[0];
+            if (mainWorkspace?.browserWindow && !mainWorkspace.browserWindow.isDestroyed() &&
+                initializedWindowIds.has(mainWorkspace.webContentsId)) {
+                showWindow(mainWorkspace.browserWindow);
+                mainWorkspace.browserWindow.webContents.send("siyuan-open-url", url);
+            } else {
+                pendingRemoteOpenURLs.push(url);
+            }
+            return;
+        }
         let isBackground = true;
         if (workspaces.length === 0) {
             isBackground = false;
@@ -2832,21 +3598,61 @@ app.on("second-instance", (event, argv) => {
         writeLog("ignored second instance while installing update");
         return;
     }
-    let workspace = argv.find((arg) => arg.startsWith("--workspace="));
+    if (remoteKernelArgError) {
+        writeLog("ignored second instance because the primary remote kernel argument is invalid");
+        return;
+    }
+    const secondRemoteArg = getArgFrom(argv, "--remote");
+    if (secondRemoteArg !== undefined || remoteKernelTarget) {
+        const siyuanURL = argv.find((arg) => arg.startsWith("siyuan://"));
+        const localTargetRequested = getArgFrom(argv, "--workspace") !== undefined ||
+            getArgFrom(argv, "--port") !== undefined;
+        let secondRemoteOrigin;
+        if (secondRemoteArg !== undefined) {
+            try {
+                secondRemoteOrigin = normalizeRemoteKernelOrigin(secondRemoteArg);
+                writeLog("got second-instance remote kernel [origin=" + secondRemoteOrigin + "]");
+                if (!remoteKernelTarget || secondRemoteOrigin !== remoteKernelTarget.origin) {
+                    writeLog("ignored a different remote kernel while another SiYuan instance is running");
+                }
+            } catch (error) {
+                writeLog("ignored invalid second-instance remote kernel: " + error.message);
+            }
+        }
+        if (remoteKernelTarget && localTargetRequested) {
+            writeLog("ignored opening a local kernel target while remote kernel mode is running");
+        }
+        const allowDeepLink = shouldForwardRemoteDeepLink({
+            currentOrigin: remoteKernelTarget?.origin,
+            requestedOrigin: secondRemoteOrigin,
+            remoteArgumentPresent: secondRemoteArg !== undefined,
+            localTargetRequested,
+        });
+        if (workspaces.length > 0) {
+            const mainWindow = workspaces[0].browserWindow;
+            showWindow(mainWindow);
+            if (siyuanURL && allowDeepLink && initializedWindowIds.has(mainWindow.webContents.id)) {
+                mainWindow.webContents.send("siyuan-open-url", siyuanURL);
+            } else if (siyuanURL && allowDeepLink) {
+                pendingRemoteOpenURLs.push(siyuanURL);
+            }
+        } else if (siyuanURL && allowDeepLink) {
+            pendingRemoteOpenURLs.push(siyuanURL);
+        }
+        return;
+    }
+    let workspace = getArgFrom(argv, "--workspace");
     if (workspace) {
-        workspace = workspace.split("=")[1];
         writeLog("got second-instance arg [--workspace=" + workspace + "]");
     }
-    let port = argv.find((arg) => arg.startsWith("--port="));
+    let port = getArgFrom(argv, "--port");
     if (port) {
-        port = port.split("=")[1];
         writeLog("got second-instance arg [--port=" + port + "]");
     } else {
         port = 0;
     }
-    let lang = argv.find((arg) => arg.startsWith("--lang="));
+    let lang = getArgFrom(argv, "--lang");
     if (lang) {
-        lang = lang.split("=")[1];
         writeLog("got second-instance arg [--lang=" + lang + "]");
     } else {
         lang = "";
@@ -2884,7 +3690,7 @@ app.on("second-instance", (event, argv) => {
 });
 
 app.on("activate", () => {
-    if (updateInstallPromise) {
+    if (updateInstallPromise || remoteKernelArgError) {
         return;
     }
     if (workspaces.length > 0) {
@@ -2894,12 +3700,25 @@ app.on("activate", () => {
         }
     }
     if (BrowserWindow.getAllWindows().length === 0) {
-        initMainWindow();
+        if (remoteKernelTarget) {
+            initRemoteKernel(remoteKernelTarget).then((result) => {
+                if (result) {
+                    initMainWindow(result.target, result.authenticated);
+                }
+            }).catch((error) => writeLog("reactivate remote kernel failed: " + error));
+        } else {
+            initMainWindow();
+        }
     }
 });
 
 app.on("web-contents-created", (webContentsCreatedEvent, contents) => {
     contents.setWindowOpenHandler((details) => {
+        const kernelTarget = getWindowKernelTarget(contents.id);
+        if (kernelTarget?.mode === "remote") {
+            openExternalURL(details.url, true);
+            return {action: "deny"};
+        }
         // https://github.com/siyuan-note/siyuan/issues/10567
         if (details.url.startsWith("file:///") && details.disposition === "foreground-tab") {
             return;
@@ -2915,7 +3734,18 @@ app.on("before-quit", (event) => {
         event.preventDefault();
         return;
     }
-    workspaces.forEach(item => {
+    workspaces.slice().forEach(item => {
+        const pathname = getWindowPathname(item.browserWindow);
+        if (!item.ownsKernel && (pathname !== "/stage/build/app/" ||
+            !initializedWindowIds.has(item.webContentsId))) {
+            const workspaceIndex = workspaces.indexOf(item);
+            if (workspaceIndex > -1) {
+                workspaces.splice(workspaceIndex, 1);
+            }
+            markExpectedRendererExit(item.browserWindow);
+            item.browserWindow.destroy();
+            return;
+        }
         if (item.browserWindow && !item.browserWindow.isDestroyed()) {
             event.preventDefault();
             item.browserWindow.webContents.send("siyuan-save-close", true);

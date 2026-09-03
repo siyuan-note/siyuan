@@ -6,7 +6,7 @@
 		"id": "20201004194026-s8h2cog",
 		"title": "Use on browser",
 		"type": "doc",
-		"updated": "20260804235500"
+		"updated": "20260903150000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091447-8iiuxlt",
-				"updated": "20260804235500"
+				"updated": "20260903150000"
 			},
 			"Children": [
 				{
@@ -187,6 +187,31 @@
 				{
 					"Type": "NodeText",
 					"Data": "Before embarking on these two solutions, please start with understanding SiYuan Technical Architecture (GitHub repo: siyuan-note/siyuan)."
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-cr1ft15",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260903150000-cr1ft15",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To connect to a remote kernel from the desktop app, see "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260903150000-s4hctea",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Connect to a Remote Kernel"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		},

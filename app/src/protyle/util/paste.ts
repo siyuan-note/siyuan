@@ -24,7 +24,7 @@ import {fixAdjacentTags, getCalloutInfo, getContenteditableElement} from "../wys
 import {clearBlockElement} from "./clear";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL, showBase64ImageSizeLimit} from "../upload/base64";
-import {applyHTMLLocalAssetPaths, collectHTMLLocalAssets} from "../upload/htmlLocalAssets";
+import {applyHTMLLocalAssetPaths, collectHTMLLocalAssets, removeHTMLLocalAssetPaths} from "../upload/htmlLocalAssets";
 import {
     applyHTMLEmbeddedAssetPaths,
     collectHTMLEmbeddedAssets,
@@ -55,6 +55,7 @@ import {
 } from "./wpsPresentation";
 import {hasDataTransferFiles} from "../upload/localDropFiles";
 import {resetPastedQueryEmbedRenderState} from "../render/embedRenderState";
+import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {eventBusHas, hasPluginSubscriber} from "../../plugin/EventBusCore";
 import {normalizeSemanticInlineElements, stripSemanticMarkersFromRangeText} from "./inlineElementMarker";
 /// #if !BROWSER
@@ -572,7 +573,7 @@ const insertConvertedBlockDOM = (protyle: IProtyle, dom: string, range: Range) =
     protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {
         if (item.textContent === "") {
             fetchPost("/api/block/getRefText", {id: item.getAttribute("data-id")}, (response) => {
-                item.innerHTML = response.data;
+                item.innerHTML = sanitizeKernelHTML(response.data);
             });
         }
     });
@@ -1101,6 +1102,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         if (isHTML) {
             const tempElement = document.createElement("div");
             tempElement.innerHTML = textHTML;
+            if (!getHostCapabilities().localFileSystem) {
+                removeHTMLLocalAssetPaths(collectHTMLLocalAssets(tempElement));
+            }
             // 移除空的 A 标签
             tempElement.querySelectorAll("a").forEach((e) => {
                 if (e.innerHTML.trim() === "") {
@@ -1119,7 +1123,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     linkElement = tempElement.firstElementChild.firstElementChild;
                 }
             }
-            if (linkElement) {
+            if (linkElement?.getAttribute("href")) {
                 const selectText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
                 protyle.toolbar.range = range;
                 const aElements = protyle.toolbar.setInlineMark(protyle, "a", "range", {
@@ -1204,6 +1208,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 }
                 tempElement.innerHTML = preflight.normalizedHTML;
                 localAssets = collectHTMLLocalAssets(tempElement);
+                if (!getHostCapabilities().localFileSystem) {
+                    removeHTMLLocalAssetPaths(localAssets);
+                    localAssets = [];
+                }
                 preparedHTML = true;
             }
             if (localAssets.length > 0) {

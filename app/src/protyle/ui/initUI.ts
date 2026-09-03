@@ -20,6 +20,7 @@ import {hideElements} from "./hideElements";
 import {AVAttributePanel} from "../render/av/attributePanel";
 import {getEditorHorizontalPadding} from "./padding";
 import {callMobileAppShowKeyboard} from "../../mobile/util/mobileAppUtil";
+import {sanitizeKernelHTML} from "../../util/hostCapabilities";
 
 const focusMobileAppEditor = (element: HTMLElement) => {
     if (window.JSAndroid?.showKeyboard || window.JSHarmony?.showKeyboard) {
@@ -319,7 +320,7 @@ export const addLoading = (protyle: IProtyle, msg?: string) => {
         if (protyle.element.getAttribute("data-loading") !== "finished") {
             protyle.element.insertAdjacentHTML("beforeend", `<div style="background-color: var(--b3-theme-background);flex-direction: column;" class="fn__loading wysiwygLoading">
     <img width="48px" src="/stage/loading-pure.svg">
-    <div style="color: var(--b3-theme-on-surface);margin-top: 8px;">${msg || ""}</div>
+    <div style="color: var(--b3-theme-on-surface);margin-top: 8px;">${sanitizeKernelHTML(msg || "")}</div>
 </div>`);
         }
     }, Constants.TIMEOUT_LOAD);

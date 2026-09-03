@@ -4,6 +4,7 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {isInIOS, saveExportFile} from "../../protyle/util/compatibility";
 import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
 import {getCloudURL} from "../util/about";
+import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabilities";
 
 /** 按当前配置刷新同步 Tab 可见性与动态面板（供 syncRuntime 调用） */
 export const refreshSyncTabPanels = (root: Element) => {
@@ -327,7 +328,7 @@ const genProviderFlexSelect = (label: string, id: string, optionsHtml: string) =
 </div>`;
 
 const genProviderActionButtons = (dataType: SyncProviderConfigKey) => {
-    const importExportHtml = dataType === "s3" || dataType === "webdav" ? `<div class="fn__space"></div>
+    const importExportHtml = getHostCapabilities().importExport && (dataType === "s3" || dataType === "webdav") ? `<div class="fn__space"></div>
     <button class="b3-button b3-button--outline fn__size200" style="position: relative">
         <input id="importSyncConfig" class="b3-form__upload" type="file" data-type="${dataType}">
         <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}
@@ -357,6 +358,9 @@ const bindProviderConfigEvent = (configElement: Element, root: Element) => {
 
     const importElement = configElement.querySelector("#importSyncConfig") as HTMLInputElement;
     importElement?.addEventListener("change", () => {
+        if (!getHostCapabilities().importExport) {
+            return;
+        }
         const formData = new FormData();
         formData.append("file", importElement.files[0]);
         const isS3 = importElement.getAttribute("data-type") === "s3";
@@ -373,6 +377,9 @@ const bindProviderConfigEvent = (configElement: Element, root: Element) => {
 
     const exportButton = configElement.querySelector("#exportSyncConfig");
     exportButton?.addEventListener("click", () => {
+        if (!getHostCapabilities().importExport) {
+            return;
+        }
         fetchPost(exportButton.getAttribute("data-type") === "s3" ? "/api/sync/exportSyncProviderS3" : "/api/sync/exportSyncProviderWebDAV", {}, (response) => {
             void saveExportFile(response.data.zip);
         });
@@ -474,7 +481,7 @@ const renderCloudSpace = (root: Element) => {
         );
         fetchSyncPost("/api/cloud/getCloudSpace").then((response) => {
             if (response.code === 1) {
-                cloudSpaceElement.innerHTML = `<span class="ft__error">${response.msg}</span>`;
+                cloudSpaceElement.innerHTML = `<span class="ft__error">${sanitizeKernelHTML(response.msg)}</span>`;
                 return;
             }
             if (response.code !== 0 || !response.data) {

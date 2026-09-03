@@ -29,6 +29,7 @@ import {showMessage} from "../../dialog/message";
 import {buildBlockDOMClipboardRichData} from "../util/blockDOMClipboard";
 import {buildWebClipboardHTML} from "../util/clipboardData";
 import {exportImage} from "../export/util";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 
 export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: string) => {
     hideTooltip();
@@ -54,6 +55,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
             id: "copyAsPNG",
             iconHTML: "",
             label: window.siyuan.languages.copyAsPNG,
+            ignore: !getHostCapabilities().importExport,
             click() {
                 exportImage(protyle.block.showAll ? protyle.block.id : protyle.block.rootID, true);
             }
@@ -317,14 +319,16 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                 openNewWindowById(protyle.block.rootID);
             }
         }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            id: "showInFolder",
-            icon: "iconFolder",
-            label: window.siyuan.languages.showInFolder,
-            click: () => {
-                useShell("showItemInFolder", path.join(window.siyuan.config.system.dataDir, protyle.notebookId, protyle.path));
-            }
-        }).element);
+        if (getHostCapabilities().localFileSystem) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "showInFolder",
+                icon: "iconFolder",
+                label: window.siyuan.languages.showInFolder,
+                click: () => {
+                    useShell("showItemInFolder", path.join(window.siyuan.config.system.dataDir, protyle.notebookId, protyle.path));
+                }
+            }).element);
+        }
         /// #endif
         if (!protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({

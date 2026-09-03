@@ -31,6 +31,8 @@ func TestListNotebooksIgnoresBoxWithoutConfAndDocuments(t *testing.T) {
 	Conf = NewAppConf()
 	Conf.FileTree = conf.NewFileTree()
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
+	Conf.Sync = conf.NewSync()
+	Conf.Sync.Enabled = true
 	t.Cleanup(func() {
 		Conf, util.DataDir = oldConf, oldDataDir
 	})
@@ -65,12 +67,14 @@ func TestListNotebooksIgnoresBoxWithoutConfAndDocuments(t *testing.T) {
 	}
 }
 
-func TestListNotebooksDefersRepairWhileSyncLockIsOccupied(t *testing.T) {
+func TestListNotebooksDoesNotRepairBoxWithDocuments(t *testing.T) {
 	oldConf, oldDataDir := Conf, util.DataDir
 	util.DataDir = t.TempDir()
 	Conf = NewAppConf()
 	Conf.FileTree = conf.NewFileTree()
 	Conf.NotebookCrypto = conf.NewNotebookCrypto()
+	Conf.Sync = conf.NewSync()
+	Conf.Sync.Enabled = true
 	t.Cleanup(func() {
 		Conf, util.DataDir = oldConf, oldDataDir
 	})
@@ -84,18 +88,16 @@ func TestListNotebooksDefersRepairWhileSyncLockIsOccupied(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	syncLock.Lock()
 	boxes, err := ListNotebooks()
-	syncLock.Unlock()
 	if err != nil {
 		t.Fatal(err)
 	}
 	if 0 != len(boxes) {
-		t.Fatalf("expected box repair to be deferred, got %+v", boxes)
+		t.Fatalf("expected box repair to require an explicit lifecycle step, got %+v", boxes)
 	}
 	confPath := filepath.Join(util.DataDir, boxID, ".siyuan", "conf.json")
 	if _, err = os.Stat(confPath); !os.IsNotExist(err) {
-		t.Fatalf("expected notebook conf not to be recreated while syncing: %v", err)
+		t.Fatalf("expected notebook conf not to be recreated while listing: %v", err)
 	}
 }
 

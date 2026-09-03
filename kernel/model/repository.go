@@ -2015,6 +2015,9 @@ func bootSyncRepo() (err error) {
 
 	syncingFiles = sync.Map{}
 	syncingStorages.Store(false)
+	if 1 > len(fetchedFiles) {
+		cleanupSyncedBoxResiduals(nil)
+	}
 	for _, fetchedFile := range fetchedFiles {
 		name := path.Base(fetchedFile.Path)
 		if strings.HasSuffix(name, ".sy") {
@@ -2286,6 +2289,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	if !mergeResult.DataChanged() { // 没有数据变更
+		cleanupSyncedBoxResiduals(nil)
 		syncSameCount.Add(1)
 		if 10 < syncSameCount.Load() {
 			syncSameCount.Store(5)
@@ -2499,9 +2503,12 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			unindex(boxID)
 			removedEncryptedBox = true
 			needUnindexBoxes[boxID] = true
-			delete(needIndexBoxes, boxID)
+		} else {
+			forgetRuntimeNormalBox(boxID)
 		}
+		delete(needIndexBoxes, boxID)
 	}
+	cleanupSyncedBoxResiduals(removedBoxConfs)
 	if removedEncryptedBox {
 		sql.FlushQueue()
 	}
@@ -2576,6 +2583,73 @@ func removeEmptyPackageDirs(basePath string, dirNames *hashset.Set) {
 		if err := gulu.File.RemoveEmptyDirs(dirPath); err != nil && !os.IsNotExist(err) {
 			logging.LogWarnf("remove empty marketplace package directory [%s] failed: %s", dirPath, err)
 		}
+	}
+}
+
+// cleanupSyncedBoxResiduals 备份并删除同步确认移除的笔记本目录，以及不含正文的历史残留目录。
+func cleanupSyncedBoxResiduals(removedBoxIDs map[string]bool) {
+	boxIDs := map[string]bool{}
+	for boxID := range removedBoxIDs {
+		boxIDs[boxID] = true
+	}
+
+	dirs, err := os.ReadDir(util.DataDir)
+	if err != nil {
+		logging.LogErrorf("read data dir before cleaning up synced box residuals failed: %s", err)
+		return
+	}
+	for _, dir := range dirs {
+		boxID := dir.Name()
+		if !dir.IsDir() || !ast.IsNodeIDPattern(boxID) || boxIDs[boxID] {
+			continue
+		}
+		boxDirPath := filepath.Join(util.DataDir, boxID)
+		if filelock.IsExist(filepath.Join(boxDirPath, ".siyuan", "conf.json")) {
+			continue
+		}
+		hasDocuments, scanErr := hasLiveBoxDocuments(boxDirPath)
+		if scanErr != nil {
+			logging.LogErrorf("scan synced box residual [%s] failed: %s", boxDirPath, scanErr)
+			continue
+		}
+		if hasDocuments || IsEncryptedBox(boxID) {
+			continue
+		}
+		boxIDs[boxID] = true
+	}
+
+	var historyDir string
+	for boxID := range boxIDs {
+		if !ast.IsNodeIDPattern(boxID) {
+			continue
+		}
+		boxDirPath := filepath.Join(util.DataDir, boxID)
+		if !filelock.IsExist(boxDirPath) {
+			continue
+		}
+		if !gulu.File.IsDir(boxDirPath) {
+			logging.LogWarnf("refuse to clean up synced box residual because it is not a directory [%s]", boxDirPath)
+			continue
+		}
+
+		if "" == historyDir {
+			var err error
+			historyDir, err = getHistoryDir(HistoryOpDelete)
+			if err != nil {
+				logging.LogErrorf("create history before cleaning up synced box residuals failed: %s", err)
+				return
+			}
+		}
+		historyPath := filepath.Join(historyDir, boxID)
+		if err := filelock.Copy(boxDirPath, historyPath); err != nil {
+			logging.LogErrorf("backup synced box residual [%s] failed: %s", boxDirPath, err)
+			continue
+		}
+		if err := removeBoxDir(boxDirPath); err != nil {
+			logging.LogErrorf("remove synced box residual [%s] failed: %s", boxDirPath, err)
+			continue
+		}
+		logging.LogInfof("removed synced box residual [%s]", boxDirPath)
 	}
 }
 

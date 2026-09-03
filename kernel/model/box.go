@@ -94,6 +94,13 @@ func StatJob() {
 }
 
 func ListNotebooks() (ret []*Box, err error) {
+	// 启用数据同步时，缺失配置可能表示其他设备已删除笔记本，不能在列表读取过程中自动重建。
+	repairMissingConf := nil != Conf && nil != Conf.Sync && !Conf.Sync.Enabled
+	ret, err = listNotebooks(repairMissingConf)
+	return
+}
+
+func listNotebooks(repairMissingConf bool) (ret []*Box, err error) {
 	ret = []*Box{}
 	dirs, err := os.ReadDir(util.DataDir)
 	if err != nil {
@@ -119,7 +126,6 @@ func ListNotebooks() (ret []*Box, err error) {
 		boxConfPath := filepath.Join(boxDirPath, ".siyuan", "conf.json")
 		isExistConf := filelock.IsExist(boxConfPath)
 		missingEncryptedIdentity := false
-		repairLockHeld := false
 		if !isExistConf {
 			if !IsUserGuide(id) {
 				// conf.json 缺失时检查加密备份，确认是否为加密笔记本
@@ -147,19 +153,16 @@ func ListNotebooks() (ret []*Box, err error) {
 					setEncryptedBoxState(id, EncryptedBoxStateError)
 					logging.LogErrorf("encrypted notebook key identity is missing [%s]", boxDirPath)
 				} else {
-					if !syncLock.TryLock() {
-						logging.LogWarnf("deferred repairing box without conf while sync lock is occupied [%s]", boxDirPath)
+					if !repairMissingConf {
+						logging.LogWarnf("ignored a box without conf because automatic repair is disabled [%s]", boxDirPath)
 						continue
 					}
-					repairLockHeld = true
 					hasDocuments, scanErr := hasLiveBoxDocuments(boxDirPath)
 					if scanErr != nil {
-						syncLock.Unlock()
 						logging.LogErrorf("scan box without conf [%s] failed: %s", boxDirPath, scanErr)
 						continue
 					}
 					if !hasDocuments {
-						syncLock.Unlock()
 						logging.LogWarnf("ignored a box without conf and documents [%s]", boxDirPath)
 						continue
 					}
@@ -234,14 +237,11 @@ func ListNotebooks() (ret []*Box, err error) {
 
 		if !isExistConf && !missingEncryptedIdentity {
 			// Automatically create notebook conf.json if not found it https://github.com/siyuan-note/siyuan/issues/9647
-			if err := box.SaveConf(boxConf); err != nil {
-				logging.LogErrorf("save box conf [%s] failed: %s", boxDirPath, err)
+			if saveErr := box.SaveConf(boxConf); saveErr != nil {
+				logging.LogErrorf("save box conf [%s] failed: %s", boxDirPath, saveErr)
 			}
 			box.Unindex()
 			logging.LogWarnf("fixed a corrupted box [%s]", boxDirPath)
-		}
-		if repairLockHeld {
-			syncLock.Unlock()
 		}
 		ret = append(ret, box)
 	}

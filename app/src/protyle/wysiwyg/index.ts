@@ -4126,7 +4126,7 @@ export class WYSIWYG {
                 getUndoFocusContext(protyle.wysiwyg.element, selection.getRangeAt(0)) : undefined;
             forwardDeleteUndoContext = !event.defaultPrevented && event.inputType === "deleteContentForward" &&
             selection.rangeCount > 0 && selection.getRangeAt(0).collapsed ?
-                getUndoFocusContext(protyle.wysiwyg.element, selection.getRangeAt(0), true) : undefined;
+                getUndoFocusContext(protyle.wysiwyg.element, selection.getRangeAt(0)) : undefined;
             if (event.defaultPrevented || !isTextInputType(event.inputType, event.data) ||
                 selection.rangeCount === 0) {
                 return;

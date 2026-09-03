@@ -147,8 +147,66 @@ func ChatGPT(msg string, contextMsgs []string, c *openai.Client, apiBaseURL, pro
 func NewOpenAIClient(apiKey, apiBaseURL string) *openai.Client {
 	config := openai.DefaultConfig(apiKey)
 	config.BaseURL = apiBaseURL
-	config.HTTPClient = httpclient.NewUserAgentClient(nil)
+	config.HTTPClient = newProviderHTTPDoer()
 	return openai.NewClientWithConfig(config)
+}
+
+// newProviderHTTPDoer 返回访问 Provider 所用的 HTTP 客户端：在带 User-Agent 的基础客户端外
+// 再包一层调用方标识请求头注入，供 chat、模型清单等所有 Provider 请求复用。
+func newProviderHTTPDoer() openai.HTTPDoer {
+	return &attributionTransport{base: httpclient.NewUserAgentClient(nil)}
+}
+
+// providerAttributionHeaders 是「服务商 API 主机名 → 调用方标识请求头」的内置清单。
+// 这些请求头只声明「请求来自思源笔记」，不含 API Key、用户内容或任何可识别用户的信息，
+// 服务商据此统计接入来源。按主机名分表是为了把请求头限定在该服务商自有端点上，
+// 避免随请求发往其他服务商，或发往仅仅转发同一 API 的第三方代理。
+var providerAttributionHeaders = map[string]map[string]string{
+	// AI/ML API：HTTP-Referer 与 X-Title 指向思源笔记自身（OpenRouter 系惯例，标识调用方应用），
+	// X-AIMLAPI-Source 与 X-AIMLAPI-Partner-ID 是该服务商用于统计接入来源的自有请求头。
+	"api.aimlapi.com": {
+		"HTTP-Referer":         "https://github.com/siyuan-note/siyuan",
+		"X-Title":              "SiYuan",
+		"X-AIMLAPI-Source":     "agent/siyuan",
+		"X-AIMLAPI-Partner-ID": "part_siyuan",
+	},
+}
+
+// AttributionHeadersForHost 按主机名大小写不敏感查表，返回该服务商需注入的调用方标识请求头；
+// 无匹配返回 nil。返回的是副本，调用方改动不会影响内置清单。
+func AttributionHeadersForHost(host string) map[string]string {
+	headers := providerAttributionHeaders[strings.ToLower(strings.TrimSpace(host))]
+	if 0 == len(headers) {
+		return nil
+	}
+	return maps.Clone(headers)
+}
+
+// attributionTransport 包装一个 HTTPDoer，为发往内置清单中服务商域名的请求补上调用方标识请求头。
+// 只在请求实际的目标主机命中清单时注入；已存在的同名请求头一律保留，不覆盖上层已设置的值。
+type attributionTransport struct {
+	base openai.HTTPDoer
+}
+
+func (t *attributionTransport) Do(req *http.Request) (*http.Response, error) {
+	if nil == req || nil == req.URL {
+		return t.base.Do(req)
+	}
+
+	headers := AttributionHeadersForHost(req.URL.Hostname())
+	if 0 == len(headers) {
+		return t.base.Do(req)
+	}
+
+	if nil == req.Header {
+		req.Header = http.Header{}
+	}
+	for name, value := range headers {
+		if "" == req.Header.Get(name) {
+			req.Header.Set(name, value)
+		}
+	}
+	return t.base.Do(req)
 }
 
 // builtinExtraBody 是「模型名前缀 → 额外请求参数」的内置适配清单。
@@ -226,7 +284,7 @@ func NewOpenAIClientWithModel(apiKey, apiBaseURL, model string) *openai.Client {
 	}
 	config := openai.DefaultConfig(apiKey)
 	config.BaseURL = apiBaseURL
-	var transport openai.HTTPDoer = httpclient.NewUserAgentClient(nil)
+	transport := newProviderHTTPDoer()
 	if len(extra) > 0 {
 		transport = &extraBodyTransport{base: transport, extraBody: extra}
 	}
@@ -380,7 +438,7 @@ func ListAvailableModelsWithContext(apiKey, apiBaseURL string, timeout int) (mod
 	if apiKey != "" {
 		req.Header.Set("Authorization", "Bearer "+apiKey)
 	}
-	resp, err := httpclient.NewUserAgentClient(nil).Do(req)
+	resp, err := newProviderHTTPDoer().Do(req)
 	if err != nil {
 		logging.LogErrorf("list models [%s] failed: %s", apiBaseURL, err)
 		return

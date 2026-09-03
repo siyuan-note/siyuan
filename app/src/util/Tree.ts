@@ -4,7 +4,7 @@ import {mathRender} from "../protyle/render/mathRender";
 import {getFileTreeIconHTML} from "../emoji/fileTreeIcon";
 import {escapeAriaLabel, escapeHtml} from "./escape";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
-import {headingNumberNeedsSpacing} from "../protyle/util/headingNumberCore";
+import {headingNumberNeedsLeadingTrim, headingNumberNeedsSpacing} from "../protyle/util/headingNumberCore";
 import {getTreeItemTailHTML} from "./treeItemTail";
 
 const genOutlineNumberHTML = (number?: string) => {
@@ -12,7 +12,8 @@ const genOutlineNumberHTML = (number?: string) => {
         return "";
     }
     const spacingClass = headingNumberNeedsSpacing(number) ? "" : " b3-list-item__number--no-spacing";
-    return `<span class="b3-list-item__number${spacingClass}">${escapeHtml(number)}</span>`;
+    const trimStartClass = headingNumberNeedsLeadingTrim(number) ? " b3-list-item__number--trim-start" : "";
+    return `<span class="b3-list-item__number${spacingClass}${trimStartClass}">${escapeHtml(number)}</span>`;
 };
 
 export class Tree {

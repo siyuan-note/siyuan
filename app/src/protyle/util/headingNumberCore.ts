@@ -3,7 +3,9 @@ const HEADING_NUMBER_CLASS = "protyle-heading-number";
 const HEADING_NUMBER_ACTIVE_CLASS = "protyle-heading-number--active";
 const HEADING_NUMBER_MEASURE_CLASS = "protyle-heading-number__measure";
 const HEADING_NUMBER_WIDTH_PROPERTY = "--b3-protyle-heading-number-width";
+const HEADING_NUMBER_TRIM_START_PROPERTY = "--b3-protyle-heading-number-trim-start";
 const HEADING_NUMBER_NO_SPACING_SUFFIXES = ["、", "）"];
+const HEADING_NUMBER_TRIM_START_PREFIXES = ["（"];
 const NUMBERED_HEADING_SELECTOR = `${HEADING_SELECTOR}[data-heading-number], ` +
     `${HEADING_SELECTOR} > [contenteditable][data-heading-number]`;
 const HEADING_CONTAINER_TYPES = new Set(["NodeDocument", "NodeList", "NodeListItem", "NodeSuperBlock"]);
@@ -36,6 +38,10 @@ export const invalidateHeadingNumberMeasurements = () => {
 
 export const headingNumberNeedsSpacing = (number: string) => {
     return !HEADING_NUMBER_NO_SPACING_SUFFIXES.some(suffix => number.endsWith(suffix));
+};
+
+export const headingNumberNeedsLeadingTrim = (number: string) => {
+    return HEADING_NUMBER_TRIM_START_PREFIXES.some(prefix => number.startsWith(prefix));
 };
 
 export const clearHeadingNumberElements = (root: Element) => {
@@ -104,19 +110,29 @@ export const buildHeadingNumberStyles = (scope: string, styles: IHeadingNumberSt
     const headingSelector = `${scopeSelector} [data-node-id][data-type="NodeHeading"]`;
     const editableSelector = `${headingSelector}>:first-child[contenteditable]`;
     const rules = [
-        `${headingSelector}{--b3-protyle-heading-number:"";--b3-protyle-heading-number-offset:0px;}`,
+        `${headingSelector}{--b3-protyle-heading-number:"";--b3-protyle-heading-number-offset:0px;` +
+        `${HEADING_NUMBER_TRIM_START_PROPERTY}:0px;}`,
         `${editableSelector}{position:relative;` +
         "padding-inline-start:var(--b3-protyle-heading-number-offset);}",
         `${editableSelector}::before{content:var(--b3-protyle-heading-number);position:absolute;` +
-        "inset-inline-start:0;" +
+        `inset-inline-start:calc(0px - var(${HEADING_NUMBER_TRIM_START_PROPERTY}));` +
         "top:0;width:auto;height:auto;background-color:transparent;color:var(--b3-theme-on-surface-light);" +
         "unicode-bidi:isolate;user-select:none;pointer-events:none;}",
     ];
     styles.forEach(style => {
-        const offset = headingNumberNeedsSpacing(style.number) ? `calc(${style.offset} + .5em)` : style.offset;
+        const offsetAdjustments = [];
+        if (headingNumberNeedsSpacing(style.number)) {
+            offsetAdjustments.push("+ .5em");
+        }
+        const trimStart = headingNumberNeedsLeadingTrim(style.number) ? ".5em" : "0px";
+        if (trimStart !== "0px") {
+            offsetAdjustments.push(`- ${trimStart}`);
+        }
+        const offset = offsetAdjustments.length > 0 ?
+            `calc(${style.offset} ${offsetAdjustments.join(" ")})` : style.offset;
         rules.push(`${scopeSelector} [data-type="NodeHeading"][data-node-id="${escapeCSSString(style.id)}"]{` +
             `--b3-protyle-heading-number:"${escapeCSSString(style.number)}";` +
-            `--b3-protyle-heading-number-offset:${offset};}`);
+            `--b3-protyle-heading-number-offset:${offset};${HEADING_NUMBER_TRIM_START_PROPERTY}:${trimStart};}`);
     });
     return rules.join("");
 };

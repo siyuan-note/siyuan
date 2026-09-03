@@ -1,6 +1,10 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {canExpandInlineRangeToParent, getInlineRangeElement} from "./inlineRangeBoundary";
+import {
+    canExpandInlineRangeToParent,
+    getInlineRangeElement,
+    normalizeCalloutTitleRange
+} from "./inlineRangeBoundary";
 
 const element = (tagName: string, parentElement: Element | null = null) => ({
     tagName,
@@ -34,5 +38,36 @@ describe("inline range boundary", () => {
             const editableElement = element(tagName);
             assert.equal(canExpandInlineRangeToParent(text(editableElement), editableElement), false);
         });
+    });
+
+    it("normalizes a browser select-all range to the callout title", () => {
+        const infoElement = element("DIV");
+        const titleElement = element("SPAN", infoElement);
+        const titleText = text(titleElement);
+        Object.defineProperty(titleElement, "childNodes", {value: [titleText]});
+        infoElement.contains = (node: Node) => node === titleElement || node === titleText;
+        titleElement.contains = (node: Node) => node === titleText;
+        const blockElement = {
+            getAttribute: (name: string) => name === "data-type" ? "NodeCallout" : null,
+            querySelector: () => titleElement,
+        } as unknown as Element;
+        const fallbackEditableElement = element("DIV");
+        const range = {
+            startContainer: infoElement,
+            endContainer: infoElement,
+            intersectsNode: (node: Node) => node === titleElement,
+            setStart(node: Node, offset: number) {
+                this.startContainer = node;
+                assert.equal(offset, 0);
+            },
+            setEnd(node: Node, offset: number) {
+                this.endContainer = node;
+                assert.equal(offset, 1);
+            },
+        } as unknown as Range;
+
+        assert.equal(normalizeCalloutTitleRange(range, blockElement, fallbackEditableElement), titleElement);
+        assert.equal(range.startContainer, titleElement);
+        assert.equal(range.endContainer, titleElement);
     });
 });

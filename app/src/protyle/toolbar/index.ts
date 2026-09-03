@@ -90,7 +90,11 @@ import {
     stripSemanticMarkersFromRangeText,
     stripSemanticInternalMarkerPrefix
 } from "../util/inlineElementMarker";
-import {canExpandInlineRangeToParent, getInlineRangeElement} from "./inlineRangeBoundary";
+import {
+    canExpandInlineRangeToParent,
+    getInlineRangeElement,
+    normalizeCalloutTitleRange
+} from "./inlineRangeBoundary";
 
 const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) => {
     if (!lite) {
@@ -752,7 +756,8 @@ export class Toolbar {
         if (!nodeElement || nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
             return;
         }
-        const editableElement = getContenteditableElement(nodeElement, this.range.startContainer);
+        const editableElement = normalizeCalloutTitleRange(this.range, nodeElement,
+            getContenteditableElement(nodeElement, this.range.startContainer));
         const isBatch = remove !== undefined;
         let rangeTypes: string[] = [];
         this.range.cloneContents().childNodes.forEach((item: HTMLElement) => {

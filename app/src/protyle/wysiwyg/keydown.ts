@@ -1381,6 +1381,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     // 段末反向删除 https://github.com/siyuan-note/insider/issues/274
                     if (isEndOfBlock(range) || editElement.textContent.substring(position.start) === "\n") {
                         const cloneRange = range.cloneRange();
+                        const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, cloneRange, true);
                         const nextElement = getNextBlock(getTopAloneElement(nodeElement));
                         if (nextElement) {
                             const nextRange = focusBlock(nextElement);
@@ -1399,7 +1400,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                     event.preventDefault();
                                     forwardBlockRemovalPending = true;
                                     try {
-                                        await removeBlock(protyle, nextBlockElement, nextRange, "Delete");
+                                        await removeBlock(protyle, nextBlockElement, nextRange, "Delete",
+                                            false, false, undoFocusContext);
                                     } finally {
                                         forwardBlockRemovalPending = false;
                                         if (caretElement.isConnected) {

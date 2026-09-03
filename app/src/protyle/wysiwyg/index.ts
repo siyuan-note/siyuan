@@ -3824,6 +3824,8 @@ export class WYSIWYG {
         let beforeInputCompositionHandled = false;
         // 原生软换行在 input 触发前已经修改 DOM，需预存选区供撤销恢复。
         let lineBreakUndoContext: Record<string, string>;
+        // 原生向前删除在 input 触发前已经修改 DOM，需预存光标供撤销恢复。
+        let forwardDeleteUndoContext: Record<string, string>;
         // 仅矫正从数据库外进入的占位光标，避免重置数据库内部的方向键导航。
         let arrowStartElement: false | HTMLElement | undefined;
         // Android 软键盘在空块中会先发送 Unidentified 并清空选区，需在实际回车或退格事件前恢复。
@@ -4122,6 +4124,9 @@ export class WYSIWYG {
             lineBreakUndoContext = !event.defaultPrevented && event.inputType === "insertLineBreak" &&
             selection.rangeCount > 0 ?
                 getUndoFocusContext(protyle.wysiwyg.element, selection.getRangeAt(0)) : undefined;
+            forwardDeleteUndoContext = !event.defaultPrevented && event.inputType === "deleteContentForward" &&
+            selection.rangeCount > 0 && selection.getRangeAt(0).collapsed ?
+                getUndoFocusContext(protyle.wysiwyg.element, selection.getRangeAt(0), true) : undefined;
             if (event.defaultPrevented || !isTextInputType(event.inputType, event.data) ||
                 selection.rangeCount === 0) {
                 return;
@@ -4148,15 +4153,18 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("input", (event: InputEvent) => {
-            let lineBreakInputOperations: Parameters<typeof input>[5];
-            if (event.inputType === "insertLineBreak" && lineBreakUndoContext) {
-                lineBreakInputOperations = {
+            const undoContext = event.inputType === "insertLineBreak" ? lineBreakUndoContext :
+                event.inputType === "deleteContentForward" ? forwardDeleteUndoContext : undefined;
+            let inputOperations: Parameters<typeof input>[5];
+            if (undoContext) {
+                inputOperations = {
                     doOperations: [],
                     undoOperations: [],
-                    undoContext: lineBreakUndoContext,
+                    undoContext,
                 };
             }
             lineBreakUndoContext = undefined;
+            forwardDeleteUndoContext = undefined;
             if (getAVTemplateInteractiveElement(event.target)) {
                 event.stopPropagation();
                 return;
@@ -4204,7 +4212,7 @@ export class WYSIWYG {
                         Constants.TIMEOUT_INPUT, false);
                 } else {
                     this.scheduleInput(() => input(protyle, blockElement, range, true, event,
-                        lineBreakInputOperations));
+                        inputOperations));
                 }
             }
             event.stopPropagation();

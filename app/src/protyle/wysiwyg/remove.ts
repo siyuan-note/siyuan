@@ -995,7 +995,8 @@ export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Ra
 
 export const removeBlock = async (protyle: IProtyle, blockElement: Element, range: Range,
                                   type: "Delete" | "Backspace" | "remove", skipRefCheck = false,
-                                  restoreSelectionModeAfterZoom = false) => {
+                                  restoreSelectionModeAfterZoom = false,
+                                  undoFocusContext?: Record<string, string>) => {
     const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
     if (selectElements?.length > 0) {
         const selectedTopElement = selectElements.length === 1 ? getTopAloneElement(selectElements[0]) : undefined;
@@ -1772,6 +1773,9 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             data: previousLastElement.outerHTML,
             id: previousId,
         });
+    }
+    if (undoFocusContext && undoOperations[0]) {
+        undoOperations[0].context = undoFocusContext;
     }
     if (parentElement && parentElement.getAttribute("data-type") === "NodeSuperBlock" && getSbChildBlockCount(parentElement) === 1) {
         const sbData = await cancelSB(protyle, parentElement);

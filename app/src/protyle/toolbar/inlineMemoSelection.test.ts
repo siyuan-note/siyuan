@@ -1,6 +1,10 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getFirstSelectedInlineMemoContent, setInlineMemoContentIfMissing} from "./inlineMemoSelection";
+import {
+    getFirstSelectedInlineMemoContent,
+    isExactInlineMemoSelection,
+    setInlineMemoContentIfMissing
+} from "./inlineMemoSelection";
 
 const element = (type: string | null, content?: string, parentElement: HTMLElement | null = null) => {
     const attributes = new Map<string, string>();
@@ -82,5 +86,27 @@ describe("setInlineMemoContentIfMissing", () => {
         setInlineMemoContentIfMissing(memoElement);
 
         assert.equal(memoElement.hasAttribute("data-inline-memo-content"), false);
+    });
+});
+
+describe("isExactInlineMemoSelection", () => {
+    it("recognizes matching selection boundaries", () => {
+        const selectedRange = {} as Range;
+        const memoRange = {selectNodeContents: (): void => undefined} as unknown as Range;
+        const memoElement = element("inline-memo", "111");
+        Object.defineProperty(memoElement, "ownerDocument", {value: {createRange: () => memoRange}});
+
+        assert.equal(isExactInlineMemoSelection(selectedRange, memoElement, currentRange =>
+            currentRange === selectedRange ? {start: 3, end: 6} : {start: 3, end: 6}), true);
+    });
+
+    it("does not compare equal text selected from different boundaries", () => {
+        const selectedRange = {} as Range;
+        const memoRange = {selectNodeContents: (): void => undefined} as unknown as Range;
+        const memoElement = element("inline-memo", "111");
+        Object.defineProperty(memoElement, "ownerDocument", {value: {createRange: () => memoRange}});
+
+        assert.equal(isExactInlineMemoSelection(selectedRange, memoElement, currentRange =>
+            currentRange === selectedRange ? {start: 4, end: 7} : {start: 3, end: 6}), false);
     });
 });

@@ -1,8 +1,10 @@
 import {ToolbarItem} from "./ToolbarItem";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
-import {getSemanticInlineVisibleText, stripSemanticMarkersFromRangeText} from "../util/inlineElementMarker";
+import {stripSemanticMarkersFromRangeText} from "../util/inlineElementMarker";
 import {Constants} from "../../constants";
-import {getFirstSelectedInlineMemoContent} from "./inlineMemoSelection";
+import {getFirstSelectedInlineMemoContent, isExactInlineMemoSelection} from "./inlineMemoSelection";
+import {getContenteditableElement} from "../wysiwyg/getBlock";
+import {getSelectionOffset} from "../util/selection";
 
 export class InlineMemo extends ToolbarItem {
     public element: HTMLElement;
@@ -21,7 +23,9 @@ export class InlineMemo extends ToolbarItem {
             const memoElement = hasClosestByAttribute(range.startContainer, "data-type", "inline-memo");
             const memoContent = getFirstSelectedInlineMemoContent(range);
             const selectedText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
-            if (memoElement && getSemanticInlineVisibleText(memoElement) === selectedText) {
+            const editableElement = memoElement && getContenteditableElement(nodeElement, range.startContainer);
+            if (memoElement && editableElement && isExactInlineMemoSelection(range, memoElement, currentRange =>
+                getSelectionOffset(editableElement, undefined, currentRange, true))) {
                 // https://github.com/siyuan-note/siyuan/issues/6569
                 protyle.toolbar.showRender(protyle, memoElement);
                 return;

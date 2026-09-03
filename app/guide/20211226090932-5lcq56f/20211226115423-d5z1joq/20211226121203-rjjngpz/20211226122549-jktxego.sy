@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260828200251"
+		"updated": "20260902224242"
 	},
 	"Children": [
 		{
@@ -3979,7 +3979,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20260828200251"
+				"updated": "20260902224242"
 			},
 			"Children": [
 				{
@@ -3994,7 +3994,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-xp1hi60",
-				"updated": "20260828200251"
+				"updated": "20260902224242"
 			},
 			"Children": [
 				{
@@ -4014,7 +4014,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112151141-ggglv0f",
-				"updated": "20260828200251"
+				"updated": "20260902224242"
 			},
 			"Children": [
 				{
@@ -6049,73 +6049,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "切換為編輯模式"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "7"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " / "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥⌘7"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td"
-						}
-					]
-				},
-				{
-					"Type": "NodeTableRow",
-					"Data": "tr",
-					"Children": [
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "切換為預覽模式"
+									"Data": "切換所見即所得和匯出預覽模式"
 								}
 							]
 						},
@@ -6181,7 +6115,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選取/取消選取目前區塊"
+									"Data": "進入或退出區塊選取模式"
 								}
 							]
 						},
@@ -6206,7 +6140,69 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "刪除、剪下或移動區塊後仍保持區塊選取模式，詳見"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260830213256-jbsiw4b",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "選取和操作內容區塊"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "標記或取消標記目前區塊"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "空格"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "僅在區塊選取模式下生效，支援標記不連續的區塊"
+								}
+							]
 						}
 					]
 				},
@@ -6276,7 +6272,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "區塊處於選取狀態時可直接按 "
+									"Data": "處於區塊選取模式時可直接按 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -6353,7 +6349,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "區塊處於選取狀態時可直接按 "
+									"Data": "處於區塊選取模式時可直接按 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -6374,7 +6370,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "退出區塊選取狀態並定位至區塊末尾"
+									"Data": "退出區塊選取模式並定位至區塊末尾"
 								}
 							]
 						},
@@ -6519,7 +6515,13 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "僅支援單個區塊或連續選取的區塊"
+								}
+							]
 						}
 					]
 				},
@@ -6585,7 +6587,13 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "僅支援單個區塊或連續選取的區塊"
+								}
+							]
 						}
 					]
 				},

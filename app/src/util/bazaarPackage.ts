@@ -55,6 +55,38 @@ export const getBazaarCompatibilityFieldVisibility = (packageType: string) => {
     };
 };
 
+type TBazaarFrontendLabels = {
+    all: string;
+    desktop: string;
+    desktopWindow: string;
+    mobile: string;
+    browserDesktop: string;
+    browserMobile: string;
+};
+
+export const getBazaarFrontendLabels = (
+    frontends: string[] | null | undefined,
+    labels: TBazaarFrontendLabels,
+    currentFrontend: string,
+    requireMobileDeclaration = false,
+) => {
+    if (!frontends?.length) {
+        return requireMobileDeclaration && ["mobile", "browser-mobile"].includes(currentFrontend) ?
+            [] : [labels.all];
+    }
+    if (frontends.includes("all")) {
+        return [labels.all];
+    }
+    const localizedLabels: Record<string, string> = {
+        desktop: labels.desktop,
+        "desktop-window": labels.desktopWindow,
+        mobile: labels.mobile,
+        "browser-desktop": labels.browserDesktop,
+        "browser-mobile": labels.browserMobile,
+    };
+    return Array.from(new Set(frontends.map((frontend) => localizedLabels[frontend] || frontend)));
+};
+
 export const isBazaarPackageEnableDisabled = (
     packageType: string,
     item: {disallowInstall?: boolean, installedIncompatible?: boolean, enabled?: boolean, current?: boolean},
@@ -129,11 +161,12 @@ export const getBazaarFundingItems = (funding: IBazaarFunding | null | undefined
         return [];
     }
     return [
-        normalizeBazaarFundingURL(funding.openCollective, "https://opencollective.com/"),
-        normalizeBazaarFundingURL(funding.patreon, "https://www.patreon.com/"),
-        normalizeBazaarFundingURL(funding.github, "https://github.com/sponsors/"),
-        ...(funding.custom || []),
-    ].filter(Boolean);
+        {url: normalizeBazaarFundingURL(funding.openCollective, "https://opencollective.com/")},
+        {url: normalizeBazaarFundingURL(funding.patreon, "https://www.patreon.com/")},
+        {url: normalizeBazaarFundingURL(funding.github, "https://github.com/sponsors/")},
+        ...(funding.custom || []).map((url) => ({url})),
+        ...(funding.links || []).map((link) => ({url: link.url, label: link.label})),
+    ].filter((item) => Boolean(item.url));
 };
 
 export const normalizeBazaarRating = (rating: Partial<IBazaarRating> | null | undefined): IBazaarRating | undefined => {
@@ -299,6 +332,31 @@ export const sortBazaarPackagesByRating = <T extends {
     const updatedResult = (b.item.updated || "").localeCompare(a.item.updated || "");
     return updatedResult || a.index - b.index;
 }).map(({item}) => item);
+
+export const sortBazaarPackages = <T extends {
+    updated: string;
+    downloads: number;
+    ratingAvailable?: boolean;
+    rating?: IBazaarRating;
+}>(packages: T[], sortValue: string): T[] => {
+    if (["4", "5"].includes(sortValue)) {
+        return sortBazaarPackagesByRating(packages, sortValue === "4");
+    }
+    const indexed = packages.map((item, index) => ({item, index}));
+    return indexed.sort((a, b) => {
+        let result = 0;
+        if (sortValue === "0") {
+            result = b.item.updated.localeCompare(a.item.updated);
+        } else if (sortValue === "1") {
+            result = a.item.updated.localeCompare(b.item.updated);
+        } else if (sortValue === "2") {
+            result = b.item.downloads - a.item.downloads;
+        } else if (sortValue === "3") {
+            result = a.item.downloads - b.item.downloads;
+        }
+        return result || a.index - b.index;
+    }).map(({item}) => item);
+};
 
 export const isBazaarPackageRatingLoaded = (
     source: "downloaded" | "updated" | "bazaar",

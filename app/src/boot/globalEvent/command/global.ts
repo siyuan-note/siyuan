@@ -47,7 +47,15 @@ import {adjustEditorFontSize} from "../../../util/editorFontSize";
 import {toggleDockPanel} from "../../../layout/dock/panel";
 /// #endif
 
-export const globalCommand = (command: string, app: App) => {
+const getSelectionText = (range?: Range) => {
+    if (range) {
+        return range.toString();
+    }
+    const selection = document.getSelection();
+    return selection?.rangeCount ? selection.getRangeAt(0).toString() : "";
+};
+
+export const globalCommand = (command: string, app: App, range?: Range) => {
     /// #if MOBILE
     switch (command) {
         case "fileTree":
@@ -101,11 +109,11 @@ export const globalCommand = (command: string, app: App) => {
             openSearch({
                 app,
                 hotkey: Constants.DIALOG_GLOBALSEARCH,
-                key: (getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : document.createRange()).toString()
+                key: getSelectionText(range)
             });
             return true;
         case "stickSearch":
-            openGlobalSearch(app, (getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : document.createRange()).toString(), true);
+            openGlobalSearch(app, getSelectionText(range), true);
             return true;
         case "goBack":
             goBack(app);

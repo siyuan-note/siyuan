@@ -15,6 +15,9 @@ import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {showMessage} from "../../dialog/message";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {getDockHotkey} from "./hotkey";
+import {syncDockBarVisibility} from "./barVisibility";
+
+export {adjustDockPadding} from "./barVisibility";
 
 export const openBacklink = async (options: {
     app: App,
@@ -194,13 +197,13 @@ export const openOutline = async (options: {
 };
 
 export const resetFloatDockSize = () => {
-    if (!window.siyuan.layout.leftDock.pin && window.siyuan.layout.leftDock.layout.element.style.opacity === "1") {
+    if (window.siyuan.layout.leftDock.isFloating() && window.siyuan.layout.leftDock.layout.element.style.opacity === "1") {
         window.siyuan.layout.leftDock.showDock(true);
     }
-    if (!window.siyuan.layout.rightDock.pin && window.siyuan.layout.rightDock.layout.element.style.opacity === "1") {
+    if (window.siyuan.layout.rightDock.isFloating() && window.siyuan.layout.rightDock.layout.element.style.opacity === "1") {
         window.siyuan.layout.rightDock.showDock(true);
     }
-    if (!window.siyuan.layout.bottomDock.pin && window.siyuan.layout.bottomDock.layout.element.style.opacity === "1") {
+    if (window.siyuan.layout.bottomDock.isFloating() && window.siyuan.layout.bottomDock.layout.element.style.opacity === "1") {
         window.siyuan.layout.bottomDock.showDock(true);
     }
 };
@@ -225,16 +228,9 @@ export const toggleDockBar = (useElement: Element) => {
         useElement.setAttribute("xlink:href", "#iconHideDock");
     }
     window.siyuan.config.uiLayout.hideDock = dockIsShow;
-    document.querySelectorAll(".dock").forEach(item => {
-        if (dockIsShow) {
-            item.classList.add("fn__none");
-        } else if (item.querySelector(".dock__item[data-type]")) {
-            item.classList.remove("fn__none");
-        }
-    });
+    syncDockBarVisibility();
     resizeTabs();
     resetFloatDockSize();
-    adjustDockPadding();
     setTabPosition();
 };
 
@@ -294,23 +290,4 @@ export const selectOpenTab = async () => {
         }
     }
     dockFile.toggleModel("file", true);
-};
-
-export const adjustDockPadding = () => {
-    const layoutElement = window.siyuan.layout.layout.children[0].element;
-    if (window.siyuan.layout.leftDock.elements[0].parentElement.classList.contains("fn__none")) {
-        layoutElement.style.marginLeft = "var(--b3-layout-space)";
-    } else {
-        layoutElement.style.marginLeft = "";
-    }
-    if (window.siyuan.layout.rightDock.elements[0].parentElement.classList.contains("fn__none")) {
-        layoutElement.style.marginRight = "var(--b3-layout-space)";
-    } else {
-        layoutElement.style.marginRight = "";
-    }
-    if (window.siyuan.config.appearance.hideStatusBar) {
-        layoutElement.style.marginBottom = "var(--b3-layout-space)";
-    } else {
-        layoutElement.style.marginBottom = "";
-    }
 };

@@ -1,6 +1,29 @@
+import {isRemoteKernel} from "../../util/hostCapabilities";
+
 export const addScriptSync = async (path: string, id: string) => {
     if (document.getElementById(id)) {
         return false;
+    }
+    if (isRemoteKernel()) {
+        return new Promise<boolean>((resolve) => {
+            const scriptElement = document.createElement("script");
+            scriptElement.type = "text/javascript";
+            scriptElement.src = path;
+            scriptElement.async = false;
+            scriptElement.id = id;
+            scriptElement.onload = () => {
+                if (typeof Lute === "undefined") {
+                    // 鸿蒙系统上第一次加载会出现 Lute 未定义的情况，重新载入一次就好了，暂时没找到原因，先这样处理
+                    window.location.reload();
+                }
+                resolve(true);
+            };
+            scriptElement.onerror = () => {
+                scriptElement.remove();
+                resolve(false);
+            };
+            document.head.appendChild(scriptElement);
+        });
     }
     const xhrObj = new XMLHttpRequest();
     xhrObj.open("GET", path, false);
@@ -16,6 +39,7 @@ export const addScriptSync = async (path: string, id: string) => {
         // 鸿蒙系统上第一次加载会出现 Lute 未定义的情况，重新载入一次就好了，暂时没找到原因，先这样处理
         window.location.reload();
     }
+    return true;
 };
 
 export const addScript = (path: string, id: string) => {

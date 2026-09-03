@@ -1,0 +1,314 @@
+{
+	"ID": "20260830213256-jbsiw4b",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260830213256-jbsiw4b",
+		"title": "選取和操作內容區塊",
+		"type": "doc",
+		"updated": "20260903165745"
+	},
+	"Children": [
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-fqbt9c2",
+			"Properties": {
+				"id": "20260830213256-fqbt9c2",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "區塊選取模式讓你無須在每次操作後返回文字編輯，即可使用鍵盤選取和操作內容區塊。淺色外框僅表示目前區塊，只有標記區塊才會包含在多個區塊的選取中。"
+				}
+			]
+		},
+		{
+			"Type": "NodeHeading",
+			"ID": "20260830213256-lp6qpp0",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260830213256-lp6qpp0",
+				"updated": "20260903165745"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "進入和退出區塊選取模式"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-y3gtmf5",
+			"Properties": {
+				"id": "20260830213256-y3gtmf5",
+				"updated": "20260903165745"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "將游標置於任意內容區塊中，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 進入區塊選取模式。跨區塊選取文字後按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可將選取範圍轉換為區塊選取；唯讀模式下同樣適用。按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↓"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 將上一個或下一個區塊設為目前區塊。再次按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可退出並清除所有標記。"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-caiwuf1",
+			"Properties": {
+				"id": "20260830213256-caiwuf1",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "對於可編輯區塊，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可退出並將游標定位至目前區塊末尾。輸入其他文字也會退出模式並編輯目前區塊。在此模式下，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "A"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 會在目前區塊後插入區塊，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "B"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 會在目前區塊前插入區塊。需要將這兩個字母作為文字輸入時，請先退出區塊選取模式。"
+				}
+			]
+		},
+		{
+			"Type": "NodeHeading",
+			"ID": "20260830213256-00a3xlr",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260830213256-00a3xlr",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "標記區塊並確定操作對象"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-mw51eoh",
+			"Properties": {
+				"id": "20260830213256-mw51eoh",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "空格"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 標記或取消標記目前區塊，標記後目前區塊不會切換。使用方向鍵切換目前區塊並重複上述操作，可以標記任意數量的區塊，包括不連續的區塊。使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↓"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可以形成連續選取。"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-i8phbor",
+			"Properties": {
+				"id": "20260830213256-i8phbor",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "存在標記區塊時，複製、刪除、剪下和移動等操作僅套用至標記區塊，未標記的目前區塊不會被自動包含。沒有標記區塊時，目前區塊就是操作對象。"
+				}
+			]
+		},
+		{
+			"Type": "NodeHeading",
+			"ID": "20260830213256-pi0f512",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260830213256-pi0f512",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "刪除和移動區塊"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-lm1fi7o",
+			"Properties": {
+				"id": "20260830213256-lm1fi7o",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "沒有標記區塊時，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Delete"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Backspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 都會刪除目前區塊。存在標記區塊時，這兩個按鍵都會刪除所有標記區塊。如果目前區塊被刪除，前者會將下一個剩餘區塊設為目前區塊，後者會在可用時將上一個剩餘區塊設為目前區塊；未被刪除的目前區塊會保持不變。"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-o13wude",
+			"Properties": {
+				"id": "20260830213256-o13wude",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "單個區塊或連續選取的區塊可以使用相應的區塊命令向上或向下移動。不連續的標記區塊不能直接上下重新排序，但可以使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "移動"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 功能將它們一起移到另一個文件。"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-6v240bs",
+			"Properties": {
+				"id": "20260830213256-6v240bs",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "刪除、剪下或移動區塊後，區塊選取模式會保持啟用，可以繼續選取和操作內容區塊。"
+				}
+			]
+		}
+	]
+}

@@ -14,12 +14,18 @@ import type {App} from "../index";
 import {isBrowserRenderableImagePath} from "../util/imageURL";
 import {
     DEFAULT_ASSET_OPEN,
+    resolveAvailableAssetOpenAction,
     resolveAssetOpenAction,
     resolveExecutableAssetOpenAction,
 } from "./assetOpen";
 import {emitOpenAsset, emitOpenLink, resolveOpenLinkEvent} from "./openLinkEvent";
+import {resolvePdfAssetLink} from "./pdfAssetLink";
+import {canOpenExternalURL, getHostCapabilities} from "../util/hostCapabilities";
 /// #if !MOBILE
 import {openAssetNewWindow} from "../window/openNewWindow";
+/// #endif
+/// #if MOBILE
+import {openMobilePDF} from "../mobile/pdf";
 /// #endif
 
 const isPreviewableAsset = (assetPath: string) => {
@@ -38,10 +44,10 @@ export const openAssetByAction = (
     /// #if MOBILE
     openByMobile(assetPath);
     /// #else
-    const resolvedAction = resolveExecutableAssetOpenAction(action, {
+    const resolvedAction = resolveAvailableAssetOpenAction(resolveExecutableAssetOpenAction(action, {
         previewable: isPreviewableAsset(assetPath),
         noSplitScreen: window.siyuan.config.fileTree.noSplitScreenWhenOpenTab,
-    });
+    }), getHostCapabilities().localFileSystem);
     if (resolvedAction === "current") {
         openAsset(app, assetPath, page);
     } else if (resolvedAction === "right") {
@@ -77,12 +83,12 @@ export const openLink = (app: App, aLink: string, event?: MouseEvent, ctrlIsPres
     const originalLinkAddress = linkAddress;
     const isAsset = linkAddress.startsWith("assets/");
     let pdfParams;
-    if (isLocalPath(linkAddress) && !linkAddress.startsWith("file://") && linkAddress.indexOf(".pdf") > -1) {
-        const pdfAddress = linkAddress.split("/");
-        if (pdfAddress.length === 3 && pdfAddress[0] === "assets" && pdfAddress[1].endsWith(".pdf") && /\d{14}-\w{7}/.test(pdfAddress[2])) {
-            linkAddress = `assets/${pdfAddress[1]}`;
-            pdfParams = pdfAddress[2];
-        } else {
+    if (isLocalPath(linkAddress) && !linkAddress.startsWith("file://")) {
+        if (linkAddress.startsWith("assets/")) {
+            const resolvedPdfLink = resolvePdfAssetLink(linkAddress);
+            linkAddress = resolvedPdfLink.linkAddress;
+            pdfParams = resolvedPdfLink.pdfParams;
+        } else if (linkAddress.toLowerCase().indexOf(".pdf") > -1) {
             pdfParams = parseInt(getSearch("page", linkAddress));
             linkAddress = linkAddress.split("?page")[0];
         }
@@ -99,17 +105,19 @@ export const openLink = (app: App, aLink: string, event?: MouseEvent, ctrlIsPres
             ctrlKey: ctrlIsPressed,
         },
     );
-    let action = resolveExecutableAssetOpenAction(configuredAction, {
+    let action = resolveAvailableAssetOpenAction(resolveExecutableAssetOpenAction(configuredAction, {
         previewable: isPreviewableAsset(linkAddress),
         noSplitScreen: window.siyuan.config.fileTree.noSplitScreenWhenOpenTab,
-    });
+    }), getHostCapabilities().localFileSystem);
     /// #if BROWSER
     if (action === "folder" || action === "new-window") {
         action = "app";
     }
     /// #endif
     /// #if MOBILE
-    action = "app";
+    const isInternalMobilePdf = linkAddress.startsWith("assets/") &&
+        getAssetExtension(linkAddress).toLowerCase() === ".pdf";
+    action = isInternalMobilePdf ? "current" : "app";
     /// #endif
     const openLinkEvent = resolveOpenLinkEvent({
         href: linkAddress,
@@ -132,12 +140,19 @@ export const openLink = (app: App, aLink: string, event?: MouseEvent, ctrlIsPres
         return;
     }
     /// #if MOBILE
-    openByMobile(linkAddress);
+    if (isInternalMobilePdf) {
+        openMobilePDF(linkAddress, pdfParams);
+    } else {
+        openByMobile(linkAddress);
+    }
     /// #else
     if (isLocalPath(linkAddress)) {
         openAssetByAction(app, linkAddress, pdfParams, action);
     } else if (linkAddress) {
         /// #if !BROWSER
+        if (!canOpenExternalURL(linkAddress)) {
+            return;
+        }
         shell.openExternal(linkAddress).catch((e) => {
             showMessage(e);
         });
@@ -153,6 +168,9 @@ export const openByMobile = (uri: string) => {
         return;
     }
     if (processSiYuanUri(window.siyuan.ws.app, uri)) {
+        return;
+    }
+    if (!canOpenExternalURL(uri)) {
         return;
     }
     if (isInIOS()) {

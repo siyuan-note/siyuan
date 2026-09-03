@@ -176,6 +176,137 @@ func isSYNotebookExport(hasBoxConf, hasBoxDocMeta bool) bool {
 	return hasBoxConf || hasBoxDocMeta
 }
 
+type importedSYSortDoc struct {
+	oldID      string
+	newID      string
+	sourcePath string
+	hidden     bool
+}
+
+func importedSYRootIDs(importedDocs []*importedSYSortDoc) (ret []string) {
+	for _, doc := range importedDocs {
+		if nil == doc || doc.hidden || "/" != path.Dir(doc.sourcePath) {
+			continue
+		}
+		ret = append(ret, doc.newID)
+	}
+	sort.Strings(ret)
+	return
+}
+
+func importedTreeRootIDs(trees []*parse.Tree, parentPath string) (ret []string) {
+	for _, tree := range trees {
+		if nil == tree || parentPath != path.Dir(tree.Path) {
+			continue
+		}
+		ret = append(ret, tree.ID)
+	}
+	sort.Strings(ret)
+	return
+}
+
+func pushDocsImported(boxID, parentPath, format string, rootIDs []string) {
+	if 1 > len(rootIDs) {
+		return
+	}
+	util.BroadcastByType("main", "docsImported", 0, "", map[string]any{
+		"notebook":   boxID,
+		"parentPath": parentPath,
+		"rootIDs":    rootIDs,
+		"format":     format,
+	})
+}
+
+func buildImportedSYSortValues(importedDocs []*importedSYSortDoc, sourceSortIDs map[string]int,
+	existingRootIDs []string, createDocAtTop bool) map[string]int {
+	groups := map[string][]*importedSYSortDoc{}
+	for _, doc := range importedDocs {
+		if nil == doc || doc.hidden {
+			continue
+		}
+		parentPath := path.Dir(doc.sourcePath)
+		groups[parentPath] = append(groups[parentPath], doc)
+	}
+
+	for _, docs := range groups {
+		sort.Slice(docs, func(i, j int) bool {
+			leftSort, rightSort := sourceSortIDs[docs[i].oldID], sourceSortIDs[docs[j].oldID]
+			if leftSort != rightSort {
+				return leftSort < rightSort
+			}
+			leftCreated, rightCreated := util.TimeFromID(docs[i].oldID), util.TimeFromID(docs[j].oldID)
+			if leftCreated != rightCreated {
+				return leftCreated > rightCreated
+			}
+			return docs[i].oldID < docs[j].oldID
+		})
+	}
+
+	sortValues := map[string]int{}
+	for _, docs := range groups {
+		for sortValue, doc := range docs {
+			sortValues[doc.newID] = sortValue
+		}
+	}
+
+	rootDocs := groups["/"]
+	rootIDs := make([]string, 0, len(rootDocs))
+	for _, doc := range rootDocs {
+		rootIDs = append(rootIDs, doc.newID)
+	}
+	orderedRootIDs := make([]string, 0, len(rootIDs)+len(existingRootIDs))
+	if createDocAtTop {
+		orderedRootIDs = append(orderedRootIDs, rootIDs...)
+		orderedRootIDs = append(orderedRootIDs, existingRootIDs...)
+	} else {
+		orderedRootIDs = append(orderedRootIDs, existingRootIDs...)
+		orderedRootIDs = append(orderedRootIDs, rootIDs...)
+	}
+	for sortValue, id := range orderedRootIDs {
+		sortValues[id] = sortValue
+	}
+	return sortValues
+}
+
+func applyImportedSYSort(boxID, targetPath string, importedDocs []*importedSYSortDoc, sourceSortIDs map[string]int) error {
+	if 1 > len(importedDocs) {
+		return nil
+	}
+
+	fileTreeSortLock.Lock()
+	defer fileTreeSortLock.Unlock()
+
+	confPath := filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")
+	fullSortIDs, err := readSortConfMap(confPath)
+	if nil != err {
+		return err
+	}
+	existingIDs, err := loadSiblingCustomOrder(boxID, targetPath, fullSortIDs)
+	if nil != err {
+		return err
+	}
+	importedIDs := map[string]struct{}{}
+	for _, doc := range importedDocs {
+		if nil != doc {
+			importedIDs[doc.newID] = struct{}{}
+		}
+	}
+	existingRootIDs := make([]string, 0, len(existingIDs))
+	for _, id := range existingIDs {
+		if _, imported := importedIDs[id]; !imported {
+			existingRootIDs = append(existingRootIDs, id)
+		}
+	}
+
+	createDocAtTop := nil != Conf.FileTree.CreateDocAtTop && *Conf.FileTree.CreateDocAtTop
+	sortValues := buildImportedSYSortValues(importedDocs, sourceSortIDs, existingRootIDs, createDocAtTop)
+	if 1 > len(sortValues) {
+		return nil
+	}
+	maps.Copy(fullSortIDs, sortValues)
+	return writeSortConfMap(confPath, fullSortIDs)
+}
+
 func importSY(zipPath, boxID, toPath string, createNotebook, autoDetect bool) (createdBoxID string, err error) {
 	return importSY0(zipPath, boxID, toPath, createNotebook, autoDetect, nil, false)
 }
@@ -289,8 +420,9 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		}
 		createNotebook = notebookExport
 	}
-	if !createNotebook && notebookExport {
-		err = errors.New(Conf.Language(373))
+	if !createNotebook && len(syPaths) < 1 {
+		logging.LogErrorf("invalid .sy.zip without documents [unzipRootPath=%s]", unzipRootPath)
+		err = errors.New(Conf.Language(199))
 		return
 	}
 	if autoDetect && !createNotebook && boxID == "" {
@@ -352,6 +484,7 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		blockIDs = map[string]string{}
 	}
 	trees := map[string]*parse.Tree{}
+	var importedSortDocs []*importedSYSortDoc
 	importedBoxDoc := false
 	containsFlashcardAttrs := false
 
@@ -410,6 +543,12 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		} else if oldRootID == importedBoxDocID {
 			removeBoxDocHiddenAttr(tree)
 		}
+		importedSortDocs = append(importedSortDocs, &importedSYSortDoc{
+			oldID:      oldRootID,
+			newID:      tree.ID,
+			sourcePath: tree.Path,
+			hidden:     createNotebook && oldRootID == importedBoxDocID,
+		})
 		trees[tree.ID] = tree
 		util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), fmt.Sprintf("%d/%d", i+1, len(syPaths))))
 	}
@@ -690,48 +829,15 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		tree.Path = finalRelPath
 	}
 
-	// 合并 sort.json
-	fullSortIDs := map[string]int{}
-	sortIDs := map[string]int{}
-	var sortData []byte
+	// 读取包内自定义排序，复制成功后根据目标位置重新编号
+	sourceSortIDs := map[string]int{}
 	var sortErr error
 	sortPath := filepath.Join(unzipRootPath, ".siyuan", "sort.json")
 	if filelock.IsExist(sortPath) {
-		sortData, sortErr = filelock.ReadFile(sortPath)
+		sourceSortIDs, sortErr = readSortConfMap(sortPath)
 		if nil != sortErr {
 			logging.LogErrorf("read import sort conf failed: %s", sortErr)
-		}
-
-		if sortErr = gulu.JSON.UnmarshalJSON(sortData, &sortIDs); nil != sortErr {
-			logging.LogErrorf("unmarshal sort conf failed: %s", sortErr)
-		}
-
-		boxSortPath := filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")
-		if filelock.IsExist(boxSortPath) {
-			sortData, sortErr = filelock.ReadFile(boxSortPath)
-			if nil != sortErr {
-				logging.LogErrorf("read box sort conf failed: %s", sortErr)
-			}
-
-			if sortErr = gulu.JSON.UnmarshalJSON(sortData, &fullSortIDs); nil != sortErr {
-				logging.LogErrorf("unmarshal box sort conf failed: %s", sortErr)
-			}
-		}
-
-		for oldID, sort := range sortIDs {
-			if newID := blockIDs[oldID]; "" != newID {
-				fullSortIDs[newID] = sort
-			}
-		}
-
-		sortData, sortErr = gulu.JSON.MarshalJSON(fullSortIDs)
-		if nil != sortErr {
-			logging.LogErrorf("marshal box full sort conf failed: %s", sortErr)
-		} else {
-			sortErr = filelock.WriteFile(boxSortPath, sortData)
-			if nil != sortErr {
-				logging.LogErrorf("write box full sort conf failed: %s", sortErr)
-			}
+			sourceSortIDs = map[string]int{}
 		}
 		if removeErr := os.RemoveAll(sortPath); nil != removeErr {
 			logging.LogErrorf("remove temp sort conf failed: %s", removeErr)
@@ -938,8 +1044,14 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		sql.IndexTreeQueue(tree)
 		util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), tree.Root.IALAttr("title")))
 	}
+	if sortErr = applyImportedSYSort(boxID, baseTargetPath, importedSortDocs, sourceSortIDs); nil != sortErr {
+		logging.LogErrorf("apply imported document sort failed: %s", sortErr)
+	}
 
 	IncSync()
+	if !createNotebook {
+		pushDocsImported(boxID, baseTargetPath, "sy", importedSYRootIDs(importedSortDocs))
+	}
 
 	task.AppendTask(task.UpdateIDs, util.PushUpdateIDs, blockIDs)
 	return
@@ -1653,6 +1765,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 		importTrees = append(importTrees, tree)
 	}
 
+	var importedRootIDs []string
 	if 0 < len(importTrees) {
 		for id, newID := range moveIDs {
 			for _, importTree := range importTrees {
@@ -1675,6 +1788,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 		refreshBoxDocInfoByBoxID(boxID)
 		util.PushClearProgress()
 
+		importedRootIDs = importedTreeRootIDs(importTrees, baseTargetPath)
 		importTrees = []*parse.Tree{}
 		searchLinks = map[string]string{}
 
@@ -1713,10 +1827,11 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 				sortVal++
 			}
 		}
-		box.setSort(sortIDVals)
+		box.setImportSort(sortIDVals)
 	}
 
 	IncSync()
+	pushDocsImported(boxID, baseTargetPath, "markdown", importedRootIDs)
 	debug.FreeOSMemory()
 	return
 }

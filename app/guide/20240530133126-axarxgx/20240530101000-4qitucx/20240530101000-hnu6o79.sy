@@ -8,7 +8,7 @@
 		"id": "20240530101000-hnu6o79",
 		"title": "エディタ",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260830213256"
 	},
 	"Children": [
 		{
@@ -188,6 +188,23 @@
 					"TextMarkBlockRefID": "20240530101000-3qhz7br",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "書式要素"
+				}
+			]
+		},
+		{
+			"ID": "20260830213256-frho5s0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830213256-frho5s0",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260830213256-014vk79",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "ブロックの選択と操作"
 				}
 			]
 		},

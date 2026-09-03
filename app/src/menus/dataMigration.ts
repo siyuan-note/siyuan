@@ -15,6 +15,7 @@ import {ipcRenderer} from "electron";
 import * as path from "path";
 import {afterExport} from "../protyle/export/util";
 /// #endif
+import {getHostCapabilities} from "../util/hostCapabilities";
 
 interface IDataMigrationOptions {
     mode?: "manage" | "onboarding";
@@ -83,6 +84,9 @@ const exportData = async () => {
 };
 
 export const openDataMigration = (options: IDataMigrationOptions = {}) => {
+    if (!getHostCapabilities().importExport) {
+        return;
+    }
     const mode = options.mode || "manage";
     const hasRepoKey = Boolean(window.siyuan.config.repo.key);
     const helpNotebookIDs = Object.values(Constants.HELP_PATH);

@@ -18,6 +18,7 @@ package tools
 
 import (
 	"fmt"
+	"path"
 	"strings"
 
 	"github.com/88250/lute/ast"
@@ -271,11 +272,24 @@ func documentSearchDocs(args map[string]any) (CallToolResult, error) {
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Documents matching '%s' (%d):\n\n", keyword, len(docs)))
+	sb.WriteString(fmt.Sprintf("Search results matching '%s' (%d):\n\n", keyword, len(docs)))
 	for _, d := range docs {
-		sb.WriteString(fmt.Sprintf("- %s (id: %s, hPath: %s)\n", d["name"], d["id"], d["hPath"]))
+		typ, id, name := documentSearchDisplayFields(d)
+		if typ == "NOTEBOOK" {
+			sb.WriteString(fmt.Sprintf("- [%s] %s (id: %s, hPath: %s)\n", typ, name, id, d["hPath"]))
+		} else {
+			sb.WriteString(fmt.Sprintf("- [%s] %s (id: %s, notebook: %s, hPath: %s)\n", typ, name, id, d["box"], d["hPath"]))
+		}
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
+}
+
+func documentSearchDisplayFields(doc map[string]string) (typ, id, name string) {
+	hPath := strings.TrimSuffix(doc["hPath"], "/")
+	if doc["path"] == "/" {
+		return "NOTEBOOK", doc["box"], path.Base(hPath)
+	}
+	return "DOCUMENT", strings.TrimSuffix(path.Base(doc["path"]), ".sy"), path.Base(hPath)
 }
 
 func documentInfo(args map[string]any) (CallToolResult, error) {
@@ -306,9 +320,7 @@ func documentInfo(args map[string]any) (CallToolResult, error) {
 	if len(info.IAL) > 0 {
 		sb.WriteString("\nIAL:")
 		for k, v := range info.IAL {
-			if len(v) > 100 {
-				v = v[:100] + "..."
-			}
+			v = truncateText(v, 100)
 			sb.WriteString(fmt.Sprintf("\n  %s: %s", k, v))
 		}
 	}

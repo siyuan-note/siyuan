@@ -7,6 +7,11 @@ import {encodeBase64, writeText} from "../util/compatibility";
 import {removeZWJ} from "../util/normalizeText";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {openGlobalSearch} from "../../search/util";
+import {
+    buildSemanticInlineHTML,
+    getSemanticInlineVisibleText,
+    transformSemanticInlineHTML
+} from "../util/inlineElementMarker";
 
 interface IOpenDocTagMenuOptions {
     protyle: IProtyle;
@@ -17,7 +22,8 @@ interface IOpenDocTagMenuOptions {
 }
 
 const copyTag = async (protyle: IProtyle, tag: string) => {
-    const textSiyuan = `<span data-type="tag">${Constants.ZWSP}${Lute.EscapeHTMLStr(tag)}</span>`;
+    const canonicalHTML = buildSemanticInlineHTML("tag", Lute.EscapeHTMLStr(tag));
+    const textSiyuan = transformSemanticInlineHTML(canonicalHTML, "legacy");
     const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${removeZWJ(protyle.lute.BlockDOM2HTML(textSiyuan))}`;
     try {
         await navigator.clipboard.write([
@@ -33,7 +39,7 @@ const copyTag = async (protyle: IProtyle, tag: string) => {
 
 export const openDocTagMenu = (options: IOpenDocTagMenuOptions) => {
     window.siyuan.menus.menu.remove();
-    const tagName = options.tagElement.textContent.trim();
+    const tagName = getSemanticInlineVisibleText(options.tagElement).trim();
     let inputElement: HTMLInputElement;
     let skipUpdate = false;
     window.siyuan.menus.menu.removeCB = () => {

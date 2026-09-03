@@ -1,6 +1,6 @@
 export type TCaretVerticalDirection = "up" | "down";
 
-interface ICaretScrollGeometry {
+export interface ICaretScrollGeometry {
     caretTop: number;
     caretHeight: number;
     viewportTop: number;
@@ -8,6 +8,21 @@ interface ICaretScrollGeometry {
     lineHeight: number;
     surroundingLines: number;
 }
+
+export const getCaretOverflowDirection = (geometry: Pick<ICaretScrollGeometry,
+    "caretTop" | "caretHeight" | "viewportTop" | "viewportHeight">): TCaretVerticalDirection | undefined => {
+    if (geometry.viewportHeight <= 0 || !Number.isFinite(geometry.caretTop) ||
+        !Number.isFinite(geometry.viewportTop)) {
+        return;
+    }
+    if (geometry.caretTop < geometry.viewportTop) {
+        return "up";
+    }
+    const caretBottom = geometry.caretTop + Math.max(0, geometry.caretHeight);
+    if (caretBottom > geometry.viewportTop + geometry.viewportHeight) {
+        return "down";
+    }
+};
 
 export const getCaretScrollDelta = (geometry: ICaretScrollGeometry, direction: TCaretVerticalDirection) => {
     if (geometry.surroundingLines <= 0 || geometry.viewportHeight <= 0 || geometry.lineHeight <= 0) {

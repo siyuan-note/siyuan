@@ -140,8 +140,8 @@ export const getSortsHTML = (columns: IAVColumn[], sorts: IAVSort[]) => {
         const valueSourceHTML = column?.type !== "template" && (column?.renderTemplate?.trim() || item.valueSource === "rendered") ? `
     <span class="fn__space"></span>
     <select class="b3-select" data-type="sortValueSource" style="margin: 4px 0">
-        <option value="stored" ${item.valueSource !== "rendered" ? "selected" : ""}>${window.siyuan.languages.original}</option>
-        <option value="rendered" ${item.valueSource === "rendered" ? "selected" : ""}>${window.siyuan.languages.template}</option>
+        <option value="stored" ${item.valueSource !== "rendered" ? "selected" : ""}>${window.siyuan.languages.originalValue}</option>
+        <option value="rendered" ${item.valueSource === "rendered" ? "selected" : ""}>${window.siyuan.languages.templateRenderedValue}</option>
     </select>` : "";
         const dateEndpointHTML = column?.type === "date" && item.valueSource !== "rendered" ? `
     <span class="fn__space"></span>

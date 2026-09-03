@@ -3,6 +3,7 @@ import {resetAVRowSelect} from "../render/av/virtualScroll";
 import {hasClosestByClassName} from "./hasClosest";
 import {Constants} from "../../constants";
 import {clearAVCellSelectionState, clearAVItemSelectionState} from "../render/av/selectionState";
+import {BLOCK_SELECTION_MODE_CLASS} from "../wysiwyg/blockSelection";
 
 const getAVElements = (element: Element) => {
     const elements: HTMLElement[] = [];
@@ -34,7 +35,10 @@ const clearViewState = (element: Element) => {
 
 export const clearBlockElement = (element: Element, keepRefcount = false) => {
     clearViewState(element);
-    element.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
+    element.classList.remove("protyle-wysiwyg--select", BLOCK_SELECTION_MODE_CLASS, "protyle-wysiwyg--hl");
+    element.querySelectorAll(`.${BLOCK_SELECTION_MODE_CLASS}`).forEach(item => {
+        item.classList.remove(BLOCK_SELECTION_MODE_CLASS);
+    });
     element.removeAttribute(Constants.CUSTOM_RIFF_DECKS);
     if (!keepRefcount) {
         element.removeAttribute("refcount");

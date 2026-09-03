@@ -114,6 +114,7 @@ const setLute = (options: ILuteOptions) => {
     lute.SetTag(true);
     lute.SetSuperBlock(true);
     lute.SetCallout(true);
+    lute.SetCustomBlock(true);
     applyLuteMarkdownSyntax(lute, window.siyuan.config.editor.markdown);
     lute.SetSpin(true);
     lute.SetProtyleWYSIWYG(true);

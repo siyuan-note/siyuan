@@ -1,6 +1,6 @@
 import {strict as assert} from "node:assert";
 import {describe, it} from "node:test";
-import {getCaretScrollDelta} from "./caretScrollCore";
+import {getCaretOverflowDirection, getCaretScrollDelta} from "./caretScrollCore";
 
 const geometry = {
     caretTop: 100,
@@ -40,5 +40,21 @@ describe("getCaretScrollDelta", () => {
         const offsetViewport = {...geometry, caretTop: 120, viewportTop: 100};
         assert.equal(getCaretScrollDelta(offsetViewport, "up"), -20);
         assert.equal(getCaretScrollDelta({...offsetViewport, caretTop: 250}, "down"), 10);
+    });
+});
+
+describe("getCaretOverflowDirection", () => {
+    it("returns the edge crossed by the caret", () => {
+        assert.equal(getCaretOverflowDirection({...geometry, caretTop: -1}), "up");
+        assert.equal(getCaretOverflowDirection({...geometry, caretTop: 181}), "down");
+    });
+
+    it("does not return a direction while the caret is visible", () => {
+        assert.equal(getCaretOverflowDirection({...geometry, caretTop: 0}), undefined);
+        assert.equal(getCaretOverflowDirection({...geometry, caretTop: 180}), undefined);
+    });
+
+    it("ignores an invalid viewport", () => {
+        assert.equal(getCaretOverflowDirection({...geometry, viewportHeight: 0}), undefined);
     });
 });

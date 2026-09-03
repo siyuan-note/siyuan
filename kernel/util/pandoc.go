@@ -120,6 +120,10 @@ func GetPandocRuntime() PandocRuntime {
 }
 
 func InitPandoc(customPandocBinPath string) {
+	initPandoc(customPandocBinPath, getPandocVer)
+}
+
+func initPandoc(customPandocBinPath string, getVersion func(string) string) {
 	if ContainerStd != Container {
 		return
 	}
@@ -150,12 +154,13 @@ func InitPandoc(customPandocBinPath string) {
 	}
 
 	tempPandocDir := filepath.Join(TempDir, "pandoc")
-	installedPandocBinPath := pandocBinPath(filepath.Join(WorkingDir, "pandoc"))
-	installedPandocVer := getPandocVer(installedPandocBinPath)
+	installedPandocDir := filepath.Join(WorkingDir, "pandoc")
+	installedPandocBinPath := pandocBinPath(installedPandocDir)
+	installedPandocVer := getVersion(installedPandocBinPath)
 
 	customPandocBinPath = strings.TrimSpace(customPandocBinPath)
 	if "" != customPandocBinPath && !isPathWithin(tempPandocDir, customPandocBinPath) {
-		if pandocVer := getPandocVer(customPandocBinPath); "" != pandocVer {
+		if pandocVer := getVersion(customPandocBinPath); "" != pandocVer {
 			runtimeState.BinPath = customPandocBinPath
 			logging.LogInfof("custom pandoc [ver=%s, bin=%s]", pandocVer, runtimeState.BinPath)
 			removeLegacyPandocDir(tempPandocDir)
@@ -171,7 +176,52 @@ func InitPandoc(customPandocBinPath string) {
 	}
 
 	removeLegacyPandocDir(tempPandocDir)
-	logging.LogErrorf("built-in pandoc executable [%s] is unavailable", installedPandocBinPath)
+	pandocZip := pandocZipPath(installedPandocDir, runtime.GOOS, runtime.GOARCH)
+	if "" == pandocZip || !gulu.File.IsExist(pandocZip) {
+		logging.LogErrorf("built-in pandoc executable [%s] is unavailable", installedPandocBinPath)
+		return
+	}
+
+	if err := gulu.Zip.Unzip(pandocZip, installedPandocDir); err != nil {
+		logging.LogErrorf("unzip built-in pandoc [%s] failed: %s", pandocZip, err)
+		return
+	}
+	if (gulu.OS.IsDarwin() || gulu.OS.IsLinux()) && "" != installedPandocBinPath {
+		if err := os.Chmod(installedPandocBinPath, 0755); err != nil {
+			logging.LogErrorf("set built-in pandoc executable [%s] permission failed: %s", installedPandocBinPath, err)
+			return
+		}
+	}
+
+	installedPandocVer = getVersion(installedPandocBinPath)
+	if "" == installedPandocVer {
+		logging.LogErrorf("initialized built-in pandoc executable [%s] is invalid", installedPandocBinPath)
+		return
+	}
+	runtimeState.BinPath = installedPandocBinPath
+	logging.LogInfof("initialized built-in pandoc [ver=%s, bin=%s]", installedPandocVer, runtimeState.BinPath)
+}
+
+func pandocZipPath(pandocDir, goos, goarch string) string {
+	name := ""
+	switch goos {
+	case "windows":
+		if "amd64" == goarch {
+			name = "pandoc-windows-amd64.zip"
+		}
+	case "darwin":
+		if "amd64" == goarch || "arm64" == goarch {
+			name = "pandoc-darwin-" + goarch + ".zip"
+		}
+	case "linux":
+		if "amd64" == goarch || "arm64" == goarch {
+			name = "pandoc-linux-" + goarch + ".zip"
+		}
+	}
+	if "" == name {
+		return ""
+	}
+	return filepath.Join(pandocDir, name)
 }
 
 func pandocBinPath(pandocDir string) string {

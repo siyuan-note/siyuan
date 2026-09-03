@@ -1,3 +1,5 @@
+import {getHostCapabilities} from "./hostCapabilities";
+
 const CONTAINER_BACKEND_SET = new Set(["docker", "ios", "android", "harmony"]);
 
 export const isKernelInContainer = (): boolean => {
@@ -86,6 +88,9 @@ export const isValidCustomAttrName = (name: string) => {
 
 // REF https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/eval
 export const looseJsonParse = (text: string) => {
+    if (getHostCapabilities().remoteKernel) {
+        return JSON.parse(text);
+    }
     return Function(`"use strict";return (${text})`)();
 };
 

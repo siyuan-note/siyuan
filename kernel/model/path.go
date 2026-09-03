@@ -34,6 +34,15 @@ import (
 )
 
 func createDocsByHPath(boxID, hPath, content, parentID, id string, titleEmpty bool) (retID string, err error) {
+	return createDocsByHPath0(boxID, hPath, content, parentID, id, titleEmpty, createDoc)
+}
+
+func createDocsByHPathSync(boxID, hPath, content, parentID, id string, titleEmpty bool) (retID string, err error) {
+	return createDocsByHPath0(boxID, hPath, content, parentID, id, titleEmpty, createDocSync)
+}
+
+func createDocsByHPath0(boxID, hPath, content, parentID, id string, titleEmpty bool,
+	createDocFn func(boxID, p, title, dom string, titleEmpty bool) (*parse.Tree, error)) (retID string, err error) {
 	if "" == id {
 		id = ast.NewNodeID()
 	}
@@ -53,7 +62,7 @@ func createDocsByHPath(boxID, hPath, content, parentID, id string, titleEmpty bo
 		if nil != preferredParent && preferredParent.RootID == parentID {
 			// 如果父文档存在且 ID 一致，则直接在父文档下创建
 			p := strings.TrimSuffix(preferredParent.Path, ".sy") + "/" + id + ".sy"
-			if _, err = createDoc(boxID, p, name, content, titleEmpty); err != nil {
+			if _, err = createDocFn(boxID, p, name, content, titleEmpty); err != nil {
 				logging.LogErrorf("create doc [%s] failed: %s", p, err)
 			}
 			return
@@ -99,11 +108,11 @@ func createDocsByHPath(boxID, hPath, content, parentID, id string, titleEmpty bo
 			pathBuilder.WriteString(rootID)
 			docP := pathBuilder.String() + ".sy"
 			if isNotLast {
-				if _, err = createDoc(boxID, docP, part, "", false); err != nil {
+				if _, err = createDocFn(boxID, docP, part, "", false); err != nil {
 					return
 				}
 			} else {
-				if _, err = createDoc(boxID, docP, part, content, titleEmpty); err != nil {
+				if _, err = createDocFn(boxID, docP, part, content, titleEmpty); err != nil {
 					return
 				}
 			}

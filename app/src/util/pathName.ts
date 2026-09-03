@@ -18,8 +18,12 @@ import {Menu} from "../plugin/Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {mergePathSegments} from "./mergePathSegments";
 import {expandFileTree} from "../layout/dock/fileTreeAnimation";
+import {getHostCapabilities} from "./hostCapabilities";
 
 export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string) => {
+    if (!getHostCapabilities().localFileSystem) {
+        return;
+    }
     /// #if !BROWSER
     ipcRenderer.send(Constants.SIYUAN_CMD, {
         cmd,
@@ -119,6 +123,10 @@ export const redirectToCheckAuth = async (to: string = window.location.href) => 
     const url = new URL(window.location.origin);
     url.pathname = "/check-auth";
     url.searchParams.set("to", to);
+    if (getHostCapabilities().remoteKernel) {
+        url.searchParams.set("lang", window.siyuan.config.appearance.lang);
+        url.searchParams.set("remote", "1");
+    }
     window.location.href = url.href;
 };
 

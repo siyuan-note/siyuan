@@ -1,6 +1,7 @@
 export interface IFormatPainterStyle {
     backgroundColor?: string;
     color?: string;
+    fontFamily?: string;
     fontSize?: string;
     shadow?: boolean;
     hollow?: boolean;
@@ -18,6 +19,7 @@ export interface IFormatPainterSnapshot {
 }
 
 export interface IFormatPainterSegment {
+    fontFamilyExcluded?: boolean;
     styles: IFormatPainterStyle;
     types: string[];
 }
@@ -27,11 +29,13 @@ export const FORMAT_PAINTER_TYPES = ["strong", "em", "u", "s", "mark", "sup", "s
 const getCommonStyles = (segments: IFormatPainterSegment[]) => {
     const styles: IFormatPainterStyle = {};
     const keys: (keyof IFormatPainterStyle)[] = [
-        "backgroundColor", "color", "fontSize", "shadow", "hollow"
+        "backgroundColor", "color", "fontFamily", "fontSize", "shadow", "hollow"
     ];
     keys.forEach(key => {
-        const value = segments[0].styles[key];
-        if (value && segments.every(item => item.styles[key] === value)) {
+        const comparableSegments = key === "fontFamily" ?
+            segments.filter(item => !item.fontFamilyExcluded) : segments;
+        const value = comparableSegments[0]?.styles[key];
+        if (value && comparableSegments.every(item => item.styles[key] === value)) {
             (styles as Record<keyof IFormatPainterStyle, string | boolean>)[key] = value;
         }
     });

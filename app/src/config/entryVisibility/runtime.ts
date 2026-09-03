@@ -1,19 +1,41 @@
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {
+    getEntryCatalogDefaultVisibility,
     getEntryCatalogChildren,
     getEntryCatalogNode,
+    getDockEntryKey,
     getEntryOrderParents,
     getEntryParentPath,
     getEntryPaths,
+    isEntryCatalogNodeConfigurable,
+    refreshDockCatalog,
+    refreshTopBarCatalog,
+    TOP_BAR_ROOT_PATH,
 } from "./catalog";
-import {reorderEntrySlots, resolveEntryOrder} from "./order";
+import {
+    mergeEntryOrderPreservingUnknown,
+    reorderEntrySlots,
+    resolveEntryOrder,
+    resolveEntryOrderWithBoundaryDefaults,
+} from "./order";
 import {getDocTreeEntryScope} from "./docTreeScope";
-import {getProfileEntryVisibility} from "./profile";
+import {getBuiltinProfileEntryVisibility, getProfileEntryVisibility} from "./profile";
 import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {resolveToolbarItems} from "../../protyle/toolbar/entryVisibility";
+import {syncDockBarVisibility} from "../../layout/dock/barVisibility";
+import {genUUID} from "../../util/genID";
+import {
+    applyDockEntryOrderSnapshot,
+    getCurrentDockEntryOrderSnapshot,
+    getDockEntryOrderSnapshot,
+    getDockOrderScopePosition,
+    isDockOrderScope,
+    mergeCurrentDockEntryOrders,
+    mergeDockEntryOrderSnapshot,
+} from "./dockOrder";
 
-export const ENTRY_VISIBILITY_VERSION = 3;
+export const ENTRY_VISIBILITY_VERSION = 4;
 export const ENTRY_PROFILE_SIMPLE = "simple";
 export const ENTRY_PROFILE_FULL = "full";
 export type TEntryVisibilityTemplate = typeof ENTRY_PROFILE_SIMPLE | typeof ENTRY_PROFILE_FULL;
@@ -26,20 +48,25 @@ export const getActiveEntryProfile = () => {
 };
 
 const getTemplateVisibility = (path: string, template: TEntryVisibilityTemplate) =>
-    template === ENTRY_PROFILE_FULL || getEntryCatalogNode(path)?.simple !== false;
+    getBuiltinProfileEntryVisibility(
+        template,
+        getEntryCatalogNode(path)?.simple !== false,
+        getEntryCatalogDefaultVisibility(path),
+    );
 
 export const isEntryVisible = (path: string): boolean => {
     /// #if MOBILE
     return true;
     /// #else
     const config = getConfig();
+    const active = config.active;
     let visible: boolean;
-    if (config.active === ENTRY_PROFILE_FULL) {
-        visible = true;
-    } else if (config.active === ENTRY_PROFILE_SIMPLE) {
+    if (active === ENTRY_PROFILE_FULL) {
+        visible = getTemplateVisibility(path, ENTRY_PROFILE_FULL);
+    } else if (active === ENTRY_PROFILE_SIMPLE) {
         visible = getTemplateVisibility(path, ENTRY_PROFILE_SIMPLE);
     } else {
-        visible = getProfileEntryVisibility(getActiveEntryProfile(), path);
+        visible = getProfileEntryVisibility(getActiveEntryProfile(), path, getEntryCatalogDefaultVisibility(path));
     }
     if (!visible) {
         return false;
@@ -60,20 +87,91 @@ export const createEntryProfileSnapshot = (template: TEntryVisibilityTemplate) =
 };
 
 export const getEntryOrder = (parentPath: string, profile = getActiveEntryProfile()) => {
+    if (isDockOrderScope(parentPath)) {
+        return mergeDockEntryOrderSnapshot(getDockEntryOrderSnapshot(), profile?.orders)[parentPath];
+    }
     const nodes = getEntryCatalogChildren(parentPath) || [];
     const defaultOrder = nodes.map((item) => item.key);
     const separatorKeys = new Set(nodes.filter((item) => item.type === "separator").map((item) => item.key));
+    if (parentPath === TOP_BAR_ROOT_PATH) {
+        return resolveEntryOrderWithBoundaryDefaults(defaultOrder, profile?.orders?.[parentPath], "drag", separatorKeys);
+    }
     return resolveEntryOrder(defaultOrder, profile?.orders?.[parentPath], separatorKeys);
 };
 
-export const createEntryOrderSnapshot = (current = false) => getEntryOrderParents()
-    .reduce<Record<string, string[]>>((orders, parentPath) => {
+export const createEntryOrderSnapshot = (current = false) => {
+    refreshDockCatalog(window.siyuan.ws?.app?.plugins || []);
+    const orders = getEntryOrderParents().reduce<Record<string, string[]>>((result, parentPath) => {
         const nodes = getEntryCatalogChildren(parentPath) || [];
-        orders[parentPath] = current
+        result[parentPath] = current
             ? getEntryOrder(parentPath)
             : nodes.map((item) => item.key);
-        return orders;
+        return result;
     }, {});
+    return {...orders, ...getDockEntryOrderSnapshot()};
+};
+
+const cloneEntryVisibilityConfig = () => JSON.parse(JSON.stringify(
+    window.siyuan.config.appearance.entryVisibility
+)) as Config.IEntryVisibility;
+
+const uniqueEntryProfileName = (name: string, profiles: Config.IEntryVisibilityProfile[]) => {
+    if (!profiles.some((item) => item.name === name)) {
+        return name;
+    }
+    let index = 2;
+    while (profiles.some((item) => item.name === `${name} (${index})`)) {
+        index++;
+    }
+    return `${name} (${index})`;
+};
+
+const getWritableEntryProfile = (config: Config.IEntryVisibility) => {
+    const activeProfile = config.profiles.find((item) => item.id === config.active);
+    if (activeProfile) {
+        return activeProfile;
+    }
+    const template = config.active === ENTRY_PROFILE_SIMPLE ? ENTRY_PROFILE_SIMPLE : ENTRY_PROFILE_FULL;
+    const profile: Config.IEntryVisibilityProfile = {
+        id: genUUID(),
+        name: uniqueEntryProfileName(window.siyuan.languages.entryCustomProfile, config.profiles),
+        entries: createEntryProfileSnapshot(template),
+        orders: createEntryOrderSnapshot(true),
+    };
+    config.profiles.push(profile);
+    config.active = profile.id;
+    return profile;
+};
+
+export const setEntryVisibilityValue = (path: string, visible: boolean) => {
+    const node = getEntryCatalogNode(path);
+    if (window.siyuan.config.readonly || !node || !isEntryCatalogNodeConfigurable(node)) {
+        return;
+    }
+    const config = cloneEntryVisibilityConfig();
+    const profile = getWritableEntryProfile(config);
+    profile.entries[path] = visible;
+    saveEntryVisibility(config);
+};
+
+export const setEntryOrderValue = (parentPath: string, order: string[]) => {
+    const dockOrder = isDockOrderScope(parentPath) ? getDockEntryOrderSnapshot()[parentPath] : undefined;
+    const nodes = dockOrder ? undefined : getEntryCatalogChildren(parentPath);
+    if (window.siyuan.config.readonly || (!dockOrder && !nodes)) {
+        return;
+    }
+    const config = cloneEntryVisibilityConfig();
+    const profile = getWritableEntryProfile(config);
+    const defaultOrder = dockOrder || nodes.map((item) => item.key);
+    const separatorKeys = new Set(nodes?.filter((item) => item.type === "separator").map((item) => item.key));
+    profile.orders[parentPath] = mergeEntryOrderPreservingUnknown(
+        defaultOrder,
+        profile.orders[parentPath],
+        order,
+        separatorKeys,
+    );
+    saveEntryVisibility(config);
+};
 
 let savePending: Config.IEntryVisibility | undefined;
 let saveRunning = false;
@@ -98,6 +196,19 @@ export const saveEntryVisibility = (config: Config.IEntryVisibility) => {
     applyEntryVisibilityLocal(config);
     savePending = config;
     flushEntryVisibility();
+};
+
+export const syncDockEntryOrders = () => {
+    if (window.siyuan.config.readonly) {
+        return;
+    }
+    refreshDockCatalog(window.siyuan.ws?.app?.plugins || []);
+    const currentOrders = getCurrentDockEntryOrderSnapshot();
+    const config = cloneEntryVisibilityConfig();
+    const profile = getWritableEntryProfile(config);
+    profile.orders ||= {};
+    Object.assign(profile.orders, mergeCurrentDockEntryOrders(currentOrders, profile.orders));
+    saveEntryVisibility(config);
 };
 
 const entryScope = (menuElement: HTMLElement): string => {
@@ -231,9 +342,24 @@ export const applyMenuEntryVisibility = (menuElement: HTMLElement) => {
 
 export const applyDockEntryVisibility = () => {
     /// #if !MOBILE
+    refreshDockCatalog(window.siyuan.ws?.app?.plugins || []);
+    applyDockEntryOrderSnapshot(mergeDockEntryOrderSnapshot(
+        getDockEntryOrderSnapshot(),
+        getActiveEntryProfile()?.orders,
+    ), undefined, (scope, item, previousItem) => {
+        const position = getDockOrderScopePosition(scope);
+        const dock = position.startsWith("Left")
+            ? window.siyuan.layout.leftDock
+            : position.startsWith("Right")
+                ? window.siyuan.layout.rightDock
+                : window.siyuan.layout.bottomDock;
+        const index = position === "LeftBottom" || position === "RightBottom" || position === "BottomRight" ? 1 : 0;
+        dock?.add(index, item, previousItem?.getAttribute("data-type") || undefined, {syncEntryOrders: false});
+    });
     document.querySelectorAll<HTMLElement>(".dock__item[data-type]").forEach((item) => {
         const type = item.dataset.type;
-        const path = `dock.${item.dataset.entryId || type}`;
+        const key = getDockEntryKey(item);
+        const path = key ? `dock.${key}` : "";
         if (!getEntryCatalogNode(path)) {
             return;
         }
@@ -245,6 +371,7 @@ export const applyDockEntryVisibility = () => {
         }
         item.classList.toggle("fn__none", !visible);
     });
+    syncDockBarVisibility();
     /// #endif
 };
 
@@ -272,10 +399,47 @@ export const applyToolbarEntryVisibility = (toolbarElement: HTMLElement) => {
     /// #endif
 };
 
+export const refreshTopBarEntryCatalog = () => {
+    /// #if !MOBILE
+    refreshTopBarCatalog(window.siyuan.ws?.app?.plugins || []);
+    /// #endif
+};
+
+export const applyTopBarEntryVisibility = () => {
+    /// #if !MOBILE
+    const toolbarElement = document.getElementById("toolbar");
+    const barMoreElement = document.getElementById("barMore");
+    const dragElement = document.getElementById("drag");
+    if (!toolbarElement || !barMoreElement || !dragElement) {
+        return;
+    }
+    refreshTopBarEntryCatalog();
+    const entryElements = Array.from(toolbarElement.querySelectorAll<HTMLElement>(
+        ":scope > [data-topbar-entry]"));
+    const elementByKey = new Map(entryElements.map((item) => [item.dataset.topbarEntry, item]));
+    getEntryOrder(TOP_BAR_ROOT_PATH).forEach((key) => {
+        const item = key === "drag" ? dragElement : elementByKey.get(key);
+        if (item) {
+            barMoreElement.before(item);
+        }
+    });
+    entryElements.forEach((item) => {
+        const key = item.dataset.topbarEntry;
+        const path = key ? `${TOP_BAR_ROOT_PATH}.${key}` : "";
+        if (path && getEntryCatalogNode(path) && !isEntryVisible(path)) {
+            item.setAttribute("data-entry-hidden", "true");
+        } else {
+            item.removeAttribute("data-entry-hidden");
+        }
+    });
+    /// #endif
+};
+
 const applyEntryVisibilityLocal = (config: Config.IEntryVisibility) => {
     window.siyuan.config.appearance.entryVisibility = config;
     /// #if !MOBILE
     window.siyuan.menus?.menu?.remove();
+    applyTopBarEntryVisibility();
     applyDockEntryVisibility();
     document.querySelectorAll<HTMLElement>(".protyle-toolbar").forEach(applyToolbarEntryVisibility);
     window.dispatchEvent(new CustomEvent("siyuan-entry-visibility"));

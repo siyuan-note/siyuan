@@ -75,6 +75,16 @@ export const resolveExecutableAssetOpenAction = (
     return action;
 };
 
+export const resolveAvailableAssetOpenAction = (
+    action: Config.TAssetOpenAction,
+    localFileSystem: boolean,
+): Config.TAssetOpenAction => {
+    if (!localFileSystem && (action === "app" || action === "folder")) {
+        return "current";
+    }
+    return action;
+};
+
 export const getAssetOpenGestures = (
     config: Config.IAssetOpen | undefined,
     action: Config.TAssetOpenAction,

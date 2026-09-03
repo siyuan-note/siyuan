@@ -8,12 +8,13 @@ import {
 } from "../protyle/util/hasClosest";
 import {MenuItem} from "./Menu";
 import {getTableCellVerticalAlignmentMenus, setTableCellStyle} from "../protyle/util/tableControl";
-import {focusBlock, focusByRange, focusByWbr, getEditorRange, selectAll,} from "../protyle/util/selection";
+import {focusBlock, focusByOffset, focusByRange, focusByWbr, getEditorRange, selectAll,} from "../protyle/util/selection";
 import {getViewFoldOccurrenceID, hasViewFoldContext, setViewFoldTransient} from "../protyle/util/viewFold";
 import {
     deleteColumn,
     deleteRow,
     getColIndex,
+    getOrCreateTableBody,
     insertColumn,
     insertRow,
     insertRowAbove,
@@ -69,13 +70,18 @@ import {setPosition} from "../util/setPosition";
 import {setFold} from "../protyle/util/blockFold";
 import {isEncryptedBox} from "../util/pathName";
 import {getHTMLAssetIFrameSrc} from "../asset/html";
+import {getHostCapabilities, sanitizeKernelHTML} from "../util/hostCapabilities";
 import {
     getDistributedTableColumnWidth,
     isDefaultTableColumnWidth,
     TABLE_DEFAULT_COLUMN_WIDTH,
 } from "../protyle/util/tableColumnWidth";
 import {getParentDocumentID} from "../protyle/util/parentDocument";
-import {shouldFocusAfterZoom} from "../protyle/util/focusRestore";
+import {getZoomFocusScrollAttr, shouldFocusAfterZoom} from "../protyle/util/focusRestore";
+import {
+    getSemanticInlineVisibleText,
+    normalizeSemanticInlineElement
+} from "../protyle/util/inlineElementMarker";
 
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
     fetchPost("/api/search/searchAsset", {
@@ -383,7 +389,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                         element.innerHTML = Lute.EscapeHTMLStr(inputElement.value).trim() || refBlockId;
                     } else {
                         fetchPost("/api/block/getRefText", {id: refBlockId}, (response) => {
-                            element.innerHTML = response.data;
+                            element.innerHTML = sanitizeKernelHTML(response.data);
                         });
                     }
                     element.setAttribute("data-subtype", inputElement.value ? "s" : "d");
@@ -523,7 +529,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 click() {
                     element.setAttribute("data-subtype", "d");
                     fetchPost("/api/block/getRefText", {id: refBlockId}, (response) => {
-                        element.innerHTML = response.data;
+                        element.innerHTML = sanitizeKernelHTML(response.data);
                         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                         updateTransaction(protyle, nodeElement, oldHTML);
                         oldHTML = nodeElement.outerHTML;
@@ -940,7 +946,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
     /// #endif
 };
 
-export const enterBack = (protyle: IProtyle, id: string) => {
+export const enterBack = (protyle: IProtyle, id: string, focusPosition?: { start: number, end: number }) => {
     if (!protyle.block.showAll) {
         const parentDocumentID = getParentDocumentID({
             path: protyle.path,
@@ -960,7 +966,7 @@ export const enterBack = (protyle: IProtyle, id: string) => {
             /// #endif
         }
     } else {
-        zoomOut({protyle, id: protyle.block.parent2ID, focusId: id});
+        zoomOut({protyle, id: protyle.block.parent2ID, focusId: id, focusPosition});
     }
 };
 
@@ -968,6 +974,7 @@ export const zoomOut = (options: {
     protyle: IProtyle,
     id: string,
     focusId?: string,
+    focusPosition?: { start: number, end: number },
     isPushBack?: boolean,
     callback?: () => void,
     reload?: boolean,
@@ -1044,10 +1051,7 @@ export const zoomOut = (options: {
             data: getResponse,
             protyle: options.protyle,
             action,
-            scrollAttr: options.focusId ? {
-                rootId: options.id,
-                focusId: options.focusId
-            } : undefined,
+            scrollAttr: getZoomFocusScrollAttr(options.id, options.focusId, options.focusPosition),
             scrollPosition: options.focusId ? "start" : undefined,
             afterCB: options.callback,
             dataDocType: options.dataDocType,
@@ -1073,7 +1077,11 @@ export const zoomOut = (options: {
                 } else {
                     showElement = getFirstBlock(showElement);
                 }
-                focusBlock(showElement, undefined, true, true);
+                if (showElement === focusElement && options.focusPosition) {
+                    focusByOffset(showElement, options.focusPosition.start, options.focusPosition.end);
+                } else {
+                    focusBlock(showElement, undefined, true, true);
+                }
             } else if (!options.focusId) {
                 const getDocParam: IObject = {
                     id: options.protyle.block.rootID,
@@ -1841,12 +1849,13 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
     let inputElement: HTMLInputElement;
     const oldHTML = nodeElement.outerHTML;
     window.siyuan.menus.menu.removeCB = () => {
-        tagElement.innerHTML = Constants.ZWSP + Lute.EscapeHTMLStr(inputElement.value || "");
+        tagElement.textContent = Constants.WORD_JOINER + (inputElement.value || "");
         if (!inputElement.value) {
             tagElement.insertAdjacentHTML("afterend", "<wbr>");
             tagElement.remove();
             focusByWbr(nodeElement, protyle.toolbar.range);
         } else {
+            normalizeSemanticInlineElement(tagElement);
             protyle.toolbar.range.selectNodeContents(tagElement);
             protyle.toolbar.range.collapse(false);
             focusByRange(protyle.toolbar.range);
@@ -1866,7 +1875,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         bind(element) {
             const listElement = element.querySelector(".b3-list") as HTMLElement;
             inputElement = element.querySelector("input");
-            inputElement.value = tagElement.textContent.replace(Constants.ZWSP, "");
+            inputElement.value = getSemanticInlineVisibleText(tagElement);
             inputElement.addEventListener("compositionend", () => {
                 genTagList(listElement, inputElement.value.trim());
                 setPosition(listElement, inputElementRect.right + 8, inputElementRect[isMobile() ? "bottom" : "top"], inputElementRect.height);
@@ -1917,15 +1926,16 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         accelerator: window.siyuan.languages.click,
         icon: "iconSearch",
         click() {
+            const tagName = getSemanticInlineVisibleText(tagElement);
             /// #if !MOBILE
-            openGlobalSearch(protyle.app, `#${tagElement.textContent}#`, false, {method: 0});
+            openGlobalSearch(protyle.app, `#${tagName}#`, false, {method: 0});
             /// #else
             popSearch(protyle.app, {
                 hasReplace: false,
                 method: 0,
                 hPath: "",
                 idPath: [],
-                k: `#${tagElement.textContent}#`,
+                k: `#${tagName}#`,
                 r: "",
                 page: 1,
             });
@@ -1937,7 +1947,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         label: window.siyuan.languages.rename,
         icon: "iconEdit",
         click() {
-            const tagName = tagElement.textContent.replace(Constants.ZWSP, "");
+            const tagName = getSemanticInlineVisibleText(tagElement);
             window.siyuan.menus.menu.remove();
             renameTag(tagName);
         }
@@ -2100,6 +2110,9 @@ const genImageHeightMenu = (label: string, imgElement: HTMLElement, protyle: IPr
 };
 
 export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
+    if (getHostCapabilities().remoteKernel) {
+        return [];
+    }
     const iframeElement = nodeElement.querySelector("iframe");
     let html = nodeElement.outerHTML;
     const subMenus: IMenu[] = [{
@@ -2264,7 +2277,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
                         }
                     });
                     if (prueTrElement) {
-                        const tbodyElement = nodeElement.querySelector("tbody");
+                        const tbodyElement = getOrCreateTableBody(nodeElement.querySelector("table"));
                         const theadElement = nodeElement.querySelector("thead");
                         while (prueTrElement !== theadElement.lastElementChild) {
                             theadElement.lastElementChild.querySelectorAll("th").forEach(item => {

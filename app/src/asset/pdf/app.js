@@ -302,7 +302,7 @@ class PDFViewerApplication {
 
                 if (typeof PDFJSDev === "undefined") {
                     // NOTE
-                    globalThis.pdfjsWorker = await import(`${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.min.mjs?v=4.8.69`);
+                    globalThis.pdfjsWorker = await import(`${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.compat.mjs?v=4.8.69`);
                 } else {
                     await __non_webpack_import__(PDFWorker.workerSrc);
                 }
@@ -2188,19 +2188,26 @@ class PDFViewerApplication {
         this._windowAbortController = null;
     }
 
-    /**
-     * @ignore
-     */
-    async testingClose() {
+    async destroy() {
         this.unbindEvents();
         this.unbindWindowEvents();
 
         this._globalAbortController?.abort();
         this._globalAbortController = null;
 
+        this._openFileInput?.remove();
+        this._openFileInput = null;
+
         this.findBar?.close();
 
         await Promise.all([this.l10n?.destroy(), this.close()]);
+    }
+
+    /**
+     * @ignore
+     */
+    async testingClose() {
+        await this.destroy();
     }
 
     _accumulateTicks(ticks, prop) {

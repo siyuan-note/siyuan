@@ -6,7 +6,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260830143000"
 	},
 	"Children": [
 		{
@@ -1714,6 +1714,213 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ 即可。"
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tplcn01",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260830143000-tplcn01",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "创建子文档树"
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tplcn02",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830143000-tplcn02",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "仅在编辑器中手动插入模板时，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "createDocTree"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 才会生效。模板渲染完成后，思源会先显示计划创建的完整子文档树，确认后才创建；取消不会插入模板或创建文档。同一父文档下即使已有同名文档也会始终新建，不会复用或覆盖。一次撤销会同时移除本次插入的模板内容和本次创建的所有子文档。单次计划最多创建 128 个文档，声明的子文档树最多 16 层；实际文件树深度仍受“允许创建深度大于 7 层的子文档”设置限制。"
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tplcn03",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260830143000-tplcn03",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "dGVtcGxhdGU="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": ".action{define \"child-review\"}\n## 复盘\n.action{end}\n\n.action{createDocTree (list\n  (dict \"title\" \"资料\" \"template\" \"children/material.md\"\n    \"children\" (list (dict \"title\" \"摘录\")))\n  (dict \"title\" \"复盘\" \"define\" \"child-review\")\n)}\n\n.action{range $doc := renderDocRef \"children\" .id}\n- ((.action{$doc.RootID} \".action{$doc.HPath}\"))\n.action{end}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tplcn04",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830143000-tplcn04",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "每个子文档内容模板都以该子文档为上下文，可使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".title"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".id"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".parentID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".rootID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".hPath"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tplcn07",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830143000-tplcn07",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "renderDocRef \"children\" <id>"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 返回创建计划中的静态子文档描述列表；"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "renderDocRef \"path\" <hPath>"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 返回指向计划文档的静态块引用文本。"
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tplcn05",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830143000-tplcn05",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "每个节点可通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "define"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 使用当前模板文件中的命名模板，或通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 引用相对于当前模板包的外部模板。任一外部模板缺失或无法解析时，整个操作都会取消，不会插入内容或创建部分子文档。"
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tplcn06",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830143000-tplcn06",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "createDocTree"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 不会在自动应用的内容模板中执行，例如新建文档、日记和数据库条目使用的内容模板。本期不包含数据库或资源打包，也不支持将整个文档子树导出为模板。"
 				}
 			]
 		},

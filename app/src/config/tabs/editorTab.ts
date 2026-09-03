@@ -6,6 +6,7 @@ import type {SettingTabBuilder} from "../setting/builder";
 import {controlSelect} from "../setting/control";
 import {genStackHtml} from "../render/render";
 import type {StackLine} from "../render/parts";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -82,7 +83,7 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
         {value: "new-window", label: window.siyuan.languages.openByNewWindow},
         {value: "app", label: window.siyuan.languages.useDefault},
         {value: "folder", label: window.siyuan.languages.showInFolder},
-    ];
+    ].filter((item) => getHostCapabilities().localFileSystem || !["app", "folder"].includes(item.value));
     const assetOpenControls = [
         {
             key: "click",
@@ -389,18 +390,20 @@ const registerEditorAdvancedGroup = (tab: SettingTabBuilder) => {
         desc: window.siyuan.languages.katexMacrosTip,
         mode: "textarea",
     });
-    group.switch("editor.dragHTMLFileToIframe", {
-        title: window.siyuan.languages.dragHTMLFileToIframe,
-        desc: window.siyuan.languages.dragHTMLFileToIframeTip,
-    });
-    group.switch("editor.allowSVGScript", {
-        title: window.siyuan.languages.allowSVGScript,
-        desc: window.siyuan.languages.allowSVGScriptTip,
-    });
-    group.switch("editor.allowHTMLBLockScript", {
-        title: window.siyuan.languages.allowHTMLBLockScript,
-        desc: window.siyuan.languages.allowHTMLBLockScriptTip,
-    });
+    if (!getHostCapabilities().remoteKernel) {
+        group.switch("editor.dragHTMLFileToIframe", {
+            title: window.siyuan.languages.dragHTMLFileToIframe,
+            desc: window.siyuan.languages.dragHTMLFileToIframeTip,
+        });
+        group.switch("editor.allowSVGScript", {
+            title: window.siyuan.languages.allowSVGScript,
+            desc: window.siyuan.languages.allowSVGScriptTip,
+        });
+        group.switch("editor.allowHTMLBLockScript", {
+            title: window.siyuan.languages.allowHTMLBLockScript,
+            desc: window.siyuan.languages.allowHTMLBLockScriptTip,
+        });
+    }
 };
 
 export const registerEditorTab = (tab: SettingTabBuilder) => {

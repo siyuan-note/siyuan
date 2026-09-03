@@ -7,7 +7,7 @@
 		"id": "20211226121203-rjjngpz",
 		"title": "通用作業",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260903150000"
 	},
 	"Children": [
 		{
@@ -347,6 +347,23 @@
 					"TextMarkBlockRefID": "20211226122523-rl8356a",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "在瀏覽器上使用"
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-jflwyxe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260903150000-jflwyxe",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260903150000-3qa6edk",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "連線至遠端內核"
 				}
 			]
 		},

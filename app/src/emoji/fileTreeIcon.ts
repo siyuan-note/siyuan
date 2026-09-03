@@ -38,8 +38,16 @@ export const getFileTreeIconHTML = (icon: string, defaultIcon: TFileTreeDefaultI
         return unicode2Emoji(getDefaultEmoji(defaultIcon), className, needSpan);
     }
 
-    const svg = `<svg><use xlink:href="#${FILE_TREE_SVG_ICONS[defaultIcon]}"></use></svg>`;
-    return needSpan ? `<span class="${escapeAttr(className)}">${svg}</span>` : svg;
+    const classAttr = needSpan ? ` class="${escapeAttr(className)}"` : "";
+    return `<svg${classAttr}><use xlink:href="#${FILE_TREE_SVG_ICONS[defaultIcon]}"></use></svg>`;
+};
+
+export const getDocumentIconHTML = (icon: string, className = "", useSVGDefaultIcon =
+    window.siyuan.config.fileTree.useSVGDefaultIcon === true) => {
+    if (!icon && useSVGDefaultIcon) {
+        return `<svg class="${escapeAttr(className)}"><use xlink:href="#${FILE_TREE_SVG_ICONS.file}"></use></svg>`;
+    }
+    return getFileTreeIconHTML(icon, "file", className, true, useSVGDefaultIcon);
 };
 
 const resolveDefaultIcon = (liElement: HTMLElement): TFileTreeDefaultIcon => {

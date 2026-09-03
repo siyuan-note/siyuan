@@ -8,7 +8,7 @@
 		"id": "20240530101000-g3ugxml",
 		"title": "基本操作",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260903150000"
 	},
 	"Children": [
 		{
@@ -366,6 +366,23 @@
 					"TextMarkBlockRefID": "20240530101000-40hohog",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "ブラウザ"
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-rzryr1j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260903150000-rzryr1j",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260903150000-hpfmx4t",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "リモートカーネルへの接続"
 				}
 			]
 		},

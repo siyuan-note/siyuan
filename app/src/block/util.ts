@@ -17,62 +17,109 @@ import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {openFileById} from "../editor/util";
 import {openMobileFileById} from "../mobile/editor";
 import {mathRender} from "../protyle/render/mathRender";
-import {buildCancelSuperBlockOperations} from "./cancelSuperBlock";
+import {
+    buildCancelSuperBlockOperations,
+    resolveCancelSuperBlockChildren,
+    type ISuperBlockChildReplacement
+} from "./cancelSuperBlock";
 import {shouldFocusJumpTarget, shouldFocusParentDocumentTitle} from "./jumpToParent";
 import {getHorizontalSuperBlockChild} from "./superBlock";
+import {normalizeHTMLAssetIFrameBlockDOM} from "../asset/html";
 
-export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: Range) => {
-    let previousId = getPreviousBlockSibling(nodeElement)?.getAttribute("data-node-id");
-    nodeElement.classList.remove("protyle-wysiwyg--select");
-    nodeElement.removeAttribute("select-start");
-    nodeElement.removeAttribute("select-end");
+export const getCancelSBOperations = async (nodeElement: Element, options: {
+    notebookID?: string,
+    previousID?: string,
+    parentID?: string,
+    fallbackParentID?: string,
+    resolveMissingPosition?: boolean,
+    excludedChildIDs?: Set<string>,
+    childReplacements?: Map<string, ISuperBlockChildReplacement>,
+}) => {
     const id = nodeElement.getAttribute("data-node-id");
-    const visibleChildElements = Array.from(nodeElement.children).filter(item => item.hasAttribute("data-node-id"));
+    const visibleChildElements = Array.from(nodeElement.children).filter(item =>
+        item.hasAttribute("data-node-id") && !options.excludedChildIDs?.has(item.getAttribute("data-node-id")));
     let operationChildElements = visibleChildElements;
     if (visibleChildElements.some(item => item.getAttribute("data-type") === "NodeHeading" &&
         item.getAttribute("fold") === "1")) {
         const response = await fetchSyncPost("/api/block/getBlockDOM", {
             id,
-            notebook: protyle.notebookId,
+            notebook: options.notebookID,
         });
         const template = document.createElement("template");
-        template.innerHTML = response.data?.dom || "";
+        template.innerHTML = normalizeHTMLAssetIFrameBlockDOM(response.data?.dom || "");
         const fullSuperBlockElement = template.content.querySelector(`[data-node-id="${id}"]`);
         if (!fullSuperBlockElement) {
-            return {doOperations: [], undoOperations: [], previousId};
+            return {
+                doOperations: [] as IOperation[],
+                undoOperations: [] as IOperation[],
+                childIDs: [] as string[],
+                foldedHeadingIDs: [] as string[],
+                previousId: options.previousID
+            };
         }
         operationChildElements = Array.from(fullSuperBlockElement.children).filter(item =>
-            item.hasAttribute("data-node-id"));
+            item.hasAttribute("data-node-id") && !options.excludedChildIDs?.has(item.getAttribute("data-node-id")));
     }
-    // 先清理拖拽手柄，避免手柄被克隆进撤销用的 SB 副本，导致恢复后残留多余手柄
-    nodeElement.querySelectorAll(".sb__resize").forEach(handle => handle.remove());
+    const {childIDs, foldedHeadingIDs} = resolveCancelSuperBlockChildren(operationChildElements.map(item => ({
+        id: item.getAttribute("data-node-id"),
+        folded: item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1",
+    })), options.excludedChildIDs, options.childReplacements);
     const sbElement = nodeElement.cloneNode() as HTMLElement;
     sbElement.innerHTML = nodeElement.lastElementChild.outerHTML;
-    let parentID = getEmbedChildOperationParentID(nodeElement) || getParentBlock(nodeElement)?.getAttribute("data-node-id");
+    let previousId = options.previousID;
+    if (typeof previousId !== "string") {
+        previousId = getPreviousBlockSibling(nodeElement)?.getAttribute("data-node-id");
+    }
+    let parentID = options.parentID || getEmbedChildOperationParentID(nodeElement) ||
+        getParentBlock(nodeElement)?.getAttribute("data-node-id");
     // 缩放和反链需要接口获取
     if (!previousId && !parentID) {
-        if (protyle.block.showAll || protyle.options.backlinkData) {
+        if (options.resolveMissingPosition) {
             const idData = await fetchSyncPost("/api/block/getBlockSiblingID", {
                 id,
-                notebook: protyle.notebookId,
+                notebook: options.notebookID,
             });
             previousId = idData.data.previous;
             parentID = idData.data.parent;
         } else {
-            parentID = protyle.block.rootID;
+            parentID = options.fallbackParentID;
         }
     }
     const operationData = buildCancelSuperBlockOperations({
         id,
         data: sbElement.outerHTML,
-        childIDs: operationChildElements.map(item => item.getAttribute("data-node-id")),
-        foldedHeadingIDs: operationChildElements.filter(item =>
-            item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1"
-        ).map(item => item.getAttribute("data-node-id")),
+        childIDs,
+        foldedHeadingIDs,
         previousID: previousId,
         parentID,
     });
     const focusId = visibleChildElements[visibleChildElements.length - 1]?.getAttribute("data-node-id") || previousId;
+    return {
+        ...operationData,
+        childIDs,
+        foldedHeadingIDs,
+        previousId: focusId
+    };
+};
+
+export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: Range,
+                               excludedChildIDs?: Set<string>,
+                               childReplacements?: Map<string, ISuperBlockChildReplacement>) => {
+    nodeElement.classList.remove("protyle-wysiwyg--select");
+    nodeElement.removeAttribute("select-start");
+    nodeElement.removeAttribute("select-end");
+    const operationData = await getCancelSBOperations(nodeElement, {
+        notebookID: protyle.notebookId,
+        fallbackParentID: protyle.block.rootID,
+        resolveMissingPosition: protyle.block.showAll || !!protyle.options.backlinkData,
+        excludedChildIDs,
+        childReplacements,
+    });
+    if (operationData.doOperations.length === 0) {
+        return operationData;
+    }
+    // 先清理拖拽手柄，避免手柄被移到超级块外部。
+    nodeElement.querySelectorAll(".sb__resize").forEach(handle => handle.remove());
     if (range) {
         getContenteditableElement(nodeElement)?.insertAdjacentHTML("afterbegin", "<wbr>");
     }
@@ -90,10 +137,7 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
             blockRender(protyle, element);
         }
     });
-    return {
-        ...operationData,
-        previousId: focusId
-    };
+    return operationData;
 };
 
 export const genSBElement = (layout: string, id?: string, attrHTML?: string) => {
@@ -470,6 +514,9 @@ export const getLangByType = (type: string) => {
             break;
         case "NodeAudio":
             lang = window.siyuan.languages.audio;
+            break;
+        case "NodeCustomBlock":
+            lang = window.siyuan.languages.custom;
             break;
         case "NodeBlockQueryEmbed":
             lang = window.siyuan.languages.blockEmbed;

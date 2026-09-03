@@ -7,7 +7,7 @@
 		"id": "20240530101000-40hohog",
 		"title": "ブラウザ",
 		"type": "doc",
-		"updated": "20260804193000"
+		"updated": "20260903150000"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-vn1tvf6",
 				"id": "20240530101000-yllodqo",
-				"updated": "20260804165003"
+				"updated": "20260903150000"
 			},
 			"Children": [
 				{
@@ -209,6 +209,31 @@
 				{
 					"Type": "NodeText",
 					"Data": "を理解することから始めてください。"
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-kmzwzmc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260903150000-kmzwzmc",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップ版からリモートカーネルに接続する方法については、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260903150000-hpfmx4t",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "リモートカーネルへの接続"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を参照してください。"
 				}
 			]
 		},

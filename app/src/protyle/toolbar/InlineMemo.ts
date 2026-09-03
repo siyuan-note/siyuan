@@ -1,5 +1,10 @@
 import {ToolbarItem} from "./ToolbarItem";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
+import {stripSemanticMarkersFromRangeText} from "../util/inlineElementMarker";
+import {Constants} from "../../constants";
+import {getFirstSelectedInlineMemoContent, isExactInlineMemoSelection} from "./inlineMemoSelection";
+import {getContenteditableElement} from "../wysiwyg/getBlock";
+import {getSelectionOffset} from "../util/selection";
 
 export class InlineMemo extends ToolbarItem {
     public element: HTMLElement;
@@ -16,18 +21,23 @@ export class InlineMemo extends ToolbarItem {
                 return;
             }
             const memoElement = hasClosestByAttribute(range.startContainer, "data-type", "inline-memo");
-            if (memoElement && memoElement.textContent === range.toString()) {
+            const memoContent = getFirstSelectedInlineMemoContent(range);
+            const selectedText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
+            const editableElement = memoElement && getContenteditableElement(nodeElement, range.startContainer);
+            if (memoElement && editableElement && isExactInlineMemoSelection(range, memoElement, currentRange =>
+                getSelectionOffset(editableElement, undefined, currentRange, true))) {
                 // https://github.com/siyuan-note/siyuan/issues/6569
                 protyle.toolbar.showRender(protyle, memoElement);
                 return;
             }
 
-            if (range.toString() === "") {
+            if (selectedText === "") {
                 return;
             }
 
             protyle.toolbar.setInlineMark(protyle, "inline-memo", "range", {
                 type: "inline-memo",
+                color: memoContent,
             });
         });
     }

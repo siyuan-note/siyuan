@@ -15,8 +15,12 @@ import {showMessage} from "../dialog/message";
 import type {Editor} from "../editor";
 import {setEditMode} from "../protyle/util/setEditMode";
 import {getDownloadURL} from "../util/imageURL";
+import {getHostCapabilities} from "../util/hostCapabilities";
 
 export const exportAsset = (src: string) => {
+    if (!getHostCapabilities().importExport) {
+        return {ignore: true};
+    }
     return {
         id: "export",
         label: window.siyuan.languages.export,
@@ -44,6 +48,9 @@ export const exportAsset = (src: string) => {
 
 // 复制资源文件到系统剪贴板，在文件资源管理器中可粘贴为文件（仅 Windows、macOS 桌面端支持）
 export const writeAssetToClipboard = (src: string) => {
+    if (!getHostCapabilities().localFileSystem) {
+        return {ignore: true};
+    }
     /// #if !BROWSER
     if (["windows", "darwin"].includes(window.siyuan.config.system.os)) {
         return {
@@ -178,23 +185,25 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
         }
     });
     /// #if !BROWSER
-    openSubmenus.push({id: "separator_2", type: "separator"});
-    openSubmenus.push({
-        id: "showInFolder",
-        icon: "iconFolder",
-        label: window.siyuan.languages.showInFolder,
-        click: () => {
-            if (notebookId) {
-                useShell("showItemInFolder", path.join(window.siyuan.config.system.dataDir, notebookId, pathString));
-            } else {
-                ids.forEach((id) => {
-                    fetchPost("/api/block/getBlockInfo", {id}, (response) => {
-                        useShell("showItemInFolder", path.join(window.siyuan.config.system.dataDir, response.data.box, response.data.path));
+    if (getHostCapabilities().localFileSystem) {
+        openSubmenus.push({id: "separator_2", type: "separator"});
+        openSubmenus.push({
+            id: "showInFolder",
+            icon: "iconFolder",
+            label: window.siyuan.languages.showInFolder,
+            click: () => {
+                if (notebookId) {
+                    useShell("showItemInFolder", path.join(window.siyuan.config.system.dataDir, notebookId, pathString));
+                } else {
+                    ids.forEach((id) => {
+                        fetchPost("/api/block/getBlockInfo", {id}, (response) => {
+                            useShell("showItemInFolder", path.join(window.siyuan.config.system.dataDir, response.data.box, response.data.path));
+                        });
                     });
-                });
+                }
             }
-        }
-    });
+        });
+    }
     /// #endif
     if (onlyGetMenus) {
         return openSubmenus;

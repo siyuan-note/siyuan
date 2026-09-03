@@ -410,11 +410,20 @@ Notes:
 ### 5.16 Custom block
 
 ```json
-{ "Type": "NodeCustomBlock", "ID": "...", "Data": "raw custom content",
-  "CustomBlockInfo": "info", "Properties": { "id": "...", "updated": "..." } }
+{ "Type": "NodeCustomBlock", "ID": "...", "Data": "raw custom content", "CustomBlockInfo": "info", "Properties": { "id": "...", "updated": "..." } }
 ```
 
 `NodeCustomBlock` is a leaf with no `Children`. `Data` stores its raw content and `CustomBlockInfo` stores the fence info string.
+
+Its Markdown source form uses exactly three semicolons for both fences:
+
+```markdown
+;;;encoded-plugin-name/encoded-block-type
+raw custom content
+;;;
+```
+
+The plugin package name and block type are encoded as URI components before being joined with `/`. A line that equals `;;;` after removing editor caret markers and trimming whitespace closes the block and therefore cannot occur in `Data`. Plugin-rendered DOM is transient and must not be written as `Children`; `Data`, block attributes, or plugin-owned external storage remain the persisted source of truth. Nested Protyle editors are not supported inside the render mount.
 
 ---
 

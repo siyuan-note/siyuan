@@ -7,6 +7,7 @@ import {openSetting} from "../config";
 import {isPaidUser} from "../util/needSubscribe";
 import {parseUriInfo, setNoteBook} from "../util/pathName";
 import type {App} from "../index";
+import {getHostCapabilities} from "../util/hostCapabilities";
 /// #if MOBILE
 import {openMobileFileById} from "../mobile/editor";
 /// #else
@@ -106,9 +107,9 @@ const renderOnboarding = (app: App) => {
 </button>
 <div class="onboarding__title">&#x1F389; ${window.siyuan.languages.onboardingWelcome}</div>
 <div class="onboarding__desc">${window.siyuan.languages.onboardingDescription}</div>
-<button class="b3-button b3-button--outline fn__block" data-type="import">
+${getHostCapabilities().importExport ? `<button class="b3-button b3-button--outline fn__block" data-type="import">
     <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.importExistingData}
-</button>
+</button>` : ""}
 <button class="b3-button b3-button--outline fn__block" data-type="sync">
     <svg><use xlink:href="#iconCloud"></use></svg>${window.siyuan.languages.loginAndSync}
 </button>
@@ -125,11 +126,13 @@ const renderOnboarding = (app: App) => {
                 dismissOnboarding();
                 break;
             case "import":
-                openDataMigration({
-                    mode: "onboarding",
-                    notebookID: window.siyuan.config.onboarding.notebookID,
-                    onContentImportComplete: dismissOnboarding,
-                });
+                if (getHostCapabilities().importExport) {
+                    openDataMigration({
+                        mode: "onboarding",
+                        notebookID: window.siyuan.config.onboarding.notebookID,
+                        onContentImportComplete: dismissOnboarding,
+                    });
+                }
                 break;
             case "sync":
                 loginAndSync(app);

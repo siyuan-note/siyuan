@@ -24,7 +24,7 @@ import {fixAdjacentTags, getCalloutInfo, getContenteditableElement} from "../wys
 import {clearBlockElement} from "./clear";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL, showBase64ImageSizeLimit} from "../upload/base64";
-import {applyHTMLLocalAssetPaths, collectHTMLLocalAssets} from "../upload/htmlLocalAssets";
+import {applyHTMLLocalAssetPaths, collectHTMLLocalAssets, removeHTMLLocalAssetPaths} from "../upload/htmlLocalAssets";
 import {
     applyHTMLEmbeddedAssetPaths,
     collectHTMLEmbeddedAssets,
@@ -55,7 +55,9 @@ import {
 } from "./wpsPresentation";
 import {hasDataTransferFiles} from "../upload/localDropFiles";
 import {resetPastedQueryEmbedRenderState} from "../render/embedRenderState";
+import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {eventBusHas, hasPluginSubscriber} from "../../plugin/EventBusCore";
+import {normalizeSemanticInlineElements, stripSemanticMarkersFromRangeText} from "./inlineElementMarker";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -116,6 +118,8 @@ export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
         refText = window.siyuan.languages.video;
     } else if ("NodeAudio" === dataType) {
         refText = window.siyuan.languages.audio;
+    } else if ("NodeCustomBlock" === dataType) {
+        refText = blockElement.getAttribute("data-content") || window.siyuan.languages.custom;
     } else if (["NodeCodeBlock", "NodeTable"].includes(dataType)) {
         refText = getPlainText(blockElement);
     } else if (blockElement.classList.contains("render-node")) {
@@ -159,6 +163,8 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
         text += blockElement.querySelector("video").getAttribute("src");
     } else if ("NodeAudio" === dataType) {
         text += blockElement.querySelector("audio").getAttribute("src");
+    } else if ("NodeCustomBlock" === dataType) {
+        text += blockElement.getAttribute("data-content") || "";
     } else if (blockElement.classList.contains("render-node")) {
         // 需在嵌入块后，代码块前
         text += Lute.UnEscapeHTMLStr(blockElement.getAttribute("data-content"));
@@ -567,7 +573,7 @@ const insertConvertedBlockDOM = (protyle: IProtyle, dom: string, range: Range) =
     protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {
         if (item.textContent === "") {
             fetchPost("/api/block/getRefText", {id: item.getAttribute("data-id")}, (response) => {
-                item.innerHTML = response.data;
+                item.innerHTML = sanitizeKernelHTML(response.data);
             });
         }
     });
@@ -872,6 +878,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         } else {
             tempElement.innerHTML = siyuanHTML;
         }
+        normalizeSemanticInlineElements(tempElement);
         const preservePastedBlockStructure = shouldPreservePastedBlockStructure(tempElement.children);
         const startRangeBlockElement = hasClosestBlock(range.startContainer);
         const endRangeBlockElement = hasClosestBlock(range.endContainer);
@@ -891,7 +898,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 return;
             }
         }
-        if (range.toString() && startRangeBlockElement === endRangeBlockElement) {
+        const selectedText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
+        if (selectedText && startRangeBlockElement === endRangeBlockElement) {
             let types: string[] = [];
             let linkElement: HTMLElement;
             if (tempElement.childNodes.length === 1 && tempElement.childElementCount === 1) {
@@ -918,7 +926,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 protyle.toolbar.range = range;
                 const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                     type: "id",
-                    color: `${linkElement.dataset.id}${Constants.ZWSP}s${Constants.ZWSP}${range.toString()}`
+                    color: `${linkElement.dataset.id}${Constants.ZWSP}s${Constants.ZWSP}${selectedText}`
                 });
                 if (refElement[0]) {
                     protyle.toolbar.range.selectNodeContents(refElement[0]);
@@ -929,7 +937,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 protyle.toolbar.range = range;
                 protyle.toolbar.setInlineMark(protyle, "a", "range", {
                     type: "a",
-                    color: `${linkElement.dataset.href}${Constants.ZWSP}${range.toString()}`
+                    color: `${linkElement.dataset.href}${Constants.ZWSP}${selectedText}`
                 });
                 return;
             }
@@ -1094,6 +1102,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         if (isHTML) {
             const tempElement = document.createElement("div");
             tempElement.innerHTML = textHTML;
+            if (!getHostCapabilities().localFileSystem) {
+                removeHTMLLocalAssetPaths(collectHTMLLocalAssets(tempElement));
+            }
             // 移除空的 A 标签
             tempElement.querySelectorAll("a").forEach((e) => {
                 if (e.innerHTML.trim() === "") {
@@ -1112,8 +1123,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     linkElement = tempElement.firstElementChild.firstElementChild;
                 }
             }
-            if (linkElement) {
-                const selectText = range.toString();
+            if (linkElement?.getAttribute("href")) {
+                const selectText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
                 protyle.toolbar.range = range;
                 const aElements = protyle.toolbar.setInlineMark(protyle, "a", "range", {
                     type: "a",
@@ -1197,6 +1208,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 }
                 tempElement.innerHTML = preflight.normalizedHTML;
                 localAssets = collectHTMLLocalAssets(tempElement);
+                if (!getHostCapabilities().localFileSystem) {
+                    removeHTMLLocalAssetPaths(localAssets);
+                    localAssets = [];
+                }
                 preparedHTML = true;
             }
             if (localAssets.length > 0) {
@@ -1282,14 +1297,15 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             uploadFiles(protyle, files, undefined, undefined, undefined, assetUploadOptions);
             return;
         } else if (textPlain.trim() !== "" && (files && files.length === 0 || !files)) {
-            if (range.toString() !== "") {
+            const selectedText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
+            if (selectedText !== "") {
                 const firstLine = textPlain.split("\n")[0];
                 if (isDynamicRef(textPlain)) {
                     protyle.toolbar.range = range;
                     const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                         type: "id",
                         // range 不能 escape，否则 https://github.com/siyuan-note/siyuan/issues/8359
-                        color: `${textPlain.substring(2, 22 + 2)}${Constants.ZWSP}s${Constants.ZWSP}${range.toString()}`
+                        color: `${textPlain.substring(2, 22 + 2)}${Constants.ZWSP}s${Constants.ZWSP}${selectedText}`
                     });
                     if (refElement[0]) {
                         protyle.toolbar.range.selectNodeContents(refElement[0]);

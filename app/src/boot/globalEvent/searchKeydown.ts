@@ -18,6 +18,7 @@ import {getUnRefList} from "../../search/unRef";
 import {toggleAssetHistory, toggleReplaceHistory, toggleSearchHistory} from "../../search/toggleHistory";
 import {Protyle} from "../../protyle";
 import {getKeysByLiElement} from "../../search/menu";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 
 export const searchKeydown = (app: App, event: KeyboardEvent) => {
     if (getSelection().rangeCount === 0) {
@@ -237,7 +238,9 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
             }
         } else {
             /// #if !BROWSER
-            useShell("showItemInFolder", path.join(window.siyuan.config.system.dataDir, currentList.lastElementChild.getAttribute("aria-label")));
+            if (getHostCapabilities().localFileSystem) {
+                useShell("showItemInFolder", path.join(window.siyuan.config.system.dataDir, currentList.lastElementChild.getAttribute("aria-label")));
+            }
             /// #endif
         }
         return true;

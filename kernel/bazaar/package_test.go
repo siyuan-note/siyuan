@@ -17,6 +17,7 @@
 package bazaar
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -67,6 +68,19 @@ func TestGetPreferredFunding(t *testing.T) {
 			funding: &Funding{Custom: []string{"Note: scan the QR code"}},
 			want:    "Note: scan the QR code",
 		},
+		{
+			name: "legacy custom before labeled links",
+			funding: &Funding{
+				Custom: []string{"https://example.com/legacy"},
+				Links:  []FundingLink{{Label: "Sponsor", URL: "https://example.com/labeled"}},
+			},
+			want: "https://example.com/legacy",
+		},
+		{
+			name:    "labeled link fallback",
+			funding: &Funding{Links: []FundingLink{{Label: "Sponsor", URL: "https://example.com/labeled"}}},
+			want:    "https://example.com/labeled",
+		},
 	}
 
 	for _, test := range tests {
@@ -75,6 +89,110 @@ func TestGetPreferredFunding(t *testing.T) {
 				t.Fatalf("expected %q, got %q", test.want, got)
 			}
 		})
+	}
+}
+
+func TestPackageImageMetadataStates(t *testing.T) {
+	var legacy Package
+	if err := json.Unmarshal([]byte(`{"name":"legacy"}`), &legacy); err != nil {
+		t.Fatal(err)
+	}
+	if legacy.Icon != nil || legacy.Preview != nil {
+		t.Fatalf("missing image fields should remain nil: %#v", legacy)
+	}
+
+	var explicit Package
+	if err := json.Unmarshal([]byte(`{"name":"explicit","icon":"","preview":"preview.avif"}`), &explicit); err != nil {
+		t.Fatal(err)
+	}
+	if explicit.Icon == nil || *explicit.Icon != "" || explicit.Preview == nil || *explicit.Preview != "preview.avif" {
+		t.Fatalf("explicit image fields lost their state: %#v", explicit)
+	}
+}
+
+func TestBuildBazaarPackageImageURLs(t *testing.T) {
+	empty := ""
+	icon := "custom icon.webp"
+	preview := "preview.avif"
+	tests := []struct {
+		name        string
+		icon        *string
+		preview     *string
+		wantIcon    string
+		wantPreview string
+	}{
+		{name: "legacy defaults", wantIcon: "/icon.png", wantPreview: "/preview.png?imageslim"},
+		{name: "explicit missing", icon: &empty, preview: &empty},
+		{name: "declared formats", icon: &icon, preview: &preview, wantIcon: "/custom%20icon.webp", wantPreview: "/preview.avif"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			pkg := buildBazaarPackageWithMetadata(&StageRepo{
+				URL:     "owner/repo@hash",
+				RepoRef: "v1.0.0",
+				Package: &Package{Name: "sample", Icon: test.icon, Preview: test.preview},
+			}, nil, nil, false, "widgets", "")
+			if pkg == nil {
+				t.Fatal("expected package")
+			}
+			if test.wantIcon == "" && test.wantPreview == "" {
+				if pkg.IconURL != "" || pkg.PreviewURL != "" {
+					t.Fatalf("explicit missing images should produce empty URLs: icon=%q preview=%q", pkg.IconURL,
+						pkg.PreviewURL)
+				}
+				return
+			}
+			if !strings.HasSuffix(pkg.IconURL, test.wantIcon) || !strings.HasSuffix(pkg.PreviewURL, test.wantPreview) {
+				t.Fatalf("unexpected image URLs: icon=%q preview=%q", pkg.IconURL, pkg.PreviewURL)
+			}
+			if pkg.RepoRef != "v1.0.0" {
+				t.Fatalf("unexpected package source metadata: %#v", pkg)
+			}
+		})
+	}
+}
+
+func TestBuildBazaarPackagesUsesStageAsPackageSet(t *testing.T) {
+	stage := &StageIndex{Repos: []*StageRepo{{
+		URL:     "owner/active@abcdef0",
+		Package: &Package{Name: "时间线-Timeline"},
+	}}}
+	stats := map[string]*bazaarStats{
+		"时间线-Timeline":    {Downloads: 12},
+		"removed-package": {Downloads: 99},
+	}
+	packages := buildBazaarPackages(stage, stats, nil, false, "widgets", "")
+	if 1 != len(packages) || "时间线-Timeline" != packages[0].Name || 12 != packages[0].Downloads {
+		t.Fatalf("statistics must enrich only packages present in Stage: %+v", packages)
+	}
+}
+
+func TestOnlinePackagePreviewURLCompression(t *testing.T) {
+	if got := onlinePackagePreviewURL("owner/repo@hash", "../preview.jpg"); got != "" {
+		t.Fatalf("unexpected invalid preview URL: %q", got)
+	}
+	for _, name := range []string{"preview.png", "preview.jpg", "preview.jpeg"} {
+		if got := onlinePackagePreviewURL("owner/repo@hash", name); !strings.HasSuffix(got, "?imageslim") {
+			t.Fatalf("expected compressed preview URL for %q: %q", name, got)
+		}
+	}
+	for _, name := range []string{"preview.webp", "preview.avif"} {
+		if got := onlinePackagePreviewURL("owner/repo@hash", name); strings.Contains(got, "imageslim") {
+			t.Fatalf("unexpected compressed preview URL for %q: %q", name, got)
+		}
+	}
+}
+
+func TestPackageImageNamesRejectUnsupportedFiles(t *testing.T) {
+	for _, name := range []string{"icon.svg", "../icon.png", "folder/icon.webp", `folder\\icon.webp`, "icon.png "} {
+		if isSupportedPackageImageName(name) {
+			t.Fatalf("unsupported package image name accepted: %q", name)
+		}
+	}
+	for _, name := range []string{"icon.png", "icon.jpg", "icon.jpeg", "icon.webp", "icon.avif"} {
+		if !isSupportedPackageImageName(name) {
+			t.Fatalf("supported package image name rejected: %q", name)
+		}
 	}
 }
 
@@ -96,7 +214,7 @@ func TestSetPreferredPackageDeprecationMetadata(t *testing.T) {
 	if pkg.PreferredDeprecatedReason != "已停止维护" {
 		t.Fatalf("unexpected preferred deprecated reason %q", pkg.PreferredDeprecatedReason)
 	}
-	if len(pkg.Alternatives) != 1 || pkg.Alternatives[0] != "new-package" {
+	if len(pkg.Alternatives) != 2 || pkg.Alternatives[0] != "new-package" || pkg.Alternatives[1] != "插件" {
 		t.Fatalf("unexpected alternatives %#v", pkg.Alternatives)
 	}
 

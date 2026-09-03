@@ -234,8 +234,8 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
     <span class="fn__flex-center">${window.siyuan.languages.template}</span>
     <span class="fn__space fn__flex-1"></span>
     <select class="b3-select" data-type="groupValueSource">
-        <option value="stored" ${!groupByRendered ? "selected" : ""}>${window.siyuan.languages.original}</option>
-        <option value="rendered" ${groupByRendered ? "selected" : ""}>${window.siyuan.languages.template}</option>
+        <option value="stored" ${!groupByRendered ? "selected" : ""}>${window.siyuan.languages.originalValue}</option>
+        <option value="rendered" ${groupByRendered ? "selected" : ""}>${window.siyuan.languages.templateRenderedValue}</option>
     </select>
 </label>` : "";
         html = `${valueSourceHTML}<button class="b3-menu__item${!groupByRendered && ["date", "updated", "created"].includes(column.type) ? "" : " fn__none"}" data-type="goGroupsDate">

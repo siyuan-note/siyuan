@@ -1,0 +1,310 @@
+{
+	"ID": "20260830213256-014vk79",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260830213256-014vk79",
+		"title": "ブロックの選択と操作",
+		"type": "doc",
+		"updated": "20260903165745"
+	},
+	"Children": [
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-lavtepl",
+			"Properties": {
+				"id": "20260830213256-lavtepl",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブロック選択モードでは、操作のたびにテキスト編集へ戻ることなく、キーボードでブロックを選択して操作できます。薄い枠線は現在のブロックを示すだけで、複数ブロックの選択に含まれるのはマークしたブロックだけです。"
+				}
+			]
+		},
+		{
+			"Type": "NodeHeading",
+			"ID": "20260830213256-pjttne5",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260830213256-pjttne5",
+				"updated": "20260903165745"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブロック選択モードの開始と終了"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-5e9nkff",
+			"Properties": {
+				"id": "20260830213256-5e9nkff",
+				"updated": "20260903165745"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "任意のブロックにカーソルを置き、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すとブロック選択モードになります。複数のブロックにまたがってテキストを選択した後、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと、その範囲をブロック選択に切り替えられます。読み取り専用モードでも同様に使用できます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " または "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↓"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと、前または次のブロックが現在のブロックになります。もう一度 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと、すべてのマークを解除してモードを終了します。"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-x9egm28",
+			"Properties": {
+				"id": "20260830213256-x9egm28",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "編集可能なブロックでは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すとモードを終了し、現在のブロック末尾にカーソルを移動します。ほかのテキストを入力した場合も、モードを終了して現在のブロックを編集します。このモードでは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "A"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で現在のブロックの後に、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "B"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で前にブロックを挿入します。これらの文字をテキストとして入力するには、先にブロック選択モードを終了してください。"
+				}
+			]
+		},
+		{
+			"Type": "NodeHeading",
+			"ID": "20260830213256-51dyjx1",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260830213256-51dyjx1",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブロックのマークと操作対象"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-f0fjx1n",
+			"Properties": {
+				"id": "20260830213256-f0fjx1n",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "スペース"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと、現在のブロックをマークまたはマーク解除できます。マーク後も現在のブロックは切り替わりません。方向キーで現在のブロックを切り替えてこの操作を繰り返すと、離れた位置にある複数のブロックもマークできます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " または "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↓"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で連続選択を作成できます。"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-zz29ngh",
+			"Properties": {
+				"id": "20260830213256-zz29ngh",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マークしたブロックがある場合、コピー、削除、切り取り、移動などの操作はマークしたブロックだけに適用され、マークしていない現在のブロックは自動的に含まれません。マークがない場合は、現在のブロックが操作対象になります。"
+				}
+			]
+		},
+		{
+			"Type": "NodeHeading",
+			"ID": "20260830213256-j3jfq7v",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260830213256-j3jfq7v",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブロックの削除と移動"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-533l69r",
+			"Properties": {
+				"id": "20260830213256-533l69r",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マークがない場合、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Delete"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Backspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " はどちらも現在のブロックを削除します。マークがある場合は、どちらのキーでもマークしたすべてのブロックを削除します。現在のブロックが削除された場合、前者は次の残りのブロックを、後者は可能な場合に前の残りのブロックを現在のブロックにします。マークされていない現在のブロックはそのまま維持されます。"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-f7qblmk",
+			"Properties": {
+				"id": "20260830213256-f7qblmk",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "単一のブロックまたは連続選択したブロックは、対応するブロックコマンドで上または下へ移動できます。連続していないマーク済みブロックは上下に並べ替えられませんが、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ドキュメントを移動"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を使用すると、まとめて別のドキュメントへ移動できます。"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-9wz9c32",
+			"Properties": {
+				"id": "20260830213256-9wz9c32",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブロックの削除、切り取り、移動後もブロック選択モードは維持されるため、続けてほかのブロックを選択して操作できます。"
+				}
+			]
+		}
+	]
+}

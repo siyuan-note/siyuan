@@ -34,6 +34,8 @@ import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
 import {hasFocusOffsets} from "./focusRestore";
 import {isIPhone} from "./compatibility";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
+import {disposeCustomBlocksInElement, setCustomBlockRootReady} from "../../plugin/customBlockRender";
+import {invalidateTrackedRanges, invalidateTrackedRangesInElement} from "./trackedRange";
 /// #if MOBILE
 import {updateMobileTitleReadonly} from "./setEditMode";
 /// #endif
@@ -49,6 +51,7 @@ export const onGet = (options: {
     dataDocType?: string,
     isValid?: () => boolean,
     focusAfterZoom?: boolean,
+    suppressFocus?: boolean,
 }) => {
     if (options.isValid && !options.isValid()) {
         return;
@@ -64,6 +67,7 @@ export const onGet = (options: {
     if (options.data.code === 1) {
         // 其他报错
         if (!options.action.includes(Constants.CB_GET_APPEND)) {    // 向下加载时块可能还没有创建 https://github.com/siyuan-note/siyuan/issues/10851
+            invalidateTrackedRanges(options.protyle);
             if (options.protyle.model) {
                 options.protyle.model.parent.parent.removeTab(options.protyle.model.parent.id);
             } else {
@@ -74,7 +78,12 @@ export const onGet = (options: {
     }
     if (options.data.code === 3) {
         // block not found
+        invalidateTrackedRanges(options.protyle);
         return;
+    }
+    if (!options.action.includes(Constants.CB_GET_APPEND) &&
+        !options.action.includes(Constants.CB_GET_BEFORE)) {
+        invalidateTrackedRanges(options.protyle);
     }
     options.protyle.notebookId = options.data.data.box;
     options.protyle.path = options.data.data.path;
@@ -140,7 +149,8 @@ export const onGet = (options: {
             refreshHeadingNumbers,
             afterCB: options.afterCB,
             scrollPosition: options.scrollPosition,
-            focusAfterZoom: options.focusAfterZoom
+            focusAfterZoom: options.focusAfterZoom,
+            suppressFocus: options.suppressFocus,
         }, options.protyle);
         removeLoading(options.protyle);
         return;
@@ -158,7 +168,8 @@ export const onGet = (options: {
             refreshHeadingNumbers,
             afterCB: options.afterCB,
             scrollPosition: options.scrollPosition,
-            focusAfterZoom: options.focusAfterZoom
+            focusAfterZoom: options.focusAfterZoom,
+            suppressFocus: options.suppressFocus,
         }, options.protyle);
         removeLoading(options.protyle);
         return;
@@ -189,7 +200,8 @@ export const onGet = (options: {
             refreshHeadingNumbers,
             afterCB: options.afterCB,
             scrollPosition: options.scrollPosition,
-            focusAfterZoom: options.focusAfterZoom
+            focusAfterZoom: options.focusAfterZoom,
+            suppressFocus: options.suppressFocus,
         }, options.protyle);
         removeLoading(options.protyle);
     };
@@ -220,10 +232,12 @@ const setHTML = (options: {
     refreshHeadingNumbers?: boolean,
     afterCB?: () => void,
     focusAfterZoom?: boolean,
+    suppressFocus?: boolean,
 }, protyle: IProtyle) => {
     if (protyle.contentElement.classList.contains("fn__none") && protyle.wysiwyg.element.innerHTML !== "") {
         return;
     }
+    setCustomBlockRootReady(protyle.wysiwyg.element, false);
 
     // XSS in inline memo elements https://github.com/siyuan-note/siyuan/issues/15280
     const parser = new DOMParser();
@@ -260,6 +274,8 @@ const setHTML = (options: {
             }
             const lastRemoveTop = removeElement.getBoundingClientRect().top;
             removeElements.forEach(item => {
+                invalidateTrackedRangesInElement(protyle, item);
+                disposeCustomBlocksInElement(item);
                 item.remove();
             });
             protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (removeElement.getBoundingClientRect().top - lastRemoveTop) - 1;
@@ -287,11 +303,15 @@ const setHTML = (options: {
                 scrollHeight -= lastElement.clientHeight + 8;   // 大部分元素的 margin
             }
             removeElements.forEach((item) => {
+                invalidateTrackedRangesInElement(protyle, item);
+                disposeCustomBlocksInElement(item);
                 item.remove();
             });
             hideElements(["toolbar"], protyle);
         }
     } else {
+        invalidateTrackedRanges(protyle);
+        disposeCustomBlocksInElement(protyle.wysiwyg.element);
         protyle.wysiwyg.element.innerHTML = options.content;
         // 设置 innerHTML 会导致浏览器将 scrollTop 重置为 0，此处立即恢复以避免页面跳转到开头
         // https://github.com/siyuan-note/siyuan/issues/17886
@@ -370,8 +390,10 @@ const setHTML = (options: {
             setReadonlyByConfig(protyle, updateReadonly);
         }
     }
+    setCustomBlockRootReady(protyle.wysiwyg.element, true);
 
-    focusElementById(protyle, options.action, options.scrollAttr, options.scrollPosition, options.focusAfterZoom);
+    focusElementById(protyle, options.action, options.scrollAttr, options.scrollPosition,
+        options.focusAfterZoom, options.suppressFocus);
 
     if (options.action.includes(Constants.CB_GET_SETID) ||
         (protyle.model && !protyle.block.showAll)) {
@@ -543,7 +565,7 @@ export const enableProtyle = (protyle: IProtyle) => {
 };
 
 const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScrollAttr,
-                          scrollPosition?: ScrollLogicalPosition, focusAfterZoom = false) => {
+                          scrollPosition?: ScrollLogicalPosition, focusAfterZoom = false, suppressFocus = false) => {
     let focusElement: Element;
     if (scrollAttr && scrollAttr.focusId) {
         focusElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${scrollAttr.focusId}"]`);
@@ -569,7 +591,7 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
         preventScroll(protyle); // 搜索页签滚动会导致再次请求
         bgFade(focusElement);
     }
-    if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
+    if (!suppressFocus && (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_FOCUSFIRST))) {
         setTimeout(() => {
             let range: Range;
             if (hasFocusOffsets(scrollAttr)) {

@@ -9,8 +9,10 @@ import {isSupportCSSHL, searchMarkRender} from "../render/searchMarkRender";
 import {hideKeyboardToolbar} from "../../mobile/util/keyboardToolbar";
 /// #endif
 import {restoreLuteMarkdownSyntax} from "./paste";
+import {invalidateTrackedRanges} from "./trackedRange";
 
 export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?: boolean) => {
+    invalidateTrackedRanges(protyle);
     /// #if MOBILE
     hideKeyboardToolbar();
     /// #endif

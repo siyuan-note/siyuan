@@ -1,4 +1,25 @@
+export type TDocumentTabMovePosition = "sibling" | "child";
+
+export const getDocumentTabMovePosition = (clientX: number, left: number, width: number): TDocumentTabMovePosition =>
+    clientX < left + width / 2 ? "sibling" : "child";
+
+export const clearDocumentTabMovePreview = (tabHeadersElement?: ParentNode) => {
+    const root = tabHeadersElement || document;
+    root.querySelectorAll(".item__document-drop").forEach((item) => item.remove());
+    if (root instanceof HTMLElement) {
+        root.classList.remove("layout-tab-bars--document-drop");
+    }
+    root.querySelectorAll<HTMLElement>(".layout-tab-bars--document-drop").forEach((item) => {
+        item.classList.remove("layout-tab-bars--document-drop");
+    });
+    root.querySelectorAll<HTMLElement>(".item--document-drop").forEach((item) => {
+        item.classList.remove("item--document-drop");
+        delete item.dataset.documentDropPosition;
+    });
+};
+
 export const clearTabDragPreview = (tabHeadersElement?: HTMLElement) => {
+    clearDocumentTabMovePreview(tabHeadersElement);
     if (tabHeadersElement) {
         tabHeadersElement.classList.remove("layout-tab-bars--drag");
         tabHeadersElement.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach((item) => {
@@ -35,6 +56,13 @@ export const reorderTabItems = <T extends { id: string }>(items: T[], item: T, n
 export const findNextTabId = <T extends { id: string }>(items: T[], candidateIds: string[]) => {
     const existingIds = new Set(items.map((item) => item.id));
     return candidateIds.find((id) => existingIds.has(id));
+};
+
+export const findDefaultTabNextId = <T extends { id: string, pin: boolean }>(items: T[], pin: boolean) => {
+    if (!pin) {
+        return undefined;
+    }
+    return items.find((item) => !item.pin)?.id;
 };
 
 type TTabHoverScheduler = (callback: () => void, delay: number) => () => void;

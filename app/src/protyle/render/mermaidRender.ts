@@ -5,6 +5,8 @@ import {genIconHTML} from "./util";
 import {applyMermaidLayout, getMermaidLayout, MERMAID_LAYOUT_ATTR} from "./mermaidLayout";
 import {MERMAID_SANITIZE_OPTIONS} from "./mermaidSanitize";
 import {isZenumlDiagram} from "./mermaidZenuml";
+import {getHostCapabilities} from "../../util/hostCapabilities";
+import {escapeHtml} from "../../util/escape";
 
 let mermaidTidyTreePromise: Promise<void>;
 let mermaidZenumlPromise: Promise<void>;
@@ -60,7 +62,8 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
             },
         ]);
         const config: any = {
-            securityLevel: "loose", // 升级后无 https://github.com/siyuan-note/siyuan/issues/3587，可使用该选项
+            // 升级后无 https://github.com/siyuan-note/siyuan/issues/3587，可使用 loose
+            securityLevel: getHostCapabilities().remoteKernel ? "strict" : "loose",
             altFontFamily: "sans-serif",
             fontFamily: "sans-serif",
             startOnLoad: false,
@@ -142,8 +145,11 @@ const initMermaid = (mermaidElements: Element[]) => {
             renderElement.lastElementChild.innerHTML = svg;
         } catch (e) {
             const errorElement = document.querySelector("#" + id);
-            renderElement.lastElementChild.innerHTML = `${errorElement.outerHTML}<div class="fn__hr"></div><div class="ft__error">${e.message.replace(/\n/, "<br>")}</div>`;
-            errorElement.parentElement.remove();
+            const errorDiagram = errorElement ?
+                window.DOMPurify.sanitize(errorElement.outerHTML, MERMAID_SANITIZE_OPTIONS) : "";
+            const errorMessage = escapeHtml(e instanceof Error ? e.message : String(e)).replace(/\n/g, "<br>");
+            renderElement.lastElementChild.innerHTML = `${errorDiagram}<div class="fn__hr"></div><div class="ft__error">${errorMessage}</div>`;
+            errorElement?.parentElement?.remove();
         }
     });
 };

@@ -23,12 +23,16 @@ describe("mobile plugin dock state", () => {
         const mobileModel = () => ({}) as never;
         const app = {
             plugins: [{
+                name: "sample-plugin",
+                displayName: "Sample plugin",
                 docks: {
                     pluginSecond: {
+                        id: "second",
                         config: {position: "BottomRight", index: 20, title: "Second", icon: "iconSecond"},
                         mobileModel,
                     },
                     pluginFirst: {
+                        id: "first",
                         config: {position: "LeftBottom", index: 10, title: "First", icon: "iconFirst"},
                         mobileModel,
                     },
@@ -38,6 +42,22 @@ describe("mobile plugin dock state", () => {
         const entries = getMobilePluginDockEntries(app as never);
 
         assert.deepEqual(entries.map(entry => entry.type), ["pluginFirst", "pluginSecond"]);
+        assert.deepEqual(entries.map(entry => ({
+            key: entry.key,
+            dockID: entry.dockID,
+            pluginName: entry.pluginName,
+            pluginDisplayName: entry.pluginDisplayName,
+        })), [{
+            key: "plugin:sample-plugin:first",
+            dockID: "first",
+            pluginName: "sample-plugin",
+            pluginDisplayName: "Sample plugin",
+        }, {
+            key: "plugin:sample-plugin:second",
+            dockID: "second",
+            pluginName: "sample-plugin",
+            pluginDisplayName: "Sample plugin",
+        }]);
         assert.deepEqual(getMobilePluginDockLayouts(entries), [
             {id: "pluginFirst", side: "left", index: 10},
             {id: "pluginSecond", side: "right", index: 20},

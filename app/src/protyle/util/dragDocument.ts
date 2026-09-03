@@ -2,6 +2,37 @@ export const isSameDragEditor = (targetEditor: Pick<Element, "contains">, source
     return targetEditor.contains(sourceElement);
 };
 
+export type TBlockDragData = {
+    html: string,
+    notebookID: string,
+    rootID: string,
+};
+
+export const stringifyBlockDragData = (data: TBlockDragData) => JSON.stringify({
+    version: 1,
+    ...data,
+});
+
+export const parseBlockDragData = (value: string): TBlockDragData => {
+    try {
+        const data = JSON.parse(value);
+        if (data?.version === 1 && typeof data.html === "string") {
+            return {
+                html: data.html,
+                notebookID: typeof data.notebookID === "string" ? data.notebookID : "",
+                rootID: typeof data.rootID === "string" ? data.rootID : "",
+            };
+        }
+    } catch {
+        // 兼容旧版窗口传递的原始 HTML。
+    }
+    return {
+        html: value,
+        notebookID: "",
+        rootID: "",
+    };
+};
+
 export const BLOCK_DRAGOVER_SELECTOR = [
     ".dragover__left",
     ".dragover__right",

@@ -27,6 +27,7 @@ import {getPadding} from "../ui/initUI";
 import {hasTopClosestByAttribute} from "../util/hasClosest";
 import {addScriptSync} from "../util/addScript";
 import {prepareWechatCopy, prepareZhihuCopy} from "./platformCopy";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 
 export class Preview {
     public element: HTMLElement;
@@ -45,6 +46,9 @@ export class Preview {
             previewElement.classList.add(protyle.options.classes.preview);
         }
         const actions = protyle.options.preview.actions;
+        if (actions.includes("desktop")) {
+            this.element.dataset.device = "desktop";
+        }
         const actionElement = document.createElement("div");
         actionElement.className = "protyle-preview__action";
         const actionHtml: string[] = [];
@@ -152,6 +156,9 @@ export class Preview {
                             item.classList.remove("protyle-preview__action--current");
                         });
                         target.classList.add("protyle-preview__action--current");
+                        if (["desktop", "tablet", "mobile"].includes(type)) {
+                            this.element.dataset.device = type;
+                        }
                     }
                     const actionCustom = actions.find((w: IPreviewActionCustom) => w?.key === type) as IPreviewActionCustom;
                     if (actionCustom) {
@@ -217,7 +224,13 @@ export class Preview {
     public updatePadding(padding: { left: number, right: number, bottom: number, top: number }) {
         if (!this.element.classList.contains("fn__none") &&
             this.element.querySelector('.protyle-preview__action [data-type="desktop"]')?.classList.contains("protyle-preview__action--current")) {
-            this.previewElement.style.padding = `${padding.top}px ${padding.left}px ${padding.bottom}px ${padding.right}px`;
+            if (this.element.dataset.paddingMode === "responsive") {
+                this.previewElement.style.padding = "";
+                this.previewElement.style.paddingTop = `${padding.top}px`;
+                this.previewElement.style.paddingBottom = `${padding.bottom}px`;
+            } else {
+                this.previewElement.style.padding = `${padding.top}px ${padding.left}px ${padding.bottom}px ${padding.right}px`;
+            }
         }
     }
 
@@ -239,7 +252,8 @@ export class Preview {
                 id: protyle.block.id || protyle.options.blockId || protyle.block.parentID,
             }, response => {
                 const oldScrollTop = protyle.preview.previewElement.scrollTop;
-                protyle.preview.previewElement.innerHTML = response.data.html;
+                protyle.preview.previewElement.innerHTML = getHostCapabilities().remoteKernel ?
+                    window.DOMPurify.sanitize(response.data.html) : response.data.html;
                 /// #if MOBILE
                 protyle.preview.previewElement.querySelector(`#${CSS.escape(protyle.block.rootID)}`)
                     ?.classList.add("protyle-preview__title");

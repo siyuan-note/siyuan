@@ -24,12 +24,29 @@ import {updateAVName} from "../render/av/action";
 import {setFold} from "../util/blockFold";
 import {nbsp2space} from "../util/normalizeText";
 import {getBlockquoteContext, isBlockquoteMarker, shouldCancelBlockquote} from "./blockquote";
+import {
+    getSemanticMarkerPrefixLengthForNode,
+    normalizeSemanticInlineElements,
+    removeEmptySemanticInlineElement
+} from "../util/inlineElementMarker";
+import {normalizeInlineFontFamilyStyle} from "../toolbar/fontFamilyCore";
+import {sanitizeKernelHTML} from "../../util/hostCapabilities";
 
 interface IInputOperations {
     doOperations: IOperation[];
     undoOperations: IOperation[];
     undoContext?: Record<string, string>;
 }
+
+const normalizeInlineFontFamilyStyles = (element: ParentNode) => {
+    element.querySelectorAll<HTMLElement>("span[style]").forEach(item => {
+        const fontFamily = item.style.fontFamily;
+        const normalizedFontFamily = normalizeInlineFontFamilyStyle(fontFamily);
+        if (normalizedFontFamily !== fontFamily) {
+            item.style.fontFamily = normalizedFontFamily;
+        }
+    });
+};
 
 export const beforeBlockquoteInput = (protyle: IProtyle, event: InputEvent) => {
     if (event.isComposing || !event.cancelable || (event.data !== ">" && event.data !== "》")) {
@@ -142,11 +159,12 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         const wbrNextElement = hasNextSibling(wbrElement) as HTMLElement;
         // 行内代码前软换行，光标应在行内代码前
         if (!hasPreviousSibling(wbrElement) && wbrElement.parentElement.tagName === "SPAN" &&
-            wbrNextElement && wbrNextElement.textContent.startsWith(Constants.ZWSP)) {
+            getSemanticMarkerPrefixLengthForNode(wbrNextElement) > 0) {
             wbrElement.parentElement.before(wbrElement);
         }
         if (event.inputType === "deleteContentForward") {
-            if (wbrNextElement && wbrNextElement.nodeType === 1 && !wbrNextElement.textContent.startsWith(Constants.ZWSP)) {
+            if (wbrNextElement && wbrNextElement.nodeType === 1 &&
+                getSemanticMarkerPrefixLengthForNode(wbrNextElement.firstChild) === 0) {
                 const nextType = (wbrNextElement.getAttribute("data-type") || "").split(" ");
                 if (nextType.includes("code") || nextType.includes("kbd") || nextType.includes("tag")) {
                     wbrNextElement.insertAdjacentElement("afterbegin", wbrElement);
@@ -169,6 +187,15 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             }
         }
     }
+    const removeEmptySemanticElementAtCaret = () => {
+        if (event?.inputType !== "deleteContentForward") {
+            return;
+        }
+        const semanticElement = wbrElement.closest("span[data-type]") as HTMLElement | null;
+        if (semanticElement) {
+            removeEmptySemanticInlineElement(range, semanticElement, wbrElement);
+        }
+    };
     const id = blockElement.getAttribute("data-node-id");
     const conversionOperations: IInputOperations | undefined = inputOperations ? {
         doOperations: inputOperations.doOperations,
@@ -181,6 +208,9 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     } : undefined;
     if (editElement.classList.contains("callout-title")) {
         fixAdjacentTags(editElement);
+        normalizeSemanticInlineElements(editElement);
+        removeEmptySemanticElementAtCaret();
+        normalizeInlineFontFamilyStyles(editElement);
         let html = protyle.lute.SpinBlockDOM(blockElement.outerHTML);
         hideElements(["util"], protyle, true);
         const tempElement = document.createElement("template");
@@ -202,7 +232,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             blockElement.querySelectorAll('[data-type~="block-ref"][data-subtype="d"]').forEach(refItem => {
                 if (refItem.textContent === "") {
                     fetchPost("/api/block/getRefText", {id: refItem.getAttribute("data-id")}, (response) => {
-                        refItem.innerHTML = response.data;
+                        refItem.innerHTML = sanitizeKernelHTML(response.data);
                     });
                 }
             });
@@ -322,6 +352,9 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     }
     // 相邻标签之间插入空格区隔，避免 SpinBlockDOM 解析时合并为一个标签 https://github.com/siyuan-note/siyuan/issues/18191
     fixAdjacentTags(editElement);
+    normalizeSemanticInlineElements(editElement);
+    removeEmptySemanticElementAtCaret();
+    normalizeInlineFontFamilyStyles(editElement);
     let html = blockElement.outerHTML;
     let focusHR = false;
     if (["---", "___", "***"].includes(editElement.textContent) && type !== "NodeCodeBlock") {
@@ -480,7 +513,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
                 realElement.querySelectorAll('[data-type~="block-ref"][data-subtype="d"]').forEach(refItem => {
                     if (refItem.textContent === "") {
                         fetchPost("/api/block/getRefText", {id: refItem.getAttribute("data-id")}, (response) => {
-                            refItem.innerHTML = response.data;
+                            refItem.innerHTML = sanitizeKernelHTML(response.data);
                         });
                     }
                 });

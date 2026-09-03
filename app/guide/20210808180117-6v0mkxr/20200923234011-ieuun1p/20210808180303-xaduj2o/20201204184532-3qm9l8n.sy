@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260830143000"
 	},
 	"Children": [
 		{
@@ -1702,6 +1702,209 @@
 				{
 					"Type": "NodeText",
 					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tplen01",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260830143000-tplen01",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Create child document trees"
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tplen02",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830143000-tplen02",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "createDocTree"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " runs only when a template is inserted manually in the editor. After rendering, SiYuan first shows the complete child document tree that will be created and creates it only after confirmation; canceling inserts no template content and creates no documents. A child is always created even when a sibling has the same title; existing documents are never reused or overwritten. A single undo removes both the inserted template content and every child document created by that insertion. A single plan can create at most 128 documents, and its declared child document tree can be at most 16 levels deep. The resulting absolute file tree depth is still subject to the “Allows creation of sub-documents deeper than 7 levels” setting."
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tplen03",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260830143000-tplen03",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "dGVtcGxhdGU="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": ".action{define \"child-review\"}\n## Review\n.action{end}\n\n.action{createDocTree (list\n  (dict \"title\" \"Materials\" \"template\" \"children/materials.md\"\n    \"children\" (list (dict \"title\" \"Excerpts\")))\n  (dict \"title\" \"Review\" \"define\" \"child-review\")\n)}\n\n.action{range $doc := renderDocRef \"children\" .id}\n- ((.action{$doc.RootID} \".action{$doc.HPath}\"))\n.action{end}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tplen04",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830143000-tplen04",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Each child content template is rendered with that child document as its context and can use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".title"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".id"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".parentID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".rootID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".hPath"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tplen07",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830143000-tplen07",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "renderDocRef \"children\" <id>"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " returns a static list of planned child document descriptions; "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "renderDocRef \"path\" <hPath>"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " returns static block-reference text that points to a planned document."
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tplen05",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830143000-tplen05",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Each node can use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "define"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to select a named template in the current template file, or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to reference an external template relative to the current template package. If any external template is missing or cannot be parsed, the entire operation is canceled; no content is inserted and no partial document tree is created."
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tplen06",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830143000-tplen06",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "createDocTree"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " does not run in automatically applied content templates, such as those used when creating documents, daily notes, or database items. Database and asset packaging and exporting an entire document subtree as a template are outside the scope of this release."
 				}
 			]
 		},

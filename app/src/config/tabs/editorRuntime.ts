@@ -44,8 +44,10 @@ const applyEditorConfig = (data: Config.IEditor) => {
         resize(protyle);
         if (isFullWidth === "true") {
             protyle.contentElement.setAttribute("data-fullwidth", "true");
+            protyle.preview.element.setAttribute("data-fullwidth", "true");
         } else {
             protyle.contentElement.removeAttribute("data-fullwidth");
+            protyle.preview.element.removeAttribute("data-fullwidth");
         }
     });
     if (refreshHeadingNumbers) {

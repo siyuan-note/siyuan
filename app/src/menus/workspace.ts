@@ -23,7 +23,7 @@ import {exportLayout, getAllLayout} from "../layout/util";
 import {getDockByType} from "../layout/tabUtil";
 import {exitSiYuan, lockScreen} from "../dialog/processSystem";
 import {showMessage} from "../dialog/message";
-import {unicode2Emoji} from "../emoji";
+import {getFileTreeIconHTML} from "../emoji/fileTreeIcon";
 import {Dock} from "../layout/dock";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {openFlashcardV2Management} from "../card/flashcardV2";
@@ -38,6 +38,7 @@ import {upDownHint} from "../util/upDownHint";
 import {openDataMigration} from "./dataMigration";
 import {openLink} from "../editor/openLink";
 import {adjustEditorFontSize} from "../util/editorFontSize";
+import {getHostCapabilities} from "../util/hostCapabilities";
 
 const editLayout = (layoutName?: string) => {
     const dialog = new Dialog({
@@ -136,12 +137,13 @@ const editLayout = (layoutName?: string) => {
 };
 
 const togglePinDock = (id: "switchLeftDock" | "switchRightDock" | "switchBottomDock", dock: Dock, pinIcon: string, unpinIcon: string) => {
+    const isFloating = dock.isFloating();
     return {
         id,
-        label: `${dock.pin ? window.siyuan.languages.switchToFloatingLayout : window.siyuan.languages.switchToFixedLayout}`,
-        icon: `${dock.pin ? unpinIcon : pinIcon}`,
+        label: `${isFloating ? window.siyuan.languages.switchToFixedLayout : window.siyuan.languages.switchToFloatingLayout}`,
+        icon: `${isFloating ? pinIcon : unpinIcon}`,
         accelerator: window.siyuan.config.keymap.general[id].custom,
-        current: !dock.pin,
+        current: isFloating,
         click() {
             dock.togglePin();
         }
@@ -247,7 +249,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
         window.siyuan.menus.menu.remove();
         return;
     }
-    fetchPost("/api/system/getWorkspaces", {}, (response) => {
+    const renderMenu = (workspaces: IWorkspace[]) => {
         window.siyuan.menus.menu.remove();
         window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BAR_WORKSPACE);
         if (!window.siyuan.config.readonly) {
@@ -286,7 +288,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             type: "submenu",
             submenu: dockMenu
         }).element);
-        if (!window.siyuan.config.readonly) {
+        if (!window.siyuan.config.readonly && getHostCapabilities().workspaces) {
             let workspaceSubMenu: IMenu[];
             /// #if !BROWSER
             workspaceSubMenu = [{
@@ -314,7 +316,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 }
             }];
             workspaceSubMenu.push({id: "separator_1", type: "separator"});
-            response.data.forEach((item: IWorkspace) => {
+            workspaces.forEach((item: IWorkspace) => {
                 workspaceSubMenu.push(workspaceItem(item) as IMenu);
             });
             /// #else
@@ -393,7 +395,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 }
             }];
             workspaceSubMenu.push({id: "separator_1", type: "separator"});
-            response.data.forEach((item: IWorkspace) => {
+            workspaces.forEach((item: IWorkspace) => {
                 workspaceSubMenu.push({
                     iconHTML: "",
                     action: "iconCloseRound",
@@ -580,7 +582,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     if (!item.closed) {
                         submenu.push({
                             label: escapeHtml(item.name),
-                            iconHTML: unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note, "b3-menu__icon", true),
+                            iconHTML: getFileTreeIconHTML(item.icon, "notebook", "b3-menu__icon", true),
                             accelerator: window.siyuan.storage[Constants.LOCAL_DAILYNOTEID] === item.id ? window.siyuan.config.keymap.general.dailyNote.custom : "",
                             click: () => {
                                 fetchNewDailyNote(app, item.id);
@@ -649,7 +651,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     openHistory(app);
                 }
             }).element);
-            if (!window.siyuan.config.readonly) {
+            if (!window.siyuan.config.readonly && getHostCapabilities().importExport) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "dataMigration",
                     label: window.siyuan.languages.dataMigration,
@@ -708,10 +710,18 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             }).element);
         }
         window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom});
-    });
+    };
+    if (getHostCapabilities().workspaces) {
+        fetchPost("/api/system/getWorkspaces", {}, (response) => renderMenu(response.data));
+    } else {
+        renderMenu([]);
+    }
 };
 
 const openWorkspace = (workspace: string) => {
+    if (!getHostCapabilities().workspaces) {
+        return;
+    }
     /// #if !BROWSER
     if (workspace === window.siyuan.config.system.workspaceDir) {
         return;

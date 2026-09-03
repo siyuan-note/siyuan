@@ -1,5 +1,6 @@
 import {hasClosestBlock, isInEmbedBlock} from "../protyle/util/hasClosest";
 import {focusByRange, getEditorRange} from "../protyle/util/selection";
+import {getStartScrollTop} from "./highlightPosition";
 
 export const bgFade = (element: Element) => {
     element.classList.add("protyle-wysiwyg--hl");
@@ -106,8 +107,22 @@ export const scrollCenter = (
     const elementRect = nodeElement.getBoundingClientRect();
     const contentRect = protyle.contentElement.getBoundingClientRect();
     if (position === "start") {
+        const breadcrumbElement = protyle.breadcrumb?.element.parentElement;
+        // 使用未应用滚动平移的面包屑边界，确保顶部栏重新显示后目标块仍在可视区域内。
+        const offsetParentTop = breadcrumbElement?.offsetParent?.getBoundingClientRect().top ?? contentRect.top;
         protyle.contentElement.scroll({
-            top: protyle.contentElement.scrollTop + elementRect.top - contentRect.top - (window.siyuan.config.editor.fontSize * 1.625 * 2 + 24),
+            top: getStartScrollTop({
+                scrollTop: protyle.contentElement.scrollTop,
+                elementTop: elementRect.top,
+                contentTop: contentRect.top,
+                contextHeight: window.siyuan.config.editor.fontSize * 1.625 * 2 + 24,
+                overlay: breadcrumbElement ? {
+                    absolute: getComputedStyle(breadcrumbElement).position === "absolute",
+                    offsetParentTop,
+                    offsetTop: breadcrumbElement.offsetTop,
+                    height: breadcrumbElement.offsetHeight,
+                } : undefined,
+            }),
             behavior
         });
         return;

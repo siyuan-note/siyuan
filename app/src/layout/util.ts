@@ -40,6 +40,7 @@ import {setTitle} from "../util/processTitle";
 import {activateQueuedAVLocate, queueAVLocateRequest} from "../protyle/render/av/locate";
 import {applyDockEntryVisibility} from "../config/entryVisibility/runtime";
 import {panePercentages, resizePanePercentages} from "./resizePane";
+import {requestResponsiveDockLayout} from "./dock/responsive";
 
 const isBuiltInCustomModel = (type: string) => {
     return type === "siyuan-card" || type === "siyuan-database-row";
@@ -575,6 +576,8 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
                     activateQueuedAVLocate(protyle, info.id);
                 }
             },
+            // 笔记本刚打开时块索引可能暂不可用，确保外部 URL 最终能打开目标块
+            retryOnUnavailable: 10,
         });
     } else {
         if (applyTabStartupMode && window.siyuan.config.fileTree.tabStartupMode === 1) {
@@ -822,33 +825,33 @@ export const resizeTopBar = () => {
         item.removeAttribute("data-hide");
     });
 
-    let afterDragElement = dragElement.nextElementSibling;
+    let afterDragElement = dragElement.nextElementSibling as HTMLElement;
     const hideIds: string[] = [];
-    while (toolbarElement.scrollWidth > toolbarElement.clientWidth + 2) {
+    while (toolbarElement.scrollWidth > toolbarElement.clientWidth + 2 &&
+        afterDragElement && afterDragElement.id !== "barMore" && afterDragElement.id !== "windowControls") {
         // 跳过默认即隐藏的元素（如桌面端 #barExit），它们本就不占溢出空间，
         // 若为其打上 data-hide，最大化后恢复阶段会误将其显示出来
-        if (!afterDragElement.classList.contains("fn__none")) {
+        if (!afterDragElement.classList.contains("fn__none") &&
+            afterDragElement.getAttribute("data-entry-hidden") !== "true" &&
+            afterDragElement.getAttribute("data-topbar-empty") !== "true") {
             hideIds.push(afterDragElement.id);
             afterDragElement.classList.add("fn__none");
             afterDragElement.setAttribute("data-hide", "true");
         }
-        afterDragElement = afterDragElement.nextElementSibling;
-        if (afterDragElement.id === "barMore") {
-            break;
-        }
+        afterDragElement = afterDragElement.nextElementSibling as HTMLElement;
     }
 
-    let beforeDragElement = dragElement.previousElementSibling;
-    while (toolbarElement.scrollWidth > toolbarElement.clientWidth + 2) {
-        if (!beforeDragElement.classList.contains("fn__none")) {
+    let beforeDragElement = dragElement.previousElementSibling as HTMLElement;
+    while (toolbarElement.scrollWidth > toolbarElement.clientWidth + 2 &&
+        beforeDragElement && beforeDragElement.id !== "barWorkspace") {
+        if (!beforeDragElement.classList.contains("fn__none") &&
+            beforeDragElement.getAttribute("data-entry-hidden") !== "true" &&
+            beforeDragElement.getAttribute("data-topbar-empty") !== "true") {
             hideIds.push(beforeDragElement.id);
             beforeDragElement.classList.add("fn__none");
             beforeDragElement.setAttribute("data-hide", "true");
         }
-        beforeDragElement = beforeDragElement.previousElementSibling;
-        if (beforeDragElement.id === "barWorkspace") {
-            break;
-        }
+        beforeDragElement = beforeDragElement.previousElementSibling as HTMLElement;
     }
     if (hideIds.length > 0) {
         barMoreElement.classList.remove("fn__none");
@@ -869,9 +872,6 @@ export const resizeTopBar = () => {
         }
     }
 
-    window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].forEach((id: string) => {
-        document.getElementById(id)?.classList.add("fn__none");
-    });
 };
 
 // TODO: 需支持所有页签类型，避免其他类型页签没有使用到而加载
@@ -967,6 +967,11 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
     }
 
     const getMinSize = (element: HTMLElement) => {
+        const dock = [window.siyuan.layout?.leftDock, window.siyuan.layout?.rightDock].find((item) =>
+            item?.layout.element === element);
+        if (dock) {
+            return dock.getResponsiveMinimumSize();
+        }
         let minSize = 232;
         Array.from(element.querySelectorAll(".file-tree")).find((item) => {
             if (item.classList.contains("sy__backlink") || item.classList.contains("sy__graph")
@@ -1018,6 +1023,10 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
             const nextElement = resizeElement.nextElementSibling as HTMLElement;
             const previousElement = resizeElement.previousElementSibling as HTMLElement;
             const isCenterResize = !!resizeElement.parentElement.closest(".layout__center");
+            const responsiveDock = !isCenterResize && direction === "lr" ?
+                [window.siyuan.layout?.leftDock, window.siyuan.layout?.rightDock].find((dock) =>
+                    dock?.layout.element === previousElement || dock?.layout.element === nextElement) : undefined;
+            let responsiveResizePrepared = false;
             const paneElements = isCenterResize ? getPaneElements() : [];
             const paneSizes = paneElements.map((item) => direction === "lr" ? item.clientWidth : item.clientHeight);
             const previousIndex = paneElements.indexOf(previousElement);
@@ -1036,6 +1045,9 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
             const x = event[direction === "lr" ? "clientX" : "clientY"];
             const previousSize = direction === "lr" ? previousElement.clientWidth : previousElement.clientHeight;
             const nextSize = direction === "lr" ? nextElement.clientWidth : nextElement.clientHeight;
+            const coordinate = direction === "lr" ? "clientX" : "clientY";
+            let resizeFrame = 0;
+            let pendingCoordinate: number | undefined;
 
             documentSelf.ondragstart = () => {
                 // 文件树拖拽会产生透明效果
@@ -1047,11 +1059,10 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                 return false;
             };
 
-            documentSelf.onmousemove = (moveEvent: MouseEvent) => {
-                moveEvent.preventDefault();
-                moveEvent.stopPropagation();
-                const previousNowSize = (previousSize + (moveEvent[direction === "lr" ? "clientX" : "clientY"] - x));
-                const nextNowSize = (nextSize - (moveEvent[direction === "lr" ? "clientX" : "clientY"] - x));
+            const applyResize = (currentCoordinate: number) => {
+                const delta = currentCoordinate - x;
+                const previousNowSize = previousSize + delta;
+                const nextNowSize = nextSize - delta;
                 if (previousNowSize < 8 || nextNowSize < 8) {
                     return;
                 }
@@ -1072,12 +1083,17 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                 if (nextElement.classList.contains("layout__center") && nextNowSize <= 148) {
                     return;
                 }
+                if (responsiveDock && !responsiveResizePrepared &&
+                    (previousNowSize !== previousSize || nextNowSize !== nextSize)) {
+                    responsiveDock.prepareForManualResize();
+                    responsiveResizePrepared = true;
+                }
                 if (isCenterResize) {
                     const percentages = resizePanePercentages(
                         paneSizes,
                         previousIndex,
                         nextIndex,
-                        moveEvent[direction === "lr" ? "clientX" : "clientY"] - x,
+                        delta,
                     );
                     if (percentages) {
                         setPanePercentages(paneElements, percentages);
@@ -1092,7 +1108,29 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                 }
             };
 
+            documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                moveEvent.preventDefault();
+                moveEvent.stopPropagation();
+                pendingCoordinate = moveEvent[coordinate];
+                if (!resizeFrame) {
+                    resizeFrame = requestAnimationFrame(() => {
+                        resizeFrame = 0;
+                        if (pendingCoordinate !== undefined) {
+                            applyResize(pendingCoordinate);
+                        }
+                        pendingCoordinate = undefined;
+                    });
+                }
+            };
+
             documentSelf.onmouseup = () => {
+                if (resizeFrame) {
+                    cancelAnimationFrame(resizeFrame);
+                    resizeFrame = 0;
+                }
+                if (pendingCoordinate !== undefined) {
+                    applyResize(pendingCoordinate);
+                }
                 documentSelf.body.classList.remove("fn__pointer-none");
                 documentSelf.onmousemove = null;
                 documentSelf.onmouseup = null;
@@ -1141,6 +1179,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
             previousElement.style.transition = "none";
             if (resizeElement.classList.contains("layout__resize--lr")) {
                 if (previousElement.classList.contains("layout__dockl")) {
+                    window.siyuan.layout.leftDock.prepareForManualResize();
                     document.querySelectorAll("#dockLeft .dock__item--active").forEach(item => {
                         if (bigType.includes(item.getAttribute("data-type"))) {
                             size = 320;
@@ -1149,6 +1188,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                     previousElement.style.width = size + "px";
                     window.siyuan.layout.leftDock.setSize();
                 } else if (nextElement.classList.contains("layout__dockr")) {
+                    window.siyuan.layout.rightDock.prepareForManualResize();
                     document.querySelectorAll("#dockRight .dock__item--active").forEach(item => {
                         if (bigType.includes(item.getAttribute("data-type"))) {
                             size = 320;
@@ -1243,6 +1283,7 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
             adjustLayout(item);
         }
     });
+    requestResponsiveDockLayout();
 };
 
 export const fixWndFlex1 = (layout: Layout) => {

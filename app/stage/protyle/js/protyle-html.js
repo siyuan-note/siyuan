@@ -16,8 +16,12 @@ class ProtyleHtml extends HTMLElement {
         if (name === 'data-content') {
             // data-content 保留原始 HTML 源码，确保 DOM 反复序列化和解析后内容不变。
             let dataContent = newValue || ''
+            const remoteKernel = new URLSearchParams(window.location.search).get('remote') === '1' ||
+                (typeof process !== 'undefined' && Array.isArray(process.argv) && process.argv.some((arg) =>
+                    arg === '--remote' || arg.startsWith('--remote=')))
+            const allowScripts = !remoteKernel && window.siyuan.config.editor.allowHTMLBLockScript
 
-            if (!window.siyuan.config.editor.allowHTMLBLockScript) {
+            if (!allowScripts) {
                 // Do not execute scripts in HTML blocks by default to prevent XSS https://github.com/siyuan-note/siyuan/issues/11172
                 dataContent = DOMPurify.sanitize(dataContent);
             }
@@ -26,7 +30,7 @@ class ProtyleHtml extends HTMLElement {
 
             const el = document.createElement('div')
             el.innerHTML = dataContent
-            const scripts = el.getElementsByTagName('script')
+            const scripts = allowScripts ? el.getElementsByTagName('script') : []
             let fatalHTML = ''
             for (const script of scripts) {
                 if (script.textContent.indexOf('document.write') > -1) {

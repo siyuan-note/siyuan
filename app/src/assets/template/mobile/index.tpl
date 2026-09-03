@@ -13,7 +13,7 @@
 </div>
 <div class="mobile-safe-area"></div>
 <div id="mobileTopBar" class="toolbar toolbar--border mobile-topbar">
-    <input class="toolbar__title fn__hidden" id="toolbarName" autocomplete="off">
+    <input class="toolbar__title fn__hidden" id="toolbarName" autocomplete="off" enterkeyhint="next">
     <span class="toolbar__title toolbar__title--readonly fn__hidden fn__none" id="toolbarNameReadonly"></span>
     <button id="toolbarSync" class="toolbar__button toolbar__icon-deactivate fn__none" type="button">
         <svg><use xlink:href="#iconCloudSucc"></use></svg>
@@ -45,6 +45,9 @@
             <svg data-type="sidebar-backlink-tab" class="toolbar__icon"><use xlink:href="#iconLink"></use></svg>
             <svg data-type="sidebar-agent-tab" class="toolbar__icon fn__none"><use xlink:href="#iconSparkles"></use></svg>
         </div>
+        <button id="sidebarRightExit" class="toolbar__button ft__error ariaLabel fn__none" type="button">
+            <svg><use xlink:href="#iconQuit"></use></svg>
+        </button>
         <svg class="toolbar__icon"><use xlink:href="#iconLeft"></use></svg>
     </div>
     <div class="fn__flex-1 b3-list--mobile">
@@ -95,7 +98,7 @@
         <span class="toolbar__tabs-count">0</span>
     </button>
     <button id="mobileBottomBarRecent" class="mobile-bottom-bar__item fn__none" data-action="recent" type="button">
-        <svg><use xlink:href="#iconList"></use></svg>
+        <svg><use xlink:href="#iconRecentDocs"></use></svg>
     </button>
     <button id="mobileBottomBarOutline" class="mobile-bottom-bar__item fn__none" data-action="outline" type="button">
         <svg><use xlink:href="#iconOutline"></use></svg>

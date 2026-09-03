@@ -64,9 +64,14 @@ import {
     endsWithMultiCharHintPrefix,
     getBlockHintTriggerOffset,
     getBlockRefStaticText,
+    isBlockHintQueryAtCaret,
     shouldCaptureHintUndoFocus,
     shouldIgnoreHintTrigger,
 } from "./blockHintRange";
+import {getMobileHintPosition} from "./mobileHintPosition";
+import {getVisibleViewportBounds} from "../../mobile/util/visibleViewport";
+import {getTopBarHeight} from "../../layout/getTopBarHeight";
+import {stripSemanticMarkersFromRangeText} from "../util/inlineElementMarker";
 
 const genEmojiInsertHTML = (value: string) => {
     const kind = getIconValueKind(value);
@@ -327,6 +332,78 @@ export class Hint {
         });
     }
 
+    public canResumeBlockHint(protyle: IProtyle, range: Range) {
+        if (!range.collapsed || !protyle.wysiwyg.element.contains(range.startContainer) ||
+            !Constants.BLOCK_HINT_KEYS.includes(this.splitChar) ||
+            hasClosestByAttribute(range.startContainer, "data-type", "code") ||
+            hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock")) {
+            return false;
+        }
+        const start = getSelectionOffset(range.startContainer, protyle.wysiwyg.element, range).start;
+        const textBeforeCaret = range.startContainer.textContent.substring(0, start) || "";
+        let textAfterCaret = "";
+        if (range.startContainer.nodeType === 3) {
+            const textNode = range.startContainer as Text;
+            const caretOffset = getWholeTextOffset(textNode, range.startOffset);
+            textAfterCaret = textNode.wholeText.substring(caretOffset);
+        }
+        return isBlockHintQueryAtCaret(textBeforeCaret, textAfterCaret, this.splitChar,
+            Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar], Constants.SIZE_TITLE);
+    }
+
+    private getMobileSelectionBounds(protyle: IProtyle) {
+        const range = getEditorRange(protyle.wysiwyg.element);
+        const position = getSelectionPosition(protyle.wysiwyg.element, range);
+        if (range.startContainer.nodeType === 3 && range.startContainer.textContent.length > 0) {
+            const textLength = range.startContainer.textContent.length;
+            const offset = Math.min(range.startOffset, textLength);
+            const textRange = range.cloneRange();
+            if (offset > 0) {
+                textRange.setStart(range.startContainer, offset - 1);
+                textRange.setEnd(range.startContainer, offset);
+            } else {
+                textRange.setStart(range.startContainer, 0);
+                textRange.setEnd(range.startContainer, 1);
+            }
+            const rects = textRange.getClientRects();
+            const rect = rects[rects.length - 1];
+            if (rect?.height > 0) {
+                return {
+                    top: rect.top,
+                    bottom: rect.bottom,
+                };
+            }
+        }
+        const rangeElement = range.startContainer.nodeType === 3 ?
+            range.startContainer.parentElement : range.startContainer as HTMLElement;
+        const computedLineHeight = rangeElement ? parseFloat(getComputedStyle(rangeElement).lineHeight) : NaN;
+        const lineHeight = Number.isNaN(computedLineHeight) ? 26 : computedLineHeight;
+        return {
+            top: position.top - lineHeight,
+            bottom: position.top + lineHeight,
+        };
+    }
+
+    private setMobilePosition(anchorTop: number, anchorBottom: number) {
+        const viewportBounds = getVisibleViewportBounds();
+        const viewportTop = Math.max(viewportBounds.top, getTopBarHeight());
+        let viewportBottom = viewportBounds.bottom;
+        const keyboardToolbarElement = document.getElementById("keyboardToolbar");
+        if (keyboardToolbarElement && !keyboardToolbarElement.classList.contains("fn__none")) {
+            viewportBottom = Math.min(viewportBottom, keyboardToolbarElement.getBoundingClientRect().top);
+        }
+        viewportBottom = Math.max(viewportTop, viewportBottom);
+        const heightLimit = (viewportBottom - viewportTop) / 3;
+        const gap = 4;
+        let position = getMobileHintPosition(anchorTop, anchorBottom, this.element.scrollHeight,
+            viewportTop, viewportBottom, heightLimit, gap);
+        this.element.style.maxHeight = `${position.maxHeight}px`;
+        position = getMobileHintPosition(anchorTop, anchorBottom, this.element.getBoundingClientRect().height,
+            viewportTop, viewportBottom, heightLimit, gap);
+        this.element.style.left = "0";
+        this.element.style.top = `${position.top}px`;
+    }
+
     public genLoading(protyle: IProtyle) {
         this.destroyEmojiPanel();
         if (this.element.classList.contains("fn__none")) {
@@ -335,19 +412,20 @@ export class Hint {
             if (this.source === "av") {
                 const cellElement = hasClosestByClassName(protyle.toolbar.range.startContainer, "av__cell");
                 if (cellElement) {
-                    /// #if !MOBILE
                     const cellRect = cellElement.getBoundingClientRect();
+                    /// #if !MOBILE
                     setPosition(this.element, cellRect.left, cellRect.bottom, cellRect.height);
                     /// #else
-                    setPosition(this.element, 0, 0);
+                    this.setMobilePosition(cellRect.top, cellRect.bottom);
                     /// #endif
                 }
             } else {
-                /// #if !MOBILE
                 const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
+                /// #if !MOBILE
                 setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
                 /// #else
-                setPosition(this.element, 0, 0);
+                const selectionBounds = this.getMobileSelectionBounds(protyle);
+                this.setMobilePosition(selectionBounds.top, selectionBounds.bottom);
                 /// #endif
             }
         } else if (!this.element.querySelector(".fn__loading")) {
@@ -436,7 +514,7 @@ export class Hint {
                 /// #if !MOBILE
                 setPosition(this.element, cellRect.left, cellRect.bottom, cellRect.height);
                 /// #else
-                setPosition(this.element, 0, 0);
+                this.setMobilePosition(cellRect.top, cellRect.bottom);
                 /// #endif
             }
         } else {
@@ -444,7 +522,8 @@ export class Hint {
             /// #if !MOBILE
             setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
             /// #else
-            setPosition(this.element, 0, 0);
+            const selectionBounds = this.getMobileSelectionBounds(protyle);
+            this.setMobilePosition(selectionBounds.top, selectionBounds.bottom);
             /// #endif
         }
         this.element.scrollTop = 0;
@@ -753,7 +832,7 @@ ${genHintItemHTML(item)}
             tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
             tempElement = tempElement.firstElementChild as HTMLDivElement;
             if (refIsS) {
-                const selectedText = range.toString();
+                const selectedText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
                 const staticText = getBlockRefStaticText(selectedText, this.splitChar, this.lastIndex > -1);
                 if (staticText) {
                     tempElement.setAttribute("data-subtype", "s");

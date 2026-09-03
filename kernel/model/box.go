@@ -94,6 +94,13 @@ func StatJob() {
 }
 
 func ListNotebooks() (ret []*Box, err error) {
+	// 启用数据同步时，缺失配置可能表示其他设备已删除笔记本，不能在列表读取过程中自动重建。
+	repairMissingConf := nil != Conf && nil != Conf.Sync && !Conf.Sync.Enabled
+	ret, err = listNotebooks(repairMissingConf)
+	return
+}
+
+func listNotebooks(repairMissingConf bool) (ret []*Box, err error) {
 	ret = []*Box{}
 	dirs, err := os.ReadDir(util.DataDir)
 	if err != nil {
@@ -146,6 +153,19 @@ func ListNotebooks() (ret []*Box, err error) {
 					setEncryptedBoxState(id, EncryptedBoxStateError)
 					logging.LogErrorf("encrypted notebook key identity is missing [%s]", boxDirPath)
 				} else {
+					if !repairMissingConf {
+						logging.LogWarnf("ignored a box without conf because automatic repair is disabled [%s]", boxDirPath)
+						continue
+					}
+					hasDocuments, scanErr := hasLiveBoxDocuments(boxDirPath)
+					if scanErr != nil {
+						logging.LogErrorf("scan box without conf [%s] failed: %s", boxDirPath, scanErr)
+						continue
+					}
+					if !hasDocuments {
+						logging.LogWarnf("ignored a box without conf and documents [%s]", boxDirPath)
+						continue
+					}
 					// 数据同步时展开文档树操作可能导致数据丢失 https://github.com/siyuan-note/siyuan/issues/7129
 					logging.LogWarnf("found a corrupted box [%s]", boxDirPath)
 				}
@@ -217,8 +237,8 @@ func ListNotebooks() (ret []*Box, err error) {
 
 		if !isExistConf && !missingEncryptedIdentity {
 			// Automatically create notebook conf.json if not found it https://github.com/siyuan-note/siyuan/issues/9647
-			if err := box.SaveConf(boxConf); err != nil {
-				logging.LogErrorf("save box conf [%s] failed: %s", boxDirPath, err)
+			if saveErr := box.SaveConf(boxConf); saveErr != nil {
+				logging.LogErrorf("save box conf [%s] failed: %s", boxDirPath, saveErr)
 			}
 			box.Unindex()
 			logging.LogWarnf("fixed a corrupted box [%s]", boxDirPath)
@@ -244,11 +264,40 @@ func ListNotebooks() (ret []*Box, err error) {
 			return util.NaturalCompare(ret[j].Name, ret[i].Name)
 		})
 	case util.SortModeCustom:
-		sort.Slice(ret, func(i, j int) bool { return ret[i].Sort < ret[j].Sort })
+		sort.Slice(ret, func(i, j int) bool {
+			if ret[i].Sort != ret[j].Sort {
+				return ret[i].Sort < ret[j].Sort
+			}
+			return ret[i].ID > ret[j].ID
+		})
 	case util.SortModeCreatedASC:
 		sort.Slice(ret, func(i, j int) bool { return ret[i].ID < ret[j].ID })
 	case util.SortModeCreatedDESC:
 		sort.Slice(ret, func(i, j int) bool { return ret[i].ID > ret[j].ID })
+	}
+	return
+}
+
+// hasLiveBoxDocuments 检查笔记本正文目录中是否存在文档，忽略仅用于保存笔记本元数据和历史数据的 .siyuan 目录。
+func hasLiveBoxDocuments(boxDirPath string) (ret bool, err error) {
+	err = filepath.WalkDir(boxDirPath, func(filePath string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if entry.IsDir() {
+			if filePath != boxDirPath && ".siyuan" == entry.Name() {
+				return fs.SkipDir
+			}
+			return nil
+		}
+		if entry.Type().IsRegular() && strings.HasSuffix(entry.Name(), ".sy") {
+			ret = true
+			return fs.SkipAll
+		}
+		return nil
+	})
+	if errors.Is(err, fs.SkipAll) {
+		err = nil
 	}
 	return
 }
@@ -961,23 +1010,134 @@ func fullReindex() {
 }
 
 func ChangeBoxSort(boxIDs []string) {
-	fileTreeSortLock.Lock()
-	defer fileTreeSortLock.Unlock()
-
-	for i, boxID := range boxIDs {
-		box := &Box{ID: boxID}
-		boxConf := box.GetConf()
-		boxConf.Sort = i + 1
-		box.SaveConf(boxConf)
+	if 1 > len(boxIDs) {
+		return
 	}
+
+	fileTreeSortLock.Lock()
+	boxes, currentIDs := loadNotebookCustomOrder()
+	orderedIDs := mergeRequestedIDOrder(currentIDs, boxIDs)
+	if equalStringSlices(currentIDs, orderedIDs) {
+		fileTreeSortLock.Unlock()
+		return
+	}
+	if err := saveNotebookCustomOrder(boxes, orderedIDs); nil != err {
+		fileTreeSortLock.Unlock()
+		logging.LogErrorf("change notebook sort failed: %s", err)
+		return
+	}
+	fileTreeSortLock.Unlock()
+	IncSync()
 	pushNotebookSortChanged()
 }
 
-func pushNotebookSortChanged() {
-	var notebookIDs []string
-	for _, box := range Conf.GetOpenedBoxes() {
-		notebookIDs = append(notebookIDs, box.ID)
+// ReorderNotebooks 将笔记本移动到目标笔记本之前或之后。
+func ReorderNotebooks(sourceIDs []string, targetID, position string) (ret *ReorderResult, err error) {
+	ret = &ReorderResult{}
+	if err = validateReorderArgs(sourceIDs, targetID, position); nil != err {
+		return
 	}
+
+	fileTreeSortLock.Lock()
+	boxes, currentIDs := loadNotebookCustomOrder()
+	orderedIDs, changed, reorderErr := reorderIDSequence(currentIDs, sourceIDs, targetID, position)
+	if nil != reorderErr || !changed {
+		fileTreeSortLock.Unlock()
+		return ret, reorderErr
+	}
+	if err = saveNotebookCustomOrder(boxes, orderedIDs); nil != err {
+		fileTreeSortLock.Unlock()
+		return ret, err
+	}
+	fileTreeSortLock.Unlock()
+
+	ret.Changed = true
+	IncSync()
+	pushNotebookSortChanged()
+	return
+}
+
+func loadNotebookCustomOrder() (boxes map[string]*Box, ids []string) {
+	allBoxes, err := ListNotebooks()
+	if nil != err {
+		return map[string]*Box{}, nil
+	}
+	sort.Slice(allBoxes, func(i, j int) bool {
+		if allBoxes[i].Sort != allBoxes[j].Sort {
+			return allBoxes[i].Sort < allBoxes[j].Sort
+		}
+		return allBoxes[i].ID > allBoxes[j].ID
+	})
+	boxes = make(map[string]*Box, len(allBoxes))
+	for _, box := range allBoxes {
+		boxes[box.ID] = box
+		ids = append(ids, box.ID)
+	}
+	return
+}
+
+func mergeRequestedIDOrder(currentIDs, requestedIDs []string) (ret []string) {
+	currentSet := make(map[string]struct{}, len(currentIDs))
+	for _, id := range currentIDs {
+		currentSet[id] = struct{}{}
+	}
+	requestedSet := map[string]struct{}{}
+	var validRequestedIDs []string
+	for _, id := range requestedIDs {
+		if _, exists := currentSet[id]; !exists {
+			continue
+		}
+		if _, exists := requestedSet[id]; exists {
+			continue
+		}
+		validRequestedIDs = append(validRequestedIDs, id)
+		requestedSet[id] = struct{}{}
+	}
+	requestedIndex := 0
+	for _, id := range currentIDs {
+		if _, requested := requestedSet[id]; requested {
+			ret = append(ret, validRequestedIDs[requestedIndex])
+			requestedIndex++
+		} else {
+			ret = append(ret, id)
+		}
+	}
+	return
+}
+
+func saveNotebookCustomOrder(boxes map[string]*Box, orderedIDs []string) error {
+	oldSorts := map[string]int{}
+	writtenIDs := []string{}
+	for i, id := range orderedIDs {
+		box := boxes[id]
+		if nil == box {
+			return fmt.Errorf("notebook [%s] not found", id)
+		}
+		boxConf := box.GetConf()
+		oldSorts[id] = boxConf.Sort
+		newSort := i + 1
+		if boxConf.Sort == newSort {
+			continue
+		}
+		boxConf.Sort = newSort
+		if err := box.SaveConf(boxConf); nil != err {
+			for _, writtenID := range writtenIDs {
+				writtenBox := boxes[writtenID]
+				writtenConf := writtenBox.GetConf()
+				writtenConf.Sort = oldSorts[writtenID]
+				if rollbackErr := writtenBox.SaveConf(writtenConf); nil != rollbackErr {
+					logging.LogErrorf("rollback notebook [%s] sort failed: %s", writtenID, rollbackErr)
+				}
+			}
+			return err
+		}
+		writtenIDs = append(writtenIDs, id)
+	}
+	return nil
+}
+
+func pushNotebookSortChanged() {
+	_, notebookIDs := loadNotebookCustomOrder()
 	util.BroadcastByType("main", "notebookSortChanged", 0, "", map[string]any{
 		"notebookIDs": notebookIDs,
 	})

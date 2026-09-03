@@ -9,13 +9,15 @@ import {fetchPost} from "../../util/fetch";
 import {exportLayout} from "../../layout/util";
 import {updateDockHotkeys} from "../../layout/dock/util";
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {sendGlobalShortcut, sendUnregisterGlobalShortcut} from "../../boot/globalEvent/keydown";
+import {sendGlobalShortcut, sendUnregisterGlobalShortcut} from "../../boot/globalEvent/globalShortcut";
 import {syncAppMenuShortcuts} from "../../boot/globalEvent/commonHotkey";
 import {normalizeSearchText} from "../search/normalize";
 import {genButtonRowHtml, genConfigGroup} from "../render/render";
 import type {Plugin} from "../../plugin";
 import {isDisallowedTextInputHotkey, isReservedKeymap} from "../../util/hotKeyPolicy";
 import {isWindow} from "../../util/functions";
+import {resolvePluginToolbar} from "../../plugin/toolbarItem";
+import {ensurePluginKeymap, setPluginKeymapCustom} from "../../plugin/keymap";
 const keymapToolbarSearchStrings = (): string[] => [
     window.siyuan.languages.keymapTip,
     window.siyuan.languages.keymapTip2,
@@ -174,7 +176,7 @@ const pluginHasKeymapItems = (item: Plugin): boolean => {
     if (item.commands.length > 0) {
         return true;
     }
-    for (const toolbarItem of item.updateProtyleToolbar([])) {
+    for (const toolbarItem of resolvePluginToolbar(item, [])) {
         if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name)) {
             continue;
         }
@@ -314,11 +316,11 @@ const buildKeymapPluginCommandHtml = (item: Plugin) => {
         ));
     }
 
-    for (const toolbarItem of item.updateProtyleToolbar([])) {
+    for (const toolbarItem of resolvePluginToolbar(item, [])) {
         if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name)) {
             continue;
         }
-        const toolbarKeymap = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name];
+        const toolbarKeymap = ensurePluginKeymap(item.name, toolbarItem.name, toolbarItem.hotkey);
         html.push(genKeymapRowHtml(
             toolbarItem.tip || window.siyuan.languages[toolbarItem.lang],
             pluginKeyPrefix + toolbarItem.name,
@@ -328,7 +330,7 @@ const buildKeymapPluginCommandHtml = (item: Plugin) => {
     }
 
     for (const key of Object.keys(item.docks)) {
-        const dockKeymap = window.siyuan.config.keymap.plugin[item.name][key];
+        const dockKeymap = ensurePluginKeymap(item.name, key, item.docks[key].config.hotkey);
         html.push(genKeymapRowHtml(
             item.docks[key].config.title,
             pluginKeyPrefix + key,
@@ -639,7 +641,8 @@ const setKeymapFromDom = (root: HTMLElement) => {
         } else if (keys[0] === "editor" && isEditorKeymapSegment(keys[1])) {
             data.editor[keys[1]][keys[2]].custom = newHotkey;
         } else if (keys[0] === "plugin") {
-            data.plugin[keys[1]][keys[2]].custom = newHotkey;
+            setPluginKeymapCustom(data.plugin, keys[1], keys[2], newHotkey,
+                item.getAttribute("data-default") || "");
             const plugin = window.siyuan.ws.app.plugins.find((item) => item.name === keys[1]);
             const command = plugin?.commands.find((item) => item.langKey === keys[2]);
             if (!command) {

@@ -257,6 +257,14 @@ func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 			return ast.WalkContinue
 		}
 
+		if ast.NodeCustomBlock == n.Type {
+			if !gulu.Str.Contains(n.Type.String(), excludeTypes) {
+				buf.Write(n.Tokens)
+			}
+			lastSpace = false
+			return ast.WalkSkipChildren
+		}
+
 		if gulu.Str.Contains(n.Type.String(), excludeTypes) {
 			return ast.WalkContinue
 		}

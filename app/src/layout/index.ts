@@ -89,17 +89,6 @@ export class Layout {
                     } else {
                         this.children.splice(index, 0, child);
                     }
-                    if (this.direction === "lr") {
-                        // 向右分屏，左侧文档抖动，移除动画和边距
-                        item.element.querySelectorAll(".protyle-content").forEach((element: HTMLElement) => {
-                            const wysiwygElement = element.querySelector<HTMLElement>(".protyle-wysiwyg");
-                            if (wysiwygElement && !element.parentElement.classList.contains("fn__none")) {
-                                element.classList.remove("protyle-content--transition");
-                                wysiwygElement.style.padding = "";
-                                element.classList.add("protyle-content--transition");
-                            }
-                        });
-                    }
                     if (after) {
                         item.element.after(child.element);
                     } else {

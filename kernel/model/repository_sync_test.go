@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/emirpasic/gods/sets/hashset"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestRemoveEmptyPackageDirs(t *testing.T) {
@@ -45,5 +46,70 @@ func TestRemoveEmptyPackageDirs(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(nonEmptyPath, "en_US.json")); err != nil {
 		t.Fatalf("expected non-empty package directory to be preserved: %s", err)
+	}
+}
+
+func TestCleanupSyncedBoxResidualsBacksUpFilesBeforeRemoval(t *testing.T) {
+	oldDataDir, oldHistoryDir := util.DataDir, util.HistoryDir
+	workspaceDir := t.TempDir()
+	util.DataDir = filepath.Join(workspaceDir, "data")
+	util.HistoryDir = filepath.Join(workspaceDir, "history")
+	t.Cleanup(func() {
+		util.DataDir, util.HistoryDir = oldDataDir, oldHistoryDir
+	})
+
+	boxID := "20260903120700-xyzabcd"
+	boxDirPath := filepath.Join(util.DataDir, boxID)
+	docPath := filepath.Join(boxDirPath, "20260903120800-efghijk.sy")
+	if err := os.MkdirAll(filepath.Dir(docPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(docPath, []byte("residual document"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(boxDirPath, ".DS_Store"), nil, 0644); err != nil {
+		t.Fatal(err)
+	}
+	documentlessBoxID := "20260903120900-lmnopqr"
+	documentlessBoxPath := filepath.Join(util.DataDir, documentlessBoxID)
+	if err := os.MkdirAll(filepath.Join(documentlessBoxPath, "20260903121000-stuvwxy"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(documentlessBoxPath, ".DS_Store"), nil, 0644); err != nil {
+		t.Fatal(err)
+	}
+	unconfirmedBoxID := "20260903121100-zabcdef"
+	unconfirmedDocPath := filepath.Join(util.DataDir, unconfirmedBoxID, "20260903121200-ghijklm.sy")
+	if err := os.MkdirAll(filepath.Dir(unconfirmedDocPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(unconfirmedDocPath, []byte("unconfirmed document"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	cleanupSyncedBoxResiduals(map[string]bool{boxID: true})
+
+	if _, err := os.Stat(boxDirPath); !os.IsNotExist(err) {
+		t.Fatalf("expected synced box residual to be removed: %v", err)
+	}
+	historyDocs, err := filepath.Glob(filepath.Join(util.HistoryDir, "*-delete", boxID, filepath.Base(docPath)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if 1 != len(historyDocs) {
+		t.Fatalf("expected one residual document backup, got %v", historyDocs)
+	}
+	data, err := os.ReadFile(historyDocs[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if "residual document" != string(data) {
+		t.Fatalf("unexpected residual document backup: %q", data)
+	}
+	if _, err = os.Stat(documentlessBoxPath); !os.IsNotExist(err) {
+		t.Fatalf("expected documentless synced box residual to be removed: %v", err)
+	}
+	if _, err = os.Stat(unconfirmedDocPath); err != nil {
+		t.Fatalf("expected unconfirmed notebook documents to be preserved: %v", err)
 	}
 }

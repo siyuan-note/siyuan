@@ -411,11 +411,20 @@ NodeList                        NodeList
 ### 5.16 自定义块
 
 ```json
-{ "Type": "NodeCustomBlock", "ID": "...", "Data": "自定义原始内容",
-  "CustomBlockInfo": "info", "Properties": { "id": "...", "updated": "..." } }
+{ "Type": "NodeCustomBlock", "ID": "...", "Data": "自定义原始内容", "CustomBlockInfo": "info", "Properties": { "id": "...", "updated": "..." } }
 ```
 
 `NodeCustomBlock` 是没有 `Children` 的叶子节点。`Data` 保存原始内容，`CustomBlockInfo` 保存围栏信息字符串。
+
+对应的 Markdown 源码在开始和结束围栏中都使用三个分号：
+
+```markdown
+;;;编码后的插件包名/编码后的块类型
+自定义原始内容
+;;;
+```
+
+插件包名和块类型分别按 URI 组件编码，再使用 `/` 拼接。移除编辑器光标标记并去除首尾空白后等于 `;;;` 的行会结束自定义块，因此不能出现在 `Data` 中。插件渲染的 DOM 是临时内容，不能作为 `Children` 写入；持久化数据源只能是 `Data`、块属性或插件自行管理的外部存储。渲染挂载点内暂不支持嵌套 Protyle 编辑器。
 
 ---
 

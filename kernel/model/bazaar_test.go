@@ -28,7 +28,8 @@ import (
 )
 
 func TestIsValidPackageName(t *testing.T) {
-	valid := []string{"plugin-sample", "plugin.sample_1", "plugin sample (v1) + beta!", "CON.123", strings.Repeat("a", 255)}
+	valid := []string{"plugin-sample", "plugin.sample_1", "plugin sample (v1) + beta!", "时间线-Timeline", "CON.123",
+		strings.Repeat("a", 255)}
 	for _, name := range valid {
 		if !isValidPackageName(name) {
 			t.Fatalf("expected package name %q to be valid", name)
@@ -36,7 +37,7 @@ func TestIsValidPackageName(t *testing.T) {
 	}
 
 	invalid := []string{"", strings.Repeat("a", 256), ".hidden", " leading-space", "trailing-space ",
-		"trailing-period.", "plugin/sample", "plugin..sample", "插件", "CON", "com1", "LPT9"}
+		"trailing-period.", "plugin/sample", "plugin..sample", "zero\u200bwidth", "CON", "com1", "LPT9"}
 	for _, name := range invalid {
 		if isValidPackageName(name) {
 			t.Fatalf("expected package name %q to be invalid", name)
@@ -47,6 +48,17 @@ func TestIsValidPackageName(t *testing.T) {
 func TestIsBuiltInAppearancePackageIgnoresCase(t *testing.T) {
 	if !isBuiltInTheme("Daylight") || !isBuiltInTheme("MIDNIGHT") || !isBuiltInIcon("Litheness") {
 		t.Fatal("expected built-in appearance package names to be case-insensitive")
+	}
+}
+
+func TestInstalledPackageBaseURLPathEscapesPackageNameOnce(t *testing.T) {
+	got := installedPackageBaseURLPath("/plugins/", "A B#C%D(E)+F")
+	if got != "/plugins/A%20B%23C%25D%28E%29+F/" {
+		t.Fatalf("unexpected installed package URL: %q", got)
+	}
+	got = installedPackageBaseURLPath("/widgets/", "时间线-Timeline")
+	if got != "/widgets/%E6%97%B6%E9%97%B4%E7%BA%BF-Timeline/" {
+		t.Fatalf("unexpected Unicode package URL: %q", got)
 	}
 }
 
@@ -119,6 +131,55 @@ func TestBuildUpdatedPackagesIgnoresMissingAndCurrentPackages(t *testing.T) {
 	}
 }
 
+func TestRefreshInstalledPackageREADMEUsesOnlyMatchingVersion(t *testing.T) {
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = oldDataDir })
+
+	packageName := "sample #%(test)+ package"
+	installPath := filepath.Join(util.DataDir, "plugins", packageName)
+	if err := os.MkdirAll(installPath, 0755); err != nil {
+		t.Fatal(err)
+	}
+	manifest := `{"name":"sample #%(test)+ package","version":"1.0.0","readme":{"default":"README.md"}}`
+	if err := os.WriteFile(filepath.Join(installPath, "plugin.json"), []byte(manifest), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(installPath, "README.md"), []byte("![missing](missing.webp)"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	installed := &bazaar.Package{
+		Name:        packageName,
+		Version:     "1.0.0",
+		Readme:      bazaar.LocaleStrings{"default": "README.md"},
+		InstallTime: 42,
+	}
+	available := &bazaar.Package{
+		Name:    packageName,
+		Version: "1.0.0",
+		RepoURL: "https://github.com/owner/repo",
+		RepoRef: "v1.0.0",
+	}
+	refreshInstalledPackageREADME("plugins", installed, available)
+	if !strings.Contains(installed.PreferredReadme,
+		"https://cdn.jsdelivr.net/gh/owner/repo@v1.0.0/missing.webp") {
+		t.Fatalf("matching version did not use the pinned README source: %q", installed.PreferredReadme)
+	}
+	if installed.RepoRef != "v1.0.0" {
+		t.Fatalf("matching version did not expose its repo ref: %q", installed.RepoRef)
+	}
+
+	installed.PreferredReadme = "unchanged"
+	installed.RepoRef = ""
+	available.Version = "2.0.0"
+	available.RepoRef = "v2.0.0"
+	refreshInstalledPackageREADME("plugins", installed, available)
+	if installed.PreferredReadme != "unchanged" || installed.RepoRef != "" {
+		t.Fatalf("outdated installed README used the latest source: %#v", installed)
+	}
+}
+
 func TestGetInstalledPackageInfosIncludesInvalidPackages(t *testing.T) {
 	oldDataDir := util.DataDir
 	util.DataDir = t.TempDir()
@@ -167,7 +228,7 @@ func TestGetInstalledPackageInfosIncludesInvalidPackages(t *testing.T) {
 		"mismatch":     bazaar.PackageInvalidReasonNameMismatch,
 		"invalid-json": bazaar.PackageInvalidReasonInvalidManifest,
 		"missing":      bazaar.PackageInvalidReasonMissingManifest,
-		"插件":           bazaar.PackageInvalidReasonInvalidManifest,
+		"插件":           "",
 	}
 	if len(got) != len(want) {
 		t.Fatalf("expected %d packages, got %#v", len(want), got)

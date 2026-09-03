@@ -1,6 +1,7 @@
 import {MobileCustom} from "./MobileCustom";
 import type {App} from "../../index";
 import type {IMobileSidePanelPluginDock} from "../util/mobileSidePanelConfig";
+import {getPluginDockEntryKey, type PluginDockEntryKey} from "../../plugin/dockKey";
 
 export const MOBILE_PLUGIN_DOCKS_CHANGE_EVENT = "siyuan-mobile-plugin-docks-change";
 
@@ -11,6 +12,10 @@ export const getMobilePluginDockSide = (position: TPluginDockPosition) => {
 };
 
 export interface IMobilePluginDockEntry {
+    key: PluginDockEntryKey,
+    dockID: string,
+    pluginName: string,
+    pluginDisplayName: string,
     type: string,
     config: IPluginDockTab,
     mobileModel: (element: Element) => MobileCustom,
@@ -22,6 +27,10 @@ export const getMobilePluginDockEntries = (app: App = window.siyuan.ws.app) => {
     app.plugins.forEach((plugin) => {
         Object.entries(plugin.docks).forEach(([type, dock]) => {
             entries.push({
+                key: getPluginDockEntryKey(plugin.name, dock.id),
+                dockID: dock.id,
+                pluginName: plugin.name,
+                pluginDisplayName: plugin.displayName?.trim() || plugin.name,
                 type,
                 config: dock.config,
                 mobileModel: dock.mobileModel,

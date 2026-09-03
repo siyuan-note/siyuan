@@ -54,6 +54,10 @@ class TestElement {
         return attribute === "data-node-id" && !!this.type;
     }
 
+    contains(element: TestElement): boolean {
+        return this === element || this.children.some(child => child.contains(element));
+    }
+
     getBoundingClientRect() {
         return {
             bottom: this.top + 10,
@@ -132,6 +136,35 @@ describe("getBlockRangeSelectElements", () => {
         assert.deepEqual(getBlockRangeSelectElements(asElement(first), asElement(second), getBlock).selectElements,
             expected);
         const upwardSelection = getBlockRangeSelectElements(asElement(second), asElement(first), getBlock);
+        assert.deepEqual(upwardSelection.selectElements, expected);
+        assert.equal(upwardSelection.toDown, false);
+    });
+
+    it("stops at a list containing the range end in the left vertical super block", () => {
+        const editor = new TestElement("editor", 0, ["protyle-wysiwyg"]);
+        const outer = block("outer", 0, "NodeSuperBlock", ["sb"]);
+        const left = block("left", 0, "NodeSuperBlock", ["sb"]);
+        const first = block("first", 10);
+        const list = block("list", 20, "NodeList", ["list"]);
+        const listItem = block("list-item", 20, "NodeListItem", ["li"]);
+        const listParagraph = block("list-paragraph", 20);
+        const listItemAttr = new TestElement("list-item-attr", 20, ["protyle-attr"]);
+        const listAttr = new TestElement("list-attr", 20, ["protyle-attr"]);
+        const leftAttr = new TestElement("left-attr", 20, ["protyle-attr"]);
+        const resize = new TestElement("resize", 0, ["sb__resize"]);
+        const right = block("right", 0, "NodeSuperBlock", ["sb"]);
+        const third = block("third", 10);
+        const fourth = block("fourth", 20);
+        const rightAttr = new TestElement("right-attr", 20, ["protyle-attr"]);
+        const outerAttr = new TestElement("outer-attr", 20, ["protyle-attr"]);
+        list.append(listItem.append(listParagraph, listItemAttr), listAttr);
+        editor.append(outer.append(left.append(first, list, leftAttr), resize,
+            right.append(third, fourth, rightAttr), outerAttr));
+
+        const expected = [asElement(first), asElement(list)];
+        assert.deepEqual(getBlockRangeSelectElements(asElement(first), asElement(listParagraph), getBlock)
+            .selectElements, expected);
+        const upwardSelection = getBlockRangeSelectElements(asElement(listParagraph), asElement(first), getBlock);
         assert.deepEqual(upwardSelection.selectElements, expected);
         assert.equal(upwardSelection.toDown, false);
     });

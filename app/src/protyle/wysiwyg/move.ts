@@ -6,13 +6,21 @@ import {preventScroll} from "../scroll/preventScroll";
 import {scrollCenter} from "../../util/highlightById";
 import {focusByWbr} from "../util/selection";
 import {refreshSbResize} from "../../block/util";
+import {
+    BLOCK_SELECTION_CLASS,
+    getBlockSelectionModeElement,
+    isContinuousBlockSelection
+} from "./blockSelection";
 
 export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Range) => {
     let previousElement: Element;
     let oldListHTML = "";
-    let sourceElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+    let sourceElements: Element[] = Array.from(protyle.wysiwyg.element.querySelectorAll<HTMLElement>(`.${BLOCK_SELECTION_CLASS}`));
+    if (sourceElements.length > 1 && !isContinuousBlockSelection(sourceElements)) {
+        return;
+    }
     if (sourceElements.length === 0) {
-        let sourceElement = getTopAloneElement(nodeElement);
+        let sourceElement = getTopAloneElement(getBlockSelectionModeElement(protyle.wysiwyg.element) || nodeElement);
         const foldElement = hasClosestByAttribute(sourceElement, "fold", "1");
         if (foldElement) {
             sourceElement = foldElement;
@@ -22,6 +30,7 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
         }
         sourceElements = [sourceElement];
     }
+    const rangeIsInSource = sourceElements.some(item => item.contains(range.startContainer));
     const type = sourceElements[0].getAttribute("data-type");
     // 子列表
     if (type === "NodeListItem" &&
@@ -29,7 +38,9 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
         sourceElements[0].parentElement.previousElementSibling?.previousElementSibling?.classList.contains("protyle-action")) {
         if (sourceElements[0].parentElement.parentElement.previousElementSibling?.classList.contains("li")) {
             previousElement = sourceElements[0].parentElement.parentElement.previousElementSibling.querySelector(".list");
-            range.insertNode(document.createElement("wbr"));
+            if (rangeIsInSource) {
+                range.insertNode(document.createElement("wbr"));
+            }
             oldListHTML = sourceElements[0].parentElement.parentElement.parentElement.outerHTML;
             if (!previousElement) {
                 const newId = Lute.NewNodeID();
@@ -44,14 +55,18 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
         sourceElements[0].previousElementSibling?.previousElementSibling?.classList.contains("protyle-action")) {
         if (sourceElements[0].parentElement.previousElementSibling?.classList.contains("li")) {
             previousElement = sourceElements[0].parentElement.previousElementSibling.querySelector(".list");
-            range.insertNode(document.createElement("wbr"));
+            if (rangeIsInSource) {
+                range.insertNode(document.createElement("wbr"));
+            }
             oldListHTML = sourceElements[0].parentElement.parentElement.outerHTML;
             if (!previousElement) {
                 // 目标 li 无子列表：直接整体移动源列表，与其他块移动保持一致
                 sourceElements[0].parentElement.previousElementSibling.lastElementChild.insertAdjacentElement("beforebegin", sourceElements[0]);
                 updateTransaction(protyle, sourceElements[0].parentElement.parentElement, oldListHTML);
                 preventScroll(protyle);
-                focusByWbr(sourceElements[0], range);
+                if (rangeIsInSource) {
+                    focusByWbr(sourceElements[0], range);
+                }
                 scrollCenter(protyle);
                 return;
             }
@@ -85,7 +100,9 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
         }
         updateTransaction(protyle, previousElement.parentElement.parentElement.parentElement, oldListHTML);
         preventScroll(protyle);
-        focusByWbr(previousElement.parentElement, range);
+        if (rangeIsInSource) {
+            focusByWbr(previousElement.parentElement, range);
+        }
         scrollCenter(protyle);
         return;
     }
@@ -121,9 +138,12 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
 export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: Range) => {
     let nextElement: Element;
     let oldListHTML = "";
-    let sourceElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+    let sourceElements: Element[] = Array.from(protyle.wysiwyg.element.querySelectorAll<HTMLElement>(`.${BLOCK_SELECTION_CLASS}`));
+    if (sourceElements.length > 1 && !isContinuousBlockSelection(sourceElements)) {
+        return;
+    }
     if (sourceElements.length === 0) {
-        let sourceElement = getTopAloneElement(nodeElement);
+        let sourceElement = getTopAloneElement(getBlockSelectionModeElement(protyle.wysiwyg.element) || nodeElement);
         const foldElement = hasClosestByAttribute(sourceElement, "fold", "1");
         if (foldElement) {
             sourceElement = foldElement;
@@ -133,6 +153,7 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
         }
         sourceElements = [sourceElement];
     }
+    const rangeIsInSource = sourceElements.some(item => item.contains(range.startContainer));
     const type = sourceElements[0].getAttribute("data-type");
     // 子列表
     if (type === "NodeListItem" &&
@@ -140,7 +161,9 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
         sourceElements[0].parentElement.parentElement?.classList.contains("li")) {
         if (sourceElements[0].parentElement.parentElement.nextElementSibling?.classList.contains("li")) {
             nextElement = sourceElements[0].parentElement.parentElement.nextElementSibling.querySelector(".list > .li");
-            range.insertNode(document.createElement("wbr"));
+            if (rangeIsInSource) {
+                range.insertNode(document.createElement("wbr"));
+            }
             oldListHTML = sourceElements[0].parentElement.parentElement.parentElement.outerHTML;
             if (!nextElement) {
                 const newId = Lute.NewNodeID();
@@ -155,14 +178,18 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
         sourceElements[0].parentElement?.classList.contains("li")) {
         if (sourceElements[0].parentElement.nextElementSibling?.classList.contains("li")) {
             nextElement = sourceElements[0].parentElement.nextElementSibling.querySelector(".list > .li");
-            range.insertNode(document.createElement("wbr"));
+            if (rangeIsInSource) {
+                range.insertNode(document.createElement("wbr"));
+            }
             oldListHTML = sourceElements[0].parentElement.parentElement.outerHTML;
             if (!nextElement) {
                 // 目标 li 无子列表：直接整体移动源列表，与其他块移动保持一致
                 sourceElements[0].parentElement.nextElementSibling.lastElementChild.insertAdjacentElement("beforebegin", sourceElements[0]);
                 updateTransaction(protyle, sourceElements[0].parentElement.parentElement, oldListHTML);
                 preventScroll(protyle);
-                focusByWbr(sourceElements[0], range);
+                if (rangeIsInSource) {
+                    focusByWbr(sourceElements[0], range);
+                }
                 scrollCenter(protyle);
                 return;
             }
@@ -189,7 +216,9 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
         }
         updateTransaction(protyle, nextElement.parentElement.parentElement.parentElement, oldListHTML);
         preventScroll(protyle);
-        focusByWbr(nextElement.parentElement, range);
+        if (rangeIsInSource) {
+            focusByWbr(nextElement.parentElement, range);
+        }
         scrollCenter(protyle);
         return;
     }

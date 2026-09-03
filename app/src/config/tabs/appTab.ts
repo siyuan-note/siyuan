@@ -23,10 +23,11 @@ import {afterExport} from "../../protyle/export/util";
 /// #endif
 import {genConfigItemMainHtml, genConfigItemName} from "../render/fragments";
 import {sendAppSetting} from "./appRuntime";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 
 /// #if MOBILE
 const registerAppWorkspaceGroup = (tab: SettingTabBuilder) => {
-    if (!isInMobileApp() || window.siyuan.config.readonly) {
+    if (!isInMobileApp() || window.siyuan.config.readonly || !getHostCapabilities().workspaces) {
         return;
     }
     const group = tab.group("workspace", window.siyuan.languages.workspaceList);
@@ -65,6 +66,9 @@ const renderWorkspaceList = (workspaceDirElement: Element) => {
 };
 
 const mountAppWorkspaceSlot = (root: HTMLElement) => {
+    if (!getHostCapabilities().workspaces) {
+        return;
+    }
     const workspaceDirElement = root.querySelector("#workspaceDir");
     if (!workspaceDirElement) {
         return;
@@ -286,6 +290,9 @@ const mountNetworkProxy = (root: HTMLElement) => {
 };
 
 const registerAppDataGroup = (tab: SettingTabBuilder) => {
+    if (!getHostCapabilities().importExport) {
+        return;
+    }
     const group = tab.group("data", window.siyuan.languages.configGroupData);
 
     group.button({
@@ -361,6 +368,9 @@ const registerAppDataGroup = (tab: SettingTabBuilder) => {
 };
 
 const mountExportData = (root: HTMLElement) => {
+    if (!getHostCapabilities().importExport) {
+        return;
+    }
     root.querySelector("#exportData")?.addEventListener("click", async () => {
         /// #if BROWSER
         fetchPost("/api/export/exportData", {}, (response) => {
@@ -436,20 +446,22 @@ const registerAppMaintenanceGroup = (tab: SettingTabBuilder) => {
             });
         },
     });
-    group.button({
-        id: "exportLog",
-        title: window.siyuan.languages.systemLog,
-        desc: window.siyuan.languages.systemLogTip,
-        label: window.siyuan.languages.export,
-        icon: "iconUpload",
-        afterMount: (root) => {
-            root.querySelector("#exportLog")?.addEventListener("click", () => {
-                fetchPost("/api/system/exportLog", {}, (response) => {
-                    void saveExportFile(response.data.zip);
+    if (getHostCapabilities().importExport) {
+        group.button({
+            id: "exportLog",
+            title: window.siyuan.languages.systemLog,
+            desc: window.siyuan.languages.systemLogTip,
+            label: window.siyuan.languages.export,
+            icon: "iconUpload",
+            afterMount: (root) => {
+                root.querySelector("#exportLog")?.addEventListener("click", () => {
+                    fetchPost("/api/system/exportLog", {}, (response) => {
+                        void saveExportFile(response.data.zip);
+                    });
                 });
-            });
-        },
-    });
+            },
+        });
+    }
 };
 
 export const registerAppTab = (tab: SettingTabBuilder) => {
@@ -457,6 +469,8 @@ export const registerAppTab = (tab: SettingTabBuilder) => {
     registerAppWorkspaceGroup(tab);
     /// #endif
     registerAppGeneralGroup(tab);
-    registerAppDataGroup(tab);
+    if (getHostCapabilities().importExport) {
+        registerAppDataGroup(tab);
+    }
     registerAppMaintenanceGroup(tab);
 };

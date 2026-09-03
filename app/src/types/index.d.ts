@@ -1140,11 +1140,17 @@ interface IMenu {
     warning?: boolean
 }
 
+interface IBazaarFundingLink {
+    label: string;
+    url: string;
+}
+
 interface IBazaarFunding {
     openCollective?: string;
     patreon?: string;
     github?: string;
     custom?: string[];
+    links?: IBazaarFundingLink[];
 }
 
 type TBazaarRatingDistribution = [number, number, number, number, number];
@@ -1184,6 +1190,7 @@ interface IBazaarItem {
     name: string;
     previewURL: string;
     repoHash: string;
+    repoRef?: string;
     repoURL: string;
     url: string;
     openIssues: number;
@@ -1203,6 +1210,7 @@ interface IBazaarItem {
     bazaarIncompatible?: boolean; // 仅插件/主题
     enabled?: boolean; // 仅 plugin
     userDisabledInPublish?: boolean; // 仅 plugin
+    hasStorageData?: boolean; // 仅插件
     modes?: string[]; // 仅 theme
 }
 

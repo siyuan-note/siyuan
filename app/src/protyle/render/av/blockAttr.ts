@@ -4,6 +4,7 @@ import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {cellValueIsEmpty, popTextCell, updateCellsValue} from "./cell";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
+import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
 import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
 import {uploadFiles} from "../../upload";
@@ -27,6 +28,8 @@ import {
 import {isLastPointerMouse} from "../../../util/touchDragBridge";
 import {getLocalDropFiles, hasDataTransferFiles} from "../../upload/localDropFiles";
 import {cloneAVCellValueSnapshot} from "./cellValue";
+import {getEditorFocusRange, restoreEditorFocusRange} from "../../util/editorFocus";
+import {getHostCapabilities} from "../../../util/hostCapabilities";
 
 interface IAVAttributeTableData {
     avID: string;
@@ -153,6 +156,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
         });
         if (element.innerHTML === "") {
             let dragBlockElement: HTMLElement;
+            let removeEditorRange: Range | undefined;
             element.addEventListener("dragstart", (event: DragEvent) => {
                 const target = event.target as HTMLElement;
                 window.siyuan.dragElement = target.parentElement;
@@ -204,7 +208,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     const cellElement = element.querySelector(".custom-attr__avvalue--active") as HTMLElement;
                     if (cellElement) {
                         const position = {x: event.clientX, y: event.clientY};
-                        if (!isBrowser()) {
+                        if (!isBrowser() && getHostCapabilities().localFileSystem) {
                             /// #if !BROWSER
                             const files = getLocalDropFiles(event.dataTransfer.files,
                                 file => webUtils.getPathForFile(file));
@@ -301,6 +305,16 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     }
                 }
             });
+            element.addEventListener("mousedown", (event) => {
+                if (!hasClosestByAttribute(event.target as HTMLElement, "data-type", "remove")) {
+                    return;
+                }
+                const selection = document.getSelection();
+                const currentRange = selection?.rangeCount ? selection.getRangeAt(0) : undefined;
+                removeEditorRange = getEditorFocusRange(protyle.wysiwyg.element, currentRange,
+                    protyle.toolbar.range);
+                event.preventDefault();
+            });
             element.addEventListener("click", (event) => {
                 if (handleTemplateInteraction(protyle, event)) {
                     return;
@@ -351,6 +365,11 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 }
                 const removeElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "remove");
                 if (removeElement) {
+                    const selection = document.getSelection();
+                    const currentRange = selection?.rangeCount ? selection.getRangeAt(0) : undefined;
+                    const editorRange = removeEditorRange || getEditorFocusRange(protyle.wysiwyg.element,
+                        currentRange, protyle.toolbar.range);
+                    removeEditorRange = undefined;
                     const blockElement = hasClosestBlock(removeElement);
                     if (blockElement) {
                         const table = attributeTableData.get(blockElement as HTMLElement);
@@ -416,6 +435,8 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                             srcIDs: [rowID],
                             avID,
                         }];
+                        const restoreEditorRange = () => restoreEditorFocusRange(protyle.wysiwyg.element,
+                            editorRange);
                         confirmDialog(window.siyuan.languages.removeAV, window.siyuan.languages.confirmDelete + "?", () => {
                             removeElement.setAttribute("disabled", "true");
                             transaction(protyle, doOperations, undoOperations.length > 0 ? undoOperations : undefined, {
@@ -432,7 +453,8 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                                     }
                                 }
                             });
-                        }, undefined, true);
+                            restoreEditorRange();
+                        }, restoreEditorRange, true);
                     }
                     event.stopPropagation();
                     return;
@@ -546,7 +568,7 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
                 h: rect.height,
                 w: rect.width,
             }, (unicode) => {
-                target.innerHTML = unicode2Emoji(unicode || window.siyuan.storage[Constants.LOCAL_IMAGES].file);
+                target.innerHTML = getFileTreeIconHTML(unicode, "file");
             }, target.querySelector("img"), {ownerElement: protyle.element});
             event.preventDefault();
             event.stopPropagation();

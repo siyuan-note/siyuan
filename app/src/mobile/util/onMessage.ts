@@ -8,7 +8,7 @@ import {
     transactionError
 } from "../../dialog/processSystem";
 import type {App} from "../../index";
-import {reloadPlugin} from "../../plugin/loader";
+import {applyPluginReload, syncGlobalPluginConfig} from "../../plugin/globalState";
 import {reloadEmoji} from "../../emoji";
 import {renderSnippet} from "../../config/util/snippets";
 import {redirectToCheckAuth} from "../../util/pathName";
@@ -23,6 +23,7 @@ import {appearanceConfigApi} from "../../config/tabs/appearanceRuntime";
 import {applyCloudUserState} from "../../config/tabs/accountUi";
 import {isInMobileApp} from "../../protyle/util/compatibility";
 import {handleMobileKernelExit} from "./kernelExit";
+import {sanitizeKernelHTML} from "../../util/hostCapabilities";
 
 let statusTimeout: number;
 const statusElement = document.querySelector("#status") as HTMLElement;
@@ -46,7 +47,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                     statusElement.style.bottom = "";
                 } else {
                     clearTimeout(statusTimeout);
-                    statusElement.innerHTML = `<div class="fn__flex">${data.data.tasks[0].action}<div class="fn__progress"><div></div></div>`;
+                    statusElement.innerHTML = `<div class="fn__flex">${sanitizeKernelHTML(data.data.tasks[0].action)}<div class="fn__progress"><div></div></div>`;
                     statusElement.style.bottom = "0";
                 }
                 break;
@@ -70,7 +71,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 setRefDynamicText(data.data);
                 break;
             case "reloadPlugin":
-                reloadPlugin(app, data.data);
+                void applyPluginReload(app, data.data).catch((error) => console.error(error));
                 break;
             case "reloadEmojiConf":
                 reloadEmoji();
@@ -80,6 +81,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "setConf":
                 window.siyuan.config = data.data;
+                syncGlobalPluginConfig(app, data.data.bazaar.petalDisabled);
                 break;
             case "setCloudUser":
                 applyCloudUserState(data.data.user, data.data.userName);
@@ -176,6 +178,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
             case "filetreeSortChanged":
                 window.siyuan.mobile.docks.file?.onFiletreeSortChanged(data.data);
                 break;
+            case "docsImported":
+                window.siyuan.mobile.docks.file?.onDocsImported(data.data);
+                break;
             case "docSortModeChanged":
                 window.siyuan.mobile.docks.file?.onDocSortModeChanged(data.data);
                 break;
@@ -191,7 +196,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                     return;
                 }
                 clearTimeout(statusTimeout);
-                statusElement.innerHTML = data.msg;
+                statusElement.innerHTML = sanitizeKernelHTML(data.msg);
                 statusElement.style.bottom = "var(--mobile-bottom-bar-safe-area)";
                 statusTimeout = window.setTimeout(() => {
                     statusElement.style.bottom = "";

@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260902120000"
 	},
 	"Children": [
 		{
@@ -2427,7 +2427,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208173416-t51ome2",
-				"updated": "20260612204637"
+				"updated": "20260902120000"
 			},
 			"Children": [
 				{
@@ -2900,6 +2900,131 @@
 			},
 			"AttributeViewID": "20240208173528-oq4elsj",
 			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20260830120000-a1dspen",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260830120000-a1dspen",
+				"updated": "20260902120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Display templates"
+				}
+			]
+		},
+		{
+			"ID": "20260830120001-b2dspen",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830120001-b2dspen",
+				"updated": "20260830120001"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A normal field can use a display template without changing its field type. Open the field menu from the column header and enter the template in the template input at the bottom. The template changes only the displayed content; editing the cell still reads and writes the original stored value. Template, rollup, line number, created time, and updated time fields do not support display templates."
+				}
+			]
+		},
+		{
+			"ID": "20260830120002-c3dspen",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830120002-c3dspen",
+				"updated": "20260830124002"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Display templates use the same Go template syntax as template snippets, with "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " delimiters, and may include HTML. For example, if the Progress field stores 42, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "&lt;progress value=\".action{.Progress}\" max=\"100\"&gt;&lt;/progress&gt; .action{.Progress}%"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " displays a progress bar at 42% followed by the text 42%. HTML is sanitized by default."
+				}
+			]
+		},
+		{
+			"ID": "20260830120003-d4dspen",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830120003-d4dspen",
+				"updated": "20260830122003"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Fields in the same row can be referenced by name. For example, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "&lt;strong&gt;.action{.Name}&lt;/strong&gt;: .action{.Progress}%"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " combines the Name and Progress fields. For a field name containing spaces or symbols, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{index . \"Project Name\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". To avoid ambiguity caused by duplicate or renamed fields, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{index .id_mod \"FieldID\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to reference a field by ID."
+				}
+			]
+		},
+		{
+			"ID": "20260830120004-e5dspen",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830120004-e5dspen",
+				"updated": "20260902120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A display template reads each field's original stored value, not the display result produced by another display template. Filters, sorts, and groups can use either the original value or the template-rendered value. Clear the display template to restore the field's original display."
+				}
+			]
 		},
 		{
 			"ID": "20240818174922-r0eubvc",

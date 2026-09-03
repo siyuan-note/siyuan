@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"os"
 	"path"
 	"path/filepath"
 	"slices"
@@ -63,9 +64,9 @@ func FlushTxQueue() {
 	}
 }
 
-// PerformTxSync 同步执行单笔事务并返回错误，供 undo/redo 重放使用。
+// PerformTxSync 同步执行单笔事务并返回错误，供需要获知落盘结果的调用方使用。
 // 与异步入队的 PerformTransactions 不同，这里直接持有 flushLock 串行执行 performTx，
-// 失败时返回原始错误（不转成推送消息），调用方据此回滚撤销栈状态。
+// 失败时返回原始错误（不转成推送消息），调用方可以保留待处理数据或回滚状态。
 func PerformTxSync(tx *Transaction) (err error) {
 	defer logging.Recover()
 	flushLock.Lock()
@@ -943,7 +944,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 	subTree := tx.luteEngine.BlockDOM2Tree(data)
 	// 兜底校验：禁止跨加密边界块引（粘贴/拖拽/API 直调可能携带跨边界引用）
 	// subTree.Box 此时尚未设置，用目标树所在 box 作为 srcBox
-	degradeCrossBoundaryBlockRefs(subTree.Root, tree.Box)
+	tx.degradeCrossBoundaryBlockRefs(subTree.Root, tree.Box)
 	insertedNode := subTree.Root.FirstChild
 	if nil == insertedNode {
 		return &TxErr{code: TxErrCodeBlockNotFound, msg: "invalid data tree", id: block.ID}
@@ -1046,7 +1047,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 	subTree := tx.luteEngine.BlockDOM2Tree(data)
 	// 兜底校验：禁止跨加密边界块引（粘贴/拖拽/API 直调可能携带跨边界引用）
 	// subTree.Box 此时尚未设置，用目标树所在 box 作为 srcBox
-	degradeCrossBoundaryBlockRefs(subTree.Root, tree.Box)
+	tx.degradeCrossBoundaryBlockRefs(subTree.Root, tree.Box)
 	insertedNode := subTree.Root.FirstChild
 	if nil == insertedNode {
 		return &TxErr{code: TxErrCodeBlockNotFound, msg: "invalid data tree", id: block.ID}
@@ -1596,7 +1597,7 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 	subTree.Box, subTree.Path = tree.Box, tree.Path
 	tx.processGlobalAssets(subTree)
 	// 兜底校验：禁止跨加密边界块引（粘贴/拖拽/API 直调可能携带跨边界引用）
-	degradeCrossBoundaryBlockRefs(subTree.Root, subTree.Box)
+	tx.degradeCrossBoundaryBlockRefs(subTree.Root, subTree.Box)
 
 	insertedNode := subTree.Root.FirstChild
 	if nil == insertedNode {
@@ -1846,7 +1847,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	var newDefIDs []string
 
 	// 兜底校验：禁止跨加密边界块引（加密笔记本↔ 普通 box，或不同加密笔记本之间）
-	degradeCrossBoundaryBlockRefs(subTree.Root, subTree.Box)
+	tx.degradeCrossBoundaryBlockRefs(subTree.Root, subTree.Box)
 
 	var unlinks []*ast.Node
 	ast.Walk(subTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -2018,6 +2019,14 @@ func getRefDefIDs(node *ast.Node) (refDefIDs []string) {
 // 加密笔记本禁止跨边界块引（双向）：防止手工输入/拖拽/粘贴/API 直调绕过前端搜索分流。
 // 返回被降级的引用数。
 func degradeCrossBoundaryBlockRefs(root *ast.Node, srcBox string) int {
+	return degradeCrossBoundaryBlockRefs0(root, srcBox, nil)
+}
+
+func (tx *Transaction) degradeCrossBoundaryBlockRefs(root *ast.Node, srcBox string) int {
+	return degradeCrossBoundaryBlockRefs0(root, srcBox, tx.restoredCreatedDocBoxes)
+}
+
+func degradeCrossBoundaryBlockRefs0(root *ast.Node, srcBox string, restoredCreatedDocBoxes map[string]string) int {
 	degraded := 0
 	localBlockIDs := map[string]struct{}{}
 	ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -2033,6 +2042,9 @@ func degradeCrossBoundaryBlockRefs(root *ast.Node, srcBox string) int {
 
 		if ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref") {
 			if _, local := localBlockIDs[n.TextMarkBlockRefID]; local {
+				return ast.WalkContinue
+			}
+			if targetBox, restored := restoredCreatedDocBoxes[n.TextMarkBlockRefID]; restored && "" != targetBox && targetBox == srcBox {
 				return ast.WalkContinue
 			}
 			if IsBlockRefCrossingBoundary(srcBox, n.TextMarkBlockRefID) {
@@ -2159,7 +2171,7 @@ func (tx *Transaction) doCreate(operation *Operation) (ret *TxErr) {
 	tree := operation.Data.(*parse.Tree)
 	// 兜底校验：禁止跨加密边界块引（创建文档可能携带跨边界引用）
 	// 必须在 getRefDefIDs 之前，避免跨边界引用被收集进引用缓存
-	degradeCrossBoundaryBlockRefs(tree.Root, tree.Box)
+	tx.degradeCrossBoundaryBlockRefs(tree.Root, tree.Box)
 	tx.markStructureCheck(tree.Root)
 	tx.writeTree(tree)
 	// 新建文档中的引用均为本次新增，刷新其最近引用时间用于块引"最近引用"排序
@@ -2173,15 +2185,36 @@ func (tx *Transaction) doRestoreCreatedDoc(operation *Operation) (ret *TxErr) {
 	if nil == tree || nil == tree.Root || operation.ID != tree.Root.ID {
 		return &TxErr{code: TxErrCodePushMsg, msg: "invalid created doc snapshot", id: operation.ID}
 	}
-	if existing, err := LoadTreeByBlockID(tree.Root.ID); nil == err && nil != existing {
-		if tx.isReplay || existing.Box != tree.Box || existing.Path != tree.Path {
+	var existing *parse.Tree
+	var loadErr error
+	if "" != operation.templateDocTreeRootID {
+		existing, loadErr = LoadTreeByBlockIDInExactBox(tree.Root.ID, tree.Box)
+	} else {
+		existing, loadErr = LoadTreeByBlockID(tree.Root.ID)
+	}
+	if nil == loadErr && nil != existing {
+		if "" != operation.templateDocTreeRootID || tx.isReplay || existing.Box != tree.Box || existing.Path != tree.Path {
 			return &TxErr{code: TxErrCodePushMsg, msg: "created doc already exists", id: operation.ID}
 		}
 		tx.writeTree(existing)
 		return
 	}
+	if nil != loadErr && !errors.Is(loadErr, ErrBlockNotFound) && !errors.Is(loadErr, ErrTreeNotFound) {
+		return &TxErr{code: TxErrCodePushMsg, msg: loadErr.Error(), id: operation.ID}
+	}
+	box := Conf.Box(tree.Box)
+	if nil == box {
+		return &TxErr{code: TxErrCodePushMsg, msg: ErrBoxNotFound.Error(), id: operation.ID}
+	}
+	if box.Exist(tree.Path) {
+		return &TxErr{code: TxErrCodePushMsg, msg: "created doc path already exists", id: operation.ID}
+	}
 	if ret = tx.doCreate(&Operation{Action: "create", Data: tree}); nil == ret {
-		tx.restoredCreatedDocs = append(tx.restoredCreatedDocs, tree)
+		if "" != operation.templateDocTreeRootID {
+			tx.restoredTemplateCreatedDocs = append(tx.restoredTemplateCreatedDocs, tree)
+		} else {
+			tx.restoredCreatedDocs = append(tx.restoredCreatedDocs, tree)
+		}
 	}
 	return
 }
@@ -2198,7 +2231,11 @@ func (tx *Transaction) doRemoveCreatedDoc(operation *Operation) (ret *TxErr) {
 		}
 		return &TxErr{code: TxErrCodeBlockNotFound, msg: err.Error(), id: operation.ID}
 	}
-	tx.removedCreatedDocs = append(tx.removedCreatedDocs, tree)
+	if "" != operation.templateDocTreeRootID {
+		tx.removedTemplateCreatedDocs = append(tx.removedTemplateCreatedDocs, tree)
+	} else {
+		tx.removedCreatedDocs = append(tx.removedCreatedDocs, tree)
+	}
 	return
 }
 
@@ -2315,8 +2352,9 @@ type Operation struct {
 	BlockIDs   []string `json:"blockIDs"` // move/append 时为随折叠标题移动的顶层块，闪卡操作时为目标块
 	BlockID    string   `json:"blockID"`
 
-	DeckID string      `json:"deckID"` // 用于添加/删除闪卡
-	Tree   *parse.Tree `json:"-"`      // 仅用于内核事务重放，不发送到前端
+	DeckID                string      `json:"deckID"` // 用于添加/删除闪卡
+	Tree                  *parse.Tree `json:"-"`      // 仅用于内核事务重放，不发送到前端
+	templateDocTreeRootID string
 
 	LockType bool `json:"-"` // 外部块更新是否禁止改变主类型
 
@@ -2453,9 +2491,10 @@ func (tx *Transaction) recordCrossTreeMoveRefRefresh(srcTree, targetTree *parse.
 }
 
 type Transaction struct {
-	Timestamp      int64        `json:"timestamp"`
-	DoOperations   []*Operation `json:"doOperations"`
-	UndoOperations []*Operation `json:"undoOperations"`
+	Timestamp             int64        `json:"timestamp"`
+	DoOperations          []*Operation `json:"doOperations"`
+	UndoOperations        []*Operation `json:"undoOperations"`
+	TemplateDocTreePlanID string       `json:"templateDocTreePlanID,omitempty"`
 
 	trees          map[string]*parse.Tree // 事务中变更的树
 	nodes          map[string]*ast.Node   // 事务中变更的节点
@@ -2463,11 +2502,18 @@ type Transaction struct {
 	changedRootIDs []string               // 变更的树 ID 列表（包含了变更定义块后影响的动态锚文本所在的树）
 	boxIcons       map[string]string      // 事务提交后需要同步的笔记本图标
 
-	isGlobalAssetsInit  bool   // 是否初始化过全局资源判断
-	isGlobalAssets      bool   // 是否属于全局资源
-	assetsDir           string // 资源目录路径
-	removedCreatedDocs  []*parse.Tree
-	restoredCreatedDocs []*parse.Tree
+	isGlobalAssetsInit           bool   // 是否初始化过全局资源判断
+	isGlobalAssets               bool   // 是否属于全局资源
+	assetsDir                    string // 资源目录路径
+	removedCreatedDocs           []*parse.Tree
+	removedTemplateCreatedDocs   []*parse.Tree
+	restoredCreatedDocs          []*parse.Tree
+	restoredTemplateCreatedDocs  []*parse.Tree
+	restoredCreatedDocBoxes      map[string]string
+	attemptedTemplateCreatedDocs map[string]*parse.Tree
+	templateDocTreeRootSnapshot  *parse.Tree
+	removeCreatedDoc             func(*Box, string, *lute.Lute) (*parse.Tree, error)
+	writeTransactionTree         func(*parse.Tree) error
 
 	fromAPI  bool // 是否来自 /api/transactions HTTP 入口（用于撤销日志捕获判别）
 	isReplay bool // 是否为 undo/redo 重放构造的事务（重放不再进入撤销日志）
@@ -2526,11 +2572,56 @@ func (tx *Transaction) WaitForCommit() {
 }
 
 func (tx *Transaction) begin() (err error) {
+	expectedTemplateDocTreeRoot := tx.templateDocTreeRootSnapshot
+	tx.templateDocTreeRootSnapshot = nil
 	tx.trees = map[string]*parse.Tree{}
 	tx.nodes = map[string]*ast.Node{}
 	tx.boxIcons = map[string]string{}
 	tx.removedCreatedDocs = nil
+	tx.removedTemplateCreatedDocs = nil
 	tx.restoredCreatedDocs = nil
+	tx.restoredTemplateCreatedDocs = nil
+	tx.restoredCreatedDocBoxes = map[string]string{}
+	tx.attemptedTemplateCreatedDocs = map[string]*parse.Tree{}
+	for _, operation := range tx.DoOperations {
+		if nil == operation {
+			continue
+		}
+		if "restoreCreatedDoc" == operation.Action && "" != operation.templateDocTreeRootID &&
+			nil != operation.Tree && nil != operation.Tree.Root &&
+			operation.ID == operation.Tree.Root.ID {
+			if existingBox, exists := tx.restoredCreatedDocBoxes[operation.ID]; exists {
+				if existingBox != operation.Tree.Box {
+					tx.restoredCreatedDocBoxes[operation.ID] = ""
+				}
+			} else {
+				tx.restoredCreatedDocBoxes[operation.ID] = operation.Tree.Box
+			}
+		}
+		if ("restoreCreatedDoc" != operation.Action && "removeCreatedDoc" != operation.Action) ||
+			"" == operation.templateDocTreeRootID || nil == operation.Tree {
+			continue
+		}
+		if nil == tx.templateDocTreeRootSnapshot {
+			snapshot, loadErr := LoadTreeByBlockID(operation.templateDocTreeRootID)
+			if nil != loadErr {
+				return fmt.Errorf("load template document tree parent snapshot failed: %w", loadErr)
+			}
+			if nil == snapshot {
+				return errors.New("template document tree parent snapshot is invalid")
+			}
+			if nil != expectedTemplateDocTreeRoot &&
+				(expectedTemplateDocTreeRoot.ID != snapshot.ID || expectedTemplateDocTreeRoot.Box != snapshot.Box ||
+					expectedTemplateDocTreeRoot.Path != snapshot.Path || expectedTemplateDocTreeRoot.HPath != snapshot.HPath) {
+				return errors.New("the document used to render the template has changed")
+			}
+			tx.templateDocTreeRootSnapshot = snapshot
+		}
+		if nil == tx.templateDocTreeRootSnapshot || tx.templateDocTreeRootSnapshot.ID != operation.templateDocTreeRootID ||
+			tx.templateDocTreeRootSnapshot.Box != operation.Tree.Box {
+			return errors.New("template document tree parent snapshot is invalid")
+		}
+	}
 	tx.listItemFoldCandidates = nil
 	tx.listItemFoldCandidateIDs = map[string]struct{}{}
 	tx.deletedAttrViewBlockIDs = map[string]map[string]struct{}{}
@@ -2543,8 +2634,74 @@ func (tx *Transaction) begin() (err error) {
 }
 
 func (tx *Transaction) commit() (err error) {
-	for _, tree := range tx.trees {
-		if err = writeTreeUpsertQueue(tree); err != nil {
+	var attemptedRemovedDocs []*parse.Tree
+	compensationRequired := 0 < len(tx.restoredTemplateCreatedDocs) || 0 < len(tx.removedTemplateCreatedDocs) ||
+		nil != tx.templateDocTreeRootSnapshot
+	committed := false
+	defer func() {
+		if compensationRequired && !committed {
+			if compensationErr := tx.compensateCreatedDocCommit(attemptedRemovedDocs); nil != compensationErr {
+				err = errors.Join(err, compensationErr)
+			}
+		}
+	}()
+
+	for _, tree := range tx.removedTemplateCreatedDocs {
+		if nil == tree {
+			continue
+		}
+		attemptedRemovedDocs = append(attemptedRemovedDocs, tree)
+		box := Conf.Box(tree.Box)
+		if nil == box {
+			return ErrBoxNotFound
+		}
+		removeCreatedDoc := tx.removeCreatedDoc
+		if nil == removeCreatedDoc {
+			removeCreatedDoc = removeDoc
+		}
+		removedTree, removeErr := removeCreatedDoc(box, tree.Path, util.NewLute())
+		if nil != removeErr {
+			return removeErr
+		}
+		if nil == removedTree {
+			return errors.New("removed created document snapshot is missing")
+		}
+		attemptedRemovedDocs[len(attemptedRemovedDocs)-1] = removedTree
+		refreshBoxDocInfo(removedTree)
+	}
+
+	var orderedTrees []*parse.Tree
+	restoredIDs := map[string]struct{}{}
+	for _, tree := range tx.restoredTemplateCreatedDocs {
+		if nil == tree {
+			continue
+		}
+		if current := tx.trees[tree.ID]; nil != current {
+			orderedTrees = append(orderedTrees, current)
+			restoredIDs[tree.ID] = struct{}{}
+		}
+	}
+	for id, tree := range tx.trees {
+		if _, restored := restoredIDs[id]; !restored {
+			orderedTrees = append(orderedTrees, tree)
+		}
+	}
+	for _, tree := range orderedTrees {
+		if _, restored := restoredIDs[tree.ID]; restored {
+			box := Conf.Box(tree.Box)
+			if nil == box {
+				return ErrBoxNotFound
+			}
+			if box.Exist(tree.Path) {
+				return fmt.Errorf("created doc path [%s] already exists", tree.Path)
+			}
+			tx.attemptedTemplateCreatedDocs[tree.ID] = tree
+		}
+		writeTransactionTree := tx.writeTransactionTree
+		if nil == writeTransactionTree {
+			writeTransactionTree = writeTreeUpsertQueue
+		}
+		if err = writeTransactionTree(tree); err != nil {
 			return
 		}
 
@@ -2584,13 +2741,13 @@ func (tx *Transaction) commit() (err error) {
 		if nil == box {
 			return ErrBoxNotFound
 		}
-		removedTree, err := removeDoc(box, tree.Path, util.NewLute())
-		if nil != err {
-			return err
+		removedTree, removeErr := removeDoc(box, tree.Path, util.NewLute())
+		if nil != removeErr {
+			return removeErr
 		}
 		refreshBoxDocInfo(removedTree)
 	}
-	for _, tree := range tx.restoredCreatedDocs {
+	for _, tree := range append(append([]*parse.Tree{}, tx.restoredCreatedDocs...), tx.restoredTemplateCreatedDocs...) {
 		box := Conf.Box(tree.Box)
 		if nil == box {
 			return ErrBoxNotFound
@@ -2602,8 +2759,12 @@ func (tx *Transaction) commit() (err error) {
 	crossTreeMoveRefRefreshes := append([]crossTreeMoveRefRefresh(nil), tx.crossTreeMoveRefRefreshes...)
 	IncSync()
 	tx.state.Store(2)
+	committed = true
 	// 已提交且 trees 稳定后记录到全局撤销日志（rollback 不记录）
 	GlobalUndoLog.Record(tx)
+	tx.templateDocTreeRootSnapshot = nil
+	tx.attemptedTemplateCreatedDocs = nil
+	tx.writeTransactionTree = nil
 	tx.m.Unlock()
 	if 0 < len(crossTreeMoveRefRefreshes) {
 		task.AppendAsyncTaskWithDelay(task.RefreshCrossTreeMoveRefs, util.SQLFlushInterval,
@@ -2613,14 +2774,94 @@ func (tx *Transaction) commit() (err error) {
 }
 
 func (tx *Transaction) rollback() {
-	tx.trees, tx.nodes, tx.boxIcons, tx.removedCreatedDocs, tx.restoredCreatedDocs = nil, nil, nil, nil, nil
+	for _, tree := range tx.restoredTemplateCreatedDocs {
+		if nil != tree {
+			treenode.RemoveBlockTreesByRootID(tree.Box, tree.ID)
+		}
+	}
+	if nil != tx.templateDocTreeRootSnapshot {
+		treenode.SetBlockTreePath(tx.templateDocTreeRootSnapshot)
+	}
+	tx.trees, tx.nodes, tx.boxIcons = nil, nil, nil
+	tx.removedCreatedDocs, tx.removedTemplateCreatedDocs = nil, nil
+	tx.restoredCreatedDocs, tx.restoredTemplateCreatedDocs = nil, nil
+	tx.restoredCreatedDocBoxes, tx.attemptedTemplateCreatedDocs = nil, nil
 	tx.listItemFoldCandidates, tx.listItemFoldCandidateIDs = nil, nil
 	tx.deletedAttrViewBlockIDs = nil
 	tx.structureCheckNodes = nil
 	tx.crossTreeMoveRefRefreshes = nil
+	tx.templateDocTreeRootSnapshot = nil
+	tx.removeCreatedDoc = nil
+	tx.writeTransactionTree = nil
 	tx.state.Store(3)
 	tx.m.Unlock()
 	return
+}
+
+// cleanupRestoredCreatedDocs 清理提交失败前已经写入的计划文档，避免父文档失败后遗留孤儿文档。
+func (tx *Transaction) cleanupRestoredCreatedDocs() {
+	for index := len(tx.restoredTemplateCreatedDocs) - 1; 0 <= index; index-- {
+		plannedTree := tx.restoredTemplateCreatedDocs[index]
+		if nil == plannedTree {
+			continue
+		}
+		tree := tx.attemptedTemplateCreatedDocs[plannedTree.ID]
+		if nil == tree {
+			continue
+		}
+		box := Conf.Box(tree.Box)
+		if nil != box && box.Exist(tree.Path) {
+			if removeErr := box.Remove(tree.Path); nil != removeErr {
+				logging.LogErrorf("cleanup template-created document [%s] failed: %s", tree.ID, removeErr)
+			}
+			parentDir := path.Dir(tree.Path)
+			if "/" != parentDir {
+				absParentDir := filepath.Join(util.DataDir, tree.Box, parentDir)
+				if entries, readErr := os.ReadDir(absParentDir); nil == readErr && 0 == len(entries) {
+					if removeErr := box.Remove(parentDir); nil != removeErr {
+						logging.LogWarnf("cleanup empty template-created directory [%s] failed: %s", parentDir, removeErr)
+					}
+				}
+			}
+		}
+		cache.RemoveTreeDataInBox(tree.ID, tree.Box)
+		cache.RemoveDocIALInBox(tree.Path, tree.Box)
+		treenode.RemoveBlockTreesByRootID(tree.Box, tree.ID)
+		sql.RemoveTreeQueue(tree.Box, tree.ID)
+	}
+}
+
+func (tx *Transaction) compensateCreatedDocCommit(attemptedRemovedDocs []*parse.Tree) (err error) {
+	tx.cleanupRestoredCreatedDocs()
+	for index := len(attemptedRemovedDocs) - 1; 0 <= index; index-- {
+		tree := attemptedRemovedDocs[index]
+		if nil == tree {
+			continue
+		}
+		if restoreErr := restoreCreatedDocTreeSnapshot(tree); nil != restoreErr {
+			err = errors.Join(err, restoreErr)
+			continue
+		}
+		if box := Conf.Box(tree.Box); nil != box {
+			box.setSortByConf(path.Dir(tree.Path), tree.ID)
+			PushCreate(box, tree.Path, nil)
+		}
+	}
+	if nil != tx.templateDocTreeRootSnapshot {
+		err = errors.Join(err, restoreCreatedDocTreeSnapshot(tx.templateDocTreeRootSnapshot))
+	}
+	return
+}
+
+func restoreCreatedDocTreeSnapshot(tree *parse.Tree) error {
+	if nil == tree || nil == tree.Root {
+		return errors.New("invalid created doc compensation snapshot")
+	}
+	if err := writeTreeUpsertQueue(tree); nil != err {
+		return err
+	}
+	treenode.UpsertBlockTree(tree)
+	return nil
 }
 
 func (tx *Transaction) loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.Tree, err error) {

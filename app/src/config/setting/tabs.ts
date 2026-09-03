@@ -28,6 +28,7 @@ import {registerAccessTab} from "../tabs/accessTab";
 import {registerAppTab} from "../tabs/appTab";
 import {registerAboutTab} from "../tabs/aboutTab";
 import {isDisabledFeature} from "../../protyle/util/compatibility";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 
 const setting = new SettingBuilder();
 const settingTabs = {
@@ -87,6 +88,7 @@ const settingTabs = {
         id: "export",
         icon: "iconUpload",
         title: () => window.siyuan.languages.export,
+        hidden: () => !getHostCapabilities().importExport,
         defaultSave: exportConfigApi.patch,
     }, registerExportTab),
     search: setting.tab({

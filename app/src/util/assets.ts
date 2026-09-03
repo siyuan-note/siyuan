@@ -28,6 +28,7 @@ import {
     loadInlineStyles
 } from "../protyle/toolbar/inlineStyle";
 import {refreshChartTheme} from "../protyle/render/chartRender";
+import {getHostCapabilities} from "./hostCapabilities";
 
 let headingNumberMeasurementRefreshTimer: number;
 const DEJAVU_EMOJI_PRESENTATION_UNICODE_RANGE = "U+25fd-25fe, U+2614-2615, U+2648-2653, U+267f, U+2693, U+26a1, " +
@@ -81,6 +82,9 @@ export const unloadThemeScript = async () => {
 };
 
 export const refreshThemeStyle = (themeAddress: string) => {
+    if (!getHostCapabilities().customAppearance) {
+        return;
+    }
     const appearance = window.siyuan.config.appearance;
     if (!isCurrentThemeSupported(appearance, getFrontend())) {
         return;
@@ -93,7 +97,14 @@ export const refreshThemeStyle = (themeAddress: string) => {
     }
 };
 
-export const loadAssets = (data: Config.IAppearance) => {
+export const loadAssets = (appearance: Config.IAppearance) => {
+    const data = getHostCapabilities().customAppearance ? appearance : {
+        ...appearance,
+        themeLight: "daylight",
+        themeDark: "midnight",
+        icon: "litheness",
+        themeJS: false,
+    };
     const changedThemeStyleElements: HTMLLinkElement[] = [];
     let themeStylesChanged = false;
     const htmlElement = document.getElementsByTagName("html")[0];
@@ -103,8 +114,8 @@ export const loadAssets = (data: Config.IAppearance) => {
     htmlElement.setAttribute("data-frontend", getFrontend()); // https://github.com/siyuan-note/siyuan/issues/12549
     htmlElement.setAttribute("data-backend", getBackend());
     htmlElement.setAttribute("data-theme-mode", themeMode);
-    htmlElement.setAttribute("data-light-theme", window.siyuan.config.appearance.themeLight);
-    htmlElement.setAttribute("data-dark-theme", window.siyuan.config.appearance.themeDark);
+    htmlElement.setAttribute("data-light-theme", data.themeLight);
+    htmlElement.setAttribute("data-dark-theme", data.themeDark);
     const OSTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     if (window.siyuan.config.appearance.modeOS && (
         (window.siyuan.config.appearance.mode === 1 && OSTheme === "light") ||
@@ -162,6 +173,7 @@ export const loadAssets = (data: Config.IAppearance) => {
     if (themeStylesChanged) {
         scheduleHeadingNumberMeasurementRefresh(changedThemeStyleElements);
     }
+    updateMobileTheme(OSTheme);
     /// #if !MOBILE
     getAllModels().graph.forEach(item => {
         item.searchGraph();
@@ -280,17 +292,20 @@ export const initAssets = () => {
 };
 
 export const setInlineStyle = async (set = true, servePath = "../../../") => {
-    const editorFonts = window.siyuan.config.editor.fontFamilies || [];
-    const codeFonts = window.siyuan.config.editor.codeFontFamilies || [];
+    const allowCustomAppearance = getHostCapabilities().customAppearance;
+    const editorFonts = allowCustomAppearance ? window.siyuan.config.editor.fontFamilies || [] : [];
+    const codeFonts = allowCustomAppearance ? window.siyuan.config.editor.codeFontFamilies || [] : [];
     let inlineStylesCSS = "";
-    try {
-        const inlineStyles = await loadInlineStyles();
-        inlineStylesCSS = getInlineStylesCSS(inlineStyles);
-    } catch (error) {
-        console.error("load inline styles error: " + error);
-        inlineStylesCSS = getInlineStylesCSS();
+    if (allowCustomAppearance) {
+        try {
+            const inlineStyles = await loadInlineStyles();
+            inlineStylesCSS = getInlineStylesCSS(inlineStyles);
+        } catch (error) {
+            console.error("load inline styles error: " + error);
+            inlineStylesCSS = getInlineStylesCSS();
+        }
     }
-    if (set) {
+    if (set && allowCustomAppearance) {
         await ensureSelectedCustomFonts([...editorFonts, ...codeFonts]);
     }
     let style;
@@ -375,14 +390,14 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
     const editorFontWeight = editorFonts[0]?.weight;
     const codeFontFamilies = codeFonts.map((font) => CSS.escape(font.family)).join(", ");
     const codeFontFamily = codeFontFamilies ?
-        `"Emojis Additional", "Emojis Reset", ${codeFontFamilies}, var(--b3-font-family-code)` :
+        `var(--b3-font-family-emoji-reset), ${codeFontFamilies}, var(--b3-font-family-code)` :
         "var(--b3-font-family-code)";
     const codeFontWeight = codeFonts[0]?.weight || 400;
     style += `\n:root { --b3-font-size-editor: ${window.siyuan.config.editor.fontSize}px; --b3-font-family-editor: ${editorFontFamilies || "var(--b3-font-family-protyle)"}; --b3-font-family-editor-code: ${codeFontFamily}; --b3-font-weight-editor-code: ${codeFontWeight} }
 .b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }
 .b3-typography:not(.b3-typography--default) code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-family: var(--b3-font-family-editor-code); font-weight: var(--b3-font-weight-editor-code) }${window.siyuan.config.editor.justify ? "\n.protyle-wysiwyg [data-node-id] { text-align: justify }" : ""}`;
     if (editorFontFamilies) {
-        style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {${editorFontWeight ? `font-weight: ${editorFontWeight};` : ""}font-family: "Emojis Additional", "Emojis Reset", var(--b3-font-family-editor), var(--b3-font-family)}`;
+        style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {${editorFontWeight ? `font-weight: ${editorFontWeight};` : ""}font-family: var(--b3-font-family-emoji-reset), var(--b3-font-family-editor), var(--b3-font-family)}`;
     }
     // pad 端菜单移除显示，如工作空间
     if ("ontouchend" in document) {
@@ -406,6 +421,9 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
 };
 
 export const reloadInlineStyles = async () => {
+    if (!getHostCapabilities().customAppearance) {
+        return;
+    }
     try {
         await loadInlineStyles(true);
     } catch (error) {

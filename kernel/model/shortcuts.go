@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -32,6 +33,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -41,10 +43,19 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 	if !gulu.File.IsDir(shorthandsDir) {
 		return
 	}
+	if !syncLock.TryLock() {
+		err = errors.New(Conf.Language(222))
+		return
+	}
+	defer syncLock.Unlock()
 
 	entries, err := os.ReadDir(shorthandsDir)
 	if nil != err {
 		logging.LogErrorf("read dir [%s] failed: %s", shorthandsDir, err)
+		return
+	}
+	if !IsShorthandSaveBoxAvailable(boxID) {
+		err = errors.New(Conf.Language(375))
 		return
 	}
 
@@ -285,15 +296,13 @@ func createShorthandDocByDOM(boxID, hPath, dom, docID string) (retID string, err
 	}
 
 	FlushTxQueue()
-	retID, err = createDocsByHPath(box.ID, hPath, dom, "", docID, false)
+	retID, err = createDocsByHPathSync(box.ID, hPath, dom, "", docID, false)
 	if nil != err {
 		return
 	}
-	FlushTxQueue()
 
 	bt := treenode.GetBlockTree(retID)
-	if nil == bt {
-		logging.LogWarnf("get block tree by id [%s] failed after create", retID)
+	if err = verifyShorthandDocPersisted(bt, retID); nil != err {
 		return
 	}
 	box.setSortByConf(path.Dir(bt.Path), retID)
@@ -303,10 +312,56 @@ func createShorthandDocByDOM(boxID, hPath, dom, docID string) (retID string, err
 	return
 }
 
+func verifyShorthandDocPersisted(bt *treenode.BlockTree, expectedID string) (err error) {
+	if nil == bt {
+		return fmt.Errorf("get block tree by id [%s] failed after create", expectedID)
+	}
+	// 清除写入缓存，确保从文件系统重新读取并验证文档。
+	cache.RemoveTreeDataInBox(expectedID, bt.BoxID)
+	persisted, err := loadTreeByBlockTree(bt)
+	if nil != err {
+		return fmt.Errorf("load created shorthand document [%s] failed: %w", expectedID, err)
+	}
+	if nil == persisted || persisted.ID != expectedID {
+		return fmt.Errorf("verify created shorthand document [%s] failed", expectedID)
+	}
+	return nil
+}
+
 var consumeShorthandsLock = sync.Mutex{}
+var shorthandSaveBoxUnavailableNotified bool
+
+func isShorthandSaveBoxAvailable(box *Box) bool {
+	return nil != box && !box.Closed && !box.Encrypted && !IsUserGuide(box.ID)
+}
+
+func selectShorthandSaveBox(configuredID string, boxes []*Box) *Box {
+	if "" != configuredID {
+		for _, box := range boxes {
+			if nil != box && box.ID == configuredID && isShorthandSaveBoxAvailable(box) {
+				return box
+			}
+		}
+		return nil
+	}
+
+	for _, box := range boxes {
+		if isShorthandSaveBoxAvailable(box) {
+			return box
+		}
+	}
+	return nil
+}
+
+func IsShorthandSaveBoxAvailable(boxID string) bool {
+	return isShorthandSaveBoxAvailable(Conf.GetBox(boxID))
+}
 
 func consumeShorthands() {
 	if !util.IsMobileContainer() {
+		return
+	}
+	if isSyncing.Load() {
 		return
 	}
 
@@ -336,33 +391,26 @@ func consumeShorthands() {
 	}
 
 	if !hasShorthand {
+		shorthandSaveBoxUnavailableNotified = false
 		return
 	}
 
-	var notebookID string
-	notebookID = Conf.FileTree.ShorthandSaveBox
-	if "" != notebookID && nil == Conf.Box(notebookID) {
-		notebookID = ""
-	}
-
-	if "" == notebookID {
-		boxes := Conf.GetBoxes()
-		for _, box := range boxes {
-			if !IsUserGuide(box.ID) {
-				notebookID = box.ID
-				break
-			}
-		}
-	}
-
-	if "" == notebookID {
+	boxes := Conf.GetBoxes()
+	box := selectShorthandSaveBox(Conf.FileTree.ShorthandSaveBox, boxes)
+	if nil == box {
 		logging.LogWarnf("auto consume shorthands failed: no available notebook found")
+		if !shorthandSaveBoxUnavailableNotified {
+			util.PushErrMsg(Conf.Language(375), 7000)
+			shorthandSaveBoxUnavailableNotified = true
+		}
 		return
 	}
 
-	if _, err = MoveLocalShorthands(notebookID); nil != err {
+	if _, err = MoveLocalShorthands(box.ID); nil != err {
 		logging.LogErrorf("auto consume shorthands failed: %s", err)
+		return
 	}
+	shorthandSaveBoxUnavailableNotified = false
 }
 
 func AutoConsumeShorthandsJob() {

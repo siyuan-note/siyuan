@@ -12,8 +12,10 @@ import {
     isDragTargetInSource,
     isSameDragEditor,
     isSameSiblingMove,
+    parseBlockDragData,
     replaceDragUndoOperation,
     shouldKeepListBlockDragTarget,
+    stringifyBlockDragData,
     uniqueDragIds
 } from "./dragDocument";
 
@@ -86,6 +88,30 @@ describe("isSameDragEditor", () => {
         const targetEditor = {contains: (element: Element) => element === sourceElement} as unknown as Element;
 
         assert.equal(isSameDragEditor(targetEditor, sourceElement), true);
+    });
+});
+
+describe("block drag data", () => {
+    it("preserves the source editor context", () => {
+        const value = stringifyBlockDragData({
+            html: "<div>content</div>",
+            notebookID: "notebook",
+            rootID: "root",
+        });
+
+        assert.deepEqual(parseBlockDragData(value), {
+            html: "<div>content</div>",
+            notebookID: "notebook",
+            rootID: "root",
+        });
+    });
+
+    it("accepts the raw HTML used by older windows", () => {
+        assert.deepEqual(parseBlockDragData("<div>content</div>"), {
+            html: "<div>content</div>",
+            notebookID: "",
+            rootID: "",
+        });
     });
 });
 

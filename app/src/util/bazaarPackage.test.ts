@@ -9,6 +9,7 @@ import {
     getBazaarCompatibilityData,
     getBazaarCompatibilityFieldVisibility,
     getBazaarDeprecationData,
+    getBazaarFrontendLabels,
     getBazaarFundingItems,
     getBazaarKernelSystemLabels,
     getBazaarPackageInvalidLanguageKey,
@@ -29,6 +30,7 @@ import {
     normalizeBazaarPackageUserRatingsResponse,
     normalizeBazaarRating,
     normalizeBazaarUserRating,
+    sortBazaarPackages,
     sortBazaarPackagesByRating,
 } from "./bazaarPackage";
 
@@ -173,6 +175,42 @@ describe("isBazaarPluginEnabledInPublish", () => {
     });
 });
 
+describe("getBazaarFrontendLabels", () => {
+    const labels = {
+        all: "All",
+        desktop: "Desktop main window",
+        desktopWindow: "Desktop detached window",
+        mobile: "Mobile app",
+        browserDesktop: "Desktop browser",
+        browserMobile: "Mobile browser",
+    };
+
+    it("distinguishes all five supported frontends", () => {
+        assert.deepEqual(getBazaarFrontendLabels([
+            "desktop", "desktop-window", "mobile", "browser-desktop", "browser-mobile",
+        ], labels, "desktop"), [
+            "Desktop main window", "Desktop detached window", "Mobile app", "Desktop browser", "Mobile browser",
+        ]);
+    });
+
+    it("preserves unknown frontends and removes duplicate labels", () => {
+        assert.deepEqual(getBazaarFrontendLabels([
+            "desktop", "custom", "desktop", "custom",
+        ], labels, "desktop"), ["Desktop main window", "custom"]);
+    });
+
+    it("treats missing and all declarations as unrestricted", () => {
+        assert.deepEqual(getBazaarFrontendLabels(undefined, labels, "desktop"), ["All"]);
+        assert.deepEqual(getBazaarFrontendLabels(["all", "desktop"], labels, "desktop"), ["All"]);
+    });
+
+    it("requires themes to declare compatibility on mobile frontends", () => {
+        assert.deepEqual(getBazaarFrontendLabels([], labels, "mobile", true), []);
+        assert.deepEqual(getBazaarFrontendLabels([], labels, "browser-mobile", true), []);
+        assert.deepEqual(getBazaarFrontendLabels([], labels, "desktop", true), ["All"]);
+    });
+});
+
 describe("bazaar system labels", () => {
     it("treats missing backends as all systems", () => {
         assert.deepEqual(getBazaarBackendSystemLabels([], "All"), ["All"]);
@@ -220,18 +258,33 @@ describe("getBazaarFundingItems", () => {
             github: "sponsor",
             custom: ["custom text", "https://example.com/custom", "custom text"],
         }), [
-            "https://opencollective.com/collective",
-            "https://example.com/patreon",
-            "https://github.com/sponsors/sponsor",
-            "custom text",
-            "https://example.com/custom",
-            "custom text",
+            {url: "https://opencollective.com/collective"},
+            {url: "https://example.com/patreon"},
+            {url: "https://github.com/sponsors/sponsor"},
+            {url: "custom text"},
+            {url: "https://example.com/custom"},
+            {url: "custom text"},
         ]);
     });
 
     it("removes empty values without discarding later custom items", () => {
-        assert.deepEqual(getBazaarFundingItems({custom: ["", "https://example.com"]}), ["https://example.com"]);
+        assert.deepEqual(getBazaarFundingItems({custom: ["", "https://example.com"]}), [
+            {url: "https://example.com"},
+        ]);
         assert.deepEqual(getBazaarFundingItems(undefined), []);
+    });
+
+    it("preserves labeled links after custom items", () => {
+        assert.deepEqual(getBazaarFundingItems({
+            custom: ["https://example.com/custom"],
+            links: [
+                {label: "Buy me a coffee", url: "https://example.com/coffee"},
+                {label: "Empty", url: ""},
+            ],
+        }), [
+            {url: "https://example.com/custom"},
+            {label: "Buy me a coffee", url: "https://example.com/coffee"},
+        ]);
     });
 });
 
@@ -510,6 +563,37 @@ describe("sortBazaarPackagesByRating", () => {
         assert.deepEqual(sortBazaarPackagesByRating(unavailable, true).map((item) => item.name), [
             "available", "unavailable", "missing-flag",
         ]);
+    });
+});
+
+describe("sortBazaarPackages", () => {
+    const packages = [
+        {name: "first", updated: "20260102", downloads: 10},
+        {name: "second", updated: "20260103", downloads: 5},
+        {name: "third", updated: "20260102", downloads: 10},
+    ];
+
+    it("sorts update times in both directions and preserves ties", () => {
+        assert.deepEqual(sortBazaarPackages(packages, "0").map((item) => item.name), [
+            "second", "first", "third",
+        ]);
+        assert.deepEqual(sortBazaarPackages(packages, "1").map((item) => item.name), [
+            "first", "third", "second",
+        ]);
+    });
+
+    it("sorts download counts in both directions and preserves ties", () => {
+        assert.deepEqual(sortBazaarPackages(packages, "2").map((item) => item.name), [
+            "first", "third", "second",
+        ]);
+        assert.deepEqual(sortBazaarPackages(packages, "3").map((item) => item.name), [
+            "second", "first", "third",
+        ]);
+    });
+
+    it("does not mutate the source order", () => {
+        sortBazaarPackages(packages, "0");
+        assert.deepEqual(packages.map((item) => item.name), ["first", "second", "third"]);
     });
 });
 

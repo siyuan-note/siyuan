@@ -22,7 +22,8 @@ import {initMessage} from "../dialog/message";
 import {getAllTabs} from "../layout/getAll";
 import {getLocalStorage} from "../protyle/util/compatibility";
 import {init} from "./init";
-import {loadPlugins, reloadPlugin} from "../plugin/loader";
+import {loadPlugins} from "../plugin/loader";
+import {applyPluginReload, syncGlobalPluginConfig} from "../plugin/globalState";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {reloadEmoji} from "../emoji";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
@@ -36,6 +37,7 @@ import {removeBlockPanelEditors} from "../block/panelRemoval";
 import {updateServerAddresses} from "../config/tabs/accessRuntime";
 import {applyCloudUserState} from "../config/tabs/accountUi";
 import {emitToPlugins} from "../plugin/EventBusCore";
+import {initializeEnglishCommandTranslations} from "../command/english";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -79,7 +81,7 @@ class App {
                                 setRefDynamicText(data.data);
                                 break;
                             case "reloadPlugin":
-                                reloadPlugin(this, data.data);
+                                void applyPluginReload(this, data.data).catch((error) => console.error(error));
                                 break;
                             case "reloadEmojiConf":
                                 reloadEmoji();
@@ -96,6 +98,7 @@ class App {
                                 break;
                             case "setConf":
                                 window.siyuan.config = data.data;
+                                syncGlobalPluginConfig(this, data.data.bazaar.petalDisabled);
                                 break;
                             case "setCloudUser":
                                 applyCloudUserState(data.data.user, data.data.userName);
@@ -205,7 +208,7 @@ class App {
         };
         const notebookPromise = setNoteBook();
         fetchPost("/api/system/getConf", {}, async (response) => {
-            addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
+            await addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = response.data.conf;
             ensureUILayout();
@@ -216,6 +219,11 @@ class App {
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
                     window.siyuan.languages = lauguages;
+                    void initializeEnglishCommandTranslations(
+                        window.siyuan.config.appearance.lang,
+                        lauguages as Record<string, string>,
+                        Constants.SIYUAN_VERSION,
+                    );
                     window.siyuan.menus = new Menus(this);
                     fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
                         window.siyuan.user = userResponse.data;

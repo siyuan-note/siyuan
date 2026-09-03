@@ -22,6 +22,7 @@
 @use "business/color" as *;
 @use "protyle/protyle" as *;
 @use "component/typography" as *;
+@use "pdf/pdf" as *;
 @use "business/config" as *;
 @use "viewerjs/viewer" as *;
 @use "business/export" as *;
@@ -36,3 +37,55 @@
 @use "component/svg" as *;
 @use "main/mobile" as *;
 @use "util/responsive" as *;
+
+.pdf-viewer--mobile {
+  min-height: 0;
+  overflow: hidden;
+
+  #toolbarViewer {
+    padding-left: 4px;
+  }
+
+  .toolbarButton {
+    margin-right: 4px;
+  }
+
+  .b3-menu__accelerator--hotkey {
+    display: none;
+  }
+
+  .dropdownToolbarButton {
+    --scale-select-width: 72px;
+    margin-right: 4px;
+  }
+
+  #scaleSelectContainer {
+    display: block;
+  }
+
+  .toolbarField.pageNumber {
+    width: 44px;
+  }
+
+  .findbar {
+    right: 4px;
+    max-height: 60vh;
+    overflow: auto;
+  }
+
+  #sidebarContainer {
+    max-width: calc(100vw - 24px);
+    z-index: 4; // 窄屏侧栏覆盖正文时需高于标注层
+  }
+
+  .pdf__rect-resize {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+@media (max-width: 340px) {
+  .pdf-viewer--mobile #numPages {
+    display: none;
+  }
+}

@@ -1,3 +1,5 @@
+import {transformSemanticInlineMarkers} from "../util/inlineElementMarker";
+
 const NBSP = "\u00A0";
 const ZERO_WIDTH_REGEXP = /\u200B|\u200C|\u200D|\uFEFF/g;
 const UNORDERED_LIST_MARKERS = ["•", "◦", "▪", "▫"];
@@ -541,6 +543,7 @@ const normalizeZhihuTables = (root: HTMLElement) => {
 };
 
 export const prepareWechatCopy = (root: HTMLElement, sourceRoot?: HTMLElement) => {
+    transformSemanticInlineMarkers(root, "remove");
     convertWechatBlockquotes(root, sourceRoot);
     preserveWechatCodeWhitespace(root);
     flattenUnsupportedLists(root, "mp-wechat");
@@ -548,6 +551,7 @@ export const prepareWechatCopy = (root: HTMLElement, sourceRoot?: HTMLElement) =
 };
 
 export const prepareZhihuCopy = (root: HTMLElement) => {
+    transformSemanticInlineMarkers(root, "remove");
     convertZhihuImages(root);
     convertZhihuCodeBlocks(root);
     normalizeZhihuTables(root);

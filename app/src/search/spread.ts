@@ -6,6 +6,15 @@ import {focusByRange} from "../protyle/util/selection";
 import {genSearch, updateConfig} from "./util";
 import type {App} from "../index";
 import {cancelSearchRequest} from "./request";
+import {
+    hasExplicitSearchScope,
+    replaceSearchConfigPath,
+    resolveGlobalSearchScope,
+    setSearchConfigTemporaryPath,
+} from "./config";
+import {beginSearchPathRequest} from "./path";
+
+let openSearchVersion = 0;
 
 export const openSearch = async (options: {
     app: App,
@@ -15,7 +24,12 @@ export const openSearch = async (options: {
     notebookIds?: string[],
     searchPath?: string
 }) => {
+    const version = ++openSearchVersion;
+    const existingSearchDialog = window.siyuan.dialogs.find((item) => item.element.querySelector("#searchList"));
+    const existingSearchElement = existingSearchDialog?.element.querySelector(".b3-dialog__body");
+    const isCurrentPathRequest = existingSearchElement ? beginSearchPathRequest(existingSearchElement) : undefined;
     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
+    const hasScopedPath = hasExplicitSearchScope(options);
     let hPath = "";
     let idPath: string[] = [];
     if (options.notebookIds?.length) {
@@ -29,6 +43,9 @@ export const openSearch = async (options: {
                 notebook: options.notebookId,
                 path: options.searchPath.endsWith(".sy") ? options.searchPath : options.searchPath + ".sy"
             });
+            if (version !== openSearchVersion || (isCurrentPathRequest && !isCurrentPathRequest())) {
+                return;
+            }
             if (response.code !== 0 || typeof response.data !== "string") {
                 return;
             }
@@ -36,13 +53,9 @@ export const openSearch = async (options: {
             idPath[0] = pathPosix().join(idPath[0], options.searchPath);
         }
     } else if (Constants.DIALOG_GLOBALSEARCH === options.hotkey) {
-        if (localData.removed) {
-            hPath = "";
-            idPath = [];
-        } else {
-            hPath = localData.hPath;
-            idPath = [...localData.idPath];
-        }
+        const globalScope = resolveGlobalSearchScope(localData);
+        hPath = globalScope.hPath;
+        idPath = globalScope.idPath;
     }
     const config = {
         removed: localData.removed,
@@ -59,8 +72,12 @@ export const openSearch = async (options: {
         replaceTypes: Object.assign({}, localData.replaceTypes),
         page: options.key ? 1 : localData.page
     };
+    setSearchConfigTemporaryPath(config, hasScopedPath || options.hotkey === Constants.DIALOG_SEARCH);
     // 搜索中继续执行 ctrl+F/P 不退出 https://github.com/siyuan-note/siyuan/issues/11637
     const exitDialog = window.siyuan.dialogs.find((item) => {
+        if (item !== existingSearchDialog || (isCurrentPathRequest && !isCurrentPathRequest())) {
+            return false;
+        }
         // 再次打开
         if (item.element.querySelector("#searchList")) {
             const searchElement = item.element.querySelector(".b3-dialog__body");
@@ -69,32 +86,55 @@ export const openSearch = async (options: {
             if (selectText) {
                 cloneData.k = selectText;
             }
+            if (hasScopedPath) {
+                setSearchConfigTemporaryPath(item.data, true);
+            } else if (options.hotkey === Constants.DIALOG_GLOBALSEARCH) {
+                setSearchConfigTemporaryPath(item.data, false);
+            }
             item.element.setAttribute("data-key", options.hotkey);
             if (options.notebookId || options.notebookIds?.length) {
                 cloneData.hasReplace = options.hotkey === Constants.DIALOG_REPLACE;
                 cloneData.hPath = hPath;
                 cloneData.idPath = [...idPath];
-                item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit);
+                item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit, {
+                    storageConfig: replaceSearchConfigPath(cloneData, localData),
+                });
             } else if (options.hotkey === Constants.DIALOG_REPLACE) {
                 cloneData.hasReplace = true;
-                item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit);
+                item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit, {
+                    storageConfig: replaceSearchConfigPath(cloneData, localData),
+                });
             } else if (options.hotkey === Constants.DIALOG_GLOBALSEARCH) {
                 cloneData.hasReplace = false;
-                cloneData.hPath = "";
-                cloneData.idPath = [];
-                item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit);
+                cloneData.hPath = hPath;
+                cloneData.idPath = [...idPath];
+                item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit, {
+                    storageConfig: replaceSearchConfigPath(cloneData, localData),
+                });
             } else if (options.hotkey === Constants.DIALOG_SEARCH) {
-                cloneData.hasReplace = false;
                 const toPath = item.editors.edit.protyle.path;
+                const toNotebook = item.editors.edit.protyle.notebookId;
                 fetchPost("/api/filetree/getHPathsByPaths", {paths: [toPath]}, (response) => {
+                    if (version !== openSearchVersion || !item.element.isConnected ||
+                        item.element.getAttribute("data-key") !== Constants.DIALOG_SEARCH ||
+                        (isCurrentPathRequest && !isCurrentPathRequest())) {
+                        return;
+                    }
                     if (!Array.isArray(response.data) || typeof response.data[0] !== "string") {
                         return;
                     }
-                    cloneData.idPath = [pathPosix().join(item.editors.edit.protyle.notebookId, toPath)];
-                    cloneData.hPath = response.data[0];
-                    item.data.idPath = cloneData.idPath;
-                    item.data.hPath = cloneData.hPath;
-                    item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit);
+                    const currentData = JSON.parse(JSON.stringify(item.data)) as Config.IUILayoutTabSearchConfig;
+                    currentData.hasReplace = false;
+                    if (selectText) {
+                        currentData.k = selectText;
+                    }
+                    currentData.idPath = [pathPosix().join(toNotebook, toPath)];
+                    currentData.hPath = response.data[0];
+                    setSearchConfigTemporaryPath(item.data, true);
+                    item.data = updateConfig(searchElement, currentData, item.data, item.editors.edit, {
+                        storageConfig: replaceSearchConfigPath(
+                            currentData, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]),
+                    });
                 });
             }
             return true;

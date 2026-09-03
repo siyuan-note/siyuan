@@ -12,6 +12,7 @@ import {getCurrentEditor} from "../editor";
 import {convertFontSize, fontEvent, getFontNodeElements, getFontSizeInfo} from "../../protyle/toolbar/Font";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {softEnter} from "../../protyle/wysiwyg/enter";
+import {endTrackedRangeInsertion, prepareTrackedRangeInsertion} from "../../protyle/util/trackedRange";
 import {
     isDisabledFeature,
     isInAndroid,
@@ -44,6 +45,7 @@ import {
 } from "../../protyle/toolbar/inlineStyle";
 import {openInlineStyleDialog} from "../../protyle/toolbar/inlineStyleDialog";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 import {
     getKeyboardHideResult,
     getMovingSelectionEndpoint,
@@ -55,6 +57,17 @@ import {
     shouldPreserveTableCellSelectAll,
     type TSelectionEndpoint,
 } from "./touchSelection";
+import {getVisibleViewportBounds} from "./visibleViewport";
+import {
+    getTextWithoutSemanticMarkers,
+    stripSemanticMarkersFromRangeText
+} from "../../protyle/util/inlineElementMarker";
+import {
+    getInlineFontFamilyLabel,
+    getInlineFontFamilyState,
+    getInlineFontFamilyValue,
+    renderMobileFontFamilyMenu,
+} from "../../protyle/toolbar/fontFamilyMenu";
 
 type TAndroidBoundedSelection = {
     container: HTMLElement,
@@ -132,7 +145,8 @@ const rememberAndroidTableCellSelectAll = () => {
         hasClosestByTag(range.startContainer, "TH")) as HTMLTableCellElement;
     const endCell = (hasClosestByTag(range.endContainer, "TD") ||
         hasClosestByTag(range.endContainer, "TH")) as HTMLTableCellElement;
-    if (!startCell || startCell !== endCell || !isTableCellSelectAll(range.toString(), startCell.textContent)) {
+    if (!startCell || startCell !== endCell || !isTableCellSelectAll(
+        stripSemanticMarkersFromRangeText(range), getTextWithoutSemanticMarkers(startCell))) {
         if (pendingAndroidTableCellSelectAll && startCell && startCell !== pendingAndroidTableCellSelectAll.cell) {
             pendingAndroidTableCellSelectAll = undefined;
         }
@@ -329,19 +343,6 @@ const preventKeyboardToolbarRender = () => {
     }, 1000);
 };
 
-const getVisibleViewportBounds = () => {
-    if (!isInMobileApp() && window.visualViewport) {
-        return {
-            top: window.visualViewport.offsetTop,
-            bottom: window.visualViewport.offsetTop + window.visualViewport.height,
-        };
-    }
-    return {
-        top: 0,
-        bottom: window.innerHeight,
-    };
-};
-
 const updateKeyboardToolbarPosition = () => {
     if (isInMobileApp() || !window.visualViewport) {
         return;
@@ -510,6 +511,8 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
         lastColorHTML += "</div>";
     }
     const {fontSize, baseFontSize} = getFontSizeInfo(protyle, nodeElements);
+    const fontFamilyState = getInlineFontFamilyState(protyle, nodeElements);
+    const disableFontFamily = disableFont || fontFamilyState.disabled;
     const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
     utilElement.innerHTML = `${lastColorHTML}
 <div data-id="color" class="keyboard__slash-title">${window.siyuan.languages.color}</div>
@@ -544,6 +547,13 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
         <span class="keyboard__slash-text">${window.siyuan.languages.clearFontStyle}</span>
     </button>
 </div>
+<div data-id="fontFamily" class="keyboard__slash-title${disableFontFamily ? " fn__none" : ""}">${window.siyuan.languages.fontFamily}</div>
+<div data-id="fontFamilyWrap" class="keyboard__slash-block${disableFontFamily ? " fn__none" : ""}">
+    <button class="keyboard__slash-item" data-action="fontFamilyMenu">
+        <span class="keyboard__slash-icon" data-type="fontFamilyPreview">A</span>
+        <span class="keyboard__slash-text">${escapeHtml(getInlineFontFamilyLabel(fontFamilyState))}</span>
+    </button>
+</div>
 <div data-id="fontSize" class="keyboard__slash-title${disableFont ? " fn__none" : ""}">${window.siyuan.languages.fontSize}</div>
 <div data-id="fontSizeWrap" class="keyboard__slash-block${disableFont ? " fn__none" : ""}">
     <label class="keyboard__font-size-toggle">
@@ -560,6 +570,10 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
         <span data-type="fontSizeValue">${(parseFloat(fontSize) * 100).toFixed(0)}%</span>
     </label>
 </div>`;
+    if (fontFamilyState.family) {
+        (utilElement.querySelector('[data-type="fontFamilyPreview"]') as HTMLElement).style.fontFamily =
+            getInlineFontFamilyValue(fontFamilyState.family);
+    }
     const switchElement = utilElement.querySelector('[data-id="fontSizeWrap"] .b3-switch') as HTMLInputElement;
     const fontSizePXElement = utilElement.querySelector('[data-type="fontSizePX"]') as HTMLInputElement;
     const fontSizeEMElement = utilElement.querySelector('[data-type="fontSizeEM"]') as HTMLInputElement;
@@ -628,7 +642,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     utilElement.innerHTML = `<div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">
     ${getSlashItem(Constants.ZWSP, "iconMarkdown", window.siyuan.languages.template)}
-    ${getSlashItem(Constants.ZWSP + 1, "iconBoth", window.siyuan.languages.widget)}
+    ${getHostCapabilities().widgets ? getSlashItem(Constants.ZWSP + 1, "iconBoth", window.siyuan.languages.widget) : ""}
     ${getSlashItem(Constants.ZWSP + 2, "iconImage", window.siyuan.languages.assets)}
     ${getSlashItem("((", "iconRef", window.siyuan.languages.ref, "true")}
     ${getSlashItem("{{", "iconSQL", window.siyuan.languages.blockEmbed, "true")}
@@ -641,7 +655,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${isInAndroid() ? getSlashItem(Constants.ZWSP + 3, "iconImage", window.siyuan.languages.insertImage + '<input class="b3-form__upload" type="file" multiple="multiple" accept="image/*,application/x-siyuan-image-picker"/>', "true") : ""}
     ${isInAndroid() ? getSlashItem(Constants.ZWSP + 3, "iconCamera", window.siyuan.languages.insertPhoto + '<input class="b3-form__upload" capture="user" type="file"' + (protyle.options.upload.accept ? (' multiple="' + protyle.options.upload.accept + '"') : "") + "/>", "true") : ""}
     ${getSlashItem(Constants.ZWSP + 3, "iconDownload", window.siyuan.languages.insertAsset + '<input class="b3-form__upload" type="file" multiple="multiple"' + (protyle.options.upload.accept ? (' accept="' + protyle.options.upload.accept + '"') : "") + "/>", "true")}
-    ${getSlashItem('<iframe sandbox="allow-forms allow-presentation allow-same-origin allow-scripts allow-modals allow-popups allow-storage-access-by-user-activation" src="" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>', "iconGlobe", window.siyuan.languages.insertIframeURL, "true")}
+    ${getHostCapabilities().remoteKernel ? "" : getSlashItem('<iframe sandbox="allow-forms allow-presentation allow-same-origin allow-scripts allow-modals allow-popups allow-storage-access-by-user-activation" src="" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>', "iconGlobe", window.siyuan.languages.insertIframeURL, "true")}
     ${getSlashItem("![]()", "iconImage", window.siyuan.languages.insertImgURL, "true")}
     ${getSlashItem('<video controls="controls" src=""></video>', "iconVideo", window.siyuan.languages.insertVideoURL, "true")}
     ${getSlashItem('<audio controls="controls" src=""></audio>', "iconRecord", window.siyuan.languages.insertAudioURL, "true")}
@@ -753,7 +767,7 @@ const renderKeyboardToolbar = () => {
             return;
         }
 
-        const selectText = range.toString();
+        const selectText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
         const startCellElement = hasClosestByTag(range.startContainer, "TD") ||
             hasClosestByTag(range.startContainer, "TH");
         const endCellElement = hasClosestByTag(range.endContainer, "TD") ||
@@ -981,7 +995,7 @@ export const hideKeyboardToolbarByApp = (preserveSelection = false) => {
     }
     hideElements(["util"], editor.protyle);
     const range = selection?.rangeCount > 0 && !selection.isCollapsed ? selection.getRangeAt(0) : undefined;
-    const hasVisibleEditorSelection = !!range && hasVisibleSelectionText(range.toString()) &&
+    const hasVisibleEditorSelection = !!range && hasVisibleSelectionText(stripSemanticMarkersFromRangeText(range)) &&
         editor.protyle.wysiwyg.element.contains(range.startContainer) &&
         editor.protyle.wysiwyg.element.contains(range.endContainer);
     const result = getKeyboardHideResult(preserveSelection, tableCellSelectionRestored, hasVisibleEditorSelection);
@@ -1170,6 +1184,42 @@ export const initKeyboardToolbar = () => {
         const protyle = getCurrentEditor()?.protyle;
         const target = event.target as HTMLElement;
         const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "keyboard__slash-item");
+        if (slashBtnElement && slashBtnElement.dataset.action === "fontFamilyMenu") {
+            const range = protyle.toolbar.range.cloneRange();
+            const nodeElements = getFontNodeElements(protyle);
+            const fontFamilyState = getInlineFontFamilyState(protyle, nodeElements);
+            const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
+            const isFontFamilyMenuValid = () => getCurrentEditor()?.protyle === protyle &&
+                toolbarElement.clientHeight > 100 && range.startContainer.isConnected &&
+                range.endContainer.isConnected && toolbarElement.querySelector('.keyboard__action[data-type="text"]')
+                    ?.classList.contains("protyle-toolbar__item--current") === true;
+            preventKeyboardToolbarRender();
+            void renderMobileFontFamilyMenu(utilElement, {
+                ...fontFamilyState,
+                isOpenValid: isFontFamilyMenuValid,
+                onBack() {
+                    if (!isFontFamilyMenuValid()) {
+                        return;
+                    }
+                    protyle.toolbar.range = range;
+                    renderTextMenu(protyle, toolbarElement);
+                    focusByRange(range);
+                },
+                onInteraction: preventKeyboardToolbarRender,
+                onSelect(family) {
+                    if (!isFontFamilyMenuValid()) {
+                        return;
+                    }
+                    protyle.toolbar.range = range;
+                    fontEvent(protyle, nodeElements, "fontFamily", getInlineFontFamilyValue(family), false);
+                    renderTextMenu(protyle, toolbarElement);
+                    focusByRange(protyle.toolbar.range);
+                }
+            });
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         if (slashBtnElement && slashBtnElement.dataset.action === "manageInlineStyle") {
             openInlineStyleDialog(slashBtnElement.dataset.inlineStyleType as TInlineStyleType, () => {
                 renderTextMenu(protyle, toolbarElement);
@@ -1317,15 +1367,18 @@ export const initKeyboardToolbar = () => {
             return;
         } else if (type === "moveup") {
             moveToUp(protyle, nodeElement, range);
-            focusByRange(range);
             return;
         } else if (type === "movedown") {
             moveToDown(protyle, nodeElement, range);
-            focusByRange(range);
             return;
         } else if (type === "softLine") {
-            range.extractContents();
-            softEnter(range, nodeElement, protyle);
+            const trackedRangeInsertion = prepareTrackedRangeInsertion(protyle, range);
+            try {
+                range.extractContents();
+                softEnter(range, nodeElement, protyle, trackedRangeInsertion);
+            } finally {
+                endTrackedRangeInsertion(trackedRangeInsertion);
+            }
             focusByRange(range);
             return;
         } else if (type === "add") {

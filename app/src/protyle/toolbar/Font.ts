@@ -5,7 +5,11 @@ import {Constants} from "../../constants";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {updateBatchTransaction} from "../wysiwyg/transaction";
 import {lineNumberRender} from "../render/highlightRender";
-import {closeSubElement} from "./subElementLifecycle";
+import {
+    closeSubElement,
+    SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE,
+    setSubElementSource,
+} from "./subElementLifecycle";
 import {escapeAttr} from "../../util/escape";
 import {
     decodeStyle1,
@@ -29,6 +33,19 @@ import {
     TInlineStyleType,
 } from "./inlineStyle";
 import {openInlineStyleDialog} from "./inlineStyleDialog";
+import {
+    getSemanticInlineVisibleText,
+    hasSemanticInlineType,
+    stripSemanticMarkersFromRangeText
+} from "../util/inlineElementMarker";
+import {setInlineMemoContentIfMissing} from "./inlineMemoSelection";
+import {
+    getInlineFontFamilyLabel,
+    getInlineFontFamilyState,
+    getInlineFontFamilyValue,
+    openFontFamilyMenu,
+} from "./fontFamilyMenu";
+import {hasInlineFontFamilyExcludedType} from "./fontFamilyCore";
 
 const MAX_RECENT_FONT_STYLES = 14;
 
@@ -61,15 +78,31 @@ export class Font extends ToolbarItem {
     constructor(protyle: IProtyle, menuItem: IMenuItem) {
         super(protyle, menuItem);
         this.element.addEventListener("click", () => {
+            if (protyle.toolbar.subElement.dataset.subElementSource === SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE &&
+                !protyle.toolbar.subElement.classList.contains("fn__none")) {
+                protyle.toolbar.subElement.classList.add("fn__none");
+                closeSubElement(protyle.toolbar);
+                focusByRange(protyle.toolbar.range);
+                return;
+            }
+            closeSubElement(protyle.toolbar);
+            /// #if !MOBILE
+            if (protyle.toolbar.element.classList.contains("fn__none")) {
+                protyle.toolbar.render(protyle, protyle.toolbar.range);
+            }
+            /// #else
+            protyle.toolbar.element.classList.add("fn__none");
+            /// #endif
             const triggerRect = this.element.getBoundingClientRect();
             const visibleTriggerRect = triggerRect.width > 0 && triggerRect.height > 0 ? triggerRect : undefined;
-            protyle.toolbar.element.classList.add("fn__none");
-            closeSubElement(protyle.toolbar);
             protyle.toolbar.subElement.innerHTML = "";
             protyle.toolbar.subElement.style.width = "";
             protyle.toolbar.subElement.style.padding = "";
             const appearanceElement = appearanceMenu(protyle, getFontNodeElements(protyle));
             protyle.toolbar.subElement.append(appearanceElement);
+            /// #if !MOBILE
+            setSubElementSource(protyle.toolbar, SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE);
+            /// #endif
             protyle.toolbar.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
             protyle.toolbar.subElement.classList.remove("fn__none");
             limitRecentFontStyleRows(appearanceElement);
@@ -125,7 +158,8 @@ export const convertFontSize = (fontSize: string, unit: "px" | "em", baseFontSiz
 };
 
 export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
-                               onChange?: (type: string, color?: string) => void) => {
+                               onChange?: (type: string, color?: string) => void,
+                               fontFamilyElements?: Element[]) => {
     const builtinStyleLabels: Record<TBuiltinInlineStyleID, string> = {
         error: window.siyuan.languages.errorStyle,
         warning: window.siyuan.languages.warningStyle,
@@ -227,8 +261,20 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
         lastColorHTML += "</div>";
     }
     const {fontSize, baseFontSize} = getFontSizeInfo(protyle, nodeElements);
+    const fontFamilyState = getInlineFontFamilyState(protyle, fontFamilyElements || nodeElements);
+    const disableFontFamily = disableFont || fontFamilyState.disabled;
     const applyFontStyle = (type: string, color?: string) => {
         fontEvent(protyle, nodeElements, type, color, true, onChange);
+    };
+    const closeSelectionToolbarAppearance = () => {
+        if (protyle.toolbar.subElement.dataset.subElementSource !== SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE) {
+            return false;
+        }
+        protyle.toolbar.subElement.classList.add("fn__none");
+        closeSubElement(protyle.toolbar);
+        protyle.toolbar.render(protyle, protyle.toolbar.range);
+        focusByRange(protyle.toolbar.range);
+        return true;
     };
     element.innerHTML = `${lastColorHTML}
 <div class="fn__hr"></div>
@@ -259,6 +305,12 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
 <div data-id="fontStyleWrap" class="fn__flex">
     <button data-type="style2" class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.hollow}" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">A</button>
     <button data-type="style4" class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.shadow}" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">A</button>
+</div>
+<div class="fn__hr${disableFontFamily ? " fn__none" : ""}"></div>
+<div data-id="fontFamily" class="fn__flex${disableFontFamily ? " fn__none" : ""}">
+    <span class="fn__flex-center">${window.siyuan.languages.fontFamily}</span>
+    <span class="fn__flex-1"></span>
+    <input class="b3-select fn__flex-center fn__size96" data-type="fontFamilyMenu" data-menu="true" type="text" value="${escapeAttr(getInlineFontFamilyLabel(fontFamilyState))}" readonly aria-label="${escapeAttr(window.siyuan.languages.fontFamily)}" aria-haspopup="listbox" aria-expanded="false">
 </div>
 <div class="fn__hr${disableFont ? " fn__none" : ""}"></div>
 <div data-id="fontSize" class="fn__flex${disableFont ? " fn__none" : ""}">
@@ -292,26 +344,63 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(element)) {
             const dataType = target.getAttribute("data-type");
+            if (dataType === "fontFamilyMenu") {
+                const range = protyle.toolbar.range.cloneRange();
+                void openFontFamilyMenu(target, {
+                    ...fontFamilyState,
+                    isOpenValid: () => target.isConnected && element.isConnected &&
+                        protyle.toolbar.subElement.contains(element) &&
+                        !protyle.toolbar.subElement.classList.contains("fn__none") &&
+                        range.startContainer.isConnected && range.endContainer.isConnected,
+                    onSelect(family) {
+                        if (!range.startContainer.isConnected || !range.endContainer.isConnected) {
+                            return;
+                        }
+                        protyle.toolbar.range = range;
+                        applyFontStyle("fontFamily", getInlineFontFamilyValue(family));
+                        if (!closeSelectionToolbarAppearance()) {
+                            focusByRange(protyle.toolbar.range);
+                        }
+                    }
+                });
+                break;
+            }
             if (target.tagName === "BUTTON") {
                 if (target.dataset.action === "manageInlineStyle") {
                     closeSubElement(protyle.toolbar);
                     protyle.toolbar.subElement.classList.add("fn__none");
+                    protyle.toolbar.element.classList.add("fn__none");
                     openInlineStyleDialog(target.dataset.inlineStyleType as TInlineStyleType);
                 } else if (dataType === "style1") {
                     applyFontStyle(dataType, encodeStyle1(target.style.backgroundColor, target.style.color));
+                    closeSelectionToolbarAppearance();
                 } else if (dataType === "fontSize") {
                     applyFontStyle(dataType, target.getAttribute("data-value"));
+                    closeSelectionToolbarAppearance();
                 } else if (dataType === "backgroundColor") {
                     applyFontStyle(dataType, target.style.backgroundColor);
+                    closeSelectionToolbarAppearance();
                 } else if (dataType === "color") {
                     applyFontStyle(dataType, target.style.color);
+                    closeSelectionToolbarAppearance();
                 } else {
                     applyFontStyle(dataType);
+                    closeSelectionToolbarAppearance();
                 }
                 break;
             }
             target = target.parentElement;
         }
+    });
+    element.addEventListener("keydown", (event: KeyboardEvent) => {
+        const target = event.target as HTMLElement;
+        if (target.getAttribute("data-type") !== "fontFamilyMenu" ||
+            !["Enter", " ", "ArrowDown"].includes(event.key)) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        target.click();
     });
     const switchElement = element.querySelector(".b3-switch") as HTMLInputElement;
     const fontSizePXElement = element.querySelector("#fontSizePX") as HTMLInputElement;
@@ -354,12 +443,14 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
                           focusRange = true, onChange?: (type: string, color?: string) => void) => {
     let localFontStyles = window.siyuan.storage[Constants.LOCAL_FONTSTYLES];
     if (type) {
-        const value = `${type}${Constants.ZWSP}${color}`;
-        const recentKey = getRecentInlineStyleKey(value);
-        localFontStyles = [value, ...localFontStyles.filter((item: string) =>
-            getRecentInlineStyleKey(item) !== recentKey)].slice(0, MAX_RECENT_FONT_STYLES);
-        window.siyuan.storage[Constants.LOCAL_FONTSTYLES] = localFontStyles;
-        setStorageVal(Constants.LOCAL_FONTSTYLES, window.siyuan.storage[Constants.LOCAL_FONTSTYLES]);
+        if (type !== "fontFamily") {
+            const value = `${type}${Constants.ZWSP}${color}`;
+            const recentKey = getRecentInlineStyleKey(value);
+            localFontStyles = [value, ...localFontStyles.filter((item: string) =>
+                getRecentInlineStyleKey(item) !== recentKey)].slice(0, MAX_RECENT_FONT_STYLES);
+            window.siyuan.storage[Constants.LOCAL_FONTSTYLES] = localFontStyles;
+            setStorageVal(Constants.LOCAL_FONTSTYLES, window.siyuan.storage[Constants.LOCAL_FONTSTYLES]);
+        }
     } else {
         const visibleFontStyles = filterHiddenRecentInlineStyles(localFontStyles);
         if (visibleFontStyles.length === 0) {
@@ -382,6 +473,20 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
         return;
     }
     if (nodeElements && nodeElements.length > 0) {
+        if (type === "clear" &&
+            protyle.toolbar.setBlockElementsInlineMark(protyle, nodeElements, type, {type: "text"}, true)) {
+            if (focusRange) {
+                focusByRange(protyle.toolbar.range);
+            }
+            return;
+        }
+        if (type === "fontFamily" &&
+            protyle.toolbar.setBlockElementsInlineMark(protyle, nodeElements, "text", {type, color})) {
+            if (focusRange) {
+                focusByRange(protyle.toolbar.range);
+            }
+            return;
+        }
         updateBatchTransaction(nodeElements, protyle, (e: HTMLElement) => {
             if (type === "clear") {
                 e.style.color = "";
@@ -390,6 +495,7 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
                 e.style.textShadow = "";
                 e.style.backgroundColor = "";
                 e.style.fontSize = "";
+                e.style.fontFamily = "";
                 e.style.removeProperty("--b3-parent-background");
             } else if (type === "style1") {
                 const style = decodeStyle1(color);
@@ -408,6 +514,9 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
                 e.style.setProperty("--b3-parent-background", color);
             } else if (type === "fontSize") {
                 e.style.fontSize = color;
+            } else if (type === "fontFamily" &&
+                !["NodeCodeBlock", "NodeMathBlock", "NodeAttributeView"].includes(e.getAttribute("data-type"))) {
+                e.style.fontFamily = color;
             }
             if ((type === "fontSize" || type === "clear") && e.getAttribute("data-type") === "NodeCodeBlock") {
                 lineNumberRender(e.querySelector(".hljs"));
@@ -466,6 +575,16 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
             case "fontSize":
                 textElement.style.fontSize = textOption.color;
                 break;
+            case "fontFamily":
+                if (!hasInlineFontFamilyExcludedType(
+                    (textElement.getAttribute("data-type") || "").split(" ").filter(Boolean))) {
+                    if (textOption.color) {
+                        textElement.style.fontFamily = textOption.color;
+                    } else {
+                        textElement.style.removeProperty("font-family");
+                    }
+                }
+                break;
             case "backgroundColor":
                 textElement.style.backgroundColor = textOption.color;
                 break;
@@ -489,7 +608,8 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
                 textElement.className = "render-node";
                 textElement.setAttribute("contenteditable", "false");
                 textElement.setAttribute("data-subtype", "math");
-                textElement.setAttribute("data-content", textElement.textContent.replace(Constants.ZWSP, ""));
+                textElement.setAttribute("data-content", hasSemanticInlineType(textElement.getAttribute("data-type")) ?
+                    getSemanticInlineVisibleText(textElement) : textElement.textContent.replace(Constants.ZWSP, ""));
                 textElement.removeAttribute("data-render");
                 textElement.textContent = "";
                 break;
@@ -502,6 +622,7 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
             case "inline-memo":
                 textElement.removeAttribute("contenteditable");
                 textElement.removeAttribute("data-content");
+                setInlineMemoContentIfMissing(textElement, textOption.color);
                 break;
         }
 
@@ -536,7 +657,8 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
             sideElement.style.webkitTextStroke === currentElement.style.webkitTextStroke &&
             sideElement.style.textShadow === currentElement.style.textShadow &&
             sideElement.style.backgroundColor === currentElement.style.backgroundColor &&
-            sideElement.style.fontSize === currentElement.style.fontSize) {
+            sideElement.style.fontSize === currentElement.style.fontSize &&
+            sideElement.style.fontFamily === currentElement.style.fontFamily) {
             return true;
         }
         return false;
@@ -550,6 +672,7 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
                 !sideElement.style.webkitTextStroke &&
                 !sideElement.style.textShadow &&
                 !sideElement.style.fontSize &&
+                !sideElement.style.fontFamily &&
                 !sideElement.style.backgroundColor;
         }
         if (textObj.type === "color") {
@@ -573,13 +696,16 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
         if (textObj.type === "fontSize") {
             return textObj.color === sideElement.style.fontSize;
         }
+        if (textObj.type === "fontFamily") {
+            return textObj.color === sideElement.style.fontFamily;
+        }
     }
     return false;
 };
 
 export const getFontNodeElements = (protyle: IProtyle) => {
     let nodeElements: Element[];
-    if (protyle.toolbar.range.toString() === "") {
+    if (stripSemanticMarkersFromRangeText(protyle.toolbar.range).split(Constants.ZWSP).join("") === "") {
         nodeElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
         if (nodeElements.length === 0) {
             const nodeElement = hasClosestBlock(protyle.toolbar.range.startContainer);

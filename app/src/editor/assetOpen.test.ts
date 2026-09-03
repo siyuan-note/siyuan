@@ -4,6 +4,7 @@ import {
     DEFAULT_ASSET_OPEN,
     getAssetOpenGestures,
     normalizeAssetOpenConfig,
+    resolveAvailableAssetOpenAction,
     resolveAssetOpenAction,
     resolveAssetOpenGesture,
     resolveExecutableAssetOpenAction,
@@ -63,6 +64,13 @@ describe("asset opening", () => {
             altClick: "current",
             shiftClick: "bottom",
         });
+    });
+
+    it("maps host file actions to the internal preview when local files are unavailable", () => {
+        assert.equal(resolveAvailableAssetOpenAction("app", false), "current");
+        assert.equal(resolveAvailableAssetOpenAction("folder", false), "current");
+        assert.equal(resolveAvailableAssetOpenAction("right", false), "right");
+        assert.equal(resolveAvailableAssetOpenAction("app", true), "app");
     });
 
     it("keeps each gesture separate when actions degrade to the default app", () => {

@@ -90,6 +90,34 @@ export const resolveEntryOrder = (defaultOrder: string[], savedOrder: string[] |
     return isValidEntryOrder(merged, separatorKeys) ? merged : [...defaultOrder];
 };
 
+export const resolveEntryOrderWithBoundaryDefaults = (
+    defaultOrder: string[],
+    savedOrder: string[] | undefined,
+    boundaryKey: string,
+    separatorKeys: Set<string>,
+) => {
+    const result = resolveEntryOrder(defaultOrder, savedOrder, separatorKeys);
+    const defaultBoundaryIndex = defaultOrder.indexOf(boundaryKey);
+    const boundaryIndex = result.indexOf(boundaryKey);
+    if (defaultBoundaryIndex < 0 || boundaryIndex < 0) {
+        return result;
+    }
+    const savedKeys = new Set(savedOrder || []);
+    const moveBefore = defaultOrder.slice(0, defaultBoundaryIndex).filter((key) =>
+        !savedKeys.has(key) && result.indexOf(key) > boundaryIndex);
+    const moveAfter = defaultOrder.slice(defaultBoundaryIndex + 1).filter((key) =>
+        !savedKeys.has(key) && result.indexOf(key) < boundaryIndex);
+    if (moveBefore.length === 0 && moveAfter.length === 0) {
+        return result;
+    }
+    const movedKeys = new Set([...moveBefore, ...moveAfter]);
+    const constrained = result.filter((key) => !movedKeys.has(key));
+    const constrainedBoundaryIndex = constrained.indexOf(boundaryKey);
+    constrained.splice(constrainedBoundaryIndex, 0, ...moveBefore);
+    constrained.splice(constrained.indexOf(boundaryKey) + 1, 0, ...moveAfter);
+    return isValidEntryOrder(constrained, separatorKeys) ? constrained : result;
+};
+
 export const moveEntryOrder = (order: string[], sourceKey: string, targetKey: string, after: boolean,
                                separatorKeys: Set<string>) => {
     if (sourceKey === targetKey || !order.includes(sourceKey) || !order.includes(targetKey)) {

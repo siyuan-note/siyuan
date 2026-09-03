@@ -63,6 +63,7 @@ func NewLute() (ret *lute.Lute) {
 	ret.SetKramdownIAL(true)
 	ret.SetTag(true)
 	ret.SetSuperBlock(true)
+	ret.SetCustomBlock(true)
 	ret.SetImgPathAllowSpace(true)
 	ret.SetGitConflict(true)
 	ret.SetInlineAsterisk(MarkdownSettings.InlineAsterisk)
@@ -98,6 +99,7 @@ func NewLute() (ret *lute.Lute) {
 
 func NewStdLute() (ret *lute.Lute) {
 	ret = lute.New()
+	ret.SetCustomBlock(true)
 	ret.SetFootnotes(false)
 	ret.SetToC(false)
 	ret.SetIndentCodeBlock(true) // 导入 Markdown 时支持缩进代码块语法 Support indented code block syntax when importing Markdown https://github.com/siyuan-note/siyuan/issues/14429

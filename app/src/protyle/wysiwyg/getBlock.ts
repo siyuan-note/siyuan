@@ -1,5 +1,6 @@
 import {hasClosestBlock, hasClosestByClassName, isInEmbedBlock} from "../util/hasClosest";
 import {Constants} from "../../constants";
+import {getTextWithoutSemanticMarkers} from "../util/inlineElementMarker";
 
 export interface IEmbedOperationContext {
     resultElement: HTMLElement;
@@ -206,7 +207,7 @@ export const getContenteditableElement = (element: Element, target?: Node): Elem
         return blockElement.querySelector(".hljs").lastElementChild;
     } else if ("NodeAttributeView" === type) {
         return blockElement.querySelector(".av__title");
-    } else if (["NodeBlockQueryEmbed", "NodeMathBlock", "NodeHTMLBlock"].includes(type)) {
+    } else if (["NodeBlockQueryEmbed", "NodeMathBlock", "NodeHTMLBlock", "NodeCustomBlock"].includes(type)) {
         return undefined;
     } else if (blockElement.getAttribute("data-node-id")) {
         return getContenteditableElement(blockElement.querySelector("[data-node-id]"));
@@ -229,7 +230,7 @@ export const isNotEditBlock = (element: Element) => {
         });
         return !hasEditable;
     }
-    return ["NodeBlockQueryEmbed", "NodeThematicBreak", "NodeMathBlock", "NodeHTMLBlock", "NodeIFrame", "NodeWidget", "NodeVideo", "NodeAudio"].includes(element.getAttribute("data-type")) ||
+    return ["NodeBlockQueryEmbed", "NodeThematicBreak", "NodeMathBlock", "NodeHTMLBlock", "NodeIFrame", "NodeWidget", "NodeVideo", "NodeAudio", "NodeCustomBlock"].includes(element.getAttribute("data-type")) ||
         (element.getAttribute("data-type") === "NodeCodeBlock" && element.classList.contains("render-node"));
 };
 
@@ -242,7 +243,7 @@ export const getTopEmptyElement = (element: Element, boundaryElement?: Element) 
         } else {
             let hasText = false;
             Array.from(topElement.parentElement.querySelectorAll('[contenteditable="true"]')).find(item => {
-                if (item.textContent.replace(Constants.ZWSP, "").replace("\n", "") !== "") {
+                if (getTextWithoutSemanticMarkers(item).split(Constants.ZWSP).join("").replace(/\n/g, "") !== "") {
                     hasText = true;
                     return true;
                 }

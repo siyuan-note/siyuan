@@ -1,10 +1,19 @@
 import * as assert from "node:assert/strict";
 import test from "node:test";
 import {
+    getBuiltinProfileEntryVisibility,
     getProfileEntryVisibility,
     isEntryVisibilityImportVersionSupported,
     normalizeEntryVisibilityImportProfile,
 } from "./profile";
+
+test("built-in profiles honor entry defaults", () => {
+    assert.equal(getBuiltinProfileEntryVisibility("full", false, true), true);
+    assert.equal(getBuiltinProfileEntryVisibility("full", true, false), false);
+    assert.equal(getBuiltinProfileEntryVisibility("simple", true, true), true);
+    assert.equal(getBuiltinProfileEntryVisibility("simple", false, true), false);
+    assert.equal(getBuiltinProfileEntryVisibility("simple", true, false), false);
+});
 
 test("custom entry visibility preserves saved values", () => {
     const profile = {entries: {visible: true, hidden: false}};
@@ -17,11 +26,19 @@ test("custom entry visibility shows missing entries", () => {
     assert.equal(getProfileEntryVisibility(undefined, "new-entry"), true);
 });
 
-test("entry visibility import supports versions 1, 2, and 3", () => {
-    assert.equal(isEntryVisibilityImportVersionSupported(1, 3), true);
-    assert.equal(isEntryVisibilityImportVersionSupported(2, 3), true);
-    assert.equal(isEntryVisibilityImportVersionSupported(3, 3), true);
-    assert.equal(isEntryVisibilityImportVersionSupported(4, 3), false);
+test("custom entry visibility uses a caller-provided default only when the entry is missing", () => {
+    const profile = {entries: {visible: true, hidden: false}};
+    assert.equal(getProfileEntryVisibility(profile, "missing", false), false);
+    assert.equal(getProfileEntryVisibility(profile, "visible", false), true);
+    assert.equal(getProfileEntryVisibility(profile, "hidden", true), false);
+});
+
+test("entry visibility import supports versions 1 through 4", () => {
+    assert.equal(isEntryVisibilityImportVersionSupported(1, 4), true);
+    assert.equal(isEntryVisibilityImportVersionSupported(2, 4), true);
+    assert.equal(isEntryVisibilityImportVersionSupported(3, 4), true);
+    assert.equal(isEntryVisibilityImportVersionSupported(4, 4), true);
+    assert.equal(isEntryVisibilityImportVersionSupported(5, 4), false);
 });
 
 test("legacy entry visibility imports require base without persisting it", () => {
@@ -47,7 +64,7 @@ test("current entry visibility imports do not require base", () => {
     assert.deepEqual(normalizeEntryVisibilityImportProfile({
         name: "Current",
         entries: {},
-    }, 3, defaultOrders), {
+    }, 4, defaultOrders), {
         name: "Current",
         entries: {},
         orders: defaultOrders,
@@ -64,5 +81,38 @@ test("version 1 entry visibility imports use default orders", () => {
         name: "Version 1",
         entries: {},
         orders: defaultOrders,
+    });
+});
+
+test("version 3 entry visibility imports migrate the edit mode submenu", () => {
+    assert.deepEqual(normalizeEntryVisibilityImportProfile({
+        name: "Legacy edit mode",
+        entries: {
+            "document.more.editMode": true,
+            "document.more.editMode.wysiwyg": false,
+            "document.more.editMode.preview": false,
+        },
+        orders: {
+            "document.more.editMode": ["preview", "wysiwyg"],
+        },
+    }, 3, {}), {
+        name: "Legacy edit mode",
+        entries: {"document.more.editMode": false},
+        orders: {},
+    });
+});
+
+test("version 3 entry visibility imports keep the merged mode entry when a legacy child is visible", () => {
+    assert.deepEqual(normalizeEntryVisibilityImportProfile({
+        name: "Partially visible edit mode",
+        entries: {
+            "document.more.editMode": true,
+            "document.more.editMode.wysiwyg": false,
+            "document.more.editMode.preview": true,
+        },
+    }, 3, {}), {
+        name: "Partially visible edit mode",
+        entries: {"document.more.editMode": true},
+        orders: {},
     });
 });

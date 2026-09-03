@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"io/fs"
 	"maps"
-	"math"
 	"os"
 	"path"
 	"path/filepath"
@@ -662,7 +661,11 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 		box.fillSort(&fileTreeFiles)
 		sort.Slice(fileTreeFiles, func(i, j int) bool {
 			if fileTreeFiles[i].Sort == fileTreeFiles[j].Sort {
-				return util.TimeFromID(fileTreeFiles[i].ID) > util.TimeFromID(fileTreeFiles[j].ID)
+				leftTime, rightTime := util.TimeFromID(fileTreeFiles[i].ID), util.TimeFromID(fileTreeFiles[j].ID)
+				if leftTime != rightTime {
+					return leftTime > rightTime
+				}
+				return fileTreeFiles[i].ID > fileTreeFiles[j].ID
 			}
 			return fileTreeFiles[i].Sort < fileTreeFiles[j].Sort
 		})
@@ -1367,6 +1370,19 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string, arg map[string]an
 	if nil != err {
 		return
 	}
+	sortTargetID, _ := arg["sortTargetID"].(string)
+	sortPosition, _ := arg["sortPosition"].(string)
+	if "" != sortTargetID {
+		if "before" != sortPosition && "after" != sortPosition {
+			return nil, fmt.Errorf("invalid sort position [%s]", sortPosition)
+		}
+		target := treenode.GetBlockTree(sortTargetID)
+		if !isSortableDocument(target) || target.BoxID != boxID || path.Dir(target.Path) != path.Dir(p) {
+			return nil, fmt.Errorf("sort target document [%s] is not a sibling of the new document", sortTargetID)
+		}
+	} else if "" != sortPosition {
+		return nil, errors.New("sort target ID is required when sort position is specified")
+	}
 
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
@@ -1377,7 +1393,12 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string, arg map[string]an
 	}
 
 	FlushTxQueue()
-	if 0 < len(sorts) {
+	if "" != sortTargetID {
+		if _, sortErr := ReorderDocs([]string{tree.ID}, sortTargetID, sortPosition); nil != sortErr {
+			logging.LogErrorf("reorder created document [%s] failed: %s", tree.ID, sortErr)
+			box.setSortByConf(path.Dir(tree.Path), tree.ID)
+		}
+	} else if 0 < len(sorts) {
 		ChangeFileTreeSort(box.ID, sorts)
 	} else {
 		box.setSortByConf(path.Dir(tree.Path), tree.ID)
@@ -1576,7 +1597,7 @@ func GetHPathByPath(boxID, p string) (hPath string, err error) {
 		return
 	}
 
-	bt := treenode.GetBlockTreeByBoxPath(boxID, p)
+	bt := treenode.GetBlockTreeRootByPath(boxID, p)
 	if nil == bt {
 		err = ErrBlockNotFound
 		return
@@ -1593,7 +1614,7 @@ func GetHPathsByPaths(paths []string) (hPaths []string, err error) {
 			continue
 		}
 
-		bt := treenode.GetBlockTreeByBoxPath(box.ID, p)
+		bt := treenode.GetBlockTreeRootByPath(box.ID, p)
 		if nil == bt {
 			logging.LogWarnf("block tree not found by path [%s]", p)
 			continue
@@ -2391,6 +2412,14 @@ func cleanBoxDocDir(p string) string {
 }
 
 func createDoc(boxID, p, title, dom string, titleEmpty bool) (tree *parse.Tree, err error) {
+	return createDoc0(boxID, p, title, dom, titleEmpty, false)
+}
+
+func createDocSync(boxID, p, title, dom string, titleEmpty bool) (tree *parse.Tree, err error) {
+	return createDoc0(boxID, p, title, dom, titleEmpty, true)
+}
+
+func createDoc0(boxID, p, title, dom string, titleEmpty, syncWrite bool) (tree *parse.Tree, err error) {
 	validation, err := validateCreateDoc(boxID, p, title, titleEmpty)
 	if nil != err {
 		return
@@ -2451,7 +2480,20 @@ func createDoc(boxID, p, title, dom string, titleEmpty bool) (tree *parse.Tree, 
 		unlink.Unlink()
 	}
 
+	err = performCreateDocTransaction(tree, syncWrite)
+	return
+}
+
+func performCreateDocTransaction(tree *parse.Tree, syncWrite bool) (err error) {
 	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: tree}}}
+	if syncWrite {
+		if err = PerformTxSync(transaction); nil != err {
+			// 事务在写文件前会更新块树，失败时清理未落盘文档的索引。
+			treenode.RemoveBlockTreesByRootID(tree.Box, tree.ID)
+			return
+		}
+		return
+	}
 	PerformTransactions(&[]*Transaction{transaction})
 	FlushTxQueue()
 	return
@@ -2604,14 +2646,14 @@ func moveSorts(rootID, fromBox, toBox string) {
 	bt := treenode.GetBlockTree(rootID)
 	if nil != bt {
 		parentPath := path.Dir(bt.Path)
-		docs, _, listErr := ListDocTree(toBox, parentPath, util.SortModeCustom, false, false, math.MaxInt)
-		if listErr != nil {
-			logging.LogErrorf("list doc tree failed: %s", listErr)
+		childIDs, loadErr := loadSiblingCustomOrder(toBox, parentPath, toFullSortIDs)
+		if loadErr != nil {
+			logging.LogErrorf("load sibling custom order failed: %s", loadErr)
 			return
 		}
 
-		for _, doc := range docs {
-			sortIDs[doc.ID] = doc.Sort
+		for _, id := range childIDs {
+			sortIDs[id] = toFullSortIDs[id]
 		}
 
 		pushFiletreeSortChanged(sortIDs)
@@ -2626,61 +2668,238 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 
 	FlushTxQueue()
 	fileTreeSortLock.Lock()
-	defer fileTreeSortLock.Unlock()
 	box := Conf.Box(boxID)
-	sortIDs := map[string]int{}
-	max := 0
-	for i, p := range paths {
-		id := util.GetTreeID(p)
-		sortIDs[id] = i + 1
-		if i == len(paths)-1 {
-			max = i + 2
-		}
+	if nil == box {
+		fileTreeSortLock.Unlock()
+		return
 	}
 
 	p := paths[0]
 	parentPath := path.Dir(p)
-	absParentPath := filepath.Join(util.DataDir, boxID, parentPath)
-	files, err := os.ReadDir(absParentPath)
-	if err != nil {
-		logging.LogErrorf("read dir [%s] failed: %s", absParentPath, err)
-	}
-
-	sortFolderIDs := map[string]int{}
-	for _, f := range files {
-		if !strings.HasSuffix(f.Name(), ".sy") {
-			continue
-		}
-
-		id := strings.TrimSuffix(f.Name(), ".sy")
-		val := sortIDs[id]
-		if 0 == val {
-			val = max
-			max++
-		}
-		sortFolderIDs[id] = val
-	}
-
 	confDir := filepath.Join(util.DataDir, box.ID, ".siyuan")
-	if err = os.MkdirAll(confDir, 0755); err != nil {
+	if err := os.MkdirAll(confDir, 0755); err != nil {
+		fileTreeSortLock.Unlock()
 		logging.LogErrorf("create conf dir failed: %s", err)
 		return
 	}
 	confPath := filepath.Join(confDir, "sort.json")
 	fullSortIDs, err := readSortConfMap(confPath)
 	if err != nil {
+		fileTreeSortLock.Unlock()
+		return
+	}
+	currentIDs, err := loadSiblingCustomOrder(boxID, parentPath, fullSortIDs)
+	if err != nil {
+		fileTreeSortLock.Unlock()
+		logging.LogErrorf("load sibling custom order failed: %s", err)
+		return
+	}
+	orderedIDs := mergeRequestedSortOrder(currentIDs, paths)
+	if 1 > len(orderedIDs) || equalStringSlices(currentIDs, orderedIDs) {
+		fileTreeSortLock.Unlock()
 		return
 	}
 
+	sortFolderIDs := map[string]int{}
+	for i, id := range orderedIDs {
+		sortFolderIDs[id] = i + 1
+	}
 	maps.Copy(fullSortIDs, sortFolderIDs)
-
 	if err = writeSortConfMap(confPath, fullSortIDs); err != nil {
+		fileTreeSortLock.Unlock()
 		return
 	}
+	fileTreeSortLock.Unlock()
 
 	IncSync()
 
 	pushFiletreeSortChanged(sortFolderIDs)
+}
+
+// ReorderResult 描述相对排序操作的结果。
+type ReorderResult struct {
+	Changed    bool   `json:"changed"`
+	Notebook   string `json:"notebook,omitempty"`
+	ParentPath string `json:"parentPath,omitempty"`
+}
+
+// ReorderDocs 将同级文档移动到目标文档之前或之后。
+func ReorderDocs(sourceIDs []string, targetID, position string) (ret *ReorderResult, err error) {
+	ret = &ReorderResult{}
+	if err = validateReorderArgs(sourceIDs, targetID, position); nil != err {
+		return
+	}
+
+	FlushTxQueue()
+	target := treenode.GetBlockTree(targetID)
+	if !isSortableDocument(target) {
+		return ret, fmt.Errorf("target document [%s] not found", targetID)
+	}
+	box := Conf.Box(target.BoxID)
+	if nil == box {
+		return ret, fmt.Errorf("target document [%s] is not in an opened and unlocked notebook", targetID)
+	}
+	parentPath := path.Dir(target.Path)
+	for _, sourceID := range sourceIDs {
+		source := treenode.GetBlockTree(sourceID)
+		if !isSortableDocument(source) {
+			return ret, fmt.Errorf("source document [%s] not found", sourceID)
+		}
+		if source.BoxID != target.BoxID || path.Dir(source.Path) != parentPath {
+			return ret, fmt.Errorf("source document [%s] is not a sibling of target document [%s]", sourceID, targetID)
+		}
+	}
+
+	fileTreeSortLock.Lock()
+	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
+	fullSortIDs, readErr := readSortConfMap(confPath)
+	if nil != readErr {
+		fileTreeSortLock.Unlock()
+		return ret, readErr
+	}
+	currentIDs, loadErr := loadSiblingCustomOrder(box.ID, parentPath, fullSortIDs)
+	if nil != loadErr {
+		fileTreeSortLock.Unlock()
+		return ret, loadErr
+	}
+	orderedIDs, changed, reorderErr := reorderIDSequence(currentIDs, sourceIDs, targetID, position)
+	if nil != reorderErr || !changed {
+		fileTreeSortLock.Unlock()
+		return ret, reorderErr
+	}
+	sortIDs := map[string]int{}
+	for i, id := range orderedIDs {
+		sortIDs[id] = i + 1
+	}
+	maps.Copy(fullSortIDs, sortIDs)
+	if writeErr := writeSortConfMap(confPath, fullSortIDs); nil != writeErr {
+		fileTreeSortLock.Unlock()
+		return ret, writeErr
+	}
+	fileTreeSortLock.Unlock()
+
+	ret.Changed = true
+	ret.Notebook = box.ID
+	ret.ParentPath = parentPath
+	IncSync()
+	pushFiletreeSortChanged(sortIDs)
+	return
+}
+
+func validateReorderArgs(sourceIDs []string, targetID, position string) error {
+	if 1 > len(sourceIDs) {
+		return errors.New("source IDs must not be empty")
+	}
+	if "before" != position && "after" != position {
+		return fmt.Errorf("invalid reorder position [%s]", position)
+	}
+	seen := map[string]struct{}{}
+	for _, sourceID := range sourceIDs {
+		if sourceID == targetID {
+			return fmt.Errorf("target ID [%s] must not be included in source IDs", targetID)
+		}
+		if _, ok := seen[sourceID]; ok {
+			return fmt.Errorf("duplicate source ID [%s]", sourceID)
+		}
+		seen[sourceID] = struct{}{}
+	}
+	return nil
+}
+
+func isSortableDocument(tree *treenode.BlockTree) bool {
+	return nil != tree && tree.ID == tree.RootID && "d" == tree.Type && !IsBoxDoc(tree.BoxID, tree.RootID)
+}
+
+func loadSiblingCustomOrder(boxID, parentPath string, fullSortIDs map[string]int) (ret []string, err error) {
+	absParentPath := filepath.Join(util.DataDir, boxID, parentPath)
+	files, err := os.ReadDir(absParentPath)
+	if nil != err {
+		return nil, fmt.Errorf("read dir [%s] failed: %w", absParentPath, err)
+	}
+	for _, file := range files {
+		if file.IsDir() || !strings.HasSuffix(file.Name(), ".sy") {
+			continue
+		}
+		id := strings.TrimSuffix(file.Name(), ".sy")
+		if !ast.IsNodeIDPattern(id) || ("/" == parentPath && id == boxID) {
+			continue
+		}
+		ret = append(ret, id)
+	}
+	sort.Slice(ret, func(i, j int) bool {
+		leftSort, rightSort := fullSortIDs[ret[i]], fullSortIDs[ret[j]]
+		if leftSort != rightSort {
+			return leftSort < rightSort
+		}
+		leftTime, rightTime := util.TimeFromID(ret[i]), util.TimeFromID(ret[j])
+		if leftTime != rightTime {
+			return leftTime > rightTime
+		}
+		return ret[i] > ret[j]
+	})
+	return
+}
+
+func mergeRequestedSortOrder(currentIDs, requestedPaths []string) (ret []string) {
+	requestedIDs := make([]string, 0, len(requestedPaths))
+	for _, requestedPath := range requestedPaths {
+		requestedIDs = append(requestedIDs, util.GetTreeID(requestedPath))
+	}
+	return mergeRequestedIDOrder(currentIDs, requestedIDs)
+}
+
+func reorderIDSequence(currentIDs, sourceIDs []string, targetID, position string) (ret []string, changed bool, err error) {
+	if err = validateReorderArgs(sourceIDs, targetID, position); nil != err {
+		return
+	}
+	currentSet := make(map[string]struct{}, len(currentIDs))
+	for _, id := range currentIDs {
+		currentSet[id] = struct{}{}
+	}
+	if _, exists := currentSet[targetID]; !exists {
+		return nil, false, fmt.Errorf("target ID [%s] is not in the current order", targetID)
+	}
+	sourceSet := make(map[string]struct{}, len(sourceIDs))
+	for _, sourceID := range sourceIDs {
+		if _, exists := currentSet[sourceID]; !exists {
+			return nil, false, fmt.Errorf("source ID [%s] is not in the current order", sourceID)
+		}
+		sourceSet[sourceID] = struct{}{}
+	}
+	remaining := make([]string, 0, len(currentIDs)-len(sourceIDs))
+	for _, id := range currentIDs {
+		if _, source := sourceSet[id]; !source {
+			remaining = append(remaining, id)
+		}
+	}
+	targetIndex := -1
+	for i, id := range remaining {
+		if id == targetID {
+			targetIndex = i
+			break
+		}
+	}
+	if "after" == position {
+		targetIndex++
+	}
+	ret = make([]string, 0, len(currentIDs))
+	ret = append(ret, remaining[:targetIndex]...)
+	ret = append(ret, sourceIDs...)
+	ret = append(ret, remaining[targetIndex:]...)
+	changed = !equalStringSlices(currentIDs, ret)
+	return
+}
+
+func equalStringSlices(left, right []string) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for i := range left {
+		if left[i] != right[i] {
+			return false
+		}
+	}
+	return true
 }
 
 var fileTreeSortLock sync.Mutex
@@ -2898,114 +3117,88 @@ func (box *Box) setSortByConf(parentPath, id string) {
 }
 
 func (box *Box) addMaxSort(parentPath, id string) {
-	docs, _, err := ListDocTree(box.ID, parentPath, util.SortModeCustom, false, false, math.MaxInt)
-	if err != nil {
-		logging.LogErrorf("list doc tree failed: %s", err)
-		return
+	if err := box.placeDocInSiblingOrder(parentPath, id, "", "after"); nil != err {
+		logging.LogErrorf("append document sort failed: %s", err)
 	}
-
-	sortVal := 0
-	if 0 < len(docs) {
-		sortVal = docs[len(docs)-1].Sort + 1
-	}
-
-	box.setSortVal(id, sortVal)
-
-	sortIDs := map[string]int{}
-	for _, doc := range docs {
-		sortIDs[doc.ID] = doc.Sort
-	}
-	sortIDs[id] = sortVal
-	pushFiletreeSortChanged(sortIDs)
 }
 
 func (box *Box) addMinSort(parentPath, id string) {
-	docs, _, err := ListDocTree(box.ID, parentPath, util.SortModeCustom, false, false, 1)
-	if err != nil {
-		logging.LogErrorf("list doc tree failed: %s", err)
-		return
+	if err := box.placeDocInSiblingOrder(parentPath, id, "", "before"); nil != err {
+		logging.LogErrorf("prepend document sort failed: %s", err)
 	}
-
-	sortVal := 0
-	if 0 < len(docs) {
-		sortVal = docs[0].Sort - 1
-	}
-
-	box.setSortVal(id, sortVal)
-
-	sortIDs := map[string]int{}
-	for _, doc := range docs {
-		sortIDs[doc.ID] = doc.Sort
-	}
-	sortIDs[id] = sortVal
-	pushFiletreeSortChanged(sortIDs)
 }
 
-func (box *Box) setSortVal(id string, sortVal int) {
+func (box *Box) placeDocInSiblingOrder(parentPath, id, targetID, position string) error {
 	fileTreeSortLock.Lock()
-	defer fileTreeSortLock.Unlock()
-
-	var err error
 	confDir := filepath.Join(util.DataDir, box.ID, ".siyuan")
-	if err = os.MkdirAll(confDir, 0755); err != nil {
-		logging.LogErrorf("create conf dir failed: %s", err)
-		return
+	if err := os.MkdirAll(confDir, 0755); nil != err {
+		fileTreeSortLock.Unlock()
+		return fmt.Errorf("create conf dir failed: %w", err)
 	}
 	confPath := filepath.Join(confDir, "sort.json")
 	fullSortIDs, err := readSortConfMap(confPath)
-	if err != nil {
-		return
+	if nil != err {
+		fileTreeSortLock.Unlock()
+		return err
 	}
-
-	fullSortIDs[id] = sortVal
-	if err = writeSortConfMap(confPath, fullSortIDs); err != nil {
-		return
+	currentIDs, err := loadSiblingCustomOrder(box.ID, parentPath, fullSortIDs)
+	if nil != err {
+		fileTreeSortLock.Unlock()
+		return err
 	}
+	orderedIDs := make([]string, 0, len(currentIDs)+1)
+	for _, currentID := range currentIDs {
+		if currentID != id {
+			orderedIDs = append(orderedIDs, currentID)
+		}
+	}
+	insertIndex := 0
+	if "after" == position {
+		insertIndex = len(orderedIDs)
+	}
+	if "" != targetID {
+		insertIndex = -1
+		for i, currentID := range orderedIDs {
+			if currentID == targetID {
+				insertIndex = i
+				if "after" == position {
+					insertIndex++
+				}
+				break
+			}
+		}
+		if 0 > insertIndex {
+			fileTreeSortLock.Unlock()
+			return fmt.Errorf("sort target document [%s] not found", targetID)
+		}
+	}
+	orderedIDs = append(orderedIDs, "")
+	copy(orderedIDs[insertIndex+1:], orderedIDs[insertIndex:])
+	orderedIDs[insertIndex] = id
+	sortIDs := make(map[string]int, len(orderedIDs))
+	for i, orderedID := range orderedIDs {
+		sortIDs[orderedID] = i + 1
+	}
+	maps.Copy(fullSortIDs, sortIDs)
+	if err = writeSortConfMap(confPath, fullSortIDs); nil != err {
+		fileTreeSortLock.Unlock()
+		return err
+	}
+	fileTreeSortLock.Unlock()
+	pushFiletreeSortChanged(sortIDs)
+	return nil
 }
 
 func (box *Box) addSort(previousPath, id string) {
-	fileTreeSortLock.Lock()
-	defer fileTreeSortLock.Unlock()
-
-	confDir := filepath.Join(util.DataDir, box.ID, ".siyuan")
-	if err := os.MkdirAll(confDir, 0755); err != nil {
-		logging.LogErrorf("create conf dir failed: %s", err)
-		return
-	}
-	confPath := filepath.Join(confDir, "sort.json")
-	fullSortIDs, err := readSortConfMap(confPath)
-	if err != nil {
-		return
-	}
-
 	parentPath := path.Dir(previousPath)
-	docs, _, err := ListDocTree(box.ID, parentPath, util.SortModeCustom, false, false, math.MaxInt)
-	if err != nil {
-		logging.LogErrorf("list doc tree failed: %s", err)
-		return
-	}
-
-	sortIDs := map[string]int{}
 	previousID := util.GetTreeID(previousPath)
-	sortVal := 0
-	for _, doc := range docs {
-		fullSortIDs[doc.ID] = sortVal
-		if doc.ID == previousID {
-			sortVal++
-			fullSortIDs[id] = sortVal
-		}
-		sortVal++
-		sortIDs[doc.ID] = sortVal
+	if err := box.placeDocInSiblingOrder(parentPath, id, previousID, "after"); nil != err {
+		logging.LogErrorf("insert document sort failed: %s", err)
 	}
-
-	if err = writeSortConfMap(confPath, fullSortIDs); err != nil {
-		return
-	}
-
-	pushFiletreeSortChanged(sortIDs)
 }
 
-func (box *Box) setSort(sortIDVals map[string]int) {
+// setImportSort 写入导入文档的排序值，导入完成后由统一事件通知。
+func (box *Box) setImportSort(sortIDVals map[string]int) {
 	fileTreeSortLock.Lock()
 	defer fileTreeSortLock.Unlock()
 
@@ -3024,8 +3217,6 @@ func (box *Box) setSort(sortIDVals map[string]int) {
 	if err = writeSortConfMap(confPath, fullSortIDs); err != nil {
 		return
 	}
-
-	pushFiletreeSortChanged(sortIDVals)
 }
 
 func pushFiletreeSortChanged(sortIDs map[string]int) {
@@ -3033,24 +3224,45 @@ func pushFiletreeSortChanged(sortIDs map[string]int) {
 		return
 	}
 
-	var childIDs []string
-	for sortID := range sortIDs {
-		childIDs = append(childIDs, sortID)
+	type siblingGroup struct {
+		boxID      string
+		parentPath string
+		changed    map[string]int
 	}
-	sort.Slice(childIDs, func(i, j int) bool {
-		return sortIDs[childIDs[i]] < sortIDs[childIDs[j]]
-	})
-
-	firstID := childIDs[0]
-	bt := treenode.GetBlockTree(firstID)
-	if nil == bt {
-		return
+	groups := map[string]*siblingGroup{}
+	for id, sortValue := range sortIDs {
+		bt := treenode.GetBlockTree(id)
+		if !isSortableDocument(bt) {
+			continue
+		}
+		parentPath := path.Dir(bt.Path)
+		key := bt.BoxID + "\x00" + parentPath
+		group := groups[key]
+		if nil == group {
+			group = &siblingGroup{boxID: bt.BoxID, parentPath: parentPath, changed: map[string]int{}}
+			groups[key] = group
+		}
+		group.changed[id] = sortValue
 	}
-
-	parentPath := path.Dir(bt.Path)
-	util.BroadcastByType("main", "filetreeSortChanged", 0, "", map[string]any{
-		"notebook":   bt.BoxID,
-		"parentPath": parentPath,
-		"childIDs":   childIDs,
-	})
+	for _, group := range groups {
+		confPath := filepath.Join(util.DataDir, group.boxID, ".siyuan", "sort.json")
+		fullSortIDs, err := readSortConfMap(confPath)
+		var childIDs []string
+		if nil == err {
+			childIDs, err = loadSiblingCustomOrder(group.boxID, group.parentPath, fullSortIDs)
+		}
+		if nil != err {
+			for id := range group.changed {
+				childIDs = append(childIDs, id)
+			}
+			sort.Slice(childIDs, func(i, j int) bool {
+				return group.changed[childIDs[i]] < group.changed[childIDs[j]]
+			})
+		}
+		util.BroadcastByType("main", "filetreeSortChanged", 0, "", map[string]any{
+			"notebook":   group.boxID,
+			"parentPath": group.parentPath,
+			"childIDs":   childIDs,
+		})
+	}
 }

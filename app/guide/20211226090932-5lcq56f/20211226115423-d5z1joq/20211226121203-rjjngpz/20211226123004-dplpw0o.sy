@@ -6,7 +6,7 @@
 		"id": "20211226123004-dplpw0o",
 		"title": "範本片段",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260830143000"
 	},
 	"Children": [
 		{
@@ -1691,6 +1691,209 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ 即可。"
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tpltw01",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260830143000-tpltw01",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "建立子文檔樹"
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tpltw02",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830143000-tpltw02",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "僅在編輯器中手動插入範本時，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "createDocTree"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 才會生效。範本演算完成後，思源會先顯示計劃建立的完整子文檔樹，確認後才建立；取消不會插入範本或建立文檔。同一父文檔下即使已有同名文檔也會始終新建，不會重複使用或覆蓋。一次撤銷會同時移除本次插入的範本內容和本次建立的所有子文檔。單次計劃最多建立 128 個文檔，宣告的子文檔樹最多 16 層；實際文件樹深度仍受「允許建立深度大於 7 層的子文件」設定限制。"
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tpltw03",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260830143000-tpltw03",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "dGVtcGxhdGU="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": ".action{define \"child-review\"}\n## 複盤\n.action{end}\n\n.action{createDocTree (list\n  (dict \"title\" \"資料\" \"template\" \"children/material.md\"\n    \"children\" (list (dict \"title\" \"摘錄\")))\n  (dict \"title\" \"複盤\" \"define\" \"child-review\")\n)}\n\n.action{range $doc := renderDocRef \"children\" .id}\n- ((.action{$doc.RootID} \".action{$doc.HPath}\"))\n.action{end}\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tpltw04",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830143000-tpltw04",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "每個子文檔內容範本都以該子文檔為上下文，可使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".title"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".id"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".parentID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".rootID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".hPath"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tpltw07",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830143000-tpltw07",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "renderDocRef \"children\" <id>"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 回傳建立計劃中的靜態子文檔描述清單；"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "renderDocRef \"path\" <hPath>"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 回傳指向計劃文檔的靜態區塊引用文字。"
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tpltw05",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830143000-tpltw05",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "每個節點可透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "define"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 使用目前範本檔案中的命名範本，或透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "template"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 引用相對於目前範本套件的外部範本。任一外部範本缺失或無法解析時，整個操作都會取消，不會插入內容或建立部分子文檔。"
+				}
+			]
+		},
+		{
+			"ID": "20260830143000-tpltw06",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830143000-tpltw06",
+				"updated": "20260830143000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "createDocTree"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 不會在自動套用的內容範本中執行，例如新建文檔、日記和資料庫條目使用的內容範本。本期不包含資料庫或資源封裝，也不支援將整個文檔子樹匯出為範本。"
 				}
 			]
 		},

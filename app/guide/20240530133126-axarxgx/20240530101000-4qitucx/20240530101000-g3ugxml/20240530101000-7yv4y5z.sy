@@ -7,7 +7,7 @@
 		"id": "20240530101000-7yv4y5z",
 		"title": "ウィンドウとタブ",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20260903130000"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-5b80d49",
-				"updated": "20260809232000"
+				"updated": "20260903130000"
 			},
 			"Children": [
 				{
@@ -60,7 +60,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204552-v3apeie",
-				"updated": "20260810212846"
+				"updated": "20260903130000"
 			},
 			"Children": [
 				{
@@ -75,7 +75,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204552-bxaw5cp",
-				"updated": "20260810212846"
+				"updated": "20260903130000"
 			},
 			"Children": [
 				{
@@ -457,6 +457,48 @@
 								{
 									"Type": "NodeText",
 									"Data": "：タブはドラッグによる並べ替えが可能で、自由に位置を調整できます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260903130000-p2g7k4s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260903130000-p2g7k4s",
+						"updated": "20260903130000"
+					},
+					"Children": [
+						{
+							"ID": "20260903130000-m8d1v6q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260903130000-m8d1v6q",
+								"updated": "20260903130000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "文書の移動"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：文書パネルから文書をドラッグするときに "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を押しながら、文書タブに一時表示される「同じ階層」または「子文書」の領域にドロップします"
 								}
 							]
 						}

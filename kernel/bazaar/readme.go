@@ -20,8 +20,11 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"net/url"
 	"os"
+	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -30,6 +33,8 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	nethtml "golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 	textUnicode "golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )
@@ -41,7 +46,65 @@ func getReadmeFileCandidates(readme LocaleStrings) []string {
 	if v := strings.TrimSpace(readme["default"]); v != "" {
 		defaultName = v
 	}
-	return gulu.Str.RemoveDuplicatedElem([]string{preferred, defaultName, "README.md"})
+	candidates := gulu.Str.RemoveDuplicatedElem([]string{preferred, defaultName, "README.md"})
+	ret := make([]string, 0, len(candidates))
+	for _, candidate := range candidates {
+		if normalized, ok := normalizePackageRelativePath(candidate); ok {
+			ret = append(ret, normalized)
+		}
+	}
+	return gulu.Str.RemoveDuplicatedElem(ret)
+}
+
+func normalizePackageRelativePath(value string) (string, bool) {
+	if value == "" || strings.ContainsAny(value, `\:`) || strings.HasPrefix(value, "/") {
+		return "", false
+	}
+	value = path.Clean(value)
+	if value == "." || value == ".." || strings.HasPrefix(value, "../") {
+		return "", false
+	}
+	return value, true
+}
+
+func escapePackageRelativeURLPath(value string) string {
+	parts := strings.Split(value, "/")
+	for i, part := range parts {
+		parts[i] = url.PathEscape(part)
+	}
+	return strings.Join(parts, "/")
+}
+
+func packageRemoteRootURL(repoURL, repoRef string, allowUnversioned bool) string {
+	repoURL, normalizedRef := normalizeGitHubPackageSource(repoURL, repoRef)
+	if repoURL == "" || (repoRef != "" && normalizedRef == "") || (!allowUnversioned && normalizedRef == "") {
+		return ""
+	}
+	ownerRepo := strings.TrimPrefix(repoURL, "https://github.com/")
+	ret := "https://cdn.jsdelivr.net/gh/" + ownerRepo
+	if normalizedRef != "" {
+		ret += "@" + url.PathEscape(normalizedRef)
+	}
+	return ret + "/"
+}
+
+func packageURLAtPath(rootURL, relativePath, rawQuery, fragment string) string {
+	ret := rootURL + escapePackageRelativeURLPath(relativePath)
+	if rawQuery != "" {
+		ret += "?" + rawQuery
+	}
+	if fragment != "" {
+		ret += "#" + (&url.URL{Fragment: fragment}).EscapedFragment()
+	}
+	return ret
+}
+
+func readmeDirectoryURL(rootURL, readmePath string) string {
+	dir := path.Dir(readmePath)
+	if dir == "." {
+		return strings.TrimSuffix(rootURL, "/")
+	}
+	return strings.TrimSuffix(rootURL, "/") + "/" + escapePackageRelativeURLPath(dir)
 }
 
 // GetBazaarPackageREADME 获取集市包的在线 README。
@@ -57,9 +120,11 @@ func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, pkgType stri
 	var data []byte
 	var loadErr error
 	var errMsgs []string
+	var readmePath string
 	for _, name := range candidates {
-		data, loadErr = downloadBazaarFile(repoURLHash+"/"+name, false)
+		data, loadErr = downloadBazaarFile(repoURLHash+"/"+escapePackageRelativeURLPath(name), false)
 		if loadErr == nil {
+			readmePath = name
 			break
 		}
 		errMsgs = append(errMsgs, fmt.Sprintf("Load bazaar package's README(%s) failed: %s", name, loadErr.Error()))
@@ -83,19 +148,27 @@ func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, pkgType stri
 		}
 	}
 
-	linkBase := "https://cdn.jsdelivr.net/gh/" + strings.TrimPrefix(repoURL, "https://github.com/")
-	ret = renderPackageREADME(linkBase, data)
+	remoteRoot := packageRemoteRootURL(repoURL, repo.RepoRef, true)
+	linkBase := readmeDirectoryURL(remoteRoot, readmePath)
+	ret = renderPackageREADMEWithImageResolver(linkBase, data, func(src string) string {
+		return resolvePackageREADMEImage(src, "", "", remoteRoot, readmePath, 0)
+	})
 	return
 }
 
 // getInstalledPackageREADME 获取集市包的本地 README。
-func getInstalledPackageREADME(installPath, linkBase string, readme LocaleStrings) (ret string) {
+func getInstalledPackageREADME(installPath, localRootURL, repoURL, repoRef string, cacheVersion int64,
+	readme LocaleStrings) (ret string) {
 	candidates := getReadmeFileCandidates(readme)
 	var errMsgs []string
 	for _, name := range candidates {
 		readmeData, readErr := os.ReadFile(filepath.Join(installPath, name))
 		if readErr == nil {
-			ret = renderPackageREADME(linkBase, readmeData)
+			remoteRoot := packageRemoteRootURL(repoURL, repoRef, false)
+			linkBase := readmeDirectoryURL(localRootURL, name)
+			ret = renderPackageREADMEWithImageResolver(linkBase, readmeData, func(src string) string {
+				return resolvePackageREADMEImage(src, installPath, localRootURL, remoteRoot, name, cacheVersion)
+			})
 			return
 		}
 		logging.LogWarnf("read installed %s failed: %s", name, readErr)
@@ -107,6 +180,10 @@ func getInstalledPackageREADME(installPath, linkBase string, readme LocaleString
 
 // renderPackageREADME 渲染 README Markdown 为 HTML。
 func renderPackageREADME(linkBase string, mdData []byte) (ret string) {
+	return renderPackageREADMEWithImageResolver(linkBase, mdData, nil)
+}
+
+func renderPackageREADMEWithImageResolver(linkBase string, mdData []byte, resolveImage func(string) string) (ret string) {
 	mdData = bytes.Clone(bytes.TrimPrefix(mdData, []byte("\xef\xbb\xbf"))) // 移除文件开头的 BOM 并隔离解析缓冲区
 	luteEngine := lute.New()
 	luteEngine.SetSanitize(true)
@@ -116,10 +193,104 @@ func renderPackageREADME(linkBase string, mdData []byte) (ret string) {
 
 	tree := parse.Parse("", mdData, luteEngine.ParseOptions)
 	normalizeNodesIAL(tree)
+	rewritePackageREADMEImages(tree, resolveImage)
 	ret = luteEngine.Tree2HTML(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	ret = util.ConvertIframeToLink(ret)
 	ret = util.LinkTarget(ret, linkBase)
 	return
+}
+
+func resolvePackageREADMEImage(src, installPath, localRootURL, remoteRootURL, readmePath string,
+	cacheVersion int64) string {
+	parsed, err := url.Parse(src)
+	if err != nil || src == "" || parsed.IsAbs() || parsed.Host != "" || strings.HasPrefix(src, "/") ||
+		strings.HasPrefix(src, "#") {
+		return src
+	}
+	resolvedPath, ok := normalizePackageRelativePath(path.Join(path.Dir(readmePath), parsed.Path))
+	if !ok {
+		return "/"
+	}
+
+	useLocal := remoteRootURL == ""
+	if installPath != "" {
+		info, statErr := os.Stat(filepath.Join(installPath, filepath.FromSlash(resolvedPath)))
+		useLocal = statErr == nil && info.Mode().IsRegular()
+	}
+	if !useLocal && remoteRootURL != "" {
+		return packageURLAtPath(remoteRootURL, resolvedPath, parsed.RawQuery, parsed.Fragment)
+	}
+
+	rawQuery := parsed.RawQuery
+	if cacheVersion > 0 {
+		if rawQuery != "" {
+			rawQuery += "&"
+		}
+		rawQuery += "v=" + strconv.FormatInt(cacheVersion, 10)
+	}
+	return packageURLAtPath(localRootURL, resolvedPath, rawQuery, parsed.Fragment)
+}
+
+func rewritePackageREADMEImages(tree *parse.Tree, resolveImage func(string) string) {
+	if tree == nil || tree.Root == nil || resolveImage == nil {
+		return
+	}
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+		switch n.Type {
+		case ast.NodeImage:
+			if dest := n.ChildByType(ast.NodeLinkDest); dest != nil {
+				dest.Tokens = []byte(resolveImage(string(dest.Tokens)))
+			}
+		case ast.NodeHTMLBlock, ast.NodeInlineHTML:
+			n.Tokens = rewriteHTMLImageSources(n.Tokens, resolveImage)
+		}
+		return ast.WalkContinue
+	})
+}
+
+func rewriteHTMLImageSources(tokens []byte, resolveImage func(string) string) []byte {
+	if !bytes.Contains(bytes.ToLower(tokens), []byte("<img")) {
+		return tokens
+	}
+	contextNode := &nethtml.Node{Type: nethtml.ElementNode, Data: "div", DataAtom: atom.Div}
+	nodes, err := nethtml.ParseFragment(bytes.NewReader(tokens), contextNode)
+	if err != nil {
+		return tokens
+	}
+	changed := false
+	var rewrite func(*nethtml.Node)
+	rewrite = func(node *nethtml.Node) {
+		if node.Type == nethtml.ElementNode && node.DataAtom == atom.Img {
+			for i, attr := range node.Attr {
+				if strings.EqualFold(attr.Key, "src") {
+					resolved := resolveImage(attr.Val)
+					if resolved != attr.Val {
+						node.Attr[i].Val = resolved
+						changed = true
+					}
+				}
+			}
+		}
+		for child := node.FirstChild; child != nil; child = child.NextSibling {
+			rewrite(child)
+		}
+	}
+	for _, node := range nodes {
+		rewrite(node)
+	}
+	if !changed {
+		return tokens
+	}
+	var buf bytes.Buffer
+	for _, node := range nodes {
+		if renderErr := nethtml.Render(&buf, node); renderErr != nil {
+			return tokens
+		}
+	}
+	return buf.Bytes()
 }
 
 func normalizeNodesIAL(tree *parse.Tree) {

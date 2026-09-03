@@ -16,6 +16,7 @@ import {hasClosestByTag, hasTopClosestByClassName} from "../util/hasClosest";
 import {removeEmbed} from "./removeEmbed";
 import {clearBlockElement} from "../util/clear";
 import {isEncryptedBox} from "../../util/pathName";
+import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement?: HTMLElement) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom, event)) {
@@ -291,7 +292,7 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
                 notebook: protyle.notebookId,
             });
             const foldTempElement = document.createElement("template");
-            foldTempElement.innerHTML = response.data.dom;
+            foldTempElement.innerHTML = normalizeHTMLAssetIFrameBlockDOM(response.data.dom);
             tempElement = foldTempElement.content.firstElementChild as HTMLElement;
         }
         if (item.getAttribute("data-type") === "NodeListItem" && !isSameLi) {
@@ -347,7 +348,7 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
                 removeFoldAttr: false,
             });
             const foldElement = document.createElement("template");
-            foldElement.innerHTML = responseHTML.data;
+            foldElement.innerHTML = normalizeHTMLAssetIFrameBlockDOM(responseHTML.data);
             let previousID = newId;
             Array.from(foldElement.content.children).slice(1).forEach((childItem: HTMLElement) => {
                 childItem.removeAttribute("parent-heading");

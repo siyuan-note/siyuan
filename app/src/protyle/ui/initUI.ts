@@ -20,6 +20,7 @@ import {hideElements} from "./hideElements";
 import {AVAttributePanel} from "../render/av/attributePanel";
 import {getEditorHorizontalPadding} from "./padding";
 import {callMobileAppShowKeyboard} from "../../mobile/util/mobileAppUtil";
+import {sanitizeKernelHTML} from "../../util/hostCapabilities";
 
 const focusMobileAppEditor = (element: HTMLElement) => {
     if (window.JSAndroid?.showKeyboard || window.JSHarmony?.showKeyboard) {
@@ -31,6 +32,14 @@ const focusMobileAppEditor = (element: HTMLElement) => {
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
     protyle.contentElement.className = "protyle-content";
+    if (!isMobile() && !protyle.lite && CSS.supports("container-type", "inline-size") &&
+        CSS.supports("width", "1cqi") && !protyle.options.action.includes(Constants.CB_GET_HISTORY) &&
+        !protyle.options.backlinkData) {
+        protyle.contentElement.dataset.paddingMode = "responsive";
+        if (protyle.options.preview.actions.includes("desktop")) {
+            protyle.preview.element.dataset.paddingMode = "responsive";
+        }
+    }
 
     if (protyle.options.render.background || protyle.options.render.title) {
         protyle.contentElement.innerHTML = '<div class="protyle-top"></div>';
@@ -319,7 +328,7 @@ export const addLoading = (protyle: IProtyle, msg?: string) => {
         if (protyle.element.getAttribute("data-loading") !== "finished") {
             protyle.element.insertAdjacentHTML("beforeend", `<div style="background-color: var(--b3-theme-background);flex-direction: column;" class="fn__loading wysiwygLoading">
     <img width="48px" src="/stage/loading-pure.svg">
-    <div style="color: var(--b3-theme-on-surface);margin-top: 8px;">${msg || ""}</div>
+    <div style="color: var(--b3-theme-on-surface);margin-top: 8px;">${sanitizeKernelHTML(msg || "")}</div>
 </div>`);
         }
     }, Constants.TIMEOUT_LOAD);
@@ -341,32 +350,64 @@ export const setPadding = (protyle: IProtyle) => {
     }
     const padding = getPadding(protyle);
     protyle.preview.updatePadding(padding);
-    const paddingLeft = protyle.options.backlinkData ? 24 : padding.left;
-    const paddingRight = protyle.options.backlinkData ? 16 : padding.right;
+    const responsivePadding = protyle.contentElement.dataset.paddingMode === "responsive";
+    let paddingLeft = protyle.options.backlinkData ? 24 : padding.left;
+    let paddingRight = protyle.options.backlinkData ? 16 : padding.right;
     const backlinkBottomElement = protyle.contentElement.querySelector(".sy__backlink--bottom") as HTMLElement;
     const backlinkBottomVisible = backlinkBottomElement &&
         !backlinkBottomElement.classList.contains("fn__none") &&
         !backlinkBottomElement.classList.contains("sy__backlink--pending");
     const backlinkBottomGap = 128;
 
-    if (protyle.options.backlinkData) {
+    if (responsivePadding) {
+        const paddingBottom = backlinkBottomVisible && protyle.options.typewriterMode ? backlinkBottomGap : padding.bottom;
+        protyle.wysiwyg.element.style.padding = "";
+        protyle.wysiwyg.element.style.paddingTop = `${padding.top}px`;
+        protyle.wysiwyg.element.style.paddingBottom = `${paddingBottom}px`;
+        const wysiwygStyle = getComputedStyle(protyle.wysiwyg.element);
+        paddingLeft = parseFloat(wysiwygStyle.paddingLeft);
+        paddingRight = parseFloat(wysiwygStyle.paddingRight);
+    } else if (protyle.options.backlinkData) {
         protyle.wysiwyg.element.style.padding = `4px ${paddingRight}px 4px ${paddingLeft}px`;
     } else {
         const paddingBottom = backlinkBottomVisible && protyle.options.typewriterMode ? backlinkBottomGap : padding.bottom;
         protyle.wysiwyg.element.style.padding = `${padding.top}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`;
     }
     if (protyle.options.render.background) {
-        protyle.background.element.querySelector(".protyle-background__ia").setAttribute("style", `margin-left:${paddingLeft}px;margin-right:${paddingRight}px`);
+        const backgroundIAElement = protyle.background.element.querySelector<HTMLElement>(".protyle-background__ia");
+        if (responsivePadding) {
+            backgroundIAElement.style.margin = "";
+        } else {
+            backgroundIAElement.style.marginLeft = `${paddingLeft}px`;
+            backgroundIAElement.style.marginRight = `${paddingRight}px`;
+        }
     }
     if (protyle.options.render.title) {
         // pc 端 文档名 attr 过长和添加标签等按钮重合
-        protyle.title.element.style.margin = `16px ${paddingRight}px 0 ${paddingLeft}px`;
+        if (responsivePadding) {
+            protyle.title.element.style.margin = "";
+            protyle.title.element.style.marginTop = "16px";
+        } else {
+            protyle.title.element.style.margin = `16px ${paddingRight}px 0 ${paddingLeft}px`;
+        }
     }
     if (protyle.databaseAttributePanel) {
-        protyle.databaseAttributePanel.element.style.margin = `8px ${paddingRight}px 8px ${paddingLeft}px`;
+        if (responsivePadding) {
+            protyle.databaseAttributePanel.element.style.margin = "";
+            protyle.databaseAttributePanel.element.style.marginTop = "8px";
+            protyle.databaseAttributePanel.element.style.marginBottom = "8px";
+        } else {
+            protyle.databaseAttributePanel.element.style.margin = `8px ${paddingRight}px 8px ${paddingLeft}px`;
+        }
     }
     if (backlinkBottomElement) {
-        backlinkBottomElement.style.padding = `0 ${paddingRight}px 16px ${paddingLeft}px`;
+        if (responsivePadding) {
+            backlinkBottomElement.style.padding = "";
+            backlinkBottomElement.style.paddingTop = "0";
+            backlinkBottomElement.style.paddingBottom = "16px";
+        } else {
+            backlinkBottomElement.style.padding = `0 ${paddingRight}px 16px ${paddingLeft}px`;
+        }
         backlinkBottomElement.style.marginBottom = backlinkBottomVisible && protyle.options.typewriterMode ?
             `${Math.max(padding.bottom - backlinkBottomGap, 0)}px` : "";
     }

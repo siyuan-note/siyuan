@@ -104,6 +104,8 @@ const desktopToolbarEntryKeys = new Map(DESKTOP_TOOLBAR_ENTRIES
     .filter((item) => !item.separator)
     .map((item) => [item.name, item.key]));
 
+export const isBuiltinToolbarItemName = (name: string) => name === "|" || desktopToolbarEntryKeys.has(name);
+
 const setToolbarEntryMetadata = (item: IMenuItem, id: string, label?: string) => {
     (item as TConfigurableToolbarItem)[toolbarEntryMetadata] = {id, label};
     return item;

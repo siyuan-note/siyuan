@@ -77,6 +77,7 @@ func createBox(name string, initializeBoxDoc bool) (id string, err error) {
 	for i, b := range boxes {
 		c := b.GetConf()
 		c.Sort = i + 1
+		b.Sort = c.Sort
 		if err := b.SaveConf(c); err != nil {
 			logging.LogErrorf("save box conf [%s] failed: %s", b.ID, err)
 		}
@@ -92,6 +93,7 @@ func createBox(name string, initializeBoxDoc bool) (id string, err error) {
 	box := &Box{ID: id, Name: name}
 	boxConf := box.GetConf()
 	boxConf.Name = name
+	boxConf.Sort = newBoxSort(boxes, nil != Conf.FileTree.CreateDocAtTop && *Conf.FileTree.CreateDocAtTop)
 	if err := box.SaveConf(boxConf); err != nil {
 		logging.LogErrorf("save box conf [%s] failed: %s", id, err)
 	}
@@ -108,6 +110,26 @@ func createBox(name string, initializeBoxDoc bool) (id string, err error) {
 	IncSync()
 	logging.LogInfof("created box [%s]", id)
 	return
+}
+
+func newBoxSort(boxes []*Box, atTop bool) int {
+	if 1 > len(boxes) {
+		return 0
+	}
+
+	minSort, maxSort := boxes[0].Sort, boxes[0].Sort
+	for _, box := range boxes[1:] {
+		if box.Sort < minSort {
+			minSort = box.Sort
+		}
+		if maxSort < box.Sort {
+			maxSort = box.Sort
+		}
+	}
+	if atTop {
+		return minSort - 1
+	}
+	return maxSort + 1
 }
 
 func RenameBox(boxID, name string) (err error) {
@@ -407,10 +429,7 @@ func mountBox(boxID string) (alreadyMount bool, err error) {
 		}
 
 		boxes, _ := ListNotebooks()
-		var sort int
-		if len(boxes) > 0 {
-			sort = boxes[0].Sort - 1
-		}
+		sort := newBoxSort(boxes, nil != Conf.FileTree.CreateDocAtTop && *Conf.FileTree.CreateDocAtTop)
 
 		p := filepath.Join(util.WorkingDir, "guide", boxID)
 		if err = filelock.Copy(p, localPath); err != nil {

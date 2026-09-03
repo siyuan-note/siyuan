@@ -18,6 +18,8 @@ import {isEncryptedBox} from "../util/pathName";
 import {bindMobileBarsScroll, pauseMobileBarsScroll} from "./util/mobileBars";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 import {restoreMobileTopBarLayout, updateMobileTopBarLayout} from "./util/mobileTopBar";
+import {stickyRow} from "../protyle/render/av/row";
+import {invalidateTrackedRanges} from "../protyle/util/trackedRange";
 
 export const getCurrentEditor = () => {
     return window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
@@ -70,7 +72,15 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
         }
         completed = true;
         updateMobileTopBarLayout();
-        bindMobileBarsScroll(protyle.contentElement);
+        bindMobileBarsScroll(protyle.contentElement, () => {
+            // 面包屑位移后同步数据库吸顶位置，避免数据库使用上一帧的面包屑位置
+            protyle.wysiwyg.element.querySelectorAll(".av[data-render='true']").forEach((item: HTMLElement) => {
+                stickyRow(item, protyle.contentElement, "top");
+            });
+        });
+        if (window.siyuan.config.fileTree.alwaysSelectOpenedFile && protyle.path) {
+            void window.siyuan.mobile.docks.file?.selectOpenedFile(protyle.notebookId, protyle.path);
+        }
         afterOpen?.(protyle);
     };
     const fail = (invalid = false) => {
@@ -186,6 +196,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             },
         };
         if (window.siyuan.mobile.editor) {
+            invalidateTrackedRanges(window.siyuan.mobile.editor.protyle);
             window.siyuan.mobile.editor.protyle.notebookId = data.data.box;
             window.siyuan.mobile.editor.protyle.title.element.removeAttribute("data-render");
             addLoading(window.siyuan.mobile.editor.protyle);

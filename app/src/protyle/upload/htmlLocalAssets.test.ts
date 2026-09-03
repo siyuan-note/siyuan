@@ -1,6 +1,11 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {applyHTMLLocalAssetPaths, type IHTMLLocalAsset, isHTMLLocalAssetPath} from "./htmlLocalAssets";
+import {
+    applyHTMLLocalAssetPaths,
+    type IHTMLLocalAsset,
+    isHTMLLocalAssetPath,
+    removeHTMLLocalAssetPaths,
+} from "./htmlLocalAssets";
 
 describe("HTML local assets", () => {
     it("recognizes absolute paths without treating web and asset URLs as local", () => {
@@ -27,5 +32,26 @@ describe("HTML local assets", () => {
         applyHTMLLocalAssetPaths(assets, [undefined, "assets/b.pdf"]);
 
         assert.deepEqual(values, ["file:///tmp/a.png", "assets/b.pdf"]);
+    });
+
+    it("removes local paths before remote HTML conversion", () => {
+        const attributes = new Map([
+            ["src", "file:///Users/test/private.png"],
+            ["data-type", "NodeImage"],
+        ]);
+        const assets = [{
+            element: {
+                removeAttribute(attribute: string) {
+                    attributes.delete(attribute);
+                },
+            } as Element,
+            attribute: "src",
+            path: attributes.get("src"),
+        }] as IHTMLLocalAsset[];
+
+        removeHTMLLocalAssetPaths(assets);
+
+        assert.equal(attributes.has("src"), false);
+        assert.equal(attributes.get("data-type"), "NodeImage");
     });
 });

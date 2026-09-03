@@ -24,6 +24,7 @@ import {
 } from "./wysiwyg/transaction";
 import {fetchPost} from "../util/fetch";
 import {getDocDisplayName, isEncryptedBox} from "../util/pathName";
+import {syncDocTitleIAL} from "./util/docTitleIAL";
 import {initMirror, refreshUndoButtons, syncMirrorFromBroadcast} from "./undo/globalUndo";
 /// #if !MOBILE
 import {updatePanelByEditor} from "../editor/util";
@@ -46,6 +47,13 @@ import {setStorageVal} from "./util/compatibility";
 import {merge} from "./util/merge";
 /// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
+import {
+    invalidateSearchPathRequests,
+    refreshSearchPathAfterNotebookRename,
+    refreshSearchPathAfterRename,
+} from "../search/path";
+import {syncSearchConfigHPath} from "../search/config";
+import {sanitizeKernelHTML} from "../util/hostCapabilities";
 /// #endif
 import {isSupportCSSHL} from "./render/searchMarkRender";
 import {renderAVAttribute} from "./render/av/blockAttr";
@@ -58,6 +66,38 @@ import {
     queueDatabaseRowRefresh,
     queueDatabaseRowRefreshForOperations
 } from "./render/av/databaseRowRefresh";
+import {registerCustomBlockRoot} from "../plugin/customBlockRender";
+import {
+    invalidateTrackedRanges,
+    releaseTrackedRange,
+    resolveTrackedRange,
+    trackRange,
+} from "./util/trackedRange";
+
+/// #if !MOBILE
+const forSearchByEditor = (edit: Protyle, callback: (config: Config.IUILayoutTabSearchConfig, element: Element) => void) => {
+    window.siyuan.dialogs.find((item) => {
+        const searchElement = item.element.querySelector(".b3-dialog__body");
+        if (item.editors?.edit === edit && item.data && searchElement) {
+            callback(item.data, searchElement);
+            return true;
+        }
+    });
+    getAllModels().search.find((item) => {
+        if (item.editors.edit === edit) {
+            callback(item.config, item.element);
+            return true;
+        }
+    });
+};
+
+const persistRefreshedSearchPath = (config: Config.IUILayoutTabSearchConfig) => {
+    const localConfig = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
+    if (syncSearchConfigHPath(localConfig, config)) {
+        setStorageVal(Constants.LOCAL_SEARCHDATA, localConfig);
+    }
+};
+/// #endif
 
 export class Protyle {
 
@@ -80,6 +120,9 @@ export class Protyle {
         const mergedOptions = getOptions.merge();
         this.protyle = {
             getInstance: () => this,
+            trackRange: (range, trackOptions) => this.trackRange(range, trackOptions),
+            resolveTrackedRange: (handle) => this.resolveTrackedRange(handle),
+            releaseTrackedRange: (handle) => this.releaseTrackedRange(handle),
             app,
             id: genUUID(),
             disabled: false,
@@ -133,6 +176,10 @@ export class Protyle {
         // lite 模式用前端操作日志 undo（不依赖 kernel），其余走 kernel 的 GlobalUndoLog。
         this.protyle.undo = this.protyle.lite ? new LocalUndo() : new Undo();
         this.protyle.wysiwyg = new WYSIWYG(this.protyle);
+        registerCustomBlockRoot(this.protyle.wysiwyg.element, {
+            disabled: () => this.protyle.disabled,
+            update: (element, oldHTML) => updateTransaction(this.protyle, element, oldHTML),
+        });
         this.protyle.toolbar = new Toolbar(this.protyle);
         this.protyle.scroll = new Scroll(this.protyle); // 不能使用 render.scroll 来判读是否初始化，除非重构后面用到的相关变量
         if (this.protyle.options.render.gutter) {
@@ -227,13 +274,30 @@ export class Protyle {
                                 /// #endif
                             }
                             break;
+                        case "renamenotebook":
+                            /// #if !MOBILE
+                            forSearchByEditor(this, (config, element) => {
+                                void refreshSearchPathAfterNotebookRename({
+                                    config,
+                                    element,
+                                    notebookId: data.data.box,
+                                    notebookName: data.data.name,
+                                }).then((refreshed) => {
+                                    if (refreshed) {
+                                        persistRefreshedSearchPath(config);
+                                    }
+                                });
+                            });
+                            /// #endif
+                            break;
                         case "rename":
                             if (this.protyle.path === data.data.path) {
                                 if (this.protyle.model) {
                                     this.protyle.model.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
                                 }
                                 if (this.protyle.background) {
-                                    this.protyle.background.ial.title = data.data.title;
+                                    syncDocTitleIAL(this.protyle.background.ial, data.data.title, data.data.empty,
+                                        Constants.CUSTOM_SY_TITLE_EMPTY);
                                 }
                                 if (window.siyuan.config.export.addTitle &&
                                     !this.protyle.preview.element.classList.contains("fn__none")) {
@@ -257,9 +321,22 @@ export class Protyle {
                             this.protyle.wysiwyg.element.querySelectorAll(`[data-type~="block-ref"][data-id="${data.data.id}"]`).forEach(item => {
                                 if (item.getAttribute("data-subtype") === "d") {
                                     // 同 updateRef 一样处理 https://github.com/siyuan-note/siyuan/issues/10458
-                                    item.innerHTML = data.data.refText;
+                                    item.innerHTML = sanitizeKernelHTML(data.data.refText);
                                 }
                             });
+                            /// #if !MOBILE
+                            forSearchByEditor(this, (config, element) => {
+                                void refreshSearchPathAfterRename({
+                                    config,
+                                    element,
+                                    rename: data.data,
+                                }).then((refreshed) => {
+                                    if (refreshed) {
+                                        persistRefreshedSearchPath(config);
+                                    }
+                                });
+                            });
+                            /// #endif
                             break;
                         case "moveDoc":
                             if (this.protyle.path === data.data.fromPath) {
@@ -271,6 +348,11 @@ export class Protyle {
                                     this.protyle.element.removeAttribute("data-notebook-id");
                                 }
                             }
+                            /// #if !MOBILE
+                            forSearchByEditor(this, (_config, element) => {
+                                invalidateSearchPathRequests(element);
+                            });
+                            /// #endif
                             break;
                         case "closeBox":
                         case "removeBox":
@@ -344,6 +426,7 @@ export class Protyle {
         queueDatabaseRowRefreshForOperations(this.protyle.id, data.data[0]?.doOperations || []);
         if (!this.protyle.preview.element.classList.contains("fn__none") &&
             data.context?.rootIDs?.includes(this.protyle.block.rootID)) {
+            invalidateTrackedRanges(this.protyle);
             this.protyle.preview.render(this.protyle);
             return;
         }
@@ -607,6 +690,18 @@ export class Protyle {
 
     public getRange(element: Element) {
         return getEditorRange(element);
+    }
+
+    public trackRange(range: Range, options: ITrackRangeOptions): ITrackedRangeHandle {
+        return trackRange(this.protyle, range, options);
+    }
+
+    public resolveTrackedRange(handle: ITrackedRangeHandle): TTrackedRangeResult {
+        return resolveTrackedRange(this.protyle, handle);
+    }
+
+    public releaseTrackedRange(handle: ITrackedRangeHandle): void {
+        releaseTrackedRange(this.protyle, handle);
     }
 
     public hasClosestBlock(element: Node) {

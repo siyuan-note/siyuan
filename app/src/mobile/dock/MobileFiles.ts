@@ -38,6 +38,7 @@ import {bindMousePointerTouchBridge, isMousePointerTouchEvent} from "../util/mou
 import {
     collectExpandedDocIDs,
     findMovedFileTreeItem,
+    getRelativeReorderRequest,
     getFileTreeChildList,
     IFileTreeMove,
     restoreMovedExpandedDocItems,
@@ -54,6 +55,7 @@ import {
     type IDocSortModeChanged,
     updateFileTreeSortMode
 } from "../../util/fileTreeSort";
+import {MobileOpenedFileSelection} from "./mobileOpenedFileSelection";
 
 export class MobileFiles extends Model {
     public element: HTMLElement;
@@ -63,6 +65,7 @@ export class MobileFiles extends Model {
     private docSortModeRefreshTimeout: number;
     private docSortModeChanges = new Map<string, IDocSortModeChanged>();
     private movedExpandedDocIDs = new Set<string>();
+    private openedFileSelection = new MobileOpenedFileSelection();
     private touchDragState: {
         selectedElement: HTMLElement;
         startX: number;
@@ -199,7 +202,7 @@ export class MobileFiles extends Model {
                         } else if (!isFileTreeCollapsing(liElement)) {
                             this.getLeaf(liElement, notebookId);
                         }
-                        this.setCurrent(target.parentElement);
+                        this.setCurrent(liElement, false);
                         window.siyuan.menus.menu.remove();
                     }
                     event.preventDefault();
@@ -442,6 +445,12 @@ export class MobileFiles extends Model {
                     const targetListElement = newElement.parentElement;
                     if (window.siyuan.config.fileTree.sort === 6 && selectRootElements.length > 0 &&
                         newElement.getAttribute("data-path") === "/") {
+                        const sourceIDs = selectRootElements.map(item => item.parentElement.getAttribute("data-url"));
+                        if (sourceIDs.includes(toURL)) {
+                            this.clearDragIndicators();
+                            this.touchDragState = null;
+                            return;
+                        }
                         if (newElement.classList.contains("dragover__top")) {
                             selectRootElements.forEach(item => {
                                 newElement.parentElement.before(item.parentElement);
@@ -451,13 +460,11 @@ export class MobileFiles extends Model {
                                 newElement.parentElement.after(item.parentElement);
                             });
                         }
-                        const notebooks: string[] = [];
-                        Array.from(this.element.children).forEach(item => {
-                            notebooks.push(item.getAttribute("data-url"));
-                        });
-                        fetchPost("/api/notebook/changeSortNotebook", {
-                            notebooks,
-                        });
+                        fetchPost("/api/notebook/reorder", getRelativeReorderRequest(
+                            sourceIDs,
+                            toURL,
+                            !newElement.classList.contains("dragover__top")
+                        ));
                     } else if (isCustomFileTreeList(targetListElement) && selectFileElements.length > 0) {
                         let hasMove = false;
                         const toDir = pathPosix().dirname(toPath);
@@ -511,16 +518,11 @@ export class MobileFiles extends Model {
                                 }
                             });
                         }
-                        const paths: string[] = [];
-                        Array.from(newElement.parentElement.children).forEach(item => {
-                            if (item.tagName === "LI") {
-                                paths.push(item.getAttribute("data-path"));
-                            }
-                        });
-                        fetchPost("/api/filetree/changeSort", {
-                            paths,
-                            notebook: toURL
-                        }, () => {
+                        fetchPost("/api/filetree/reorderDocs", getRelativeReorderRequest(
+                            selectFileElements.map(item => item.getAttribute("data-node-id")),
+                            newElement.getAttribute("data-node-id"),
+                            !newElement.classList.contains("dragover__top")
+                        ), () => {
                             if (hasMove) {
                                 fetchPost("/api/filetree/listDocsByPath", {
                                     notebook: toURL,
@@ -1125,6 +1127,15 @@ export class MobileFiles extends Model {
         });
     }
 
+    public onDocsImported(data: { notebook: string, parentPath: string, rootIDs: string[] }) {
+        const rootID = data.rootIDs?.[0];
+        if (!rootID) {
+            return;
+        }
+        const importedPath = data.parentPath === "/" ? `/${rootID}.sy` : `${data.parentPath}/${rootID}.sy`;
+        this.updateItemArrow(data.notebook, importedPath);
+    }
+
     public onDocSortModeChanged(data: IDocSortModeChanged) {
         updateFileTreeSortMode(data, this.element);
         this.docSortModeChanges.set(`${data.scope}:${data.box}:${data.id}:${data.path}`, data);
@@ -1319,6 +1330,26 @@ export class MobileFiles extends Model {
             const elementRect = this.element.getBoundingClientRect();
             this.element.scrollTop = this.element.scrollTop + (target.getBoundingClientRect().top - (elementRect.top + elementRect.height / 2));
         }
+    }
+
+    public async selectOpenedFile(notebookId: string, filePath: string) {
+        const currentElement = this.element.querySelector(
+            `ul[data-url="${notebookId}"] li[data-path="${filePath}"]`
+        );
+        if (currentElement?.classList.contains("b3-list-item--focus")) {
+            this.openedFileSelection.cancel();
+            return;
+        }
+        const target = await this.openedFileSelection.resolve(
+            () => this.selectItem(notebookId, filePath, undefined, true, false),
+            () => {
+                const protyle = window.siyuan.mobile.editor?.protyle;
+                return window.siyuan.config.fileTree.alwaysSelectOpenedFile &&
+                    !protyle?.element.classList.contains("fn__none") &&
+                    protyle?.notebookId === notebookId && protyle.path === filePath;
+            }
+        );
+        this.setCurrent(target);
     }
 
     public getLeaf(liElement: Element, notebookId: string, focusUpdate = false) {

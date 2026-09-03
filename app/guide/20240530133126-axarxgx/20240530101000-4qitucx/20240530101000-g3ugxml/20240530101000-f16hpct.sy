@@ -7,7 +7,7 @@
 		"id": "20240530101000-f16hpct",
 		"title": "Docker サーバー",
 		"type": "doc",
-		"updated": "20250926110655"
+		"updated": "20260903150000"
 	},
 	"Children": [
 		{
@@ -906,7 +906,7 @@
 			"Properties": {
 				"ID": "20240530101000-8bjgcwz",
 				"id": "20240530101000-av0hc90",
-				"updated": "20250926110655"
+				"updated": "20260903150000"
 			},
 			"Children": [
 				{
@@ -922,7 +922,7 @@
 			"Properties": {
 				"ID": "20240530101000-c39mqvp",
 				"id": "20240530101000-95f1jst",
-				"updated": "20250926110655"
+				"updated": "20260903150000"
 			},
 			"Children": [
 				{
@@ -935,7 +935,7 @@
 					"Properties": {
 						"ID": "20240530101000-9bey4kd",
 						"id": "20240530101000-49rpkzp",
-						"updated": "20240530101000"
+						"updated": "20260903150000"
 					},
 					"Children": [
 						{
@@ -944,12 +944,23 @@
 							"Properties": {
 								"ID": "20240530101000-ymg86bk",
 								"id": "20240530101000-790mb98",
-								"updated": "20240530101000"
+								"updated": "20260903150000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "デスクトップ版やモバイル版アプリとの接続には対応しておらずブラウザでの使用に限られます"
+									"Data": "モバイル版アプリからの接続には対応していません。デスクトップ版はリモートモードで接続できます。詳しくは、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260903150000-hpfmx4t",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "リモートカーネルへの接続"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "を参照してください。"
 								}
 							]
 						}

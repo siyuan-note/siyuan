@@ -39,6 +39,8 @@ import {
     getAssetOpenGestures,
     type TAssetOpenGesture,
 } from "../editor/assetOpen";
+import {resolvePdfAssetLink} from "../editor/pdfAssetLink";
+import {getHostCapabilities} from "../util/hostCapabilities";
 
 const bindAttrInput = (inputElement: HTMLInputElement, id: string) => {
     inputElement.addEventListener("change", () => {
@@ -543,7 +545,7 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
 };
 
 export const exportMd = (id: string) => {
-    if (window.siyuan.isPublish) {
+    if (window.siyuan.isPublish || !getHostCapabilities().importExport) {
         return;
     }
     return new MenuItem({
@@ -853,7 +855,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
         label: isInAndroid() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
         accelerator: showAccelerator ? window.siyuan.languages.click : "",
         click: () => {
-            openByMobile(src);
+            openByMobile(resolvePdfAssetLink(src).linkAddress);
         }
     });
     /// #else
@@ -929,43 +931,47 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                     openAssetNewWindow(src.trim());
                 }
             });
-            submenu.push({
-                id: "useDefault",
-                label: window.siyuan.languages.useDefault,
-                accelerator: getAccelerator("app"),
-                click() {
-                    openBy(src, "app");
-                }
-            });
-            submenu.push({
-                id: "showInFolder",
-                icon: "iconFolder",
-                label: window.siyuan.languages.showInFolder,
-                accelerator: getAccelerator("folder"),
-                click: () => {
-                    openBy(src, "folder");
-                }
-            });
+            if (getHostCapabilities().localFileSystem) {
+                submenu.push({
+                    id: "useDefault",
+                    label: window.siyuan.languages.useDefault,
+                    accelerator: getAccelerator("app"),
+                    click() {
+                        openBy(src, "app");
+                    }
+                });
+                submenu.push({
+                    id: "showInFolder",
+                    icon: "iconFolder",
+                    label: window.siyuan.languages.showInFolder,
+                    accelerator: getAccelerator("folder"),
+                    click: () => {
+                        openBy(src, "folder");
+                    }
+                });
+            }
             /// #endif
         } else {
             /// #if !BROWSER
-            submenu.push({
-                id: "useDefault",
-                label: window.siyuan.languages.useDefault,
-                accelerator: getAccelerator("app"),
-                click() {
-                    openBy(src, "app");
-                }
-            });
-            submenu.push({
-                id: "showInFolder",
-                icon: "iconFolder",
-                label: window.siyuan.languages.showInFolder,
-                accelerator: getAccelerator("folder"),
-                click: () => {
-                    openBy(src, "folder");
-                }
-            });
+            if (getHostCapabilities().localFileSystem) {
+                submenu.push({
+                    id: "useDefault",
+                    label: window.siyuan.languages.useDefault,
+                    accelerator: getAccelerator("app"),
+                    click() {
+                        openBy(src, "app");
+                    }
+                });
+                submenu.push({
+                    id: "showInFolder",
+                    icon: "iconFolder",
+                    label: window.siyuan.languages.showInFolder,
+                    accelerator: getAccelerator("folder"),
+                    click: () => {
+                        openBy(src, "folder");
+                    }
+                });
+            }
             /// #else
             submenu.push({
                 id: isInAndroid() || isInHarmony() ? "useDefault" : "useBrowserView",

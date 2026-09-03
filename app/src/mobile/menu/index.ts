@@ -27,6 +27,16 @@ import {clearSyncTabElement} from "../../config/tabs/syncRuntime";
 import {clearAccessTabElement} from "../../config/tabs/accessRuntime";
 import {isMobileMenuSearchMatch} from "./searchFilter";
 import {unmountAssetsTab} from "../../config/assets";
+import {escapeAttr, escapeHtml} from "../../util/escape";
+import {getMobilePluginDockEntries, MOBILE_PLUGIN_DOCKS_CHANGE_EVENT} from "../dock/pluginDockState";
+
+let mobileMenuReturnCallback: (() => void) | undefined;
+
+const takeMobileMenuReturnCallback = () => {
+    const callback = mobileMenuReturnCallback;
+    mobileMenuReturnCallback = undefined;
+    return callback;
+};
 
 const getSettingTabFromMenuTarget = (target: HTMLElement): ISettingTabShell<TSettingTab> | undefined => {
     const item = target.closest(".b3-menu__item") as HTMLElement | null;
@@ -37,8 +47,8 @@ const getSettingTabFromMenuTarget = (target: HTMLElement): ISettingTabShell<TSet
     return getSettingTabDefs().find(def => def.id === tabId);
 };
 
-const getSettingTabsMenuHTML = (includeIds = false) => getSettingTabDefs().map(def =>
-    `<div class="b3-menu__item${def.hidden ? " fn__none" : ""}"${includeIds ? ` id="${settingTabToMenuId(def.id)}"` : ""} data-type="setting-tab" data-name="${def.id}">
+const getSettingTabsMenuHTML = () => getSettingTabDefs().map(def =>
+    `<div class="b3-menu__item${def.hidden ? " fn__none" : ""}" id="${settingTabToMenuId(def.id)}" data-type="setting-tab" data-name="${def.id}">
         <svg class="b3-menu__icon"><use xlink:href="#${def.icon}"></use></svg>
         <span class="b3-menu__label">${def.title}</span>
     </div>`).join("");
@@ -108,24 +118,6 @@ const createSettingSearchMountQueue = (app: App) => {
             void queue.catch((error) => console.error("mount setting search result failed", error));
         },
     };
-};
-
-const filterSettingTabsMenu = (element: HTMLElement, keywords: string) => {
-    const matches = new Map<TSettingTab, SettingTabSearchResult>();
-    for (const def of getSettingTabDefs()) {
-        if (def.hidden) {
-            continue;
-        }
-        const item = element.querySelector(`[data-type="setting-tab"][data-name="${def.id}"]`);
-        const result = keywords ? getSettingTab(def.id).scanSearch(keywords) : undefined;
-        const matched = !keywords || result?.matches;
-        item?.classList.toggle("config-search-hidden", !matched);
-        if (result?.matches) {
-            matches.set(def.id, result);
-        }
-    }
-    element.querySelector('[data-type="setting-search-empty"]')?.classList.toggle("fn__none", !keywords || matches.size > 0);
-    return matches;
 };
 
 const filterMainMenu = (element: HTMLElement, keywords: string) => {
@@ -203,135 +195,33 @@ const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettingTab>, 
             if (returnCallback) {
                 returnCallback();
             } else {
-                openSettingMenu(app, "back");
+                closeModel();
             }
         },
         transition: "forward",
     });
 };
 
-const openSettingMenu = (
-    app: App,
-    transition?: "back",
-    returnCallback?: () => void,
-) => {
-    let settingMenuElement: HTMLElement | undefined;
-    const searchMountQueue = createSettingSearchMountQueue(app);
-    openModel({
-        title: window.siyuan.languages.config,
-        icon: "iconLeft",
-        html: `<div class="mobile-setting-menu">
-    <div class="mobile-setting-menu__search">
-        <input placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__flex-1" autocomplete="off" autocorrect="off" spellcheck="false">
-    </div>
-    <div class="b3-menu__groups mobile-setting-menu__groups">
-        <div class="b3-menu__group">
-            <div class="b3-menu__group-items">${getSettingTabsMenuHTML()}</div>
-        </div>
-        <div class="b3-list--empty fn__none" data-type="setting-search-empty">${window.siyuan.languages.emptyContent}</div>
-        ${getSettingTabResultsHTML()}
-    </div>
-</div>`,
-        bindEvent(modelMainElement: HTMLElement) {
-            settingMenuElement = modelMainElement;
-            const searchElement = modelMainElement.querySelector("input") as HTMLInputElement;
-            const groupsElement = modelMainElement.querySelector(".mobile-setting-menu__groups") as HTMLElement;
-            let selectedTabId: TSettingTab | undefined;
-            const showSearchResult = (keywords: string, tabId: TSettingTab, result: SettingTabSearchResult) => {
-                groupsElement.classList.toggle("mobile-setting-menu__groups--bazaar", tabId === "bazaar");
-                modelMainElement.querySelectorAll<HTMLElement>(".mobile-setting-menu__result").forEach((item) => {
-                    if (item.dataset.name !== tabId) {
-                        if (item.childElementCount > 0 || !item.classList.contains("fn__none")) {
-                            clearSettingTabResult(item);
-                        }
-                    } else {
-                        item.classList.remove("fn__none");
-                    }
-                });
-                modelMainElement.querySelectorAll('[data-type="setting-tab"]').forEach((item) => {
-                    item.classList.toggle("b3-menu__item--current", (item as HTMLElement).dataset.name === tabId);
-                });
-                const root = modelMainElement.querySelector(`.mobile-setting-menu__result[data-name="${tabId}"]`) as HTMLElement;
-                bindSettingSaveDelegation(root);
-                searchMountQueue.mount(root, tabId, keywords, result);
-            };
-            const syncSearch = () => {
-                const keywords = normalizeSearchText(searchElement.value);
-                const matches = filterSettingTabsMenu(modelMainElement, keywords);
-                if (!keywords || matches.size === 0) {
-                    selectedTabId = undefined;
-                    searchMountQueue.invalidate();
-                    groupsElement.classList.remove("mobile-setting-menu__groups--bazaar");
-                    clearSettingTabResults(modelMainElement);
-                    return;
-                }
-                if (!selectedTabId || !matches.has(selectedTabId)) {
-                    selectedTabId = matches.keys().next().value;
-                }
-                if (selectedTabId) {
-                    const result = matches.get(selectedTabId);
-                    if (result) {
-                        showSearchResult(keywords, selectedTabId, result);
-                    }
-                }
-            };
-            searchElement.addEventListener("compositionend", syncSearch);
-            searchElement.addEventListener("input", (event: InputEvent) => {
-                if (!event.isComposing) {
-                    syncSearch();
-                }
-            });
-            modelMainElement.addEventListener("click", (event) => {
-                const def = getSettingTabFromMenuTarget(event.target as HTMLElement);
-                if (def) {
-                    const keywords = normalizeSearchText(searchElement.value);
-                    if (keywords) {
-                        const result = getSettingTab(def.id).scanSearch(keywords);
-                        if (!result.matches) {
-                            return;
-                        }
-                        selectedTabId = def.id;
-                        showSearchResult(keywords, def.id, result);
-                        return;
-                    }
-                    openSettingTab(app, def, () => openSettingMenu(app, "back", returnCallback));
-                }
-            });
-            syncSearch();
-        },
-        destroyCallback() {
-            searchMountQueue.invalidate();
-            if (settingMenuElement) {
-                clearSettingTabResults(settingMenuElement);
-                settingMenuElement.replaceChildren();
-            }
-        },
-        backCallback() {
-            if (returnCallback) {
-                returnCallback();
-            } else {
-                closeModel();
-            }
-        },
-        transition,
-    });
-};
-
 export const openMobileSetting = (app: App, tab?: TSettingTab, returnCallback?: () => void) => {
-    activeBlur();
-    document.getElementById("menu")?.dispatchEvent(new CustomEvent(MOBILE_MENU_CLOSE_EVENT));
-    if (tab) {
-        const settingTabDef = getSettingTabDefs().find(def => def.id === tab);
-        if (!settingTabDef || settingTabDef.hidden) {
-            return;
+    if (!tab) {
+        popMenu();
+        if (document.getElementById("menu")?.style.transform === "translateX(0px)") {
+            mobileMenuReturnCallback = returnCallback;
         }
-        openSettingTab(app, settingTabDef, returnCallback);
         return;
     }
-    openSettingMenu(app, undefined, returnCallback);
+    const callback = returnCallback || takeMobileMenuReturnCallback();
+    activeBlur();
+    document.getElementById("menu")?.dispatchEvent(new CustomEvent(MOBILE_MENU_CLOSE_EVENT));
+    const settingTabDef = getSettingTabDefs().find(def => def.id === tab);
+    if (!settingTabDef || settingTabDef.hidden) {
+        return;
+    }
+    openSettingTab(app, settingTabDef, callback);
 };
 
 export const popMenu = () => {
+    mobileMenuReturnCallback = undefined;
     if (getCurrentEditor()?.protyle.toolbar.isMultiSelectMode()) {
         return;
     }
@@ -340,6 +230,20 @@ export const popMenu = () => {
     const menuElement = document.getElementById("menu");
     menuElement.style.zIndex = (++window.siyuan.zIndex).toString();
     menuElement.style.transform = "translateX(0px)";
+};
+
+const renderMobilePluginDockMenu = (app: App, menuElement: HTMLElement) => {
+    menuElement.querySelectorAll('[data-type="mobile-plugin-dock"]').forEach(item => item.remove());
+    const markerElement = menuElement.querySelector("#menuPluginDocks");
+    if (!markerElement) {
+        return;
+    }
+    const html = getMobilePluginDockEntries(app).map((entry) =>
+        `<div class="b3-menu__item" data-type="mobile-plugin-dock" data-plugin-dock-key="${escapeAttr(entry.key)}">
+            <svg class="b3-menu__icon"><use xlink:href="#${escapeAttr(entry.config.icon)}"></use></svg>
+            <span class="b3-menu__label">${escapeHtml(`${entry.pluginDisplayName} - ${entry.config.title}`)}</span>
+        </div>`).join("");
+    markerElement.insertAdjacentHTML("beforebegin", html);
 };
 
 export const initRightMenu = (app: App) => {
@@ -377,7 +281,7 @@ export const initRightMenu = (app: App) => {
                 <svg class="b3-menu__icon"><use xlink:href="#iconInbox"></use></svg><span class="b3-menu__label">${window.siyuan.languages.inbox}</span>
             </div>
             <div id="menuRecent" class="b3-menu__item">
-                <svg class="b3-menu__icon"><use xlink:href="#iconList"></use></svg><span class="b3-menu__label">${window.siyuan.languages.recentDocs}</span>
+                <svg class="b3-menu__icon"><use xlink:href="#iconRecentDocs"></use></svg><span class="b3-menu__label">${window.siyuan.languages.recentDocs}</span>
             </div>
             <div id="menuSearch" class="b3-menu__item">
                 <svg class="b3-menu__icon"><use xlink:href="#iconSearch"></use></svg><span class="b3-menu__label">${window.siyuan.languages.search}</span>
@@ -405,7 +309,7 @@ export const initRightMenu = (app: App) => {
         <div class="b3-menu__group-title">${window.siyuan.languages.mobileMenuCreate}</div>
         <div class="b3-menu__group-items">
             <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuNewDoc">
-                <svg class="b3-menu__icon"><use xlink:href="#iconFile"></use></svg><span class="b3-menu__label">${window.siyuan.languages.newFile}</span>
+                <svg class="b3-menu__icon"><use xlink:href="#iconAddDoc"></use></svg><span class="b3-menu__label">${window.siyuan.languages.newFile}</span>
             </div>
             <div id="menuNewDaily" class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}">
                 <svg class="b3-menu__icon"><use xlink:href="#iconCalendar"></use></svg><span class="b3-menu__label">${window.siyuan.languages.dailyNote}</span>
@@ -439,12 +343,13 @@ export const initRightMenu = (app: App) => {
                 <svg class="b3-menu__icon"><use xlink:href="#iconPlugin"></use></svg><span class="b3-menu__label">${window.siyuan.languages.plugin}</span>
             </div>
             <div id="menuPluginTopBar" class="fn__none"></div>
+            <div id="menuPluginDocks" class="fn__none"></div>
         </div>
     </div>
     <div class="b3-menu__group">
         <div class="b3-menu__group-title">${window.siyuan.languages.mobileMenuSettingsAndHelp}</div>
         <div class="b3-menu__group-items">
-            ${getSettingTabsMenuHTML(true)}
+            ${getSettingTabsMenuHTML()}
             <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuHelp">
                 <svg class="b3-menu__icon"><use xlink:href="#iconHelp"></use></svg><span class="b3-menu__label">${window.siyuan.languages.userGuide}</span>
             </div>
@@ -457,6 +362,10 @@ export const initRightMenu = (app: App) => {
     <div class="b3-list--empty fn__none" data-type="menu-search-empty">${window.siyuan.languages.emptyContent}</div>
     ${getSettingTabResultsHTML()}
 </div>`;
+    renderMobilePluginDockMenu(app, menuElement);
+    window.addEventListener(MOBILE_PLUGIN_DOCKS_CHANGE_EVENT, () => {
+        renderMobilePluginDockMenu(app, menuElement);
+    });
     const searchElement = menuElement.querySelector(".mobile-main-menu__search input") as HTMLInputElement;
     const groupsElement = menuElement.querySelector(".mobile-main-menu__groups") as HTMLElement;
     const searchMountQueue = createSettingSearchMountQueue(app);
@@ -515,7 +424,13 @@ export const initRightMenu = (app: App) => {
             syncSearch();
         }
     });
-    menuElement.addEventListener(MOBILE_MENU_CLOSE_EVENT, resetSearch);
+    menuElement.addEventListener(MOBILE_MENU_CLOSE_EVENT, () => {
+        resetSearch();
+        const callback = takeMobileMenuReturnCallback();
+        if (callback) {
+            window.setTimeout(callback);
+        }
+    });
     const pluginGroupItems = menuElement.querySelector("#menuPluginTopBar")?.parentElement;
     if (pluginGroupItems) {
         new MutationObserver((mutations) => {
@@ -544,6 +459,11 @@ export const initRightMenu = (app: App) => {
     // 只能用 click，否则无法上下滚动 https://github.com/siyuan-note/siyuan/issues/6628
     menuElement.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
+        const topLevelMenuItem = target.closest(".b3-menu__item") as HTMLElement | null;
+        if (topLevelMenuItem?.parentElement?.classList.contains("b3-menu__group-items") &&
+            topLevelMenuItem.dataset.type !== "setting-tab") {
+            mobileMenuReturnCallback = undefined;
+        }
         while (target && !target.isEqualNode(menuElement)) {
             const settingTabDef = getSettingTabFromMenuTarget(target);
             if (target.classList.contains("b3-menu__title")) {
@@ -561,7 +481,7 @@ export const initRightMenu = (app: App) => {
                     selectedTabId = settingTabDef.id;
                     showSearchResult(keywords, settingTabDef.id, result);
                 } else {
-                    openSettingTab(app, settingTabDef, closeModel);
+                    openSettingTab(app, settingTabDef, takeMobileMenuReturnCallback() || closeModel);
                 }
                 event.preventDefault();
                 event.stopPropagation();
@@ -660,6 +580,16 @@ export const initRightMenu = (app: App) => {
                 event.preventDefault();
                 event.stopPropagation();
                 exitSiYuan();
+                break;
+            } else if (target.dataset.type === "mobile-plugin-dock") {
+                const pluginDockEntry = getMobilePluginDockEntries(app)
+                    .find(entry => entry.key === target.dataset.pluginDockKey);
+                closePanel();
+                if (pluginDockEntry) {
+                    openDock(pluginDockEntry.type);
+                }
+                event.preventDefault();
+                event.stopPropagation();
                 break;
             } else if (target.id === "menuPlugin") {
                 openTopBarMenu(app);

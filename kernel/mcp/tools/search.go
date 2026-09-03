@@ -149,9 +149,7 @@ func fulltextSearch(args map[string]any) (CallToolResult, error) {
 		if content == "" {
 			content = b.Content
 		}
-		if len(content) > 200 {
-			content = content[:200] + "..."
-		}
+		content = truncateText(content, 200)
 		sb.WriteString(fmt.Sprintf("- [%s] %s\n  %s\n  id: %s\n\n", b.HPath, b.Type, content, b.ID))
 	}
 	if docMode {
@@ -205,9 +203,7 @@ func semanticSearch(args map[string]any) (CallToolResult, error) {
 		if content == "" {
 			content = b.Content
 		}
-		if len(content) > 200 {
-			content = content[:200] + "..."
-		}
+		content = truncateText(content, 200)
 		sb.WriteString(fmt.Sprintf("- [%s] %s\n  %s\n  id: %s\n\n", b.HPath, b.Type, content, b.ID))
 	}
 	if matchedRootCount > 0 {
@@ -264,9 +260,7 @@ func assetSearch(args map[string]any) (CallToolResult, error) {
 	sb.WriteString(fmt.Sprintf("Found %d asset matches (page %d/%d):\n\n", matchedAssetCount, page, pageCount))
 	for _, a := range assetContents {
 		content := a.Content
-		if len(content) > 200 {
-			content = content[:200] + "..."
-		}
+		content = truncateText(content, 200)
 		sb.WriteString(fmt.Sprintf("- [%s] %s\n", a.Ext, a.Name))
 		sb.WriteString(fmt.Sprintf("  path: %s\n", a.Path))
 		sb.WriteString(fmt.Sprintf("  size: %s\n", a.HSize))

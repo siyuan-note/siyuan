@@ -17,6 +17,7 @@ import {
     hasVisibleSelectionText,
     shouldRestoreLongPressSelection,
 } from "./touchSelection";
+import {stripSemanticMarkersFromRangeText} from "../../protyle/util/inlineElementMarker";
 import {getTouchAxis, shouldStartLongPressMultiSelect} from "./touchGesture";
 import {getMobileBlockSelectionElement} from "./blockSelection";
 import {
@@ -121,7 +122,7 @@ const clearInvisibleEditorSelection = () => {
         return false;
     }
     const range = selection.getRangeAt(0);
-    if (range.collapsed || hasVisibleSelectionText(range.toString()) ||
+    if (range.collapsed || hasVisibleSelectionText(stripSemanticMarkersFromRangeText(range)) ||
         !editor.protyle.wysiwyg.element.contains(range.startContainer) ||
         !editor.protyle.wysiwyg.element.contains(range.endContainer)) {
         return false;
@@ -148,7 +149,7 @@ const restoreInvisibleLongPressSelection = () => {
     const endBlockElement = hasClosestBlock(range.endContainer);
     if (!shouldRestoreLongPressSelection(
         range.collapsed,
-        range.toString(),
+        stripSemanticMarkersFromRangeText(range),
         startBlockElement ? startBlockElement.getAttribute("data-node-id") : undefined,
         endBlockElement ? endBlockElement.getAttribute("data-node-id") : undefined,
         longPressBlockElement.getAttribute("data-node-id"),
@@ -408,7 +409,7 @@ export const handleTouchStart = (event: TouchEvent) => {
                 const selection = window.getSelection();
                 if (selection?.rangeCount > 0) {
                     const range = selection.getRangeAt(0);
-                    if (!range.collapsed && hasVisibleSelectionText(range.toString()) &&
+                    if (!range.collapsed && hasVisibleSelectionText(stripSemanticMarkersFromRangeText(range)) &&
                         editor.protyle.wysiwyg.element.contains(range.startContainer) &&
                         editor.protyle.wysiwyg.element.contains(range.endContainer)) {
                         longPressTimer = undefined;
@@ -472,7 +473,8 @@ export const handleTouchMove = (event: TouchEvent) => {
         // 选中后扩选的情况
         const range = getSelection().getRangeAt(0);
         const currentEditor = getCurrentEditor();
-        if (range.toString() !== "" && currentEditor?.protyle.wysiwyg.element.contains(range.startContainer)) {
+        if (hasVisibleSelectionText(stripSemanticMarkersFromRangeText(range)) &&
+            currentEditor?.protyle.wysiwyg.element.contains(range.startContainer)) {
             return;
         }
     }
@@ -571,6 +573,7 @@ export const handleTouchMove = (event: TouchEvent) => {
                 return;
             }
             sideMaskElement.style.zIndex = (++window.siyuan.zIndex).toString();
+            showPanelMask();
             const activeSidebar = getTargetSidebar(target) || openingSidebar;
             updateSidebarSwipeState(activeSidebar);
             getSidebarElement(activeSidebar).style.zIndex = (++window.siyuan.zIndex).toString();
@@ -581,7 +584,6 @@ export const handleTouchMove = (event: TouchEvent) => {
         if (targetSidebar) {
             const offset = getSidebarClosingOffset(targetSidebar, xDiff, windowWidth);
             getSidebarElement(targetSidebar).style.transform = `translateX(${offset}px)`;
-            transformMask(Math.abs(offset) / windowWidth);
             return;
         }
 
@@ -590,15 +592,9 @@ export const handleTouchMove = (event: TouchEvent) => {
         getSidebarElement(otherSidebar)?.style.removeProperty("transform");
         const offset = getSidebarOpeningOffset(openingSidebar, xDiff, windowWidth);
         getSidebarElement(openingSidebar).style.transform = `translateX(${offset}px)`;
-        transformMask(Math.abs(offset) / windowWidth);
         activeBlur();
         if (window.siyuan.mobile.editor) {
             window.siyuan.mobile.editor.protyle.contentElement.style.overflow = "hidden";
         }
     }
-};
-
-const transformMask = (closedRatio: number) => {
-    const maskElement = showPanelMask();
-    maskElement.style.opacity = Math.min(Math.max(1 - closedRatio, 0), 0.68).toString();
 };

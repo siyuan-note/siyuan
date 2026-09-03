@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -117,7 +118,7 @@ func updatePackages(packages []*UpdatedPackage, pkgType string, successCount, fa
 	items := make([]batchInstallItem, 0, len(packages))
 	for _, updated := range packages {
 		pkg := updated.Available
-		meta, err := installBazaarPackage(pkgType, pkg.RepoURL, pkg.RepoHash, pkg.Name)
+		meta, err := installBazaarPackage(pkgType, pkg.RepoURL, pkg.RepoHash, pkg.RepoRef, pkg.Name)
 		if err != nil {
 			logging.LogErrorf("update %s [%s] failed: %s", pkgType, pkg.Name, err)
 			util.PushErrMsg(fmt.Sprintf(Conf.language(238), pkg.Name), 5000)
@@ -349,6 +350,10 @@ func GetInstalledPackages(pkgType, frontend, keyword string) (installedPackages 
 	return v.([]*bazaar.Package)
 }
 
+func installedPackageBaseURLPath(prefix, packageName string) string {
+	return prefix + url.PathEscape(packageName) + "/"
+}
+
 func getInstalledPackages0(pkgType, frontend, keyword string) (installedPackages []*bazaar.Package) {
 	installedPackages = []*bazaar.Package{}
 
@@ -363,8 +368,11 @@ func getInstalledPackages0(pkgType, frontend, keyword string) (installedPackages
 
 	for _, info := range installedInfos {
 		pkg := info.Pkg
+		if pkgType == "plugins" {
+			setPluginStorageData(pkg, info.DirName)
+		}
 		installPath := filepath.Join(basePath, info.DirName)
-		baseURLPath := baseURLPathPrefix + info.DirName + "/"
+		baseURLPath := installedPackageBaseURLPath(baseURLPathPrefix, info.DirName)
 		// 设置本地集市包的通用元数据
 		if !bazaar.SetInstalledPackageMetadata(pkg, installPath, baseURLPath, pkgType) {
 			continue
@@ -444,7 +452,27 @@ func GetBazaarPackageDetail(pkgType, packageName, frontend string) (installed, a
 	available.Installed = true
 	available.Outdated = 0 > semver.Compare("v"+installed.Version, "v"+available.Version)
 	available.Current = installed.Current
+	refreshInstalledPackageREADME(pkgType, installed, available)
 	return
+}
+
+func refreshInstalledPackageREADME(pkgType string, installed, available *bazaar.Package) {
+	if installed == nil || available == nil || installed.Version != available.Version || available.RepoRef == "" {
+		return
+	}
+	installedInfos, basePath, baseURLPathPrefix, err := GetInstalledPackageInfos(pkgType)
+	if err != nil {
+		return
+	}
+	for _, info := range installedInfos {
+		if info.Pkg.InvalidReason != "" || info.Pkg.Name != installed.Name {
+			continue
+		}
+		installPath := filepath.Join(basePath, info.DirName)
+		baseURLPath := installedPackageBaseURLPath(baseURLPathPrefix, info.DirName)
+		bazaar.RefreshInstalledPackageREADME(installed, installPath, baseURLPath, available.RepoURL, available.RepoRef)
+		return
+	}
 }
 
 // GetBazaarPackages 获取在线集市包列表
@@ -485,7 +513,7 @@ func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, pkgType stri
 }
 
 // installBazaarPackage 下载并安装集市包
-func installBazaarPackage(pkgType, repoURL, repoHash, packageName string) (meta installMeta, err error) {
+func installBazaarPackage(pkgType, repoURL, repoHash, repoRef, packageName string) (meta installMeta, err error) {
 	installPath, jsonFileName, err := getPackageInstallPath(pkgType, packageName)
 	if err != nil {
 		return
@@ -494,7 +522,7 @@ func installBazaarPackage(pkgType, repoURL, repoHash, packageName string) (meta 
 	installedPkg, parseErr := bazaar.ParsePackageJSON(filepath.Join(installPath, jsonFileName))
 	meta.update = parseErr == nil && installedPkg != nil && installedPkg.Name == packageName
 
-	err = bazaar.InstallPackage(repoURL, repoHash, installPath, Conf.System.ID, pkgType, packageName, meta.update)
+	err = bazaar.InstallPackage(repoURL, repoHash, repoRef, installPath, Conf.System.ID, pkgType, packageName, meta.update)
 	if err != nil {
 		err = fmt.Errorf(Conf.Language(46), packageName, err)
 	}
@@ -579,8 +607,8 @@ func finishInstall(pkgType string, items []batchInstallItem, themeOptions *Theme
 }
 
 // InstallBazaarPackage 安装集市包，themeOptions 仅在 pkgType 为 "themes" 时生效
-func InstallBazaarPackage(pkgType, repoURL, repoHash, packageName string, themeOptions *ThemeInstallOptions) error {
-	meta, err := installBazaarPackage(pkgType, repoURL, repoHash, packageName)
+func InstallBazaarPackage(pkgType, repoURL, repoHash, repoRef, packageName string, themeOptions *ThemeInstallOptions) error {
+	meta, err := installBazaarPackage(pkgType, repoURL, repoHash, repoRef, packageName)
 	if err != nil {
 		return err
 	}
@@ -649,7 +677,8 @@ func UpdateBazaarPackage(pkgType, packageName, frontend string) error {
 		if updated.Available.DisallowUpdate {
 			return errors.New("marketplace package update is not allowed")
 		}
-		return InstallBazaarPackage(pkgType, updated.Available.RepoURL, updated.Available.RepoHash, packageName, nil)
+		return InstallBazaarPackage(pkgType, updated.Available.RepoURL, updated.Available.RepoHash,
+			updated.Available.RepoRef, packageName, nil)
 	}
 	return errors.New("marketplace package update not found")
 }

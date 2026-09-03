@@ -8,11 +8,17 @@ import {processRender} from "../util/processCode";
 import {highlightRender} from "../render/highlightRender";
 import {focusBlock, focusByRange, getEditorRange} from "../util/selection";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
-import {getContenteditableElement, getTopAloneElement} from "../wysiwyg/getBlock";
+import {
+    getContenteditableElement,
+    getNextBlock,
+    getPreviousBlock,
+    getSbChildBlockCount,
+    getTopAloneElement
+} from "../wysiwyg/getBlock";
 import {replaceFileName} from "../../editor/rename";
 import {transaction} from "../wysiwyg/transaction";
 import {getAssetExtension, getAssetName, getDisplayName, isEncryptedBox} from "../../util/pathName";
-import {genEmptyElement} from "../../block/util";
+import {cancelSB, genEmptyElement, rebalanceSbWidth, refreshSbResize} from "../../block/util";
 import {getOrderedListStart, updateListOrder} from "../wysiwyg/list";
 import {escapeHtml, escapeSearchHighlight, stripSearchMark} from "../../util/escape";
 import {zoomOut} from "../../menus/protyle";
@@ -35,6 +41,44 @@ import {
     isBuiltinInlineStyleVisible,
     TBuiltinInlineStyleID,
 } from "../toolbar/inlineStyle";
+import {confirmDialog} from "../../dialog/confirmDialog";
+import {buildSemanticInlineHTML} from "../util/inlineElementMarker";
+import {getHostCapabilities} from "../../util/hostCapabilities";
+import {
+    getBlockSelectionModeElement,
+    getBlockSelectionStatusIDs,
+    getDeleteSelectionCandidate,
+    setBlockSelectionModeElement
+} from "../wysiwyg/blockSelection";
+import {countBlockWord} from "../../layout/status";
+
+interface ITemplateDocTreePlan {
+    id: string;
+    count: number;
+    nodes: Array<{
+        id: string;
+        title: string;
+        parentID: string;
+        hPath: string;
+        depth: number;
+    }>;
+}
+
+const genTemplateDocTreePlanHTML = (plan: ITemplateDocTreePlan) => {
+    const itemsHTML = plan.nodes.map((item) => {
+        const depth = Number.isFinite(item.depth) ? Math.min(32, Math.max(0, Math.trunc(item.depth))) : 0;
+        return `<li class="b3-list-item" style="padding-left: ${depth * 18 + 4}px">
+    <svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+    <span class="b3-list-item__text">${escapeHtml(item.title)}</span>
+</li>`;
+    }).join("");
+    const count = Number.isFinite(plan.count) ? Math.max(0, Math.trunc(plan.count)) : plan.nodes.length;
+    return `<div class="fn__flex">
+    <span class="fn__flex-1">${window.siyuan.languages.newSubDoc}</span>
+    <span class="counter">${count}</span>
+</div>
+<ul class="b3-list b3-list--background" style="max-height: 50vh; overflow: auto">${itemsHTML}</ul>`;
+};
 
 const slashBuiltinStyleIDs: Partial<Record<string, TBuiltinInlineStyleID>> = {
     infoStyle: "info",
@@ -62,12 +106,12 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         id: "template",
         value: Constants.ZWSP,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconMarkdown"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.template}</span></div>`,
-    }, {
+    }, ...(getHostCapabilities().widgets ? [{
         filter: [window.siyuan.languages.widget, "widget", "挂件", "guajian", "gj"],
         id: "widget",
         value: Constants.ZWSP + 1,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconBoth"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.widget}</span></div>`,
-    }, {
+    }] : []), {
         filter: [window.siyuan.languages.assets, "assets", "资源", "ziyuan", "zy"],
         id: "assets",
         value: Constants.ZWSP + 2,
@@ -300,18 +344,18 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         value: Constants.ZWSP + 3,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconDownload"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.insertAsset}</span>
 <input class="b3-form__upload" type="file" multiple="multiple"${protyle.options.upload.accept ? ' accept="' + protyle.options.upload.accept + '"' : ""}></div>`,
-    }, {
+    }, ...(getHostCapabilities().localFileSystem ? [{
         filter: [window.siyuan.languages.insertHTMLFile, "embed html file", "iframe", "嵌入 html 文件", "qianruhtmlwenjian", "qrhtmlwj"],
         id: "insertHTMLFile",
         value: Constants.ZWSP + 3,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconHTML5"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.insertHTMLFile}</span>
 <input class="b3-form__upload" data-upload-mode="html-iframe" type="file" multiple="multiple" accept=".html,.htm"></div>`,
-    }, {
+    }] : []), ...(getHostCapabilities().remoteKernel ? [] : [{
         filter: [window.siyuan.languages.insertIframeURL, "insert iframe link", "插入 iframe 链接", "charuiframelianjie", "criframelj"],
         id: "insertIframeURL",
         value: '<iframe sandbox="allow-forms allow-presentation allow-same-origin allow-scripts allow-modals allow-popups allow-storage-access-by-user-activation" src="" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>',
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconGlobe"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.insertIframeURL}</span></div>`,
-    }, {
+    }]), {
         filter: [window.siyuan.languages.insertImgURL, "insert image link", "image", "img", "插入图片链接", "charutupianlianjie", "crtplj"],
         id: "insertImgURL",
         value: "![]()",
@@ -456,7 +500,7 @@ export const hintTag = (key: string, protyle: IProtyle): IHintData[] => {
         response.data.tags.forEach((item: string) => {
             const value = item.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
             dataList.push({
-                value: `<span data-type="tag">${value}</span>`,
+                value: buildSemanticInlineHTML("tag", value),
                 html: `<div class="b3-list-item__text">${item}</div>`,
             });
             if (value === response.data.k) {
@@ -465,7 +509,7 @@ export const hintTag = (key: string, protyle: IProtyle): IHintData[] => {
         });
         if (response.data.k && !hasKey) {
             dataList.splice(0, 0, {
-                value: `<span data-type="tag">${response.data.k}</span>`,
+                value: buildSemanticInlineHTML("tag", response.data.k),
                 html: `<div class="b3-list-item__text">${window.siyuan.languages.newTag} <mark>${escapeHtml(response.data.k)}</mark></div>`,
             });
             if (dataList.length > 1) {
@@ -631,28 +675,46 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
 export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement: Element) => {
     fetchPost("/api/template/render", {
         id: protyle.block.parentID,
-        path: value
+        path: value,
+        mode: "editorInsert"
     }, (response) => {
-        focusByRange(protyle.toolbar.range);
-        const editElement = getContenteditableElement(nodeElement);
-        if (editElement && editElement.textContent.trim() === "") {
-            insertHTML(response.data.content, protyle, true);
+        const insertTemplate = (templateDocTreePlanID?: string) => {
+            focusByRange(protyle.toolbar.range);
+            const editElement = getContenteditableElement(nodeElement);
+            if (templateDocTreePlanID || (editElement && editElement.textContent.trim() === "")) {
+                insertHTML(response.data.content, protyle, true, false, false, undefined, undefined,
+                    templateDocTreePlanID);
+            } else {
+                insertHTML(response.data.content, protyle);
+            }
+            // https://github.com/siyuan-note/siyuan/issues/4488
+            protyle.wysiwyg.element.querySelectorAll('[status="temp"]').forEach(item => {
+                item.remove();
+            });
+            blockRender(protyle, protyle.wysiwyg.element);
+            processRender(protyle.wysiwyg.element);
+            highlightRender(protyle.wysiwyg.element);
+            avRender(protyle.wysiwyg.element, protyle);
+            hideElements(["util"], protyle);
+        };
+        const docTreePlan = response.data.docTreePlan as ITemplateDocTreePlan | undefined;
+        if (docTreePlan?.id) {
+            hideElements(["util"], protyle);
+            confirmDialog(window.siyuan.languages.template, genTemplateDocTreePlanHTML(docTreePlan), () => {
+                insertTemplate(docTreePlan.id);
+            }, () => {
+                focusByRange(protyle.toolbar.range);
+            });
         } else {
-            insertHTML(response.data.content, protyle);
+            insertTemplate();
         }
-        // https://github.com/siyuan-note/siyuan/issues/4488
-        protyle.wysiwyg.element.querySelectorAll('[status="temp"]').forEach(item => {
-            item.remove();
-        });
-        blockRender(protyle, protyle.wysiwyg.element);
-        processRender(protyle.wysiwyg.element);
-        highlightRender(protyle.wysiwyg.element);
-        avRender(protyle.wysiwyg.element, protyle);
-        hideElements(["util"], protyle);
     });
 };
 
 export const hintRenderWidget = (value: string, protyle: IProtyle) => {
+    if (!getHostCapabilities().widgets) {
+        return;
+    }
     focusByRange(protyle.toolbar.range);
     // src 地址以 / 结尾
     // Use the path ending with `/` when loading the widget https://github.com/siyuan-note/siyuan/issues/10520
@@ -669,7 +731,7 @@ export const hintRenderAssets = (value: string, protyle: IProtyle) => {
     hideElements(["util"], protyle);
 };
 
-export const hintMoveBlock = (pathString: string, sourceElements: Element[], protyle: IProtyle) => {
+export const hintMoveBlock = async (pathString: string, sourceElements: Element[], protyle: IProtyle) => {
     if (pathString === "/") {
         return;
     }
@@ -678,18 +740,31 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
         return;
     }
     const doOperations: IOperation[] = [];
-    let topSourceElement: Element;
-    const parentElement = sourceElements[0].parentElement;
-    const listStart = getOrderedListStart(parentElement);
-    let sideElement;
-    sourceElements.forEach((item, index) => {
-        if (index === sourceElements.length - 1 &&
-            // 动态加载过慢，导致 item 被移除
-            item.parentElement) {
-            topSourceElement = getTopAloneElement(item);
-            sideElement = topSourceElement.nextElementSibling || topSourceElement.previousElementSibling;
-            if (topSourceElement === item) {
-                topSourceElement = undefined;
+    const selectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
+    const sourceParents = new Map<Element, number | undefined>();
+    const sourceSuperBlocks = new Map<Element, Set<string>>();
+    sourceElements.forEach(item => {
+        if (item.parentElement && !sourceParents.has(item.parentElement)) {
+            sourceParents.set(item.parentElement, getOrderedListStart(item.parentElement));
+        }
+    });
+    const candidateElements = Array.from(new Set(sourceElements.filter(item => item.parentElement)
+        .map(item => getTopAloneElement(item))));
+    const sideElement = getDeleteSelectionCandidate(candidateElements, "remove",
+        getPreviousBlock, getNextBlock)?.element;
+    sourceElements.forEach((item) => {
+        let topSourceElement: Element;
+        // 动态加载过慢时 item 可能已被移除，此时仍提交移动操作，但不再处理本地容器。
+        if (item.parentElement) {
+            const topElement = getTopAloneElement(item);
+            if (topElement.parentElement?.getAttribute("data-type") === "NodeSuperBlock") {
+                if (!sourceSuperBlocks.has(topElement.parentElement)) {
+                    sourceSuperBlocks.set(topElement.parentElement, new Set());
+                }
+                sourceSuperBlocks.get(topElement.parentElement).add(topElement.getAttribute("data-node-id"));
+            }
+            if (topElement !== item) {
+                topSourceElement = topElement;
             }
         }
         doOperations.push({
@@ -698,18 +773,21 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
             parentID,
         });
         item.remove();
+        if (topSourceElement) {
+            doOperations.push({
+                action: "delete",
+                id: topSourceElement.getAttribute("data-node-id"),
+            });
+            topSourceElement.remove();
+        }
     });
-    // 删除空元素
-    if (topSourceElement) {
-        doOperations.push({
-            action: "delete",
-            id: topSourceElement.getAttribute("data-node-id"),
-        });
-        topSourceElement.remove();
-    } else if (parentElement.classList.contains("list") && parentElement.getAttribute("data-subtype") === "o" &&
-        parentElement.childElementCount > 1) {
-        updateListOrder(parentElement, listStart);
-        Array.from(parentElement.children).forEach((item) => {
+    sourceParents.forEach((listStart, sourceParent) => {
+        if (!sourceParent.isConnected || !sourceParent.classList.contains("list") ||
+            sourceParent.getAttribute("data-subtype") !== "o" || sourceParent.childElementCount <= 1) {
+            return;
+        }
+        updateListOrder(sourceParent, listStart);
+        Array.from(sourceParent.children).forEach((item) => {
             if (item.classList.contains("protyle-attr")) {
                 return;
             }
@@ -720,12 +798,71 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
                 data: item.outerHTML
             });
         });
-    } else if (protyle.block.showAll && parentElement.classList.contains("protyle-wysiwyg") && parentElement.childElementCount === 0) {
+    });
+    const getElementDepth = (element: Element) => {
+        let depth = 0;
+        let parentElement = element.parentElement;
+        while (parentElement) {
+            depth++;
+            parentElement = parentElement.parentElement;
+        }
+        return depth;
+    };
+    const childReplacements = new Map<string, {
+        childIDs: string[],
+        foldedHeadingIDs: string[]
+    }>();
+    const sortedSuperBlocks = Array.from(sourceSuperBlocks.entries())
+        .sort(([first], [second]) => getElementDepth(second) - getElementDepth(first));
+    for (const [superBlock, excludedChildIDs] of sortedSuperBlocks) {
+        if (!superBlock.isConnected) {
+            continue;
+        }
+        if (getSbChildBlockCount(superBlock) === 1) {
+            const cancelOperations = await cancelSB(protyle, superBlock, undefined, excludedChildIDs,
+                childReplacements);
+            doOperations.push(...cancelOperations.doOperations);
+            if (cancelOperations.doOperations.length > 0) {
+                childReplacements.set(superBlock.getAttribute("data-node-id"), {
+                    childIDs: cancelOperations.childIDs || [],
+                    foldedHeadingIDs: cancelOperations.foldedHeadingIDs || [],
+                });
+            }
+        } else {
+            refreshSbResize(superBlock);
+            rebalanceSbWidth(superBlock).forEach(change => {
+                const targetElement = superBlock.querySelector(`[data-node-id="${change.id}"]`);
+                if (targetElement) {
+                    doOperations.push({
+                        action: "setAttrs",
+                        id: change.id,
+                        data: JSON.stringify({style: targetElement.getAttribute("style") || ""})
+                    });
+                }
+            });
+        }
+    }
+    const editorElement = protyle.wysiwyg.element;
+    if (protyle.block.showAll && editorElement.childElementCount === 0) {
+        const focusID = protyle.block.parent2ID;
         setTimeout(() => {
-            zoomOut({protyle, id: protyle.block.parent2ID, focusId: protyle.block.parent2ID});
+            zoomOut({
+                protyle,
+                id: focusID,
+                focusId: focusID,
+                callback: selectionModeElement ? () => {
+                    const targetElement = editorElement.querySelector<HTMLElement>(`[data-node-id="${focusID}"]`) ||
+                        editorElement.querySelector<HTMLElement>("[data-node-id]");
+                    if (targetElement) {
+                        setBlockSelectionModeElement(editorElement, targetElement);
+                        focusBlock(targetElement);
+                        countBlockWord(getBlockSelectionStatusIDs(editorElement), protyle.block.rootID);
+                    }
+                } : undefined,
+            });
         }, Constants.TIMEOUT_INPUT * 2 + 100);
-    } else if (parentElement.classList.contains("protyle-wysiwyg") && parentElement.innerHTML === "" &&
-        !hasClosestByClassName(parentElement, "block__edit", true) &&
+    } else if (editorElement.innerHTML === "" &&
+        !hasClosestByClassName(editorElement, "block__edit", true) &&
         protyle.block.id === protyle.block.rootID) {
         // 根文档原内容为空
         const newId = Lute.NewNodeID();
@@ -736,10 +873,32 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
             data: newElement.outerHTML,
             parentID: protyle.block.parentID
         });
-        parentElement.innerHTML = newElement.outerHTML;
-        focusBlock(newElement);
-    } else if (sideElement) {
-        focusBlock(sideElement);
+        editorElement.innerHTML = newElement.outerHTML;
+        if (!selectionModeElement) {
+            focusBlock(editorElement.firstElementChild);
+        }
+    } else if (sideElement?.isConnected && editorElement.contains(sideElement) &&
+        sideElement.getAttribute("data-node-id")) {
+        if (!selectionModeElement) {
+            focusBlock(sideElement);
+        }
+    }
+    if (selectionModeElement) {
+        let nextSelectionModeElement: Element;
+        const isValidSelectionModeElement = (element?: Element) => !!element && element.isConnected &&
+            editorElement.contains(element) && !!element.getAttribute("data-node-id");
+        if (isValidSelectionModeElement(selectionModeElement)) {
+            nextSelectionModeElement = selectionModeElement;
+        } else if (isValidSelectionModeElement(sideElement)) {
+            nextSelectionModeElement = sideElement;
+        } else {
+            nextSelectionModeElement = editorElement.querySelector<HTMLElement>("[data-node-id]");
+        }
+        if (nextSelectionModeElement) {
+            setBlockSelectionModeElement(editorElement, nextSelectionModeElement);
+            focusBlock(nextSelectionModeElement);
+            countBlockWord(getBlockSelectionStatusIDs(editorElement), protyle.block.rootID);
+        }
     }
     // 跨文档不支持撤销
     transaction(protyle, doOperations);

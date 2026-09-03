@@ -7,7 +7,7 @@
 		"id": "20210808180320-abz7w6k",
 		"title": "编辑器",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260830213256"
 	},
 	"Children": [
 		{
@@ -197,6 +197,23 @@
 					"TextMarkBlockRefID": "20200825162036-4dx365o",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "排版元素"
+				}
+			]
+		},
+		{
+			"ID": "20260830213256-w99ex05",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830213256-w99ex05",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260830213256-ye4cos4",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "选择和操作内容块"
 				}
 			]
 		},

@@ -164,19 +164,7 @@
 </div>
 <script>
     const getSearch = (key) => {
-        if (window.location.search.indexOf('?') === -1) {
-            return ''
-        }
-        let value = ''
-        const data = window.location.search.split('?')[1].split('&')
-        data.find(item => {
-            const keyValue = item.split('=')
-            if (keyValue[0] === key) {
-                value = keyValue[1]
-                return true
-            }
-        })
-        return value
+        return new URLSearchParams(window.location.search).get(key) || ''
     }
 
     const escapeBootAppearanceHTML = (value) => String(value).replace(/[&<>"']/g, (character) => ({
@@ -318,7 +306,8 @@
 
     let bootAppearanceRequestID = 0;
     const loadBootAppearance = (port, frontend) => {
-        if (getSearch("appearance") === "0" || getSearch("safe") === "1") {
+        const remoteOrigin = getSearch("remote");
+        if (remoteOrigin || getSearch("appearance") === "0" || getSearch("safe") === "1") {
             return;
         }
         const normalizedPort = String(port);
@@ -449,9 +438,11 @@
     (async () => {
         const v = getSearch('v')
         const port = getSearch('port') || '6806'
+        const remoteOrigin = getSearch('remote')
+        const serverURL = remoteOrigin || 'http://127.0.0.1:' + port
         const progressEl = document.getElementById('progress')
         const detailsEl = document.getElementById('details')
-        detailsEl.textContent = "v" + v + ' Booting kernel...'
+        detailsEl.textContent = "v" + v + (remoteOrigin ? ' Connecting to remote kernel...' : ' Booting kernel...')
         loadBootAppearance(port, "desktop");
 
         // 随机起始基数（15~25），等待内核进度时先平滑填充到此值
@@ -527,7 +518,7 @@
 
         let progressing = false
         const subscribe = () => {
-            const es = new EventSource('http://127.0.0.1:' + port + '/api/system/bootProgressSSE')
+            const es = new EventSource(serverURL + '/api/system/bootProgressSSE')
             es.onmessage = (event) => {
                 const progressData = JSON.parse(event.data)
                 // 内核进度按比例映射到 baseProgress~100 区间，从当前显示值继续递增
@@ -563,7 +554,9 @@
                 }
             }
         }
-        subscribe()
+        if (!remoteOrigin) {
+            subscribe()
+        }
     })()
 </script>
 </body>

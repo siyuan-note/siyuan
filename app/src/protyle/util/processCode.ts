@@ -7,8 +7,9 @@ import {mindmapRender} from "../render/mindmapRender";
 import {flowchartRender} from "../render/flowchartRender";
 import {plantumlRender} from "../render/plantumlRender";
 import {htmlRender} from "../render/htmlRender";
-import {Constants} from "../../constants";
 import {escapeHtml} from "../../util/escape";
+import {customBlockRender} from "../../plugin/customBlockRender";
+import {buildSemanticInlineHTML} from "./inlineElementMarker";
 
 export const processPasteCode = (html: string, text: string, originalTextHTML: string, protyle: IProtyle) => {
     const tempElement = document.createElement("div");
@@ -41,7 +42,7 @@ export const processPasteCode = (html: string, text: string, originalTextHTML: s
             return protyle.lute.Md2BlockDOM(code);
         } else {
             // Paste code <&lt;div class="b3-dialog__action"&gt;> WithAll<XXX>() <div class="b3-dialog__action">
-            return `<span data-type="code" spellcheck="false">${Constants.ZWSP}${escapeHtml(code)}</span>`;
+            return buildSemanticInlineHTML("code", escapeHtml(code), ' spellcheck="false"');
         }
     }
     return false;
@@ -59,6 +60,7 @@ const RENDER_MAP: Record<string, (previewPanel: Element) => void> = {
 };
 
 export const processRender = (previewPanel: Element) => {
+    customBlockRender(previewPanel);
     const language = previewPanel.getAttribute("data-subtype");
     if (RENDER_MAP[language]) {
         RENDER_MAP[language](previewPanel);

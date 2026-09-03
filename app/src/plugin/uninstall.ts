@@ -18,6 +18,12 @@ import {removeBreadcrumbButtons} from "./breadcrumbButton";
 import {refreshDockCatalog} from "../config/entryVisibility/catalog";
 import {isWindow} from "../util/functions";
 import {destroyEventBus} from "./EventBusCore";
+import {unregisterPluginCommands} from "./commandAdapter";
+import {sendGlobalShortcut} from "../boot/globalEvent/globalShortcut";
+import {releaseTrackedRangesByPlugin} from "../protyle/util/trackedRange";
+/// #if !MOBILE
+import {applyTopBarEntryVisibility} from "../config/entryVisibility/runtime";
+/// #endif
 
 const runCleanup = (plugin: Plugin, step: string, callback: () => unknown) => {
     try {
@@ -33,7 +39,9 @@ const runCleanup = (plugin: Plugin, step: string, callback: () => unknown) => {
 };
 
 export const beginPluginTeardown = (plugin: Plugin) => {
+    runCleanup(plugin, "commands", () => unregisterPluginCommands(plugin));
     runCleanup(plugin, "asset upload", () => cancelAssetUploadsByPlugin(plugin));
+    runCleanup(plugin, "tracked ranges", () => releaseTrackedRangesByPlugin(plugin));
 };
 
 export const destroyPlugin = (app: App, plugin: Plugin, isUninstall: boolean) => {
@@ -98,14 +106,17 @@ export const destroyPlugin = (app: App, plugin: Plugin, isUninstall: boolean) =>
             });
         });
     });
-    runCleanup(plugin, "top bar layout", () => resizeTopBar());
-    runCleanup(plugin, "tab layout", () => setTabPosition(true));
     /// #endif
     const index = app.plugins.indexOf(plugin);
     if (index > -1) {
         app.plugins.splice(index, 1);
     }
     runCleanup(plugin, "dock catalog", () => refreshDockCatalog(app.plugins));
+    /// #if !MOBILE
+    runCleanup(plugin, "top bar catalog", () => applyTopBarEntryVisibility());
+    runCleanup(plugin, "top bar layout", () => resizeTopBar());
+    runCleanup(plugin, "tab layout", () => setTabPosition(true));
+    /// #endif
     /// #if MOBILE
     // 移动端卸载插件后，若无任何插件停靠栏则隐藏插件入口图标。
     runCleanup(plugin, "mobile plugin entry", () => {
@@ -137,6 +148,7 @@ export const destroyPlugin = (app: App, plugin: Plugin, isUninstall: boolean) =>
         });
     });
     runCleanup(plugin, "style", () => document.getElementById("pluginsStyle" + plugin.name)?.remove());
+    runCleanup(plugin, "commands", () => unregisterPluginCommands(plugin));
     /// #if !BROWSER
     if (!isWindow()) {
         runCleanup(plugin, "global shortcut", () => {
@@ -151,6 +163,9 @@ export const destroyPlugin = (app: App, plugin: Plugin, isUninstall: boolean) =>
                 }
             });
         });
+        if (window.siyuan.languages?.["_trayMenu"]) {
+            runCleanup(plugin, "global shortcut sync", () => sendGlobalShortcut(app));
+        }
     }
     /// #endif
 };

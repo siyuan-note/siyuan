@@ -1,3 +1,5 @@
+import {getSemanticMarkerPrefixLengthForNode} from "../util/inlineElementMarker";
+
 const getNextBlockSibling = (element: Element) => {
     let nextElement = element.nextElementSibling;
     while (nextElement && !nextElement.hasAttribute("data-node-id")) {
@@ -23,6 +25,7 @@ const NATIVE_COMPOSITION_SNAPSHOT_TYPES = new Set([
     "NodeAttributeView",
     "NodeAudio",
     "NodeBlockQueryEmbed",
+    "NodeCustomBlock",
     "NodeHTMLBlock",
     "NodeIFrame",
     "NodeMathBlock",
@@ -165,9 +168,10 @@ ICrossBlockNestedListMergeContext | undefined => {
         let hasText = false;
         let textNode = walker.nextNode();
         while (textNode) {
-            if (textNode.textContent.replace(/[\s\u200b]/g, "") !== "") {
+            const markerPrefixLength = getSemanticMarkerPrefixLengthForNode(textNode);
+            if (textNode.textContent.substring(markerPrefixLength).replace(/[\s\u200b]/g, "") !== "") {
                 hasText = true;
-                if (selectedRange.comparePoint(textNode, 0) !== 0 ||
+                if (selectedRange.comparePoint(textNode, markerPrefixLength) !== 0 ||
                     selectedRange.comparePoint(textNode, textNode.textContent.length) !== 0) {
                     return false;
                 }

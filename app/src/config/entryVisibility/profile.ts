@@ -1,6 +1,12 @@
 export const getProfileEntryVisibility = (profile: Pick<Config.IEntryVisibilityProfile, "entries"> | undefined,
-                                           path: string) =>
-    typeof profile?.entries[path] === "boolean" ? profile.entries[path] : true;
+                                           path: string, defaultVisible = true) =>
+    typeof profile?.entries[path] === "boolean" ? profile.entries[path] : defaultVisible;
+
+export const getBuiltinProfileEntryVisibility = (
+    profile: "simple" | "full",
+    simple: boolean,
+    defaultVisible = true,
+) => defaultVisible && (profile === "full" || simple);
 
 export type TEntryVisibilityImportProfile = {
     name?: unknown;
@@ -36,6 +42,15 @@ export const normalizeEntryVisibilityImportProfile = (
             }
             return result;
         }, {})
-        : defaultOrders;
+        : Object.fromEntries(Object.entries(defaultOrders).map(([path, order]) => [path, [...order]]));
+    if (version < 4) {
+        if (entries["document.more.editMode.wysiwyg"] === false &&
+            entries["document.more.editMode.preview"] === false) {
+            entries["document.more.editMode"] = false;
+        }
+        delete entries["document.more.editMode.wysiwyg"];
+        delete entries["document.more.editMode.preview"];
+        delete orders["document.more.editMode"];
+    }
     return {name: profile.name, entries, orders};
 };

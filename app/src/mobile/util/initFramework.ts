@@ -3,7 +3,7 @@ import {closeModel, closePanel} from "./closePanel";
 import {getCurrentEditor, openMobileFileById} from "../editor";
 import {openMobileOnboarding} from "../../onboarding";
 import {validateName} from "../../editor/rename";
-import {getEventName, isDisabledFeature} from "../../protyle/util/compatibility";
+import {getEventName, isDisabledFeature, isInMobileApp} from "../../protyle/util/compatibility";
 import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";
@@ -44,6 +44,8 @@ import {
     removeMobilePluginDock,
     type IMobilePluginDockEntry,
 } from "../dock/pluginDockState";
+import {exitSiYuan} from "../../dialog/processSystem";
+import {enterDocumentFromTitle} from "../../protyle/header/titleEnter";
 
 const getDockTabElement = (type: string) => {
     return document.querySelector(`[data-type="${CSS.escape(`sidebar-${type}-tab`)}"]`) as HTMLElement;
@@ -300,6 +302,15 @@ export const initFramework = async (app: App, isStart: boolean) => {
     renderMobileSidePanelLayout(app);
     initSidePanelTabs(app, sidebarElement);
     initSidePanelTabs(app, sidebarRightElement);
+    const sidebarRightExitElement = document.getElementById("sidebarRightExit");
+    if (isInMobileApp() && sidebarRightExitElement) {
+        sidebarRightExitElement.classList.remove("fn__none");
+        sidebarRightExitElement.setAttribute("aria-label", window.siyuan.languages.safeQuit);
+        sidebarRightExitElement.addEventListener("click", (event) => {
+            event.stopPropagation();
+            void exitSiYuan();
+        });
+    }
     window.addEventListener(MOBILE_SIDE_PANEL_CONFIG_CHANGE_EVENT, () => {
         renderMobileSidePanelLayout(app);
         updateOpenSidePanelDocks(app, [sidebarElement, sidebarRightElement]);
@@ -401,21 +412,43 @@ export const initFramework = async (app: App, isStart: boolean) => {
 
 const initEditorName = () => {
     const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
-    inputElement.setAttribute("placeholder", window.siyuan.languages._kernel[16]);
-    inputElement.addEventListener("blur", () => {
+    let titleSavePromise: Promise<unknown> = Promise.resolve();
+    const saveTitle = () => {
         if (inputElement.getAttribute("readonly") === "readonly") {
-            return;
+            return titleSavePromise;
         }
         if (!validateName(inputElement.value)) {
             inputElement.value = inputElement.value.substring(0, Constants.SIZE_TITLE);
-            return false;
+            return titleSavePromise;
         }
 
-        fetchPost("/api/filetree/renameDoc", {
+        titleSavePromise = fetchPost("/api/filetree/renameDoc", {
             notebook: window.siyuan.mobile.editor.protyle.notebookId,
             path: window.siyuan.mobile.editor.protyle.path,
             title: inputElement.value,
         });
         setTitle(inputElement.value);
+        return titleSavePromise;
+    };
+    inputElement.setAttribute("placeholder", window.siyuan.languages._kernel[16]);
+    inputElement.addEventListener("blur", () => {
+        void saveTitle();
+    });
+    inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (event.isComposing || event.key !== "Enter") {
+            return;
+        }
+        const protyle = window.siyuan.mobile.editor?.protyle;
+        if (!protyle || protyle.disabled || inputElement.readOnly) {
+            return;
+        }
+        const rootID = protyle.block.rootID;
+        event.preventDefault();
+        event.stopPropagation();
+        inputElement.blur();
+        enterDocumentFromTitle(protyle, {
+            beforeLoad: titleSavePromise,
+            isValid: () => window.siyuan.mobile.editor?.protyle === protyle && protyle.block.rootID === rootID,
+        });
     });
 };

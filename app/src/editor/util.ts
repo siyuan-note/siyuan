@@ -36,6 +36,7 @@ import {Model} from "../layout/Model";
 import {hideElements} from "../protyle/ui/hideElements";
 import {isBrowserRenderableImagePath} from "../util/imageURL";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
+import {getHostCapabilities} from "../util/hostCapabilities";
 
 const isSameCustomTab = (type: string, data: any, options: IOpenFileOptions) => {
     if (!options.custom || (options.custom.id && options.custom.id !== type)) {
@@ -61,9 +62,18 @@ export const openFileById = async (options: {
     keepAVPanel?: boolean
     afterOpen?: (model: Model) => void,
     scrollPosition?: ScrollLogicalPosition
-}) => {
+    retryOnUnavailable?: number
+}): Promise<Tab | void> => {
     const response = await fetchSyncPost("/api/block/getBlockInfo", {id: options.id, notebook: options.notebookId});
     if (response.code === -1) {
+        const retryOnUnavailable = options.retryOnUnavailable || 0;
+        if (retryOnUnavailable > 0) {
+            await new Promise(resolve => window.setTimeout(resolve, Constants.TIMEOUT_TRANSITION));
+            return openFileById({
+                ...options,
+                retryOnUnavailable: retryOnUnavailable - 1,
+            });
+        }
         return;
     }
     if (response.code === 3) {
@@ -800,6 +810,9 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
 };
 
 export const openBy = (url: string, type: "folder" | "app") => {
+    if (!getHostCapabilities().localFileSystem) {
+        return;
+    }
     /// #if !BROWSER
     if (url.startsWith("assets/")) {
         fetchPost("/api/asset/resolveAssetPath", {path: url.replace(/\.pdf\?page=\d{1,}$/, ".pdf")}, (response) => {

@@ -18,7 +18,8 @@ import {genUUID} from "../../util/genID";
 import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
 import {escapeHtml} from "../../util/escape";
-import {unicode2Emoji} from "../../emoji";
+import {getFileTreeIconHTML} from "../../emoji/fileTreeIcon";
+import {syncDocTitleIAL} from "../../protyle/util/docTitleIAL";
 import {bindMousePointerTouchBridge, isMousePointerTouchEvent} from "../util/mousePointerTouchBridge";
 import {
     operationsMayChangeOutline,
@@ -431,11 +432,9 @@ export class MobileOutline extends Model {
                     break;
                 case "rename":
                     if (this.blockId === data.data.id) {
-                        this.updateDocTitle({
-                            title: data.data.title,
+                        this.updateDocTitle(syncDocTitleIAL({
                             icon: Constants.ZWSP,
-                            [Constants.CUSTOM_SY_TITLE_EMPTY]: data.data.empty ? "true" : "false"
-                        }, -1);
+                        }, data.data.title, data.data.empty, Constants.CUSTOM_SY_TITLE_EMPTY), -1);
                     }
                     break;
             }
@@ -595,8 +594,7 @@ export class MobileOutline extends Model {
             docTitleElement.classList.add("fn__none");
             return;
         }
-        let iconHTML = unicode2Emoji(ial.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file,
-            "b3-list-item__graphic", true);
+        let iconHTML = getFileTreeIconHTML(ial.icon, "file", "b3-list-item__graphic", true);
         if (ial.icon === Constants.ZWSP && docTitleElement.firstElementChild) {
             iconHTML = docTitleElement.firstElementChild.outerHTML;
         }

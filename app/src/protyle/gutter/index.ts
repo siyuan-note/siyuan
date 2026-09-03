@@ -35,7 +35,7 @@ import {
     updateBatchTransaction,
     updateTransaction
 } from "../wysiwyg/transaction";
-import {removeBlock} from "../wysiwyg/remove";
+import {removeBlockPreservingSelectionMode} from "../wysiwyg/remove";
 import {focusBlock, focusByRange, getBlockElementsByRange, getEditorRange, selectBlocksByRange} from "../util/selection";
 import {hideElements} from "../ui/hideElements";
 import {markGutterForFoldRestore} from "../ui/gutterVisibility";
@@ -62,6 +62,7 @@ import {
 } from "../../block/util";
 import {getHorizontalSuperBlockChild} from "../../block/superBlock";
 import {setDragTipGhost} from "../util/dragTip";
+import {stringifyBlockDragData} from "../util/dragDocument";
 import {countBlockWord} from "../../layout/status";
 import {Constants} from "../../constants";
 import {mathRender} from "../render/mathRender";
@@ -86,6 +87,8 @@ import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {genCellValueByElement} from "../render/av/cell";
 import {getPlainText} from "../util/paste";
 import {CODE_TAB_SPACE_VALUES} from "../wysiwyg/codeBlockUtil";
+import {getHostCapabilities} from "../../util/hostCapabilities";
+import {getEditorFocusRangeOutsideElement, restoreEditorFocusRange} from "../util/editorFocus";
 import {
     getCrossBlockTextSelectionTarget,
     getGutterSelection,
@@ -112,6 +115,7 @@ import {
     setOrderedListStart
 } from "../wysiwyg/list";
 import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../util/headingTransform";
+import {getBlockSelectionModeElement} from "../wysiwyg/blockSelection";
 import {
     getBacklinkGutterContentTop,
     getContainerGutterSpace,
@@ -143,6 +147,7 @@ const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
     NodeAudio: "audio",
     NodeWidget: "widget",
     NodeAttributeView: "database",
+    NodeCustomBlock: "custom",
 };
 
 const getGutterFixedContainerRect = (protyle: IProtyle) => {
@@ -327,7 +332,11 @@ export class Gutter {
             }
             window.siyuan.dragElement = avElement as HTMLElement || protyle.wysiwyg.element;
             event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}${buttonElement.getAttribute("data-type")}${Constants.ZWSP}${buttonElement.getAttribute("data-subtype")}${Constants.ZWSP}${selectIds}${Constants.ZWSP}${window.siyuan.config.system.workspaceDir}`,
-                protyle.wysiwyg.element.innerHTML);
+                stringifyBlockDragData({
+                    html: protyle.wysiwyg.element.innerHTML,
+                    notebookID: protyle.notebookId,
+                    rootID: protyle.block.rootID,
+                }));
             isGutterDragging = true;
             dragCleanupController?.abort();
             const cleanupController = new AbortController();
@@ -1418,7 +1427,7 @@ export class Gutter {
                 click: () => {
                     movePathTo({
                         cb: (toPath) => {
-                            hintMoveBlock(toPath[0], selectsElement, protyle);
+                            void hintMoveBlock(toPath[0], selectsElement, protyle);
                         },
                         flashcard: false
                     });
@@ -1451,7 +1460,8 @@ export class Gutter {
                 accelerator: "⌫",
                 click: () => {
                     protyle.breadcrumb?.hide();
-                    removeBlock(protyle, selectsElement[0], getEditorRange(selectsElement[0]), "Backspace");
+                    void removeBlockPreservingSelectionMode(protyle, selectsElement[0],
+                        getEditorRange(selectsElement[0]), "Backspace");
                 }
             }).element);
 
@@ -1580,6 +1590,11 @@ export class Gutter {
             hideElements(["gutter"], protyle);
             return;
         }
+        const selection = document.getSelection();
+        const currentRange = selection?.rangeCount ? selection.getRangeAt(0) : undefined;
+        const removalEditorRange = !getBlockSelectionModeElement(protyle.wysiwyg.element) ?
+            getEditorFocusRangeOutsideElement(protyle.wysiwyg.element, nodeElement, currentRange,
+                protyle.toolbar.range) : undefined;
         const editableElement = getContenteditableElement(nodeElement);
         const range = prepareCrossBlockTextSelection(protyle, nodeElement);
         if (range) {
@@ -1587,7 +1602,8 @@ export class Gutter {
         }
         const embedContext = getEmbedGutterOperationContext(nodeElement);
         const selectsElement = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-        if (!embedContext && selectsElement.length > 1) {
+        if (!embedContext && (selectsElement.length > 1 ||
+            getBlockSelectionModeElement(protyle.wysiwyg.element) && selectsElement.length > 0)) {
             window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BLOCK_MULTI);
             const match = Array.from(selectsElement).find(item => {
                 if (id === item.getAttribute("data-node-id") ||
@@ -2003,7 +2019,7 @@ export class Gutter {
                 click: () => {
                     movePathTo({
                         cb: (toPath) => {
-                            hintMoveBlock(toPath[0], [nodeElement], protyle);
+                            void hintMoveBlock(toPath[0], [nodeElement], protyle);
                         },
                         flashcard: false,
                     });
@@ -2030,9 +2046,14 @@ export class Gutter {
                 icon: "iconTrashcan",
                 label: window.siyuan.languages.delete,
                 accelerator: "⌫",
-                click: () => {
+                click: async () => {
                     protyle.breadcrumb?.hide();
-                    removeBlock(protyle, nodeElement, getEditorRange(nodeElement), "Backspace");
+                    const removed = await removeBlockPreservingSelectionMode(protyle, nodeElement,
+                        getEditorRange(nodeElement),
+                        "Backspace");
+                    if (removed) {
+                        restoreEditorFocusRange(protyle.wysiwyg.element, removalEditorRange);
+                    }
                 }
             }).element);
         }
@@ -2264,7 +2285,7 @@ export class Gutter {
                             window.siyuan.menus.menu.remove();
                         });
                     }
-                }, {
+                }, ...(getHostCapabilities().importExport ? [{
                     id: "saveCodeBlockAsFile",
                     iconHTML: "",
                     label: window.siyuan.languages.saveCodeBlockAsFile,
@@ -2274,7 +2295,7 @@ export class Gutter {
                             saveExportFile(response.data.path, msgId);
                         });
                     }
-                }]
+                }] : [])]
             }).element);
         } else if (type === "NodeCodeBlock" && !protyle.disabled && ["echarts", "mindmap"].includes(nodeElement.getAttribute("data-subtype"))) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_chart", type: "separator"}).element);
@@ -2335,35 +2356,39 @@ export class Gutter {
                 }).element);
             }
         } else if (type === "NodeAttributeView") {
-            window.siyuan.menus.menu.append(new MenuItem({id: "separator_exportCSV", type: "separator"}).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: "exportCSV",
-                icon: "iconDatabase",
-                label: window.siyuan.languages.export + " CSV",
-                click() {
-                    fetchPost("/api/export/exportAttributeView", {
-                        id: nodeElement.getAttribute("data-av-id"),
-                        blockID: id,
-                    }, response => {
-                        saveExportFile(response.data.zip);
-                    });
-                }
-            }).element);
+            if (getHostCapabilities().importExport) {
+                window.siyuan.menus.menu.append(new MenuItem({id: "separator_exportCSV", type: "separator"}).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "exportCSV",
+                    icon: "iconDatabase",
+                    label: window.siyuan.languages.export + " CSV",
+                    click() {
+                        fetchPost("/api/export/exportAttributeView", {
+                            id: nodeElement.getAttribute("data-av-id"),
+                            blockID: id,
+                        }, response => {
+                            saveExportFile(response.data.zip);
+                        });
+                    }
+                }).element);
+            }
             /// #if !BROWSER
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: "showDatabaseInFolder",
-                icon: "iconFolder",
-                label: window.siyuan.languages.showInFolder,
-                click() {
-                    const avId = nodeElement.getAttribute("data-av-id");
-                    const notebookId = protyle.notebookId;
-                    // 加密笔记本的 AV 定义存笔记本级路径
-                    const avDir = isEncryptedBox(notebookId)
-                        ? path.join(window.siyuan.config.system.dataDir, notebookId, "storage", "av")
-                        : path.join(window.siyuan.config.system.dataDir, "storage", "av");
-                    useShell("showItemInFolder", path.join(avDir, avId) + ".json");
-                }
-            }).element);
+            if (getHostCapabilities().localFileSystem) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "showDatabaseInFolder",
+                    icon: "iconFolder",
+                    label: window.siyuan.languages.showInFolder,
+                    click() {
+                        const avId = nodeElement.getAttribute("data-av-id");
+                        const notebookId = protyle.notebookId;
+                        // 加密笔记本的 AV 定义存笔记本级路径
+                        const avDir = isEncryptedBox(notebookId)
+                            ? path.join(window.siyuan.config.system.dataDir, notebookId, "storage", "av")
+                            : path.join(window.siyuan.config.system.dataDir, "storage", "av");
+                        useShell("showItemInFolder", path.join(avDir, avId) + ".json");
+                    }
+                }).element);
+            }
             /// #endif
         } else if ((type === "NodeVideo" || type === "NodeAudio") && !protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_VideoOrAudio", type: "separator"}).element);
@@ -2374,7 +2399,7 @@ export class Gutter {
                 label: window.siyuan.languages.assets,
                 submenu: videoMenu(protyle, nodeElement, type)
             }).element);
-        } else if (type === "NodeIFrame" && !protyle.disabled) {
+        } else if (type === "NodeIFrame" && !protyle.disabled && !getHostCapabilities().remoteKernel) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_IFrame", type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "assetIFrame",
@@ -2833,7 +2858,7 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_4", type: "separator"}).element);
         }
         if (window.siyuan.config.cloudRegion === 0 &&
-            !["NodeThematicBreak", "NodeBlockQueryEmbed", "NodeIFrame", "NodeHTMLBlock", "NodeWidget", "NodeVideo", "NodeAudio"].includes(type) &&
+            !["NodeThematicBreak", "NodeBlockQueryEmbed", "NodeIFrame", "NodeHTMLBlock", "NodeWidget", "NodeVideo", "NodeAudio", "NodeCustomBlock"].includes(type) &&
             getContenteditableElement(nodeElement)?.textContent.trim() !== "" &&
             (type !== "NodeCodeBlock" || (type === "NodeCodeBlock" && !nodeElement.getAttribute("data-subtype")))) {
             window.siyuan.menus.menu.append(new MenuItem({
@@ -3428,6 +3453,7 @@ export class Gutter {
             id: "copyAsPNG",
             iconHTML: "",
             label: window.siyuan.languages.copyAsPNG,
+            ignore: !getHostCapabilities().importExport,
             click() {
                 exportImage(id, true);
             }

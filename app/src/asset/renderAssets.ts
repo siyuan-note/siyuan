@@ -4,7 +4,7 @@ import {getAllModels} from "../layout/getAll";
 /// #endif
 import {getAssetExtension} from "../util/pathName";
 import * as dayjs from "dayjs";
-import {escapeAttr} from "../util/escape";
+import {escapeAttr, escapeHtml} from "../util/escape";
 import {getHTMLAssetIFrameSrc, isHTMLFilePath} from "./html";
 import {isBrowserRenderableImagePath} from "../util/imageURL";
 import {getAssetsPreviewPath} from "./previewPath";
@@ -22,7 +22,7 @@ export const renderAssetsPreview = (pathString: string, dataPath?: string) => {
     } else if (Constants.SIYUAN_ASSETS_VIDEO.includes(type)) {
         return `<video style="max-width: 100%" controls="controls" src="${previewPath}"></video>`;
     } else {
-        return pathString;
+        return escapeHtml(pathString);
     }
 };
 

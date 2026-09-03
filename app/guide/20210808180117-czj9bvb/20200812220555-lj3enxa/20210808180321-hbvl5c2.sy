@@ -7,7 +7,7 @@
 		"id": "20210808180321-hbvl5c2",
 		"title": "通用操作",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260903150000"
 	},
 	"Children": [
 		{
@@ -347,6 +347,23 @@
 					"TextMarkBlockRefID": "20201004184819-nj8ibyg",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "在浏览器上使用"
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-r25yic3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260903150000-r25yic3",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260903150000-u4065fm",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "连接远程内核"
 				}
 			]
 		},

@@ -6,6 +6,15 @@ import {
     TOOLBAR_ENTRY_ROOT_PATH,
 } from "../../protyle/toolbar/defaults";
 import {mergeEntryOrderPreservingUnknown} from "./order";
+import {getPluginDockEntryKey} from "../../plugin/dockKey";
+import {
+    getLegacyPluginTopBarEntryKey,
+    getPluginTopBarEntryKey,
+    isPluginTopBarEntryKey,
+} from "../../plugin/topBarKey";
+
+export {getPluginDockEntryKey} from "../../plugin/dockKey";
+export {getLegacyPluginTopBarEntryKey, getPluginTopBarEntryKey} from "../../plugin/topBarKey";
 
 export interface IEntryCatalogNode {
     key: string;
@@ -14,6 +23,8 @@ export interface IEntryCatalogNode {
     type: "entry" | "separator";
     displayChildrenDirectly?: boolean;
     sortable?: boolean;
+    fixed?: boolean;
+    defaultVisible?: () => boolean;
     children?: IEntryCatalogNode[];
 }
 
@@ -28,13 +39,14 @@ const lang = (key: string) => () => window.siyuan.languages[key] || key;
 const literal = (value: string) => () => value;
 const location = (...labels: Array<() => string>) => () => labels.map((label) => label()).join(" - ");
 const node = (key: string, label: () => string, simple = true, children?: IEntryCatalogNode[],
-              sortable?: boolean): IEntryCatalogNode => ({
+              sortable?: boolean, options?: Pick<IEntryCatalogNode, "defaultVisible" | "fixed">): IEntryCatalogNode => ({
     key,
     label,
     simple,
     type: "entry",
     children,
     sortable,
+    ...options,
 });
 const separator = (key: string): IEntryCatalogNode => ({
     key,
@@ -42,6 +54,8 @@ const separator = (key: string): IEntryCatalogNode => ({
     simple: true,
     type: "separator",
 });
+const fixed = (key: string, label: () => string): IEntryCatalogNode =>
+    node(key, label, true, undefined, undefined, {fixed: true});
 
 const codeTabSpacesChildren = () => [
     node("default", () => `${window.siyuan.languages.default} (${window.siyuan.config.editor.codeTabSpaces})`),
@@ -531,6 +545,33 @@ const toolbarCatalogSection: IEntryCatalogSection = {
     children: toolbarBuiltinChildren,
 };
 
+export const TOP_BAR_ROOT_PATH = "topBar";
+
+const topBarBuiltinChildren = [
+    node("barSync", lang("syncNow")),
+    node("barBack", lang("goBack")),
+    node("barForward", lang("goForward")),
+    fixed("drag", lang("entryTopBarDrag")),
+    node("toolbarVIP", lang("accountDisplayVIP"), true, undefined, undefined, {
+        defaultVisible: () => window.siyuan.config.account.displayVIP,
+    }),
+    node("toolbarTitle", lang("accountDisplayTitle"), true, undefined, undefined, {
+        defaultVisible: () => window.siyuan.config.account.displayTitle,
+    }),
+    node("barPlugins", lang("plugin")),
+    node("barCommand", lang("commandPanel")),
+    node("barSearch", lang("globalSearch")),
+    node("barZoom", lang("zoom")),
+    node("barMode", lang("appearanceMode")),
+    node("barExit", lang("safeQuit")),
+];
+
+const topBarCatalogSection: IEntryCatalogSection = {
+    key: TOP_BAR_ROOT_PATH,
+    label: lang("entryTopBar"),
+    children: topBarBuiltinChildren,
+};
+
 const dockBuiltinChildren = [
     node("file", lang("fileTree")),
     node("outline", lang("outline")),
@@ -543,6 +584,32 @@ const dockBuiltinChildren = [
     node("globalGraph", lang("globalGraph"), false),
 ];
 
+const dockBuiltinPositions = new Map<string, TPluginDockPosition>([
+    ["file", "LeftTop"],
+    ["outline", "LeftTop"],
+    ["bookmark", "LeftBottom"],
+    ["tag", "LeftBottom"],
+    ["backlink", "RightBottom"],
+    ["agentChat", "RightTop"],
+    ["inbox", "LeftTop"],
+    ["graph", "RightTop"],
+    ["globalGraph", "RightTop"],
+]);
+
+const dockRuntimeTypeKeys = new Map<string, string>();
+const dockEntryPositions = new Map(dockBuiltinPositions);
+
+export const getDockEntryKey = (element: Element) => {
+    const entryID = element.getAttribute("data-entry-id");
+    if (entryID) {
+        return entryID;
+    }
+    const type = element.getAttribute("data-type");
+    return type ? dockRuntimeTypeKeys.get(type) || type : undefined;
+};
+
+export const getDockEntryPosition = (key: string) => dockEntryPositions.get(key);
+
 const dockCatalogSection: IEntryCatalogSection = {
     key: "dock",
     label: lang("entryDock"),
@@ -551,6 +618,7 @@ const dockCatalogSection: IEntryCatalogSection = {
 };
 
 export const entryCatalog: IEntryCatalogSection[] = [
+    topBarCatalogSection,
     dockCatalogSection,
     {
         key: "docTree.panel",
@@ -693,10 +761,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("refresh", lang("refresh")),
             node("optimizeTypography", lang("optimizeTypography")),
             node("fullscreen", lang("fullscreen")),
-            node("editMode", lang("edit-mode"), true, [
-                node("wysiwyg", lang("wysiwyg")),
-                node("preview", lang("preview")),
-            ]),
+            node("editMode", lang("editMode")),
             node("editReadonly", lang("editReadonly"), false, [
                 node("enable", lang("enable"), false),
                 node("disable", lang("disable"), false),
@@ -951,7 +1016,12 @@ rebuildCatalogIndexes();
 
 export const getEntryCatalogNode = (path: string) => entryMap.get(path);
 export const getEntryParentPath = (path: string) => parentMap.get(path);
-export const getEntryPaths = () => Array.from(entryMap.keys());
+export const isEntryCatalogNodeConfigurable = (item: IEntryCatalogNode) => item.fixed !== true;
+export const getEntryCatalogDefaultVisibility = (path: string) =>
+    getEntryCatalogNode(path)?.defaultVisible?.() ?? true;
+export const getEntryPaths = () => Array.from(entryMap.entries())
+    .filter(([, item]) => isEntryCatalogNodeConfigurable(item))
+    .map(([path]) => path);
 export const getEntryCatalogSection = (key: string) => sectionMap.get(key);
 export const getEntryCatalogChildren = (path: string) => childrenMap.get(path);
 export const isEntryOrderSortable = (parentPath: string) => {
@@ -977,19 +1047,83 @@ export const getEntryCatalogPathChain = (sectionKey: string, path: string) => {
     return current === sectionKey ? chain : [];
 };
 
+export interface ITopBarCatalogPlugin {
+    name: string;
+    displayName?: string;
+    topBarIcons: Element[];
+}
+
+let topBarCatalogSignature = "[]";
+
+export const refreshTopBarCatalog = (plugins: ITopBarCatalogPlugin[]) => {
+    const signature = JSON.stringify(plugins.map((plugin) => ({
+        name: plugin.name,
+        displayName: plugin.displayName,
+        items: plugin.topBarIcons.map((item) => ({
+            id: item.getAttribute("data-id"),
+            elementID: item.getAttribute("id"),
+            entryKey: item.getAttribute("data-topbar-entry"),
+            location: item.getAttribute("data-location"),
+            title: item.getAttribute("aria-label"),
+        })),
+    })));
+    if (signature === topBarCatalogSignature) {
+        return;
+    }
+    const leftPluginNodes: IEntryCatalogNode[] = [];
+    const rightPluginNodes: IEntryCatalogNode[] = [];
+    const pluginKeys = new Set<string>();
+    plugins.forEach((plugin) => {
+        plugin.topBarIcons.forEach((item, index) => {
+            const id = item.getAttribute("data-id");
+            const elementKey = item.getAttribute("data-topbar-entry");
+            const key = isPluginTopBarEntryKey(elementKey)
+                ? elementKey
+                : id === null
+                    ? getLegacyPluginTopBarEntryKey(plugin.name, index)
+                    : getPluginTopBarEntryKey(plugin.name, id);
+            if (pluginKeys.has(key)) {
+                return;
+            }
+            pluginKeys.add(key);
+            const pluginName = plugin.displayName?.trim() || plugin.name;
+            const title = item.getAttribute("aria-label")?.trim() || id || item.getAttribute("id") || key;
+            const pluginNode = node(key, literal(`${pluginName} - ${title}`), true, undefined, undefined, {
+                defaultVisible: () => {
+                    const elementID = item.getAttribute("id");
+                    const unpinned = window.siyuan.storage?.["local-plugintopunpin"] as string[] | undefined;
+                    return !elementID || !unpinned?.includes(elementID);
+                },
+            });
+            if (item.getAttribute("data-location") === "left") {
+                leftPluginNodes.push(pluginNode);
+            } else {
+                rightPluginNodes.push(pluginNode);
+            }
+        });
+    });
+    const dragIndex = topBarBuiltinChildren.findIndex((item) => item.key === "drag");
+    const pluginMenuIndex = topBarBuiltinChildren.findIndex((item) => item.key === "barPlugins");
+    topBarCatalogSection.children = [
+        ...topBarBuiltinChildren.slice(0, dragIndex),
+        ...leftPluginNodes,
+        topBarBuiltinChildren[dragIndex],
+        ...topBarBuiltinChildren.slice(dragIndex + 1, pluginMenuIndex),
+        ...rightPluginNodes,
+        ...topBarBuiltinChildren.slice(pluginMenuIndex),
+    ];
+    topBarCatalogSignature = signature;
+    rebuildCatalogIndexes();
+};
+
 interface IDockCatalogPlugin {
     name: string;
     displayName?: string;
     docks: Record<string, {
         id: string;
-        config: Pick<IPluginDockTab, "title">;
+        config: Pick<IPluginDockTab, "title" | "position" | "index">;
     }>;
 }
-
-const encodeDockEntryKeyPart = (value: string) => encodeURIComponent(value).replace(/\./g, "%2E");
-
-export const getPluginDockEntryKey = (pluginName: string, dockID: string) =>
-    `plugin:${encodeDockEntryKeyPart(pluginName)}:${encodeDockEntryKeyPart(dockID)}`;
 
 let dockCatalogSignature = "[]";
 
@@ -997,9 +1131,12 @@ export const refreshDockCatalog = (plugins: IDockCatalogPlugin[]) => {
     const signature = JSON.stringify(plugins.map((plugin) => ({
         name: plugin.name,
         displayName: plugin.displayName,
-        docks: Object.values(plugin.docks).map((dock) => ({
+        docks: Object.entries(plugin.docks).map(([type, dock]) => ({
+            type,
             id: dock.id,
             title: dock.config.title,
+            position: dock.config.position,
+            index: dock.config.index,
         })),
     })));
     if (signature === dockCatalogSignature) {
@@ -1007,18 +1144,26 @@ export const refreshDockCatalog = (plugins: IDockCatalogPlugin[]) => {
     }
     const pluginNodes: IEntryCatalogNode[] = [];
     const pluginKeys = new Set<string>();
+    const runtimeTypeKeys = new Map<string, string>();
+    const entryPositions = new Map(dockBuiltinPositions);
     plugins.forEach((plugin) => {
-        Object.values(plugin.docks).forEach((dock) => {
+        Object.entries(plugin.docks).forEach(([type, dock]) => {
             const key = getPluginDockEntryKey(plugin.name, dock.id);
+            runtimeTypeKeys.set(type, key);
             if (pluginKeys.has(key)) {
                 return;
             }
             pluginKeys.add(key);
+            entryPositions.set(key, dock.config.position);
             const pluginName = plugin.displayName?.trim() || plugin.name;
             pluginNodes.push(node(key, literal(`${pluginName} - ${dock.config.title}`)));
         });
     });
     dockCatalogSection.children = [...dockBuiltinChildren, ...pluginNodes];
+    dockRuntimeTypeKeys.clear();
+    runtimeTypeKeys.forEach((key, type) => dockRuntimeTypeKeys.set(type, key));
+    dockEntryPositions.clear();
+    entryPositions.forEach((position, key) => dockEntryPositions.set(key, position));
     dockCatalogSignature = signature;
     rebuildCatalogIndexes();
 };

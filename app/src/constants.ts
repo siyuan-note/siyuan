@@ -25,6 +25,7 @@ export abstract class Constants {
 
     // drop 事件
     public static readonly SIYUAN_DROP_FILE: string = "application/siyuan-file";
+    public static readonly SIYUAN_DROP_DOCUMENTS: string = "application/siyuan-documents";
     public static readonly SIYUAN_DROP_GUTTER: string = "application/siyuan-gutter";
     public static readonly SIYUAN_DROP_BLOCK: string = "application/siyuan-block";
     public static readonly SIYUAN_DROP_BLOCK_REF: string = "application/siyuan-block-ref";
@@ -577,8 +578,7 @@ export abstract class Constants {
                 alignLeft: {default: "⌥L", custom: "⌥L"},
                 alignCenter: {default: "⌥C", custom: "⌥C"},
                 alignRight: {default: "⌥R", custom: "⌥R"},
-                wysiwyg: {default: "⌥⌘7", custom: "⌥⌘7"},
-                preview: {default: "⌥⌘9", custom: "⌥⌘9"},
+                editMode: {default: "⌥⌘9", custom: "⌥⌘9"},
                 insertBefore: {default: "⇧⌘B", custom: "⇧⌘B"},
                 insertAfter: {default: "⇧⌘A", custom: "⇧⌘A"},
                 insertSuperBlockLeft: {default: "", custom: ""},
@@ -924,6 +924,7 @@ export abstract class Constants {
         "nnfx-light", "panda-syntax-light", "paraiso-light", "purebasic", "qtcreator-light", "rose-pine-dawn", "routeros",
         "school-book", "stackoverflow-light", "tokyo-night-light", "vs", "xcode", "default"];
     public static readonly ZWSP: string = "\u200b";
+    public static readonly WORD_JOINER: string = "\u2060";
     public static readonly INLINE_TYPE: string[] = ["block-ref", "kbd", "text", "file-annotation-ref", "a", "strong", "em", "u", "s", "mark", "sup", "sub", "tag", "code", "inline-math", "inline-memo", "clear"];
     public static readonly BLOCK_HINT_KEYS: string[] = ["((", "[[", "（（", "【【"];
     public static readonly BLOCK_HINT_CLOSE_KEYS: Record<string, string> = {"((": "))", "[[": "]]", "（（": "））", "【【": "】】"};

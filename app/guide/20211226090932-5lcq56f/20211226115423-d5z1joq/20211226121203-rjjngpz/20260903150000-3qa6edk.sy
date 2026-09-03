@@ -1,0 +1,37 @@
+{
+	"ID": "20260903150000-3qa6edk",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260903150000-3qa6edk",
+		"title": "連線至遠端內核",
+		"type": "doc",
+		"updated": "20260903205342"
+	},
+	"Children": [
+		{"ID": "20260903150000-jrf9aw4", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-jrf9aw4", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "概述"}]},
+		{"ID": "20260903150000-6shebfx", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-6shebfx", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "桌面端可以連線至其他裝置上執行的思源內核，並使用本機桌面介面進行編輯。遠端模式僅用於連線至現有內核，不會在本機啟動內核。"}]},
+		{"ID": "20260903150000-o9vrit3", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-o9vrit3", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "啟動方式"}]},
+		{"ID": "20260903150000-m5fkfh5", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-m5fkfh5", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "完全結束思源桌面用戶端後，從命令列啟動桌面端並加入參數 "}, {"Type": "NodeTextMark", "TextMarkType": "code", "TextMarkTextContent": "--remote=https://host[:port]"}, {"Type": "NodeText", "Data": "。如果已有執行中的實例，單一實例機制不會切換目前的連線。"}]},
+		{"ID": "20260903150000-l1lghrh", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-l1lghrh", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "安全性與版本"}]},
+		{"ID": "20260903150000-dk8m7z0", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-dk8m7z0", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "僅支援 HTTPS 遠端位址，用戶端作業系統必須信任伺服器使用的 TLS 憑證。請只連線至你信任的伺服器；桌面用戶端與遠端內核的版本必須完全一致，否則無法連線。桌面用戶端僅載入安裝套件內建的前端，不會載入遠端伺服器提供的 HTML、指令碼等可執行前端資源，因此同源的遠端 HTML 嵌入內容也無法使用。"}]},
+		{"ID": "20260903150000-uleg2f1", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-uleg2f1", "updated": "20260903205342"}, "Children": [{"Type": "NodeText", "Data": "功能限制"}]},
+		{"ID": "20260903150000-ovlxdje", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-ovlxdje", "updated": "20260903205342"}, "Children": [{"Type": "NodeText", "Data": "遠端模式不支援以下功能，本機模式不受影響："}]},
+		{
+			"ID": "20260903150000-lw8m6qj",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {"id": "20260903150000-lw8m6qj", "updated": "20260903150000"},
+			"Children": [
+				{"ID": "20260903150000-iaab0bj", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-iaab0bj", "updated": "20260903150000"}, "Children": [{"ID": "20260903150000-rj4jvo4", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-rj4jvo4", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "匯入和匯出"}]}]},
+				{"ID": "20260903150000-o4d17am", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-o4d17am", "updated": "20260903150000"}, "Children": [{"ID": "20260903150000-uqpqmld", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-uqpqmld", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "檔案剪貼簿操作"}]}]},
+				{"ID": "20260903150000-7489c2g", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-7489c2g", "updated": "20260903150000"}, "Children": [{"ID": "20260903150000-gopw68q", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-gopw68q", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "依賴用戶端本機路徑或伺服器絕對路徑的操作，例如在檔案管理器中顯示，以及透過路徑拖入或開啟檔案；透過檔案選擇器進行一般資源上傳仍可使用"}]}]},
+				{"ID": "20260903150000-yn3mxw7", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-yn3mxw7", "updated": "20260903150000"}, "Children": [{"ID": "20260903150000-m8ot8ql", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-m8ot8ql", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "桌面端外掛程式、集市和小工具不可用；僅使用用戶端內建外觀，不載入遠端自訂佈景主題、圖示、字型和程式碼片段"}]}]},
+				{"ID": "20260903150000-3s12hif", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-3s12hif", "updated": "20260903150000"}, "Children": [{"ID": "20260903150000-pfjakt6", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-pfjakt6", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "HTML 和 SVG 區塊、資料庫範本及 JavaScript 查詢嵌入區塊中的指令碼不會執行，iframe 區塊不可用；圖表、圖解和數學公式等渲染結果會進行安全淨化"}]}]},
+				{"ID": "20260903150000-kl3k0d9", "Type": "NodeListItem", "ListData": {"BulletChar": 42, "Marker": "Kg=="}, "Properties": {"id": "20260903150000-kl3k0d9", "updated": "20260903150000"}, "Children": [{"ID": "20260903150000-c7bpnf2", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-c7bpnf2", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "僅支援存取授權碼登入，不支援 OIDC 登入"}]}]}
+			]
+		},
+		{"ID": "20260903150000-ie4h9hx", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-ie4h9hx", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "生命週期"}]},
+		{"ID": "20260903150000-3bhf4xb", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-3bhf4xb", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "遠端內核的啟動、停止、重新啟動、升級和工作空間切換均需在伺服器端完成。關閉桌面用戶端不會關閉遠端內核。"}]}
+	]
+}

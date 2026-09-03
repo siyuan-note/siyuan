@@ -13,16 +13,26 @@ import {activeBlur} from "./keyboardToolbar";
 import {isMobileBlockSelecting} from "./mobileBars";
 import {newDailyNote, newDailyNoteFromLastNotebook} from "../../util/mount";
 import {
+    getMobilePluginDockEntries,
+    MOBILE_PLUGIN_DOCKS_CHANGE_EVENT,
+    type IMobilePluginDockEntry,
+} from "../dock/pluginDockState";
+import {
+    isMobileBottomBarAction,
+    isMobileBottomBarBuiltInAction,
     MOBILE_BOTTOM_BAR_ACTIONS,
     normalizeMobileBottomBarConfig,
     reduceMobileBottomBarConfig,
     resolveMobileBottomBarAvailability,
     type IMobileBottomBarConfig,
     type MobileBottomBarAction,
+    type MobileBottomBarBuiltInAction,
     type MobileBottomBarSlot,
 } from "./mobileBottomBarConfig";
 
-const getActionLabel = (action: MobileBottomBarAction) => {
+let bottomBarSettingPluginDocksChangeHandler: (() => void) | undefined;
+
+const getActionLabel = (action: MobileBottomBarBuiltInAction) => {
     switch (action) {
         case "back":
             return window.siyuan.languages.goBack;
@@ -61,8 +71,16 @@ const getActionLabel = (action: MobileBottomBarAction) => {
     }
 };
 
-const getBottomBarConfig = () => {
-    const config = normalizeMobileBottomBarConfig(window.siyuan.storage[Constants.LOCAL_MOBILE_BOTTOM_BAR]);
+const getPluginDockLabel = (entry: IMobilePluginDockEntry) =>
+    `${entry.pluginDisplayName} - ${entry.config.title}`;
+
+const getStoredBottomBarConfig = () =>
+    normalizeMobileBottomBarConfig(window.siyuan.storage[Constants.LOCAL_MOBILE_BOTTOM_BAR]);
+
+const resolveBottomBarConfig = (
+    config: IMobileBottomBarConfig,
+    pluginDockEntries: readonly IMobilePluginDockEntry[],
+) => {
     const unavailableActions = new Set<MobileBottomBarAction>();
     if (window.siyuan.config.readonly) {
         unavailableActions.add("newDoc");
@@ -79,6 +97,12 @@ const getBottomBarConfig = () => {
     if (isDisabledFeature("ai")) {
         unavailableActions.add("agent");
     }
+    const pluginDockKeys = new Set(pluginDockEntries.map(entry => entry.key));
+    config.actions.forEach((action) => {
+        if (!isMobileBottomBarBuiltInAction(action) && !pluginDockKeys.has(action)) {
+            unavailableActions.add(action);
+        }
+    });
     if (unavailableActions.size === 0) {
         return config;
     }
@@ -103,7 +127,10 @@ export const renderMobileBottomBar = () => {
         return;
     }
 
-    const config = getBottomBarConfig();
+    const pluginDockEntries = getMobilePluginDockEntries();
+    const pluginDockEntriesByKey = new Map(pluginDockEntries.map(entry => [entry.key, entry]));
+    const config = resolveBottomBarConfig(getStoredBottomBarConfig(), pluginDockEntries);
+    bottomBarElement.querySelectorAll("[data-mobile-plugin-dock]").forEach(item => item.remove());
     MOBILE_BOTTOM_BAR_ACTIONS.forEach((action) => {
         const element = bottomBarElement.querySelector<HTMLElement>(`[data-action="${action}"]`);
         if (!element) {
@@ -114,11 +141,26 @@ export const renderMobileBottomBar = () => {
         updateActionLabel(element, getActionLabel(action));
     });
     config.actions.forEach((action, slot) => {
-        const element = bottomBarElement.querySelector<HTMLElement>(`[data-action="${action}"]`);
+        let element: HTMLElement | null;
+        if (isMobileBottomBarBuiltInAction(action)) {
+            element = bottomBarElement.querySelector<HTMLElement>(`[data-action="${action}"]`);
+            element?.classList.remove("fn__none");
+        } else {
+            const pluginDockEntry = pluginDockEntriesByKey.get(action);
+            if (!pluginDockEntry) {
+                return;
+            }
+            element = document.createElement("button");
+            element.className = "mobile-bottom-bar__item";
+            element.setAttribute("type", "button");
+            element.dataset.action = action;
+            element.dataset.mobilePluginDock = pluginDockEntry.type;
+            element.innerHTML = `<svg><use xlink:href="#${escapeAttr(pluginDockEntry.config.icon)}"></use></svg>`;
+            updateActionLabel(element, getPluginDockLabel(pluginDockEntry));
+        }
         if (!element) {
             return;
         }
-        element.classList.remove("fn__none");
         element.dataset.slot = slot.toString();
         bottomBarElement.insertBefore(element, moreElement);
     });
@@ -146,6 +188,21 @@ export const initMobileBottomBar = (app: App) => {
     }
     bottomBarElement.classList.remove("fn__none");
     bottomBarElement.dataset.bound = "true";
+    window.addEventListener(MOBILE_PLUGIN_DOCKS_CHANGE_EVENT, renderMobileBottomBar);
+    bottomBarElement.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) {
+            return;
+        }
+        const pluginDockElement = target.closest<HTMLElement>("[data-mobile-plugin-dock]");
+        if (!pluginDockElement || !bottomBarElement.contains(pluginDockElement) || isMobileBlockSelecting()) {
+            return;
+        }
+        const type = pluginDockElement.dataset.mobilePluginDock;
+        if (type) {
+            openDock(type);
+        }
+    });
     bindBottomBarAction("mobileBottomBarBack", () => {
         if (isMobileBlockSelecting()) {
             return;
@@ -248,16 +305,20 @@ export const initMobileBottomBar = (app: App) => {
     });
 };
 
-const genBottomBarOptions = () => MOBILE_BOTTOM_BAR_ACTIONS.map((action) =>
-    `<option value="${action}"${action === "agent" && isDisabledFeature("ai") ? " disabled" : ""}>${escapeHtml(getActionLabel(action))}</option>`
-).join("");
+const genBottomBarOptions = (pluginDockEntries: readonly IMobilePluginDockEntry[]) => [
+    ...MOBILE_BOTTOM_BAR_ACTIONS.map((action) =>
+        `<option value="${action}"${action === "agent" && isDisabledFeature("ai") ? " disabled" : ""}>${escapeHtml(getActionLabel(action))}</option>`),
+    ...pluginDockEntries.map((entry) =>
+        `<option value="${escapeAttr(entry.key)}">${escapeHtml(getPluginDockLabel(entry))}</option>`),
+].join("");
 
 export const genMobileBottomBarSettingHTML = () => {
     const title = window.siyuan.languages.mobileBottomBar;
     const disabled = window.siyuan.config.readonly || window.siyuan.isPublish ? " disabled" : "";
+    const options = genBottomBarOptions(getMobilePluginDockEntries());
     const selects = [0, 1, 2, 3, 4].map((slot) => `<label class="mobile-bottom-bar-setting__slot">
         <span>${slot + 1}</span>
-        <select class="b3-select fn__flex-1" data-bottom-bar-slot="${slot}" aria-label="${escapeAttr(`${title} ${slot + 1}`)}"${disabled}>${genBottomBarOptions()}</select>
+        <select class="b3-select fn__flex-1" data-bottom-bar-slot="${slot}" aria-label="${escapeAttr(`${title} ${slot + 1}`)}"${disabled}>${options}</select>
     </label>`).join("");
     return `<div id="mobileBottomBarSetting" class="b3-label config-item mobile-bottom-bar-setting">
     <div class="fn__flex">
@@ -275,11 +336,17 @@ export const mountMobileBottomBarSetting = (root: HTMLElement) => {
     if (!settingElement) {
         return;
     }
-    let config = getBottomBarConfig();
-    const syncSelects = () => {
+    let config = getStoredBottomBarConfig();
+    let pluginDockEntries = getMobilePluginDockEntries();
+    const syncSelects = (refreshOptions = false) => {
+        const resolvedConfig = resolveBottomBarConfig(config, pluginDockEntries);
+        const options = refreshOptions ? genBottomBarOptions(pluginDockEntries) : "";
         settingElement.querySelectorAll<HTMLSelectElement>("[data-bottom-bar-slot]").forEach((selectElement) => {
             const slot = Number(selectElement.dataset.bottomBarSlot) as MobileBottomBarSlot;
-            selectElement.value = config.actions[slot];
+            if (refreshOptions) {
+                selectElement.innerHTML = options;
+            }
+            selectElement.value = resolvedConfig.actions[slot];
         });
     };
     settingElement.addEventListener("change", (event) => {
@@ -288,8 +355,10 @@ export const mountMobileBottomBarSetting = (root: HTMLElement) => {
             return;
         }
         const slot = Number(selectElement.dataset.bottomBarSlot);
-        const action = selectElement.value as MobileBottomBarAction;
-        if (![0, 1, 2, 3, 4].includes(slot) || !MOBILE_BOTTOM_BAR_ACTIONS.includes(action)) {
+        const action = selectElement.value;
+        const pluginDockKeys = new Set(pluginDockEntries.map(entry => entry.key));
+        if (![0, 1, 2, 3, 4].includes(slot) || !isMobileBottomBarAction(action) ||
+            (!isMobileBottomBarBuiltInAction(action) && !pluginDockKeys.has(action))) {
             syncSelects();
             return;
         }
@@ -306,5 +375,21 @@ export const mountMobileBottomBarSetting = (root: HTMLElement) => {
         setBottomBarConfig(config);
         syncSelects();
     });
+    const onPluginDocksChange = () => {
+        if (!settingElement.isConnected) {
+            window.removeEventListener(MOBILE_PLUGIN_DOCKS_CHANGE_EVENT, onPluginDocksChange);
+            if (bottomBarSettingPluginDocksChangeHandler === onPluginDocksChange) {
+                bottomBarSettingPluginDocksChangeHandler = undefined;
+            }
+            return;
+        }
+        pluginDockEntries = getMobilePluginDockEntries();
+        syncSelects(true);
+    };
+    if (bottomBarSettingPluginDocksChangeHandler) {
+        window.removeEventListener(MOBILE_PLUGIN_DOCKS_CHANGE_EVENT, bottomBarSettingPluginDocksChangeHandler);
+    }
+    bottomBarSettingPluginDocksChangeHandler = onPluginDocksChange;
+    window.addEventListener(MOBILE_PLUGIN_DOCKS_CHANGE_EVENT, onPluginDocksChange);
     syncSelects();
 };

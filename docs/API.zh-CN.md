@@ -528,6 +528,66 @@
   }
   ```
 
+### 相对调整文档顺序
+
+* `/api/filetree/reorderDocs`
+* 参数
+
+  ```json
+  {
+    "sourceIDs": ["20210917220056-yxtyl7i"],
+    "targetID": "20210917220057-abcdefg",
+    "position": "before"
+  }
+  ```
+
+    * `sourceIDs`：按数组顺序插入的源文档 ID
+    * `targetID`：目标兄弟文档 ID
+    * `position`：`before` 或 `after`
+    * 源文档必须在移动后与目标文档属于同一笔记本和父文档；排序基于包含隐藏文档和未列出文档的完整子文档列表
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "changed": true,
+      "notebook": "20210817205410-2kvfpfn",
+      "parentPath": "/"
+    }
+  }
+  ```
+
+### 相对调整笔记本顺序
+
+* `/api/notebook/reorder`
+* 参数
+
+  ```json
+  {
+    "sourceIDs": ["20210817205410-2kvfpfn"],
+    "targetID": "20210817205411-abcdefg",
+    "position": "after"
+  }
+  ```
+
+    * `sourceIDs`：按数组顺序插入的源笔记本 ID
+    * `targetID`：目标笔记本 ID
+    * `position`：`before` 或 `after`
+    * 排序基于包含已关闭笔记本的完整列表
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "changed": true
+    }
+  }
+  ```
+
 ### 设置笔记本和文档排序值
 
 * `/api/filetree/setSort`

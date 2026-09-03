@@ -57,6 +57,9 @@ export const getIconByType = (type: string, sub?: string) => {
         case "NodeWidget":
             iconName = "iconBoth";
             break;
+        case "NodeCustomBlock":
+            iconName = "iconPlugin";
+            break;
         case "NodeIFrame":
             iconName = "iconGlobe";
             break;

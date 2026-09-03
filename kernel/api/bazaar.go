@@ -181,11 +181,12 @@ func updateBazaarPackage(c *gin.Context) {
 		return
 	}
 
-	var pkgType, packageName, frontend string
+	var pkgType, packageName, frontend, keyword string
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("packageType", &pkgType, true, true),
 		util.BindJsonArg("packageName", &packageName, true, true),
 		util.BindJsonArg("frontend", &frontend, true, true),
+		util.BindJsonArg("keyword", &keyword, false, false),
 	) {
 		return
 	}
@@ -201,7 +202,7 @@ func updateBazaarPackage(c *gin.Context) {
 	}
 	util.PushMsg(model.Conf.Language(69), 3000)
 	ret.Data = map[string]any{
-		"packages": model.GetBazaarPackages(pkgType, frontend, ""),
+		"packages": model.GetBazaarPackages(pkgType, frontend, keyword),
 	}
 }
 
@@ -535,17 +536,18 @@ func installBazaarPlugin(c *gin.Context) {
 		return
 	}
 
-	var frontend, keyword, repoURL, repoHash, packageName string
+	var frontend, keyword, repoURL, repoHash, repoRef, packageName string
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("frontend", &frontend, true, true),
 		util.BindJsonArg("keyword", &keyword, false, false),
 		util.BindJsonArg("repoURL", &repoURL, true, true),
 		util.BindJsonArg("repoHash", &repoHash, true, true),
+		util.BindJsonArg("repoRef", &repoRef, false, false),
 		util.BindJsonArg("packageName", &packageName, true, true),
 	) {
 		return
 	}
-	err := model.InstallBazaarPackage("plugins", repoURL, repoHash, packageName, nil)
+	err := model.InstallBazaarPackage("plugins", repoURL, repoHash, repoRef, packageName, nil)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -642,16 +644,17 @@ func installBazaarWidget(c *gin.Context) {
 		return
 	}
 
-	var keyword, repoURL, repoHash, packageName string
+	var keyword, repoURL, repoHash, repoRef, packageName string
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("keyword", &keyword, false, false),
 		util.BindJsonArg("repoURL", &repoURL, true, true),
 		util.BindJsonArg("repoHash", &repoHash, true, true),
+		util.BindJsonArg("repoRef", &repoRef, false, false),
 		util.BindJsonArg("packageName", &packageName, true, true),
 	) {
 		return
 	}
-	err := model.InstallBazaarPackage("widgets", repoURL, repoHash, packageName, nil)
+	err := model.InstallBazaarPackage("widgets", repoURL, repoHash, repoRef, packageName, nil)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -739,16 +742,17 @@ func installBazaarIcon(c *gin.Context) {
 		return
 	}
 
-	var keyword, repoURL, repoHash, packageName string
+	var keyword, repoURL, repoHash, repoRef, packageName string
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("keyword", &keyword, false, false),
 		util.BindJsonArg("repoURL", &repoURL, true, true),
 		util.BindJsonArg("repoHash", &repoHash, true, true),
+		util.BindJsonArg("repoRef", &repoRef, false, false),
 		util.BindJsonArg("packageName", &packageName, true, true),
 	) {
 		return
 	}
-	err := model.InstallBazaarPackage("icons", repoURL, repoHash, packageName, nil)
+	err := model.InstallBazaarPackage("icons", repoURL, repoHash, repoRef, packageName, nil)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -838,16 +842,17 @@ func installBazaarTemplate(c *gin.Context) {
 		return
 	}
 
-	var keyword, repoURL, repoHash, packageName string
+	var keyword, repoURL, repoHash, repoRef, packageName string
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("keyword", &keyword, false, false),
 		util.BindJsonArg("repoURL", &repoURL, true, true),
 		util.BindJsonArg("repoHash", &repoHash, true, true),
+		util.BindJsonArg("repoRef", &repoRef, false, false),
 		util.BindJsonArg("packageName", &packageName, true, true),
 	) {
 		return
 	}
-	err := model.InstallBazaarPackage("templates", repoURL, repoHash, packageName, nil)
+	err := model.InstallBazaarPackage("templates", repoURL, repoHash, repoRef, packageName, nil)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -942,12 +947,13 @@ func installBazaarTheme(c *gin.Context) {
 		return
 	}
 
-	var frontend, keyword, repoURL, repoHash, packageName string
+	var frontend, keyword, repoURL, repoHash, repoRef, packageName string
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("frontend", &frontend, false, false),
 		util.BindJsonArg("keyword", &keyword, false, false),
 		util.BindJsonArg("repoURL", &repoURL, true, true),
 		util.BindJsonArg("repoHash", &repoHash, true, true),
+		util.BindJsonArg("repoRef", &repoRef, false, false),
 		util.BindJsonArg("packageName", &packageName, true, true),
 	) {
 		return
@@ -979,7 +985,7 @@ func installBazaarTheme(c *gin.Context) {
 		themeOptions = &model.ThemeInstallOptions{Mode: int(mode), ModeOS: modeOS}
 	}
 
-	err := model.InstallBazaarPackage("themes", repoURL, repoHash, packageName, themeOptions)
+	err := model.InstallBazaarPackage("themes", repoURL, repoHash, repoRef, packageName, themeOptions)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()

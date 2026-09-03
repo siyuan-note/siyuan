@@ -7,7 +7,7 @@
 		"id": "20210808180303-xaduj2o",
 		"title": "General Operations",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260903150000"
 	},
 	"Children": [
 		{
@@ -347,6 +347,23 @@
 					"TextMarkBlockRefID": "20201004194026-s8h2cog",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "Use on browser"
+				}
+			]
+		},
+		{
+			"ID": "20260903150000-wowa4te",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260903150000-wowa4te",
+				"updated": "20260903150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260903150000-s4hctea",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Connect to a Remote Kernel"
 				}
 			]
 		},

@@ -11,6 +11,7 @@ import {openFileById} from "../editor/util";
 import {openMobileFileById} from "../mobile/editor";
 import type {App} from "../index";
 import {getLastDailyNoteNotebookId} from "./dailyNote";
+import {getHostCapabilities} from "./hostCapabilities";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 import {importObsidianVault} from "../menus/importObsidian";
@@ -114,6 +115,9 @@ export const mountHelp = () => {
 };
 
 export const importNotebook = (file: File) => {
+    if (!getHostCapabilities().importExport) {
+        return;
+    }
     const formData = new FormData();
     formData.append("file", file);
     fetchPost("/api/import/importSYNotebook", formData);
@@ -122,21 +126,24 @@ export const importNotebook = (file: File) => {
 export const newNotebook = () => {
     let nativeImportHTML = "";
     /// #if !BROWSER
-    nativeImportHTML = `<div class="b3-list-item fn__pointer" data-type="import-markdown-file" role="button" tabindex="0"><svg class="b3-list-item__graphic"><use xlink:href="#iconMarkdown"></use></svg><span class="b3-list-item__text">Markdown ${window.siyuan.languages.doc}</span></div>
+    if (getHostCapabilities().localFileSystem) {
+        nativeImportHTML = `<div class="b3-list-item fn__pointer" data-type="import-markdown-file" role="button" tabindex="0"><svg class="b3-list-item__graphic"><use xlink:href="#iconMarkdown"></use></svg><span class="b3-list-item__text">Markdown ${window.siyuan.languages.doc}</span></div>
         <div class="b3-list-item fn__pointer" data-type="import-markdown-folder" role="button" tabindex="0"><svg class="b3-list-item__graphic"><use xlink:href="#iconFolder"></use></svg><span class="b3-list-item__text">Markdown ${window.siyuan.languages.folder}</span></div>
         <div class="b3-list-item fn__pointer" data-type="import-obsidian" role="button" tabindex="0"><svg class="b3-list-item__graphic"><use xlink:href="#iconObsidian"></use></svg><span class="b3-list-item__text">Obsidian Vault</span></div>`;
+    }
     /// #endif
-    const dialog = new Dialog({
-        title: window.siyuan.languages.newNotebook,
-        content: `<div class="b3-dialog__content">
-    <input placeholder="${window.siyuan.languages.notebookName}" class="b3-text-field fn__block" data-type="notebook-name">
-    <div class="fn__hr"></div>
+    const importHTML = getHostCapabilities().importExport ? `<div class="fn__hr"></div>
     <div class="b3-label__text fn__pointer fn__flex" style="align-items: center;gap: 4px" data-type="toggle-import" role="button" tabindex="0" aria-expanded="false"><svg class="b3-list-item__arrow" style="display: block;flex: none;height: 14px;width: 14px" data-type="import-arrow"><use xlink:href="#iconRight"></use></svg><span style="line-height: 20px">${window.siyuan.languages.importFromMoreApps}</span></div>
     <div class="b3-list--background fn__none" data-type="import-options" style="padding-top: 8px">
         <label class="b3-list-item fn__pointer" data-type="import-sy"><svg class="b3-list-item__graphic"><use xlink:href="#iconSiYuan"></use></svg><span class="b3-list-item__text">SiYuan .sy.zip</span><input class="b3-form__upload" type="file" accept="application/zip"></label>
         <label class="b3-list-item fn__pointer" data-type="import-markdown-zip"><svg class="b3-list-item__graphic"><use xlink:href="#iconMarkdown"></use></svg><span class="b3-list-item__text">Markdown .zip</span><input class="b3-form__upload" type="file" accept="application/zip"></label>
         ${nativeImportHTML}
-    </div>
+    </div>` : "";
+    const dialog = new Dialog({
+        title: window.siyuan.languages.newNotebook,
+        content: `<div class="b3-dialog__content">
+    <input placeholder="${window.siyuan.languages.notebookName}" class="b3-text-field fn__block" data-type="notebook-name">
+    ${importHTML}
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel" data-type="cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
@@ -165,6 +172,9 @@ export const newNotebook = () => {
         });
         dialog.destroy();
     });
+    if (!getHostCapabilities().importExport) {
+        return;
+    }
     const createNotebookForImport = (fallbackName: string, callback: (notebookID: string) => void) => {
         let name = notebookNameElement.value.trim();
         if (!name) {

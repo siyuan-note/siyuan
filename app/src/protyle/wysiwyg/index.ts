@@ -78,7 +78,7 @@ import {
     IBlockRefCheckTargets,
     ICrossBlockComposition,
     prepareCrossBlockComposition,
-    removeBlock,
+    removeBlockPreservingSelectionMode,
     removeCrossBlockRange
 } from "./remove";
 import {highlightRender} from "../render/highlightRender";
@@ -173,6 +173,14 @@ import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
 import {enhanceRichClipboard, prepareExternalClipboardHTML, prepareRichClipboardHTML} from "../util/richClipboard";
 import {buildBlockDOMClipboardRichData} from "../util/blockDOMClipboard";
+import {
+    getSemanticInlineVisibleText,
+    getTextWithoutSemanticMarkers,
+    hasSemanticInlineType,
+    normalizeSemanticInlineHTML,
+    stripSemanticMarkersFromRangeText,
+    transformSemanticInlineHTML
+} from "../util/inlineElementMarker";
 import {addSpellcheckMenuItems, requestSpellcheckContext} from "../../menus/spellcheck";
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "../render/av/attributeValue";
 import {focusAVByArrow} from "../render/av/focus";
@@ -202,6 +210,14 @@ import {LargeListVirtualizer} from "./listVirtualization";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {syncRootAttributes} from "../util/syncRootAttributes";
 import {isDirectCalloutStructureClick} from "./calloutClick";
+import {
+    BLOCK_SELECTION_CLASS,
+    clearBlockSelectionMode,
+    cleanBlockSelectionModeHTML,
+    getBlockSelectionModeElement,
+    getBlockSelectionStatusIDs,
+    toggleBlockSelection
+} from "./blockSelection";
 
 interface IShiftClickBlockPoint {
     blockElement: HTMLElement;
@@ -499,8 +515,10 @@ export class WYSIWYG {
         }
         if (isFullWidth === "true") {
             this.element.parentElement.setAttribute("data-fullwidth", "true");
+            this.protyle.preview.element.setAttribute("data-fullwidth", "true");
         } else {
             this.element.parentElement.removeAttribute("data-fullwidth");
+            this.protyle.preview.element.removeAttribute("data-fullwidth");
         }
         const ialKeys = Object.keys(ial);
         for (let i = 0; i < this.element.attributes.length; i++) {
@@ -624,7 +642,7 @@ export class WYSIWYG {
         attrElements.forEach(item => {
             item.textContent = Constants.ZWSP;
         });
-        return element.textContent;
+        return getTextWithoutSemanticMarkers(element);
     }
 
     private normalizeCrossBlockCopy(element: HTMLElement, range: Range) {
@@ -721,10 +739,12 @@ export class WYSIWYG {
             event.stopPropagation();
             event.preventDefault();
             const range = getEditorRange(protyle.wysiwyg.element);
+            const semanticRangeText = stripSemanticMarkersFromRangeText(range);
             const nodeElement = hasClosestBlock(range.startContainer);
             if (!nodeElement) {
                 return;
             }
+            const selectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
             const selectImgElement = nodeElement.querySelector(".img--select");
             const selectAVElement = nodeElement.querySelector(".av__row--select, .av__cell--select") ||
                 (getAVSelectedCells(nodeElement).length > 0 ||
@@ -749,12 +769,15 @@ export class WYSIWYG {
                     }
                 }
             }
-            let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(`.${BLOCK_SELECTION_CLASS}`));
             if (selectElements.length === 0 && range.toString() === "" && !range.cloneContents().querySelector("img") &&
                 !selectImgElement && !selectAVElement && !selectTableElement) {
-                nodeElement.classList.add("protyle-wysiwyg--select");
-                countBlockWord([nodeElement.getAttribute("data-node-id")]);
-                selectElements = [nodeElement];
+                const copyElement = selectionModeElement || nodeElement;
+                if (!selectionModeElement) {
+                    copyElement.classList.add(BLOCK_SELECTION_CLASS);
+                    countBlockWord([copyElement.getAttribute("data-node-id")]);
+                }
+                selectElements = [copyElement];
             }
             let html = "";
             let textPlain = "";
@@ -803,6 +826,7 @@ export class WYSIWYG {
                         } else {
                             itemHTML = removeEmbed(item);
                         }
+                        itemHTML = cleanBlockSelectionModeHTML(itemHTML);
                         if (item.getAttribute("data-type") === "NodeListItem") {
                             if (!listHTML) {
                                 listHTML = `<div data-subtype="${item.getAttribute("data-subtype")}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">`;
@@ -903,8 +927,13 @@ export class WYSIWYG {
                 const selectTypes = protyle.toolbar.getCurrentType(range);
                 const spanElement = hasClosestByTag(range.startContainer, "SPAN");
                 const headingElement = hasClosestByAttribute(range.startContainer, "data-type", "NodeHeading");
-                const matchHeading = headingElement && headingElement.textContent.replace(Constants.ZWSP, "") === range.toString();
-                if ((selectTypes.length > 0 && spanElement && spanElement.textContent.replace(Constants.ZWSP, "") === range.toString()) ||
+                const matchHeading = headingElement &&
+                    getTextWithoutSemanticMarkers(headingElement).split(Constants.ZWSP).join("") ===
+                    semanticRangeText.split(Constants.ZWSP).join("");
+                if ((selectTypes.length > 0 && spanElement &&
+                    (hasSemanticInlineType(spanElement.getAttribute("data-type")) ?
+                        getSemanticInlineVisibleText(spanElement) : spanElement.textContent.replace(Constants.ZWSP, "")) ===
+                    semanticRangeText) ||
                     matchHeading) {
                     if (matchHeading) {
                         // 复制标题 https://github.com/siyuan-note/insider/issues/297
@@ -931,7 +960,7 @@ export class WYSIWYG {
                         this.emojiToMd(tempElement);
                     }
                     html = tempElement.innerHTML;
-                    textPlain = textPlain || range.toString();
+                    textPlain = textPlain || semanticRangeText;
                 } else if (selectImgElement) {
                     html = selectImgElement.outerHTML;
                     // 和图片菜单中的复制保持一致
@@ -952,7 +981,7 @@ export class WYSIWYG {
                     }
                     spanElement.textContent = range.toString();
                     html = spanElement.outerHTML;
-                    textPlain = range.toString();
+                    textPlain = semanticRangeText;
                 } else {
                     tempElement.append(range.cloneContents());
                     const isCrossBlock = nodeElement !== hasClosestBlock(range.endContainer);
@@ -976,7 +1005,7 @@ export class WYSIWYG {
                         html = tempElement.innerHTML;
                     }
                     // 不能使用 commonAncestorContainer https://ld246.com/article/1643282894693
-                    textPlain = crossBlockTextPlain ?? tempElement.textContent;
+                    textPlain = crossBlockTextPlain ?? getTextWithoutSemanticMarkers(tempElement);
                     if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock")) {
                         if (isEndOfBlock(range)) {
                             textPlain = textPlain.replace(/\n$/, "");
@@ -984,7 +1013,8 @@ export class WYSIWYG {
                         isInCodeBlock = true;
                     } else if (hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH")) {
                         tempElement.innerHTML = tempElement.innerHTML.replace(/<br>/g, "\n").replace(/<br\/>/g, "\n");
-                        textPlain = tempElement.textContent.endsWith("\n") ? tempElement.textContent.replace(/\n$/, "") : tempElement.textContent;
+                        const tableText = getTextWithoutSemanticMarkers(tempElement);
+                        textPlain = tableText.endsWith("\n") ? tableText.replace(/\n$/, "") : tableText;
                     } else if (tempElement.querySelector('.img, [data-type~="inline-math"]')) {
                         textPlain = "";
                         tempElement.childNodes.forEach((item: Element) => {
@@ -997,11 +1027,12 @@ export class WYSIWYG {
                                 }
                                 textPlain += protyle.lute.BlockDOM2StdMd(item.outerHTML).trimEnd();
                             } else {
-                                textPlain += item.textContent;
+                                textPlain += item.nodeType === Node.ELEMENT_NODE ?
+                                    getTextWithoutSemanticMarkers(item) : item.textContent;
                             }
                         });
                     } else if (!hasClosestByTag(range.startContainer, "CODE")) {
-                        textPlain = crossBlockTextPlain ?? textWithoutAttr ?? range.toString();
+                        textPlain = crossBlockTextPlain ?? textWithoutAttr ?? semanticRangeText;
                     }
                 }
             }
@@ -1009,7 +1040,8 @@ export class WYSIWYG {
             if (protyle.disabled) {
                 html = getEnableHTML(html);
             }
-            textPlain = textPlain || protyle.lute.BlockDOM2StdMd(html).trimEnd();
+            textPlain = textPlain || protyle.lute.BlockDOM2StdMd(selectAVElement ? html :
+                transformSemanticInlineHTML(normalizeSemanticInlineHTML(html), "legacy")).trimEnd();
             textPlain = removeZWJ(nbsp2space(textPlain)) // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
                 // Remove ZWSP when copying inline elements https://github.com/siyuan-note/siyuan/issues/13882
                 .replace(new RegExp(Constants.ZWSP, "g"), "");
@@ -1017,8 +1049,10 @@ export class WYSIWYG {
 
             if (!isInCodeBlock) {
                 enableLuteMarkdownSyntax(protyle);
+                const clipboardBlockDOM = selectAVElement ? html :
+                    transformSemanticInlineHTML(normalizeSemanticInlineHTML(html), "legacy");
                 const blockDOMClipboardRichData = useBlockDOMClipboardRichData && !copyAsRichText ?
-                    buildBlockDOMClipboardRichData(protyle.lute, html) : undefined;
+                    buildBlockDOMClipboardRichData(protyle.lute, clipboardBlockDOM) : undefined;
                 // 表格选区（框选或跨多单元格文本选区）直接构建 BlockDOM，不走 HTML2BlockDOM 的 markdown 往返
                 //（GFM 表格只有单行表头，markdown 往返会丢失多行 thead 和单元格 th 属性）
                 let textSiyuan = blockDOMClipboardRichData?.textSiyuan;
@@ -1026,18 +1060,22 @@ export class WYSIWYG {
                     // 表格选区：html 已是合法 <table>...</table>（含 thead/tbody/fn__none 占位），
                     // 构建最小化 NodeTable BlockDOM，不经过 markdown 往返（GFM 表格只有单行表头，往返会丢失多行 thead）
                     const newId = Lute.NewNodeID();
-                    textSiyuan = `<div data-node-id="${newId}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${html}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
+                    textSiyuan = `<div data-node-id="${newId}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${clipboardBlockDOM}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
                     html = textSiyuan;
                 } else if (!textSiyuan) {
-                    textSiyuan = html;
+                    textSiyuan = clipboardBlockDOM;
+                }
+                if (!selectAVElement) {
+                    textSiyuan = transformSemanticInlineHTML(textSiyuan, "legacy");
                 }
                 event.clipboardData.setData("text/siyuan", textSiyuan);
                 restoreLuteMarkdownSyntax(protyle);
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
                 let exportedHTML = blockDOMClipboardRichData?.textHTML ??
                     removeZWJ((selectTableElement || selectTableRange) ? html :
-                        (copyAsRichText ? protyle.lute.BlockDOM2RichHTML(selectAVElement ? textPlain : html) :
-                            protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
+                        (copyAsRichText ? protyle.lute.BlockDOM2RichHTML(selectAVElement ? textPlain : clipboardBlockDOM) :
+                            protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : clipboardBlockDOM)));
+                exportedHTML = transformSemanticInlineHTML(exportedHTML, "remove");
                 if (copyAsRichText) {
                     const prepared = prepareRichClipboardHTML(exportedHTML);
                     exportedHTML = prepared.html;
@@ -1078,6 +1116,13 @@ export class WYSIWYG {
             if (event.button === 2) {
                 // 右键
                 return;
+            }
+            if (getBlockSelectionModeElement(this.element)) {
+                const preserveMarks = isOnlyMeta(event) || event.shiftKey;
+                clearBlockSelectionMode(this.element, !preserveMarks);
+                if (!preserveMarks) {
+                    countBlockWord([], protyle.block.rootID);
+                }
             }
             if (getAVTemplateInteractiveElement(event.target)) {
                 event.stopPropagation();
@@ -1202,29 +1247,8 @@ export class WYSIWYG {
                         ctrlElement = embedBlockElement;
                     }
                     ctrlElement = getTopAloneElement(ctrlElement) as HTMLElement;
-                    if (ctrlElement.classList.contains("protyle-wysiwyg--select")) {
-                        ctrlElement.classList.remove("protyle-wysiwyg--select");
-                        ctrlElement.removeAttribute("select-start");
-                        ctrlElement.removeAttribute("select-end");
-                    } else {
-                        ctrlElement.classList.add("protyle-wysiwyg--select");
-                    }
-                    ctrlElement.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-                        item.classList.remove("protyle-wysiwyg--select");
-                        item.removeAttribute("select-start");
-                        item.removeAttribute("select-end");
-                    });
-                    const ctrlParentElement = hasClosestByClassName(ctrlElement.parentElement, "protyle-wysiwyg--select");
-                    if (ctrlParentElement) {
-                        ctrlParentElement.classList.remove("protyle-wysiwyg--select");
-                        ctrlParentElement.removeAttribute("select-start");
-                        ctrlParentElement.removeAttribute("select-end");
-                    }
-                    const ids: string[] = [];
-                    protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-                        ids.push(item.getAttribute("data-node-id"));
-                    });
-                    countBlockWord(ids);
+                    toggleBlockSelection(protyle.wysiwyg.element, ctrlElement);
+                    countBlockWord(getBlockSelectionStatusIDs(protyle.wysiwyg.element));
                 }
                 return;
             }
@@ -1945,7 +1969,7 @@ export class WYSIWYG {
                     setTimeout(() => {
                         if (getSelection().rangeCount > 0) {
                             const range = getSelection().getRangeAt(0);
-                            if (range.toString().replace(Constants.ZWSP, "") !== "") {
+                            if (stripSemanticMarkersFromRangeText(range).replace(new RegExp(Constants.ZWSP, "g"), "") !== "") {
                                 protyle.toolbar.render(protyle, range, {
                                     x: mouseUpEvent.clientX,
                                     y: mouseUpEvent.clientY,
@@ -2942,14 +2966,17 @@ export class WYSIWYG {
                 protyle.breadcrumb.hide();
             }
             const range = getEditorRange(protyle.wysiwyg.element);
+            const semanticRangeText = stripSemanticMarkersFromRangeText(range);
             let nodeElement = hasClosestBlock(range.startContainer);
             if (!nodeElement) {
                 event.stopPropagation();
                 event.preventDefault();
                 return;
             }
+            const selectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
+            const hasMarkedBlocks = !!protyle.wysiwyg.element.querySelector(`.${BLOCK_SELECTION_CLASS}`);
             const calloutTitleElement = hasClosestByClassName(range.startContainer, "callout-title");
-            if (calloutTitleElement && calloutTitleElement.contains(range.endContainer)) {
+            if (!hasMarkedBlocks && calloutTitleElement && calloutTitleElement.contains(range.endContainer)) {
                 setInsertWbrHTML(nodeElement, range, protyle);
                 return;
             }
@@ -2957,7 +2984,7 @@ export class WYSIWYG {
             const embedElement = isInEmbedBlock(nodeElement);
             const isSameBlockTextCut = !range.collapsed && range.toString() !== "" &&
                 hasClosestBlock(range.endContainer) === nodeElement;
-            if (embedElement && !embedElement.classList.contains("protyle-wysiwyg--select") &&
+            if (!hasMarkedBlocks && embedElement && !embedElement.classList.contains(BLOCK_SELECTION_CLASS) &&
                 !isSameBlockTextCut) {
                 event.stopPropagation();
                 event.preventDefault();
@@ -2989,15 +3016,28 @@ export class WYSIWYG {
                     }
                 }
             }
-            let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(`.${BLOCK_SELECTION_CLASS}`));
             const cloneElement = range.cloneContents();
             let autoSelectedBlock = false;
+            let autoSelectedElement: HTMLElement;
             if (selectElements.length === 0 && range.toString() === "" && !cloneElement.querySelector("img") &&
                 !selectImgElement && !selectAVElement && !selectTableElement) {
-                nodeElement.classList.add("protyle-wysiwyg--select");
-                selectElements = [nodeElement];
+                autoSelectedElement = selectionModeElement || nodeElement;
+                autoSelectedElement.classList.add(BLOCK_SELECTION_CLASS);
+                selectElements = [autoSelectedElement];
                 autoSelectedBlock = true;
             }
+            const clearAutoSelectedBlock = () => {
+                if (!autoSelectedBlock || !autoSelectedElement?.isConnected) {
+                    return;
+                }
+                autoSelectedElement.classList.remove(BLOCK_SELECTION_CLASS);
+                autoSelectedElement.removeAttribute("select-start");
+                autoSelectedElement.removeAttribute("select-end");
+                if (selectionModeElement) {
+                    countBlockWord(getBlockSelectionStatusIDs(protyle.wysiwyg.element), protyle.block.rootID);
+                }
+            };
             const selectedStateElements = [...selectElements];
             const endElement = hasClosestBlock(range.endContainer);
             const cutCrossBlockRange = selectedStateElements.length === 0 && !range.collapsed &&
@@ -3095,6 +3135,7 @@ export class WYSIWYG {
                             id: item.getAttribute("data-node-id"),
                         });
                         if (deleteResponse.code !== 0) {
+                            clearAutoSelectedBlock();
                             return;
                         }
                         deleteResponse.data.doOperations.forEach((operation: IOperation) => {
@@ -3113,6 +3154,7 @@ export class WYSIWYG {
                     } else {
                         itemHTML = removeEmbed(item);
                     }
+                    itemHTML = cleanBlockSelectionModeHTML(itemHTML);
                     if (item.getAttribute("data-type") === "NodeListItem") {
                         if (!listHTML) {
                             listHTML = `<div data-subtype="${item.getAttribute("data-subtype")}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">`;
@@ -3136,12 +3178,11 @@ export class WYSIWYG {
                     deletedIDs: uniqueCheckIDs,
                     notebook: protyle.notebookId,
                 }, protyle)) {
-                    if (autoSelectedBlock) {
-                        nodeElement.classList.remove("protyle-wysiwyg--select");
-                    }
+                    clearAutoSelectedBlock();
                     return;
                 }
                 if (selectedStateElements.some(item => !item.isConnected || !item.classList.contains("protyle-wysiwyg--select"))) {
+                    clearAutoSelectedBlock();
                     return;
                 }
                 needClipboardWrite = true;
@@ -3202,7 +3243,7 @@ export class WYSIWYG {
                     }
                 }
                 const headElement = hasClosestByAttribute(startContainer, "data-type", "NodeHeading");
-                if (headElement && range.toString() === headElement.firstElementChild.textContent) {
+                if (headElement && semanticRangeText === getTextWithoutSemanticMarkers(headElement.firstElementChild)) {
                     tempElement.insertAdjacentHTML("afterbegin", headElement.firstElementChild.innerHTML);
                     headElement.firstElementChild.innerHTML = "";
                 } else if (range.toString() !== "" && startContainer === range.endContainer &&
@@ -3213,7 +3254,7 @@ export class WYSIWYG {
                     !["DIV", "TD", "TH", "TR"].includes(range.startContainer.parentElement.tagName)) {
                     // 选中整个内联元素
                     tempElement.append(range.startContainer.parentElement);
-                    textPlain = tempElement.textContent;
+                    textPlain = getTextWithoutSemanticMarkers(tempElement);
                 } else if (selectImgElement) {
                     tempElement.append(selectImgElement);
                 } else if (range.startContainer.nodeType === 3 && range.startContainer.parentElement.tagName === "SPAN" &&
@@ -3232,8 +3273,9 @@ export class WYSIWYG {
                         newSpanElement.setAttribute("data-subtype", "s");
                         spanElement.setAttribute("data-subtype", "s");
                     }
-                    newSpanElement.textContent = range.toString();
-                    textPlain = range.toString();
+                    newSpanElement.textContent = hasSemanticInlineType(newSpanElement.getAttribute("data-type")) ?
+                        Constants.WORD_JOINER + semanticRangeText : semanticRangeText;
+                    textPlain = semanticRangeText;
                     range.deleteContents();
                     tempElement.append(newSpanElement);
                 } else {
@@ -3298,11 +3340,12 @@ export class WYSIWYG {
                                         (item.classList.contains("img") || item.getAttribute("data-type") === "inline-math")) {
                                         textPlain += protyle.lute.BlockDOM2StdMd(item.outerHTML).trimEnd();
                                     } else {
-                                        textPlain += item.textContent;
+                                        textPlain += item.nodeType === Node.ELEMENT_NODE ?
+                                            getTextWithoutSemanticMarkers(item) : item.textContent;
                                     }
                                 });
                             } else if (!hasClosestByTag(range.startContainer, "CODE")) {
-                                textPlain = range.toString();
+                                textPlain = semanticRangeText;
                             }
                             range.deleteContents();
                             if (parentElement) {
@@ -3323,7 +3366,7 @@ export class WYSIWYG {
                 // https://github.com/siyuan-note/siyuan/issues/10722
                 if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock") ||
                     hasClosestByTag(range.startContainer, "CODE")) {
-                    textPlain = tempElement.textContent.replace(Constants.ZWSP, "");
+                    textPlain = getTextWithoutSemanticMarkers(tempElement).replace(Constants.ZWSP, "");
                     isInCodeBlock = true;
                 }
                 // https://github.com/siyuan-note/siyuan/issues/4321
@@ -3347,13 +3390,16 @@ export class WYSIWYG {
             }
             protyle.hint.render(protyle);
             if (!selectAVElement) {
-                textPlain = textPlain || protyle.lute.BlockDOM2StdMd(html).trimEnd(); // 需要 trimEnd，否则 \n 会导致 https://github.com/siyuan-note/siyuan/issues/6218
+                textPlain = textPlain || protyle.lute.BlockDOM2StdMd(
+                    transformSemanticInlineHTML(normalizeSemanticInlineHTML(html), "legacy")
+                ).trimEnd(); // 需要 trimEnd，否则 \n 会导致 https://github.com/siyuan-note/siyuan/issues/6218
                 if (nodeElement.classList.contains("table")) {
                     textPlain = textPlain.replace(/<br>/g, "\n").replace(/<br\/>/g, "\n");
                     textPlain = textPlain.endsWith("\n") ? textPlain.replace(/\n$/, "") : textPlain;
                 }
             }
-            textPlain = removeZWJ(nbsp2space(textPlain)); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
+            textPlain = removeZWJ(nbsp2space(textPlain)) // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
+                .replace(new RegExp(Constants.ZWSP, "g"), "");
             if (!cutClipboardWritten) {
                 event.clipboardData.setData("text/plain", textPlain);
             }
@@ -3361,26 +3407,31 @@ export class WYSIWYG {
             if (!isInCodeBlock) {
                 html = sanitizeViewFoldHTML(html);
                 enableLuteMarkdownSyntax(protyle);
+                const clipboardBlockDOM = selectAVElement ? html :
+                    transformSemanticInlineHTML(normalizeSemanticInlineHTML(html), "legacy");
                 const blockDOMClipboardRichData = useBlockDOMClipboardRichData ?
-                    buildBlockDOMClipboardRichData(protyle.lute, html) : undefined;
+                    buildBlockDOMClipboardRichData(protyle.lute, clipboardBlockDOM) : undefined;
                 // 表格选区（框选或跨多单元格文本选区）直接构建 BlockDOM，不走 HTML2BlockDOM 的 markdown 往返
                 let textSiyuan = blockDOMClipboardRichData?.textSiyuan;
                 if (!textSiyuan && (selectTableElement || selectTableRange)) {
                     // 表格选区：html 已是合法 <table>...</table>，构建最小化 NodeTable BlockDOM，不走 markdown 往返
                     const newId = Lute.NewNodeID();
-                    textSiyuan = `<div data-node-id="${newId}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${html}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
+                    textSiyuan = `<div data-node-id="${newId}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${clipboardBlockDOM}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
                     html = textSiyuan;
                 } else if (!textSiyuan) {
-                    textSiyuan = html;
+                    textSiyuan = clipboardBlockDOM;
+                }
+                if (!selectAVElement) {
+                    textSiyuan = transformSemanticInlineHTML(textSiyuan, "legacy");
                 }
                 restoreLuteMarkdownSyntax(protyle);
                 if (!cutClipboardWritten) {
                     event.clipboardData.setData("text/siyuan", textSiyuan);
                 }
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-                const exportedHTML = prepareExternalClipboardHTML(blockDOMClipboardRichData?.textHTML ??
+                const exportedHTML = transformSemanticInlineHTML(prepareExternalClipboardHTML(blockDOMClipboardRichData?.textHTML ??
                     removeZWJ((selectTableElement || selectTableRange) ? html :
-                        protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
+                        protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : clipboardBlockDOM))), "remove");
                 const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${exportedHTML}`;
                 if (!cutClipboardWritten) {
                     event.clipboardData.setData("text/html", textHTML);
@@ -3405,11 +3456,16 @@ export class WYSIWYG {
                         undefined, false, false, false, cutAVCells);
                 }
                 if (cutBlockSelection && clipboardWriteSucceeded) {
-                    const removed = await removeBlock(protyle, nodeElement, range, "remove", true);
-                    if (removed && cutNextElement && cutNextElement.isConnected) {
+                    const removed = await removeBlockPreservingSelectionMode(protyle, nodeElement, range,
+                        "remove", true);
+                    if (!removed && autoSelectedBlock) {
+                        clearAutoSelectedBlock();
+                    } else if (removed && !selectionModeElement && cutNextElement && cutNextElement.isConnected) {
                         // Ctrl+X 剪切后光标应跳到下一行行首 https://github.com/siyuan-note/siyuan/issues/5485
                         focusBlock(cutNextElement);
                     }
+                } else if (autoSelectedBlock && selectionModeElement?.isConnected) {
+                    clearAutoSelectedBlock();
                 }
             }
         });
@@ -3426,7 +3482,8 @@ export class WYSIWYG {
             const x = event.clientX || event.detail.x;
             const y = event.clientY || event.detail.y;
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectElements.length > 1) {
+            if (selectElements.length > 1 ||
+                getBlockSelectionModeElement(protyle.wysiwyg.element) && selectElements.length > 0) {
                 // 多选块
                 hideElements(["util"], protyle);
                 protyle.gutter.renderMenu(protyle, selectElements[0]);
@@ -3769,6 +3826,8 @@ export class WYSIWYG {
         let beforeInputCompositionHandled = false;
         // 原生软换行在 input 触发前已经修改 DOM，需预存选区供撤销恢复。
         let lineBreakUndoContext: Record<string, string>;
+        // 原生向前删除在 input 触发前已经修改 DOM，需预存光标供撤销恢复。
+        let forwardDeleteUndoContext: Record<string, string>;
         // 仅矫正从数据库外进入的占位光标，避免重置数据库内部的方向键导航。
         let arrowStartElement: false | HTMLElement | undefined;
         // Android 软键盘在空块中会先发送 Unidentified 并清空选区，需在实际回车或退格事件前恢复。
@@ -3879,6 +3938,11 @@ export class WYSIWYG {
             // 但搜狗输入法选中后继续输入不走 keydown，isComposition 阻止了 keyup 记录，因此需在此记录。
             const range = getEditorRange(protyle.wysiwyg.element);
             const nodeElement = hasClosestBlock(range.startContainer);
+            const selectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
+            if (selectionModeElement) {
+                clearBlockSelectionMode(protyle.wysiwyg.element, true);
+                countBlockWord([], protyle.block.rootID);
+            }
             if (nodeElement) {
                 const startCell = hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
                 if (startCell && !isAfterInlineMath(range)) {
@@ -3897,7 +3961,7 @@ export class WYSIWYG {
                 crossBlockComposition = prepareCrossBlockComposition(
                     protyle, range, nodeElement, endElement);
             }
-            if (!isMac() && nodeElement && !crossBlockComposition) {
+            if ((selectionModeElement || !isMac()) && nodeElement && !crossBlockComposition) {
                 setInsertWbrHTML(nodeElement, range, protyle);
             }
             event.stopPropagation();
@@ -4062,6 +4126,9 @@ export class WYSIWYG {
             lineBreakUndoContext = !event.defaultPrevented && event.inputType === "insertLineBreak" &&
             selection.rangeCount > 0 ?
                 getUndoFocusContext(protyle.wysiwyg.element, selection.getRangeAt(0)) : undefined;
+            forwardDeleteUndoContext = !event.defaultPrevented && event.inputType === "deleteContentForward" &&
+            selection.rangeCount > 0 && selection.getRangeAt(0).collapsed ?
+                getUndoFocusContext(protyle.wysiwyg.element, selection.getRangeAt(0)) : undefined;
             if (event.defaultPrevented || !isTextInputType(event.inputType, event.data) ||
                 selection.rangeCount === 0) {
                 return;
@@ -4088,15 +4155,18 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("input", (event: InputEvent) => {
-            let lineBreakInputOperations: Parameters<typeof input>[5];
-            if (event.inputType === "insertLineBreak" && lineBreakUndoContext) {
-                lineBreakInputOperations = {
+            const undoContext = event.inputType === "insertLineBreak" ? lineBreakUndoContext :
+                event.inputType === "deleteContentForward" ? forwardDeleteUndoContext : undefined;
+            let inputOperations: Parameters<typeof input>[5];
+            if (undoContext) {
+                inputOperations = {
                     doOperations: [],
                     undoOperations: [],
-                    undoContext: lineBreakUndoContext,
+                    undoContext,
                 };
             }
             lineBreakUndoContext = undefined;
+            forwardDeleteUndoContext = undefined;
             if (getAVTemplateInteractiveElement(event.target)) {
                 event.stopPropagation();
                 return;
@@ -4144,7 +4214,7 @@ export class WYSIWYG {
                         Constants.TIMEOUT_INPUT, false);
                 } else {
                     this.scheduleInput(() => input(protyle, blockElement, range, true, event,
-                        lineBreakInputOperations));
+                        inputOperations));
                 }
             }
             event.stopPropagation();
@@ -4399,6 +4469,8 @@ export class WYSIWYG {
                 }
             }
             const range = getEditorRange(this.element);
+            const resumeBlockHint = !protyle.hint.element.classList.contains("fn__none") &&
+                Constants.BLOCK_HINT_KEYS.includes(protyle.hint.splitChar);
             // 面包屑定位，需至于前，否则 return 的元素就无法进行面包屑定位
             if (protyle.options.render.breadcrumb) {
                 protyle.breadcrumb.render(protyle, false, hasClosestBlock(range.startContainer));
@@ -4579,8 +4651,9 @@ export class WYSIWYG {
 
             const tagElement = hasClosestByAttribute(event.target, "data-type", "tag");
             if (tagElement && !event.altKey && !event.shiftKey && range.toString() === "") {
+                const tagName = getSemanticInlineVisibleText(tagElement);
                 /// #if !MOBILE
-                openGlobalSearch(protyle.app, `#${tagElement.textContent}#`, !ctrlIsPressed, {method: 0});
+                openGlobalSearch(protyle.app, `#${tagName}#`, !ctrlIsPressed, {method: 0});
                 hideElements(["dialog"]);
                 /// #else
                 popSearch(protyle.app, {
@@ -4588,7 +4661,7 @@ export class WYSIWYG {
                     method: 0,
                     hPath: "",
                     idPath: [],
-                    k: `#${tagElement.textContent}#`,
+                    k: `#${tagName}#`,
                     r: "",
                     page: 1,
                 });
@@ -4981,7 +5054,8 @@ export class WYSIWYG {
                         if (embedElement) {
                             blockElement = embedElement;
                         }
-                        newRange = focusBlock(blockElement, undefined, event.clientX < rect.left + parseInt(this.element.style.paddingLeft)) || newRange;
+                        const paddingLeft = parseFloat(getComputedStyle(this.element).paddingLeft);
+                        newRange = focusBlock(blockElement, undefined, event.clientX < rect.left + paddingLeft) || newRange;
                         if (protyle.options.render.breadcrumb) {
                             protyle.breadcrumb.render(protyle, false, blockElement);
                         }
@@ -5010,7 +5084,7 @@ export class WYSIWYG {
                     focusByRange(newRange);
                 }
                 /// #if !MOBILE
-                if (newRange.toString().replace(Constants.ZWSP, "") !== "") {
+                if (stripSemanticMarkersFromRangeText(newRange).replace(new RegExp(Constants.ZWSP, "g"), "") !== "") {
                     const paintedRange = formatPainter.paint(protyle, newRange);
                     if (paintedRange) {
                         newRange = paintedRange;
@@ -5044,7 +5118,7 @@ export class WYSIWYG {
                 mobileBlur = false;
             }, (isMobile() || isInIOS()) ? 520 : 0); // Android/iPad 双击慢了出不来
 
-            protyle.hint.enableExtend = false;
+            protyle.hint.enableExtend = resumeBlockHint && protyle.hint.canResumeBlockHint(protyle, range);
 
             if (this.element.querySelector(".protyle-wysiwyg--select") && range.toString() !== "") {
                 // 选中块后，文字不能被选中。需在 shift click 之后，防止shift点击单个块出现文字选中

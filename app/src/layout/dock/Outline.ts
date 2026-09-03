@@ -16,7 +16,7 @@ import {openFileById} from "../../editor/util";
 import {Constants} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
 import {escapeAttr, escapeHtml} from "../../util/escape";
-import {unicode2Emoji} from "../../emoji";
+import {getFileTreeIconHTML} from "../../emoji/fileTreeIcon";
 import {getPreviousBlock} from "../../protyle/wysiwyg/getBlock";
 import type {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
@@ -34,6 +34,7 @@ import {
     transactionsMayChangeRootHeadingNumberSetting
 } from "../../protyle/util/headingNumberCore";
 import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../../protyle/util/headingTransform";
+import {syncDocTitleIAL} from "../../protyle/util/docTitleIAL";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -347,14 +348,16 @@ export class Outline extends Model {
                     }
                     break;
                 case "rename":
-                    if (this.type === "local" && this.blockId === data.data.id) {
+                    if (this.blockId !== data.data.id) {
+                        break;
+                    }
+                    if (this.type === "local") {
                         this.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
                         this.protyle.model.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
                     } else {
-                        this.updateDocTitle({
-                            title: data.data.title,
-                            icon: Constants.ZWSP
-                        }, -1);
+                        this.updateDocTitle(syncDocTitleIAL({
+                            icon: Constants.ZWSP,
+                        }, data.data.title, data.data.empty, Constants.CUSTOM_SY_TITLE_EMPTY), -1);
                     }
                     break;
                 case "closeBox":
@@ -525,7 +528,7 @@ export class Outline extends Model {
                 return;
             }
             if (ial) {
-                let iconHTML = `${unicode2Emoji(ial.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file, "b3-list-item__graphic", true)}`;
+                let iconHTML = getFileTreeIconHTML(ial.icon, "file", "b3-list-item__graphic", true);
                 if (ial.icon === Constants.ZWSP && docTitleElement.firstElementChild) {
                     iconHTML = docTitleElement.firstElementChild.outerHTML;
                 }

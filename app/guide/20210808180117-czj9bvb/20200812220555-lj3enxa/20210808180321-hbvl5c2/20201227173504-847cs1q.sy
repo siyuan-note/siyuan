@@ -6,7 +6,7 @@
 		"id": "20201227173504-847cs1q",
 		"title": "Docker 伺服",
 		"type": "doc",
-		"updated": "20250926110513"
+		"updated": "20260903150000"
 	},
 	"Children": [
 		{
@@ -798,7 +798,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230406104141-6o5jpu6",
-				"updated": "20250926110513"
+				"updated": "20260903150000"
 			},
 			"Children": [
 				{
@@ -813,7 +813,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230406104201-nbfn2p9",
-				"updated": "20250926110513"
+				"updated": "20260903150000"
 			},
 			"Children": [
 				{
@@ -825,7 +825,7 @@
 					},
 					"Properties": {
 						"id": "20230406104217-8m58gpo",
-						"updated": "20230406104217"
+						"updated": "20260903150000"
 					},
 					"Children": [
 						{
@@ -833,12 +833,23 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230406104217-42a91na",
-								"updated": "20230406104310"
+								"updated": "20260903150000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "不支持桌面端和移动端应用连接，仅支持在浏览器上使用"
+									"Data": "移动端应用仍不支持连接。桌面端可以通过远程模式连接，详见 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260903150000-u4065fm",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "连接远程内核"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。"
 								}
 							]
 						}

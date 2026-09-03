@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {canInput} from "./mobileAppUtil";
+import {callMobileAppShowKeyboard, canInput} from "./mobileAppUtil";
 
 const createElement = (options: {
     tagName?: string,
@@ -48,5 +48,38 @@ describe("mobile input detection", () => {
         });
 
         assert.equal(canInput(wysiwygElement), false);
+    });
+});
+
+describe("mobile app keyboard", () => {
+    it("notifies listeners before requesting the Android keyboard", () => {
+        const originalWindow = globalThis.window;
+        const calls: string[] = [];
+        const testWindow = new EventTarget() as Window & typeof globalThis;
+        Object.assign(testWindow, {
+            JSAndroid: {
+                showKeyboard() {
+                    calls.push("keyboard");
+                },
+            },
+        });
+        testWindow.addEventListener("siyuan-mobile-keyboard-change", ((event: CustomEvent<boolean>) => {
+            assert.equal(event.detail, true);
+            calls.push("change");
+        }) as EventListener);
+        Object.defineProperty(globalThis, "window", {
+            configurable: true,
+            value: testWindow,
+        });
+
+        try {
+            callMobileAppShowKeyboard();
+            assert.deepEqual(calls, ["change", "keyboard"]);
+        } finally {
+            Object.defineProperty(globalThis, "window", {
+                configurable: true,
+                value: originalWindow,
+            });
+        }
     });
 });

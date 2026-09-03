@@ -18,8 +18,11 @@ package bazaar
 
 import (
 	"errors"
+	"net/url"
+	"path"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/88250/go-humanize"
 	"github.com/araddon/dateparse"
@@ -43,10 +46,18 @@ func getBazaarPackages(pkgType, frontend string, showError bool) (packages []*Pa
 		return make([]*Package, 0), err
 	}
 
-	packages = make([]*Package, 0, len(result.StageIndex.Repos))
-	for _, repo := range result.StageIndex.Repos {
-		pkg := buildBazaarPackageWithMetadata(repo, result.BazaarStats, result.BazaarRatings,
-			result.RatingAvailable, pkgType, frontend)
+	packages = buildBazaarPackages(result.StageIndex, result.BazaarStats, result.BazaarRatings,
+		result.RatingAvailable, pkgType, frontend)
+	return
+}
+
+// buildBazaarPackages 仅以 Stage 索引中的仓库构建在线集市包，统计索引只用于补充元数据。
+func buildBazaarPackages(stageIndex *StageIndex, bazaarStats map[string]*bazaarStats,
+	bazaarRatings map[string]*PackageRating, ratingsAvailable bool, pkgType, frontend string) (packages []*Package) {
+	packages = make([]*Package, 0, len(stageIndex.Repos))
+	for _, repo := range stageIndex.Repos {
+		pkg := buildBazaarPackageWithMetadata(repo, bazaarStats, bazaarRatings,
+			ratingsAvailable, pkgType, frontend)
 		if nil == pkg {
 			continue
 		}
@@ -90,6 +101,63 @@ func isValidStageRepoURL(url string) bool {
 	return true
 }
 
+func packageImageName(configured *string, legacyName string) string {
+	if configured == nil {
+		return legacyName
+	}
+	return *configured
+}
+
+func isSupportedPackageImageName(name string) bool {
+	if name == "" || name != strings.TrimSpace(name) || path.Base(name) != name || strings.ContainsRune(name, '\\') {
+		return false
+	}
+	switch strings.ToLower(path.Ext(name)) {
+	case ".png", ".jpg", ".jpeg", ".webp", ".avif":
+		return true
+	}
+	return false
+}
+
+func onlinePackageImageURL(repoURL, imageName string) string {
+	if !isSupportedPackageImageName(imageName) {
+		return ""
+	}
+	return util.BazaarOSSServer + "/package/" + repoURL + "/" + url.PathEscape(imageName)
+}
+
+func onlinePackagePreviewURL(repoURL, imageName string) string {
+	previewURL := onlinePackageImageURL(repoURL, imageName)
+	if previewURL == "" {
+		return ""
+	}
+	switch strings.ToLower(path.Ext(imageName)) {
+	case ".png", ".jpg", ".jpeg":
+		return previewURL + "?imageslim"
+	}
+	return previewURL
+}
+
+func normalizeGitHubPackageSource(repoURL, repoRef string) (string, string) {
+	const githubPrefix = "https://github.com/"
+	repoURL = strings.TrimSuffix(repoURL, "/")
+	if !strings.HasPrefix(repoURL, githubPrefix) || !isValidBazaarRepo(strings.TrimPrefix(repoURL, githubPrefix)) {
+		return "", ""
+	}
+	if repoRef == "" {
+		return repoURL, ""
+	}
+	if len(repoRef) > 256 || repoRef != strings.TrimSpace(repoRef) {
+		return "", ""
+	}
+	for _, r := range repoRef {
+		if unicode.IsControl(r) {
+			return "", ""
+		}
+	}
+	return repoURL, repoRef
+}
+
 // buildBazaarPackageWithMetadata 从 StageRepo 构建带有在线元数据的集市包。
 func buildBazaarPackageWithMetadata(repo *StageRepo, bazaarStats map[string]*bazaarStats,
 	bazaarRatings map[string]*PackageRating, ratingsAvailable bool, pkgType string, frontend string) *Package {
@@ -106,10 +174,11 @@ func buildBazaarPackageWithMetadata(repo *StageRepo, bazaarStats map[string]*baz
 	}
 	pkg.RepoURL = "https://github.com/" + repoURLHash[0]
 	pkg.RepoHash = repoURLHash[1]
+	pkg.RepoRef = repo.RepoRef
 
 	// 展示信息
-	pkg.IconURL = util.BazaarOSSServer + "/package/" + repo.URL + "/icon.png"
-	pkg.PreviewURL = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageslim"
+	pkg.IconURL = onlinePackageImageURL(repo.URL, packageImageName(pkg.Icon, "icon.png"))
+	pkg.PreviewURL = onlinePackagePreviewURL(repo.URL, packageImageName(pkg.Preview, "preview.png"))
 	pkg.PreferredName = GetPreferredLocaleString(pkg.DisplayName, pkg.Name)
 	pkg.PreferredDesc = GetPreferredLocaleString(pkg.Description, "")
 	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)

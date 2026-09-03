@@ -10,7 +10,7 @@ module.exports = (env, argv) => {
     return {
         mode: argv.mode || "development",
         watch: argv.mode !== "production",
-        devtool: argv.mode !== "production" ? "eval-source-map" : false,
+        devtool: argv.mode !== "production" ? "source-map" : false,
         target: "electron-renderer",
         output: {
             globalObject: "globalThis",

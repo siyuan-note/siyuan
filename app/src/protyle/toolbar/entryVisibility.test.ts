@@ -56,6 +56,17 @@ test("toolbar applies configured order while preserving unregistered slots", () 
     assert.deepEqual(result.ordered, [{key: "c"}, unregistered, {key: "b"}, {key: "a"}]);
 });
 
+test("toolbar restores a temporarily removed plugin entry to its configured slot", () => {
+    const pluginKey = getPluginToolbarEntryKey("plugin.name", "item");
+    const order = ["a", pluginKey, "b"];
+    assert.deepEqual(resolve([{key: "a"}, {key: "b"}], {order}).ordered, [{key: "a"}, {key: "b"}]);
+    assert.deepEqual(resolve([{key: "a"}, {key: "b"}, {key: pluginKey}], {order}).ordered, [
+        {key: "a"},
+        {key: pluginKey},
+        {key: "b"},
+    ]);
+});
+
 test("toolbar hides configured entries without hiding unregistered entries", () => {
     const unregistered = {};
     const result = resolve([{key: "a"}, unregistered, {key: "b"}], {hidden: ["a", "b"]});

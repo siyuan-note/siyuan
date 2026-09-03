@@ -5,13 +5,17 @@ import {genUUID} from "../../util/genID";
 import {
     entryCatalog,
     getEntryCatalogChildren,
+    getEntryCatalogDefaultVisibility,
     getEntryCatalogPathChain,
     getEntryPaths,
     IEntryCatalogNode,
     IEntryCatalogSection,
+    isEntryCatalogNodeConfigurable,
     isEntryOrderSortable,
     refreshDockCatalog,
     refreshSlashMenuCatalog,
+    refreshTopBarCatalog,
+    TOP_BAR_ROOT_PATH,
 } from "./catalog";
 import {
     createEntryProfileSnapshot,
@@ -23,13 +27,30 @@ import {
     saveEntryVisibility,
     TEntryVisibilityTemplate,
 } from "./runtime";
-import {mergeEntryOrderPreservingUnknown, moveEntryOrder, resolveEntryOrder} from "./order";
+import {
+    mergeEntryOrderPreservingUnknown,
+    moveEntryOrder,
+    resolveEntryOrder,
+    resolveEntryOrderWithBoundaryDefaults,
+} from "./order";
 import {
     getProfileEntryVisibility,
     isEntryVisibilityImportVersionSupported,
     normalizeEntryVisibilityImportProfile,
     TEntryVisibilityImportProfile,
 } from "./profile";
+import {getHostCapabilities} from "../../util/hostCapabilities";
+import {
+    DOCK_ORDER_SCOPES,
+    DOCK_ORDER_SCOPES_BY_SIDE,
+    getDockEntryOrderSnapshot,
+    getDockOrderScopeLabelKey,
+    isDockOrderScope,
+    mergeDockEntryOrderSnapshot,
+    moveDockEntryOrderSnapshot,
+    TDockOrderScope,
+    TDockOrderSnapshot,
+} from "./dockOrder";
 
 type TImportFile = {
     type: "siyuan-entry-profile" | "siyuan-entry-profile-bundle";
@@ -59,6 +80,9 @@ const uniqueName = (name: string, profiles = window.siyuan.config.appearance.ent
 };
 
 const downloadJSON = (name: string, data: unknown) => {
+    if (!getHostCapabilities().importExport) {
+        return;
+    }
     const blob = new Blob([JSON.stringify(data, undefined, 2)], {type: "application/json"});
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
@@ -158,7 +182,7 @@ const profileCard = (
     <div class="b3-card__actions b3-card__actions--right">
         ${active ? "" : `<button class="b3-button b3-button--outline" data-action="activate">${window.siyuan.languages.use}</button>`}
         <button class="block__icon block__icon--show ariaLabel" data-action="duplicate" data-position="north" aria-label="${window.siyuan.languages.duplicateCopy}"><svg><use xlink:href="#iconCopy"></use></svg></button>
-        ${builtin ? "" : `<button class="block__icon block__icon--show ariaLabel" data-action="export" data-position="north" aria-label="${window.siyuan.languages.export}"><svg><use xlink:href="#iconDownload"></use></svg></button>`}
+        ${builtin || !getHostCapabilities().importExport ? "" : `<button class="block__icon block__icon--show ariaLabel" data-action="export" data-position="north" aria-label="${window.siyuan.languages.export}"><svg><use xlink:href="#iconDownload"></use></svg></button>`}
         <button class="block__icon block__icon--show${active || builtin ? " fn__none" : " block__icon--warning"} ariaLabel" data-action="delete" data-position="north" aria-label="${window.siyuan.languages.delete}"><svg><use xlink:href="#iconTrashcan"></use></svg></button>
     </div>
 </div>`;
@@ -180,12 +204,21 @@ const renderProfileCards = (root: HTMLElement) => {
     container.innerHTML = `<div class="b3-cards b3-cards--nowrap">${cards.join("")}</div>`;
 };
 
-const getProfileEntryOrder = (profile: Config.IEntryVisibilityProfile, parentPath: string,
-                              nodes = getEntryCatalogChildren(parentPath) || []) => {
-    const defaultOrder = nodes.map((item) => item.key);
-    return resolveEntryOrder(defaultOrder, profile.orders?.[parentPath],
-        new Set(nodes.filter((item) => item.type === "separator").map((item) => item.key)));
+const resolveProfileEntryOrder = (profile: Config.IEntryVisibilityProfile, parentPath: string,
+                                  defaultOrder: string[], separatorKeys: Set<string>) => {
+    if (parentPath === TOP_BAR_ROOT_PATH) {
+        return resolveEntryOrderWithBoundaryDefaults(defaultOrder, profile.orders?.[parentPath], "drag", separatorKeys);
+    }
+    return resolveEntryOrder(defaultOrder, profile.orders?.[parentPath], separatorKeys);
 };
+
+const getProfileEntryOrder = (profile: Config.IEntryVisibilityProfile, parentPath: string,
+                              nodes = getEntryCatalogChildren(parentPath) || []) => resolveProfileEntryOrder(
+    profile,
+    parentPath,
+    nodes.map((item) => item.key),
+    new Set(nodes.filter((item) => item.type === "separator").map((item) => item.key)),
+);
 
 const orderEntryNodes = (profile: Config.IEntryVisibilityProfile, parentPath: string,
                          nodes: IEntryCatalogNode[]) => {
@@ -199,20 +232,17 @@ const renderEntrySwitch = (profile: Config.IEntryVisibilityProfile, path: string
     const label = item.type === "separator" ? window.siyuan.languages.entrySeparator : item.label();
     return `<input class="b3-switch" type="checkbox"
     aria-label="${escapeAttr(label)}" data-entry-path="${escapeAttr(path)}"${readOnly ? ' data-entry-readonly aria-disabled="true"' : ""}
-    ${!parentEnabled && !readOnly ? " disabled" : ""}${getProfileEntryVisibility(profile, path) ? " checked" : ""}>`;
+    ${!parentEnabled && !readOnly ? " disabled" : ""}${getProfileEntryVisibility(profile, path,
+        getEntryCatalogDefaultVisibility(path)) ? " checked" : ""}>`;
 };
 
-const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: string, prefix: string,
-                           nodes: IEntryCatalogNode[], depth: number, selectedPaths: string[],
-                           parentEnabled: boolean, readOnly: boolean, sortable: boolean) => `<section class="config-entry-visibility__column"
-    data-entry-column data-entry-depth="${depth}">
-    <div class="config-entry-visibility__column-title">
-        <span class="fn__ellipsis fn__flex-1" title="${escapeAttr(title)}">${escapeHtml(title)}</span>
-    </div>
-    <div class="config-entry-visibility__column-list">
-        ${nodes.map((item) => {
-        const path = `${prefix}.${item.key}`;
-        const draggable = sortable && parentEnabled;
+const renderEntryRows = (profile: Config.IEntryVisibilityProfile, prefix: string,
+                         nodes: IEntryCatalogNode[], depth: number, selectedPaths: string[],
+                         parentEnabled: boolean, readOnly: boolean, sortable: boolean,
+                         getItemPath = (item: IEntryCatalogNode) => `${prefix}.${item.key}`) => nodes.map((item) => {
+        const path = getItemPath(item);
+        const configurable = isEntryCatalogNodeConfigurable(item);
+        const draggable = sortable && parentEnabled && configurable;
         if (item.type === "separator") {
             return `<div class="config-entry-visibility__row config-entry-visibility__row--separator${parentEnabled ? "" : " config-entry-visibility__row--disabled"}${readOnly ? " config-entry-visibility__row--readonly" : ""}"
                 data-entry-row data-entry-key="${escapeAttr(item.key)}" data-entry-parent="${escapeAttr(prefix)}">
@@ -225,21 +255,33 @@ const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: strin
         const label = item.label();
         const hasChildren = Boolean(item.children?.length);
         const selected = selectedPaths[depth] === path;
-        const rowTag = hasChildren ? "div" : "label";
-        return `<${rowTag} class="config-entry-visibility__row config-entry-visibility__row--${hasChildren ? "navigable" : "toggleable"}${selected ? " config-entry-visibility__row--current" : ""}${parentEnabled ? "" : " config-entry-visibility__row--disabled"}${readOnly ? " config-entry-visibility__row--readonly" : ""}"
+        const rowTag = hasChildren || !configurable ? "div" : "label";
+        const rowType = hasChildren ? "navigable" : configurable ? "toggleable" : "fixed";
+        return `<${rowTag} class="config-entry-visibility__row config-entry-visibility__row--${rowType}${selected ? " config-entry-visibility__row--current" : ""}${parentEnabled ? "" : " config-entry-visibility__row--disabled"}${readOnly ? " config-entry-visibility__row--readonly" : ""}"
             data-entry-row data-entry-key="${escapeAttr(item.key)}" data-entry-parent="${escapeAttr(prefix)}" data-entry-path-row="${escapeAttr(path)}"${hasChildren ? ` data-action="navigate-entry" data-entry-path="${escapeAttr(path)}" data-entry-depth="${depth}"` : ""}>
             ${draggable ? '<span class="config-entry-visibility__drag" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></span>' : ""}
             ${hasChildren ? `<button class="config-entry-visibility__navigate" data-action="navigate-entry"
                 data-entry-path="${escapeAttr(path)}" data-entry-depth="${depth}" title="${escapeAttr(label)}">
                 <span>${escapeHtml(label)}</span>
             </button>` : `<span class="config-entry-visibility__label" title="${escapeAttr(label)}">${escapeHtml(label)}</span>`}
-            ${renderEntrySwitch(profile, path, item, parentEnabled, readOnly)}
+            ${configurable ? renderEntrySwitch(profile, path, item, parentEnabled, readOnly) : ""}
             ${hasChildren ? `<button class="block__icon block__icon--show config-entry-visibility__arrow" data-action="navigate-entry"
                 data-entry-path="${escapeAttr(path)}" data-entry-depth="${depth}" aria-label="${escapeAttr(window.siyuan.languages.expand)}">
                 <svg><use xlink:href="#iconRight"></use></svg>
             </button>` : '<span class="config-entry-visibility__arrow-space"></span>'}
         </${rowTag}>`;
-    }).join("")}
+    }).join("");
+
+const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: string, prefix: string,
+                           nodes: IEntryCatalogNode[], depth: number, selectedPaths: string[],
+                           parentEnabled: boolean, readOnly: boolean, sortable: boolean,
+                           getItemPath = (item: IEntryCatalogNode) => `${prefix}.${item.key}`) => `<section class="config-entry-visibility__column"
+    data-entry-column data-entry-depth="${depth}">
+    <div class="config-entry-visibility__column-title">
+        <span class="fn__ellipsis fn__flex-1" title="${escapeAttr(title)}">${escapeHtml(title)}</span>
+    </div>
+    <div class="config-entry-visibility__column-list">
+        ${renderEntryRows(profile, prefix, nodes, depth, selectedPaths, parentEnabled, readOnly, sortable, getItemPath)}
     </div>
 </section>`;
 
@@ -276,9 +318,97 @@ const renderEntryLocation = (profile: Config.IEntryVisibilityProfile, item: IEnt
     </div>`;
 };
 
+type TDockSide = keyof typeof DOCK_ORDER_SCOPES_BY_SIDE;
+
+const DOCK_SECTION_KEY = "dock";
+const DOCK_SIDES = Object.keys(DOCK_ORDER_SCOPES_BY_SIDE) as TDockSide[];
+const getDockSideLabel = (side: TDockSide) => `${window.siyuan.languages.entryDock} - ${
+    window.siyuan.languages[side === "left" ? "marginLeft" : "marginRight"]}`;
+
+const getEntryOrderContext = (parentPath: string, dockOrderSnapshot: TDockOrderSnapshot) => {
+    if (isDockOrderScope(parentPath)) {
+        const defaultOrder = [...dockOrderSnapshot[parentPath]];
+        const dockNodes = new Map((getEntryCatalogChildren(DOCK_SECTION_KEY) || []).map((item) => [item.key, item]));
+        return {
+            defaultOrder,
+            nodes: defaultOrder.map((key) => dockNodes.get(key))
+                .filter((item): item is IEntryCatalogNode => Boolean(item)),
+            separatorKeys: new Set<string>(),
+        };
+    }
+    const nodes = getEntryCatalogChildren(parentPath) || [];
+    return {
+        defaultOrder: nodes.map((item) => item.key),
+        nodes,
+        separatorKeys: new Set(nodes.filter((item) => item.type === "separator").map((item) => item.key)),
+    };
+};
+
+const getDockScopeLabel = (scope: TDockOrderScope) => {
+    const labelKey = getDockOrderScopeLabelKey(scope);
+    return window.siyuan.languages[labelKey] || labelKey;
+};
+
+const getDockScopeNodes = (
+    scope: TDockOrderScope,
+    snapshot: TDockOrderSnapshot,
+) => {
+    const nodes = new Map((getEntryCatalogChildren(DOCK_SECTION_KEY) || []).map((item) => [item.key, item]));
+    return snapshot[scope]
+        .map((key) => nodes.get(key))
+        .filter((item): item is IEntryCatalogNode => Boolean(item));
+};
+
+const renderDockColumns = (
+    columns: string[],
+    profile: Config.IEntryVisibilityProfile,
+    selectedPaths: string[],
+    readOnly: boolean,
+    snapshot: TDockOrderSnapshot,
+    visiblePaths?: Set<string>,
+) => {
+    const profileSnapshot = mergeDockEntryOrderSnapshot(snapshot, profile.orders);
+    DOCK_SIDES.forEach((side) => {
+        const groups = DOCK_ORDER_SCOPES_BY_SIDE[side].map((scope) => {
+            const scopeLabel = getDockScopeLabel(scope);
+            const nodes = getDockScopeNodes(scope, profileSnapshot);
+            const visibleNodes = visiblePaths
+                ? nodes.filter((item) => visiblePaths.has(`${DOCK_SECTION_KEY}.${item.key}`))
+                : nodes;
+            return `<section class="config-entry-visibility__dock-group" data-entry-drop-scope="${scope}">
+                <div class="config-entry-visibility__dock-group-title" title="${escapeAttr(scopeLabel)}">${escapeHtml(scopeLabel)}</div>
+                <div class="config-entry-visibility__dock-list" data-entry-drop-scope="${scope}">
+                    ${renderEntryRows(
+        profile,
+        scope,
+        visibleNodes,
+        0,
+        selectedPaths,
+        true,
+        readOnly,
+        !visiblePaths && !readOnly,
+        (item) => `${DOCK_SECTION_KEY}.${item.key}`,
+    )}
+                    ${visibleNodes.length === 0
+        ? `<div class="config-entry-visibility__dock-empty">${window.siyuan.languages.emptyContent}</div>`
+        : ""}
+                </div>
+            </section>`;
+        }).join("");
+        columns.push(`<section class="config-entry-visibility__column config-entry-visibility__dock-column" data-entry-column>
+            <div class="config-entry-visibility__column-title">
+                <span class="fn__ellipsis fn__flex-1" title="${escapeAttr(getDockSideLabel(side))}">${escapeHtml(getDockSideLabel(side))}</span>
+            </div>
+            <div class="config-entry-visibility__column-list">${groups}</div>
+        </section>`);
+    });
+};
+
+const getDockEntrySelectedPaths = (key: string) => [`${DOCK_SECTION_KEY}.${key}`];
+
 const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey: string,
                             selectedPaths: string[], readOnly: boolean, visiblePaths?: Set<string>,
-                            visibleSectionKeys?: Set<string>) => {
+                            visibleSectionKeys?: Set<string>, dockOrderSnapshot = getDockEntryOrderSnapshot()) => {
     const sections = visibleSectionKeys
         ? entryCatalog.filter((item) => visibleSectionKeys.has(item.key))
         : entryCatalog;
@@ -290,6 +420,10 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
     </div>
 </section>`;
     const columns = [locationColumn];
+    if (section.key === DOCK_SECTION_KEY) {
+        renderDockColumns(columns, profile, selectedPaths, readOnly, dockOrderSnapshot, visiblePaths);
+        return `<div class="config-entry-visibility__columns">${columns.join("")}</div>`;
+    }
     const directDisplayRoot = getDirectDisplayRoot(section);
     const directDisplayRootPath = directDisplayRoot ? `${section.key}.${directDisplayRoot.key}` : "";
     const columnSelectedPaths = directDisplayRoot && selectedPaths[0] === directDisplayRootPath
@@ -299,7 +433,8 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
     let prefix = directDisplayRoot ? directDisplayRootPath : section.key;
     let title = directDisplayRoot?.label() || section.label();
     let parentEnabled = directDisplayRoot
-        ? getProfileEntryVisibility(profile, directDisplayRootPath)
+        ? getProfileEntryVisibility(profile, directDisplayRootPath,
+            getEntryCatalogDefaultVisibility(directDisplayRootPath))
         : true;
     let depth = 0;
     while (nodes.length > 0) {
@@ -317,7 +452,8 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
         if (!selectedNode?.children?.length) {
             break;
         }
-        parentEnabled = parentEnabled && getProfileEntryVisibility(profile, selectedPath);
+        parentEnabled = parentEnabled && getProfileEntryVisibility(profile, selectedPath,
+            getEntryCatalogDefaultVisibility(selectedPath));
         nodes = selectedNode.children;
         prefix = selectedPath;
         title = selectedNode.label();
@@ -337,7 +473,7 @@ const getEntrySearchResults = (query: string) => {
     const results: IEntrySearchResult[] = [];
     const visit = (section: IEntryCatalogSection, prefix: string, nodes: IEntryCatalogNode[], labels: string[]) => {
         nodes.forEach((item) => {
-            if (item.type === "separator") {
+            if (item.type === "separator" || !isEntryCatalogNodeConfigurable(item)) {
                 return;
             }
             const path = `${prefix}.${item.key}`;
@@ -367,8 +503,10 @@ const getEntrySearchFilter = (query: string) => {
 
 const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     const plugins = window.siyuan.ws?.app?.plugins || [];
+    refreshTopBarCatalog(plugins);
     refreshDockCatalog(plugins);
     refreshSlashMenuCatalog(plugins);
+    const dockOrderSnapshot = getDockEntryOrderSnapshot();
     const builtin = profileID === ENTRY_PROFILE_SIMPLE || profileID === ENTRY_PROFILE_FULL;
     let selectedTemplate: TEntryVisibilityTemplate | "current" = ENTRY_PROFILE_SIMPLE;
     const existing = profileID
@@ -427,11 +565,19 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     let selectedSectionKey = entryCatalog[0].key;
     let selectedPaths: string[] = [];
     let previousQuery = "";
-    let dragging: {parentPath: string; sourceKey: string; defaultOrder?: string[]; order?: string[]} | undefined;
+    let dragging: {
+        parentPath: string;
+        sourceKey: string;
+        defaultOrder?: string[];
+        order?: string[];
+        dockOrder?: TDockOrderSnapshot;
+    } | undefined;
     const clearDropTarget = () => {
         browser.querySelectorAll(".config-entry-visibility__row--drop-before, .config-entry-visibility__row--drop-after")
             .forEach((item) => item.classList.remove("config-entry-visibility__row--drop-before",
                 "config-entry-visibility__row--drop-after"));
+        browser.querySelectorAll(".config-entry-visibility__dock-group--drop")
+            .forEach((item) => item.classList.remove("config-entry-visibility__dock-group--drop"));
     };
     const renderBrowser = (scrollToEnd = false, resetEntryColumns = false, revealSelection = false) => {
         const oldColumns = Array.from(browser.querySelectorAll<HTMLElement>("[data-entry-column]"));
@@ -450,13 +596,15 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         if (filter && queryChanged) {
             const target = filter.results.find((item) => item.section.key === selectedSectionKey) || filter.results[0];
             selectedSectionKey = target.section.key;
-            selectedPaths = getEntryCatalogPathChain(target.section.key, target.path);
+            selectedPaths = target.section.key === DOCK_SECTION_KEY
+                ? getDockEntrySelectedPaths(target.item.key)
+                : getEntryCatalogPathChain(target.section.key, target.path);
             scrollToEnd = true;
             resetEntryColumns = true;
             revealSelection = true;
         }
         browser.innerHTML = renderEntryColumns(draft, selectedSectionKey, selectedPaths, builtin,
-            filter?.visiblePaths, filter?.visibleSectionKeys);
+            filter?.visiblePaths, filter?.visibleSectionKeys, dockOrderSnapshot);
         previousQuery = query;
         const columnsContainer = browser.querySelector<HTMLElement>(".config-entry-visibility__columns");
         const columns = Array.from(browser.querySelectorAll<HTMLElement>("[data-entry-column]"));
@@ -508,17 +656,56 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             return;
         }
         const row = (event.target as Element).closest<HTMLElement>("[data-entry-row]");
+        if (isDockOrderScope(dragging.parentPath)) {
+            const dropScopeElement = (event.target as Element).closest<HTMLElement>("[data-entry-drop-scope]");
+            const targetScopeValue = row?.dataset.entryParent || dropScopeElement?.dataset.entryDropScope || "";
+            if (!isDockOrderScope(targetScopeValue)) {
+                clearDropTarget();
+                dragging.dockOrder = undefined;
+                return;
+            }
+            const targetKey = row?.dataset.entryParent === targetScopeValue ? row.dataset.entryKey : undefined;
+            const after = targetKey
+                ? event.clientY >= row.getBoundingClientRect().top + row.offsetHeight / 2
+                : undefined;
+            const movedOrder = moveDockEntryOrderSnapshot(
+                mergeDockEntryOrderSnapshot(dockOrderSnapshot, draft.orders),
+                dragging.sourceKey,
+                targetScopeValue,
+                targetKey,
+                after,
+            );
+            clearDropTarget();
+            dragging.dockOrder = movedOrder;
+            if (!movedOrder) {
+                return;
+            }
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+            if (targetKey) {
+                row.classList.add(`config-entry-visibility__row--drop-${after ? "after" : "before"}`);
+            } else {
+                dropScopeElement?.closest(".config-entry-visibility__dock-group")
+                    ?.classList.add("config-entry-visibility__dock-group--drop");
+            }
+            return;
+        }
         if (!row || row.dataset.entryParent !== dragging.parentPath || !row.dataset.entryKey) {
             clearDropTarget();
             dragging.order = undefined;
             return;
         }
-        const nodes = getEntryCatalogChildren(dragging.parentPath) || [];
-        dragging.defaultOrder = nodes.map((item) => item.key);
-        const order = getProfileEntryOrder(draft, dragging.parentPath, nodes);
+        const context = getEntryOrderContext(dragging.parentPath, dockOrderSnapshot);
+        dragging.defaultOrder = context.defaultOrder;
+        const order = resolveProfileEntryOrder(
+            draft,
+            dragging.parentPath,
+            context.defaultOrder,
+            context.separatorKeys,
+        );
         const after = event.clientY >= row.getBoundingClientRect().top + row.offsetHeight / 2;
         const movedOrder = moveEntryOrder(order, dragging.sourceKey, row.dataset.entryKey, after,
-            new Set(nodes.filter((item) => item.type === "separator").map((item) => item.key)));
+            context.separatorKeys);
         clearDropTarget();
         dragging.order = movedOrder;
         if (!movedOrder) {
@@ -529,16 +716,28 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         row.classList.add(`config-entry-visibility__row--drop-${after ? "after" : "before"}`);
     });
     browser.addEventListener("drop", (event: DragEvent) => {
+        if (dragging && isDockOrderScope(dragging.parentPath)) {
+            if (!dragging.dockOrder) {
+                return;
+            }
+            event.preventDefault();
+            draft.orders ||= {};
+            DOCK_ORDER_SCOPES.forEach((scope) => {
+                draft.orders[scope] = [...dragging.dockOrder[scope]];
+            });
+            dragging = undefined;
+            renderBrowser();
+            return;
+        }
         if (!dragging?.defaultOrder || !dragging.order) {
             return;
         }
         event.preventDefault();
         draft.orders ||= {};
         const savedOrder = draft.orders[dragging.parentPath];
+        const context = getEntryOrderContext(dragging.parentPath, dockOrderSnapshot);
         const separatorKeys = new Set([
-            ...(getEntryCatalogChildren(dragging.parentPath) || [])
-                .filter((item) => item.type === "separator")
-                .map((item) => item.key),
+            ...context.separatorKeys,
             ...(savedOrder || []).filter((key) =>
                 key.startsWith("separator_") || key.startsWith("plugin-separator:")),
         ]);
@@ -643,6 +842,9 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
 };
 
 const importProfiles = async (root: HTMLElement, file: File) => {
+    if (!getHostCapabilities().importExport) {
+        return;
+    }
     try {
         const data = JSON.parse(await file.text()) as TImportFile;
         if (!isEntryVisibilityImportVersionSupported(data.version, ENTRY_VISIBILITY_VERSION)) {
@@ -687,10 +889,10 @@ export const genEntryVisibilityHtml = () => `<div class="b3-label config-item" d
     <div class="fn__flex config-wrap">
         <div><div class="config-name">${window.siyuan.languages.entryVisibility}</div><div class="b3-label__text">${window.siyuan.languages.entryVisibilityTip}</div></div>
         <span class="fn__space fn__flex-1"></span>
-        <button class="b3-button b3-button--outline" data-action="import"><svg class="b3-button__icon"><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.import}</button>
+        ${getHostCapabilities().importExport ? `<button class="b3-button b3-button--outline" data-action="import"><svg class="b3-button__icon"><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.import}</button>
         <span class="fn__space"></span>
         <button class="b3-button b3-button--outline" data-action="export-all"><svg class="b3-button__icon"><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.export}</button>
-        <span class="fn__space"></span>
+        <span class="fn__space"></span>` : ""}
         <button class="b3-button b3-button--outline" data-action="create"><svg class="b3-button__icon"><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.entryCreateProfile}</button>
         <input class="fn__none" data-type="entry-import" type="file" accept="application/json,.json">
     </div>

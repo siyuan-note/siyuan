@@ -9,6 +9,7 @@ import {showMessage} from "../dialog/message";
 import {getAssetExtension, getDisplayName} from "../util/pathName";
 import {getSearch} from "../util/functions";
 import {isBrowserRenderableImagePath} from "../util/imageURL";
+import {appendRemoteQuery} from "../util/hostCapabilities";
 
 interface windowOptions {
     position?: {
@@ -20,6 +21,13 @@ interface windowOptions {
     alwaysOnTop?: boolean,
 }
 
+const getWindowURL = (layout: unknown) => {
+    const url = new URL("/stage/build/app/window.html", window.location.origin);
+    url.searchParams.set("v", Constants.SIYUAN_VERSION);
+    url.searchParams.set("json", JSON.stringify(layout));
+    return appendRemoteQuery(url).href;
+};
+
 export const openNewWindow = (tab: Tab, options: windowOptions = {}) => {
     const json = {};
     layoutToJSON(tab, json);
@@ -29,8 +37,7 @@ export const openNewWindow = (tab: Tab, options: windowOptions = {}) => {
         width: options.width,
         height: options.height,
         alwaysOnTop: !!options.alwaysOnTop,
-        // 需要 encode， 否则 https://github.com/siyuan-note/siyuan/issues/9343
-        url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify([json]))}`
+        url: getWindowURL([json]),
     });
     /// #endif
     tab.parent.removeTab(tab.id);
@@ -71,7 +78,7 @@ export const openNewWindowById = async (id: string | string[], options: windowOp
         width: options.width,
         height: options.height,
         alwaysOnTop: !!options.alwaysOnTop,
-        url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify(json))}`
+        url: getWindowURL(json),
     });
     /// #endif
 };
@@ -111,7 +118,7 @@ export const openAssetNewWindow = (
             width: options.width,
             height: options.height,
             alwaysOnTop: !!options.alwaysOnTop,
-            url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify(json))}`
+            url: getWindowURL(json),
         });
     }
     /// #endif

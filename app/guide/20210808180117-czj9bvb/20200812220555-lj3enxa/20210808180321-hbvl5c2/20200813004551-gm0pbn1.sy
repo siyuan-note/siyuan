@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260828200251"
+		"updated": "20260902224242"
 	},
 	"Children": [
 		{
@@ -3985,7 +3985,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20260828200251"
+				"updated": "20260902224242"
 			},
 			"Children": [
 				{
@@ -4000,7 +4000,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-kazyttz",
-				"updated": "20260828200251"
+				"updated": "20260902224242"
 			},
 			"Children": [
 				{
@@ -4024,7 +4024,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-vopotjc",
-				"updated": "20260828200251"
+				"updated": "20260902224242"
 			},
 			"Children": [
 				{
@@ -6036,73 +6036,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "切换为编辑模式"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "7"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " / "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥⌘7"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td"
-						}
-					]
-				},
-				{
-					"Type": "NodeTableRow",
-					"Data": "tr",
-					"Children": [
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "切换为预览模式"
+									"Data": "切换所见即所得和导出预览模式"
 								}
 							]
 						},
@@ -6168,7 +6102,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "选择/取消选择当前块"
+									"Data": "进入或退出块选择模式"
 								}
 							]
 						},
@@ -6193,7 +6127,69 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "删除、剪切或移动块后仍保持块选择模式，详见"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260830213256-ye4cos4",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "选择和操作内容块"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "标记或取消标记当前块"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "空格"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "仅在块选择模式下生效，支持标记不连续的块"
+								}
+							]
 						}
 					]
 				},
@@ -6263,7 +6259,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "块处于选中状态时可直接按 "
+									"Data": "处于块选择模式时可直接按 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -6340,7 +6336,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "块处于选中状态时可直接按 "
+									"Data": "处于块选择模式时可直接按 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -6361,7 +6357,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "退出块选中状态并定位到块末尾"
+									"Data": "退出块选择模式并定位到块末尾"
 								}
 							]
 						},
@@ -6506,7 +6502,13 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "仅支持单个块或连续选择的块"
+								}
+							]
 						}
 					]
 				},
@@ -6572,7 +6574,13 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "仅支持单个块或连续选择的块"
+								}
+							]
 						}
 					]
 				},

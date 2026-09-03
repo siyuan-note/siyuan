@@ -17,8 +17,17 @@ import {beginPluginTeardown, destroyPlugin} from "./uninstall";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {getAllEditor} from "../layout/getAll";
 import {getPluginDockEntryKey, refreshDockCatalog} from "../config/entryVisibility/catalog";
-import {applyDockEntryVisibility, isEntryVisible} from "../config/entryVisibility/runtime";
+import {
+    applyDockEntryVisibility,
+    applyTopBarEntryVisibility,
+    isEntryVisible,
+} from "../config/entryVisibility/runtime";
 import {PluginLifecycleCoordinator} from "./lifecycle";
+import {
+    activateCustomBlockPlugin,
+    deactivateCustomBlockPlugin,
+} from "./customBlockRender";
+import {getHostCapabilities} from "../util/hostCapabilities";
 
 const requireFunc = (key: string) => {
     const modules = {
@@ -90,16 +99,23 @@ const getLifecycleManager = (app: App) => {
         onload: (plugin) => plugin.onload(),
         init: (plugin) => plugin.kernel.init(),
         onLayoutReady: (plugin) => plugin.onLayoutReady(),
-        mount: (plugin) => mountPlugin(plugin),
+        mount: (plugin) => {
+            mountPlugin(plugin);
+            activateCustomBlockPlugin(plugin.name);
+        },
         shouldReloadOnDataChange: (plugin) => plugin.onDataChanged === Plugin.prototype.onDataChanged,
         onDataChanged: (plugin) => plugin.onDataChanged(),
         onunload: (plugin) => {
+            deactivateCustomBlockPlugin(plugin.name);
             beginPluginTeardown(plugin);
             return plugin.onunload();
         },
         uninstall: (plugin) => plugin.uninstall(),
         markDisposed: (plugin) => markPluginDisposed(plugin),
-        dispose: (plugin, isUninstall) => destroyPlugin(app, plugin, isUninstall),
+        dispose: (plugin, isUninstall) => {
+            deactivateCustomBlockPlugin(plugin.name);
+            destroyPlugin(app, plugin, isUninstall);
+        },
         onError: (name, hook, error) => console.error(`plugin ${name} ${hook} error:`, error),
     });
     lifecycleManagers.set(app, manager);
@@ -115,6 +131,9 @@ const createPluginDataLoader = () => {
 };
 
 export const loadPlugins = async (app: App, names?: string[], init = true) => {
+    if (!getHostCapabilities().plugins) {
+        return;
+    }
     const manager = getLifecycleManager(app);
     let tasks: Promise<void>[];
     let shouldStart = true;
@@ -158,6 +177,9 @@ const insertPluginCSS = (item: IPluginData, pluginsStyle: HTMLElement) => {
 
 // 启用插件
 export const loadPlugin = async (app: App, item: IPluginData) => {
+    if (!getHostCapabilities().plugins) {
+        return;
+    }
     const manager = getLifecycleManager(app);
     manager.start();
     await manager.requestLoad(item.name, async () => item);
@@ -206,9 +228,6 @@ const mountPlugin = (plugin: Plugin) => {
                     document.getElementById("menuPluginTopBar")?.after(element);
                 }
             } else if (!isWindow()) {
-                if (window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(element.id)) {
-                    element.classList.add("fn__none");
-                }
                 document.querySelector("#" + (element.getAttribute("data-location") === "right" ? "barPlugins" : "drag")).before(element);
             }
         });
@@ -225,6 +244,7 @@ const mountPlugin = (plugin: Plugin) => {
             statusElement.insertAdjacentElement("afterbegin", element);
         }
     });
+    applyTopBarEntryVisibility();
     resizeTopBar();
     /// #endif
     addPluginDock(plugin);
@@ -312,12 +332,21 @@ export const addPluginDock = (plugin: Plugin) => {
     /// #endif
 };
 
-export const reloadPlugin = async (app: App, data: {
+export interface IPluginReloadData {
     uninstallPlugins?: string[],  // 插件卸载
     unloadPlugins?: string[],     // 插件禁用
     reloadPlugins?: string[],     // 插件启用，或插件代码变更
     dataChangePlugins?: string[], // 插件存储数据变更
-} = {}) => {
+    globalPetalEnabled?: boolean,
+    globalPetalDisabled?: boolean,
+    globalPetalRevision?: number,
+    globalPetalChanged?: boolean,
+}
+
+export const reloadPlugin = async (app: App, data: IPluginReloadData = {}) => {
+    if (!getHostCapabilities().plugins) {
+        return;
+    }
     const manager = getLifecycleManager(app);
     const uninstallNames = new Set(data.uninstallPlugins || []);
     const unloadNames = new Set((data.unloadPlugins || []).filter(name => !uninstallNames.has(name)));

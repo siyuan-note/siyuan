@@ -22,6 +22,8 @@ import (
 	"path"
 	"strings"
 	"sync"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/filelock"
@@ -33,10 +35,16 @@ import (
 type LocaleStrings map[string]string
 
 type Funding struct {
-	OpenCollective string   `json:"openCollective"`
-	Patreon        string   `json:"patreon"`
-	GitHub         string   `json:"github"`
-	Custom         []string `json:"custom"`
+	OpenCollective string        `json:"openCollective"`
+	Patreon        string        `json:"patreon"`
+	GitHub         string        `json:"github"`
+	Custom         []string      `json:"custom"`
+	Links          []FundingLink `json:"links,omitempty"`
+}
+
+type FundingLink struct {
+	Label string `json:"label"`
+	URL   string `json:"url"`
 }
 
 // PackageRating 描述集市包的公开评分汇总。
@@ -67,6 +75,8 @@ type Package struct {
 	DisplayName       LocaleStrings `json:"displayName"`
 	Description       LocaleStrings `json:"description"`
 	Readme            LocaleStrings `json:"readme"`
+	Icon              *string       `json:"icon,omitempty"`
+	Preview           *string       `json:"preview,omitempty"`
 	Funding           *Funding      `json:"funding"`
 	Keywords          []string      `json:"keywords"`
 	Deprecated        bool          `json:"deprecated,omitempty"`
@@ -82,10 +92,12 @@ type Package struct {
 	Name       string `json:"name"`    // 包名，不一定是仓库名
 	RepoURL    string `json:"repoURL"` // 形式为 https://github.com/owner/repo
 	RepoHash   string `json:"repoHash"`
+	RepoRef    string `json:"repoRef,omitempty"`
 	PreviewURL string `json:"previewURL"`
 	IconURL    string `json:"iconURL"`
 
 	Installed               bool   `json:"installed"`
+	HasStorageData          bool   `json:"hasStorageData,omitempty"`
 	Outdated                bool   `json:"outdated"`
 	Current                 bool   `json:"current"`
 	Updated                 string `json:"updated"`
@@ -132,12 +144,13 @@ var reservedPackageNames = map[string]bool{
 
 // IsValidPackageName 判断包名是否可以安全地用作跨平台目录名。
 func IsValidPackageName(packageName string) bool {
-	if len(packageName) < 1 || len(packageName) > 255 || packageName[0] == '.' || packageName[0] == ' ' ||
+	if !utf8.ValidString(packageName) || len(packageName) < 1 || len(packageName) > 255 || packageName[0] == '.' ||
+		packageName[0] == ' ' ||
 		packageName[len(packageName)-1] == '.' || packageName[len(packageName)-1] == ' ' || strings.Contains(packageName, "..") {
 		return false
 	}
-	for _, char := range []byte(packageName) {
-		if char < 0x20 || char > 0x7E || strings.ContainsRune(`<>&'":/\|?*`, rune(char)) {
+	for _, char := range packageName {
+		if !unicode.IsPrint(char) || strings.ContainsRune(`<>&'":/\|?*`, char) {
 			return false
 		}
 	}
@@ -151,6 +164,7 @@ func IsValidInstalledPackage(pkg *Package, dirName string) bool {
 
 type StageRepo struct {
 	URL         string `json:"url"` // owner/repo@hash 形式
+	RepoRef     string `json:"repoRef,omitempty"`
 	Updated     string `json:"updated"`
 	Stars       int    `json:"stars"`
 	OpenIssues  int    `json:"openIssues"`
@@ -224,6 +238,10 @@ func unescapePackageDisplayStrings(pkg *Package) {
 		for i, v := range pkg.Funding.Custom {
 			pkg.Funding.Custom[i] = html.UnescapeString(v)
 		}
+		for i, link := range pkg.Funding.Links {
+			pkg.Funding.Links[i].Label = html.UnescapeString(link.Label)
+			pkg.Funding.Links[i].URL = html.UnescapeString(link.URL)
+		}
 	}
 	for i, kw := range pkg.Keywords {
 		pkg.Keywords[i] = html.UnescapeString(kw)
@@ -294,6 +312,11 @@ func getPreferredFunding(funding *Funding) string {
 	for _, v := range funding.Custom {
 		if !unsafeFundingURI(v) && "" != strings.TrimSpace(v) {
 			return v
+		}
+	}
+	for _, link := range funding.Links {
+		if !unsafeFundingURI(link.URL) && "" != strings.TrimSpace(link.URL) {
+			return link.URL
 		}
 	}
 	return ""

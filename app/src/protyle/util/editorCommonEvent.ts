@@ -22,6 +22,7 @@ import {
     cancelSB,
     genEmptyElement,
     genSBElement,
+    getCancelSBOperations,
     insertEmptyBlock,
     refreshSbAndPersistWidth,
     refreshSbResize
@@ -55,6 +56,7 @@ import {clearSelect} from "./clear";
 import {dragoverTab} from "../render/av/view";
 import {setFold} from "./blockFold";
 import {isEncryptedBox} from "../../util/pathName";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 import {
     getAVRowDropTarget,
     getBlockDragInsertPosition,
@@ -66,6 +68,7 @@ import {
     isDragTargetInSource,
     isSameDragEditor,
     isSameSiblingMove,
+    parseBlockDragData,
     replaceDragUndoOperation,
     shouldKeepListBlockDragTarget,
     uniqueDragIds
@@ -75,9 +78,12 @@ import {getAVData, getAVPreviousItemID, getAVSelectedItemPoints, updateAVRowSele
 import {setAVItemAnchor} from "../render/av/rangeSelect";
 import {getCaretRect} from "./caretRect";
 import {isBlockRefDropTargetDisabled} from "./blockRefDrop";
+import {appendCancelSuperBlockOperations} from "../../block/cancelSuperBlock";
 
 const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`;
 const SHIFT_EMBED_INSERT_TARGET_TYPES = ["NodeParagraph", "NodeHeading", "NodeCodeBlock", "NodeAttributeView"];
+const DRAG_SOURCE_NOTEBOOK_ID = "data-drag-source-notebook-id";
+const DRAG_SOURCE_ROOT_ID = "data-drag-source-root-id";
 
 const convertListItemSubtype = (listItem: Element, subtype: string) => {
     const actionElement = listItem.querySelector(".protyle-action");
@@ -153,10 +159,49 @@ const getDragSourceParentID = async (protyle: IProtyle, element: Element) => {
     if (sourceRootID) {
         return sourceRootID;
     }
+    const dragSourceElement = element.closest(`[${DRAG_SOURCE_ROOT_ID}]`);
+    sourceRootID = dragSourceElement?.getAttribute(DRAG_SOURCE_ROOT_ID) || "";
+    if (sourceRootID) {
+        return sourceRootID;
+    }
     const response = await fetchSyncPost("/api/block/getBlockInfo", {
-        id: element.getAttribute("data-node-id")
+        id: element.getAttribute("data-node-id"),
+        notebook: dragSourceElement?.getAttribute(DRAG_SOURCE_NOTEBOOK_ID) || "",
     });
     return response?.data?.rootID || "";
+};
+
+const cancelDetachedSourceSB = async (nodeElement: Element, excludedChildIDs: Set<string>) => {
+    const sourceElement = nodeElement.closest(`[${DRAG_SOURCE_ROOT_ID}]`);
+    const notebookID = sourceElement?.getAttribute(DRAG_SOURCE_NOTEBOOK_ID) || "";
+    const relevantIDs = await fetchSyncPost("/api/block/getBlockRelevantIDs", {
+        id: nodeElement.getAttribute("data-node-id"),
+        notebook: notebookID,
+    });
+    const operationData = await getCancelSBOperations(nodeElement, {
+        notebookID,
+        previousID: relevantIDs?.data?.previousID,
+        parentID: relevantIDs?.data?.parentID || sourceElement?.getAttribute(DRAG_SOURCE_ROOT_ID) || "",
+        fallbackParentID: sourceElement?.getAttribute(DRAG_SOURCE_ROOT_ID) || "",
+        excludedChildIDs,
+    });
+    if (operationData.doOperations.length > 0) {
+        nodeElement.querySelectorAll(".sb__resize").forEach(handle => handle.remove());
+        nodeElement.lastElementChild.remove();
+        nodeElement.replaceWith(...nodeElement.children);
+    }
+    return operationData;
+};
+
+const cancelDragSourceSB = async (nodeElement: Element, excludedChildIDs: Set<string>) => {
+    /// #if !MOBILE
+    const sourceProtyleElement = hasClosestByClassName(nodeElement, "protyle", true);
+    const sourceEditor = getAllEditor().find(item => item.protyle.element === sourceProtyleElement);
+    if (sourceEditor) {
+        return cancelSB(sourceEditor.protyle, nodeElement);
+    }
+    /// #endif
+    return cancelDetachedSourceSB(nodeElement, excludedChildIDs);
 };
 
 const wrapInRowSB = async (protyle: IProtyle, elements: Element[]) => {
@@ -221,6 +266,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     const copyFoldHeadingIds: { newId: string, oldId: string }[] = [];
+    const removedSourceIDs = new Set(sourceElements.map(item => item.getAttribute("data-node-id"))
+        .filter((id): id is string => !!id));
     const targetId = targetElement.getAttribute("data-node-id");
     const newSourceElements: Element[] = [];
     let tempTargetElement = targetElement;
@@ -440,6 +487,10 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     });
                 }
                 const topSourceParentElement = topSourceElement.parentElement;
+                const topSourceID = topSourceElement.getAttribute("data-node-id");
+                if (topSourceID) {
+                    removedSourceIDs.add(topSourceID);
+                }
                 topSourceElement.remove();
                 if (!isSameEditor) {
                     // 打开两个相同的文档
@@ -452,44 +503,20 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     // 拖拽后，sb 只剩下一个元素
                     if (isSameEditor) {
                         const sbData = await cancelSB(protyle, topSourceParentElement);
-                        doOperations.push(sbData.doOperations[0], sbData.doOperations[1]);
-                        undoOperations.push(sbData.undoOperations[1], sbData.undoOperations[0]);
+                        appendCancelSuperBlockOperations(doOperations, undoOperations, sbData);
                     } else {
-                        /// #if !MOBILE
-                        const allEditor = getAllEditor();
-                        const sourceProtyleElement = hasClosestByClassName(topSourceParentElement, "protyle", true);
-                        for (let i = 0; i < allEditor.length; i++) {
-                            if (allEditor[i].protyle.element === sourceProtyleElement) {
-                                const otherSbData = await cancelSB(allEditor[i].protyle, topSourceParentElement);
-                                doOperations.push(otherSbData.doOperations[0], otherSbData.doOperations[1]);
-                                undoOperations.push(otherSbData.undoOperations[1], otherSbData.undoOperations[0]);
-                                // 全局撤销栈下跨文档移动为可逆条目，无需清空源编辑器历史
-                                break;
-                            }
-                        }
-                        /// #endif
+                        const sbData = await cancelDragSourceSB(topSourceParentElement, removedSourceIDs);
+                        appendCancelSuperBlockOperations(doOperations, undoOperations, sbData);
                     }
                 }
             } else if (oldSourceParentElement.classList.contains("sb") && getSbChildBlockCount(oldSourceParentElement) === 1) {
                 // 拖拽后，sb 只剩下一个元素
                 if (isSameEditor) {
                     const sbData = await cancelSB(protyle, oldSourceParentElement);
-                    doOperations.push(sbData.doOperations[0], sbData.doOperations[1]);
-                    undoOperations.push(sbData.undoOperations[1], sbData.undoOperations[0]);
+                    appendCancelSuperBlockOperations(doOperations, undoOperations, sbData);
                 } else {
-                    /// #if !MOBILE
-                    const allEditor = getAllEditor();
-                    const sourceProtyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
-                    for (let i = 0; i < allEditor.length; i++) {
-                        if (allEditor[i].protyle.element === sourceProtyleElement) {
-                            const otherSbData = await cancelSB(allEditor[i].protyle, oldSourceParentElement);
-                            doOperations.push(otherSbData.doOperations[0], otherSbData.doOperations[1]);
-                            undoOperations.push(otherSbData.undoOperations[1], otherSbData.undoOperations[0]);
-                            // 全局撤销栈下跨文档移动为可逆条目，无需清空源编辑器历史
-                            break;
-                        }
-                    }
-                    /// #endif
+                    const sbData = await cancelDragSourceSB(oldSourceParentElement, removedSourceIDs);
+                    appendCancelSuperBlockOperations(doOperations, undoOperations, sbData);
                 }
             } else if (oldSourceParentElement.classList.contains("protyle-wysiwyg") && oldSourceParentElement.childElementCount === 0) {
                 /// #if !MOBILE
@@ -1168,9 +1195,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     };
     const getAdjustedDragTarget = (event: DragEvent) => {
         const contentRect = protyle.contentElement.getBoundingClientRect();
-        const editorLeft = contentRect.left + (parseInt(editorElement.style.paddingLeft) || 0);
+        const editorStyle = getComputedStyle(editorElement);
+        const editorLeft = contentRect.left + (parseFloat(editorStyle.paddingLeft) || 0);
         const editorRight = contentRect.left + protyle.contentElement.clientWidth -
-            (parseInt(editorElement.style.paddingRight) || 0);
+            (parseFloat(editorStyle.paddingRight) || 0);
         const x = event.clientX < editorLeft ? editorLeft :
             (event.clientX >= editorRight ? editorRight - 6 : event.clientX);
         return document.elementFromPoint(x, event.clientY);
@@ -1506,9 +1534,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 } else if (window.siyuan.config.system.workspaceDir.toLowerCase() === gutterTypes[3]) {
                     // 跨窗口拖拽
                     // 不能跨工作区域拖拽 https://github.com/siyuan-note/siyuan/issues/13582
-                    const targetProtyleElement = document.createElement("template");
-                    targetProtyleElement.innerHTML = `<div>${event.dataTransfer.getData(gutterType)}</div>`;
-                    targetProtyleElement.content.querySelectorAll(queryClass.substring(0, queryClass.length - 1)).forEach(elementItem => {
+                    const dragData = parseBlockDragData(event.dataTransfer.getData(gutterType));
+                    const sourceProtyleElement = document.createElement("div");
+                    sourceProtyleElement.setAttribute(DRAG_SOURCE_NOTEBOOK_ID, dragData.notebookID);
+                    sourceProtyleElement.setAttribute(DRAG_SOURCE_ROOT_ID, dragData.rootID);
+                    sourceProtyleElement.innerHTML = dragData.html;
+                    sourceProtyleElement.querySelectorAll(queryClass.substring(0, queryClass.length - 1)).forEach(elementItem => {
                         appendSourceElement(elementItem);
                     });
                 }
@@ -2085,7 +2116,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             const avElement = hasClosestByClassName(event.target, "av");
             if (!avElement) {
                 focusByRange(getRangeByPoint(event.clientX, event.clientY));
-                if (event.dataTransfer.types.includes("Files") && !isBrowser()) {
+                if (event.dataTransfer.types.includes("Files") && !isBrowser() &&
+                    getHostCapabilities().localFileSystem) {
                     const files = getLocalDropFiles(event.dataTransfer.files, file => webUtils.getPathForFile(file));
                     if (!files) {
                         paste(protyle, event, {
@@ -2111,9 +2143,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (cellElement) {
                     if (getTypeByCellElement(cellElement) === "mAsset" && hasDataTransferFiles(event.dataTransfer.types)) {
                         /// #if !BROWSER
-                        const files = getLocalDropFiles(event.dataTransfer.files,
-                            file => webUtils.getPathForFile(file));
-                        if (!files) {
+                        if (!getHostCapabilities().localFileSystem) {
                             focusBlock(hasClosestBlock(cellElement) as HTMLElement);
                             uploadFiles(protyle, event.dataTransfer.files, undefined, undefined, undefined, {
                                 source: "drop",
@@ -2121,7 +2151,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 position: {x: event.clientX, y: event.clientY},
                             });
                         } else {
-                            dragUpload(files, protyle, cellElement, {x: event.clientX, y: event.clientY});
+                            const files = getLocalDropFiles(event.dataTransfer.files,
+                                file => webUtils.getPathForFile(file));
+                            if (!files) {
+                                focusBlock(hasClosestBlock(cellElement) as HTMLElement);
+                                uploadFiles(protyle, event.dataTransfer.files, undefined, undefined, undefined, {
+                                    source: "drop",
+                                    target: "av-cell",
+                                    position: {x: event.clientX, y: event.clientY},
+                                });
+                            } else {
+                                dragUpload(files, protyle, cellElement, {x: event.clientX, y: event.clientY});
+                            }
                         }
                         /// #else
                         focusBlock(hasClosestBlock(cellElement) as HTMLElement);
@@ -2465,9 +2506,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 point.className = "dragover__top";
             } else {
                 const contentRect = protyle.contentElement.getBoundingClientRect();
+                const editorStyle = getComputedStyle(editorElement);
                 const editorPosition = {
-                    left: contentRect.left + parseInt(editorElement.style.paddingLeft),
-                    right: contentRect.left + protyle.contentElement.clientWidth - parseInt(editorElement.style.paddingRight)
+                    left: contentRect.left + parseFloat(editorStyle.paddingLeft),
+                    right: contentRect.left + protyle.contentElement.clientWidth - parseFloat(editorStyle.paddingRight)
                 };
                 if (event.clientX < editorPosition.left) {
                     // 左侧

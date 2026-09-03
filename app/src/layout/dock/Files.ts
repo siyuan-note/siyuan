@@ -49,6 +49,7 @@ import {updateNotebookRootForBoxDoc} from "../../util/notebookRoot";
 import {
     collectExpandedDocIDs,
     findMovedFileTreeItem,
+    getRelativeReorderRequest,
     getFileTreeChildList,
     IDocumentTabDragData,
     IFileTreeMove,
@@ -69,6 +70,8 @@ import {
     type IDocSortModeChanged,
     updateFileTreeSortMode
 } from "../../util/fileTreeSort";
+import {clearDocumentTabMovePreview} from "../tabDrag";
+import {getHostCapabilities} from "../../util/hostCapabilities";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -505,6 +508,11 @@ export class Files extends Model {
                     });
                 }
                 event.dataTransfer.setData(Constants.SIYUAN_DROP_FILE, ids);
+                if (selectElements.every((item) => item.getAttribute("data-type") === "navigation-file")) {
+                    event.dataTransfer.setData(Constants.SIYUAN_DROP_DOCUMENTS, JSON.stringify({
+                        ids: ids.split(","),
+                    }));
+                }
                 event.dataTransfer.dropEffect = "move";
                 let selectionTitle = "";
                 if (selectElements.length > 1) {
@@ -557,6 +565,7 @@ export class Files extends Model {
             window.siyuan.dragElement = undefined;
             hideDragTip();
             window.siyuan.dragTitle = "";
+            clearDocumentTabMovePreview();
             /// #if !BROWSER
             ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "resetTabsStyle", data: "rmDragStyle"});
             /// #else
@@ -856,6 +865,11 @@ export class Files extends Model {
                 const targetListElement = newElement.parentElement;
                 if (window.siyuan.config.fileTree.sort === 6 && selectRootElements.length > 0 &&
                     newElement.getAttribute("data-path") === "/") {
+                    const sourceIDs = selectRootElements.map(item => item.parentElement.getAttribute("data-url"));
+                    if (sourceIDs.includes(toURL)) {
+                        newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
+                        return;
+                    }
                     if (newElement.classList.contains("dragover__top")) {
                         selectRootElements.forEach(item => {
                             newElement.parentElement.before(item.parentElement);
@@ -865,13 +879,11 @@ export class Files extends Model {
                             newElement.parentElement.after(item.parentElement);
                         });
                     }
-                    const notebooks: string[] = [];
-                    Array.from(this.element.children).forEach(item => {
-                        notebooks.push(item.getAttribute("data-url"));
-                    });
-                    fetchPost("/api/notebook/changeSortNotebook", {
-                        notebooks,
-                    });
+                    fetchPost("/api/notebook/reorder", getRelativeReorderRequest(
+                        sourceIDs,
+                        toURL,
+                        !newElement.classList.contains("dragover__top")
+                    ));
                 } else if (isCustomFileTreeList(targetListElement) && selectFileElements.length > 0) {
                     const toDir = pathPosix().dirname(toPath);
                     const newElementClassList = newElement.getAttribute("class");
@@ -943,10 +955,11 @@ export class Files extends Model {
                             }
                         });
                     }
-                    const sortResponse = await fetchSyncPost("/api/filetree/changeSort", {
-                        paths: sortedPaths,
-                        notebook: toURL
-                    });
+                    const sortResponse = await fetchSyncPost("/api/filetree/reorderDocs", getRelativeReorderRequest(
+                        selectFileElements.map(item => item.getAttribute("data-node-id")),
+                        newElement.getAttribute("data-node-id"),
+                        !newElementClassList.includes("dragover__top")
+                    ));
                     if (sortResponse.code !== 0) {
                         newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
                         return;
@@ -1050,10 +1063,11 @@ export class Files extends Model {
         if (moveResponse.code !== 0) {
             return;
         }
-        const sortResponse = await fetchSyncPost("/api/filetree/changeSort", {
-            paths: sortedPaths,
-            notebook: targetNotebook,
-        });
+        const sortResponse = await fetchSyncPost("/api/filetree/reorderDocs", getRelativeReorderRequest(
+            [documentTabData.rootId],
+            targetElement.getAttribute("data-node-id"),
+            insertAfter
+        ));
         if (sortResponse.code !== 0) {
             return;
         }
@@ -1541,6 +1555,15 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         });
     }
 
+    public onDocsImported(data: { notebook: string, parentPath: string, rootIDs: string[] }) {
+        const rootID = data.rootIDs?.[0];
+        if (!rootID) {
+            return;
+        }
+        const importedPath = data.parentPath === "/" ? `/${rootID}.sy` : `${data.parentPath}/${rootID}.sy`;
+        this.updateItemArrow(data.notebook, importedPath);
+    }
+
     public onDocSortModeChanged(data: IDocSortModeChanged) {
         updateFileTreeSortMode(data, this.element);
         this.docSortModeChanges.set(`${data.scope}:${data.box}:${data.id}:${data.path}`, data);
@@ -2026,20 +2049,22 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
                     }
                 }).element);
             }
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: "importNotebook",
-                icon: "iconDownload",
-                label: `${window.siyuan.languages.importNotebook}<input class="b3-form__upload" type="file" accept="application/zip">`,
-                bind: (element) => {
-                    element.querySelector<HTMLInputElement>(".b3-form__upload").addEventListener("change", (event) => {
-                        const file = (event.target as HTMLInputElement).files?.[0];
-                        if (file) {
-                            window.siyuan.menus.menu.remove();
-                            importNotebook(file);
-                        }
-                    });
-                },
-            }).element);
+            if (getHostCapabilities().importExport) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "importNotebook",
+                    icon: "iconDownload",
+                    label: `${window.siyuan.languages.importNotebook}<input class="b3-form__upload" type="file" accept="application/zip">`,
+                    bind: (element) => {
+                        element.querySelector<HTMLInputElement>(".b3-form__upload").addEventListener("change", (event) => {
+                            const file = (event.target as HTMLInputElement).files?.[0];
+                            if (file) {
+                                window.siyuan.menus.menu.remove();
+                                importNotebook(file);
+                            }
+                        });
+                    },
+                }).element);
+            }
         }
         window.siyuan.menus.menu.append(new MenuItem({
             id: "rebuildDataIndex",

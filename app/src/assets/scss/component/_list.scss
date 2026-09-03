@@ -355,6 +355,10 @@
       &--no-spacing {
         margin-inline-end: 0;
       }
+
+      &--trim-start {
+        margin-inline-start: -.5em;
+      }
     }
 
     &__showall {

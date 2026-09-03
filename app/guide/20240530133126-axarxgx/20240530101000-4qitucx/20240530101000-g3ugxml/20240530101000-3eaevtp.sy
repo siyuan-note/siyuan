@@ -8,7 +8,7 @@
 		"id": "20240530101000-3eaevtp",
 		"title": "データベース",
 		"type": "doc",
-		"updated": "20250115145155"
+		"updated": "20260902120000"
 	},
 	"Children": [
 		{
@@ -2435,7 +2435,7 @@
 			"Properties": {
 				"ID": "20240530101000-gdiaw90",
 				"id": "20240530101000-yinvvxy",
-				"updated": "20260612204659"
+				"updated": "20260902120000"
 			},
 			"Children": [
 				{
@@ -2910,6 +2910,131 @@
 			},
 			"AttributeViewID": "20240530133134-wlxgyny",
 			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20260830120300-a1dspja",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260830120300-a1dspja",
+				"updated": "20260902120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "表示テンプレート"
+				}
+			]
+		},
+		{
+			"ID": "20260830120301-b2dspja",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830120301-b2dspja",
+				"updated": "20260830120301"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通常のフィールドは、フィールドタイプを変更せずに表示テンプレートを設定できます。列ヘッダーからフィールドメニューを開き、下部のテンプレート入力欄にテンプレートを入力します。表示テンプレートは表示内容だけを変更し、セルの編集では元の保存値を読み書きします。テンプレート、ロールアップ、行番号、作成日時、更新日時フィールドは表示テンプレートに対応していません。"
+				}
+			]
+		},
+		{
+			"ID": "20260830120302-c3dspja",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830120302-c3dspja",
+				"updated": "20260830124002"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "表示テンプレートはテンプレートスニペットと同じ Go テンプレート構文を使用し、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を区切り文字として HTML を含めることもできます。たとえば、進捗フィールドの保存値が 42 の場合、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "&lt;progress value=\".action{.進捗}\" max=\"100\"&gt;&lt;/progress&gt; .action{.進捗}%"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は進捗 42% のプログレスバーとテキスト 42% を表示します。HTML はデフォルトでサニタイズされます。"
+				}
+			]
+		},
+		{
+			"ID": "20260830120303-d4dspja",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830120303-d4dspja",
+				"updated": "20260830124003"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "同じ行の他のフィールドを名前で参照できます。たとえば、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "&lt;strong&gt;.action{.名前}&lt;/strong&gt;: .action{.進捗}%"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は名前と進捗フィールドを組み合わせます。フィールド名に空白や記号が含まれる場合は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{index . \"プロジェクト 名\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を使用します。フィールドの重複名や名前変更による曖昧さを避けるには、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{index .id_mod \"フィールドID\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でフィールド ID を指定します。"
+				}
+			]
+		},
+		{
+			"ID": "20260830120304-e5dspja",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830120304-e5dspja",
+				"updated": "20260902120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "表示テンプレートが読み取るのは各フィールドの元の保存値であり、他の表示テンプレートが生成した表示結果ではありません。フィルター、ソート、グループ化では、元の値またはテンプレートレンダリング値を選択できます。表示テンプレートを空にすると、フィールド本来の表示に戻ります。"
+				}
+			]
 		},
 		{
 			"ID": "20240818180118-fq3wqdb",

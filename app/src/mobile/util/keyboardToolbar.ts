@@ -1367,11 +1367,9 @@ export const initKeyboardToolbar = () => {
             return;
         } else if (type === "moveup") {
             moveToUp(protyle, nodeElement, range);
-            focusByRange(range);
             return;
         } else if (type === "movedown") {
             moveToDown(protyle, nodeElement, range);
-            focusByRange(range);
             return;
         } else if (type === "softLine") {
             const trackedRangeInsertion = prepareTrackedRangeInsertion(protyle, range);

@@ -2,7 +2,6 @@ import {
     focusBlock,
     focusByOffset,
     focusByRange,
-    focusByWbr,
     getEditorRange,
     getSelectionOffset,
 } from "../util/selection";
@@ -18,11 +17,9 @@ import * as dayjs from "dayjs";
 import {openFileById} from "../../editor/util";
 /// #endif
 import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
-import {getContenteditableElement, getNoContainerElement} from "../wysiwyg/getBlock";
+import {getNoContainerElement} from "../wysiwyg/getBlock";
 import {commonHotkey} from "../wysiwyg/commonHotkey";
 import {nbsp2space} from "../util/normalizeText";
-import {genEmptyElement} from "../../block/util";
-import {transaction} from "../wysiwyg/transaction";
 import {hideTooltip} from "../../dialog/tooltip";
 import {commonClick} from "../wysiwyg/commonClick";
 import {openTitleMenu} from "./openTitleMenu";
@@ -32,6 +29,7 @@ import {addSpellcheckMenuItems, requestSpellcheckContext} from "../../menus/spel
 import {focusAVByArrow} from "../render/av/focus";
 import {getParentDocumentID} from "../util/parentDocument";
 import {getTextSiyuanFromClipboardData} from "../util/clipboardData";
+import {enterDocumentFromTitle} from "./titleEnter";
 
 export class Title {
     public element: HTMLElement;
@@ -164,27 +162,7 @@ export class Title {
                         event.stopPropagation();
                     }
                 } else if (event.key === "Enter") {
-                    const firstElement = protyle.wysiwyg.element.firstElementChild;
-                    const editElement = getContenteditableElement(firstElement);
-                    if (editElement && editElement.textContent === "" && editElement.getAttribute("placeholder") ||
-                        firstElement.classList.contains("li")) {
-                        // 配合提示文本使用，避免提示文本挤压到第二个块中
-                        focusBlock(firstElement, protyle.wysiwyg.element);
-                    } else {
-                        const newId = Lute.NewNodeID();
-                        const newElement = genEmptyElement(false, true, newId);
-                        protyle.wysiwyg.element.insertAdjacentElement("afterbegin", newElement);
-                        focusByWbr(newElement, protyle.toolbar.range || getEditorRange(newElement));
-                        transaction(protyle, [{
-                            action: "insert",
-                            data: newElement.outerHTML,
-                            id: newId,
-                            parentID: protyle.block.parentID
-                        }], [{
-                            action: "delete",
-                            id: newId,
-                        }]);
-                    }
+                    enterDocumentFromTitle(protyle);
                     event.preventDefault();
                     event.stopPropagation();
                 } else if (matchHotKey(window.siyuan.config.keymap.editor.general.attr.custom, event)) {

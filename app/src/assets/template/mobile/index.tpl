@@ -13,7 +13,7 @@
 </div>
 <div class="mobile-safe-area"></div>
 <div id="mobileTopBar" class="toolbar toolbar--border mobile-topbar">
-    <input class="toolbar__title fn__hidden" id="toolbarName" autocomplete="off">
+    <input class="toolbar__title fn__hidden" id="toolbarName" autocomplete="off" enterkeyhint="next">
     <span class="toolbar__title toolbar__title--readonly fn__hidden fn__none" id="toolbarNameReadonly"></span>
     <button id="toolbarSync" class="toolbar__button toolbar__icon-deactivate fn__none" type="button">
         <svg><use xlink:href="#iconCloudSucc"></use></svg>

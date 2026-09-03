@@ -259,7 +259,7 @@
 	"entrySubmenu": "하위 메뉴",
 	"splitMergedCellTip": "먼저 병합된 셀을 분할해야 합니다",
 	"entryVisibility": "상단 표시줄, 메뉴, 도구 모음 및 도크",
-	"entryVisibilityTip": "상단 표시줄 항목과 데스크톱 메뉴 및 도구 모음의 기본 항목 표시 여부와 순서, 도크 아이콘의 표시 여부를 설정합니다",
+	"entryVisibilityTip": "상단 표시줄 항목과 데스크톱 메뉴 및 도구 모음의 기본 항목 표시 여부와 순서, 도크 아이콘의 표시 여부와 순서를 설정합니다",
 	"entrySimple": "간단",
 	"entryFull": "전체",
 	"entrySimpleTip": "자주 사용하는 항목을 표시해 새 사용자가 빠르게 시작할 수 있도록 함",

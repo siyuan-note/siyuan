@@ -259,7 +259,7 @@
 	"entrySubmenu": "Submenu",
 	"splitMergedCellTip": "Split merged cells first",
 	"entryVisibility": "Top bar, menus, toolbar and dock",
-	"entryVisibilityTip": "Configure the visibility and order of desktop top bar items and built-in menu and toolbar items, and the visibility of dock icons",
+	"entryVisibilityTip": "Configure the visibility and order of desktop top bar items and built-in menu and toolbar items, and the visibility and order of dock icons",
 	"entrySimple": "Simple",
 	"entryFull": "Full",
 	"entrySimpleTip": "Shows commonly used entries for getting started quickly",

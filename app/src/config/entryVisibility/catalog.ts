@@ -584,6 +584,32 @@ const dockBuiltinChildren = [
     node("globalGraph", lang("globalGraph"), false),
 ];
 
+const dockBuiltinPositions = new Map<string, TPluginDockPosition>([
+    ["file", "LeftTop"],
+    ["outline", "LeftTop"],
+    ["bookmark", "LeftBottom"],
+    ["tag", "LeftBottom"],
+    ["backlink", "RightBottom"],
+    ["agentChat", "RightTop"],
+    ["inbox", "LeftTop"],
+    ["graph", "RightTop"],
+    ["globalGraph", "RightTop"],
+]);
+
+const dockRuntimeTypeKeys = new Map<string, string>();
+const dockEntryPositions = new Map(dockBuiltinPositions);
+
+export const getDockEntryKey = (element: Element) => {
+    const entryID = element.getAttribute("data-entry-id");
+    if (entryID) {
+        return entryID;
+    }
+    const type = element.getAttribute("data-type");
+    return type ? dockRuntimeTypeKeys.get(type) || type : undefined;
+};
+
+export const getDockEntryPosition = (key: string) => dockEntryPositions.get(key);
+
 const dockCatalogSection: IEntryCatalogSection = {
     key: "dock",
     label: lang("entryDock"),
@@ -1095,7 +1121,7 @@ interface IDockCatalogPlugin {
     displayName?: string;
     docks: Record<string, {
         id: string;
-        config: Pick<IPluginDockTab, "title">;
+        config: Pick<IPluginDockTab, "title" | "position" | "index">;
     }>;
 }
 
@@ -1105,9 +1131,12 @@ export const refreshDockCatalog = (plugins: IDockCatalogPlugin[]) => {
     const signature = JSON.stringify(plugins.map((plugin) => ({
         name: plugin.name,
         displayName: plugin.displayName,
-        docks: Object.values(plugin.docks).map((dock) => ({
+        docks: Object.entries(plugin.docks).map(([type, dock]) => ({
+            type,
             id: dock.id,
             title: dock.config.title,
+            position: dock.config.position,
+            index: dock.config.index,
         })),
     })));
     if (signature === dockCatalogSignature) {
@@ -1115,18 +1144,26 @@ export const refreshDockCatalog = (plugins: IDockCatalogPlugin[]) => {
     }
     const pluginNodes: IEntryCatalogNode[] = [];
     const pluginKeys = new Set<string>();
+    const runtimeTypeKeys = new Map<string, string>();
+    const entryPositions = new Map(dockBuiltinPositions);
     plugins.forEach((plugin) => {
-        Object.values(plugin.docks).forEach((dock) => {
+        Object.entries(plugin.docks).forEach(([type, dock]) => {
             const key = getPluginDockEntryKey(plugin.name, dock.id);
+            runtimeTypeKeys.set(type, key);
             if (pluginKeys.has(key)) {
                 return;
             }
             pluginKeys.add(key);
+            entryPositions.set(key, dock.config.position);
             const pluginName = plugin.displayName?.trim() || plugin.name;
             pluginNodes.push(node(key, literal(`${pluginName} - ${dock.config.title}`)));
         });
     });
     dockCatalogSection.children = [...dockBuiltinChildren, ...pluginNodes];
+    dockRuntimeTypeKeys.clear();
+    runtimeTypeKeys.forEach((key, type) => dockRuntimeTypeKeys.set(type, key));
+    dockEntryPositions.clear();
+    entryPositions.forEach((position, key) => dockEntryPositions.set(key, position));
     dockCatalogSignature = signature;
     rebuildCatalogIndexes();
 };

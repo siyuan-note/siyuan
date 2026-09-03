@@ -29,6 +29,7 @@ import {
 } from "./pluginDockState";
 import {getDockHotkey} from "./hotkey";
 import {resolveDockPanelVisibility} from "./panelVisibility";
+import {syncDockEntryOrders} from "../../config/entryVisibility/runtime";
 
 const TYPES = ["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink", "agentChat"];
 const DEFAULT_DOCK_SIZE = 232;
@@ -1063,6 +1064,7 @@ export class Dock {
         adjustDockPadding();
         this.adjustSplit();
         sourceDock.adjustSplit();
+        syncDockEntryOrders();
     }
 
     public remove(key: TDock | string) {

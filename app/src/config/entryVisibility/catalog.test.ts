@@ -16,6 +16,8 @@ import {
     getEntryCatalogNode,
     getEntryCatalogPathChain,
     getEntryCatalogSection,
+    getDockEntryKey,
+    getDockEntryPosition,
     getEntryParentPath,
     getEntryOrderParents,
     getEntryPaths,
@@ -343,14 +345,23 @@ test("dock catalog refreshes unique plugin docks and removes unloaded entries", 
             name: "plugin.one",
             displayName: "Plugin One",
             docks: {
-                first: {id: "shared.id", config: {title: "First Dock"}},
-                duplicate: {id: "shared.id", config: {title: "Duplicate Dock"}},
+                first: {
+                    id: "shared.id",
+                    config: {title: "First Dock", position: "LeftTop", index: 0},
+                },
+                duplicate: {
+                    id: "shared.id",
+                    config: {title: "Duplicate Dock", position: "RightBottom", index: 1},
+                },
             },
         }, {
             name: "plugin.two",
             displayName: "Plugin Two",
             docks: {
-                second: {id: "shared.id", config: {title: "Second Dock"}},
+                second: {
+                    id: "shared.id",
+                    config: {title: "Second Dock", position: "BottomRight", index: 2},
+                },
             },
         }]);
 
@@ -360,10 +371,71 @@ test("dock catalog refreshes unique plugin docks and removes unloaded entries", 
         assert.equal(getEntryCatalogNode(`dock.${firstKey}`)?.label(), "Plugin One - First Dock");
         assert.equal(getEntryCatalogNode(`dock.${secondKey}`)?.label(), "Plugin Two - Second Dock");
         assert.equal(getEntryParentPath(`dock.${firstKey}`), "dock");
+        assert.equal(getDockEntryPosition(firstKey), "LeftTop");
+        assert.equal(getDockEntryPosition(secondKey), "BottomRight");
     } finally {
         refreshDockCatalog([]);
     }
     assert.equal(getEntryCatalogNode(`dock.${firstKey}`), undefined);
+    assert.equal(getDockEntryPosition(firstKey), undefined);
+});
+
+test("dock catalog exposes the built-in default positions", () => {
+    const positions = {
+        file: "LeftTop",
+        outline: "LeftTop",
+        bookmark: "LeftBottom",
+        tag: "LeftBottom",
+        backlink: "RightBottom",
+        agentChat: "RightTop",
+        inbox: "LeftTop",
+        graph: "RightTop",
+        globalGraph: "RightTop",
+    };
+    Object.entries(positions).forEach(([key, position]) => {
+        assert.equal(getDockEntryPosition(key), position, key);
+    });
+});
+
+test("dock catalog refreshes plugin placement metadata and resolves runtime types", () => {
+    const runtimeType = "plugin.runtime-dock";
+    const stableKey = getPluginDockEntryKey("plugin.runtime", "stable.id");
+    const plugins = (position: TPluginDockPosition, index: number) => [{
+        name: "plugin.runtime",
+        docks: {
+            [runtimeType]: {
+                id: "stable.id",
+                config: {title: "Runtime Dock", position, index},
+            },
+        },
+    }];
+    const element = (attributes: Record<string, string>) => ({
+        getAttribute: (name: string) => attributes[name] ?? null,
+    }) as unknown as Element;
+    try {
+        refreshDockCatalog(plugins("LeftTop", 0));
+        const initialChildren = getEntryCatalogChildren("dock");
+        assert.equal(getDockEntryKey(element({"data-type": runtimeType})), stableKey);
+        assert.equal(getDockEntryKey(element({
+            "data-entry-id": "explicit-entry",
+            "data-type": runtimeType,
+        })), "explicit-entry");
+        assert.equal(getDockEntryPosition(stableKey), "LeftTop");
+
+        refreshDockCatalog(plugins("LeftTop", 1));
+        const indexChangedChildren = getEntryCatalogChildren("dock");
+        assert.notEqual(indexChangedChildren, initialChildren);
+        refreshDockCatalog(plugins("LeftTop", 1));
+        assert.equal(getEntryCatalogChildren("dock"), indexChangedChildren);
+
+        refreshDockCatalog(plugins("RightBottom", 1));
+        assert.equal(getDockEntryPosition(stableKey), "RightBottom");
+    } finally {
+        refreshDockCatalog([]);
+    }
+    assert.equal(getDockEntryKey(element({"data-type": runtimeType})), runtimeType);
+    assert.equal(getDockEntryPosition(stableKey), undefined);
+    assert.equal(getDockEntryPosition("file"), "LeftTop");
 });
 
 test("plugin dock keys encode dotted names and IDs without ambiguity", () => {

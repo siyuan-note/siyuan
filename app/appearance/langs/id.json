@@ -259,7 +259,7 @@
 	"entrySubmenu": "Submenu",
 	"splitMergedCellTip": "Pisahkan sel yang digabungkan terlebih dahulu",
 	"entryVisibility": "Bilah atas, menu, bilah alat, dan dok",
-	"entryVisibilityTip": "Atur visibilitas dan urutan item bilah atas serta item bawaan di menu desktop dan bilah alat, juga visibilitas ikon dok",
+	"entryVisibilityTip": "Atur visibilitas dan urutan item bilah atas serta item bawaan di menu desktop dan bilah alat, juga visibilitas dan urutan ikon dok",
 	"entrySimple": "Sederhana",
 	"entryFull": "Lengkap",
 	"entrySimpleTip": "Menampilkan entri yang umum digunakan agar pengguna baru dapat memulai dengan cepat",

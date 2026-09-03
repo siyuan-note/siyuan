@@ -40,6 +40,15 @@ import {
     TEntryVisibilityImportProfile,
 } from "./profile";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {
+    DOCK_ORDER_SCOPES_BY_SIDE,
+    getDockEntryOrderSnapshot,
+    getDockOrderScopeLabelKey,
+    isDockOrderScope,
+    mergeDockEntryOrderSnapshot,
+    TDockOrderScope,
+    TDockOrderSnapshot,
+} from "./dockOrder";
 
 type TImportFile = {
     type: "siyuan-entry-profile" | "siyuan-entry-profile-bundle";
@@ -193,15 +202,21 @@ const renderProfileCards = (root: HTMLElement) => {
     container.innerHTML = `<div class="b3-cards b3-cards--nowrap">${cards.join("")}</div>`;
 };
 
-const getProfileEntryOrder = (profile: Config.IEntryVisibilityProfile, parentPath: string,
-                              nodes = getEntryCatalogChildren(parentPath) || []) => {
-    const defaultOrder = nodes.map((item) => item.key);
-    const separatorKeys = new Set(nodes.filter((item) => item.type === "separator").map((item) => item.key));
+const resolveProfileEntryOrder = (profile: Config.IEntryVisibilityProfile, parentPath: string,
+                                  defaultOrder: string[], separatorKeys: Set<string>) => {
     if (parentPath === TOP_BAR_ROOT_PATH) {
         return resolveEntryOrderWithBoundaryDefaults(defaultOrder, profile.orders?.[parentPath], "drag", separatorKeys);
     }
     return resolveEntryOrder(defaultOrder, profile.orders?.[parentPath], separatorKeys);
 };
+
+const getProfileEntryOrder = (profile: Config.IEntryVisibilityProfile, parentPath: string,
+                              nodes = getEntryCatalogChildren(parentPath) || []) => resolveProfileEntryOrder(
+    profile,
+    parentPath,
+    nodes.map((item) => item.key),
+    new Set(nodes.filter((item) => item.type === "separator").map((item) => item.key)),
+);
 
 const orderEntryNodes = (profile: Config.IEntryVisibilityProfile, parentPath: string,
                          nodes: IEntryCatalogNode[]) => {
@@ -221,14 +236,15 @@ const renderEntrySwitch = (profile: Config.IEntryVisibilityProfile, path: string
 
 const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: string, prefix: string,
                            nodes: IEntryCatalogNode[], depth: number, selectedPaths: string[],
-                           parentEnabled: boolean, readOnly: boolean, sortable: boolean) => `<section class="config-entry-visibility__column"
+                           parentEnabled: boolean, readOnly: boolean, sortable: boolean,
+                           getItemPath = (item: IEntryCatalogNode) => `${prefix}.${item.key}`) => `<section class="config-entry-visibility__column"
     data-entry-column data-entry-depth="${depth}">
     <div class="config-entry-visibility__column-title">
         <span class="fn__ellipsis fn__flex-1" title="${escapeAttr(title)}">${escapeHtml(title)}</span>
     </div>
     <div class="config-entry-visibility__column-list">
         ${nodes.map((item) => {
-        const path = `${prefix}.${item.key}`;
+        const path = getItemPath(item);
         const configurable = isEntryCatalogNodeConfigurable(item);
         const draggable = sortable && parentEnabled && configurable;
         if (item.type === "separator") {
@@ -295,9 +311,134 @@ const renderEntryLocation = (profile: Config.IEntryVisibilityProfile, item: IEnt
     </div>`;
 };
 
+type TDockSide = keyof typeof DOCK_ORDER_SCOPES_BY_SIDE;
+
+const DOCK_SECTION_KEY = "dock";
+const DOCK_SIDES = Object.keys(DOCK_ORDER_SCOPES_BY_SIDE) as TDockSide[];
+const getDockSidePath = (side: TDockSide) => `${DOCK_SECTION_KEY}.side.${side}`;
+const getDockSideLabel = (side: TDockSide) => `${window.siyuan.languages.entryDock} - ${
+    window.siyuan.languages[side === "left" ? "marginLeft" : "marginRight"]}`;
+
+const getEntryOrderContext = (parentPath: string, dockOrderSnapshot: TDockOrderSnapshot) => {
+    if (isDockOrderScope(parentPath)) {
+        const defaultOrder = [...dockOrderSnapshot[parentPath]];
+        const dockNodes = new Map((getEntryCatalogChildren(DOCK_SECTION_KEY) || []).map((item) => [item.key, item]));
+        return {
+            defaultOrder,
+            nodes: defaultOrder.map((key) => dockNodes.get(key))
+                .filter((item): item is IEntryCatalogNode => Boolean(item)),
+            separatorKeys: new Set<string>(),
+        };
+    }
+    const nodes = getEntryCatalogChildren(parentPath) || [];
+    return {
+        defaultOrder: nodes.map((item) => item.key),
+        nodes,
+        separatorKeys: new Set(nodes.filter((item) => item.type === "separator").map((item) => item.key)),
+    };
+};
+
+const renderEntryNavigationColumn = (
+    title: string,
+    items: Array<{label: string; path: string}>,
+    depth: number,
+    selectedPath?: string,
+) => `<section class="config-entry-visibility__column" data-entry-column data-entry-depth="${depth}">
+    <div class="config-entry-visibility__column-title">
+        <span class="fn__ellipsis fn__flex-1" title="${escapeAttr(title)}">${escapeHtml(title)}</span>
+    </div>
+    <div class="config-entry-visibility__column-list">
+        ${items.map((item) => `<div class="config-entry-visibility__row config-entry-visibility__row--navigable${
+        selectedPath === item.path ? " config-entry-visibility__row--current" : ""}"
+            data-action="navigate-entry" data-entry-path="${escapeAttr(item.path)}" data-entry-depth="${depth}">
+            <button class="config-entry-visibility__navigate" data-action="navigate-entry"
+                data-entry-path="${escapeAttr(item.path)}" data-entry-depth="${depth}" title="${escapeAttr(item.label)}">
+                <span>${escapeHtml(item.label)}</span>
+            </button>
+            <button class="block__icon block__icon--show config-entry-visibility__arrow" data-action="navigate-entry"
+                data-entry-path="${escapeAttr(item.path)}" data-entry-depth="${depth}"
+                aria-label="${escapeAttr(window.siyuan.languages.expand)}">
+                <svg><use xlink:href="#iconRight"></use></svg>
+            </button>
+        </div>`).join("")}
+    </div>
+</section>`;
+
+const getDockScopeLabel = (scope: TDockOrderScope) => {
+    const labelKey = getDockOrderScopeLabelKey(scope);
+    return window.siyuan.languages[labelKey] || labelKey;
+};
+
+const getDockScopeNodes = (
+    profile: Config.IEntryVisibilityProfile,
+    scope: TDockOrderScope,
+    snapshot: TDockOrderSnapshot,
+) => {
+    const context = getEntryOrderContext(scope, snapshot);
+    const nodes = new Map(context.nodes.map((item) => [item.key, item]));
+    return resolveProfileEntryOrder(profile, scope, context.defaultOrder, context.separatorKeys)
+        .map((key) => nodes.get(key))
+        .filter((item): item is IEntryCatalogNode => Boolean(item));
+};
+
+const renderDockColumns = (
+    columns: string[],
+    profile: Config.IEntryVisibilityProfile,
+    section: IEntryCatalogSection,
+    selectedPaths: string[],
+    readOnly: boolean,
+    snapshot: TDockOrderSnapshot,
+    visiblePaths?: Set<string>,
+) => {
+    const sideItems = DOCK_SIDES.map((side) => ({
+        label: getDockSideLabel(side),
+        path: getDockSidePath(side),
+    }));
+    columns.push(renderEntryNavigationColumn(section.label(), sideItems, 0, selectedPaths[0]));
+    const selectedSide = DOCK_SIDES.find((side) => getDockSidePath(side) === selectedPaths[0]);
+    if (!selectedSide) {
+        return;
+    }
+    const scopes = DOCK_ORDER_SCOPES_BY_SIDE[selectedSide];
+    const scopeItems = scopes.map((scope) => ({
+        label: getDockScopeLabel(scope),
+        path: scope,
+    }));
+    columns.push(renderEntryNavigationColumn(getDockSideLabel(selectedSide), scopeItems, 1, selectedPaths[1]));
+    const selectedScope = scopes.find((scope) => scope === selectedPaths[1]);
+    if (!selectedScope) {
+        return;
+    }
+    const nodes = getDockScopeNodes(profile, selectedScope, snapshot);
+    const visibleNodes = visiblePaths
+        ? nodes.filter((item) => visiblePaths.has(`${DOCK_SECTION_KEY}.${item.key}`))
+        : nodes;
+    columns.push(renderEntryColumn(
+        profile,
+        getDockScopeLabel(selectedScope),
+        selectedScope,
+        visibleNodes,
+        2,
+        selectedPaths,
+        true,
+        readOnly,
+        !visiblePaths && !readOnly,
+        (item) => `${DOCK_SECTION_KEY}.${item.key}`,
+    ));
+};
+
+const getDockEntrySelectedPaths = (snapshot: TDockOrderSnapshot, key: string) => {
+    for (const side of DOCK_SIDES) {
+        const scope = DOCK_ORDER_SCOPES_BY_SIDE[side].find((item) => snapshot[item].includes(key));
+        if (scope) {
+            return [getDockSidePath(side), scope, `${DOCK_SECTION_KEY}.${key}`];
+        }
+    }
+};
+
 const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey: string,
                             selectedPaths: string[], readOnly: boolean, visiblePaths?: Set<string>,
-                            visibleSectionKeys?: Set<string>) => {
+                            visibleSectionKeys?: Set<string>, dockOrderSnapshot = getDockEntryOrderSnapshot()) => {
     const sections = visibleSectionKeys
         ? entryCatalog.filter((item) => visibleSectionKeys.has(item.key))
         : entryCatalog;
@@ -309,6 +450,10 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
     </div>
 </section>`;
     const columns = [locationColumn];
+    if (section.key === DOCK_SECTION_KEY) {
+        renderDockColumns(columns, profile, section, selectedPaths, readOnly, dockOrderSnapshot, visiblePaths);
+        return `<div class="config-entry-visibility__columns">${columns.join("")}</div>`;
+    }
     const directDisplayRoot = getDirectDisplayRoot(section);
     const directDisplayRootPath = directDisplayRoot ? `${section.key}.${directDisplayRoot.key}` : "";
     const columnSelectedPaths = directDisplayRoot && selectedPaths[0] === directDisplayRootPath
@@ -391,6 +536,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     refreshTopBarCatalog(plugins);
     refreshDockCatalog(plugins);
     refreshSlashMenuCatalog(plugins);
+    const dockOrderSnapshot = getDockEntryOrderSnapshot();
     const builtin = profileID === ENTRY_PROFILE_SIMPLE || profileID === ENTRY_PROFILE_FULL;
     let selectedTemplate: TEntryVisibilityTemplate | "current" = ENTRY_PROFILE_SIMPLE;
     const existing = profileID
@@ -472,13 +618,15 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         if (filter && queryChanged) {
             const target = filter.results.find((item) => item.section.key === selectedSectionKey) || filter.results[0];
             selectedSectionKey = target.section.key;
-            selectedPaths = getEntryCatalogPathChain(target.section.key, target.path);
+            selectedPaths = target.section.key === DOCK_SECTION_KEY
+                ? getDockEntrySelectedPaths(dockOrderSnapshot, target.item.key) || []
+                : getEntryCatalogPathChain(target.section.key, target.path);
             scrollToEnd = true;
             resetEntryColumns = true;
             revealSelection = true;
         }
         browser.innerHTML = renderEntryColumns(draft, selectedSectionKey, selectedPaths, builtin,
-            filter?.visiblePaths, filter?.visibleSectionKeys);
+            filter?.visiblePaths, filter?.visibleSectionKeys, dockOrderSnapshot);
         previousQuery = query;
         const columnsContainer = browser.querySelector<HTMLElement>(".config-entry-visibility__columns");
         const columns = Array.from(browser.querySelectorAll<HTMLElement>("[data-entry-column]"));
@@ -535,12 +683,17 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             dragging.order = undefined;
             return;
         }
-        const nodes = getEntryCatalogChildren(dragging.parentPath) || [];
-        dragging.defaultOrder = nodes.map((item) => item.key);
-        const order = getProfileEntryOrder(draft, dragging.parentPath, nodes);
+        const context = getEntryOrderContext(dragging.parentPath, dockOrderSnapshot);
+        dragging.defaultOrder = context.defaultOrder;
+        const order = resolveProfileEntryOrder(
+            draft,
+            dragging.parentPath,
+            context.defaultOrder,
+            context.separatorKeys,
+        );
         const after = event.clientY >= row.getBoundingClientRect().top + row.offsetHeight / 2;
         const movedOrder = moveEntryOrder(order, dragging.sourceKey, row.dataset.entryKey, after,
-            new Set(nodes.filter((item) => item.type === "separator").map((item) => item.key)));
+            context.separatorKeys);
         clearDropTarget();
         dragging.order = movedOrder;
         if (!movedOrder) {
@@ -557,10 +710,9 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         event.preventDefault();
         draft.orders ||= {};
         const savedOrder = draft.orders[dragging.parentPath];
+        const context = getEntryOrderContext(dragging.parentPath, dockOrderSnapshot);
         const separatorKeys = new Set([
-            ...(getEntryCatalogChildren(dragging.parentPath) || [])
-                .filter((item) => item.type === "separator")
-                .map((item) => item.key),
+            ...context.separatorKeys,
             ...(savedOrder || []).filter((key) =>
                 key.startsWith("separator_") || key.startsWith("plugin-separator:")),
         ]);
@@ -570,6 +722,9 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             dragging.order,
             separatorKeys,
         );
+        if (isDockOrderScope(dragging.parentPath)) {
+            Object.assign(draft.orders, mergeDockEntryOrderSnapshot(dockOrderSnapshot, draft.orders));
+        }
         dragging = undefined;
         renderBrowser();
     });

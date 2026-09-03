@@ -259,7 +259,7 @@
 	"entrySubmenu": "Sous-menu",
 	"splitMergedCellTip": "Les cellules fusionnées doivent d'abord être fractionnées",
 	"entryVisibility": "Barre supérieure, menus, barre d’outils et barre d’ancrage",
-	"entryVisibilityTip": "Configurez la visibilité et l’ordre des éléments de la barre supérieure et des éléments intégrés des menus et de la barre d’outils du bureau, ainsi que la visibilité des icônes de la barre d’ancrage",
+	"entryVisibilityTip": "Configurez la visibilité et l’ordre des éléments de la barre supérieure et des éléments intégrés des menus et de la barre d’outils du bureau, ainsi que la visibilité et l’ordre des icônes de la barre d’ancrage",
 	"entrySimple": "Simple",
 	"entryFull": "Complet",
 	"entrySimpleTip": "Affiche les entrées courantes pour démarrer rapidement",

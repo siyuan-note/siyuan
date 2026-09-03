@@ -259,7 +259,7 @@
 	"entrySubmenu": "Submenu",
 	"splitMergedCellTip": "Splits eerst de samengevoegde cellen",
 	"entryVisibility": "Bovenbalk, menu's, werkbalk en dock",
-	"entryVisibilityTip": "Configureer de zichtbaarheid en volgorde van bovenbalkitems en ingebouwde items in desktopmenu's en de werkbalk, en de zichtbaarheid van dockpictogrammen",
+	"entryVisibilityTip": "Configureer de zichtbaarheid en volgorde van bovenbalkitems en ingebouwde items in desktopmenu's en de werkbalk, en de zichtbaarheid en volgorde van dockpictogrammen",
 	"entrySimple": "Eenvoudig",
 	"entryFull": "Volledig",
 	"entrySimpleTip": "Toont veelgebruikte items om snel aan de slag te gaan",

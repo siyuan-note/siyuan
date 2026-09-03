@@ -259,7 +259,7 @@
 	"entrySubmenu": "Untermenü",
 	"splitMergedCellTip": "Zusammengeführte Zellen müssen zuerst geteilt werden",
 	"entryVisibility": "Obere Leiste, Menüs, Symbolleiste und Dock",
-	"entryVisibilityTip": "Konfigurieren Sie die Sichtbarkeit und Reihenfolge von Einträgen in der oberen Leiste sowie integrierten Einträgen in Desktop-Menüs und der Symbolleiste und die Sichtbarkeit der Dock-Symbole",
+	"entryVisibilityTip": "Konfigurieren Sie die Sichtbarkeit und Reihenfolge von Einträgen in der oberen Leiste sowie integrierten Einträgen in Desktop-Menüs und der Symbolleiste und die Sichtbarkeit und Reihenfolge der Dock-Symbole",
 	"entrySimple": "Einfach",
 	"entryFull": "Vollständig",
 	"entrySimpleTip": "Zeigt häufig verwendete Einträge für einen schnellen Einstieg",

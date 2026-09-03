@@ -1,7 +1,7 @@
 {
   "name": "SiYuan",
   "desktopName": "org.b3log.siyuan",
-  "version": "3.8.2",
+  "version": "3.8.3-alpha.1",
   "description": "From thought to insight, with agents",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron/main.js",

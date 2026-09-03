@@ -28,7 +28,7 @@ import {
 import {isLastPointerMouse} from "../../../util/touchDragBridge";
 import {getLocalDropFiles, hasDataTransferFiles} from "../../upload/localDropFiles";
 import {cloneAVCellValueSnapshot} from "./cellValue";
-import {getAVAttributeEditorRange, restoreAVAttributeEditorRange} from "./blockAttrFocus";
+import {getEditorFocusRange, restoreEditorFocusRange} from "../../util/editorFocus";
 
 interface IAVAttributeTableData {
     avID: string;
@@ -310,7 +310,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 }
                 const selection = document.getSelection();
                 const currentRange = selection?.rangeCount ? selection.getRangeAt(0) : undefined;
-                removeEditorRange = getAVAttributeEditorRange(protyle.wysiwyg.element, currentRange,
+                removeEditorRange = getEditorFocusRange(protyle.wysiwyg.element, currentRange,
                     protyle.toolbar.range);
                 event.preventDefault();
             });
@@ -366,7 +366,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 if (removeElement) {
                     const selection = document.getSelection();
                     const currentRange = selection?.rangeCount ? selection.getRangeAt(0) : undefined;
-                    const editorRange = removeEditorRange || getAVAttributeEditorRange(protyle.wysiwyg.element,
+                    const editorRange = removeEditorRange || getEditorFocusRange(protyle.wysiwyg.element,
                         currentRange, protyle.toolbar.range);
                     removeEditorRange = undefined;
                     const blockElement = hasClosestBlock(removeElement);
@@ -434,7 +434,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                             srcIDs: [rowID],
                             avID,
                         }];
-                        const restoreEditorRange = () => restoreAVAttributeEditorRange(protyle.wysiwyg.element,
+                        const restoreEditorRange = () => restoreEditorFocusRange(protyle.wysiwyg.element,
                             editorRange);
                         confirmDialog(window.siyuan.languages.removeAV, window.siyuan.languages.confirmDelete + "?", () => {
                             removeElement.setAttribute("disabled", "true");

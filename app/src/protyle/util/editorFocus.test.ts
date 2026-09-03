@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getAVAttributeEditorRange, restoreAVAttributeEditorRange} from "./blockAttrFocus";
+import {getEditorFocusRange, getEditorFocusRangeOutsideElement, restoreEditorFocusRange} from "./editorFocus";
 
 class TestElement {
     public readonly nodeType = 1;
@@ -63,14 +63,14 @@ const createSelection = () => {
     };
 };
 
-describe("database attribute editor focus", () => {
+describe("editor focus", () => {
     it("prefers the current editor range", () => {
         const editor = new TestElement();
         const editable = new TestElement(editor, true);
         const currentRange = createRange(new TestText(editable));
         const savedRange = createRange(new TestText(editable));
 
-        const range = getAVAttributeEditorRange(editor as unknown as HTMLElement, currentRange, savedRange);
+        const range = getEditorFocusRange(editor as unknown as HTMLElement, currentRange, savedRange);
 
         assert.equal(range, currentRange.cloneRange());
     });
@@ -81,10 +81,33 @@ describe("database attribute editor focus", () => {
         const outside = new TestElement();
         const savedRange = createRange(new TestText(editable));
 
-        const range = getAVAttributeEditorRange(editor as unknown as HTMLElement,
+        const range = getEditorFocusRange(editor as unknown as HTMLElement,
             createRange(new TestText(outside)), savedRange);
 
         assert.equal(range, savedRange.cloneRange());
+    });
+
+    it("captures a range outside the operated element", () => {
+        const editor = new TestElement();
+        const operated = new TestElement(editor);
+        const editable = new TestElement(editor, true);
+        const currentRange = createRange(new TestText(editable));
+
+        const range = getEditorFocusRangeOutsideElement(editor as unknown as HTMLElement,
+            operated as unknown as Element, currentRange);
+
+        assert.equal(range, currentRange.cloneRange());
+    });
+
+    it("ignores a range inside the operated element", () => {
+        const editor = new TestElement();
+        const operated = new TestElement(editor);
+        const editable = new TestElement(operated, true);
+
+        const range = getEditorFocusRangeOutsideElement(editor as unknown as HTMLElement,
+            operated as unknown as Element, createRange(new TestText(editable)));
+
+        assert.equal(range, undefined);
     });
 
     it("restores the range and focuses its editable element", () => {
@@ -93,7 +116,7 @@ describe("database attribute editor focus", () => {
         const range = createRange(new TestText(editable));
         const {selection, state} = createSelection();
 
-        const restored = restoreAVAttributeEditorRange(editor as unknown as HTMLElement, range, selection);
+        const restored = restoreEditorFocusRange(editor as unknown as HTMLElement, range, selection);
 
         assert.equal(restored, true);
         assert.equal(editable.focused, true);
@@ -108,7 +131,7 @@ describe("database attribute editor focus", () => {
         text.isConnected = false;
         const {selection, state} = createSelection();
 
-        const restored = restoreAVAttributeEditorRange(editor as unknown as HTMLElement,
+        const restored = restoreEditorFocusRange(editor as unknown as HTMLElement,
             createRange(text), selection);
 
         assert.equal(restored, false);

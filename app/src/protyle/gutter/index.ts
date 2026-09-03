@@ -86,6 +86,7 @@ import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {genCellValueByElement} from "../render/av/cell";
 import {getPlainText} from "../util/paste";
 import {CODE_TAB_SPACE_VALUES} from "../wysiwyg/codeBlockUtil";
+import {getEditorFocusRangeOutsideElement, restoreEditorFocusRange} from "../util/editorFocus";
 import {
     getCrossBlockTextSelectionTarget,
     getGutterSelection,
@@ -1586,6 +1587,11 @@ export class Gutter {
             hideElements(["gutter"], protyle);
             return;
         }
+        const selection = document.getSelection();
+        const currentRange = selection?.rangeCount ? selection.getRangeAt(0) : undefined;
+        const removalEditorRange = !getBlockSelectionModeElement(protyle.wysiwyg.element) ?
+            getEditorFocusRangeOutsideElement(protyle.wysiwyg.element, nodeElement, currentRange,
+                protyle.toolbar.range) : undefined;
         const editableElement = getContenteditableElement(nodeElement);
         const range = prepareCrossBlockTextSelection(protyle, nodeElement);
         if (range) {
@@ -2037,10 +2043,14 @@ export class Gutter {
                 icon: "iconTrashcan",
                 label: window.siyuan.languages.delete,
                 accelerator: "⌫",
-                click: () => {
+                click: async () => {
                     protyle.breadcrumb?.hide();
-                    void removeBlockPreservingSelectionMode(protyle, nodeElement, getEditorRange(nodeElement),
+                    const removed = await removeBlockPreservingSelectionMode(protyle, nodeElement,
+                        getEditorRange(nodeElement),
                         "Backspace");
+                    if (removed) {
+                        restoreEditorFocusRange(protyle.wysiwyg.element, removalEditorRange);
+                    }
                 }
             }).element);
         }

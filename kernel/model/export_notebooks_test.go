@@ -119,14 +119,6 @@ func TestExportNotebooksSYKeepsCrossNotebookReferences(t *testing.T) {
 	if err = ImportSY(exportAbsPath, sourceBoxID, "/"); nil == err {
 		t.Fatal("notebook bundle should not be imported into a document")
 	}
-	singleExportPath := ExportNotebookSY(sourceBoxID)
-	singleExportAbsPath, err := exportedFilePath(singleExportPath)
-	if nil != err {
-		t.Fatal(err)
-	}
-	if err = ImportSY(singleExportAbsPath, targetBoxID, "/"); nil == err {
-		t.Fatal("notebook archive should not be imported into a document")
-	}
 	syArchive := openExportArchive(t, exportPath)
 	syRoot := "Notebook-2"
 	sourceArchivePath := filepath.ToSlash(filepath.Join(syRoot, "notebooks", "Notebook.sy.zip"))
@@ -191,6 +183,15 @@ func TestImportNotebooksSYKeepsEmptyNotebooks(t *testing.T) {
 	}
 	if len(boxIDs) != 2 {
 		t.Fatalf("imported %d notebooks, want 2", len(boxIDs))
+	}
+
+	singleExportPath := ExportNotebookSY(firstBoxID)
+	singleExportAbsPath, err := exportedFilePath(singleExportPath)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if err = ImportSY(singleExportAbsPath, secondBoxID, "/"); nil == err {
+		t.Fatal("empty notebook archive should not be imported as documents")
 	}
 }
 

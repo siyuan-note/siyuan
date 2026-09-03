@@ -420,8 +420,9 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		}
 		createNotebook = notebookExport
 	}
-	if !createNotebook && notebookExport {
-		err = errors.New(Conf.Language(373))
+	if !createNotebook && len(syPaths) < 1 {
+		logging.LogErrorf("invalid .sy.zip without documents [unzipRootPath=%s]", unzipRootPath)
+		err = errors.New(Conf.Language(199))
 		return
 	}
 	if autoDetect && !createNotebook && boxID == "" {

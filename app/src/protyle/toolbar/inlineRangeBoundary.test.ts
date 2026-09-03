@@ -2,6 +2,7 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     canExpandInlineRangeToParent,
+    canRemoveEmptyInlineElement,
     getInlineRangeElement,
     normalizeCalloutTitleRange
 } from "./inlineRangeBoundary";
@@ -22,6 +23,7 @@ describe("inline range boundary", () => {
 
         assert.equal(getInlineRangeElement(text(calloutTitle), calloutTitle), undefined);
         assert.equal(canExpandInlineRangeToParent(text(calloutTitle), calloutTitle), false);
+        assert.equal(canRemoveEmptyInlineElement(calloutTitle, calloutTitle), false);
     });
 
     it("recognizes inline elements nested inside an editable root", () => {
@@ -31,6 +33,7 @@ describe("inline range boundary", () => {
 
         assert.equal(getInlineRangeElement(textNode, calloutTitle), inlineElement);
         assert.equal(canExpandInlineRangeToParent(textNode, calloutTitle), true);
+        assert.equal(canRemoveEmptyInlineElement(inlineElement, calloutTitle), true);
     });
 
     it("keeps existing block-level editable boundaries", () => {

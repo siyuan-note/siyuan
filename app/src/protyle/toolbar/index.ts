@@ -92,6 +92,7 @@ import {
 } from "../util/inlineElementMarker";
 import {
     canExpandInlineRangeToParent,
+    canRemoveEmptyInlineElement,
     getInlineRangeElement,
     normalizeCalloutTitleRange
 } from "./inlineRangeBoundary";
@@ -904,7 +905,7 @@ export class Toolbar {
             if (emptyNode && emptyNode.nodeType !== 3 &&
                 (hasSemanticInlineType(emptyNode.getAttribute("data-type")) ?
                     getSemanticInlineVisibleText(emptyNode) : emptyNode.textContent.replace(Constants.ZWSP, "")) === "" &&
-                !["TD", "TH", "BR"].includes(emptyNode.tagName)) {
+                canRemoveEmptyInlineElement(emptyNode, editableElement)) {
                 emptyNode.remove();
             }
         }

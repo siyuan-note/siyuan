@@ -14,6 +14,9 @@ export const canExpandInlineRangeToParent = (container: Node, editableElement: E
     return !!parentElement && parentElement !== editableElement && !INLINE_RANGE_ROOT_TAGS.includes(parentElement.tagName);
 };
 
+export const canRemoveEmptyInlineElement = (element: Element, editableElement: Element) =>
+    element !== editableElement && !["TD", "TH", "BR"].includes(element.tagName);
+
 export const normalizeCalloutTitleRange = (range: Range, blockElement: Element,
                                            editableElement: Element) => {
     if (blockElement.getAttribute("data-type") !== "NodeCallout") {

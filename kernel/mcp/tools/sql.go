@@ -24,14 +24,16 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/sql"
 )
 
+const sqlQueryDefaultLimit = 100
+
 var SQLTool = &Tool{
 	Name:        "sql",
-	Description: "Read-only SQL on SiYuan's database. Action: query(stmt) — SELECT only.",
+	Description: "Read-only SQL on SiYuan's database. Action: query(stmt) — SELECT only. Results default to at most 100 rows; use explicit LIMIT and OFFSET clauses for pagination.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
 			"action":   {Type: "string", Description: "Operation", Enum: []string{"query"}},
-			"stmt":     {Type: "string", Description: "SQL SELECT statement"},
+			"stmt":     {Type: "string", Description: "SQL SELECT statement. Results default to at most 100 rows; use LIMIT and OFFSET for pagination"},
 			"notebook": {Type: "string", Description: "Optional notebook ID used to query an encrypted notebook"},
 		},
 		Required: []string{"action", "stmt"},
@@ -84,13 +86,16 @@ func sqlQuery(args map[string]any) (CallToolResult, error) {
 	}
 
 	var rows []map[string]any
+	var possiblyTruncated bool
 	var err error
 	if boxID == "" {
-		rows, err = sql.Query(stmt, 100)
+		rows, err = sql.Query(stmt, sqlQueryDefaultLimit)
+		possiblyTruncated = len(rows) == sqlQueryDefaultLimit
 	} else {
 		rows, err = sql.QueryNoLimitInBox(stmt, boxID)
-		if len(rows) > 100 {
-			rows = rows[:100]
+		if len(rows) > sqlQueryDefaultLimit {
+			possiblyTruncated = true
+			rows = rows[:sqlQueryDefaultLimit]
 		}
 	}
 	if err != nil {
@@ -101,15 +106,19 @@ func sqlQuery(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no results"}}}, nil
 	}
 
-	return CallToolResult{Content: []ContentItem{{Type: "text", Text: formatSQLRows(rows)}}}, nil
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: formatSQLRows(rows, possiblyTruncated)}}}, nil
 }
 
-func formatSQLRows(rows []map[string]any) string {
+func formatSQLRows(rows []map[string]any, possiblyTruncated bool) string {
 	columns := keysOf(rows[0])
 	sort.Strings(columns)
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Query results (%d rows):\n\n", len(rows)))
+	if possiblyTruncated {
+		sb.WriteString(fmt.Sprintf("Query results (%d rows; the %d-row limit may have truncated the result. Use an explicit LIMIT with OFFSET to paginate):\n\n", len(rows), sqlQueryDefaultLimit))
+	} else {
+		sb.WriteString(fmt.Sprintf("Query results (%d rows):\n\n", len(rows)))
+	}
 	sb.WriteString("| " + strings.Join(columns, " | ") + " |\n")
 	sb.WriteString("|" + strings.Repeat("---|", len(columns)) + "\n")
 	for _, row := range rows {

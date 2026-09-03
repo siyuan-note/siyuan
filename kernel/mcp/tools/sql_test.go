@@ -16,7 +16,10 @@
 
 package tools
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestFormatSQLRowsKeepsValuesAlignedWithColumns(t *testing.T) {
 	rows := []map[string]any{
@@ -31,7 +34,21 @@ func TestFormatSQLRowsKeepsValuesAlignedWithColumns(t *testing.T) {
 		"| row-2 | beta | 202 |\n" +
 		"| row-3 | gamma | 303 |\n"
 
-	if got := formatSQLRows(rows); got != want {
+	if got := formatSQLRows(rows, false); got != want {
 		t.Fatalf("unexpected SQL rows:\n%s\nwant:\n%s", got, want)
+	}
+}
+
+func TestFormatSQLRowsReportsPossibleTruncation(t *testing.T) {
+	rows := make([]map[string]any, sqlQueryDefaultLimit)
+	for i := range rows {
+		rows[i] = map[string]any{"id": i}
+	}
+
+	got := formatSQLRows(rows, true)
+	wantPrefix := "Query results (100 rows; the 100-row limit may have truncated the result. " +
+		"Use an explicit LIMIT with OFFSET to paginate):\n\n"
+	if !strings.HasPrefix(got, wantPrefix) {
+		t.Fatalf("missing SQL result truncation warning:\n%s", got)
 	}
 }

@@ -1045,6 +1045,9 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
             const x = event[direction === "lr" ? "clientX" : "clientY"];
             const previousSize = direction === "lr" ? previousElement.clientWidth : previousElement.clientHeight;
             const nextSize = direction === "lr" ? nextElement.clientWidth : nextElement.clientHeight;
+            const coordinate = direction === "lr" ? "clientX" : "clientY";
+            let resizeFrame = 0;
+            let pendingCoordinate: number | undefined;
 
             documentSelf.ondragstart = () => {
                 // 文件树拖拽会产生透明效果
@@ -1056,11 +1059,10 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                 return false;
             };
 
-            documentSelf.onmousemove = (moveEvent: MouseEvent) => {
-                moveEvent.preventDefault();
-                moveEvent.stopPropagation();
-                const previousNowSize = (previousSize + (moveEvent[direction === "lr" ? "clientX" : "clientY"] - x));
-                const nextNowSize = (nextSize - (moveEvent[direction === "lr" ? "clientX" : "clientY"] - x));
+            const applyResize = (currentCoordinate: number) => {
+                const delta = currentCoordinate - x;
+                const previousNowSize = previousSize + delta;
+                const nextNowSize = nextSize - delta;
                 if (previousNowSize < 8 || nextNowSize < 8) {
                     return;
                 }
@@ -1091,7 +1093,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                         paneSizes,
                         previousIndex,
                         nextIndex,
-                        moveEvent[direction === "lr" ? "clientX" : "clientY"] - x,
+                        delta,
                     );
                     if (percentages) {
                         setPanePercentages(paneElements, percentages);
@@ -1106,7 +1108,29 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                 }
             };
 
+            documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                moveEvent.preventDefault();
+                moveEvent.stopPropagation();
+                pendingCoordinate = moveEvent[coordinate];
+                if (!resizeFrame) {
+                    resizeFrame = requestAnimationFrame(() => {
+                        resizeFrame = 0;
+                        if (pendingCoordinate !== undefined) {
+                            applyResize(pendingCoordinate);
+                        }
+                        pendingCoordinate = undefined;
+                    });
+                }
+            };
+
             documentSelf.onmouseup = () => {
+                if (resizeFrame) {
+                    cancelAnimationFrame(resizeFrame);
+                    resizeFrame = 0;
+                }
+                if (pendingCoordinate !== undefined) {
+                    applyResize(pendingCoordinate);
+                }
                 documentSelf.body.classList.remove("fn__pointer-none");
                 documentSelf.onmousemove = null;
                 documentSelf.onmouseup = null;

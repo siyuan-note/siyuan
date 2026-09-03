@@ -79,7 +79,8 @@ export const init = (app: App) => {
             adjustLayout(window.siyuan.layout.centerLayout);
             resizeTabs();
             window.siyuan.menus.menu.resetPosition();
-            if (getSelection().rangeCount > 0) {
+            if (window.siyuan.menus.menu.element.classList.contains("fn__none") &&
+                getSelection().rangeCount > 0) {
                 const range = getSelection().getRangeAt(0);
                 getAllEditor().forEach(item => {
                     if (item.protyle.wysiwyg.element.contains(range.startContainer)) {

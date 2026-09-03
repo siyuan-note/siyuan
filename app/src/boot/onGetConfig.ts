@@ -113,7 +113,8 @@ export const onGetConfig = (isStart: boolean, app: App) => {
             setTabPosition(true);
             window.siyuan.menus.menu.resetPosition();
             firstResize = true;
-            if (getSelection().rangeCount > 0) {
+            if (window.siyuan.menus.menu.element.classList.contains("fn__none") &&
+                getSelection().rangeCount > 0) {
                 const range = getSelection().getRangeAt(0);
                 getAllEditor().forEach(item => {
                     if (item.protyle.wysiwyg.element.contains(range.startContainer)) {

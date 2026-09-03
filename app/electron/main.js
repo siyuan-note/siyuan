@@ -1147,7 +1147,7 @@ const sleep = (ms) => {
     return new Promise(resolve => setTimeout(resolve, ms));
 };
 
-const showErrorWindow = (titleZh, titleEn, content, emoji = "⚠️") => {
+const showErrorWindow = (titleZh, titleEn, content, emoji = "⚠️", logPath = "") => {
     let errorHTMLPath = path.join(appDir, "app", "electron", "error.html");
     if (isDevEnv) {
         errorHTMLPath = path.join(appDir, "electron", "error.html");
@@ -1171,6 +1171,7 @@ const showErrorWindow = (titleZh, titleEn, content, emoji = "⚠️") => {
             title: `<h2>${titleZh}</h2><h2>${titleEn}</h2>`,
             emoji,
             content,
+            logPath,
             icon: path.join(appDir, "stage", "icon-large.png"),
         },
     });
@@ -1509,6 +1510,10 @@ const loadBootWindow = (disableAppearance = false) => {
 
 const initKernel = (workspace, port, lang, safeMode) => {
     return new Promise(async (resolve) => {
+        const currentWorkspace = [workspace, process.env.SIYUAN_WORKSPACE_PATH, lastWorkspacePath]
+            .find(item => typeof item === "string" && item);
+        const workspaceLogPath = currentWorkspace ? path.resolve(currentWorkspace, "temp", "siyuan.log") : "";
+        const kernelLogPath = path.join(confDir, "kernel.log");
         // 必须在首次异步等待前创建窗口，避免工作空间选择窗口关闭后因无窗口触发应用退出。
         bootWindow = new BrowserWindow({
             show: false,
@@ -1618,7 +1623,7 @@ const initKernel = (workspace, port, lang, safeMode) => {
                     let errorWindowId;
                     switch (code) {
                         case 20:
-                            errorWindowId = showErrorWindow("数据库不可用", "The database is unavailable", "<div>无法访问数据库文件，请查看 工作空间/temp/siyuan.log 获取详细报错信息</div><div>Cannot access the database file. Please check workspace/temp/siyuan.log for detailed error information.</div>");
+                            errorWindowId = showErrorWindow("数据库不可用", "The database is unavailable", "<div>无法访问数据库文件，请查看 <a href=\"#\" data-log-path>工作空间/temp/siyuan.log</a> 获取详细报错信息</div><div>Cannot access the database file. Please check <a href=\"#\" data-log-path>workspace/temp/siyuan.log</a> for detailed error information.</div>", "⚠️", workspaceLogPath);
                             break;
                         case 21:
                             errorWindowId = showErrorWindow("监听端口 " + currentKernelPort + " 失败", "Failed to listen to port " + currentKernelPort, "<div>监听 " + currentKernelPort + " 端口失败，请确保程序拥有网络权限并不受防火墙和杀毒软件阻止。</div><div>Failed to listen to port " + currentKernelPort + ", please make sure the program has network permissions and is not blocked by firewalls and antivirus software.</div>");
@@ -1631,10 +1636,10 @@ const initKernel = (workspace, port, lang, safeMode) => {
                             errorWindowId = showErrorWindow("工作空间已被锁定", "The workspace is locked", "<div>该工作空间正在被使用，请尝试在任务管理器中结束 SiYuan-Kernel 进程或者重启操作系统后再启动思源。</div><div>The workspace is being used, please try to end the SiYuan-Kernel process in the task manager or restart the operating system and then start SiYuan.</div>");
                             break;
                         case 25:
-                            errorWindowId = showErrorWindow("初始化工作空间失败", "Failed to create workspace directory", "<div>工作空间文件夹权限不足，请查看 工作空间/temp/siyuan.log 获取详细报错信息</div><div>Insufficient permissions for the workspace folder. Please check workspace/temp/siyuan.log for detailed error information.</div>");
+                            errorWindowId = showErrorWindow("初始化工作空间失败", "Failed to create workspace directory", "<div>工作空间文件夹权限不足，请查看 <a href=\"#\" data-log-path>~/.config/siyuan/kernel.log</a> 获取详细报错信息</div><div>Insufficient permissions for the workspace folder. Please check <a href=\"#\" data-log-path>~/.config/siyuan/kernel.log</a> for detailed error information.</div>", "⚠️", kernelLogPath);
                             break;
                         case 26:
-                            errorWindowId = showErrorWindow("文件系统访问失败", "File system access failed", "<div>思源内核无法访问所需文件，现已安全退出。可能原因包括文件或文件夹权限不足、文件为只读、文件被其他程序占用，以及同步盘或安全软件干预。</div><div>请查看 工作空间/temp/siyuan.log 获取详细错误信息。</div><div>SiYuan Kernel could not access a required file and has exited safely. Possible causes include insufficient permissions, read-only files, another process using a file, or interference from sync or security software.</div><div>Please check workspace/temp/siyuan.log for details.</div>");
+                            errorWindowId = showErrorWindow("文件系统访问失败", "File system access failed", "<div>思源内核无法访问所需文件，现已安全退出。可能原因包括文件或文件夹权限不足、文件为只读、文件被其他程序占用，以及同步盘或安全软件干预。</div><div>请查看 <a href=\"#\" data-log-path>工作空间/temp/siyuan.log</a> 获取详细错误信息。</div><div>SiYuan Kernel could not access a required file and has exited safely. Possible causes include insufficient permissions, read-only files, another process using a file, or interference from sync or security software.</div><div>Please check <a href=\"#\" data-log-path>workspace/temp/siyuan.log</a> for details.</div>", "⚠️", workspaceLogPath);
                             break;
                         case 0:
                             break;
@@ -1688,8 +1693,9 @@ const initKernel = (workspace, port, lang, safeMode) => {
                     if (Date.now() - bootShowStart > bootTimeout) {
                         writeLog("boot progress timeout after " + bootTimeout + "ms, exiting boot");
                         showErrorWindow("启动超时", "Boot timeout",
-                            "<div>内核启动超时，请查看 工作空间/temp/siyuan.log 获取详细报错信息，或尝试重启思源。</div>" +
-                            "<div>Kernel boot timed out. Please check workspace/temp/siyuan.log for details, or try restarting SiYuan.</div>");
+                            "<div>内核启动超时，请查看 <a href=\"#\" data-log-path>工作空间/temp/siyuan.log</a> 获取详细报错信息，或尝试重启思源。</div>" +
+                            "<div>Kernel boot timed out. Please check <a href=\"#\" data-log-path>workspace/temp/siyuan.log</a> for details, or try restarting SiYuan.</div>",
+                            "⚠️", workspaceLogPath);
                         requestKernelExit(currentKernelPort);
                         bootWindow.destroy();
                         resolve(false);

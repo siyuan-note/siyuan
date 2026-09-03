@@ -246,6 +246,13 @@ export class App {
                             }
                             break;
                         }
+                        case "docsImported": {
+                            const fileDock = getDockByType("file");
+                            if (fileDock) {
+                                (fileDock.data.file as Files).onDocsImported(data.data);
+                            }
+                            break;
+                        }
                         case "docSortModeChanged": {
                             const fileDock = getDockByType("file");
                             if (fileDock) {

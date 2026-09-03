@@ -3197,7 +3197,8 @@ func (box *Box) addSort(previousPath, id string) {
 	}
 }
 
-func (box *Box) setSort(sortIDVals map[string]int) {
+// setImportSort 写入导入文档的排序值，导入完成后由统一事件通知。
+func (box *Box) setImportSort(sortIDVals map[string]int) {
 	fileTreeSortLock.Lock()
 	defer fileTreeSortLock.Unlock()
 
@@ -3216,8 +3217,6 @@ func (box *Box) setSort(sortIDVals map[string]int) {
 	if err = writeSortConfMap(confPath, fullSortIDs); err != nil {
 		return
 	}
-
-	pushFiletreeSortChanged(sortIDVals)
 }
 
 func pushFiletreeSortChanged(sortIDs map[string]int) {

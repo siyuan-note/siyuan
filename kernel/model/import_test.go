@@ -30,6 +30,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/image/bmp"
 )
@@ -113,6 +114,41 @@ func TestBuildImportedSYSortValuesWithoutSourceSort(t *testing.T) {
 
 	got := buildImportedSYSortValues([]*importedSYSortDoc{older, newer}, nil, []string{"existing"}, true)
 	assertImportedSYSortValues(t, got, map[string]int{newer.newID: 0, older.newID: 1, "existing": 2})
+}
+
+func TestImportedSYRootIDs(t *testing.T) {
+	rootB := &importedSYSortDoc{newID: "root-b", sourcePath: "/root-b.sy"}
+	rootA := &importedSYSortDoc{newID: "root-a", sourcePath: "/root-a.sy"}
+	child := &importedSYSortDoc{newID: "child", sourcePath: "/root-a/child.sy"}
+	hidden := &importedSYSortDoc{newID: "hidden", sourcePath: "/hidden.sy", hidden: true}
+
+	got := importedSYRootIDs([]*importedSYSortDoc{rootB, nil, child, hidden, rootA})
+	assertStringSlice(t, got, []string{"root-a", "root-b"})
+}
+
+func TestImportedTreeRootIDs(t *testing.T) {
+	trees := []*parse.Tree{
+		{ID: "root-b", Path: "/target/root-b.sy"},
+		nil,
+		{ID: "child", Path: "/target/root-b/child.sy"},
+		{ID: "root-a", Path: "/target/root-a.sy"},
+		{ID: "other", Path: "/other.sy"},
+	}
+
+	got := importedTreeRootIDs(trees, "/target")
+	assertStringSlice(t, got, []string{"root-a", "root-b"})
+}
+
+func assertStringSlice(t *testing.T, got, want []string) {
+	t.Helper()
+	if len(got) != len(want) {
+		t.Fatalf("string slice length = %d, want %d: got=%v", len(got), len(want), got)
+	}
+	for i, wantValue := range want {
+		if got[i] != wantValue {
+			t.Fatalf("string slice item %d = %q, want %q: got=%v", i, got[i], wantValue, got)
+		}
+	}
 }
 
 func assertImportedSYSortValues(t *testing.T, got, want map[string]int) {

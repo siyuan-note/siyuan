@@ -183,6 +183,40 @@ type importedSYSortDoc struct {
 	hidden     bool
 }
 
+func importedSYRootIDs(importedDocs []*importedSYSortDoc) (ret []string) {
+	for _, doc := range importedDocs {
+		if nil == doc || doc.hidden || "/" != path.Dir(doc.sourcePath) {
+			continue
+		}
+		ret = append(ret, doc.newID)
+	}
+	sort.Strings(ret)
+	return
+}
+
+func importedTreeRootIDs(trees []*parse.Tree, parentPath string) (ret []string) {
+	for _, tree := range trees {
+		if nil == tree || parentPath != path.Dir(tree.Path) {
+			continue
+		}
+		ret = append(ret, tree.ID)
+	}
+	sort.Strings(ret)
+	return
+}
+
+func pushDocsImported(boxID, parentPath, format string, rootIDs []string) {
+	if 1 > len(rootIDs) {
+		return
+	}
+	util.BroadcastByType("main", "docsImported", 0, "", map[string]any{
+		"notebook":   boxID,
+		"parentPath": parentPath,
+		"rootIDs":    rootIDs,
+		"format":     format,
+	})
+}
+
 func buildImportedSYSortValues(importedDocs []*importedSYSortDoc, sourceSortIDs map[string]int,
 	existingRootIDs []string, createDocAtTop bool) map[string]int {
 	groups := map[string][]*importedSYSortDoc{}
@@ -1014,6 +1048,9 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 	}
 
 	IncSync()
+	if !createNotebook {
+		pushDocsImported(boxID, baseTargetPath, "sy", importedSYRootIDs(importedSortDocs))
+	}
 
 	task.AppendTask(task.UpdateIDs, util.PushUpdateIDs, blockIDs)
 	return
@@ -1727,6 +1764,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 		importTrees = append(importTrees, tree)
 	}
 
+	var importedRootIDs []string
 	if 0 < len(importTrees) {
 		for id, newID := range moveIDs {
 			for _, importTree := range importTrees {
@@ -1749,6 +1787,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 		refreshBoxDocInfoByBoxID(boxID)
 		util.PushClearProgress()
 
+		importedRootIDs = importedTreeRootIDs(importTrees, baseTargetPath)
 		importTrees = []*parse.Tree{}
 		searchLinks = map[string]string{}
 
@@ -1787,10 +1826,11 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 				sortVal++
 			}
 		}
-		box.setSort(sortIDVals)
+		box.setImportSort(sortIDVals)
 	}
 
 	IncSync()
+	pushDocsImported(boxID, baseTargetPath, "markdown", importedRootIDs)
 	debug.FreeOSMemory()
 	return
 }

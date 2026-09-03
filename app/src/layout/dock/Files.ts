@@ -1547,6 +1547,15 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         });
     }
 
+    public onDocsImported(data: { notebook: string, parentPath: string, rootIDs: string[] }) {
+        const rootID = data.rootIDs?.[0];
+        if (!rootID) {
+            return;
+        }
+        const importedPath = data.parentPath === "/" ? `/${rootID}.sy` : `${data.parentPath}/${rootID}.sy`;
+        this.updateItemArrow(data.notebook, importedPath);
+    }
+
     public onDocSortModeChanged(data: IDocSortModeChanged) {
         updateFileTreeSortMode(data, this.element);
         this.docSortModeChanges.set(`${data.scope}:${data.box}:${data.id}:${data.path}`, data);

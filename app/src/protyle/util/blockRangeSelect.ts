@@ -58,8 +58,8 @@ export const getBlockRangeSelectElements = (rangeStartElement: HTMLElement, rang
                     if (!currentElement.classList.contains("sb__resize")) {
                         selectElements.push(currentElement);
                     }
-                    // 到达实际选区终点后停止，避免经过属性节点继续提升到父容器。
-                    if (currentElement === endElement) {
+                    // 当前选择单元包含选区终点时停止，避免经过属性节点继续提升到父容器。
+                    if (currentElement === endElement || currentElement.contains(endElement)) {
                         break;
                     }
                     const parentElement = currentElement.parentElement;

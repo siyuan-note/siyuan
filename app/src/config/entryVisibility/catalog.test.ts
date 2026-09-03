@@ -12,20 +12,26 @@ import {
 import {
     entryCatalog,
     getEntryCatalogChildren,
+    getEntryCatalogDefaultVisibility,
     getEntryCatalogNode,
     getEntryCatalogPathChain,
     getEntryCatalogSection,
     getEntryParentPath,
     getEntryOrderParents,
     getEntryPaths,
+    getLegacyPluginTopBarEntryKey,
     getPluginDockEntryKey,
     getPluginSlashEntryKey,
+    getPluginTopBarEntryKey,
     getSlashMenuEntryPath,
+    isEntryCatalogNodeConfigurable,
     isEntryOrderSortable,
     refreshDockCatalog,
     refreshSlashMenuCatalog,
+    refreshTopBarCatalog,
     refreshToolbarCatalog,
     SLASH_MENU_ROOT_PATH,
+    TOP_BAR_ROOT_PATH,
 } from "./catalog";
 
 const slashMenuBuiltinOrder = [
@@ -114,7 +120,185 @@ test("entry catalog paths are unique and indexed", () => {
     };
     entryCatalog.forEach((section) => visit(section.key, section.children));
     assert.equal(new Set(paths).size, paths.length);
-    assert.deepEqual(new Set(getEntryPaths()), new Set(paths));
+    assert.deepEqual(new Set(getEntryPaths()), new Set(paths.filter((path) =>
+        isEntryCatalogNodeConfigurable(getEntryCatalogNode(path)!))));
+});
+
+test("top bar catalog includes a fixed drag boundary in built-in DOM order", () => {
+    assert.equal(TOP_BAR_ROOT_PATH, "topBar");
+    assert.deepEqual(getEntryCatalogChildren(TOP_BAR_ROOT_PATH).map((item) => item.key), [
+        "barSync",
+        "barBack",
+        "barForward",
+        "drag",
+        "toolbarVIP",
+        "toolbarTitle",
+        "barPlugins",
+        "barCommand",
+        "barSearch",
+        "barZoom",
+        "barMode",
+        "barExit",
+    ]);
+    const drag = getEntryCatalogNode("topBar.drag")!;
+    assert.equal(drag.fixed, true);
+    assert.equal(isEntryCatalogNodeConfigurable(drag), false);
+    assert.equal(getEntryPaths().includes("topBar.drag"), false);
+    assert.equal(getEntryOrderParents().includes(TOP_BAR_ROOT_PATH), true);
+    assert.equal(getEntryCatalogNode("topBar.barWorkspace"), undefined);
+    assert.equal(getEntryCatalogNode("topBar.barMore"), undefined);
+    assert.equal(getEntryCatalogNode("topBar.windowControls"), undefined);
+});
+
+test("top bar markup stays aligned with its configurable built-in catalog", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/layout/topBar.ts"), "utf8");
+    const markupKeys = Array.from(source.matchAll(/data-topbar-entry="([^"]+)"/g), (match) => match[1]);
+    const catalogKeys = getEntryCatalogChildren(TOP_BAR_ROOT_PATH)
+        .filter(isEntryCatalogNodeConfigurable)
+        .map((item) => item.key);
+    assert.deepEqual(markupKeys, catalogKeys);
+    assert.match(source, /id="drag"/);
+    assert.doesNotMatch(source, /id="drag"[^>]*data-topbar-entry/);
+});
+
+test("top bar account entries use legacy account switches only as defaults", () => {
+    const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
+    Object.defineProperty(globalThis, "window", {
+        configurable: true,
+        value: {
+            siyuan: {
+                config: {
+                    account: {
+                        displayVIP: false,
+                        displayTitle: true,
+                    },
+                },
+            },
+        },
+    });
+    try {
+        assert.equal(getEntryCatalogDefaultVisibility("topBar.toolbarVIP"), false);
+        assert.equal(getEntryCatalogDefaultVisibility("topBar.toolbarTitle"), true);
+        assert.equal(getEntryCatalogDefaultVisibility("topBar.barSearch"), true);
+        assert.equal(getEntryCatalogDefaultVisibility("topBar.drag"), true);
+    } finally {
+        if (windowDescriptor) {
+            Object.defineProperty(globalThis, "window", windowDescriptor);
+        } else {
+            Reflect.deleteProperty(globalThis, "window");
+        }
+    }
+});
+
+const topBarElement = (attributes: Record<string, string>) => ({
+    getAttribute: (name: string) => attributes[name] ?? null,
+}) as unknown as Element;
+
+test("top bar catalog inserts plugin entries on their declared side of the fixed boundary", () => {
+    const leftKey = getPluginTopBarEntryKey("plugin.one", "left.item");
+    const rightKey = getPluginTopBarEntryKey("plugin.two", "right.item");
+    const legacyKey = getLegacyPluginTopBarEntryKey("plugin.two", 1);
+    try {
+        refreshTopBarCatalog([{
+            name: "plugin.one",
+            displayName: "Plugin One",
+            topBarIcons: [topBarElement({
+                id: "plugin_one:left.item",
+                "data-id": "left.item",
+                "data-topbar-entry": leftKey,
+                "data-location": "left",
+                "aria-label": "Left Item",
+            })],
+        }, {
+            name: "plugin.two",
+            topBarIcons: [topBarElement({
+                id: "plugin_two:right.item",
+                "data-id": "right.item",
+                "data-topbar-entry": rightKey,
+                "data-location": "right",
+                "aria-label": "Right Item",
+            }), topBarElement({
+                id: "plugin_two_1",
+                "data-topbar-entry": legacyKey,
+                "data-location": "right",
+                "aria-label": "Legacy Item",
+            })],
+        }]);
+        const children = getEntryCatalogChildren(TOP_BAR_ROOT_PATH);
+        const keys = children.map((item) => item.key);
+        assert.deepEqual(keys.slice(0, 5), ["barSync", "barBack", "barForward", leftKey, "drag"]);
+        assert.deepEqual(keys.slice(keys.indexOf("toolbarTitle"), keys.indexOf("barCommand")), [
+            "toolbarTitle",
+            rightKey,
+            legacyKey,
+            "barPlugins",
+        ]);
+        assert.equal(getEntryCatalogNode(`${TOP_BAR_ROOT_PATH}.${leftKey}`)?.label(),
+            "Plugin One - Left Item");
+        assert.equal(getEntryCatalogNode(`${TOP_BAR_ROOT_PATH}.${rightKey}`)?.label(),
+            "plugin.two - Right Item");
+        assert.equal(getEntryParentPath(`${TOP_BAR_ROOT_PATH}.${legacyKey}`), TOP_BAR_ROOT_PATH);
+    } finally {
+        refreshTopBarCatalog([]);
+    }
+    assert.equal(getEntryCatalogNode(`${TOP_BAR_ROOT_PATH}.${leftKey}`), undefined);
+    assert.equal(getEntryCatalogNode(`${TOP_BAR_ROOT_PATH}.${rightKey}`), undefined);
+});
+
+test("top bar catalog keeps the assigned key when a legacy item changes array index", () => {
+    const key = getLegacyPluginTopBarEntryKey("plugin.name", 2);
+    try {
+        refreshTopBarCatalog([{
+            name: "plugin.name",
+            topBarIcons: [topBarElement({
+                id: "plugin_name_2",
+                "data-topbar-entry": key,
+                "data-location": "right",
+                "aria-label": "Legacy Item",
+            })],
+        }]);
+        assert.equal(getEntryCatalogNode(`${TOP_BAR_ROOT_PATH}.${key}`)?.key, key);
+        assert.equal(getEntryCatalogNode(`${TOP_BAR_ROOT_PATH}.${getLegacyPluginTopBarEntryKey("plugin.name", 0)}`),
+            undefined);
+    } finally {
+        refreshTopBarCatalog([]);
+    }
+});
+
+test("plugin top bar entries use the legacy unpinned list as their default visibility", () => {
+    const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
+    const key = getPluginTopBarEntryKey("plugin.name", "item");
+    Object.defineProperty(globalThis, "window", {
+        configurable: true,
+        value: {
+            siyuan: {
+                storage: {
+                    "local-plugintopunpin": ["plugin_name:item"],
+                },
+            },
+        },
+    });
+    try {
+        refreshTopBarCatalog([{
+            name: "plugin.name",
+            topBarIcons: [topBarElement({
+                id: "plugin_name:item",
+                "data-id": "item",
+                "data-location": "right",
+                "aria-label": "Item",
+            })],
+        }]);
+        assert.equal(getEntryCatalogDefaultVisibility(`${TOP_BAR_ROOT_PATH}.${key}`), false);
+        window.siyuan.storage["local-plugintopunpin"] = [];
+        assert.equal(getEntryCatalogDefaultVisibility(`${TOP_BAR_ROOT_PATH}.${key}`), true);
+    } finally {
+        refreshTopBarCatalog([]);
+        if (windowDescriptor) {
+            Object.defineProperty(globalThis, "window", windowDescriptor);
+        } else {
+            Reflect.deleteProperty(globalThis, "window");
+        }
+    }
 });
 
 test("toolbar catalog follows the default toolbar declaration", () => {

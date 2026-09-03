@@ -1,4 +1,6 @@
 {
+	"entryTopBar": "Barra superiore",
+	"entryTopBarDrag": "Area di trascinamento della finestra",
 	"bazaarFrontendDesktop": "Finestra principale desktop",
 	"bazaarFrontendDesktopWindow": "Finestra desktop separata",
 	"bazaarFrontendMobile": "App mobile",
@@ -256,8 +258,8 @@
 	"entryInlineMenu": "Menu degli elementi in linea",
 	"entrySubmenu": "Sottomenu",
 	"splitMergedCellTip": "Prima dividi le celle unite",
-	"entryVisibility": "Menu, barra degli strumenti e barra di ancoraggio",
-	"entryVisibilityTip": "Configura la visibilità e l'ordine delle voci integrate dei menu e della barra degli strumenti desktop, nonché la visibilità delle icone della barra di ancoraggio",
+	"entryVisibility": "Barra superiore, menu, barra degli strumenti e barra di ancoraggio",
+	"entryVisibilityTip": "Configura la visibilità e l'ordine delle voci della barra superiore e delle voci integrate dei menu e della barra degli strumenti desktop, nonché la visibilità delle icone della barra di ancoraggio",
 	"entrySimple": "Semplice",
 	"entryFull": "Completo",
 	"entrySimpleTip": "Mostra le voci usate più spesso per iniziare rapidamente",

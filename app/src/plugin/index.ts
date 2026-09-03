@@ -38,6 +38,8 @@ import {
     setPluginToolbarItem,
 } from "./toolbarItem";
 import {isBuiltinToolbarItemName} from "../protyle/toolbar/defaults";
+import {getLegacyPluginTopBarEntryKey, getPluginTopBarEntryKey} from "./topBarKey";
+import {applyTopBarEntryVisibility} from "../config/entryVisibility/runtime";
 
 const disposedPlugins = new WeakSet<Plugin>();
 
@@ -247,12 +249,14 @@ export class Plugin {
             if (typeof options.id === "string") {
                 iconElement.id = `plugin_${encodeURIComponent(this.name)}:${encodeURIComponent(options.id)}`;
                 iconElement.setAttribute("data-id", options.id);
+                iconElement.setAttribute("data-topbar-entry", getPluginTopBarEntryKey(this.name, options.id));
             } else {
                 let index = this.topBarIcons.length;
                 do {
                     iconElement.id = `plugin_${this.name}_${index}`;
                     index++;
                 } while (this.topBarIcons.some(item => item.getAttribute("id") === iconElement.id));
+                iconElement.setAttribute("data-topbar-entry", getLegacyPluginTopBarEntryKey(this.name, index - 1));
             }
         }
         const previousLocation = iconElement.getAttribute("data-location");
@@ -277,9 +281,6 @@ export class Plugin {
                 document.getElementById("menuPluginTopBar")?.after(iconElement);
             }
         } else if (!isWindow() && window.siyuan.storage) {
-            if (window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(iconElement.id)) {
-                iconElement.classList.add("fn__none");
-            }
             if (!document.contains(iconElement) || previousLocation !== iconElement.getAttribute("data-location")) {
                 document.querySelector("#" + (iconElement.getAttribute("data-location") === "right" ? "barPlugins" : "drag"))?.before(iconElement);
             }
@@ -289,6 +290,7 @@ export class Plugin {
         }
         /// #if !MOBILE
         if (!isWindow()) {
+            applyTopBarEntryVisibility();
             resizeTopBar();
             setTabPosition(true);
         }
@@ -308,6 +310,7 @@ export class Plugin {
         this.topBarIcons.splice(index, 1);
         /// #if !MOBILE
         if (!isWindow()) {
+            applyTopBarEntryVisibility();
             resizeTopBar();
             setTabPosition(true);
         }

@@ -1,4 +1,6 @@
 {
+	"entryTopBar": "Bilah atas",
+	"entryTopBarDrag": "Area seret jendela",
 	"bazaarFrontendDesktop": "Jendela utama desktop",
 	"bazaarFrontendDesktopWindow": "Jendela desktop terpisah",
 	"bazaarFrontendMobile": "Aplikasi seluler",
@@ -256,8 +258,8 @@
 	"entryInlineMenu": "Menu elemen sebaris",
 	"entrySubmenu": "Submenu",
 	"splitMergedCellTip": "Pisahkan sel yang digabungkan terlebih dahulu",
-	"entryVisibility": "Menu, bilah alat, dan dok",
-	"entryVisibilityTip": "Atur visibilitas dan urutan item menu dan bilah alat desktop bawaan, serta visibilitas ikon dok",
+	"entryVisibility": "Bilah atas, menu, bilah alat, dan dok",
+	"entryVisibilityTip": "Atur visibilitas dan urutan item bilah atas serta item bawaan di menu desktop dan bilah alat, juga visibilitas ikon dok",
 	"entrySimple": "Sederhana",
 	"entryFull": "Lengkap",
 	"entrySimpleTip": "Menampilkan entri yang umum digunakan agar pengguna baru dapat memulai dengan cepat",

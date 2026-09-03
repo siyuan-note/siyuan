@@ -1,10 +1,19 @@
 import * as assert from "node:assert/strict";
 import test from "node:test";
 import {
+    getBuiltinProfileEntryVisibility,
     getProfileEntryVisibility,
     isEntryVisibilityImportVersionSupported,
     normalizeEntryVisibilityImportProfile,
 } from "./profile";
+
+test("built-in profiles honor entry defaults", () => {
+    assert.equal(getBuiltinProfileEntryVisibility("full", false, true), true);
+    assert.equal(getBuiltinProfileEntryVisibility("full", true, false), false);
+    assert.equal(getBuiltinProfileEntryVisibility("simple", true, true), true);
+    assert.equal(getBuiltinProfileEntryVisibility("simple", false, true), false);
+    assert.equal(getBuiltinProfileEntryVisibility("simple", true, false), false);
+});
 
 test("custom entry visibility preserves saved values", () => {
     const profile = {entries: {visible: true, hidden: false}};
@@ -15,6 +24,13 @@ test("custom entry visibility preserves saved values", () => {
 test("custom entry visibility shows missing entries", () => {
     assert.equal(getProfileEntryVisibility({entries: {}}, "new-entry"), true);
     assert.equal(getProfileEntryVisibility(undefined, "new-entry"), true);
+});
+
+test("custom entry visibility uses a caller-provided default only when the entry is missing", () => {
+    const profile = {entries: {visible: true, hidden: false}};
+    assert.equal(getProfileEntryVisibility(profile, "missing", false), false);
+    assert.equal(getProfileEntryVisibility(profile, "visible", false), true);
+    assert.equal(getProfileEntryVisibility(profile, "hidden", true), false);
 });
 
 test("entry visibility import supports versions 1 through 4", () => {

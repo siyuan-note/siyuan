@@ -1,6 +1,12 @@
 export const getProfileEntryVisibility = (profile: Pick<Config.IEntryVisibilityProfile, "entries"> | undefined,
-                                           path: string) =>
-    typeof profile?.entries[path] === "boolean" ? profile.entries[path] : true;
+                                           path: string, defaultVisible = true) =>
+    typeof profile?.entries[path] === "boolean" ? profile.entries[path] : defaultVisible;
+
+export const getBuiltinProfileEntryVisibility = (
+    profile: "simple" | "full",
+    simple: boolean,
+    defaultVisible = true,
+) => defaultVisible && (profile === "full" || simple);
 
 export type TEntryVisibilityImportProfile = {
     name?: unknown;

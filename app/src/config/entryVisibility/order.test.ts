@@ -6,6 +6,7 @@ import {
     moveEntryOrder,
     reorderEntrySlots,
     resolveEntryOrder,
+    resolveEntryOrderWithBoundaryDefaults,
 } from "./order";
 
 test("entry order keeps custom order and inserts new entries by their default neighbors", () => {
@@ -118,6 +119,53 @@ test("entry order preserves plugin registration slots", () => {
     const items = [{key: "a"}, {key: "plugin"}, {key: "b"}, {key: "separator"}];
     assert.deepEqual(reorderEntrySlots(items, ["b", "separator", "a"], (item) => item.key),
         [{key: "b"}, {key: "plugin"}, {key: "separator"}, {key: "a"}]);
+});
+
+test("top bar order can move entries across its fixed boundary while preserving an unavailable plugin slot", () => {
+    const defaultOrder = ["barSync", "barBack", "drag", "toolbarVIP", "barPlugins"];
+    const savedOrder = ["barBack", "plugin:missing:item", "drag", "barSync", "toolbarVIP", "barPlugins"];
+    assert.deepEqual(mergeEntryOrderPreservingUnknown(defaultOrder, savedOrder, [
+        "barBack",
+        "toolbarVIP",
+        "drag",
+        "barSync",
+        "barPlugins",
+    ]), [
+        "barBack",
+        "plugin:missing:item",
+        "toolbarVIP",
+        "drag",
+        "barSync",
+        "barPlugins",
+    ]);
+});
+
+test("new top bar entries use their default side while saved entries keep their user placement", () => {
+    const defaultOrder = ["leftBuiltin", "leftNew", "drag", "rightNew", "rightBuiltin"];
+    assert.deepEqual(resolveEntryOrderWithBoundaryDefaults(defaultOrder, [
+        "drag",
+        "leftBuiltin",
+        "rightBuiltin",
+    ], "drag", new Set()), [
+        "leftNew",
+        "drag",
+        "rightNew",
+        "leftBuiltin",
+        "rightBuiltin",
+    ]);
+    assert.deepEqual(resolveEntryOrderWithBoundaryDefaults(defaultOrder, [
+        "rightBuiltin",
+        "rightNew",
+        "drag",
+        "leftNew",
+        "leftBuiltin",
+    ], "drag", new Set()), [
+        "rightBuiltin",
+        "rightNew",
+        "drag",
+        "leftNew",
+        "leftBuiltin",
+    ]);
 });
 
 test("tab menu ordering handles mutually exclusive and conditional entries", () => {

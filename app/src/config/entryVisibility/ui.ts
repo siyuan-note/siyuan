@@ -5,13 +5,17 @@ import {genUUID} from "../../util/genID";
 import {
     entryCatalog,
     getEntryCatalogChildren,
+    getEntryCatalogDefaultVisibility,
     getEntryCatalogPathChain,
     getEntryPaths,
     IEntryCatalogNode,
     IEntryCatalogSection,
+    isEntryCatalogNodeConfigurable,
     isEntryOrderSortable,
     refreshDockCatalog,
     refreshSlashMenuCatalog,
+    refreshTopBarCatalog,
+    TOP_BAR_ROOT_PATH,
 } from "./catalog";
 import {
     createEntryProfileSnapshot,
@@ -23,7 +27,12 @@ import {
     saveEntryVisibility,
     TEntryVisibilityTemplate,
 } from "./runtime";
-import {mergeEntryOrderPreservingUnknown, moveEntryOrder, resolveEntryOrder} from "./order";
+import {
+    mergeEntryOrderPreservingUnknown,
+    moveEntryOrder,
+    resolveEntryOrder,
+    resolveEntryOrderWithBoundaryDefaults,
+} from "./order";
 import {
     getProfileEntryVisibility,
     isEntryVisibilityImportVersionSupported,
@@ -187,8 +196,11 @@ const renderProfileCards = (root: HTMLElement) => {
 const getProfileEntryOrder = (profile: Config.IEntryVisibilityProfile, parentPath: string,
                               nodes = getEntryCatalogChildren(parentPath) || []) => {
     const defaultOrder = nodes.map((item) => item.key);
-    return resolveEntryOrder(defaultOrder, profile.orders?.[parentPath],
-        new Set(nodes.filter((item) => item.type === "separator").map((item) => item.key)));
+    const separatorKeys = new Set(nodes.filter((item) => item.type === "separator").map((item) => item.key));
+    if (parentPath === TOP_BAR_ROOT_PATH) {
+        return resolveEntryOrderWithBoundaryDefaults(defaultOrder, profile.orders?.[parentPath], "drag", separatorKeys);
+    }
+    return resolveEntryOrder(defaultOrder, profile.orders?.[parentPath], separatorKeys);
 };
 
 const orderEntryNodes = (profile: Config.IEntryVisibilityProfile, parentPath: string,
@@ -203,7 +215,8 @@ const renderEntrySwitch = (profile: Config.IEntryVisibilityProfile, path: string
     const label = item.type === "separator" ? window.siyuan.languages.entrySeparator : item.label();
     return `<input class="b3-switch" type="checkbox"
     aria-label="${escapeAttr(label)}" data-entry-path="${escapeAttr(path)}"${readOnly ? ' data-entry-readonly aria-disabled="true"' : ""}
-    ${!parentEnabled && !readOnly ? " disabled" : ""}${getProfileEntryVisibility(profile, path) ? " checked" : ""}>`;
+    ${!parentEnabled && !readOnly ? " disabled" : ""}${getProfileEntryVisibility(profile, path,
+        getEntryCatalogDefaultVisibility(path)) ? " checked" : ""}>`;
 };
 
 const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: string, prefix: string,
@@ -216,7 +229,8 @@ const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: strin
     <div class="config-entry-visibility__column-list">
         ${nodes.map((item) => {
         const path = `${prefix}.${item.key}`;
-        const draggable = sortable && parentEnabled;
+        const configurable = isEntryCatalogNodeConfigurable(item);
+        const draggable = sortable && parentEnabled && configurable;
         if (item.type === "separator") {
             return `<div class="config-entry-visibility__row config-entry-visibility__row--separator${parentEnabled ? "" : " config-entry-visibility__row--disabled"}${readOnly ? " config-entry-visibility__row--readonly" : ""}"
                 data-entry-row data-entry-key="${escapeAttr(item.key)}" data-entry-parent="${escapeAttr(prefix)}">
@@ -229,15 +243,16 @@ const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: strin
         const label = item.label();
         const hasChildren = Boolean(item.children?.length);
         const selected = selectedPaths[depth] === path;
-        const rowTag = hasChildren ? "div" : "label";
-        return `<${rowTag} class="config-entry-visibility__row config-entry-visibility__row--${hasChildren ? "navigable" : "toggleable"}${selected ? " config-entry-visibility__row--current" : ""}${parentEnabled ? "" : " config-entry-visibility__row--disabled"}${readOnly ? " config-entry-visibility__row--readonly" : ""}"
+        const rowTag = hasChildren || !configurable ? "div" : "label";
+        const rowType = hasChildren ? "navigable" : configurable ? "toggleable" : "fixed";
+        return `<${rowTag} class="config-entry-visibility__row config-entry-visibility__row--${rowType}${selected ? " config-entry-visibility__row--current" : ""}${parentEnabled ? "" : " config-entry-visibility__row--disabled"}${readOnly ? " config-entry-visibility__row--readonly" : ""}"
             data-entry-row data-entry-key="${escapeAttr(item.key)}" data-entry-parent="${escapeAttr(prefix)}" data-entry-path-row="${escapeAttr(path)}"${hasChildren ? ` data-action="navigate-entry" data-entry-path="${escapeAttr(path)}" data-entry-depth="${depth}"` : ""}>
             ${draggable ? '<span class="config-entry-visibility__drag" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></span>' : ""}
             ${hasChildren ? `<button class="config-entry-visibility__navigate" data-action="navigate-entry"
                 data-entry-path="${escapeAttr(path)}" data-entry-depth="${depth}" title="${escapeAttr(label)}">
                 <span>${escapeHtml(label)}</span>
             </button>` : `<span class="config-entry-visibility__label" title="${escapeAttr(label)}">${escapeHtml(label)}</span>`}
-            ${renderEntrySwitch(profile, path, item, parentEnabled, readOnly)}
+            ${configurable ? renderEntrySwitch(profile, path, item, parentEnabled, readOnly) : ""}
             ${hasChildren ? `<button class="block__icon block__icon--show config-entry-visibility__arrow" data-action="navigate-entry"
                 data-entry-path="${escapeAttr(path)}" data-entry-depth="${depth}" aria-label="${escapeAttr(window.siyuan.languages.expand)}">
                 <svg><use xlink:href="#iconRight"></use></svg>
@@ -303,7 +318,8 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
     let prefix = directDisplayRoot ? directDisplayRootPath : section.key;
     let title = directDisplayRoot?.label() || section.label();
     let parentEnabled = directDisplayRoot
-        ? getProfileEntryVisibility(profile, directDisplayRootPath)
+        ? getProfileEntryVisibility(profile, directDisplayRootPath,
+            getEntryCatalogDefaultVisibility(directDisplayRootPath))
         : true;
     let depth = 0;
     while (nodes.length > 0) {
@@ -321,7 +337,8 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
         if (!selectedNode?.children?.length) {
             break;
         }
-        parentEnabled = parentEnabled && getProfileEntryVisibility(profile, selectedPath);
+        parentEnabled = parentEnabled && getProfileEntryVisibility(profile, selectedPath,
+            getEntryCatalogDefaultVisibility(selectedPath));
         nodes = selectedNode.children;
         prefix = selectedPath;
         title = selectedNode.label();
@@ -341,7 +358,7 @@ const getEntrySearchResults = (query: string) => {
     const results: IEntrySearchResult[] = [];
     const visit = (section: IEntryCatalogSection, prefix: string, nodes: IEntryCatalogNode[], labels: string[]) => {
         nodes.forEach((item) => {
-            if (item.type === "separator") {
+            if (item.type === "separator" || !isEntryCatalogNodeConfigurable(item)) {
                 return;
             }
             const path = `${prefix}.${item.key}`;
@@ -371,6 +388,7 @@ const getEntrySearchFilter = (query: string) => {
 
 const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     const plugins = window.siyuan.ws?.app?.plugins || [];
+    refreshTopBarCatalog(plugins);
     refreshDockCatalog(plugins);
     refreshSlashMenuCatalog(plugins);
     const builtin = profileID === ENTRY_PROFILE_SIMPLE || profileID === ENTRY_PROFILE_FULL;

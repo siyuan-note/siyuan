@@ -1,4 +1,6 @@
 {
+	"entryTopBar": "Horný panel",
+	"entryTopBarDrag": "Oblasť na presúvanie okna",
 	"bazaarFrontendDesktop": "Hlavné okno počítačovej aplikácie",
 	"bazaarFrontendDesktopWindow": "Samostatné okno počítačovej aplikácie",
 	"bazaarFrontendMobile": "Mobilná aplikácia",
@@ -256,8 +258,8 @@
 	"entryInlineMenu": "Ponuka vnorených prvkov",
 	"entrySubmenu": "Podponuka",
 	"splitMergedCellTip": "Najprv rozdeľte zlúčené bunky",
-	"entryVisibility": "Ponuky, panel s nástrojmi a dok",
-	"entryVisibilityTip": "Nastavte viditeľnosť a poradie vstavaných položiek ponúk a panela s nástrojmi na pracovnej ploche, ako aj viditeľnosť ikon doku",
+	"entryVisibility": "Horný panel, ponuky, panel s nástrojmi a dok",
+	"entryVisibilityTip": "Nastavte viditeľnosť a poradie položiek horného panela a vstavaných položiek ponúk a panela s nástrojmi na pracovnej ploche, ako aj viditeľnosť ikon doku",
 	"entrySimple": "Jednoduchý",
 	"entryFull": "Úplný",
 	"entrySimpleTip": "Zobrazuje často používané položky na rýchle začatie práce",

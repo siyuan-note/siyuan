@@ -14,7 +14,7 @@ import {closePanel} from "../../mobile/util/closePanel";
 /// #endif
 import md5 from "blueimp-md5";
 import type {SettingTabBuilder} from "../setting/builder";
-import {patchSyncConfig, refreshSyncCloudSpaceGroup, syncTabElement} from "./syncRuntime";
+import {refreshSyncCloudSpaceGroup, syncTabElement} from "./syncRuntime";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {bindAccountAuthEnter, isAccountLoginDisabled} from "./accountAuth";
 import {
@@ -73,16 +73,6 @@ export const registerAccountGroup = (tab: SettingTabBuilder) => {
         html: genAccountPaymentHTML,
         afterMount: bindAccountPaymentEvent,
     });
-    if (!isMobile()) {
-        group.switch("account.displayVIP", {
-            title: window.siyuan.languages.accountDisplayVIP,
-            save: (value) => patchSyncConfig("account.displayVIP", value),
-        });
-        group.switch("account.displayTitle", {
-            title: window.siyuan.languages.accountDisplayTitle,
-            save: (value) => patchSyncConfig("account.displayTitle", value),
-        });
-    }
 };
 
 const genAccountMainHTML = () => {
@@ -551,11 +541,8 @@ const confirmDeactivateAccount = () => {
     });
 };
 
-export const updateAccountSwitchesVisibility = (accountSettingsRoot: Element) => {
-    const user = window.siyuan.user;
-    accountSettingsRoot.querySelector(`#${CSS.escape("account.displayTitle")}`)?.closest(".config-item")?.classList.toggle("fn__none", !user || user.userTitles.length === 0);
-    accountSettingsRoot.querySelector(`#${CSS.escape("account.displayVIP")}`)?.closest(".config-item")?.classList.toggle("fn__none", !user);
-    accountSettingsRoot.querySelector("#configAccountPayment")?.classList.toggle("fn__none", !user);
+export const updateAccountPanelVisibility = (accountSettingsRoot: Element) => {
+    accountSettingsRoot.querySelector("#configAccountPayment")?.classList.toggle("fn__none", !window.siyuan.user);
 };
 
 const renderAccount = (accountSettingsRoot: Element) => {
@@ -567,7 +554,7 @@ const renderAccount = (accountSettingsRoot: Element) => {
     if (accountPaymentEl) {
         accountPaymentEl.outerHTML = genAccountPaymentHTML();
     }
-    updateAccountSwitchesVisibility(accountSettingsRoot);
+    updateAccountPanelVisibility(accountSettingsRoot);
     bindAccountMainEvent(accountSettingsRoot);
     bindAccountPaymentEvent(accountSettingsRoot);
 };
@@ -589,14 +576,20 @@ const genVIPIconHTML = (className = "") =>
 const genToolbarItemHTML = (ariaLabel: string, svg: string) =>
     `<div class="toolbar__item ariaLabel" aria-label="${ariaLabel}">${svg}</div>`;
 
+const setToolbarItems = (element: HTMLElement, parts: string[]) => {
+    element.innerHTML = parts.join("");
+    if (parts.length === 0) {
+        element.setAttribute("data-topbar-empty", "true");
+    } else {
+        element.removeAttribute("data-topbar-empty");
+    }
+};
+
 export const onSetaccount = () => {
     /// #if !MOBILE
     const toolbarVIPEl = document.getElementById("toolbarVIP");
-    if (!toolbarVIPEl) {
-        return;
-    }
-    const parts: string[] = [];
-    if (window.siyuan.config.account.displayVIP) {
+    if (toolbarVIPEl) {
+        const parts: string[] = [];
         if (!window.siyuan.user) {
             // 未登录
             parts.push(genToolbarItemHTML(window.siyuan.languages.freeSub, genVIPIconHTML("ft__error")));
@@ -626,14 +619,19 @@ export const onSetaccount = () => {
                 parts.push(genToolbarItemHTML(window.siyuan.languages.onepay, genVIPIconHTML("ft__success")));
             }
         }
+        setToolbarItems(toolbarVIPEl, parts);
     }
 
-    if (window.siyuan.config.account.displayTitle && window.siyuan.user) {
-        window.siyuan.user.userTitles.forEach(item => {
-            parts.push(genToolbarItemHTML(`${item.name}：${item.desc}`, item.icon));
-        });
+    const toolbarTitleEl = document.getElementById("toolbarTitle");
+    if (toolbarTitleEl) {
+        const parts: string[] = [];
+        if (window.siyuan.user) {
+            window.siyuan.user.userTitles.forEach(item => {
+                parts.push(genToolbarItemHTML(`${item.name}：${item.desc}`, item.icon));
+            });
+        }
+        setToolbarItems(toolbarTitleEl, parts);
     }
-
-    toolbarVIPEl.innerHTML = parts.join("");
+    window.dispatchEvent(new CustomEvent("siyuan-topbar-change"));
     /// #endif
 };

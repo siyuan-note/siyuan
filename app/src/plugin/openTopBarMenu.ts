@@ -7,6 +7,9 @@ import {setTabPosition} from "../layout/tabUtil";
 /// #endif
 import {Constants} from "../constants";
 import {hasPluginSetting} from "./index";
+import {isMobile} from "../util/functions";
+import {isEntryVisible, setEntryVisibilityValue} from "../config/entryVisibility/runtime";
+import {TOP_BAR_ROOT_PATH} from "../config/entryVisibility/catalog";
 
 export const openTopBarMenu = (app: App, target?: Element) => {
     const menu = new Menu(Constants.MENU_BAR_PLUGIN);
@@ -34,21 +37,33 @@ export const openTopBarMenu = (app: App, target?: Element) => {
                 i--;
                 continue;
             }
-            const hasUnpin = window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(item.id);
-            const submenu = [{
+            const entryKey = item.getAttribute("data-topbar-entry");
+            const entryPath = entryKey ? `${TOP_BAR_ROOT_PATH}.${entryKey}` : "";
+            const hasUnpin = isMobile() || !entryPath
+                ? window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(item.id)
+                : !isEntryVisible(entryPath);
+            const submenu: IMenu[] = [{
                 id: hasUnpin ? "pin" : "unpin",
                 icon: hasUnpin ? "iconPin" : "iconUnpin",
                 label: hasUnpin ? window.siyuan.languages.pin : window.siyuan.languages.unpin,
+                disabled: !isMobile() && window.siyuan.config.readonly,
                 click() {
-                    if (hasUnpin) {
-                        window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].splice(window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].indexOf(item.id), 1);
-                        item.classList.remove("fn__none");
+                    if (!isMobile() && entryPath) {
+                        setEntryVisibilityValue(entryPath, hasUnpin);
                     } else {
-                        window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].push(item.id);
-                        window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN] = Array.from(new Set(window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN]));
-                        item.classList.add("fn__none");
+                        if (hasUnpin) {
+                            window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].splice(
+                                window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].indexOf(item.id), 1);
+                            item.classList.remove("fn__none");
+                        } else {
+                            window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].push(item.id);
+                            window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN] = Array.from(new Set(
+                                window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN]));
+                            item.classList.add("fn__none");
+                        }
+                        setStorageVal(Constants.LOCAL_PLUGINTOPUNPIN,
+                            window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN]);
                     }
-                    setStorageVal(Constants.LOCAL_PLUGINTOPUNPIN, window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN]);
                     /// #if !MOBILE
                     setTabPosition(true);
                     /// #endif

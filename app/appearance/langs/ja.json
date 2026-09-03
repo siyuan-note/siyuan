@@ -1,4 +1,6 @@
 {
+	"entryTopBar": "トップバー",
+	"entryTopBarDrag": "ウィンドウのドラッグ領域",
 	"bazaarFrontendDesktop": "デスクトップメインウィンドウ",
 	"bazaarFrontendDesktopWindow": "デスクトップ独立ウィンドウ",
 	"bazaarFrontendMobile": "モバイルアプリ",
@@ -256,8 +258,8 @@
 	"entryInlineMenu": "インライン要素メニュー",
 	"entrySubmenu": "サブメニュー",
 	"splitMergedCellTip": "先に結合セルを分割する必要があります",
-	"entryVisibility": "メニュー、ツールバー、ドック",
-	"entryVisibilityTip": "デスクトップの組み込みメニュー項目とツールバー項目の表示と順序、およびドックアイコンの表示を設定します",
+	"entryVisibility": "トップバー、メニュー、ツールバー、ドック",
+	"entryVisibilityTip": "トップバー項目とデスクトップメニューおよびツールバーの組み込み項目の表示と順序、およびドックアイコンの表示を設定します",
 	"entrySimple": "シンプル",
 	"entryFull": "完全",
 	"entrySimpleTip": "よく使う項目を表示し、すぐに使い始められる構成",

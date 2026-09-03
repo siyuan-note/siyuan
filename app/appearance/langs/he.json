@@ -1,4 +1,6 @@
 {
+	"entryTopBar": "סרגל עליון",
+	"entryTopBarDrag": "אזור גרירת החלון",
 	"bazaarFrontendDesktop": "חלון שולחן עבודה ראשי",
 	"bazaarFrontendDesktopWindow": "חלון שולחן עבודה נפרד",
 	"bazaarFrontendMobile": "יישום נייד",
@@ -256,8 +258,8 @@
 	"entryInlineMenu": "תפריט רכיבים בשורה",
 	"entrySubmenu": "תפריט משנה",
 	"splitMergedCellTip": "יש לפצל תחילה תאים ממוזגים",
-	"entryVisibility": "תפריטים, סרגל כלים וסרגל עגינה",
-	"entryVisibilityTip": "הגדרת הנראות והסדר של פריטי התפריט וסרגל הכלים המובנים בשולחן העבודה, והנראות של סמלי סרגל העגינה",
+	"entryVisibility": "סרגל עליון, תפריטים, סרגל כלים וסרגל עגינה",
+	"entryVisibilityTip": "הגדרת הנראות והסדר של פריטי הסרגל העליון ושל הפריטים המובנים בתפריטי שולחן העבודה ובסרגל הכלים, והנראות של סמלי סרגל העגינה",
 	"entrySimple": "פשוט",
 	"entryFull": "מלא",
 	"entrySimpleTip": "מציג פריטים נפוצים כדי לעזור למשתמשים חדשים להתחיל במהירות",

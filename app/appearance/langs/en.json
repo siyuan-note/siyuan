@@ -1,4 +1,6 @@
 {
+	"entryTopBar": "Top bar",
+	"entryTopBarDrag": "Window drag area",
 	"bazaarFrontendDesktop": "Desktop main window",
 	"bazaarFrontendDesktopWindow": "Desktop detached window",
 	"bazaarFrontendMobile": "Mobile app",
@@ -256,8 +258,8 @@
 	"entryInlineMenu": "Inline element menu",
 	"entrySubmenu": "Submenu",
 	"splitMergedCellTip": "Split merged cells first",
-	"entryVisibility": "Menus, toolbar and dock",
-	"entryVisibilityTip": "Configure the visibility and order of built-in desktop menu and toolbar items, and the visibility of dock icons",
+	"entryVisibility": "Top bar, menus, toolbar and dock",
+	"entryVisibilityTip": "Configure the visibility and order of desktop top bar items and built-in menu and toolbar items, and the visibility of dock icons",
 	"entrySimple": "Simple",
 	"entryFull": "Full",
 	"entrySimpleTip": "Shows commonly used entries for getting started quickly",

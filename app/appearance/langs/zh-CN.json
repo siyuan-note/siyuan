@@ -1,4 +1,6 @@
 {
+	"entryTopBar": "顶栏",
+	"entryTopBarDrag": "窗口拖拽区域",
 	"bazaarFrontendDesktop": "桌面主窗口",
 	"bazaarFrontendDesktopWindow": "桌面独立窗口",
 	"bazaarFrontendMobile": "移动应用",
@@ -256,8 +258,8 @@
 	"entryInlineMenu": "行级元素菜单",
 	"entrySubmenu": "子菜单",
 	"splitMergedCellTip": "需要先拆分合并的单元格",
-	"entryVisibility": "菜单、工具栏与停靠栏",
-	"entryVisibilityTip": "配置桌面端内置菜单项与工具栏项的显隐与排序，以及停靠栏图标的显隐",
+	"entryVisibility": "顶栏、菜单、工具栏与停靠栏",
+	"entryVisibilityTip": "配置桌面端顶栏项、内置菜单项与工具栏项的显隐与排序，以及停靠栏图标的显隐",
 	"entrySimple": "简洁方案",
 	"entryFull": "完整方案",
 	"entrySimpleTip": "显示常用入口，适合新用户快速上手",

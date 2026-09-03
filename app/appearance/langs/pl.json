@@ -1,4 +1,6 @@
 {
+	"entryTopBar": "Górny pasek",
+	"entryTopBarDrag": "Obszar przeciągania okna",
 	"bazaarFrontendDesktop": "Główne okno aplikacji komputerowej",
 	"bazaarFrontendDesktopWindow": "Oddzielne okno aplikacji komputerowej",
 	"bazaarFrontendMobile": "Aplikacja mobilna",
@@ -256,8 +258,8 @@
 	"entryInlineMenu": "Menu elementów wbudowanych",
 	"entrySubmenu": "Podmenu",
 	"splitMergedCellTip": "Najpierw podziel scalone komórki",
-	"entryVisibility": "Menu, pasek narzędzi i dok",
-	"entryVisibilityTip": "Skonfiguruj widoczność i kolejność wbudowanych elementów menu i paska narzędzi pulpitu, a także widoczność ikon doku",
+	"entryVisibility": "Górny pasek, menu, pasek narzędzi i dok",
+	"entryVisibilityTip": "Skonfiguruj widoczność i kolejność elementów górnego paska oraz wbudowanych elementów menu i paska narzędzi pulpitu, a także widoczność ikon doku",
 	"entrySimple": "Prosty",
 	"entryFull": "Pełny",
 	"entrySimpleTip": "Wyświetla często używane pozycje, aby ułatwić szybki start",

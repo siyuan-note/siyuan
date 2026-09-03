@@ -1,4 +1,6 @@
 {
+	"entryTopBar": "Üst çubuk",
+	"entryTopBarDrag": "Pencere sürükleme alanı",
 	"bazaarFrontendDesktop": "Masaüstü ana penceresi",
 	"bazaarFrontendDesktopWindow": "Bağımsız masaüstü penceresi",
 	"bazaarFrontendMobile": "Mobil uygulama",
@@ -256,8 +258,8 @@
 	"entryInlineMenu": "Satır içi öğe menüsü",
 	"entrySubmenu": "Alt menü",
 	"splitMergedCellTip": "Önce birleştirilmiş hücreleri bölün",
-	"entryVisibility": "Menüler, araç çubuğu ve yuva",
-	"entryVisibilityTip": "Yerleşik masaüstü menü ve araç çubuğu öğelerinin görünürlüğünü ve sırasını, ayrıca yuva simgelerinin görünürlüğünü yapılandırın",
+	"entryVisibility": "Üst çubuk, menüler, araç çubuğu ve yuva",
+	"entryVisibilityTip": "Üst çubuk öğeleri ile masaüstü menüleri ve araç çubuğundaki yerleşik öğelerin görünürlüğünü ve sırasını, ayrıca yuva simgelerinin görünürlüğünü yapılandırın",
 	"entrySimple": "Basit",
 	"entryFull": "Tam",
 	"entrySimpleTip": "Yeni kullanıcıların hızlıca başlayabilmesi için sık kullanılan öğeleri gösterir",

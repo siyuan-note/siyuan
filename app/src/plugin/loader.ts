@@ -17,7 +17,11 @@ import {beginPluginTeardown, destroyPlugin} from "./uninstall";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {getAllEditor} from "../layout/getAll";
 import {getPluginDockEntryKey, refreshDockCatalog} from "../config/entryVisibility/catalog";
-import {applyDockEntryVisibility, isEntryVisible} from "../config/entryVisibility/runtime";
+import {
+    applyDockEntryVisibility,
+    applyTopBarEntryVisibility,
+    isEntryVisible,
+} from "../config/entryVisibility/runtime";
 import {PluginLifecycleCoordinator} from "./lifecycle";
 import {
     activateCustomBlockPlugin,
@@ -224,9 +228,6 @@ const mountPlugin = (plugin: Plugin) => {
                     document.getElementById("menuPluginTopBar")?.after(element);
                 }
             } else if (!isWindow()) {
-                if (window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(element.id)) {
-                    element.classList.add("fn__none");
-                }
                 document.querySelector("#" + (element.getAttribute("data-location") === "right" ? "barPlugins" : "drag")).before(element);
             }
         });
@@ -243,6 +244,7 @@ const mountPlugin = (plugin: Plugin) => {
             statusElement.insertAdjacentElement("afterbegin", element);
         }
     });
+    applyTopBarEntryVisibility();
     resizeTopBar();
     /// #endif
     addPluginDock(plugin);

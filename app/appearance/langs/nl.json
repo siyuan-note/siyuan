@@ -1,4 +1,6 @@
 {
+	"entryTopBar": "Bovenbalk",
+	"entryTopBarDrag": "Sleepgebied voor venster",
 	"bazaarFrontendDesktop": "Hoofdvenster van desktop-app",
 	"bazaarFrontendDesktopWindow": "Afzonderlijk desktopvenster",
 	"bazaarFrontendMobile": "Mobiele app",
@@ -256,8 +258,8 @@
 	"entryInlineMenu": "Menu voor inline-elementen",
 	"entrySubmenu": "Submenu",
 	"splitMergedCellTip": "Splits eerst de samengevoegde cellen",
-	"entryVisibility": "Menu's, werkbalk en dock",
-	"entryVisibilityTip": "Configureer de zichtbaarheid en volgorde van ingebouwde desktopmenu- en werkbalkitems en de zichtbaarheid van dockpictogrammen",
+	"entryVisibility": "Bovenbalk, menu's, werkbalk en dock",
+	"entryVisibilityTip": "Configureer de zichtbaarheid en volgorde van bovenbalkitems en ingebouwde items in desktopmenu's en de werkbalk, en de zichtbaarheid van dockpictogrammen",
 	"entrySimple": "Eenvoudig",
 	"entryFull": "Volledig",
 	"entrySimpleTip": "Toont veelgebruikte items om snel aan de slag te gaan",

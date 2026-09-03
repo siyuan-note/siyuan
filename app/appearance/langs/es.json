@@ -1,4 +1,6 @@
 {
+	"entryTopBar": "Barra superior",
+	"entryTopBarDrag": "Área de arrastre de la ventana",
 	"bazaarFrontendDesktop": "Ventana principal de escritorio",
 	"bazaarFrontendDesktopWindow": "Ventana de escritorio independiente",
 	"bazaarFrontendMobile": "Aplicación móvil",
@@ -256,8 +258,8 @@
 	"entryInlineMenu": "Menú de elementos en línea",
 	"entrySubmenu": "Submenú",
 	"splitMergedCellTip": "Primero hay que dividir las celdas combinadas",
-	"entryVisibility": "Menús, barra de herramientas y panel acoplable",
-	"entryVisibilityTip": "Configura la visibilidad y el orden de los elementos integrados de los menús y la barra de herramientas del escritorio, así como la visibilidad de los iconos del panel acoplable",
+	"entryVisibility": "Barra superior, menús, barra de herramientas y panel acoplable",
+	"entryVisibilityTip": "Configura la visibilidad y el orden de los elementos de la barra superior y de los elementos integrados de los menús y la barra de herramientas del escritorio, así como la visibilidad de los iconos del panel acoplable",
 	"entrySimple": "Sencillo",
 	"entryFull": "Completo",
 	"entrySimpleTip": "Muestra las entradas más utilizadas para empezar rápidamente",

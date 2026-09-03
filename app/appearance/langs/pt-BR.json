@@ -1,4 +1,6 @@
 {
+	"entryTopBar": "Barra superior",
+	"entryTopBarDrag": "Área de arrasto da janela",
 	"bazaarFrontendDesktop": "Janela principal do desktop",
 	"bazaarFrontendDesktopWindow": "Janela separada do desktop",
 	"bazaarFrontendMobile": "Aplicativo móvel",
@@ -256,8 +258,8 @@
 	"entryInlineMenu": "Menu de elementos em linha",
 	"entrySubmenu": "Submenu",
 	"splitMergedCellTip": "Divida primeiro as células mescladas",
-	"entryVisibility": "Menus, barra de ferramentas e dock",
-	"entryVisibilityTip": "Configure a visibilidade e a ordem dos itens integrados dos menus e da barra de ferramentas da área de trabalho, bem como a visibilidade dos ícones do dock",
+	"entryVisibility": "Barra superior, menus, barra de ferramentas e dock",
+	"entryVisibilityTip": "Configure a visibilidade e a ordem dos itens da barra superior e dos itens integrados dos menus e da barra de ferramentas da área de trabalho, bem como a visibilidade dos ícones do dock",
 	"entrySimple": "Simples",
 	"entryFull": "Completo",
 	"entrySimpleTip": "Mostra os itens mais usados para começar rapidamente",

@@ -77,6 +77,11 @@ html[data-frontend="browser-desktop"] {
   padding: 0 5px 0 var(--b3-toolbar-left-mac);
   overflow: hidden; // 最小化后右上角显示不全
 
+  & > [data-entry-hidden="true"],
+  & > [data-topbar-empty="true"] {
+    display: none !important;
+  }
+
   &--browser {
     padding-left: calc(env(titlebar-area-x, 0px) + 5px);
     padding-right: calc(100% - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px) + 5px);
@@ -102,6 +107,10 @@ html[data-frontend="browser-desktop"] {
     font-size: 12px;
     min-width: 148px;
     box-sizing: border-box;
+
+    &[data-topbar-reordering="true"] {
+      -webkit-app-region: no-drag;
+    }
   }
 
   &__item {

@@ -825,33 +825,33 @@ export const resizeTopBar = () => {
         item.removeAttribute("data-hide");
     });
 
-    let afterDragElement = dragElement.nextElementSibling;
+    let afterDragElement = dragElement.nextElementSibling as HTMLElement;
     const hideIds: string[] = [];
-    while (toolbarElement.scrollWidth > toolbarElement.clientWidth + 2) {
+    while (toolbarElement.scrollWidth > toolbarElement.clientWidth + 2 &&
+        afterDragElement && afterDragElement.id !== "barMore" && afterDragElement.id !== "windowControls") {
         // 跳过默认即隐藏的元素（如桌面端 #barExit），它们本就不占溢出空间，
         // 若为其打上 data-hide，最大化后恢复阶段会误将其显示出来
-        if (!afterDragElement.classList.contains("fn__none")) {
+        if (!afterDragElement.classList.contains("fn__none") &&
+            afterDragElement.getAttribute("data-entry-hidden") !== "true" &&
+            afterDragElement.getAttribute("data-topbar-empty") !== "true") {
             hideIds.push(afterDragElement.id);
             afterDragElement.classList.add("fn__none");
             afterDragElement.setAttribute("data-hide", "true");
         }
-        afterDragElement = afterDragElement.nextElementSibling;
-        if (afterDragElement.id === "barMore") {
-            break;
-        }
+        afterDragElement = afterDragElement.nextElementSibling as HTMLElement;
     }
 
-    let beforeDragElement = dragElement.previousElementSibling;
-    while (toolbarElement.scrollWidth > toolbarElement.clientWidth + 2) {
-        if (!beforeDragElement.classList.contains("fn__none")) {
+    let beforeDragElement = dragElement.previousElementSibling as HTMLElement;
+    while (toolbarElement.scrollWidth > toolbarElement.clientWidth + 2 &&
+        beforeDragElement && beforeDragElement.id !== "barWorkspace") {
+        if (!beforeDragElement.classList.contains("fn__none") &&
+            beforeDragElement.getAttribute("data-entry-hidden") !== "true" &&
+            beforeDragElement.getAttribute("data-topbar-empty") !== "true") {
             hideIds.push(beforeDragElement.id);
             beforeDragElement.classList.add("fn__none");
             beforeDragElement.setAttribute("data-hide", "true");
         }
-        beforeDragElement = beforeDragElement.previousElementSibling;
-        if (beforeDragElement.id === "barWorkspace") {
-            break;
-        }
+        beforeDragElement = beforeDragElement.previousElementSibling as HTMLElement;
     }
     if (hideIds.length > 0) {
         barMoreElement.classList.remove("fn__none");
@@ -872,9 +872,6 @@ export const resizeTopBar = () => {
         }
     }
 
-    window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].forEach((id: string) => {
-        document.getElementById(id)?.classList.add("fn__none");
-    });
 };
 
 // TODO: 需支持所有页签类型，避免其他类型页签没有使用到而加载

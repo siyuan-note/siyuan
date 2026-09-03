@@ -26,6 +26,7 @@ export const PROVIDER_PRESETS: IProviderPreset[] = [
     {id: "siliconflow", name: "SiliconFlow", baseURL: "https://api.siliconflow.cn/v1", category: "aggregator", responsesSupport: "unsupported", icon: "/stage/images/ai-providers/siliconflow.svg"},
     {id: "openrouter", name: "OpenRouter", baseURL: "https://openrouter.ai/api/v1", category: "aggregator", responsesSupport: "supported", icon: "/stage/images/ai-providers/openrouter.svg"},
     {id: "groq", name: "Groq", baseURL: "https://api.groq.com/openai/v1", category: "aggregator", responsesSupport: "experimental"},
+    {id: "aimlapi", name: "aimlapi.com", baseURL: "https://api.aimlapi.com/v1", category: "aggregator", responsesSupport: "experimental"},
     {id: "ollama", name: "Ollama", baseURL: "http://localhost:11434/v1", category: "local", responsesSupport: "supported", icon: "/stage/images/ai-providers/ollama.svg"},
     {id: "lmstudio", name: "LM Studio", baseURL: "http://localhost:1234/v1", category: "local", responsesSupport: "supported", icon: "/stage/images/ai-providers/lmstudio.svg"},
     {id: "custom", name: "", baseURL: "", category: "custom", responsesSupport: "experimental"},

@@ -10,6 +10,7 @@ export const armKeyboardLock = () => {
 
 export const callMobileAppShowKeyboard = () => {
     armKeyboardLock();
+    window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: true}));
 
     if (window.JSAndroid && window.JSAndroid.showKeyboard) {
         window.JSAndroid.showKeyboard();

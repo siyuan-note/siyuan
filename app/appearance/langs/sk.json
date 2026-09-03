@@ -1,4 +1,9 @@
 {
+	"bazaarFrontendDesktop": "Hlavné okno počítačovej aplikácie",
+	"bazaarFrontendDesktopWindow": "Samostatné okno počítačovej aplikácie",
+	"bazaarFrontendMobile": "Mobilná aplikácia",
+	"bazaarFrontendBrowserDesktop": "Prehliadač v počítači",
+	"bazaarFrontendBrowserMobile": "Mobilný prehliadač",
 	"switchToPreview": "Prepnúť do režimu náhľadu exportu",
 	"switchToWYSIWYG": "Prepnúť do režimu WYSIWYG",
 	"openStorageLocation": "Otvoriť umiestnenie úložiska",
@@ -283,7 +288,6 @@
 	"bazaarMinAppVersion": "Minimálna verzia SiYuan",
 	"bazaarPlatforms": "Platformy",
 	"bazaarSystems": "Systémy",
-	"bazaarWeb": "Web",
 	"bazaarCheckUpdateFailed": "Nepodarilo sa skontrolovať aktualizácie balíkov z trhoviska",
 	"reasoningEffortNone": "Žiadne",
 	"reasoningEffortXHigh": "Veľmi vysoká",

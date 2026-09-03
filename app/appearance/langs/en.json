@@ -1,4 +1,9 @@
 {
+	"bazaarFrontendDesktop": "Desktop main window",
+	"bazaarFrontendDesktopWindow": "Desktop detached window",
+	"bazaarFrontendMobile": "Mobile app",
+	"bazaarFrontendBrowserDesktop": "Desktop browser",
+	"bazaarFrontendBrowserMobile": "Mobile browser",
 	"switchToPreview": "Switch to Export Preview mode",
 	"switchToWYSIWYG": "Switch to WYSIWYG mode",
 	"openStorageLocation": "Open storage location",
@@ -283,7 +288,6 @@
 	"bazaarMinAppVersion": "Minimum SiYuan version",
 	"bazaarPlatforms": "Platforms",
 	"bazaarSystems": "Systems",
-	"bazaarWeb": "Web",
 	"bazaarCheckUpdateFailed": "Failed to check marketplace package updates",
 	"reasoningEffortNone": "None",
 	"reasoningEffortXHigh": "Extra high",

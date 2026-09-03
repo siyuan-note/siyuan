@@ -18,6 +18,7 @@ import {
     getBazaarCompatibilityData,
     getBazaarCompatibilityFieldVisibility,
     getBazaarDeprecationData,
+    getBazaarFrontendLabels,
     getBazaarFundingItems,
     getBazaarKernelSystemLabels,
     getBazaarPackageInvalidLanguageKey,
@@ -480,28 +481,6 @@ export const bazaar = {
             return chips;
         }
         return `${chips}<button type="button" data-type="keywords-expand" data-position="north" aria-label="${escapeAttr(window.siyuan.languages.showMore)}" class="item__keywords-more b3-chip b3-chip--small b3-chip--hover ariaLabel">...</button>`;
-    },
-    _getFrontendLabels(frontends: string[], requireMobileDeclaration = false) {
-        if (!frontends?.length) {
-            return requireMobileDeclaration && ["mobile", "browser-mobile"].includes(getFrontend()) ?
-                [] : [window.siyuan.languages.all];
-        }
-        if (frontends.includes("all")) {
-            return [window.siyuan.languages.all];
-        }
-        const labels = new Set<string>();
-        frontends.forEach((frontend) => {
-            if (["desktop", "desktop-window"].includes(frontend)) {
-                labels.add(window.siyuan.languages.desktop);
-            } else if (frontend === "mobile") {
-                labels.add(window.siyuan.languages.mobile);
-            } else if (["browser-desktop", "browser-mobile"].includes(frontend)) {
-                labels.add(window.siyuan.languages.bazaarWeb);
-            } else {
-                labels.add(frontend);
-            }
-        });
-        return Array.from(labels);
     },
     _genReadmeActionsHTML(bazaarType: TBazaarType, installed?: IBazaarItem, available?: IBazaarItem) {
         if (!installed) {
@@ -1000,8 +979,19 @@ type="checkbox">
         const urls = resourceData.repoURL.split("/");
         urls.pop();
         const compatibilityFieldVisibility = getBazaarCompatibilityFieldVisibility(bazaarType);
-        const frontendLabels = compatibilityFieldVisibility.frontends ?
-            bazaar._getFrontendLabels(compatibilityData.frontends, bazaarType === "themes") : [];
+        const frontendLabels = compatibilityFieldVisibility.frontends ? getBazaarFrontendLabels(
+            compatibilityData.frontends,
+            {
+                all: window.siyuan.languages.all,
+                desktop: window.siyuan.languages.bazaarFrontendDesktop,
+                desktopWindow: window.siyuan.languages.bazaarFrontendDesktopWindow,
+                mobile: window.siyuan.languages.bazaarFrontendMobile,
+                browserDesktop: window.siyuan.languages.bazaarFrontendBrowserDesktop,
+                browserMobile: window.siyuan.languages.bazaarFrontendBrowserMobile,
+            },
+            getFrontend(),
+            bazaarType === "themes",
+        ) : [];
         const systemLabels = compatibilityFieldVisibility.systems ?
             getBazaarBackendSystemLabels(compatibilityData.backends, window.siyuan.languages.all) : [];
         const kernelSystemLabels = compatibilityFieldVisibility.kernelSystems ?

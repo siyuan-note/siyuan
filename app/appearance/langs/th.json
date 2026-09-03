@@ -1,4 +1,9 @@
 {
+	"bazaarFrontendDesktop": "หน้าต่างหลักเดสก์ท็อป",
+	"bazaarFrontendDesktopWindow": "หน้าต่างเดสก์ท็อปแยก",
+	"bazaarFrontendMobile": "แอปมือถือ",
+	"bazaarFrontendBrowserDesktop": "เบราว์เซอร์เดสก์ท็อป",
+	"bazaarFrontendBrowserMobile": "เบราว์เซอร์มือถือ",
 	"switchToPreview": "สลับเป็นโหมดตัวอย่างการส่งออก",
 	"switchToWYSIWYG": "สลับเป็นโหมด WYSIWYG",
 	"openStorageLocation": "เปิดตำแหน่งที่เก็บข้อมูล",
@@ -283,7 +288,6 @@
 	"bazaarMinAppVersion": "เวอร์ชัน SiYuan ขั้นต่ำ",
 	"bazaarPlatforms": "แพลตฟอร์ม",
 	"bazaarSystems": "ระบบ",
-	"bazaarWeb": "เว็บ",
 	"bazaarCheckUpdateFailed": "ตรวจสอบการอัปเดตแพ็กเกจในตลาดไม่สำเร็จ",
 	"reasoningEffortNone": "ไม่มี",
 	"reasoningEffortXHigh": "สูงมาก",

@@ -1,4 +1,9 @@
 {
+	"bazaarFrontendDesktop": "桌面主窗口",
+	"bazaarFrontendDesktopWindow": "桌面独立窗口",
+	"bazaarFrontendMobile": "移动应用",
+	"bazaarFrontendBrowserDesktop": "桌面端浏览器",
+	"bazaarFrontendBrowserMobile": "移动端浏览器",
 	"switchToPreview": "切换为导出预览模式",
 	"switchToWYSIWYG": "切换为所见即所得模式",
 	"openStorageLocation": "打开存储位置",
@@ -283,7 +288,6 @@
 	"bazaarMinAppVersion": "最低思源版本",
 	"bazaarPlatforms": "平台",
 	"bazaarSystems": "系统",
-	"bazaarWeb": "网页端",
 	"bazaarCheckUpdateFailed": "检查集市包更新失败",
 	"reasoningEffortNone": "无",
 	"reasoningEffortXHigh": "超高",

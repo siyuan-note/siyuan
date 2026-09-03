@@ -1,4 +1,9 @@
 {
+	"bazaarFrontendDesktop": "Główne okno aplikacji komputerowej",
+	"bazaarFrontendDesktopWindow": "Oddzielne okno aplikacji komputerowej",
+	"bazaarFrontendMobile": "Aplikacja mobilna",
+	"bazaarFrontendBrowserDesktop": "Przeglądarka na komputerze",
+	"bazaarFrontendBrowserMobile": "Przeglądarka mobilna",
 	"switchToPreview": "Przełącz na tryb podglądu eksportu",
 	"switchToWYSIWYG": "Przełącz na tryb WYSIWYG",
 	"openStorageLocation": "Otwórz lokalizację przechowywania",
@@ -283,7 +288,6 @@
 	"bazaarMinAppVersion": "Minimalna wersja SiYuan",
 	"bazaarPlatforms": "Platformy",
 	"bazaarSystems": "Systemy",
-	"bazaarWeb": "Sieć",
 	"bazaarCheckUpdateFailed": "Nie udało się sprawdzić aktualizacji pakietów marketplace",
 	"reasoningEffortNone": "Brak",
 	"reasoningEffortXHigh": "Bardzo wysoki",

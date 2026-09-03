@@ -1,4 +1,9 @@
 {
+	"bazaarFrontendDesktop": "डेस्कटॉप मुख्य विंडो",
+	"bazaarFrontendDesktopWindow": "स्वतंत्र डेस्कटॉप विंडो",
+	"bazaarFrontendMobile": "मोबाइल ऐप",
+	"bazaarFrontendBrowserDesktop": "डेस्कटॉप ब्राउज़र",
+	"bazaarFrontendBrowserMobile": "मोबाइल ब्राउज़र",
 	"switchToPreview": "निर्यात पूर्वावलोकन मोड पर स्विच करें",
 	"switchToWYSIWYG": "जो दिखे वही मिले मोड पर स्विच करें",
 	"openStorageLocation": "संग्रहण स्थान खोलें",
@@ -283,7 +288,6 @@
 	"bazaarMinAppVersion": "न्यूनतम SiYuan संस्करण",
 	"bazaarPlatforms": "प्लेटफ़ॉर्म",
 	"bazaarSystems": "सिस्टम",
-	"bazaarWeb": "वेब",
 	"bazaarCheckUpdateFailed": "बाज़ार पैकेज अपडेट की जाँच विफल रही",
 	"reasoningEffortNone": "कोई नहीं",
 	"reasoningEffortXHigh": "बहुत अधिक",

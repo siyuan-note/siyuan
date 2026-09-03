@@ -1,4 +1,9 @@
 {
+	"bazaarFrontendDesktop": "חלון שולחן עבודה ראשי",
+	"bazaarFrontendDesktopWindow": "חלון שולחן עבודה נפרד",
+	"bazaarFrontendMobile": "יישום נייד",
+	"bazaarFrontendBrowserDesktop": "דפדפן שולחן עבודה",
+	"bazaarFrontendBrowserMobile": "דפדפן נייד",
 	"switchToPreview": "מעבר למצב תצוגה מקדימה לייצוא",
 	"switchToWYSIWYG": "מעבר למצב WYSIWYG",
 	"openStorageLocation": "פתיחת מיקום האחסון",
@@ -283,7 +288,6 @@
 	"bazaarMinAppVersion": "גרסת SiYuan מזערית",
 	"bazaarPlatforms": "פלטפורמות",
 	"bazaarSystems": "מערכות",
-	"bazaarWeb": "אינטרנט",
 	"bazaarCheckUpdateFailed": "בדיקת עדכונים לחבילות השוק נכשלה",
 	"reasoningEffortNone": "ללא",
 	"reasoningEffortXHigh": "גבוה מאוד",

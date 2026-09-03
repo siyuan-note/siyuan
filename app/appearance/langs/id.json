@@ -1,4 +1,9 @@
 {
+	"bazaarFrontendDesktop": "Jendela utama desktop",
+	"bazaarFrontendDesktopWindow": "Jendela desktop terpisah",
+	"bazaarFrontendMobile": "Aplikasi seluler",
+	"bazaarFrontendBrowserDesktop": "Peramban desktop",
+	"bazaarFrontendBrowserMobile": "Peramban seluler",
 	"switchToPreview": "Beralih ke mode Pratinjau Ekspor",
 	"switchToWYSIWYG": "Beralih ke mode WYSIWYG",
 	"openStorageLocation": "Buka lokasi penyimpanan",
@@ -283,7 +288,6 @@
 	"bazaarMinAppVersion": "Versi minimum SiYuan",
 	"bazaarPlatforms": "Platform",
 	"bazaarSystems": "Sistem",
-	"bazaarWeb": "Web",
 	"bazaarCheckUpdateFailed": "Gagal memeriksa pembaruan paket bazar",
 	"reasoningEffortNone": "Tidak ada",
 	"reasoningEffortXHigh": "Sangat tinggi",

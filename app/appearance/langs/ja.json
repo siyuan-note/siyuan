@@ -1,4 +1,9 @@
 {
+	"bazaarFrontendDesktop": "デスクトップメインウィンドウ",
+	"bazaarFrontendDesktopWindow": "デスクトップ独立ウィンドウ",
+	"bazaarFrontendMobile": "モバイルアプリ",
+	"bazaarFrontendBrowserDesktop": "デスクトップブラウザー",
+	"bazaarFrontendBrowserMobile": "モバイルブラウザー",
 	"switchToPreview": "プレビューモードに切り替える",
 	"switchToWYSIWYG": "WYSIWYG モードに切り替える",
 	"openStorageLocation": "保存場所を開く",
@@ -283,7 +288,6 @@
 	"bazaarMinAppVersion": "SiYuan の最小バージョン",
 	"bazaarPlatforms": "プラットフォーム",
 	"bazaarSystems": "システム",
-	"bazaarWeb": "ウェブ",
 	"bazaarCheckUpdateFailed": "マーケットプレイスパッケージの更新確認に失敗しました",
 	"reasoningEffortNone": "なし",
 	"reasoningEffortXHigh": "非常に高い",

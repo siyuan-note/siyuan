@@ -1,4 +1,9 @@
 {
+	"bazaarFrontendDesktop": "데스크톱 기본 창",
+	"bazaarFrontendDesktopWindow": "데스크톱 독립 창",
+	"bazaarFrontendMobile": "모바일 앱",
+	"bazaarFrontendBrowserDesktop": "데스크톱 브라우저",
+	"bazaarFrontendBrowserMobile": "모바일 브라우저",
 	"switchToPreview": "내보내기 미리보기 모드로 전환",
 	"switchToWYSIWYG": "WYSIWYG 모드로 전환",
 	"openStorageLocation": "저장 위치 열기",
@@ -283,7 +288,6 @@
 	"bazaarMinAppVersion": "최소 SiYuan 버전",
 	"bazaarPlatforms": "플랫폼",
 	"bazaarSystems": "시스템",
-	"bazaarWeb": "웹",
 	"bazaarCheckUpdateFailed": "마켓 패키지 업데이트를 확인하지 못했습니다",
 	"reasoningEffortNone": "없음",
 	"reasoningEffortXHigh": "매우 높음",

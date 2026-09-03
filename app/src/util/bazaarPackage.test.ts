@@ -9,6 +9,7 @@ import {
     getBazaarCompatibilityData,
     getBazaarCompatibilityFieldVisibility,
     getBazaarDeprecationData,
+    getBazaarFrontendLabels,
     getBazaarFundingItems,
     getBazaarKernelSystemLabels,
     getBazaarPackageInvalidLanguageKey,
@@ -171,6 +172,42 @@ describe("isBazaarPluginEnabledInPublish", () => {
             disabledInPublish: true,
             userDisabledInPublish: true,
         }), false);
+    });
+});
+
+describe("getBazaarFrontendLabels", () => {
+    const labels = {
+        all: "All",
+        desktop: "Desktop main window",
+        desktopWindow: "Desktop detached window",
+        mobile: "Mobile app",
+        browserDesktop: "Desktop browser",
+        browserMobile: "Mobile browser",
+    };
+
+    it("distinguishes all five supported frontends", () => {
+        assert.deepEqual(getBazaarFrontendLabels([
+            "desktop", "desktop-window", "mobile", "browser-desktop", "browser-mobile",
+        ], labels, "desktop"), [
+            "Desktop main window", "Desktop detached window", "Mobile app", "Desktop browser", "Mobile browser",
+        ]);
+    });
+
+    it("preserves unknown frontends and removes duplicate labels", () => {
+        assert.deepEqual(getBazaarFrontendLabels([
+            "desktop", "custom", "desktop", "custom",
+        ], labels, "desktop"), ["Desktop main window", "custom"]);
+    });
+
+    it("treats missing and all declarations as unrestricted", () => {
+        assert.deepEqual(getBazaarFrontendLabels(undefined, labels, "desktop"), ["All"]);
+        assert.deepEqual(getBazaarFrontendLabels(["all", "desktop"], labels, "desktop"), ["All"]);
+    });
+
+    it("requires themes to declare compatibility on mobile frontends", () => {
+        assert.deepEqual(getBazaarFrontendLabels([], labels, "mobile", true), []);
+        assert.deepEqual(getBazaarFrontendLabels([], labels, "browser-mobile", true), []);
+        assert.deepEqual(getBazaarFrontendLabels([], labels, "desktop", true), ["All"]);
     });
 });
 

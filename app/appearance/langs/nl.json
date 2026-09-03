@@ -1,4 +1,9 @@
 {
+	"bazaarFrontendDesktop": "Hoofdvenster van desktop-app",
+	"bazaarFrontendDesktopWindow": "Afzonderlijk desktopvenster",
+	"bazaarFrontendMobile": "Mobiele app",
+	"bazaarFrontendBrowserDesktop": "Desktopbrowser",
+	"bazaarFrontendBrowserMobile": "Mobiele browser",
 	"switchToPreview": "Overschakelen naar de exportvoorbeeldmodus",
 	"switchToWYSIWYG": "Overschakelen naar de WYSIWYG-modus",
 	"openStorageLocation": "Opslaglocatie openen",
@@ -283,7 +288,6 @@
 	"bazaarMinAppVersion": "Minimale SiYuan-versie",
 	"bazaarPlatforms": "Platforms",
 	"bazaarSystems": "Systemen",
-	"bazaarWeb": "Web",
 	"bazaarCheckUpdateFailed": "Controleren op updates voor marktplaatspakketten is mislukt",
 	"reasoningEffortNone": "Geen",
 	"reasoningEffortXHigh": "Zeer hoog",

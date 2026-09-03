@@ -1,4 +1,9 @@
 {
+	"bazaarFrontendDesktop": "Fenêtre principale de bureau",
+	"bazaarFrontendDesktopWindow": "Fenêtre de bureau indépendante",
+	"bazaarFrontendMobile": "Application mobile",
+	"bazaarFrontendBrowserDesktop": "Navigateur de bureau",
+	"bazaarFrontendBrowserMobile": "Navigateur mobile",
 	"switchToPreview": "Passer en mode aperçu de l'exportation",
 	"switchToWYSIWYG": "Passer en mode WYSIWYG",
 	"openStorageLocation": "Ouvrir l’emplacement de stockage",
@@ -283,7 +288,6 @@
 	"bazaarMinAppVersion": "Version minimale de SiYuan",
 	"bazaarPlatforms": "Plateformes",
 	"bazaarSystems": "Systèmes",
-	"bazaarWeb": "Web",
 	"bazaarCheckUpdateFailed": "Échec de la vérification des mises à jour des paquets de la place de marché",
 	"reasoningEffortNone": "Aucun",
 	"reasoningEffortXHigh": "Très élevé",

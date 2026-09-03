@@ -55,6 +55,38 @@ export const getBazaarCompatibilityFieldVisibility = (packageType: string) => {
     };
 };
 
+type TBazaarFrontendLabels = {
+    all: string;
+    desktop: string;
+    desktopWindow: string;
+    mobile: string;
+    browserDesktop: string;
+    browserMobile: string;
+};
+
+export const getBazaarFrontendLabels = (
+    frontends: string[] | null | undefined,
+    labels: TBazaarFrontendLabels,
+    currentFrontend: string,
+    requireMobileDeclaration = false,
+) => {
+    if (!frontends?.length) {
+        return requireMobileDeclaration && ["mobile", "browser-mobile"].includes(currentFrontend) ?
+            [] : [labels.all];
+    }
+    if (frontends.includes("all")) {
+        return [labels.all];
+    }
+    const localizedLabels: Record<string, string> = {
+        desktop: labels.desktop,
+        "desktop-window": labels.desktopWindow,
+        mobile: labels.mobile,
+        "browser-desktop": labels.browserDesktop,
+        "browser-mobile": labels.browserMobile,
+    };
+    return Array.from(new Set(frontends.map((frontend) => localizedLabels[frontend] || frontend)));
+};
+
 export const isBazaarPackageEnableDisabled = (
     packageType: string,
     item: {disallowInstall?: boolean, installedIncompatible?: boolean, enabled?: boolean, current?: boolean},

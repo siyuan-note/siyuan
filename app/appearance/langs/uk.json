@@ -1,4 +1,9 @@
 {
+	"bazaarFrontendDesktop": "Головне вікно програми",
+	"bazaarFrontendDesktopWindow": "Окреме вікно програми",
+	"bazaarFrontendMobile": "Мобільний застосунок",
+	"bazaarFrontendBrowserDesktop": "Браузер на комп'ютері",
+	"bazaarFrontendBrowserMobile": "Мобільний браузер",
 	"switchToPreview": "Перемкнутися в режим попереднього перегляду експорту",
 	"switchToWYSIWYG": "Перемкнутися в режим WYSIWYG",
 	"openStorageLocation": "Відкрити розташування сховища",
@@ -283,7 +288,6 @@
 	"bazaarMinAppVersion": "Мінімальна версія SiYuan",
 	"bazaarPlatforms": "Платформи",
 	"bazaarSystems": "Системи",
-	"bazaarWeb": "Веб",
 	"bazaarCheckUpdateFailed": "Не вдалося перевірити оновлення пакетів маркетплейсу",
 	"reasoningEffortNone": "Немає",
 	"reasoningEffortXHigh": "Дуже висока",

@@ -14,6 +14,7 @@ import {
     deleteColumn,
     deleteRow,
     getColIndex,
+    getOrCreateTableBody,
     insertColumn,
     insertRow,
     insertRowAbove,
@@ -2272,7 +2273,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
                         }
                     });
                     if (prueTrElement) {
-                        const tbodyElement = nodeElement.querySelector("tbody");
+                        const tbodyElement = getOrCreateTableBody(nodeElement.querySelector("table"));
                         const theadElement = nodeElement.querySelector("thead");
                         while (prueTrElement !== theadElement.lastElementChild) {
                             theadElement.lastElementChild.querySelectorAll("th").forEach(item => {

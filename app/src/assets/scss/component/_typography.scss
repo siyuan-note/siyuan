@@ -357,11 +357,13 @@
       border-top-right-radius: var(--b3-table-border-radius-top-right);
     }
 
-    tbody:last-of-type > tr:last-child > :first-child {
+    tbody:last-of-type > tr:last-child > :first-child,
+    thead:last-child > tr:last-child > :first-child {
       border-bottom-left-radius: var(--b3-table-border-radius-bottom-left);
     }
 
-    tbody:last-of-type > tr:last-child > :nth-last-child(1 of :not(.fn__none)) {
+    tbody:last-of-type > tr:last-child > :nth-last-child(1 of :not(.fn__none)),
+    thead:last-child > tr:last-child > :nth-last-child(1 of :not(.fn__none)) {
       border-bottom-right-radius: var(--b3-table-border-radius-bottom-right);
     }
 

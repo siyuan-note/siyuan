@@ -48,6 +48,10 @@ export const getColIndex = (cellElement: HTMLElement) => {
     return index;
 };
 
+export const getOrCreateTableBody = (tableElement: HTMLTableElement) => {
+    return tableElement.tBodies[0] || tableElement.createTBody();
+};
+
 export const isTableHeaderEnabled = (nodeElement: Element, type: "row" | "column") => {
     return type === "row" ? nodeElement.getAttribute("custom-sy-table-header-row") !== "false" :
         nodeElement.getAttribute("custom-sy-table-header-column") === "true";
@@ -158,14 +162,9 @@ export const insertRow = (protyle: IProtyle, range: Range, cellElement: HTMLElem
     }
     let newRowElement: HTMLTableRowElement;
     if (cellElement.tagName === "TH") {
-        const tbodyElement = nodeElement.querySelector("tbody");
-        if (tbodyElement) {
-            tbodyElement.insertAdjacentHTML("afterbegin", `<tr>${rowHTML}</tr>`.repeat(count));
-            newRowElement = tbodyElement.firstElementChild as HTMLTableRowElement;
-        } else {
-            cellElement.parentElement.parentElement.insertAdjacentHTML("afterend", `<tbody>${`<tr>${rowHTML}</tr>`.repeat(count)}</tbody>`);
-            newRowElement = cellElement.parentElement.parentElement.nextElementSibling.firstElementChild as HTMLTableRowElement;
-        }
+        const tbodyElement = getOrCreateTableBody(nodeElement.querySelector("table"));
+        tbodyElement.insertAdjacentHTML("afterbegin", `<tr>${rowHTML}</tr>`.repeat(count));
+        newRowElement = tbodyElement.firstElementChild as HTMLTableRowElement;
     } else {
         cellElement.parentElement.insertAdjacentHTML("afterend", `<tr>${rowHTML}</tr>`.repeat(count));
         newRowElement = cellElement.parentElement.nextElementSibling as HTMLTableRowElement;
@@ -212,6 +211,7 @@ export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTM
     }
     let newRowElement: HTMLTableRowElement;
     if (cellElement.parentElement.parentElement.tagName === "THEAD" && !cellElement.parentElement.previousElementSibling) {
+        getOrCreateTableBody(nodeElement.querySelector("table"));
         cellElement.parentElement.parentElement.insertAdjacentHTML("beforebegin", `<thead><tr>${rowHTML}</tr></thead>`);
         newRowElement = nodeElement.querySelector("thead tr");
         cellElement.parentElement.parentElement.nextElementSibling.insertAdjacentHTML("afterbegin", cellElement.parentElement.parentElement.innerHTML.replace(/<th/g, "<td").replace(/<\/th>/g, "</td>"));

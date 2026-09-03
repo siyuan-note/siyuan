@@ -409,6 +409,8 @@
 
     &__title {
       padding: 16px;
+      background-color: var(--b3-theme-background);
+      background-color: color-mix(in srgb, var(--b3-theme-background) 88%, transparent);
       backdrop-filter: blur(8px);
       position: sticky;
       top: 0;

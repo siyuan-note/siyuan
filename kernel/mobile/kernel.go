@@ -290,6 +290,7 @@ func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang
 		sql.SetIndexAssetPath(model.Conf.Search.IndexAssetPath)
 
 		model.BootSyncData()
+		model.CleanupEmptyPluginStorageDirs()
 		model.InitBoxes()
 		model.LoadFlashcards()
 		util.LoadAssetsTexts()

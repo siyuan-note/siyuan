@@ -95,6 +95,7 @@ type Package struct {
 	IconURL    string `json:"iconURL"`
 
 	Installed               bool   `json:"installed"`
+	HasStorageData          bool   `json:"hasStorageData,omitempty"`
 	Outdated                bool   `json:"outdated"`
 	Current                 bool   `json:"current"`
 	Updated                 string `json:"updated"`

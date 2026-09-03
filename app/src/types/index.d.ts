@@ -1206,6 +1206,7 @@ interface IBazaarItem {
     bazaarIncompatible?: boolean; // 仅插件/主题
     enabled?: boolean; // 仅 plugin
     userDisabledInPublish?: boolean; // 仅 plugin
+    hasStorageData?: boolean; // 仅插件
     modes?: string[]; // 仅 theme
 }
 

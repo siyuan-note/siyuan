@@ -181,11 +181,12 @@ func updateBazaarPackage(c *gin.Context) {
 		return
 	}
 
-	var pkgType, packageName, frontend string
+	var pkgType, packageName, frontend, keyword string
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("packageType", &pkgType, true, true),
 		util.BindJsonArg("packageName", &packageName, true, true),
 		util.BindJsonArg("frontend", &frontend, true, true),
+		util.BindJsonArg("keyword", &keyword, false, false),
 	) {
 		return
 	}
@@ -201,7 +202,7 @@ func updateBazaarPackage(c *gin.Context) {
 	}
 	util.PushMsg(model.Conf.Language(69), 3000)
 	ret.Data = map[string]any{
-		"packages": model.GetBazaarPackages(pkgType, frontend, ""),
+		"packages": model.GetBazaarPackages(pkgType, frontend, keyword),
 	}
 }
 

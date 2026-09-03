@@ -47,11 +47,29 @@ import {
     refreshVisibleRatingUI,
     syncRatingUser,
 } from "./bazaar/rating";
+import {
+    filterBazaarPackagesByThemeMode,
+    getNextBazaarCardBatch,
+} from "./bazaar/batchRenderer";
 
 interface IBazaarMountSnapshot {
     element: HTMLElement;
     generation: number;
     requestID?: number;
+}
+
+interface IBazaarCardRenderState {
+    container: Element;
+    panel: HTMLElement;
+    cardsElement: HTMLElement;
+    packages: IBazaarItem[];
+    bazaarType: TBazaarType;
+    cursor: number;
+    active: boolean;
+    mount: IBazaarMountSnapshot;
+    observer?: IntersectionObserver;
+    scrollHandler?: () => void;
+    frameID?: number;
 }
 
 /** 集市 Tab 挂载（面板页，不走注册表渲染） */
@@ -113,6 +131,7 @@ export const bazaar = {
     _globalPluginStateUnsubscribe: undefined as (() => void) | undefined,
     _ratingUserID: "",
     _ratingUserChangeHandler: undefined as (() => void) | undefined,
+    _bazaarCardRenderStates: new Map<Element, IBazaarCardRenderState>(),
     _activateMount(element: HTMLElement, force = false) {
         if (!force && this.element === element) {
             return;
@@ -121,6 +140,9 @@ export const bazaar = {
         this.element = element;
     },
     _invalidateMount() {
+        Array.from(this._bazaarCardRenderStates.keys()).forEach((container) => {
+            this._disposeBazaarCardRender(container);
+        });
         this._mountGeneration++;
         this._updateRequestID++;
         this._pluginGlobalRequestID++;
@@ -380,8 +402,17 @@ export const bazaar = {
         <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
+        ${bazaar._genOpenStorageHTML(item, bazaarType)}
     </div>
 </div>`;
+    },
+    _genOpenStorageHTML(item: IBazaarItem, bazaarType: TBazaarType) {
+        if (bazaarType !== "plugins" || !item.hasStorageData) {
+            return "";
+        }
+        return `<span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open-storage" aria-label="${window.siyuan.languages.openStorageLocation}">
+    <svg><use xlink:href="#iconDatabase"></use></svg>
+</span>`;
     },
     _getDetailKey(bazaarType: TBazaarType, packageName: string) {
         return `${bazaarType}:${packageName}`;
@@ -596,6 +627,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
+        ${bazaar._genOpenStorageHTML(installed, bazaarType)}
         ${bazaar._genUpdateButtonHTML(available, bazaarType)}
         ${genRatePackageActionHTML(ratingLoaded, bazaar._data.userRatings.get(ratingKey))}
     </div>
@@ -840,6 +872,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
+        ${bazaar._genOpenStorageHTML(bazaarItem, bazaarType)}
         <span data-position="north" class="ariaLabel block__icon block__icon--show${showSwitch ? "" : " fn__none"}" data-type="switch" aria-label="${window.siyuan.languages.use}">
             <svg><use xlink:href="#iconSelect"></use></svg>
         </span>
@@ -1270,7 +1303,12 @@ type="checkbox">
     _reloadBazaarType(bazaarType: TBazaarType) {
         const config = BAZAAR_PACKAGE_CONFIG[bazaarType];
         const mount = bazaar._beginBazaarRequest(bazaarType);
-        fetchPost(config.api.bazaar, {frontend: getFrontend()}, response => {
+        const keyword = (mount.element.querySelector(
+            `.config-bazaar__panel[data-type="${config.tabType}"] .b3-text-field`) as HTMLInputElement)?.value.trim() || "";
+        fetchPost(config.api.bazaar, {
+            ...(config.bazaarRequestUsesFrontend ? {frontend: getFrontend()} : {}),
+            keyword,
+        }, response => {
             if (response.code === 0) {
                 bazaar._onBazaar(response, bazaarType, mount);
             }
@@ -1445,6 +1483,7 @@ type="checkbox">
             const panelType = panel.getAttribute("data-type");
             const isActive = panelType === layoutTabType;
             panel.classList.toggle("fn__none", !isActive);
+            bazaar._setBazaarPanelActive(panel, isActive);
             if (isActive && from === "bazaar") {
                 bazaar._initBazaarPanel(bazaarType, panel as HTMLElement);
             }
@@ -1657,20 +1696,127 @@ type="checkbox">
         this._bindLocalPackageEvent(app, mount);
         bindBazaarEvents(this, app, mount);
     },
-    _renderBazaarCards(container: Element, packages: IBazaarItem[], bazaarType: TBazaarType, themeModeValue?: string) {
-        const htmlParts: string[] = [];
-        for (const item of packages) {
-            if (bazaarType === "themes" && themeModeValue && themeModeValue !== "2" && (
-                (themeModeValue === "0" && item.modes?.includes("dark")) ||
-                (themeModeValue === "1" && item.modes?.includes("light"))
-            )) {
-                continue;
-            }
-            htmlParts.push(bazaar._genCardHTML(item, bazaarType));
+    _stopBazaarCardWatcher(state: IBazaarCardRenderState) {
+        state.observer?.disconnect();
+        state.observer = undefined;
+        if (state.scrollHandler) {
+            state.panel.removeEventListener("scroll", state.scrollHandler);
+            state.scrollHandler = undefined;
         }
-        const html = htmlParts.join("");
-        container.innerHTML = `<div class="b3-cards${html ? "" : " b3-cards--nowrap"}">${html || `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`}</div>`;
-        container.parentElement.querySelector(".counter").textContent = htmlParts.length.toString();
+        if (state.frameID !== undefined) {
+            window.cancelAnimationFrame(state.frameID);
+            state.frameID = undefined;
+        }
+    },
+    _disposeBazaarCardRender(container: Element) {
+        const state = this._bazaarCardRenderStates.get(container);
+        if (!state) {
+            return;
+        }
+        state.active = false;
+        this._stopBazaarCardWatcher(state);
+        this._bazaarCardRenderStates.delete(container);
+    },
+    _isBazaarCardRenderCurrent(state: IBazaarCardRenderState) {
+        return this._bazaarCardRenderStates.get(state.container) === state &&
+            this._isMountCurrent(state.mount) && state.container.isConnected && state.cardsElement.isConnected;
+    },
+    _scheduleBazaarCardBatch(state: IBazaarCardRenderState) {
+        if (state.frameID !== undefined || !state.active || !this._isBazaarCardRenderCurrent(state)) {
+            return;
+        }
+        state.frameID = window.requestAnimationFrame(() => {
+            state.frameID = undefined;
+            if (state.active && this._isBazaarCardRenderCurrent(state)) {
+                this._appendBazaarCardBatch(state);
+            }
+        });
+    },
+    _watchBazaarCardBatch(state: IBazaarCardRenderState) {
+        if (!state.active || state.cursor >= state.packages.length || !this._isBazaarCardRenderCurrent(state)) {
+            return;
+        }
+        if (typeof window.IntersectionObserver === "function") {
+            if (!state.observer) {
+                state.observer = new IntersectionObserver((entries) => {
+                    if (entries.some((entry) => entry.isIntersecting)) {
+                        state.observer?.disconnect();
+                        this._scheduleBazaarCardBatch(state);
+                    }
+                }, {
+                    root: state.panel,
+                    rootMargin: "640px 0px",
+                });
+            }
+            state.observer.disconnect();
+            const lastCard = state.cardsElement.lastElementChild;
+            if (lastCard) {
+                state.observer.observe(lastCard);
+            }
+            return;
+        }
+        if (!state.scrollHandler) {
+            state.scrollHandler = () => {
+                if (state.panel.scrollTop + state.panel.clientHeight + 640 >= state.panel.scrollHeight) {
+                    this._scheduleBazaarCardBatch(state);
+                }
+            };
+            state.panel.addEventListener("scroll", state.scrollHandler, {passive: true});
+        }
+        if (state.panel.clientHeight > 0 &&
+            state.panel.scrollTop + state.panel.clientHeight + 640 >= state.panel.scrollHeight) {
+            this._scheduleBazaarCardBatch(state);
+        }
+    },
+    _appendBazaarCardBatch(state: IBazaarCardRenderState) {
+        if (!this._isBazaarCardRenderCurrent(state)) {
+            return;
+        }
+        const batch = getNextBazaarCardBatch(state.packages, state.cursor);
+        state.cursor = batch.nextCursor;
+        state.cardsElement.insertAdjacentHTML("beforeend", batch.packages.map((item) =>
+            this._genCardHTML(item, state.bazaarType)).join(""));
+        if (batch.complete) {
+            this._stopBazaarCardWatcher(state);
+        } else {
+            this._watchBazaarCardBatch(state);
+        }
+    },
+    _setBazaarPanelActive(panel: Element, active: boolean) {
+        this._bazaarCardRenderStates.forEach((state: IBazaarCardRenderState) => {
+            if (state.panel !== panel) {
+                return;
+            }
+            state.active = active;
+            if (active) {
+                this._watchBazaarCardBatch(state);
+            } else {
+                this._stopBazaarCardWatcher(state);
+            }
+        });
+    },
+    _renderBazaarCards(container: Element, packages: IBazaarItem[], bazaarType: TBazaarType, themeModeValue?: string) {
+        this._disposeBazaarCardRender(container);
+        const visiblePackages = filterBazaarPackagesByThemeMode(packages, bazaarType, themeModeValue);
+        container.parentElement.querySelector(".counter").textContent = visiblePackages.length.toString();
+        if (visiblePackages.length === 0) {
+            container.innerHTML = `<div class="b3-cards b3-cards--nowrap"><ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul></div>`;
+            return;
+        }
+        container.innerHTML = '<div class="b3-cards"></div>';
+        const panel = container.closest(".config-bazaar__panel") as HTMLElement;
+        const state: IBazaarCardRenderState = {
+            container,
+            panel,
+            cardsElement: container.firstElementChild as HTMLElement,
+            packages: visiblePackages,
+            bazaarType,
+            cursor: 0,
+            active: !panel.classList.contains("fn__none"),
+            mount: this._captureMount(),
+        };
+        this._bazaarCardRenderStates.set(container, state);
+        this._appendBazaarCardBatch(state);
     },
     _onBazaar(response: IWebSocketData, bazaarType: TBazaarType, mount: IBazaarMountSnapshot) {
         if (!bazaar._isBazaarRequestCurrent(bazaarType, mount)) {

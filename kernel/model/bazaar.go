@@ -368,6 +368,9 @@ func getInstalledPackages0(pkgType, frontend, keyword string) (installedPackages
 
 	for _, info := range installedInfos {
 		pkg := info.Pkg
+		if pkgType == "plugins" {
+			setPluginStorageData(pkg, info.DirName)
+		}
 		installPath := filepath.Join(basePath, info.DirName)
 		baseURLPath := installedPackageBaseURLPath(baseURLPathPrefix, info.DirName)
 		// 设置本地集市包的通用元数据

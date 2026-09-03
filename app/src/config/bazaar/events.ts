@@ -131,6 +131,17 @@ const ACTION_HANDLERS = {
         /// #endif
         return HANDLED;
     }) satisfies TBazaarActionHandler,
+    "open-storage": ((context) => {
+        const {installedItem, pkgItem, pkgType} = context;
+        const item = installedItem || pkgItem;
+        if (!item || pkgType !== "plugins" || !item.hasStorageData) {
+            return CONTINUE;
+        }
+        /// #if !BROWSER
+        useShell("openPath", path.join(window.siyuan.config.system.dataDir, "storage", "petal", item.name));
+        /// #endif
+        return HANDLED;
+    }) satisfies TBazaarActionHandler,
     "retry-update": ((context) => {
         context.controller._checkUpdate(true);
         return HANDLED;
@@ -213,9 +224,13 @@ const ACTION_HANDLERS = {
                     target.parentElement.insertAdjacentHTML("afterend", '<img data-type="img-loading" style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 16px;box-sizing: border-box;" src="/stage/loading-pure.svg">');
                 }
                 const request = controller._beginBazaarRequest(pkgType, mount);
+                const config = BAZAAR_PACKAGE_CONFIG[pkgType];
+                const keyword = (mount.element.querySelector(
+                    `.config-bazaar__panel[data-type="${config.tabType}"] .b3-text-field`) as HTMLInputElement)?.value.trim() || "";
                 fetchPost("/api/bazaar/updateBazaarPackage", {
                     packageType: pkgType,
                     packageName,
+                    keyword,
                     frontend: getFrontend()
                 }, response => {
                     if (response.code !== 0) {
@@ -448,16 +463,16 @@ const handleLayoutTabClick = (context: IBazaarClickContext, target: HTMLElement)
     controller.element.querySelector(".layout-tab-bar .item--focus").classList.remove("item--focus");
     target.classList.add("item--focus");
     controller.element.querySelectorAll(".config-bazaar__panel").forEach((item) => {
-        if (type === item.getAttribute("data-type")) {
-            item.classList.remove("fn__none");
+        const isActive = type === item.getAttribute("data-type");
+        item.classList.toggle("fn__none", !isActive);
+        controller._setBazaarPanelActive(item, isActive);
+        if (isActive) {
             if (type !== "downloaded") {
                 const bazaarType = getBazaarTypeByTab(type);
                 if (bazaarType) {
                     controller._initBazaarPanel(bazaarType, item as HTMLElement);
                 }
             }
-        } else {
-            item.classList.add("fn__none");
         }
     });
     return HANDLED;
@@ -578,9 +593,10 @@ const bindBazaarSelectEvents = (controller: TBazaarController) => {
                 controller._reorderDownloadedCards(controller._sortDownloadedPackages(
                     controller._data.downloadedDefault, selectElement.value));
             } else if (selectElement.id === "bazaarSelect") {
+                const sortValue = window.siyuan.storage[Constants.LOCAL_BAZAAR][BAZAAR_PACKAGE_CONFIG.themes.tabType];
                 controller._renderBazaarCards(
                     controller.element.querySelector("#configBazaarTheme"),
-                    controller._data.themes,
+                    sortBazaarPackages(controller._data.themes, sortValue),
                     "themes",
                     selectElement.value
                 );

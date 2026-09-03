@@ -1,4 +1,5 @@
 {
+	"openStorageLocation": "저장 위치 열기",
 	"moveDocToSameLevel": "같은 수준",
 	"moveDocAsChild": "하위 문서",
 	"editMode": "모드 전환",

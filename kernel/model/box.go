@@ -119,6 +119,7 @@ func ListNotebooks() (ret []*Box, err error) {
 		boxConfPath := filepath.Join(boxDirPath, ".siyuan", "conf.json")
 		isExistConf := filelock.IsExist(boxConfPath)
 		missingEncryptedIdentity := false
+		repairLockHeld := false
 		if !isExistConf {
 			if !IsUserGuide(id) {
 				// conf.json 缺失时检查加密备份，确认是否为加密笔记本
@@ -146,6 +147,22 @@ func ListNotebooks() (ret []*Box, err error) {
 					setEncryptedBoxState(id, EncryptedBoxStateError)
 					logging.LogErrorf("encrypted notebook key identity is missing [%s]", boxDirPath)
 				} else {
+					if !syncLock.TryLock() {
+						logging.LogWarnf("deferred repairing box without conf while sync lock is occupied [%s]", boxDirPath)
+						continue
+					}
+					repairLockHeld = true
+					hasDocuments, scanErr := hasLiveBoxDocuments(boxDirPath)
+					if scanErr != nil {
+						syncLock.Unlock()
+						logging.LogErrorf("scan box without conf [%s] failed: %s", boxDirPath, scanErr)
+						continue
+					}
+					if !hasDocuments {
+						syncLock.Unlock()
+						logging.LogWarnf("ignored a box without conf and documents [%s]", boxDirPath)
+						continue
+					}
 					// 数据同步时展开文档树操作可能导致数据丢失 https://github.com/siyuan-note/siyuan/issues/7129
 					logging.LogWarnf("found a corrupted box [%s]", boxDirPath)
 				}
@@ -223,6 +240,9 @@ func ListNotebooks() (ret []*Box, err error) {
 			box.Unindex()
 			logging.LogWarnf("fixed a corrupted box [%s]", boxDirPath)
 		}
+		if repairLockHeld {
+			syncLock.Unlock()
+		}
 		ret = append(ret, box)
 	}
 
@@ -254,6 +274,30 @@ func ListNotebooks() (ret []*Box, err error) {
 		sort.Slice(ret, func(i, j int) bool { return ret[i].ID < ret[j].ID })
 	case util.SortModeCreatedDESC:
 		sort.Slice(ret, func(i, j int) bool { return ret[i].ID > ret[j].ID })
+	}
+	return
+}
+
+// hasLiveBoxDocuments 检查笔记本正文目录中是否存在文档，忽略仅用于保存笔记本元数据和历史数据的 .siyuan 目录。
+func hasLiveBoxDocuments(boxDirPath string) (ret bool, err error) {
+	err = filepath.WalkDir(boxDirPath, func(filePath string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if entry.IsDir() {
+			if filePath != boxDirPath && ".siyuan" == entry.Name() {
+				return fs.SkipDir
+			}
+			return nil
+		}
+		if entry.Type().IsRegular() && strings.HasSuffix(entry.Name(), ".sy") {
+			ret = true
+			return fs.SkipAll
+		}
+		return nil
+	})
+	if errors.Is(err, fs.SkipAll) {
+		err = nil
 	}
 	return
 }

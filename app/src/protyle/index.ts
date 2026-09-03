@@ -66,6 +66,12 @@ import {
     queueDatabaseRowRefreshForOperations
 } from "./render/av/databaseRowRefresh";
 import {registerCustomBlockRoot} from "../plugin/customBlockRender";
+import {
+    invalidateTrackedRanges,
+    releaseTrackedRange,
+    resolveTrackedRange,
+    trackRange,
+} from "./util/trackedRange";
 
 /// #if !MOBILE
 const forSearchByEditor = (edit: Protyle, callback: (config: Config.IUILayoutTabSearchConfig, element: Element) => void) => {
@@ -113,6 +119,9 @@ export class Protyle {
         const mergedOptions = getOptions.merge();
         this.protyle = {
             getInstance: () => this,
+            trackRange: (range, trackOptions) => this.trackRange(range, trackOptions),
+            resolveTrackedRange: (handle) => this.resolveTrackedRange(handle),
+            releaseTrackedRange: (handle) => this.releaseTrackedRange(handle),
             app,
             id: genUUID(),
             disabled: false,
@@ -416,6 +425,7 @@ export class Protyle {
         queueDatabaseRowRefreshForOperations(this.protyle.id, data.data[0]?.doOperations || []);
         if (!this.protyle.preview.element.classList.contains("fn__none") &&
             data.context?.rootIDs?.includes(this.protyle.block.rootID)) {
+            invalidateTrackedRanges(this.protyle);
             this.protyle.preview.render(this.protyle);
             return;
         }
@@ -679,6 +689,18 @@ export class Protyle {
 
     public getRange(element: Element) {
         return getEditorRange(element);
+    }
+
+    public trackRange(range: Range, options: ITrackRangeOptions): ITrackedRangeHandle {
+        return trackRange(this.protyle, range, options);
+    }
+
+    public resolveTrackedRange(handle: ITrackedRangeHandle): TTrackedRangeResult {
+        return resolveTrackedRange(this.protyle, handle);
+    }
+
+    public releaseTrackedRange(handle: ITrackedRangeHandle): void {
+        releaseTrackedRange(this.protyle, handle);
     }
 
     public hasClosestBlock(element: Node) {

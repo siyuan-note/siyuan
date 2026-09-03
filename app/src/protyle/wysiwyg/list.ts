@@ -23,6 +23,7 @@ import {fetchSyncPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
 import {showMessage} from "../../dialog/message";
+import {activateTrackedRangeInsertion, type ITrackedRangeInsertion} from "../util/trackedRange";
 
 const getLastChildBlock = (element: Element) => {
     if (!element || !element.lastElementChild) {
@@ -941,7 +942,8 @@ export const listIndent = async (protyle: IProtyle, liItemElements: Element[], r
     focusByWbr(protyle.wysiwyg.element, range);
 };
 
-export const breakList = async (protyle: IProtyle, blockElement: Element, range: Range) => {
+export const breakList = async (protyle: IProtyle, blockElement: Element, range: Range,
+                                trackedRangeInsertion?: ITrackedRangeInsertion) => {
     const listItemElement = blockElement.parentElement;
     if (!listItemElement.previousElementSibling) {
         await removeBlock(protyle, blockElement, range, "Backspace");
@@ -955,6 +957,7 @@ export const breakList = async (protyle: IProtyle, blockElement: Element, range:
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
 
+    activateTrackedRangeInsertion(trackedRangeInsertion);
     range.insertNode(document.createElement("wbr"));
     const newListId = Lute.NewNodeID();
     let newListHTML = "";
@@ -1065,7 +1068,7 @@ export const breakList = async (protyle: IProtyle, blockElement: Element, range:
         doOperations.push(...mergeOperations.doOperations);
         undoOperations.splice(0, 0, ...mergeOperations.undoOperations);
     }
-    transaction(protyle, doOperations, undoOperations);
+    transaction(protyle, doOperations, undoOperations, {trackedRangeInsertion});
     focusByWbr(protyle.wysiwyg.element, range);
 };
 
@@ -1077,11 +1080,8 @@ export const breakList = async (protyle: IProtyle, blockElement: Element, range:
  * @param isDelete
  * @param deleteElement 末尾反向删除时才会传入
  */
-export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], range: Range, isDelete = false, deleteElement?: Element) => {
-    liItemElements.forEach(item => {
-        item.removeAttribute("select-start");
-        item.removeAttribute("select-end");
-    });
+export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], range: Range, isDelete = false,
+                                  deleteElement?: Element, trackedRangeInsertion?: ITrackedRangeInsertion) => {
     if (!liItemElements[0].classList.contains("li")) {
         if (liItemElements[0].parentElement.childElementCount === liItemElements.length + 2) {
             liItemElements = [liItemElements[0].parentElement];
@@ -1119,6 +1119,11 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
         liItemElements.some((item) => !item.isConnected)) {
         return;
     }
+    activateTrackedRangeInsertion(trackedRangeInsertion);
+    liItemElements.forEach(item => {
+        item.removeAttribute("select-start");
+        item.removeAttribute("select-end");
+    });
     const movedListItemElements = [...liItemElements] as HTMLElement[];
     if (parentLiItemElement.classList.contains("protyle-wysiwyg") || parentLiItemElement.classList.contains("sb") ||
         parentLiItemElement.classList.contains("bq") || parentLiItemElement.classList.contains("callout")) {
@@ -1304,7 +1309,7 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
                 });
             }
         }
-        transaction(protyle, topDoOperations, topUndoOperations);
+        transaction(protyle, topDoOperations, topUndoOperations, {trackedRangeInsertion});
         focusByWbr(parentLiItemElement, range);
         return;
     }
@@ -1321,7 +1326,7 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
         liItemElements[0].firstElementChild.remove();
         liItemElements[0].lastElementChild.remove();
         liElement.outerHTML = liItemElements[0].innerHTML;
-        updateTransaction(protyle, parentLiItemElement, html);
+        updateTransaction(protyle, parentLiItemElement, html, undefined, undefined, {trackedRangeInsertion});
         focusByWbr(parentLiItemElement, range);
         return;
     }
@@ -1564,12 +1569,12 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
             appendFocusedOutdentListUpdate(focusedParentListElement, parentLiItemElement as HTMLElement,
                 movedListItemElements, doOperations, undoOperations);
         }
-        transaction(protyle, doOperations, undoOperations);
+        transaction(protyle, doOperations, undoOperations, {trackedRangeInsertion});
     } else {
         if (parentLiItemElement && parentLiItemElement.getAttribute("data-subtype") === "o") {
             updateListOrder(parentParentElement);
         }
-        updateTransaction(protyle, parentParentElement, html);
+        updateTransaction(protyle, parentParentElement, html, undefined, undefined, {trackedRangeInsertion});
     }
     focusByWbr(parentParentElement, range);
 };

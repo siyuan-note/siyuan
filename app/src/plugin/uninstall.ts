@@ -19,6 +19,7 @@ import {isWindow} from "../util/functions";
 import {destroyEventBus} from "./EventBusCore";
 import {unregisterPluginCommands} from "./commandAdapter";
 import {sendGlobalShortcut} from "../boot/globalEvent/globalShortcut";
+import {releaseTrackedRangesByPlugin} from "../protyle/util/trackedRange";
 
 const runCleanup = (plugin: Plugin, step: string, callback: () => unknown) => {
     try {
@@ -36,6 +37,7 @@ const runCleanup = (plugin: Plugin, step: string, callback: () => unknown) => {
 export const beginPluginTeardown = (plugin: Plugin) => {
     runCleanup(plugin, "commands", () => unregisterPluginCommands(plugin));
     runCleanup(plugin, "asset upload", () => cancelAssetUploadsByPlugin(plugin));
+    runCleanup(plugin, "tracked ranges", () => releaseTrackedRangesByPlugin(plugin));
 };
 
 export const destroyPlugin = (app: App, plugin: Plugin, isUninstall: boolean) => {

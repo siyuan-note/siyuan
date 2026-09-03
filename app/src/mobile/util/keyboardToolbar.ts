@@ -12,6 +12,7 @@ import {getCurrentEditor} from "../editor";
 import {convertFontSize, fontEvent, getFontNodeElements, getFontSizeInfo} from "../../protyle/toolbar/Font";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {softEnter} from "../../protyle/wysiwyg/enter";
+import {endTrackedRangeInsertion, prepareTrackedRangeInsertion} from "../../protyle/util/trackedRange";
 import {
     isDisabledFeature,
     isInAndroid,
@@ -1372,8 +1373,13 @@ export const initKeyboardToolbar = () => {
             focusByRange(range);
             return;
         } else if (type === "softLine") {
-            range.extractContents();
-            softEnter(range, nodeElement, protyle);
+            const trackedRangeInsertion = prepareTrackedRangeInsertion(protyle, range);
+            try {
+                range.extractContents();
+                softEnter(range, nodeElement, protyle, trackedRangeInsertion);
+            } finally {
+                endTrackedRangeInsertion(trackedRangeInsertion);
+            }
             focusByRange(range);
             return;
         } else if (type === "add") {

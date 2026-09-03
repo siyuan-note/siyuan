@@ -28,6 +28,7 @@ import {
     removeEmptySemanticInlineElement
 } from "../util/inlineElementMarker";
 import {hasUnloadedDocumentBlocks} from "../util/documentRange";
+import {endTrackedRangeInsertion, prepareTrackedRangeInsertion} from "../util/trackedRange";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -1583,10 +1584,17 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         // 软换行
-        if (selectText === "" && matchHotKey("⇧↩", event) && softEnter(range, nodeElement, protyle)) {
-            event.stopPropagation();
-            event.preventDefault();
-            return;
+        if (selectText === "" && matchHotKey("⇧↩", event)) {
+            const trackedRangeInsertion = prepareTrackedRangeInsertion(protyle, range);
+            try {
+                if (softEnter(range, nodeElement, protyle, trackedRangeInsertion)) {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
+            } finally {
+                endTrackedRangeInsertion(trackedRangeInsertion);
+            }
         }
 
         // 代码块修改语言 https://github.com/siyuan-note/siyuan/issues/14126
@@ -1618,7 +1626,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             (matchHotKey("⇧↩", event) && nodeType === "NodeHeading")) {
             event.stopPropagation();
             event.preventDefault();
-            await enter(nodeElement, range, protyle);
+            const trackedRangeInsertion = prepareTrackedRangeInsertion(protyle, range);
+            try {
+                await enter(nodeElement, range, protyle, trackedRangeInsertion);
+            } finally {
+                endTrackedRangeInsertion(trackedRangeInsertion);
+            }
             if (blockSelectionModeElement) {
                 countBlockWord([], protyle.block.rootID);
             }

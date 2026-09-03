@@ -65,6 +65,11 @@ import {
     getBlockSelectionStatusIDs,
     restoreBlockSelectionModeState
 } from "./blockSelection";
+import {
+    invalidateTrackedRangesByOperations,
+    type ITrackedRangeInsertion,
+    syncTrackedRanges,
+} from "../util/trackedRange";
 
 const cleanBlockSelectionModeOperations = (operations?: IOperation[]) => {
     operations?.forEach(operation => {
@@ -173,6 +178,7 @@ const promiseTransaction = (options: {
     skipSync: boolean,
     callback?: () => void,
     templateDocTreePlanID?: string,
+    trackedRangeInsertion?: ITrackedRangeInsertion,
 }) => {
     const protyle = options.protyle;
     // 受影响的嵌入块需推迟到事务提交后再渲染，否则其查询请求会早于写入到达内核而拿到旧数据
@@ -528,6 +534,9 @@ const promiseTransaction = (options: {
             focusByWbr(emptyElement, range);
         }
     }
+    if (!options.skipSync) {
+        syncTrackedRanges(protyle, options.doOperations, options.trackedRangeInsertion);
+    }
     queueTransaction(protyle, () => fetchPost("/api/transactions", {
         session: protyle.id,
         app: Constants.SIYUAN_APPID,
@@ -721,9 +730,13 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
 };
 
 // 用于推送和撤销；普通模式在内核事务完成后回放，lite 模式仅更新本地 DOM。
-export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUndo: boolean) => {
+export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUndo: boolean,
+                              preserveTrackedRanges = isUndo) => {
     if (protyle.wysiwyg.element.firstElementChild?.classList.contains("protyle-password")) {
         return;
+    }
+    if (!preserveTrackedRanges) {
+        invalidateTrackedRangesByOperations(protyle, operations);
     }
     invalidateViewFoldRequests(protyle);
     const undoFocusContext = isUndo ? operations.find(item => item.context?.undoFocusId)?.context : undefined;
@@ -1358,6 +1371,9 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             return;
         }
     });
+    if (preserveTrackedRanges) {
+        syncTrackedRanges(protyle, operations);
+    }
     void applyViewFoldStates(protyle);
     pendingUndoEmbedElements.forEach(item => {
         if (!item.isConnected) {
@@ -2057,7 +2073,7 @@ export const turnListsRecursively = async (options: {
         transaction(options.protyle, doOperations.concat(doFoldOperations), undoOperations.concat(undoFoldOperations));
     }
     if (!hasViewFoldContext(options.protyle)) {
-        onTransaction(options.protyle, doFoldOperations, false);
+        onTransaction(options.protyle, doFoldOperations, false, true);
     }
     focusByWbr(options.protyle.wysiwyg.element, getEditorRange(options.protyle.wysiwyg.element));
     options.protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {
@@ -2181,6 +2197,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                                 skipSync?: boolean,
                                 callback?: () => void,
                                 templateDocTreePlanID?: string,
+                                trackedRangeInsertion?: ITrackedRangeInsertion,
                             }) => {
     if (protyle) {
         const prepared = prepareViewFoldTransaction(protyle, doOperations, undoOperations);
@@ -2214,6 +2231,9 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
         protyle.undo.add(doOperations, undoOperations, protyle);
     }
     if (protyle?.lite) {
+        if (!options?.skipSync) {
+            syncTrackedRanges(protyle, doOperations, options?.trackedRangeInsertion);
+        }
         return;
     }
     promiseTransaction({
@@ -2223,6 +2243,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
         skipSync: options?.skipSync,
         callback: options?.callback,
         templateDocTreePlanID: options?.templateDocTreePlanID,
+        trackedRangeInsertion: options?.trackedRangeInsertion,
     });
     // 插入块后会导致高度变化，从而产生再次定位 https://github.com/siyuan-note/siyuan/issues/11798
     doOperations.find(item => {
@@ -2328,7 +2349,7 @@ export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: 
         doOperations: IOperation[],
         undoOperations: IOperation[],
         context?: Record<string, string>,
-    }) => {
+    }, options?: {trackedRangeInsertion?: ITrackedRangeInsertion}) => {
     if (element.getAttribute("data-type") === "NodeSuperBlock") {
         refreshSbResize(element);
     }
@@ -2355,7 +2376,7 @@ export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: 
         doOperations.unshift(...additionalOperations.doOperations);
         undoOperations.push(...additionalOperations.undoOperations);
     }
-    transaction(protyle, doOperations, undoOperations);
+    transaction(protyle, doOperations, undoOperations, options);
 };
 
 type TEmptyParagraphTarget = "code" | "table" | "line" | "math";

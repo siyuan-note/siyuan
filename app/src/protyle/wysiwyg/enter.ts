@@ -39,8 +39,14 @@ import {
     getBlockSelectionModeElement
 } from "./blockSelection";
 import {getTextWithoutSemanticMarkers} from "../util/inlineElementMarker";
+import {
+    activateTrackedRangeInsertion,
+    setTrackedRangeInsertionResult,
+    type ITrackedRangeInsertion,
+} from "../util/trackedRange";
 
-export const enter = async (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
+export const enter = async (blockElement: HTMLElement, range: Range, protyle: IProtyle,
+                            trackedRangeInsertion?: ITrackedRangeInsertion) => {
     const selectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
     if (selectionModeElement) {
         blockElement = selectionModeElement;
@@ -109,6 +115,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
             trimStartHTML.replace(codeBlockMarkerRegExp, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
             // ```test` 不处理，正常渲染为段落块
         } else if (blockElement.classList.contains("p")) { // https://github.com/siyuan-note/siyuan/issues/6953
+            activateTrackedRangeInsertion(trackedRangeInsertion);
             range.insertNode(document.createElement("wbr"));
             const oldHTML = blockElement.outerHTML;
             // https://github.com/siyuan-note/siyuan/issues/16744
@@ -147,12 +154,13 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
                 protyle.toolbar.showRender(protyle, blockElement);
                 processRender(blockElement);
             }
-            updateTransaction(protyle, blockElement, oldHTML);
+            updateTransaction(protyle, blockElement, oldHTML, undefined, undefined, {trackedRangeInsertion});
             return true;
         }
     }
     // 代码块
     if (blockElement.getAttribute("data-type") === "NodeCodeBlock") {
+        activateTrackedRangeInsertion(trackedRangeInsertion);
         const wbrElement = document.createElement("wbr");
         range.insertNode(wbrElement);
         const oldHTML = blockElement.outerHTML;
@@ -166,7 +174,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
         range.insertNode(wbrElement);
         editableElement.parentElement.removeAttribute("data-render");
         highlightRender(blockElement);
-        updateTransaction(protyle, blockElement, oldHTML);
+        updateTransaction(protyle, blockElement, oldHTML, undefined, undefined, {trackedRangeInsertion});
         scrollCenter(protyle);
         return true;
     }
@@ -179,6 +187,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
         if (embedContext && !embedContext.boundaryElement.contains(getParentBlock(blockElement).parentElement)) {
             return;
         }
+        activateTrackedRangeInsertion(trackedRangeInsertion);
         range.insertNode(document.createElement("wbr"));
         const topElement = getTopEmptyElement(blockElement, embedContext?.boundaryElement);
         const blockId = blockElement.getAttribute("data-node-id");
@@ -230,7 +239,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
             enterDoOperations.push(...sbOperations.doOperations);
             enterUndoOperations.splice(0, 0, ...sbOperations.undoOperations);
         }
-        transaction(protyle, enterDoOperations, enterUndoOperations);
+        transaction(protyle, enterDoOperations, enterUndoOperations, {trackedRangeInsertion});
         focusByWbr(blockElement, range);
         return true;
     }
@@ -246,7 +255,8 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
         if ("none" === embedListEnterMode) {
             return;
         }
-        if ("list" === embedListEnterMode && await listEnter(protyle, blockElement, range)) {
+        if ("list" === embedListEnterMode &&
+            await listEnter(protyle, blockElement, range, trackedRangeInsertion)) {
             return true;
         }
     }
@@ -262,6 +272,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
         } else {
             newElement = genEmptyElement(false, true);
         }
+        activateTrackedRangeInsertion(trackedRangeInsertion);
         blockElement.insertAdjacentElement("beforebegin", newElement);
         const newId = newElement.getAttribute("data-node-id");
         const doOperations: IOperation[] = [{
@@ -289,12 +300,13 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
             doOperations.push(...mergeOperations.doOperations);
             undoOperations.splice(0, 0, ...mergeOperations.undoOperations);
         }
-        transaction(protyle, doOperations, undoOperations);
+        transaction(protyle, doOperations, undoOperations, {trackedRangeInsertion});
         newElement.querySelector("wbr").remove();
         removeEmptyNode(newElement);
         return true;
     }
     const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range);
+    activateTrackedRangeInsertion(trackedRangeInsertion);
     range.insertNode(document.createElement("wbr"));
     const html = blockElement.outerHTML;
     const parentHTML = getParentBlock(blockElement).outerHTML;
@@ -432,7 +444,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
             parentElement = parentElement.nextElementSibling as HTMLElement;
             parentElement.previousElementSibling.remove();
             mathRender(protyle.wysiwyg.element);
-            updateTransaction(protyle, parentElement, parentHTML);
+            updateTransaction(protyle, parentElement, parentHTML, undefined, undefined, {trackedRangeInsertion});
             focusByWbr(protyle.wysiwyg.element, range);
             scrollCenter(protyle);
             return true;
@@ -459,7 +471,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
         doOperation.push(...sbOperations.doOperations);
         undoOperation.splice(0, 0, ...sbOperations.undoOperations);
     }
-    transaction(protyle, doOperation, undoOperation);
+    transaction(protyle, doOperation, undoOperation, {trackedRangeInsertion});
     focusByWbr(currentElement, range);
     scrollCenter(protyle);
     return true;
@@ -481,7 +493,8 @@ const getEmbedListEnterMode = (blockElement: HTMLElement, embedContext: IEmbedCh
     return embedContext.boundaryElement.contains(exitsList ? listElement.parentElement : listElement) ? "list" : "none";
 };
 
-const listEnter = async (protyle: IProtyle, blockElement: HTMLElement, range: Range) => {
+const listEnter = async (protyle: IProtyle, blockElement: HTMLElement, range: Range,
+                         trackedRangeInsertion?: ITrackedRangeInsertion) => {
     const listItemElement = blockElement.parentElement;
     const editableElement = getContenteditableElement(blockElement);
     const isPrimaryBlock = blockElement.previousElementSibling.classList.contains("protyle-action");
@@ -496,11 +509,11 @@ const listEnter = async (protyle: IProtyle, blockElement: HTMLElement, range: Ra
         isPrimaryBlock // https://ld246.com/article/1651820644238
     ) {
         if (listItemElement.nextElementSibling?.classList.contains("protyle-attr")) {
-            await listOutdent(protyle, [blockElement.parentElement], range);
+            await listOutdent(protyle, [blockElement.parentElement], range, false, undefined, trackedRangeInsertion);
             return true;
         } else if (!listItemElement.parentElement.classList.contains("protyle-wysiwyg")) {
             // 打断列表
-            await breakList(protyle, blockElement, range);
+            await breakList(protyle, blockElement, range, trackedRangeInsertion);
             return true;
         }
     }
@@ -514,6 +527,7 @@ const listEnter = async (protyle: IProtyle, blockElement: HTMLElement, range: Ra
             return true;
         }
         // https://github.com/siyuan-note/siyuan/issues/8935
+        activateTrackedRangeInsertion(trackedRangeInsertion);
         const wbrElement = document.createElement("wbr");
         range.insertNode(wbrElement);
         const listElement = listItemElement.parentElement;
@@ -537,7 +551,7 @@ const listEnter = async (protyle: IProtyle, blockElement: HTMLElement, range: Ra
         if (listItemElement.getAttribute("data-subtype") === "o") {
             updateListOrder(listElement, listStart);
         }
-        updateTransaction(protyle, listElement, html);
+        updateTransaction(protyle, listElement, html, undefined, undefined, {trackedRangeInsertion});
         focusByWbr(newElement, range);
         scrollCenter(protyle);
         removeEmptyNode(newElement);
@@ -554,6 +568,7 @@ const listEnter = async (protyle: IProtyle, blockElement: HTMLElement, range: Ra
     if (!listItemElement.isConnected) {
         return true;
     }
+    activateTrackedRangeInsertion(trackedRangeInsertion);
     const subListElement = listItemElement.querySelector(".list");
     let newElement;
     if (subListElement && listItemElement.getAttribute("fold") !== "1" &&
@@ -573,7 +588,7 @@ const listEnter = async (protyle: IProtyle, blockElement: HTMLElement, range: Ra
             if (subListElement.getAttribute("data-subtype") === "o") {
                 updateListOrder(subListElement, listStart);
             }
-            updateTransaction(protyle, listItemElement, html);
+            updateTransaction(protyle, listItemElement, html, undefined, undefined, {trackedRangeInsertion});
             focusByWbr(listItemElement, range);
             scrollCenter(protyle);
         } else {
@@ -629,9 +644,10 @@ const listEnter = async (protyle: IProtyle, blockElement: HTMLElement, range: Ra
                     action: "update",
                     data: listItemHTML,
                     id: listItemElement.getAttribute("data-node-id")
-                }, ...orderOperations.undoOperations]);
+                }, ...orderOperations.undoOperations], {trackedRangeInsertion});
             } else {
-                updateTransaction(protyle, listItemElement.parentElement, html);
+                updateTransaction(protyle, listItemElement.parentElement, html, undefined, undefined,
+                    {trackedRangeInsertion});
             }
             focusByWbr(newElement, range);
             scrollCenter(protyle);
@@ -721,9 +737,10 @@ const listEnter = async (protyle: IProtyle, blockElement: HTMLElement, range: Ra
             action: "update",
             id: listItemElement.getAttribute("data-node-id"),
             data: listItemHTML
-        }, ...orderOperations.undoOperations]);
+        }, ...orderOperations.undoOperations], {trackedRangeInsertion});
     } else {
-        updateTransaction(protyle, listItemElement.parentElement, oldHTML);
+        updateTransaction(protyle, listItemElement.parentElement, oldHTML, undefined, undefined,
+            {trackedRangeInsertion});
     }
     focusByWbr(newElement, range);
     scrollCenter(protyle);
@@ -741,7 +758,8 @@ const removeEmptyNode = (newElement: Element) => {
     }
 };
 
-export const softEnter = (range: Range, nodeElement: HTMLElement, protyle: IProtyle) => {
+export const softEnter = (range: Range, nodeElement: HTMLElement, protyle: IProtyle,
+                          trackedRangeInsertion?: ITrackedRangeInsertion) => {
     let startElement = range.startContainer as HTMLElement;
     const nextSibling = hasNextSibling(startElement) as Element;
     if (nodeElement.getAttribute("data-type") === "NodeAttributeView") {
@@ -752,6 +770,7 @@ export const softEnter = (range: Range, nodeElement: HTMLElement, protyle: IProt
         if (textPosition.end === range.endContainer.textContent.length) {
             // 图片之前软换行 || 数学公式之前软换行 https://github.com/siyuan-note/siyuan/issues/13621
             if (nextSibling.classList.contains("img") || nextSibling.getAttribute("data-type") === "inline-math") {
+                activateTrackedRangeInsertion(trackedRangeInsertion);
                 nextSibling.insertAdjacentHTML("beforebegin", "<wbr>");
                 const oldHTML = nodeElement.outerHTML;
                 nextSibling.previousElementSibling.remove();
@@ -760,7 +779,7 @@ export const softEnter = (range: Range, nodeElement: HTMLElement, protyle: IProt
                 startElement.after(newlineNode);
                 range.selectNode(newlineNode);
                 range.collapse(false);
-                updateTransaction(protyle, nodeElement, oldHTML);
+                updateTransaction(protyle, nodeElement, oldHTML, undefined, undefined, {trackedRangeInsertion});
                 return true;
             }
         }
@@ -771,7 +790,7 @@ export const softEnter = (range: Range, nodeElement: HTMLElement, protyle: IProt
     }
     if (startElement && protyle.toolbar.getCurrentType(range).length > 0 &&
         getSelectionOffset(startElement, startElement, range).end === startElement.textContent.length) {
-        addNewLineToEnd(range, nodeElement, protyle, startElement);
+        addNewLineToEnd(range, nodeElement, protyle, startElement, trackedRangeInsertion);
         return true;
     }
     if (isIPad() || isMobile()) {
@@ -782,13 +801,15 @@ export const softEnter = (range: Range, nodeElement: HTMLElement, protyle: IProt
             document.execCommand("insertHTML", false, "\n");
             return true;
         }
-        addNewLineToEnd(range, nodeElement, protyle, startElement);
+        addNewLineToEnd(range, nodeElement, protyle, startElement, trackedRangeInsertion);
         return true;
     }
     return false;
 };
 
-const addNewLineToEnd = (range: Range, nodeElement: HTMLElement, protyle: IProtyle, startElement: Element) => {
+const addNewLineToEnd = (range: Range, nodeElement: HTMLElement, protyle: IProtyle, startElement: Element,
+                         trackedRangeInsertion?: ITrackedRangeInsertion) => {
+    activateTrackedRangeInsertion(trackedRangeInsertion);
     const wbrElement = document.createElement("wbr");
     if (startElement.nodeType === 3) {
         range.insertNode(wbrElement);
@@ -804,6 +825,13 @@ const addNewLineToEnd = (range: Range, nodeElement: HTMLElement, protyle: IProty
     }
     const newlineNode = document.createTextNode("\n");
     startElement.after(newlineNode);
+    const beforeRange = document.createRange();
+    beforeRange.setStartBefore(newlineNode);
+    beforeRange.collapse(true);
+    const afterRange = document.createRange();
+    afterRange.setStartAfter(newlineNode);
+    afterRange.collapse(true);
+    setTrackedRangeInsertionResult(trackedRangeInsertion, beforeRange, afterRange);
     if (endNewlineNode) {
         range.setStart(endNewlineNode, 0);
     } else {
@@ -811,5 +839,5 @@ const addNewLineToEnd = (range: Range, nodeElement: HTMLElement, protyle: IProty
     }
     range.collapse(true);
     focusByRange(range);
-    updateTransaction(protyle, nodeElement, oldHTML);
+    updateTransaction(protyle, nodeElement, oldHTML, undefined, undefined, {trackedRangeInsertion});
 };

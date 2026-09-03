@@ -12,6 +12,7 @@ import {isSkillHintRequestActive, shouldYieldSkillHint} from "./agentHintState";
 import {uploadFiles} from "../../../protyle/upload";
 import {previewImages} from "../../../protyle/preview/image";
 import {removeCompressURL} from "../../../util/image";
+import {invalidateTrackedRanges} from "../../../protyle/util/trackedRange";
 
 export interface AgentComposerData {
     text: string;
@@ -239,6 +240,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
     p.toolbar.subElement.setAttribute("data-position-boundary", "viewport");
 
     const setEmptyContent = () => {
+        invalidateTrackedRanges(p);
         wysiwyg.element.innerHTML = "";
         const emptyElement = genEmptyElement(false, false);
         emptyElement.firstElementChild.classList.add("protyle-wysiwyg--empty");
@@ -327,6 +329,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
                 event.stopPropagation();
                 const target = history.isBrowsing() ?
                     history.navigateUp() : history.beginBrowsing(wysiwyg.element.innerHTML);
+                invalidateTrackedRanges(p);
                 wysiwyg.element.innerHTML = p.lute.Md2BlockDOM(target);
                 return;
             }
@@ -336,6 +339,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
             event.preventDefault();
             event.stopPropagation();
             const target = history.navigateDown();
+            invalidateTrackedRanges(p);
             if (history.isBrowsing()) {
                 p.wysiwyg.element.innerHTML = p.lute.Md2BlockDOM(target);
             } else {

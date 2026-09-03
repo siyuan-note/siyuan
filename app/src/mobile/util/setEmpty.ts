@@ -8,8 +8,15 @@ import type {App} from "../../index";
 import {setTitle} from "../../util/processTitle";
 import {clearMobileBarsScroll} from "./mobileBars";
 import {updateMobileTopBarLayout} from "./mobileTopBar";
+import {invalidateTrackedRanges} from "../../protyle/util/trackedRange";
 
 export const setEmpty = (app: App) => {
+    if (window.siyuan.mobile.editor?.protyle) {
+        invalidateTrackedRanges(window.siyuan.mobile.editor.protyle);
+    }
+    if (window.siyuan.mobile.popEditor?.protyle) {
+        invalidateTrackedRanges(window.siyuan.mobile.popEditor.protyle);
+    }
     setTitle("", true);
     clearMobileBarsScroll();
     document.getElementById("mobileTopBar").classList.add("fn__none");

@@ -35,6 +35,7 @@ import {hasFocusOffsets} from "./focusRestore";
 import {isIPhone} from "./compatibility";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {disposeCustomBlocksInElement, setCustomBlockRootReady} from "../../plugin/customBlockRender";
+import {invalidateTrackedRanges, invalidateTrackedRangesInElement} from "./trackedRange";
 /// #if MOBILE
 import {updateMobileTitleReadonly} from "./setEditMode";
 /// #endif
@@ -66,6 +67,7 @@ export const onGet = (options: {
     if (options.data.code === 1) {
         // 其他报错
         if (!options.action.includes(Constants.CB_GET_APPEND)) {    // 向下加载时块可能还没有创建 https://github.com/siyuan-note/siyuan/issues/10851
+            invalidateTrackedRanges(options.protyle);
             if (options.protyle.model) {
                 options.protyle.model.parent.parent.removeTab(options.protyle.model.parent.id);
             } else {
@@ -76,7 +78,12 @@ export const onGet = (options: {
     }
     if (options.data.code === 3) {
         // block not found
+        invalidateTrackedRanges(options.protyle);
         return;
+    }
+    if (!options.action.includes(Constants.CB_GET_APPEND) &&
+        !options.action.includes(Constants.CB_GET_BEFORE)) {
+        invalidateTrackedRanges(options.protyle);
     }
     options.protyle.notebookId = options.data.data.box;
     options.protyle.path = options.data.data.path;
@@ -267,6 +274,7 @@ const setHTML = (options: {
             }
             const lastRemoveTop = removeElement.getBoundingClientRect().top;
             removeElements.forEach(item => {
+                invalidateTrackedRangesInElement(protyle, item);
                 disposeCustomBlocksInElement(item);
                 item.remove();
             });
@@ -295,12 +303,14 @@ const setHTML = (options: {
                 scrollHeight -= lastElement.clientHeight + 8;   // 大部分元素的 margin
             }
             removeElements.forEach((item) => {
+                invalidateTrackedRangesInElement(protyle, item);
                 disposeCustomBlocksInElement(item);
                 item.remove();
             });
             hideElements(["toolbar"], protyle);
         }
     } else {
+        invalidateTrackedRanges(protyle);
         disposeCustomBlocksInElement(protyle.wysiwyg.element);
         protyle.wysiwyg.element.innerHTML = options.content;
         // 设置 innerHTML 会导致浏览器将 scrollTop 重置为 0，此处立即恢复以避免页面跳转到开头

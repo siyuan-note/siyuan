@@ -5,11 +5,13 @@ import {cancelAssetUploads} from "../upload/pluginEvent";
 import {unmountBreadcrumbButtons} from "../../plugin/breadcrumbButton";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {unregisterCustomBlockRoot} from "../../plugin/customBlockRender";
+import {destroyTrackedRanges} from "./trackedRange";
 
 export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
         return;
     }
+    destroyTrackedRanges(protyle);
     cancelAssetUploads(protyle);
     unmountBreadcrumbButtons(protyle);
     hideElements(["util"], protyle, true);

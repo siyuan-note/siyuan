@@ -19,6 +19,7 @@ import {bindMobileBarsScroll, pauseMobileBarsScroll} from "./util/mobileBars";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 import {restoreMobileTopBarLayout, updateMobileTopBarLayout} from "./util/mobileTopBar";
 import {stickyRow} from "../protyle/render/av/row";
+import {invalidateTrackedRanges} from "../protyle/util/trackedRange";
 
 export const getCurrentEditor = () => {
     return window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
@@ -195,6 +196,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             },
         };
         if (window.siyuan.mobile.editor) {
+            invalidateTrackedRanges(window.siyuan.mobile.editor.protyle);
             window.siyuan.mobile.editor.protyle.notebookId = data.data.box;
             window.siyuan.mobile.editor.protyle.title.element.removeAttribute("data-render");
             addLoading(window.siyuan.mobile.editor.protyle);

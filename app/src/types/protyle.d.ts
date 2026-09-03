@@ -531,6 +531,24 @@ interface IProtyleOptions {
     lite?: boolean;
 }
 
+interface ITrackedRangeHandle {
+    readonly id: string;
+}
+
+interface ITrackRangeOptions {
+    /** 用于在插件卸载时自动释放句柄 */
+    owner: import("../plugin").Plugin;
+    /** 同一位置插入新内容时，锚点保留在新内容之前还是之后，默认为 before */
+    affinity?: "before" | "after";
+}
+
+type TTrackedRangeResult = {
+    status: "resolved";
+    range: Range;
+} | {
+    status: "invalid";
+};
+
 interface IProtyle {
     highlight: {
         mark: Highlight
@@ -540,6 +558,9 @@ interface IProtyle {
         styleElement: HTMLStyleElement
     }
     getInstance: () => import("../protyle").Protyle,
+    trackRange: (range: Range, options: ITrackRangeOptions) => ITrackedRangeHandle,
+    resolveTrackedRange: (handle: ITrackedRangeHandle) => TTrackedRangeResult,
+    releaseTrackedRange: (handle: ITrackedRangeHandle) => void,
     observerLoad?: ResizeObserver,
     observer?: ResizeObserver,
     app: import("../index").App,

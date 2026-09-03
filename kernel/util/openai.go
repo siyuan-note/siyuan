@@ -168,7 +168,7 @@ var providerAttributionHeaders = map[string]map[string]string{
 		"HTTP-Referer":         "https://github.com/siyuan-note/siyuan",
 		"X-Title":              "SiYuan",
 		"X-AIMLAPI-Source":     "agent/siyuan",
-		"X-AIMLAPI-Partner-ID": "part_siyuan",
+		"X-AIMLAPI-Partner-ID": "part_7cceWAMI91xwz7G6FrcOEUwN",
 	},
 }
 

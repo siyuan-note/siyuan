@@ -86,7 +86,7 @@ func TestAttributionHeadersForHostReturnsCopy(t *testing.T) {
 	delete(first, "X-Title")
 
 	second := AttributionHeadersForHost("api.aimlapi.com")
-	if "part_siyuan" != second["X-AIMLAPI-Partner-ID"] {
+	if "part_7cceWAMI91xwz7G6FrcOEUwN" != second["X-AIMLAPI-Partner-ID"] {
 		t.Fatalf("shared attribution map was mutated, got %q", second["X-AIMLAPI-Partner-ID"])
 	}
 	if "" == second["X-Title"] {
@@ -117,7 +117,7 @@ func TestAttributionTransportInjectsForKnownHost(t *testing.T) {
 		"Http-Referer":         "https://github.com/siyuan-note/siyuan",
 		"X-Title":              "SiYuan",
 		"X-Aimlapi-Source":     "agent/siyuan",
-		"X-Aimlapi-Partner-Id": "part_siyuan",
+		"X-Aimlapi-Partner-Id": "part_7cceWAMI91xwz7G6FrcOEUwN",
 	}
 	for name, value := range want {
 		if got := captured.Get(name); got != value {
@@ -173,7 +173,7 @@ func TestAttributionTransportKeepsExistingHeader(t *testing.T) {
 	if "Custom" != captured.Get("X-Title") {
 		t.Errorf("existing X-Title was overwritten, got %q", captured.Get("X-Title"))
 	}
-	if "part_siyuan" != captured.Get("X-Aimlapi-Partner-Id") {
+	if "part_7cceWAMI91xwz7G6FrcOEUwN" != captured.Get("X-Aimlapi-Partner-Id") {
 		t.Errorf("missing header was not filled in, got %q", captured.Get("X-Aimlapi-Partner-Id"))
 	}
 }

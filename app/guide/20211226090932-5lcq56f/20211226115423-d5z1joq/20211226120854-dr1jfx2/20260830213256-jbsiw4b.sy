@@ -6,7 +6,7 @@
 		"id": "20260830213256-jbsiw4b",
 		"title": "選取和操作內容區塊",
 		"type": "doc",
-		"updated": "20260830213256"
+		"updated": "20260903165745"
 	},
 	"Children": [
 		{
@@ -29,7 +29,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260830213256-lp6qpp0",
-				"updated": "20260830213256"
+				"updated": "20260903165745"
 			},
 			"Children": [
 				{
@@ -43,7 +43,7 @@
 			"ID": "20260830213256-y3gtmf5",
 			"Properties": {
 				"id": "20260830213256-y3gtmf5",
-				"updated": "20260830213256"
+				"updated": "20260903165745"
 			},
 			"Children": [
 				{
@@ -57,7 +57,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 進入區塊選取模式。按 "
+					"Data": " 進入區塊選取模式。跨區塊選取文字後按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可將選取範圍轉換為區塊選取；唯讀模式下同樣適用。按 "
 				},
 				{
 					"Type": "NodeTextMark",

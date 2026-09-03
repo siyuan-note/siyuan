@@ -29,9 +29,9 @@ import {fetchPost} from "../../util/fetch";
 import {goBack, goForward} from "../../util/backForward";
 import {getDisplayName, getNotebookName, isEncryptedBox} from "../../util/pathName";
 import {openFileById} from "../../editor/util";
-import {getAllDocks, getAllModels, getAllTabs} from "../../layout/getAll";
+import {getAllDocks, getAllEditor, getAllModels, getAllTabs} from "../../layout/getAll";
 import {getDockHotkey} from "../../layout/dock/hotkey";
-import {focusBlock, focusByRange, getBlockElementsByRange} from "../../protyle/util/selection";
+import {focusBlock, focusByRange, getBlockElementsByRange, selectBlocksByRange} from "../../protyle/util/selection";
 import {initFileMenu, initNavigationMenu} from "../../menus/navigation";
 import {bindMenuKeydown} from "../../menus/Menu";
 import {Dialog} from "../../dialog";
@@ -86,6 +86,22 @@ const EDITOR_FONT_SIZE_COMMANDS: Array<{
     {command: "decreaseEditorFontSize", action: "decrease"},
     {command: "resetEditorFontSize", action: "reset"},
 ];
+
+const selectReadonlyBlocksByRange = (range: Range) => {
+    const startElement = hasClosestBlock(range.startContainer);
+    const endElement = hasClosestBlock(range.endContainer);
+    if (!startElement || !endElement || startElement === endElement) {
+        return false;
+    }
+    const protyle = getAllEditor().find(item => item.protyle.wysiwyg.element.contains(startElement) &&
+        item.protyle.wysiwyg.element.contains(endElement))?.protyle;
+    if (!protyle?.disabled) {
+        return false;
+    }
+    hideElements(["toolbar", "hint", "util", "select"], protyle);
+    selectBlocksByRange(protyle, range);
+    return true;
+};
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -1630,6 +1646,10 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         if (getSelection().rangeCount > 0) {
             const range = getSelection().getRangeAt(0);
             if (hasClosestByClassName(range.startContainer, "protyle-content", true)) {
+                if (!event.repeat && selectReadonlyBlocksByRange(range)) {
+                    event.preventDefault();
+                    return;
+                }
                 focusByRange(range);
                 return;
             }

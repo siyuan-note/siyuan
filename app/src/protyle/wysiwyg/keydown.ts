@@ -296,10 +296,17 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             matchHotKey(Constants.SIYUAN_KEYMAP.editor.general.redo.default, event)) {
             event.preventDefault();
         }
-        if (protyle.disabled ||
-            (!protyle.selectElement.classList.contains("fn__none") &&
-             // 框选块时放行 ⌘C，以便复制选中的块 https://github.com/siyuan-note/siyuan/issues/18043
-             !matchHotKey("⌘C", event))) {
+        if (protyle.disabled) {
+            if (event.key === "Escape" && !event.isComposing && !event.repeat) {
+                return;
+            }
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+        }
+        if (!protyle.selectElement.classList.contains("fn__none") &&
+            // 框选块时放行 ⌘C，以便复制选中的块 https://github.com/siyuan-note/siyuan/issues/18043
+            !matchHotKey("⌘C", event)) {
             event.stopPropagation();
             event.preventDefault();
             return;

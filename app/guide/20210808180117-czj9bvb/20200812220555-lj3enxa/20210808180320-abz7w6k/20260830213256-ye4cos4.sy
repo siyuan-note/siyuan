@@ -6,7 +6,7 @@
 		"id": "20260830213256-ye4cos4",
 		"title": "选择和操作内容块",
 		"type": "doc",
-		"updated": "20260830213256"
+		"updated": "20260903165745"
 	},
 	"Children": [
 		{
@@ -29,7 +29,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260830213256-ub9wfgv",
-				"updated": "20260830213256"
+				"updated": "20260903165745"
 			},
 			"Children": [
 				{
@@ -43,7 +43,7 @@
 			"ID": "20260830213256-2bk3bwx",
 			"Properties": {
 				"id": "20260830213256-2bk3bwx",
-				"updated": "20260830213256"
+				"updated": "20260903165745"
 			},
 			"Children": [
 				{
@@ -57,7 +57,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 进入块选择模式。按 "
+					"Data": " 进入块选择模式。跨块划选文本后按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可将划选范围转换为块选择，只读模式下同样适用。按 "
 				},
 				{
 					"Type": "NodeTextMark",

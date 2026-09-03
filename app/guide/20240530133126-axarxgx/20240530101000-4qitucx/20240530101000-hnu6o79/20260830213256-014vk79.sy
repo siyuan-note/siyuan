@@ -6,7 +6,7 @@
 		"id": "20260830213256-014vk79",
 		"title": "ブロックの選択と操作",
 		"type": "doc",
-		"updated": "20260830213256"
+		"updated": "20260903165745"
 	},
 	"Children": [
 		{
@@ -29,7 +29,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260830213256-pjttne5",
-				"updated": "20260830213256"
+				"updated": "20260903165745"
 			},
 			"Children": [
 				{
@@ -43,7 +43,7 @@
 			"ID": "20260830213256-5e9nkff",
 			"Properties": {
 				"id": "20260830213256-5e9nkff",
-				"updated": "20260830213256"
+				"updated": "20260903165745"
 			},
 			"Children": [
 				{
@@ -57,7 +57,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " を押すとブロック選択モードになります。"
+					"Data": " を押すとブロック選択モードになります。複数のブロックにまたがってテキストを選択した後、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと、その範囲をブロック選択に切り替えられます。読み取り専用モードでも同様に使用できます。"
 				},
 				{
 					"Type": "NodeTextMark",

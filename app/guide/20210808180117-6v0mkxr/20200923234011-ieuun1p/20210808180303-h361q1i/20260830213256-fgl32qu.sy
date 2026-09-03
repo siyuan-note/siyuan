@@ -6,7 +6,7 @@
 		"id": "20260830213256-fgl32qu",
 		"title": "Select and operate content blocks",
 		"type": "doc",
-		"updated": "20260830213256"
+		"updated": "20260903165745"
 	},
 	"Children": [
 		{
@@ -29,7 +29,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260830213256-5do6z3r",
-				"updated": "20260830213256"
+				"updated": "20260903165745"
 			},
 			"Children": [
 				{
@@ -43,7 +43,7 @@
 			"ID": "20260830213256-819rhwy",
 			"Properties": {
 				"id": "20260830213256-819rhwy",
-				"updated": "20260830213256"
+				"updated": "20260903165745"
 			},
 			"Children": [
 				{
@@ -57,7 +57,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to enter block selection mode. Press "
+					"Data": " to enter block selection mode. After selecting text across blocks, press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to convert the range to a block selection; this also works in read-only mode. Press "
 				},
 				{
 					"Type": "NodeTextMark",

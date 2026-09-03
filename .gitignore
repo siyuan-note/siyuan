@@ -15,6 +15,11 @@ app/build
 app/src/types/dist
 app/kernel*
 app/SiYuan-Kernel
+app/pandoc/bin/
+app/pandoc/share/
+app/pandoc/COPYING.rtf
+app/pandoc/COPYRIGHT.txt
+app/pandoc/MANUAL.html
 ios
 pprof
 

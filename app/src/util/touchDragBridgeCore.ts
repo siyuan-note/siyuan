@@ -9,6 +9,44 @@ interface DragCompletionCallbacks {
     cleanup: () => void;
 }
 
+export const createDragRefreshQueue = (
+    refresh: () => void,
+    requestFrame: (callback: FrameRequestCallback) => number,
+    cancelFrame: (handle: number) => void,
+) => {
+    let scheduled = false;
+    let frameHandle = 0;
+    let generation = 0;
+
+    return {
+        schedule: () => {
+            if (scheduled) {
+                return;
+            }
+            scheduled = true;
+            const currentGeneration = ++generation;
+            const handle = requestFrame(() => {
+                if (!scheduled || generation !== currentGeneration) {
+                    return;
+                }
+                scheduled = false;
+                refresh();
+            });
+            if (scheduled && generation === currentGeneration) {
+                frameHandle = handle;
+            }
+        },
+        cancel: () => {
+            if (!scheduled) {
+                return;
+            }
+            scheduled = false;
+            generation++;
+            cancelFrame(frameHandle);
+        },
+    };
+};
+
 export const suspendNativeDrag = (state: NativeDragGuard) => {
     state.draggableElement.setAttribute("draggable", "false");
     state.restoreDraggable = true;

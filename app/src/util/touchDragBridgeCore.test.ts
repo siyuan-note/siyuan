@@ -2,6 +2,7 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     completeDrag,
+    createDragRefreshQueue,
     dispatchWithNativeDragEnabled,
     restoreNativeDrag,
     shouldSuppressNativeContextMenu,
@@ -83,6 +84,79 @@ describe("touch drag completion", () => {
 
     it("only cleans up when the long press did not become a drag", () => {
         assert.deepEqual(runCompletion(false, false), ["cleanup"]);
+    });
+});
+
+describe("touch drag refresh queue", () => {
+    const createFrameHarness = () => {
+        let nextHandle = 0;
+        const callbacks = new Map<number, FrameRequestCallback>();
+        const canceled: number[] = [];
+        return {
+            requestFrame: (callback: FrameRequestCallback) => {
+                const handle = ++nextHandle;
+                callbacks.set(handle, callback);
+                return handle;
+            },
+            cancelFrame: (handle: number) => {
+                canceled.push(handle);
+            },
+            runFrame: (handle: number) => callbacks.get(handle)?.(0),
+            getRequestedCount: () => callbacks.size,
+            getCanceled: () => canceled,
+        };
+    };
+
+    it("coalesces refreshes scheduled in the same frame", () => {
+        const frames = createFrameHarness();
+        let refreshCount = 0;
+        const queue = createDragRefreshQueue(
+            () => refreshCount++,
+            frames.requestFrame,
+            frames.cancelFrame,
+        );
+
+        queue.schedule();
+        queue.schedule();
+
+        assert.equal(frames.getRequestedCount(), 1);
+        frames.runFrame(1);
+        assert.equal(refreshCount, 1);
+    });
+
+    it("does not refresh after canceling a scheduled frame", () => {
+        const frames = createFrameHarness();
+        let refreshCount = 0;
+        const queue = createDragRefreshQueue(
+            () => refreshCount++,
+            frames.requestFrame,
+            frames.cancelFrame,
+        );
+
+        queue.schedule();
+        queue.cancel();
+        frames.runFrame(1);
+
+        assert.deepEqual(frames.getCanceled(), [1]);
+        assert.equal(refreshCount, 0);
+    });
+
+    it("allows scheduling again after a refresh", () => {
+        const frames = createFrameHarness();
+        let refreshCount = 0;
+        const queue = createDragRefreshQueue(
+            () => refreshCount++,
+            frames.requestFrame,
+            frames.cancelFrame,
+        );
+
+        queue.schedule();
+        frames.runFrame(1);
+        queue.schedule();
+        frames.runFrame(2);
+
+        assert.equal(refreshCount, 2);
+        assert.equal(frames.getRequestedCount(), 2);
     });
 });
 

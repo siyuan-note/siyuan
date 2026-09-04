@@ -3088,11 +3088,16 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             hideDragTip();
         }
     });
-    editorElement.addEventListener("dragenter", (event) => {
+    editorElement.addEventListener("dragenter", (event: DragEvent) => {
         event.preventDefault();
+        if (!event.isTrusted) {
+            // 合成拖拽会在动态加载后重新命中节点，不依赖已被移除节点的 dragleave 来平衡计数。
+            counter = 0;
+        }
         counter++;
     });
     editorElement.addEventListener("dragend", () => {
+        counter = 0;
         if (window.siyuan.dragElement) {
             window.siyuan.dragElement.style.opacity = "";
             window.siyuan.dragElement = undefined;

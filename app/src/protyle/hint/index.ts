@@ -351,7 +351,7 @@ export class Hint {
             Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar], Constants.SIZE_TITLE);
     }
 
-    private getMobileSelectionBounds(protyle: IProtyle) {
+    private getMobileSelectionTop(protyle: IProtyle) {
         const range = getEditorRange(protyle.wysiwyg.element);
         const position = getSelectionPosition(protyle.wysiwyg.element, range);
         if (range.startContainer.nodeType === 3 && range.startContainer.textContent.length > 0) {
@@ -368,23 +368,13 @@ export class Hint {
             const rects = textRange.getClientRects();
             const rect = rects[rects.length - 1];
             if (rect?.height > 0) {
-                return {
-                    top: rect.top,
-                    bottom: rect.bottom,
-                };
+                return rect.top;
             }
         }
-        const rangeElement = range.startContainer.nodeType === 3 ?
-            range.startContainer.parentElement : range.startContainer as HTMLElement;
-        const computedLineHeight = rangeElement ? parseFloat(getComputedStyle(rangeElement).lineHeight) : NaN;
-        const lineHeight = Number.isNaN(computedLineHeight) ? 26 : computedLineHeight;
-        return {
-            top: position.top - lineHeight,
-            bottom: position.top + lineHeight,
-        };
+        return position.top;
     }
 
-    private setMobilePosition(anchorTop: number, anchorBottom: number) {
+    private setMobilePosition(anchorTop: number) {
         const viewportBounds = getVisibleViewportBounds();
         const viewportTop = Math.max(viewportBounds.top, getTopBarHeight());
         let viewportBottom = viewportBounds.bottom;
@@ -394,10 +384,15 @@ export class Hint {
         }
         viewportBottom = Math.max(viewportTop, viewportBottom);
         const heightLimit = (viewportBottom - viewportTop) / 3;
-        const gap = 4;
-        const position = getMobileHintPosition(anchorTop, anchorBottom, viewportTop, viewportBottom,
+        const gap = 8;
+        let position = getMobileHintPosition(anchorTop, this.element.scrollHeight, viewportTop, viewportBottom,
             heightLimit, gap);
-        this.element.style.maxHeight = `${position.maxHeight}px`;
+        const hintStyle = getComputedStyle(this.element);
+        const verticalInset = parseFloat(hintStyle.paddingTop) + parseFloat(hintStyle.paddingBottom) +
+            parseFloat(hintStyle.borderTopWidth) + parseFloat(hintStyle.borderBottomWidth);
+        this.element.style.maxHeight = `${Math.max(0, position.maxHeight - verticalInset)}px`;
+        position = getMobileHintPosition(anchorTop, this.element.getBoundingClientRect().height, viewportTop,
+            viewportBottom, heightLimit, gap);
         this.element.style.left = "0";
         this.element.style.top = `${position.top}px`;
     }
@@ -414,7 +409,7 @@ export class Hint {
                     /// #if !MOBILE
                     setPosition(this.element, cellRect.left, cellRect.bottom, cellRect.height);
                     /// #else
-                    this.setMobilePosition(cellRect.top, cellRect.bottom);
+                    this.setMobilePosition(cellRect.top);
                     /// #endif
                 }
             } else {
@@ -422,8 +417,7 @@ export class Hint {
                 /// #if !MOBILE
                 setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
                 /// #else
-                const selectionBounds = this.getMobileSelectionBounds(protyle);
-                this.setMobilePosition(selectionBounds.top, selectionBounds.bottom);
+                this.setMobilePosition(this.getMobileSelectionTop(protyle));
                 /// #endif
             }
         } else if (!this.element.querySelector(".fn__loading")) {
@@ -512,7 +506,7 @@ export class Hint {
                 /// #if !MOBILE
                 setPosition(this.element, cellRect.left, cellRect.bottom, cellRect.height);
                 /// #else
-                this.setMobilePosition(cellRect.top, cellRect.bottom);
+                this.setMobilePosition(cellRect.top);
                 /// #endif
             }
         } else {
@@ -520,8 +514,7 @@ export class Hint {
             /// #if !MOBILE
             setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
             /// #else
-            const selectionBounds = this.getMobileSelectionBounds(protyle);
-            this.setMobilePosition(selectionBounds.top, selectionBounds.bottom);
+            this.setMobilePosition(this.getMobileSelectionTop(protyle));
             /// #endif
         }
         this.element.scrollTop = 0;

@@ -6,6 +6,13 @@ import {aiConfigApi} from "./aiRuntime";
 import {Menu} from "../../../plugin/Menu";
 import {upDownHint} from "../../../util/upDownHint";
 import {moveModelItem} from "./aiModelOrder";
+import {
+    findProviderPreset,
+    getDefaultProviderProtocol,
+    getResponsesSupport,
+    IProviderPreset,
+    PROVIDER_PRESETS,
+} from "./aiProviderPresets";
 
 type ModelPickerGroup = "editing" | "agent" | "imageGeneration";
 type GroupedModelPickerElement = HTMLInputElement | HTMLButtonElement;
@@ -20,35 +27,6 @@ export interface IGroupedModelPicker {
     update: () => void;
 }
 
-interface IProviderPreset {
-    id: string;
-    name: string;
-    baseURL: string;
-    category: "official" | "aggregator" | "local" | "custom";
-    region?: "china" | "international";
-    icon?: string;
-}
-
-const PROVIDER_PRESETS: IProviderPreset[] = [
-    {id: "openai", name: "OpenAI", baseURL: "https://api.openai.com/v1", category: "official", icon: "/stage/images/ai-providers/openai.svg"},
-    {id: "deepseek", name: "DeepSeek", baseURL: "https://api.deepseek.com", category: "official", icon: "/stage/images/ai-providers/deepseek.svg"},
-    {id: "moonshot", name: "Moonshot AI", baseURL: "https://api.moonshot.cn/v1", category: "official", icon: "/stage/images/ai-providers/moonshot.svg"},
-    {id: "minimax", name: "MiniMax", baseURL: "https://api.minimax.io/v1", category: "official", region: "international", icon: "/stage/images/ai-providers/minimax.svg"},
-    {id: "minimax-cn", name: "MiniMax", baseURL: "https://api.minimaxi.com/v1", category: "official", region: "china", icon: "/stage/images/ai-providers/minimax.svg"},
-    {id: "aliyun", name: "Alibaba Model Studio", baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1", category: "official", region: "china", icon: "/stage/images/ai-providers/aliyun.svg"},
-    {id: "aliyun-intl", name: "Alibaba Model Studio", baseURL: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1", category: "official", region: "international", icon: "/stage/images/ai-providers/aliyun.svg"},
-    {id: "volcengine", name: "Volcengine Ark", baseURL: "https://ark.cn-beijing.volces.com/api/v3", category: "official", icon: "/stage/images/ai-providers/volcengine.svg"},
-    {id: "zhipu", name: "Zhipu AI", baseURL: "https://open.bigmodel.cn/api/paas/v4", category: "official", icon: "/stage/images/ai-providers/zhipu.svg"},
-    {id: "gemini", name: "Gemini", baseURL: "https://generativelanguage.googleapis.com/v1beta/openai", category: "official", icon: "/stage/images/ai-providers/gemini.svg"},
-    {id: "mistral", name: "Mistral AI", baseURL: "https://api.mistral.ai/v1", category: "official", icon: "/stage/images/ai-providers/mistral.svg"},
-    {id: "siliconflow", name: "SiliconFlow", baseURL: "https://api.siliconflow.cn/v1", category: "aggregator", icon: "/stage/images/ai-providers/siliconflow.svg"},
-    {id: "openrouter", name: "OpenRouter", baseURL: "https://openrouter.ai/api/v1", category: "aggregator", icon: "/stage/images/ai-providers/openrouter.svg"},
-    {id: "groq", name: "Groq", baseURL: "https://api.groq.com/openai/v1", category: "aggregator"},
-    {id: "ollama", name: "Ollama", baseURL: "http://localhost:11434/v1", category: "local", icon: "/stage/images/ai-providers/ollama.svg"},
-    {id: "lmstudio", name: "LM Studio", baseURL: "http://localhost:1234/v1", category: "local", icon: "/stage/images/ai-providers/lmstudio.svg"},
-    {id: "custom", name: "", baseURL: "", category: "custom"},
-];
-
 const PROVIDER_CATEGORIES = ["official", "aggregator", "local", "custom"] as const;
 
 const escapeHTML = (value: string) => Lute.EscapeHTMLStr(value ?? "");
@@ -56,10 +34,7 @@ const escapeHTML = (value: string) => Lute.EscapeHTMLStr(value ?? "");
 const cloneProvider = (provider: Config.IProvider): Config.IProvider =>
     JSON.parse(JSON.stringify(provider)) as Config.IProvider;
 
-const normalizeBaseURL = (value: string) => value.trim().replace(/\/+$/, "").toLowerCase();
-
-const findPreset = (provider: Config.IProvider) =>
-    PROVIDER_PRESETS.find((preset) => preset.baseURL && normalizeBaseURL(preset.baseURL) === normalizeBaseURL(provider.baseURL));
+const findPreset = (provider: Config.IProvider) => findProviderPreset(provider.baseURL);
 
 const requiresAPIKey = (provider: Config.IProvider) => {
     const preset = findPreset(provider);
@@ -218,7 +193,7 @@ const openProviderCatalog = (root: HTMLElement) => {
                 displayName: preset.name,
                 baseURL: preset.baseURL,
                 apiKey: "",
-                protocol: preset.id === "openai" ? "openai-responses" : "openai",
+                protocol: getDefaultProviderProtocol(preset.id),
                 requestTimeout: 120,
                 models: [],
             };
@@ -397,15 +372,11 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         displayName: preset?.name || "",
         baseURL: preset?.baseURL || "",
         apiKey: "",
-        protocol: preset?.id === "openai" ? "openai-responses" : "openai",
+        protocol: getDefaultProviderProtocol(preset?.id || "custom"),
         requestTimeout: 120,
         models: [],
     };
     draft.protocol ||= "openai";
-    const openAIApiType = findPreset(draft)?.id === "openai";
-    if (!openAIApiType) {
-        draft.protocol = "openai";
-    }
     const initialJSON = JSON.stringify(draft);
     const openedFromCatalog = !existing && !!preset;
     const view = createProviderView(
@@ -428,8 +399,9 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                 <span class="fn__space"></span>
                 <input class="b3-text-field fn__flex-center fn__size200" data-provider-field="baseURL" type="text" spellcheck="false" value="${escapeHTML(draft.baseURL)}">
             </label>
-            <label class="fn__flex b3-label config-item config-wrap${openAIApiType ? "" : " fn__none"}" data-type="openAIApiType">
-                ${genConfigItemMainHtml(window.siyuan.languages.apiType)}
+            <label class="fn__flex b3-label config-item config-wrap" data-type="openAIApiType">
+                ${genConfigItemMainHtml(window.siyuan.languages.apiType,
+        '<span class="fn__none" data-type="responsesCompatibility"></span>')}
                 <span class="fn__space"></span>
                 <select class="b3-select fn__flex-center fn__size200" data-provider-field="protocol">
                     <option value="openai"${draft.protocol === "openai" ? " selected" : ""}>Chat Completions API</option>
@@ -486,6 +458,18 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     let fetchingModels = false;
     let draggingModelIndex: number | undefined;
     let dropModelTarget: {index: number; after: boolean} | undefined;
+    const updateResponsesCompatibility = () => {
+        const compatibility = view.querySelector<HTMLElement>("[data-type='responsesCompatibility']");
+        if (!compatibility) {
+            return;
+        }
+        const support = getResponsesSupport(draft.baseURL);
+        compatibility.classList.toggle("fn__none", draft.protocol !== "openai-responses" || support === "supported");
+        compatibility.classList.toggle("ft__error", support === "unsupported");
+        compatibility.textContent = support === "unsupported"
+            ? window.siyuan.languages.incompatible
+            : window.siyuan.languages.experimentalFeature;
+    };
     const validateAPIKey = () => {
         if (!requiresAPIKey(draft) || draft.apiKey.trim() !== "") {
             return true;
@@ -502,6 +486,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         fetchModelsButton.disabled = disabled;
     };
     updateModelActionButtons();
+    updateResponsesCompatibility();
     renderDraftModels(modelsContainer, draft.models, availableModels);
 
     const clearModelDropTarget = () => {
@@ -732,15 +717,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             }
             if (providerField === "baseURL") {
                 updateModelActionButtons();
-                const isOpenAI = findPreset(draft)?.id === "openai";
-                view.querySelector<HTMLElement>("[data-type='openAIApiType']")?.classList.toggle("fn__none", !isOpenAI);
-                if (!isOpenAI) {
-                    draft.protocol = "openai";
-                    const protocolSelect = view.querySelector<HTMLSelectElement>("[data-provider-field='protocol']");
-                    if (protocolSelect) {
-                        protocolSelect.value = draft.protocol;
-                    }
-                }
+                updateResponsesCompatibility();
             }
             return;
         }
@@ -770,6 +747,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         const target = event.target as HTMLInputElement;
         if (target.dataset.providerField === "protocol") {
             draft.protocol = target.value;
+            updateResponsesCompatibility();
             return;
         }
         if (target.dataset.modelField !== "enabled") {

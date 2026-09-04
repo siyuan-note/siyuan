@@ -72,7 +72,8 @@ func TestOpenAIResponsesStreamPreservesOutput(t *testing.T) {
 		}},
 	}
 	stream, err := CreateOpenAICompletionStream(
-		context.Background(), client, OpenAIProtocolResponses, request, nil)
+		ContextWithOpenAIResponsesBaseURL(context.Background(), "https://api.openai.com/v1"),
+		client, OpenAIProtocolResponses, request, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -137,6 +138,45 @@ func TestOpenAIResponsesStreamPreservesOutput(t *testing.T) {
 	}
 	if _, exists := functionTool["function"]; exists {
 		t.Fatalf("Responses function tool contains Chat wrapper: %#v", functionTool)
+	}
+}
+
+func TestOpenAIResponsesConservativeRequestOmitsOptionalFields(t *testing.T) {
+	request := responseRequestFromChat(context.Background(), openai.ChatCompletionRequest{
+		Model:           "test-model",
+		ReasoningEffort: "high",
+	}, nil)
+	payload, err := json.Marshal(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var decoded map[string]any
+	if err = json.Unmarshal(payload, &decoded); err != nil {
+		t.Fatal(err)
+	}
+	for _, field := range []string{"store", "include"} {
+		if _, exists := decoded[field]; exists {
+			t.Fatalf("conservative Responses request contains %s: %s", field, payload)
+		}
+	}
+	reasoning, _ := decoded["reasoning"].(map[string]any)
+	if reasoning["effort"] != "high" {
+		t.Fatalf("reasoning effort was not preserved: %s", payload)
+	}
+	if _, exists := reasoning["summary"]; exists {
+		t.Fatalf("conservative Responses request contains reasoning.summary: %s", payload)
+	}
+}
+
+func TestOpenAIResponsesRequestOptionsForBaseURL(t *testing.T) {
+	openAI := openAIResponsesRequestOptionsForBaseURL("https://api.openai.com/v1/")
+	if !openAI.storeFalse || !openAI.includeEncryptedReasoning || openAI.reasoningSummary != "auto" ||
+		!openAI.nativeCompaction {
+		t.Fatalf("unexpected OpenAI Responses options: %#v", openAI)
+	}
+	groq := openAIResponsesRequestOptionsForBaseURL("https://api.groq.com/openai/v1")
+	if groq.storeFalse || groq.includeEncryptedReasoning || groq.reasoningSummary != "" || groq.nativeCompaction {
+		t.Fatalf("unexpected conservative Responses options: %#v", groq)
 	}
 }
 
@@ -318,10 +358,12 @@ func TestModelFallsBackToResponses(t *testing.T) {
 			_, _ = fmt.Fprint(w, "{\"error\":{\"message\":\"unsupported\"}}")
 		case "/v1/responses":
 			responsesCalled = true
-			w.Header().Set("Content-Type", "application/json")
-			_, _ = fmt.Fprint(w, "{\"id\":\"resp_1\",\"object\":\"response\",\"status\":\"completed\","+
-				"\"model\":\"gpt-test\",\"output\":[{\"type\":\"message\",\"role\":\"assistant\","+
-				"\"content\":[{\"type\":\"output_text\",\"text\":\"1\"}]}]}")
+			w.Header().Set("Content-Type", "text/event-stream")
+			_, _ = fmt.Fprint(w, "event: response.completed\n"+
+				"data: {\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\","+
+				"\"object\":\"response\",\"status\":\"completed\",\"model\":\"gpt-test\","+
+				"\"output\":[{\"type\":\"message\",\"role\":\"assistant\",\"content\":[{"+
+				"\"type\":\"output_text\",\"text\":\"1\"}]}]}}\n\n")
 		default:
 			t.Errorf("unexpected path: %s", r.URL.Path)
 			w.WriteHeader(http.StatusNotFound)
@@ -337,6 +379,68 @@ func TestModelFallsBackToResponses(t *testing.T) {
 	if len(available) != 0 || !matched || !responsesCalled {
 		t.Fatalf("unexpected model test result: available=%v, matched=%v, responses=%v",
 			available, matched, responsesCalled)
+	}
+}
+
+func TestModelProbesResponsesWhenAvailableListMatches(t *testing.T) {
+	var responsesCalled bool
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/v1/models":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = fmt.Fprint(w, "{\"object\":\"list\",\"data\":[{\"id\":\"gpt-test\","+
+				"\"object\":\"model\",\"created\":0,\"owned_by\":\"test\"}]}")
+		case "/v1/responses":
+			responsesCalled = true
+			w.Header().Set("Content-Type", "text/event-stream")
+			_, _ = fmt.Fprint(w, "event: response.completed\n"+
+				"data: {\"type\":\"response.completed\",\"response\":{\"id\":\"resp_1\","+
+				"\"object\":\"response\",\"status\":\"completed\",\"model\":\"gpt-test\","+
+				"\"output\":[{\"type\":\"message\",\"role\":\"assistant\",\"content\":[{"+
+				"\"type\":\"output_text\",\"text\":\"1\"}]}]}}\n\n")
+		default:
+			t.Errorf("unexpected path: %s", r.URL.Path)
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer server.Close()
+
+	available, matched, err := TestModel(
+		"test", server.URL+"/v1", OpenAIProtocolResponses, "gpt-test", 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(available) != 1 || available[0] != "gpt-test" || !matched || !responsesCalled {
+		t.Fatalf("unexpected model test result: available=%v, matched=%v, responses=%v",
+			available, matched, responsesCalled)
+	}
+}
+
+func TestModelRejectsUnavailableSelectedProtocol(t *testing.T) {
+	var responsesCalled bool
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/v1/models":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = fmt.Fprint(w, "{\"object\":\"list\",\"data\":[{\"id\":\"gpt-test\","+
+				"\"object\":\"model\",\"created\":0,\"owned_by\":\"test\"}]}")
+		case "/v1/responses":
+			responsesCalled = true
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			_, _ = fmt.Fprint(w, "{\"error\":{\"message\":\"unsupported protocol\"}}")
+		default:
+			t.Errorf("unexpected path: %s", r.URL.Path)
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer server.Close()
+
+	available, matched, err := TestModel(
+		"test", server.URL+"/v1", OpenAIProtocolResponses, "gpt-test", 5)
+	if err == nil || matched || !responsesCalled || len(available) != 1 {
+		t.Fatalf("unexpected model test result: available=%v, matched=%v, responses=%v, err=%v",
+			available, matched, responsesCalled, err)
 	}
 }
 

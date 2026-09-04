@@ -46,6 +46,11 @@ import {
     openFontFamilyMenu,
 } from "./fontFamilyMenu";
 import {hasInlineFontFamilyExcludedType} from "./fontFamilyCore";
+import {
+    hasInlineDirectionStyle,
+    hasSameInlineDirectionStyle,
+    setInlineDirectionStyle,
+} from "./inlineDirectionStyle";
 
 const MAX_RECENT_FONT_STYLES = 14;
 
@@ -263,6 +268,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
     const {fontSize, baseFontSize} = getFontSizeInfo(protyle, nodeElements);
     const fontFamilyState = getInlineFontFamilyState(protyle, fontFamilyElements || nodeElements);
     const disableFontFamily = disableFont || fontFamilyState.disabled;
+    const showInlineDirection = !nodeElements || nodeElements.length === 0 || !!onChange;
     const applyFontStyle = (type: string, color?: string) => {
         fontEvent(protyle, nodeElements, type, color, true, onChange);
     };
@@ -306,6 +312,20 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
     <button data-type="style2" class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.hollow}" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">A</button>
     <button data-type="style4" class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.shadow}" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">A</button>
 </div>
+${showInlineDirection ? `<div class="fn__hr"></div>
+<div data-id="textDirection" class="fn__flex">
+    <span class="fn__flex-center">${window.siyuan.languages.textDirection}</span>
+    <span class="fn__flex-1"></span>
+    <button type="button" class="block__icon block__icon--show ariaLabel" data-position="3south" data-type="direction" data-value="ltr" aria-label="${window.siyuan.languages.ltr}">
+        <svg><use xlink:href="#iconLtr"></use></svg>
+    </button>
+    <button type="button" class="block__icon block__icon--show ariaLabel" data-position="3south" data-type="direction" data-value="rtl" aria-label="${window.siyuan.languages.rtl}">
+        <svg><use xlink:href="#iconRtl"></use></svg>
+    </button>
+    <button type="button" class="block__icon block__icon--show ariaLabel" data-position="3south" data-type="direction" data-value="" aria-label="${window.siyuan.languages.clear}">
+        <svg><use xlink:href="#iconClear"></use></svg>
+    </button>
+</div>` : ""}
 <div class="fn__hr${disableFontFamily ? " fn__none" : ""}"></div>
 <div data-id="fontFamily" class="fn__flex${disableFontFamily ? " fn__none" : ""}">
     <span class="fn__flex-center">${window.siyuan.languages.fontFamily}</span>
@@ -383,6 +403,9 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
                 } else if (dataType === "color") {
                     applyFontStyle(dataType, target.style.color);
                     closeSelectionToolbarAppearance();
+                } else if (dataType === "direction") {
+                    applyFontStyle(dataType, target.dataset.value);
+                    closeSelectionToolbarAppearance();
                 } else {
                     applyFontStyle(dataType);
                     closeSelectionToolbarAppearance();
@@ -443,7 +466,7 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
                           focusRange = true, onChange?: (type: string, color?: string) => void) => {
     let localFontStyles = window.siyuan.storage[Constants.LOCAL_FONTSTYLES];
     if (type) {
-        if (type !== "fontFamily") {
+        if (!["direction", "fontFamily"].includes(type)) {
             const value = `${type}${Constants.ZWSP}${color}`;
             const recentKey = getRecentInlineStyleKey(value);
             localFontStyles = [value, ...localFontStyles.filter((item: string) =>
@@ -585,6 +608,9 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
                     }
                 }
                 break;
+            case "direction":
+                setInlineDirectionStyle(textElement.style, textOption.color);
+                break;
             case "backgroundColor":
                 textElement.style.backgroundColor = textOption.color;
                 break;
@@ -658,7 +684,8 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
             sideElement.style.textShadow === currentElement.style.textShadow &&
             sideElement.style.backgroundColor === currentElement.style.backgroundColor &&
             sideElement.style.fontSize === currentElement.style.fontSize &&
-            sideElement.style.fontFamily === currentElement.style.fontFamily) {
+            sideElement.style.fontFamily === currentElement.style.fontFamily &&
+            hasSameInlineDirectionStyle(currentElement.style, sideElement.style)) {
             return true;
         }
         return false;
@@ -673,6 +700,8 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
                 !sideElement.style.textShadow &&
                 !sideElement.style.fontSize &&
                 !sideElement.style.fontFamily &&
+                !sideElement.style.direction &&
+                !sideElement.style.unicodeBidi &&
                 !sideElement.style.backgroundColor;
         }
         if (textObj.type === "color") {
@@ -698,6 +727,9 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
         }
         if (textObj.type === "fontFamily") {
             return textObj.color === sideElement.style.fontFamily;
+        }
+        if (textObj.type === "direction") {
+            return hasInlineDirectionStyle(sideElement.style, textObj.color);
         }
     }
     return false;

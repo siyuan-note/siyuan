@@ -1,6 +1,7 @@
 export interface IFormatPainterStyle {
     backgroundColor?: string;
     color?: string;
+    direction?: "ltr" | "rtl";
     fontFamily?: string;
     fontSize?: string;
     shadow?: boolean;
@@ -29,7 +30,7 @@ export const FORMAT_PAINTER_TYPES = ["strong", "em", "u", "s", "mark", "sup", "s
 const getCommonStyles = (segments: IFormatPainterSegment[]) => {
     const styles: IFormatPainterStyle = {};
     const keys: (keyof IFormatPainterStyle)[] = [
-        "backgroundColor", "color", "fontFamily", "fontSize", "shadow", "hollow"
+        "backgroundColor", "color", "direction", "fontFamily", "fontSize", "shadow", "hollow"
     ];
     keys.forEach(key => {
         const comparableSegments = key === "fontFamily" ?

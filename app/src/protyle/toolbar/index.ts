@@ -458,6 +458,9 @@ export class Toolbar {
                 if (snapshot.styles.fontFamily) {
                     applyMark("text", {type: "fontFamily", color: snapshot.styles.fontFamily});
                 }
+                if (snapshot.styles.direction) {
+                    applyMark("text", {type: "direction", color: snapshot.styles.direction});
+                }
                 if (snapshot.styles.shadow) {
                     applyMark("text", {type: "style4"});
                 }
@@ -1014,6 +1017,8 @@ export class Toolbar {
                             item.style.backgroundColor = "";
                             item.style.fontSize = "";
                             item.style.fontFamily = "";
+                            item.style.direction = "";
+                            item.style.unicodeBidi = "";
                         }
                         item.setAttribute("data-type", types.join(" "));
                         if (hasSemanticInlineType(types.join(" "))) {

@@ -1,4 +1,5 @@
 {
+	"textDirection": "Textrichtung",
 	"contextFilter": "Kontextfilter",
 	"contextFilterTip": "Gilt für alle Ansichten in diesem Datenbankblock",
 	"contextFilterNoRelation": "Erstelle und konfiguriere ein Beziehungsfeld, bevor du den Kontextfilter aktivierst",

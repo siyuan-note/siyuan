@@ -1,4 +1,5 @@
 {
+	"textDirection": "文字方向",
 	"contextFilter": "情境篩選",
 	"contextFilterTip": "套用於此資料庫區塊的所有檢視",
 	"contextFilterNoRelation": "啟用情境篩選前，請先建立並設定關聯欄位",

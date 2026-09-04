@@ -1,4 +1,5 @@
 {
+	"textDirection": "Arah teks",
 	"contextFilter": "Filter konteks",
 	"contextFilterTip": "Berlaku untuk setiap tampilan dalam blok basis data ini",
 	"contextFilterNoRelation": "Buat dan konfigurasikan bidang relasi sebelum mengaktifkan filter konteks",

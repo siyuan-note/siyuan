@@ -1,4 +1,5 @@
 {
+	"textDirection": "文本方向",
 	"contextFilter": "上下文筛选",
 	"contextFilterTip": "应用于当前数据库块的所有视图",
 	"contextFilterNoRelation": "请先创建并配置关联字段，再启用上下文筛选",

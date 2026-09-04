@@ -1,4 +1,5 @@
 {
+	"textDirection": "כיוון הטקסט",
 	"contextFilter": "מסנן הקשר",
 	"contextFilterTip": "חל על כל התצוגות בבלוק מסד הנתונים הזה",
 	"contextFilterNoRelation": "יש ליצור ולהגדיר שדה קשר לפני הפעלת מסנן ההקשר",

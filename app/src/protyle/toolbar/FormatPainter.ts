@@ -35,6 +35,8 @@ const getSegment = (textNode: Text, editableElement: Element) => {
             styles.fontSize = styles.fontSize || element.style.fontSize || undefined;
             styles.shadow = styles.shadow || !!element.style.textShadow || undefined;
             styles.hollow = styles.hollow || !!element.style.webkitTextStroke || undefined;
+            styles.direction = styles.direction ||
+                (element.style.direction === "ltr" || element.style.direction === "rtl" ? element.style.direction : undefined);
         }
         if (element === editableElement) {
             break;

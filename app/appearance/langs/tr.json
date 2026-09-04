@@ -1,4 +1,5 @@
 {
+	"textDirection": "Metin yönü",
 	"contextFilter": "Bağlam filtresi",
 	"contextFilterTip": "Bu veritabanı bloğundaki tüm görünümlere uygulanır",
 	"contextFilterNoRelation": "Bağlam filtresini etkinleştirmeden önce bir ilişki alanı oluşturup yapılandırın",

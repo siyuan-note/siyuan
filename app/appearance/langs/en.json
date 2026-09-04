@@ -1,4 +1,5 @@
 {
+	"textDirection": "Text direction",
 	"contextFilter": "Context filter",
 	"contextFilterTip": "Applies to every view in this database block",
 	"contextFilterNoRelation": "Create and configure a relation field before enabling the context filter",

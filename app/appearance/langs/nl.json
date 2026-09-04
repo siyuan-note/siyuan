@@ -1,4 +1,5 @@
 {
+	"textDirection": "Tekstrichting",
 	"contextFilter": "Contextfilter",
 	"contextFilterTip": "Is van toepassing op alle weergaven in dit databaseblok",
 	"contextFilterNoRelation": "Maak en configureer een relatieveld voordat je het contextfilter inschakelt",

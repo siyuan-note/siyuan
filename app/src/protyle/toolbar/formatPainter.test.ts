@@ -10,13 +10,26 @@ describe("getCommonFormatPainterSnapshot", () => {
     it("keeps only formats shared by every selected text segment", () => {
         assert.deepEqual(getCommonFormatPainterSnapshot([{
             types: ["strong", "em"],
-            styles: {color: "red", fontFamily: "Arial", fontSize: "16px"},
+            styles: {color: "red", direction: "rtl", fontFamily: "Arial", fontSize: "16px"},
         }, {
             types: ["strong", "u"],
-            styles: {color: "blue", fontFamily: "Arial", fontSize: "16px"},
+            styles: {color: "blue", direction: "rtl", fontFamily: "Arial", fontSize: "16px"},
         }]), {
             types: ["strong"],
-            styles: {fontFamily: "Arial", fontSize: "16px"},
+            styles: {direction: "rtl", fontFamily: "Arial", fontSize: "16px"},
+        });
+    });
+
+    it("omits mixed inline text directions", () => {
+        assert.deepEqual(getCommonFormatPainterSnapshot([{
+            types: [],
+            styles: {direction: "ltr"},
+        }, {
+            types: [],
+            styles: {direction: "rtl"},
+        }]), {
+            types: [],
+            styles: {},
         });
     });
 

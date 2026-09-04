@@ -1,4 +1,5 @@
 {
+	"textDirection": "اتجاه النص",
 	"contextFilter": "مرشح السياق",
 	"contextFilterTip": "يُطبّق على جميع طرق العرض في كتلة قاعدة البيانات هذه",
 	"contextFilterNoRelation": "أنشئ حقل علاقة وقم بتكوينه قبل تمكين مرشح السياق",

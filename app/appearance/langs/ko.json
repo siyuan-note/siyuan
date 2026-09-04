@@ -1,4 +1,5 @@
 {
+	"textDirection": "텍스트 방향",
 	"contextFilter": "컨텍스트 필터",
 	"contextFilterTip": "이 데이터베이스 블록의 모든 보기에 적용됩니다",
 	"contextFilterNoRelation": "컨텍스트 필터를 사용하기 전에 관계 필드를 만들고 구성하세요",

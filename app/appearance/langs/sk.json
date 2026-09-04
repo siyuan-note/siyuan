@@ -1,4 +1,5 @@
 {
+	"textDirection": "Smer textu",
 	"contextFilter": "Kontextový filter",
 	"contextFilterTip": "Použije sa na všetky zobrazenia v tomto databázovom bloku",
 	"contextFilterNoRelation": "Pred zapnutím kontextového filtra vytvorte a nastavte pole vzťahu",

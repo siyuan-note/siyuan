@@ -1,4 +1,5 @@
 {
+	"textDirection": "Kierunek tekstu",
 	"contextFilter": "Filtr kontekstowy",
 	"contextFilterTip": "Dotyczy wszystkich widoków w tym bloku bazy danych",
 	"contextFilterNoRelation": "Przed włączeniem filtra kontekstowego utwórz i skonfiguruj pole relacji",

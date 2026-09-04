@@ -1,4 +1,5 @@
 {
+	"textDirection": "テキストの方向",
 	"contextFilter": "コンテキストフィルター",
 	"contextFilterTip": "このデータベースブロックのすべてのビューに適用します",
 	"contextFilterNoRelation": "コンテキストフィルターを有効にする前に関連フィールドを作成して設定してください",

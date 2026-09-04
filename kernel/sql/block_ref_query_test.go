@@ -169,3 +169,49 @@ func TestQueryRefsByDefIDsInBoxBatchesAndParameterizesIDs(t *testing.T) {
 		t.Fatalf("query argument changed stored refs, count: %d", count)
 	}
 }
+
+// TestDefRefsRejectNonSingleStatement 验证关系图引用查询条件无法通过多语句拼接执行写入语句，
+// 执行前由 CheckSingleStatement 拒绝 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-5rwv-4j4c-f954
+func TestDefRefsRejectNonSingleStatement(t *testing.T) {
+	testDB, err := gosql.Open("sqlite3_extended", ":memory:")
+	if nil != err {
+		t.Fatalf("open test database failed: %s", err)
+	}
+	testDB.SetMaxOpenConns(1)
+	defer testDB.Close()
+	if _, err = testDB.Exec("CREATE TABLE blocks (id TEXT, parent_id TEXT, root_id TEXT, hash TEXT, box TEXT, path TEXT, hpath TEXT, name TEXT, alias TEXT, memo TEXT, tag TEXT, content TEXT, fcontent TEXT, markdown TEXT, length INTEGER, type TEXT, subtype TEXT, ial TEXT, sort INTEGER, created TEXT, updated TEXT)"); nil != err {
+		t.Fatalf("create blocks table failed: %s", err)
+	}
+	if _, err = testDB.Exec("CREATE TABLE refs (block_id TEXT, def_block_id TEXT)"); nil != err {
+		t.Fatalf("create refs table failed: %s", err)
+	}
+	if _, err = testDB.Exec("INSERT INTO blocks (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated) VALUES ('def', '', 'def', '', '', '/', '/', '', '', '', '', '', '', '', 0, 'd', '', '', 0, '', '')"); nil != err {
+		t.Fatalf("insert block failed: %s", err)
+	}
+	if _, err = testDB.Exec("INSERT INTO refs VALUES ('def', 'def')"); nil != err {
+		t.Fatalf("insert ref failed: %s", err)
+	}
+
+	previousDB := db
+	db = testDB
+	defer func() {
+		db = previousDB
+	}()
+
+	ret := DefRefs("1=1); DELETE FROM blocks; --", 10)
+	if 0 != len(ret) {
+		t.Fatalf("unexpected refs returned for injected condition: %#v", ret)
+	}
+	var count int
+	if err = testDB.QueryRow("SELECT COUNT(*) FROM blocks").Scan(&count); nil != err {
+		t.Fatalf("query block count failed: %s", err)
+	}
+	if 1 != count {
+		t.Fatalf("injected statement changed blocks, count: %d", count)
+	}
+
+	ret = DefRefs("ref.content LIKE '%x%'", 10)
+	if 0 != len(ret) {
+		t.Fatalf("unexpected refs returned for non-matching condition: %#v", ret)
+	}
+}

@@ -976,6 +976,15 @@ func GetChildBlocks(parentID, condition string, limit int) (ret []*Block) {
 		sqlStmt += " AND " + condition
 	}
 	sqlStmt += " LIMIT " + strconv.Itoa(limit)
+	// 关系图查询条件由用户输入动态拼接，执行前校验单条只读语句，防止注入
+	if err := CheckSingleStatement(sqlStmt); nil != err {
+		logging.LogErrorf("sql query [%s] rejected as non-single statement: %s", sqlStmt, err)
+		return
+	}
+	if err := CheckReadonlyStatement(sqlStmt); nil != err {
+		logging.LogErrorf("sql query [%s] rejected as non-readonly statement: %s", sqlStmt, err)
+		return
+	}
 	rows, err := query(sqlStmt)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
@@ -997,6 +1006,15 @@ func GetAllChildBlocks(rootIDs []string, condition string, limit int) (ret []*Bl
 		sqlStmt += " AND " + condition
 	}
 	sqlStmt += " LIMIT " + strconv.Itoa(limit)
+	// 关系图查询条件由用户输入动态拼接，执行前校验单条只读语句，防止注入
+	if err := CheckSingleStatement(sqlStmt); nil != err {
+		logging.LogErrorf("sql query [%s] rejected as non-single statement: %s", sqlStmt, err)
+		return
+	}
+	if err := CheckReadonlyStatement(sqlStmt); nil != err {
+		logging.LogErrorf("sql query [%s] rejected as non-readonly statement: %s", sqlStmt, err)
+		return
+	}
 	rows, err := query(sqlStmt)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)

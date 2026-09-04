@@ -677,7 +677,9 @@ func query2Stmt(queryStr string) (ret string) {
 				return ast.WalkContinue
 			}
 			if n.IsTextMarkType("tag") {
-				tags = append(tags, n.Text())
+				// 转义单引号，避免标签内容闭合 SQL 字符串字面量造成注入
+				// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-5rwv-4j4c-f954
+				tags = append(tags, strings.ReplaceAll(n.Text(), "'", "''"))
 			}
 			return ast.WalkContinue
 		})

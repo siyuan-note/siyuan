@@ -577,6 +577,10 @@ declare namespace Config {
          */
         blockRefDynamicAnchorTextMaxLen: number;
         /**
+         * Whether to check block references and database bindings before deleting or cutting
+         */
+        checkBlockRef: boolean;
+        /**
          * Whether the code block has enabled ligatures
          */
         codeLigatures: boolean;

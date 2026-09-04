@@ -1,4 +1,6 @@
 {
+	"checkBlockRef": "Vérifier les références de blocs avant de supprimer ou couper",
+	"checkBlockRefTip": "Lorsque cette option est activée, un avertissement apparaît avant de supprimer ou couper des blocs référencés ou liés à une base de données",
 	"aiMcpDisableStandaloneSSE": "Désactiver le SSE autonome",
 	"aiMcpDisableStandaloneSSETip": "Empêche la connexion SSE autonome tout en maintenant les requêtes Streamable HTTP disponibles",
 	"textDirection": "Direction du texte",

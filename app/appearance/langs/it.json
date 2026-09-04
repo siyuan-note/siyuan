@@ -1,4 +1,6 @@
 {
+	"checkBlockRef": "Controlla i riferimenti ai blocchi prima di eliminare o tagliare",
+	"checkBlockRefTip": "Se abilitato, viene mostrato un avviso prima di eliminare o tagliare blocchi referenziati o associati a un database",
 	"aiMcpDisableStandaloneSSE": "Disabilita SSE autonomo",
 	"aiMcpDisableStandaloneSSETip": "Impedisce la connessione SSE autonoma mantenendo disponibili le richieste Streamable HTTP",
 	"textDirection": "Direzione del testo",

@@ -1,4 +1,6 @@
 {
+	"checkBlockRef": "التحقق من مراجع الكتل قبل الحذف أو القص",
+	"checkBlockRefTip": "عند التمكين، يظهر تحذير قبل حذف أو قص الكتل المشار إليها أو المرتبطة بقاعدة بيانات",
 	"aiMcpDisableStandaloneSSE": "تعطيل SSE المستقل",
 	"aiMcpDisableStandaloneSSETip": "يمنع اتصال SSE المستقل مع إبقاء طلبات Streamable HTTP متاحة",
 	"textDirection": "اتجاه النص",

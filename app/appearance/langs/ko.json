@@ -1,4 +1,6 @@
 {
+	"checkBlockRef": "삭제하거나 잘라내기 전에 블록 참조 확인",
+	"checkBlockRefTip": "활성화하면 참조되거나 데이터베이스에 바인딩된 블록을 삭제하거나 잘라내기 전에 경고가 표시됩니다",
 	"aiMcpDisableStandaloneSSE": "독립 SSE 비활성화",
 	"aiMcpDisableStandaloneSSETip": "Streamable HTTP 요청을 유지하면서 독립 SSE 연결을 차단합니다",
 	"textDirection": "텍스트 방향",

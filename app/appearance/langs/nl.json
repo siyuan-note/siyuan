@@ -1,4 +1,6 @@
 {
+	"checkBlockRef": "Blokverwijzingen controleren vóór verwijderen of knippen",
+	"checkBlockRefTip": "Indien ingeschakeld verschijnt een waarschuwing voordat verwezen of aan een database gekoppelde blokken worden verwijderd of geknipt",
 	"aiMcpDisableStandaloneSSE": "Zelfstandige SSE uitschakelen",
 	"aiMcpDisableStandaloneSSETip": "Voorkomt de zelfstandige SSE-verbinding terwijl Streamable HTTP-verzoeken beschikbaar blijven",
 	"textDirection": "Tekstrichting",

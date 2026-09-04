@@ -1,4 +1,6 @@
 {
+	"checkBlockRef": "ตรวจสอบการอ้างอิงบล็อกก่อนลบหรือตัด",
+	"checkBlockRefTip": "เมื่อเปิดใช้งาน ระบบจะแสดงคำเตือนก่อนลบหรือตัดบล็อกที่ถูกอ้างอิงหรือผูกกับฐานข้อมูล",
 	"aiMcpDisableStandaloneSSE": "ปิดใช้งาน SSE แบบสแตนด์อโลน",
 	"aiMcpDisableStandaloneSSETip": "ป้องกันการเชื่อมต่อ SSE แบบสแตนด์อโลนโดยยังคงใช้คำขอ Streamable HTTP ได้",
 	"textDirection": "ทิศทางข้อความ",

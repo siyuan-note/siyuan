@@ -1,4 +1,6 @@
 {
+	"checkBlockRef": "Sprawdzaj odwołania do bloków przed usunięciem lub wycięciem",
+	"checkBlockRefTip": "Po włączeniu przed usunięciem lub wycięciem bloków z odwołaniami albo powiązanych z bazą danych pojawi się ostrzeżenie",
 	"aiMcpDisableStandaloneSSE": "Wyłącz niezależne SSE",
 	"aiMcpDisableStandaloneSSETip": "Zapobiega niezależnemu połączeniu SSE, zachowując dostępność żądań Streamable HTTP",
 	"textDirection": "Kierunek tekstu",

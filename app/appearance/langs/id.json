@@ -1,4 +1,6 @@
 {
+	"checkBlockRef": "Periksa referensi blok sebelum menghapus atau memotong",
+	"checkBlockRefTip": "Jika diaktifkan, peringatan muncul sebelum menghapus atau memotong blok yang dirujuk atau terikat ke basis data",
 	"aiMcpDisableStandaloneSSE": "Nonaktifkan SSE mandiri",
 	"aiMcpDisableStandaloneSSETip": "Mencegah koneksi SSE mandiri sambil mempertahankan permintaan Streamable HTTP",
 	"textDirection": "Arah teks",

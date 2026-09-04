@@ -1,4 +1,6 @@
 {
+	"checkBlockRef": "刪除或剪下前檢查區塊引用",
+	"checkBlockRefTip": "啟用後，刪除或剪下被引用或綁定到資料庫的內容區塊前將進行檢查並提示",
 	"aiMcpDisableStandaloneSSE": "停用獨立 SSE",
 	"aiMcpDisableStandaloneSSETip": "禁止建立獨立 SSE 連線，同時保留 Streamable HTTP 請求",
 	"textDirection": "文字方向",

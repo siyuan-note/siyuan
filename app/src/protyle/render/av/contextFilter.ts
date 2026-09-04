@@ -4,6 +4,7 @@ import {
     createContextFilter,
     getContextFilterFields,
     getContextFilterKeyID,
+    toggleContextFilterKeyID,
 } from "./contextFilterState";
 import {unicode2Emoji} from "../../../emoji";
 
@@ -25,14 +26,9 @@ export const getContextFilterHTML = (data: IAV) => {
 </button>
 <button class="b3-menu__separator"></button>
 <div class="b3-menu__item b3-menu__item--readonly">
-    <span class="b3-menu__label ft__on-surface">${window.siyuan.languages.contextFilterTip}</span>
+    <span class="b3-menu__label ft__on-surface fn__flex"><span class="fn__flex-center">${window.siyuan.languages.contextFilterTip}</span></span>
 </div>
-${optionsHTML || `<div class="b3-menu__item b3-menu__item--readonly"><span class="b3-menu__label ft__on-surface">${window.siyuan.languages.contextFilterNoRelation}</span></div>`}
-<button class="b3-menu__separator${selectedKeyID ? "" : " fn__none"}"></button>
-<button class="b3-menu__item b3-menu__item--warning${selectedKeyID ? "" : " fn__none"}" data-type="disableContextFilter">
-    <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.disable}</span>
-</button>
+${optionsHTML || `<div class="b3-menu__item b3-menu__item--readonly"><span class="b3-menu__label ft__on-surface fn__flex"><span class="fn__flex-center">${window.siyuan.languages.contextFilterNoRelation}</span></span></div>`}
 </div>`;
 };
 
@@ -46,17 +42,11 @@ export const bindContextFilterEvent = (options: {
     options.menuElement.addEventListener("click", (event: MouseEvent) => {
         const target = event.target as HTMLElement;
         const fieldElement = target.closest('[data-type="contextFilterField"]') as HTMLElement;
-        const disableElement = target.closest('[data-type="disableContextFilter"]') as HTMLElement;
-        if (!fieldElement && !disableElement) {
+        if (!fieldElement) {
             return;
         }
         const oldKeyID = getContextFilterKeyID(options.data.contextFilter);
-        const keyID = disableElement ? "" : fieldElement.dataset.id || "";
-        if (keyID === oldKeyID) {
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
+        const keyID = toggleContextFilterKeyID(oldKeyID, fieldElement.dataset.id || "");
         const operation = (operationKeyID: string): IOperation => ({
             action: "setAttrViewContextFilter",
             avID: options.avID,

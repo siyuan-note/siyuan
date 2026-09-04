@@ -4,6 +4,7 @@ import {
     createContextFilter,
     getContextFilterFields,
     getContextFilterKeyID,
+    toggleContextFilterKeyID,
 } from "./contextFilterState";
 
 describe("database block context filter", () => {
@@ -30,5 +31,11 @@ describe("database block context filter", () => {
     it("normalizes an empty field selection to a disabled filter", () => {
         assert.deepEqual(createContextFilter("relation-a"), {spec: 1, keyID: "relation-a"});
         assert.equal(createContextFilter(""), null);
+    });
+
+    it("toggles the selected relation field", () => {
+        assert.equal(toggleContextFilterKeyID("", "relation-a"), "relation-a");
+        assert.equal(toggleContextFilterKeyID("relation-a", "relation-a"), "");
+        assert.equal(toggleContextFilterKeyID("relation-a", "relation-b"), "relation-b");
     });
 });

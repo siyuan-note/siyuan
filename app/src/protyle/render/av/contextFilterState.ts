@@ -9,3 +9,7 @@ export const getContextFilterFields = (fields?: IAVContextFilterField[]) => {
 export const createContextFilter = (keyID: string): IAVContextFilter | null => {
     return keyID ? {spec: 1, keyID} : null;
 };
+
+export const toggleContextFilterKeyID = (currentKeyID: string, targetKeyID: string) => {
+    return currentKeyID === targetKeyID ? "" : targetKeyID;
+};

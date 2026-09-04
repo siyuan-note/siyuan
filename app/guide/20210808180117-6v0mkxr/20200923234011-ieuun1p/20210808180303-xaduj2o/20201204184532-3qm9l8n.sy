@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20260830143000"
+		"updated": "20260904091600"
 	},
 	"Children": [
 		{
@@ -1702,6 +1702,35 @@
 				{
 					"Type": "NodeText",
 					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20260904022100-kqbyhrl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260904022100-kqbyhrl",
+				"updated": "20260904091600"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Databases in saved templates"
+				}
+			]
+		},
+		{
+			"ID": "20260904022100-vq38you",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260904022100-vq38you",
+				"updated": "20260904091600"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When saving a document as a template, “Databases in the template” applies one mode to every database block in that document. “Create complete copy” is the default: each use creates independent databases that no longer synchronize with the sources, and block-level Context filters are removed. “Create mirror copy” preserves the existing database references and Context filters: inserted database blocks share data and view settings with the source databases. Reference mode requires the target document to be able to access the source databases within the same encryption boundary; otherwise template insertion fails. Combining a referenced shared task database with the database block’s Context filter set to the Project relation field (“Contains any item - Current document”) lets one reusable project template show only the tasks related to each project document."
 				}
 			]
 		},

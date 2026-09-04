@@ -1,4 +1,12 @@
 {
+	"contextFilter": "Filtro contestuale",
+	"contextFilterTip": "Si applica a tutte le viste di questo blocco database",
+	"contextFilterNoRelation": "Crea e configura un campo relazione prima di attivare il filtro contestuale",
+	"filterCurrentDocument": "Documento corrente",
+	"filterCurrentDocumentTip": "Viene risolto come l’elemento del database associato al documento che contiene questo blocco database",
+	"templateDatabaseMode": "Database nel modello",
+	"templateDatabaseCopyTip": "Crea database indipendenti che non restano sincronizzati con l’origine",
+	"templateDatabaseReferenceTip": "Mantiene i riferimenti ai database esistenti e ne condivide dati e impostazioni di visualizzazione",
 	"entryTopBar": "Barra superiore",
 	"entryTopBarDrag": "Area di trascinamento della finestra",
 	"bazaarFrontendDesktop": "Finestra principale desktop",

@@ -1,4 +1,12 @@
 {
+	"contextFilter": "コンテキストフィルター",
+	"contextFilterTip": "このデータベースブロックのすべてのビューに適用します",
+	"contextFilterNoRelation": "コンテキストフィルターを有効にする前に関連フィールドを作成して設定してください",
+	"filterCurrentDocument": "現在の文書",
+	"filterCurrentDocumentTip": "このデータベースブロックが存在する文書に紐付けられたデータベース項目として解決します",
+	"templateDatabaseMode": "テンプレート内のデータベース",
+	"templateDatabaseCopyTip": "独立したデータベースを作成し、元のデータベースとは同期しません",
+	"templateDatabaseReferenceTip": "既存のデータベースへの参照を保持し、データとビュー設定を共有します",
 	"entryTopBar": "トップバー",
 	"entryTopBarDrag": "ウィンドウのドラッグ領域",
 	"bazaarFrontendDesktop": "デスクトップメインウィンドウ",

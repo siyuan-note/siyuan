@@ -1327,6 +1327,34 @@
   }
   ```
 
+### 将文档保存为模板
+
+* `/api/template/docSaveAsTemplate`
+* 参数
+
+  ```json
+  {
+    "id": "20220724223548-j6g0o87",
+    "name": "项目",
+    "overwrite": false,
+    "databaseMode": "copy"
+  }
+  ```
+
+    * `id`: 源文档 ID
+    * `name`: 模板名称。内核会清理名称并添加 `.md` 扩展名
+    * `overwrite`: 是否覆盖同名模板。为 `false` 且模板已存在时，响应 `code` 为 `1`
+    * `databaseMode`: 文档中所有数据库块的可选处理方式。`copy`（默认值）在每次使用模板时创建独立数据库，并清除块级上下文筛选；`reference` 保留原有数据库 ID 和上下文筛选，使渲染出的块成为与源数据库共享数据和视图配置的镜像。若目标文档的加密边界内无法访问源数据库，引用模式的模板渲染会失败
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
 ### 渲染 Sprig
 
 * `/api/template/renderSprig`
@@ -1859,7 +1887,7 @@
   ```
 
     * `id`: 数据库 ID
-    * `blockID`: 嵌入该数据库的数据库块，用于解析当前视图和发布权限。其 `custom-sy-av-view` 缺失或无效时使用第一个可用视图。渲染独立数据库时可省略
+    * `blockID`: 嵌入该数据库的数据库块，用于解析当前视图、发布权限和块级上下文筛选。其 `custom-sy-av-view` 缺失或无效时使用第一个可用视图。渲染独立数据库时可省略；已配置上下文筛选时必须传入有效的数据库块实例
     * `viewID`: 明确指定要渲染的视图。值无效时返回错误；省略时先通过 `blockID` 解析，无法解析则使用第一个可用视图
     * `page`: 页码，从 1 开始。默认为 `1`
     * `pageSize`: 每页条目数。`-1` 或省略表示使用视图默认值（`50`）
@@ -1881,6 +1909,8 @@
       "viewType": "table",
       "viewID": "20240118120204-7rnmyc1",
       "isMirror": false,
+      "contextFilter": null,
+      "contextFilterFields": [],
       "views": [
         {
           "id": "20240118120204-7rnmyc1",
@@ -1963,6 +1993,67 @@
     * `data.view.rows[].cells[].value`: 一个 `Value` 对象——所有 value 形态见 [设置单元格值](#设置单元格值)。`createdAt`/`updatedAt` 为 int64 毫秒时间戳。当普通字段配置了非空 `renderTemplate` 时，可选属性 `renderedContent` 包含运行时显示模板结果；该属性不会持久化，原有类型属性仍包含存储值。`data.view.cards[]` 中的值遵循相同规则
     * `data.views`: 所有视图的元数据（不含行数据）
     * `data.isMirror`: 当数据库块为数据库的镜像（只读副本）时为 `true`
+    * `data.contextFilter`: 当前数据库块配置的上下文筛选；禁用时为 `null`。当前规格为 `{ "spec": 1, "keyID": "<关联字段 ID>" }`，它会在所有视图中筛选出所选关联字段包含 `blockID` 所在根文档所绑定数据库条目的行，并与当前视图的筛选条件通过“且”组合。所选字段被删除、改为非关联字段或关联目标失效时，该块级配置会保留，但渲染结果为空，直至修复字段、更换字段或禁用上下文筛选
+    * `data.contextFilterFields`: 数据库中所有已配置关联字段的轻量元数据，不受当前所选视图影响。每项包含 `id`、`name`、`icon` 和 `targetAvID`，用于配置 `contextFilter`。发布只读响应会将 `contextFilter` 隐藏为 `null`，并将此列表隐藏为 `[]`，但已保存的上下文筛选仍会应用于渲染结果
+
+### 设置数据库块上下文筛选
+
+* `/api/av/setAttrViewContextFilter`
+* 参数
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "keyID": "20240118120300-relation"
+  }
+  ```
+
+    * `avID`: 数据库 ID
+    * `blockID`: 要修改上下文筛选的具体数据库块 ID，必须是 `avID` 的实例
+    * `keyID`: 数据库中已配置的关联字段 ID，筛选语义固定等同于 `包含任一 - 当前文档`。传入空字符串可禁用上下文筛选
+* 返回值：`data.contextFilter` 中的规范化配置；禁用后为 `null`
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "contextFilter": {
+        "spec": 1,
+        "keyID": "20240118120300-relation"
+      }
+    }
+  }
+  ```
+
+### 获取当前数据库视图中的图片
+
+* `/api/av/getCurrentAttrViewImages`
+* 参数
+
+  ```json
+  {
+    "id": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "viewID": "20240118120204-7rnmyc1",
+    "query": ""
+  }
+  ```
+
+    * `id`: 数据库 ID
+    * `blockID`: 嵌入该数据库的数据库块，用于解析当前视图、发布权限和块级上下文筛选。仅在独立数据库且不需要块上下文时省略
+    * `viewID`: 可选的明确视图 ID。省略时先通过 `blockID` 解析，无法解析则使用第一个可用视图
+    * `query`: 可选的主键值全文过滤关键字
+* 返回值：应用数据库块上下文筛选、视图筛选与排序后，可见资源字段中的图片资源路径数组
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": ["assets/example-20240118120201-abc1234.png"]
+  }
+  ```
 
 ### 获取
 

@@ -17,10 +17,16 @@
 package model
 
 import (
+	"bytes"
 	"reflect"
 	"testing"
 
+	"github.com/88250/lute/ast"
+	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestGetAttrViewTableAligns(t *testing.T) {
@@ -57,5 +63,100 @@ func TestGetAttrViewCSVRenderedValue(t *testing.T) {
 	table.Columns[0].RenderTemplate = ""
 	if _, ok := getAttrViewCSVRenderedValue(table, value); ok {
 		t.Fatal("a field without a display template should use its stored CSV formatting")
+	}
+}
+
+func TestAttributeViewExportDoesNotCrossEncryptedBoundary(t *testing.T) {
+	const (
+		normalBoxID    = "20260904010000-box0001"
+		docID          = "20260904010001-doc0001"
+		blockID        = "20260904010002-avnode1"
+		encryptedBoxID = "20260904010003-box0002"
+		encryptedAvID  = "20260904010004-av00001"
+		otherAvID      = "20260904010005-av00002"
+		directAvID     = "20260904010006-av00003"
+		middleAvID     = "20260904010007-av00004"
+		recursiveAvID  = "20260904010008-av00005"
+	)
+
+	setupExportRelatedTest(t, normalBoxID)
+	Conf.Editor = conf.NewEditor()
+	oldLang, oldAttrViewLangs := util.Lang, util.AttrViewLangs
+	util.Lang = "en"
+	util.AttrViewLangs = map[string]map[string]any{
+		"en": {"key": "Key", "select": "Select", "table": "Table", "gallery": "Gallery"},
+	}
+	markRuntimeEncryptedBox(encryptedBoxID)
+	setDEKForTest(encryptedBoxID, bytes.Repeat([]byte{0x42}, 32))
+	t.Cleanup(func() {
+		util.Lang, util.AttrViewLangs = oldLang, oldAttrViewLangs
+		av.SetAVBoxID(encryptedAvID, "")
+		cachedDEKsLock.Lock()
+		delete(cachedDEKs, encryptedBoxID)
+		cachedDEKsLock.Unlock()
+		forgetRuntimeEncryptedBox(encryptedBoxID)
+	})
+
+	attrView := av.NewAttributeView(encryptedAvID)
+	av.SetAVBoxID(encryptedAvID, encryptedBoxID)
+	if err := av.SaveAttributeView(attrView); nil != err {
+		t.Fatalf("save encrypted attribute view failed: %v", err)
+	}
+	if parsed, err := av.ParseAttributeView(encryptedAvID); nil != err || nil == parsed {
+		t.Fatalf("fallback precondition failed: parsed=%v, err=%v", parsed, err)
+	}
+
+	tree := treenode.NewTree(normalBoxID, "/"+docID+".sy", "/Export", "Export")
+	for nil != tree.Root.FirstChild {
+		tree.Root.FirstChild.Unlink()
+	}
+	database := &ast.Node{
+		Type: ast.NodeAttributeView, ID: blockID, AttributeViewID: encryptedAvID,
+		AttributeViewType: string(av.LayoutTypeTable),
+	}
+	database.SetIALAttr("id", blockID)
+	database.SetIALAttr(av.NodeAttrView, attrView.Views[0].ID)
+	tree.Root.AppendChild(database)
+	writeExportRelatedTestTree(t, tree)
+
+	if _, err := ExportAv2CSV(otherAvID, blockID); nil == err {
+		t.Fatal("CSV export accepted an attribute view ID that is not bound to the database block")
+	}
+	if _, err := ExportAv2CSV(encryptedAvID, blockID); nil == err {
+		t.Fatal("CSV export crossed from a normal document to an encrypted attribute view")
+	}
+
+	exported := exportTree(tree, false, false, true, 0, 0, 0, "", "", "", "", false, "", false, false, false)
+	if nodes := exported.Root.ChildrenByType(ast.NodeAttributeView); 1 != len(nodes) {
+		t.Fatal("document export resolved an encrypted attribute view from a normal document")
+	}
+
+	newRelationAttributeView := func(id, targetID string) *av.AttributeView {
+		ret := av.NewAttributeView(id)
+		ret.KeyValues = append(ret.KeyValues, &av.KeyValues{Key: &av.Key{
+			ID: ast.NewNodeID(), Type: av.KeyTypeRelation, Relation: &av.Relation{AvID: targetID},
+		}})
+		return ret
+	}
+	for _, relationAv := range []*av.AttributeView{
+		newRelationAttributeView(directAvID, encryptedAvID),
+		newRelationAttributeView(middleAvID, encryptedAvID),
+		newRelationAttributeView(recursiveAvID, middleAvID),
+	} {
+		if err := av.SaveAttributeView(relationAv); nil != err {
+			t.Fatalf("save relation attribute view [%s] failed: %v", relationAv.ID, err)
+		}
+	}
+
+	directIDs := hashset.New()
+	walkRelationAvs(directAvID, "", directIDs)
+	if !directIDs.Contains(directAvID) || directIDs.Contains(encryptedAvID) {
+		t.Fatalf("direct relation export crossed the encrypted boundary: %v", directIDs.Values())
+	}
+	recursiveIDs := hashset.New()
+	walkRelationAvs(recursiveAvID, "", recursiveIDs)
+	if !recursiveIDs.Contains(recursiveAvID) || !recursiveIDs.Contains(middleAvID) ||
+		recursiveIDs.Contains(encryptedAvID) {
+		t.Fatalf("recursive relation export crossed the encrypted boundary: %v", recursiveIDs.Values())
 	}
 }

@@ -1,4 +1,12 @@
 {
+	"contextFilter": "Kontextový filter",
+	"contextFilterTip": "Použije sa na všetky zobrazenia v tomto databázovom bloku",
+	"contextFilterNoRelation": "Pred zapnutím kontextového filtra vytvorte a nastavte pole vzťahu",
+	"filterCurrentDocument": "Aktuálny dokument",
+	"filterCurrentDocumentTip": "Vyhodnotí sa ako položka databázy prepojená s dokumentom, ktorý obsahuje tento databázový blok",
+	"templateDatabaseMode": "Databázy v šablóne",
+	"templateDatabaseCopyTip": "Vytvorí nezávislé databázy, ktoré už nie sú synchronizované so zdrojom",
+	"templateDatabaseReferenceTip": "Zachová odkazy na existujúce databázy a zdieľa ich údaje a nastavenia zobrazenia",
 	"entryTopBar": "Horný panel",
 	"entryTopBarDrag": "Oblasť na presúvanie okna",
 	"bazaarFrontendDesktop": "Hlavné okno počítačovej aplikácie",

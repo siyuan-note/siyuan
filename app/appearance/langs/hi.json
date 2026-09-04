@@ -1,4 +1,12 @@
 {
+	"contextFilter": "संदर्भ फ़िल्टर",
+	"contextFilterTip": "इस डेटाबेस ब्लॉक के हर दृश्य पर लागू होता है",
+	"contextFilterNoRelation": "संदर्भ फ़िल्टर चालू करने से पहले संबंध फ़ील्ड बनाएँ और कॉन्फ़िगर करें",
+	"filterCurrentDocument": "वर्तमान दस्तावेज़",
+	"filterCurrentDocumentTip": "इस डेटाबेस ब्लॉक वाले दस्तावेज़ से बंधी डेटाबेस प्रविष्टि के रूप में हल होता है",
+	"templateDatabaseMode": "टेम्पलेट में डेटाबेस",
+	"templateDatabaseCopyTip": "स्वतंत्र डेटाबेस बनाता है जो स्रोत के साथ सिंक नहीं रहते",
+	"templateDatabaseReferenceTip": "मौजूदा डेटाबेस के संदर्भ बनाए रखता है और उनका डेटा व दृश्य सेटिंग साझा करता है",
 	"entryTopBar": "शीर्ष पट्टी",
 	"entryTopBarDrag": "विंडो खींचने का क्षेत्र",
 	"bazaarFrontendDesktop": "डेस्कटॉप मुख्य विंडो",

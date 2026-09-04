@@ -35,7 +35,6 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/sql"
-	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -408,36 +407,30 @@ func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pa
 
 	waitForSyncingStorages()
 
-	// 加密笔记本的 AV 定义存笔记本级路径，通过 blockID 反查 boxID
-	avBoxID := ""
-	if "" != blockID {
-		bt := treenode.GetBlockTree(blockID)
-		if nil == bt {
-			for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
-				if encBT := treenode.GetBlockTreeInBox(blockID, encBoxID); nil != encBT {
-					bt = encBT
-					break
-				}
-			}
-		}
-		if nil != bt && IsEncryptedBox(bt.BoxID) {
-			avBoxID = bt.BoxID
-		}
+	avBoxID, exactBox, resolveErr := resolveAttributeViewCarrierBoxID(blockID)
+	if nil != resolveErr {
+		err = resolveErr
+		return
 	}
 
-	// 通过 fallback 查找 AV 定义路径（普通 box 全局，加密笔记本笔记本级）
-	// 已知 box 时直接用 InBox 查找，避免全局 pending 映射被并发覆盖
+	// 已知载体时只在同一加密边界内查找；无载体的兼容调用保留全局回退。
 	var existPath string
-	if avBoxID != "" {
+	if exactBox {
 		existPath, _ = av.FindAttributeViewPathInBox(avID, avBoxID)
 	} else {
 		existPath, _ = av.FindAttributeViewPath(avID)
 	}
 	if "" == existPath {
+		if exactBox {
+			if foreignPath, foreignBoxID := av.FindAttributeViewPath(avID); "" != foreignPath &&
+				foreignBoxID != avBoxID {
+				err = av.ErrAttributeViewNotFound
+				return
+			}
+		}
 		if avBoxID != "" {
 			existPath = filepath.Join(util.DataDir, avBoxID, "storage", "av", avID+".json")
 		} else {
-			// fallback 找不到时按全局路径检查（首次创建场景）
 			existPath = av.GetAttributeViewDataPath(avID)
 		}
 	}
@@ -462,8 +455,7 @@ func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pa
 		}
 	}
 
-	// 已知 box 时直接用 InBox 解析，不依赖全局 pending 状态
-	if avBoxID != "" {
+	if exactBox {
 		attrView, err = av.ParseAttributeViewInBox(avID, avBoxID)
 	} else {
 		attrView, err = av.ParseAttributeView(avID)
@@ -531,6 +523,11 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 			return
 		}
 	}
+	filterContext, contextErr := resolveAttributeViewFilterContext(attrView, view, nodeID)
+	if nil != contextErr {
+		err = contextErr
+		return
+	}
 
 	// 渲染视图
 	renderContext := sql.NewAttributeViewRenderContext()
@@ -552,7 +549,7 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 	}
 	var targetIndex, targetOffset int
 	targetIndex, targetOffset, err = renderViewableInstance(viewable, view, attrView, page, pageSize, ignoreRows,
-		renderTargetItemID, renderContext)
+		renderTargetItemID, renderContext, filterContext)
 	if nil != err {
 		return
 	}
@@ -566,7 +563,7 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 	// 渲染分组视图。当 ignoreRows 时若有已生成的分组则渲染元数据供面板使用，无分组则跳过（生成分组需要行数据）
 	if !ignoreRows || len(view.Groups) > 0 {
 		err = renderAttributeViewGroups(viewable, attrView, view, query, page, pageSize, groupPaging, groupRenderSource,
-			ignoreRows, writable, target, targetGroupID, renderContext)
+			ignoreRows, writable, target, targetGroupID, renderContext, filterContext)
 	}
 	if writable && nil == err && attrView.HasCardCoverPositionChanges() {
 		if err = av.SaveAttributeView(attrView); nil != err {
@@ -579,7 +576,8 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 
 func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView, view *av.View, query string, page,
 	pageSize int, groupPaging map[string]any, groupRenderSource *sql.GroupViewRenderSource, ignoreRows, writable bool,
-	target *AttributeViewRenderTarget, targetGroupID string, renderContext *sql.AttributeViewRenderContext) (err error) {
+	target *AttributeViewRenderTarget, targetGroupID string, renderContext *sql.AttributeViewRenderContext,
+	filterContext *av.FilterContext) (err error) {
 	groupKey := view.GetGroupKey(attrView)
 	if nil == groupKey {
 		if view.LayoutType == av.LayoutTypeKanban {
@@ -694,7 +692,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 			}
 		}
 		targetIndex, targetOffset, renderErr := renderViewableInstance(groupViewable, view, attrView, groupPage,
-			groupPageSize, ignoreRows, groupTargetItemID, renderContext)
+			groupPageSize, ignoreRows, groupTargetItemID, renderContext, filterContext)
 		err = renderErr
 		if nil != err {
 			return
@@ -754,15 +752,28 @@ func hideEmptyGroupViews(view *av.View, viewable av.Viewable) {
 	}
 
 	groupHidden := viewable.GetGroupHidden()
+	if 2 == groupHidden {
+		return
+	}
 	if !view.Group.HideEmpty {
-		if 2 != groupHidden {
-			viewable.SetGroupHidden(0)
-		}
+		viewable.SetGroupHidden(0)
 		return
 	}
 
-	itemCount := viewable.(av.Collection).CountItems()
-	if 1 == groupHidden && 0 < itemCount {
+	itemCount := 0
+	switch viewable.GetType() {
+	case av.LayoutTypeTable:
+		itemCount = viewable.(*av.Table).RowCount
+	case av.LayoutTypeGallery:
+		itemCount = viewable.(*av.Gallery).CardCount
+	case av.LayoutTypeKanban:
+		itemCount = viewable.(*av.Kanban).CardCount
+	default:
+		itemCount = viewable.(av.Collection).CountItems()
+	}
+	if 1 > itemCount {
+		viewable.SetGroupHidden(1)
+	} else {
 		viewable.SetGroupHidden(0)
 	}
 }
@@ -1022,7 +1033,7 @@ func attrViewFiltersUseRenderedValues(filters []*av.ViewFilter, renderTemplateKe
 
 func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int,
 	ignoreRows bool, targetItemID string,
-	renderContext *sql.AttributeViewRenderContext) (targetIndex, targetOffset int, err error) {
+	renderContext *sql.AttributeViewRenderContext, filterContexts ...*av.FilterContext) (targetIndex, targetOffset int, err error) {
 	targetIndex = -1
 	if nil == viewable {
 		err = av.ErrViewNotFound
@@ -1037,7 +1048,11 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 
 	cachedAttrViews := map[string]*av.AttributeView{}
 	rollupFurtherCollections := sql.GetFurtherCollectionsWithContext(attrView, cachedAttrViews, renderContext)
-	av.Filter(viewable, attrView, rollupFurtherCollections, cachedAttrViews)
+	var filterContext *av.FilterContext
+	if 0 < len(filterContexts) {
+		filterContext = filterContexts[0]
+	}
+	av.FilterWithContext(viewable, attrView, rollupFurtherCollections, cachedAttrViews, filterContext)
 	av.Sort(viewable, attrView)
 	av.Calc(viewable, attrView)
 

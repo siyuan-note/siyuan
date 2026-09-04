@@ -1,4 +1,12 @@
 {
+	"contextFilter": "Kontextfilter",
+	"contextFilterTip": "Gilt für alle Ansichten in diesem Datenbankblock",
+	"contextFilterNoRelation": "Erstelle und konfiguriere ein Beziehungsfeld, bevor du den Kontextfilter aktivierst",
+	"filterCurrentDocument": "Aktuelles Dokument",
+	"filterCurrentDocumentTip": "Wird als der Datenbankeintrag aufgelöst, der mit dem Dokument dieses Datenbankblocks verknüpft ist",
+	"templateDatabaseMode": "Datenbanken in der Vorlage",
+	"templateDatabaseCopyTip": "Erstellt unabhängige Datenbanken, die nicht mehr mit der Quelle synchronisiert werden",
+	"templateDatabaseReferenceTip": "Behält Verweise auf vorhandene Datenbanken bei und teilt deren Daten und Ansichtseinstellungen",
 	"entryTopBar": "Obere Leiste",
 	"entryTopBarDrag": "Ziehbereich des Fensters",
 	"bazaarFrontendDesktop": "Desktop-Hauptfenster",

@@ -1,4 +1,12 @@
 {
+	"contextFilter": "Filtro contextual",
+	"contextFilterTip": "Aplica-se a todas as visualizações deste bloco de banco de dados",
+	"contextFilterNoRelation": "Crie e configure um campo de relação antes de ativar o filtro contextual",
+	"filterCurrentDocument": "Documento atual",
+	"filterCurrentDocumentTip": "É resolvido como o item do banco de dados vinculado ao documento que contém este bloco de banco de dados",
+	"templateDatabaseMode": "Bancos de dados no modelo",
+	"templateDatabaseCopyTip": "Cria bancos de dados independentes que deixam de ser sincronizados com a origem",
+	"templateDatabaseReferenceTip": "Mantém referências aos bancos de dados existentes e compartilha seus dados e configurações de visualização",
 	"entryTopBar": "Barra superior",
 	"entryTopBarDrag": "Área de arrasto da janela",
 	"bazaarFrontendDesktop": "Janela principal do desktop",

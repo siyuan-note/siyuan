@@ -297,6 +297,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewNewItemTemplates(op)
 			case "setAttrViewFilters":
 				ret = tx.doSetAttrViewFilters(op)
+			case "setAttrViewContextFilter":
+				ret = tx.doSetAttrViewContextFilter(op)
 			case "setAttrViewColRelationFilters":
 				ret = tx.doSetAttrViewColRelationFilters(op)
 			case "setAttrViewColRollupFilters":
@@ -343,7 +345,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				operations := []*Operation{op}
 				for nextIndex := operationIndex + 1; nextIndex < len(tx.DoOperations); nextIndex++ {
 					nextOperation := tx.DoOperations[nextIndex]
-					if "updateAttrViewCell" != nextOperation.Action || op.AvID != nextOperation.AvID {
+					if "updateAttrViewCell" != nextOperation.Action || op.AvID != nextOperation.AvID ||
+						op.BlockID != nextOperation.BlockID {
 						break
 					}
 					operations = append(operations, nextOperation)

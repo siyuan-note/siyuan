@@ -1,4 +1,12 @@
 {
+	"contextFilter": "情境篩選",
+	"contextFilterTip": "套用於此資料庫區塊的所有檢視",
+	"contextFilterNoRelation": "啟用情境篩選前，請先建立並設定關聯欄位",
+	"filterCurrentDocument": "目前文件",
+	"filterCurrentDocumentTip": "解析為綁定目前資料庫區塊所在文件的資料庫項目",
+	"templateDatabaseMode": "範本中的資料庫",
+	"templateDatabaseCopyTip": "建立獨立資料庫，不再與來源資料庫同步",
+	"templateDatabaseReferenceTip": "保留現有資料庫的引用，共用資料與檢視設定",
 	"entryTopBar": "頂欄",
 	"entryTopBarDrag": "視窗拖曳區域",
 	"bazaarFrontendDesktop": "桌面主視窗",

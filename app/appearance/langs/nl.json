@@ -1,4 +1,12 @@
 {
+	"contextFilter": "Contextfilter",
+	"contextFilterTip": "Is van toepassing op alle weergaven in dit databaseblok",
+	"contextFilterNoRelation": "Maak en configureer een relatieveld voordat je het contextfilter inschakelt",
+	"filterCurrentDocument": "Huidig document",
+	"filterCurrentDocumentTip": "Wordt omgezet naar het database-item dat is gekoppeld aan het document met dit databaseblok",
+	"templateDatabaseMode": "Databases in de sjabloon",
+	"templateDatabaseCopyTip": "Maakt onafhankelijke databases die niet langer met de bron worden gesynchroniseerd",
+	"templateDatabaseReferenceTip": "Behoudt verwijzingen naar bestaande databases en deelt hun gegevens en weergave-instellingen",
 	"entryTopBar": "Bovenbalk",
 	"entryTopBarDrag": "Sleepgebied voor venster",
 	"bazaarFrontendDesktop": "Hoofdvenster van desktop-app",

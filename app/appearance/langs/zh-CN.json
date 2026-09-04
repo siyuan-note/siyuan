@@ -1,4 +1,12 @@
 {
+	"contextFilter": "上下文筛选",
+	"contextFilterTip": "应用于当前数据库块的所有视图",
+	"contextFilterNoRelation": "请先创建并配置关联字段，再启用上下文筛选",
+	"filterCurrentDocument": "当前文档",
+	"filterCurrentDocumentTip": "解析为绑定了当前数据库块所在文档的数据库条目",
+	"templateDatabaseMode": "模板中的数据库",
+	"templateDatabaseCopyTip": "创建独立数据库，不再与源数据库同步",
+	"templateDatabaseReferenceTip": "保留对现有数据库的引用，共享数据和视图配置",
 	"entryTopBar": "顶栏",
 	"entryTopBarDrag": "窗口拖拽区域",
 	"bazaarFrontendDesktop": "桌面主窗口",

@@ -120,9 +120,14 @@ func TestBuildNewItemFieldValueOperationsWithoutKeyIDs(t *testing.T) {
 	attrView.KeyValues = []*av.KeyValues{{Key: blockKey}, {Key: textKey}}
 	value := &av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: "value"}}
 
-	operations := buildNewItemFieldValueOperations(attrView, map[string]*av.Value{textKey.ID: value}, ast.NewNodeID())
+	blockID := ast.NewNodeID()
+	operations := buildNewItemFieldValueOperations(attrView, map[string]*av.Value{textKey.ID: value},
+		ast.NewNodeID(), blockID)
 	if 1 != len(operations) || "updateAttrViewCell" != operations[0].Action || textKey.ID != operations[0].KeyID {
 		t.Fatalf("unexpected field operations: %+v", operations)
+	}
+	if blockID != operations[0].BlockID {
+		t.Fatalf("field operation lost its database carrier: %+v", operations[0])
 	}
 }
 

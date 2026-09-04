@@ -1338,10 +1338,11 @@ var (
 )
 
 const (
-	NodeAttrNameAvs        = "custom-avs"                 // 用于标记块所属的属性视图，逗号分隔 av id
-	NodeAttrView           = "custom-sy-av-view"          // 用于标记块所属的属性视图视图 view id Database block support specified view https://github.com/siyuan-note/siyuan/issues/10443
-	NodeAttrVisibleViewIDs = "custom-sy-av-visible-views" // 用于标记数据库块显示的视图 ID，逗号分隔
-	NodeAttrViewStaticText = "custom-sy-av-s-text"        // 用于标记块所属的属性视图静态文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
+	NodeAttrNameAvs        = "custom-avs"                  // 用于标记块所属的属性视图，逗号分隔 av id
+	NodeAttrView           = "custom-sy-av-view"           // 用于标记块所属的属性视图视图 view id Database block support specified view https://github.com/siyuan-note/siyuan/issues/10443
+	NodeAttrVisibleViewIDs = "custom-sy-av-visible-views"  // 用于标记数据库块显示的视图 ID，逗号分隔
+	NodeAttrContextFilter  = "custom-sy-av-context-filter" // 用于保存数据库块独有的上下文筛选配置
+	NodeAttrViewStaticText = "custom-sy-av-s-text"         // 用于标记块所属的属性视图静态文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
 
 	NodeAttrViewNames = "av-names" // 用于临时标记块所属的属性视图名称，空格分隔
 )

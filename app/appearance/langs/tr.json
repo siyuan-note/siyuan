@@ -1,4 +1,12 @@
 {
+	"contextFilter": "Bağlam filtresi",
+	"contextFilterTip": "Bu veritabanı bloğundaki tüm görünümlere uygulanır",
+	"contextFilterNoRelation": "Bağlam filtresini etkinleştirmeden önce bir ilişki alanı oluşturup yapılandırın",
+	"filterCurrentDocument": "Geçerli belge",
+	"filterCurrentDocumentTip": "Bu veritabanı bloğunu içeren belgeye bağlı veritabanı öğesi olarak çözümlenir",
+	"templateDatabaseMode": "Şablondaki veritabanları",
+	"templateDatabaseCopyTip": "Kaynakla artık eşitlenmeyen bağımsız veritabanları oluşturur",
+	"templateDatabaseReferenceTip": "Mevcut veritabanlarına başvuruları korur ve verileriyle görünüm ayarlarını paylaşır",
 	"entryTopBar": "Üst çubuk",
 	"entryTopBarDrag": "Pencere sürükleme alanı",
 	"bazaarFrontendDesktop": "Masaüstü ana penceresi",

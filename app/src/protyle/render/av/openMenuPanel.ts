@@ -81,11 +81,12 @@ import {
 import {openFieldVisibilityPanel} from "./fieldVisibility";
 import {clearSelect} from "../../util/clear";
 import {applyAVColorPalette, getAVCustomColors} from "./color";
+import {bindContextFilterEvent, getContextFilterHTML} from "./contextFilter";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
     blockElement: Element,
-    type: "select" | "properties" | "config" | "sorts" | "filters" | "edit" | "date" | "asset" | "switcher" | "relation" | "rollup",
+    type: "select" | "properties" | "config" | "sorts" | "filters" | "contextFilter" | "edit" | "date" | "asset" | "switcher" | "relation" | "rollup",
     colId?: string, // for edit, rollup
     // 使用前端构造的数据
     editData?: {
@@ -109,8 +110,9 @@ export const openMenuPanel = (options: {
     }
     const avID = options.blockElement.getAttribute("data-av-id");
     const avPageSize = getPageSize(options.blockElement);
-    // config/properties/sorts/filters/switcher 菜单只需要字段/视图元数据，不需要行数据，跳过行渲染以提升大体量视图下的响应速度
-    const ignoreRows = ["config", "properties", "sorts", "filters", "switcher"].includes(options.type);
+    // config/properties/sorts/filters/contextFilter/switcher 菜单只需要字段/视图元数据，不需要行数据，
+    // 跳过行渲染以提升大体量视图下的响应速度。
+    const ignoreRows = ["config", "properties", "sorts", "filters", "contextFilter", "switcher"].includes(options.type);
     const fetchPayload = {
         id: avID,
         query: options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "",
@@ -160,6 +162,8 @@ export const openMenuPanel = (options: {
             html = getSwitcherHTML(data.views, data.viewID, options.blockElement);
         } else if (options.type === "filters") {
             html = getFiltersHTML(data);
+        } else if (options.type === "contextFilter") {
+            html = getContextFilterHTML(data);
         } else if (options.type === "select") {
             html = getSelectHTML(fields, options.cellElements, true, options.blockElement);
         } else if (options.type === "asset") {
@@ -312,6 +316,8 @@ export const openMenuPanel = (options: {
             } else if (options.type === "filters") {
                 bindInlineFilterEvents(avPanelElement as HTMLElement, data, options.protyle, blockID, avID,
                     options.filterOperation);
+            } else if (options.type === "contextFilter") {
+                bindContextFilterEvent({protyle: options.protyle, menuElement, data, blockID, avID});
             } else if (options.type === "edit") {
                 bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr, blockID});
             } else if (options.type === "config") {
@@ -1803,7 +1809,8 @@ export const openMenuPanel = (options: {
                     const assetLink = target.parentElement.dataset.content;
                     if (target.parentElement.dataset.type === "image" &&
                         isBrowserRenderableImagePath(assetLink)) {
-                        previewAttrViewImages(assetLink, avID, options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+                        previewAttrViewImages(assetLink, avID, options.blockElement.getAttribute("data-node-id"),
+                            options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
                             options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "");
                     } else {
                         openLink(options.protyle.app, assetLink, event, event.ctrlKey || event.metaKey);

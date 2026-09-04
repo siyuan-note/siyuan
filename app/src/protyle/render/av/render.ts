@@ -55,6 +55,7 @@ import {
 } from "./groupTableVirtual";
 import {getAVHeaderEditingState} from "./headerEditing";
 import {getAVColorStyle} from "./color";
+import {getContextFilterKeyID} from "./contextFilterState";
 
 interface IIds {
     groupId: string,
@@ -148,6 +149,10 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span>
             <div class="fn__space"></div>
+            ${blockElement.classList.contains("av") ? `<span data-type="av-context-filter" aria-label="${window.siyuan.languages.contextFilter}" data-position="8south" class="ariaLabel block__icon${getContextFilterKeyID(data.contextFilter) ? " block__icon--active" : ""}">
+                <svg><use xlink:href="#iconFocus"></use></svg>
+            </span>
+            <div class="fn__space"></div>` : ""}
             <span data-type="av-sort" aria-label="${window.siyuan.languages.sort}" data-position="8south" class="ariaLabel block__icon${data.view.sorts.length > 0 ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconSort"></use></svg>
             </span>
@@ -860,6 +865,16 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 return;
             }
             setAVVisibleViewIDs(item, operation.viewIDs);
+            item.removeAttribute("data-render");
+            avRender(item, protyle);
+        });
+        return;
+    }
+    if (operation.action === "setAttrViewContextFilter") {
+        getAVElements(protyle, operation.avID).forEach((item) => {
+            if (item.dataset.nodeId !== operation.blockID) {
+                return;
+            }
             item.removeAttribute("data-render");
             avRender(item, protyle);
         });

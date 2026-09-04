@@ -1,4 +1,12 @@
 {
+	"contextFilter": "Filtr kontekstowy",
+	"contextFilterTip": "Dotyczy wszystkich widoków w tym bloku bazy danych",
+	"contextFilterNoRelation": "Przed włączeniem filtra kontekstowego utwórz i skonfiguruj pole relacji",
+	"filterCurrentDocument": "Bieżący dokument",
+	"filterCurrentDocumentTip": "Jest rozpoznawany jako element bazy danych powiązany z dokumentem zawierającym ten blok bazy danych",
+	"templateDatabaseMode": "Bazy danych w szablonie",
+	"templateDatabaseCopyTip": "Tworzy niezależne bazy danych, które nie są już synchronizowane ze źródłem",
+	"templateDatabaseReferenceTip": "Zachowuje odwołania do istniejących baz danych oraz współdzieli ich dane i ustawienia widoku",
 	"entryTopBar": "Górny pasek",
 	"entryTopBarDrag": "Obszar przeciągania okna",
 	"bazaarFrontendDesktop": "Główne okno aplikacji komputerowej",

@@ -1,4 +1,12 @@
 {
+	"contextFilter": "Filtre contextuel",
+	"contextFilterTip": "S’applique à toutes les vues de ce bloc de base de données",
+	"contextFilterNoRelation": "Créez et configurez un champ de relation avant d’activer le filtre contextuel",
+	"filterCurrentDocument": "Document actuel",
+	"filterCurrentDocumentTip": "Correspond à l’élément de base de données lié au document contenant ce bloc de base de données",
+	"templateDatabaseMode": "Bases de données du modèle",
+	"templateDatabaseCopyTip": "Crée des bases de données indépendantes qui ne restent plus synchronisées avec la source",
+	"templateDatabaseReferenceTip": "Conserve les références aux bases de données existantes et partage leurs données et paramètres de vue",
 	"entryTopBar": "Barre supérieure",
 	"entryTopBarDrag": "Zone de déplacement de la fenêtre",
 	"bazaarFrontendDesktop": "Fenêtre principale de bureau",

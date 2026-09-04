@@ -1,4 +1,12 @@
 {
+	"contextFilter": "Filter konteks",
+	"contextFilterTip": "Berlaku untuk setiap tampilan dalam blok basis data ini",
+	"contextFilterNoRelation": "Buat dan konfigurasikan bidang relasi sebelum mengaktifkan filter konteks",
+	"filterCurrentDocument": "Dokumen saat ini",
+	"filterCurrentDocumentTip": "Diuraikan menjadi item basis data yang terikat ke dokumen tempat blok basis data ini berada",
+	"templateDatabaseMode": "Basis data dalam templat",
+	"templateDatabaseCopyTip": "Membuat basis data mandiri yang tidak lagi disinkronkan dengan sumber",
+	"templateDatabaseReferenceTip": "Mempertahankan referensi ke basis data yang ada serta berbagi data dan pengaturan tampilannya",
 	"entryTopBar": "Bilah atas",
 	"entryTopBarDrag": "Area seret jendela",
 	"bazaarFrontendDesktop": "Jendela utama desktop",

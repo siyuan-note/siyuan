@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20260902120000"
+		"updated": "20260904091600"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101729-yhz5zrt",
-				"updated": "20260613164228"
+				"updated": "20260904091600"
 			},
 			"Children": [
 				{
@@ -984,7 +984,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613171246-whfdkq8",
-				"updated": "20260613171246"
+				"updated": "20260904091600"
 			},
 			"Children": [
 				{
@@ -1013,7 +1013,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613171246-qovn46w",
-				"updated": "20260613171246"
+				"updated": "20260904091600"
 			},
 			"Children": [
 				{
@@ -1042,7 +1042,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613171246-frygk48",
-				"updated": "20260613171246"
+				"updated": "20260904091600"
 			},
 			"Children": [
 				{
@@ -1313,6 +1313,39 @@
 											]
 										}
 									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260904022100-5x68nm2",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260904022100-5x68nm2",
+						"updated": "20260904091600"
+					},
+					"Children": [
+						{
+							"ID": "20260904022100-ivb080o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260904022100-ivb080o",
+								"updated": "20260904091600"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "情境篩選"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：在資料庫區塊工具列的「情境篩選」中選擇已設定的關聯欄位。系統會對此資料庫區塊的所有檢視套用「包含任一項 - 目前文件」，將資料庫區塊所在文件解析為目標資料庫中的對應項目。一般檢視篩選仍只屬於各自檢視，並與情境篩選以且組合。可在同一面板中更換欄位或停用情境篩選"
 								}
 							]
 						}

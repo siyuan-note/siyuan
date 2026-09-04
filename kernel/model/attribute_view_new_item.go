@@ -93,7 +93,7 @@ func CreateAttributeViewItemWithMarkdown(avID, blockID, viewID, templateID, prev
 
 func createAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID string,
 	document *CreateAttributeViewItemMarkdown) (*CreateAttributeViewItemResult, error) {
-	attrView, err := av.ParseAttributeView(avID)
+	attrView, err := avParseView(avID, blockID)
 	if nil != err {
 		return nil, err
 	}
@@ -132,11 +132,6 @@ func createAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 		}
 	}
 
-	itemID := ast.NewNodeID()
-	fieldValues, err := resolveNewItemFieldValues(attrView, itemTemplate, createdAt)
-	if nil != err {
-		return nil, err
-	}
 	dbTree, err := LoadTreeByBlockID(blockID)
 	if nil != err {
 		return nil, err
@@ -145,6 +140,20 @@ func createAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 	if nil == dbNode {
 		return nil, ErrBlockNotFound
 	}
+	itemID := ast.NewNodeID()
+	fieldValues, err := resolveNewItemFieldValues(attrView, itemTemplate, createdAt, dbTree.Box)
+	if nil != err {
+		return nil, err
+	}
+	filterContext, err := resolveAttributeViewFilterContext(attrView, nil, blockID)
+	if nil != err {
+		return nil, err
+	}
+	if nil != filterContext && 1 > len(filterContext.CurrentDocumentItemIDs) {
+		return nil, av.ErrAttributeViewContextNotBound
+	}
+	// 模板字段会在插入条目后写入，需提前合并上下文关系，避免覆盖插入阶段自动填充的当前文档。
+	applyAttributeViewContextFilterDefaultValue(attrView, itemID, filterContext, fieldValues)
 	boundBlockID := itemID
 	isDetached := av.NewItemTargetDocument != itemTemplate.TargetType
 	var createdTree *parse.Tree
@@ -164,11 +173,11 @@ func createAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 		PreviousID: previousID, IgnoreDefaultFill: false,
 		Srcs: []map[string]any{{"itemID": itemID, "id": boundBlockID, "content": preview.PrimaryKey, "isDetached": isDetached}},
 	})
-	fieldOperations := buildNewItemFieldValueOperations(attrView, fieldValues, itemID)
+	fieldOperations := buildNewItemFieldValueOperations(attrView, fieldValues, itemID, blockID)
 	doOperations = append(doOperations, fieldOperations...)
 	doOperations = append(doOperations, &Operation{Action: "doUpdateUpdated", ID: blockID, Data: util.CurrentTimeSecondsStr()})
 
-	undoOperations := []*Operation{{Action: "removeAttrViewBlock", AvID: avID, SrcIDs: []string{itemID}}}
+	undoOperations := []*Operation{{Action: "removeAttrViewBlock", AvID: avID, BlockID: blockID, SrcIDs: []string{itemID}}}
 	if nil != createdTree {
 		undoOperations = append(undoOperations, &Operation{Action: "removeCreatedDoc", ID: boundBlockID, Tree: createdTree})
 	}
@@ -176,7 +185,7 @@ func createAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 	tx := &Transaction{DoOperations: doOperations, UndoOperations: undoOperations, Timestamp: createdAt.UnixMilli()}
 	tx.MarkFromAPI()
 	if err = PerformTxSync(tx); nil != err {
-		cleanupErr := RemoveAttributeViewBlock([]string{itemID}, avID)
+		cleanupErr := removeAttributeViewBlock([]string{itemID}, avID, blockID, nil)
 		if nil != createdTree {
 			cleanupErr = errors.Join(cleanupErr, removeCreatedNewItemDoc(boundBlockID))
 		}
@@ -568,7 +577,8 @@ func newItemTitleFromPath(renderedPath string) string {
 	return normalizeDocTitle(path.Base(renderedPath))
 }
 
-func resolveNewItemFieldValues(attrView *av.AttributeView, itemTemplate *av.NewItemTemplate, createdAt time.Time) (ret map[string]*av.Value, err error) {
+func resolveNewItemFieldValues(attrView *av.AttributeView, itemTemplate *av.NewItemTemplate, createdAt time.Time,
+	carrierBoxID string) (ret map[string]*av.Value, err error) {
 	ret = map[string]*av.Value{}
 	for keyID, fieldValue := range itemTemplate.FieldValues {
 		key, getErr := attrView.GetKey(keyID)
@@ -592,7 +602,7 @@ func resolveNewItemFieldValues(attrView *av.AttributeView, itemTemplate *av.NewI
 			}
 			value = fieldValue.Value.Clone()
 			if av.KeyTypeRelation == key.Type {
-				filterNewItemTemplateRelationValue(attrView, key, value)
+				filterNewItemTemplateRelationValue(attrView, key, value, carrierBoxID)
 				if nil == value.Relation || 0 == len(value.Relation.BlockIDs) {
 					continue
 				}
@@ -605,13 +615,17 @@ func resolveNewItemFieldValues(attrView *av.AttributeView, itemTemplate *av.NewI
 	return
 }
 
-func filterNewItemTemplateRelationValue(attrView *av.AttributeView, key *av.Key, value *av.Value) {
+func filterNewItemTemplateRelationValue(attrView *av.AttributeView, key *av.Key, value *av.Value,
+	carrierBoxID string) {
 	if nil == key.Relation || nil == value.Relation {
 		return
 	}
 	targetAv := attrView
 	if key.Relation.AvID != attrView.ID {
-		targetAv, _ = av.ParseAttributeView(key.Relation.AvID)
+		contextFilter := &av.AttributeViewContextFilter{
+			Spec: av.AttributeViewContextFilterSpec, KeyID: key.ID,
+		}
+		targetAv, _ = resolveAttributeViewContextFilterTarget(attrView, contextFilter, carrierBoxID)
 	}
 	if nil == targetAv {
 		value.Relation.BlockIDs = nil
@@ -631,7 +645,8 @@ func filterNewItemTemplateRelationValue(attrView *av.AttributeView, key *av.Key,
 	value.Relation.BlockIDs = blockIDs
 }
 
-func buildNewItemFieldValueOperations(attrView *av.AttributeView, fieldValues map[string]*av.Value, itemID string) (ret []*Operation) {
+func buildNewItemFieldValueOperations(attrView *av.AttributeView, fieldValues map[string]*av.Value, itemID,
+	blockID string) (ret []*Operation) {
 	for _, keyValues := range attrView.KeyValues {
 		if nil == keyValues || nil == keyValues.Key {
 			continue
@@ -641,7 +656,10 @@ func buildNewItemFieldValueOperations(attrView *av.AttributeView, fieldValues ma
 		if nil == value {
 			continue
 		}
-		ret = append(ret, &Operation{Action: "updateAttrViewCell", ID: ast.NewNodeID(), AvID: attrView.ID, KeyID: keyID, RowID: itemID, Data: value})
+		ret = append(ret, &Operation{
+			Action: "updateAttrViewCell", ID: ast.NewNodeID(), AvID: attrView.ID, BlockID: blockID,
+			KeyID: keyID, RowID: itemID, Data: value,
+		})
 	}
 	return
 }

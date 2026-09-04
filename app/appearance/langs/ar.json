@@ -1,4 +1,12 @@
 {
+	"contextFilter": "مرشح السياق",
+	"contextFilterTip": "يُطبّق على جميع طرق العرض في كتلة قاعدة البيانات هذه",
+	"contextFilterNoRelation": "أنشئ حقل علاقة وقم بتكوينه قبل تمكين مرشح السياق",
+	"filterCurrentDocument": "المستند الحالي",
+	"filterCurrentDocumentTip": "يُحل إلى عنصر قاعدة البيانات المرتبط بالمستند الذي يحتوي على كتلة قاعدة البيانات هذه",
+	"templateDatabaseMode": "قواعد البيانات في القالب",
+	"templateDatabaseCopyTip": "ينشئ قواعد بيانات مستقلة لا تبقى متزامنة مع المصدر",
+	"templateDatabaseReferenceTip": "يحتفظ بمراجع قواعد البيانات الحالية ويشارك بياناتها وإعدادات العرض",
 	"entryTopBar": "الشريط العلوي",
 	"entryTopBarDrag": "منطقة سحب النافذة",
 	"bazaarFrontendDesktop": "نافذة سطح المكتب الرئيسية",

@@ -59,6 +59,7 @@ type TOperation =
     | "duplicateAttrViewView"
     | "duplicateAttrViewRow"
     | "setAttrViewBlockVisibleViews"
+    | "setAttrViewContextFilter"
     | "sortAttrViewView"
     | "setAttrViewPageSize"
     | "updateAttrViewColRelation"
@@ -796,7 +797,7 @@ interface IOperation {
     backRelationKeyID?: string, // 双向关联的目标关联列 ID
     avID?: string,  // av
     format?: string // 属性视图字段格式化
-    keyID?: string // updateAttrViewCell 专享
+    keyID?: string // 属性视图字段 ID
     rowID?: string // updateAttrViewCell 专享
     cellUpdates?: Array<{
         keyID: string,
@@ -1248,7 +1249,21 @@ interface IAV {
     customColors?: IAVCustomColor[];
     colorOrder?: string[];
     usedCustomColorIndexes?: number[];
+    contextFilter?: IAVContextFilter | null;
+    contextFilterFields?: IAVContextFilterField[];
     target?: IAVRenderTarget;
+}
+
+interface IAVContextFilter {
+    spec: 1;
+    keyID: string;
+}
+
+interface IAVContextFilterField {
+    id: string;
+    name: string;
+    icon: string;
+    targetAvID: string;
 }
 
 interface IAVRenderTarget {

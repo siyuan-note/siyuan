@@ -292,6 +292,32 @@ func setAttrViewFilters(c *gin.Context) {
 	c.JSON(http.StatusOK, ret)
 }
 
+func setAttrViewContextFilter(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	avID := arg["avID"].(string)
+	blockID := arg["blockID"].(string)
+	keyID, _ := arg["keyID"].(string)
+	if err := holdAttributeViewRequest(c, blockID, avID); nil != err {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
+	}
+
+	contextFilter, err := model.SetAttributeViewContextFilter(blockID, avID, keyID)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = map[string]any{"contextFilter": contextFilter}
+}
+
 func setAttrViewSorts(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	arg, ok := util.JsonArg(c, ret)
@@ -1346,6 +1372,9 @@ func renderAttributeView(c *gin.Context) {
 	if ret.Code == 0 && readOnlyRole {
 		retDataMap := ret.Data.(map[string]any)
 		retDataMap["view"] = model.FilterAttributeViewByPublishAccess(c, publishAccess, id, blockID, retDataMap["view"].(av.Viewable))
+		// 发布只读渲染不暴露当前视图之外的实例筛选配置和关联字段元数据。
+		retDataMap["contextFilter"] = nil
+		retDataMap["contextFilterFields"] = []*av.AttributeViewContextFilterField{}
 	}
 
 	// 大体量响应（如全量数据库视图）用 goccy 序列化后直接写字节，跳过 gin 内部基于标准库的二次序列化
@@ -1359,8 +1388,20 @@ func renderAttributeView(c *gin.Context) {
 
 func holdAttributeViewRequest(c *gin.Context, blockID, avID string) error {
 	if blockID != "" {
-		if block := treenode.GetBlockTree(blockID); block != nil && model.IsEncryptedBox(block.BoxID) {
-			return holdEncryptedBoxRequest(c, block.BoxID)
+		block := treenode.GetBlockTree(blockID)
+		if nil == block {
+			for _, encryptedBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+				if block = treenode.GetBlockTreeInBox(blockID, encryptedBoxID); nil != block {
+					break
+				}
+			}
+		}
+		if nil != block {
+			if model.IsEncryptedBox(block.BoxID) {
+				return holdEncryptedBoxRequest(c, block.BoxID)
+			}
+			// 已解析的普通载体是权威上下文，不得再按 avID 回退到已打开的加密笔记本。
+			return nil
 		}
 	}
 	if _, boxID := av.FindAttributeViewPath(avID); boxID != "" {
@@ -1397,6 +1438,12 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 			PageSize:         v.PageSize,
 		})
 	}
+	contextFilter, err := model.GetAttributeViewContextFilter(attrView, blockID)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 
 	retData := map[string]any{
 		"name":                   attrView.Name,
@@ -1411,6 +1458,8 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 		"isMirror":               av.IsMirror(attrView.ID),
 		"newItemTemplates":       attrView.NewItemTemplates,
 		"defaultTemplateID":      attrView.DefaultTemplateID,
+		"contextFilter":          contextFilter,
+		"contextFilterFields":    attrView.ContextFilterFields(),
 	}
 	if nil != target {
 		retData["target"] = target
@@ -1429,6 +1478,7 @@ func getCurrentAttrViewImages(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	blockID, _ := arg["blockID"].(string)
 	viewIDArg := arg["viewID"]
 	var viewID string
 	if nil != viewIDArg {
@@ -1441,7 +1491,13 @@ func getCurrentAttrViewImages(c *gin.Context) {
 		query = queryArg.(string)
 	}
 
-	images, err := model.GetCurrentAttributeViewImages(c, id, viewID, query)
+	if err := holdAttributeViewRequest(c, blockID, id); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
+	}
+
+	images, err := model.GetCurrentAttributeViewImages(c, id, blockID, viewID, query)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

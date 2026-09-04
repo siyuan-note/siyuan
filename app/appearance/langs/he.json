@@ -1,4 +1,12 @@
 {
+	"contextFilter": "מסנן הקשר",
+	"contextFilterTip": "חל על כל התצוגות בבלוק מסד הנתונים הזה",
+	"contextFilterNoRelation": "יש ליצור ולהגדיר שדה קשר לפני הפעלת מסנן ההקשר",
+	"filterCurrentDocument": "המסמך הנוכחי",
+	"filterCurrentDocumentTip": "מזוהה כפריט מסד הנתונים המקושר למסמך שמכיל את בלוק מסד הנתונים הזה",
+	"templateDatabaseMode": "מסדי נתונים בתבנית",
+	"templateDatabaseCopyTip": "יוצר מסדי נתונים עצמאיים שאינם נשארים מסונכרנים עם המקור",
+	"templateDatabaseReferenceTip": "שומר הפניות למסדי נתונים קיימים ומשתף את הנתונים והגדרות התצוגה שלהם",
 	"entryTopBar": "סרגל עליון",
 	"entryTopBarDrag": "אזור גרירת החלון",
 	"bazaarFrontendDesktop": "חלון שולחן עבודה ראשי",

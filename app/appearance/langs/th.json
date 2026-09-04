@@ -1,4 +1,12 @@
 {
+	"contextFilter": "ตัวกรองบริบท",
+	"contextFilterTip": "ใช้กับทุกมุมมองในบล็อกฐานข้อมูลนี้",
+	"contextFilterNoRelation": "สร้างและกำหนดค่าฟิลด์ความสัมพันธ์ก่อนเปิดใช้ตัวกรองบริบท",
+	"filterCurrentDocument": "เอกสารปัจจุบัน",
+	"filterCurrentDocumentTip": "แปลงเป็นรายการฐานข้อมูลที่ผูกกับเอกสารซึ่งมีบล็อกฐานข้อมูลนี้อยู่",
+	"templateDatabaseMode": "ฐานข้อมูลในเทมเพลต",
+	"templateDatabaseCopyTip": "สร้างฐานข้อมูลอิสระที่ไม่ซิงค์กับต้นฉบับอีกต่อไป",
+	"templateDatabaseReferenceTip": "คงการอ้างอิงไปยังฐานข้อมูลที่มีอยู่และใช้ข้อมูลกับการตั้งค่ามุมมองร่วมกัน",
 	"entryTopBar": "แถบด้านบน",
 	"entryTopBarDrag": "พื้นที่ลากหน้าต่าง",
 	"bazaarFrontendDesktop": "หน้าต่างหลักเดสก์ท็อป",

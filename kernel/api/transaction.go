@@ -136,7 +136,15 @@ func holdTransactionEncryptedBoxRequests(c *gin.Context, transactions []*model.T
 		if blockID == "" {
 			return
 		}
-		if block := treenode.GetBlockTree(blockID); block != nil {
+		block := treenode.GetBlockTree(blockID)
+		if nil == block {
+			for _, encryptedBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+				if block = treenode.GetBlockTreeInBox(blockID, encryptedBoxID); nil != block {
+					break
+				}
+			}
+		}
+		if nil != block {
 			addBoxID(block.BoxID)
 			return
 		}

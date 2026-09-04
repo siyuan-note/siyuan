@@ -1,4 +1,12 @@
 {
+	"contextFilter": "Context filter",
+	"contextFilterTip": "Applies to every view in this database block",
+	"contextFilterNoRelation": "Create and configure a relation field before enabling the context filter",
+	"filterCurrentDocument": "Current document",
+	"filterCurrentDocumentTip": "Resolves to the database item bound to the document containing this database block",
+	"templateDatabaseMode": "Databases in the template",
+	"templateDatabaseCopyTip": "Creates independent databases that no longer stay synchronized with the source",
+	"templateDatabaseReferenceTip": "Keeps references to existing databases and shares their data and view settings",
 	"entryTopBar": "Top bar",
 	"entryTopBarDrag": "Window drag area",
 	"bazaarFrontendDesktop": "Desktop main window",

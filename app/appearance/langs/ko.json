@@ -1,4 +1,12 @@
 {
+	"contextFilter": "컨텍스트 필터",
+	"contextFilterTip": "이 데이터베이스 블록의 모든 보기에 적용됩니다",
+	"contextFilterNoRelation": "컨텍스트 필터를 사용하기 전에 관계 필드를 만들고 구성하세요",
+	"filterCurrentDocument": "현재 문서",
+	"filterCurrentDocumentTip": "이 데이터베이스 블록이 있는 문서에 연결된 데이터베이스 항목으로 확인됩니다",
+	"templateDatabaseMode": "템플릿의 데이터베이스",
+	"templateDatabaseCopyTip": "원본과 더 이상 동기화되지 않는 독립 데이터베이스를 만듭니다",
+	"templateDatabaseReferenceTip": "기존 데이터베이스 참조를 유지하고 데이터와 보기 설정을 공유합니다",
 	"entryTopBar": "상단 표시줄",
 	"entryTopBarDrag": "창 끌기 영역",
 	"bazaarFrontendDesktop": "데스크톱 기본 창",

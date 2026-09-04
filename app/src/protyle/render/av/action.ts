@@ -384,6 +384,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
+        } else if (type === "av-context-filter" && !protyle.disabled) {
+            openMenuPanel({protyle, blockElement, type: "contextFilter"});
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
         } else if (type === "av-filter" && !protyle.disabled) {
             openMenuPanel({protyle, blockElement, type: "filters"});
             event.preventDefault();
@@ -690,6 +695,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             previewAttrViewImages(
                 removeCompressURL((target as HTMLImageElement).getAttribute("src")),
                 blockElement.getAttribute("data-av-id"),
+                blockElement.getAttribute("data-node-id"),
                 blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
                 blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || ""
             );

@@ -563,7 +563,19 @@ export const exportMd = (id: string) => {
 
                 const dialog = new Dialog({
                     title: window.siyuan.languages.fileName,
-                    content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value=""></div>
+                    content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value="">
+<div class="fn__hr"></div>
+<div class="b3-label__text">${window.siyuan.languages.templateDatabaseMode}</div>
+<label class="fn__flex b3-label">
+    <input type="radio" name="templateDatabaseMode" value="copy" checked>
+    <span class="fn__space"></span>
+    <div>${window.siyuan.languages.duplicateCompletely}<div class="b3-label__text">${window.siyuan.languages.templateDatabaseCopyTip}</div></div>
+</label>
+<label class="fn__flex b3-label">
+    <input type="radio" name="templateDatabaseMode" value="reference">
+    <span class="fn__space"></span>
+    <div>${window.siyuan.languages.duplicateMirror}<div class="b3-label__text">${window.siyuan.languages.templateDatabaseReferenceTip}</div></div>
+</label></div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
@@ -598,17 +610,23 @@ export const exportMd = (id: string) => {
                         name = name.substring(0, maxNameLen);
                     }
 
-                    fetchPost("/api/template/docSaveAsTemplate", {
+                    const templateName = inputElement.value;
+                    const selectedDatabaseMode = (dialog.element.querySelector(
+                        "input[name=\"templateDatabaseMode\"]:checked") as HTMLInputElement)?.value;
+                    const databaseMode: "copy" | "reference" = selectedDatabaseMode === "reference" ?
+                        "reference" : "copy";
+                    const requestData = {
                         id,
-                        name: inputElement.value,
-                        overwrite: false
-                    }, response => {
+                        name: templateName,
+                        overwrite: false,
+                        databaseMode,
+                    };
+                    fetchPost("/api/template/docSaveAsTemplate", requestData, response => {
                         if (response.code === 1) {
                             // 重名
                             confirmDialog(window.siyuan.languages.export, window.siyuan.languages.exportTplTip, () => {
                                 fetchPost("/api/template/docSaveAsTemplate", {
-                                    id,
-                                    name: inputElement.value,
+                                    ...requestData,
                                     overwrite: true
                                 }, resp => {
                                     if (resp.code === 0) {

@@ -395,11 +395,9 @@ export class Hint {
         viewportBottom = Math.max(viewportTop, viewportBottom);
         const heightLimit = (viewportBottom - viewportTop) / 3;
         const gap = 4;
-        let position = getMobileHintPosition(anchorTop, anchorBottom, this.element.scrollHeight,
-            viewportTop, viewportBottom, heightLimit, gap);
+        const position = getMobileHintPosition(anchorTop, anchorBottom, viewportTop, viewportBottom,
+            heightLimit, gap);
         this.element.style.maxHeight = `${position.maxHeight}px`;
-        position = getMobileHintPosition(anchorTop, anchorBottom, this.element.getBoundingClientRect().height,
-            viewportTop, viewportBottom, heightLimit, gap);
         this.element.style.left = "0";
         this.element.style.top = `${position.top}px`;
     }

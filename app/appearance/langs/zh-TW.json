@@ -1,4 +1,6 @@
 {
+	"aiMcpDisableStandaloneSSE": "停用獨立 SSE",
+	"aiMcpDisableStandaloneSSETip": "禁止建立獨立 SSE 連線，同時保留 Streamable HTTP 請求",
 	"textDirection": "文字方向",
 	"contextFilter": "情境篩選",
 	"contextFilterTip": "套用於此資料庫區塊的所有檢視",

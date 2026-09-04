@@ -1,4 +1,6 @@
 {
+	"aiMcpDisableStandaloneSSE": "Disable standalone SSE",
+	"aiMcpDisableStandaloneSSETip": "Prevents the standalone SSE connection while keeping Streamable HTTP requests available",
 	"textDirection": "Text direction",
 	"contextFilter": "Context filter",
 	"contextFilterTip": "Applies to every view in this database block",

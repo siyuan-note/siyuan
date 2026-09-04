@@ -1,4 +1,6 @@
 {
+	"aiMcpDisableStandaloneSSE": "Bağımsız SSE'yi devre dışı bırak",
+	"aiMcpDisableStandaloneSSETip": "Streamable HTTP isteklerini kullanılabilir tutarken bağımsız SSE bağlantısını engeller",
 	"textDirection": "Metin yönü",
 	"contextFilter": "Bağlam filtresi",
 	"contextFilterTip": "Bu veritabanı bloğundaki tüm görünümlere uygulanır",

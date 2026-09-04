@@ -1,4 +1,6 @@
 {
+	"aiMcpDisableStandaloneSSE": "독립 SSE 비활성화",
+	"aiMcpDisableStandaloneSSETip": "Streamable HTTP 요청을 유지하면서 독립 SSE 연결을 차단합니다",
 	"textDirection": "텍스트 방향",
 	"contextFilter": "컨텍스트 필터",
 	"contextFilterTip": "이 데이터베이스 블록의 모든 보기에 적용됩니다",

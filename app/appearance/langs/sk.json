@@ -1,4 +1,6 @@
 {
+	"aiMcpDisableStandaloneSSE": "Zakázať samostatné SSE",
+	"aiMcpDisableStandaloneSSETip": "Zabráni samostatnému pripojeniu SSE a zachová požiadavky Streamable HTTP dostupné",
 	"textDirection": "Smer textu",
 	"contextFilter": "Kontextový filter",
 	"contextFilterTip": "Použije sa na všetky zobrazenia v tomto databázovom bloku",

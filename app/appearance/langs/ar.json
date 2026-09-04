@@ -1,4 +1,6 @@
 {
+	"aiMcpDisableStandaloneSSE": "تعطيل SSE المستقل",
+	"aiMcpDisableStandaloneSSETip": "يمنع اتصال SSE المستقل مع إبقاء طلبات Streamable HTTP متاحة",
 	"textDirection": "اتجاه النص",
 	"contextFilter": "مرشح السياق",
 	"contextFilterTip": "يُطبّق على جميع طرق العرض في كتلة قاعدة البيانات هذه",

@@ -1,4 +1,6 @@
 {
+	"aiMcpDisableStandaloneSSE": "独立 SSE を無効化",
+	"aiMcpDisableStandaloneSSETip": "Streamable HTTP リクエストを維持したまま独立 SSE 接続を無効にします",
 	"textDirection": "テキストの方向",
 	"contextFilter": "コンテキストフィルター",
 	"contextFilterTip": "このデータベースブロックのすべてのビューに適用します",

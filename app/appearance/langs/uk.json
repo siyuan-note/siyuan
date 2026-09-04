@@ -1,4 +1,6 @@
 {
+	"aiMcpDisableStandaloneSSE": "Вимкнути автономний SSE",
+	"aiMcpDisableStandaloneSSETip": "Запобігає автономному SSE-з’єднанню, зберігаючи доступність запитів Streamable HTTP",
 	"textDirection": "Напрямок тексту",
 	"contextFilter": "Контекстний фільтр",
 	"contextFilterTip": "Застосовується до всіх подань у цьому блоці бази даних",

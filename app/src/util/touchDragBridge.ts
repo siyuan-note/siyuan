@@ -8,7 +8,11 @@ import {
     completeDrag,
     createDragRefreshQueue,
     dispatchWithNativeDragEnabled,
+    getDragRelayTypes,
+    hasActiveTouchGesture,
+    isDragRelaySource,
     restoreNativeDrag,
+    shouldRequireLongPress,
     shouldSuppressNativeContextMenu,
     suspendNativeDrag,
 } from "./touchDragBridgeCore";
@@ -91,6 +95,13 @@ interface BlockDragRelayMessage {
     sequence?: number;
     sourceWebContentsId?: number;
 }
+
+const dragRelayMimeTypes = {
+    block: Constants.SIYUAN_DROP_BLOCK,
+    documents: Constants.SIYUAN_DROP_DOCUMENTS,
+    file: Constants.SIYUAN_DROP_FILE,
+    gutterPrefix: Constants.SIYUAN_DROP_GUTTER,
+};
 
 interface DragState {
     dataTransfer: DataTransfer | null;
@@ -291,7 +302,7 @@ const handleTouchEnd = (e: TouchEvent) => {
 const handleContextMenu = (event: MouseEvent) => {
     // WebView 会在手指仍按住时派发原生长按菜单，菜单遮罩会截获后续 drop。
     // 松手后由 event.ts 合成的 contextmenu 不是可信事件，需要保留以打开正常的长按菜单。
-    if (shouldSuppressNativeContextMenu(event.isTrusted, !!(dragState || manualState))) {
+    if (shouldSuppressNativeContextMenu(event.isTrusted, hasActiveTouchGesture([dragState, manualState]))) {
         event.preventDefault();
         event.stopImmediatePropagation();
     }
@@ -321,19 +332,48 @@ const createDragState = (draggableElement: HTMLElement, point: DragPoint, inputT
         startX: point.clientX,
         startY: point.clientY,
         touchStartTime: Date.now(),
-        // 文件树、画廊、页签和列表操作需长按，以避免与滚动冲突。
-        requireLongPress: draggableElement.closest(".sy__file") !== null ||
+        // 触摸操作和 Android 外接鼠标在文件树、画廊、页签和列表操作中需长按，以避免与滚动冲突。
+        requireLongPress: shouldRequireLongPress(draggableElement.closest(".sy__file") !== null ||
             draggableElement.closest(".sy__outline") !== null ||
             draggableElement.closest(".av__gallery-item") !== null ||
             draggableElement.closest(".av__group-title") !== null ||
             draggableElement.closest(".layout-tab-bar") !== null ||
-            draggableElement.closest(".protyle-action") !== null,
+            draggableElement.closest(".protyle-action") !== null, isMouse, !!isInAndroid()),
         longPressCancelled: false,
         isMouse,
     };
 };
 
 let suppressMouseClick = false;
+let suppressMouseClickPointerId: number | undefined;
+let suppressMouseClickTimeout: number | undefined;
+
+const clearMouseClickSuppression = () => {
+    suppressMouseClick = false;
+    suppressMouseClickPointerId = undefined;
+    if (suppressMouseClickTimeout !== undefined) {
+        window.clearTimeout(suppressMouseClickTimeout);
+        suppressMouseClickTimeout = undefined;
+    }
+};
+
+const waitForMouseClickSuppression = (pointerId: number) => {
+    suppressMouseClick = false;
+    suppressMouseClickPointerId = pointerId;
+    if (suppressMouseClickTimeout !== undefined) {
+        window.clearTimeout(suppressMouseClickTimeout);
+        suppressMouseClickTimeout = undefined;
+    }
+};
+
+const armMouseClickSuppression = () => {
+    suppressMouseClick = true;
+    suppressMouseClickPointerId = undefined;
+    if (suppressMouseClickTimeout !== undefined) {
+        window.clearTimeout(suppressMouseClickTimeout);
+    }
+    suppressMouseClickTimeout = window.setTimeout(clearMouseClickSuppression);
+};
 
 const isDesktopBlockGutter = (draggable: HTMLElement) => {
     const gutterElement = draggable.closest(".protyle-gutters");
@@ -341,7 +381,16 @@ const isDesktopBlockGutter = (draggable: HTMLElement) => {
     return !!gutterElement && buttonElement?.tagName === "BUTTON" && !buttonElement.dataset.rowId;
 };
 
+const isDesktopFileTreeItem = (draggable: HTMLElement) => {
+    return draggable.closest(".sy__file") !== null &&
+        ["navigation-file", "navigation-root"].includes(draggable.dataset.type);
+};
+
 const handlePointerDown = (event: PointerEvent) => {
+    if (suppressMouseClick || suppressMouseClickPointerId !== undefined) {
+        // 上一次取消发生在窗口失焦等未收到 pointerup 的场景，新一轮按下不应继承点击抑制。
+        clearMouseClickSuppression();
+    }
     if (event.pointerType !== "mouse" || event.button !== 0 || dragState || manualState ||
         !(event.target instanceof Element) ||
         event.target.closest(".av__widthdrag") || event.target.closest(".av__freeze-drag")) {
@@ -349,18 +398,14 @@ const handlePointerDown = (event: PointerEvent) => {
     }
 
     const draggable = getDraggableAncestor(event.target);
-    if (!draggable || (!isInAndroid() && !isDesktopBlockGutter(draggable))) {
+    if (!draggable || (!isInAndroid() && !isDesktopBlockGutter(draggable) &&
+        !isDesktopFileTreeItem(draggable))) {
         return;
     }
 
     dragState = createDragState(draggable, event, "pointer", true, event.pointerId);
     // 原生 dragstart 会取消 Pointer 流，临时关闭 draggable 以保留 pointermove 和 pointerup。
     suspendNativeDrag(dragState);
-    try {
-        draggable.setPointerCapture(event.pointerId);
-    } catch {
-        // 指针可能已由系统取消，此时后续 Pointer 事件会负责清理。
-    }
 };
 
 const handlePointerMove = (event: PointerEvent) => {
@@ -388,6 +433,9 @@ const handlePointerMove = (event: PointerEvent) => {
 };
 
 const handlePointerUp = (event: PointerEvent) => {
+    if (suppressMouseClickPointerId === event.pointerId) {
+        armMouseClickSuppression();
+    }
     if (dragState?.inputType !== "pointer" || dragState.pointerId !== event.pointerId) {
         return;
     }
@@ -401,10 +449,7 @@ const handlePointerUp = (event: PointerEvent) => {
         completeBridgeDrag(event, false);
     }
     if (isDragging) {
-        suppressMouseClick = true;
-        setTimeout(() => {
-            suppressMouseClick = false;
-        });
+        armMouseClickSuppression();
     }
 };
 
@@ -412,13 +457,22 @@ const handlePointerCancel = (event: PointerEvent) => {
     if (dragState?.inputType === "pointer" && dragState.pointerId === event.pointerId) {
         completeBridgeDrag(event, true);
     }
+    if (suppressMouseClickPointerId === event.pointerId) {
+        clearMouseClickSuppression();
+    }
+};
+
+const handlePointerLeave = (event: PointerEvent) => {
+    if (dragState?.inputType === "pointer" && dragState.pointerId === event.pointerId && !dragState.isDragging) {
+        completeBridgeDrag(undefined, true);
+    }
 };
 
 const handleMouseClick = (event: MouseEvent) => {
     if (suppressMouseClick) {
         event.preventDefault();
         event.stopImmediatePropagation();
-        suppressMouseClick = false;
+        clearMouseClickSuppression();
     }
 };
 
@@ -484,8 +538,7 @@ const dispatchBridgeDragOver = (dataTransfer: DataTransfer, point: DragPoint,
 };
 
 const serializeDataTransfer = (dataTransfer: DataTransfer): BlockDragRelayPayload => {
-    const items = Array.from(dataTransfer.types)
-        .filter(type => type === Constants.SIYUAN_DROP_BLOCK || type.startsWith(Constants.SIYUAN_DROP_GUTTER))
+    const items = getDragRelayTypes(Array.from(dataTransfer.types), dragRelayMimeTypes)
         .map(type => ({
             type,
             data: dataTransfer.getData(type),
@@ -556,6 +609,14 @@ const startBridgeDrag = (point: DragPoint) => {
     dragState.isDragging = true;
     dragState.lastPoint = copyDragPoint(point);
 
+    if (dragState.inputType === "pointer" && dragState.pointerId !== undefined) {
+        try {
+            dragState.draggableElement.setPointerCapture(dragState.pointerId);
+        } catch {
+            // 指针可能已由系统取消，此时后续 Pointer 事件会负责清理。
+        }
+    }
+
     const closestEditorElement = dragState.draggableElement.closest(".protyle-wysiwyg") as HTMLElement;
     dragState.dragEnteredEditor = closestEditorElement ||
         dragState.draggableElement.closest(".protyle")?.querySelector<HTMLElement>(".protyle-wysiwyg");
@@ -581,7 +642,8 @@ const startBridgeDrag = (point: DragPoint) => {
     }
 
     /// #if !BROWSER
-    if (dragState.inputType === "pointer" && dt.types.includes(Constants.SIYUAN_DROP_BLOCK)) {
+    if (dragState.inputType === "pointer" &&
+        isDragRelaySource(Array.from(dt.types), dragRelayMimeTypes)) {
         dragState.relayId = `${Date.now()}-${++dragRelaySequence}`;
         sendBlockDragRelay({phase: "begin", dragId: dragState.relayId});
         sendBlockDragRelayMove(point);
@@ -630,6 +692,10 @@ const dispatchBridgeDragEnd = (point?: DragPoint) => {
 
 const completeBridgeDrag = (point: DragPoint | undefined, canceled: boolean, remoteDrop = false) => {
     const relayId = dragState?.relayId;
+    if (canceled && dragState?.inputType === "pointer" && dragState.isDragging &&
+        dragState.pointerId !== undefined) {
+        waitForMouseClickSuppression(dragState.pointerId);
+    }
     if (dragState?.pendingDropTimeout) {
         window.clearTimeout(dragState.pendingDropTimeout);
     }
@@ -703,14 +769,14 @@ const createForeignDataTransfer = (payload?: BlockDragRelayPayload) => {
         return;
     }
     const dataTransfer = new DataTransfer();
+    const relayTypes = getDragRelayTypes(payload.items.map(item => item?.type).filter(type => typeof type === "string"),
+        dragRelayMimeTypes);
     payload.items.forEach(item => {
-        if (typeof item?.type === "string" && typeof item.data === "string" &&
-            (item.type === Constants.SIYUAN_DROP_BLOCK || item.type.startsWith(Constants.SIYUAN_DROP_GUTTER))) {
+        if (typeof item?.type === "string" && typeof item.data === "string" && relayTypes.includes(item.type)) {
             dataTransfer.setData(item.type, item.data);
         }
     });
-    if (!dataTransfer.types.includes(Constants.SIYUAN_DROP_BLOCK) ||
-        !dataTransfer.types.some(type => type.startsWith(Constants.SIYUAN_DROP_GUTTER))) {
+    if (!isDragRelaySource(Array.from(dataTransfer.types), dragRelayMimeTypes)) {
         return;
     }
     try {
@@ -955,11 +1021,12 @@ export const initTouchDragBridge = () => {
     });
     /// #endif
     if (enablePointerBridge) {
-        // Android 外接鼠标和桌面普通块标由 Pointer 路径驱动，避免原生 dragstart 取消事件流。
+        // Android 外接鼠标、桌面普通块标和文档树由 Pointer 路径驱动，避免原生 dragstart 取消事件流。
         document.addEventListener("pointerdown", handlePointerDown, {capture: true, passive: true});
         document.addEventListener("pointermove", handlePointerMove, {capture: true, passive: false});
         document.addEventListener("pointerup", handlePointerUp, {capture: true, passive: false});
         document.addEventListener("pointercancel", handlePointerCancel, {capture: true, passive: true});
+        document.documentElement.addEventListener("pointerleave", handlePointerLeave, {passive: true});
         document.addEventListener("lostpointercapture", handleLostPointerCapture, {capture: true, passive: true});
         document.addEventListener("click", handleMouseClick, {capture: true, passive: false});
         window.addEventListener("blur", () => {

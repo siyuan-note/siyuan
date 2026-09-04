@@ -46,7 +46,7 @@ export abstract class Constants {
     public static readonly SIYUAN_INIT: string = "siyuan-init";
     public static readonly SIYUAN_READY_TO_SHOW: string = "siyuan-ready-to-show";
     public static readonly SIYUAN_SEND_WINDOWS: string = "siyuan-send-windows"; // 主窗口和各新窗口之间的通信
-    public static readonly SIYUAN_BLOCK_DRAG: string = "siyuan-block-drag"; // 跨窗口块拖拽通信
+    public static readonly SIYUAN_BLOCK_DRAG: string = "siyuan-block-drag"; // 跨窗口合成拖拽通信
     public static readonly SIYUAN_AUTO_LAUNCH: string = "siyuan-auto-launch";
 
     public static readonly SIYUAN_OPEN_WORKSPACE: string = "siyuan-open-workspace";

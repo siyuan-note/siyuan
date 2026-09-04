@@ -4,10 +4,21 @@ import {
     completeDrag,
     createDragRefreshQueue,
     dispatchWithNativeDragEnabled,
+    getDragRelayTypes,
+    hasActiveTouchGesture,
+    isDragRelaySource,
     restoreNativeDrag,
+    shouldRequireLongPress,
     shouldSuppressNativeContextMenu,
     suspendNativeDrag,
 } from "./touchDragBridgeCore";
+
+const dragRelayMimeTypes = {
+    block: "application/siyuan-block",
+    documents: "application/siyuan-documents",
+    file: "application/siyuan-file",
+    gutterPrefix: "application/siyuan-gutter",
+};
 
 const createGuard = () => {
     let draggable = "true";
@@ -84,6 +95,46 @@ describe("touch drag completion", () => {
 
     it("only cleans up when the long press did not become a drag", () => {
         assert.deepEqual(runCompletion(false, false), ["cleanup"]);
+    });
+});
+
+describe("touch drag relay data", () => {
+    it("keeps the block and gutter payload while excluding unrelated data", () => {
+        const types = [
+            "text/plain",
+            dragRelayMimeTypes.block,
+            `${dragRelayMimeTypes.gutterPrefix}NodeParagraph`,
+        ];
+
+        assert.deepEqual(getDragRelayTypes(types, dragRelayMimeTypes), types.slice(1));
+        assert.equal(isDragRelaySource(types, dragRelayMimeTypes), true);
+    });
+
+    it("keeps document tree data for cross-window dragging", () => {
+        const types = [dragRelayMimeTypes.file, dragRelayMimeTypes.documents, "text/html"];
+
+        assert.deepEqual(getDragRelayTypes(types, dragRelayMimeTypes), types.slice(0, 2));
+        assert.equal(isDragRelaySource(types, dragRelayMimeTypes), true);
+    });
+
+    it("rejects incomplete relay payloads", () => {
+        assert.equal(isDragRelaySource([dragRelayMimeTypes.block], dragRelayMimeTypes), false);
+        assert.equal(isDragRelaySource([dragRelayMimeTypes.documents], dragRelayMimeTypes), false);
+    });
+});
+
+describe("desktop mouse drag candidates", () => {
+    it("does not suppress a trusted context menu for a mouse candidate", () => {
+        const activeGesture = hasActiveTouchGesture([{isMouse: true}, null]);
+
+        assert.equal(shouldSuppressNativeContextMenu(true, activeGesture), false);
+        assert.equal(hasActiveTouchGesture([{isMouse: false}, {isMouse: true}]), true);
+    });
+
+    it("starts desktop mouse drags without the touch long-press delay", () => {
+        assert.equal(shouldRequireLongPress(true, true, false), false);
+        assert.equal(shouldRequireLongPress(true, true, true), true);
+        assert.equal(shouldRequireLongPress(true, false, false), true);
     });
 });
 

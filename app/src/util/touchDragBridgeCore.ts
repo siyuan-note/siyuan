@@ -9,6 +9,31 @@ interface DragCompletionCallbacks {
     cleanup: () => void;
 }
 
+interface DragRelayMimeTypes {
+    block: string;
+    documents: string;
+    file: string;
+    gutterPrefix: string;
+}
+
+export const getDragRelayTypes = (types: readonly string[], mimeTypes: DragRelayMimeTypes) => {
+    return types.filter(type => type === mimeTypes.block || type === mimeTypes.file ||
+        type === mimeTypes.documents || type.startsWith(mimeTypes.gutterPrefix));
+};
+
+export const isDragRelaySource = (types: readonly string[], mimeTypes: DragRelayMimeTypes) => {
+    return types.includes(mimeTypes.file) ||
+        (types.includes(mimeTypes.block) && types.some(type => type.startsWith(mimeTypes.gutterPrefix)));
+};
+
+export const hasActiveTouchGesture = (states: readonly ({isMouse: boolean} | null | undefined)[]) => {
+    return states.some(state => !!state && !state.isMouse);
+};
+
+export const shouldRequireLongPress = (isLongPressTarget: boolean, isMouse: boolean, isAndroid: boolean) => {
+    return isLongPressTarget && (!isMouse || isAndroid);
+};
+
 export const createDragRefreshQueue = (
     refresh: () => void,
     requestFrame: (callback: FrameRequestCallback) => number,

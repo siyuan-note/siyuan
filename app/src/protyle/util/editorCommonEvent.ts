@@ -2390,7 +2390,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 操作提示：上半=操作对象名称，下半=操作文案
         const attributeViewTarget = getAttributeViewDropTarget(event);
         const isAvTarget = attributeViewTarget.isItem;
-        if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
+        const isFileTreeDrag = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE);
+        const fileTreeIds = isFileTreeDrag ? window.siyuan.dragElement?.innerText ||
+            event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE) : "";
+        if (isFileTreeDrag) {
             // 文档面板拖拽文档到编辑器
             if (attributeViewTarget.isAttributeView && !isAvTarget) {
                 event.preventDefault();
@@ -2450,12 +2453,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (!gutterType && !window.siyuan.dragElement) {
+        if (!gutterType && !window.siyuan.dragElement && !fileTreeIds) {
             // https://github.com/siyuan-note/siyuan/issues/6436
             event.preventDefault();
             return;
         }
-        const fileTreeIds = (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE) && window.siyuan.dragElement) ? window.siyuan.dragElement.innerText : "";
         const isFileTreeRef = fileTreeIds.indexOf("-") > -1 && !event.altKey && !isAvTarget;
         if (isFileTreeRef || (event.altKey && fileTreeIds.indexOf("-") === -1)) {
             // 插入引用（行级）时走光标定位语义，清除全部块级拖拽指示。

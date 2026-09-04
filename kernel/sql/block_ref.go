@@ -38,6 +38,7 @@ type Ref struct {
 }
 
 func upsertRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
+	removeRefCacheByPath(tree.Box, tree.Path)
 	if err = deleteRefsByPath(tx, tree.Box, tree.Path); err != nil {
 		return
 	}
@@ -49,6 +50,7 @@ func upsertRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
 }
 
 func deleteRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
+	removeRefCacheByPath(tree.Box, tree.Path)
 	if err = deleteRefsByPath(tx, tree.Box, tree.Path); err != nil {
 		return
 	}

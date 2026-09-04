@@ -861,9 +861,10 @@ export const showKeyboardToolbar = () => {
     }
     const toolbarElement = document.getElementById("keyboardToolbar");
     const selection = getSelection();
-    if (selection.rangeCount > 0 &&
-        hasClosestByClassName(selection.getRangeAt(0).startContainer, "agent-chat__composer-host", true)) {
-        // 智能体发送框自带操作栏，不能显示会作用于下层文档的移动端编辑工具栏。
+    if (selection.rangeCount > 0 && (
+        hasClosestByClassName(selection.getRangeAt(0).startContainer, "protyle-lite-fragment", true) ||
+        hasClosestByClassName(selection.getRangeAt(0).startContainer, "agent-chat__composer-host", true))) {
+        // Lite 编辑器使用自己的工具栏，不能显示会作用于下层文档的移动端编辑工具栏。
         window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: true}));
         toolbarElement.classList.add("fn__none");
         return;

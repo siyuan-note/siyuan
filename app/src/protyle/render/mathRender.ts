@@ -6,6 +6,7 @@ import {hasClosestBlock} from "../util/hasClosest";
 import {looseJsonParse} from "../../util/functions";
 import {genRenderFrame} from "./util";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {getMathRenderSecurity} from "./mathRenderSecurity";
 
 const fitMathWidth = (mathElement: HTMLElement, blockElement: HTMLElement | false, isBlock: boolean) => {
     return new Promise<void>((resolve) => {
@@ -48,15 +49,17 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                 }
                 const isBlock = mathElement.tagName === "DIV";
                 const remoteKernel = getHostCapabilities().remoteKernel;
+                const security = getMathRenderSecurity(remoteKernel,
+                    Boolean(mathElement.closest('[data-protyle-lite-render="safe"]')));
                 try {
                     let mathHTML = window.katex.renderToString(Lute.UnEscapeHTMLStr(mathElement.getAttribute("data-content")), {
                         displayMode: isBlock,
                         output: "html",
                         macros,
-                        trust: !remoteKernel, // REF: https://katex.org/docs/supported#html
+                        trust: security.trust, // REF: https://katex.org/docs/supported#html
                         strict: (errorCode) => errorCode === "unicodeTextInMathMode" ? "ignore" : "warn",
                     });
-                    if (remoteKernel) {
+                    if (security.sanitize) {
                         mathHTML = window.DOMPurify.sanitize(mathHTML);
                     }
                     const blockElement = hasClosestBlock(mathElement);

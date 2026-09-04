@@ -1,18 +1,14 @@
-import {Protyle} from "../../../protyle";
 import {Constants} from "../../../constants";
-import type {App} from "../../../index";
 import {escapeHtml} from "../../../util/escape";
 import {fetchPost} from "../../../util/fetch";
 import {hintRef} from "../../../protyle/hint/extend";
-import {genEmptyElement} from "../../../block/util";
 import {blockRender} from "../../../protyle/render/blockRender";
-import {focusBlock} from "../../../protyle/util/selection";
 import {matchHotKey} from "../../../protyle/util/hotKey";
 import {isSkillHintRequestActive, shouldYieldSkillHint} from "./agentHintState";
 import {uploadFiles} from "../../../protyle/upload";
 import {previewImages} from "../../../protyle/preview/image";
 import {removeCompressURL} from "../../../util/image";
-import {invalidateTrackedRanges} from "../../../protyle/util/trackedRange";
+import {mountProtyleLiteFragment} from "../../../protyle/lite/fragmentEditor";
 
 export interface AgentComposerData {
     text: string;
@@ -192,71 +188,45 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
     const L = window.siyuan.languages;
     const enableHistory = options.enableHistory !== false;
 
-    const app: App = window.siyuan.ws.app;
-    const protyle = new Protyle(app, host, {
-        lite: true,
-        blockId: "",
-        render: {
-            gutter: false,
-            breadcrumb: false,
-            scroll: false,
-            background: false,
-            title: false,
+    const fragment = mountProtyleLiteFragment(host, {
+        initialMarkdown: options.initialContent,
+        initialBlockHTML: options.initialBlockHTML,
+        placeholder: options.placeholder || L.agentInputPlaceholder,
+        emptyClass: "agent-composer--empty",
+        hintOverlayClass: AGENT_HINT_OVERLAY_CLASS,
+        onChange,
+        protyleOptions: {
+            hint: {
+                // / 技能菜单（覆盖默认的块插入菜单 hintSlash）；[[ 块引用由 protyle 默认 extend 提供
+                extend: [{
+                    key: "((",
+                    hint: hintAgentRef,
+                }, {
+                    key: "【【",
+                    hint: hintAgentRef,
+                }, {
+                    key: "（（",
+                    hint: hintAgentRef,
+                }, {
+                    key: "[[",
+                    hint: hintAgentRef,
+                }, {
+                    key: "/",
+                    hint: hintSkill,
+                }, {
+                    key: "、",
+                    hint: hintSkill,
+                }],
+            },
         },
-        hint: {
-            // / 技能菜单（覆盖默认的块插入菜单 hintSlash）；[[ 块引用由 protyle 默认 extend 提供
-            extend: [{
-                key: "((",
-                hint: hintAgentRef,
-            }, {
-                key: "【【",
-                hint: hintAgentRef,
-            }, {
-                key: "（（",
-                hint: hintAgentRef,
-            }, {
-                key: "[[",
-                hint: hintAgentRef,
-            }, {
-                key: "/",
-                hint: hintSkill,
-            }, {
-                key: "、",
-                hint: hintSkill,
-            }],
+        afterSetContent: (protyle, element) => {
+            resetEmbedBlocks(element);
+            blockRender(protyle, element);
         },
     });
-
-    // Protyle 实例的 protyle 属性才是 IProtyle（持有 wysiwyg/hint/lute 等）。
-    // 类方法（focus/insert/destroy）在 Protyle 实例上，内部数据属性在 IProtyle 上。
-    const p = protyle.protyle;
+    const protyle = fragment.instance;
+    const p = fragment.protyle;
     const wysiwyg = p.wysiwyg!;
-    const hintElement = p.hint.element;
-    // Hint 使用视口坐标定位，挂到顶层可避免受浮动 Dock 的变换坐标系和裁剪影响。
-    hintElement.classList.add(AGENT_HINT_OVERLAY_CLASS);
-    document.body.appendChild(hintElement);
-    wysiwyg.element.setAttribute("data-readonly", "false");
-    // 智能体输入区高度较小，工具栏子面板需以窗口而非编辑器作为垂直边界。
-    p.toolbar.subElement.setAttribute("data-position-boundary", "viewport");
-
-    const setEmptyContent = () => {
-        invalidateTrackedRanges(p);
-        wysiwyg.element.innerHTML = "";
-        const emptyElement = genEmptyElement(false, false);
-        emptyElement.firstElementChild.classList.add("protyle-wysiwyg--empty");
-        emptyElement.firstElementChild.setAttribute("placeholder", options.placeholder || L.agentInputPlaceholder);
-        wysiwyg.element.appendChild(emptyElement);
-    };
-    if (options.initialBlockHTML) {
-        wysiwyg.element.innerHTML = options.initialBlockHTML;
-        resetEmbedBlocks(wysiwyg.element);
-        blockRender(p, wysiwyg.element);
-    } else if (options.initialContent) {
-        wysiwyg.element.innerHTML = p.lute.Md2BlockDOM(options.initialContent);
-        blockRender(p, wysiwyg.element);
-    } else {
-        setEmptyContent();
-    }
 
     // 智能体输入框没有文档 ID，直接预览输入框中的图片，避免走依赖文档资源列表的默认逻辑。
     wysiwyg.element.addEventListener("dblclick", (event: MouseEvent) => {
@@ -275,21 +245,6 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
         event.stopImmediatePropagation();
         previewImages(srcList, currentSrc);
     }, true);
-
-    const updatePlaceholder = () => {
-        const isEmpty = (wysiwyg.element.textContent || "").replace(new RegExp(Constants.ZWSP, "g"), "").trim() === "";
-        wysiwyg.element.classList.toggle("agent-composer--empty", isEmpty);
-    };
-    updatePlaceholder();
-
-    // Protyle 的粘贴、块删除和程序化插入会直接修改 DOM，不一定派发 input，需以实际 DOM 变化为准刷新状态。
-    const contentObserver = new MutationObserver(() => {
-        updatePlaceholder();
-        if (onChange) {
-            onChange();
-        }
-    });
-    contentObserver.observe(wysiwyg.element, {childList: true, characterData: true, subtree: true});
 
     // capture 阶段拦截 hint 选择、发送快捷键、历史翻页；undo/redo 交给 protyle 的 keydown（调 LocalUndo）。
     wysiwyg.element.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -329,8 +284,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
                 event.stopPropagation();
                 const target = history.isBrowsing() ?
                     history.navigateUp() : history.beginBrowsing(wysiwyg.element.innerHTML);
-                invalidateTrackedRanges(p);
-                wysiwyg.element.innerHTML = p.lute.Md2BlockDOM(target);
+                fragment.setMarkdown(target);
                 return;
             }
         }
@@ -339,11 +293,10 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
             event.preventDefault();
             event.stopPropagation();
             const target = history.navigateDown();
-            invalidateTrackedRanges(p);
             if (history.isBrowsing()) {
-                p.wysiwyg.element.innerHTML = p.lute.Md2BlockDOM(target);
+                fragment.setMarkdown(target);
             } else {
-                wysiwyg.element.innerHTML = target;
+                fragment.setBlockHTML(target);
             }
             return;
         }
@@ -356,30 +309,22 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
     }, true);
 
     const getMarkdown = (): string => {
-        const clone = wysiwyg.element.cloneNode(true) as HTMLElement;
-        clone.querySelectorAll(AGENT_SKILL_SELECTOR).forEach((skillElement) => {
-            skillElement.replaceWith(document.createTextNode(skillElement.textContent || ""));
+        return fragment.getMarkdown((element) => {
+            element.querySelectorAll(AGENT_SKILL_SELECTOR).forEach((skillElement) => {
+                skillElement.replaceWith(document.createTextNode(skillElement.textContent || ""));
+            });
         });
-        return p.lute.BlockDOM2StdMd(clone.innerHTML).trim();
     };
 
     const getBlockHTML = (): string => {
-        const clone = wysiwyg.element.cloneNode(true) as HTMLElement;
-        resetEmbedBlocks(clone);
-        return clone.innerHTML;
+        return fragment.getBlockHTML(resetEmbedBlocks);
     };
 
     return {
         focus: (toEnd = false) => {
-            if (!toEnd || !focusBlock(wysiwyg.element.lastElementChild, wysiwyg.element, false)) {
-                protyle.focus();
-            }
+            fragment.focus(toEnd);
         },
-        destroy: () => {
-            contentObserver.disconnect();
-            protyle.destroy();
-            hintElement.remove();
-        },
+        destroy: fragment.destroy,
         getSendData: () => {
             const references: { id: string; title: string }[] = [];
             wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach((ref) => {
@@ -391,9 +336,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
             return {text: getMarkdown(), blockHTML: getBlockHTML(), references};
         },
         clear: () => {
-            setEmptyContent();
-            p.undo.clear();
-            updatePlaceholder();
+            fragment.clear();
             history.resetCursor();
         },
         pushHistory: (text: string) => history.push(text),

@@ -73,6 +73,17 @@ import {
     resolveTrackedRange,
     trackRange,
 } from "./util/trackedRange";
+import {
+    applyProtyleLockedOptions,
+    areProtyleRuntimePluginExtensionsEnabled,
+    disableProtyleUpload,
+    isProtyleCustomBlockRenderEnabled,
+    registerProtyleRuntimeCapabilities,
+    resolveProtyleLute,
+} from "./runtimeCapabilities";
+import type {ProtyleRuntimeCapabilities} from "./runtimeCapabilities";
+
+export type {ProtyleRuntimeCapabilities} from "./runtimeCapabilities";
 
 /// #if !MOBILE
 const forSearchByEditor = (edit: Protyle, callback: (config: Config.IUILayoutTabSearchConfig, element: Element) => void) => {
@@ -108,16 +119,26 @@ export class Protyle {
      * @param id 要挂载 Protyle 的元素或者元素 ID。
      * @param options Protyle 参数
      */
-    constructor(app: App, id: HTMLElement, options: IProtyleOptions) {
+    constructor(app: App, id: HTMLElement, options: IProtyleOptions,
+                runtimeCapabilities: ProtyleRuntimeCapabilities = {}) {
         this.version = Constants.SIYUAN_VERSION;
         let pluginsOptions: IProtyleOptions = options;
-        app.plugins.forEach(item => {
-            if (item.protyleOptions) {
-                pluginsOptions = merge(pluginsOptions, item.protyleOptions);
-            }
-        });
+        if (areProtyleRuntimePluginExtensionsEnabled(runtimeCapabilities)) {
+            app.plugins.forEach(item => {
+                if (item.protyleOptions) {
+                    pluginsOptions = merge(pluginsOptions, item.protyleOptions);
+                }
+            });
+        }
+        pluginsOptions = applyProtyleLockedOptions(pluginsOptions, runtimeCapabilities.lockedOptions);
         const getOptions = new Options(pluginsOptions);
         const mergedOptions = getOptions.merge();
+        if (runtimeCapabilities.upload === false) {
+            mergedOptions.upload.url = "";
+            mergedOptions.upload.linkToImgUrl = "";
+            mergedOptions.upload.handler = undefined;
+            mergedOptions.upload.file = undefined;
+        }
         this.protyle = {
             getInstance: () => this,
             trackRange: (range, trackOptions) => this.trackRange(range, trackOptions),
@@ -140,6 +161,10 @@ export class Protyle {
                 styleElement: document.createElement("style"),
             }
         };
+        registerProtyleRuntimeCapabilities(this.protyle, runtimeCapabilities);
+        if (runtimeCapabilities.upload === false) {
+            disableProtyleUpload(this.protyle);
+        }
 
         if (isSupportCSSHL()) {
             const styleId = genUUID();
@@ -176,21 +201,23 @@ export class Protyle {
         // lite 模式用前端操作日志 undo（不依赖 kernel），其余走 kernel 的 GlobalUndoLog。
         this.protyle.undo = this.protyle.lite ? new LocalUndo() : new Undo();
         this.protyle.wysiwyg = new WYSIWYG(this.protyle);
-        registerCustomBlockRoot(this.protyle.wysiwyg.element, {
-            disabled: () => this.protyle.disabled,
-            update: (element, oldHTML) => updateTransaction(this.protyle, element, oldHTML),
-        });
+        if (isProtyleCustomBlockRenderEnabled(this.protyle)) {
+            registerCustomBlockRoot(this.protyle.wysiwyg.element, {
+                disabled: () => this.protyle.disabled,
+                update: (element, oldHTML) => updateTransaction(this.protyle, element, oldHTML),
+            });
+        }
         this.protyle.toolbar = new Toolbar(this.protyle);
         this.protyle.scroll = new Scroll(this.protyle); // 不能使用 render.scroll 来判读是否初始化，除非重构后面用到的相关变量
         if (this.protyle.options.render.gutter) {
             this.protyle.gutter = new Gutter(this.protyle);
         }
-        if (mergedOptions.upload.url || mergedOptions.upload.handler) {
+        if (runtimeCapabilities.upload !== false && (mergedOptions.upload.url || mergedOptions.upload.handler)) {
             this.protyle.upload = new Upload();
         }
 
-        this.init();
-        if (!mergedOptions.action.includes(Constants.CB_GET_HISTORY)) {
+        this.init(runtimeCapabilities.lute);
+        if (runtimeCapabilities.websocket !== false && !mergedOptions.action.includes(Constants.CB_GET_HISTORY)) {
             this.protyle.ws = new Model({app});
             this.protyle.ws.connect({
                 id: this.protyle.id,
@@ -578,15 +605,15 @@ export class Protyle {
         this.protyle.contentElement.classList.add("protyle-content--transition");
     }
 
-    private init() {
-        this.protyle.lute = getLute({
+    private init(lute?: Lute) {
+        this.protyle.lute = resolveProtyleLute(() => getLute({
             emojiSite: this.protyle.options.hint.emojiPath,
             emojis: this.protyle.options.hint.emoji,
             headingAnchor: false,
             listStyle: this.protyle.options.preview.markdown.listStyle,
             paragraphBeginningSpace: this.protyle.options.preview.markdown.paragraphBeginningSpace,
             sanitize: this.protyle.options.preview.markdown.sanitize,
-        });
+        }), lute);
 
         this.protyle.preview = new Preview(this.protyle);
 
@@ -600,7 +627,7 @@ export class Protyle {
 
     /** 上传是否还在进行中 */
     public isUploading() {
-        return this.protyle.upload.isUploading;
+        return this.protyle.upload?.isUploading || false;
     }
 
     /** 清空 undo & redo 栈 */

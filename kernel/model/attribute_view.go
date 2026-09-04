@@ -8152,17 +8152,16 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 		val.Type = keyValues.Key.Type
 	}
 
+	created := false
 	if nil == val {
 		val = &av.Value{ID: ast.NewNodeID(), KeyID: keyID, BlockID: itemID, Type: keyValues.Key.Type, CreatedAt: now, UpdatedAt: now}
-		keyValues.Values = append(keyValues.Values, val)
-		if nil != context {
-			context.values[keyID][itemID] = val
-		}
+		created = true
 	}
 
 	valueID := val.ID
 	valueType := val.Type
 	valueCreatedAt := val.CreatedAt
+	oldText := val.Text
 
 	isUpdatingBlockKey := av.KeyTypeBlock == val.Type
 	var oldRelationBlockIDs []string
@@ -8178,15 +8177,42 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 		logging.LogErrorf("marshal value [%+v] failed: %s", valueData, err)
 		return
 	}
-	if err = gulu.JSON.UnmarshalJSON(data, val); err != nil {
+	updatedVal := val
+	// 文本值先在副本上合并和校验，避免富文本校验失败污染原值，并保留旧客户端的部分更新语义。
+	if av.KeyTypeText == valueType {
+		updatedVal = val.Clone()
+		if nil == updatedVal {
+			err = fmt.Errorf("clone attribute view text value [%s] failed", valueID)
+			return
+		}
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, updatedVal); err != nil {
 		logging.LogErrorf("unmarshal data [%s] failed: %s", data, err)
 		return
 	}
-	val.ID = valueID
-	val.KeyID = keyID
-	val.BlockID = itemID
-	val.Type = valueType
-	val.CreatedAt = valueCreatedAt
+	updatedVal.ID = valueID
+	updatedVal.KeyID = keyID
+	updatedVal.BlockID = itemID
+	updatedVal.Type = valueType
+	updatedVal.CreatedAt = valueCreatedAt
+	if av.KeyTypeText == updatedVal.Type && nil != updatedVal.Text {
+		if nil != oldText && nil != oldText.Rich && !attributeViewTextRichFieldPresent(data) &&
+			updatedVal.Text.Content != oldText.Content {
+			updatedVal.Text.Rich = nil
+		}
+		if err = updatedVal.Text.NormalizeRichContent(); nil != err {
+			return
+		}
+	}
+	if updatedVal != val {
+		*val = *updatedVal
+	}
+	if created {
+		keyValues.Values = append(keyValues.Values, val)
+		if nil != context {
+			context.values[keyID][itemID] = val
+		}
+	}
 
 	key, _ := attrView.GetKey(keyID)
 
@@ -8362,6 +8388,23 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 		refreshRelatedSrcAvsInBlock(avID, blockID, tx)
 	}
 	return
+}
+
+func attributeViewTextRichFieldPresent(data []byte) bool {
+	var valueFields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &valueFields); nil != err {
+		return false
+	}
+	textData, ok := valueFields["text"]
+	if !ok {
+		return false
+	}
+	var textFields map[string]json.RawMessage
+	if err := json.Unmarshal(textData, &textFields); nil != err {
+		return false
+	}
+	_, ret := textFields["rich"]
+	return ret
 }
 
 func refreshRelatedSrcAvs(destAvID string, tx *Transaction) {

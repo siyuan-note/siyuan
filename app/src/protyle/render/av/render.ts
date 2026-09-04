@@ -47,6 +47,7 @@ import {
     setAVVisibleViewIDs
 } from "./viewVisibility";
 import {removeAVPasteSkeleton} from "./paste";
+import {renderAVRichTextElements} from "./richText";
 import {
     getGroupTableRenderPlan,
     getUninitializedGroupRowCounts,
@@ -403,12 +404,14 @@ export const initUnfoldedGroupTables = (blockElement: HTMLElement, protyle: IPro
     blockElement.toggleAttribute(Constants.ATTRIBUTE_V_SCROLL,
         totalLoadedRows > GROUP_TABLE_INITIAL_ROW_BUDGET || bodies.some(bodyElement =>
             bodyElement.querySelector(".av__spacer")));
+    renderAVRichTextElements(blockElement);
     initVirtualScroll({protyle, blockElement, data, selectedItemPoints});
     restoreAVCellSelection(blockElement);
 };
 
 const afterRenderTable = (options: ITableOptions) => {
     setAVData(options.blockElement, options.data);
+    renderAVRichTextElements(options.blockElement);
     if (!refreshAVCellSelection(options.blockElement, options.data)) {
         options.resetData.selectCellId = undefined;
         options.resetData.dragFillId = undefined;

@@ -36,6 +36,7 @@ import {isIPhone} from "./compatibility";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {disposeCustomBlocksInElement, setCustomBlockRootReady} from "../../plugin/customBlockRender";
 import {invalidateTrackedRanges, invalidateTrackedRangesInElement} from "./trackedRange";
+import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 /// #if MOBILE
 import {updateMobileTitleReadonly} from "./setEditMode";
 /// #endif
@@ -408,12 +409,14 @@ const setHTML = (options: {
     });
     protyle.options.defIds = [];
     if (options.action.includes(Constants.CB_GET_APPEND) || options.action.includes(Constants.CB_GET_BEFORE)) {
-        forEachPluginSubscriber("loaded-protyle-dynamic", eventBus => {
-            eventBus.emit("loaded-protyle-dynamic", {
-                protyle,
-                position: options.action.includes(Constants.CB_GET_APPEND) ? "afterend" : "beforebegin"
+        if (areProtylePluginExtensionsEnabled(protyle)) {
+            forEachPluginSubscriber("loaded-protyle-dynamic", eventBus => {
+                eventBus.emit("loaded-protyle-dynamic", {
+                    protyle,
+                    position: options.action.includes(Constants.CB_GET_APPEND) ? "afterend" : "beforebegin"
+                });
             });
-        });
+        }
         return;
     }
 
@@ -462,9 +465,11 @@ const setHTML = (options: {
         }
 
     }
-    forEachPluginSubscriber("loaded-protyle-static", eventBus => {
-        eventBus.emit("loaded-protyle-static", {protyle});
-    });
+    if (areProtylePluginExtensionsEnabled(protyle)) {
+        forEachPluginSubscriber("loaded-protyle-static", eventBus => {
+            eventBus.emit("loaded-protyle-static", {protyle});
+        });
+    }
 };
 
 export const disabledForeverProtyle = (protyle: IProtyle) => {

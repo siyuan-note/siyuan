@@ -851,8 +851,8 @@ func TestUpgradeSpec5(t *testing.T) {
 	// spec 4 + 扁平叶子 → 包装成根组
 	av4 := &AttributeView{Spec: 4, Views: []*View{{Filters: []*ViewFilter{leaf("c1"), leaf("c2")}}}}
 	UpgradeSpec(av4)
-	if av4.Spec != CurrentSpec {
-		t.Fatalf("spec should be upgraded to %d, got %d", CurrentSpec, av4.Spec)
+	if av4.Spec != PlainTextSpec {
+		t.Fatalf("spec should be upgraded to %d, got %d", PlainTextSpec, av4.Spec)
 	}
 	filters := av4.Views[0].Filters
 	if len(filters) != 1 || !filters[0].IsGroup() || FilterCombinationAnd != filters[0].Combination {

@@ -680,7 +680,13 @@ func RollbackAttributeViewHistory(historyPath string) (err error) {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
 		return
 	}
-	cache.RemoveAVData(strings.TrimSuffix(filepath.Base(historyPath), ".json"))
+	avID := strings.TrimSuffix(filepath.Base(historyPath), ".json")
+	cache.RemoveAVData(avID)
+	avBoxID := ""
+	if len(pathParts) >= 2 && IsEncryptedBox(pathParts[1]) {
+		avBoxID = pathParts[1]
+	}
+	queueExternalAttributeViewRefIndex(avID, avBoxID)
 	IncSync()
 	util.PushMsg(Conf.Language(102), 3000)
 	return nil

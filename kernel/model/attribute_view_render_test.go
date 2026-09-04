@@ -83,7 +83,7 @@ func TestImmutableAttributeViewRenderDoesNotWrite(t *testing.T) {
 	if nil != err {
 		t.Fatal(err)
 	}
-	if view.GetID() != attrView.Views[0].ID || attrView.Spec != av.CurrentSpec {
+	if view.GetID() != attrView.Views[0].ID || attrView.Spec != av.PlainTextSpec {
 		t.Fatalf("unexpected immutable render result: %s, spec %d", view.GetID(), attrView.Spec)
 	}
 	path := filepath.Join(util.DataDir, "storage", "av", attrView.ID+".json")

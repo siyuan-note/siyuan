@@ -2215,7 +2215,8 @@ func assetLinkDestBlockID(node *ast.Node) string {
 func getAssetLinkDestsByNode(node *ast.Node, includeServePath bool) []string {
 	if !node.IsBlock() && ast.NodeLinkDest != node.Type && ast.NodeHTMLBlock != node.Type && ast.NodeInlineHTML != node.Type &&
 		ast.NodeIFrame != node.Type && ast.NodeWidget != node.Type && ast.NodeAudio != node.Type && ast.NodeVideo != node.Type &&
-		ast.NodeAttributeView != node.Type && !node.IsTextMarkType("a") && !node.IsTextMarkType("file-annotation-ref") {
+		ast.NodeAttributeView != node.Type && ast.NodeFileAnnotationRefID != node.Type && !node.IsTextMarkType("a") &&
+		!node.IsTextMarkType("file-annotation-ref") {
 		return nil
 	}
 
@@ -2319,7 +2320,8 @@ func getAssetsLinkDestsWithAttributeViewItemFilter(
 		// 修改以下代码时需要同时修改 database 构造行级元素实现，增加必要的类型
 		if !entering || (ast.NodeLinkDest != n.Type && ast.NodeHTMLBlock != n.Type && ast.NodeInlineHTML != n.Type &&
 			ast.NodeIFrame != n.Type && ast.NodeWidget != n.Type && ast.NodeAudio != n.Type && ast.NodeVideo != n.Type &&
-			ast.NodeAttributeView != n.Type && !n.IsTextMarkType("a") && !n.IsTextMarkType("file-annotation-ref")) {
+			ast.NodeAttributeView != n.Type && ast.NodeFileAnnotationRefID != n.Type && !n.IsTextMarkType("a") &&
+			!n.IsTextMarkType("file-annotation-ref")) {
 			return ast.WalkContinue
 		}
 
@@ -2338,17 +2340,13 @@ func getAssetsLinkDestsWithAttributeViewItemFilter(
 			dest := strings.TrimSpace(n.TextMarkAHref)
 			ret = append(ret, dest)
 		} else if n.IsTextMarkType("file-annotation-ref") {
-			if !util.IsAssetLinkDest(gulu.Str.ToBytes(n.TextMarkFileAnnotationRefID), includeServePath) {
-				return ast.WalkContinue
+			if dest := fileAnnotationAssetLinkDest(n.TextMarkFileAnnotationRefID, includeServePath); "" != dest {
+				ret = append(ret, dest)
 			}
-
-			if !strings.Contains(n.TextMarkFileAnnotationRefID, "/") {
-				return ast.WalkContinue
+		} else if ast.NodeFileAnnotationRefID == n.Type {
+			if dest := fileAnnotationAssetLinkDest(n.TokensStr(), includeServePath); "" != dest {
+				ret = append(ret, dest)
 			}
-
-			dest := n.TextMarkFileAnnotationRefID[:strings.LastIndexByte(n.TextMarkFileAnnotationRefID, '/')]
-			dest = strings.TrimSpace(dest)
-			ret = append(ret, dest)
 		} else if ast.NodeAttributeView == n.Type {
 			attrView, _ := av.ParseAttributeView(n.AttributeViewID)
 			if nil == attrView {
@@ -2387,34 +2385,87 @@ func getAssetsLinkDestsWithAttributeViewItemFilter(
 	return
 }
 
+func fileAnnotationAssetLinkDest(reference string, includeServePath bool) string {
+	if !util.IsAssetLinkDest(gulu.Str.ToBytes(reference), includeServePath) {
+		return ""
+	}
+	separator := strings.LastIndexByte(reference, '/')
+	if separator < len("assets/") {
+		return ""
+	}
+	return strings.TrimSpace(reference[:separator])
+}
+
 func getAttributeViewAssetsLinkDests(
 	attrView *av.AttributeView,
 	includeServePath bool,
 	itemFilter attributeViewItemFilter,
 ) (ret []string) {
-	for _, keyValues := range attrView.KeyValues {
-		if av.KeyTypeMAsset != keyValues.Key.Type && av.KeyTypeURL != keyValues.Key.Type {
-			continue
-		}
-
-		for _, value := range keyValues.Values {
-			if nil != itemFilter && !itemFilter(attrView, value.BlockID) {
+	if nil == attrView {
+		return
+	}
+	collectValue := func(value *av.Value) {
+		ret = append(ret, getAttributeViewValueAssetsLinkDests(value, includeServePath)...)
+	}
+	if nil == itemFilter {
+		attrView.VisitPersistedValues(collectValue)
+	} else {
+		for _, keyValues := range attrView.KeyValues {
+			if nil == keyValues {
 				continue
 			}
-
-			if av.KeyTypeMAsset == keyValues.Key.Type {
-				for _, asset := range value.MAsset {
-					dest := asset.Content
-					if util.IsAssetLinkDest([]byte(dest), includeServePath) {
-						ret = append(ret, strings.TrimSpace(dest))
-					}
+			for _, value := range keyValues.Values {
+				if nil == value || !itemFilter(attrView, value.BlockID) {
+					continue
 				}
-			} else if nil != value.URL {
-				dest := value.URL.Content
-				if util.IsAssetLinkDest([]byte(dest), includeServePath) {
-					ret = append(ret, strings.TrimSpace(dest))
-				}
+				visitAttributeViewValue(value, collectValue)
 			}
+		}
+	}
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	return
+}
+
+func visitAttributeViewValue(value *av.Value, visit func(*av.Value)) {
+	visitAttributeViewValue0(value, visit, map[*av.Value]struct{}{})
+}
+
+func visitAttributeViewValue0(value *av.Value, visit func(*av.Value), visited map[*av.Value]struct{}) {
+	if nil == value {
+		return
+	}
+	if _, ok := visited[value]; ok {
+		return
+	}
+	visited[value] = struct{}{}
+	visit(value)
+	if nil != value.Relation {
+		for _, content := range value.Relation.Contents {
+			visitAttributeViewValue0(content, visit, visited)
+		}
+	}
+	if nil != value.Rollup {
+		for _, content := range value.Rollup.Contents {
+			visitAttributeViewValue0(content, visit, visited)
+		}
+	}
+}
+
+func getAttributeViewValueAssetsLinkDests(value *av.Value, includeServePath bool) (ret []string) {
+	if nil == value {
+		return
+	}
+	if nil != value.URL && util.IsAssetLinkDest([]byte(value.URL.Content), includeServePath) {
+		ret = append(ret, strings.TrimSpace(value.URL.Content))
+	}
+	for _, asset := range value.MAsset {
+		if nil != asset && util.IsAssetLinkDest([]byte(asset.Content), includeServePath) {
+			ret = append(ret, strings.TrimSpace(asset.Content))
+		}
+	}
+	if nil != value.Text && nil != value.Text.Rich {
+		if tree, err := av.ParseValueTextRich(value.Text.Rich); nil == err && nil != tree {
+			ret = append(ret, getAssetsLinkDests(tree.Root, includeServePath)...)
 		}
 	}
 	return

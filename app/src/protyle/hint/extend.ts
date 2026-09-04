@@ -44,6 +44,7 @@ import {
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {buildSemanticInlineHTML} from "../util/inlineElementMarker";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 import {
     getBlockSelectionModeElement,
     getBlockSelectionStatusIDs,
@@ -457,23 +458,25 @@ export const hintSlash = (key: string, protyle: IProtyle, sourceOrHideConfigured
         entryKey: item.id || "",
     }));
     let hasPlugin = false;
-    protyle.app.plugins.forEach((plugin) => {
-        plugin.protyleSlash.forEach(slash => {
-            allList.push({
-                filter: slash.filter,
-                id: slash.id,
-                entryKey: getPluginSlashEntryKey(plugin.name, slash.id,
-                    slash.html === "separator" ? "separator" : "entry"),
-                value: `plugin${Constants.ZWSP}${plugin.name}${Constants.ZWSP}${slash.id}`,
-                html: slash.html
+    if (areProtylePluginExtensionsEnabled(protyle)) {
+        protyle.app.plugins.forEach((plugin) => {
+            plugin.protyleSlash.forEach(slash => {
+                allList.push({
+                    filter: slash.filter,
+                    id: slash.id,
+                    entryKey: getPluginSlashEntryKey(plugin.name, slash.id,
+                        slash.html === "separator" ? "separator" : "entry"),
+                    value: `plugin${Constants.ZWSP}${plugin.name}${Constants.ZWSP}${slash.id}`,
+                    html: slash.html
+                });
+                hasPlugin = true;
             });
-            hasPlugin = true;
         });
-    });
+    }
     if (!hasPlugin) {
         allList.pop();
     }
-    refreshSlashMenuCatalog(protyle.app.plugins);
+    refreshSlashMenuCatalog(areProtylePluginExtensionsEnabled(protyle) ? protyle.app.plugins : []);
     return resolveSlashMenuItems(allList.filter((item) => {
         const builtinStyleID = slashBuiltinStyleIDs[item.entryKey];
         return getEntryCatalogNode(getSlashMenuEntryPath(item.entryKey)) &&

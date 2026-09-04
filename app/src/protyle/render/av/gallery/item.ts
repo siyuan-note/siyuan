@@ -2,6 +2,7 @@ import {genCellValue, getTypeByCellElement, renderCell, renderCellAttr} from "..
 import {fetchPost} from "../../../../util/fetch";
 import {setPage} from "../row";
 import {clearSelect} from "../../../util/clear";
+import {renderAVRichTextElements} from "../richText";
 
 export const insertGalleryItemAnimation = (options: {
     blockElement: HTMLElement;
@@ -95,6 +96,7 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
                         cellItem.innerHTML = renderCell(cellValue, undefined, false, type, undefined,
                             cellItem.dataset.dateFormat as TAVDateFormat);
                         renderCellAttr(cellItem, cellValue);
+                        renderAVRichTextElements(cellItem);
                     }
                 });
             });

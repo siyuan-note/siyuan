@@ -661,10 +661,13 @@ func TestGetAssetLinkDestsByNode(t *testing.T) {
 	paragraph := &ast.Node{Type: ast.NodeParagraph, ID: blockID}
 	paragraph.SetIALAttr("custom-data-assets", "assets/custom.png")
 	linkDest := &ast.Node{Type: ast.NodeLinkDest, Tokens: []byte("assets/image.png")}
+	annotationID := &ast.Node{Type: ast.NodeFileAnnotationRefID,
+		Tokens: []byte("assets/document-20200101000001-bcdefgh.pdf/20200101000002-cdefghi")}
 	root.AppendChild(paragraph)
 	paragraph.AppendChild(linkDest)
+	paragraph.AppendChild(annotationID)
 
-	want := []string{"assets/custom.png", "assets/image.png"}
+	want := []string{"assets/custom.png", "assets/image.png", "assets/document-20200101000001-bcdefgh.pdf"}
 	if got := getAssetsLinkDests(root, false); !reflect.DeepEqual(got, want) {
 		t.Fatalf("get asset link destinations: got %v, want %v", got, want)
 	}
@@ -673,6 +676,10 @@ func TestGetAssetLinkDestsByNode(t *testing.T) {
 	}
 	if got := getAssetLinkDestsByNode(linkDest, false); !reflect.DeepEqual(got, []string{"assets/image.png"}) {
 		t.Fatalf("get inline asset link destinations: got %v, want %v", got, []string{"assets/image.png"})
+	}
+	if got := getAssetLinkDestsByNode(annotationID, false); !reflect.DeepEqual(got,
+		[]string{"assets/document-20200101000001-bcdefgh.pdf"}) {
+		t.Fatalf("get PDF annotation asset link destination: got %v", got)
 	}
 	if got := assetLinkDestBlockID(linkDest); got != blockID {
 		t.Fatalf("get asset link destination block ID: got %q, want %q", got, blockID)
@@ -706,21 +713,87 @@ func TestGetAttributeViewAssetsLinkDestsFiltersItems(t *testing.T) {
 					{BlockID: "private-item", URL: &av.ValueURL{Content: "assets/private-url.png"}},
 				},
 			},
+			{
+				Key: &av.Key{Type: av.KeyTypeText},
+				Values: []*av.Value{
+					{
+						BlockID: "public-item",
+						Text: newAttributeViewRichText(t, strings.Join([]string{
+							"[Markdown](assets/public-rich.png)",
+							`<span data-type="a" data-href="assets/public-text-mark.png">Text mark</span>`,
+							`<<assets/public-document-20200101000001-bcdefgh.pdf/20200101000002-cdefghi "PDF shorthand">>`,
+							`<span data-type="file-annotation-ref" data-id="assets/public-span-20200101000003-defghij.pdf/20200101000004-efghijk">PDF text mark</span>`,
+							"[Network](https://example.com/remote.png)",
+						}, "\n\n")),
+						Relation: &av.ValueRelation{Contents: []*av.Value{{
+							Text: newAttributeViewRichText(t, "[Relation](assets/public-relation.png)"),
+						}}},
+						Rollup: &av.ValueRollup{Contents: []*av.Value{{
+							Text: newAttributeViewRichText(t, "[Rollup](assets/public-rollup.png)"),
+						}}},
+					},
+					{
+						BlockID: "private-item",
+						Text:    newAttributeViewRichText(t, "[Private](assets/private-rich.png)"),
+					},
+				},
+			},
 		},
+		NewItemTemplates: []*av.NewItemTemplate{{
+			FieldValues: map[string]*av.NewItemFieldValue{
+				"text": {Value: &av.Value{Text: newAttributeViewRichText(t, "[Template](assets/template-rich.png)")}},
+			},
+		}},
 	}
 
 	filter := func(_ *av.AttributeView, itemID string) bool {
 		return "public-item" == itemID
 	}
-	want := []string{"assets/public.png", "assets/public-url.png"}
+	want := []string{
+		"assets/public.png",
+		"assets/public-url.png",
+		"assets/public-rich.png",
+		"assets/public-text-mark.png",
+		"assets/public-document-20200101000001-bcdefgh.pdf",
+		"assets/public-span-20200101000003-defghij.pdf",
+		"assets/public-relation.png",
+		"assets/public-rollup.png",
+	}
 	if got := getAttributeViewAssetsLinkDests(attrView, false, filter); !reflect.DeepEqual(got, want) {
 		t.Fatalf("get filtered attribute view asset links: got %v, want %v", got, want)
 	}
 
-	want = []string{"assets/public.png", "assets/private.png", "assets/public-url.png", "assets/private-url.png"}
+	want = []string{
+		"assets/public.png",
+		"assets/private.png",
+		"assets/public-url.png",
+		"assets/private-url.png",
+		"assets/public-rich.png",
+		"assets/public-text-mark.png",
+		"assets/public-document-20200101000001-bcdefgh.pdf",
+		"assets/public-span-20200101000003-defghij.pdf",
+		"assets/public-relation.png",
+		"assets/public-rollup.png",
+		"assets/private-rich.png",
+		"assets/template-rich.png",
+	}
 	if got := getAttributeViewAssetsLinkDests(attrView, false, nil); !reflect.DeepEqual(got, want) {
 		t.Fatalf("get unfiltered attribute view asset links: got %v, want %v", got, want)
 	}
+}
+
+func newAttributeViewRichText(t *testing.T, content string) *av.ValueText {
+	t.Helper()
+	ret := &av.ValueText{
+		Content: "stale projection",
+		Rich: &av.ValueTextRich{
+			Spec: av.ValueTextRichSpec, Format: av.ValueTextRichFormatKramdown, Content: content,
+		},
+	}
+	if err := ret.NormalizeRichContent(); nil != err {
+		t.Fatalf("normalize attribute view rich text: %v", err)
+	}
+	return ret
 }
 
 func TestRenameAssetClearsAttributeViewCache(t *testing.T) {

@@ -368,10 +368,15 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 	treeRefNodeIDs := map[string]*hashset.Set{}
 	var changedNodes []*ast.Node
 	var refs []*sql.Ref
+	var attributeViewRefs []*sql.Ref
 	for _, updateNode := range updatedDefNodes {
 		boxID := updatedNodeBoxID(updateNode, updatedTrees)
 		refs, changedNodes = getRefsCacheByDefNode(updateNode, boxID)
 		for _, ref := range refs {
+			if sql.AttributeViewRefType == ref.Type {
+				attributeViewRefs = append(attributeViewRefs, ref)
+				continue
+			}
 			if refIDs, ok := treeRefNodeIDs[ref.RootID]; !ok {
 				refIDs = hashset.New()
 				refIDs.Add(ref.BlockID)
@@ -384,6 +389,7 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 	for _, n := range changedNodes {
 		updatedDefNodes[n.ID] = n
 	}
+	refreshAttributeViewDynamicRefTexts(updatedDefNodes, attributeViewRefs)
 
 	changedRefTree := map[string]*parse.Tree{}
 

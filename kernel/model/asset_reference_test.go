@@ -18,6 +18,7 @@ package model
 
 import (
 	stdhtml "html"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -121,18 +122,61 @@ func TestRewriteAttributeViewAssetReferences(t *testing.T) {
 		sourceBoxID = "20260812000000-source0"
 		targetBoxID = "20260812000001-target0"
 	)
+	richText := &av.ValueText{
+		Content: "stale rich projection",
+		Rich: &av.ValueTextRich{
+			Spec: av.ValueTextRichSpec, Format: av.ValueTextRichFormatKramdown,
+			Content: strings.Join([]string{
+				"[Markdown](assets/rich.png)",
+				`<span data-type="a" data-href="assets/rich-text-mark.png">Text mark</span>`,
+				`<<assets/native-20200101000001-bcdefgh.pdf/20200101000002-cdefghi "PDF shorthand">>`,
+				`<span data-type="file-annotation-ref" data-id="assets/span-20200101000003-defghij.pdf/20200101000004-efghijk">PDF text mark</span>`,
+				"[Network](https://example.com/remote.png)",
+			}, "\n\n"),
+		},
+	}
+	relationRichText := &av.ValueText{Content: "stale relation projection", Rich: &av.ValueTextRich{
+		Spec: av.ValueTextRichSpec, Format: av.ValueTextRichFormatKramdown,
+		Content: "[Relation rich](assets/relation-rich.png)",
+	}}
+	rollupRichText := &av.ValueText{Content: "stale rollup projection", Rich: &av.ValueTextRich{
+		Spec: av.ValueTextRichSpec, Format: av.ValueTextRichFormatKramdown,
+		Content: "[Rollup rich](assets/rollup-rich.png)",
+	}}
+	templateRichText := &av.ValueText{Content: "stale template projection", Rich: &av.ValueTextRich{
+		Spec: av.ValueTextRichSpec, Format: av.ValueTextRichFormatKramdown,
+		Content: "[Template rich](assets/template-rich.png)",
+	}}
 	attrView := &av.AttributeView{KeyValues: []*av.KeyValues{{Values: []*av.Value{
 		{URL: &av.ValueURL{Content: "assets/url.png?box=" + sourceBoxID}},
 		{MAsset: []*av.ValueAsset{{Content: "assets/file.pdf?page=3&box=" + sourceBoxID}}},
-		{Relation: &av.ValueRelation{Contents: []*av.Value{{URL: &av.ValueURL{Content: "assets/relation.png?box=" + sourceBoxID}}}}},
-		{Rollup: &av.ValueRollup{Contents: []*av.Value{{MAsset: []*av.ValueAsset{{Content: "assets/rollup.png?box=" + sourceBoxID}}}}}},
-	}}}}
+		{Text: richText},
+		{Relation: &av.ValueRelation{Contents: []*av.Value{{
+			URL:  &av.ValueURL{Content: "assets/relation.png?box=" + sourceBoxID},
+			Text: relationRichText,
+		}}}},
+		{Rollup: &av.ValueRollup{Contents: []*av.Value{{
+			MAsset: []*av.ValueAsset{{Content: "assets/rollup.png?box=" + sourceBoxID}},
+			Text:   rollupRichText,
+		}}}},
+	}}}, NewItemTemplates: []*av.NewItemTemplate{{
+		FieldValues: map[string]*av.NewItemFieldValue{
+			"text": {Value: &av.Value{Text: templateRichText}},
+		},
+	}}}
 	options := assetReferenceRewriteOptions{
 		pathMap: map[string]string{
-			"assets/url.png":      "assets/encrypted-url.png",
-			"assets/file.pdf":     "assets/encrypted-file.pdf",
-			"assets/relation.png": "assets/encrypted-relation.png",
-			"assets/rollup.png":   "assets/encrypted-rollup.png",
+			"assets/url.png":                           "assets/encrypted-url.png",
+			"assets/file.pdf":                          "assets/encrypted-file.pdf",
+			"assets/rich.png":                          "assets/encrypted-rich.png",
+			"assets/rich-text-mark.png":                "assets/encrypted-rich-text-mark.png",
+			"assets/native-20200101000001-bcdefgh.pdf": "assets/encrypted-native-20200101000011-lmnopqr.pdf",
+			"assets/span-20200101000003-defghij.pdf":   "assets/encrypted-span-20200101000013-nopqrst.pdf",
+			"assets/relation.png":                      "assets/encrypted-relation.png",
+			"assets/relation-rich.png":                 "assets/encrypted-relation-rich.png",
+			"assets/rollup.png":                        "assets/encrypted-rollup.png",
+			"assets/rollup-rich.png":                   "assets/encrypted-rollup-rich.png",
+			"assets/template-rich.png":                 "assets/encrypted-template-rich.png",
 		},
 		targetBoxID:   targetBoxID,
 		bindTargetBox: true,
@@ -144,10 +188,54 @@ func TestRewriteAttributeViewAssetReferences(t *testing.T) {
 	values := attrView.KeyValues[0].Values
 	assertEqualAssetReference(t, values[0].URL.Content, "assets/encrypted-url.png?box="+targetBoxID)
 	assertEqualAssetReference(t, values[1].MAsset[0].Content, "assets/encrypted-file.pdf?box="+targetBoxID+"&page=3")
-	assertEqualAssetReference(t, values[2].Relation.Contents[0].URL.Content,
+	assertEqualAssetReference(t, values[3].Relation.Contents[0].URL.Content,
 		"assets/encrypted-relation.png?box="+targetBoxID)
-	assertEqualAssetReference(t, values[3].Rollup.Contents[0].MAsset[0].Content,
+	assertEqualAssetReference(t, values[4].Rollup.Contents[0].MAsset[0].Content,
 		"assets/encrypted-rollup.png?box="+targetBoxID)
+
+	wantRichAssets := []string{
+		"assets/encrypted-rich.png?box=" + targetBoxID,
+		"assets/encrypted-rich-text-mark.png?box=" + targetBoxID,
+		"assets/encrypted-native-20200101000011-lmnopqr.pdf",
+		"assets/encrypted-span-20200101000013-nopqrst.pdf",
+	}
+	assertAttributeViewRichAssets(t, richText, wantRichAssets)
+	if got, want := richText.Content, "Markdown\nText mark\nPDF shorthand\nPDF text mark\nNetwork"; got != want {
+		t.Fatalf("rich plain projection = %q, want %q", got, want)
+	}
+	assertAttributeViewRichAssets(t, relationRichText,
+		[]string{"assets/encrypted-relation-rich.png?box=" + targetBoxID})
+	assertAttributeViewRichAssets(t, rollupRichText,
+		[]string{"assets/encrypted-rollup-rich.png?box=" + targetBoxID})
+	assertAttributeViewRichAssets(t, templateRichText,
+		[]string{"assets/encrypted-template-rich.png?box=" + targetBoxID})
+	if got, want := relationRichText.Content, "Relation rich"; got != want {
+		t.Fatalf("relation rich plain projection = %q, want %q", got, want)
+	}
+	if got, want := rollupRichText.Content, "Rollup rich"; got != want {
+		t.Fatalf("rollup rich plain projection = %q, want %q", got, want)
+	}
+	if got, want := templateRichText.Content, "Template rich"; got != want {
+		t.Fatalf("template rich plain projection = %q, want %q", got, want)
+	}
+}
+
+func assertAttributeViewRichAssets(t *testing.T, text *av.ValueText, want []string) {
+	t.Helper()
+	tree, err := av.ParseValueTextRich(text.Rich)
+	if nil != err {
+		t.Fatalf("parse rewritten attribute view rich text: %v", err)
+	}
+	if got := getAssetsLinkDests(tree.Root, false); !reflect.DeepEqual(got, want) {
+		t.Fatalf("rewritten attribute view rich assets: got %v, want %v", got, want)
+	}
+	normalized := text.Rich.Content
+	if err = text.NormalizeRichContent(); nil != err {
+		t.Fatalf("renormalize rewritten attribute view rich text: %v", err)
+	}
+	if text.Rich.Content != normalized {
+		t.Fatalf("rewritten attribute view rich text is not normalized:\ngot  %q\nwant %q", text.Rich.Content, normalized)
+	}
 }
 
 func assertAssetReferenceContains(t *testing.T, got, want string) {

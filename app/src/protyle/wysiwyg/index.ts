@@ -208,6 +208,7 @@ import {shouldOpenListItemAttr} from "./listContext";
 import {getBlockEdgeCaretRange, isCaretRangeInsideElement} from "./blockEdgeCaret";
 import {LargeListVirtualizer} from "./listVirtualization";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
+import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 import {syncRootAttributes} from "../util/syncRootAttributes";
 import {isDirectCalloutStructureClick} from "./calloutClick";
 import {
@@ -4406,12 +4407,14 @@ export class WYSIWYG {
                 this.preventClick = false;
                 return;
             }
-            forEachPluginSubscriber("click-editorcontent", eventBus => {
-                eventBus.emit("click-editorcontent", {
-                    protyle,
-                    event
+            if (areProtylePluginExtensionsEnabled(protyle)) {
+                forEachPluginSubscriber("click-editorcontent", eventBus => {
+                    eventBus.emit("click-editorcontent", {
+                        protyle,
+                        event
+                    });
                 });
-            });
+            }
             const templateInteractiveElement = getAVTemplateInteractiveElement(event.target);
             if (templateInteractiveElement && !isAVTemplateLink(templateInteractiveElement)) {
                 event.stopPropagation();

@@ -95,6 +95,7 @@ export const windowMouseMove = (event: MouseEvent) => {
         const inDockOverlay = hasClosestByClassName(target, "b3-menu") ||
             hasClosestByClassName(target, "tooltip") ||
             hasClosestByClassName(target, "block__popover") ||
+            hasClosestByClassName(target, "protyle-hint--lite-overlay") ||
             hasClosestByClassName(target, "protyle-hint--agent-overlay") ||
             hasClosestByClassName(target, "b3-dialog", true);
         if (event.buttons !== 0 || inDockOverlay) {

@@ -72,6 +72,7 @@ import {getMobileHintPosition} from "./mobileHintPosition";
 import {getVisibleViewportBounds} from "../../mobile/util/visibleViewport";
 import {getTopBarHeight} from "../../layout/getTopBarHeight";
 import {stripSemanticMarkersFromRangeText} from "../util/inlineElementMarker";
+import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 
 const genEmojiInsertHTML = (value: string) => {
     const kind = getIconValueKind(value);
@@ -962,7 +963,7 @@ ${genHintItemHTML(item)}
                 nodeElement.setAttribute("style", value.split(Constants.ZWSP)[1] || "");
                 updateTransaction(protyle, nodeElement, html);
                 return;
-            } else if (value.startsWith("plugin")) {
+            } else if (value.startsWith("plugin") && areProtylePluginExtensionsEnabled(protyle)) {
                 protyle.app.plugins.find((plugin) => {
                     const ids = value.split(Constants.ZWSP);
                     if (ids[1] === plugin.name) {

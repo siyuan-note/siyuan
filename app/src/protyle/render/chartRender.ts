@@ -48,6 +48,9 @@ const secureEChartsOption = (option: any) => {
 };
 
 export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
+    if (element.closest('[data-protyle-lite-render="safe"]')) {
+        return;
+    }
     let echartsElements: Element[] | NodeListOf<Element> = [];
     if (element.getAttribute("data-subtype") === "echarts" && element.getAttribute("data-render") !== "true") {
         echartsElements = [element];
@@ -65,6 +68,9 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
                 width = wysiswgElement.firstElementChild.clientWidth;
             }
             echartsElements.forEach(async (e: HTMLDivElement) => {
+                if (e.closest('[data-protyle-lite-render="safe"]')) {
+                    return;
+                }
                 e.setAttribute("data-render", "true");
                 if (!e.firstElementChild.classList.contains("protyle-icons")) {
                     e.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement, ["refresh", "edit", "more"]));
@@ -100,7 +106,7 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
 };
 
 export const refreshChartTheme = (element: Element) => {
-    if (typeof window.echarts === "undefined") {
+    if (element.closest('[data-protyle-lite-render="safe"]') || typeof window.echarts === "undefined") {
         return;
     }
     let echartsElements: HTMLElement[] | NodeListOf<HTMLElement> = [];
@@ -111,6 +117,9 @@ export const refreshChartTheme = (element: Element) => {
     }
     const refreshElements: HTMLElement[] = [];
     echartsElements.forEach((item) => {
+        if (item.closest('[data-protyle-lite-render="safe"]')) {
+            return;
+        }
         const chartElement = item.querySelector<HTMLElement>("[_echarts_instance_]");
         if (!chartElement) {
             return;

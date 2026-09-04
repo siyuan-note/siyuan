@@ -72,6 +72,14 @@ func (av *AttributeView) suspendRenderedContents() (restore func()) {
 	}
 }
 
+// VisitPersistedValues 遍历属性视图中所有会持久化的值，每个值仅访问一次。
+func (av *AttributeView) VisitPersistedValues(visit func(*Value)) {
+	if nil == av || nil == visit {
+		return
+	}
+	av.visitPersistedValues(visit)
+}
+
 func (av *AttributeView) visitPersistedValues(visit func(*Value)) {
 	visited := map[*Value]struct{}{}
 	var visitValue func(value *Value)

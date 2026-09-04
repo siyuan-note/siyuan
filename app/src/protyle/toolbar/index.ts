@@ -98,6 +98,10 @@ import {
     normalizeCalloutTitleRange
 } from "./inlineRangeBoundary";
 import {resolvePluginToolbar} from "../../plugin/toolbarItem";
+import {
+    areProtylePluginExtensionsEnabled,
+    getProtyleLockedToolbar,
+} from "../runtimeCapabilities";
 
 const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) => {
     if (!lite) {
@@ -117,6 +121,9 @@ const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) 
 };
 
 const applyPluginToolbar = (toolbar: Array<string | IMenuItem>, protyle: IProtyle) => {
+    if (!areProtylePluginExtensionsEnabled(protyle)) {
+        return toolbarKeyToMenu(toolbar) as IMenuItem[];
+    }
     let result = toolbar;
     protyle.app.plugins.forEach((plugin) => {
         const previous = [...result];
@@ -183,13 +190,15 @@ export class Toolbar {
         });
         applyToolbarEntryVisibility(this.element);
         /// #if MOBILE
-        updateMobilePluginToolbar(protyle);
+        if (areProtylePluginExtensionsEnabled(protyle)) {
+            updateMobilePluginToolbar(protyle);
+        }
         /// #endif
     }
 
     public update(protyle: IProtyle) {
         this.element.innerHTML = "";
-        protyle.options.toolbar = toolbarKeyToMenu(getDefaultToolbar(isMobile()));
+        protyle.options.toolbar = toolbarKeyToMenu(getProtyleLockedToolbar(protyle) || getDefaultToolbar(isMobile()));
         protyle.options.toolbar = applyPluginToolbar(protyle.options.toolbar, protyle);
         if (!isMobile() && !protyle.lite) {
             refreshToolbarCatalog(protyle.options.toolbar);
@@ -200,7 +209,9 @@ export class Toolbar {
         });
         applyToolbarEntryVisibility(this.element);
         /// #if MOBILE
-        updateMobilePluginToolbar(protyle);
+        if (areProtylePluginExtensionsEnabled(protyle)) {
+            updateMobilePluginToolbar(protyle);
+        }
         /// #endif
     }
 
@@ -1845,14 +1856,16 @@ export class Toolbar {
         if (!protyle.disabled) {
             textElement.select();
         }
-        forEachPluginSubscriber("open-noneditableblock", eventBus => {
-            eventBus.emit("open-noneditableblock", {
-                protyle,
-                toolbar: this,
-                blockElement: nodeElement,
-                renderElement,
+        if (areProtylePluginExtensionsEnabled(protyle)) {
+            forEachPluginSubscriber("open-noneditableblock", eventBus => {
+                eventBus.emit("open-noneditableblock", {
+                    protyle,
+                    toolbar: this,
+                    blockElement: nodeElement,
+                    renderElement,
+                });
             });
-        });
+        }
     }
 
     public showCodeLanguage(protyle: IProtyle, languageElements: HTMLElement[]) {
@@ -1879,7 +1892,7 @@ export class Toolbar {
         let html = `<div data-id="clearLanguage" class="b3-list-item">${window.siyuan.languages.clear}</div>`;
         let hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
 
-        if (hasPluginSubscriber("code-language-update")) {
+        if (areProtylePluginExtensionsEnabled(protyle) && hasPluginSubscriber("code-language-update")) {
             const eventDetail = {languages: hljsLanguages, type: "init", listElement};
             emitToPlugins("code-language-update", eventDetail);
             hljsLanguages = eventDetail.languages;
@@ -1951,7 +1964,7 @@ export class Toolbar {
                 }
             }
 
-            if (hasPluginSubscriber("code-language-update")) {
+            if (areProtylePluginExtensionsEnabled(protyle) && hasPluginSubscriber("code-language-update")) {
                 const eventDetail = {languages: value ? matchLanguages : hljsLanguages, type: "match", value, listElement};
                 emitToPlugins("code-language-update", eventDetail);
                 matchLanguages = eventDetail.languages;
@@ -2532,13 +2545,15 @@ export class Toolbar {
     private updateLanguage(languageElements: HTMLElement[], protyle: IProtyle, selectedLang: string) {
         const currentLang = selectedLang === window.siyuan.languages.clear ? "" : selectedLang;
 
-        forEachPluginSubscriber("code-language-change", eventBus => {
-            eventBus.emit("code-language-change", {
-                language: currentLang,
-                languageElements,
-                protyle: protyle
+        if (areProtylePluginExtensionsEnabled(protyle)) {
+            forEachPluginSubscriber("code-language-change", eventBus => {
+                eventBus.emit("code-language-change", {
+                    language: currentLang,
+                    languageElements,
+                    protyle: protyle
+                });
             });
-        });
+        }
 
         if (!Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(currentLang)) {
             window.siyuan.storage[Constants.LOCAL_CODELANG] = currentLang;

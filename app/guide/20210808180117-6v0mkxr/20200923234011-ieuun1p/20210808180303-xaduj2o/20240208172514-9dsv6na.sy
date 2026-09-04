@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20260904115016"
+		"updated": "20260904121106"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251224101749-zybcbjk",
-				"updated": "20260904115016"
+				"updated": "20260904121106"
 			},
 			"Children": [
 				{
@@ -984,7 +984,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613171129-edm1pru",
-				"updated": "20260904115016"
+				"updated": "20260904121106"
 			},
 			"Children": [
 				{
@@ -1013,7 +1013,7 @@
 			"HeadingLevel": 4,
 			"Properties": {
 				"id": "20260613171129-5zjv62o",
-				"updated": "20260904115016"
+				"updated": "20260904121106"
 			},
 			"Children": [
 				{
@@ -1042,7 +1042,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613171129-438l9c3",
-				"updated": "20260904115016"
+				"updated": "20260904121106"
 			},
 			"Children": [
 				{
@@ -1327,7 +1327,7 @@
 					},
 					"Properties": {
 						"id": "20260904022100-t3p2t45",
-						"updated": "20260904115016"
+						"updated": "20260904121106"
 					},
 					"Children": [
 						{
@@ -1335,7 +1335,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260904022100-h1drat7",
-								"updated": "20260904115016"
+								"updated": "20260904121106"
 							},
 							"Children": [
 								{
@@ -1354,7 +1354,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " from the database block toolbar and select a configured Relation field. The panel lists all configured Relation fields in the database, but only one can be enabled at a time. Select another field to switch to it; select the checked field again to turn off the context filter. Once enabled, the fixed condition “Contains any item - Current document” applies to every view in this database block. Each view’s ordinary filters remain independent and are combined with the context filter using AND. When you add an item from this database block, the current document is automatically added to the selected Relation field. For filtering and adding items to work, the current document must already be bound to an item in the selected Relation field’s target database; otherwise, no matching items are shown and you cannot add items from this database block."
+									"Data": " from the database block toolbar and select a configured Relation field. The panel lists all configured Relation fields in the database, but only one can be enabled at a time. Select another field to switch to it; select the checked field again to turn off the context filter. Once enabled, the fixed condition “Contains any item - Current document” applies to every view in this database block. Each view’s ordinary filters remain independent and are combined with the context filter using AND. When you add an item from this database block, the current document is automatically added to the selected Relation field. For filtering and adding items to work, the current document must already be bound to an item in the selected Relation field’s target database; otherwise, no matching items are shown and you cannot add items from this database block"
 								}
 							]
 						}

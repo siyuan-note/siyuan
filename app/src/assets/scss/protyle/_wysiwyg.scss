@@ -46,6 +46,12 @@
   [data-node-id] {
     position: relative;
 
+    &.protyle-wysiwyg--navigation {
+      outline: 2px solid var(--b3-theme-primary-lighter);
+      outline-offset: -2px;
+      border-radius: var(--b3-border-radius);
+    }
+
     &[data-type="NodeHeading"] {
       & > .protyle-heading-number__measure {
         position: absolute;

@@ -73,10 +73,10 @@ func setPetalEnabled(c *gin.Context) {
 	ret.Data = data
 	if enabled {
 		reloadPluginSet := hashset.New(packageName)
-		model.PushReloadPlugin(nil, nil, reloadPluginSet, nil, app)
+		model.PushReloadPlugin(nil, nil, reloadPluginSet, nil, app, "")
 	} else {
 		unloadPluginSet := hashset.New(packageName)
-		model.PushReloadPlugin(nil, unloadPluginSet, nil, nil, app)
+		model.PushReloadPlugin(nil, unloadPluginSet, nil, nil, app, "")
 	}
 }
 

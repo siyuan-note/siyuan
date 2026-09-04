@@ -1,4 +1,6 @@
 {
+	"aiMcpDisableStandaloneSSE": "禁用独立 SSE",
+	"aiMcpDisableStandaloneSSETip": "禁止建立独立 SSE 连接，同时保留 Streamable HTTP 请求",
 	"textDirection": "文本方向",
 	"contextFilter": "上下文筛选",
 	"contextFilterTip": "应用于当前数据库块的所有视图",

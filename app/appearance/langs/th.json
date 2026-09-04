@@ -1,4 +1,6 @@
 {
+	"aiMcpDisableStandaloneSSE": "ปิดใช้งาน SSE แบบสแตนด์อโลน",
+	"aiMcpDisableStandaloneSSETip": "ป้องกันการเชื่อมต่อ SSE แบบสแตนด์อโลนโดยยังคงใช้คำขอ Streamable HTTP ได้",
 	"textDirection": "ทิศทางข้อความ",
 	"contextFilter": "ตัวกรองบริบท",
 	"contextFilterTip": "ใช้กับทุกมุมมองในบล็อกฐานข้อมูลนี้",

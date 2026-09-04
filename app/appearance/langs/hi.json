@@ -1,4 +1,6 @@
 {
+	"aiMcpDisableStandaloneSSE": "स्वतंत्र SSE अक्षम करें",
+	"aiMcpDisableStandaloneSSETip": "Streamable HTTP अनुरोधों को उपलब्ध रखते हुए स्वतंत्र SSE कनेक्शन को रोकता है",
 	"textDirection": "पाठ की दिशा",
 	"contextFilter": "संदर्भ फ़िल्टर",
 	"contextFilterTip": "इस डेटाबेस ब्लॉक के हर दृश्य पर लागू होता है",

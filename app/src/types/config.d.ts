@@ -281,6 +281,7 @@ declare namespace Config {
         env?: Record<string, string>;
         headers?: Record<string, string>;
         timeout: number;
+        disableStandaloneSSE: boolean;
         trustToolAnnotations: boolean;
     }
 

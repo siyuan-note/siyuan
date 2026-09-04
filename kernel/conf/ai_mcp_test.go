@@ -84,8 +84,9 @@ func TestMigrateMCPEnvironment(t *testing.T) {
 	mcp := migrateMCP(map[string]any{
 		"servers": []any{
 			map[string]any{
-				"name":       "stdio",
-				"inheritEnv": []any{"PATH", "HOME"},
+				"name":                 "stdio",
+				"inheritEnv":           []any{"PATH", "HOME"},
+				"disableStandaloneSSE": true,
 				"env": map[string]any{
 					"TOKEN": "{{secrets.TOKEN}}",
 				},
@@ -96,7 +97,8 @@ func TestMigrateMCPEnvironment(t *testing.T) {
 		t.Fatalf("unexpected MCP servers: %#v", mcp.Servers)
 	}
 	server := mcp.Servers[0]
-	if len(server.InheritEnv) != 2 || server.InheritEnv[0] != "PATH" || server.Env["TOKEN"] != "{{secrets.TOKEN}}" {
+	if len(server.InheritEnv) != 2 || server.InheritEnv[0] != "PATH" || server.Env["TOKEN"] != "{{secrets.TOKEN}}" ||
+		!server.DisableStandaloneSSE {
 		t.Fatalf("unexpected migrated environment: %#v", server)
 	}
 }

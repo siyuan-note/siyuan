@@ -1,4 +1,6 @@
 {
+	"aiMcpDisableStandaloneSSE": "Nonaktifkan SSE mandiri",
+	"aiMcpDisableStandaloneSSETip": "Mencegah koneksi SSE mandiri sambil mempertahankan permintaan Streamable HTTP",
 	"textDirection": "Arah teks",
 	"contextFilter": "Filter konteks",
 	"contextFilterTip": "Berlaku untuk setiap tampilan dalam blok basis data ini",

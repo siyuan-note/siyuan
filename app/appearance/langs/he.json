@@ -1,4 +1,6 @@
 {
+	"aiMcpDisableStandaloneSSE": "השבתת SSE עצמאי",
+	"aiMcpDisableStandaloneSSETip": "מונע את חיבור ה-SSE העצמאי תוך שמירה על בקשות Streamable HTTP זמינות",
 	"textDirection": "כיוון הטקסט",
 	"contextFilter": "מסנן הקשר",
 	"contextFilterTip": "חל על כל התצוגות בבלוק מסד הנתונים הזה",

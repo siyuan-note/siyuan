@@ -1,4 +1,6 @@
 {
+	"aiMcpDisableStandaloneSSE": "Désactiver le SSE autonome",
+	"aiMcpDisableStandaloneSSETip": "Empêche la connexion SSE autonome tout en maintenant les requêtes Streamable HTTP disponibles",
 	"textDirection": "Direction du texte",
 	"contextFilter": "Filtre contextuel",
 	"contextFilterTip": "S’applique à toutes les vues de ce bloc de base de données",

@@ -1,4 +1,6 @@
 {
+	"allChangelogs": "すべての更新履歴",
+	"changelog": "更新履歴",
 	"textDirection": "テキストの方向",
 	"contextFilter": "コンテキストフィルター",
 	"contextFilterTip": "このデータベースブロックのすべてのビューに適用します",
@@ -2142,7 +2144,7 @@
 	"mobileModeTip": "無効にするとモバイルレイアウトを使用",
 	"checkUpdate": "アップデートを確認",
 	"currentVer": "現在のバージョン",
-	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\", target=\"_blank\">最新バージョンをダウンロード</a>",
+	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\" target=\"_blank\">最新バージョンをダウンロード</a>",
 	"themeLight": "ライト",
 	"themeDark": "ダーク",
 	"themeOS": "システムに従う",

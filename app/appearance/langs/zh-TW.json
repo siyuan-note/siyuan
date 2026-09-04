@@ -1,4 +1,6 @@
 {
+	"allChangelogs": "所有日誌",
+	"changelog": "更新日誌",
 	"textDirection": "文字方向",
 	"contextFilter": "情境篩選",
 	"contextFilterTip": "套用於此資料庫區塊的所有檢視",
@@ -2142,7 +2144,7 @@
 	"mobileModeTip": "禁用後使用移動端界面佈局",
 	"checkUpdate": "檢查更新",
 	"currentVer": "當前版本",
-	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/download.html\", target=\"_blank\">下載最新版</a>",
+	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/download.html\" target=\"_blank\">下載最新版</a>",
 	"themeLight": "淺色",
 	"themeDark": "深色",
 	"themeOS": "跟隨系統",

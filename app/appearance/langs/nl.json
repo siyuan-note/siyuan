@@ -1,4 +1,6 @@
 {
+	"allChangelogs": "Alle wijzigingslogboeken",
+	"changelog": "Wijzigingslogboek",
 	"textDirection": "Tekstrichting",
 	"contextFilter": "Contextfilter",
 	"contextFilterTip": "Is van toepassing op alle weergaven in dit databaseblok",
@@ -2142,7 +2144,7 @@
 	"mobileModeTip": "Gebruik de mobiele interface-indeling wanneer uitgeschakeld",
 	"checkUpdate": "Update controleren",
 	"currentVer": "Huidige versie",
-	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\", target=\"_blank\">Nieuwste versie downloaden</a>",
+	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\" target=\"_blank\">Nieuwste versie downloaden</a>",
 	"themeLight": "Licht",
 	"themeDark": "Donker",
 	"themeOS": "Systeem volgen",

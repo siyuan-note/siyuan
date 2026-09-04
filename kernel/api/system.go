@@ -41,6 +41,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/mod/semver"
 )
 
 func clearTempFiles(c *gin.Context) {
@@ -121,7 +122,15 @@ func getChangelog(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	data := map[string]any{"show": false, "html": ""}
+	force := false
+	arg := map[string]any{}
+	if err := c.ShouldBindJSON(&arg); err == nil {
+		if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("force", &force, false, false)) {
+			return
+		}
+	}
+
+	data := map[string]any{"show": false, "html": "", "version": ""}
 	ret.Data = data
 
 	changelogsDir := filepath.Join(util.WorkingDir, "changelogs")
@@ -129,23 +138,23 @@ func getChangelog(c *gin.Context) {
 		return
 	}
 
-	if !model.Conf.ShowChangelog {
+	if !force && !model.Conf.ShowChangelog {
 		return
 	}
 
-	if !util.IsReleaseVer(util.Ver) {
+	if !force && !util.IsReleaseVer(util.Ver) {
 		model.Conf.ShowChangelog = false
 		model.Conf.Save()
 		return
 	}
 
-	verDir := filepath.Join(changelogsDir, "v"+util.Ver)
-	changelogPath := filepath.Join(verDir, "v"+util.Ver+"."+model.Conf.Lang+".md")
-	if !gulu.File.IsExist(changelogPath) {
-		changelogPath = filepath.Join(verDir, "v"+util.Ver+".md")
+	changelogVer := util.Ver
+	changelogPath := getChangelogPath(changelogsDir, changelogVer)
+	if force && changelogPath == "" {
+		changelogVer, changelogPath = getLatestChangelog(changelogsDir, util.Ver)
 	}
-	if !gulu.File.IsExist(changelogPath) {
-		logging.LogErrorf("changelog not found in %s", verDir)
+	if changelogPath == "" {
+		logging.LogErrorf("changelog not found for v%s", util.Ver)
 		return
 	}
 
@@ -155,15 +164,54 @@ func getChangelog(c *gin.Context) {
 		return
 	}
 
-	model.Conf.ShowChangelog = false
-	model.Conf.Save()
+	if !force {
+		model.Conf.ShowChangelog = false
+		model.Conf.Save()
+	}
 	luteEngine := lute.New()
 	htmlContent := luteEngine.MarkdownStr("", string(contentData))
 	htmlContent = util.LinkTarget(htmlContent, "")
 
 	data["show"] = true
 	data["html"] = htmlContent
+	data["version"] = changelogVer
 	ret.Data = data
+}
+
+func getChangelogPath(changelogsDir, ver string) string {
+	verDir := filepath.Join(changelogsDir, "v"+ver)
+	changelogPath := filepath.Join(verDir, "v"+ver+"."+model.Conf.Lang+".md")
+	if gulu.File.IsExist(changelogPath) {
+		return changelogPath
+	}
+	changelogPath = filepath.Join(verDir, "v"+ver+".md")
+	if gulu.File.IsExist(changelogPath) {
+		return changelogPath
+	}
+	return ""
+}
+
+func getLatestChangelog(changelogsDir, currentVer string) (ver, path string) {
+	entries, err := os.ReadDir(changelogsDir)
+	if err != nil {
+		return "", ""
+	}
+	currentSemver := "v" + strings.TrimPrefix(currentVer, "v")
+	for _, entry := range entries {
+		candidate := strings.TrimPrefix(entry.Name(), "v")
+		candidateSemver := "v" + candidate
+		if !entry.IsDir() || !util.IsReleaseVer(candidate) ||
+			(semver.IsValid(currentSemver) && semver.Compare(candidateSemver, currentSemver) > 0) ||
+			(ver != "" && semver.Compare(candidateSemver, "v"+ver) <= 0) {
+			continue
+		}
+		candidatePath := getChangelogPath(changelogsDir, candidate)
+		if candidatePath != "" {
+			ver = candidate
+			path = candidatePath
+		}
+	}
+	return
 }
 
 func getEmojiConf(c *gin.Context) {

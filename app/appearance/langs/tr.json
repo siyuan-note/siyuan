@@ -1,4 +1,6 @@
 {
+	"allChangelogs": "Tüm değişiklik günlükleri",
+	"changelog": "Değişiklik günlüğü",
 	"textDirection": "Metin yönü",
 	"contextFilter": "Bağlam filtresi",
 	"contextFilterTip": "Bu veritabanı bloğundaki tüm görünümlere uygulanır",

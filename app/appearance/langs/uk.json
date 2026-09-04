@@ -1,4 +1,6 @@
 {
+	"allChangelogs": "Усі журнали змін",
+	"changelog": "Журнал змін",
 	"textDirection": "Напрямок тексту",
 	"contextFilter": "Контекстний фільтр",
 	"contextFilterTip": "Застосовується до всіх подань у цьому блоці бази даних",
@@ -2142,7 +2144,7 @@
 	"mobileModeTip": "Вимкніть для використання мобільного макета",
 	"checkUpdate": "Перевірити оновлення",
 	"currentVer": "Поточна версія",
-	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\", target=\"_blank\">Завантажити останню версію</a>",
+	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\" target=\"_blank\">Завантажити останню версію</a>",
 	"themeLight": "Світла",
 	"themeDark": "Темна",
 	"themeOS": "Як у системі",

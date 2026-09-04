@@ -1,4 +1,6 @@
 {
+	"allChangelogs": "모든 변경 로그",
+	"changelog": "변경 로그",
 	"textDirection": "텍스트 방향",
 	"contextFilter": "컨텍스트 필터",
 	"contextFilterTip": "이 데이터베이스 블록의 모든 보기에 적용됩니다",
@@ -2142,7 +2144,7 @@
 	"mobileModeTip": "비활성화 시 모바일 레이아웃 사용",
 	"checkUpdate": "업데이트 확인",
 	"currentVer": "현재 버전",
-	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\", target=\"_blank\">최신 버전 다운로드</a>",
+	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\" target=\"_blank\">최신 버전 다운로드</a>",
 	"themeLight": "라이트",
 	"themeDark": "다크",
 	"themeOS": "시스템 따르기",

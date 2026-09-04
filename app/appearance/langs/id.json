@@ -1,4 +1,6 @@
 {
+	"allChangelogs": "Semua catatan perubahan",
+	"changelog": "Catatan perubahan",
 	"textDirection": "Arah teks",
 	"contextFilter": "Filter konteks",
 	"contextFilterTip": "Berlaku untuk setiap tampilan dalam blok basis data ini",
@@ -2142,7 +2144,7 @@
 	"mobileModeTip": "Gunakan tata letak antarmuka seluler saat dinonaktifkan",
 	"checkUpdate": "Periksa pembaruan",
 	"currentVer": "Versi saat ini",
-	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\", target=\"_blank\">Unduh versi terbaru</a>",
+	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\" target=\"_blank\">Unduh versi terbaru</a>",
 	"themeLight": "Terang",
 	"themeDark": "Gelap",
 	"themeOS": "Ikuti sistem",

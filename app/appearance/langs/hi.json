@@ -1,4 +1,6 @@
 {
+	"allChangelogs": "सभी बदलाव सूचियाँ",
+	"changelog": "बदलाव सूची",
 	"textDirection": "पाठ की दिशा",
 	"contextFilter": "संदर्भ फ़िल्टर",
 	"contextFilterTip": "इस डेटाबेस ब्लॉक के हर दृश्य पर लागू होता है",
@@ -2142,7 +2144,7 @@
 	"mobileModeTip": "अक्षम होने पर मोबाइल इंटरफ़ेस लेआउट का उपयोग करें",
 	"checkUpdate": "अपडेट जांचें",
 	"currentVer": "वर्तमान संस्करण",
-	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\", target=\"_blank\">नवीनतम संस्करण डाउनलोड करें</a>",
+	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\" target=\"_blank\">नवीनतम संस्करण डाउनलोड करें</a>",
 	"themeLight": "हल्का",
 	"themeDark": "गहरा",
 	"themeOS": "सिस्टम के अनुसार",

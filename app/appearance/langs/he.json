@@ -1,4 +1,6 @@
 {
+	"allChangelogs": "כל יומני השינויים",
+	"changelog": "יומן שינויים",
 	"textDirection": "כיוון הטקסט",
 	"contextFilter": "מסנן הקשר",
 	"contextFilterTip": "חל על כל התצוגות בבלוק מסד הנתונים הזה",
@@ -2142,7 +2144,7 @@
 	"mobileModeTip": "השבת כדי להשתמש בפריסה ניידת",
 	"checkUpdate": "בדוק עדכון",
 	"currentVer": "גרסה נוכחית",
-	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\", target=\"_blank\">הורד את הגרסה האחרונה</a>",
+	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\" target=\"_blank\">הורד את הגרסה האחרונה</a>",
 	"themeLight": "בהיר",
 	"themeDark": "כהה",
 	"themeOS": "עקוב אחרי המערכת",

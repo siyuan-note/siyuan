@@ -1,4 +1,6 @@
 {
+	"allChangelogs": "All changelogs",
+	"changelog": "Changelog",
 	"textDirection": "Text direction",
 	"contextFilter": "Context filter",
 	"contextFilterTip": "Applies to every view in this database block",
@@ -2142,7 +2144,7 @@
 	"mobileModeTip": "Use mobile interface layout when disabled",
 	"checkUpdate": "Check update",
 	"currentVer": "Current version",
-	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\", target=\"_blank\">Download the latest version</a>",
+	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\" target=\"_blank\">Download the latest version</a>",
 	"themeLight": "Light",
 	"themeDark": "Dark",
 	"themeOS": "Follow the system",

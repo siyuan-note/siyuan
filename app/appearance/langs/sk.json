@@ -1,4 +1,6 @@
 {
+	"allChangelogs": "Všetky denníky zmien",
+	"changelog": "Denník zmien",
 	"textDirection": "Smer textu",
 	"contextFilter": "Kontextový filter",
 	"contextFilterTip": "Použije sa na všetky zobrazenia v tomto databázovom bloku",
@@ -2142,7 +2144,7 @@
 	"mobileModeTip": "Zakázať pre použitie mobilného rozloženia",
 	"checkUpdate": "Skontrolovať aktualizáciu",
 	"currentVer": "Aktuálna verzia",
-	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\", target=\"_blank\">Stiahnuť najnovšiu verziu</a>",
+	"downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\" target=\"_blank\">Stiahnuť najnovšiu verziu</a>",
 	"themeLight": "Svetlá",
 	"themeDark": "Tmavá",
 	"themeOS": "Podľa systému",

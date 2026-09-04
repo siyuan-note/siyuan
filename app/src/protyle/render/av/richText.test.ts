@@ -17,6 +17,7 @@ import {
     getAVTextPlainContent,
     getAVTextSource,
     getAVRichTextSafeURL,
+    isAVRichTextEditorAllowedTag,
     isAVRichTextExecutableCodeLanguage,
     projectAVRichTextPlainBlocks,
     protectAVRichTextKramdownStyleEntities,
@@ -287,6 +288,10 @@ describe("attribute view text source compatibility", () => {
     });
 
     it("uses a strict active-content and interaction policy for previews", () => {
+        for (const tag of ["svg", "SVG", "use", "USE"]) {
+            assert.equal(isAVRichTextEditorAllowedTag(tag), true);
+        }
+        assert.equal(isAVRichTextEditorAllowedTag("script"), false);
         for (const tag of ["h1", "h2", "h3", "h4", "h5", "h6"]) {
             assert.equal(AV_RICH_TEXT_PREVIEW_ALLOWED_TAGS.includes(tag), true);
         }

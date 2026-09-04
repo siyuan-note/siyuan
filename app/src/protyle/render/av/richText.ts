@@ -7,6 +7,7 @@ import {
     createAVRichTextStyleEntityReplacer,
     configureAVRichTextLute,
     getAVRichTextSafeURL,
+    isAVRichTextEditorAllowedTag,
     isAVRichTextExecutableCodeLanguage,
     projectAVRichTextPlainBlocks,
     protectAVRichTextKramdownStyleEntities,
@@ -15,7 +16,6 @@ import {
     AV_RICH_TEXT_PREVIEW_SANITIZE_OPTIONS,
     AV_RICH_TEXT_PREVIEW_TEXT_ONLY_TAGS,
     AV_RICH_TEXT_EDITOR_ALLOWED_ATTRIBUTES,
-    AV_RICH_TEXT_EDITOR_ALLOWED_TAGS,
 } from "./richTextValue";
 import type {AVRichTextStyleEntityProtection} from "./richTextValue";
 
@@ -74,7 +74,6 @@ const ALLOWED_INLINE_TYPES = new Set([
     "text",
     "u",
 ]);
-const ALLOWED_EDITOR_TAGS = new Set(AV_RICH_TEXT_EDITOR_ALLOWED_TAGS.map((tag) => tag.toUpperCase()));
 const previewCache = new Map<string, string>();
 const PREVIEW_CACHE_LIMIT = 256;
 let richTextLute: Lute | undefined;
@@ -138,7 +137,7 @@ export const sanitizeAVRichTextBlockDOM = (blockDOM: string) => {
         element.remove();
     });
     template.content.querySelectorAll<HTMLElement>("*").forEach((element) => {
-        if (!ALLOWED_EDITOR_TAGS.has(element.tagName)) {
+        if (!isAVRichTextEditorAllowedTag(element.tagName)) {
             replaceWithText(element);
         }
     });

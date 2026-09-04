@@ -12,6 +12,9 @@ export const AV_RICH_TEXT_PREVIEW_ALLOWED_ATTRIBUTES = [
 ];
 export const AV_RICH_TEXT_PREVIEW_TEXT_ONLY_TAGS = ["sup"];
 export const AV_RICH_TEXT_EDITOR_ALLOWED_TAGS = ["br", "div", "span", "svg", "use", "wbr"];
+const AV_RICH_TEXT_EDITOR_ALLOWED_TAG_SET = new Set(AV_RICH_TEXT_EDITOR_ALLOWED_TAGS);
+export const isAVRichTextEditorAllowedTag = (tagName: string) =>
+    AV_RICH_TEXT_EDITOR_ALLOWED_TAG_SET.has(tagName.toLowerCase());
 export const AV_RICH_TEXT_EDITOR_ALLOWED_ATTRIBUTES = [
     "aria-label", "class", "contenteditable", "data-content", "data-href", "data-id", "data-inline-memo-content",
     "data-marker", "data-node-id", "data-node-index", "data-position", "data-subtype", "data-type", "draggable",

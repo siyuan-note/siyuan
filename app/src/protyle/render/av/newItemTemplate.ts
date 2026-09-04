@@ -15,6 +15,7 @@ import {hasClosestByClassName} from "../../util/hasClosest";
 import * as dayjs from "dayjs";
 import {getAVBlockRefSubtype} from "./cellValue";
 import {getAVColorStyle} from "./color";
+import {createAVPlainTextEditValue} from "./richTextValue";
 
 interface ICreatePosition {
     previousID?: string;
@@ -89,8 +90,9 @@ const getFieldText = (value: IAVCellValue) => {
     }
 };
 
-const genFieldValue = (column: IAVColumn, input: HTMLElement): IAVCellValue => {
-    const content = (input as HTMLInputElement).value?.trim() || "";
+const genFieldValue = (column: IAVColumn, input: HTMLElement, previousValue?: IAVCellValue): IAVCellValue => {
+    const inputContent = (input as HTMLInputElement).value || "";
+    const content = inputContent.trim();
     switch (column.type) {
         case "number":
             return {type: column.type, number: {content: Number(content), isNotEmpty: content !== ""}};
@@ -131,6 +133,9 @@ const genFieldValue = (column: IAVColumn, input: HTMLElement): IAVCellValue => {
             return {type: column.type, relation: {blockIDs: getSelectedOptionNames(input)}};
         case "checkbox":
             return {type: column.type, checkbox: {checked: input.getAttribute("aria-pressed") === "true"}};
+        case "text":
+            return createAVPlainTextEditValue(previousValue?.type === "text" &&
+                previousValue.text?.content === inputContent ? inputContent : content, previousValue);
         default:
             return {type: column.type, text: {content}};
     }
@@ -208,6 +213,8 @@ const hasFieldValue = (column: IAVColumn, value: IAVCellValue) => {
             return value.relation?.blockIDs?.length > 0;
         case "checkbox":
             return value.checkbox?.checked;
+        case "text":
+            return !!value.text?.content || !!value.text?.rich;
         default:
             return !!value.text?.content;
     }
@@ -496,7 +503,9 @@ const collectTemplate = (root: HTMLElement, itemTemplate: IAVNewItemTemplate, fi
     root.querySelectorAll<HTMLElement>("[data-field-id]").forEach(element => {
         const column = fields.find(item => item.id === element.dataset.fieldId);
         const mode = (element.querySelector('[data-role="field-mode"]') as HTMLSelectElement)?.value as TAVNewItemFieldValueMode || "static";
-        const value = mode === "static" ? genFieldValue(column, element.querySelector('[data-role="field-value"]')) : undefined;
+        const previousValue = itemTemplate.fieldValues?.[column.id]?.value;
+        const value = mode === "static" ?
+            genFieldValue(column, element.querySelector('[data-role="field-value"]'), previousValue) : undefined;
         if (mode === "static" && !hasFieldValue(column, value)) {
             return;
         }

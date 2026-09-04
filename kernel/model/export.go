@@ -2934,7 +2934,7 @@ func exportAv(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap
 }
 
 func copyExportAttributeViewAssets(attrView *av.AttributeView, boxID, exportFolder string, assetPathMap map[string]string) {
-	// 导出资源文件列和指向本地资源的 URL 列 https://github.com/siyuan-note/siyuan/issues/9919
+	// 导出资源文件列、指向本地资源的 URL 列和富文本中的本地资源 https://github.com/siyuan-note/siyuan/issues/9919
 	for _, assetPath := range getAttributeViewAssetsLinkDests(attrView, false, nil) {
 		destPath := filepath.Join(exportFolder, AssetPathWithoutQuery(assetPath))
 		srcPath := ""

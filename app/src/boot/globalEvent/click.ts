@@ -60,6 +60,7 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
         !hasClosestByClassName(event.target, "b3-dialog--open", true) &&
         !hasClosestByClassName(event.target, "b3-menu") &&
         !hasClosestByClassName(event.target, "block__popover") &&
+        !hasClosestByClassName(event.target, "protyle-hint--lite-overlay") &&
         !hasClosestByClassName(event.target, "protyle-hint--agent-overlay") &&
         !hasClosestByClassName(event.target, "dock") &&
         !hasClosestByClassName(event.target, "layout--float", true)

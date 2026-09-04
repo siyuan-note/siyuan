@@ -217,3 +217,221 @@ func TestCheckAttrViewCorrectsValueKeyID(t *testing.T) {
 		t.Fatalf("value key ID was not corrected: %s", value.KeyID)
 	}
 }
+
+func TestUpdateAttributeViewTextValuePreservesRichPayloadForUnchangedLegacyWrites(t *testing.T) {
+	attrView, textValue, textKeyID, itemID := newAttributeViewRichTextUpdateTest()
+	originalRichContent := textValue.Text.Rich.Content
+
+	updated, err := updateAttributeViewValue(nil, attrView, textKeyID, itemID,
+		&av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: "old"}}, false)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if updated != textValue || nil == updated.Text || "old" != updated.Text.Content || nil == updated.Text.Rich ||
+		originalRichContent != updated.Text.Rich.Content {
+		t.Fatalf("unchanged legacy write did not preserve rich text: value=%+v text=%+v rich=%+v", updated,
+			updated.Text, updated.Text.Rich)
+	}
+}
+
+func TestUpdateAttributeViewTextValueClearsRichPayloadForChangedLegacyWrites(t *testing.T) {
+	attrView, textValue, textKeyID, itemID := newAttributeViewRichTextUpdateTest()
+
+	updated, err := updateAttributeViewValue(nil, attrView, textKeyID, itemID,
+		&av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: "plain replacement"}}, false)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if updated != textValue || nil == updated.Text || "plain replacement" != updated.Text.Content || nil != updated.Text.Rich {
+		t.Fatalf("plain write did not replace rich text: %+v", updated)
+	}
+}
+
+func TestUpdateAttributeViewTextValueExplicitlyClearsUnchangedRichPayload(t *testing.T) {
+	attrView, textValue, textKeyID, itemID := newAttributeViewRichTextUpdateTest()
+
+	updated, err := updateAttributeViewValue(nil, attrView, textKeyID, itemID, map[string]any{
+		"text": map[string]any{
+			"content": "old",
+			"rich":    nil,
+		},
+	}, false)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if updated != textValue || nil == updated.Text || "old" != updated.Text.Content || nil != updated.Text.Rich {
+		t.Fatalf("explicit rich null did not clear formatting: %+v", updated)
+	}
+}
+
+func TestUpdateAttributeViewTextValueExplicitlyClearsRichWithoutContent(t *testing.T) {
+	attrView, textValue, textKeyID, itemID := newAttributeViewRichTextUpdateTest()
+
+	updated, err := updateAttributeViewValue(nil, attrView, textKeyID, itemID, map[string]any{
+		"text": map[string]any{"rich": nil},
+	}, false)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if updated != textValue || nil == updated.Text || "old" != updated.Text.Content || nil != updated.Text.Rich {
+		t.Fatalf("explicit rich null changed the plain text projection: %+v", updated)
+	}
+}
+
+func TestUpdateAttributeViewTextValuePreservesOmittedFields(t *testing.T) {
+	tests := []struct {
+		name string
+		data any
+	}{
+		{name: "value fields omitted", data: map[string]any{"type": av.KeyTypeText}},
+		{name: "empty text object", data: map[string]any{"text": map[string]any{}}},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			attrView, textValue, textKeyID, itemID := newAttributeViewRichTextUpdateTest()
+			originalCreatedAt := textValue.CreatedAt
+
+			updated, err := updateAttributeViewValue(nil, attrView, textKeyID, itemID, test.data, false)
+			if nil != err {
+				t.Fatal(err)
+			}
+			if updated != textValue || nil == updated.Text || "old" != updated.Text.Content || nil == updated.Text.Rich ||
+				originalCreatedAt != updated.CreatedAt {
+				t.Fatalf("partial text update discarded stored fields: %+v", updated)
+			}
+		})
+	}
+}
+
+func TestUpdateAttributeViewTextValueNormalizesRichProjection(t *testing.T) {
+	attrView, textValue, textKeyID, itemID := newAttributeViewRichTextUpdateTest()
+
+	updated, err := updateAttributeViewValue(nil, attrView, textKeyID, itemID, &av.Value{
+		Type: av.KeyTypeText,
+		Text: &av.ValueText{
+			Content: "untrusted projection",
+			Rich: &av.ValueTextRich{
+				Spec:    av.ValueTextRichSpec,
+				Format:  av.ValueTextRichFormatKramdown,
+				Content: "**updated** text",
+			},
+		},
+	}, false)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if updated != textValue || nil == updated.Text || "updated text" != updated.Text.Content || nil == updated.Text.Rich {
+		t.Fatalf("rich write was not normalized: %+v", updated)
+	}
+}
+
+func TestUpdateAttributeViewTextValueRejectsInvalidRichPayloadWithoutMutation(t *testing.T) {
+	attrView, textValue, textKeyID, itemID := newAttributeViewRichTextUpdateTest()
+	originalText := textValue.Text
+
+	_, err := updateAttributeViewValue(nil, attrView, textKeyID, itemID, &av.Value{
+		Type: av.KeyTypeText,
+		Text: &av.ValueText{Rich: &av.ValueTextRich{
+			Spec:    av.ValueTextRichSpec + 1,
+			Format:  av.ValueTextRichFormatKramdown,
+			Content: "invalid",
+		}},
+	}, false)
+	if nil == err {
+		t.Fatal("invalid rich payload was accepted")
+	}
+	if textValue.Text != originalText || "old" != textValue.Text.Content || nil == textValue.Text.Rich {
+		t.Fatalf("invalid rich write mutated the stored value: %+v", textValue)
+	}
+}
+
+func TestUpdateAttributeViewTextValueRejectsInvalidRichPayloadWithoutCreatingMissingCell(t *testing.T) {
+	for _, useContext := range []bool{false, true} {
+		name := "without context"
+		if useContext {
+			name = "with context"
+		}
+		t.Run(name, func(t *testing.T) {
+			const (
+				blockKeyID = "20260904130000-blockky"
+				textKeyID  = "20260904130001-textkey"
+				itemID     = "20260904130002-item001"
+			)
+			blockValue := &av.Value{
+				BlockID: itemID,
+				Type:    av.KeyTypeBlock,
+				Block:   &av.ValueBlock{},
+			}
+			textKeyValues := &av.KeyValues{Key: &av.Key{ID: textKeyID, Type: av.KeyTypeText}}
+			attrView := &av.AttributeView{KeyValues: []*av.KeyValues{
+				{Key: &av.Key{ID: blockKeyID, Type: av.KeyTypeBlock}, Values: []*av.Value{blockValue}},
+				textKeyValues,
+			}}
+			var context *attrViewValueUpdateContext
+			if useContext {
+				context = newAttrViewValueUpdateContext(attrView)
+			}
+
+			_, err := updateAttributeViewValue0(nil, attrView, textKeyID, itemID, &av.Value{
+				Type: av.KeyTypeText,
+				Text: &av.ValueText{Rich: &av.ValueTextRich{
+					Spec:    av.ValueTextRichSpec + 1,
+					Format:  av.ValueTextRichFormatKramdown,
+					Content: "invalid",
+				}},
+			}, false, context)
+			if nil == err {
+				t.Fatal("invalid rich payload was accepted")
+			}
+			if 0 != len(textKeyValues.Values) {
+				t.Fatalf("invalid rich write created a missing cell: %+v", textKeyValues.Values)
+			}
+			if nil != context {
+				if 0 != len(context.values[textKeyID]) || nil != context.values[textKeyID][itemID] {
+					t.Fatalf("invalid rich write registered a missing cell in the update context: %+v",
+						context.values[textKeyID])
+				}
+				if context.keyValues[textKeyID] != textKeyValues || context.blockValues[itemID] != blockValue {
+					t.Fatal("invalid rich write changed existing update context indexes")
+				}
+			}
+		})
+	}
+}
+
+func newAttributeViewRichTextUpdateTest() (attrView *av.AttributeView, textValue *av.Value, textKeyID, itemID string) {
+	const (
+		blockKeyID = "20260904120000-blockky"
+		keyID      = "20260904120001-textkey"
+		rowID      = "20260904120002-item001"
+	)
+	textValue = &av.Value{
+		ID:      "20260904120003-value01",
+		KeyID:   keyID,
+		BlockID: rowID,
+		Type:    av.KeyTypeText,
+		Text: &av.ValueText{
+			Content: "old",
+			Rich: &av.ValueTextRich{
+				Spec:    av.ValueTextRichSpec,
+				Format:  av.ValueTextRichFormatKramdown,
+				Content: `<span data-type="strong">old</span>`,
+			},
+		},
+	}
+	attrView = &av.AttributeView{KeyValues: []*av.KeyValues{
+		{
+			Key: &av.Key{ID: blockKeyID, Type: av.KeyTypeBlock},
+			Values: []*av.Value{{
+				BlockID: rowID,
+				Type:    av.KeyTypeBlock,
+				Block:   &av.ValueBlock{},
+			}},
+		},
+		{
+			Key:    &av.Key{ID: keyID, Type: av.KeyTypeText},
+			Values: []*av.Value{textValue},
+		},
+	}}
+	return attrView, textValue, keyID, rowID
+}

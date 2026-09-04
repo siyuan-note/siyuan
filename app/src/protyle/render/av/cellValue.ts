@@ -1,4 +1,27 @@
+import type {IAVSelectedCell} from "./selectionState";
+
 export const getAVBlockRefSubtype = (value?: IAVCellValue): "s" | "d" => value?.block?.refSubtype === "d" ? "d" : "s";
+
+export const createEmptyAVValue = (keyID: string, type: TAVCol, blockID?: string) => ({
+    type,
+    keyID,
+    blockID,
+    block: {id: "", content: ""},
+    text: {content: ""},
+    number: {content: 0, isNotEmpty: false, formattedContent: ""},
+    url: {content: ""},
+    phone: {content: ""},
+    email: {content: ""},
+    template: {content: ""},
+    date: {isNotEmpty: false, isNotEmpty2: false},
+    created: {isNotEmpty: false},
+    updated: {isNotEmpty: false},
+    checkbox: {checked: false},
+    mSelect: [],
+    mAsset: [],
+    relation: {blockIDs: [], contents: []},
+    rollup: {contents: []},
+} as IAVCellValue);
 
 export const hasAVRenderTemplateResult = (value: IAVCellValue, renderTemplate?: string) =>
     value.type !== "template" &&
@@ -96,6 +119,56 @@ export const cloneAVCellValueSnapshot = (value: IAVCellValue): IAVCellValue => {
     }
     return snapshot;
 };
+
+export const createAVStableTextCell = (options: {
+    groupID?: string;
+    rowID?: string;
+    colID?: string;
+    rowIndex?: number;
+    colIndex?: number;
+    cellID?: string;
+    value: IAVCellValue;
+}): IAVSelectedCell | undefined => {
+    const rowID = options.rowID || "";
+    const colID = options.colID || "";
+    if (!rowID || !colID) {
+        return;
+    }
+    const value = cloneAVCellValueSnapshot(options.value);
+    return {
+        groupID: options.groupID || "",
+        rowID,
+        colID,
+        rowIndex: options.rowIndex ?? 0,
+        colIndex: options.colIndex ?? -1,
+        cell: {
+            id: value.id || options.cellID || "",
+            color: "",
+            bgColor: "",
+            value,
+            valueType: "text",
+        },
+        column: {
+            id: colID,
+            type: "text",
+        } as IAVColumn,
+    };
+};
+
+export const createAVCellUpdateOperation = (options: {
+    valueID?: string;
+    avID?: string;
+    keyID: string;
+    rowID: string;
+    data: IAVCellValue;
+}): IOperation => ({
+    action: "updateAttrViewCell",
+    id: options.valueID || "",
+    avID: options.avID,
+    keyID: options.keyID,
+    rowID: options.rowID,
+    data: options.data,
+});
 
 export const getConvertedEmptyAVCellValue = (colType: TAVCol, value: IAVCellValue) => {
     if (colType === value.type || !cellValueIsEmpty(value)) {

@@ -66,6 +66,7 @@ import {
     getBlockSelectionStatusIDs,
     restoreBlockSelectionModeState
 } from "./blockSelection";
+import {isEmptyParagraph} from "./emptyTextBlock";
 import {
     invalidateTrackedRangesByOperations,
     type ITrackedRangeInsertion,
@@ -2402,20 +2403,6 @@ const getEmptyParagraphTargetMarkdown = (type: TEmptyParagraphTarget) => {
 |  |  |  |`;
     }
     return type === "line" ? "---" : "$$";
-};
-
-export const isEmptyParagraph = (element: Element) => {
-    if (element.getAttribute("data-type") !== "NodeParagraph") {
-        return false;
-    }
-    const editableElement = getContenteditableElement(element);
-    if (!editableElement) {
-        return false;
-    }
-    const contentElement = editableElement.cloneNode(true) as Element;
-    contentElement.querySelectorAll("br, wbr").forEach(item => item.remove());
-    const text = contentElement.textContent.replace(new RegExp(Constants.ZWSP, "g"), "").trim();
-    return text === "" && contentElement.childElementCount === 0;
 };
 
 export const turnEmptyParagraphsIntoTransaction = (options: {

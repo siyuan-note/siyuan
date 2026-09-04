@@ -530,6 +530,13 @@ func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnno
 			if ast.NodeCustomBlock == n.Type {
 				return ast.WalkSkipChildren
 			}
+			if ast.NodeAttributeView == n.Type {
+				for _, ref := range attributeViewRefsFromNode(tree, n) {
+					if !isRepeatedRef(refs, ref) {
+						refs = append(refs, ref)
+					}
+				}
+			}
 			return ast.WalkContinue
 		}
 

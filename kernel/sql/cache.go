@@ -150,7 +150,22 @@ func removeBlockCacheKey(id, key string) {
 	}
 }
 
-var defIDRefsCache = gcache.New(30*time.Minute, 5*time.Minute)
+var (
+	defIDRefsCache           = gcache.New(30*time.Minute, 5*time.Minute)
+	refCacheMu               sync.RWMutex
+	refCacheGlobalGeneration uint64
+	refCacheGenerations      = map[string]uint64{}
+)
+
+type refCacheGeneration struct {
+	global uint64
+	scope  uint64
+}
+
+type refCacheEntry struct {
+	refs     map[string]*Ref
+	complete bool
+}
 
 // refCacheScopeBoxID 按加密边界规范化引用缓存范围：普通笔记本共享全局范围，加密笔记本保持独立范围。
 func refCacheScopeBoxID(boxID string) string {
@@ -169,28 +184,50 @@ func GetRefsCacheByDefID(defID string) (ret []*Ref) {
 }
 
 func GetRefsCacheByDefIDInBox(defID, boxID string) (ret []*Ref) {
+	return getRefsCacheByDefIDInBox(defID, boxID, QueryRefsByDefIDInBox)
+}
+
+func getRefsCacheByDefIDInBox(defID, boxID string,
+	query func(defBlockID string, containChildren bool, boxID string) []*Ref) (ret []*Ref) {
 	if encryptedBoxCacheUnavailable(boxID) {
 		return
 	}
 	boxID = refCacheScopeBoxID(boxID)
 	key := refCacheKey(defID, boxID)
-	for k, refs := range defIDRefsCache.Items() {
-		if k == key {
-			for _, ref := range refs.Object.(map[string]*Ref) {
+	refCacheMu.RLock()
+	generation := currentRefCacheGeneration(boxID)
+	partial := map[string]*Ref{}
+	if cached, ok := defIDRefsCache.Get(key); ok {
+		if entry, valid := cached.(*refCacheEntry); valid {
+			for blockID, ref := range entry.refs {
 				ret = append(ret, ref)
+				partial[blockID] = ref
+			}
+			if entry.complete {
+				refCacheMu.RUnlock()
+				return
 			}
 		}
 	}
-	if 1 > len(ret) {
-		allRefs := QueryRefsByDefIDInBox(defID, false, boxID)
-		for _, ref := range allRefs {
-			// 按 box 过滤：boxID 非空时只选同 box 的 Ref，boxID 为空时全部保留
-			if boxID == "" || ref.Box == boxID {
-				ret = append(ret, ref)
-				putRefCache(boxID, ref)
-			}
+	refCacheMu.RUnlock()
+	allRefs := query(defID, false, boxID)
+	merged := map[string]*Ref{}
+	var cacheable []*Ref
+	for _, ref := range allRefs {
+		// 按 box 过滤：boxID 非空时只选同 box 的 Ref，boxID 为空时全部保留
+		if boxID == "" || ref.Box == boxID {
+			merged[ref.BlockID] = ref
+			cacheable = append(cacheable, ref)
 		}
 	}
+	for blockID, ref := range partial {
+		merged[blockID] = ref
+	}
+	ret = ret[:0]
+	for _, ref := range merged {
+		ret = append(ret, ref)
+	}
+	putRefCacheIfGeneration(defID, boxID, generation, cacheable)
 	return
 }
 
@@ -203,19 +240,101 @@ func putRefCache(boxID string, ref *Ref) {
 	if encryptedBoxCacheUnavailable(boxID) {
 		return
 	}
-	key := refCacheKey(ref.DefBlockID, boxID)
-	defBlockRefs, ok := defIDRefsCache.Get(key)
-	if !ok {
-		defBlockRefs = map[string]*Ref{}
+	refCacheMu.Lock()
+	defer refCacheMu.Unlock()
+	boxID = refCacheScopeBoxID(boxID)
+	refCacheGenerations[boxID]++
+	putRefCacheLocked(boxID, ref)
+}
+
+func putRefCacheIfGeneration(defID, boxID string, generation refCacheGeneration, refs []*Ref) {
+	if encryptedBoxCacheUnavailable(boxID) {
+		return
 	}
-	defBlockRefs.(map[string]*Ref)[ref.BlockID] = ref
-	defIDRefsCache.SetDefault(key, defBlockRefs)
+	boxID = refCacheScopeBoxID(boxID)
+	refCacheMu.Lock()
+	defer refCacheMu.Unlock()
+	if generation != currentRefCacheGeneration(boxID) {
+		return
+	}
+	complete := make(map[string]*Ref, len(refs))
+	for _, ref := range refs {
+		if nil != ref {
+			complete[ref.BlockID] = ref
+		}
+	}
+	key := refCacheKey(defID, boxID)
+	if cached, ok := defIDRefsCache.Get(key); ok {
+		if entry, valid := cached.(*refCacheEntry); valid {
+			for blockID, ref := range entry.refs {
+				complete[blockID] = ref
+			}
+		}
+	}
+	defIDRefsCache.SetDefault(key, &refCacheEntry{refs: complete, complete: true})
+}
+
+func putRefCacheLocked(boxID string, ref *Ref) {
+	if nil == ref {
+		return
+	}
+	key := refCacheKey(ref.DefBlockID, boxID)
+	entry := &refCacheEntry{refs: map[string]*Ref{}}
+	if cached, ok := defIDRefsCache.Get(key); ok {
+		if existing, valid := cached.(*refCacheEntry); valid {
+			entry = existing
+		}
+	}
+	entry.refs[ref.BlockID] = ref
+	entry.complete = false
+	defIDRefsCache.SetDefault(key, entry)
 }
 
 func removeRefCacheByDefID(defID string) {
-	defIDRefsCache.Delete(refCacheKey(defID, ""))
+	refCacheMu.Lock()
+	defer refCacheMu.Unlock()
+	refCacheGlobalGeneration++
+	suffix := "\x00" + defID
+	for key := range defIDRefsCache.Items() {
+		if strings.HasSuffix(key, suffix) {
+			defIDRefsCache.Delete(key)
+		}
+	}
+}
+
+func removeRefCacheByPath(boxID, path string) {
+	refCacheMu.Lock()
+	defer refCacheMu.Unlock()
+	refCacheGenerations[refCacheScopeBoxID(boxID)]++
+	for key, item := range defIDRefsCache.Items() {
+		entry, ok := item.Object.(*refCacheEntry)
+		if !ok {
+			continue
+		}
+		for _, ref := range entry.refs {
+			if nil != ref && ref.Box == boxID && ref.Path == path {
+				defIDRefsCache.Delete(key)
+				break
+			}
+		}
+	}
 }
 
 func clearRefCache() {
+	refCacheMu.Lock()
+	defer refCacheMu.Unlock()
+	refCacheGlobalGeneration++
+	refCacheGenerations = map[string]uint64{}
 	defIDRefsCache.Flush()
+}
+
+func getRefCacheGeneration(boxID string) refCacheGeneration {
+	refCacheMu.RLock()
+	defer refCacheMu.RUnlock()
+	return currentRefCacheGeneration(refCacheScopeBoxID(boxID))
+}
+
+// currentRefCacheGeneration 返回当前引用缓存代数，调用方必须持有 refCacheMu。
+func currentRefCacheGeneration(boxID string) refCacheGeneration {
+	return refCacheGeneration{global: refCacheGlobalGeneration, scope: refCacheGenerations[boxID]}
 }

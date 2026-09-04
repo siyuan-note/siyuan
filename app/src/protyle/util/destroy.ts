@@ -6,6 +6,7 @@ import {unmountBreadcrumbButtons} from "../../plugin/breadcrumbButton";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {unregisterCustomBlockRoot} from "../../plugin/customBlockRender";
 import {destroyTrackedRanges} from "./trackedRange";
+import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 
 export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
@@ -46,9 +47,11 @@ export const destroy = (protyle: IProtyle) => {
             }, 10240);
         }
     }
-    forEachPluginSubscriber("destroy-protyle", eventBus => {
-        eventBus.emit("destroy-protyle", {
-            protyle,
+    if (areProtylePluginExtensionsEnabled(protyle)) {
+        forEachPluginSubscriber("destroy-protyle", eventBus => {
+            eventBus.emit("destroy-protyle", {
+                protyle,
+            });
         });
-    });
+    }
 };

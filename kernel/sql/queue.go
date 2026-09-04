@@ -284,14 +284,17 @@ func FlushQueue() {
 		if err = execOp(op, tx, context); err != nil {
 			tx.Rollback()
 			closeTxPreparedStmts(tx)
+			invalidateRefsCacheForOperation(op)
 			logging.LogErrorf("queue operation [%s] failed: %s", op.action, err)
 			continue
 		}
 
 		if err = commitTx(tx); err != nil {
+			invalidateRefsCacheForOperation(op)
 			logging.LogErrorf("commit tx failed: %s", err)
 			continue
 		}
+		invalidateRefsCacheForOperation(op)
 		backlinkChange.addOperation(op)
 
 		switch op.action {
@@ -326,6 +329,12 @@ func FlushQueue() {
 
 	// 刷新期间追加的操作仍在内存队列中，磁盘队列仅用于进程重启恢复，不能在这里重复执行。
 	clearIndexQueue(indexSnapshot)
+}
+
+func invalidateRefsCacheForOperation(op *dbQueueOperation) {
+	if nil != op && ("update_refs" == op.action || "delete_refs" == op.action) && nil != op.upsertTree {
+		removeRefCacheByPath(op.upsertTree.Box, op.upsertTree.Path)
+	}
 }
 
 func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error) {

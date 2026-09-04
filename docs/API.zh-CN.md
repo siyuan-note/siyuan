@@ -2272,6 +2272,7 @@
 |------------|----------------------------------------------------------------------------------------------------------------------|
 | `block`    | `{"block": {"content": "第一行", "id": "<绑定块ID>"}, "isDetached": false}`                                          |
 | `text`     | `{"text": {"content": "文本"}}`                                                                                      |
+| `text`（富文本） | `{"text": {"content": "文本", "rich": {"spec": 1, "format": "kramdown", "content": "**文本**"}}}`     |
 | `number`   | `{"number": {"content": 42, "isNotEmpty": true}}`（清空用 `{"isNotEmpty": false}`）                                  |
 | `date`     | `{"date": {"content": 1676042451000, "isNotEmpty": true}}`（毫秒时间戳）                                             |
 | `select`   | `{"mSelect": [{"content": "已完成", "color": "1"}]}`（至多一个选项）                                                 |
@@ -2282,6 +2283,8 @@
 | `checkbox` | `{"checkbox": {"checked": true}}`                                                                                    |
 
 > ⚠️ `itemID` 是**条目 ID**，即[渲染](#渲染)返回的条目 `id`：表格为 `rows[].id`，卡片和看板为 `cards[].id`，启用分组时位于 `groups[]` 的对应视图实例中。它也等于主键值的 `value.blockID`。对于绑定条目，绑定块 ID 位于主键值的 `value.block.id`；二者是不同概念，不能假设相等。传入错误的 ID 会把值存为孤儿数据，不会出现在渲染后的单元格中。
+
+对于富文本，`text.rich.content` 是权威的 Kramdown 源。内核会校验其受支持的结构并派生 `text.content` 纯文本投影；调用方提供的纯文本投影会被忽略。为兼容现有 API 客户端，省略 `text.rich` 时，如果 `text.content` 未改变则保留已存储的富文本载荷，如果 `text.content` 改变则以纯文本替换。即使纯文本投影未改变，也可以发送 `"rich": null` 明确移除富文本格式。包含富文本的数据库使用存储规范 9，无法由仅支持更早数据库规范的内核打开。
 
 * `/api/av/setAttributeViewBlockAttr`
 * 参数

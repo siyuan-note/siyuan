@@ -278,6 +278,62 @@
     left: 0;
   }
 
+  &__richtext-mask {
+    background: rgba(0, 0, 0, .08);
+  }
+
+  &__richtext-editor {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    min-height: 240px;
+    overflow: hidden;
+    border: 1px solid var(--b3-border-color);
+    border-radius: var(--b3-border-radius-b);
+    background: var(--b3-theme-background);
+    box-shadow: var(--b3-dialog-shadow);
+
+    &--mobile {
+      position: fixed;
+      inset: env(safe-area-inset-top) 0 0;
+      max-height: none;
+      border: 0;
+      border-radius: 0;
+    }
+  }
+
+  &__richtext-host {
+    min-height: 0;
+    flex: 1;
+
+    > .protyle,
+    .protyle-content {
+      height: 100%;
+    }
+
+    .protyle-content {
+      overflow: auto;
+    }
+
+    .protyle-wysiwyg {
+      min-height: 100%;
+      padding: 12px;
+      box-sizing: border-box;
+      outline: none;
+      font-size: var(--b3-font-size-editor);
+    }
+  }
+
+  &__richtext-actions {
+    display: flex;
+    flex-shrink: 0;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 8px;
+    border-top: 1px solid var(--b3-border-color);
+    background: var(--b3-theme-surface);
+  }
+
   &__scroll {
     overflow: auto hidden;
     position: relative;
@@ -1059,6 +1115,40 @@
   &__celltext {
     overflow: hidden;
 
+    &--rich {
+      width: 100%;
+      max-height: 8.125em;
+      overflow: hidden;
+      white-space: normal;
+      font: inherit;
+
+      > p,
+      > blockquote,
+      > ul,
+      > ol,
+      > .code-block,
+      > .language-math {
+        margin: 0;
+      }
+
+      li > p,
+      > p,
+      blockquote > p {
+        min-height: 0;
+        padding: 0;
+        margin: 0;
+        line-height: inherit;
+      }
+
+      > :not(:first-child) {
+        margin-top: 4px;
+      }
+    }
+
+    &--plain {
+      white-space: pre-wrap;
+    }
+
     &--url,
     &--ref {
       border-bottom: .5px solid var(--b3-border-color);
@@ -1079,6 +1169,10 @@
       height: 10px;
       width: 10px;
     }
+  }
+
+  &__cell[data-wrap="false"] > &__celltext--rich {
+    max-height: 1.625em;
   }
 
   &__checkbox {

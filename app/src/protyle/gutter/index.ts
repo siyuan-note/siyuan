@@ -30,11 +30,11 @@ import {
     turnsIntoOneTransaction,
     turnsIntoTransaction,
     turnsOneInto,
-    isEmptyParagraph,
     turnEmptyParagraphsIntoTransaction,
     updateBatchTransaction,
     updateTransaction
 } from "../wysiwyg/transaction";
+import {isEmptyParagraph} from "../wysiwyg/emptyTextBlock";
 import {removeBlockPreservingSelectionMode} from "../wysiwyg/remove";
 import {focusBlock, focusByRange, getBlockElementsByRange, getEditorRange, selectBlocksByRange} from "../util/selection";
 import {hideElements} from "../ui/hideElements";

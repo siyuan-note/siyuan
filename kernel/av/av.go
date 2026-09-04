@@ -513,7 +513,7 @@ type Viewable interface {
 func NewAttributeView(id string) (ret *AttributeView) {
 	view, blockKey, selectKey := NewTableViewWithBlockKey(ast.NewNodeID())
 	ret = &AttributeView{
-		Spec:              CurrentSpec,
+		Spec:              PlainTextSpec,
 		ID:                id,
 		KeyValues:         []*KeyValues{{Key: blockKey}, {Key: selectKey}},
 		Views:             []*View{view},
@@ -910,6 +910,9 @@ func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveC
 		err = CheckSpec(ret)
 	}
 	if nil == err {
+		err = ret.NormalizeRichText()
+	}
+	if nil == err {
 		if resolveColors {
 			ret.ResolveDirectColors()
 			cache.SetAVSearchDataInBox(avID, boxID, dataVersion, newAttributeViewSearchInfo(ret))
@@ -929,6 +932,11 @@ func SaveAttributeView(av *AttributeView) (err error) {
 			av.ResetCardCoverPositionChanges()
 		}
 	}()
+
+	if err = av.NormalizeRichText(); nil != err {
+		logging.LogErrorf("normalize attribute view [%s] rich text failed: %s", av.ID, err)
+		return
+	}
 
 	// 做一些数据兼容和订正处理
 	UpgradeSpec(av)
@@ -1037,6 +1045,9 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	}
 
 	cacheAttributeViewData(av, avBoxID, data)
+	if RichTextSpec <= av.Spec {
+		NotifyAttributeViewSaved(av.ID, avBoxID)
+	}
 
 	if util.ExceedLargeFileWarningSize(len(data)) {
 		msg := fmt.Sprintf(util.Langs[util.Lang][268], av.Name+" "+filepath.Base(avJSONPath), util.LargeFileWarningSize)
@@ -1334,6 +1345,7 @@ var (
 	ErrWrongLayoutType        = errors.New("wrong layout type")
 	ErrInvalidColumnAlign     = errors.New("invalid column align")
 	ErrSpecTooNew             = errors.New("attribute view spec is too new")
+	ErrRichTextSpecMismatch   = errors.New("attribute view rich text requires storage spec 9")
 	ErrFilterTooDeep          = errors.New("filter nesting depth exceeds the maximum allowed")
 )
 

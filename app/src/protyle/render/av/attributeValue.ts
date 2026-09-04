@@ -4,30 +4,16 @@ import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
 import {getCompressURL} from "../../../util/image";
 import {isBrowserRenderableImagePath} from "../../../util/imageURL";
 import {formatDateDisplay, formatDateValue} from "./dateFormat";
-import {cloneAVCellValueSnapshot, getAVBlockRefSubtype, hasAVRenderTemplateResult} from "./cellValue";
+import {
+    cloneAVCellValueSnapshot,
+    getAVBlockRefSubtype,
+    hasAVRenderTemplateResult,
+} from "./cellValue";
 import {getAVColorStyle} from "./color";
 import {getHostCapabilities} from "../../../util/hostCapabilities";
+import {getAVRichTextPreviewHTML, getAVTextSource} from "./richText";
 
-export const createEmptyAVValue = (keyID: string, type: TAVCol, blockID?: string) => ({
-    type,
-    keyID,
-    blockID,
-    block: {id: "", content: ""},
-    text: {content: ""},
-    number: {content: 0, isNotEmpty: false, formattedContent: ""},
-    url: {content: ""},
-    phone: {content: ""},
-    email: {content: ""},
-    template: {content: ""},
-    date: {isNotEmpty: false, isNotEmpty2: false},
-    created: {isNotEmpty: false},
-    updated: {isNotEmpty: false},
-    checkbox: {checked: false},
-    mSelect: [],
-    mAsset: [],
-    relation: {blockIDs: [], contents: []},
-    rollup: {contents: []},
-} as IAVCellValue);
+export {createEmptyAVValue} from "./cellValue";
 
 export const getAVTemplateHTML = (content: string) => {
     if (!getHostCapabilities().remoteKernel && window.siyuan.config.editor.allowHTMLBLockScript) {
@@ -132,9 +118,15 @@ export const genAVValueHTML = (value: IAVCellValue, dateFormat: TAVDateFormat = 
         case "block":
             html = `<input data-id="${value.block.id}" value="${escapeAttr(value.block.content)}" type="text" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">`;
             break;
-        case "text":
-            html = `<textarea style="resize: vertical" rows="${(value.text?.content || "").split("\n").length}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">${escapeHtml(value.text?.content || "")}</textarea>`;
+        case "text": {
+            const source = getAVTextSource(value);
+            if (source.kind === "rich") {
+                html = `<div class="av__celltext av__celltext--rich b3-typography fn__flex-1" data-protyle-lite-render="safe" placeholder="${window.siyuan.languages.empty}">${getAVRichTextPreviewHTML(source.content)}</div>`;
+            } else {
+                html = `<div class="av__celltext av__celltext--plain fn__flex-1" placeholder="${window.siyuan.languages.empty}">${escapeHtml(source.content)}</div>`;
+            }
             break;
+        }
         case "number":
             html = `<span class="av__celltext" data-content="${value.number.isNotEmpty ? value.number.content : ""}" placeholder="${window.siyuan.languages.empty}">${value.number.formattedContent || (value.number.isNotEmpty ? value.number.content : "")}</span>`;
             break;
@@ -245,7 +237,7 @@ export const genAVAttributeRowHTML = (options: {
 }) => {
     const value = options.value;
     const storedValue = cloneAVCellValueSnapshot(value);
-    const textInputType = ["url", "text", "email", "phone", "block"].includes(value.type);
+    const textInputType = ["url", "email", "phone", "block"].includes(value.type);
     const hasOwnPlaceholder = ["text", "number", "date", "url", "phone", "template", "email"].includes(value.type);
     return `<div class="block__icons av__row" data-id="${options.nodeID}" data-col-id="${options.keyID}" data-empty="${options.empty}"${options.type === "block" ? ' data-primary="true"' : ""}>
     <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>

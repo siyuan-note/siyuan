@@ -357,7 +357,7 @@ export const getMcpServersBlockKeywords = (): string[] => [
 const openedMcpOAuthURLs = new Map<string, string>();
 
 export const genMcpServersBlockHtml = (): string => `<div class="b3-label config-item" id="aiMcpServersBlock">
-    <div class="fn__flex config-wrap">
+    <div class="fn__flex">
         <span class="b3-label__text">${window.siyuan.languages.aiMcpServersTip}</span>
         <span class="fn__flex-1"></span>
         <span id="aiMcpStatusSummary" class="b3-label__text ft__on-surface fn__none"></span>

@@ -126,7 +126,7 @@ const createProviderView = (root: HTMLElement, backLabel: string, stacked = fals
 };
 
 export const genProviderCardsHtml = (): string => `<div class="b3-label config-item" id="aiProviderCardsBlock">
-    <div class="fn__flex config-wrap">
+    <div class="fn__flex">
         ${genConfigItemMainHtml(window.siyuan.languages.openAICompatibleProvider, window.siyuan.languages.apiProviderTip)}
         <span class="fn__space"></span>
         <button class="b3-button b3-button--outline fn__flex-center fn__size200" data-action="addProvider">
@@ -238,7 +238,7 @@ const renderDraftModels = (container: HTMLElement, models: Config.IModel[], avai
         return;
     }
     const modelInputAction = availableModels.length > 0 ? ' data-action="selectModel" data-menu="true"' : "";
-    container.innerHTML = models.map((model, index) => `<div class="fn__flex b3-label config-item config-wrap config-ai-provider__model" data-model-index="${index}">
+    container.innerHTML = models.map((model, index) => `<div class="fn__flex b3-label config-item config-ai-provider__model" data-model-index="${index}">
     <button class="block__icon block__icon--show config-ai-provider__model-drag" data-action="sortModel" type="button" draggable="true" aria-label="${window.siyuan.languages.sort}">
         <svg><use xlink:href="#iconDrag"></use></svg>
     </button>
@@ -389,17 +389,17 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     <div class="config-group">
         <div class="config-title">${window.siyuan.languages.aiProviderSettings}</div>
         <div class="config-items">
-            <label class="fn__flex b3-label config-item config-wrap">
+            <label class="fn__flex b3-label config-item">
                 ${genConfigItemMainHtml(window.siyuan.languages.customDisplayName)}
                 <span class="fn__space"></span>
                 <input class="b3-text-field fn__flex-center fn__size200" data-provider-field="displayName" type="text" spellcheck="false" value="${escapeHTML(draft.displayName || "")}">
             </label>
-            <label class="fn__flex b3-label config-item config-wrap">
+            <label class="fn__flex b3-label config-item">
                 ${genConfigItemMainHtml(window.siyuan.languages.apiBaseURL)}
                 <span class="fn__space"></span>
                 <input class="b3-text-field fn__flex-center fn__size200" data-provider-field="baseURL" type="text" spellcheck="false" value="${escapeHTML(draft.baseURL)}">
             </label>
-            <label class="fn__flex b3-label config-item config-wrap" data-type="openAIApiType">
+            <label class="fn__flex b3-label config-item" data-type="openAIApiType">
                 ${genConfigItemMainHtml(window.siyuan.languages.apiType,
         '<span class="fn__none" data-type="responsesCompatibility"></span>')}
                 <span class="fn__space"></span>
@@ -408,12 +408,12 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                     <option value="openai-responses"${draft.protocol === "openai-responses" ? " selected" : ""}>Responses API</option>
                 </select>
             </label>
-            <label class="fn__flex b3-label config-item config-wrap">
+            <label class="fn__flex b3-label config-item">
                 ${genConfigItemMainHtml(window.siyuan.languages.apiTimeout)}
                 <span class="fn__space"></span>
                 <input class="b3-text-field fn__flex-center fn__size200" data-provider-field="requestTimeout" type="number" min="1" max="600" value="${draft.requestTimeout}">
             </label>
-            <label class="fn__flex b3-label config-item config-wrap">
+            <label class="fn__flex b3-label config-item">
                 ${genConfigItemMainHtml(window.siyuan.languages.apiKey)}
                 <span class="fn__space"></span>
                 <div class="b3-form__icona fn__size200">
@@ -1044,7 +1044,7 @@ export const genGroupedModelPickerHtml = (group: ModelPickerGroup): string => {
     const selectedModelId = getSelectedModelId(group);
     const disabled = getEnabledModelGroups().length === 0 ? " disabled" : "";
     const modelLabel = getModelPickerLabel(selectedModelId);
-    return `<div class="fn__flex b3-label config-item config-wrap" id="aiModelPickerBlock-${group}" data-type="aiModelPicker" data-name="${group}">
+    return `<div class="fn__flex b3-label config-item" id="aiModelPickerBlock-${group}" data-type="aiModelPicker" data-name="${group}">
     ${genConfigItemMainHtml(window.siyuan.languages.defaultModel, desc)}
     <span class="fn__space"></span>
     <input class="b3-select fn__flex-center fn__size200" data-type="groupedModelPicker" data-group="${group}" data-model-id="${escapeHTML(selectedModelId)}" data-menu="true" type="text" value="${escapeHTML(modelLabel)}" readonly${disabled}>

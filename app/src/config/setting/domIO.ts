@@ -50,7 +50,7 @@ export const snapRangeValue = (value: number, min: number, max: number, step: nu
 
 /** 同步 range 行内滑块与移动端下拉的显示值；非 range 行返回 undefined */
 export const syncRangeRowValue = (el: HTMLElement): number | undefined => {
-    const wrap = el?.closest(".config-wrap--range");
+    const wrap = el?.closest(".config-range");
     if (!wrap) {
         return undefined;
     }

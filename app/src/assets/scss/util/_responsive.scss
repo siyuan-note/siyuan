@@ -1,7 +1,19 @@
 @media (max-width: 750px) {
   #encryptedNotebookEnabledActions {
     flex: 1 1 100%;
+    flex-wrap: wrap;
     min-width: 0;
+
+    & > .fn__space {
+      display: none;
+    }
+
+    & > .b3-button {
+      flex: 1 1 100%;
+      width: 100%;
+      max-width: 100%;
+      margin-top: 8px;
+    }
   }
 
   .config-about__motto {
@@ -44,14 +56,10 @@
       }
     }
 
-    &-wrap {
+    &-item,
+    &-item > .fn__flex,
+    &-item .b3-label--inner {
       flex-wrap: wrap;
-      align-items: flex-start;
-
-      & > .fn__flex-1 {
-        flex: 1 1 100%;
-        min-width: 0;
-      }
 
       & > .fn__space {
         display: none;
@@ -69,9 +77,22 @@
         max-width: 100%;
         margin-top: 8px;
       }
+
+      // 输入控件占满整行；普通标题（fn__flex-1）保持弹性收缩，开关行才可左右布局
+      & > .b3-text-field.fn__flex-1,
+      & > .b3-select.fn__flex-1,
+      & > .fn__flex > .b3-text-field.fn__flex-1,
+      & > .fn__flex > .b3-select.fn__flex-1,
+      & .b3-label--inner > .b3-text-field.fn__flex-1,
+      & .b3-label--inner > .b3-select.fn__flex-1 {
+        flex: 1 1 100%;
+        width: 100%;
+        max-width: 100%;
+        margin-top: 8px;
+      }
     }
 
-    &-wrap--range {
+    &-range {
       .config-range__desktop {
         display: none;
       }
@@ -86,7 +107,7 @@
     }
 
     &-item--save-path {
-      .config-wrap {
+      .fn__flex {
         & > .fn__space {
           display: none;
         }

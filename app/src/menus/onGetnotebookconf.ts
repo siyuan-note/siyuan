@@ -66,7 +66,7 @@ export const onGetnotebookconf = (data: INotebookConf) => {
     <div class="config-name">${window.siyuan.languages.fileTree12}</div>
     <div class="b3-label__text">${window.siyuan.languages.fileTree13}</div>
     <span class="fn__hr"></span>
-    <div class="fn__flex config-wrap">
+    <div class="fn__flex">
         <select class="b3-select fn__size200" id="docCreateSaveBox">${genNotebookOption(data.conf.docCreateSaveBox, data.box)}</select>
         <div class="fn__space"></div>
         <input class="b3-text-field fn__flex-1" id="docCreateSavePath" value="">
@@ -80,7 +80,7 @@ export const onGetnotebookconf = (data: INotebookConf) => {
     <div class="config-name">${window.siyuan.languages.fileTree5}</div>
     <div class="b3-label__text">${window.siyuan.languages.fileTree6}</div>
     <span class="fn__hr"></span>
-    <div class="fn__flex config-wrap">
+    <div class="fn__flex">
         <select class="b3-select fn__size200" id="refCreateSaveBox">${genNotebookOption(data.conf.refCreateSaveBox, data.box)}</select>
         <div class="fn__space"></div>
         <input class="b3-text-field fn__flex-1" id="refCreateSavePath" value="">

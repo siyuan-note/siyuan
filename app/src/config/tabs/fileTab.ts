@@ -29,7 +29,7 @@ const genNotebookSavePathHtml = (
     ${genConfigItemName(title)}
     <div class="b3-label__text">${desc}</div>
     <div class="fn__hr--small"></div>
-    <div class="fn__flex config-wrap">
+    <div class="fn__flex">
         <select class="b3-select fn__size200" id="${selectId}">${optionsHtml}</select>
         <div class="fn__space"></div>
         <input class="b3-text-field fn__flex-1" id="${pathId}" value="">
@@ -250,7 +250,7 @@ const registerFileManagementGroup = (tab: SettingTabBuilder) => {
         ${genConfigItemName(window.siyuan.languages.historyRetentionDaysTip)}
     </div>
     <div class="fn__hr--small"></div>
-    <div class="fn__flex config-wrap">
+    <div class="fn__flex">
         <div class="fn__block">
             <div class="b3-label__text">${window.siyuan.languages.clearHistory}</div>
         </div>
@@ -258,7 +258,7 @@ const registerFileManagementGroup = (tab: SettingTabBuilder) => {
         ${genButtonHtml("clearHistory", window.siyuan.languages.purge, "iconTrashcan")}
     </div>
     <div class="fn__hr--small"></div>
-    <div class="fn__flex config-wrap">
+    <div class="fn__flex">
         <div class="fn__block">
             <div class="b3-label__text">${window.siyuan.languages.historyRetentionDays}</div>
         </div>

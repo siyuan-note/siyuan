@@ -48,21 +48,21 @@ const registerAboutVersionGroup = (tab: SettingTabBuilder) => {
 
 const genAboutVersionHtml = (): string => {
     if (!getHostCapabilities().ownsKernel) {
-        return `<div class="fn__flex b3-label config-item config-wrap">
+        return `<div class="fn__flex b3-label config-item">
     <div class="fn__flex-1">
         <div class="config-name">${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}</div>
     </div>
 </div>`;
     }
     if (window.siyuan.config.system.isMicrosoftStore) {
-        return `<div class="fn__flex b3-label config-item config-wrap">
+        return `<div class="fn__flex b3-label config-item">
     <div class="fn__flex-1">
         <div class="config-name">${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}</div>
         <div class="b3-label__text">${window.siyuan.languages.isMsStoreVerTip}</div>
     </div>
 </div>`;
     }
-    return `<div class="fn__flex b3-label config-item config-wrap">
+    return `<div class="fn__flex b3-label config-item">
     <div class="fn__flex-1">
         <div class="config-name">${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}</div>
         <div class="b3-label__text">${window.siyuan.languages.downloadLatestVer}</div>
@@ -104,7 +104,7 @@ const registerAboutInfoGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.sponsor,
             motto,
         ],
-        html: () => `<div class="fn__flex b3-label config-item config-wrap">
+        html: () => `<div class="fn__flex b3-label config-item">
     <div class="fn__flex-1">
         <div class="config-about__logo">
             <img src="/stage/icon.png">

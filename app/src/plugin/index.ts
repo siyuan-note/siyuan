@@ -472,11 +472,11 @@ export class Plugin {
 
     public addTab(options: {
         type: string,
-        destroy?: () => void,
-        beforeDestroy?: () => void,
-        resize?: () => void,
-        update?: () => void,
-        init: () => void
+        destroy?: (this: Custom) => void,
+        beforeDestroy?: (this: Custom) => void,
+        resize?: (this: Custom) => void,
+        update?: (this: Custom) => void,
+        init: (this: Custom, custom: Custom) => void
     }) {
         if (isPluginDisposed(this)) {
             return;
@@ -572,10 +572,10 @@ export class Plugin {
         config: IPluginDockTab,
         data: any,
         type: string,
-        destroy?: () => void,
-        resize?: () => void,
-        update?: () => void,
-        init: () => void
+        destroy?: (this: Custom | MobileCustom) => void,
+        resize?: (this: Custom) => void,
+        update?: (this: Custom | MobileCustom) => void,
+        init: (this: Custom | MobileCustom, custom: Custom | MobileCustom) => void
     }) {
         if (isPluginDisposed(this)) {
             return;

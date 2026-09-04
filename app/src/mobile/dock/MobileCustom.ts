@@ -2,17 +2,17 @@ export class MobileCustom {
     public element: Element;
     public data: any;
     public type: string;
-    public init: (custom: MobileCustom) => void;
-    public destroy: () => void;
-    public update: () => void;
+    public init: (this: MobileCustom, custom: MobileCustom) => void;
+    public destroy: (this: MobileCustom) => void;
+    public update: (this: MobileCustom) => void;
 
     constructor(options: {
         element: Element,
         type: string,
         data: any,
-        destroy?: () => void,
-        update?: () => void,
-        init: (custom: MobileCustom) => void
+        destroy?: (this: MobileCustom) => void,
+        update?: (this: MobileCustom) => void,
+        init: (this: MobileCustom, custom: MobileCustom) => void
     }) {
         this.element = options.element;
         this.data = options.data;

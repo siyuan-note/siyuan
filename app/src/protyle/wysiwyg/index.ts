@@ -184,6 +184,7 @@ import {
 import {addSpellcheckMenuItems, requestSpellcheckContext} from "../../menus/spellcheck";
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "../render/av/attributeValue";
 import {focusAVByArrow} from "../render/av/focus";
+import {shouldRunAVKeyupFallback} from "../render/av/verticalNavigation";
 import {applyAVDragSelection, clearAVDragSelection, isAVDragSelectSupported} from "../render/av/dragSelect";
 import {
     selectAVCellRange,
@@ -4234,7 +4235,8 @@ export class WYSIWYG {
             }
 
             if (!event.altKey && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.isComposing &&
-                event.key.startsWith("Arrow") && isArrowFromOutsideAV &&
+                event.key.startsWith("Arrow") && shouldRunAVKeyupFallback(this.preventKeyup,
+                    !!isArrowFromOutsideAV) &&
                 nodeElement && nodeElement.classList.contains("av") &&
                 !nodeElement.classList.contains("protyle-wysiwyg--select") &&
                 hasClosestByClassName(range.startContainer, "av__cursor") &&

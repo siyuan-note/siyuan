@@ -119,6 +119,7 @@ import {preventScroll} from "../scroll/preventScroll";
 import {newFileBySelectRange} from "../../util/newFile";
 import {removeSearchMark} from "../toolbar/util";
 import {avKeydown} from "../render/av/keydown";
+import {shouldPreserveAVSelectionOnKeyup} from "../render/av/verticalNavigation";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {AIActions} from "../../ai/actions";
 import {openLink} from "../../editor/openLink";
@@ -207,6 +208,14 @@ const showSelectAllTip = () => {
             }
         });
     });
+};
+
+const preserveAVSelectionOnKeyup = (protyle: IProtyle, event: KeyboardEvent) => {
+    const focusedElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
+    if (shouldPreserveAVSelectionOnKeyup(event.key,
+        !!focusedElement && focusedElement.classList.contains("av"))) {
+        protyle.wysiwyg.preventKeyup = true;
+    }
 };
 
 const showSelectAllIncompleteTip = () => {
@@ -341,9 +350,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (document.querySelector(".av__panel")) {
             return;
         }
-        if (avKeydown(event, nodeElement, protyle, direction => {
+        const avHandled = avKeydown(event, nodeElement, protyle, direction => {
             leaveAVVerticalRegion(protyle, nodeElement, direction, verticalGoalX ?? 0);
-        })) {
+        });
+        if (avHandled) {
+            preserveAVSelectionOnKeyup(protyle, event);
             return;
         }
 
@@ -1004,6 +1015,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 isAtomicVerticalNavigationTarget(nodeElement)) {
                 focusAdjacentVerticalRegion(protyle, nodeElement, verticalDirection, verticalGoalX ?? 0,
                     range.startContainer);
+                preserveAVSelectionOnKeyup(protyle, event);
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -1044,6 +1056,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (selectText === "" && range.collapsed && verticalDirection && (toPrevious || toNext)) {
                 focusAdjacentVerticalRegion(protyle, nodeElement, verticalDirection, verticalGoalX ?? 0,
                     range.startContainer);
+                preserveAVSelectionOnKeyup(protyle, event);
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -1051,6 +1064,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (selectText === "" && range.collapsed && !verticalDirection && nodeElement.classList.contains("av") &&
                 hasClosestByClassName(range.startContainer, "av__title") && (toPrevious || toNext) &&
                 focusAVByArrow(protyle, nodeElement, event.key, true)) {
+                preserveAVSelectionOnKeyup(protyle, event);
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -1062,6 +1076,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     adjacentElement = toPrevious ? getLastBlock(adjacentElement) : getFirstBlock(adjacentElement);
                     if (adjacentElement.classList.contains("av") &&
                         focusAVByArrow(protyle, adjacentElement as HTMLElement, event.key)) {
+                        preserveAVSelectionOnKeyup(protyle, event);
                         event.stopPropagation();
                         event.preventDefault();
                         return;

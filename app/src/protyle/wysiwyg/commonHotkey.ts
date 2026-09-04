@@ -18,7 +18,7 @@ import {clearBlockElement} from "../util/clear";
 import {isEncryptedBox} from "../../util/pathName";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 import {captureCommandContext} from "../../command/context";
-import {resolvePluginCommandCallback} from "../../plugin/commandAdapter";
+import {resolvePluginCommandCallback, supportsPluginCommandSource} from "../../plugin/commandAdapter";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement?: HTMLElement) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom, event)) {
@@ -113,28 +113,29 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
         return true;
     }
     /// #if !MOBILE
-    let matchCommand = false;
-    const commandContext = captureCommandContext({
-        app: protyle.app,
-        source: "editorShortcut",
-        protyle,
-        range: protyle.toolbar.range,
-    });
+    let matchedCommand: ICommand | undefined;
     protyle.app.plugins.find(item => {
         item.commands.find(command => {
-            const callback = resolvePluginCommandCallback(command, commandContext);
-            if (callback && matchHotKey(command.customHotkey, event)) {
-                matchCommand = true;
-                void callback();
+            if (supportsPluginCommandSource(command, "editorShortcut") &&
+                matchHotKey(command.customHotkey, event)) {
+                matchedCommand = command;
                 return true;
             }
         });
-        if (matchCommand) {
+        return Boolean(matchedCommand);
+    });
+    if (matchedCommand) {
+        const commandContext = captureCommandContext({
+            app: protyle.app,
+            source: "editorShortcut",
+            protyle,
+            range: protyle.toolbar.range,
+        });
+        const callback = resolvePluginCommandCallback(matchedCommand, commandContext);
+        if (callback) {
+            void callback();
             return true;
         }
-    });
-    if (matchCommand) {
-        return true;
     }
     /// #endif
 };

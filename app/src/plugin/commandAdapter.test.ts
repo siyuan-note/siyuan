@@ -7,6 +7,7 @@ import {
     getPluginCommandId,
     registerPluginCommand,
     resolvePluginCommandCallback,
+    supportsPluginCommandSource,
     unregisterPluginCommands,
 } from "./commandAdapter";
 
@@ -185,13 +186,16 @@ describe("plugin command adapter", () => {
         }]);
     });
 
-    it("executes unified commands from scoped shortcuts", async () => {
+    it("uses legacy callbacks as unified command scope markers", async () => {
         const sources: ICommandContext["source"][] = [];
         const command = {
             langKey: "sample",
             execute: (context) => {
                 sources.push(context.source);
             },
+            editorCallback: () => undefined,
+            fileTreeCallback: () => undefined,
+            dockCallback: () => undefined,
         } as ICommand;
         const protyle = {} as IProtyle;
         const files = {} as import("../layout/dock/Files").Files;
@@ -212,9 +216,33 @@ describe("plugin command adapter", () => {
             focus: "dock",
             dock: {element: dockElement},
         }))?.();
+
+        assert.equal(resolvePluginCommandCallback(command, createContext({source: "shortcut"})), undefined);
+        assert.deepEqual(sources, ["editorShortcut", "fileTreeShortcut", "dockShortcut"]);
+    });
+
+    it("treats execute-only commands as generic shortcuts", async () => {
+        const sources: ICommandContext["source"][] = [];
+        const command = {
+            langKey: "sample",
+            execute: (context) => {
+                sources.push(context.source);
+            },
+        } as ICommand;
+
+        assert.equal(supportsPluginCommandSource(command, "editorShortcut"), false);
+        assert.equal(supportsPluginCommandSource(command, "fileTreeShortcut"), false);
+        assert.equal(supportsPluginCommandSource(command, "dockShortcut"), false);
+        assert.equal(supportsPluginCommandSource(command, "shortcut"), true);
+        assert.equal(resolvePluginCommandCallback(command, createContext({
+            source: "editorShortcut",
+            focus: "editor",
+            protyle: {} as IProtyle,
+        })), undefined);
+
         await resolvePluginCommandCallback(command, createContext({source: "shortcut"}))?.();
 
-        assert.deepEqual(sources, ["editorShortcut", "fileTreeShortcut", "dockShortcut", "shortcut"]);
+        assert.deepEqual(sources, ["shortcut"]);
     });
 
     it("omits a detached range from the plugin command context", () => {

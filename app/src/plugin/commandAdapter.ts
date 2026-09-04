@@ -1,5 +1,5 @@
 import {getCommandRegistry} from "../command/service";
-import type {ICommandContextSnapshot, ICommandDefinition} from "../command/types";
+import type {ICommandContextSnapshot, ICommandDefinition, TCommandSource} from "../command/types";
 
 interface IPluginCommandOwner {
     name: string;
@@ -33,75 +33,102 @@ const createPluginCommandContext = (context: ICommandContextSnapshot): ICommandC
     dock: hasPluginDockContext(context) ? context.dock.element : undefined,
 });
 
+const hasPluginCommandScopedCallback = (command: ICommand) =>
+    Boolean(command.globalCallback || command.fileTreeCallback || command.editorCallback || command.dockCallback);
+
+const hasPluginCommandLegacyCallback = (command: ICommand) =>
+    Boolean(command.callback || hasPluginCommandScopedCallback(command));
+
+export const supportsPluginCommandSource = (command: ICommand, source: TCommandSource) => {
+    if (source === "globalShortcut") {
+        return Boolean(command.globalCallback);
+    }
+    if (source === "editorShortcut") {
+        return Boolean(command.editorCallback);
+    }
+    if (source === "fileTreeShortcut") {
+        return Boolean(command.fileTreeCallback);
+    }
+    if (source === "dockShortcut") {
+        return Boolean(command.dockCallback);
+    }
+    if (source === "shortcut") {
+        return Boolean((command.execute || command.callback) && !hasPluginCommandScopedCallback(command));
+    }
+    return false;
+};
+
+const resolvePluginCommandExecution = (
+    command: ICommand,
+    context: ICommandContextSnapshot,
+    legacyCallback: (pluginContext: ICommandContext) => void,
+) => () => {
+    const pluginContext = createPluginCommandContext(context);
+    return command.execute ? command.execute(pluginContext) : legacyCallback(pluginContext);
+};
+
 export const resolvePluginCommandCallback = (command: ICommand, context: ICommandContextSnapshot) => {
     if (context.source === "globalShortcut") {
         if (!command.globalCallback) {
             return undefined;
         }
-        return command.execute ?
-            () => command.execute(createPluginCommandContext(context)) :
-            () => command.globalCallback(createPluginCommandContext(context));
+        return resolvePluginCommandExecution(command, context, pluginContext => command.globalCallback(pluginContext));
     }
     if (context.source === "commandPanel") {
-        if (command.execute) {
-            return () => command.execute(createPluginCommandContext(context));
-        }
         if (command.callback) {
-            return () => command.callback(createPluginCommandContext(context));
+            return resolvePluginCommandExecution(command, context, pluginContext => command.callback(pluginContext));
         }
         if (!isMobileContext(context)) {
             if (context.focus === "editor" && context.protyle && command.editorCallback) {
-                return () => command.editorCallback(context.protyle, createPluginCommandContext(context));
+                return resolvePluginCommandExecution(command, context, pluginContext => {
+                    command.editorCallback(context.protyle, pluginContext);
+                });
             }
             if (context.focus === "fileTree" && context.fileTree?.model && command.fileTreeCallback) {
-                return () => command.fileTreeCallback(
-                    context.fileTree.model as import("../layout/dock/Files").Files,
-                    createPluginCommandContext(context),
-                );
+                return resolvePluginCommandExecution(command, context, pluginContext => {
+                    command.fileTreeCallback(
+                        context.fileTree.model as import("../layout/dock/Files").Files,
+                        pluginContext,
+                    );
+                });
             }
             if (context.focus === "dock" && hasPluginDockContext(context) && command.dockCallback) {
-                return () => command.dockCallback(context.dock.element, createPluginCommandContext(context));
+                return resolvePluginCommandExecution(command, context, pluginContext => {
+                    command.dockCallback(context.dock.element, pluginContext);
+                });
             }
         }
         if (command.globalCallback && ["desktop", "browser-desktop"].includes(context.environment)) {
-            return () => command.globalCallback(createPluginCommandContext(context));
+            return resolvePluginCommandExecution(command, context, pluginContext => {
+                command.globalCallback(pluginContext);
+            });
+        }
+        if (command.execute && !hasPluginCommandLegacyCallback(command)) {
+            return resolvePluginCommandExecution(command, context, () => undefined);
         }
         return undefined;
     }
-    if (context.source === "editorShortcut" && context.protyle) {
-        if (command.execute) {
-            return () => command.execute(createPluginCommandContext(context));
-        }
-        if (command.editorCallback) {
-            return () => command.editorCallback(context.protyle, createPluginCommandContext(context));
-        }
+    if (context.source === "editorShortcut" && context.protyle && command.editorCallback) {
+        return resolvePluginCommandExecution(command, context, pluginContext => {
+            command.editorCallback(context.protyle, pluginContext);
+        });
     }
-    if (context.source === "fileTreeShortcut" && context.fileTree?.model) {
-        if (command.execute) {
-            return () => command.execute(createPluginCommandContext(context));
-        }
-        if (command.fileTreeCallback) {
-            return () => command.fileTreeCallback(
+    if (context.source === "fileTreeShortcut" && context.fileTree?.model && command.fileTreeCallback) {
+        return resolvePluginCommandExecution(command, context, pluginContext => {
+            command.fileTreeCallback(
                 context.fileTree.model as import("../layout/dock/Files").Files,
-                createPluginCommandContext(context),
+                pluginContext,
             );
-        }
+        });
     }
-    if (context.source === "dockShortcut" && hasPluginDockContext(context)) {
-        if (command.execute) {
-            return () => command.execute(createPluginCommandContext(context));
-        }
-        if (command.dockCallback) {
-            return () => command.dockCallback(context.dock.element, createPluginCommandContext(context));
-        }
+    if (context.source === "dockShortcut" && hasPluginDockContext(context) && command.dockCallback) {
+        return resolvePluginCommandExecution(command, context, pluginContext => {
+            command.dockCallback(context.dock.element, pluginContext);
+        });
     }
     if (context.source === "shortcut") {
-        if (command.execute) {
-            return () => command.execute(createPluginCommandContext(context));
-        }
-        if (command.callback &&
-            !command.fileTreeCallback && !command.editorCallback && !command.dockCallback && !command.globalCallback) {
-            return () => command.callback(createPluginCommandContext(context));
+        if ((command.execute || command.callback) && !hasPluginCommandScopedCallback(command)) {
+            return resolvePluginCommandExecution(command, context, pluginContext => command.callback(pluginContext));
         }
     }
     return undefined;

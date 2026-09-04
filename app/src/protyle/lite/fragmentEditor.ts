@@ -3,6 +3,7 @@ import type {App} from "../../index";
 import {Constants} from "../../constants";
 import {Protyle} from "../index";
 import type {ProtyleRuntimeCapabilities} from "../runtimeCapabilities";
+import {removeLoading} from "../ui/initUI";
 import {focusBlock} from "../util/selection";
 import {invalidateTrackedRanges} from "../util/trackedRange";
 
@@ -134,6 +135,7 @@ export const mountProtyleLiteFragment = (host: HTMLElement,
     } else {
         setEmptyContent();
     }
+    removeLoading(protyle);
 
     const contentObserver = new MutationObserver(() => {
         updateEmptyState();

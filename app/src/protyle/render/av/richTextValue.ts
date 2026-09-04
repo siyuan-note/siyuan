@@ -3,8 +3,8 @@ import {getInlineFontFamilyName, getInlineFontFamilyStyle} from "../../toolbar/f
 export const AV_RICH_TEXT_SPEC = 1 as const;
 export const AV_RICH_TEXT_FORMAT = "kramdown" as const;
 export const AV_RICH_TEXT_PREVIEW_ALLOWED_TAGS = [
-    "a", "blockquote", "br", "code", "div", "em", "input", "kbd", "li", "mark", "ol", "p", "pre",
-    "s", "span", "strong", "sub", "sup", "u", "ul",
+    "a", "blockquote", "br", "code", "div", "em", "h1", "h2", "h3", "h4", "h5", "h6", "input", "kbd",
+    "li", "mark", "ol", "p", "pre", "s", "span", "strong", "sub", "sup", "u", "ul",
 ];
 export const AV_RICH_TEXT_PREVIEW_ALLOWED_ATTRIBUTES = [
     "checked", "class", "data-content", "data-href", "data-id", "data-language", "data-subtype", "data-type",

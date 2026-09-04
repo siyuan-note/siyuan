@@ -5,6 +5,7 @@ import {hintRef, hintSlash} from "../../hint/extend";
 import {mountProtyleLiteFragment} from "../../lite/fragmentEditor";
 import {highlightRender} from "../highlightRender";
 import {mathRender} from "../mathRender";
+import {positionAVRichTextEditor} from "./richTextEditorPosition";
 import {
     configureAVRichTextLute,
     createAVRichTextValue,
@@ -17,6 +18,12 @@ import {
 
 const SAFE_SLASH_IDS = new Set([
     "ref",
+    "heading1",
+    "heading2",
+    "heading3",
+    "heading4",
+    "heading5",
+    "heading6",
     "list",
     "orderedList",
     "check",
@@ -76,18 +83,7 @@ const setPanelPosition = (panelElement: HTMLElement, anchorElement: HTMLElement)
         panelElement.removeAttribute("style");
         return;
     }
-    const margin = 8;
-    const anchorRect = anchorElement.getBoundingClientRect();
-    const width = Math.min(Math.max(anchorRect.width, 420), window.innerWidth - margin * 2);
-    const maxHeight = Math.max(240, Math.min(480, window.innerHeight - margin * 2));
-    const left = Math.min(Math.max(anchorRect.left, margin), window.innerWidth - width - margin);
-    const availableBelow = window.innerHeight - anchorRect.bottom - margin;
-    const top = availableBelow >= Math.min(maxHeight, 320) ? anchorRect.bottom :
-        Math.max(margin, anchorRect.top - maxHeight);
-    panelElement.style.left = `${left}px`;
-    panelElement.style.top = `${top}px`;
-    panelElement.style.width = `${width}px`;
-    panelElement.style.maxHeight = `${maxHeight}px`;
+    positionAVRichTextEditor(panelElement, anchorElement);
 };
 
 export const destroyAVRichTextEditor = (save = false) => {
@@ -149,6 +145,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             protyle.undo.clear();
         },
     });
+    setPanelPosition(panelElement, options.anchorElement);
     const initialMarkdown = serializeAVRichTextBlockDOM(fragment.getBlockHTML()).markdown;
 
     let finished = false;
@@ -157,6 +154,8 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         options.anchorElement.isConnected;
     const resize = () => setPanelPosition(panelElement, options.anchorElement);
     window.addEventListener("resize", resize);
+    const panelResizeObserver = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(resize);
+    panelResizeObserver?.observe(panelElement);
     const ownerObserver = new MutationObserver(() => {
         if (!isOwnerConnected()) {
             void finish(false);
@@ -186,6 +185,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             }
         } finally {
             ownerObserver.disconnect();
+            panelResizeObserver?.disconnect();
             window.removeEventListener("resize", resize);
             fragment.destroy();
             maskElement.remove();

@@ -49,6 +49,7 @@ export const AV_RICH_TEXT_CLASS = "av__celltext--rich";
 
 const ALLOWED_BLOCK_TYPES = new Set([
     "NodeParagraph",
+    "NodeHeading",
     "NodeList",
     "NodeListItem",
     "NodeBlockquote",
@@ -117,14 +118,15 @@ export const sanitizeAVRichTextBlockDOM = (blockDOM: string) => {
             element.remove();
             return;
         }
-        if (ALLOWED_BLOCK_TYPES.has(type)) {
-            removeUnsupportedBlockAttributes(element);
-            return;
-        }
         if (type === "NodeHeading") {
-            element.dataset.type = "NodeParagraph";
-            element.className = "p";
-            element.removeAttribute("data-subtype");
+            const subtype = element.dataset.subtype || "";
+            if (!/^h[1-6]$/.test(subtype)) {
+                element.remove();
+                return;
+            }
+            element.className = subtype;
+        }
+        if (ALLOWED_BLOCK_TYPES.has(type)) {
             removeUnsupportedBlockAttributes(element);
             return;
         }
@@ -264,7 +266,8 @@ const getAVRichTextPlainContent = (blockDOM: string, lute: Lute) => {
     const template = document.createElement("template");
     template.innerHTML = blockDOM;
     const blocks = Array.from(template.content.querySelectorAll<HTMLElement>(
-        '[data-type="NodeParagraph"], [data-type="NodeCodeBlock"], [data-type="NodeMathBlock"]'
+        '[data-type="NodeParagraph"], [data-type="NodeHeading"], [data-type="NodeCodeBlock"], ' +
+        '[data-type="NodeMathBlock"]'
     )).map((element) => lute.BlockDOM2Content(element.outerHTML));
     return projectAVRichTextPlainBlocks(blocks, lute.BlockDOM2Content(blockDOM));
 };

@@ -99,6 +99,7 @@ func TestValueTextRichMultiBlockPlainProjection(t *testing.T) {
 		expected string
 	}{
 		{"paragraphs", "first\n\nsecond", "first\nsecond"},
+		{"headings", "# first\n\n###### second", "first\nsecond"},
 		{"list", "- first\n- second", "first\nsecond"},
 		{"task list", "- [ ] todo\n- [x] done", "todo\ndone"},
 		{"blockquote", "> first\n>\n> second", "first\nsecond"},
@@ -121,6 +122,7 @@ func TestValueTextRichMultiBlockPlainProjection(t *testing.T) {
 func TestValueTextRichASTWhitelist(t *testing.T) {
 	allowed := []string{
 		"",
+		"# heading\n\n###### small heading",
 		"plain **strong** *emphasis* ~~strike~~ ==mark== `code` $x$ [link](https://example.com) " +
 			"((20240101000000-abcdefg \"reference\"))",
 		"<u>underline</u>",
@@ -153,7 +155,6 @@ func TestValueTextRichASTWhitelist(t *testing.T) {
 	}
 
 	rejected := []string{
-		"# heading",
 		"![image](assets/image.png)",
 		"| a | b |\n| --- | --- |\n| 1 | 2 |",
 		"<div>HTML</div>",
@@ -172,6 +173,23 @@ func TestValueTextRichASTWhitelist(t *testing.T) {
 		if _, err := NormalizeValueTextRich(rich); nil == err {
 			t.Fatalf("unsupported rich text was accepted: %q", content)
 		}
+	}
+}
+
+func TestValueTextRichHeadingRoundTrip(t *testing.T) {
+	rich := &ValueTextRich{
+		Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown, Content: "## heading",
+	}
+	tree, err := NormalizeValueTextRich(rich)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if "## heading" != rich.Content {
+		t.Fatalf("heading syntax was not preserved: %q", rich.Content)
+	}
+	if nil == tree.Root.FirstChild || ast.NodeHeading != tree.Root.FirstChild.Type ||
+		2 != tree.Root.FirstChild.HeadingLevel {
+		t.Fatalf("heading structure was not preserved: %v", tree.Root.FirstChild)
 	}
 }
 

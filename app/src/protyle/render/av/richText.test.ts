@@ -287,6 +287,9 @@ describe("attribute view text source compatibility", () => {
     });
 
     it("uses a strict active-content and interaction policy for previews", () => {
+        for (const tag of ["h1", "h2", "h3", "h4", "h5", "h6"]) {
+            assert.equal(AV_RICH_TEXT_PREVIEW_ALLOWED_TAGS.includes(tag), true);
+        }
         for (const tag of ["audio", "embed", "iframe", "img", "object", "script", "style", "video"]) {
             assert.equal(AV_RICH_TEXT_PREVIEW_ALLOWED_TAGS.includes(tag), false);
             assert.equal(AV_RICH_TEXT_EDITOR_ALLOWED_TAGS.includes(tag), false);
@@ -506,13 +509,14 @@ describe("attribute view text value creation", () => {
 });
 
 describe("attribute view rich text DOM policy", () => {
-    it("drops unsupported blocks and preserves supported inline marks", {
+    it("preserves supported headings and inline marks while dropping unsupported blocks", {
         skip: hasDOM ? false : "The Node test environment does not provide a DOM implementation",
     }, async () => {
         Object.assign(globalThis, {NODE_ENV: "test", SIYUAN_VERSION: "test"});
         const richText = await import("./richText");
         const blockDOM = [
             '<div data-type="NodeHeading" data-subtype="h2"><div contenteditable="true">heading</div></div>',
+            '<div data-type="NodeHeading" data-subtype="h7"><div contenteditable="true">invalid</div></div>',
             '<div data-type="NodeParagraph"><div contenteditable="true">',
             '<span data-type="tag">tag</span>',
             '<span data-type="file-annotation-ref">annotation</span>',
@@ -529,13 +533,14 @@ describe("attribute view rich text DOM policy", () => {
         ].join("");
         const sanitized = richText.sanitizeAVRichTextBlockDOM(blockDOM);
 
-        assert.match(sanitized, /data-type="NodeParagraph"[^>]*>.*heading/s);
+        assert.match(sanitized, /data-type="NodeHeading"[^>]*data-subtype="h2"[^>]*class="h2"/);
+        assert.doesNotMatch(sanitized, /data-subtype="h7"/);
         assert.match(sanitized, /data-type="tag"/);
         assert.match(sanitized, /data-type="file-annotation-ref"/);
         assert.match(sanitized, /data-type="inline-memo"/);
         assert.match(sanitized, /data-type="strong">unstyled strong/);
         assert.match(sanitized, /data-type="strong text" style="color: var\(--b3-font-color2\);">styled strong/);
-        for (const type of ["NodeHeading", "NodeImage", "NodeTable", "NodeHTMLBlock", "NodeBlockQueryEmbed"]) {
+        for (const type of ["NodeImage", "NodeTable", "NodeHTMLBlock", "NodeBlockQueryEmbed"]) {
             assert.doesNotMatch(sanitized, new RegExp(`data-type="${type}"`));
         }
         assert.doesNotMatch(sanitized, /data-subtype="mermaid"/);

@@ -654,7 +654,7 @@ func isAllowedValueTextRichNode(node *ast.Node) bool {
 		return false
 	}
 	switch node.Type {
-	case ast.NodeDocument, ast.NodeParagraph,
+	case ast.NodeDocument, ast.NodeParagraph, ast.NodeHeading, ast.NodeHeadingC8hMarker,
 		ast.NodeBlockquote, ast.NodeBlockquoteMarker,
 		ast.NodeList, ast.NodeListItem, ast.NodeTaskListItemMarker,
 		ast.NodeCodeBlockFenceOpenMarker, ast.NodeCodeBlockFenceCloseMarker, ast.NodeCodeBlockCode,
@@ -2150,7 +2150,7 @@ func valueTextRichPlainContent(tree *parse.Tree) string {
 			return ast.WalkContinue
 		}
 		switch node.Type {
-		case ast.NodeParagraph, ast.NodeCodeBlock, ast.NodeMathBlock:
+		case ast.NodeParagraph, ast.NodeHeading, ast.NodeCodeBlock, ast.NodeMathBlock:
 			blocks = append(blocks, strings.TrimRight(node.Content(), "\n"))
 			return ast.WalkSkipChildren
 		}

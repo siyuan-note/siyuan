@@ -61,6 +61,7 @@ import {
     getAVRowDropTarget,
     getBlockDragInsertPosition,
     getBlockDragoverTarget,
+    getMissingDragIds,
     getSameSuperBlockEdgeTarget,
     getSuperBlockResizeDropTarget,
     getTopListDragTarget,
@@ -1531,15 +1532,19 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     window.siyuan.dragElement.querySelectorAll(queryClass.substring(0, queryClass.length - 1)).forEach(elementItem => {
                         appendSourceElement(elementItem);
                     });
-                } else if (window.siyuan.config.system.workspaceDir.toLowerCase() === gutterTypes[3]) {
-                    // 跨窗口拖拽
+                }
+                const missingSourceIds = getMissingDragIds(selectedIds, sourceElementIds);
+                if (missingSourceIds.length > 0 &&
+                    window.siyuan.config.system.workspaceDir.toLowerCase() === gutterTypes[3]) {
+                    // 跨窗口拖拽或动态加载卸载源块时，从拖拽快照中补齐源块
                     // 不能跨工作区域拖拽 https://github.com/siyuan-note/siyuan/issues/13582
                     const dragData = parseBlockDragData(event.dataTransfer.getData(gutterType));
                     const sourceProtyleElement = document.createElement("div");
                     sourceProtyleElement.setAttribute(DRAG_SOURCE_NOTEBOOK_ID, dragData.notebookID);
                     sourceProtyleElement.setAttribute(DRAG_SOURCE_ROOT_ID, dragData.rootID);
                     sourceProtyleElement.innerHTML = dragData.html;
-                    sourceProtyleElement.querySelectorAll(queryClass.substring(0, queryClass.length - 1)).forEach(elementItem => {
+                    const missingSourceSelector = missingSourceIds.map(id => `[data-node-id="${id}"]`).join(",");
+                    sourceProtyleElement.querySelectorAll(missingSourceSelector).forEach(elementItem => {
                         appendSourceElement(elementItem);
                     });
                 }

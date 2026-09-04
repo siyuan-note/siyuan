@@ -5,6 +5,7 @@ import {
     getAVRowDropTarget,
     getBlockDragInsertPosition,
     getBlockDragoverTarget,
+    getMissingDragIds,
     getSameSuperBlockEdgeTarget,
     getSuperBlockResizeDropTarget,
     getTopListDragTarget,
@@ -211,6 +212,14 @@ describe("isAttributeViewTitleTarget", () => {
 describe("uniqueDragIds", () => {
     it("removes empty and duplicate block IDs while preserving their order", () => {
         assert.deepEqual(uniqueDragIds(["a", "", "b", "a", "b", "c"]), ["a", "b", "c"]);
+    });
+});
+
+describe("getMissingDragIds", () => {
+    it("returns source IDs unloaded during dynamic loading", () => {
+        assert.deepEqual(getMissingDragIds(["a", "b"], new Set()), ["a", "b"]);
+        assert.deepEqual(getMissingDragIds(["a", "b", "c"], new Set(["a", "c"])), ["b"]);
+        assert.deepEqual(getMissingDragIds(["a", "b"], new Set(["a", "b"])), []);
     });
 });
 

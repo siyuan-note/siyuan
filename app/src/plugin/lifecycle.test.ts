@@ -707,6 +707,24 @@ describe("plugin lifecycle coordinator", () => {
         assert.ok(mountIndex >= 0 && mountIndex < events.indexOf("data:sample:1"));
     });
 
+    it("passes the latest coalesced data change reason to onDataChanged", async () => {
+        const {coordinator, events} = createHarness({
+            onDataChanged(plugin, reason) {
+                events.push(`data:${plugin.name}:${reason}`);
+            },
+        });
+        coordinator.start();
+        await coordinator.requestLoad("sample", getSampleData());
+        await coordinator.setLayoutReady();
+
+        const syncChange = coordinator.requestDataChange("sample", getSampleData(), "sync");
+        const overwriteChange = coordinator.requestDataChange("sample", getSampleData(), "overwrite");
+        await Promise.all([syncChange, overwriteChange]);
+
+        assert.equal(events.filter(event => event === "data:sample:overwrite").length, 1);
+        assert.equal(events.includes("data:sample:sync"), false);
+    });
+
     it("decides the default data-change reload after the pending instance reaches ready", async () => {
         const data = deferred<ITestPluginData>();
         const inspectedRevisions: number[] = [];

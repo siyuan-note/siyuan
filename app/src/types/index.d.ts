@@ -888,16 +888,30 @@ interface ILayoutJSON extends ILayoutOptions {
     children?: ILayoutJSON[] | ILayoutJSON
 }
 
+interface ICommandContext {
+    source: "commandPanel" | "shortcut" | "editorShortcut" | "fileTreeShortcut" | "dockShortcut" |
+        "globalShortcut" | "keymap" | "menu" | "api",
+    focus: "global" | "editor" | "fileTree" | "dock",
+    protyle?: IProtyle,
+    range?: Range,
+    fileTree?: import("../layout/dock/Files").Files,
+    dock?: HTMLElement,
+}
+
 interface ICommand {
     langKey: string, // 用于区分不同快捷键的 key, 同时作为 i18n 的字段名
     langText?: string, // 显示的文本, 指定后不再使用 langKey 对应的 i18n 文本
     hotkey?: string, // 快捷键，默认为空字符串
     customHotkey?: string,
-    callback?: () => void   // 其余回调存在时将不会触发
-    globalCallback?: () => void // 焦点不在应用内时执行的回调
-    fileTreeCallback?: (file: import("../layout/dock/Files").Files) => void // 焦点在文档树上时执行的回调
-    editorCallback?: (protyle: IProtyle) => void     // 焦点在编辑器上时执行的回调
-    dockCallback?: (element: HTMLElement) => void    // 焦点在 dock 上时执行的回调
+    execute?: (context: ICommandContext) => void | Promise<void>
+    callback?: (context?: ICommandContext) => void   // 其余回调存在时将不会触发
+    globalCallback?: (context?: ICommandContext) => void // 焦点不在应用内时执行的回调
+    fileTreeCallback?: (
+        file: import("../layout/dock/Files").Files,
+        context?: ICommandContext
+    ) => void // 焦点在文档树上时执行的回调
+    editorCallback?: (protyle: IProtyle, context?: ICommandContext) => void // 焦点在编辑器上时执行的回调
+    dockCallback?: (element: HTMLElement, context?: ICommandContext) => void // 焦点在 dock 上时执行的回调
 }
 
 interface IPluginData {

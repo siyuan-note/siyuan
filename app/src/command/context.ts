@@ -33,6 +33,7 @@ interface ICaptureCommandContextOptions {
     range?: Range;
     protyle?: IProtyle;
     fileLiElements?: Element[];
+    dockElement?: HTMLElement;
 }
 
 const findDialogProtyle = (range?: Range) => {
@@ -182,7 +183,11 @@ export const captureCommandContext = (options: ICaptureCommandContextOptions): I
     const dialogProtyle = protyle || explicitFileTree ? undefined : findDialogProtyle(range);
     protyle ||= dialogProtyle;
     let fileTreeFocused = false;
-    const dock = getDockElement(activeElement);
+    const dock = options.dockElement ? {
+        element: options.dockElement,
+        type: Array.from(options.dockElement.classList)
+            .find(item => item.startsWith("sy__"))?.substring(4),
+    } : getDockElement(activeElement);
     /// #if !MOBILE
     const activePanelElement = document.querySelector<HTMLElement>(".layout__tab--active");
     fileTreeFocused = !protyle && (explicitFileTree || activePanelElement?.classList.contains("sy__file"));

@@ -23,4 +23,21 @@ describe("plugin global shortcuts", () => {
         assert.equal(dispatchPluginGlobalShortcut(plugins, "⌘B"), false);
         assert.equal(calls, 0);
     });
+
+    it("prefers execute and passes the global context", () => {
+        const calls: string[] = [];
+        let receivedContext: ICommandContext | undefined;
+        const plugins = [{commands: [{
+            customHotkey: "⌘A",
+            execute: (context: ICommandContext) => {
+                calls.push("execute");
+                receivedContext = context;
+            },
+            globalCallback: () => calls.push("global"),
+        }]}];
+
+        assert.equal(dispatchPluginGlobalShortcut(plugins, "⌘A"), true);
+        assert.deepEqual(calls, ["execute"]);
+        assert.deepEqual(receivedContext, {source: "globalShortcut", focus: "global"});
+    });
 });

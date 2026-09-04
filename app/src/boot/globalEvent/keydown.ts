@@ -66,6 +66,8 @@ import {zoomOut} from "../../menus/protyle";
 import {getPlainText} from "../../protyle/util/paste";
 import {commandPanel} from "./command/panel";
 import {execByCommand} from "../../command/executor";
+import {captureCommandContext} from "../../command/context";
+import {resolvePluginCommandCallback} from "../../plugin/commandAdapter";
 import {filterHotkey} from "./commonHotkey";
 import {editorConfigApi} from "../../config/tabs/editorRuntime";
 import {copyPNGByLink} from "../../menus/util";
@@ -618,12 +620,19 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         return false;
     }
 
+    const liElements = Array.from(files.element.querySelectorAll(".b3-list-item--focus"));
+    const commandContext = captureCommandContext({
+        app,
+        source: "fileTreeShortcut",
+        fileLiElements: liElements,
+    });
     let matchCommand = false;
     app.plugins.find(item => {
         item.commands.find(command => {
-            if (command.fileTreeCallback && matchHotKey(command.customHotkey, event)) {
+            const callback = resolvePluginCommandCallback(command, commandContext);
+            if (callback && matchHotKey(command.customHotkey, event)) {
                 matchCommand = true;
-                command.fileTreeCallback(files);
+                void callback();
                 return true;
             }
         });
@@ -635,7 +644,6 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
 
-    const liElements = Array.from(files.element.querySelectorAll(".b3-list-item--focus"));
     if (liElements.length === 0) {
         if (event.key.startsWith("Arrow") && isNotCtrl(event)) {
             const liElement = files.element.querySelector(".b3-list-item");
@@ -1050,11 +1058,17 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
 
     let matchCommand = false;
     if (!bottomBacklink) {
+        const commandContext = captureCommandContext({
+            app,
+            source: "dockShortcut",
+            dockElement: activePanelElement as HTMLElement,
+        });
         app.plugins.find(item => {
             item.commands.find(command => {
-                if (command.dockCallback && matchHotKey(command.customHotkey, event)) {
+                const callback = resolvePluginCommandCallback(command, commandContext);
+                if (callback && matchHotKey(command.customHotkey, event)) {
                     matchCommand = true;
-                    command.dockCallback(activePanelElement as HTMLElement);
+                    void callback();
                     return true;
                 }
             });
@@ -1849,13 +1863,13 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
 
     let matchCommand = false;
+    const commandContext = captureCommandContext({app, source: "shortcut"});
     app.plugins.find(item => {
         item.commands.find(command => {
-            if (command.callback &&
-                !command.fileTreeCallback && !command.editorCallback && !command.dockCallback && !command.globalCallback
-                && matchHotKey(command.customHotkey, event)) {
+            const callback = resolvePluginCommandCallback(command, commandContext);
+            if (callback && matchHotKey(command.customHotkey, event)) {
                 matchCommand = true;
-                command.callback();
+                void callback();
                 return true;
             }
         });

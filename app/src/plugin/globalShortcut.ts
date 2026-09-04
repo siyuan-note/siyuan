@@ -1,6 +1,7 @@
 interface IPluginGlobalShortcutCommand {
     customHotkey?: string;
-    globalCallback?: () => void;
+    execute?: (context: ICommandContext) => void | Promise<void>;
+    globalCallback?: (context?: ICommandContext) => void;
 }
 
 interface IPluginGlobalShortcutOwner {
@@ -8,10 +9,15 @@ interface IPluginGlobalShortcutOwner {
 }
 
 export const dispatchPluginGlobalShortcut = (plugins: IPluginGlobalShortcutOwner[], hotkey: string) => {
+    const context: ICommandContext = {source: "globalShortcut", focus: "global"};
     for (const plugin of plugins) {
         const command = plugin.commands.find(item => item.globalCallback && item.customHotkey === hotkey);
         if (command) {
-            command.globalCallback();
+            if (command.execute) {
+                void command.execute(context);
+            } else {
+                command.globalCallback(context);
+            }
             return true;
         }
     }

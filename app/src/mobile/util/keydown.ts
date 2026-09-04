@@ -3,6 +3,8 @@ import {execByCommand} from "../../command/executor";
 import {matchHotKey} from "../../protyle/util/hotKey";
 import {getCurrentEditor} from "../editor";
 import {filterHotkey} from "../../boot/globalEvent/commonHotkey";
+import {captureCommandContext} from "../../command/context";
+import {resolvePluginCommandCallback} from "../../plugin/commandAdapter";
 
 export const mobileKeydown = (app: App, event: KeyboardEvent) => {
     // 移动端输入框默认填充无 event.key
@@ -25,13 +27,13 @@ export const mobileKeydown = (app: App, event: KeyboardEvent) => {
     }
 
     let matchCommand = false;
+    const commandContext = captureCommandContext({app, source: "shortcut"});
     app.plugins.find(item => {
         item.commands.find(command => {
-            if (command.callback &&
-                !command.fileTreeCallback && !command.editorCallback && !command.dockCallback && !command.globalCallback
-                && matchHotKey(command.customHotkey, event)) {
+            const callback = resolvePluginCommandCallback(command, commandContext);
+            if (callback && matchHotKey(command.customHotkey, event)) {
                 matchCommand = true;
-                command.callback();
+                void callback();
                 return true;
             }
         });

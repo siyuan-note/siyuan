@@ -17,6 +17,8 @@ import {removeEmbed} from "./removeEmbed";
 import {clearBlockElement} from "../util/clear";
 import {isEncryptedBox} from "../../util/pathName";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
+import {captureCommandContext} from "../../command/context";
+import {resolvePluginCommandCallback} from "../../plugin/commandAdapter";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement?: HTMLElement) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom, event)) {
@@ -112,11 +114,18 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
     }
     /// #if !MOBILE
     let matchCommand = false;
+    const commandContext = captureCommandContext({
+        app: protyle.app,
+        source: "editorShortcut",
+        protyle,
+        range: protyle.toolbar.range,
+    });
     protyle.app.plugins.find(item => {
         item.commands.find(command => {
-            if (command.editorCallback && matchHotKey(command.customHotkey, event)) {
+            const callback = resolvePluginCommandCallback(command, commandContext);
+            if (callback && matchHotKey(command.customHotkey, event)) {
                 matchCommand = true;
-                command.editorCallback(protyle);
+                void callback();
                 return true;
             }
         });

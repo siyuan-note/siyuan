@@ -16,10 +16,11 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 
 ### Verification and prohibited operations
 
-1. **Frontend verification:** Do not use `npx webpack` or `pnpm dev` to verify changes; after changes, run `pnpm run lint` with `app/` as the working directory to check code style
-2. **Frontend build:** Do NOT run `pnpm build` — the developer runs `pnpm dev` manually, and `pnpm build` will conflict with it, producing broken bundles
-3. **Kernel development:** After modifying Go code, run `gofmt`, but do not compile the kernel binary or restart a running kernel; the developer handles both manually
-4. **Git:** **NEVER** run `git commit` / `git push` unless explicitly asked — no exceptions
+1. **Repository update:** Before modifying code, check the working tree and update the current branch from its upstream using a fast-forward-only pull. If the working tree is not clean or the update fails or would require conflict resolution, report the condition to the user and do not stash, reset, discard, overwrite, or otherwise alter existing work to force the update
+2. **Frontend verification:** Do not use `npx webpack` or `pnpm dev` to verify changes; after changes, run `pnpm run lint` with `app/` as the working directory to check code style
+3. **Frontend build:** Do NOT run `pnpm build` — the developer runs `pnpm dev` manually, and `pnpm build` will conflict with it, producing broken bundles
+4. **Kernel development:** After modifying Go code, run `gofmt`, but do not compile the kernel binary or restart a running kernel; the developer handles both manually
+5. **Git:** **NEVER** run `git commit` / `git push` unless explicitly asked — no exceptions
 
 ---
 

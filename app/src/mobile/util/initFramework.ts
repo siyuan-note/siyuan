@@ -292,7 +292,7 @@ const initSidePanelTabs = (app: App, sidePanelElement: HTMLElement) => {
 };
 
 export const initFramework = async (app: App, isStart: boolean) => {
-    setInlineStyle();
+    const inlineStyleReady = setInlineStyle();
     const snippetReady = renderSnippet(Constants.TIMEOUT_SNIPPET_LOAD);
     initKeyboardToolbar();
     initMobileBottomBar(app);
@@ -319,7 +319,7 @@ export const initFramework = async (app: App, isStart: boolean) => {
         renderMobileSidePanelLayout(app);
         updateOpenSidePanelDocks(app, [sidebarElement, sidebarRightElement]);
     });
-    await snippetReady;
+    await Promise.all([inlineStyleReady, snippetReady]);
     window.siyuan.mobile.docks.file = new MobileFiles(app, getDockContentElement("file"));
     document.getElementById("toolbarFile").addEventListener("click", () => {
         if (getCurrentEditor()?.protyle.toolbar.isMultiSelectMode()) {

@@ -198,42 +198,59 @@ const isMatchingContextMenuRequest = (context, request) => {
         context.createdAt - request.requestedAt < 1000;
 };
 
-const popupNativeTextContextMenu = (contents, context, request) => {
-    const params = context?.params;
-    const template = [];
-    if (params?.misspelledWord) {
-        params.dictionarySuggestions.forEach((suggestion) => {
-            template.push(new MenuItem({
-                label: suggestion,
-                click: () => contents.replaceMisspelling(suggestion),
-            }));
-        });
-        template.push(new MenuItem({
-            label: request.addToDictionary,
-            click: () => {
-                if (!contents.session.addWordToSpellCheckerDictionary(params.misspelledWord)) {
-                    writeLog("failed to add word to spell checker dictionary");
-                }
-            },
-        }), {type: "separator"});
+const NATIVE_TEXT_CONTEXT_MENU_ROLES = new Set([
+    "undo", "redo", "cut", "copy", "paste", "pasteAndMatchStyle", "delete", "selectAll",
+]);
+
+const getNativeTextContextMenuItems = (contents, request = {}, params) => {
+    const items = [];
+    if (!Array.isArray(request.items)) {
+        return items;
     }
-    template.push(new MenuItem({
-        role: "undo", label: request.undo
-    }), new MenuItem({
-        role: "redo", label: request.redo
-    }), {type: "separator"}, new MenuItem({
-        role: "copy", label: request.copy
-    }), new MenuItem({
-        role: "cut", label: request.cut
-    }), new MenuItem({
-        role: "delete", label: request.delete
-    }), new MenuItem({
-        role: "paste", label: request.paste
-    }), new MenuItem({
-        role: "pasteAndMatchStyle", label: request.pasteAsPlainText
-    }), new MenuItem({
-        role: "selectAll", label: request.selectAll
-    }));
+    const misspelledWord = params?.misspelledWord;
+    request.items.forEach((item) => {
+        if (!item || typeof item !== "object") {
+            return;
+        }
+        if (item.type === "addToDictionary") {
+            if (!misspelledWord) {
+                return;
+            }
+            (params.dictionarySuggestions || []).forEach((suggestion) => {
+                items.push(new MenuItem({
+                    label: suggestion,
+                    click: () => contents.replaceMisspelling(suggestion),
+                }));
+            });
+            items.push(new MenuItem({
+                label: item.label,
+                click: () => {
+                    if (!contents.session.addWordToSpellCheckerDictionary(misspelledWord)) {
+                        writeLog("failed to add word to spell checker dictionary");
+                    }
+                },
+            }), {type: "separator"});
+            return;
+        }
+        if (item.type === "separator") {
+            items.push({type: "separator"});
+            return;
+        }
+        if (!NATIVE_TEXT_CONTEXT_MENU_ROLES.has(item.role)) {
+            return;
+        }
+        items.push(new MenuItem({
+            role: item.role,
+            label: item.label,
+        }));
+    });
+    return items;
+};
+
+const popupNativeTextContextMenu = (contents, context, request) => {
+    request = request || {};
+    const params = context?.params;
+    const template = getNativeTextContextMenuItems(contents, request, params);
     const menu = Menu.buildFromTemplate(template);
     const options = {
         window: BrowserWindow.fromWebContents(contents),

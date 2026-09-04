@@ -39,15 +39,18 @@ export class Menus {
                     x: event.clientX,
                     y: event.clientY,
                     requestedAt: Date.now(),
-                    undo: window.siyuan.languages.undo,
-                    redo: window.siyuan.languages.redo,
-                    copy: window.siyuan.languages.copy,
-                    cut: window.siyuan.languages.cut,
-                    delete: window.siyuan.languages.delete,
-                    paste: window.siyuan.languages.paste,
-                    pasteAsPlainText: window.siyuan.languages.pasteAsPlainText,
-                    selectAll: window.siyuan.languages.selectAll,
-                    addToDictionary: window.siyuan.languages.addToDictionary,
+                    items: [
+                        {type: "addToDictionary", label: window.siyuan.languages.addToDictionary},
+                        {role: "undo", label: window.siyuan.languages.undo},
+                        {role: "redo", label: window.siyuan.languages.redo},
+                        {type: "separator"},
+                        {role: "copy", label: window.siyuan.languages.copy},
+                        {role: "cut", label: window.siyuan.languages.cut},
+                        {role: "delete", label: window.siyuan.languages.delete},
+                        {role: "paste", label: window.siyuan.languages.paste},
+                        {role: "pasteAndMatchStyle", label: window.siyuan.languages.pasteAsPlainText},
+                        {role: "selectAll", label: window.siyuan.languages.selectAll},
+                    ],
                 });
                 /// #endif
                 event.stopPropagation();

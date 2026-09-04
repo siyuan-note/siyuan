@@ -1,6 +1,10 @@
 {
 	"allChangelogs": "Todos los registros de cambios",
 	"changelog": "Registro de cambios",
+	"checkBlockRef": "Comprobar referencias de bloques antes de eliminar o cortar",
+	"checkBlockRefTip": "Cuando está activado, aparece una advertencia antes de eliminar o cortar bloques referenciados o vinculados a una base de datos",
+	"aiMcpDisableStandaloneSSE": "Desactivar SSE independiente",
+	"aiMcpDisableStandaloneSSETip": "Impide la conexión SSE independiente mientras mantiene disponibles las solicitudes de Streamable HTTP",
 	"textDirection": "Dirección del texto",
 	"contextFilter": "Filtro contextual",
 	"contextFilterTip": "Se aplica a todas las vistas de este bloque de base de datos",

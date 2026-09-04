@@ -1,6 +1,10 @@
 {
 	"allChangelogs": "Všetky denníky zmien",
 	"changelog": "Denník zmien",
+	"checkBlockRef": "Kontrolovať odkazy na bloky pred odstránením alebo vystrihnutím",
+	"checkBlockRefTip": "Ak je táto možnosť zapnutá, pred odstránením alebo vystrihnutím odkazovaných blokov alebo blokov prepojených s databázou sa zobrazí upozornenie",
+	"aiMcpDisableStandaloneSSE": "Zakázať samostatné SSE",
+	"aiMcpDisableStandaloneSSETip": "Zabráni samostatnému pripojeniu SSE a zachová požiadavky Streamable HTTP dostupné",
 	"textDirection": "Smer textu",
 	"contextFilter": "Kontextový filter",
 	"contextFilterTip": "Použije sa na všetky zobrazenia v tomto databázovom bloku",

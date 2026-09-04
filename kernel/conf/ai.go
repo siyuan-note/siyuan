@@ -160,6 +160,7 @@ type MCPServer struct {
 	URL                  string            `json:"url"`
 	Headers              map[string]string `json:"headers"`
 	Timeout              int               `json:"timeout"`
+	DisableStandaloneSSE bool              `json:"disableStandaloneSSE"`
 	TrustToolAnnotations bool              `json:"trustToolAnnotations"`
 }
 
@@ -926,6 +927,7 @@ func migrateMCP(raw map[string]any) *MCP {
 			URL:                  getString(sm, "url"),
 			Headers:              getStringMap(sm, "headers"),
 			Timeout:              getInt(sm, "timeout"),
+			DisableStandaloneSSE: getBool(sm, "disableStandaloneSSE"),
 			TrustToolAnnotations: getBool(sm, "trustToolAnnotations"),
 		})
 	}

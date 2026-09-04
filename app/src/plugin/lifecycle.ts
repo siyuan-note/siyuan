@@ -1,3 +1,5 @@
+import type {TPluginDataChangeReason} from "./index";
+
 export type TPluginLifecycleState =
     "absent" |
     "loading" |
@@ -28,7 +30,7 @@ export interface IPluginLifecycleAdapter<TData, TPlugin> {
     onLayoutReady(plugin: TPlugin): Promise<void> | void;
     mount(plugin: TPlugin): void;
     shouldReloadOnDataChange(plugin: TPlugin): boolean;
-    onDataChanged(plugin: TPlugin): Promise<void> | void;
+    onDataChanged(plugin: TPlugin, reason?: TPluginDataChangeReason): Promise<void> | void;
     onunload(plugin: TPlugin): Promise<void> | void;
     uninstall(plugin: TPlugin): Promise<void> | void;
     markDisposed(plugin: TPlugin): void;
@@ -48,6 +50,7 @@ interface IPluginLifecycleTask<TData> {
     kind: TPluginLifecycleTaskKind;
     sequence: number;
     dataProvider?: () => Promise<TData | undefined>;
+    dataChangeReason?: TPluginDataChangeReason;
     uninstallHandled?: boolean;
     waiters: Array<() => void>;
 }
@@ -170,7 +173,8 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
         return this.enqueueStructural(this.getRecord(name), "uninstall");
     }
 
-    public requestDataChange(name: string, dataProvider: () => Promise<TData | undefined>) {
+    public requestDataChange(name: string, dataProvider: () => Promise<TData | undefined>,
+                             reason?: TPluginDataChangeReason) {
         const record = this.getRecord(name);
         const finalStructuralKind = this.getFinalStructuralKind(record);
         if (finalStructuralKind === "unload" || finalStructuralKind === "uninstall" ||
@@ -179,12 +183,14 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
         }
         const existing = record.tasks.find((task) => task.kind === "dataChange");
         if (existing) {
+            existing.dataChangeReason = reason;
             return new Promise<void>((resolve) => existing.waiters.push(resolve));
         }
         return this.enqueue(record, {
             kind: "dataChange",
             sequence: 0,
             dataProvider,
+            dataChangeReason: reason,
             waiters: [],
         });
     }
@@ -434,7 +440,8 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
             await this.runLoad(record, task, true);
             return;
         }
-        await this.runInterruptibleHook(record, "onDataChanged", () => this.adapter.onDataChanged(plugin));
+        await this.runInterruptibleHook(record, "onDataChanged",
+            () => this.adapter.onDataChanged(plugin, task.dataChangeReason));
     }
 
     private async teardown(record: IPluginLifecycleRecord<TData, TPlugin>,

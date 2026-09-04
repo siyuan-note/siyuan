@@ -1,6 +1,10 @@
 {
 	"allChangelogs": "כל יומני השינויים",
 	"changelog": "יומן שינויים",
+	"checkBlockRef": "בדיקת הפניות לבלוקים לפני מחיקה או גזירה",
+	"checkBlockRefTip": "כאשר האפשרות מופעלת, תוצג אזהרה לפני מחיקה או גזירה של בלוקים שמפנים אליהם או שמקושרים למסד נתונים",
+	"aiMcpDisableStandaloneSSE": "השבתת SSE עצמאי",
+	"aiMcpDisableStandaloneSSETip": "מונע את חיבור ה-SSE העצמאי תוך שמירה על בקשות Streamable HTTP זמינות",
 	"textDirection": "כיוון הטקסט",
 	"contextFilter": "מסנן הקשר",
 	"contextFilterTip": "חל על כל התצוגות בבלוק מסד הנתונים הזה",

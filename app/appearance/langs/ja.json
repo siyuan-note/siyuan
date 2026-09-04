@@ -1,6 +1,10 @@
 {
 	"allChangelogs": "すべての更新履歴",
 	"changelog": "更新履歴",
+	"checkBlockRef": "削除または切り取り前にブロック参照を確認",
+	"checkBlockRefTip": "有効にすると、参照されているブロックまたはデータベースにバインドされたブロックを削除または切り取る前に警告を表示します",
+	"aiMcpDisableStandaloneSSE": "独立 SSE を無効化",
+	"aiMcpDisableStandaloneSSETip": "Streamable HTTP リクエストを維持したまま独立 SSE 接続を無効にします",
 	"textDirection": "テキストの方向",
 	"contextFilter": "コンテキストフィルター",
 	"contextFilterTip": "このデータベースブロックのすべてのビューに適用します",

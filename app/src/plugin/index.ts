@@ -41,6 +41,8 @@ import {isBuiltinToolbarItemName} from "../protyle/toolbar/defaults";
 import {getLegacyPluginTopBarEntryKey, getPluginTopBarEntryKey} from "./topBarKey";
 import {applyTopBarEntryVisibility} from "../config/entryVisibility/runtime";
 
+export type TPluginDataChangeReason = "sync" | "overwrite";
+
 const disposedPlugins = new WeakSet<Plugin>();
 
 const isPluginDisposed = (plugin: Plugin) => disposedPlugins.has(plugin);
@@ -143,8 +145,14 @@ export class Plugin {
         // 卸载
     }
 
-    public onDataChanged(): Promise<void> | void {
-        // 存储数据变更
+    /**
+     * 插件实例就绪后存储数据发生变化时运行，思源会等待返回的 Promise；
+     * 未覆盖该方法时则重载整个插件。
+     * @param reason 数据变更来源，sync 为跨设备同步合并，overwrite 为其他前端实例通过文件接口写入
+     */
+    public onDataChanged(reason?: TPluginDataChangeReason): Promise<void> | void {
+        // 存储数据变更，子类可根据来源区分处理
+        void reason;
     }
 
     public async updateCards(options: ICardData) {
@@ -425,6 +433,7 @@ export class Plugin {
             formData.append("path", pathString);
             formData.append("file", file);
             formData.append("isDir", "false");
+            formData.append("app", Constants.SIYUAN_APPID);
             fetchPost("/api/file/putFile", formData, (response) => {
                 this.data[storageName] = data;
                 resolve(response);
@@ -447,7 +456,10 @@ export class Plugin {
             if (!this.data) {
                 this.data = {};
             }
-            fetchPost("/api/file/removeFile", {path: `/data/storage/petal/${this.name}/${normalizeStoragePath(storageName)}`}, (response) => {
+            fetchPost("/api/file/removeFile", {
+                path: `/data/storage/petal/${this.name}/${normalizeStoragePath(storageName)}`,
+                app: Constants.SIYUAN_APPID,
+            }, (response) => {
                 delete this.data[storageName];
                 resolve(response);
             });

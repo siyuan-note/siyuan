@@ -42,6 +42,22 @@ func TestIsReconnectableError(t *testing.T) {
 	}
 }
 
+func TestNewStreamableClientTransport(t *testing.T) {
+	for _, disableStandaloneSSE := range []bool{false, true} {
+		server := conf.MCPServer{
+			URL:                  "https://example.com/mcp",
+			DisableStandaloneSSE: disableStandaloneSSE,
+		}
+		transport := newStreamableClientTransport(server)
+		if transport.Endpoint != server.URL {
+			t.Fatalf("unexpected endpoint: %s", transport.Endpoint)
+		}
+		if transport.DisableStandaloneSSE != disableStandaloneSSE {
+			t.Fatalf("unexpected standalone SSE setting: %v", transport.DisableStandaloneSSE)
+		}
+	}
+}
+
 func TestBuildStdioEnvironment(t *testing.T) {
 	server := conf.MCPServer{
 		InheritEnv: []string{"PATH", "MISSING"},

@@ -281,6 +281,7 @@ declare namespace Config {
         env?: Record<string, string>;
         headers?: Record<string, string>;
         timeout: number;
+        disableStandaloneSSE: boolean;
         trustToolAnnotations: boolean;
     }
 
@@ -575,6 +576,10 @@ declare namespace Config {
          * The maximum length of the dynamic anchor text for block references
          */
         blockRefDynamicAnchorTextMaxLen: number;
+        /**
+         * Whether to check block references and database bindings before deleting or cutting
+         */
+        checkBlockRef: boolean;
         /**
          * Whether the code block has enabled ligatures
          */

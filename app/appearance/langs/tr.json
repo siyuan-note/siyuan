@@ -1,6 +1,10 @@
 {
 	"allChangelogs": "Tüm değişiklik günlükleri",
 	"changelog": "Değişiklik günlüğü",
+	"checkBlockRef": "Silmeden veya kesmeden önce blok başvurularını denetle",
+	"checkBlockRefTip": "Etkinleştirildiğinde başvurulan veya bir veritabanına bağlı bloklar silinmeden ya da kesilmeden önce bir uyarı gösterilir",
+	"aiMcpDisableStandaloneSSE": "Bağımsız SSE'yi devre dışı bırak",
+	"aiMcpDisableStandaloneSSETip": "Streamable HTTP isteklerini kullanılabilir tutarken bağımsız SSE bağlantısını engeller",
 	"textDirection": "Metin yönü",
 	"contextFilter": "Bağlam filtresi",
 	"contextFilterTip": "Bu veritabanı bloğundaki tüm görünümlere uygulanır",

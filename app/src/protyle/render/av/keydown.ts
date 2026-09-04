@@ -17,8 +17,10 @@ import {
 } from "./rangeSelect";
 import {getAVCellSelection, getAVItemSelection} from "./selectionState";
 import {isMobile} from "../../../util/functions";
+import {getAVVerticalNavigationAction} from "./verticalNavigation";
 
-export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyle: IProtyle) => {
+export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyle: IProtyle,
+                          leaveVerticalRegion: (direction: "up" | "down") => void) => {
     if (!nodeElement.classList.contains("av") || !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
         return false;
     }
@@ -203,11 +205,14 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             if (previousRowElement && !previousRowElement.classList.contains("av__row--header")) {
                 newCellElement = previousRowElement.querySelector(`.av__cell[data-col-id="${selectCellElement.dataset.colId}"]`);
             }
-            if (newCellElement) {
+            if (getAVVerticalNavigationAction(!!newCellElement) === "move") {
                 clearSelect(["cell"], nodeElement);
                 newCellElement.classList.add("av__cell--select");
                 addDragFill(newCellElement);
                 cellScrollIntoView(nodeElement, newCellElement);
+            } else {
+                clearSelect(["cell"], nodeElement);
+                leaveVerticalRegion("up");
             }
             event.preventDefault();
             return true;
@@ -217,11 +222,14 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             if (nextRowElement && !nextRowElement.classList.contains("av__row--footer")) {
                 newCellElement = nextRowElement.querySelector(`.av__cell[data-col-id="${selectCellElement.dataset.colId}"]`);
             }
-            if (newCellElement) {
+            if (getAVVerticalNavigationAction(!!newCellElement) === "move") {
                 clearSelect(["cell"], nodeElement);
                 newCellElement.classList.add("av__cell--select");
                 addDragFill(newCellElement);
                 cellScrollIntoView(nodeElement, newCellElement);
+            } else {
+                clearSelect(["cell"], nodeElement);
+                leaveVerticalRegion("down");
             }
             event.preventDefault();
             return true;
@@ -321,12 +329,13 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             const previousRowElement = ensureAVTableAdjacentRow(currentRowElement, "previous") ||
                 currentRowElement.previousElementSibling as HTMLElement;
             clearSelect(["row", "galleryItem"], nodeElement);
-            if (previousRowElement?.matches(".av__row[data-id], .av__gallery-item[data-id]")) {
+            const hasPreviousItem = previousRowElement?.matches(".av__row[data-id], .av__gallery-item[data-id]");
+            if (getAVVerticalNavigationAction(!!hasPreviousItem) === "move") {
                 setAVItemAnchor(nodeElement, previousRowElement as HTMLElement);
                 selectAVItemRange(nodeElement, previousRowElement);
                 cellScrollIntoView(nodeElement, previousRowElement);
             } else {
-                nodeElement.classList.add("protyle-wysiwyg--select");
+                leaveVerticalRegion("up");
             }
             event.preventDefault();
             return true;
@@ -336,12 +345,13 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             const nextRowElement = ensureAVTableAdjacentRow(currentRowElement, "next") ||
                 currentRowElement.nextElementSibling as HTMLElement;
             clearSelect(["row", "galleryItem"], nodeElement);
-            if (nextRowElement?.matches(".av__row[data-id], .av__gallery-item[data-id]")) {
+            const hasNextItem = nextRowElement?.matches(".av__row[data-id], .av__gallery-item[data-id]");
+            if (getAVVerticalNavigationAction(!!hasNextItem) === "move") {
                 setAVItemAnchor(nodeElement, nextRowElement as HTMLElement);
                 selectAVItemRange(nodeElement, nextRowElement);
                 cellScrollIntoView(nodeElement, nextRowElement);
             } else {
-                nodeElement.classList.add("protyle-wysiwyg--select");
+                leaveVerticalRegion("down");
             }
             event.preventDefault();
             return true;

@@ -71,6 +71,7 @@ type Editor struct {
 	VirtualBlockRef                 bool           `json:"virtualBlockRef"`                 // 是否启用虚拟引用
 	VirtualBlockRefExclude          string         `json:"virtualBlockRefExclude"`          // 虚拟引用关键字排除列表
 	VirtualBlockRefInclude          string         `json:"virtualBlockRefInclude"`          // 虚拟引用关键字包含列表
+	CheckBlockRef                   *bool          `json:"checkBlockRef"`                   // 删除或剪切前是否检查块引用和数据库绑定
 	BlockRefDynamicAnchorTextMaxLen int            `json:"blockRefDynamicAnchorTextMaxLen"` // 块引动态锚文本最大长度
 	AssetOpen                       *AssetOpen     `json:"assetOpen"`                       // 资源打开方式
 	PlantUMLServePath               string         `json:"plantUMLServePath"`               // PlantUML 伺服地址
@@ -209,6 +210,7 @@ func NewEditor() *Editor {
 		HistoryRetentionDays:            30,
 		Emoji:                           []string{},
 		VirtualBlockRef:                 false,
+		CheckBlockRef:                   new(true),
 		BlockRefDynamicAnchorTextMaxLen: 96,
 		AssetOpen:                       NewAssetOpen(),
 		PlantUMLServePath:               "https://www.plantuml.com/plantuml/svg/~1",

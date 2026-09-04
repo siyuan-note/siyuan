@@ -1,6 +1,10 @@
 {
 	"allChangelogs": "Alle Änderungsprotokolle",
 	"changelog": "Änderungsprotokoll",
+	"checkBlockRef": "Blockreferenzen vor dem Löschen oder Ausschneiden prüfen",
+	"checkBlockRefTip": "Wenn aktiviert, erscheint vor dem Löschen oder Ausschneiden referenzierter oder an eine Datenbank gebundener Blöcke eine Warnung",
+	"aiMcpDisableStandaloneSSE": "Eigenständiges SSE deaktivieren",
+	"aiMcpDisableStandaloneSSETip": "Verhindert die eigenständige SSE-Verbindung, während Streamable-HTTP-Anfragen verfügbar bleiben",
 	"textDirection": "Textrichtung",
 	"contextFilter": "Kontextfilter",
 	"contextFilterTip": "Gilt für alle Ansichten in diesem Datenbankblock",

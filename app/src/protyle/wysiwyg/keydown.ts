@@ -133,6 +133,7 @@ import {isMobile} from "../../util/functions";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 import {scheduleCaretScroll, scheduleOffscreenCaretScroll} from "./caretScroll";
 import {scrollPage} from "../scroll/page";
+import {getCalloutTitleNavigationTarget} from "./calloutCaret";
 import {
     BLOCK_SELECTION_CLASS,
     clearBlockSelectionMode,
@@ -1034,6 +1035,17 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (selectText === "" && range.collapsed && !nodeElement.classList.contains("av")) {
                 let adjacentElement = toPrevious ? getPreviousBlock(nodeElement) :
                     (toNext ? getNextBlock(nodeElement) : undefined);
+                const calloutTitleNavigationTarget =
+                    (event.key === "ArrowUp" && toPrevious || event.key === "ArrowDown" && toNext) ?
+                        getCalloutTitleNavigationTarget(nodeElement, adjacentElement, event.key) : undefined;
+                if (calloutTitleNavigationTarget) {
+                    range.selectNodeContents(calloutTitleNavigationTarget);
+                    range.collapse(event.key === "ArrowDown");
+                    focusByRange(range);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
                 if (adjacentElement) {
                     adjacentElement = toPrevious ? getLastBlock(adjacentElement) : getFirstBlock(adjacentElement);
                     // 显式聚焦空段落，避免浏览器跨越容器边界时跳过该块。

@@ -1,4 +1,11 @@
 {
+	"syncAssetSnapshotIncomplete": "Il contenuto di alcune risorse dipende dall’archiviazione cloud; questa istantanea locale è incompleta",
+	"syncAssetDownloadMode": "Download delle risorse",
+	"syncAssetDownloadModeTip": "Si applica solo a questo dispositivo. Le risorse su richiesta vengono scaricate quando utilizzate e non sono disponibili offline fino ad allora. Le risorse scaricate vengono conservate e aggiornate durante la sincronizzazione. Il passaggio a Scarica tutto scarica prima le risorse mancanti",
+	"syncAssetDownloadAll": "Scarica tutto",
+	"syncAssetDownloadOnDemand": "Scarica su richiesta",
+	"syncAssetDownloadModeUpdating": "Aggiornamento della modalità di download delle risorse...",
+	"syncAssetDownloadModeFailed": "Impossibile aggiornare la modalità di download delle risorse",
 	"globalDefaultFont": "Carattere predefinito globale",
 	"globalDefaultFontTip": "Usato per l'interfaccia e i contenuti senza un carattere specifico; lascia vuota la selezione per usare il carattere predefinito del tema",
 	"mobileMultiSelectTip": "Tocca i blocchi per selezionarli o deselezionarli",
@@ -2696,6 +2703,8 @@
 		"372": "Il taccuino è stato ripristinato e rimane chiuso",
 		"373": "Questo archivio contiene dati di un taccuino. Importalo da [Albero dei documenti - Altro - Importa taccuino]",
 		"374": "Database [%s], campo modello [%s], primo elemento interessato [%s] (ID elemento: %s), numero di elementi interessati: %d, errore: %s",
-		"375": "Il taccuino per il salvataggio delle note rapide non è disponibile. Seleziona un taccuino aperto e non crittografato in Impostazioni - Documento"
+		"375": "Il taccuino per il salvataggio delle note rapide non è disponibile. Seleziona un taccuino aperto e non crittografato in Impostazioni - Documento",
+		"376": "La risorsa non è ancora stata scaricata e al momento non può essere recuperata",
+		"377": "Passa a Scarica tutto prima di cambiare o reimpostare il repository dei dati"
 	}
 }

@@ -188,6 +188,9 @@ func GetCurrentWorkspacePath() *C.char {
 //export GetAssetAbsPath
 func GetAssetAbsPath(relativePath *C.char) *C.char {
 	absPath, err := model.GetAssetAbsPath(C.GoString(relativePath))
+	if err == nil {
+		err = model.EnsureAssetLocal(absPath)
+	}
 	if nil != err {
 		logging.LogErrorf("get asset abs path failed: %s", err)
 		return relativePath
@@ -273,6 +276,9 @@ func GetExportFilePath(exportPath *C.char) *C.char {
 	} else if strings.HasPrefix(pathStr, "assets/") {
 		var err error
 		absPath, err = model.GetAssetAbsPath(pathStr)
+		if err == nil {
+			err = model.EnsureAssetLocal(absPath)
+		}
 		if nil != err {
 			logging.LogErrorf("get asset abs path [%s] failed: %s", pathStr, err)
 			return nil

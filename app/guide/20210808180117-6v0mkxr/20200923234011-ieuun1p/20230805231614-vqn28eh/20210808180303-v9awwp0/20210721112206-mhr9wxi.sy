@@ -6,7 +6,7 @@
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260905191024"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210721112403-8no39l4",
-				"updated": "20250218121000"
+				"updated": "20260905184908"
 			},
 			"Children": [
 				{
@@ -29,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210721112403-0ft3r91",
-				"updated": "20250218121000"
+				"updated": "20260905184908"
 			},
 			"Children": [
 				{
@@ -43,7 +43,133 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ folder data consistent on multiple devices, includes assets, custom icons, plugins, code snippets, templates, widgets, and document data."
+					"Data": "​ folder logically consistent across devices, including assets, custom icons, plugins, code snippets, templates, widgets, and document data. With on-demand downloads, some asset content may not yet be stored on this device."
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-022q2es",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260905184908-022q2es",
+				"updated": "20260905191024"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Asset downloads"
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-jpha7l7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905184908-jpha7l7",
+				"updated": "20260905184908"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Choose Download all or Download on demand in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Account & Sync"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Asset downloads"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". This setting applies only to the current device."
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-5jlxwbn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905184908-5jlxwbn",
+				"updated": "20260905184908"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Download all is the default. On-demand mode still fully syncs documents, database definitions, and the asset list. Required assets are downloaded when displaying images, audio, video, PDFs, or other content, or when opening asset links. Encrypted notebook assets still require the notebook to be unlocked."
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-2t2p88b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905184908-2t2p88b",
+				"updated": "20260905184908"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Downloaded assets remain on this device and continue to receive updates during subsequent syncs. Enabling on-demand downloads does not remove existing files or immediately free their storage space."
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-bb2w63n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905184908-bb2w63n",
+				"updated": "20260905191024"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Assets that have not been downloaded are unavailable offline, and an error is reported if they cannot be retrieved. Switching to Download all first downloads the content needed by current assets and all retained local snapshots, which may include historical versions. If downloading fails, the previous mode is retained; reconnect and try again."
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-yzvkosv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905184908-yzvkosv",
+				"updated": "20260905184908"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Local snapshots in on-demand mode may depend on cloud storage and must not be treated as complete offline backups. Downloading a complete snapshot, and exports or recovery operations that need asset content, first download the required assets and report an error if they cannot be retrieved."
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-1wxzlh9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905184908-1wxzlh9",
+				"updated": "20260905184908"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Before changing the sync target, resetting the data repository, or opening this workspace with an older version, switch to Download all and finish downloading to preserve access to assets that are not yet stored locally."
 				}
 			]
 		},

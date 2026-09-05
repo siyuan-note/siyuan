@@ -17,12 +17,62 @@
 package model
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestExportAssetCopyFailureReturnsNoOutput(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	originalWorkspaceDir := util.WorkspaceDir
+	util.WorkspaceDir = filepath.Dir(util.DataDir)
+	t.Cleanup(func() { util.WorkspaceDir = originalWorkspaceDir })
+	Conf.Editor = conf.NewEditor()
+	Conf.Export = conf.NewExport()
+	Conf.Appearance = conf.NewAppearance()
+	Conf.Search = conf.NewSearch()
+	Conf.System = conf.NewSystem()
+	assetPath := "assets/export-20260905000000-abcdefg.html"
+	absPath := filepath.Join(util.DataDir, assetPath)
+	if err := os.MkdirAll(filepath.Dir(absPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(absPath, []byte("asset content"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	tree := addFileOperationTestDoc(t, fixture, "20260905000001-abcdefg", "Export copy failure", false)
+	tree.Root.AppendChild(&ast.Node{Type: ast.NodeIFrame, Tokens: []byte(`<iframe src="` + assetPath + `"></iframe>`)})
+	if _, err := filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+
+	savePath := t.TempDir()
+	if err := os.WriteFile(filepath.Join(savePath, "assets"), []byte("blocks asset directory"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	for _, docx := range []bool{false, true} {
+		name, dom, err := exportMarkdownHTML(tree.ID, savePath, docx, false)
+		if err == nil || !strings.Contains(err.Error(), "assets") {
+			t.Fatalf("expected asset copy failure for docx=%v, got %v", docx, err)
+		}
+		if name != "" || dom != "" {
+			t.Fatalf("failed markdown HTML export returned output: name=%q, dom=%q", name, dom)
+		}
+	}
+	if name, dom := ExportMarkdownHTML(tree.ID, savePath, false, false); name != "" || dom != "" {
+		t.Fatalf("failed public markdown HTML export returned output: name=%q, dom=%q", name, dom)
+	}
+	if name, dom, node := ExportHTMLWithTitle(tree.ID, savePath, false, false, false, false, ""); name != "" || dom != "" || node != nil {
+		t.Fatalf("failed HTML export returned output: name=%q, dom=%q, node=%v", name, dom, node)
+	}
+}
 
 func TestResolveExportAssetPaths(t *testing.T) {
 	const (

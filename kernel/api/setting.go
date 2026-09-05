@@ -1113,6 +1113,11 @@ func getCloudUser(c *gin.Context) {
 		ret.Data = nil
 		return
 	}
+	if model.IsCloudAssetSourceChange(err) {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		return
+	}
 	ret.Code = 1
 	ret.Msg = model.Conf.Language(18)
 }

@@ -1,4 +1,11 @@
 {
+	"syncAssetSnapshotIncomplete": "部分资源文件内容依赖云端，本地快照尚不完整",
+	"syncAssetDownloadMode": "资源文件下载",
+	"syncAssetDownloadModeTip": "仅作用于当前设备；按需模式在使用资源文件时下载，未下载的资源文件离线不可用；已下载资源文件会保留并随同步更新；切换为全部下载前会先补齐缺失内容",
+	"syncAssetDownloadAll": "全部下载",
+	"syncAssetDownloadOnDemand": "按需下载",
+	"syncAssetDownloadModeUpdating": "正在更新资源文件下载模式...",
+	"syncAssetDownloadModeFailed": "无法更新资源文件下载模式",
 	"globalDefaultFont": "全局默认字体",
 	"globalDefaultFontTip": "用于界面和未单独设置字体的内容，不选择任何字体时使用主题默认字体",
 	"mobileMultiSelectTip": "轻点块以选中或取消选中",
@@ -2696,6 +2703,8 @@
 		"372": "笔记本已回滚并保持关闭状态",
 		"373": "该压缩包包含笔记本数据，请从 [文档树 - 更多 - 导入笔记本] 中导入",
 		"374": "数据库 [%s]，模板字段 [%s]，首个出错条目 [%s]（项目 ID：%s），出错条目数：%d，错误：%s",
-		"375": "闪念速记存放笔记本不可用，请在设置 - 文档中选择一个已打开的非加密笔记本"
+		"375": "闪念速记存放笔记本不可用，请在设置 - 文档中选择一个已打开的非加密笔记本",
+		"376": "资源文件尚未下载，当前无法获取",
+		"377": "请先切换为全部下载，再更换或重置数据仓库"
 	}
 }

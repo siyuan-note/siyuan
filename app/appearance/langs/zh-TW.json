@@ -1,4 +1,11 @@
 {
+	"syncAssetSnapshotIncomplete": "部分資源檔案內容依賴雲端，本機快照尚不完整",
+	"syncAssetDownloadMode": "資源檔案下載",
+	"syncAssetDownloadModeTip": "僅套用於目前裝置；按需模式會在使用資源檔案時下載，尚未下載的資源檔案無法離線使用；已下載的資源檔案會保留並隨同步更新；切換為全部下載前會先補齊缺少的內容",
+	"syncAssetDownloadAll": "全部下載",
+	"syncAssetDownloadOnDemand": "按需下載",
+	"syncAssetDownloadModeUpdating": "正在更新資源檔案下載模式...",
+	"syncAssetDownloadModeFailed": "無法更新資源檔案下載模式",
 	"globalDefaultFont": "全域預設字型",
 	"globalDefaultFontTip": "用於介面和未個別設定字型的內容，未選擇任何字型時使用佈景主題的預設字型",
 	"mobileMultiSelectTip": "輕點區塊以選取或取消選取",
@@ -2696,6 +2703,8 @@
 		"372": "筆記本已回滾並保持關閉狀態",
 		"373": "該壓縮檔包含筆記本資料，請從 [文件樹 - 更多 - 導入筆記本] 中導入",
 		"374": "資料庫 [%s]，範本欄位 [%s]，第一個出錯項目 [%s]（項目 ID：%s），出錯項目數：%d，錯誤：%s",
-		"375": "閃念速記存放筆記本不可用，請在設定 - 文件中選擇一個已開啟的非加密筆記本"
+		"375": "閃念速記存放筆記本不可用，請在設定 - 文件中選擇一個已開啟的非加密筆記本",
+		"376": "資源檔案尚未下載，目前無法取得",
+		"377": "請先切換為全部下載，再更換或重設資料倉庫"
 	}
 }

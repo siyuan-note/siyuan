@@ -1,4 +1,11 @@
 {
+	"syncAssetSnapshotIncomplete": "Some asset content depends on cloud storage; this local snapshot is incomplete",
+	"syncAssetDownloadMode": "Asset downloads",
+	"syncAssetDownloadModeTip": "Applies only to this device. On-demand assets are downloaded when used and unavailable offline until downloaded. Downloaded assets are kept and updated during sync. Switching to Download all first downloads missing assets",
+	"syncAssetDownloadAll": "Download all",
+	"syncAssetDownloadOnDemand": "Download on demand",
+	"syncAssetDownloadModeUpdating": "Updating asset download mode...",
+	"syncAssetDownloadModeFailed": "Unable to update asset download mode",
 	"globalDefaultFont": "Global Default Font",
 	"globalDefaultFontTip": "Used for the interface and content without a separate font setting; leave empty to use the theme's default font",
 	"mobileMultiSelectTip": "Tap blocks to select or deselect them",
@@ -2696,6 +2703,8 @@
 		"372": "The notebook has been restored and remains closed",
 		"373": "This archive contains notebook data. Please import it from [Document Tree - More - Import Notebook]",
 		"374": "Database [%s], template field [%s], first affected item [%s] (item ID: %s), affected item count: %d, error: %s",
-		"375": "The shorthand save notebook is unavailable. Select an opened non-encrypted notebook in Settings - Document"
+		"375": "The shorthand save notebook is unavailable. Select an opened non-encrypted notebook in Settings - Document",
+		"376": "The asset has not been downloaded and cannot be retrieved right now",
+		"377": "Please switch to Download all before changing or resetting the data repository"
 	}
 }

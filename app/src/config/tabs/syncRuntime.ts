@@ -1,6 +1,7 @@
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {processSync} from "../../dialog/processSystem";
 import {updateAccountPanelVisibility} from "./accountUi";
+import {showMessage} from "../../dialog/message";
 import {
     refreshLANSyncConfigItemVisibility,
     refreshSyncModeRelatedItems,
@@ -9,6 +10,43 @@ import {
 
 /** 账号同步 Tab 根节点 */
 export let syncTabElement: HTMLElement | undefined;
+
+let syncAssetDownloadModePending = false;
+
+/** 切换资源下载模式时显示进度，并阻止重复提交。 */
+export const mountSyncAssetDownloadMode = (root: ParentNode) => {
+    root.querySelectorAll<HTMLSelectElement>('[id="sync.assetDownloadMode"]').forEach((element) => {
+        element.disabled = syncAssetDownloadModePending || window.siyuan.config.readonly;
+        element.setAttribute("aria-busy", String(syncAssetDownloadModePending));
+        if (!syncAssetDownloadModePending) {
+            element.value = String(window.siyuan.config.sync.assetDownloadMode ?? 0);
+        }
+    });
+    root.querySelectorAll<HTMLElement>('[data-type="syncAssetDownloadStatus"]').forEach((element) => {
+        element.textContent = syncAssetDownloadModePending ? window.siyuan.languages.syncAssetDownloadModeUpdating : "";
+    });
+};
+
+const setSyncAssetDownloadMode = async (mode: Config.ISync["assetDownloadMode"]) => {
+    if (syncAssetDownloadModePending || (mode !== 0 && mode !== 1)) {
+        mountSyncAssetDownloadMode(document);
+        return;
+    }
+    syncAssetDownloadModePending = true;
+    mountSyncAssetDownloadMode(document);
+    try {
+        const response = await fetchSyncPost("/api/sync/setSyncAssetDownloadMode", {mode});
+        if (response.code === 0) {
+            window.siyuan.config.sync.assetDownloadMode = response.data.assetDownloadMode;
+        }
+    } catch (error) {
+        console.warn("[config] failed to update asset download mode", error);
+        showMessage(window.siyuan.languages.syncAssetDownloadModeFailed, 5000, "error");
+    } finally {
+        syncAssetDownloadModePending = false;
+        mountSyncAssetDownloadMode(document);
+    }
+};
 
 /** 释放 Tab 根节点引用；传入 root 时仅释放对应挂载，避免影响其他设置入口 */
 export const clearSyncTabElement = (root?: HTMLElement) => {
@@ -115,6 +153,9 @@ export const patchSyncConfig = (controlId: string, value: unknown) => {
                 }
             });
             break;
+        }
+        case "sync.assetDownloadMode": {
+            return setSyncAssetDownloadMode(value as Config.ISync["assetDownloadMode"]);
         }
         case "sync.interval": {
             const interval = value as Config.ISync["interval"];

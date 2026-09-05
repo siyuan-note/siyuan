@@ -1804,6 +1804,10 @@ declare namespace Config {
          */
         generateConflictDoc: boolean;
         /**
+         * 当前设备的资源下载模式，0：全部下载，1：按需下载。
+         */
+        assetDownloadMode: 0 | 1;
+        /**
          * Synchronization mode
          * - `0`: Not set
          * - `1`: Automatic synchronization

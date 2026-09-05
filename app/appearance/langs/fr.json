@@ -1,4 +1,11 @@
 {
+	"syncAssetSnapshotIncomplete": "Le contenu de certaines ressources dépend du stockage cloud ; cet instantané local est incomplet",
+	"syncAssetDownloadMode": "Téléchargement des ressources",
+	"syncAssetDownloadModeTip": "S’applique uniquement à cet appareil. Les ressources à la demande sont téléchargées lors de leur utilisation et restent indisponibles hors ligne jusque-là. Les ressources téléchargées sont conservées et mises à jour lors de la synchronisation. Le passage à Tout télécharger commence par télécharger les ressources manquantes",
+	"syncAssetDownloadAll": "Tout télécharger",
+	"syncAssetDownloadOnDemand": "Télécharger à la demande",
+	"syncAssetDownloadModeUpdating": "Mise à jour du mode de téléchargement des ressources...",
+	"syncAssetDownloadModeFailed": "Impossible de mettre à jour le mode de téléchargement des ressources",
 	"globalDefaultFont": "Police globale par défaut",
 	"globalDefaultFontTip": "Utilisée pour l'interface et le contenu sans police spécifique ; ne sélectionnez aucune police pour utiliser celle du thème",
 	"mobileMultiSelectTip": "Touchez les blocs pour les sélectionner ou les désélectionner",
@@ -2696,6 +2703,8 @@
 		"372": "Le carnet a été restauré et reste fermé",
 		"373": "Cette archive contient des données de carnet. Veuillez l’importer depuis [Arborescence des documents - Plus - Importer un carnet]",
 		"374": "Base de données [%s], champ de modèle [%s], premier élément affecté [%s] (ID de l’élément : %s), nombre d’éléments affectés : %d, erreur : %s",
-		"375": "Le carnet d’enregistrement des notes rapides n’est pas disponible. Sélectionnez un carnet ouvert et non chiffré dans Paramètres - Document"
+		"375": "Le carnet d’enregistrement des notes rapides n’est pas disponible. Sélectionnez un carnet ouvert et non chiffré dans Paramètres - Document",
+		"376": "La ressource n’a pas encore été téléchargée et ne peut pas être récupérée actuellement",
+		"377": "Veuillez passer à Tout télécharger avant de modifier ou de réinitialiser le dépôt de données"
 	}
 }

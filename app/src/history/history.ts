@@ -218,6 +218,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         systemName: string,
         systemOS: string,
         tag: string,
+        requiresDownload?: boolean,
         typesCount: { type: string, count: number }[]
     }) => {
         let statHTML = "";
@@ -238,6 +239,8 @@ ${window.siyuan.languages.fileCount} ${item.count}<span class="fn__space"></span
     <span class="fn__space"></span>
     <span class="b3-chip b3-chip--secondary b3-chip--small${item.tag ? "" : " fn__none"}">${item.tag}</span>
 </div>
+${item.requiresDownload && ["getRepoTagSnapshots", "getRepoSnapshots"].includes(type) ?
+    `<div class="ft__smaller ft__error" style="white-space:normal">${escapeHtml(window.siyuan.languages.syncAssetSnapshotIncomplete)}</div>` : ""}
 <div class="b3-list-item__meta${isPhone ? " fn__none" : ""}">
     ${escapeHtml(item.memo)}
     <span class="fn__space"></span>

@@ -10,7 +10,7 @@ import {bindSyncCloudListEvent, renderSyncCloudList, setKey} from "../../sync/sy
 import {Dialog} from "../../dialog";
 import {genConfigItemMainHtml, genConfigItemName} from "../render/fragments";
 import {getLANSyncSearchAvailability, getSyncProviderConfigKeywords} from "./syncUi";
-import {mountLANSyncStatus, patchSyncConfig} from "./syncRuntime";
+import {mountLANSyncStatus, mountSyncAssetDownloadMode, patchSyncConfig} from "./syncRuntime";
 import {openHistory} from "../../history/history";
 
 const registerSyncGroup = (tab: SettingTabBuilder) => {
@@ -56,6 +56,16 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
             {value: 3, label: window.siyuan.languages.syncMode3},
         ],
         save: (value) => patchSyncConfig("sync.mode", value),
+    });
+    group.select("sync.assetDownloadMode", {
+        title: window.siyuan.languages.syncAssetDownloadMode,
+        desc: `${window.siyuan.languages.syncAssetDownloadModeTip}<div data-type="syncAssetDownloadStatus" role="status"></div>`,
+        options: [
+            {value: 0, label: window.siyuan.languages.syncAssetDownloadAll},
+            {value: 1, label: window.siyuan.languages.syncAssetDownloadOnDemand},
+        ],
+        save: (value) => patchSyncConfig("sync.assetDownloadMode", value),
+        afterMount: mountSyncAssetDownloadMode,
     });
     group.number("sync.interval", {
         title: window.siyuan.languages.syncInterval,

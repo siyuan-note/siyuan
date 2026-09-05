@@ -1,4 +1,11 @@
 {
+	"syncAssetSnapshotIncomplete": "Obsah niektorých zdrojových súborov závisí od cloudového úložiska; táto lokálna snímka je neúplná",
+	"syncAssetDownloadMode": "Sťahovanie zdrojových súborov",
+	"syncAssetDownloadModeTip": "Platí iba pre toto zariadenie. Súbory na požiadanie sa sťahujú pri použití a dovtedy nie sú dostupné offline. Stiahnuté súbory sa uchovávajú a aktualizujú počas synchronizácie. Pri prepnutí na Stiahnuť všetky sa najprv stiahnu chýbajúce súbory",
+	"syncAssetDownloadAll": "Stiahnuť všetky",
+	"syncAssetDownloadOnDemand": "Sťahovať na požiadanie",
+	"syncAssetDownloadModeUpdating": "Aktualizuje sa režim sťahovania zdrojových súborov...",
+	"syncAssetDownloadModeFailed": "Režim sťahovania zdrojových súborov sa nedá aktualizovať",
 	"globalDefaultFont": "Globálne predvolené písmo",
 	"globalDefaultFontTip": "Používa sa pre rozhranie a obsah bez samostatného nastavenia písma; bez výberu sa použije predvolené písmo témy",
 	"mobileMultiSelectTip": "Ťuknutím na bloky ich vyberiete alebo zrušíte ich výber",
@@ -2696,6 +2703,8 @@
 		"372": "Zápisník bol obnovený a zostáva zatvorený",
 		"373": "Tento archív obsahuje údaje zápisníka. Importujte ho cez [Strom dokumentov - Viac - Importovať zápisník]",
 		"374": "Databáza [%s], pole šablóny [%s], prvá ovplyvnená položka [%s] (ID položky: %s), počet ovplyvnených položiek: %d, chyba: %s",
-		"375": "Zápisník na ukladanie rýchlych poznámok nie je k dispozícii. Vyberte otvorený nezašifrovaný zápisník v Nastavenia - Dokument"
+		"375": "Zápisník na ukladanie rýchlych poznámok nie je k dispozícii. Vyberte otvorený nezašifrovaný zápisník v Nastavenia - Dokument",
+		"376": "Zdrojový súbor ešte nebol stiahnutý a momentálne ho nemožno získať",
+		"377": "Pred zmenou alebo obnovením dátového úložiska prepnite na Stiahnuť všetky"
 	}
 }

@@ -31,7 +31,7 @@ export const wrapPastedTabItems = (root: Element, lute: Lute) => {
             return;
         }
         const template = document.createElement("template");
-        template.innerHTML = lute.Md2BlockDOM(":::tabs\n:::tab\n:::\n:::\n");
+        template.innerHTML = lute.Md2BlockDOM("::: tabs\n@tab\n\n:::\n");
         const tabs = template.content.firstElementChild;
         tabs.querySelector(":scope > .tab-item").remove();
         item.before(tabs);

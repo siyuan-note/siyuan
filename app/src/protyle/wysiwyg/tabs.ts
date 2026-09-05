@@ -34,7 +34,7 @@ const changeTabs = (protyle: IProtyle, elements: HTMLElement[], change: () => vo
 
 const newTab = (protyle: IProtyle) => {
     const template = document.createElement("template");
-    template.innerHTML = protyle.lute.Md2BlockDOM(":::tabs\n:::tab\n\n:::\n:::\n");
+    template.innerHTML = protyle.lute.Md2BlockDOM("::: tabs\n@tab\n\n:::\n");
     return template.content.querySelector<HTMLElement>(".tab-item");
 };
 

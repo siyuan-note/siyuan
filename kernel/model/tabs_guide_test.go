@@ -43,6 +43,11 @@ func TestTabsUserGuideExamplesRoundTrip(t *testing.T) {
 			}
 			fragment := &parse.Tree{Root: n}
 			dom := l.Tree2BlockDOM(fragment, l.RenderOptions, l.ParseOptions)
+			markdown := l.BlockDOM2Md(dom)
+			if !strings.Contains(markdown, ":::: tabs\n") || !strings.Contains(markdown, "\n::: tabs\n") ||
+				strings.Count(markdown, "@tab:active ") != 2 || strings.Contains(markdown, ":::tab") {
+				t.Fatalf("%s: unexpected nested tabs syntax\n%s", path, markdown)
+			}
 			spun := l.SpinBlockDOM(dom)
 			for _, id := range n.BlockIDs() {
 				if !strings.Contains(spun, id) {

@@ -3487,6 +3487,11 @@ export class WYSIWYG {
             if (selectElements.length > 1 ||
                 getBlockSelectionModeElement(protyle.wysiwyg.element) && selectElements.length > 0) {
                 // 多选块
+                if (!protyle.gutter) {
+                    event.preventDefault();
+                    window.siyuan.menus.menu.remove();
+                    return;
+                }
                 hideElements(["util"], protyle);
                 protyle.gutter.renderMenu(protyle, selectElements[0]);
                 window.siyuan.menus.menu.popup({x, y});
@@ -3495,6 +3500,11 @@ export class WYSIWYG {
             const target = event.detail.target || event.target as HTMLElement;
             const embedElement = isInEmbedBlock(target);
             if (embedElement) {
+                if (!protyle.gutter) {
+                    event.preventDefault();
+                    window.siyuan.menus.menu.remove();
+                    return;
+                }
                 if (getSelection().rangeCount === 0) {
                     focusSideBlock(embedElement);
                 }
@@ -3690,6 +3700,11 @@ export class WYSIWYG {
                     }
                 }
             } else if (protyle.toolbar.range.toString() === "") {
+                if (!protyle.gutter) {
+                    event.preventDefault();
+                    window.siyuan.menus.menu.remove();
+                    return;
+                }
                 hideElements(["util"], protyle);
                 if (protyle.gutter) {
                     protyle.gutter.renderMenu(protyle, nodeElement);
@@ -4789,6 +4804,11 @@ export class WYSIWYG {
 
             const menuElement = hasClosestByClassName(event.target, "protyle-action__menu");
             if (menuElement) {
+                if (!protyle.gutter) {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
                 protyle.gutter.renderMenu(protyle, menuElement.parentElement.parentElement);
                 /// #if MOBILE
                 window.siyuan.menus.menu.fullscreen();

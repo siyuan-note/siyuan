@@ -3,6 +3,10 @@
 @use "wysiwyg" as *;
 @use "attr" as *;
 
+.protyle-lite-fragment .protyle-action__menu {
+  display: none;
+}
+
 .protyle-scroll {
   --b3-dynamicscroll-width: 200px;
   position: absolute;

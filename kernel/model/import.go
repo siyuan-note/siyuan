@@ -496,6 +496,9 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 			err = readErr
 			return
 		}
+		if err = treenode.CheckSpecJSON(data); nil != err {
+			return
+		}
 		tree, _, parseErr := dataparser.ParseJSON(data, luteEngine.ParseOptions)
 		if nil != parseErr {
 			logging.LogErrorf("parse .sy [%s] failed: %s", syPath, parseErr)
@@ -563,8 +566,9 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 
 	// 引用和嵌入指向重新生成的块 ID
 	for _, tree := range trees {
+		treenode.RemapTabsActiveIDs(tree.Root, blockIDs)
 		util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), tree.Root.IALAttr("title")))
-		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		treenode.WalkWithTabTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering {
 				return ast.WalkContinue
 			}

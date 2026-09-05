@@ -1,4 +1,9 @@
 {
+	"tabs": "탭 블록",
+	"tabItem": "탭",
+	"tabsPositionTop": "상단 탭",
+	"tabsPositionLeft": "왼쪽 탭",
+	"tabsUnwrap": "탭 레이아웃 해제",
 	"headingBatch": "제목 수준 일괄 변환",
 	"headingBatchSource": "원본 수준",
 	"headingBatchTarget": "대상 수준",

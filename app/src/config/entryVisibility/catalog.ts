@@ -484,6 +484,7 @@ const slashMenuBuiltinChildren = [
     node("orderedList", lang("ordered-list")),
     node("check", lang("check")),
     node("quote", lang("quote")),
+    node("tabs", lang("tabs")),
     node("calloutNote", location(lang("callout"), literal("Note"))),
     node("calloutTip", location(lang("callout"), literal("Tip"))),
     node("calloutImportant", location(lang("callout"), literal("Important"))),

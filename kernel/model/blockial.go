@@ -359,6 +359,9 @@ func setNodeAttrsWithTx(tx *Transaction, node *ast.Node, tree *parse.Tree, nameV
 }
 
 func setNodeAttrs0(node *ast.Node, nameValues map[string]string, boxID string) (oldAttrs map[string]string, err error) {
+	if err = treenode.ValidateTabsAttrs(node, nameValues); nil != err {
+		return
+	}
 	// 加密笔记本不支持书签和标签（依赖全局 SQLite 聚合，加密笔记本是孤岛）
 	if IsEncryptedBox(boxID) && boxID != "" {
 		for name := range nameValues {

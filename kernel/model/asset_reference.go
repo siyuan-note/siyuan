@@ -166,7 +166,7 @@ func rewriteTreeAssetReferences(tree *parse.Tree, options assetReferenceRewriteO
 		tree.Root.SetIALAttr("title-img", strings.Replace(titleImg, titleImgPath, rewritten, 1))
 	}
 
-	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithTabTitles(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}

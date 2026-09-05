@@ -1,4 +1,9 @@
 {
+	"tabs": "บล็อกแท็บ",
+	"tabItem": "แท็บ",
+	"tabsPositionTop": "แท็บด้านบน",
+	"tabsPositionLeft": "แท็บด้านซ้าย",
+	"tabsUnwrap": "ยกเลิกเค้าโครงแท็บ",
 	"headingBatch": "แปลงระดับหัวเรื่องพร้อมกัน",
 	"headingBatchSource": "ระดับเดิม",
 	"headingBatchTarget": "ระดับเป้าหมาย",

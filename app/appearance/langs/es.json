@@ -1,4 +1,9 @@
 {
+	"tabs": "Bloque con pestañas",
+	"tabItem": "Pestaña",
+	"tabsPositionTop": "Pestañas arriba",
+	"tabsPositionLeft": "Pestañas a la izquierda",
+	"tabsUnwrap": "Quitar la disposición en pestañas",
 	"headingBatch": "Convertir niveles de encabezado en lote",
 	"headingBatchSource": "Nivel original",
 	"headingBatchTarget": "Nivel de destino",

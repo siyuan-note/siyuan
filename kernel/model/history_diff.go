@@ -463,6 +463,9 @@ func loadSnapshotDocVersion(fileID string) (ret *loadedDocVersion, err error) {
 }
 
 func parseDocVersionTree(data []byte, rootID string) (ret *parse.Tree, err error) {
+	if err = treenode.CheckSpecJSON(data); nil != err {
+		return
+	}
 	luteEngine := NewLute()
 	ret, _, err = dataparser.ParseJSON(data, luteEngine.ParseOptions)
 	if err != nil {
@@ -646,6 +649,8 @@ func docDiffBlockSignatureWithAttributeViews(block *ast.Node, attributeViews map
 	builder.WriteString(block.CalloutType)
 	builder.WriteByte(':')
 	builder.WriteString(block.CalloutTitle)
+	builder.WriteByte(':')
+	builder.WriteString(block.TabItemTitle)
 	builder.WriteByte(':')
 	builder.WriteString(block.CalloutIcon)
 	builder.WriteByte(':')

@@ -43,6 +43,8 @@ type Search struct {
 	IFrameBlock   bool `json:"iframeBlock"`
 	WidgetBlock   bool `json:"widgetBlock"`
 	Callout       bool `json:"callout"`
+	Tabs          bool `json:"tabs"`
+	TabItem       bool `json:"tabItem"`
 
 	Limit         int   `json:"limit"`
 	CaseSensitive bool  `json:"caseSensitive"`
@@ -87,6 +89,8 @@ func NewSearch() *Search {
 		IFrameBlock:   false,
 		WidgetBlock:   false,
 		Callout:       false,
+		Tabs:          false,
+		TabItem:       true,
 
 		Limit:         64,
 		CaseSensitive: false,
@@ -254,6 +258,12 @@ func (s *Search) TypeFilter() string {
 		buf.WriteString(",")
 	}
 
+	if s.Tabs {
+		buf.WriteString("'tabs',")
+	}
+	if s.TabItem {
+		buf.WriteString("'tab',")
+	}
 	ret := buf.String()
 	if "" == ret {
 		return ret

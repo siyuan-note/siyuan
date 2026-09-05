@@ -1,4 +1,9 @@
 {
+	"tabs": "בלוק עם כרטיסיות",
+	"tabItem": "כרטיסייה",
+	"tabsPositionTop": "כרטיסיות למעלה",
+	"tabsPositionLeft": "כרטיסיות משמאל",
+	"tabsUnwrap": "ביטול פריסת הכרטיסיות",
 	"headingBatch": "המרת רמות כותרת באצווה",
 	"headingBatchSource": "רמת המקור",
 	"headingBatchTarget": "רמת היעד",

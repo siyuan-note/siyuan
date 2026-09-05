@@ -1,4 +1,9 @@
 {
+	"tabs": "Blok met tabbladen",
+	"tabItem": "Tabblad",
+	"tabsPositionTop": "Tabbladen bovenaan",
+	"tabsPositionLeft": "Tabbladen links",
+	"tabsUnwrap": "Tabbladindeling opheffen",
 	"headingBatch": "Kopniveaus in één keer omzetten",
 	"headingBatchSource": "Oorspronkelijk niveau",
 	"headingBatchTarget": "Doelniveau",

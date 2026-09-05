@@ -15,6 +15,7 @@ import {copyTextByType} from "../toolbar/util";
 import {hasClosestByTag, hasTopClosestByClassName} from "../util/hasClosest";
 import {removeEmbed} from "./removeEmbed";
 import {clearBlockElement} from "../util/clear";
+import {remapTabsDOMIDs} from "../util/tabsCopy";
 import {isEncryptedBox} from "../../util/pathName";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 import {captureCommandContext} from "../../command/context";
@@ -328,16 +329,19 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
         if (index === nodeElements.length - 1) {
             focusElement = tempElement;
         }
+        const copiedIDs = new Map<string, string>([[tempElement.getAttribute("data-node-id"), newId]]);
         tempElement.setAttribute("data-node-id", newId);
         tempElement.setAttribute("updated", newId.split("-")[0]);
         clearBlockElement(tempElement);
         tempElement.classList.add("protyle-wysiwyg--select");
         tempElement.querySelectorAll("[data-node-id]").forEach(childItem => {
             const subNewId = Lute.NewNodeID();
+            copiedIDs.set(childItem.getAttribute("data-node-id"), subNewId);
             childItem.setAttribute("data-node-id", subNewId);
             childItem.setAttribute("updated", subNewId.split("-")[0]);
             clearBlockElement(childItem);
         });
+        remapTabsDOMIDs(tempElement, copiedIDs);
         if (typeof starIndex === "number") {
             const orderIndex = starIndex + index + 1;
             tempElement.setAttribute("data-marker", (orderIndex) + ".");
@@ -365,13 +369,18 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
             let previousID = newId;
             Array.from(foldElement.content.children).slice(1).forEach((childItem: HTMLElement) => {
                 childItem.removeAttribute("parent-heading");
+                const foldedIDs = new Map<string, string>();
                 childItem.querySelectorAll("[data-node-id]").forEach(subItem => {
-                    subItem.setAttribute("data-node-id", Lute.NewNodeID());
+                    const id = Lute.NewNodeID();
+                    foldedIDs.set(subItem.getAttribute("data-node-id"), id);
+                    subItem.setAttribute("data-node-id", id);
                     clearBlockElement(subItem);
                 });
                 const newChildId = Lute.NewNodeID();
+                foldedIDs.set(childItem.getAttribute("data-node-id"), newChildId);
                 childItem.setAttribute("data-node-id", newChildId);
                 clearBlockElement(childItem);
+                remapTabsDOMIDs(childItem, foldedIDs);
                 doOperations.push({
                     context: {
                         ignoreProcess: "true"

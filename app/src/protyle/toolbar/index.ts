@@ -594,7 +594,7 @@ export class Toolbar {
                     isInEmbedBlock(candidate)) {
                     return;
                 }
-                if (candidate.getAttribute("data-type") === "NodeCallout") {
+                if (["NodeCallout", "NodeTabItem"].includes(candidate.getAttribute("data-type"))) {
                     const titleElement = candidate.querySelector<HTMLElement>(
                         ":scope > .callout-info > .callout-title");
                     if (titleElement && !editableElements.has(titleElement)) {

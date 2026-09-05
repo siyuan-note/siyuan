@@ -870,7 +870,8 @@ func RenderTemplateWithMode(p, id string, mode TemplateRenderMode) (tree *parse.
 
 	// 用映射成套改写模板内部的自引用，并补全指向外部块的引用锚文本
 	// 仅命中 blockIDs 的引用（模板内部块）才会改写 ID；未命中的（外部块）保持不变
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.RemapTabsActiveIDs(tree.Root, blockIDs)
+	treenode.WalkWithTabTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}

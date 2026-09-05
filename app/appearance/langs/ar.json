@@ -1,4 +1,9 @@
 {
+	"tabs": "كتلة بعلامات تبويب",
+	"tabItem": "علامة تبويب",
+	"tabsPositionTop": "علامات التبويب بالأعلى",
+	"tabsPositionLeft": "علامات التبويب على اليسار",
+	"tabsUnwrap": "إلغاء تخطيط علامات التبويب",
 	"headingBatch": "تحويل مستويات العناوين دفعة واحدة",
 	"headingBatchSource": "المستوى الأصلي",
 	"headingBatchTarget": "المستوى المستهدف",

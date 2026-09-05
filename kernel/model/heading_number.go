@@ -146,6 +146,7 @@ func collectOutlineHeadings(tree *parse.Tree) (ret []*ast.Node) {
 		if entering && ast.NodeHeading == n.Type &&
 			!n.ParentIs(ast.NodeBlockquote) &&
 			!n.ParentIs(ast.NodeCallout) &&
+			!n.ParentIs(ast.NodeTabItem) &&
 			!n.ParentIs(ast.NodeBlockQueryEmbed) {
 			ret = append(ret, n)
 			return ast.WalkSkipChildren

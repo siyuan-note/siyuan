@@ -1,4 +1,9 @@
 {
+	"tabs": "Blocco con schede",
+	"tabItem": "Scheda",
+	"tabsPositionTop": "Schede in alto",
+	"tabsPositionLeft": "Schede a sinistra",
+	"tabsUnwrap": "Rimuovi il layout a schede",
 	"headingBatch": "Converti i livelli dei titoli in blocco",
 	"headingBatchSource": "Livello originale",
 	"headingBatchTarget": "Livello di destinazione",

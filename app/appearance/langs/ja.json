@@ -1,4 +1,9 @@
 {
+	"tabs": "タブブロック",
+	"tabItem": "タブ",
+	"tabsPositionTop": "上部タブ",
+	"tabsPositionLeft": "左側タブ",
+	"tabsUnwrap": "タブレイアウトを解除",
 	"headingBatch": "見出しレベルを一括変換",
 	"headingBatchSource": "元のレベル",
 	"headingBatchTarget": "変換先のレベル",

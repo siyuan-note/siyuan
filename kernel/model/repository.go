@@ -724,6 +724,9 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 		}
 
 		var tree *parse.Tree
+		if err = treenode.CheckSpecJSON(data); nil != err {
+			return
+		}
 		tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 		if err != nil {
 			logging.LogErrorf("parse file [%s] failed: %s", fileID, err)
@@ -793,6 +796,9 @@ func decryptRepoDataIfNeeded(data []byte, filePath string) ([]byte, error) {
 func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isLargeDoc bool, tree *parse.Tree, err error) {
 	isLargeDoc = 1024*1024*1 <= len(data)
 	// 调用方必须先根据快照路径完成解密，解析层不处理密文。
+	if err = treenode.CheckSpecJSON(data); nil != err {
+		return
+	}
 	tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if err != nil {
 		return
@@ -938,6 +944,9 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 	if strings.HasSuffix(file.Path, ".sy") {
 		var tree *parse.Tree
 		luteEngine := NewLute()
+		if err = treenode.CheckSpecJSON(data); nil != err {
+			return
+		}
 		tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 		if err != nil {
 			logging.LogErrorf("parse file [%s] failed: %s", id, err)

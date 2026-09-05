@@ -1,3 +1,4 @@
+import {revealTabsForTarget} from "../protyle/render/tabsRender";
 import {hasClosestBlock, isInEmbedBlock} from "../protyle/util/hasClosest";
 import {focusByRange, getEditorRange} from "../protyle/util/selection";
 import {getStartScrollTop} from "./highlightPosition";
@@ -45,6 +46,9 @@ export const scrollCenter = (
     position: ScrollLogicalPosition = "nearest",
     behavior: ScrollBehavior = "auto"
 ) => {
+    if (nodeElement) {
+        revealTabsForTarget(nodeElement);
+    }
     if (!protyle.disabled && !nodeElement && getSelection().rangeCount > 0) {
         const range = getSelection().getRangeAt(0);
         const blockElement = hasClosestBlock(range.startContainer);

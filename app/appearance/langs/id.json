@@ -1,4 +1,9 @@
 {
+	"tabs": "Blok bertab",
+	"tabItem": "Tab",
+	"tabsPositionTop": "Tab di atas",
+	"tabsPositionLeft": "Tab di kiri",
+	"tabsUnwrap": "Hapus tata letak tab",
 	"headingBatch": "Konversi tingkat judul secara massal",
 	"headingBatchSource": "Tingkat asal",
 	"headingBatchTarget": "Tingkat tujuan",

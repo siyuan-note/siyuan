@@ -233,6 +233,8 @@ declare class Lute {
 
     public SetCallout(enable: boolean): void;
 
+    public SetTabs(enable: boolean): void;
+
     public SetCustomBlock(enable: boolean): void;
 
     public SetTag(enable: boolean): void;

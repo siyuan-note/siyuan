@@ -1,4 +1,9 @@
 {
+	"tabs": "Bloc à onglets",
+	"tabItem": "Onglet",
+	"tabsPositionTop": "Onglets en haut",
+	"tabsPositionLeft": "Onglets à gauche",
+	"tabsUnwrap": "Supprimer la disposition en onglets",
 	"headingBatch": "Convertir les niveaux de titre par lot",
 	"headingBatchSource": "Niveau d’origine",
 	"headingBatchTarget": "Niveau cible",

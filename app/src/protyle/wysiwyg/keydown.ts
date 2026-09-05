@@ -1,4 +1,5 @@
 import {hideElements} from "../ui/hideElements";
+import {isTabTextBoundary} from "./tabsBoundary";
 import {isNotCtrl, isOnlyMeta, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
     focusBlock,
@@ -343,6 +344,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         const blockSelectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
+        if (!blockSelectionModeElement && !event.isComposing && !event.ctrlKey && !event.metaKey &&
+            ["Backspace", "Delete"].includes(event.key) &&
+            !protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") &&
+            isTabTextBoundary(range, event.key === "Backspace")) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         const calloutTitleElement = hasClosestByClassName(range.startContainer, "callout-title");
         const verticalGoalX = prepareVerticalNavigation(editorElement, event, range, nodeElement,
             nodeElement.classList.contains("av") ? getAVVerticalGoalX(nodeElement) : undefined);

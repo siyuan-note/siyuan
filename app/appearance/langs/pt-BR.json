@@ -1,4 +1,9 @@
 {
+	"tabs": "Bloco com abas",
+	"tabItem": "Aba",
+	"tabsPositionTop": "Abas no topo",
+	"tabsPositionLeft": "Abas à esquerda",
+	"tabsUnwrap": "Remover layout de abas",
 	"headingBatch": "Converter níveis de título em lote",
 	"headingBatchSource": "Nível original",
 	"headingBatchTarget": "Nível de destino",

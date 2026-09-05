@@ -334,8 +334,8 @@ const promiseTransaction = (options: {
                                 // 列表特殊处理
                                 if (item.firstElementChild?.classList.contains("protyle-action")) {
                                     item.firstElementChild.after(...cloneElements);
-                                } else if (item.classList.contains("callout")) {
-                                    item.querySelector(".callout-content").prepend(...cloneElements);
+                                } else if ((item.classList.contains("callout") || item.classList.contains("tab-item"))) {
+                                    item.querySelector(":scope > .callout-content, :scope > .tab-item-content").prepend(...cloneElements);
                                 } else {
                                     item.prepend(...cloneElements);
                                 }
@@ -455,9 +455,9 @@ const promiseTransaction = (options: {
                                 item.firstElementChild.nextElementSibling?.getAttribute("data-node-id") !== operation.id) {
                                 item.firstElementChild.insertAdjacentHTML("afterend", visibleData);
                                 cursorElements.push(item.firstElementChild.nextElementSibling);
-                            } else if (item.classList.contains("callout") &&
+                            } else if ((item.classList.contains("callout") || item.classList.contains("tab-item")) &&
                                 item.querySelector("[data-node-id]")?.getAttribute("data-node-id") !== operation.id) {
-                                item.querySelector(".callout-content").insertAdjacentHTML("afterbegin", visibleData);
+                                item.querySelector(":scope > .callout-content, :scope > .tab-item-content").insertAdjacentHTML("afterbegin", visibleData);
                                 cursorElements.push(item.querySelector("[data-node-id]"));
                             } else if (item.firstElementChild.getAttribute("data-node-id") !== operation.id) {
                                 item.insertAdjacentHTML("afterbegin", visibleData);
@@ -1139,8 +1139,8 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                             // 列表特殊处理
                             if (item.firstElementChild?.classList.contains("protyle-action")) {
                                 item.firstElementChild.after(...cloneElements);
-                            } else if (item.classList.contains("callout")) {
-                                item.querySelector(".callout-content").prepend(...cloneElements);
+                            } else if ((item.classList.contains("callout") || item.classList.contains("tab-item"))) {
+                                item.querySelector(":scope > .callout-content, :scope > .tab-item-content").prepend(...cloneElements);
                             } else {
                                 item.prepend(...cloneElements);
                             }
@@ -1269,8 +1269,8 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                             if (item.firstElementChild?.classList.contains("protyle-action")) {
                                 item.firstElementChild.insertAdjacentHTML("afterend", visibleData);
                                 cursorElements.push(item.firstElementChild.nextElementSibling);
-                            } else if (item.classList.contains("callout")) {
-                                item.querySelector(".callout-content").insertAdjacentHTML("afterbegin", visibleData);
+                            } else if ((item.classList.contains("callout") || item.classList.contains("tab-item"))) {
+                                item.querySelector(":scope > .callout-content, :scope > .tab-item-content").insertAdjacentHTML("afterbegin", visibleData);
                                 cursorElements.push(item.querySelector("[data-node-id]"));
                             } else {
                                 item.insertAdjacentHTML("afterbegin", visibleData);

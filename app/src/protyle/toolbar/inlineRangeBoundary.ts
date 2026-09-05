@@ -19,7 +19,7 @@ export const canRemoveEmptyInlineElement = (element: Element, editableElement: E
 
 export const normalizeCalloutTitleRange = (range: Range, blockElement: Element,
                                            editableElement: Element) => {
-    if (blockElement.getAttribute("data-type") !== "NodeCallout") {
+    if (!["NodeCallout", "NodeTabItem"].includes(blockElement.getAttribute("data-type"))) {
         return editableElement;
     }
     const titleElement = blockElement.querySelector(":scope > .callout-info > .callout-title");

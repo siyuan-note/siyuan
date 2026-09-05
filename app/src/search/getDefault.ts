@@ -15,6 +15,8 @@ export const getDefaultType = () => {
         table: window.siyuan.config.search.table,
         blockquote: window.siyuan.config.search.blockquote,
         callout: window.siyuan.config.search.callout,
+        tabs: window.siyuan.config.search.tabs,
+        tabItem: window.siyuan.config.search.tabItem,
         superBlock: window.siyuan.config.search.superBlock,
         paragraph: window.siyuan.config.search.paragraph,
         embedBlock: window.siyuan.config.search.embedBlock,

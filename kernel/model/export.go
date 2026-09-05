@@ -3088,6 +3088,8 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 		tagOpenMarker, tagCloseMarker,
 		blockRefTextLeft, blockRefTextRight,
 		addTitle, "", inlineMemo, 0 < len(defBlockIDs), singleFile, accessChecker...)
+	finishTabTitles := treenode.MaterializeTabTitles(tree.Root)
+	defer finishTabTitles()
 	if adjustHeadingLv {
 		bt := treenode.GetBlockTreeInBox(id, tree.Box)
 		adjustHeadingLevel(bt, tree, addTitle)
@@ -3206,6 +3208,7 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 	luteEngine.SetUnorderedListMarker("-")
 	luteEngine.SetImgTag(imgTag)
 	prepareMarkdownFontFamilyTextMarks(tree.Root)
+	finishTabTitles()
 	renderer := render.NewProtyleExportMdRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	ret = gulu.Str.FromBytes(renderer.Render())
 	return
@@ -3245,6 +3248,8 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	// 解析查询嵌入节点
 	depth := 0
 	resolveEmbedR(ret.Root, blockEmbedMode, luteEngine, &[]string{}, &depth, accessChecker...)
+	finishTabTitles := treenode.MaterializeTabTitles(ret.Root)
+	defer finishTabTitles()
 
 	// 将当前文档的块超链接转换为引用
 	blockLink2Ref(ret)
@@ -4475,6 +4480,8 @@ func resolveExportAssetPaths(asset string, assetsOldNew, assetsNewOld map[string
 }
 
 func removeAssetsID(tree *parse.Tree, assetsOldNew, assetsNewOld map[string]string) {
+	finishTabTitles := treenode.MaterializeTabTitles(tree.Root)
+	defer finishTabTitles()
 	assetNodes := getAssetsLinkDestsInTree(tree, false)
 	for _, node := range assetNodes {
 		dests := getAssetsLinkDests(node, false)
@@ -4586,7 +4593,7 @@ func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees map[string
 	}
 	retTrees[tree.ID] = tree
 
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithTabTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}

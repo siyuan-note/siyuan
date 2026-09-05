@@ -1,6 +1,6 @@
 {
 	"ID": "20240530101000-3qhz7br",
-	"Spec": "2",
+	"Spec": "3",
 	"Type": "NodeDocument",
 	"Properties": {
 		"ID": "20240530101000-rgsbrsc",
@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260820124102"
+		"updated": "20260905124213"
 	},
 	"Children": [
 		{
@@ -2064,7 +2064,7 @@
 			"Children": [
 				{
 					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e"
+					"Data": ">"
 				},
 				{
 					"ID": "20240530101000-5cczm4i",
@@ -2233,6 +2233,148 @@
 			]
 		},
 		{
+			"ID": "20260905124213-ar71gu2",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260905124213-ar71gu2",
+				"updated": "20260905124213"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タブブロック"
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-sbrf9s1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905124213-sbrf9s1",
+				"updated": "20260905124213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "/ を入力してタブブロックを選択すると、2 つのタブを作成できます。タイトルをクリックするとタブが切り替わり、ダブルクリックまたはタブメニューからタイトルを編集できます。タイトルはコールアウトと同じインライン書式に対応し、本文にはタブブロックを入れ子にできます。"
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-hlwyrq8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905124213-hlwyrq8",
+				"updated": "20260905124213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タブ右側のメニューで、タブの追加、複製、削除、並べ替え、および上部／左側の配置を選べます。選択中のタブと配置はドキュメントとともに保存・同期されます。読み取り専用画面での切り替えは一時的です。タブ配置を解除すると、すべてのタイトルと本文が順番に残ります。"
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-539fwxw",
+			"Type": "NodeTabs",
+			"Properties": {
+				"id": "20260905124213-539fwxw",
+				"updated": "20260905124213",
+				"tabs-active-id": "20260905124213-yw9eiqm",
+				"tabs-position": "top"
+			},
+			"Children": [
+				{
+					"ID": "20260905124213-yw9eiqm",
+					"Type": "NodeTabItem",
+					"Properties": {
+						"id": "20260905124213-yw9eiqm",
+						"updated": "20260905124213"
+					},
+					"TabItemTitle": "案 1",
+					"Children": [
+						{
+							"ID": "20260905124213-xissq7f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260905124213-xissq7f",
+								"updated": "20260905124213"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最初のタブの本文です。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260905124213-drkz4tl",
+					"Type": "NodeTabItem",
+					"Properties": {
+						"id": "20260905124213-drkz4tl",
+						"updated": "20260905124213"
+					},
+					"TabItemTitle": "案 2",
+					"Children": [
+						{
+							"ID": "20260905124213-bfoxhkx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260905124213-bfoxhkx",
+								"updated": "20260905124213"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "2 番目のタブの本文です。"
+								}
+							]
+						},
+						{
+							"ID": "20260905124213-547v4hx",
+							"Type": "NodeTabs",
+							"Properties": {
+								"id": "20260905124213-547v4hx",
+								"updated": "20260905124213",
+								"tabs-active-id": "20260905124213-rperaj3",
+								"tabs-position": "left"
+							},
+							"Children": [
+								{
+									"ID": "20260905124213-rperaj3",
+									"Type": "NodeTabItem",
+									"Properties": {
+										"id": "20260905124213-rperaj3",
+										"updated": "20260905124213"
+									},
+									"TabItemTitle": "入れ子のタブ",
+									"Children": [
+										{
+											"ID": "20260905124213-zaar54w",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20260905124213-zaar54w",
+												"updated": "20260905124213"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "最初のタブの本文です。"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
 			"ID": "20240530101000-m0yf1fg",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
@@ -2395,7 +2537,7 @@
 			"Children": [
 				{
 					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e "
+					"Data": "> "
 				},
 				{
 					"ID": "20240530101000-zi30x91",
@@ -2716,7 +2858,7 @@
 		{
 			"ID": "20240530101000-h7ilkw7",
 			"Type": "NodeHTMLBlock",
-			"Data": "\u003cdiv\u003e\n\u003cruby\u003e\n你\u003crt\u003enǐ\u003c/rt\u003e\n　好\u003crt\u003e　hǎo\u003c/rt\u003e\n　世\u003crt\u003e　shì\u003c/rt\u003e\n　界\u003crt\u003e　jiè\u003c/rt\u003e\n\u003c/ruby\u003e\u003cbr\u003e\nHello World\n\u003c/div\u003e",
+			"Data": "<div>\n<ruby>\n你<rt>nǐ</rt>\n　好<rt>　hǎo</rt>\n　世<rt>　shì</rt>\n　界<rt>　jiè</rt>\n</ruby><br>\nHello World\n</div>",
 			"Properties": {
 				"ID": "20240530101000-ne7c7md",
 				"id": "20240530101000-h7ilkw7",
@@ -2830,7 +2972,7 @@
 		{
 			"ID": "20240530101000-vdi4815",
 			"Type": "NodeIFrame",
-			"Data": "\u003ciframe src=\"https://player.bilibili.com/player.html?bvid=BV1ov41187qM\u0026amp;page=1\u0026amp;high_quality=1\u0026amp;as_wide=1\u0026amp;allowfullscreen=true\u0026amp;aid=247401039\u0026amp;cid=319662466\u0026amp;autoplay=0\" data-src=\"//player.bilibili.com/player.html?aid=247401039\u0026amp;bvid=BV1ov41187qM\u0026amp;cid=319662466\u0026amp;page=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\" style=\"width: 981px; height: 440px;\" sandbox=\"allow-top-navigation-by-user-activation allow-same-origin allow-forms allow-scripts allow-popups\"\u003e\u003c/iframe\u003e",
+			"Data": "<iframe src=\"https://player.bilibili.com/player.html?bvid=BV1ov41187qM&amp;page=1&amp;high_quality=1&amp;as_wide=1&amp;allowfullscreen=true&amp;aid=247401039&amp;cid=319662466&amp;autoplay=0\" data-src=\"//player.bilibili.com/player.html?aid=247401039&amp;bvid=BV1ov41187qM&amp;cid=319662466&amp;page=1\" scrolling=\"no\" border=\"0\" frameborder=\"no\" framespacing=\"0\" allowfullscreen=\"true\" style=\"width: 981px; height: 440px;\" sandbox=\"allow-top-navigation-by-user-activation allow-same-origin allow-forms allow-scripts allow-popups\"></iframe>",
 			"Properties": {
 				"ID": "20240530101000-2niry28",
 				"id": "20240530101000-vdi4815",
@@ -2856,7 +2998,7 @@
 		{
 			"ID": "20240530101000-qxq2v9r",
 			"Type": "NodeVideo",
-			"Data": "\u003cvideo controls=\"controls\" src=\"assets/formatting_elements-20210607225733-o1keasx.mp4\" data-src=\"assets/formatting_elements-20210607213508-y2r3y55-20210608113914-q11ou4j.mp4\" style=\"width: 640px; height: 327px;\"\u003e\u003c/video\u003e",
+			"Data": "<video controls=\"controls\" src=\"assets/formatting_elements-20210607225733-o1keasx.mp4\" data-src=\"assets/formatting_elements-20210607213508-y2r3y55-20210608113914-q11ou4j.mp4\" style=\"width: 640px; height: 327px;\"></video>",
 			"Properties": {
 				"ID": "20240530101000-mlc68a3",
 				"id": "20240530101000-qxq2v9r",
@@ -2882,7 +3024,7 @@
 		{
 			"ID": "20240530101000-xhk41lp",
 			"Type": "NodeAudio",
-			"Data": "\u003caudio controls=\"controls\" src=\"assets/record1623077643753-20210607225403-7cg1jkq.wav\" data-src=\"assets/record1623077643753-20210607225403-7cg1jkq-20210608121458-mc4mcvz.wav\"\u003e\u003c/audio\u003e",
+			"Data": "<audio controls=\"controls\" src=\"assets/record1623077643753-20210607225403-7cg1jkq.wav\" data-src=\"assets/record1623077643753-20210607225403-7cg1jkq-20210608121458-mc4mcvz.wav\"></audio>",
 			"Properties": {
 				"ID": "20240530101000-93e5cfq",
 				"id": "20240530101000-xhk41lp",
@@ -3003,7 +3145,7 @@
 				{
 					"ID": "20240530101000-43eabs8",
 					"Type": "NodeCodeBlockCode",
-					"Data": "graph TB\n    c1--\u003ea2\n    subgraph one\n    a1--\u003ea2\n    end\n    subgraph two\n    b1--\u003eb2\n    end\n    subgraph three\n    c1--\u003ec2\n    end\n",
+					"Data": "graph TB\n    c1-->a2\n    subgraph one\n    a1-->a2\n    end\n    subgraph two\n    b1-->b2\n    end\n    subgraph three\n    c1-->c2\n    end\n",
 					"Properties": {
 						"ID": "20240530101000-smyh5f3",
 						"id": "20240530101000-43eabs8"
@@ -3084,7 +3226,7 @@
 				{
 					"ID": "20240530101000-kacz87e",
 					"Type": "NodeCodeBlockCode",
-					"Data": "sequenceDiagram\n    Alice-\u003e\u003eJohn: Hello John, how are you?\n    loop Every minute\n        John--\u003e\u003eAlice: Great!\n    end\n",
+					"Data": "sequenceDiagram\n    Alice->>John: Hello John, how are you?\n    loop Every minute\n        John-->>Alice: Great!\n    end\n",
 					"Properties": {
 						"ID": "20240530101000-8l8e38t",
 						"id": "20240530101000-kacz87e"
@@ -3233,7 +3375,7 @@
 				{
 					"ID": "20240530101000-aat6t4x",
 					"Type": "NodeCodeBlockCode",
-					"Data": "classDiagram\nClass01 \u0026lt;|-- AveryLongClass : Cool\nClass03 *-- Class04\nClass05 o-- Class06\nClass07 .. Class08\nClass09 --\u0026gt; C2 : Where am i?\nClass09 --* C3\nClass09 --|\u0026gt; Class07\nClass07 : equals()\nClass07 : Object[] elementData\nClass01 : size()\nClass01 : int chimp\nClass01 : int gorilla\nClass08 \u0026lt;--\u0026gt; C2: Cool label",
+					"Data": "classDiagram\nClass01 &lt;|-- AveryLongClass : Cool\nClass03 *-- Class04\nClass05 o-- Class06\nClass07 .. Class08\nClass09 --&gt; C2 : Where am i?\nClass09 --* C3\nClass09 --|&gt; Class07\nClass07 : equals()\nClass07 : Object[] elementData\nClass01 : size()\nClass01 : int chimp\nClass01 : int gorilla\nClass08 &lt;--&gt; C2: Cool label",
 					"Properties": {
 						"ID": "20240530101000-9cw4hs8",
 						"id": "20240530101000-aat6t4x"
@@ -3674,7 +3816,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "{\n  \u0026quot;title\u0026quot;: { \u0026quot;text\u0026quot;: \u0026quot;Latest 30 days\u0026quot; },\n  \u0026quot;backgroundColor\u0026quot;: \u0026quot;transparent\u0026quot;,\n  \u0026quot;tooltip\u0026quot;: { \u0026quot;trigger\u0026quot;: \u0026quot;axis\u0026quot;, \u0026quot;axisPointer\u0026quot;: { \u0026quot;lineStyle\u0026quot;: { \u0026quot;width\u0026quot;: 0 } } },\n  \u0026quot;legend\u0026quot;: { \u0026quot;data\u0026quot;: [\u0026quot;Articles\u0026quot;, \u0026quot;Users\u0026quot;, \u0026quot;Replies\u0026quot;] },\n  \u0026quot;xAxis\u0026quot;: [{\n      \u0026quot;type\u0026quot;: \u0026quot;category\u0026quot;,\n      \u0026quot;boundaryGap\u0026quot;: false,\n      \u0026quot;data\u0026quot;: [\u0026quot;2019-05-08\u0026quot;,\u0026quot;2019-05-09\u0026quot;,\u0026quot;2019-05-10\u0026quot;,\u0026quot;2019-05-11\u0026quot;,\u0026quot;2019-05-12\u0026quot;,\u0026quot;2019-05-13\u0026quot;,\u0026quot;2019-05-14\u0026quot;,\u0026quot;2019-05-15\u0026quot;,\u0026quot;2019-05-16\u0026quot;,\u0026quot;2019-05-17\u0026quot;,\u0026quot;2019-05-18\u0026quot;,\u0026quot;2019-05-19\u0026quot;,\u0026quot;2019-05-20\u0026quot;,\u0026quot;2019-05-21\u0026quot;,\u0026quot;2019-05-22\u0026quot;,\u0026quot;2019-05-23\u0026quot;,\u0026quot;2019-05-24\u0026quot;,\u0026quot;2019-05-25\u0026quot;,\u0026quot;2019-05-26\u0026quot;,\u0026quot;2019-05-27\u0026quot;,\u0026quot;2019-05-28\u0026quot;,\u0026quot;2019-05-29\u0026quot;,\u0026quot;2019-05-30\u0026quot;,\u0026quot;2019-05-31\u0026quot;,\u0026quot;2019-06-01\u0026quot;,\u0026quot;2019-06-02\u0026quot;,\u0026quot;2019-06-03\u0026quot;,\u0026quot;2019-06-04\u0026quot;,\u0026quot;2019-06-05\u0026quot;,\u0026quot;2019-06-06\u0026quot;,\u0026quot;2019-06-07\u0026quot;],\n      \u0026quot;axisTick\u0026quot;: { \u0026quot;show\u0026quot;: false },\n      \u0026quot;axisLine\u0026quot;: { \u0026quot;show\u0026quot;: false }\n  }],\n  \u0026quot;yAxis\u0026quot;: [{ \u0026quot;type\u0026quot;: \u0026quot;value\u0026quot;, \u0026quot;axisTick\u0026quot;: { \u0026quot;show\u0026quot;: false }, \u0026quot;axisLine\u0026quot;: { \u0026quot;show\u0026quot;: false }, \u0026quot;splitLine\u0026quot;: { \u0026quot;lineStyle\u0026quot;: { \u0026quot;color\u0026quot;: \u0026quot;rgba(0, 0, 0, .38)\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;dashed\u0026quot; } } }],\n  \u0026quot;series\u0026quot;: [\n    {\n      \u0026quot;name\u0026quot;: \u0026quot;Articles\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;line\u0026quot;, \u0026quot;smooth\u0026quot;: true, \u0026quot;itemStyle\u0026quot;: { \u0026quot;color\u0026quot;: \u0026quot;#d23f31\u0026quot; }, \u0026quot;areaStyle\u0026quot;: { \u0026quot;normal\u0026quot;: {} }, \u0026quot;z\u0026quot;: 3,\n      \u0026quot;data\u0026quot;: [\u0026quot;18\u0026quot;,\u0026quot;14\u0026quot;,\u0026quot;22\u0026quot;,\u0026quot;9\u0026quot;,\u0026quot;7\u0026quot;,\u0026quot;18\u0026quot;,\u0026quot;10\u0026quot;,\u0026quot;12\u0026quot;,\u0026quot;13\u0026quot;,\u0026quot;16\u0026quot;,\u0026quot;6\u0026quot;,\u0026quot;9\u0026quot;,\u0026quot;15\u0026quot;,\u0026quot;15\u0026quot;,\u0026quot;12\u0026quot;,\u0026quot;15\u0026quot;,\u0026quot;8\u0026quot;,\u0026quot;14\u0026quot;,\u0026quot;9\u0026quot;,\u0026quot;10\u0026quot;,\u0026quot;29\u0026quot;,\u0026quot;22\u0026quot;,\u0026quot;14\u0026quot;,\u0026quot;22\u0026quot;,\u0026quot;9\u0026quot;,\u0026quot;10\u0026quot;,\u0026quot;15\u0026quot;,\u0026quot;9\u0026quot;,\u0026quot;9\u0026quot;,\u0026quot;15\u0026quot;,\u0026quot;0\u0026quot;]\n    },\n    {\n      \u0026quot;name\u0026quot;: \u0026quot;Users\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;line\u0026quot;, \u0026quot;smooth\u0026quot;: true, \u0026quot;itemStyle\u0026quot;: { \u0026quot;color\u0026quot;: \u0026quot;#f1e05a\u0026quot; }, \u0026quot;areaStyle\u0026quot;: { \u0026quot;normal\u0026quot;: {} }, \u0026quot;z\u0026quot;: 2,\n      \u0026quot;data\u0026quot;: [\u0026quot;31\u0026quot;,\u0026quot;33\u0026quot;,\u0026quot;30\u0026quot;,\u0026quot;23\u0026quot;,\u0026quot;16\u0026quot;,\u0026quot;29\u0026quot;,\u0026quot;23\u0026quot;,\u0026quot;37\u0026quot;,\u0026quot;41\u0026quot;,\u0026quot;29\u0026quot;,\u0026quot;16\u0026quot;,\u0026quot;13\u0026quot;,\u0026quot;39\u0026quot;,\u0026quot;23\u0026quot;,\u0026quot;38\u0026quot;,\u0026quot;136\u0026quot;,\u0026quot;89\u0026quot;,\u0026quot;35\u0026quot;,\u0026quot;22\u0026quot;,\u0026quot;50\u0026quot;,\u0026quot;57\u0026quot;,\u0026quot;47\u0026quot;,\u0026quot;36\u0026quot;,\u0026quot;59\u0026quot;,\u0026quot;14\u0026quot;,\u0026quot;23\u0026quot;,\u0026quot;46\u0026quot;,\u0026quot;44\u0026quot;,\u0026quot;51\u0026quot;,\u0026quot;43\u0026quot;,\u0026quot;0\u0026quot;]\n    },\n    {\n      \u0026quot;name\u0026quot;: \u0026quot;Replies\u0026quot;, \u0026quot;type\u0026quot;: \u0026quot;line\u0026quot;, \u0026quot;smooth\u0026quot;: true, \u0026quot;itemStyle\u0026quot;: { \u0026quot;color\u0026quot;: \u0026quot;#4285f4\u0026quot; }, \u0026quot;areaStyle\u0026quot;: { \u0026quot;normal\u0026quot;: {} }, \u0026quot;z\u0026quot;: 1,\n      \u0026quot;data\u0026quot;: [\u0026quot;35\u0026quot;,\u0026quot;42\u0026quot;,\u0026quot;73\u0026quot;,\u0026quot;15\u0026quot;,\u0026quot;43\u0026quot;,\u0026quot;58\u0026quot;,\u0026quot;55\u0026quot;,\u0026quot;35\u0026quot;,\u0026quot;46\u0026quot;,\u0026quot;87\u0026quot;,\u0026quot;36\u0026quot;,\u0026quot;15\u0026quot;,\u0026quot;44\u0026quot;,\u0026quot;76\u0026quot;,\u0026quot;130\u0026quot;,\u0026quot;73\u0026quot;,\u0026quot;50\u0026quot;,\u0026quot;20\u0026quot;,\u0026quot;21\u0026quot;,\u0026quot;54\u0026quot;,\u0026quot;48\u0026quot;,\u0026quot;73\u0026quot;,\u0026quot;60\u0026quot;,\u0026quot;89\u0026quot;,\u0026quot;26\u0026quot;,\u0026quot;27\u0026quot;,\u0026quot;70\u0026quot;,\u0026quot;63\u0026quot;,\u0026quot;55\u0026quot;,\u0026quot;37\u0026quot;,\u0026quot;0\u0026quot;]\n    }\n  ]\n}"
+					"Data": "{\n  &quot;title&quot;: { &quot;text&quot;: &quot;Latest 30 days&quot; },\n  &quot;backgroundColor&quot;: &quot;transparent&quot;,\n  &quot;tooltip&quot;: { &quot;trigger&quot;: &quot;axis&quot;, &quot;axisPointer&quot;: { &quot;lineStyle&quot;: { &quot;width&quot;: 0 } } },\n  &quot;legend&quot;: { &quot;data&quot;: [&quot;Articles&quot;, &quot;Users&quot;, &quot;Replies&quot;] },\n  &quot;xAxis&quot;: [{\n      &quot;type&quot;: &quot;category&quot;,\n      &quot;boundaryGap&quot;: false,\n      &quot;data&quot;: [&quot;2019-05-08&quot;,&quot;2019-05-09&quot;,&quot;2019-05-10&quot;,&quot;2019-05-11&quot;,&quot;2019-05-12&quot;,&quot;2019-05-13&quot;,&quot;2019-05-14&quot;,&quot;2019-05-15&quot;,&quot;2019-05-16&quot;,&quot;2019-05-17&quot;,&quot;2019-05-18&quot;,&quot;2019-05-19&quot;,&quot;2019-05-20&quot;,&quot;2019-05-21&quot;,&quot;2019-05-22&quot;,&quot;2019-05-23&quot;,&quot;2019-05-24&quot;,&quot;2019-05-25&quot;,&quot;2019-05-26&quot;,&quot;2019-05-27&quot;,&quot;2019-05-28&quot;,&quot;2019-05-29&quot;,&quot;2019-05-30&quot;,&quot;2019-05-31&quot;,&quot;2019-06-01&quot;,&quot;2019-06-02&quot;,&quot;2019-06-03&quot;,&quot;2019-06-04&quot;,&quot;2019-06-05&quot;,&quot;2019-06-06&quot;,&quot;2019-06-07&quot;],\n      &quot;axisTick&quot;: { &quot;show&quot;: false },\n      &quot;axisLine&quot;: { &quot;show&quot;: false }\n  }],\n  &quot;yAxis&quot;: [{ &quot;type&quot;: &quot;value&quot;, &quot;axisTick&quot;: { &quot;show&quot;: false }, &quot;axisLine&quot;: { &quot;show&quot;: false }, &quot;splitLine&quot;: { &quot;lineStyle&quot;: { &quot;color&quot;: &quot;rgba(0, 0, 0, .38)&quot;, &quot;type&quot;: &quot;dashed&quot; } } }],\n  &quot;series&quot;: [\n    {\n      &quot;name&quot;: &quot;Articles&quot;, &quot;type&quot;: &quot;line&quot;, &quot;smooth&quot;: true, &quot;itemStyle&quot;: { &quot;color&quot;: &quot;#d23f31&quot; }, &quot;areaStyle&quot;: { &quot;normal&quot;: {} }, &quot;z&quot;: 3,\n      &quot;data&quot;: [&quot;18&quot;,&quot;14&quot;,&quot;22&quot;,&quot;9&quot;,&quot;7&quot;,&quot;18&quot;,&quot;10&quot;,&quot;12&quot;,&quot;13&quot;,&quot;16&quot;,&quot;6&quot;,&quot;9&quot;,&quot;15&quot;,&quot;15&quot;,&quot;12&quot;,&quot;15&quot;,&quot;8&quot;,&quot;14&quot;,&quot;9&quot;,&quot;10&quot;,&quot;29&quot;,&quot;22&quot;,&quot;14&quot;,&quot;22&quot;,&quot;9&quot;,&quot;10&quot;,&quot;15&quot;,&quot;9&quot;,&quot;9&quot;,&quot;15&quot;,&quot;0&quot;]\n    },\n    {\n      &quot;name&quot;: &quot;Users&quot;, &quot;type&quot;: &quot;line&quot;, &quot;smooth&quot;: true, &quot;itemStyle&quot;: { &quot;color&quot;: &quot;#f1e05a&quot; }, &quot;areaStyle&quot;: { &quot;normal&quot;: {} }, &quot;z&quot;: 2,\n      &quot;data&quot;: [&quot;31&quot;,&quot;33&quot;,&quot;30&quot;,&quot;23&quot;,&quot;16&quot;,&quot;29&quot;,&quot;23&quot;,&quot;37&quot;,&quot;41&quot;,&quot;29&quot;,&quot;16&quot;,&quot;13&quot;,&quot;39&quot;,&quot;23&quot;,&quot;38&quot;,&quot;136&quot;,&quot;89&quot;,&quot;35&quot;,&quot;22&quot;,&quot;50&quot;,&quot;57&quot;,&quot;47&quot;,&quot;36&quot;,&quot;59&quot;,&quot;14&quot;,&quot;23&quot;,&quot;46&quot;,&quot;44&quot;,&quot;51&quot;,&quot;43&quot;,&quot;0&quot;]\n    },\n    {\n      &quot;name&quot;: &quot;Replies&quot;, &quot;type&quot;: &quot;line&quot;, &quot;smooth&quot;: true, &quot;itemStyle&quot;: { &quot;color&quot;: &quot;#4285f4&quot; }, &quot;areaStyle&quot;: { &quot;normal&quot;: {} }, &quot;z&quot;: 1,\n      &quot;data&quot;: [&quot;35&quot;,&quot;42&quot;,&quot;73&quot;,&quot;15&quot;,&quot;43&quot;,&quot;58&quot;,&quot;55&quot;,&quot;35&quot;,&quot;46&quot;,&quot;87&quot;,&quot;36&quot;,&quot;15&quot;,&quot;44&quot;,&quot;76&quot;,&quot;130&quot;,&quot;73&quot;,&quot;50&quot;,&quot;20&quot;,&quot;21&quot;,&quot;54&quot;,&quot;48&quot;,&quot;73&quot;,&quot;60&quot;,&quot;89&quot;,&quot;26&quot;,&quot;27&quot;,&quot;70&quot;,&quot;63&quot;,&quot;55&quot;,&quot;37&quot;,&quot;0&quot;]\n    }\n  ]\n}"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -3871,7 +4013,7 @@
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": "(() =\u003e {\n    const option = {};\n    option.propName = `propValue`;\n    return option;\n})()\n"
+									"Data": "(() => {\n    const option = {};\n    option.propName = `propValue`;\n    return option;\n})()\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -3944,7 +4086,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "%%params {tablature: [{instrument: \u0026quot;violin\u0026quot;}]}\nX: 24\nT: Clouds Thicken\nC: Paul Rosen\nS: Copyright 2005, Paul Rosen\nM: 6/8\nL: 1/8\nQ: 3/8=116\nR: Creepy Jig\nK: Em\n|:\u0026quot;Em\u0026quot;EEE E2G|\u0026quot;C7\u0026quot;_B2A G2F|\u0026quot;Em\u0026quot;EEE E2G|\\\n\u0026quot;C7\u0026quot;_B2A \u0026quot;B7\u0026quot;=B3|\u0026quot;Em\u0026quot;EEE E2G|\n\u0026quot;C7\u0026quot;_B2A G2F|\u0026quot;Em\u0026quot;GFE \u0026quot;D (Bm7)\u0026quot;F2D|\\\n1\u0026quot;Em\u0026quot;E3-E3:|2\u0026quot;Em\u0026quot;E3-E2B|:\u0026quot;Em\u0026quot;e2e gfe|\n\u0026quot;G\u0026quot;g2ab3|\u0026quot;Em\u0026quot;gfeg2e|\u0026quot;D\u0026quot;fedB2A|\u0026quot;Em\u0026quot;e2e gfe|\\\n\u0026quot;G\u0026quot;g2ab3|\u0026quot;Em\u0026quot;gfe\u0026quot;D\u0026quot;f2d|\u0026quot;Em\u0026quot;e3-e3:|"
+					"Data": "%%params {tablature: [{instrument: &quot;violin&quot;}]}\nX: 24\nT: Clouds Thicken\nC: Paul Rosen\nS: Copyright 2005, Paul Rosen\nM: 6/8\nL: 1/8\nQ: 3/8=116\nR: Creepy Jig\nK: Em\n|:&quot;Em&quot;EEE E2G|&quot;C7&quot;_B2A G2F|&quot;Em&quot;EEE E2G|\\\n&quot;C7&quot;_B2A &quot;B7&quot;=B3|&quot;Em&quot;EEE E2G|\n&quot;C7&quot;_B2A G2F|&quot;Em&quot;GFE &quot;D (Bm7)&quot;F2D|\\\n1&quot;Em&quot;E3-E3:|2&quot;Em&quot;E3-E2B|:&quot;Em&quot;e2e gfe|\n&quot;G&quot;g2ab3|&quot;Em&quot;gfeg2e|&quot;D&quot;fedB2A|&quot;Em&quot;e2e gfe|\\\n&quot;G&quot;g2ab3|&quot;Em&quot;gfe&quot;D&quot;f2d|&quot;Em&quot;e3-e3:|"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -4056,7 +4198,7 @@
 				{
 					"ID": "20240530101000-34gfymq",
 					"Type": "NodeCodeBlockCode",
-					"Data": "digraph finite_state_machine {\n     rankdir=LR;\n     size=\"8,5\"\n     node [shape = doublecircle]; S;\n     node [shape = point ]; qi\n\n     node [shape = circle];\n     qi -\u003e S;\n     S -\u003e q1 [label = \"a\" ];\n     S -\u003e S [label = \"a\" ];\n     q1 -\u003e S [label = \"a\" ];\n     q1 -\u003e q2 [label = \"ddb\" ];\n     q2 -\u003e q1 [label = \"b\" ];\n     q2 -\u003e q2 [label = \"b\" ];\n}",
+					"Data": "digraph finite_state_machine {\n     rankdir=LR;\n     size=\"8,5\"\n     node [shape = doublecircle]; S;\n     node [shape = point ]; qi\n\n     node [shape = circle];\n     qi -> S;\n     S -> q1 [label = \"a\" ];\n     S -> S [label = \"a\" ];\n     q1 -> S [label = \"a\" ];\n     q1 -> q2 [label = \"ddb\" ];\n     q2 -> q1 [label = \"b\" ];\n     q2 -> q2 [label = \"b\" ];\n}",
 					"Properties": {
 						"ID": "20240530101000-xdaprre",
 						"id": "20240530101000-34gfymq"
@@ -4135,7 +4277,7 @@
 				{
 					"ID": "20240530101000-q26h6an",
 					"Type": "NodeCodeBlockCode",
-					"Data": "st=\u003estart: Start\nop=\u003eoperation: Your Operation\ncond=\u003econdition: Yes or No?\ne=\u003eend\n\nst-\u003eop-\u003econd\ncond(yes)-\u003ee\ncond(no)-\u003eop\n",
+					"Data": "st=>start: Start\nop=>operation: Your Operation\ncond=>condition: Yes or No?\ne=>end\n\nst->op->cond\ncond(yes)->e\ncond(no)->op\n",
 					"Properties": {
 						"ID": "20240530101000-q7n247r",
 						"id": "20240530101000-q26h6an"
@@ -4208,7 +4350,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "@startuml component\nactor client\nnode app\ndatabase db\ndb -\u0026gt; app\napp -\u0026gt; client\n@enduml"
+					"Data": "@startuml component\nactor client\nnode app\ndatabase db\ndb -&gt; app\napp -&gt; client\n@enduml"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

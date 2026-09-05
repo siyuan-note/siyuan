@@ -1,4 +1,9 @@
 {
+	"tabs": "Blok z kartami",
+	"tabItem": "Karta",
+	"tabsPositionTop": "Karty u góry",
+	"tabsPositionLeft": "Karty po lewej",
+	"tabsUnwrap": "Usuń układ kart",
 	"headingBatch": "Zbiorcza zmiana poziomów nagłówków",
 	"headingBatchSource": "Poziom źródłowy",
 	"headingBatchTarget": "Poziom docelowy",

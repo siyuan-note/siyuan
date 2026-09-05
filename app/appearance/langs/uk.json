@@ -1,4 +1,9 @@
 {
+	"tabs": "Блок із вкладками",
+	"tabItem": "Вкладка",
+	"tabsPositionTop": "Вкладки зверху",
+	"tabsPositionLeft": "Вкладки ліворуч",
+	"tabsUnwrap": "Прибрати розкладку вкладок",
 	"headingBatch": "Масова зміна рівнів заголовків",
 	"headingBatchSource": "Початковий рівень",
 	"headingBatchTarget": "Цільовий рівень",

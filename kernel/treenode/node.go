@@ -409,6 +409,8 @@ var typeAbbrMap = map[string]string{
 	"NodeAudio":            "audio",
 	"NodeCustomBlock":      "custom",
 	"NodeCallout":          "callout",
+	"NodeTabs":             "tabs",
+	"NodeTabItem":          "tab",
 	// 行级元素
 	"NodeText":     "text",
 	"NodeImage":    "img",

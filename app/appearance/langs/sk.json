@@ -1,4 +1,9 @@
 {
+	"tabs": "Blok s kartami",
+	"tabItem": "Karta",
+	"tabsPositionTop": "Karty hore",
+	"tabsPositionLeft": "Karty vľavo",
+	"tabsUnwrap": "Zrušiť rozloženie kariet",
 	"headingBatch": "Hromadná zmena úrovní nadpisov",
 	"headingBatchSource": "Pôvodná úroveň",
 	"headingBatchTarget": "Cieľová úroveň",

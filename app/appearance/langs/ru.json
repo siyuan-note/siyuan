@@ -1,4 +1,9 @@
 {
+	"tabs": "Блок с вкладками",
+	"tabItem": "Вкладка",
+	"tabsPositionTop": "Вкладки сверху",
+	"tabsPositionLeft": "Вкладки слева",
+	"tabsUnwrap": "Убрать раскладку вкладок",
 	"headingBatch": "Массовое изменение уровней заголовков",
 	"headingBatchSource": "Исходный уровень",
 	"headingBatchTarget": "Целевой уровень",

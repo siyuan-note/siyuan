@@ -1,3 +1,4 @@
+import {tabsRender} from "./render/tabsRender";
 import { graphvizRender } from "./render/graphvizRender";
 import { highlightRender } from "./render/highlightRender";
 import { mathRender } from "./render/mathRender";
@@ -11,6 +12,7 @@ import { plantumlRender } from "./render/plantumlRender";
 import "../assets/scss/export.scss";
 
 class Protyle {
+    public static tabsRender = tabsRender;
     /** 对 graphviz 进行渲染 */
     public static graphvizRender = graphvizRender;
     /** 为 element 中的代码块进行高亮渲染 */

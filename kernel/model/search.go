@@ -2095,6 +2095,8 @@ func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
 		s.IFrameBlock = types["iframeBlock"]
 		s.WidgetBlock = types["widgetBlock"]
 		s.Callout = types["callout"]
+		s.Tabs = types["tabs"]
+		s.TabItem = types["tabItem"]
 	} else {
 		s.Document = Conf.Search.Document
 		s.Heading = Conf.Search.Heading
@@ -2114,6 +2116,8 @@ func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
 		s.IFrameBlock = Conf.Search.IFrameBlock
 		s.WidgetBlock = Conf.Search.WidgetBlock
 		s.Callout = Conf.Search.Callout
+		s.Tabs = Conf.Search.Tabs
+		s.TabItem = Conf.Search.TabItem
 	}
 
 	var headingSubs, listSubs []string
@@ -2149,6 +2153,8 @@ func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
 	addSimple(s.IFrameBlock, treenode.TypeAbbr(ast.NodeIFrame.String()))
 	addSimple(s.WidgetBlock, treenode.TypeAbbr(ast.NodeWidget.String()))
 	addSimple(s.Callout, treenode.TypeAbbr(ast.NodeCallout.String()))
+	addSimple(s.Tabs, "tabs")
+	addSimple(s.TabItem, "tab")
 
 	var clauses []string
 

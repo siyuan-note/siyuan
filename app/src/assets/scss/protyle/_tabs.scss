@@ -1,0 +1,125 @@
+.protyle-wysiwyg, .b3-typography {
+  .tabs {
+    border: 1px solid var(--b3-border-color);
+    border-radius: var(--b3-border-radius);
+    min-width: 0;
+    padding: 4px;
+    margin: 4px 0;
+    position: relative;
+  }
+
+  .tabs-header {
+    display: none;
+    min-width: 0;
+    gap: 4px;
+    border-bottom: 1px solid var(--b3-border-color);
+    padding-bottom: 4px;
+  }
+
+  .tabs-list {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    overflow: auto;
+    gap: 4px;
+  }
+
+  .tabs-tab, .tabs-control {
+    color: var(--b3-theme-on-surface);
+    background: transparent;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    padding: 6px 10px;
+    cursor: pointer;
+    font: inherit;
+    flex-shrink: 0;
+    max-width: 240px;
+
+    &:hover {
+      background: var(--b3-list-hover);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--b3-theme-primary);
+      outline-offset: -2px;
+    }
+
+    &[aria-selected="true"] {
+      color: var(--b3-theme-primary);
+      background: var(--b3-theme-primary-lightest);
+    }
+  }
+
+  .tabs-tab-label {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .tab-item {
+    min-width: 0;
+    padding: 4px;
+    position: relative;
+  }
+
+  .tab-item-title {
+    display: block;
+    font-weight: bold;
+    min-height: 1.5em;
+    outline: none;
+  }
+
+  .tab-item-content {
+    min-width: 0;
+  }
+
+  .tabs[data-tabs-ready="true"] {
+    > .tabs-header {
+      display: flex;
+    }
+
+    > .tab-item[data-tabs-hidden="true"] {
+      display: none;
+    }
+
+    > .tab-item:not([data-tabs-editing="true"]) > .tab-item-info {
+      display: none;
+    }
+
+    &[data-tabs-orientation="vertical"] {
+      display: grid;
+      grid-template-columns: minmax(80px, 25%) minmax(0, 1fr);
+
+      > .tabs-header {
+        flex-wrap: wrap;
+        align-content: start;
+        border-bottom: 0;
+        border-right: 1px solid var(--b3-border-color);
+
+        > .tabs-list {
+          flex-direction: column;
+          flex-basis: 100%;
+          max-height: 60vh;
+        }
+      }
+    }
+  }
+}
+
+@media print {
+  .protyle-wysiwyg, .b3-typography {
+    .tabs[data-tabs-ready="true"] {
+      display: block !important;
+
+      > .tabs-header {
+        display: none;
+      }
+
+      > .tab-item[data-tabs-hidden], > .tab-item > .tab-item-info {
+        display: block !important;
+      }
+    }
+  }
+}

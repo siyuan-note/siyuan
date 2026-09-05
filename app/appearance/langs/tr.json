@@ -1,4 +1,9 @@
 {
+	"tabs": "Sekmeli blok",
+	"tabItem": "Sekme",
+	"tabsPositionTop": "Üstteki sekmeler",
+	"tabsPositionLeft": "Soldaki sekmeler",
+	"tabsUnwrap": "Sekme düzenini kaldır",
 	"headingBatch": "Başlık düzeylerini toplu dönüştür",
 	"headingBatchSource": "Kaynak düzey",
 	"headingBatchTarget": "Hedef düzey",

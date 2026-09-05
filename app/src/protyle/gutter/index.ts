@@ -136,6 +136,8 @@ const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
     NodeListItem: "listItem",
     NodeBlockquote: "quote",
     NodeCallout: "callout",
+    NodeTabs: "tabs",
+    NodeTabItem: "tabItem",
     NodeSuperBlock: "superBlock",
     NodeTable: "table",
     NodeCodeBlock: "code",

@@ -1,4 +1,9 @@
 {
+	"tabs": "页签块",
+	"tabItem": "页签",
+	"tabsPositionTop": "顶部页签",
+	"tabsPositionLeft": "左侧页签",
+	"tabsUnwrap": "取消页签布局",
 	"headingBatch": "批量转换标题级别",
 	"headingBatchSource": "原级别",
 	"headingBatchTarget": "目标级别",

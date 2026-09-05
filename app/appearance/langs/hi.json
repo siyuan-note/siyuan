@@ -1,4 +1,9 @@
 {
+	"tabs": "टैब वाला ब्लॉक",
+	"tabItem": "टैब",
+	"tabsPositionTop": "ऊपर टैब",
+	"tabsPositionLeft": "बाईं ओर टैब",
+	"tabsUnwrap": "टैब लेआउट हटाएँ",
 	"headingBatch": "शीर्षक स्तरों को एक साथ बदलें",
 	"headingBatchSource": "मूल स्तर",
 	"headingBatchTarget": "लक्षित स्तर",

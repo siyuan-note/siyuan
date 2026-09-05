@@ -1,4 +1,9 @@
 {
+	"tabs": "Registerkartenblock",
+	"tabItem": "Registerkarte",
+	"tabsPositionTop": "Registerkarten oben",
+	"tabsPositionLeft": "Registerkarten links",
+	"tabsUnwrap": "Registerkartenlayout aufheben",
 	"headingBatch": "Überschriftenebenen gesammelt umwandeln",
 	"headingBatchSource": "Ausgangsebene",
 	"headingBatchTarget": "Zielebene",

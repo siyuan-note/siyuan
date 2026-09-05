@@ -1,4 +1,9 @@
 {
+	"tabs": "Tabbed container",
+	"tabItem": "Tab",
+	"tabsPositionTop": "Top tabs",
+	"tabsPositionLeft": "Left tabs",
+	"tabsUnwrap": "Remove tab layout",
 	"headingBatch": "Batch convert heading levels",
 	"headingBatchSource": "Source level",
 	"headingBatchTarget": "Target level",

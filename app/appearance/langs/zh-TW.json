@@ -1,4 +1,9 @@
 {
+	"tabs": "頁籤區塊",
+	"tabItem": "頁籤",
+	"tabsPositionTop": "頂部頁籤",
+	"tabsPositionLeft": "左側頁籤",
+	"tabsUnwrap": "取消頁籤版面配置",
 	"headingBatch": "批次轉換標題層級",
 	"headingBatchSource": "原層級",
 	"headingBatchTarget": "目標層級",

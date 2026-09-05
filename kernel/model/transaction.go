@@ -2003,7 +2003,7 @@ func unfoldHeading(heading, currentNode *ast.Node) {
 }
 
 func getRefDefIDs(node *ast.Node) (refDefIDs []string) {
-	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithTabTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
@@ -2429,6 +2429,10 @@ func (tx *Transaction) structureOperationSummary() string {
 }
 
 func (tx *Transaction) validateStructureChanges() (ret *TxErr) {
+	for _, tree := range tx.trees {
+		treenode.NormalizeTabs(tree.Root)
+		treenode.UpgradeSpec(tree)
+	}
 	for node := range tx.structureCheckNodes {
 		if !isNodeInDocument(node) {
 			continue
@@ -3008,7 +3012,7 @@ type changedDefNode struct {
 }
 
 func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (changed bool, defNodes []*changedDefNode) {
-	ast.Walk(refNode, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithTabTitles(refNode, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}

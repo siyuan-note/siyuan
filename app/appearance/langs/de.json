@@ -1,4 +1,7 @@
 {
+	"imageViewerPlay": "Diashow starten",
+	"imageFlipHorizontal": "Horizontal spiegeln",
+	"imageFlipVertical": "Vertikal spiegeln",
 	"imageCopyFailed": "Das Bild konnte nicht kopiert werden. Prüfe, ob es geladen werden kann, und versuche es erneut.",
 	"syncAssetSnapshotIncomplete": "Einige Ressourceninhalte sind vom Cloudspeicher abhängig; dieser lokale Schnappschuss ist unvollständig",
 	"syncAssetDownloadMode": "Ressourcendownloads",

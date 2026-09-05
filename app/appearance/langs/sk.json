@@ -1,4 +1,7 @@
 {
+	"imageViewerPlay": "Spustiť prezentáciu",
+	"imageFlipHorizontal": "Prevrátiť vodorovne",
+	"imageFlipVertical": "Prevrátiť zvislo",
 	"imageCopyFailed": "Obrázok sa nepodarilo skopírovať. Skontrolujte, či sa dá načítať, a skúste to znova.",
 	"syncAssetSnapshotIncomplete": "Obsah niektorých zdrojových súborov závisí od cloudového úložiska; táto lokálna snímka je neúplná",
 	"syncAssetDownloadMode": "Sťahovanie zdrojových súborov",

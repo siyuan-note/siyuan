@@ -1,4 +1,7 @@
 {
+	"imageViewerPlay": "Slayt gösterisini oynat",
+	"imageFlipHorizontal": "Yatay çevir",
+	"imageFlipVertical": "Dikey çevir",
 	"imageCopyFailed": "Görüntü kopyalanamadı. Yüklenebildiğini kontrol edip tekrar deneyin.",
 	"syncAssetSnapshotIncomplete": "Bazı kaynakların içeriği bulut depolamaya bağlıdır; bu yerel anlık görüntü eksiktir",
 	"syncAssetDownloadMode": "Kaynak dosyası indirmeleri",

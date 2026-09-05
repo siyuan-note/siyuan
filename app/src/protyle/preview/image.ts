@@ -38,11 +38,31 @@ export const previewImages = (srcList: string[], currentSrc?: string, onHidden?:
             }],
             button: false,
             transition: false,
-            ready: function (this: Viewer) {
-                const copyElement = this.toolbar.querySelector(".viewer-copy");
+            ready: () => {
+                const copyElement = viewer.toolbar.querySelector(".viewer-copy");
                 copyElement.innerHTML = '<svg><use xlink:href="#iconCopy"></use></svg>';
-                copyElement.setAttribute("title", window.siyuan.languages.copyAsPNG);
-                copyElement.setAttribute("aria-label", window.siyuan.languages.copyAsPNG);
+                const languages = window.siyuan.languages;
+                const labels: Record<string, string> = {
+                    "zoom-in": languages.zoomIn,
+                    "zoom-out": languages.zoomOut,
+                    "one-to-one": languages.pageScaleActual,
+                    reset: languages.reset,
+                    prev: languages.previous,
+                    play: languages.imageViewerPlay,
+                    next: languages.next,
+                    "rotate-left": languages.rotateCcw,
+                    "rotate-right": languages.rotateCw,
+                    "flip-horizontal": languages.imageFlipHorizontal,
+                    "flip-vertical": languages.imageFlipVertical,
+                    copy: languages.copyAsPNG,
+                    close: languages.close,
+                };
+                Object.entries(labels).forEach(([action, label]) => {
+                    const button = viewer.toolbar.querySelector(`.viewer-${action}`);
+                    button.classList.add("ariaLabel");
+                    button.setAttribute("aria-label", label);
+                    button.setAttribute("data-position", "north");
+                });
             },
             hidden: close,
             toolbar: {

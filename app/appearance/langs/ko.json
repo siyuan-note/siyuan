@@ -1,4 +1,7 @@
 {
+	"imageViewerPlay": "슬라이드 쇼 재생",
+	"imageFlipHorizontal": "좌우 반전",
+	"imageFlipVertical": "상하 반전",
 	"imageCopyFailed": "이미지를 복사할 수 없습니다. 이미지를 불러올 수 있는지 확인한 후 다시 시도하세요.",
 	"syncAssetSnapshotIncomplete": "일부 리소스 내용이 클라우드 저장소에 의존하므로 이 로컬 스냅샷은 완전하지 않습니다",
 	"syncAssetDownloadMode": "리소스 파일 다운로드",

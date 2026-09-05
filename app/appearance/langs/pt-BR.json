@@ -1,4 +1,7 @@
 {
+	"imageViewerPlay": "Reproduzir apresentação de slides",
+	"imageFlipHorizontal": "Inverter horizontalmente",
+	"imageFlipVertical": "Inverter verticalmente",
 	"imageCopyFailed": "Não foi possível copiar a imagem. Verifique se ela pode ser carregada e tente novamente.",
 	"syncAssetSnapshotIncomplete": "O conteúdo de alguns recursos depende do armazenamento em nuvem; este instantâneo local está incompleto",
 	"syncAssetDownloadMode": "Download de recursos",

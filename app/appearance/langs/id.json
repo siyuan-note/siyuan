@@ -1,4 +1,7 @@
 {
+	"imageViewerPlay": "Putar tayangan slide",
+	"imageFlipHorizontal": "Balik secara horizontal",
+	"imageFlipVertical": "Balik secara vertikal",
 	"imageCopyFailed": "Tidak dapat menyalin gambar. Pastikan gambar dapat dimuat dan coba lagi.",
 	"syncAssetSnapshotIncomplete": "Sebagian konten sumber daya bergantung pada penyimpanan awan; snapshot lokal ini belum lengkap",
 	"syncAssetDownloadMode": "Unduhan berkas sumber daya",

@@ -1,4 +1,7 @@
 {
+	"imageViewerPlay": "播放投影片",
+	"imageFlipHorizontal": "水平翻轉",
+	"imageFlipVertical": "垂直翻轉",
 	"imageCopyFailed": "無法複製圖片，請確認圖片能夠載入後重試。",
 	"syncAssetSnapshotIncomplete": "部分資源檔案內容依賴雲端，本機快照尚不完整",
 	"syncAssetDownloadMode": "資源檔案下載",

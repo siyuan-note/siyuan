@@ -1,4 +1,7 @@
 {
+	"imageViewerPlay": "הפעלת מצגת",
+	"imageFlipHorizontal": "היפוך אופקי",
+	"imageFlipVertical": "היפוך אנכי",
 	"imageCopyFailed": "לא ניתן להעתיק את התמונה. יש לבדוק שניתן לטעון אותה ולנסות שוב.",
 	"syncAssetSnapshotIncomplete": "התוכן של חלק מהמשאבים תלוי באחסון בענן; תמונת מצב מקומית זו אינה שלמה",
 	"syncAssetDownloadMode": "הורדת קובצי משאבים",

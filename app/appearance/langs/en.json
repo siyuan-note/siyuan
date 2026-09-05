@@ -1,4 +1,7 @@
 {
+	"imageViewerPlay": "Play slideshow",
+	"imageFlipHorizontal": "Flip horizontally",
+	"imageFlipVertical": "Flip vertically",
 	"imageCopyFailed": "Unable to copy the image. Check that it can be loaded and try again.",
 	"syncAssetSnapshotIncomplete": "Some asset content depends on cloud storage; this local snapshot is incomplete",
 	"syncAssetDownloadMode": "Asset downloads",

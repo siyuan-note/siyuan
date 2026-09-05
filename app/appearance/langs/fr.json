@@ -1,4 +1,7 @@
 {
+	"imageViewerPlay": "Lancer le diaporama",
+	"imageFlipHorizontal": "Retourner horizontalement",
+	"imageFlipVertical": "Retourner verticalement",
 	"imageCopyFailed": "Impossible de copier l’image. Vérifiez qu’elle peut être chargée et réessayez.",
 	"syncAssetSnapshotIncomplete": "Le contenu de certaines ressources dépend du stockage cloud ; cet instantané local est incomplet",
 	"syncAssetDownloadMode": "Téléchargement des ressources",

@@ -329,8 +329,8 @@ func imageOperationAssetExists(documentID, assetPath string) bool {
 	if bt == nil {
 		return false
 	}
-	absPath, err := model.GetAssetAbsPathInBox(assetPath, bt.BoxID)
-	return err == nil && filelock.IsExist(absPath)
+	_, err := model.GetAssetAbsPathInBox(assetPath, bt.BoxID)
+	return err == nil
 }
 
 func imageJSON(value any) CallToolResult {

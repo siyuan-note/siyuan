@@ -22,6 +22,8 @@ import {avRender} from "../render/av/render";
 import {cellScrollIntoView, getCellText} from "../render/av/cell";
 import {fixAdjacentTags, getCalloutInfo, getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
+import {remapTabsDOMIDs, wrapPastedTabItems} from "./tabsCopy";
+import {getTabItems, getTabTitle} from "../render/tabsRender";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL, showBase64ImageSizeLimit} from "../upload/base64";
 import {applyHTMLLocalAssetPaths, collectHTMLLocalAssets, removeHTMLLocalAssetPaths} from "../upload/htmlLocalAssets";
@@ -141,6 +143,11 @@ export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
         });
     } else if ("NodeCallout" === dataType) {
         refText = getCalloutInfo(blockElement);
+    } else if ("NodeTabItem" === dataType) {
+        refText = getTabTitle(blockElement)?.innerHTML || "";
+    } else if ("NodeTabs" === dataType) {
+        const firstItem = getTabItems(blockElement)[0];
+        refText = firstItem ? getTextStar(firstItem, true) : "";
     }
     if (contentOnly) {
         return refText;
@@ -186,9 +193,13 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
             }
         });
         text = text.slice(0, -1);
-    } else if (!isNested && ["NodeBlockquote", "NodeCallout", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(dataType)) {
+    } else if (dataType === "NodeTabItem" && isNested) {
+        text += getTabTitle(blockElement)?.textContent || "";
+    } else if (!isNested && ["NodeBlockquote", "NodeCallout", "NodeList", "NodeSuperBlock", "NodeListItem", "NodeTabs", "NodeTabItem"].includes(dataType)) {
         if (dataType === "NodeCallout") {
             text += `${getCalloutInfo(blockElement)}\n`;
+        } else if (dataType === "NodeTabItem") {
+            text += `${getTabTitle(blockElement)?.textContent || ""}\n`;
         }
         blockElement.querySelectorAll("[data-node-id]").forEach((item: HTMLElement) => {
             const nestedText = getPlainText(item, true);
@@ -974,6 +985,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             }
         }
         resetPastedQueryEmbedRenderState(tempElement);
+        wrapPastedTabItems(tempElement, protyle.lute);
         let isBlock = false;
         const pastedBlockElements = tempElement.querySelectorAll("[data-node-id]");
         if (pastedBlockElements.length > 0) {
@@ -989,6 +1001,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             if (!range) {
                 return;
             }
+            const pastedIDs = new Map<string, string>();
             pastedBlockElements.forEach((e) => {
                 const originalId = e.getAttribute("data-node-id");
                 const isCutPaste = existResponse.data[originalId] === false; // 剪切来的（原块已删）
@@ -996,8 +1009,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     // 复制粘贴：生成新 ID
                     e.setAttribute("data-node-id", Lute.NewNodeID());
                 }
+                pastedIDs.set(originalId, e.getAttribute("data-node-id"));
                 clearBlockElement(e, isCutPaste); // 剪切粘贴保留引用角标
             });
+            remapTabsDOMIDs(tempElement, pastedIDs);
             const updated = dayjs().format("YYYYMMDDHHmmss");
             pastedBlockElements.forEach((e) => {
                 e.setAttribute("updated", updated);

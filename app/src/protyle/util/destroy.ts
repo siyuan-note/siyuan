@@ -1,3 +1,4 @@
+import {destroyTabsRender} from "../render/tabsRender";
 import {hideElements} from "../ui/hideElements";
 import {isSupportCSSHL} from "../render/searchMarkRender";
 import {destroyAIEditor} from "../../ai/editor";
@@ -31,6 +32,7 @@ export const destroy = (protyle: IProtyle) => {
     protyle.element.removeAttribute("style");
     if (protyle.wysiwyg) {
         unregisterCustomBlockRoot(protyle.wysiwyg.element);
+        destroyTabsRender(protyle.wysiwyg.element);
         protyle.wysiwyg.destroy();
         protyle.wysiwyg.tableControl?.destroy();
         protyle.wysiwyg.lastHTMLs = {};

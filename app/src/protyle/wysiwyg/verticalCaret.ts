@@ -1,16 +1,23 @@
-import {focusByRange, getSelectionPosition} from "../util/selection";
-import {isCaretRectAtVerticalBoundary} from "./verticalGeometry";
+import {focusByRange, getSelectionPosition, setLastNodeRange} from "../util/selection";
+import {getNavigableVerticalRects, isCaretRectAtVerticalBoundary} from "./verticalGeometry";
 
 export type TVerticalDirection = "up" | "down";
 
-const getVisibleRects = (range: Range) => Array.from(range.getClientRects()).filter(rect =>
-    rect.height > 0.5 && rect.width > 0.5
-);
+const getCodeTrailingBlankLineCount = (element: Element) => {
+    if (!element.closest(".code-block")) {
+        return;
+    }
+    const trailingNewlineCount = element.textContent.match(/\n+$/)?.[0].length || 0;
+    if (trailingNewlineCount === 0) {
+        return;
+    }
+    return Math.max(0, trailingNewlineCount - 1);
+};
 
 const getContentRects = (element: Element) => {
     const range = document.createRange();
     range.selectNodeContents(element);
-    return getVisibleRects(range);
+    return getNavigableVerticalRects(Array.from(range.getClientRects()), getCodeTrailingBlankLineCount(element));
 };
 
 export const isCaretAtVerticalBoundary = (element: Element, range: Range, direction: TVerticalDirection) => {
@@ -50,7 +57,9 @@ const getBoundaryLineRects = (element: Element, direction: TVerticalDirection) =
 };
 
 export const focusEditableAtGoalX = (element: Element, direction: TVerticalDirection, goalX: number) => {
-    const elementRect = element.getBoundingClientRect();
+    if (getNavigableVerticalRects(Array.from(element.getClientRects())).length === 0) {
+        return false;
+    }
     const lineRects = getBoundaryLineRects(element, direction);
     const range = document.createRange();
     if (lineRects.length > 0 && typeof document.caretRangeFromPoint === "function") {
@@ -60,14 +69,26 @@ export const focusEditableAtGoalX = (element: Element, direction: TVerticalDirec
         const lineBottom = Math.max(...lineRects.map(rect => rect.bottom));
         const x = Math.max(lineLeft + 1, Math.min(goalX, lineRight - 1));
         const pointRange = document.caretRangeFromPoint(x, (lineTop + lineBottom) / 2);
-        if (pointRange && element.contains(pointRange.startContainer)) {
+        const isZeroWidthLine = lineRects.every(rect => rect.width <= 0.5);
+        if (pointRange && element.contains(pointRange.startContainer) &&
+            (!isZeroWidthLine ||
+                isCaretRectAtVerticalBoundary(getSelectionPosition(element, pointRange).top, lineRects, "up"))) {
             pointRange.collapse(true);
             focusByRange(pointRange);
             return true;
         }
     }
-    range.selectNodeContents(element);
-    range.collapse(direction === "down");
+    if (direction === "up" && getCodeTrailingBlankLineCount(element) !== undefined) {
+        setLastNodeRange(element, range);
+        if (range.startContainer.nodeType === Node.TEXT_NODE && range.startOffset > 0 &&
+            range.startContainer.textContent[range.startOffset - 1] === "\n") {
+            range.setStart(range.startContainer, range.startOffset - 1);
+        }
+        range.collapse(true);
+    } else {
+        range.selectNodeContents(element);
+        range.collapse(direction === "down");
+    }
     focusByRange(range);
-    return elementRect.height > 0;
+    return true;
 };

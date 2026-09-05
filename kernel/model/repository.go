@@ -80,6 +80,8 @@ var (
 )
 
 func autoPurgeRepo(cron bool) {
+	assetDownloadSourceMu.RLock()
+	defer assetDownloadSourceMu.RUnlock()
 	if cron && !autoPurgeRepoAfterFirstSync {
 		return
 	}
@@ -96,7 +98,7 @@ func autoPurgeRepo(cron bool) {
 		return
 	}
 
-	repo, err := newRepository()
+	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -203,17 +205,7 @@ func GetRepoFile(fileID string) (ret []byte, p string, err error) {
 		return
 	}
 
-	repo, err := newRepository()
-	if err != nil {
-		return
-	}
-
-	file, err := repo.GetFile(fileID)
-	if err != nil {
-		return
-	}
-
-	ret, err = repo.OpenFile(file)
+	ret, file, err := readRepoFileWithAssets(fileID)
 	if err != nil {
 		return
 	}
@@ -253,17 +245,7 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 		return
 	}
 
-	repo, err := newRepository()
-	if err != nil {
-		return
-	}
-
-	file, err := repo.GetFile(fileID)
-	if err != nil {
-		return
-	}
-
-	data, err := repo.OpenFile(file)
+	data, file, err := readRepoFileWithAssets(fileID)
 	if err != nil {
 		return
 	}
@@ -278,7 +260,7 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 	// 回滚快照时默认为当前数据创建一个快照
 	// When rolling back a snapshot, a snapshot is created for the current data by default https://github.com/siyuan-note/siyuan/issues/12470
 	FlushTxQueue()
-	_, err = repo.Index("Backup before checkout", false, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	_, err = IndexRepo("Backup before checkout")
 	if err != nil {
 		logging.LogErrorf("index repository failed: %s", err)
 		util.PushClearProgress()
@@ -400,17 +382,7 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 		return
 	}
 
-	repo, err := newRepository()
-	if err != nil {
-		return
-	}
-
-	file, err := repo.GetFile(fileID)
-	if err != nil {
-		return
-	}
-
-	data, err := repo.OpenFile(file)
+	data, file, err := readRepoFileWithAssets(fileID)
 	if err != nil {
 		return
 	}
@@ -724,6 +696,9 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 		}
 
 		var tree *parse.Tree
+		if err = treenode.CheckSpecJSON(data); nil != err {
+			return
+		}
 		tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 		if err != nil {
 			logging.LogErrorf("parse file [%s] failed: %s", fileID, err)
@@ -793,6 +768,9 @@ func decryptRepoDataIfNeeded(data []byte, filePath string) ([]byte, error) {
 func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isLargeDoc bool, tree *parse.Tree, err error) {
 	isLargeDoc = 1024*1024*1 <= len(data)
 	// 调用方必须先根据快照路径完成解密，解析层不处理密文。
+	if err = treenode.CheckSpecJSON(data); nil != err {
+		return
+	}
 	tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if err != nil {
 		return
@@ -883,17 +861,7 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 		return
 	}
 
-	repo, err := newRepository()
-	if err != nil {
-		return
-	}
-
-	file, err := repo.GetFile(id)
-	if err != nil {
-		return
-	}
-
-	data, err := repo.OpenFile(file)
+	data, file, err := readRepoFileWithAssets(id)
 	if err != nil {
 		return
 	}
@@ -938,6 +906,9 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 	if strings.HasSuffix(file.Path, ".sy") {
 		var tree *parse.Tree
 		luteEngine := NewLute()
+		if err = treenode.CheckSpecJSON(data); nil != err {
+			return
+		}
 		tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 		if err != nil {
 			logging.LogErrorf("parse file [%s] failed: %s", id, err)
@@ -1007,7 +978,8 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 
 type Snapshot struct {
 	*dejavu.Log
-	TypesCount []*TypeCount `json:"typesCount"`
+	TypesCount       []*TypeCount `json:"typesCount"`
+	RequiresDownload bool         `json:"requiresDownload"`
 }
 
 type TypeCount struct {
@@ -1047,12 +1019,21 @@ func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err
 }
 
 func buildSnapshots(logs []*dejavu.Log) (ret []*Snapshot) {
+	chunkAvailability := map[string]bool{}
 	for _, l := range logs {
 		typesCount := statTypesByPath(l.Files)
+		requiresDownload := false
+		for _, file := range l.Files {
+			if repoFileNeedsDownloadWithCache(file, chunkAvailability) {
+				requiresDownload = true
+				break
+			}
+		}
 		l.Files = nil // 置空，否则返回前端数据量太大
 		ret = append(ret, &Snapshot{
-			Log:        l,
-			TypesCount: typesCount,
+			Log:              l,
+			TypesCount:       typesCount,
+			RequiresDownload: requiresDownload,
 		})
 	}
 	return
@@ -1095,6 +1076,11 @@ func statTypesByPath(files []*entity.File) (ret []*TypeCount) {
 }
 
 func ImportRepoKey(base64Key string) (retKey string, err error) {
+	release := lockAssetSourceChange()
+	defer release()
+	if err = requireCompleteAssetDownloads(); err != nil {
+		return
+	}
 	util.PushMsg(Conf.Language(136), 3000)
 
 	retKey = gulu.Str.RemoveInvisible(base64Key)
@@ -1112,6 +1098,9 @@ func ImportRepoKey(base64Key string) (retKey string, err error) {
 	if 32 != len(key) {
 		return "", errors.New(Conf.Language(157))
 	}
+	if err = clearAssetDownloadState(); err != nil {
+		return
+	}
 
 	suspendLANSyncManager()
 	Conf.Repo.Key = key
@@ -1125,21 +1114,30 @@ func ImportRepoKey(base64Key string) (retKey string, err error) {
 		return
 	}
 
+	release()
 	initDataRepo()
 	refreshLANSyncManager()
 	return
 }
 
 func ResetRepo() (err error) {
+	release := lockAssetSourceChange()
+	defer release()
+	if err = requireCompleteAssetDownloads(); err != nil {
+		return
+	}
 	logging.LogInfof("resetting data repo...")
 	msgId := util.PushMsg(Conf.Language(144), 1000*60)
 	suspendLANSyncManager()
 
-	repo, err := newRepository()
+	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
 
+	if err = repo.ClearAssetDownloadState(); err != nil {
+		return
+	}
 	if err = repo.Reset(); err != nil {
 		logging.LogErrorf("reset data repo failed: %s", err)
 		return
@@ -1157,11 +1155,16 @@ func ResetRepo() (err error) {
 }
 
 func PurgeCloud() (err error) {
+	assetDownloadSourceMu.RLock()
+	defer assetDownloadSourceMu.RUnlock()
+	if err = requireCompleteAssetDownloads(); err != nil {
+		return
+	}
 	msg := Conf.Language(223)
 	util.PushEndlessProgress(msg)
 	defer util.PushClearProgress()
 
-	repo, err := newRepository()
+	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -1180,11 +1183,13 @@ func PurgeCloud() (err error) {
 }
 
 func PurgeRepo() (err error) {
+	assetDownloadSourceMu.RLock()
+	defer assetDownloadSourceMu.RUnlock()
 	msg := Conf.Language(202)
 	util.PushEndlessProgress(msg)
 	defer util.PushClearProgress()
 
-	repo, err := newRepository()
+	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -1203,10 +1208,18 @@ func PurgeRepo() (err error) {
 }
 
 func InitRepoKeyFromPassphrase(passphrase string) (err error) {
+	release := lockAssetSourceChange()
+	defer release()
+	if err = requireCompleteAssetDownloads(); err != nil {
+		return
+	}
 	passphrase = gulu.Str.RemoveInvisible(passphrase)
 	passphrase = strings.TrimSpace(passphrase)
 	if "" == passphrase {
 		return errors.New(Conf.Language(142))
+	}
+	if err = clearAssetDownloadState(); err != nil {
+		return
 	}
 
 	util.PushMsg(Conf.Language(136), 3000)
@@ -1237,12 +1250,21 @@ func InitRepoKeyFromPassphrase(passphrase string) (err error) {
 	Conf.Save()
 	logging.LogInfof("inited repo key [%x]", sha1.Sum(Conf.Repo.Key))
 
+	release()
 	initDataRepo()
 	refreshLANSyncManager()
 	return
 }
 
 func InitRepoKey() (err error) {
+	release := lockAssetSourceChange()
+	defer release()
+	if err = requireCompleteAssetDownloads(); err != nil {
+		return
+	}
+	if err = clearAssetDownloadState(); err != nil {
+		return
+	}
 	util.PushMsg(Conf.Language(136), 3000)
 	suspendLANSyncManager()
 
@@ -1276,6 +1298,7 @@ func InitRepoKey() (err error) {
 	Conf.Save()
 	logging.LogInfof("inited repo key [%x]", sha1.Sum(Conf.Repo.Key))
 
+	release()
 	initDataRepo()
 	refreshLANSyncManager()
 	return
@@ -1304,16 +1327,25 @@ func checkoutRepo(id string) {
 		util.PushErrMsg(Conf.Language(26), 7000)
 		return
 	}
+	FlushTxQueue()
+	release := lockAssetSourceChange()
+	defer release()
 
-	repo, err := newRepository()
+	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		logging.LogErrorf("new repository failed: %s", err)
 		util.PushErrMsg(Conf.Language(141), 7000)
 		return
 	}
+	if err = ensureAllSyncAssets(); err == nil {
+		err = ensureRepoSnapshotComplete(repo, id)
+	}
+	if err != nil {
+		util.PushErrMsg(err.Error(), 7000)
+		return
+	}
 
 	util.PushEndlessProgress(Conf.Language(63))
-	FlushTxQueue()
 
 	CloseWatchAssets()
 	defer WatchAssets()
@@ -1335,7 +1367,6 @@ func checkoutRepo(id string) {
 
 	// 回滚快照时默认为当前数据创建一个快照
 	// When rolling back a snapshot, a snapshot is created for the current data by default https://github.com/siyuan-note/siyuan/issues/12470
-	FlushTxQueue()
 	_, err = repo.Index("Backup before checkout", false, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
 	if err != nil {
 		logging.LogErrorf("index repository failed: %s", err)
@@ -1352,6 +1383,7 @@ func checkoutRepo(id string) {
 		return
 	}
 
+	release()
 	FullReindexDirect()
 	appendAgentRollbackEntries()
 	time.Sleep(time.Second)
@@ -1417,12 +1449,14 @@ func appendAgentRollbackEntries() {
 }
 
 func DownloadCloudSnapshot(tag, id string) (err error) {
+	assetDownloadSourceMu.RLock()
+	defer assetDownloadSourceMu.RUnlock()
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
 	}
 
-	repo, err := newRepository()
+	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -1459,12 +1493,14 @@ func DownloadCloudSnapshot(tag, id string) (err error) {
 }
 
 func UploadCloudSnapshot(tag, id string) (err error) {
+	assetDownloadSourceMu.RLock()
+	defer assetDownloadSourceMu.RUnlock()
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
 	}
 
-	repo, err := newRepository()
+	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -1500,12 +1536,14 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 }
 
 func RemoveCloudRepoTag(tag string) (err error) {
+	assetDownloadSourceMu.RLock()
+	defer assetDownloadSourceMu.RUnlock()
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
 	}
 
-	repo, err := newRepository()
+	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -1630,12 +1668,14 @@ func GetTagSnapshots() (ret []*Snapshot, err error) {
 }
 
 func RemoveTagSnapshot(tag string) (err error) {
+	assetDownloadSourceMu.RLock()
+	defer assetDownloadSourceMu.RUnlock()
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
 	}
 
-	repo, err := newRepository()
+	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -1645,6 +1685,8 @@ func RemoveTagSnapshot(tag string) (err error) {
 }
 
 func TagSnapshot(id, name string) (err error) {
+	assetDownloadSourceMu.RLock()
+	defer assetDownloadSourceMu.RUnlock()
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -1662,7 +1704,7 @@ func TagSnapshot(id, name string) (err error) {
 		return
 	}
 
-	repo, err := newRepository()
+	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -1692,19 +1734,31 @@ func IndexRepo(memo string) (id string, err error) {
 		err = errors.New(Conf.Language(142))
 		return
 	}
+	FlushTxQueue()
+	assetDownloadSourceMu.RLock()
+	defer assetDownloadSourceMu.RUnlock()
 
-	repo, err := newRepository()
+	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
+	}
+	needsDownload, err := repo.NeedsAssetDownloadsForIndex()
+	if err != nil {
+		return
+	}
+	if needsDownload {
+		if err = checkAssetDownloadAccess(); err != nil {
+			return
+		}
 	}
 
 	util.PushEndlessProgress(Conf.Language(143))
 
 	start := time.Now()
 	latest, _ := repo.Latest()
-	FlushTxQueue()
 	index, err := repo.Index(memo, true, map[string]any{
-		eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress,
+		eventbus.CtxPushMsg:             eventbus.CtxPushMsgToStatusBarAndProgress,
+		dejavu.CtxAssetDownloadsAllowed: checkAssetDownloadAccess() == nil,
 	})
 	if err != nil {
 		util.PushStatusBar("Index data repo failed: " + html.EscapeString(err.Error()))
@@ -1786,6 +1840,7 @@ func syncRepoDownload() (err error) {
 	}
 
 	logging.LogInfof("downloading data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t]", Conf.System.ID, KernelID, Conf.Sync.Provider, "d", true)
+	defer finishAssetDownloadRecovery(repo, &err)
 	start := time.Now()
 	indexStart := time.Now()
 	_, _, err = indexRepoBeforeCloudSync(repo)
@@ -1839,7 +1894,7 @@ func syncRepoDownload() (err error) {
 
 	calcPetalDiff(beforeSyncPetals, mergeResult)
 	postProcessStart := time.Now()
-	processSyncMergeResult(false, true, mergeResult, trafficStat, "d", elapsed)
+	err = processAssetSyncMergeResult(repo, false, true, mergeResult, trafficStat, "d", elapsed)
 	logging.LogInfof("download data repo phases [index=%.2fs, cloud=%.2fs, post-process=%.2fs, total=%.2fs]",
 		indexElapsed.Seconds(), cloudElapsed.Seconds(), time.Since(postProcessStart).Seconds(), time.Since(start).Seconds())
 	return
@@ -1868,6 +1923,7 @@ func syncRepoUpload() (err error) {
 	}
 
 	logging.LogInfof("uploading data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t]", Conf.System.ID, KernelID, Conf.Sync.Provider, "u", true)
+	defer finishAssetDownloadRecovery(repo, &err)
 	start := time.Now()
 	indexStart := time.Now()
 	_, _, err = indexRepoBeforeCloudSync(repo)
@@ -1950,6 +2006,11 @@ func bootSyncRepo() (err error) {
 		util.PushErrMsg(msg, 0)
 		return
 	}
+	preparedSourceConf, err := buildCloudConf()
+	if err != nil {
+		return
+	}
+	preparedSourceScope := assetDownloadScope(Conf.Sync.Provider, preparedSourceConf, Conf.Repo.Key)
 
 	isBootSyncing.Store(true)
 
@@ -2038,6 +2099,16 @@ func bootSyncRepo() (err error) {
 
 			lockSync()
 			defer unlockSync()
+			currentSourceConf, sourceErr := buildCloudConf()
+			if sourceErr != nil || preparedSourceScope != assetDownloadScope(Conf.Sync.Provider, currentSourceConf, Conf.Repo.Key) {
+				logging.LogInfof("skip prepared boot sync after repository source changed")
+				return
+			}
+			repo, repoErr := newSyncRepository()
+			if repoErr != nil {
+				logging.LogErrorf("reopen prepared boot repository failed: %s", repoErr)
+				return
+			}
 
 			logging.LogInfof("syncing prepared boot data repo [device=%s, kernel=%s, provider=%d]", Conf.System.ID, KernelID, Conf.Sync.Provider)
 			syncStart := time.Now()
@@ -2110,6 +2181,9 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 }
 
 func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterIndex *entity.Index, start time.Time, indexElapsed time.Duration, skipCloudPreflight bool, prefetchTraffic *dejavu.DownloadTrafficStat) (dataChanged bool, err error) {
+	if !exit {
+		defer finishAssetDownloadRecovery(repo, &err)
+	}
 	beforeSyncPetals := getPetals()
 
 	syncContext := newSyncContext()
@@ -2165,7 +2239,7 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterInd
 
 	calcPetalDiff(beforeSyncPetals, mergeResult)
 	postProcessStart := time.Now()
-	processSyncMergeResult(exit, byHand, mergeResult, trafficStat, "a", elapsed)
+	err = processAssetSyncMergeResult(repo, exit, byHand, mergeResult, trafficStat, "a", elapsed)
 	if dataChanged {
 		notifyLANSyncCommit(repo)
 	}
@@ -2216,7 +2290,7 @@ func calcPetalDiff(beforeSyncPetals []*Petal, mergeResult *dejavu.MergeResult) {
 	mergeResult.RemovePetals = gulu.Str.RemoveDuplicatedElem(removePetals)
 }
 
-func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, trafficStat *dejavu.TrafficStat, mode string, elapsed time.Duration) {
+func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, trafficStat *dejavu.TrafficStat, mode string, elapsed time.Duration, immediateIndex ...bool) {
 	logging.LogInfof("synced data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s, pfc=%d, pcc=%d, pb=%s, pf=%d] in [%.2fs], merge result [conflicts=%d, upserts=%d, removes=%d]\n\n",
 		Conf.System.ID, KernelID, Conf.Sync.Provider, mode, byHand,
 		trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes), 2),
@@ -2518,7 +2592,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		sql.FlushQueue()
 	}
 
-	if needFullReindex(upsertTrees) { // 改进同步后全量重建索引判断 https://github.com/siyuan-note/siyuan/issues/5764
+	// 需要确认恢复记录时，索引更新必须在当前调用内完成
+	if needFullReindex(upsertTrees) && (len(immediateIndex) == 0 || !immediateIndex[0]) {
 		FullReindex(false)
 		return
 	}
@@ -2548,6 +2623,9 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	upsertRootIDs, removeRootIDs := incReindex(upserts, removes)
+	if len(immediateIndex) != 0 && immediateIndex[0] {
+		sql.FlushQueue()
+	}
 	for changedPath := range changedAttributeViewPaths {
 		queueExternalAttributeViewRefIndexByRepoPath(changedPath)
 	}
@@ -2744,6 +2822,9 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 
 	beforeIndex, _ = repo.Latest()
 	FlushTxQueue()
+	if err = processAssetDownloadRecovery(repo, true); err != nil {
+		return
+	}
 
 	checkChunks := true
 	if util.IsMobileContainer() {
@@ -2792,6 +2873,13 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 }
 
 func newRepository() (ret *dejavu.Repo, err error) {
+	assetDownloadSourceMu.RLock()
+	defer assetDownloadSourceMu.RUnlock()
+	return newRepositoryWithAssetSourceLocked()
+}
+
+// newRepositoryWithAssetSourceLocked 由已持有来源锁的调用方创建仓库，避免读写锁递归等待。
+func newRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
 	cloudConf, err := buildCloudConf()
 	if err != nil {
 		return
@@ -2829,6 +2917,17 @@ func newRepository() (ret *dejavu.Repo, err error) {
 		logging.LogErrorf("init data repo failed: %s", err)
 		return
 	}
+	scope := assetDownloadScope(Conf.Sync.Provider, cloudConf, Conf.Repo.Key)
+	if Conf.Sync.Provider == conf.ProviderSiYuan && Conf.GetUser() == nil {
+		stored, readErr := dejavu.ReadAssetDownloadScope(assetDownloadStatePath(), Conf.Repo.Key)
+		if readErr != nil {
+			return nil, readErr
+		}
+		if stored != "" {
+			scope = stored
+		}
+	}
+	err = ret.ConfigureAssetDownloads(Conf.Sync.AssetDownloadMode == 1, assetDownloadStatePath(), scope)
 	return
 }
 

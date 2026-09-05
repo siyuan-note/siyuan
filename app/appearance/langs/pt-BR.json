@@ -1,4 +1,22 @@
 {
+	"imageCopyFailed": "Não foi possível copiar a imagem. Verifique se ela pode ser carregada e tente novamente.",
+	"syncAssetSnapshotIncomplete": "O conteúdo de alguns recursos depende do armazenamento em nuvem; este instantâneo local está incompleto",
+	"syncAssetDownloadMode": "Download de recursos",
+	"syncAssetDownloadModeTip": "Aplica-se apenas a este dispositivo. Os recursos sob demanda são baixados quando utilizados e ficam indisponíveis offline até então. Os recursos baixados são mantidos e atualizados durante a sincronização. Ao mudar para Baixar todos, os recursos ausentes são baixados primeiro",
+	"syncAssetDownloadAll": "Baixar todos",
+	"syncAssetDownloadOnDemand": "Baixar sob demanda",
+	"syncAssetDownloadModeUpdating": "Atualizando o modo de download de recursos...",
+	"syncAssetDownloadModeFailed": "Não foi possível atualizar o modo de download de recursos",
+	"globalDefaultFont": "Fonte padrão global",
+	"globalDefaultFontTip": "Usada na interface e no conteúdo sem uma fonte específica; deixe a seleção vazia para usar a fonte padrão do tema",
+	"mobileMultiSelectTip": "Toque nos blocos para selecioná-los ou desmarcá-los",
+	"headingBatchWithSubheadingsTip": "Deslocar os subtítulos pela mesma diferença de níveis; níveis fora de H1 a H6 são limitados a H1 ou H6",
+	"newSiblingDoc": "Novo documento no mesmo nível",
+	"tabs": "Bloco com abas",
+	"tabItem": "Aba",
+	"tabsPositionTop": "Abas no topo",
+	"tabsPositionLeft": "Abas à esquerda",
+	"tabsUnwrap": "Remover layout de abas",
 	"headingBatch": "Converter níveis de título em lote",
 	"headingBatchSource": "Nível original",
 	"headingBatchTarget": "Nível de destino",
@@ -2686,6 +2704,8 @@
 		"372": "O caderno foi restaurado e permanece fechado",
 		"373": "Este arquivo contém dados de caderno. Importe-o em [Árvore de documentos - Mais - Importar caderno]",
 		"374": "Banco de dados [%s], campo de modelo [%s], primeiro item afetado [%s] (ID do item: %s), quantidade de itens afetados: %d, erro: %s",
-		"375": "O caderno para salvar notas rápidas não está disponível. Selecione um caderno aberto e não criptografado em Configurações - Documento"
+		"375": "O caderno para salvar notas rápidas não está disponível. Selecione um caderno aberto e não criptografado em Configurações - Documento",
+		"376": "O recurso ainda não foi baixado e não pode ser obtido no momento",
+		"377": "Mude para Baixar todos antes de alterar ou redefinir o repositório de dados"
 	}
 }

@@ -217,8 +217,8 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         tempElement.innerHTML = html;
         const renderedCalloutElement = tempElement.content.firstElementChild as HTMLElement;
         const renderedTitleElement = renderedCalloutElement.querySelector(".callout-title");
-        const calloutContentElement = blockElement.querySelector(":scope > .callout-content");
-        const renderedContentElement = renderedCalloutElement.querySelector(":scope > .callout-content");
+        const calloutContentElement = blockElement.querySelector(":scope > .callout-content, :scope > .tab-item-content");
+        const renderedContentElement = renderedCalloutElement.querySelector(":scope > .callout-content, :scope > .tab-item-content");
         if (calloutContentElement && renderedContentElement) {
             renderedContentElement.replaceWith(calloutContentElement.cloneNode(true));
             html = renderedCalloutElement.outerHTML;
@@ -227,6 +227,9 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             blockElement.insertAdjacentHTML("afterend", html);
             blockElement = blockElement.nextElementSibling as HTMLElement;
             blockElement.previousElementSibling.remove();
+            if (blockElement.classList.contains("tab-item")) {
+                blockElement.dataset.tabsEditing = "true";
+            }
             blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
             mathRender(blockElement);
             blockElement.querySelectorAll('[data-type~="block-ref"][data-subtype="d"]').forEach(refItem => {

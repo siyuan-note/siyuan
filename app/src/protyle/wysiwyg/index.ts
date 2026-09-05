@@ -1,3 +1,5 @@
+import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
+import {isTabTextBoundary} from "./tabsBoundary";
 import {
     beforePaste,
     convertPastedListItemSubtype,
@@ -1037,6 +1039,10 @@ export class WYSIWYG {
                         textPlain = crossBlockTextPlain ?? textWithoutAttr ?? semanticRangeText;
                     }
                 }
+            }
+            if (selectElements.length === 0 && !selectionModeElement && html.includes("data-tabs-hidden")) {
+                html = visibleTabsSelectionHTML(html);
+                textPlain = "";
             }
             html = sanitizeViewFoldHTML(html);
             if (protyle.disabled) {
@@ -4061,6 +4067,13 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("beforeinput", async (event: InputEvent) => {
+            if (!event.isComposing && ["deleteContentBackward", "deleteContentForward"].includes(event.inputType) &&
+                !getBlockSelectionModeElement(this.element) && !this.element.querySelector(".protyle-wysiwyg--select") &&
+                isTabTextBoundary(getEditorRange(this.element), event.inputType === "deleteContentBackward")) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             if (event.target === this.element &&
                 (event.inputType === "historyUndo" || event.inputType === "historyRedo")) {
                 event.preventDefault();
@@ -4071,7 +4084,7 @@ export class WYSIWYG {
                 (event.inputType === "insertParagraph" || event.inputType === "insertLineBreak")) {
                 const blockElement = hasClosestBlock(calloutTitleElement);
                 if (blockElement) {
-                    focusBlock(blockElement);
+                    focusBlock(calloutTitleElement.closest(".tab-item") || blockElement);
                 }
                 event.preventDefault();
                 event.stopPropagation();

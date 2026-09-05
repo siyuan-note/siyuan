@@ -1,4 +1,5 @@
 import {hideElements} from "../ui/hideElements";
+import {isTabTextBoundary} from "./tabsBoundary";
 import {isNotCtrl, isOnlyMeta, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
     focusBlock,
@@ -343,6 +344,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         const blockSelectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
+        if (!blockSelectionModeElement && !event.isComposing && !event.ctrlKey && !event.metaKey &&
+            ["Backspace", "Delete"].includes(event.key) &&
+            !protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") &&
+            isTabTextBoundary(range, event.key === "Backspace")) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         const calloutTitleElement = hasClosestByClassName(range.startContainer, "callout-title");
         const verticalGoalX = prepareVerticalNavigation(editorElement, event, range, nodeElement,
             nodeElement.classList.contains("av") ? getAVVerticalGoalX(nodeElement) : undefined);
@@ -432,7 +441,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             if (event.key === "Enter" || event.key === "Tab") {
-                focusBlock(nodeElement);
+                focusBlock(calloutTitleElement.closest(".tab-item") || nodeElement);
                 event.preventDefault();
                 event.stopPropagation();
                 return;
@@ -446,9 +455,15 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.stopPropagation();
                 return;
             }
-            if (event.key.startsWith("Arrow") || event.key === "Home" || event.key === "End") {
+            const isPlainVerticalArrow = ["ArrowUp", "ArrowDown"].includes(event.key) &&
+                !event.altKey && !event.shiftKey && isNotCtrl(event);
+            if ((event.key.startsWith("Arrow") && !isPlainVerticalArrow) ||
+                event.key === "Home" || event.key === "End") {
                 event.stopPropagation();
                 return;
+            }
+            if (isPlainVerticalArrow) {
+                event.stopPropagation();
             }
         }
 
@@ -1013,16 +1028,18 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     tdStatus = "last";
                 }
             }
-            const nodeEditableElement = (tdElement || getContenteditableElement(nodeElement) || nodeElement) as HTMLElement;
+            const nodeEditableElement = (tdElement || getContenteditableElement(nodeElement, range.startContainer) ||
+                nodeElement) as HTMLElement;
             const verticalDirection = event.key === "ArrowUp" ? "up" : event.key === "ArrowDown" ? "down" : undefined;
             if (selectText === "" && range.collapsed && verticalDirection &&
                 isAtomicVerticalNavigationTarget(nodeElement)) {
-                focusAdjacentVerticalRegion(protyle, nodeElement, verticalDirection, verticalGoalX ?? 0,
-                    range.startContainer);
-                preserveAVSelectionOnKeyup(protyle, event);
-                event.stopPropagation();
-                event.preventDefault();
-                return;
+                if (focusAdjacentVerticalRegion(protyle, nodeElement, verticalDirection, verticalGoalX ?? 0,
+                    range.startContainer)) {
+                    preserveAVSelectionOnKeyup(protyle, event);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
             }
             if (selectText === "" && range.collapsed && (event.key === "ArrowLeft" || event.key === "ArrowRight") &&
                 moveCaretAcrossSemanticMarker(range, event.key === "ArrowLeft" ? "left" : "right")) {
@@ -1058,11 +1075,15 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             const toNext = (event.key === "ArrowDown" && isLastLine) ||
                 (event.key === "ArrowRight" && isEnd);
             if (selectText === "" && range.collapsed && verticalDirection && (toPrevious || toNext)) {
-                focusAdjacentVerticalRegion(protyle, nodeElement, verticalDirection, verticalGoalX ?? 0,
-                    range.startContainer);
-                preserveAVSelectionOnKeyup(protyle, event);
-                event.stopPropagation();
-                event.preventDefault();
+                if (focusAdjacentVerticalRegion(protyle, nodeElement, verticalDirection, verticalGoalX ?? 0,
+                    range.startContainer)) {
+                    preserveAVSelectionOnKeyup(protyle, event);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
+            }
+            if (calloutTitleElement && verticalDirection) {
                 return;
             }
             if (selectText === "" && range.collapsed && !verticalDirection && nodeElement.classList.contains("av") &&

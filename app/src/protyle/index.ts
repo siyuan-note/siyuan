@@ -66,6 +66,7 @@ import {
     queueDatabaseRowRefresh,
     queueDatabaseRowRefreshForOperations
 } from "./render/av/databaseRowRefresh";
+import {initEditorTabs} from "./wysiwyg/tabs";
 import {registerCustomBlockRoot} from "../plugin/customBlockRender";
 import {
     invalidateTrackedRanges,
@@ -201,6 +202,7 @@ export class Protyle {
         // lite 模式用前端操作日志 undo（不依赖 kernel），其余走 kernel 的 GlobalUndoLog。
         this.protyle.undo = this.protyle.lite ? new LocalUndo() : new Undo();
         this.protyle.wysiwyg = new WYSIWYG(this.protyle);
+        initEditorTabs(this.protyle);
         if (isProtyleCustomBlockRenderEnabled(this.protyle)) {
             registerCustomBlockRoot(this.protyle.wysiwyg.element, {
                 disabled: () => this.protyle.disabled,

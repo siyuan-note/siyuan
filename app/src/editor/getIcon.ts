@@ -20,6 +20,12 @@ export const getIconByType = (type: string, sub?: string) => {
         case "NodeBlockquote":
             iconName = "iconQuote";
             break;
+        case "NodeTabs":
+            iconName = "iconTabs";
+            break;
+        case "NodeTabItem":
+            iconName = "iconTabItem";
+            break;
         case "NodeCallout":
             iconName = "iconCallout";
             break;

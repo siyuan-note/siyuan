@@ -19,6 +19,7 @@ package conf
 import "github.com/siyuan-note/siyuan/kernel/util"
 
 type Appearance struct {
+	GlobalFontFamilies  []*EditorFont       `json:"globalFontFamilies"`  // 按优先级排列的全局默认字体
 	Mode                int                 `json:"mode"`                // 模式：0：明亮，1：暗黑
 	ModeOS              bool                `json:"modeOS"`              // 模式是否跟随系统
 	DarkThemes          []*AppearanceTheme  `json:"darkThemes"`          // 暗黑模式外观主题列表
@@ -43,6 +44,7 @@ type Appearance struct {
 
 func NewAppearance() *Appearance {
 	return &Appearance{
+		GlobalFontFamilies:  []*EditorFont{},
 		Mode:                0,
 		ModeOS:              true,
 		ThemeDark:           "midnight",
@@ -58,6 +60,11 @@ func NewAppearance() *Appearance {
 		Notifications:       util.NewNotifications(),
 		EntryVisibility:     NewEntryVisibility(EntryVisibilityProfileSimple),
 	}
+}
+
+// NormalizeGlobalFontFamilies 清理全局默认字体并保留用户指定的顺序。
+func (appearance *Appearance) NormalizeGlobalFontFamilies() {
+	appearance.GlobalFontFamilies = normalizeEditorFontFamilies(appearance.GlobalFontFamilies)
 }
 
 const (

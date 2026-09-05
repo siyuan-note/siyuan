@@ -43,6 +43,7 @@ import (
 )
 
 func resetTree(tree *parse.Tree, titleSuffix string, removeAvBinding bool) {
+	oldRootID := tree.Root.ID
 	tree.ID = ast.NewNodeID()
 	tree.Root.ID = tree.ID
 	title := tree.Root.IALAttr("title")
@@ -80,12 +81,14 @@ func resetTree(tree *parse.Tree, titleSuffix string, removeAvBinding bool) {
 	})
 
 	// 重置块 ID
+	blockIDs := map[string]string{oldRootID: tree.ID}
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || ast.NodeDocument == n.Type {
 			return ast.WalkContinue
 		}
 		if n.IsBlock() && "" != n.ID {
 			newID := ast.NewNodeID()
+			blockIDs[n.ID] = newID
 			if "1" == refIDs[n.ID] {
 				// 如果是文档自身的内部引用
 				refIDs[n.ID] = newID
@@ -96,8 +99,10 @@ func resetTree(tree *parse.Tree, titleSuffix string, removeAvBinding bool) {
 		return ast.WalkContinue
 	})
 
+	treenode.RemapTabsActiveIDs(tree.Root, blockIDs)
+	remapTabTitleBlockIDs(tree.Root, blockIDs)
 	// 重置内部引用
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithTabTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || !treenode.IsBlockRef(n) {
 			return ast.WalkContinue
 		}
@@ -190,6 +195,9 @@ func loadTreeByData(localPath string, data []byte, luteEngine *lute.Lute) (ret *
 		}
 	}
 
+	if err = treenode.CheckSpecJSON(data); nil != err {
+		return
+	}
 	ret, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if err != nil {
 		logging.LogErrorf("parse json to tree [%s] failed: %s", localPath, err)

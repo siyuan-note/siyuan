@@ -45,6 +45,7 @@ const setSyncConfigItemVisible = (root: Element) => {
         "sync.enabled",
         "sync.generateConflictDoc",
         "sync.mode",
+        "sync.assetDownloadMode",
         "sync.interval",
         "sync.perception",
         "sync.lan.enabled",

@@ -92,6 +92,9 @@ func PrepareRichClipboardAssets(assets []RichClipboardAsset) (ret *RichClipboard
 		if resolveErr != nil {
 			return nil, resolveErr
 		}
+		if ensureErr := ensureReadableAssetLocal(absPath); ensureErr != nil {
+			return nil, ensureErr
+		}
 
 		destPath, ok := copied[absPath]
 		if !ok {

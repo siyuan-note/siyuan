@@ -7,7 +7,7 @@
 		"id": "20240530101000-35bbvcx",
 		"title": "コンテンツブロックの種類",
 		"type": "doc",
-		"updated": "20260803170332"
+		"updated": "20260905124213"
 	},
 	"Children": [
 		{
@@ -1792,7 +1792,7 @@
 		{
 			"ID": "20240530101000-twb2trd",
 			"Type": "NodeHTMLBlock",
-			"Data": "\u003cdiv\u003e\n\u003cruby\u003e\n你\u003crt\u003enǐ\u003c/rt\u003e\n　好\u003crt\u003e　hǎo\u003c/rt\u003e\n　世\u003crt\u003e　shì\u003c/rt\u003e\n　界\u003crt\u003e　jiè\u003c/rt\u003e\n\u003c/ruby\u003e\u003cbr\u003e\nHello World\n\u003c/div\u003e",
+			"Data": "<div>\n<ruby>\n你<rt>nǐ</rt>\n　好<rt>　hǎo</rt>\n　世<rt>　shì</rt>\n　界<rt>　jiè</rt>\n</ruby><br>\nHello World\n</div>",
 			"Properties": {
 				"ID": "20240530101000-5o1iaz1",
 				"id": "20240530101000-twb2trd",
@@ -1923,7 +1923,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;div\u0026gt;\u0026lt;/div\u0026gt;"
+									"TextMarkTextContent": "&lt;div&gt;&lt;/div&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -2651,7 +2651,7 @@
 			"Children": [
 				{
 					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e ",
+					"Data": "> ",
 					"Properties": {
 						"id": ""
 					}
@@ -3175,6 +3175,35 @@
 				"id": "20240530101000-28sah71",
 				"updated": "20240530101000"
 			}
+		},
+		{
+			"ID": "20260905124213-rmj1ui2",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260905124213-rmj1ui2",
+				"updated": "20260905124213"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タブブロック"
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-q5thtxj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905124213-q5thtxj",
+				"updated": "20260905124213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タブブロックにはタブ項目だけを格納できます。各項目は独立したブロック ID を持ち、通常のコンテンツブロックや入れ子のタブブロックを格納できます。"
+				}
+			]
 		}
 	]
 }

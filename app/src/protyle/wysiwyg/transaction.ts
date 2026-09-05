@@ -67,6 +67,8 @@ import {
     restoreBlockSelectionModeState
 } from "./blockSelection";
 import {isEmptyParagraph} from "./emptyTextBlock";
+import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
+import {waitForPendingTransactions} from "../util/transactionQueue";
 import {
     invalidateTrackedRangesByOperations,
     type ITrackedRangeInsertion,
@@ -334,8 +336,8 @@ const promiseTransaction = (options: {
                                 // 列表特殊处理
                                 if (item.firstElementChild?.classList.contains("protyle-action")) {
                                     item.firstElementChild.after(...cloneElements);
-                                } else if (item.classList.contains("callout")) {
-                                    item.querySelector(".callout-content").prepend(...cloneElements);
+                                } else if ((item.classList.contains("callout") || item.classList.contains("tab-item"))) {
+                                    item.querySelector(":scope > .callout-content, :scope > .tab-item-content").prepend(...cloneElements);
                                 } else {
                                     item.prepend(...cloneElements);
                                 }
@@ -455,9 +457,9 @@ const promiseTransaction = (options: {
                                 item.firstElementChild.nextElementSibling?.getAttribute("data-node-id") !== operation.id) {
                                 item.firstElementChild.insertAdjacentHTML("afterend", visibleData);
                                 cursorElements.push(item.firstElementChild.nextElementSibling);
-                            } else if (item.classList.contains("callout") &&
+                            } else if ((item.classList.contains("callout") || item.classList.contains("tab-item")) &&
                                 item.querySelector("[data-node-id]")?.getAttribute("data-node-id") !== operation.id) {
-                                item.querySelector(".callout-content").insertAdjacentHTML("afterbegin", visibleData);
+                                item.querySelector(":scope > .callout-content, :scope > .tab-item-content").insertAdjacentHTML("afterbegin", visibleData);
                                 cursorElements.push(item.querySelector("[data-node-id]"));
                             } else if (item.firstElementChild.getAttribute("data-node-id") !== operation.id) {
                                 item.insertAdjacentHTML("afterbegin", visibleData);
@@ -1139,8 +1141,8 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                             // 列表特殊处理
                             if (item.firstElementChild?.classList.contains("protyle-action")) {
                                 item.firstElementChild.after(...cloneElements);
-                            } else if (item.classList.contains("callout")) {
-                                item.querySelector(".callout-content").prepend(...cloneElements);
+                            } else if ((item.classList.contains("callout") || item.classList.contains("tab-item"))) {
+                                item.querySelector(":scope > .callout-content, :scope > .tab-item-content").prepend(...cloneElements);
                             } else {
                                 item.prepend(...cloneElements);
                             }
@@ -1269,8 +1271,8 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                             if (item.firstElementChild?.classList.contains("protyle-action")) {
                                 item.firstElementChild.insertAdjacentHTML("afterend", visibleData);
                                 cursorElements.push(item.firstElementChild.nextElementSibling);
-                            } else if (item.classList.contains("callout")) {
-                                item.querySelector(".callout-content").insertAdjacentHTML("afterbegin", visibleData);
+                            } else if ((item.classList.contains("callout") || item.classList.contains("tab-item"))) {
+                                item.querySelector(":scope > .callout-content, :scope > .tab-item-content").insertAdjacentHTML("afterbegin", visibleData);
                                 cursorElements.push(item.querySelector("[data-node-id]"));
                             } else {
                                 item.insertAdjacentHTML("afterbegin", visibleData);
@@ -2136,8 +2138,37 @@ export const turnsOneInto = async (options: {
     }
     const parentId = getEmbedChildOperationParentID(options.nodeElement) ||
         getParentBlock(options.nodeElement).getAttribute("data-node-id") || options.protyle.block.parentID;
-    // @ts-ignore
-    const newHTML = options.protyle.lute[options.type](options.nodeElement.outerHTML, options.level);
+    let newHTML: string;
+    if (isTabsListConversion(options.type)) {
+        let source = options.nodeElement;
+        if (!options.protyle.lite && source.querySelector('[fold="1"]')) {
+            await waitForPendingTransactions(options.protyle);
+            const snapshot = source.outerHTML;
+            const response = await fetchSyncPost("/api/block/getBlockDOM", {
+                id: options.id,
+                notebook: options.protyle.notebookId,
+            });
+            if (!source.isConnected || source.outerHTML !== snapshot) {
+                return;
+            }
+            const template = document.createElement("template");
+            template.innerHTML = normalizeHTMLAssetIFrameBlockDOM(response.data?.dom || "");
+            const full = template.content.firstElementChild;
+            if (full?.getAttribute("data-node-id") !== options.id) {
+                return;
+            }
+            source = completeTabsListSource(source, full);
+            oldHTML = source.outerHTML;
+        }
+        const converted = convertTabsList(source, options.type, options.protyle.lute);
+        if (!converted) {
+            return;
+        }
+        newHTML = converted.outerHTML;
+    } else {
+        // @ts-ignore
+        newHTML = options.protyle.lute[options.type](options.nodeElement.outerHTML, options.level);
+    }
     disposeCustomBlocksInElement(options.nodeElement);
     options.nodeElement.insertAdjacentHTML("afterend", newHTML);
     options.nodeElement = options.nodeElement.nextElementSibling as HTMLElement;

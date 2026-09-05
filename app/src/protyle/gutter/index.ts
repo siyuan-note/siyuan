@@ -74,6 +74,7 @@ import {transferBlockRef} from "../../menus/block";
 import {isMobile} from "../../util/functions";
 import {AIActions} from "../../ai/actions";
 import {activeBlur, renderTextMenu, showKeyboardToolbarUtil} from "../../mobile/util/keyboardToolbar";
+import {getMobileBlockSelectionElement} from "../../mobile/util/blockSelection";
 import {hideTooltip} from "../../dialog/tooltip";
 import {appearanceMenu, limitRecentFontStyleRows} from "../toolbar/Font";
 import {setPosition} from "../../util/setPosition";
@@ -136,6 +137,8 @@ const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
     NodeListItem: "listItem",
     NodeBlockquote: "quote",
     NodeCallout: "callout",
+    NodeTabs: "tabs",
+    NodeTabItem: "tabItem",
     NodeSuperBlock: "superBlock",
     NodeTable: "table",
     NodeCodeBlock: "code",
@@ -1636,6 +1639,19 @@ export class Gutter {
         hideElements(["select"], protyle);
         nodeElement.classList.add("protyle-wysiwyg--select");
         countBlockWord([id], protyle.block.rootID);
+        if (isMobile() && !protyle.toolbar.isMultiSelectMode()) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "multiSelect",
+                icon: "iconCheck",
+                label: window.siyuan.languages.multiSelect,
+                click: () => {
+                    const blockElement = getMobileBlockSelectionElement(nodeElement as HTMLElement);
+                    hideElements(["select"], protyle);
+                    window.getSelection()?.removeAllRanges();
+                    protyle.toolbar.showMultiSelectMode(protyle, blockElement);
+                }
+            }).element);
+        }
         // "heading1-6", "list", "ordered-list", "check", "quote", "code", "table", "line", "math", "paragraph"
         if (type === "NodeParagraph" && allowStructuralMutation) {
             turnIntoSubmenu.push(this.turnsIntoOne({
@@ -1869,6 +1885,15 @@ export class Gutter {
                 selectsElement: [nodeElement],
                 type: "Blocks2Callout"
             }));
+            turnIntoSubmenu.push(this.turnsOneInto({
+                menuId: "tabs",
+                id,
+                icon: "iconTabs",
+                label: window.siyuan.languages.tabs,
+                protyle,
+                nodeElement,
+                type: "List2Tabs"
+            }));
             const listSubtype = nodeElement.getAttribute("data-subtype");
             if (listSubtype === "o") {
                 turnIntoSubmenu.push(this.turnsOneInto({
@@ -1937,6 +1962,18 @@ export class Gutter {
             if (this.hasSublist([nodeElement])) {
                 turnIntoSubmenu.push(this.recursiveListMenu(protyle, [nodeElement]));
             }
+        } else if (type === "NodeTabs" && allowStructuralMutation) {
+            [
+                {menuId: "list", icon: "iconList", label: "list", type: "Tabs2UL"},
+                {menuId: "orderedList", icon: "iconOrderedList", label: "ordered-list", type: "Tabs2OL"},
+                {menuId: "check", icon: "iconCheck", label: "check", type: "Tabs2TL"},
+            ].forEach(target => turnIntoSubmenu.push(this.turnsOneInto({
+                ...target,
+                id,
+                label: window.siyuan.languages[target.label],
+                protyle,
+                nodeElement,
+            })));
         } else if (type === "NodeBlockquote" && allowStructuralMutation) {
             turnIntoSubmenu.push(this.turnsOneInto({
                 menuId: "paragraph",
@@ -3573,6 +3610,11 @@ export class Gutter {
         }
         let html = "";
         let nodeElement = selectedElement || element;
+        const tabsHeader = !isMultiSelect && nodeElement.getAttribute("data-type") === "NodeTabs" ?
+            nodeElement.querySelector(":scope > .tabs-header") : null;
+        if (tabsHeader) {
+            element = tabsHeader;
+        }
         this.element.classList.toggle("protyle-gutters--sb-column",
             !!getHorizontalSuperBlockChild(nodeElement, protyle.wysiwyg.element));
         let space = 0;
@@ -3627,7 +3669,7 @@ export class Gutter {
                         }
                     }
 
-                    let topElement = selectedElement || getTopAloneElement(nodeElement);
+                    let topElement = selectedElement || (tabsHeader ? nodeElement : getTopAloneElement(nodeElement));
                     if (embedContext && !embedContext.boundaryElement.contains(topElement)) {
                         // 单独查询列表项时，渲染器生成的无 ID 列表包装节点不属于可操作边界。
                         topElement = embedContext.targetElement || nodeElement;
@@ -3642,7 +3684,7 @@ export class Gutter {
                         getParentBlock(nodeElement) !== topElement) {
                         topElement = topElement.querySelector("[data-node-id]");
                     }
-                    listItem = topElement.querySelector(".li") || topElement.querySelector(".list");
+                    listItem = tabsHeader ? undefined : topElement.querySelector(".li") || topElement.querySelector(".list");
                     // 嵌入块中有列表时块标显示位置错误 https://github.com/siyuan-note/siyuan/issues/6254
                     if ((!embedContext && isInEmbedBlock(listItem)) || isInAVBlock(listItem) ||
                         hasClosestByClassName(nodeElement, "callout")) {
@@ -3719,8 +3761,10 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
                 while (previousBlock && !previousBlock.getAttribute("data-node-id")) {
                     previousBlock = previousBlock.previousElementSibling;
                 }
+                // 页签栏用于操作整个容器，正文区域的块标层级只显示到当前页签项。
+                const isTabItemBoundary = type === "NodeTabItem" && nodeElement.parentElement.classList.contains("tabs");
                 if ((previousBlock && previousBlock.getAttribute("data-node-id")) ||
-                    nodeElement.parentElement.classList.contains("callout-content")) {
+                    nodeElement.parentElement.classList.contains("callout-content") || isTabItemBoundary) {
                     // 前一个块存在时，只显示到当前层级
                     hideParent = true;
                     // 由于折叠块的第二个子块在界面上不显示，因此移除块标 https://github.com/siyuan-note/siyuan/issues/14304

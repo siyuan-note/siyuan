@@ -1,4 +1,22 @@
 {
+	"imageCopyFailed": "No se pudo copiar la imagen. Comprueba que se pueda cargar e inténtalo de nuevo.",
+	"syncAssetSnapshotIncomplete": "El contenido de algunos recursos depende del almacenamiento en la nube; esta instantánea local está incompleta",
+	"syncAssetDownloadMode": "Descarga de recursos",
+	"syncAssetDownloadModeTip": "Solo se aplica a este dispositivo. Los recursos bajo demanda se descargan al usarlos y no están disponibles sin conexión hasta entonces. Los recursos descargados se conservan y actualizan durante la sincronización. Al cambiar a Descargar todos, primero se descargan los recursos que faltan",
+	"syncAssetDownloadAll": "Descargar todos",
+	"syncAssetDownloadOnDemand": "Descargar bajo demanda",
+	"syncAssetDownloadModeUpdating": "Actualizando el modo de descarga de recursos...",
+	"syncAssetDownloadModeFailed": "No se puede actualizar el modo de descarga de recursos",
+	"globalDefaultFont": "Fuente predeterminada global",
+	"globalDefaultFontTip": "Se usa en la interfaz y en el contenido sin una fuente específica; deja la selección vacía para usar la fuente predeterminada del tema",
+	"mobileMultiSelectTip": "Toca los bloques para seleccionarlos o deseleccionarlos",
+	"headingBatchWithSubheadingsTip": "Cambiar los subencabezados en la misma cantidad de niveles; los niveles fuera de H1 a H6 se limitan a H1 o H6",
+	"newSiblingDoc": "Nuevo documento del mismo nivel",
+	"tabs": "Bloque con pestañas",
+	"tabItem": "Pestaña",
+	"tabsPositionTop": "Pestañas arriba",
+	"tabsPositionLeft": "Pestañas a la izquierda",
+	"tabsUnwrap": "Quitar la disposición en pestañas",
 	"headingBatch": "Convertir niveles de encabezado en lote",
 	"headingBatchSource": "Nivel original",
 	"headingBatchTarget": "Nivel de destino",
@@ -2686,6 +2704,8 @@
 		"372": "El cuaderno se ha restaurado y permanece cerrado",
 		"373": "Este archivo contiene datos de cuadernos. Impórtelo desde [Árbol de documentos - Más - Importar cuaderno]",
 		"374": "Base de datos [%s], campo de plantilla [%s], primer elemento afectado [%s] (ID del elemento: %s), cantidad de elementos afectados: %d, error: %s",
-		"375": "El cuaderno para guardar notas rápidas no está disponible. Seleccione un cuaderno abierto y sin cifrar en Configuración - Documento"
+		"375": "El cuaderno para guardar notas rápidas no está disponible. Seleccione un cuaderno abierto y sin cifrar en Configuración - Documento",
+		"376": "El recurso aún no se ha descargado y no se puede obtener en este momento",
+		"377": "Cambie a Descargar todos antes de cambiar o restablecer el repositorio de datos"
 	}
 }

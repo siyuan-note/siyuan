@@ -1,4 +1,22 @@
 {
+	"imageCopyFailed": "Das Bild konnte nicht kopiert werden. Prüfe, ob es geladen werden kann, und versuche es erneut.",
+	"syncAssetSnapshotIncomplete": "Einige Ressourceninhalte sind vom Cloudspeicher abhängig; dieser lokale Schnappschuss ist unvollständig",
+	"syncAssetDownloadMode": "Ressourcendownloads",
+	"syncAssetDownloadModeTip": "Gilt nur für dieses Gerät. Ressourcen werden bei Bedarf heruntergeladen und sind bis dahin offline nicht verfügbar. Heruntergeladene Ressourcen bleiben gespeichert und werden bei der Synchronisierung aktualisiert. Beim Wechsel zu Alle herunterladen werden zuerst fehlende Ressourcen heruntergeladen",
+	"syncAssetDownloadAll": "Alle herunterladen",
+	"syncAssetDownloadOnDemand": "Bei Bedarf herunterladen",
+	"syncAssetDownloadModeUpdating": "Downloadmodus für Ressourcen wird aktualisiert...",
+	"syncAssetDownloadModeFailed": "Downloadmodus für Ressourcen konnte nicht aktualisiert werden",
+	"globalDefaultFont": "Globale Standardschrift",
+	"globalDefaultFontTip": "Für die Oberfläche und Inhalte ohne eigene Schrifteinstellung; ohne Auswahl wird die Standardschrift des Designs verwendet",
+	"mobileMultiSelectTip": "Tippe auf Blöcke, um sie auszuwählen oder die Auswahl aufzuheben",
+	"headingBatchWithSubheadingsTip": "Unterüberschriften um denselben Abstand verschieben; Ebenen außerhalb von H1 bis H6 werden auf H1 oder H6 begrenzt",
+	"newSiblingDoc": "Neues Dokument auf gleicher Ebene",
+	"tabs": "Registerkartenblock",
+	"tabItem": "Registerkarte",
+	"tabsPositionTop": "Registerkarten oben",
+	"tabsPositionLeft": "Registerkarten links",
+	"tabsUnwrap": "Registerkartenlayout aufheben",
 	"headingBatch": "Überschriftenebenen gesammelt umwandeln",
 	"headingBatchSource": "Ausgangsebene",
 	"headingBatchTarget": "Zielebene",
@@ -2686,6 +2704,8 @@
 		"372": "Das Notizbuch wurde wiederhergestellt und bleibt geschlossen",
 		"373": "Dieses Archiv enthält Notizbuchdaten. Bitte importieren Sie es über [Dokumentenbaum - Mehr - Notizbuch importieren]",
 		"374": "Datenbank [%s], Vorlagenfeld [%s], erster betroffener Eintrag [%s] (Element-ID: %s), Anzahl betroffener Einträge: %d, Fehler: %s",
-		"375": "Das Notizbuch zum Speichern von Kurznotizen ist nicht verfügbar. Wählen Sie unter Einstellungen - Dokument ein geöffnetes, unverschlüsseltes Notizbuch"
+		"375": "Das Notizbuch zum Speichern von Kurznotizen ist nicht verfügbar. Wählen Sie unter Einstellungen - Dokument ein geöffnetes, unverschlüsseltes Notizbuch",
+		"376": "Die Ressource wurde noch nicht heruntergeladen und kann derzeit nicht abgerufen werden",
+		"377": "Bitte wechseln Sie zu Alle herunterladen, bevor Sie das Datenrepository ändern oder zurücksetzen"
 	}
 }

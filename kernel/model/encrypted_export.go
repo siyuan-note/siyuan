@@ -224,7 +224,20 @@ func AcquireExportArtifactLease(exportPath string) (lease *ExportArtifactLease, 
 		if resolveErr != nil {
 			return nil, resolveErr
 		}
+		if ensureErr := EnsureAssetLocal(artifact); ensureErr != nil {
+			return nil, ensureErr
+		}
 		return registerMobileExportLease("", artifact, filepath.Base(artifact), "")
+	}
+	if !IsBoxUnlocked(boxID) {
+		return nil, errors.New(Conf.Language(314))
+	}
+	artifact, resolveErr := GetAssetAbsPathInBox(relativePath, boxID)
+	if resolveErr != nil {
+		return nil, resolveErr
+	}
+	if ensureErr := EnsureAssetLocal(artifact); ensureErr != nil {
+		return nil, ensureErr
 	}
 
 	if err = AcquireEncryptedBoxOperation(boxID); err != nil {
@@ -241,10 +254,6 @@ func AcquireExportArtifactLease(exportPath string) (lease *ExportArtifactLease, 
 	dek, dekErr := GetDEKIfUnlocked(boxID)
 	if dekErr != nil {
 		return nil, dekErr
-	}
-	artifact, resolveErr := GetAssetAbsPathInBox(relativePath, boxID)
-	if resolveErr != nil {
-		return nil, resolveErr
 	}
 	diskName := filepath.Base(relativePath)
 	leaseID, idErr := newManagedEncryptedExportID()

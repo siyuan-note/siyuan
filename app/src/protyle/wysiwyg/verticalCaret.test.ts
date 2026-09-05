@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {isCaretRectAtVerticalBoundary} from "./verticalGeometry";
+import {getNavigableVerticalRects, isCaretRectAtVerticalBoundary} from "./verticalGeometry";
 
 const rect = (top: number, height = 20) => ({
     top,
@@ -31,5 +31,21 @@ describe("vertical caret boundary", () => {
     it("treats an empty editable region as both vertical boundaries", () => {
         assert.equal(isCaretRectAtVerticalBoundary(0, [], "up"), true);
         assert.equal(isCaretRectAtVerticalBoundary(0, [], "down"), true);
+    });
+
+    it("keeps zero-width visual lines navigable", () => {
+        const rects = [rect(10), {...rect(30), right: 10, width: 0}];
+        const navigableRects = getNavigableVerticalRects(rects);
+
+        assert.equal(navigableRects.length, 2);
+        assert.equal(isCaretRectAtVerticalBoundary(10, navigableRects, "down"), false);
+        assert.equal(isCaretRectAtVerticalBoundary(30, navigableRects, "down"), true);
+    });
+
+    it("removes only the technical trailing line from code blocks", () => {
+        const rects = [rect(10), {...rect(30), right: 10, width: 0}, {...rect(50), right: 10, width: 0}];
+        const navigableRects = getNavigableVerticalRects(rects, 1);
+
+        assert.deepEqual(navigableRects, rects.slice(0, 2));
     });
 });

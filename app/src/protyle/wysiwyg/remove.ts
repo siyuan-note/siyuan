@@ -1,3 +1,5 @@
+import {isHiddenTabContent} from "../render/tabsVisibility";
+import {captureTabsRemoval} from "./tabsRemoval";
 import {
     focusBlock,
     focusByOffset,
@@ -167,7 +169,8 @@ const getCrossBlockRemovalContext = (editorElement: HTMLElement, selectedRange: 
     selectedRange.cloneContents().querySelectorAll<HTMLElement>("[data-node-id]").forEach(item => {
         const element = editorElement.querySelector<HTMLElement>(`[data-node-id="${item.getAttribute("data-node-id")}"]`);
         if (!element || selectedElements.includes(element) || element === rangeStartElement || element === endElement ||
-            element.contains(rangeStartElement) || element.contains(endElement) || isInEmbedBlock(element)) {
+            element.contains(rangeStartElement) || element.contains(endElement) || isInEmbedBlock(element) ||
+            isHiddenTabContent(element) || element.matches(".tabs, .tab-item") || element.querySelector(".tabs")) {
             return;
         }
         const elementRange = document.createRange();
@@ -198,7 +201,8 @@ const getCrossBlockRemovalContext = (editorElement: HTMLElement, selectedRange: 
     let mergeEndElement: Element;
     const siblingListItemMergeContext = getCrossBlockSiblingListItemMergeContext(
         editorElement, rangeStartElement, endElement);
-    const endAction = handleEndElement && rangeStartElement !== endElement && startEditableElement && endBlockRange ?
+    const sameTab = rangeStartElement.closest(".tab-item") === endElement.closest(".tab-item");
+    const endAction = sameTab && handleEndElement && rangeStartElement !== endElement && startEditableElement && endBlockRange ?
         getCrossBlockEndAction(
             rangeStartElement.getAttribute("data-type"),
             endElement.getAttribute("data-type"),
@@ -244,7 +248,7 @@ const getCrossBlockRemovalPlan = (editorElement: HTMLElement, selectedRange: Ran
                                    handleEndElement = true, replacement = false) => {
     const context = getCrossBlockRemovalContext(
         editorElement, selectedRange, startElement, endElement, handleEndElement);
-    if (!handleEndElement) {
+    if (!handleEndElement || startElement.closest(".tab-item") !== endElement.closest(".tab-item")) {
         return {
             ...context,
             nestedListMergeContext: undefined,
@@ -855,6 +859,15 @@ export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Ra
         action: "delete",
         id: item.getAttribute("data-node-id")
     }));
+    editorElement.querySelectorAll<HTMLElement>(".tab-item-content").forEach(content => {
+        if (!content.querySelector(":scope > [data-node-id]")) {
+            const paragraph = genEmptyElement(false, false);
+            content.appendChild(paragraph);
+            doOperations.push({action: "insert", id: paragraph.dataset.nodeId,
+                parentID: content.parentElement.dataset.nodeId, data: paragraph.outerHTML});
+            undoOperations.push({action: "delete", id: paragraph.dataset.nodeId});
+        }
+    });
     if (nestedListMergeContext?.newListParentElement) {
         doOperations.push({
             action: "insert",
@@ -1082,6 +1095,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         const deletes: IOperation[] = [];
         const inserts: IOperation[] = [];
         const candidateElements = Array.from(new Set(selectElements.map(item => getTopAloneElement(item))));
+        const tabsRemoval = captureTabsRemoval(candidateElements);
         const selectionCandidate = getDeleteSelectionCandidate(candidateElements, type,
             getPreviousBlock, getNextBlock);
         let sideElement = selectionCandidate?.element;
@@ -1191,6 +1205,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 ensureListItemContentBlock(topParentElement, deletes, inserts);
             }
         }
+        tabsRemoval.normalize();
         Object.keys(unfoldData).forEach(item => {
             const foldOperations = setFold(protyle, unfoldData[item].element, true, false, false, true);
             deletes.push(...foldOperations.doOperations);
@@ -1337,7 +1352,8 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 scrollCenter(protyle, sideElement);
             }
             const parentUndoOperations = parentUndoOperationGroups.reverse().flat();
-            transaction(protyle, deletes, parentUndoOperations.concat(inserts.reverse()));
+            const tabOperations = tabsRemoval.operations(deletes, parentUndoOperations.concat(inserts.reverse()));
+            transaction(protyle, tabOperations.doOperations, tabOperations.undoOperations);
         }
 
         hideElements(["util"], protyle);

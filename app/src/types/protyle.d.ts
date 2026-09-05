@@ -142,6 +142,9 @@ declare class Viz {
 
 declare class Viewer {
     public destroyed: boolean;
+    public image: HTMLImageElement;
+    public viewed: boolean;
+    public toolbar: HTMLElement;
 
     constructor(element: Element, options: {
         title: [number, (image: HTMLImageElement, imageData: IObject) => string],
@@ -149,6 +152,7 @@ declare class Viewer {
         initialViewIndex?: number,
         transition: boolean,
         hidden: () => void,
+        ready?: (this: Viewer) => void,
         toolbar: {
             zoomIn: boolean,
             zoomOut: boolean,
@@ -161,6 +165,7 @@ declare class Viewer {
             rotateRight: boolean,
             flipHorizontal: boolean,
             flipVertical: boolean,
+            copy?: () => void,
             close: () => void
         }
     })
@@ -232,6 +237,8 @@ declare class Lute {
     public SetSuperBlock(enable: boolean): void;
 
     public SetCallout(enable: boolean): void;
+
+    public SetTabs(enable: boolean): void;
 
     public SetCustomBlock(enable: boolean): void;
 

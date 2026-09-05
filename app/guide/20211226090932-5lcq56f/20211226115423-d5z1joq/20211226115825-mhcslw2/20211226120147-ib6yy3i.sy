@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容區塊類型",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260905124213"
 	},
 	"Children": [
 		{
@@ -1765,7 +1765,7 @@
 		{
 			"ID": "20220429115013-5xmtrpl",
 			"Type": "NodeHTMLBlock",
-			"Data": "\u003cruby\u003e\n你\u003crt\u003enǐ\u003c/rt\u003e\n　好\u003crt\u003e　hǎo\u003c/rt\u003e\n　世\u003crt\u003e　shì\u003c/rt\u003e\n　界\u003crt\u003e　jiè\u003c/rt\u003e\n\u003c/ruby\u003e\u003cbr\u003e\nHello World",
+			"Data": "<ruby>\n你<rt>nǐ</rt>\n　好<rt>　hǎo</rt>\n　世<rt>　shì</rt>\n　界<rt>　jiè</rt>\n</ruby><br>\nHello World",
 			"Properties": {
 				"id": "20220429115013-5xmtrpl",
 				"updated": "20220429115013"
@@ -1885,7 +1885,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;div\u0026gt;\u0026lt;/div\u0026gt;"
+									"TextMarkTextContent": "&lt;div&gt;&lt;/div&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -2486,7 +2486,7 @@
 			"Children": [
 				{
 					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e"
+					"Data": ">"
 				},
 				{
 					"ID": "20211226120227-ujfxv1r",
@@ -2882,6 +2882,35 @@
 				"id": "20211226120227-gz5syjf",
 				"updated": "20211226120227"
 			}
+		},
+		{
+			"ID": "20260905124213-371qsy7",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260905124213-371qsy7",
+				"updated": "20260905124213"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "頁籤區塊"
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-n1gggna",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905124213-n1gggna",
+				"updated": "20260905124213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "頁籤區塊僅包含頁籤項目；每個頁籤項目都有獨立區塊 ID，可容納一般內容區塊及巢狀頁籤區塊。"
+				}
+			]
 		}
 	]
 }

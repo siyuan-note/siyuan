@@ -1,4 +1,22 @@
 {
+	"imageCopyFailed": "이미지를 복사할 수 없습니다. 이미지를 불러올 수 있는지 확인한 후 다시 시도하세요.",
+	"syncAssetSnapshotIncomplete": "일부 리소스 내용이 클라우드 저장소에 의존하므로 이 로컬 스냅샷은 완전하지 않습니다",
+	"syncAssetDownloadMode": "리소스 파일 다운로드",
+	"syncAssetDownloadModeTip": "현재 기기에만 적용됩니다. 필요할 때 다운로드하는 모드에서는 리소스를 사용할 때 다운로드하며, 다운로드 전에는 오프라인에서 사용할 수 없습니다. 다운로드한 리소스는 보관되고 동기화 시 업데이트됩니다. 모두 다운로드로 전환하기 전에 누락된 리소스를 먼저 다운로드합니다",
+	"syncAssetDownloadAll": "모두 다운로드",
+	"syncAssetDownloadOnDemand": "필요할 때 다운로드",
+	"syncAssetDownloadModeUpdating": "리소스 다운로드 모드 업데이트 중...",
+	"syncAssetDownloadModeFailed": "리소스 다운로드 모드를 업데이트할 수 없습니다",
+	"globalDefaultFont": "전역 기본 글꼴",
+	"globalDefaultFontTip": "인터페이스와 글꼴을 별도로 설정하지 않은 콘텐츠에 사용하며, 글꼴을 선택하지 않으면 테마의 기본 글꼴을 사용합니다",
+	"mobileMultiSelectTip": "블록을 탭하여 선택하거나 선택 해제하세요",
+	"headingBatchWithSubheadingsTip": "하위 제목도 같은 수준 차이만큼 변경하며 H1부터 H6까지의 범위를 벗어나면 H1 또는 H6으로 제한합니다",
+	"newSiblingDoc": "같은 수준에 새 문서 만들기",
+	"tabs": "탭 블록",
+	"tabItem": "탭",
+	"tabsPositionTop": "상단 탭",
+	"tabsPositionLeft": "왼쪽 탭",
+	"tabsUnwrap": "탭 레이아웃 해제",
 	"headingBatch": "제목 수준 일괄 변환",
 	"headingBatchSource": "원본 수준",
 	"headingBatchTarget": "대상 수준",
@@ -2686,6 +2704,8 @@
 		"372": "노트북이 복원되었으며 닫힌 상태로 유지됩니다",
 		"373": "이 압축 파일에는 노트북 데이터가 포함되어 있습니다. [문서 트리 - 더보기 - 노트북 가져오기]에서 가져오세요",
 		"374": "데이터베이스 [%s], 템플릿 필드 [%s], 첫 번째 오류 항목 [%s](항목 ID: %s), 오류 항목 수: %d, 오류: %s",
-		"375": "플래시 메모 저장 노트북을 사용할 수 없습니다. 설정 - 문서에서 열려 있는 암호화되지 않은 노트북을 선택하세요"
+		"375": "플래시 메모 저장 노트북을 사용할 수 없습니다. 설정 - 문서에서 열려 있는 암호화되지 않은 노트북을 선택하세요",
+		"376": "리소스가 아직 다운로드되지 않았으며 현재 가져올 수 없습니다",
+		"377": "데이터 저장소를 변경하거나 초기화하기 전에 모두 다운로드로 전환하세요"
 	}
 }

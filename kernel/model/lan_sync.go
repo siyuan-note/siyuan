@@ -242,7 +242,14 @@ func RefreshLANSyncNetwork() {
 }
 
 func newSyncRepository() (ret *dejavu.Repo, err error) {
-	ret, err = newRepository()
+	assetDownloadSourceMu.RLock()
+	defer assetDownloadSourceMu.RUnlock()
+	return newSyncRepositoryWithAssetSourceLocked()
+}
+
+// newSyncRepositoryWithAssetSourceLocked 在来源锁保护下创建带局域网分块来源的仓库。
+func newSyncRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
+	ret, err = newRepositoryWithAssetSourceLocked()
 	if nil != err {
 		return
 	}

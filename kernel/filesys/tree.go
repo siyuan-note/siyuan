@@ -444,6 +444,9 @@ func writeTreeByWriteFile(filePath string, data []byte) (err error) {
 }
 
 func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error) {
+	if err = treenode.CheckSpec(tree); nil != err {
+		return
+	}
 	luteEngine := util.NewLute() // 不关注用户的自定义解析渲染选项
 
 	if nil == tree.Root.FirstChild {
@@ -453,6 +456,9 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 		treenode.UpsertBlockTree(tree)
 	}
 
+	if treenode.NormalizeTabs(tree.Root) {
+		treenode.UpsertBlockTree(tree)
+	}
 	treenode.UpgradeSpec(tree)
 
 	if _, err = ValidateBoxRelativePath(tree.Box, tree.Path); err != nil {
@@ -537,6 +543,9 @@ func afterWriteTree(tree *parse.Tree) {
 // fixTreeJSONData 订正树 JSON 数据。
 func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, dek []byte, encrypted bool) (data []byte, needFix bool, err error) {
 	jsonData, needFix = removeUnescapedUnicodeNull(jsonData)
+	if err = treenode.CheckSpecJSON(jsonData); nil != err {
+		return
+	}
 	ret, parseNeedFix, err := dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
 	if parseNeedFix {
 		needFix = true
@@ -582,6 +591,9 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, de
 	if treenode.FixInvalidListChildren(ret.Root) {
 		needFix = true
 	}
+	if treenode.NormalizeTabs(ret.Root) {
+		needFix = true
+	}
 
 	if !needFix {
 		return jsonData, false, nil
@@ -616,6 +628,9 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, de
 }
 
 func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
+	if err = treenode.CheckSpecJSON(jsonData); nil != err {
+		return
+	}
 	ret, _, err = dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
 	if err != nil {
 		logging.LogErrorf("parse json [%s] to tree failed: %s", boxID+p, err)

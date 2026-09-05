@@ -38,7 +38,7 @@ export const closePanel = () => {
 };
 
 export const closeModel = () => {
-    activeBlur();
+    activeBlur(true);
     destroyModel();
     document.getElementById("model").style.transform = "";
 };

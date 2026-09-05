@@ -1,4 +1,22 @@
 {
+	"imageCopyFailed": "Tidak dapat menyalin gambar. Pastikan gambar dapat dimuat dan coba lagi.",
+	"syncAssetSnapshotIncomplete": "Sebagian konten sumber daya bergantung pada penyimpanan awan; snapshot lokal ini belum lengkap",
+	"syncAssetDownloadMode": "Unduhan berkas sumber daya",
+	"syncAssetDownloadModeTip": "Hanya berlaku untuk perangkat ini. Sumber daya sesuai kebutuhan diunduh saat digunakan dan tidak tersedia luring sebelum diunduh. Sumber daya yang telah diunduh tetap disimpan dan diperbarui saat sinkronisasi. Beralih ke Unduh semua akan mengunduh sumber daya yang belum tersedia terlebih dahulu",
+	"syncAssetDownloadAll": "Unduh semua",
+	"syncAssetDownloadOnDemand": "Unduh sesuai kebutuhan",
+	"syncAssetDownloadModeUpdating": "Memperbarui mode unduhan sumber daya...",
+	"syncAssetDownloadModeFailed": "Tidak dapat memperbarui mode unduhan sumber daya",
+	"globalDefaultFont": "Font Default Global",
+	"globalDefaultFontTip": "Digunakan untuk antarmuka dan konten tanpa pengaturan font tersendiri; biarkan pilihan kosong untuk menggunakan font default tema",
+	"mobileMultiSelectTip": "Ketuk blok untuk memilih atau membatalkan pilihan",
+	"headingBatchWithSubheadingsTip": "Geser subjudul dengan selisih tingkat yang sama; tingkat di luar H1 hingga H6 dibatasi ke H1 atau H6",
+	"newSiblingDoc": "Dokumen baru pada tingkat yang sama",
+	"tabs": "Blok bertab",
+	"tabItem": "Tab",
+	"tabsPositionTop": "Tab di atas",
+	"tabsPositionLeft": "Tab di kiri",
+	"tabsUnwrap": "Hapus tata letak tab",
 	"headingBatch": "Konversi tingkat judul secara massal",
 	"headingBatchSource": "Tingkat asal",
 	"headingBatchTarget": "Tingkat tujuan",
@@ -2686,6 +2704,8 @@
 		"372": "Buku catatan telah dipulihkan dan tetap ditutup",
 		"373": "Arsip ini berisi data buku catatan. Impor dari [Pohon dokumen - Lainnya - Impor buku catatan]",
 		"374": "Basis data [%s], bidang templat [%s], item pertama yang terdampak [%s] (ID item: %s), jumlah item terdampak: %d, kesalahan: %s",
-		"375": "Buku catatan penyimpanan catatan cepat tidak tersedia. Pilih buku catatan terbuka dan tidak terenkripsi di Pengaturan - Dokumen"
+		"375": "Buku catatan penyimpanan catatan cepat tidak tersedia. Pilih buku catatan terbuka dan tidak terenkripsi di Pengaturan - Dokumen",
+		"376": "Sumber daya belum diunduh dan saat ini tidak dapat diambil",
+		"377": "Beralihlah ke Unduh semua sebelum mengubah atau mengatur ulang repositori data"
 	}
 }

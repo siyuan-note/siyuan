@@ -406,6 +406,14 @@ func getNodeRefText0(node *ast.Node, maxLen int, removeLineBreak bool) string {
 		return "Video..."
 	case ast.NodeAudio:
 		return "Audio..."
+	case ast.NodeTabItem:
+		if title := treenode.TabTitleParagraph(node); nil != title {
+			ret := renderBlockText(title, nil, removeLineBreak)
+			if maxLen < utf8.RuneCountInString(ret) {
+				ret = gulu.Str.SubStr(ret, maxLen) + "..."
+			}
+			return ret
+		}
 	case ast.NodeAttributeView:
 		ret, _ := av.GetAttributeViewName(node.AttributeViewID)
 		if "" == ret {
@@ -760,6 +768,8 @@ func buildBlockBreadcrumbChild(node *ast.Node, excludeTypes []string) (ret *Bloc
 	name := node.IALAttr("name")
 	if ast.NodeAttributeView == node.Type {
 		name, _ = av.GetAttributeViewName(node.AttributeViewID)
+	} else if ast.NodeTabItem == node.Type && "" == name {
+		name = getNodeRefText0(node, maxNameLen, true)
 	} else if "" == name {
 		if ast.NodeListItem == node.Type || ast.NodeList == node.Type || ast.NodeSuperBlock == node.Type ||
 			ast.NodeBlockquote == node.Type || ast.NodeCallout == node.Type {
@@ -822,6 +832,8 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 			}
 		} else if ast.NodeAttributeView == parent.Type {
 			name, _ = av.GetAttributeViewName(parent.AttributeViewID)
+		} else if ast.NodeTabItem == parent.Type && "" == name {
+			name = getNodeRefText0(parent, maxNameLen, true)
 		} else {
 			if "" == name {
 				if ast.NodeListItem == parent.Type || ast.NodeList == parent.Type || ast.NodeSuperBlock == parent.Type || ast.NodeBlockquote == parent.Type || ast.NodeCallout == parent.Type {

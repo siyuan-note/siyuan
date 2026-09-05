@@ -1923,6 +1923,9 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 	moveToRoot := "/" == toPath
 	toBlockID := tree.ID
 	fromFolder := path.Join(path.Dir(fromPath), tree.ID)
+	if err = EnsureAssetPrefixLocal(filepath.Join(util.DataDir, fromBox.ID, fromFolder)); err != nil {
+		return
+	}
 	toFolder := "/"
 	if moveToRoot {
 		refresh.addNotebook(toBox.ID)
@@ -2118,6 +2121,12 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 	if err != nil || nil == ret {
 		return nil, ErrBlockNotFound
 	}
+	if !IsEncryptedBox(box.ID) {
+		assetParent := filepath.Dir(filepath.Join(util.DataDir, box.ID, p))
+		if err = EnsureAssetPrefixLocal(assetParent); err != nil {
+			return nil, err
+		}
+	}
 
 	historyDir, err := getHistoryDir(HistoryOpDelete)
 	if err != nil {
@@ -2135,7 +2144,9 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 	generateAvHistoryInTree(ret, historyDir)
 	// 加密笔记本的 assets 不提升到全局
 	if !IsEncryptedBox(box.ID) {
-		copyDocAssetsToDataAssets(box.ID, p)
+		if err = copyDocAssetsToDataAssets(box.ID, p); err != nil {
+			return nil, err
+		}
 	}
 
 	removeIDs := treenode.RootChildIDs(ret.ID)

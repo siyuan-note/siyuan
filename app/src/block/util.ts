@@ -350,6 +350,11 @@ export const insertEmptyBlock = async (protyle: IProtyle, position: InsertPositi
     if (!blockElement) {
         return;
     }
+    // 页签项不能容纳同级普通块，上下插入以所属页签组为目标。
+    if (blockElement.getAttribute("data-type") === "NodeTabItem" &&
+        blockElement.parentElement.getAttribute("data-type") === "NodeTabs") {
+        blockElement = blockElement.parentElement;
+    }
     const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range);
     protyle.observerLoad?.disconnect();
     let newElement = genEmptyElement(false, true);

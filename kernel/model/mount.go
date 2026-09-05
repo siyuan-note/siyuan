@@ -239,6 +239,11 @@ func RemoveBox(boxID string) (err error) {
 
 	// 删目录前固定加密状态，确保后续历史、资源和索引清理始终使用同一个安全边界。
 	isEncrypted := IsEncryptedBox(boxID)
+	if !isUserGuide {
+		if err = EnsureAssetPrefixLocal(localPath); err != nil {
+			return
+		}
+	}
 	if isEncrypted {
 		// 加密索引先持有生命周期租约再获取索引锁，因此删除也必须先结束生命周期，保持锁顺序一致。
 		unmount0(boxID)
@@ -273,7 +278,9 @@ func RemoveBox(boxID string) (err error) {
 
 		// 加密笔记本的 assets 不提升到全局 data/assets，避免密文污染全局或被全局索引
 		if !isEncrypted {
-			copyBoxAssetsToDataAssets(boxID)
+			if err = copyBoxAssetsToDataAssets(boxID); err != nil {
+				return
+			}
 		}
 	}
 

@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260905124213"
 	},
 	"Children": [
 		{
@@ -1778,7 +1778,7 @@
 		{
 			"ID": "20220429115137-wr4okkr",
 			"Type": "NodeHTMLBlock",
-			"Data": "\u003cruby\u003e\n你\u003crt\u003enǐ\u003c/rt\u003e\n　好\u003crt\u003e　hǎo\u003c/rt\u003e\n　世\u003crt\u003e　shì\u003c/rt\u003e\n　界\u003crt\u003e　jiè\u003c/rt\u003e\n\u003c/ruby\u003e\u003cbr\u003e\nHello World",
+			"Data": "<ruby>\n你<rt>nǐ</rt>\n　好<rt>　hǎo</rt>\n　世<rt>　shì</rt>\n　界<rt>　jiè</rt>\n</ruby><br>\nHello World",
 			"Properties": {
 				"id": "20220429115137-wr4okkr",
 				"updated": "20220429115137"
@@ -1914,7 +1914,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;div\u0026gt;\u0026lt;/div\u0026gt;"
+									"TextMarkTextContent": "&lt;div&gt;&lt;/div&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -2545,7 +2545,7 @@
 			"Children": [
 				{
 					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e "
+					"Data": "> "
 				},
 				{
 					"ID": "20210104090624-o0wtf6v",
@@ -2968,6 +2968,35 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-9etkynq",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260905124213-9etkynq",
+				"updated": "20260905124213"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "页签块"
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-6mc5n1n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905124213-6mc5n1n",
+				"updated": "20260905124213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "页签块只包含页签项；每个页签项有独立块 ID，可容纳普通内容块及嵌套页签块。"
 				}
 			]
 		}

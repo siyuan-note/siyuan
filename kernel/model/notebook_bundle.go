@@ -375,6 +375,9 @@ func inspectSYNotebookArchive(zipPath string) (ret *inspectedSYNotebook, err err
 		if nil != readTreeErr {
 			return readTreeErr
 		}
+		if specErr := treenode.CheckSpecJSON(data); nil != specErr {
+			return specErr
+		}
 		tree, _, parseErr := dataparser.ParseJSON(data, luteEngine.ParseOptions)
 		if nil != parseErr {
 			return parseErr

@@ -1,4 +1,22 @@
 {
+	"imageCopyFailed": "Görüntü kopyalanamadı. Yüklenebildiğini kontrol edip tekrar deneyin.",
+	"syncAssetSnapshotIncomplete": "Bazı kaynakların içeriği bulut depolamaya bağlıdır; bu yerel anlık görüntü eksiktir",
+	"syncAssetDownloadMode": "Kaynak dosyası indirmeleri",
+	"syncAssetDownloadModeTip": "Yalnızca bu cihaz için geçerlidir. İsteğe bağlı kaynaklar kullanıldıklarında indirilir ve indirilene kadar çevrimdışı kullanılamaz. İndirilen kaynaklar saklanır ve eşitleme sırasında güncellenir. Tümünü indir seçeneğine geçmeden önce eksik kaynaklar indirilir",
+	"syncAssetDownloadAll": "Tümünü indir",
+	"syncAssetDownloadOnDemand": "Gerektiğinde indir",
+	"syncAssetDownloadModeUpdating": "Kaynak indirme modu güncelleniyor...",
+	"syncAssetDownloadModeFailed": "Kaynak indirme modu güncellenemedi",
+	"globalDefaultFont": "Genel Varsayılan Yazı Tipi",
+	"globalDefaultFontTip": "Arayüz ve ayrı bir yazı tipi ayarı olmayan içerik için kullanılır; temanın varsayılan yazı tipini kullanmak için seçimi boş bırakın",
+	"mobileMultiSelectTip": "Blokları seçmek veya seçimlerini kaldırmak için dokunun",
+	"headingBatchWithSubheadingsTip": "Alt başlıkları aynı düzey farkıyla kaydır; H1 ile H6 aralığının dışındaki düzeyler H1 veya H6 ile sınırlandırılır",
+	"newSiblingDoc": "Aynı düzeyde yeni belge",
+	"tabs": "Sekmeli blok",
+	"tabItem": "Sekme",
+	"tabsPositionTop": "Üstteki sekmeler",
+	"tabsPositionLeft": "Soldaki sekmeler",
+	"tabsUnwrap": "Sekme düzenini kaldır",
 	"headingBatch": "Başlık düzeylerini toplu dönüştür",
 	"headingBatchSource": "Kaynak düzey",
 	"headingBatchTarget": "Hedef düzey",
@@ -2686,6 +2704,8 @@
 		"372": "Defter geri yüklendi ve kapalı kalacak",
 		"373": "Bu arşiv not defteri verileri içeriyor. [Belge ağacı - Diğer - Not defteri içe aktar] menüsünden içe aktarın",
 		"374": "Veritabanı [%s], şablon alanı [%s], etkilenen ilk öğe [%s] (öğe kimliği: %s), etkilenen öğe sayısı: %d, hata: %s",
-		"375": "Hızlı notların kaydedileceği not defteri kullanılamıyor. Ayarlar - Belge bölümünde açık ve şifrelenmemiş bir not defteri seçin"
+		"375": "Hızlı notların kaydedileceği not defteri kullanılamıyor. Ayarlar - Belge bölümünde açık ve şifrelenmemiş bir not defteri seçin",
+		"376": "Kaynak henüz indirilmedi ve şu anda alınamıyor",
+		"377": "Veri deposunu değiştirmeden veya sıfırlamadan önce Tümünü indir seçeneğine geçin"
 	}
 }

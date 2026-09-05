@@ -462,10 +462,11 @@ func getDocHeadingLevelTransaction(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 	var arg struct {
-		ID       string `json:"id"`
-		Notebook string `json:"notebook"`
-		Source   int    `json:"source"`
-		Target   int    `json:"target"`
+		ID              string `json:"id"`
+		Notebook        string `json:"notebook"`
+		Source          int    `json:"source"`
+		Target          int    `json:"target"`
+		WithSubheadings bool   `json:"withSubheadings"`
 	}
 	if err := c.ShouldBindJSON(&arg); err != nil || arg.ID == "" ||
 		arg.Source < 0 || arg.Source > 6 || arg.Target < 0 || arg.Target > 6 ||
@@ -474,13 +475,13 @@ func getDocHeadingLevelTransaction(c *gin.Context) {
 		ret.Msg = "invalid heading conversion parameters"
 		return
 	}
-	counts, title, transaction, err := model.GetDocHeadingLevelTransaction(arg.ID, arg.Notebook, arg.Source, arg.Target)
+	result, err := model.GetDocHeadingLevelTransaction(arg.ID, arg.Notebook, arg.Source, arg.Target, arg.WithSubheadings)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
-	ret.Data = map[string]any{"counts": counts, "title": title, "transaction": transaction}
+	ret.Data = result
 }
 
 func getHeadingLevelTransaction(c *gin.Context) {

@@ -1,6 +1,6 @@
 # SiYuan `.sy` File JSON Structure — AI Read/Write Guide
 
-> Canonical Spec baseline: `2` (the current writer output; compatible readers may encounter an older or missing `Spec` and upgrade it).
+> Canonical Spec baseline: `2` for ordinary documents, `3` for documents containing tabs; compatible readers may upgrade older or missing versions.
 > Verified against samples: `20200825162036-4dx365o.sy` (formatting elements), `20200905090211-2vixtlf.sy` (block types).
 > All conclusions are based on real samples and the current Lute / SiYuan kernel source. The cited samples contain a few known legacy artifacts; canonical write rules follow the current source when a sample differs.
 > This guide describes plaintext `.sy` JSON in an ordinary notebook, or the decrypted AST of an unlocked encrypted notebook. An encrypted notebook's on-disk `.sy` file is ciphertext and must not be edited as JSON.
@@ -16,7 +16,7 @@ This guide distinguishes the format that new writers should emit from historical
 
 | Term | Meaning |
 |---|---|
-| **Required** | Required in newly generated canonical Spec 2 data |
+| **Required** | Required in newly generated canonical data |
 | **Optional** | May be omitted because the field is empty or carries `omitempty` |
 | **Compatible input** | Historical or external data that the reader may accept and preserve, repair, or upgrade according to explicit compatibility rules |
 
@@ -69,7 +69,7 @@ Division of labor among the four paths:
 | Top-level key | Required | Meaning |
 |---|---|---|
 | `ID` | ✅ | Document block ID. **Equals the filename without `.sy`** |
-| `Spec` | ✅ | `"2"` in canonical current files; older or missing values are compatible input and may be upgraded |
+| `Spec` | ✅ | `"2"` for ordinary documents, `"3"` for tabs documents; older or missing values are compatible input and may be upgraded |
 | `Type` | ✅ | `"NodeDocument"` |
 | `Properties` | ✅ | Document-level IAL — see §8 |
 | `Children` | ✅ | Array of body child blocks; canonical files contain at least one block |
@@ -90,7 +90,7 @@ Division of labor among the four paths:
 | `Children` | array | containers and structurally composite nodes | Child node array |
 | Type-specific fields | - | per type | e.g. `HeadingLevel`, `ListData`, `TextMarkType`, `AttributeViewID` |
 
-**Core discriminator rule:** `Type` determines whether a node is a block (`ast.Node.IsBlock()` is authoritative); the presence of `ID` does not. In canonical Spec 2 data, every block has an `ID` and matching `Properties.id`, while new inline/marker nodes have neither. Historical files produced by old bugs may contain IDs on non-block nodes such as `NodeCodeBlockCode` or `NodeMathBlockContent`. Compatible readers and editors may remove those legacy `ID` / `Properties.id` fields during normalization, but must classify the node by `Type` and must not delete the node merely because its `ID` conflicts with the canonical rule.
+**Core discriminator rule:** `Type` determines whether a node is a block (`ast.Node.IsBlock()` is authoritative); the presence of `ID` does not. In canonical data, every block has an `ID` and matching `Properties.id`, while new inline/marker nodes have neither. Historical files produced by old bugs may contain IDs on non-block nodes such as `NodeCodeBlockCode` or `NodeMathBlockContent`. Compatible readers and editors may remove those legacy `ID` / `Properties.id` fields during normalization, but must classify the node by `Type` and must not delete the node merely because its `ID` conflicts with the canonical rule.
 
 ---
 
@@ -113,7 +113,7 @@ Division of labor among the four paths:
 
 **Leaf blocks:** `NodeParagraph`, `NodeHeading`, `NodeThematicBreak`, `NodeHTMLBlock`, `NodeCodeBlock`, `NodeMathBlock`, `NodeTable`, `NodeBlockQueryEmbed`, `NodeAttributeView`, `NodeIFrame`, `NodeVideo`, `NodeAudio`, `NodeWidget`, `NodeCustomBlock`
 
-**Container blocks:** `NodeList`, `NodeListItem`, `NodeBlockquote`, `NodeCallout`, `NodeSuperBlock`
+**Container blocks:** `NodeList`, `NodeListItem`, `NodeBlockquote`, `NodeCallout`, `NodeSuperBlock`, `NodeTabs`, `NodeTabItem`
 
 ### Inline / marker nodes (no ID in canonical data)
 
@@ -302,7 +302,7 @@ The table lists the five built-in types and their defaults. Custom `CalloutType`
   ] }
 ```
 
-> `NodeSuperBlockLayoutMarker.Data` can only be `"row"` (vertical) or `"col"` (horizontal). A canonical super block contains the open marker, layout marker, at least one content block, and close marker — at least four children total. It may contain multiple content blocks, can nest, and is the only container that can hold any block (including itself).
+> `NodeSuperBlockLayoutMarker.Data` can only be `"row"` (vertical) or `"col"` (horizontal). A canonical super block contains the open marker, layout marker, at least one content block, and close marker — at least four children total. It may contain multiple content blocks, can nest, and can hold ordinary content blocks including itself, but not a bare tab item.
 
 ### 5.9 Embed block (five-part structure `{{ ... }}`)
 
@@ -316,6 +316,33 @@ The table lists the five built-in types and their defaults. Custom `CalloutType`
     { "Type": "NodeCloseBrace" }
   ] }
 ```
+
+### 5.9.1 Tabbed container and tab item (Spec 3)
+
+`NodeTabs` and `NodeTabItem` are real container blocks with their own `ID`, `Properties.id` and `Properties.updated`. A tabs container holds only tab items; each item holds ordinary content blocks, including nested tabs, and always has at least one body block. Use an empty paragraph for an empty body. A standalone tab item is an editing fragment and cannot be a direct document child.
+
+```json
+{
+  "Type": "NodeTabs",
+  "ID": "20260905120000-tabs001",
+  "Properties": {"id": "20260905120000-tabs001", "updated": "20260905120000", "tabs-active-id": "20260905120000-item001", "tabs-position": "left"},
+  "Children": [{
+    "Type": "NodeTabItem",
+    "ID": "20260905120000-item001",
+    "TabItemTitle": "**Example**",
+    "Properties": {"id": "20260905120000-item001", "updated": "20260905120000"},
+    "Children": [{"Type": "NodeParagraph", "ID": "20260905120000-body001", "Properties": {"id": "20260905120000-body001", "updated": "20260905120000"}}]
+  }]
+}
+```
+
+`TabItemTitle` is optional inline Markdown, with the same inline text-mark representation as `CalloutTitle`. It is not a separate persistent child block. Empty and duplicate titles are valid. Tab order follows the child array. `tabs-active-id` references a direct item ID; a missing or invalid value falls back to the first item. `tabs-position` accepts `top` (default) or `left`. Both attributes are saved and synced; changing only the active item does not change body modification timestamps. Regenerating IDs must also remap active-item IDs and internal references in titles.
+
+Documents containing either node require `Spec: "3"`; ordinary documents remain on Spec 2. Keep Spec 3 after removing the feature. Check the raw root `Spec` before passing JSON to a tolerant parser, because unknown node types can otherwise lose their children. Unsupported versions must not be repaired and written back.
+
+The internal Markdown syntax uses `::: tabs` to open a group and `@tab <inline title>` to start each item; `@tab:active <inline title>` identifies the selected item. The opening fence requires at least three colons and whitespace (spaces or tabs) before `tabs`; canonical output uses one space. Items have no closing marker; the group closes with a standalone fence containing the same number of colons as its opening fence. Outer fences must be longer than nested fences. Indentation is optional, and canonical output computes fence lengths from nesting depth without adding indentation to tab bodies. Old `:::tabs` and `:::tab` syntax is not recognized; existing `.sy` tab nodes retain the same structure.
+
+An item's IAL appears immediately after its title marker, with no intervening blank line; a blank line separates that metadata from its body. The group's IAL follows its closing fence, and body-block IALs follow their respective blocks. On import, the first valid `@tab:active` marker sets `tabs-active-id`, taking precedence over the group's IAL. Without an active marker, a valid `tabs-active-id` is preserved; a missing or invalid value falls back to the first item. Each nested group has its own selection. Code-block markers are literal; use `\@tab` or `\@tab:active` for literal markers at the start of a body line. Standard Markdown exports title paragraphs followed by every item's body; HTML can enhance the full content into interactive tabs, while print, PDF and Word show all items. See [Tabs design](TABS.md) for the full contract.
 
 ### 5.10 Code block (four-part structure; fenced only)
 
@@ -558,8 +585,12 @@ A flat `map[string]string`.
 | `NodeListItem` | any non-`NodeListItem` block (paragraph/code block/sub-`NodeList`/super block…) | `NodeListItem` (nesting requires another `NodeList`) |
 | `NodeBlockquote` | any non-`NodeListItem` block + one `NodeBlockquoteMarker` | `NodeListItem` |
 | `NodeCallout` | any non-`NodeListItem` block | `NodeListItem` |
-| `NodeSuperBlock` | **any block** (incl. nested super blocks), inside its open/layout/close marker envelope | none (most permissive) |
+| `NodeSuperBlock` | Content blocks (incl. nested super blocks), inside its open/layout/close marker envelope | `NodeDocument`, bare `NodeListItem`, bare `NodeTabItem` |
 | `NodeDocument` | any non-`NodeListItem` block | `NodeListItem` |
+| `NodeTabs` | only `NodeTabItem`, at least one | other content blocks |
+| `NodeTabItem` | ordinary content blocks and nested `NodeTabs`, at least one | `NodeDocument`, `NodeListItem`, `NodeTabItem` |
+> `NodeTabItem` must be a direct child of `NodeTabs`; none of the other containers above can directly contain it.
+
 
 > These are canonical writer constraints derived from Lute's `CanContain`. The Markdown parser applies them while building a tree, but `dataparser.ParseJSON` is not a strict containment validator and does not reject every violation. Direct writers must validate these relationships themselves; invalid trees can cause parse or render anomalies.
 
@@ -595,7 +626,7 @@ Canonical writers must not generate the following syntax or node families. Most 
 
 When generating or compatibly editing a `.sy` that SiYuan can load cleanly, verify item by item:
 
-1. ☐ Root `Type` = `"NodeDocument"`, `Spec` = `"2"`; root `ID` = filename (without `.sy`) and equals `Properties.id`
+1. ☐ Root `Type` = `"NodeDocument"`, `Spec` = `"2"` or `"3"` (tabs documents); root `ID` = filename (without `.sy`) and equals `Properties.id`
 2. ☐ Root `Properties` contains `id`/`title`/`type:"doc"`/`updated`
 3. ☐ Every newly generated ID is fresh and workspace-wide unique; every canonical block has a 22-char `ID`, matching `Properties.id`, and a valid 14-digit `Properties.updated`
 4. ☐ Determine block status from `Type`, not from `ID`; do not add IDs to new inline/marker nodes, and only remove historical non-block IDs as field normalization without deleting the node

@@ -1,5 +1,6 @@
 import * as assert from "node:assert/strict";
 import test from "node:test";
+import {getEntryCatalogChildren} from "./catalog";
 import {
     mergeEntryOrder,
     mergeEntryOrderPreservingUnknown,
@@ -29,6 +30,34 @@ test("entry order inserts document sorting after attributes in existing profiles
 
 test("entry order ignores unknown and duplicate keys", () => {
     assert.deepEqual(mergeEntryOrder(["a", "b", "c"], ["missing", "c", "c", "a"]), ["c", "a", "b"]);
+});
+
+test("tab conversion merges into saved block menus without moving plugin slots", () => {
+    const entries = getEntryCatalogChildren("gutter.single.turnInto");
+    const defaults = entries.map(item => item.key);
+    const saved = defaults.filter(key => key !== "tabs");
+    saved.splice(1, 0, "plugin:example:item");
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+    assert.deepEqual(merged.filter(key => key !== "tabs"), saved);
+    assert.equal(merged[1], "plugin:example:item");
+    assert.equal(merged[merged.indexOf("tabs") + 1], "list");
+});
+
+test("document tree profiles merge sibling creation while preserving custom order and plugin slots", () => {
+    const entries = getEntryCatalogChildren("docTree.document");
+    const defaults = entries.map((item) => item.key);
+    const separators = new Set(entries.filter((item) => item.type === "separator").map((item) => item.key));
+    const saved = defaults.filter((key) => key !== "newSiblingDoc");
+    saved.splice(0, 3, "newDocBelow", "openDocument", "newDocAbove");
+    saved.splice(1, 0, "plugin:example:item");
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+    assert.deepEqual(merged.filter((key) => key !== "newSiblingDoc"), saved);
+    assert.equal(merged[1], "plugin:example:item");
+    assert.equal(merged[merged.indexOf("newDocBelow") + 2], "newSiblingDoc");
+    assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
+
+    const visible = ["newSiblingDoc", "plugin:example:item", "separator_1", "copy"].map((key) => ({key}));
+    assert.deepEqual(reorderEntrySlots(visible, defaults, (item) => item.key), visible);
 });
 
 test("entry order can preserve an unknown plugin key and its slot", () => {

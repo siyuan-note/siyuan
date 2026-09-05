@@ -60,6 +60,7 @@ export const getAgentLute = (options: ILuteOptions): Lute => {
     lute.SetKramdownIAL(true);
     lute.SetSuperBlock(true);
     lute.SetCallout(true);
+    lute.SetTabs(true);
     // 行内语法全部启用，不随编辑器设置变化。
     lute.SetInlineAsterisk(true);
     lute.SetInlineUnderscore(true);
@@ -114,6 +115,7 @@ const setLute = (options: ILuteOptions) => {
     lute.SetTag(true);
     lute.SetSuperBlock(true);
     lute.SetCallout(true);
+    lute.SetTabs(true);
     lute.SetCustomBlock(true);
     applyLuteMarkdownSyntax(lute, window.siyuan.config.editor.markdown);
     lute.SetSpin(true);

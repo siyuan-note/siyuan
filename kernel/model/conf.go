@@ -469,6 +469,7 @@ func InitConf() {
 	}
 	Conf.Editor.AssetOpen = conf.NormalizeAssetOpen(Conf.Editor.AssetOpen)
 	Conf.Editor.NormalizeFontFamilies()
+	Conf.Appearance.NormalizeGlobalFontFamilies()
 	Conf.Editor.Emoji = util.FilterRecentIconValues(Conf.Editor.Emoji)
 	if 9 > Conf.Editor.FontSize || 72 < Conf.Editor.FontSize {
 		Conf.Editor.FontSize = 16

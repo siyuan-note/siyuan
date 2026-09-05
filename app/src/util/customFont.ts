@@ -107,6 +107,30 @@ export const ensureSelectedCustomFonts = async (fonts: Array<{ family: string; w
     await Promise.all(fonts.map((font) => ensureSelectedCustomFont(font.family, font.weight)));
 };
 
+export const getExportCustomFontStyle = async (fonts: Array<{family: string}>) => {
+    const families = new Set(fonts.map((font) => font.family).filter((family) =>
+        family.startsWith(CUSTOM_FONT_FAMILY_PREFIX)));
+    if (window.siyuan.config.system.safeMode || families.size === 0) {
+        return "";
+    }
+    const customFonts = (await loadCustomFonts()).filter((font) => isValidCustomFont(font) && families.has(font.family));
+    const styles = await Promise.all(customFonts.map(async (font) => {
+        const response = await fetch(`/custom-fonts/${font.id}`);
+        if (!response.ok) {
+            throw new Error(`export custom font failed: ${response.status}`);
+        }
+        const blob = await response.blob();
+        const dataURL = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(blob);
+        });
+        return `@font-face { font-family: "${font.family}"; src: url("${dataURL}"); font-style: normal; font-weight: ${Math.max(1, Math.min(1000, font.weight || 400))}; }`;
+    }));
+    return styles.join("\n");
+};
+
 const setCustomFontStyle = (font: ICustomFont) => {
     let styleElement = document.getElementById(`customFontStyle-${font.id}`) as HTMLStyleElement;
     if (!styleElement) {

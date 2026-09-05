@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260905124213"
 	},
 	"Children": [
 		{
@@ -1738,7 +1738,7 @@
 		{
 			"ID": "20220429115221-kc5rrg5",
 			"Type": "NodeHTMLBlock",
-			"Data": "\u003cruby\u003e\n你\u003crt\u003enǐ\u003c/rt\u003e\n　好\u003crt\u003e　hǎo\u003c/rt\u003e\n　世\u003crt\u003e　shì\u003c/rt\u003e\n　界\u003crt\u003e　jiè\u003c/rt\u003e\n\u003c/ruby\u003e\u003cbr\u003e\nHello World",
+			"Data": "<ruby>\n你<rt>nǐ</rt>\n　好<rt>　hǎo</rt>\n　世<rt>　shì</rt>\n　界<rt>　jiè</rt>\n</ruby><br>\nHello World",
 			"Properties": {
 				"id": "20220429115221-kc5rrg5",
 				"updated": "20220429115221"
@@ -1858,7 +1858,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;div\u0026gt;\u0026lt;/div\u0026gt;"
+									"TextMarkTextContent": "&lt;div&gt;&lt;/div&gt;"
 								},
 								{
 									"Type": "NodeText",
@@ -2462,7 +2462,7 @@
 			"Children": [
 				{
 					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e "
+					"Data": "> "
 				},
 				{
 					"ID": "20210104091538-osgy8b0",
@@ -2858,6 +2858,35 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-wbxn79t",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260905124213-wbxn79t",
+				"updated": "20260905124213"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Tabbed container"
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-dak8rh5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905124213-dak8rh5",
+				"updated": "20260905124213"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A tabbed container contains only tab items. Each item has its own block ID and can contain ordinary content blocks and nested tabbed containers."
 				}
 			]
 		}

@@ -1,4 +1,22 @@
 {
+	"imageCopyFailed": "Nie można skopiować obrazu. Sprawdź, czy można go załadować, i spróbuj ponownie.",
+	"syncAssetSnapshotIncomplete": "Zawartość niektórych zasobów zależy od pamięci w chmurze; ta lokalna migawka jest niekompletna",
+	"syncAssetDownloadMode": "Pobieranie zasobów",
+	"syncAssetDownloadModeTip": "Dotyczy tylko tego urządzenia. Zasoby na żądanie są pobierane podczas użycia i do tego czasu są niedostępne offline. Pobrane zasoby są zachowywane i aktualizowane podczas synchronizacji. Przełączenie na Pobierz wszystkie najpierw pobiera brakujące zasoby",
+	"syncAssetDownloadAll": "Pobierz wszystkie",
+	"syncAssetDownloadOnDemand": "Pobieraj na żądanie",
+	"syncAssetDownloadModeUpdating": "Aktualizowanie trybu pobierania zasobów...",
+	"syncAssetDownloadModeFailed": "Nie można zaktualizować trybu pobierania zasobów",
+	"globalDefaultFont": "Globalna czcionka domyślna",
+	"globalDefaultFontTip": "Używana w interfejsie i treści bez osobnego ustawienia czcionki; pozostaw pusty wybór, aby użyć domyślnej czcionki motywu",
+	"mobileMultiSelectTip": "Dotknij bloków, aby je zaznaczyć lub odznaczyć",
+	"headingBatchWithSubheadingsTip": "Przesuń podnagłówki o tę samą liczbę poziomów; poziomy poza zakresem H1–H6 zostaną ograniczone do H1 lub H6",
+	"newSiblingDoc": "Nowy dokument na tym samym poziomie",
+	"tabs": "Blok z kartami",
+	"tabItem": "Karta",
+	"tabsPositionTop": "Karty u góry",
+	"tabsPositionLeft": "Karty po lewej",
+	"tabsUnwrap": "Usuń układ kart",
 	"headingBatch": "Zbiorcza zmiana poziomów nagłówków",
 	"headingBatchSource": "Poziom źródłowy",
 	"headingBatchTarget": "Poziom docelowy",
@@ -2686,6 +2704,8 @@
 		"372": "Notatnik został przywrócony i pozostaje zamknięty",
 		"373": "To archiwum zawiera dane notatnika. Zaimportuj je z [Drzewo dokumentów - Więcej - Importuj notatnik]",
 		"374": "Baza danych [%s], pole szablonu [%s], pierwszy element z błędem [%s] (ID elementu: %s), liczba elementów z błędem: %d, błąd: %s",
-		"375": "Notatnik zapisu szybkich notatek jest niedostępny. Wybierz otwarty, niezaszyfrowany notatnik w Ustawienia - Dokument"
+		"375": "Notatnik zapisu szybkich notatek jest niedostępny. Wybierz otwarty, niezaszyfrowany notatnik w Ustawienia - Dokument",
+		"376": "Zasób nie został jeszcze pobrany i obecnie nie można go uzyskać",
+		"377": "Przełącz na Pobierz wszystkie przed zmianą lub zresetowaniem repozytorium danych"
 	}
 }

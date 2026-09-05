@@ -821,6 +821,10 @@ func setAppearance(c *gin.Context) {
 	if nil == appearance.EntryVisibility {
 		appearance.EntryVisibility = model.Conf.Appearance.EntryVisibility
 	}
+	if _, exists := arg["globalFontFamilies"]; !exists {
+		appearance.GlobalFontFamilies = model.Conf.Appearance.GlobalFontFamilies
+	}
+	appearance.NormalizeGlobalFontFamilies()
 	appearance.StatusBar = util.NormalizeStatusBar(appearance.StatusBar, util.IsMobileContainer())
 	model.Conf.Appearance = appearance
 	util.StatusBarCfg = model.Conf.Appearance.StatusBar
@@ -1107,6 +1111,11 @@ func getCloudUser(c *gin.Context) {
 		ret.Code = 255
 		ret.Msg = model.Conf.Language(19)
 		ret.Data = nil
+		return
+	}
+	if model.IsCloudAssetSourceChange(err) {
+		ret.Code = 1
+		ret.Msg = err.Error()
 		return
 	}
 	ret.Code = 1

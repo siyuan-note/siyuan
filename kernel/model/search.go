@@ -2095,6 +2095,8 @@ func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
 		s.IFrameBlock = types["iframeBlock"]
 		s.WidgetBlock = types["widgetBlock"]
 		s.Callout = types["callout"]
+		s.Tabs = types["tabs"]
+		s.TabItem = types["tabItem"]
 	} else {
 		s.Document = Conf.Search.Document
 		s.Heading = Conf.Search.Heading
@@ -2114,6 +2116,8 @@ func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
 		s.IFrameBlock = Conf.Search.IFrameBlock
 		s.WidgetBlock = Conf.Search.WidgetBlock
 		s.Callout = Conf.Search.Callout
+		s.Tabs = Conf.Search.Tabs
+		s.TabItem = Conf.Search.TabItem
 	}
 
 	var headingSubs, listSubs []string
@@ -2149,6 +2153,8 @@ func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
 	addSimple(s.IFrameBlock, treenode.TypeAbbr(ast.NodeIFrame.String()))
 	addSimple(s.WidgetBlock, treenode.TypeAbbr(ast.NodeWidget.String()))
 	addSimple(s.Callout, treenode.TypeAbbr(ast.NodeCallout.String()))
+	addSimple(s.Tabs, "tabs")
+	addSimple(s.TabItem, "tab")
 
 	var clauses []string
 
@@ -2567,9 +2573,16 @@ func loadFTSAndHPathMatchBlocks(matches []ftsAndHPathMatch, rawQuery, query stri
 		if nil == sqlBlock {
 			continue
 		}
-		ret = append(ret, fromHPathSearchSQLBlock(sqlBlock, rawQuery, beforeLen))
+		ret = append(ret, fromFTSAndHPathMatchSQLBlock(sqlBlock, match.source, rawQuery, beforeLen))
 	}
 	return
+}
+
+func fromFTSAndHPathMatchSQLBlock(sqlBlock *sql.Block, source int, rawQuery string, beforeLen int) *Block {
+	if 0 == source {
+		return fromSQLBlockWithHPathTerms(sqlBlock, "", "", beforeLen)
+	}
+	return fromHPathSearchSQLBlock(sqlBlock, rawQuery, beforeLen)
 }
 
 func queryFTSSnippetBlocksByRowID(query string, rowIDs []int64, boxID string) (ret map[int64]*sql.Block, err error) {
@@ -2782,10 +2795,10 @@ func fullTextSearchByLikeWithRootInBox(query, boxFilter, pathFilter string, boxA
 	for i, resultBlock := range resultBlocks {
 		if 1 == result[i]["matchSource"].(int64) {
 			docContent, _ := result[i]["docContent"].(string)
-			contentTerms := matchedSearchTerms(docContent, terms)
-			ret = append(ret, fromHPathSearchSQLBlockWithContentTerms(resultBlock, terms, contentTerms, beforeLen))
+			contentTerms, hPathTerms := partitionSearchTerms(docContent, terms)
+			ret = append(ret, fromHPathSearchSQLBlockWithContentTerms(resultBlock, hPathTerms, contentTerms, beforeLen))
 		} else {
-			ret = append(ret, fromSQLBlock(resultBlock, terms, beforeLen))
+			ret = append(ret, fromSQLBlockWithHPathTerms(resultBlock, terms, "", beforeLen))
 		}
 	}
 	if 1 > len(ret) {
@@ -3048,15 +3061,17 @@ func markSearch(text string, keyword string, beforeLen int) (marked string, scor
 	return
 }
 
-func matchedSearchTerms(text, terms string) string {
-	var matched []string
+func partitionSearchTerms(text, terms string) (matched, unmatched string) {
+	var matchedTerms, unmatchedTerms []string
 	for _, term := range search.SplitKeyword(terms) {
 		pos, _ := search.MarkText(text, term, -1, Conf.Search.CaseSensitive)
 		if -1 < pos {
-			matched = append(matched, term)
+			matchedTerms = append(matchedTerms, term)
+		} else {
+			unmatchedTerms = append(unmatchedTerms, term)
 		}
 	}
-	return strings.Join(matched, search.TermSep)
+	return strings.Join(matchedTerms, search.TermSep), strings.Join(unmatchedTerms, search.TermSep)
 }
 
 func fromSQLBlocks(sqlBlocks *[]*sql.Block, terms string, beforeLen int) (ret []*Block) {
@@ -3067,6 +3082,10 @@ func fromSQLBlocks(sqlBlocks *[]*sql.Block, terms string, beforeLen int) (ret []
 }
 
 func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Block) {
+	return fromSQLBlockWithHPathTerms(sqlBlock, terms, terms, beforeLen)
+}
+
+func fromSQLBlockWithHPathTerms(sqlBlock *sql.Block, contentTerms, hPathTerms string, beforeLen int) (block *Block) {
 	if nil == sqlBlock {
 		return
 	}
@@ -3085,9 +3104,9 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 		}
 	}
 
-	content, _ = markSearch(content, terms, beforeLen)
+	content, _ = markSearch(content, contentTerms, beforeLen)
 	content = maxContent(content, 5120)
-	tag, _ := markSearch(sqlBlock.Tag, terms, beforeLen)
+	tag, _ := markSearch(sqlBlock.Tag, contentTerms, beforeLen)
 	markdown := maxContent(sqlBlock.Markdown, 5120)
 	fContent := util.EscapeHTML(sqlBlock.FContent) // fContent 会用于和 content 对比，在反链计算时用于判断是否是列表项下第一个子块，所以也需要转义 https://github.com/siyuan-note/siyuan/issues/11001
 	block = &Block{
@@ -3120,18 +3139,18 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 	}
 
 	hPathBeforeLen := 18
-	if "" != terms {
+	if "" != hPathTerms {
 		hPathBeforeLen = -1
 	}
-	markBlockHPath(block, sqlBlock.HPath, terms, hPathBeforeLen)
+	markBlockHPath(block, sqlBlock.HPath, hPathTerms, hPathBeforeLen)
 	if "" != block.Name {
-		block.Name, _ = markSearch(block.Name, terms, 256)
+		block.Name, _ = markSearch(block.Name, contentTerms, 256)
 	}
 	if "" != block.Alias {
-		block.Alias, _ = markSearch(block.Alias, terms, 256)
+		block.Alias, _ = markSearch(block.Alias, contentTerms, 256)
 	}
 	if "" != block.Memo {
-		block.Memo, _ = markSearch(block.Memo, terms, 256)
+		block.Memo, _ = markSearch(block.Memo, contentTerms, 256)
 	}
 	return
 }
@@ -3145,13 +3164,11 @@ func markBlockHPath(block *Block, hPath, terms string, beforeLen int) {
 }
 
 func fromHPathSearchSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Block) {
-	return fromHPathSearchSQLBlockWithContentTerms(sqlBlock, terms, "", beforeLen)
+	return fromSQLBlockWithHPathTerms(sqlBlock, "", terms, beforeLen)
 }
 
 func fromHPathSearchSQLBlockWithContentTerms(sqlBlock *sql.Block, hPathTerms, contentTerms string, beforeLen int) (block *Block) {
-	block = fromSQLBlock(sqlBlock, contentTerms, beforeLen)
-	markBlockHPath(block, sqlBlock.HPath, hPathTerms, -1)
-	return
+	return fromSQLBlockWithHPathTerms(sqlBlock, contentTerms, hPathTerms, beforeLen)
 }
 
 func maxContent(content string, maxLen int) string {

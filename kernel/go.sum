@@ -38,6 +38,10 @@ github.com/88250/lute v1.7.8-0.20260831034846-2d14fe5ae283 h1:ZexCCs/2tBBEn0zVxm
 github.com/88250/lute v1.7.8-0.20260831034846-2d14fe5ae283/go.mod h1:h/ggQpM7i6cXwck2SUocUSfu12zW39vOgYETtt7pALA=
 github.com/88250/lute v1.7.8-0.20260903090158-726c7c7acca8 h1:hAPHh7nMOh+i84gnmAR6XoUMH2gwMmRpOnGdS8rk5To=
 github.com/88250/lute v1.7.8-0.20260903090158-726c7c7acca8/go.mod h1:h/ggQpM7i6cXwck2SUocUSfu12zW39vOgYETtt7pALA=
+github.com/88250/lute v1.7.8-0.20260905084535-603ad0b41834 h1:OF2PfkM3PG+f+c1kZB1LHzokt9HYFx258BTXmUIPMEw=
+github.com/88250/lute v1.7.8-0.20260905084535-603ad0b41834/go.mod h1:h/ggQpM7i6cXwck2SUocUSfu12zW39vOgYETtt7pALA=
+github.com/88250/lute v1.7.8-0.20260905132531-2e26b772245f h1:NpwlShvJAd1txFsY0TRPUmTyO1oduftCZrthXZBISDg=
+github.com/88250/lute v1.7.8-0.20260905132531-2e26b772245f/go.mod h1:h/ggQpM7i6cXwck2SUocUSfu12zW39vOgYETtt7pALA=
 github.com/88250/pdfcpu v0.3.14-0.20250424122812-f10e8d9d8d46 h1:Bq1JsDfVbHKUxNL/B2JXd8cC/1h6aFjrlXpGycnh0Hk=
 github.com/88250/pdfcpu v0.3.14-0.20250424122812-f10e8d9d8d46/go.mod h1:fVfOloBzs2+W2VJCCbq60XIxc3yJHAZ0Gahv1oO0gyI=
 github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1 h1:48T899JQDwyyRu9yXHePYlPdHtpJfrJEUGBMH3SMBWY=
@@ -450,6 +454,12 @@ github.com/siyuan-note/dejavu v0.0.0-20260819021305-56b6bf7abb5b h1:o0ar5s5+hzI4
 github.com/siyuan-note/dejavu v0.0.0-20260819021305-56b6bf7abb5b/go.mod h1:ixj6rxm+wkjoV8pBDGbuCyfMiPQh3MlxBwHG5OvtEQU=
 github.com/siyuan-note/dejavu v0.0.0-20260903044336-18ff3975dc11 h1:Ee596t6S1Uiy6zHJz7gpu+WQpyNsVsXP1SKSMxUYI2g=
 github.com/siyuan-note/dejavu v0.0.0-20260903044336-18ff3975dc11/go.mod h1:ixj6rxm+wkjoV8pBDGbuCyfMiPQh3MlxBwHG5OvtEQU=
+github.com/siyuan-note/dejavu v0.0.0-20260905115124-7887e495ff49 h1:rDRuOm/laqJ/KkvwHVsnGuKDCudZfmpM4YT7ViTsXOU=
+github.com/siyuan-note/dejavu v0.0.0-20260905115124-7887e495ff49/go.mod h1:ixj6rxm+wkjoV8pBDGbuCyfMiPQh3MlxBwHG5OvtEQU=
+github.com/siyuan-note/dejavu v0.0.0-20260905120512-d425e91537a1 h1:m/ika/vN5H4u5sS9DUX7hb/v2FRE9hkAP+Mqd15TwCk=
+github.com/siyuan-note/dejavu v0.0.0-20260905120512-d425e91537a1/go.mod h1:ixj6rxm+wkjoV8pBDGbuCyfMiPQh3MlxBwHG5OvtEQU=
+github.com/siyuan-note/dejavu v0.0.0-20260905131214-a34dcbf11739 h1:mKqaw8m7jFWhINLMzWCrX+ykACA8pjFpOpmIAP+O0Xk=
+github.com/siyuan-note/dejavu v0.0.0-20260905131214-a34dcbf11739/go.mod h1:ixj6rxm+wkjoV8pBDGbuCyfMiPQh3MlxBwHG5OvtEQU=
 github.com/siyuan-note/encryption v0.0.0-20260715062728-9cb8e9548044 h1:b1/Q4DSREDvGh1/NbzR9873EKrjakdoUtsNlghWxUOI=
 github.com/siyuan-note/encryption v0.0.0-20260715062728-9cb8e9548044/go.mod h1:t6jXpJdrXzRsdQF+XGaw35f16JVZcDyIkk5/6//ywnY=
 github.com/siyuan-note/eventbus v0.0.0-20260530125927-d77c74260dce h1:356bfC3pucxXuYpZIwaQ3viVCbq5RbRuvBhb4xtoBR0=

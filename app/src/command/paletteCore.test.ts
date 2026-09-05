@@ -51,9 +51,25 @@ describe("command palette core", () => {
         const events: string[] = [];
         const lifecycle = createPaletteFocusLifecycle(() => events.push("restore"));
 
-        lifecycle.restoreAfterCancel();
-        lifecycle.restoreAfterCancel();
+        assert.equal(lifecycle.restoreAfterCancel(), true);
+        assert.equal(lifecycle.restoreAfterCancel(), true);
 
         assert.deepEqual(events, ["restore"]);
+    });
+
+    it("can cancel without restoring focus", () => {
+        const events: string[] = [];
+        const lifecycle = createPaletteFocusLifecycle(() => events.push("restore"));
+
+        assert.equal(lifecycle.restoreAfterCancel(false), true);
+        assert.deepEqual(events, []);
+    });
+
+    it("does not treat command execution as cancellation", () => {
+        const lifecycle = createPaletteFocusLifecycle(() => undefined);
+
+        lifecycle.prepareCommand();
+
+        assert.equal(lifecycle.restoreAfterCancel(false), false);
     });
 });

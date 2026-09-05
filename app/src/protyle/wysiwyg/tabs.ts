@@ -3,7 +3,7 @@ import {repairActiveTab} from "./tabsRemoval";
 import {transaction} from "./transaction";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
-import {focusBlock, focusByRange} from "../util/selection";
+import {focusBlock} from "../util/selection";
 import {genEmptyElement, genSBElement} from "../../block/util";
 import {Menu} from "../../plugin/Menu";
 import {processRender} from "../util/processCode";
@@ -11,6 +11,8 @@ import {avRender} from "../render/av/render";
 import {isHiddenTabContent} from "../render/tabsVisibility";
 import {queueTransaction} from "../util/transactionQueue";
 import {remapTabsDOMIDs} from "../util/tabsCopy";
+import {Dialog} from "../../dialog";
+import {isMobile} from "../../util/functions";
 
 const canEdit = (protyle: IProtyle, element: Element) => !protyle.disabled &&
     !protyle.options.action.includes(Constants.CB_GET_HISTORY) && !element.closest(".protyle-wysiwyg__embed");
@@ -36,19 +38,39 @@ const newTab = (protyle: IProtyle) => {
     return template.content.querySelector<HTMLElement>(".tab-item");
 };
 
-export const editTabTitle = (protyle: IProtyle, item: HTMLElement) => {
+export const renameTab = (protyle: IProtyle, item: HTMLElement) => {
     if (!canEdit(protyle, item)) {
         return;
     }
     revealTabAncestors(protyle.wysiwyg.element, item);
-    protyle.wysiwyg.lastHTMLs[item.dataset.nodeId] = item.outerHTML;
-    item.dataset.tabsEditing = "true";
     const title = getTabTitle(item);
-    title.setAttribute("contenteditable", "true");
-    const range = document.createRange();
-    range.selectNodeContents(title);
-    title.focus();
-    focusByRange(range);
+    const initialTitle = title.textContent || "";
+    const dialog = new Dialog({
+        title: window.siyuan.languages.rename,
+        content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block"></div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+        width: isMobile() ? "92vw" : "520px",
+    });
+    const input = dialog.element.querySelector("input") as HTMLInputElement;
+    const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-button");
+    const confirm = () => {
+        const value = input.value.trim();
+        if (value !== initialTitle) {
+            changeTabs(protyle, [item.parentElement], () => {
+                title.textContent = value;
+            });
+        }
+        dialog.destroy();
+    };
+    dialog.bindInput(input, confirm);
+    input.value = initialTitle;
+    input.focus();
+    input.select();
+    buttons[0].addEventListener("click", () => dialog.destroy());
+    buttons[1].addEventListener("click", confirm);
 };
 
 const addTab = (protyle: IProtyle, tabs: HTMLElement) => {
@@ -57,7 +79,7 @@ const addTab = (protyle: IProtyle, tabs: HTMLElement) => {
         tabs.insertBefore(item, tabs.querySelector(":scope > .protyle-attr"));
         tabs.setAttribute("tabs-active-id", item.dataset.nodeId);
     });
-    editTabTitle(protyle, item);
+    renameTab(protyle, item);
 };
 
 export const moveTab = (protyle: IProtyle, source: HTMLElement, target: HTMLElement, after = false) => {
@@ -111,7 +133,7 @@ export const openTabsMenu = (protyle: IProtyle, tabs: HTMLElement, item: HTMLEle
     }
     const lang = window.siyuan.languages;
     const menu = new Menu();
-    menu.addItem({icon: "iconEdit", label: lang.edit, click: () => editTabTitle(protyle, item)});
+    menu.addItem({icon: "iconEdit", label: lang.rename, click: () => renameTab(protyle, item)});
     menu.addItem({icon: "iconAdd", label: lang.tabItem, click: () => addTab(protyle, tabs)});
     const siblings = getTabItems(tabs);
     const index = siblings.indexOf(item);
@@ -178,7 +200,7 @@ export const initEditorTabs = (protyle: IProtyle) => {
                 }));
             }
         },
-        edit: item => editTabTitle(protyle, item),
+        rename: item => renameTab(protyle, item),
         add: tabs => addTab(protyle, tabs),
         menu: (tabs, item, anchor) => openTabsMenu(protyle, tabs, item, anchor),
         move: (source, target, after) => moveTab(protyle, source, target, after),

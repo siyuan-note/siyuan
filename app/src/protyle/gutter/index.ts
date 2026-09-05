@@ -3721,8 +3721,10 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
                 while (previousBlock && !previousBlock.getAttribute("data-node-id")) {
                     previousBlock = previousBlock.previousElementSibling;
                 }
+                // 页签栏用于操作整个容器，正文区域的块标层级只显示到当前页签项。
+                const isTabItemBoundary = type === "NodeTabItem" && nodeElement.parentElement.classList.contains("tabs");
                 if ((previousBlock && previousBlock.getAttribute("data-node-id")) ||
-                    nodeElement.parentElement.classList.contains("callout-content")) {
+                    nodeElement.parentElement.classList.contains("callout-content") || isTabItemBoundary) {
                     // 前一个块存在时，只显示到当前层级
                     hideParent = true;
                     // 由于折叠块的第二个子块在界面上不显示，因此移除块标 https://github.com/siyuan-note/siyuan/issues/14304

@@ -6,7 +6,7 @@ export interface ITabsRenderOptions {
     addLabel?: string;
     menuLabel?: string;
     select?: (tabs: HTMLElement, id: string) => void;
-    edit?: (item: HTMLElement) => void;
+    rename?: (item: HTMLElement) => void;
     add?: (tabs: HTMLElement) => void;
     menu?: (tabs: HTMLElement, item: HTMLElement, anchor: HTMLElement) => void;
     move?: (source: HTMLElement, target: HTMLElement, after?: boolean) => void;
@@ -142,9 +142,10 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                 header.setAttribute("contenteditable", "false");
                 if (!boundHeaders.has(header)) {
                     boundHeaders.add(header);
-                    ["pointerdown", "mousedown", "keydown"].forEach(type => {
+                    ["pointerdown", "mousedown", "mouseup", "click", "keydown"].forEach(type => {
                         header.addEventListener(type, event => event.stopPropagation());
                     });
+                    header.addEventListener("selectstart", event => event.preventDefault());
                 }
                 const signature = JSON.stringify([readonly, ...items.map(item => [itemID(item), getTabTitle(item)?.innerHTML])]);
                 if (state.signature !== signature || !header.firstElementChild) {
@@ -186,7 +187,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                             event.preventDefault();
                             event.stopPropagation();
                             if (!controller.options.readonly?.(tabs)) {
-                                controller.options.edit?.(item);
+                                controller.options.rename?.(item);
                             }
                         });
                         button.addEventListener("contextmenu", event => {
@@ -255,7 +256,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                         const menu = document.createElement("button");
                         menu.type = "button";
                         menu.className = "tabs-control";
-                        menu.textContent = "...";
+                        menu.innerHTML = '<svg><use xlink:href="#iconMore"></use></svg>';
                         menu.title = controller.options.menuLabel || "...";
                         menu.setAttribute("aria-label", menu.title);
                         menu.addEventListener("click", event => {
@@ -284,7 +285,11 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                         content.id = panelID;
                         content.setAttribute("role", "tabpanel");
                         content.setAttribute("aria-labelledby", button.id);
-                        content.tabIndex = 0;
+                        if (readonly) {
+                            content.tabIndex = 0;
+                        } else {
+                            content.removeAttribute("tabindex");
+                        }
                     }
                     item.setAttribute("data-tabs-hidden", selected ? "false" : "true");
                     const title = getTabTitle(item);

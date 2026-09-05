@@ -14,6 +14,7 @@
     gap: 4px;
     border-bottom: 1px solid var(--b3-border-color);
     padding-bottom: 4px;
+    user-select: none;
   }
 
   .tabs-list {
@@ -56,6 +57,12 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     pointer-events: none;
+  }
+
+  .tabs-control svg {
+    display: block;
+    width: 1em;
+    height: 1em;
   }
 
   .tab-item {

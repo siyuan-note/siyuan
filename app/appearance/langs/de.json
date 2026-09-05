@@ -1,4 +1,11 @@
 {
+	"headingBatch": "Überschriftenebenen gesammelt umwandeln",
+	"headingBatchSource": "Ausgangsebene",
+	"headingBatchTarget": "Zielebene",
+	"headingBatchTip": "Nur die angegebene Ebene umwandeln; andere Überschriftenebenen bleiben unverändert",
+	"headingBatchConvert": "{count} Überschriften umwandeln",
+	"headingBatchScope": "Aktuelles Dokument: {title}",
+	"headingBatchOption": "{heading} ({count})",
 	"allChangelogs": "Alle Änderungsprotokolle",
 	"changelog": "Änderungsprotokoll",
 	"checkBlockRef": "Blockreferenzen vor dem Löschen oder Ausschneiden prüfen",

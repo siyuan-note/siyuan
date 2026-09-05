@@ -1,4 +1,11 @@
 {
+	"headingBatch": "แปลงระดับหัวเรื่องพร้อมกัน",
+	"headingBatchSource": "ระดับเดิม",
+	"headingBatchTarget": "ระดับเป้าหมาย",
+	"headingBatchTip": "แปลงเฉพาะระดับที่ระบุ โดยไม่เปลี่ยนระดับหัวเรื่องอื่น",
+	"headingBatchConvert": "แปลงหัวเรื่อง {count} รายการ",
+	"headingBatchScope": "เอกสารปัจจุบัน: {title}",
+	"headingBatchOption": "{heading} ({count} รายการ)",
 	"allChangelogs": "บันทึกการเปลี่ยนแปลงทั้งหมด",
 	"changelog": "บันทึกการเปลี่ยนแปลง",
 	"checkBlockRef": "ตรวจสอบการอ้างอิงบล็อกก่อนลบหรือตัด",

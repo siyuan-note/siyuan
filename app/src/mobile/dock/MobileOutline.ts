@@ -20,6 +20,7 @@ import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragov
 import {escapeHtml} from "../../util/escape";
 import {getFileTreeIconHTML} from "../../emoji/fileTreeIcon";
 import {syncDocTitleIAL} from "../../protyle/util/docTitleIAL";
+import {canBatchConvertHeadings, showHeadingBatchDialog, updateHeadingBatchButton} from "../../protyle/util/headingBatch";
 import {bindMousePointerTouchBridge, isMousePointerTouchEvent} from "../util/mousePointerTouchBridge";
 import {
     operationsMayChangeOutline,
@@ -71,10 +72,18 @@ export class MobileOutline extends Model {
     <svg data-type="expandLevel" class="toolbar__icon"><use xlink:href="#iconList"></use></svg>
     <svg data-type="expand" class="toolbar__icon"><use xlink:href="#iconExpand"></use></svg>
     <svg data-type="collapse" class="toolbar__icon"><use xlink:href="#iconContract"></use></svg>
+    <button data-type="headingBatch" disabled class="toolbar__button" aria-label="${window.siyuan.languages.headingBatch}"><svg><use xlink:href="#iconRefresh"></use></svg></button>
 </div>
 <div class="b3-list-item fn__none" data-type="doc-title"></div>
 <div class="fn__flex-1" style="padding: 3px 0 8px"></div>`;
         const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
+        this.element.querySelector('[data-type="headingBatch"]').addEventListener("click", () => {
+            const protyle = window.siyuan.mobile.editor?.protyle;
+            if (canBatchConvertHeadings(protyle, this.blockId, this.isPreview)) {
+                void showHeadingBatchDialog(protyle, () => window.siyuan.mobile.editor?.protyle === protyle &&
+                    canBatchConvertHeadings(protyle, this.blockId, this.isPreview));
+            }
+        });
         inputElement.addEventListener("blur", () => {
             inputElement.classList.add("fn__none");
             const filterIconElement = inputElement.nextElementSibling as HTMLElement; // search 图标
@@ -567,6 +576,11 @@ export class MobileOutline extends Model {
         }
         const scrollTop = this.tree.element.scrollTop;
         this.tree.updateData(data.data);
+        const protyle = window.siyuan.mobile.editor?.protyle;
+        const rootID = this.blockId;
+        updateHeadingBatchButton(this.element.querySelector('[data-type="headingBatch"]'), protyle,
+            !!data.data?.length, () => rootID === this.blockId && window.siyuan.mobile.editor?.protyle === protyle &&
+                canBatchConvertHeadings(protyle, rootID, this.isPreview));
 
         if (this.isPreview) {
             this.tree.element.querySelectorAll(".popover__block").forEach(item => {

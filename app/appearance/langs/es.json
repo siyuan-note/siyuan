@@ -1,4 +1,11 @@
 {
+	"headingBatch": "Convertir niveles de encabezado en lote",
+	"headingBatchSource": "Nivel original",
+	"headingBatchTarget": "Nivel de destino",
+	"headingBatchTip": "Convertir solo el nivel indicado; los demás niveles de encabezado no cambian",
+	"headingBatchConvert": "Convertir {count} encabezados",
+	"headingBatchScope": "Documento actual: {title}",
+	"headingBatchOption": "{heading} ({count})",
 	"allChangelogs": "Todos los registros de cambios",
 	"changelog": "Registro de cambios",
 	"checkBlockRef": "Comprobar referencias de bloques antes de eliminar o cortar",

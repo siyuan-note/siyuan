@@ -1,4 +1,11 @@
 {
+	"headingBatch": "Converti i livelli dei titoli in blocco",
+	"headingBatchSource": "Livello originale",
+	"headingBatchTarget": "Livello di destinazione",
+	"headingBatchTip": "Converti solo il livello specificato; gli altri livelli dei titoli restano invariati",
+	"headingBatchConvert": "Converti {count} titoli",
+	"headingBatchScope": "Documento corrente: {title}",
+	"headingBatchOption": "{heading} ({count})",
 	"allChangelogs": "Tutti i registri delle modifiche",
 	"changelog": "Registro delle modifiche",
 	"checkBlockRef": "Controlla i riferimenti ai blocchi prima di eliminare o tagliare",

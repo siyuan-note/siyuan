@@ -148,6 +148,47 @@ func newHeadingLevelTestNode(id string, level int) *ast.Node {
 	return heading
 }
 
+func TestDocHeadingLevelConversionMatchesOriginalLevelAcrossContainers(t *testing.T) {
+	root := &ast.Node{Type: ast.NodeDocument, ID: "document"}
+	first := newHeadingLevelTestNode("first", 3)
+	child := newHeadingLevelTestNode("child", 4)
+	nested := newHeadingLevelTestNode("nested", 3)
+	quote := &ast.Node{Type: ast.NodeBlockquote}
+	root.AppendChild(first)
+	root.AppendChild(child)
+	root.AppendChild(quote)
+	quote.AppendChild(nested)
+	first.SetIALAttr("custom-test", "preserved")
+	treenode.SetSelfFolded(first, true)
+
+	headings, counts := collectDocHeadingLevelNodes(root, 3)
+	assertHeadingLevelNodeIDs(t, headings, first.ID, nested.ID)
+	if counts != [6]int{0, 0, 2, 1, 0, 0} {
+		t.Fatalf("unexpected heading counts: %v", counts)
+	}
+	tx := buildDocHeadingLevelTransaction(headings, 1, root.ID)
+	if len(tx.DoOperations) != 2 || len(tx.UndoOperations) != 2 || child.HeadingLevel != 4 {
+		t.Fatal("conversion must update only matching headings")
+	}
+	if !treenode.IsSelfFolded(first) || first.IALAttr("custom-test") != "preserved" || nested.Parent != quote {
+		t.Fatal("conversion must preserve folds, attributes and containers")
+	}
+	for i, id := range []string{first.ID, nested.ID} {
+		for _, operations := range [][]*Operation{tx.DoOperations, tx.UndoOperations} {
+			if operations[i].ID != id || operations[i].Action != "update" || operations[i].Context["headingBatchRootID"] != root.ID {
+				t.Fatal("conversion and undo must preserve block identity and document context")
+			}
+		}
+		if !strings.Contains(tx.DoOperations[i].Data.(string), `data-subtype="h4"`) ||
+			!strings.Contains(tx.UndoOperations[i].Data.(string), `data-subtype="h3"`) {
+			t.Fatal("undo must restore the original heading level")
+		}
+	}
+	if headings, counts := collectDocHeadingLevelNodes(root, 6); len(headings) != 0 || counts[3] != 3 {
+		t.Fatal("an absent source level must match no headings")
+	}
+}
+
 func assertHeadingLevelNodeIDs(t *testing.T, nodes []*ast.Node, expected ...string) {
 	t.Helper()
 	if len(nodes) != len(expected) {

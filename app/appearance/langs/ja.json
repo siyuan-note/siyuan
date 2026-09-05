@@ -1,4 +1,11 @@
 {
+	"headingBatch": "見出しレベルを一括変換",
+	"headingBatchSource": "元のレベル",
+	"headingBatchTarget": "変換先のレベル",
+	"headingBatchTip": "指定したレベルのみ変換し、他の見出しレベルは変更しません",
+	"headingBatchConvert": "{count} 件の見出しを変換",
+	"headingBatchScope": "現在のドキュメント：{title}",
+	"headingBatchOption": "{heading}（{count} 件）",
 	"allChangelogs": "すべての更新履歴",
 	"changelog": "更新履歴",
 	"checkBlockRef": "削除または切り取り前にブロック参照を確認",

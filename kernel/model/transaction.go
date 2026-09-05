@@ -1949,14 +1949,16 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	oldNode.InsertAfter(updatedNode)
 	oldNode.Unlink()
 
-	if needUnfoldParentHeading {
+	batchRootID, _ := operation.Context["headingBatchRootID"].(string)
+	preserveHeadingFold := batchRootID == tree.Root.ID && oldNode.Type == ast.NodeHeading && updatedNode.Type == ast.NodeHeading
+	if needUnfoldParentHeading && !preserveHeadingFold {
 		newParentFoldedHeading := treenode.GetParentFoldedHeading(updatedNode)
 		if nil == oldParentFoldedHeading || (nil != newParentFoldedHeading && oldParentFoldedHeading.ID != newParentFoldedHeading.ID) {
 			unfoldHeading(newParentFoldedHeading, updatedNode)
 		}
 	}
 
-	if needInsertAfterParentHeading {
+	if needInsertAfterParentHeading && !preserveHeadingFold {
 		insertDom := data
 		if 2 == len(tx.DoOperations) && "foldHeading" == tx.DoOperations[1].Action {
 			treenode.SetSelfFolded(updatedNode, true)

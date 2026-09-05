@@ -1,4 +1,11 @@
 {
+	"headingBatch": "批次轉換標題層級",
+	"headingBatchSource": "原層級",
+	"headingBatchTarget": "目標層級",
+	"headingBatchTip": "僅轉換指定層級，其他標題層級保持不變",
+	"headingBatchConvert": "轉換 {count} 個標題",
+	"headingBatchScope": "目前文件：{title}",
+	"headingBatchOption": "{heading}（{count} 個）",
 	"allChangelogs": "所有日誌",
 	"changelog": "更新日誌",
 	"checkBlockRef": "刪除或剪下前檢查區塊引用",

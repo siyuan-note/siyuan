@@ -1,4 +1,11 @@
 {
+	"headingBatch": "Zbiorcza zmiana poziomów nagłówków",
+	"headingBatchSource": "Poziom źródłowy",
+	"headingBatchTarget": "Poziom docelowy",
+	"headingBatchTip": "Zmień tylko wskazany poziom; pozostałe poziomy nagłówków pozostaną bez zmian",
+	"headingBatchConvert": "Zmień nagłówki ({count})",
+	"headingBatchScope": "Bieżący dokument: {title}",
+	"headingBatchOption": "{heading} ({count})",
 	"allChangelogs": "Wszystkie dzienniki zmian",
 	"changelog": "Dziennik zmian",
 	"checkBlockRef": "Sprawdzaj odwołania do bloków przed usunięciem lub wycięciem",

@@ -120,6 +120,69 @@ func TestCancelFoldedHeadingSuperBlockKeepsUndoBoundary(t *testing.T) {
 	assertCancelledFoldedSuperBlock(t, fixture.sourceID, superBlockID, headingID, paragraphID, outsideID)
 }
 
+func TestDocHeadingBatchPreservesFoldedParentOnUndoRedo(t *testing.T) {
+	fixture := setupStructureTransactionTest(t)
+	setupFoldTransactionDatabase(t, fixture)
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for tree.Root.FirstChild != nil {
+		tree.Root.FirstChild.Unlink()
+	}
+	parent := newHeadingLevelTestNode("20260905000001-parent0", 4)
+	child := newHeadingLevelTestNode("20260905000002-child00", 3)
+	other := newHeadingLevelTestNode("20260905000003-other00", 3)
+	for _, node := range []*ast.Node{parent, child, other} {
+		node.SetIALAttr("id", node.ID)
+		node.SetIALAttr("custom-test", "preserved")
+		tree.Root.AppendChild(node)
+	}
+	treenode.SetSelfFolded(parent, true)
+	treenode.SetSelfFolded(child, true)
+	treenode.SetSelfFolded(other, true)
+	if _, err = filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(tree)
+	sql.IndexTreeQueue(tree)
+	sql.FlushQueue()
+
+	counts, _, tx, err := GetDocHeadingLevelTransaction(tree.Root.ID, tree.Box, 3, 5)
+	if err != nil || counts[2] != 2 || tx == nil {
+		t.Fatalf("prepare conversion: counts %v, error %v", counts, err)
+	}
+	for i, operations := range [][]*Operation{tx.DoOperations, tx.UndoOperations, tx.DoOperations} {
+		if err = PerformTxSync(&Transaction{DoOperations: cloneOperations(operations)}); err != nil {
+			t.Fatal(err)
+		}
+		actual, loadErr := LoadTreeByBlockID(tree.Root.ID)
+		if loadErr != nil {
+			t.Fatal(loadErr)
+		}
+		level := 5
+		if i == 1 {
+			level = 3
+		}
+		for _, id := range []string{child.ID, other.ID} {
+			node := treenode.GetNodeInTree(actual, id)
+			if node == nil || node.HeadingLevel != level || !treenode.IsSelfFolded(node) || node.IALAttr("custom-test") != "preserved" {
+				t.Fatalf("step %d did not preserve heading %s", i, id)
+			}
+		}
+		actualParent := treenode.GetNodeInTree(actual, parent.ID)
+		if actualParent.HeadingLevel != 4 || !treenode.IsSelfFolded(actualParent) {
+			t.Fatal("nonmatching parent headings must retain their level and fold state")
+		}
+	}
+	for _, levels := range [][2]int{{5, 5}, {6, 1}, {0, 0}, {1, 7}} {
+		_, _, noOp, err := GetDocHeadingLevelTransaction(tree.Root.ID, tree.Box, levels[0], levels[1])
+		if err != nil || noOp != nil {
+			t.Fatalf("expected no transaction for levels %v, got %v", levels, err)
+		}
+	}
+}
+
 func TestReplayFoldedHeadingMoveUsesOriginalChildren(t *testing.T) {
 	const (
 		anchorID    = "20260819000000-anchor0"

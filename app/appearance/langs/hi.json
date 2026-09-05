@@ -1,4 +1,11 @@
 {
+	"headingBatch": "शीर्षक स्तरों को एक साथ बदलें",
+	"headingBatchSource": "मूल स्तर",
+	"headingBatchTarget": "लक्षित स्तर",
+	"headingBatchTip": "केवल चुने गए स्तर को बदलें, अन्य शीर्षक स्तर अपरिवर्तित रहेंगे",
+	"headingBatchConvert": "{count} शीर्षक बदलें",
+	"headingBatchScope": "वर्तमान दस्तावेज़: {title}",
+	"headingBatchOption": "{heading} ({count})",
 	"allChangelogs": "सभी बदलाव सूचियाँ",
 	"changelog": "बदलाव सूची",
 	"checkBlockRef": "हटाने या काटने से पहले ब्लॉक संदर्भों की जाँच करें",

@@ -1,4 +1,11 @@
 {
+	"headingBatch": "Масова зміна рівнів заголовків",
+	"headingBatchSource": "Початковий рівень",
+	"headingBatchTarget": "Цільовий рівень",
+	"headingBatchTip": "Змінити лише вказаний рівень; інші рівні заголовків залишаться без змін",
+	"headingBatchConvert": "Змінити заголовки ({count})",
+	"headingBatchScope": "Поточний документ: {title}",
+	"headingBatchOption": "{heading} ({count})",
 	"allChangelogs": "Усі журнали змін",
 	"changelog": "Журнал змін",
 	"checkBlockRef": "Перевіряти посилання на блоки перед видаленням або вирізанням",

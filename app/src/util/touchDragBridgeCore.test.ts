@@ -5,6 +5,7 @@ import {
     createDragRefreshQueue,
     dispatchWithNativeDragEnabled,
     getDragRelayTypes,
+    getWheelScrollDelta,
     hasActiveTouchGesture,
     isDragRelaySource,
     restoreNativeDrag,
@@ -135,6 +136,14 @@ describe("desktop mouse drag candidates", () => {
         assert.equal(shouldRequireLongPress(true, true, false), false);
         assert.equal(shouldRequireLongPress(true, true, true), true);
         assert.equal(shouldRequireLongPress(true, false, false), true);
+    });
+});
+
+describe("synthetic drag wheel scrolling", () => {
+    it("normalizes pixel, line, and page wheel deltas", () => {
+        assert.equal(getWheelScrollDelta(12, 0, 30, 300), 12);
+        assert.equal(getWheelScrollDelta(2, 1, 30, 300), 60);
+        assert.equal(getWheelScrollDelta(-1, 2, 30, 300), -300);
     });
 });
 

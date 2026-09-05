@@ -9,6 +9,7 @@ import {
     createDragRefreshQueue,
     dispatchWithNativeDragEnabled,
     getDragRelayTypes,
+    getWheelScrollDelta,
     hasActiveTouchGesture,
     isDragRelaySource,
     restoreNativeDrag,
@@ -131,9 +132,16 @@ interface ForeignDragState {
     lastPoint?: DragPoint;
 }
 
+interface PendingWheelScroll {
+    delta: number;
+    element: HTMLElement;
+    scrollTop: number;
+}
+
 let dragState: (DragState & LongPressGate) | null = null;
 let lastDragOverElement: Element | null = null;
 let foreignDragState: ForeignDragState | null = null;
+let pendingWheelScroll: PendingWheelScroll | null = null;
 let dragRelaySequence = 0;
 const DRAG_IDLE_TIMEOUT = 30000;
 
@@ -725,6 +733,7 @@ const cleanupDrag = () => {
     stopScrollAnimation();
     clearDragoverClasses();
     dragRefreshQueue.cancel();
+    pendingWheelScroll = null;
     stopScrollAfterRefresh = false;
 
     if (completedState?.idleTimeout) {
@@ -804,6 +813,7 @@ const cleanupForeignDrag = (type: "leave" | "end", point?: DragPoint) => {
     stopScrollAnimation();
     clearDragoverClasses();
     dragRefreshQueue.cancel();
+    pendingWheelScroll = null;
     stopScrollAfterRefresh = false;
     window.siyuan.dragTitle = "";
     foreignDragState = null;
@@ -908,6 +918,13 @@ const handleBlockDragRelay = (message: BlockDragRelayMessage) => {
 
 let stopScrollAfterRefresh = false;
 const dragRefreshQueue = createDragRefreshQueue(() => {
+    if (pendingWheelScroll) {
+        const wheelScroll = pendingWheelScroll;
+        pendingWheelScroll = null;
+        if (wheelScroll.element.isConnected && wheelScroll.element.scrollTop === wheelScroll.scrollTop) {
+            wheelScroll.element.scrollTop += wheelScroll.delta;
+        }
+    }
     if (dragState?.isDragging && dragState.lastPoint) {
         continueBridgeDrag(dragState.lastPoint, false);
     }
@@ -930,12 +947,28 @@ export const refreshSyntheticDragTarget = () => {
     }
 };
 
-const handleDragWheel = () => {
+const handleDragWheel = (event: WheelEvent) => {
     if (!dragState?.isDragging && !foreignDragState) {
         return;
     }
     stopScrollAfterRefresh = true;
     stopScrollAnimation();
+    const hitElement = getElementUnderPoint(event, dragState?.ghostElement);
+    const fileTreeElement = hitElement?.closest(".sy__file");
+    const scrollElement = fileTreeElement?.querySelector<HTMLElement>(":scope > .fn__flex-1");
+    if (scrollElement && event.deltaY !== 0) {
+        const lineHeight = Number.parseFloat(getComputedStyle(scrollElement).lineHeight) || 30;
+        const delta = getWheelScrollDelta(event.deltaY, event.deltaMode, lineHeight, scrollElement.clientHeight);
+        if (pendingWheelScroll?.element === scrollElement) {
+            pendingWheelScroll.delta += delta;
+        } else {
+            pendingWheelScroll = {
+                delta,
+                element: scrollElement,
+                scrollTop: scrollElement.scrollTop,
+            };
+        }
+    }
     resetLocalDragIdleTimeout();
     resetForeignDragIdleTimeout();
     dragRefreshQueue.schedule();

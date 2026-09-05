@@ -34,6 +34,16 @@ export const shouldRequireLongPress = (isLongPressTarget: boolean, isMouse: bool
     return isLongPressTarget && (!isMouse || isAndroid);
 };
 
+export const getWheelScrollDelta = (delta: number, deltaMode: number, lineSize: number, pageSize: number) => {
+    if (deltaMode === 1) {
+        return delta * lineSize;
+    }
+    if (deltaMode === 2) {
+        return delta * pageSize;
+    }
+    return delta;
+};
+
 export const createDragRefreshQueue = (
     refresh: () => void,
     requestFrame: (callback: FrameRequestCallback) => number,

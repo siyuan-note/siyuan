@@ -1,4 +1,5 @@
 {
+	"headingBatchWithSubheadingsTip": "Verschuif subkoppen met hetzelfde aantal niveaus; niveaus buiten H1 tot H6 worden begrensd op H1 of H6",
 	"newSiblingDoc": "Nieuw document op hetzelfde niveau",
 	"tabs": "Blok met tabbladen",
 	"tabItem": "Tabblad",

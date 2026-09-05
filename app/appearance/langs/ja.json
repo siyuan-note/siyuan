@@ -1,4 +1,5 @@
 {
+	"headingBatchWithSubheadingsTip": "子見出しも同じレベル差で変更し、H1 から H6 の範囲を超える場合は H1 または H6 に制限します",
 	"newSiblingDoc": "同じ階層に新規ドキュメントを作成",
 	"tabs": "タブブロック",
 	"tabItem": "タブ",

@@ -1,4 +1,5 @@
 {
+	"headingBatchWithSubheadingsTip": "Posunúť podnadpisy o rovnaký počet úrovní; úrovne mimo rozsahu H1 až H6 sa obmedzia na H1 alebo H6",
 	"newSiblingDoc": "Nový dokument na rovnakej úrovni",
 	"tabs": "Blok s kartami",
 	"tabItem": "Karta",

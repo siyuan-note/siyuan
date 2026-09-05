@@ -49,6 +49,7 @@ export const showHeadingBatchDialog = async (protyle: IProtyle, isCurrent: () =>
         }
         const languages = window.siyuan.languages;
         let counts: number[] = response.data.counts;
+        let withSubheadingCounts: number[] = response.data.withSubheadingCounts;
         let closed = false;
         const dialog = new Dialog({
             title: languages.headingBatch,
@@ -60,7 +61,9 @@ export const showHeadingBatchDialog = async (protyle: IProtyle, isCurrent: () =>
     <div class="fn__hr--b"></div>
     <label>${languages.headingBatchTarget}<div class="fn__hr"></div><select class="b3-select fn__block" data-type="target"></select></label>
     <div class="fn__hr--b"></div>
-    <div class="ft__on-surface">${languages.headingBatchTip}</div>
+    <label class="fn__flex"><span class="fn__flex-1">${languages.tWithSubtitle}</span><input type="checkbox" class="b3-switch" data-type="withSubheadings"></label>
+    <div class="fn__hr--b"></div>
+    <div class="ft__on-surface" data-type="tip">${languages.headingBatchTip}</div>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${languages.cancel}</button><div class="fn__space"></div>
@@ -73,6 +76,8 @@ export const showHeadingBatchDialog = async (protyle: IProtyle, isCurrent: () =>
         const source = dialog.element.querySelector('[data-type="source"]') as HTMLSelectElement;
         const target = dialog.element.querySelector('[data-type="target"]') as HTMLSelectElement;
         const convert = dialog.element.querySelector('[data-type="convert"]') as HTMLButtonElement;
+        const withSubheadings = dialog.element.querySelector('[data-type="withSubheadings"]') as HTMLInputElement;
+        const tip = dialog.element.querySelector('[data-type="tip"]');
         const update = () => {
             Array.from(target.options).forEach(option => {
                 option.disabled = option.value === source.value;
@@ -80,7 +85,8 @@ export const showHeadingBatchDialog = async (protyle: IProtyle, isCurrent: () =>
             if (target.value === source.value) {
                 target.value = String(Number(source.value) === 6 ? 5 : Number(source.value) + 1);
             }
-            const count = counts[Number(source.value) - 1] || 0;
+            const count = (withSubheadings.checked ? withSubheadingCounts : counts)[Number(source.value) - 1] || 0;
+            tip.textContent = withSubheadings.checked ? languages.headingBatchWithSubheadingsTip : languages.headingBatchTip;
             convert.textContent = languages.headingBatchConvert.replace("{count}", String(count));
             convert.disabled = !count || !available();
         };
@@ -107,6 +113,7 @@ export const showHeadingBatchDialog = async (protyle: IProtyle, isCurrent: () =>
         populate();
         source.addEventListener("change", update);
         target.addEventListener("change", update);
+        withSubheadings.addEventListener("change", update);
         dialog.element.querySelector(".b3-button--cancel").addEventListener("click", () => dialog.destroy());
         convert.addEventListener("click", async () => {
             if (convert.disabled || !available()) {
@@ -115,6 +122,7 @@ export const showHeadingBatchDialog = async (protyle: IProtyle, isCurrent: () =>
             convert.disabled = true;
             source.disabled = true;
             target.disabled = true;
+            withSubheadings.disabled = true;
             await protyle.wysiwyg.flushPendingInput();
             await waitForPendingTransactions(protyle);
             if (closed || !available()) {
@@ -126,6 +134,7 @@ export const showHeadingBatchDialog = async (protyle: IProtyle, isCurrent: () =>
                 notebook: protyle.notebookId,
                 source: Number(source.value),
                 target: Number(target.value),
+                withSubheadings: withSubheadings.checked,
             }, result => {
                 if (closed || !available() || !result.data) {
                     return;
@@ -133,6 +142,7 @@ export const showHeadingBatchDialog = async (protyle: IProtyle, isCurrent: () =>
                 const operations = result.data.transaction;
                 if (!operations?.doOperations?.length) {
                     counts = result.data.counts;
+                    withSubheadingCounts = result.data.withSubheadingCounts;
                     populate();
                     return;
                 }
@@ -148,6 +158,7 @@ export const showHeadingBatchDialog = async (protyle: IProtyle, isCurrent: () =>
                 if (!closed) {
                     source.disabled = source.options.length === 0;
                     target.disabled = source.disabled;
+                    withSubheadings.disabled = false;
                     update();
                 }
             });

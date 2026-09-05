@@ -1,4 +1,5 @@
 {
+	"headingBatchWithSubheadingsTip": "Geser subjudul dengan selisih tingkat yang sama; tingkat di luar H1 hingga H6 dibatasi ke H1 atau H6",
 	"newSiblingDoc": "Dokumen baru pada tingkat yang sama",
 	"tabs": "Blok bertab",
 	"tabItem": "Tab",

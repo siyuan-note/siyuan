@@ -1,4 +1,5 @@
 {
+	"headingBatchWithSubheadingsTip": "子标题按相同级差升降，超出 H1 至 H6 的级别按 H1 或 H6 处理",
 	"newSiblingDoc": "新建同级文档",
 	"tabs": "页签块",
 	"tabItem": "页签",

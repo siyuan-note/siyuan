@@ -139,7 +139,7 @@ func ensureReadableAssetLocal(absPath string) error {
 }
 
 // prepareExportAssets 在导出持有笔记本读锁或生成产物之前补齐文档引用的资源。
-func prepareExportAssets(boxID string, docPaths []string) error {
+func prepareExportAssets(boxID string, docPaths []string, includeFootnotes ...bool) error {
 	if boxID != "" && IsEncryptedBox(boxID) && !IsBoxUnlocked(boxID) {
 		return errors.New(Conf.Language(314))
 	}
@@ -154,10 +154,16 @@ func prepareExportAssets(boxID string, docPaths []string) error {
 			continue
 		}
 		targetBoxID := boxID
-		if targetBoxID == "" {
-			if bt := getExportBlockTree(util.GetTreeID(docPath)); bt != nil {
-				targetBoxID = bt.BoxID
+		rootID := util.GetTreeID(docPath)
+		bt := getExportBlockTreeInBox(rootID, boxID)
+		if bt == nil && !IsEncryptedBox(boxID) {
+			bt = treenode.GetBlockTree(rootID)
+		}
+		if bt != nil {
+			if boxID != "" && !IsSameCryptoBoundary(boxID, bt.BoxID) {
+				return ErrTreeNotFound
 			}
+			targetBoxID, docPath = bt.BoxID, bt.Path
 		}
 		if targetBoxID == "" {
 			continue
@@ -185,6 +191,20 @@ func prepareExportAssets(boxID string, docPaths []string) error {
 	appendPending()
 	for i := 0; i < len(pending); i++ {
 		tree := pending[i]
+		if len(includeFootnotes) != 0 && includeFootnotes[0] && Conf.Export.BlockRefMode == 4 {
+			// 按单文件导出的脚注展开规则收集资源，不受是否另行导出关联文档影响
+			order := []string{}
+			footnotes := map[string]*refAsFootnotes{}
+			depth := 0
+			collectFootnotesDefs(tree, tree.ID, &order, footnotes, &depth)
+			defs := resolveFootnotesDefs(&order, footnotes, tree, map[string]bool{},
+				Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight)
+			if defs != nil {
+				footnoteTree := *tree
+				footnoteTree.ID, footnoteTree.Root = tree.ID+"-footnotes", defs
+				trees[footnoteTree.ID] = &footnoteTree
+			}
+		}
 		treenode.WalkWithTabTitles(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 			if !entering || node.Type != ast.NodeBlockQueryEmbedScript {
 				return ast.WalkContinue
@@ -269,5 +289,5 @@ func prepareExportBlockAssets(id string, includeSubDocs bool) error {
 			}
 		}
 	}
-	return prepareExportAssets(bt.BoxID, docPaths)
+	return prepareExportAssets(bt.BoxID, docPaths, true)
 }

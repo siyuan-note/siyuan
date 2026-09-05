@@ -80,6 +80,13 @@ func prepareAssetDownloadRepoTest(t *testing.T) (*dejavu.Repo, *dejavu.Repo, str
 	if _, _, err = partial.Sync(nil); err != nil {
 		t.Fatal(err)
 	}
+	id, _, err := partial.AssetDownloadChanges()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = partial.AcknowledgeAssetDownloadChanges(id); err != nil {
+		t.Fatal(err)
+	}
 	return full, partial, fullData
 }
 

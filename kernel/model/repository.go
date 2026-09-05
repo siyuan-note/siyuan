@@ -1840,6 +1840,7 @@ func syncRepoDownload() (err error) {
 	}
 
 	logging.LogInfof("downloading data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t]", Conf.System.ID, KernelID, Conf.Sync.Provider, "d", true)
+	defer finishAssetDownloadRecovery(repo, &err)
 	start := time.Now()
 	indexStart := time.Now()
 	_, _, err = indexRepoBeforeCloudSync(repo)
@@ -1893,7 +1894,7 @@ func syncRepoDownload() (err error) {
 
 	calcPetalDiff(beforeSyncPetals, mergeResult)
 	postProcessStart := time.Now()
-	processSyncMergeResult(false, true, mergeResult, trafficStat, "d", elapsed)
+	err = processAssetSyncMergeResult(repo, false, true, mergeResult, trafficStat, "d", elapsed)
 	logging.LogInfof("download data repo phases [index=%.2fs, cloud=%.2fs, post-process=%.2fs, total=%.2fs]",
 		indexElapsed.Seconds(), cloudElapsed.Seconds(), time.Since(postProcessStart).Seconds(), time.Since(start).Seconds())
 	return
@@ -1922,6 +1923,7 @@ func syncRepoUpload() (err error) {
 	}
 
 	logging.LogInfof("uploading data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t]", Conf.System.ID, KernelID, Conf.Sync.Provider, "u", true)
+	defer finishAssetDownloadRecovery(repo, &err)
 	start := time.Now()
 	indexStart := time.Now()
 	_, _, err = indexRepoBeforeCloudSync(repo)
@@ -2179,6 +2181,9 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 }
 
 func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterIndex *entity.Index, start time.Time, indexElapsed time.Duration, skipCloudPreflight bool, prefetchTraffic *dejavu.DownloadTrafficStat) (dataChanged bool, err error) {
+	if !exit {
+		defer finishAssetDownloadRecovery(repo, &err)
+	}
 	beforeSyncPetals := getPetals()
 
 	syncContext := newSyncContext()
@@ -2234,7 +2239,7 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterInd
 
 	calcPetalDiff(beforeSyncPetals, mergeResult)
 	postProcessStart := time.Now()
-	processSyncMergeResult(exit, byHand, mergeResult, trafficStat, "a", elapsed)
+	err = processAssetSyncMergeResult(repo, exit, byHand, mergeResult, trafficStat, "a", elapsed)
 	if dataChanged {
 		notifyLANSyncCommit(repo)
 	}
@@ -2285,7 +2290,7 @@ func calcPetalDiff(beforeSyncPetals []*Petal, mergeResult *dejavu.MergeResult) {
 	mergeResult.RemovePetals = gulu.Str.RemoveDuplicatedElem(removePetals)
 }
 
-func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, trafficStat *dejavu.TrafficStat, mode string, elapsed time.Duration) {
+func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, trafficStat *dejavu.TrafficStat, mode string, elapsed time.Duration, immediateIndex ...bool) {
 	logging.LogInfof("synced data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t, ufc=%d, dfc=%d, ucc=%d, dcc=%d, ub=%s, db=%s, pfc=%d, pcc=%d, pb=%s, pf=%d] in [%.2fs], merge result [conflicts=%d, upserts=%d, removes=%d]\n\n",
 		Conf.System.ID, KernelID, Conf.Sync.Provider, mode, byHand,
 		trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes), 2),
@@ -2587,7 +2592,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		sql.FlushQueue()
 	}
 
-	if needFullReindex(upsertTrees) { // 改进同步后全量重建索引判断 https://github.com/siyuan-note/siyuan/issues/5764
+	// 需要确认恢复记录时，索引更新必须在当前调用内完成
+	if needFullReindex(upsertTrees) && (len(immediateIndex) == 0 || !immediateIndex[0]) {
 		FullReindex(false)
 		return
 	}
@@ -2617,6 +2623,9 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	upsertRootIDs, removeRootIDs := incReindex(upserts, removes)
+	if len(immediateIndex) != 0 && immediateIndex[0] {
+		sql.FlushQueue()
+	}
 	for changedPath := range changedAttributeViewPaths {
 		queueExternalAttributeViewRefIndexByRepoPath(changedPath)
 	}
@@ -2813,6 +2822,9 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 
 	beforeIndex, _ = repo.Latest()
 	FlushTxQueue()
+	if err = processAssetDownloadRecovery(repo, true); err != nil {
+		return
+	}
 
 	checkChunks := true
 	if util.IsMobileContainer() {

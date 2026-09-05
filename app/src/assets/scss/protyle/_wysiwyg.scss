@@ -761,8 +761,7 @@
 
   &--select::after,
   &--select-mode::after,
-  &--hl::after,
-  .tabs[data-tabs-ready="true"].protyle-wysiwyg--hl > .tab-item::after {
+  &--hl::after {
     background-color: var(--b3-theme-primary-lightest);
     position: absolute;
     width: 100%;

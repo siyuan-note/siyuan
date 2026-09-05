@@ -2,7 +2,25 @@ import {Constants} from "../../constants";
 import {addScript} from "../util/addScript";
 import {fetchPost} from "../../util/fetch";
 import {isBrowserRenderableImagePath} from "../../util/imageURL";
-import {copyPNGByLink} from "../../menus/util";
+import {copyPNGByLink, writeAssetToClipboard} from "../../menus/util";
+import {isEncryptedBox} from "../../util/pathName";
+
+const getCopyFileMenu = (src: string) => {
+    try {
+        const url = new URL(src, window.location.href);
+        const path = decodeURIComponent(url.pathname);
+        const box = url.searchParams.get("box");
+        if (url.origin !== window.location.origin || !["http:", "https:"].includes(url.protocol) ||
+            !path.startsWith("/assets/") || path.includes("\\") || path.split("/").includes("..") ||
+            isEncryptedBox(box)) {
+            return;
+        }
+        const menu = writeAssetToClipboard(path.substring(1) + (box ? `?box=${encodeURIComponent(box)}` : ""));
+        return menu.ignore ? undefined : menu;
+    } catch {
+        return;
+    }
+};
 
 export const previewImages = (srcList: string[], currentSrc?: string, onHidden?: () => void) => {
     addScript(`${Constants.PROTYLE_CDN}/js/viewerjs/viewer.js?v=1.11.8`, "protyleViewerScript").then(() => {
@@ -40,7 +58,10 @@ export const previewImages = (srcList: string[], currentSrc?: string, onHidden?:
             transition: false,
             ready: () => {
                 const copyElement = viewer.toolbar.querySelector(".viewer-copy");
-                copyElement.innerHTML = '<svg><use xlink:href="#iconCopy"></use></svg>';
+                copyElement.innerHTML = '<svg><use xlink:href="#iconImage"></use></svg>';
+                const copyFileElement = viewer.toolbar.querySelector(".viewer-copy-file");
+                copyFileElement.innerHTML = '<svg><use xlink:href="#iconFile"></use></svg>';
+                copyFileElement.classList.add("fn__none");
                 const languages = window.siyuan.languages;
                 const labels: Record<string, string> = {
                     "zoom-in": languages.zoomIn,
@@ -55,6 +76,7 @@ export const previewImages = (srcList: string[], currentSrc?: string, onHidden?:
                     "flip-horizontal": languages.imageFlipHorizontal,
                     "flip-vertical": languages.imageFlipVertical,
                     copy: languages.copyAsPNG,
+                    "copy-file": languages.copyFile,
                     close: languages.close,
                 };
                 Object.entries(labels).forEach(([action, label]) => {
@@ -65,6 +87,12 @@ export const previewImages = (srcList: string[], currentSrc?: string, onHidden?:
                 });
             },
             hidden: close,
+            view: () => {
+                viewer.toolbar.querySelector(".viewer-copy-file").classList.add("fn__none");
+            },
+            viewed: () => {
+                viewer.toolbar.querySelector(".viewer-copy-file").classList.toggle("fn__none", !getCopyFileMenu(viewer.image.src));
+            },
             toolbar: {
                 zoomIn: true,
                 zoomOut: true,
@@ -80,6 +108,11 @@ export const previewImages = (srcList: string[], currentSrc?: string, onHidden?:
                 copy: () => {
                     if (viewer.viewed && viewer.image) {
                         copyPNGByLink(viewer.image.src);
+                    }
+                },
+                copyFile: () => {
+                    if (viewer.viewed && viewer.image) {
+                        getCopyFileMenu(viewer.image.src)?.click();
                     }
                 },
                 close,

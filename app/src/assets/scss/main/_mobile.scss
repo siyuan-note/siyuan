@@ -277,6 +277,14 @@ body.mobile-keyboard--open {
     font-size: 17px;
     min-height: 30px;
     line-height: 30px;
+
+    // 搜索栏使用独立布局，避免 WebKit 的单行截断影响内部控件的垂直对齐。
+    &--search {
+      display: block;
+      min-width: 0;
+      height: 48px;
+      -webkit-line-clamp: unset;
+    }
   }
 
   &__tabs {

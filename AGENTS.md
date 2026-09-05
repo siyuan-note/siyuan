@@ -21,6 +21,14 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 3. **Kernel development:** After modifying Go code, run `gofmt`, but do not compile the kernel binary or restart a running kernel; the developer handles both manually
 4. **Git:** **NEVER** run `git commit` / `git push` unless explicitly asked — no exceptions
 
+### Encrypted notebook compatibility
+
+- Encrypted notebooks are preparing for release. Existing encrypted data is a compatibility baseline, not disposable development data; do not require users to delete or recreate it after an upgrade
+- Changes to document, asset, attribute-view, key-envelope, backup, history, or sync formats must retain authenticated reads of supported existing formats or provide a recoverable migration before removing a reader
+- Changes to envelopes, AAD semantics, or key derivation must use an explicit format version and a compatibility plan. Migration must authenticate the source, preserve recovery material, and remain recoverable after failure or interruption; never regenerate MasterSalt or discard keys to work around incompatibility
+- Unknown formats, corruption, and authentication failures must preserve the original data and return an error; compatibility must not bypass authentication or fall back to plaintext. Derived indexes may be rebuilt after the source ciphertext authenticates
+- Format changes require regression coverage using fixtures from the supported previous format, including the affected read, export, history, backup, and recovery paths. See `docs/ENCRYPTED-NOTEBOOK.md` and `docs/ENCRYPTED-NOTEBOOK.zh-CN.md`; keep their compatibility policies aligned
+
 ---
 
 ## 2. Project-specific rules

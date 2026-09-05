@@ -354,6 +354,7 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
 };
 
 const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTabSearchConfig) => {
+    let focusTimeout = 0;
     const searchInputElement = document.getElementById("toolbarSearch") as HTMLInputElement;
     searchInputElement.value = config.k || "";
     searchInputElement.addEventListener("compositionend", (event: InputEvent) => {
@@ -388,7 +389,10 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
     });
     if (window.JSAndroid?.showKeyboard || window.JSHarmony?.showKeyboard) {
         callMobileAppShowKeyboard();
-        setTimeout(() => searchInputElement.focus(), Constants.TIMEOUT_TRANSITION);
+        focusTimeout = window.setTimeout(() => {
+            focusTimeout = 0;
+            searchInputElement.focus();
+        }, Constants.TIMEOUT_TRANSITION);
     } else {
         searchInputElement.focus();
     }
@@ -751,6 +755,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
             target = target.parentElement;
         }
     }, false);
+    return () => clearTimeout(focusTimeout);
 };
 
 export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConfig) => {
@@ -789,6 +794,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
         }
     });
 
+    let destroySearchEvent: (() => void) | undefined;
     openModel({
         title: `<div class="fn__flex">
     <span data-menu="true" class="toolbar__icon toolbar__icon--history" data-type="history">
@@ -884,6 +890,8 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
      <div class="fn__loading"><img width="120px" src="/stage/loading-pure.svg"></div>
 </div>`,
         destroyCallback() {
+            destroySearchEvent?.();
+            activeBlur(true);
             cancelSearchRequest(document.getElementById("modelMain"));
         },
         bindEvent(element) {
@@ -894,7 +902,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
             historyElement.addEventListener("click", () => {
                 toggleSearchHistory(document.querySelector("#model"), config, undefined, element);
             });
-            initSearchEvent(app, element, config);
+            destroySearchEvent = initSearchEvent(app, element, config);
             updateSearchResult(config, element);
         }
     });

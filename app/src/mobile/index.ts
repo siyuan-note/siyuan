@@ -61,6 +61,7 @@ import {initHarmonyTextSelectionMenu} from "../util/harmonyTextSelectionMenu";
 import {updateMobileTopBarLayout} from "./util/mobileTopBar";
 import {showMobileBars} from "./util/mobileBars";
 import {initializeEnglishCommandTranslations} from "../command/english";
+import {scrollInputIntoView} from "./util/visibleViewport";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -124,9 +125,7 @@ class App {
             const editableElement = canInput(event.target);
             if (editableElement && ["INPUT", "TEXTAREA"].includes(editableElement.tagName)) {
                 setTimeout(() => {
-                    editableElement.scrollIntoView({
-                        block: "center",
-                    });
+                    scrollInputIntoView(editableElement);
                 }, Constants.TIMEOUT_TRANSITION);
             }
             if (editableElement) {

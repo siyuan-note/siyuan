@@ -947,6 +947,9 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
 };
 
 export const enterBack = (protyle: IProtyle, id: string, focusPosition?: { start: number, end: number }) => {
+    if (protyle.lite) {
+        return;
+    }
     if (!protyle.block.showAll) {
         const parentDocumentID = getParentDocumentID({
             path: protyle.path,
@@ -980,7 +983,7 @@ export const zoomOut = (options: {
     reload?: boolean,
     dataDocType?: string
 }) => {
-    if (options.protyle.options.backlinkData) {
+    if (options.protyle.lite || options.protyle.options.backlinkData) {
         return;
     }
     if (options.id !== options.protyle.block.rootID) {

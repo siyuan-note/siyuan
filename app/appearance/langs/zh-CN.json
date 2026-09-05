@@ -1,4 +1,6 @@
 {
+	"globalDefaultFont": "全局默认字体",
+	"globalDefaultFontTip": "用于界面和未单独设置字体的内容，不选择任何字体时使用主题默认字体",
 	"mobileMultiSelectTip": "轻点块以选中或取消选中",
 	"headingBatchWithSubheadingsTip": "子标题按相同级差升降，超出 H1 至 H6 的级别按 H1 或 H6 处理",
 	"newSiblingDoc": "新建同级文档",

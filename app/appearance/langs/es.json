@@ -1,4 +1,6 @@
 {
+	"globalDefaultFont": "Fuente predeterminada global",
+	"globalDefaultFontTip": "Se usa en la interfaz y en el contenido sin una fuente específica; deja la selección vacía para usar la fuente predeterminada del tema",
 	"mobileMultiSelectTip": "Toca los bloques para seleccionarlos o deseleccionarlos",
 	"headingBatchWithSubheadingsTip": "Cambiar los subencabezados en la misma cantidad de niveles; los niveles fuera de H1 a H6 se limitan a H1 o H6",
 	"newSiblingDoc": "Nuevo documento del mismo nivel",

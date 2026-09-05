@@ -1,4 +1,6 @@
 {
+	"globalDefaultFont": "전역 기본 글꼴",
+	"globalDefaultFontTip": "인터페이스와 글꼴을 별도로 설정하지 않은 콘텐츠에 사용하며, 글꼴을 선택하지 않으면 테마의 기본 글꼴을 사용합니다",
 	"mobileMultiSelectTip": "블록을 탭하여 선택하거나 선택 해제하세요",
 	"headingBatchWithSubheadingsTip": "하위 제목도 같은 수준 차이만큼 변경하며 H1부터 H6까지의 범위를 벗어나면 H1 또는 H6으로 제한합니다",
 	"newSiblingDoc": "같은 수준에 새 문서 만들기",

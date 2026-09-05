@@ -1,4 +1,6 @@
 {
+	"globalDefaultFont": "Globálne predvolené písmo",
+	"globalDefaultFontTip": "Používa sa pre rozhranie a obsah bez samostatného nastavenia písma; bez výberu sa použije predvolené písmo témy",
 	"mobileMultiSelectTip": "Ťuknutím na bloky ich vyberiete alebo zrušíte ich výber",
 	"headingBatchWithSubheadingsTip": "Posunúť podnadpisy o rovnaký počet úrovní; úrovne mimo rozsahu H1 až H6 sa obmedzia na H1 alebo H6",
 	"newSiblingDoc": "Nový dokument na rovnakej úrovni",

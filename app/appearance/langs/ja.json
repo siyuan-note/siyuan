@@ -1,4 +1,6 @@
 {
+	"globalDefaultFont": "全体の既定フォント",
+	"globalDefaultFontTip": "インターフェースとフォントを個別に設定していないコンテンツに使用します。何も選択しない場合はテーマの既定フォントを使用します",
 	"mobileMultiSelectTip": "ブロックをタップして選択または選択解除",
 	"headingBatchWithSubheadingsTip": "子見出しも同じレベル差で変更し、H1 から H6 の範囲を超える場合は H1 または H6 に制限します",
 	"newSiblingDoc": "同じ階層に新規ドキュメントを作成",

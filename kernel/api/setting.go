@@ -821,6 +821,10 @@ func setAppearance(c *gin.Context) {
 	if nil == appearance.EntryVisibility {
 		appearance.EntryVisibility = model.Conf.Appearance.EntryVisibility
 	}
+	if _, exists := arg["globalFontFamilies"]; !exists {
+		appearance.GlobalFontFamilies = model.Conf.Appearance.GlobalFontFamilies
+	}
+	appearance.NormalizeGlobalFontFamilies()
 	appearance.StatusBar = util.NormalizeStatusBar(appearance.StatusBar, util.IsMobileContainer())
 	model.Conf.Appearance = appearance
 	util.StatusBarCfg = model.Conf.Appearance.StatusBar

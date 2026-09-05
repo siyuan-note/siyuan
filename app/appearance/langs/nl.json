@@ -1,4 +1,6 @@
 {
+	"globalDefaultFont": "Globaal standaardlettertype",
+	"globalDefaultFontTip": "Voor de interface en inhoud zonder afzonderlijk ingesteld lettertype; laat de selectie leeg om het standaardlettertype van het thema te gebruiken",
 	"mobileMultiSelectTip": "Tik op blokken om ze te selecteren of te deselecteren",
 	"headingBatchWithSubheadingsTip": "Verschuif subkoppen met hetzelfde aantal niveaus; niveaus buiten H1 tot H6 worden begrensd op H1 of H6",
 	"newSiblingDoc": "Nieuw document op hetzelfde niveau",

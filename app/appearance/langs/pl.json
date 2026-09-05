@@ -1,4 +1,6 @@
 {
+	"globalDefaultFont": "Globalna czcionka domyślna",
+	"globalDefaultFontTip": "Używana w interfejsie i treści bez osobnego ustawienia czcionki; pozostaw pusty wybór, aby użyć domyślnej czcionki motywu",
 	"mobileMultiSelectTip": "Dotknij bloków, aby je zaznaczyć lub odznaczyć",
 	"headingBatchWithSubheadingsTip": "Przesuń podnagłówki o tę samą liczbę poziomów; poziomy poza zakresem H1–H6 zostaną ograniczone do H1 lub H6",
 	"newSiblingDoc": "Nowy dokument na tym samym poziomie",

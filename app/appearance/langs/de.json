@@ -1,4 +1,6 @@
 {
+	"globalDefaultFont": "Globale Standardschrift",
+	"globalDefaultFontTip": "Für die Oberfläche und Inhalte ohne eigene Schrifteinstellung; ohne Auswahl wird die Standardschrift des Designs verwendet",
 	"mobileMultiSelectTip": "Tippe auf Blöcke, um sie auszuwählen oder die Auswahl aufzuheben",
 	"headingBatchWithSubheadingsTip": "Unterüberschriften um denselben Abstand verschieben; Ebenen außerhalb von H1 bis H6 werden auf H1 oder H6 begrenzt",
 	"newSiblingDoc": "Neues Dokument auf gleicher Ebene",

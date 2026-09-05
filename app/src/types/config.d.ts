@@ -299,6 +299,8 @@ declare namespace Config {
      * SiYuan appearance related configuration
      */
     export interface IAppearance {
+        /** 全局默认字体，按优先级从高到低排列 */
+        globalFontFamilies: IEditor["fontFamilies"];
         /**
          * Close button behavior
          * - `0`: Exit application

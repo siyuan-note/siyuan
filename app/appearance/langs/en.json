@@ -1,4 +1,6 @@
 {
+	"globalDefaultFont": "Global Default Font",
+	"globalDefaultFontTip": "Used for the interface and content without a separate font setting; leave empty to use the theme's default font",
 	"mobileMultiSelectTip": "Tap blocks to select or deselect them",
 	"headingBatchWithSubheadingsTip": "Shift subheadings by the same amount; levels outside H1 to H6 are limited to H1 or H6",
 	"newSiblingDoc": "New sibling document",

@@ -1,4 +1,6 @@
 {
+	"globalDefaultFont": "Font Default Global",
+	"globalDefaultFontTip": "Digunakan untuk antarmuka dan konten tanpa pengaturan font tersendiri; biarkan pilihan kosong untuk menggunakan font default tema",
 	"mobileMultiSelectTip": "Ketuk blok untuk memilih atau membatalkan pilihan",
 	"headingBatchWithSubheadingsTip": "Geser subjudul dengan selisih tingkat yang sama; tingkat di luar H1 hingga H6 dibatasi ke H1 atau H6",
 	"newSiblingDoc": "Dokumen baru pada tingkat yang sama",

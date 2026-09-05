@@ -1,4 +1,6 @@
 {
+	"globalDefaultFont": "全域預設字型",
+	"globalDefaultFontTip": "用於介面和未個別設定字型的內容，未選擇任何字型時使用佈景主題的預設字型",
 	"mobileMultiSelectTip": "輕點區塊以選取或取消選取",
 	"headingBatchWithSubheadingsTip": "子標題依相同層級差升降，超出 H1 至 H6 的層級以 H1 或 H6 處理",
 	"newSiblingDoc": "新增同級文件",

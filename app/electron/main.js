@@ -99,6 +99,7 @@ const pendingRemoteOpenURLs = [];
 const blockDragSessions = new Map();
 const blockDragWindowFocusOrder = new Map();
 let blockDragWindowFocusSequence = 0;
+const blockDragCursorPollInterval = 16;
 
 const getBlockDragSessionKey = (sourceWebContentsId, dragId) => {
     return sourceWebContentsId + ":" + dragId;
@@ -174,7 +175,7 @@ const isPointInBounds = (point, bounds) => {
         point.screenY >= bounds.y && point.screenY < bounds.y + bounds.height;
 };
 
-const getBlockDragTarget = (dragSession) => {
+const getBlockDragTarget = (dragSession, expectedTargetWebContentsId) => {
     if (!dragSession.point) {
         return;
     }
@@ -187,6 +188,9 @@ const getBlockDragTarget = (dragSession) => {
         if (item.isDestroyed() || item.webContents.isDestroyed() ||
             item.webContents.id === dragSession.sourceWebContentsId ||
             !initializedWindowIds.has(item.webContents.id) || !item.isVisible() || item.isMinimized()) {
+            return false;
+        }
+        if (expectedTargetWebContentsId !== undefined && item.webContents.id !== expectedTargetWebContentsId) {
             return false;
         }
         const kernelTarget = windowKernelTargets.get(item.webContents.id);
@@ -202,7 +206,7 @@ const getBlockDragTarget = (dragSession) => {
             (blockDragWindowFocusOrder.get(first.webContents.id) || 0);
     });
     const targetWindow = candidates[0];
-    if (!targetWindow || (sourceContainsPoint &&
+    if (!targetWindow || (expectedTargetWebContentsId === undefined && sourceContainsPoint &&
         (sourceWindow.isAlwaysOnTop() || !targetWindow.isAlwaysOnTop()))) {
         // 普通目标窗口位于源窗口后方时，不应让指针穿透源窗口。
         return;
@@ -239,8 +243,8 @@ const sendBlockDragRoute = (dragSession, remote, sequence = dragSession.point?.s
     });
 };
 
-const routeBlockDragMove = (dragSession, notifySource = true) => {
-    const target = getBlockDragTarget(dragSession);
+const routeBlockDragMove = (dragSession, notifySource = true, expectedTargetWebContentsId) => {
+    const target = getBlockDragTarget(dragSession, expectedTargetWebContentsId);
     if (!target) {
         leaveBlockDragTarget(dragSession);
         if (notifySource) {
@@ -293,8 +297,26 @@ const routeBlockDragMove = (dragSession, notifySource = true) => {
     return {target, ready: true};
 };
 
+const startBlockDragCursorPolling = (sessionKey, dragSession) => {
+    dragSession.cursorPollInterval = setInterval(() => {
+        if (blockDragSessions.get(sessionKey) !== dragSession || dragSession.dropping || !dragSession.point) {
+            return;
+        }
+        const cursorPoint = screen.getCursorScreenPoint();
+        if (cursorPoint.x === dragSession.point.screenX && cursorPoint.y === dragSession.point.screenY) {
+            return;
+        }
+        dragSession.point = {
+            ...dragSession.point,
+            screenX: cursorPoint.x,
+            screenY: cursorPoint.y,
+        };
+        routeBlockDragMove(dragSession);
+    }, blockDragCursorPollInterval);
+};
+
 const dispatchBlockDragDrop = (dragSession) => {
-    const dragRoute = routeBlockDragMove(dragSession, false);
+    const dragRoute = routeBlockDragMove(dragSession, false, dragSession.dropTargetWebContentsId);
     if (dragRoute?.target && !dragRoute.ready) {
         dragSession.waitingForDropPayload = true;
         return;
@@ -317,10 +339,23 @@ const dispatchBlockDragDrop = (dragSession) => {
     }
     const dropSequence = dragSession.pendingDropSequence;
     dragSession.pendingDropSequence = undefined;
+    if (dragSession.dropTargetWebContentsId !== undefined) {
+        sendBlockDragMessage(dragSession.sourceWebContentsId, {
+            phase: "complete",
+            dragId: dragSession.dragId,
+            canceled: true,
+        });
+        finishBlockDragSession(getBlockDragSessionKey(dragSession.sourceWebContentsId, dragSession.dragId),
+            dragSession);
+        return;
+    }
     sendBlockDragRoute(dragSession, false, dropSequence);
 };
 
 const finishBlockDragSession = (sessionKey, dragSession) => {
+    if (dragSession.cursorPollInterval) {
+        clearInterval(dragSession.cursorPollInterval);
+    }
     if (dragSession.targetWebContentsId) {
         sendBlockDragMessage(dragSession.targetWebContentsId, {
             phase: "end",
@@ -328,6 +363,33 @@ const finishBlockDragSession = (sessionKey, dragSession) => {
         });
     }
     blockDragSessions.delete(sessionKey);
+};
+
+const dropBlockDragFromTarget = (targetWebContentsId, data) => {
+    const targetKernel = windowKernelTargets.get(targetWebContentsId);
+    const point = normalizeBlockDragPoint(data.point);
+    if (!targetKernel || !initializedWindowIds.has(targetWebContentsId) || !point) {
+        return;
+    }
+    for (const dragSession of blockDragSessions.values()) {
+        if (dragSession.sourceWebContentsId === targetWebContentsId || dragSession.dropping ||
+            dragSession.kernelOrigin !== targetKernel.origin) {
+            continue;
+        }
+        updateBlockDragCursorPoint(dragSession, {
+            ...point,
+            sequence: dragSession.point?.sequence || 0,
+        });
+        const target = getBlockDragTarget(dragSession, targetWebContentsId);
+        if (!target) {
+            continue;
+        }
+        dragSession.dropping = true;
+        dragSession.dropTargetWebContentsId = targetWebContentsId;
+        dragSession.pendingDropSequence = dragSession.point?.sequence || 0;
+        dispatchBlockDragDrop(dragSession);
+        return;
+    }
 };
 
 const cleanupBlockDragSessions = (webContentsId) => {
@@ -3621,7 +3683,14 @@ app.whenReady().then(() => {
         });
     });
     ipcMain.on("siyuan-block-drag", (event, data) => {
-        if (!data || typeof data !== "object" || typeof data.dragId !== "string" || !data.dragId ||
+        if (!data || typeof data !== "object") {
+            return;
+        }
+        if (data.phase === "release") {
+            dropBlockDragFromTarget(event.sender.id, data);
+            return;
+        }
+        if (typeof data.dragId !== "string" || !data.dragId ||
             !["begin", "move", "payload", "drop", "drop-ack", "end"].includes(data.phase)) {
             return;
         }
@@ -3637,6 +3706,15 @@ app.whenReady().then(() => {
             }
             sourceDragSession.pendingDropSequence = undefined;
             sourceDragSession.waitingForDropPayload = false;
+            if (sourceDragSession.dropTargetWebContentsId !== undefined) {
+                sendBlockDragMessage(sourceDragSession.sourceWebContentsId, {
+                    phase: "complete",
+                    dragId: sourceDragSession.dragId,
+                    remote: true,
+                });
+                finishBlockDragSession(sourceSessionKey, sourceDragSession);
+                return;
+            }
             sendBlockDragRoute(sourceDragSession, true, data.sequence);
             return;
         }
@@ -3654,7 +3732,7 @@ app.whenReady().then(() => {
             }
             const point = normalizeBlockDragPoint(data.point);
             const payload = normalizeBlockDragPayload(data.payload);
-            blockDragSessions.set(sessionKey, {
+            const dragSession = {
                 dragId: data.dragId,
                 sourceWebContentsId,
                 kernelOrigin: kernelTarget.origin,
@@ -3662,7 +3740,9 @@ app.whenReady().then(() => {
                 payload,
                 payloadRequested: false,
                 targetWebContentsId: undefined,
-            });
+            };
+            blockDragSessions.set(sessionKey, dragSession);
+            startBlockDragCursorPolling(sessionKey, dragSession);
             return;
         }
         const dragSession = blockDragSessions.get(sessionKey);

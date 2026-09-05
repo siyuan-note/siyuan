@@ -9,7 +9,8 @@ import {
     hasActiveTouchGesture,
     isDragRelaySource,
     restoreNativeDrag,
-    shouldCancelPointerDragOnBlur,
+    shouldCancelPointerDragAfterWindowExit,
+    shouldRequestForeignMouseDrop,
     shouldRequireLongPress,
     shouldSuppressNativeContextMenu,
     suspendNativeDrag,
@@ -139,11 +140,19 @@ describe("desktop mouse drag candidates", () => {
         assert.equal(shouldRequireLongPress(true, false, false), true);
     });
 
-    it("keeps an active desktop relay alive when its source window loses focus", () => {
-        assert.equal(shouldCancelPointerDragOnBlur(false, true, true), false);
-        assert.equal(shouldCancelPointerDragOnBlur(false, false, true), true);
-        assert.equal(shouldCancelPointerDragOnBlur(false, true, false), true);
-        assert.equal(shouldCancelPointerDragOnBlur(true, true, true), true);
+    it("keeps an active desktop relay alive after its source window loses capture", () => {
+        assert.equal(shouldCancelPointerDragAfterWindowExit(false, true, true), false);
+        assert.equal(shouldCancelPointerDragAfterWindowExit(false, false, true), true);
+        assert.equal(shouldCancelPointerDragAfterWindowExit(false, true, false), true);
+        assert.equal(shouldCancelPointerDragAfterWindowExit(true, true, true), true);
+    });
+
+    it("requests a drop when the mouse is released over a foreign desktop window", () => {
+        assert.equal(shouldRequestForeignMouseDrop(false, 0, true, false), true);
+        assert.equal(shouldRequestForeignMouseDrop(false, 1, true, false), false);
+        assert.equal(shouldRequestForeignMouseDrop(false, 0, false, false), false);
+        assert.equal(shouldRequestForeignMouseDrop(false, 0, true, true), false);
+        assert.equal(shouldRequestForeignMouseDrop(true, 0, true, false), false);
     });
 });
 

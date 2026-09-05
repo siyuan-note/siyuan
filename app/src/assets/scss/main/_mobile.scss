@@ -265,6 +265,12 @@ body.mobile-keyboard--open {
     }
   }
 
+  &__search {
+    display: flex;
+    align-items: center;
+    height: 48px;
+  }
+
   &__text {
     @include mixin.text-clamp(1);
     flex: 1;

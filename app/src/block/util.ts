@@ -350,17 +350,17 @@ export const insertEmptyBlock = async (protyle: IProtyle, position: InsertPositi
     if (!blockElement) {
         return;
     }
+    // 页签项不能容纳同级普通块，上下插入以所属页签组为目标。
+    if (blockElement.getAttribute("data-type") === "NodeTabItem" &&
+        blockElement.parentElement.getAttribute("data-type") === "NodeTabs") {
+        blockElement = blockElement.parentElement;
+    }
     const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range);
     protyle.observerLoad?.disconnect();
     let newElement = genEmptyElement(false, true);
     let orderIndex = 1;
     const previousBlockElement = getPreviousBlockSibling(blockElement);
-    if (blockElement.getAttribute("data-type") === "NodeTabItem") {
-        const template = document.createElement("template");
-        template.innerHTML = protyle.lute.Md2BlockDOM(":::tabs\n:::tab\n\n:::\n:::\n");
-        newElement = template.content.querySelector<HTMLDivElement>(".tab-item");
-        newElement.querySelector<HTMLElement>(".tab-item-content [contenteditable=\"true\"]").innerHTML = "<wbr>";
-    } else if (blockElement.getAttribute("data-type") === "NodeListItem") {
+    if (blockElement.getAttribute("data-type") === "NodeListItem") {
         newElement = genListItemElement(blockElement, 0, true) as HTMLDivElement;
         orderIndex = parseInt(blockElement.parentElement.firstElementChild.getAttribute("data-marker"));
     } else if (position === "beforebegin" &&
@@ -376,11 +376,7 @@ export const insertEmptyBlock = async (protyle: IProtyle, position: InsertPositi
     const parentOldHTML = blockElement.parentElement.outerHTML;
     const newId = newElement.getAttribute("data-node-id");
     blockElement.insertAdjacentElement(position, newElement);
-    if (newElement.getAttribute("data-type") === "NodeTabItem" &&
-        newElement.parentElement.getAttribute("data-type") === "NodeTabs") {
-        newElement.parentElement.setAttribute("tabs-active-id", newId);
-        updateTransaction(protyle, newElement.parentElement, parentOldHTML, undoFocusContext);
-    } else if (blockElement.getAttribute("data-type") === "NodeListItem" && blockElement.getAttribute("data-subtype") === "o" &&
+    if (blockElement.getAttribute("data-type") === "NodeListItem" && blockElement.getAttribute("data-subtype") === "o" &&
         !newElement.parentElement.classList.contains("protyle-wysiwyg")) {
         updateListOrder(newElement.parentElement, orderIndex);
         updateTransaction(protyle, newElement.parentElement, parentOldHTML, undoFocusContext);

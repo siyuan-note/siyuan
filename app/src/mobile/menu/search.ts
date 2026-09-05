@@ -382,6 +382,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
     addClearButton({
         inputElement: searchInputElement,
         className: "toolbar__icon",
+        icon: "iconClear",
         clearCB() {
             config.page = 1;
             updateSearchResult(config, element, true);
@@ -401,6 +402,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
     addClearButton({
         inputElement: replaceInputElement,
         className: "toolbar__icon",
+        icon: "iconClear",
     });
     const criteriaData: Config.IUILayoutTabSearchConfig[] = [];
     initCriteriaMenu(element.querySelector("#criteria"), criteriaData, config);
@@ -796,7 +798,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
 
     let destroySearchEvent: (() => void) | undefined;
     openModel({
-        title: `<div class="fn__flex">
+        title: `<div class="toolbar__search">
     <span data-menu="true" class="toolbar__icon toolbar__icon--history" data-type="history">
         <svg class="svg--mid"><use xlink:href="#iconSearch"></use></svg>
         <svg class="svg--smaller"><use xlink:href="#iconDown"></use></svg>
@@ -937,6 +939,7 @@ const goAsset = () => {
     addClearButton({
         inputElement,
         className: "toolbar__icon",
+        icon: "iconClear",
         clearCB() {
             assetInputEvent(assetsElement, localSearch);
         }

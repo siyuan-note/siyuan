@@ -1,7 +1,7 @@
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {processSync} from "../../dialog/processSystem";
 import {updateAccountPanelVisibility} from "./accountUi";
-import {showMessage} from "../../dialog/message";
+import {hideMessage, showMessage} from "../../dialog/message";
 import {
     refreshLANSyncConfigItemVisibility,
     refreshSyncModeRelatedItems,
@@ -13,7 +13,7 @@ export let syncTabElement: HTMLElement | undefined;
 
 let syncAssetDownloadModePending = false;
 
-/** 切换资源下载模式时显示进度，并阻止重复提交。 */
+/** 切换资源下载模式时同步控件状态，并阻止重复提交 */
 export const mountSyncAssetDownloadMode = (root: ParentNode) => {
     root.querySelectorAll<HTMLSelectElement>('[id="sync.assetDownloadMode"]').forEach((element) => {
         element.disabled = syncAssetDownloadModePending || window.siyuan.config.readonly;
@@ -21,9 +21,6 @@ export const mountSyncAssetDownloadMode = (root: ParentNode) => {
         if (!syncAssetDownloadModePending) {
             element.value = String(window.siyuan.config.sync.assetDownloadMode ?? 0);
         }
-    });
-    root.querySelectorAll<HTMLElement>('[data-type="syncAssetDownloadStatus"]').forEach((element) => {
-        element.textContent = syncAssetDownloadModePending ? window.siyuan.languages.syncAssetDownloadModeUpdating : "";
     });
 };
 
@@ -34,6 +31,10 @@ const setSyncAssetDownloadMode = async (mode: Config.ISync["assetDownloadMode"])
     }
     syncAssetDownloadModePending = true;
     mountSyncAssetDownloadMode(document);
+    let messageId: string | undefined;
+    const progressTimeout = window.setTimeout(() => {
+        messageId = showMessage(window.siyuan.languages.syncAssetDownloadModeUpdating, -1);
+    }, 300);
     try {
         const response = await fetchSyncPost("/api/sync/setSyncAssetDownloadMode", {mode});
         if (response.code === 0) {
@@ -43,6 +44,10 @@ const setSyncAssetDownloadMode = async (mode: Config.ISync["assetDownloadMode"])
         console.warn("[config] failed to update asset download mode", error);
         showMessage(window.siyuan.languages.syncAssetDownloadModeFailed, 5000, "error");
     } finally {
+        window.clearTimeout(progressTimeout);
+        if (messageId) {
+            hideMessage(messageId);
+        }
         syncAssetDownloadModePending = false;
         mountSyncAssetDownloadMode(document);
     }

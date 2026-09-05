@@ -59,7 +59,7 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
     });
     group.select("sync.assetDownloadMode", {
         title: window.siyuan.languages.syncAssetDownloadMode,
-        desc: `${window.siyuan.languages.syncAssetDownloadModeTip}<div data-type="syncAssetDownloadStatus" role="status"></div>`,
+        desc: window.siyuan.languages.syncAssetDownloadModeTip,
         options: [
             {value: 0, label: window.siyuan.languages.syncAssetDownloadAll},
             {value: 1, label: window.siyuan.languages.syncAssetDownloadOnDemand},

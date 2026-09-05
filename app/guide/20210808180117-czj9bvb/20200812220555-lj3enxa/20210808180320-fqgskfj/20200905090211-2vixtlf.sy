@@ -1,12 +1,12 @@
 {
 	"ID": "20200905090211-2vixtlf",
-	"Spec": "2",
+	"Spec": "3",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20260905124213"
+		"updated": "20260906003609"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090624-fkv1xsc",
-				"updated": "20260425181343"
+				"updated": "20260906003609"
 			},
 			"Children": [
 				{
@@ -53,7 +53,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210104090624-c5bu25o",
-				"updated": "20260425181343"
+				"updated": "20260906003609"
 			},
 			"Children": [
 				{
@@ -1112,6 +1112,126 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeImage",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "tabs-block"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/tabs-block-20260906010000-kzrxtfp.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "页签块"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "容器块"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeImage",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "tab-item-block"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/tab-item-block-20260906010000-gdmnqvw.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "页签项块"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "容器块"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
 									"Type": "NodeText",
 									"Data": "​​​​"
 								},
@@ -1249,7 +1369,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090624-9qgquxh",
-				"updated": "20260803171606"
+				"updated": "20260906003122"
 			},
 			"Children": [
 				{
@@ -2654,6 +2774,212 @@
 			]
 		},
 		{
+			"ID": "20260905124213-9etkynq",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260905124213-9etkynq",
+				"updated": "20260906003122"
+			},
+			"HeadingLevel": 3,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "页签块"
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-6mc5n1n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905124213-6mc5n1n",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "页签块将相关内容收纳在同一组页签中，一次显示一个页签项的正文。点击标题切换，拖拽标题排序；选中的页签和顶部或左侧布局会保存并同步，刷新或重启后可恢复。"
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-7k5crhi",
+			"Type": "NodeTabs",
+			"Properties": {
+				"id": "20260906003122-7k5crhi",
+				"updated": "20260906003122",
+				"tabs-active-id": "20260906003122-jpiy4iu"
+			},
+			"Children": [
+				{
+					"ID": "20260906003122-jpiy4iu",
+					"Type": "NodeTabItem",
+					"Properties": {
+						"id": "20260906003122-jpiy4iu",
+						"updated": "20260906003122"
+					},
+					"Children": [
+						{
+							"ID": "20260906003122-71zp2pa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260906003122-71zp2pa",
+								"updated": "20260906003122"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "这是第一页的正文。"
+								}
+							]
+						}
+					],
+					"TabItemTitle": "第一页"
+				},
+				{
+					"ID": "20260906003122-1afhnbj",
+					"Type": "NodeTabItem",
+					"Properties": {
+						"id": "20260906003122-1afhnbj",
+						"updated": "20260906003122"
+					},
+					"Children": [
+						{
+							"ID": "20260906003122-4m3u6x6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260906003122-4m3u6x6",
+								"updated": "20260906003122"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "点击第二个页签查看此内容。"
+								}
+							]
+						}
+					],
+					"TabItemTitle": "第二页"
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-812ct16",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260906003122-812ct16",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "输入 / 并选择页签块可创建一组页签。通过 + 添加页签，通过更多菜单管理页签及布局。双击标题或使用重命名菜单修改标题。重命名支持 **加粗** 等 Markdown；已有颜色等样式会显示为 Kramdown 源码，修改其中的文字并保留样式标记即可保留格式。"
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-j2v89xm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260906003122-j2v89xm",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通过列表或页签块的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "块标菜单"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "转换为"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可以在列表和页签之间转换。列表项首段落作为完整标题，不重复出现在正文中；转回列表时还原为首段落，保留其格式、块 ID 和属性。"
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-t6toer8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260906003122-t6toer8",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Markdown 示例：::: 与 tabs 之间需要空格，@tab 开始一个页签项，@tab:active 指定选中项，结束围栏独占一行。嵌套时外层围栏比内层长，缩进可选，例如外层使用四个冒号、内层使用三个。"
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-jdsnmej",
+			"Type": "NodeCodeBlock",
+			"Properties": {
+				"id": "20260906003122-jdsnmej",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "bWFya2Rvd24="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "::: tabs\n@tab 第一页\n\n这是第一页的正文。\n\n@tab:active 第二页\n\n点击第二个页签查看此内容。\n:::\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			],
+			"IsFencedCodeBlock": true
+		},
+		{
+			"ID": "20260906003122-tqc63mt",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260906003122-tqc63mt",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "页签项块"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20260906003122-xun3tcl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260906003122-xun3tcl",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "页签项块属于页签块，包含标题和正文，有独立的块 ID。正文可以包含段落、列表等内容，也可以嵌套页签块。页签块只能直接包含页签项块，页签项不能独立放在文档中。"
+				}
+			]
+		},
+		{
 			"ID": "20210104090624-jtebaer",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -2738,7 +3064,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200925095848-aon4lem",
-				"updated": "20210302223257"
+				"updated": "20260906003122"
 			},
 			"Children": [
 				{
@@ -2770,7 +3096,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104090624-vsksysm",
-				"updated": "20210302223257"
+				"updated": "20260906003122"
 			},
 			"Children": [
 				{
@@ -2968,35 +3294,62 @@
 							]
 						}
 					]
-				}
-			]
-		},
-		{
-			"ID": "20260905124213-9etkynq",
-			"Type": "NodeHeading",
-			"Properties": {
-				"id": "20260905124213-9etkynq",
-				"updated": "20260905124213"
-			},
-			"HeadingLevel": 2,
-			"Children": [
+				},
 				{
-					"Type": "NodeText",
-					"Data": "页签块"
-				}
-			]
-		},
-		{
-			"ID": "20260905124213-6mc5n1n",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260905124213-6mc5n1n",
-				"updated": "20260905124213"
-			},
-			"Children": [
+					"ID": "20260906003122-4h509lv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260906003122-4h509lv",
+						"updated": "20260906003122"
+					},
+					"Children": [
+						{
+							"ID": "20260906003122-x7ano6a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260906003122-x7ano6a",
+								"updated": "20260906003122"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "页签块：只能包含页签项块"
+								}
+							]
+						}
+					]
+				},
 				{
-					"Type": "NodeText",
-					"Data": "页签块只包含页签项；每个页签项有独立块 ID，可容纳普通内容块及嵌套页签块。"
+					"ID": "20260906003122-egrc569",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260906003122-egrc569",
+						"updated": "20260906003122"
+					},
+					"Children": [
+						{
+							"ID": "20260906003122-5yng35y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260906003122-5yng35y",
+								"updated": "20260906003122"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "页签项块：包含普通内容块及嵌套页签块"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

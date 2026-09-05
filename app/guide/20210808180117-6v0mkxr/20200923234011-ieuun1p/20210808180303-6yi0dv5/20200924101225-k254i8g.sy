@@ -1,12 +1,12 @@
 {
 	"ID": "20200924101225-k254i8g",
-	"Spec": "2",
+	"Spec": "3",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20260905124213"
+		"updated": "20260906003609"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091538-4b3n4al",
-				"updated": "20260425181345"
+				"updated": "20260906003609"
 			},
 			"Children": [
 				{
@@ -64,7 +64,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210104091538-le8t1ci",
-				"updated": "20260425181345"
+				"updated": "20260906003609"
 			},
 			"Children": [
 				{
@@ -1087,6 +1087,126 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeImage",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "tabs-block"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/tabs-block-20260906010000-kzrxtfp.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Tabbed container"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Container block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeImage",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "tab-item-block"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/tab-item-block-20260906010000-gdmnqvw.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Tab item block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Container block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
 									"Type": "NodeText",
 									"Data": "​​"
 								},
@@ -1216,7 +1336,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091538-a55chyw",
-				"updated": "20260803171606"
+				"updated": "20260906003122"
 			},
 			"Children": [
 				{
@@ -2572,6 +2692,212 @@
 			]
 		},
 		{
+			"ID": "20260905124213-wbxn79t",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260905124213-wbxn79t",
+				"updated": "20260906003122"
+			},
+			"HeadingLevel": 3,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Tabbed container"
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-dak8rh5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905124213-dak8rh5",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A tabbed container groups related content and displays one tab item at a time. Click a title to switch tabs and drag titles to reorder them. The selected tab and the top or left layout are saved and synced, and restored after a refresh or restart."
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-mwps4py",
+			"Type": "NodeTabs",
+			"Properties": {
+				"id": "20260906003122-mwps4py",
+				"updated": "20260906003122",
+				"tabs-active-id": "20260906003122-rbm0esh"
+			},
+			"Children": [
+				{
+					"ID": "20260906003122-rbm0esh",
+					"Type": "NodeTabItem",
+					"Properties": {
+						"id": "20260906003122-rbm0esh",
+						"updated": "20260906003122"
+					},
+					"Children": [
+						{
+							"ID": "20260906003122-o2oiqax",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260906003122-o2oiqax",
+								"updated": "20260906003122"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "This is the first tab’s body."
+								}
+							]
+						}
+					],
+					"TabItemTitle": "First tab"
+				},
+				{
+					"ID": "20260906003122-wmohl62",
+					"Type": "NodeTabItem",
+					"Properties": {
+						"id": "20260906003122-wmohl62",
+						"updated": "20260906003122"
+					},
+					"Children": [
+						{
+							"ID": "20260906003122-kzst18a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260906003122-kzst18a",
+								"updated": "20260906003122"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Click the second tab to view this content."
+								}
+							]
+						}
+					],
+					"TabItemTitle": "Second tab"
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-knct56j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260906003122-knct56j",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Type / and choose the tabs block to create a group. Use + to add tabs and the more menu to manage tabs and their layout. Double-click a title or use Rename to edit it. Renaming supports Markdown such as **bold**. Existing colors and other styles appear as Kramdown source; edit the text while keeping the style markup to preserve formatting."
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-bmkcb6i",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260906003122-bmkcb6i",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use the list or tabs "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "block icon menu"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Turn into"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to convert between lists and tabs. Each list item’s first paragraph becomes its full title without being duplicated in the body. Converting back restores it as the first paragraph, preserving formatting, its block ID and attributes."
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-onyjz2c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260906003122-onyjz2c",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Markdown example: a space is required between ::: and tabs. @tab starts an item, @tab:active selects it, and the closing fence occupies its own line. For nesting, outer fences must be longer than inner fences; indentation is optional. For example, use four colons outside and three inside."
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-0rbj8az",
+			"Type": "NodeCodeBlock",
+			"Properties": {
+				"id": "20260906003122-0rbj8az",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "bWFya2Rvd24="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "::: tabs\n@tab First tab\n\nThis is the first tab’s body.\n\n@tab:active Second tab\n\nClick the second tab to view this content.\n:::\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			],
+			"IsFencedCodeBlock": true
+		},
+		{
+			"ID": "20260906003122-tfblsll",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260906003122-tfblsll",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Tab item block"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20260906003122-gtkz3ie",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260906003122-gtkz3ie",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A tab item block belongs to a tabbed container, has its own block ID, and contains a title and body. Its body can contain paragraphs, lists and nested tabbed containers. A tabbed container can directly contain only tab items; a tab item cannot stand alone in a document."
+				}
+			]
+		},
+		{
 			"ID": "20210104091538-lubwy1k",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -2656,7 +2982,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200925102736-x94e40g",
-				"updated": "20251209212756"
+				"updated": "20260906003122"
 			},
 			"Children": [
 				{
@@ -2688,7 +3014,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091538-3pi7fbf",
-				"updated": "20251209212756"
+				"updated": "20260906003122"
 			},
 			"Children": [
 				{
@@ -2858,35 +3184,62 @@
 							]
 						}
 					]
-				}
-			]
-		},
-		{
-			"ID": "20260905124213-wbxn79t",
-			"Type": "NodeHeading",
-			"Properties": {
-				"id": "20260905124213-wbxn79t",
-				"updated": "20260905124213"
-			},
-			"HeadingLevel": 2,
-			"Children": [
+				},
 				{
-					"Type": "NodeText",
-					"Data": "Tabbed container"
-				}
-			]
-		},
-		{
-			"ID": "20260905124213-dak8rh5",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260905124213-dak8rh5",
-				"updated": "20260905124213"
-			},
-			"Children": [
+					"ID": "20260906003122-oey7g4a",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260906003122-oey7g4a",
+						"updated": "20260906003122"
+					},
+					"Children": [
+						{
+							"ID": "20260906003122-fdo0uac",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260906003122-fdo0uac",
+								"updated": "20260906003122"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Tabbed container: can contain only tab item blocks"
+								}
+							]
+						}
+					]
+				},
 				{
-					"Type": "NodeText",
-					"Data": "A tabbed container contains only tab items. Each item has its own block ID and can contain ordinary content blocks and nested tabbed containers."
+					"ID": "20260906003122-vrgmgyj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260906003122-vrgmgyj",
+						"updated": "20260906003122"
+					},
+					"Children": [
+						{
+							"ID": "20260906003122-g665lnb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260906003122-g665lnb",
+								"updated": "20260906003122"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Tab item block: contains ordinary content blocks and nested tabbed containers"
+								}
+							]
+						}
+					]
 				}
 			]
 		}

@@ -1,12 +1,12 @@
 {
 	"ID": "20211226120147-ib6yy3i",
-	"Spec": "2",
+	"Spec": "3",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容區塊類型",
 		"type": "doc",
-		"updated": "20260905124213"
+		"updated": "20260906003609"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120227-2s70boj",
-				"updated": "20260730184353"
+				"updated": "20260906003609"
 			},
 			"Children": [
 				{
@@ -49,7 +49,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226120227-nx8tlf5",
-				"updated": "20260730184353"
+				"updated": "20260906003609"
 			},
 			"Children": [
 				{
@@ -1108,6 +1108,126 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeImage",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "tabs-block"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/tabs-block-20260906010000-kzrxtfp.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "頁籤區塊"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "容器區塊"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeImage",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "tab-item-block"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/tab-item-block-20260906010000-gdmnqvw.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "頁籤項目區塊"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "容器區塊"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
 									"Type": "NodeText",
 									"Data": "​​"
 								},
@@ -1245,7 +1365,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120227-esm6f20",
-				"updated": "20260803171606"
+				"updated": "20260906003122"
 			},
 			"Children": [
 				{
@@ -2572,6 +2692,212 @@
 			]
 		},
 		{
+			"ID": "20260905124213-371qsy7",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260905124213-371qsy7",
+				"updated": "20260906003122"
+			},
+			"HeadingLevel": 3,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "頁籤區塊"
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-n1gggna",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905124213-n1gggna",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "頁籤區塊將相關內容收納在同一組頁籤中，一次顯示一個頁籤項目的正文。點擊標題切換，拖曳標題排序；選取的頁籤和頂部或左側配置會儲存並同步，重新整理或重新啟動後可恢復。"
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-qm7kl1d",
+			"Type": "NodeTabs",
+			"Properties": {
+				"id": "20260906003122-qm7kl1d",
+				"updated": "20260906003122",
+				"tabs-active-id": "20260906003122-3rvhwbl"
+			},
+			"Children": [
+				{
+					"ID": "20260906003122-3rvhwbl",
+					"Type": "NodeTabItem",
+					"Properties": {
+						"id": "20260906003122-3rvhwbl",
+						"updated": "20260906003122"
+					},
+					"Children": [
+						{
+							"ID": "20260906003122-xsqooeh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260906003122-xsqooeh",
+								"updated": "20260906003122"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "這是第一頁的正文。"
+								}
+							]
+						}
+					],
+					"TabItemTitle": "第一頁"
+				},
+				{
+					"ID": "20260906003122-5ci1tz5",
+					"Type": "NodeTabItem",
+					"Properties": {
+						"id": "20260906003122-5ci1tz5",
+						"updated": "20260906003122"
+					},
+					"Children": [
+						{
+							"ID": "20260906003122-b3jeb3f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260906003122-b3jeb3f",
+								"updated": "20260906003122"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "點擊第二個頁籤查看此內容。"
+								}
+							]
+						}
+					],
+					"TabItemTitle": "第二頁"
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-0jlwsyi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260906003122-0jlwsyi",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "輸入 / 並選擇頁籤區塊可建立一組頁籤。透過 + 新增頁籤，透過更多選單管理頁籤及配置。按兩下標題或使用重新命名選單修改標題。重新命名支援 **粗體** 等 Markdown；已有顏色等樣式會顯示為 Kramdown 原始碼，修改其中的文字並保留樣式標記即可保留格式。"
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-n21xwrx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260906003122-n21xwrx",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "透過列表或頁籤區塊的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "區塊圖示選單"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "轉換為"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可以在列表和頁籤之間轉換。列表項目首段落作為完整標題，不重複出現在正文中；轉回列表時還原為首段落，保留其格式、區塊 ID 和屬性。"
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-lcxok4v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260906003122-lcxok4v",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Markdown 範例：::: 與 tabs 之間需要空格，@tab 開始一個頁籤項目，@tab:active 指定選取項目，結束圍欄獨占一行。巢狀使用時外層圍欄比內層長，縮排可選，例如外層使用四個冒號、內層使用三個。"
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-6aj8ks9",
+			"Type": "NodeCodeBlock",
+			"Properties": {
+				"id": "20260906003122-6aj8ks9",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "bWFya2Rvd24="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "::: tabs\n@tab 第一頁\n\n這是第一頁的正文。\n\n@tab:active 第二頁\n\n點擊第二個頁籤查看此內容。\n:::\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			],
+			"IsFencedCodeBlock": true
+		},
+		{
+			"ID": "20260906003122-6qha4x8",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260906003122-6qha4x8",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "頁籤項目區塊"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20260906003122-6we2ve6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260906003122-6we2ve6",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "頁籤項目區塊屬於頁籤區塊，包含標題和正文，有獨立的區塊 ID。正文可以包含段落、列表等內容，也可以巢狀放置頁籤區塊。頁籤區塊只能直接包含頁籤項目區塊，頁籤項目不能獨立放在文件中。"
+				}
+			]
+		},
+		{
 			"ID": "20211226120227-hqosjsi",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -2657,7 +2983,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120227-3jdgfm5",
-				"updated": "20260730184353"
+				"updated": "20260906003122"
 			},
 			"Children": [
 				{
@@ -2686,7 +3012,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226120227-8jsk008",
-				"updated": "20251209211409"
+				"updated": "20260906003122"
 			},
 			"Children": [
 				{
@@ -2872,6 +3198,62 @@
 							]
 						}
 					]
+				},
+				{
+					"ID": "20260906003122-i0dqkfl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260906003122-i0dqkfl",
+						"updated": "20260906003122"
+					},
+					"Children": [
+						{
+							"ID": "20260906003122-xc7guz7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260906003122-xc7guz7",
+								"updated": "20260906003122"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "頁籤區塊：只能包含頁籤項目區塊"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260906003122-9eb5lsh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260906003122-9eb5lsh",
+						"updated": "20260906003122"
+					},
+					"Children": [
+						{
+							"ID": "20260906003122-4hbperu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260906003122-4hbperu",
+								"updated": "20260906003122"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "頁籤項目區塊：包含一般內容區塊及巢狀頁籤區塊"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -2882,35 +3264,6 @@
 				"id": "20211226120227-gz5syjf",
 				"updated": "20211226120227"
 			}
-		},
-		{
-			"ID": "20260905124213-371qsy7",
-			"Type": "NodeHeading",
-			"Properties": {
-				"id": "20260905124213-371qsy7",
-				"updated": "20260905124213"
-			},
-			"HeadingLevel": 2,
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "頁籤區塊"
-				}
-			]
-		},
-		{
-			"ID": "20260905124213-n1gggna",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260905124213-n1gggna",
-				"updated": "20260905124213"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "頁籤區塊僅包含頁籤項目；每個頁籤項目都有獨立區塊 ID，可容納一般內容區塊及巢狀頁籤區塊。"
-				}
-			]
 		}
 	]
 }

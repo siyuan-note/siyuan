@@ -1,13 +1,13 @@
 {
 	"ID": "20240530101000-35bbvcx",
-	"Spec": "2",
+	"Spec": "3",
 	"Type": "NodeDocument",
 	"Properties": {
 		"ID": "20240530101000-detubz9",
 		"id": "20240530101000-35bbvcx",
 		"title": "コンテンツブロックの種類",
 		"type": "doc",
-		"updated": "20260905124213"
+		"updated": "20260906003609"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-6nam42g",
 				"id": "20240530101000-n0tipvh",
-				"updated": "20260425180748"
+				"updated": "20260906003609"
 			},
 			"Children": [
 				{
@@ -73,7 +73,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-7ed5u6l",
-				"updated": "20260425180748"
+				"updated": "20260906003609"
 			},
 			"Children": [
 				{
@@ -1156,6 +1156,126 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeImage",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "tabs-block"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/tabs-block-20260906010000-kzrxtfp.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "タブブロック"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "コンテナブロック"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeImage",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "tab-item-block"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/tab-item-block-20260906010000-gdmnqvw.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "タブ項目ブロック"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "コンテナブロック"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
 									"Type": "NodeText",
 									"Data": "​​"
 								},
@@ -1302,7 +1422,7 @@
 			"Properties": {
 				"ID": "20240530101000-rjjxxn8",
 				"id": "20240530101000-p035stn",
-				"updated": "20260803170332"
+				"updated": "20260906003122"
 			},
 			"Children": [
 				{
@@ -2766,6 +2886,212 @@
 			]
 		},
 		{
+			"ID": "20260905124213-rmj1ui2",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260905124213-rmj1ui2",
+				"updated": "20260906003122"
+			},
+			"HeadingLevel": 3,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タブブロック"
+				}
+			]
+		},
+		{
+			"ID": "20260905124213-q5thtxj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905124213-q5thtxj",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タブブロックは関連する内容をまとめ、選択したタブ項目の本文だけを表示します。タイトルのクリックで切り替え、ドラッグで並べ替えます。選択したタブと上部または左側の配置は保存・同期され、再読み込みや再起動後も復元されます。"
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-lqlyood",
+			"Type": "NodeTabs",
+			"Properties": {
+				"id": "20260906003122-lqlyood",
+				"updated": "20260906003122",
+				"tabs-active-id": "20260906003122-pdn8pj5"
+			},
+			"Children": [
+				{
+					"ID": "20260906003122-pdn8pj5",
+					"Type": "NodeTabItem",
+					"Properties": {
+						"id": "20260906003122-pdn8pj5",
+						"updated": "20260906003122"
+					},
+					"Children": [
+						{
+							"ID": "20260906003122-5klv23t",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260906003122-5klv23t",
+								"updated": "20260906003122"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最初のタブの本文です。"
+								}
+							]
+						}
+					],
+					"TabItemTitle": "最初のタブ"
+				},
+				{
+					"ID": "20260906003122-lodxejd",
+					"Type": "NodeTabItem",
+					"Properties": {
+						"id": "20260906003122-lodxejd",
+						"updated": "20260906003122"
+					},
+					"Children": [
+						{
+							"ID": "20260906003122-t08src6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260906003122-t08src6",
+								"updated": "20260906003122"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "二つ目のタブをクリックすると、この内容が表示されます。"
+								}
+							]
+						}
+					],
+					"TabItemTitle": "二つ目のタブ"
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-om7wyo8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260906003122-om7wyo8",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "/ を入力してタブブロックを選択すると、タブのグループを作成できます。+ でタブを追加し、その他メニューでタブや配置を管理します。タイトルのダブルクリックまたは名前変更メニューで編集できます。**太字** などの Markdown に対応しています。文字色などの既存のスタイルは Kramdown ソースで表示されるため、書式を残すにはスタイルの記述を保ったまま文字を変更してください。"
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-z3z90i9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260906003122-z3z90i9",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リストまたはタブの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ブロックアイコンメニュー"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "変換"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " から、リストとタブを相互に変換できます。リスト項目の最初の段落が省略なしでタイトルになり、本文には重複しません。リストに戻すと最初の段落として復元され、書式、ブロック ID、属性が保持されます。"
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-x1ssv4a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260906003122-x1ssv4a",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Markdown の例：::: と tabs の間には空白が必要です。@tab で項目を開始し、@tab:active で選択項目を指定します。閉じるフェンスは独立した行に置きます。入れ子では外側のフェンスを内側より長くし、字下げは任意です。例えば外側をコロン四つ、内側を三つにします。"
+				}
+			]
+		},
+		{
+			"ID": "20260906003122-o05eqs7",
+			"Type": "NodeCodeBlock",
+			"Properties": {
+				"id": "20260906003122-o05eqs7",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "bWFya2Rvd24="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "::: tabs\n@tab 最初のタブ\n\n最初のタブの本文です。\n\n@tab:active 二つ目のタブ\n\n二つ目のタブをクリックすると、この内容が表示されます。\n:::\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			],
+			"IsFencedCodeBlock": true
+		},
+		{
+			"ID": "20260906003122-3mia0g1",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260906003122-3mia0g1",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タブ項目ブロック"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20260906003122-azyooos",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260906003122-azyooos",
+				"updated": "20260906003122"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タブ項目ブロックはタブブロックに属し、独立したブロック ID、タイトル、本文を持ちます。本文には段落やリスト、入れ子のタブブロックを含められます。タブブロックの直接の子はタブ項目だけで、タブ項目をドキュメント内に単独で置くことはできません。"
+				}
+			]
+		},
+		{
 			"ID": "20240530101000-cb0jgj8",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -2905,7 +3231,7 @@
 			"Properties": {
 				"ID": "20240530101000-f8xitg4",
 				"id": "20240530101000-yy3nfa8",
-				"updated": "20251209213348"
+				"updated": "20260906003122"
 			},
 			"Children": [
 				{
@@ -2945,7 +3271,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240530101000-jcermop",
-				"updated": "20251209213348"
+				"updated": "20260906003122"
 			},
 			"Children": [
 				{
@@ -3164,6 +3490,62 @@
 							]
 						}
 					]
+				},
+				{
+					"ID": "20260906003122-wh1g93x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260906003122-wh1g93x",
+						"updated": "20260906003122"
+					},
+					"Children": [
+						{
+							"ID": "20260906003122-vu4206u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260906003122-vu4206u",
+								"updated": "20260906003122"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "タブブロック：タブ項目ブロックだけを格納できます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260906003122-wkvs6ra",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260906003122-wkvs6ra",
+						"updated": "20260906003122"
+					},
+					"Children": [
+						{
+							"ID": "20260906003122-efb4636",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260906003122-efb4636",
+								"updated": "20260906003122"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "タブ項目ブロック：通常のコンテンツブロックや入れ子のタブブロックを格納できます"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -3175,35 +3557,6 @@
 				"id": "20240530101000-28sah71",
 				"updated": "20240530101000"
 			}
-		},
-		{
-			"ID": "20260905124213-rmj1ui2",
-			"Type": "NodeHeading",
-			"Properties": {
-				"id": "20260905124213-rmj1ui2",
-				"updated": "20260905124213"
-			},
-			"HeadingLevel": 2,
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "タブブロック"
-				}
-			]
-		},
-		{
-			"ID": "20260905124213-q5thtxj",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260905124213-q5thtxj",
-				"updated": "20260905124213"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "タブブロックにはタブ項目だけを格納できます。各項目は独立したブロック ID を持ち、通常のコンテンツブロックや入れ子のタブブロックを格納できます。"
-				}
-			]
 		}
 	]
 }

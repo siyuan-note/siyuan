@@ -1,5 +1,6 @@
 .config {
   &__tab-wrap {
+    position: relative;
     overflow: hidden;
     box-sizing: border-box;
     background-color: var(--b3-theme-background);
@@ -8,6 +9,14 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+  }
+
+  &__drag {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    touch-action: none;
   }
 
   &__tab-container {
@@ -187,9 +196,11 @@
       .config__tab-title {
         display: flex;
         align-items: center;
-        height: 21px;
-        margin-bottom: 16px;
-        padding: 0 4px;
+        height: 61px;
+        box-sizing: border-box;
+        margin: -24px -20px 0;
+        padding: 24px 24px 16px;
+        touch-action: none;
 
         .b3-list-item__graphic {
           padding: 0 4px;
@@ -208,6 +219,16 @@
           padding: 0 6px 0 4px;
         }
       }
+    }
+  }
+
+  &__panel .config__tab-container .layout-tab-bar {
+    padding-top: 16px;
+    padding-bottom: 15px;
+
+    .item {
+      margin-top: 0;
+      margin-bottom: 0;
     }
   }
 

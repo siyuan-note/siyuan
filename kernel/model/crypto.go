@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
@@ -153,10 +154,15 @@ func hasEncryptedNotebookPayloadAtPath(boxDir string) (bool, error) {
 }
 
 const encryptedAssetMetadataMaxSize = 1024 * 1024
+const encryptedAssetLegacySpec = 1
+const encryptedAssetSpec = 2
+const encryptedAssetContainerIDSize = 32
 const encryptedAssetChunkSize = 1024 * 1024
 const encryptedAssetChunkMaxCiphertextSize = encryptedAssetChunkSize + 1024
 
 type encryptedAssetMetadata struct {
+	Spec         int    `json:"spec"`
+	ContainerID  []byte `json:"containerID"`
 	OriginalName string `json:"originalName"`
 	Size         int64  `json:"size"`
 	Chunks       uint64 `json:"chunks"`
@@ -347,7 +353,7 @@ func ImportNotebookCryptoBackup(data []byte, password string) error {
 	}
 
 	// 校验 KEK 能解密现存笔记本和已删除笔记本历史中的 WrappedDEK，避免导入不匹配的备份。
-	if !verifyKEKAgainstExistingBoxes(kek) || !verifyKEKAgainstEncryptedHistory(kek) {
+	if !verifyKEKAgainstExistingBoxes(kek, nc) || !verifyKEKAgainstEncryptedHistory(kek, nc) {
 		return errors.New(Conf.Language(316)) // 密钥不匹配
 	}
 
@@ -432,7 +438,14 @@ func writeNotebookCryptoBackupData(nc *conf.NotebookCrypto, kek []byte) error {
 // 优先尝试 conf 的 WrappedDEK，解密失败时 fallback 到 backup（与解锁路径一致）；
 // GetBoxEncryption 报错时 fail-closed（元数据损坏的加密笔记本不能静默跳过）。
 // 全部通过或不存在加密笔记本时返回 true。
-func verifyKEKAgainstExistingBoxes(kek []byte) bool {
+func verifyKEKAgainstExistingBoxes(kek []byte, nc *conf.NotebookCrypto) bool {
+	if nc != nil {
+		keys, err := decryptHistoryKEKs(kek, nc.HistoryKEKs)
+		clearHistoryKEKs(keys)
+		if err != nil {
+			return false
+		}
+	}
 	boxIDs, err := listAllEncryptedBoxIDs()
 	if err != nil {
 		logging.LogErrorf("list encrypted notebooks failed: %s", err)
@@ -446,14 +459,16 @@ func verifyKEKAgainstExistingBoxes(kek []byte) bool {
 		if boxCrypt == nil || len(boxCrypt.WrappedDEK) == 0 {
 			return false // ListAllEncryptedBoxIDs 认定为加密但无可用 key material → fail-closed
 		}
-		if _, dErr := decryptWrappedDEK(id, boxCrypt, kek); dErr == nil {
+		if dek, dErr := decryptWrappedDEKWithHistory(id, boxCrypt, kek, nc); dErr == nil {
+			zeroAndClear(dek)
 			continue // 解密成功
 		}
 		// conf 的 WrappedDEK 无法解密：尝试 backup（与解锁路径 fallback 一致）
 		backup, bErr := readNotebookCryptBackup(id)
 		if bErr == nil && backup != nil && len(backup.WrappedDEK) > 0 &&
 			!bytes.Equal(backup.WrappedDEK, boxCrypt.WrappedDEK) {
-			if _, err2 := decryptWrappedDEK(id, backup, kek); err2 == nil {
+			if dek, err2 := decryptWrappedDEKWithHistory(id, backup, kek, nc); err2 == nil {
+				zeroAndClear(dek)
 				continue // backup 解密成功
 			}
 		}
@@ -497,6 +512,7 @@ type masterPasswordMigration struct {
 	NewVerifier      []byte              `json:"newVerifier"`
 	NewVerifierNonce []byte              `json:"newVerifierNonce"`
 	NewKDFParams     json.RawMessage     `json:"newKDFParams"`
+	NewHistoryKEKs   [][]byte            `json:"newHistoryKEKs,omitempty"`
 	Boxes            []migrationBoxEntry `json:"boxes"`
 }
 
@@ -588,7 +604,7 @@ func removeMasterPasswordMigrationBox(boxID string) {
 	if !found {
 		return
 	}
-	if len(remaining) == 0 {
+	if len(remaining) == 0 && len(mig.NewHistoryKEKs) == 0 {
 		removeMasterPasswordMigrationUnlocked()
 		return
 	}
@@ -658,7 +674,7 @@ func recoverMasterPasswordMigration() {
 	}
 	if len(remaining) != len(mig.Boxes) {
 		mig.Boxes = remaining
-		if len(mig.Boxes) == 0 {
+		if len(mig.Boxes) == 0 && len(mig.NewHistoryKEKs) == 0 {
 			removeMasterPasswordMigration()
 			return
 		}
@@ -673,6 +689,11 @@ func recoverMasterPasswordMigration() {
 	Conf.m.RUnlock()
 
 	if bytes.Equal(currentVerifier, mig.NewVerifier) {
+		if mig.NewHistoryKEKs != nil {
+			Conf.m.Lock()
+			Conf.NotebookCrypto.HistoryKEKs = mig.NewHistoryKEKs
+			Conf.m.Unlock()
+		}
 		// Phase 2 已完成（verifier 已切换），补写未完成的 box
 		for _, entry := range mig.Boxes {
 			box := &Box{ID: entry.BoxID}
@@ -829,7 +850,7 @@ func hasEncryptedNotebookDeleteHistory(boxID string) (bool, error) {
 	return false, nil
 }
 
-func verifyKEKAgainstEncryptedHistory(kek []byte) bool {
+func verifyKEKAgainstEncryptedHistory(kek []byte, nc *conf.NotebookCrypto) bool {
 	boxDirs, err := encryptedNotebookHistoryBoxDirs()
 	if err != nil {
 		logging.LogErrorf("list encrypted notebook history failed: %s", err)
@@ -844,7 +865,7 @@ func verifyKEKAgainstEncryptedHistory(kek []byte) bool {
 		}
 		matched := false
 		for _, candidate := range candidates {
-			dek, decryptErr := decryptWrappedDEK(boxID, candidate, kek)
+			dek, decryptErr := decryptWrappedDEKWithHistory(boxID, candidate, kek, nc)
 			if decryptErr == nil {
 				zeroAndClear(dek)
 				matched = true
@@ -1187,7 +1208,7 @@ func deriveNotebookCryptoBackupCandidate(password string) (backup *conf.Notebook
 		zeroAndClear(kek)
 		return nil, nil, errors.New(Conf.Language(316))
 	}
-	if !verifyKEKAgainstExistingBoxes(kek) || !verifyKEKAgainstEncryptedHistory(kek) {
+	if !verifyKEKAgainstExistingBoxes(kek, backup) || !verifyKEKAgainstEncryptedHistory(kek, backup) {
 		zeroAndClear(kek)
 		return nil, nil, errors.New(Conf.Language(316))
 	}
@@ -1253,7 +1274,11 @@ func deriveKEK(password string) ([]byte, error) {
 			zeroAndClear(kek)
 			return nil, errors.New(Conf.Language(315))
 		}
-		if !verifyKEKAgainstExistingBoxes(kek) {
+		trusted := &nc
+		if !localAuthenticated {
+			trusted = backup
+		}
+		if !verifyKEKAgainstExistingBoxes(kek, trusted) {
 			zeroAndClear(kek)
 			return nil, errors.New(Conf.Language(315))
 		}
@@ -1274,7 +1299,9 @@ func deriveKEK(password string) ([]byte, error) {
 
 	if migrationPending {
 		// 崩溃恢复后的首次新密码验证：确认所有笔记本都已切换到新 KEK，再生成带认证的全局备份并结束迁移。
-		if !verifyKEKAgainstExistingBoxes(kek) {
+		keys, keyErr := decryptHistoryKEKs(kek, nc.HistoryKEKs)
+		clearHistoryKEKs(keys)
+		if keyErr != nil || !verifyKEKAgainstExistingBoxes(kek, nil) || !verifyKEKAgainstEncryptedHistory(kek, &nc) {
 			zeroAndClear(kek)
 			return nil, errMasterPasswordMigrationPending
 		}
@@ -1297,7 +1324,8 @@ func decryptBoxCrypt(boxID string, kek []byte) (dek []byte, boxCrypt *conf.BoxEn
 		return nil, nil, fmt.Errorf("no encrypted key material for box [%s]", boxID)
 	}
 
-	dek, err = decryptWrappedDEK(boxID, boxCrypt, kek)
+	nc := currentNotebookCrypto()
+	dek, err = decryptWrappedDEKWithHistory(boxID, boxCrypt, kek, nc)
 	if err == nil {
 		return dek, boxCrypt, nil
 	}
@@ -1306,7 +1334,7 @@ func decryptBoxCrypt(boxID string, kek []byte) (dek []byte, boxCrypt *conf.BoxEn
 	backup, bErr := readNotebookCryptBackup(boxID)
 	if bErr == nil && backup != nil && len(backup.WrappedDEK) > 0 &&
 		!bytes.Equal(backup.WrappedDEK, boxCrypt.WrappedDEK) {
-		dek, err = decryptWrappedDEK(boxID, backup, kek)
+		dek, err = decryptWrappedDEKWithHistory(boxID, backup, kek, nc)
 		if err == nil {
 			// backup 解密成功：修复 conf + 刷新 backup
 			box := &Box{ID: boxID}
@@ -1705,9 +1733,7 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	}
 	defer zeroAndClear(oldKEK)
 
-	Conf.m.Lock()
-	nc := Conf.NotebookCrypto
-	Conf.m.Unlock()
+	nc := currentNotebookCrypto()
 
 	params, validErr := util.ValidateArgon2Params(nc.KDFParams)
 	if validErr != nil {
@@ -1715,6 +1741,10 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	}
 	newKEK := util.DeriveKey(newPassword, nc.MasterSalt, params)
 	defer zeroAndClear(newKEK)
+	newHistoryKEKs, err := rewrapHistoryKEKs(oldKEK, newKEK, nc.HistoryKEKs)
+	if err != nil {
+		return err
+	}
 	newVerifier, err := util.EncryptWithAAD(newKEK, kekVerifierMagic, []byte("siyuan:kek-verifier"))
 	if err != nil {
 		return err
@@ -1733,6 +1763,7 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 			return errors.New(Conf.Language(316) + " [box=" + id + "]")
 		}
 		newWrapped, nErr := util.EncryptWithAAD(newKEK, dek, wrappedDEKAAD(id))
+		zeroAndClear(dek)
 		if nErr != nil {
 			return nErr
 		}
@@ -1752,6 +1783,7 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 		NewVerifier:      newVerifier,
 		NewVerifierNonce: mustEncryptionNonce(newVerifier),
 		NewKDFParams:     newParamsJSON,
+		NewHistoryKEKs:   newHistoryKEKs,
 		Boxes:            entries,
 	}
 	if err = writeMasterPasswordMigration(mig); err != nil {
@@ -1763,6 +1795,7 @@ func ChangeMasterPassword(oldPassword, newPassword string) error {
 	Conf.NotebookCrypto.KEKVerifier = newVerifier
 	Conf.NotebookCrypto.VerifierNonce = mustEncryptionNonce(newVerifier)
 	Conf.NotebookCrypto.KDFParams = params
+	Conf.NotebookCrypto.HistoryKEKs = newHistoryKEKs
 	Conf.m.Unlock()
 
 	// Conf.Save 内部会加 Conf.m，不能在持锁状态下调用（RWMutex 不可重入）
@@ -2214,7 +2247,13 @@ func EncryptAsset(boxID, diskName, originalName string, dek, plaintext []byte) (
 	if chunkCount == 0 {
 		chunkCount = 1
 	}
+	containerID := make([]byte, encryptedAssetContainerIDSize)
+	if _, err := rand.Read(containerID); err != nil {
+		return nil, err
+	}
 	metadata, err := json.Marshal(&encryptedAssetMetadata{
+		Spec:         encryptedAssetSpec,
+		ContainerID:  containerID,
 		OriginalName: originalName,
 		Size:         int64(len(plaintext)),
 		Chunks:       chunkCount,
@@ -2247,7 +2286,7 @@ func EncryptAsset(boxID, diskName, originalName string, dek, plaintext []byte) (
 		encryptedChunk, encryptErr := util.EncryptWithAAD(
 			assetKey,
 			plaintext[start:end],
-			[]byte(fmt.Sprintf("%s:content:%d", aadPrefix, chunkIndex)),
+			encryptedAssetChunkAAD(aadPrefix, containerID, chunkIndex),
 		)
 		if encryptErr != nil {
 			return nil, encryptErr
@@ -2278,18 +2317,51 @@ func decryptAssetMetadata(boxID, diskName string, dek, ciphertext []byte) (metad
 	if decryptErr != nil {
 		return nil, 0, decryptErr
 	}
-	metadata = &encryptedAssetMetadata{}
-	if err = json.Unmarshal(plainMetadata, metadata); err != nil {
+	defer zeroAndClear(plainMetadata)
+	if metadata, err = parseEncryptedAssetMetadata(plainMetadata); err != nil {
 		return nil, 0, err
+	}
+	return metadata, 8 + metadataSize, nil
+}
+
+// encryptedAssetChunkAAD 将分块绑定到本次写入的容器，阻止同名资源的不同版本互换分块。
+func encryptedAssetChunkAAD(prefix string, containerID []byte, index uint64) []byte {
+	return []byte(fmt.Sprintf("%s:content:v%d:%x:%d", prefix, encryptedAssetSpec, containerID, index))
+}
+
+func parseEncryptedAssetMetadata(data []byte) (*encryptedAssetMetadata, error) {
+	metadata := &encryptedAssetMetadata{}
+	if err := json.Unmarshal(data, metadata); err != nil {
+		return nil, err
+	}
+	var version struct {
+		Spec        json.RawMessage `json:"spec"`
+		ContainerID json.RawMessage `json:"containerID"`
+	}
+	if err := json.Unmarshal(data, &version); err != nil {
+		return nil, err
+	}
+	// 仅认证元数据同时缺少两个版本字段时按旧容器读取，显式空值或不完整的新格式不能降级。
+	if len(version.Spec) == 0 && len(version.ContainerID) == 0 {
+		metadata.Spec = encryptedAssetLegacySpec
+	} else if metadata.Spec != encryptedAssetSpec || len(metadata.ContainerID) != encryptedAssetContainerIDSize {
+		return nil, errors.New("unsupported encrypted asset container version")
 	}
 	if metadata.OriginalName == "" || metadata.OriginalName == "." ||
 		filepath.Base(metadata.OriginalName) != metadata.OriginalName || strings.ContainsAny(metadata.OriginalName, `/\`) {
-		return nil, 0, errors.New("invalid encrypted asset original name")
+		return nil, errors.New("invalid encrypted asset original name")
 	}
-	if metadata.Size < 0 || metadata.Chunks == 0 {
-		return nil, 0, errors.New("invalid encrypted asset content metadata")
+	if metadata.Size < 0 {
+		return nil, errors.New("invalid encrypted asset content metadata")
 	}
-	return metadata, 8 + metadataSize, nil
+	chunks := uint64(metadata.Size) / encryptedAssetChunkSize
+	if metadata.Size%encryptedAssetChunkSize != 0 || metadata.Size == 0 {
+		chunks++
+	}
+	if metadata.Chunks != chunks {
+		return nil, errors.New("invalid encrypted asset chunk count")
+	}
+	return metadata, nil
 }
 
 // DecryptAssetWithName 解密资源内容并返回原始名称。
@@ -2335,16 +2407,10 @@ func DecryptAssetNameFromReader(boxID, diskName string, dek []byte, reader io.Re
 	if decryptErr != nil {
 		return "", decryptErr
 	}
-	metadata := &encryptedAssetMetadata{}
-	if err = json.Unmarshal(plainMetadata, metadata); err != nil {
+	defer zeroAndClear(plainMetadata)
+	metadata, err := parseEncryptedAssetMetadata(plainMetadata)
+	if err != nil {
 		return "", err
-	}
-	if metadata.OriginalName == "" || metadata.OriginalName == "." ||
-		filepath.Base(metadata.OriginalName) != metadata.OriginalName || strings.ContainsAny(metadata.OriginalName, `/\`) {
-		return "", errors.New("invalid encrypted asset original name")
-	}
-	if metadata.Size < 0 || metadata.Chunks == 0 {
-		return "", errors.New("invalid encrypted asset content metadata")
 	}
 	return metadata.OriginalName, nil
 }
@@ -2374,16 +2440,10 @@ func DecryptAssetToWriter(boxID, diskName string, dek []byte, reader io.Reader, 
 	if decryptErr != nil {
 		return "", decryptErr
 	}
-	metadata := &encryptedAssetMetadata{}
-	if err = json.Unmarshal(plainMetadata, metadata); err != nil {
+	defer zeroAndClear(plainMetadata)
+	metadata, err := parseEncryptedAssetMetadata(plainMetadata)
+	if err != nil {
 		return "", err
-	}
-	if metadata.OriginalName == "" || metadata.OriginalName == "." ||
-		filepath.Base(metadata.OriginalName) != metadata.OriginalName || strings.ContainsAny(metadata.OriginalName, `/\`) {
-		return "", errors.New("invalid encrypted asset original name")
-	}
-	if metadata.Size < 0 || metadata.Chunks == 0 {
-		return "", errors.New("invalid encrypted asset content metadata")
 	}
 
 	var written int64
@@ -2399,13 +2459,25 @@ func DecryptAssetToWriter(boxID, diskName string, dek []byte, reader io.Reader, 
 		if _, err = io.ReadFull(reader, encryptedChunk); err != nil {
 			return "", err
 		}
+		aad := encryptedAssetChunkAAD(aadPrefix, metadata.ContainerID, chunkIndex)
+		if metadata.Spec == encryptedAssetLegacySpec {
+			aad = []byte(fmt.Sprintf("%s:content:%d", aadPrefix, chunkIndex))
+		}
 		plainChunk, chunkErr := util.DecryptWithAAD(
 			assetKey,
 			encryptedChunk,
-			[]byte(fmt.Sprintf("%s:content:%d", aadPrefix, chunkIndex)),
+			aad,
 		)
 		if chunkErr != nil {
 			return "", chunkErr
+		}
+		expectedSize := int64(encryptedAssetChunkSize)
+		if remaining := metadata.Size - written; remaining < expectedSize {
+			expectedSize = remaining
+		}
+		if int64(len(plainChunk)) != expectedSize {
+			zeroAndClear(plainChunk)
+			return "", errors.New("invalid encrypted asset plaintext chunk size")
 		}
 		n, writeErr := writer.Write(plainChunk)
 		written += int64(n)

@@ -34,6 +34,9 @@ type NotebookCrypto struct {
 	CreatedAt int64  `json:"createdAt,omitempty"` // 备份创建/更新时间（unix 秒）
 	Checksum  string `json:"checksum,omitempty"`  // SHA-256 校验和
 	KEKMAC    []byte `json:"kekMAC,omitempty"`    // KEK HMAC-SHA256（需主密码验证）
+
+	// 历次 KEK 由当前 KEK 认证加密，用于恢复本机、其他设备或离线快照中尚未重新包络的笔记本。
+	HistoryKEKs [][]byte `json:"historyKEKs,omitempty"`
 }
 
 // NewNotebookCrypto 创建带默认 Argon2id 参数的 NotebookCrypto。

@@ -73,6 +73,7 @@ func TestHideConfSecretPreservesNotebookCryptoSettings(t *testing.T) {
 	appConf.NotebookCrypto.KEKVerifier = verifier
 	appConf.NotebookCrypto.VerifierNonce = nonce
 	appConf.NotebookCrypto.AutoLockMinutes = 17
+	appConf.NotebookCrypto.HistoryKEKs = [][]byte{bytes.Repeat([]byte{3}, 64)}
 	prepareBackupForWrite(appConf.NotebookCrypto)
 	appConf.NotebookCrypto.KEKMAC = computeKEKMAC(appConf.NotebookCrypto, kek)
 
@@ -96,7 +97,8 @@ func TestHideConfSecretPreservesNotebookCryptoSettings(t *testing.T) {
 		"" != notebookCrypto.BackupID ||
 		0 != notebookCrypto.CreatedAt ||
 		"" != notebookCrypto.Checksum ||
-		0 < len(notebookCrypto.KEKMAC) {
+		0 < len(notebookCrypto.KEKMAC) ||
+		0 < len(notebookCrypto.HistoryKEKs) {
 		t.Fatalf("notebook crypto key material was not hidden: %#v", notebookCrypto)
 	}
 }

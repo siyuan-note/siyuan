@@ -18,9 +18,12 @@ package api
 
 import (
 	"errors"
+	"sort"
 
+	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
 const requestBoxLeasesKey = "siyuan-request-box-leases"
@@ -46,6 +49,41 @@ func holdEncryptedBoxRequest(c *gin.Context, boxID string) error {
 	}
 	leases = append(leases, boxID)
 	c.Set(requestBoxLeasesKey, leases)
+	return nil
+}
+
+// holdEncryptedBlockRequests 按块的实际归属取得响应租约，覆盖省略笔记本参数的通用和批量读取。
+func holdEncryptedBlockRequests(c *gin.Context, boxID string, ids []string, allowMissing bool) error {
+	if boxID != "" {
+		return holdEncryptedBoxRequest(c, boxID)
+	}
+	boxIDSet := map[string]struct{}{}
+	for _, id := range ids {
+		if !ast.IsNodeIDPattern(id) {
+			continue
+		}
+		block := treenode.GetBlockTree(id)
+		if block == nil {
+			if allowMissing {
+				continue
+			}
+			// 查不到的块直接拒绝，防止随后解锁的笔记本在第二次查找时被无租约访问。
+			return errors.New("block not found or its encrypted notebook is locked")
+		}
+		if model.IsEncryptedBox(block.BoxID) {
+			boxIDSet[block.BoxID] = struct{}{}
+		}
+	}
+	boxIDs := make([]string, 0, len(boxIDSet))
+	for id := range boxIDSet {
+		boxIDs = append(boxIDs, id)
+	}
+	sort.Strings(boxIDs)
+	for _, id := range boxIDs {
+		if err := holdEncryptedBoxRequest(c, id); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

@@ -112,7 +112,7 @@ func checkBlockRef(c *gin.Context) {
 		if "" != notebook && util.InvalidIDPattern(notebook, ret) {
 			return
 		}
-		if "" != notebook && !holdBlockRequest(c, ret, notebook) {
+		if !holdBlockRequest(c, ret, notebook, arg, true) {
 			return
 		}
 		ids = filterBlockIDsByPublishAccess(c, ids, notebook)
@@ -157,7 +157,7 @@ func checkBlockRef(c *gin.Context) {
 		if util.InvalidIDPattern(notebook, ret) {
 			return
 		}
-		if !holdBlockRequest(c, ret, notebook) {
+		if !holdBlockRequest(c, ret, notebook, arg) {
 			return
 		}
 		if model.IsReadOnlyRoleContext(c) {
@@ -220,7 +220,7 @@ func getBlockTreeInfos(c *gin.Context) {
 	}
 
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	ids = filterBlockIDsByPublishAccess(c, ids, boxID)
@@ -238,7 +238,7 @@ func getBlockSiblingID(c *gin.Context) {
 
 	id := arg["id"].(string)
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	if !isBlockPublishAccessible(c, id, boxID) {
@@ -269,7 +269,7 @@ func getBlockRelevantIDs(c *gin.Context) {
 
 	id := arg["id"].(string)
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	if !isBlockPublishAccessible(c, id, boxID) {
@@ -589,7 +589,7 @@ func getUnfoldedParentID(c *gin.Context) {
 
 	id := arg["id"].(string)
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	if !isBlockPublishAccessible(c, id, boxID) {
@@ -615,7 +615,7 @@ func checkBlockFold(c *gin.Context) {
 
 	id := arg["id"].(string)
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg, true) {
 		return
 	}
 	if !isBlockPublishAccessible(c, id, boxID) {
@@ -643,7 +643,7 @@ func checkBlockExist(c *gin.Context) {
 
 	id := arg["id"].(string)
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg, true) {
 		return
 	}
 	if !isBlockPublishAccessible(c, id, boxID) {
@@ -670,7 +670,7 @@ func checkBlocksExist(c *gin.Context) {
 		}
 	}
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg, true) {
 		return
 	}
 	ids = filterBlockIDsByPublishAccess(c, ids, boxID)
@@ -688,7 +688,7 @@ func getDocInfo(c *gin.Context) {
 
 	id := arg["id"].(string)
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	if !checkBlockPublishAccessInBox(c, id, boxID, ret) {
@@ -805,7 +805,7 @@ func getBlocksWordCount(c *gin.Context) {
 		ids = append(ids, id.(string))
 	}
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	ids = filterBlockIDsByPublishAccess(c, ids, boxID)
@@ -833,7 +833,7 @@ func getTreeStat(c *gin.Context) {
 		return
 	}
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	if !isBlockPublishAccessible(c, id, boxID) {
@@ -896,7 +896,7 @@ func getRefText(c *gin.Context) {
 	}
 
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	if !isBlockPublishAccessible(c, id, boxID) {
@@ -951,7 +951,7 @@ func getRefIDs(c *gin.Context) {
 		return
 	}
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	refDefs, originalRefBlockIDs := model.GetBlockRefsInBox(id, boxID)
@@ -1038,7 +1038,7 @@ func getBlockBreadcrumb(c *gin.Context) {
 	}
 
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	if !isBlockPublishAccessible(c, id, boxID) {
@@ -1092,7 +1092,7 @@ func getBlockBreadcrumbChildren(c *gin.Context) {
 		limit = int(limitArg.(float64))
 	}
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	if !isBlockPublishAccessible(c, id, boxID) {
@@ -1120,7 +1120,7 @@ func getBlockIndex(c *gin.Context) {
 
 	id := arg["id"].(string)
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	if !isBlockPublishAccessible(c, id, boxID) {
@@ -1146,7 +1146,7 @@ func getBlocksIndexes(c *gin.Context) {
 		ids = append(ids, id.(string))
 	}
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	ids = filterBlockIDsByPublishAccess(c, ids, boxID)
@@ -1197,7 +1197,7 @@ func getBlockInfo(c *gin.Context) {
 		return
 	}
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	blockTree, publishAccessRequired, publishMetadataVisible, publishAccessible := getBlockInfoPublishAccess(c, id, boxID)
@@ -1375,7 +1375,7 @@ func getBlockDOM(c *gin.Context) {
 		return
 	}
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	dom := model.GetBlockDOMInBox(id, boxID)
@@ -1417,7 +1417,7 @@ func getOrderedListContinueStart(c *gin.Context) {
 		return
 	}
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	start, found := model.GetOrderedListContinueStartInBox(id, boxID)
@@ -1448,7 +1448,7 @@ func getBlockDOMs(c *gin.Context) {
 		return
 	}
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	doms := model.GetBlockDOMsInBox(ids, boxID)
@@ -1478,7 +1478,7 @@ func getBlockDOMWithEmbed(c *gin.Context) {
 		return
 	}
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
@@ -1532,7 +1532,7 @@ func getBlockDOMsWithEmbed(c *gin.Context) {
 		return
 	}
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
@@ -1562,8 +1562,21 @@ func encryptedNotebookFromArg(arg map[string]any) string {
 	return ""
 }
 
-func holdBlockRequest(c *gin.Context, ret *gulu.Result, boxID string) bool {
-	if err := holdEncryptedBoxRequest(c, boxID); err != nil {
+func holdBlockRequest(c *gin.Context, ret *gulu.Result, boxID string, arg map[string]any, allowMissingIDs ...bool) bool {
+	var ids []string
+	if id, ok := arg["id"].(string); ok {
+		ids = append(ids, id)
+	}
+	if values, ok := arg["ids"].([]any); ok {
+		for _, value := range values {
+			if id, ok := value.(string); ok {
+				ids = append(ids, id)
+			}
+		}
+	}
+	// 存在性与状态检查需要接受已删除的块 ID；输出块内容的接口必须在准入时确定全部归属。
+	allowMissing := len(allowMissingIDs) > 0 && allowMissingIDs[0]
+	if err := holdEncryptedBlockRequests(c, boxID, ids, allowMissing); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return false
@@ -1625,7 +1638,7 @@ func getBlockKramdown(c *gin.Context) {
 		return
 	}
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	var kramdown string
@@ -1693,7 +1706,7 @@ func getBlockKramdowns(c *gin.Context) {
 		return
 	}
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	var kramdowns map[string]string
@@ -1744,7 +1757,7 @@ func getChildBlocks(c *gin.Context) {
 	}
 
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	ret.Data = model.GetChildBlocksInBox(id, boxID)
@@ -1774,7 +1787,7 @@ func getTailChildBlocks(c *gin.Context) {
 	}
 
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID) {
+	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
 	ret.Data = model.GetTailChildBlocksInBox(id, n, boxID)

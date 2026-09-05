@@ -20,7 +20,7 @@
   .tabs-list {
     display: flex;
     align-items: center;
-    flex: 1;
+    flex: 0 1 auto;
     min-width: 0;
     overflow: auto;
     gap: 8px;
@@ -77,10 +77,21 @@
     opacity: .36;
   }
 
-  .tabs-control svg {
-    display: block;
-    width: 1em;
-    height: 1em;
+  .tabs-control {
+    width: 24px;
+    height: 24px;
+    min-height: 24px;
+    padding: 4px;
+
+    svg {
+      display: block;
+      width: 16px;
+      height: 16px;
+    }
+
+    &--more {
+      margin-left: auto;
+    }
   }
 
   .tab-item {

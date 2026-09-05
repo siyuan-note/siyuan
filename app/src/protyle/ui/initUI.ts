@@ -234,6 +234,10 @@ export const initUI = (protyle: IProtyle) => {
 
         const tabsHeader = hasClosestByClassName(event.target, "tabs-header");
         const nodeElement = tabsHeader ? hasClosestBlock(tabsHeader.parentElement) : hasClosestBlock(event.target);
+        if (!tabsHeader && nodeElement && nodeElement.getAttribute("data-type") === "NodeTabItem") {
+            hideElements(["gutter"], protyle);
+            return;
+        }
         if (protyle.options.render.gutter && nodeElement) {
             if (!protyle.wysiwyg.element.contains(nodeElement)) {
                 hideElements(["gutter"], protyle);

@@ -1,5 +1,6 @@
 import {resolveTabID, tabKeyboardTarget} from "./tabsState";
 import {bindTabsDrag, cancelTabsDrag, isDraggingTabs} from "./tabsDrag";
+import {escapeHtml} from "../../util/escape";
 
 export interface ITabsRenderOptions {
     readonly?: (tabs?: Element) => boolean;
@@ -176,11 +177,12 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                         button.dataset.tabId = itemID(item);
                         button.id = `${state.instance}-tab-${index}`;
                         const title = getTabTitle(item);
-                        button.title = title?.textContent || controller.options.label || "Tab";
+                        const label = title?.textContent || controller.options.label || "Tab";
                         if (title?.textContent) {
                             const clone = title.cloneNode(true) as HTMLElement;
                             clone.className = "tabs-tab-label";
                             clone.removeAttribute("contenteditable");
+                            clone.querySelectorAll("br").forEach(br => br.replaceWith(" "));
                             clone.querySelectorAll("[contenteditable], [id], [data-node-id]").forEach(child => {
                                 child.removeAttribute("contenteditable");
                                 child.removeAttribute("id");
@@ -188,8 +190,10 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                             });
                             button.appendChild(clone);
                         } else {
-                            button.textContent = button.title;
+                            button.innerHTML = '<span class="tabs-tab-label"></span>';
+                            button.firstElementChild.textContent = label;
                         }
+                        button.setAttribute("aria-label", escapeHtml(button.textContent));
                         button.addEventListener("click", event => {
                             event.preventDefault();
                             event.stopPropagation();
@@ -232,10 +236,9 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                     if (!readonly) {
                         const add = document.createElement("button");
                         add.type = "button";
-                        add.className = "tabs-control";
-                        add.textContent = "+";
-                        add.title = controller.options.addLabel || "+";
-                        add.setAttribute("aria-label", add.title);
+                        add.className = "tabs-control ariaLabel";
+                        add.innerHTML = '<svg><use xlink:href="#iconAdd"></use></svg>';
+                        add.setAttribute("aria-label", escapeHtml(controller.options.addLabel || "+"));
                         add.addEventListener("click", event => {
                             event.stopPropagation();
                             controller.options.add?.(tabs);
@@ -243,13 +246,12 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                         header.appendChild(add);
                         const menu = document.createElement("button");
                         menu.type = "button";
-                        menu.className = "tabs-control";
+                        menu.className = "tabs-control tabs-control--more ariaLabel";
                         menu.innerHTML = '<svg><use xlink:href="#iconMore"></use></svg>';
-                        menu.title = controller.options.menuLabel || "...";
-                        menu.setAttribute("aria-label", menu.title);
+                        menu.setAttribute("aria-label", escapeHtml(controller.options.menuLabel || "..."));
                         menu.addEventListener("click", event => {
                             event.stopPropagation();
-                            controller.options.menu?.(tabs, items.find(item => itemID(item) === state.active), menu);
+                            controller.options.menu?.(tabs, undefined, menu);
                         });
                         header.appendChild(menu);
                     }
@@ -286,6 +288,9 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                     }
                 });
                 tabs.setAttribute("data-tabs-ready", "true");
+                list.querySelectorAll<HTMLElement>(".tabs-tab-label").forEach(label => {
+                    label.parentElement.classList.toggle("ariaLabel", label.scrollWidth > label.clientWidth);
+                });
                 controller.resize.observe(tabs);
                 if (!tabs.closest('.tab-item[data-tabs-hidden="true"]') && state.renderedActive !== state.active) {
                     state.renderedActive = state.active;
@@ -309,15 +314,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
             shown.forEach(item => controller.options.shown?.(item));
         },
         observer: new MutationObserver(schedule),
-        resize: new ResizeObserver(entries => {
-            if (entries.some(entry => {
-                const tabs = entry.target;
-                const vertical = tabs.getAttribute("tabs-position") === "left" && (tabs as HTMLElement).clientWidth >= 420;
-                return tabs.getAttribute("data-tabs-orientation") !== (vertical ? "vertical" : "horizontal");
-            })) {
-                schedule();
-            }
-        }),
+        resize: new ResizeObserver(schedule),
         destroy() {
             cancelTabsDrag(element);
             destroyed = true;

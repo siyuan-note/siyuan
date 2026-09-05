@@ -139,50 +139,39 @@ export const openTabsMenu = (protyle: IProtyle, tabs: HTMLElement, item: HTMLEle
     }
     const lang = window.siyuan.languages;
     const menu = new Menu();
-    menu.addItem({icon: "iconEdit", label: lang.rename, click: () => renameTab(protyle, item)});
-    menu.addItem({icon: "iconAdd", label: lang.tabItem, click: () => addTab(protyle, tabs)});
-    const siblings = getTabItems(tabs);
-    const index = siblings.indexOf(item);
-    if (index > 0) {
-        menu.addItem({icon: "iconLeft", label: lang.dragTipMoveTargetFront.replace("${x}",
-            getTabTitle(siblings[index - 1]).textContent || lang.tabItem),
-        click: () => moveTab(protyle, item, siblings[index - 1])});
+    if (item) {
+        menu.addItem({icon: "iconEdit", label: lang.rename, click: () => renameTab(protyle, item)});
+        menu.addItem({icon: "iconCopy", label: lang.duplicateCopy, click: () => {
+            const copy = item.cloneNode(true) as HTMLElement;
+            const ids = new Map<string, string>();
+            [copy, ...Array.from(copy.querySelectorAll<HTMLElement>("[data-node-id]"))].forEach(block => {
+                const id = Lute.NewNodeID();
+                ids.set(block.dataset.nodeId, id);
+                block.dataset.nodeId = id;
+                block.setAttribute("updated", id.substring(0, 14));
+            });
+            remapTabsDOMIDs(copy, ids);
+            changeTabs(protyle, [tabs], () => {
+                item.after(copy);
+                tabs.setAttribute("tabs-active-id", copy.dataset.nodeId);
+            });
+        }});
+        menu.addItem({icon: "iconTrashcan", label: lang.delete, click: () => {
+            const ids = getTabItems(tabs).map(entry => entry.dataset.nodeId);
+            changeTabs(protyle, [tabs], () => {
+                item.remove();
+                repairActiveTab(tabs, ids, item.dataset.nodeId);
+            });
+            focusBlock(tabs);
+        }});
+    } else {
+        ["top", "left"].forEach(position => menu.addItem({
+            label: position === "top" ? lang.tabsPositionTop : lang.tabsPositionLeft,
+            icon: (tabs.getAttribute("tabs-position") || "top") === position ? "iconSelect" : undefined,
+            click: () => changeTabs(protyle, [tabs], () => tabs.setAttribute("tabs-position", position)),
+        }));
+        menu.addItem({icon: "iconSuper", label: lang.tabsUnwrap, click: () => unwrapTabs(protyle, tabs)});
     }
-    if (index + 1 < siblings.length) {
-        menu.addItem({icon: "iconRight", label: lang.dragTipMoveTargetBack.replace("${x}",
-            getTabTitle(siblings[index + 1]).textContent || lang.tabItem),
-        click: () => changeTabs(protyle, [tabs], () => siblings[index + 1].after(item))});
-    }
-    menu.addItem({icon: "iconCopy", label: lang.duplicateCopy, click: () => {
-        const copy = item.cloneNode(true) as HTMLElement;
-        const ids = new Map<string, string>();
-        [copy, ...Array.from(copy.querySelectorAll<HTMLElement>("[data-node-id]"))].forEach(block => {
-            const id = Lute.NewNodeID();
-            ids.set(block.dataset.nodeId, id);
-            block.dataset.nodeId = id;
-            block.setAttribute("updated", id.substring(0, 14));
-        });
-        remapTabsDOMIDs(copy, ids);
-        changeTabs(protyle, [tabs], () => {
-            item.after(copy);
-            tabs.setAttribute("tabs-active-id", copy.dataset.nodeId);
-        });
-    }});
-    menu.addItem({icon: "iconTrashcan", label: lang.delete, click: () => {
-        const ids = getTabItems(tabs).map(entry => entry.dataset.nodeId);
-        changeTabs(protyle, [tabs], () => {
-            item.remove();
-            repairActiveTab(tabs, ids, item.dataset.nodeId);
-        });
-        focusBlock(tabs);
-    }});
-    menu.addSeparator();
-    ["top", "left"].forEach(position => menu.addItem({
-        label: position === "top" ? lang.tabsPositionTop : lang.tabsPositionLeft,
-        icon: (tabs.getAttribute("tabs-position") || "top") === position ? "iconSelect" : undefined,
-        click: () => changeTabs(protyle, [tabs], () => tabs.setAttribute("tabs-position", position)),
-    }));
-    menu.addItem({icon: "iconSuper", label: lang.tabsUnwrap, click: () => unwrapTabs(protyle, tabs)});
     const rect = anchor.getBoundingClientRect();
     menu.open({x: rect.left, y: rect.bottom});
 };

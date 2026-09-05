@@ -793,7 +793,7 @@ export class Gutter {
             const type = buttonElement.getAttribute("data-type");
             const id = buttonElement.getAttribute("data-node-id");
             // 情况C：非有效块标（折叠箭头、数据库行等）→ 隐藏框线与+号
-            if (type === "fold" || type === "NodeAttributeViewRow" || type === "NodeAttributeViewRowMenu" || !id) {
+            if (type === "fold" || type === "NodeTabItem" || type === "NodeAttributeViewRow" || type === "NodeAttributeViewRowMenu" || !id) {
                 hideInsert();
                 return;
             }
@@ -2762,7 +2762,7 @@ export class Gutter {
             }).element);
             /// #endif
         }
-        if (allowStructuralMutation) {
+        if (allowStructuralMutation && nodeElement.getAttribute("data-type") !== "NodeTabItem") {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "insertBefore",
                 icon: "iconBefore",

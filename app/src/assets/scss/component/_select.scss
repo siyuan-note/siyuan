@@ -39,25 +39,6 @@
       white-space: nowrap;
       field-sizing: content;
 
-      & > button {
-        display: flex;
-        width: 100%;
-        min-width: 0;
-        padding: 0;
-        border: 0;
-        background: transparent;
-        color: inherit;
-        font: inherit;
-
-        & > selectedcontent {
-          display: block;
-          min-width: 0;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-      }
-
       &:disabled {
         opacity: .68;
       }

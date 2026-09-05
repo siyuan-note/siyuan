@@ -1,28 +1,33 @@
 .protyle-wysiwyg, .b3-typography {
   .tabs {
-    border: 1px solid var(--b3-border-color);
-    border-radius: var(--b3-border-radius);
     min-width: 0;
-    padding: 4px;
+    padding: 0;
     margin: 4px 0;
     position: relative;
   }
 
   .tabs-header {
     display: none;
+    align-items: center;
     min-width: 0;
     gap: 4px;
-    border-bottom: 1px solid var(--b3-border-color);
-    padding-bottom: 4px;
+    font-size: 87.5%;
+    border-bottom: 1px solid var(--b3-theme-background-light);
+    padding: 0 4px;
     user-select: none;
   }
 
   .tabs-list {
     display: flex;
+    align-items: center;
     flex: 1;
     min-width: 0;
     overflow: auto;
-    gap: 4px;
+    gap: 8px;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   .tabs-tab, .tabs-control {
@@ -30,14 +35,22 @@
     background: transparent;
     border: 0;
     border-radius: var(--b3-border-radius);
-    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-height: 29px;
+    margin: 6px 0;
+    padding: 0 8px;
     cursor: pointer;
     font: inherit;
+    line-height: 22px;
     flex-shrink: 0;
-    max-width: 240px;
+    max-width: 186px;
 
     &:hover {
-      background: var(--b3-list-hover);
+      background: var(--b3-theme-surface);
+      color: var(--b3-theme-on-background);
     }
 
     &:focus-visible {
@@ -46,8 +59,9 @@
     }
 
     &[aria-selected="true"] {
-      color: var(--b3-theme-primary);
+      color: var(--b3-theme-on-background);
       background: var(--b3-theme-primary-lightest);
+      box-shadow: 0 0 0 1px var(--b3-theme-primary-lighter) inset;
     }
   }
 
@@ -102,13 +116,22 @@
       > .tabs-header {
         flex-wrap: wrap;
         align-content: start;
+        align-items: stretch;
         border-bottom: 0;
         border-right: 1px solid var(--b3-border-color);
 
         > .tabs-list {
           flex-direction: column;
+          align-items: stretch;
+          gap: 4px;
           flex-basis: 100%;
           max-height: 60vh;
+
+          > .tabs-tab {
+            justify-content: flex-start;
+            max-width: none;
+            margin: 0;
+          }
         }
       }
     }

@@ -72,8 +72,19 @@ func TestEncryptedAssetRejectsSplicedVersions(t *testing.T) {
 func TestEncryptedAssetRejectsUnboundContainerMetadata(t *testing.T) {
 	boxID, diskName := "20260905120000-review1", "asset.bin"
 	dek := bytes.Repeat([]byte{42}, 32)
-	for _, spec := range []int{0, 1, encryptedAssetSpec + 1, encryptedAssetSpec} {
-		metadata, err := json.Marshal(&encryptedAssetMetadata{Spec: spec, OriginalName: "asset.bin", Size: 0, Chunks: 1})
+	for _, version := range []map[string]any{
+		{"spec": 0},
+		{"spec": 1},
+		{"spec": encryptedAssetSpec + 1},
+		{"spec": encryptedAssetSpec},
+		{"spec": nil},
+		{"containerID": nil},
+		{"containerID": bytes.Repeat([]byte{1}, encryptedAssetContainerIDSize)},
+		{"spec": encryptedAssetSpec, "containerID": nil},
+		{"spec": encryptedAssetSpec, "containerID": []byte{1}},
+	} {
+		version["originalName"], version["size"], version["chunks"] = "asset.bin", 0, 1
+		metadata, err := json.Marshal(version)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -88,14 +99,14 @@ func TestEncryptedAssetRejectsUnboundContainerMetadata(t *testing.T) {
 		container = append(container, encryptedMetadata...)
 		container = binary.BigEndian.AppendUint32(container, 0)
 		if _, err = DecryptAssetName(boxID, diskName, dek, container); err == nil {
-			t.Fatalf("metadata reader accepted unbound container spec %d", spec)
+			t.Fatalf("metadata reader accepted invalid version fields: %v", version)
 		}
 		if _, err = DecryptAssetNameFromReader(boxID, diskName, dek, bytes.NewReader(container)); err == nil {
-			t.Fatalf("streaming metadata reader accepted unbound container spec %d", spec)
+			t.Fatalf("streaming metadata reader accepted invalid version fields: %v", version)
 		}
 		var output bytes.Buffer
 		if _, err = DecryptAssetToWriter(boxID, diskName, dek, bytes.NewReader(container), &output); err == nil || output.Len() != 0 {
-			t.Fatalf("content reader accepted unbound container spec %d", spec)
+			t.Fatalf("content reader accepted invalid version fields: %v", version)
 		}
 	}
 }

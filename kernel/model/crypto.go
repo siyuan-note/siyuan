@@ -154,6 +154,7 @@ func hasEncryptedNotebookPayloadAtPath(boxDir string) (bool, error) {
 }
 
 const encryptedAssetMetadataMaxSize = 1024 * 1024
+const encryptedAssetLegacySpec = 1
 const encryptedAssetSpec = 2
 const encryptedAssetContainerIDSize = 32
 const encryptedAssetChunkSize = 1024 * 1024
@@ -2333,7 +2334,17 @@ func parseEncryptedAssetMetadata(data []byte) (*encryptedAssetMetadata, error) {
 	if err := json.Unmarshal(data, metadata); err != nil {
 		return nil, err
 	}
-	if metadata.Spec != encryptedAssetSpec || len(metadata.ContainerID) != encryptedAssetContainerIDSize {
+	var version struct {
+		Spec        json.RawMessage `json:"spec"`
+		ContainerID json.RawMessage `json:"containerID"`
+	}
+	if err := json.Unmarshal(data, &version); err != nil {
+		return nil, err
+	}
+	// 仅认证元数据同时缺少两个版本字段时按旧容器读取，显式空值或不完整的新格式不能降级。
+	if len(version.Spec) == 0 && len(version.ContainerID) == 0 {
+		metadata.Spec = encryptedAssetLegacySpec
+	} else if metadata.Spec != encryptedAssetSpec || len(metadata.ContainerID) != encryptedAssetContainerIDSize {
 		return nil, errors.New("unsupported encrypted asset container version")
 	}
 	if metadata.OriginalName == "" || metadata.OriginalName == "." ||
@@ -2448,10 +2459,14 @@ func DecryptAssetToWriter(boxID, diskName string, dek []byte, reader io.Reader, 
 		if _, err = io.ReadFull(reader, encryptedChunk); err != nil {
 			return "", err
 		}
+		aad := encryptedAssetChunkAAD(aadPrefix, metadata.ContainerID, chunkIndex)
+		if metadata.Spec == encryptedAssetLegacySpec {
+			aad = []byte(fmt.Sprintf("%s:content:%d", aadPrefix, chunkIndex))
+		}
 		plainChunk, chunkErr := util.DecryptWithAAD(
 			assetKey,
 			encryptedChunk,
-			encryptedAssetChunkAAD(aadPrefix, metadata.ContainerID, chunkIndex),
+			aad,
 		)
 		if chunkErr != nil {
 			return "", chunkErr

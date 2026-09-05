@@ -152,7 +152,9 @@ declare class Viewer {
         initialViewIndex?: number,
         transition: boolean,
         hidden: () => void,
-        ready?: (this: Viewer) => void,
+        ready?: (this: HTMLElement, event: CustomEvent) => void,
+        view?: (this: HTMLElement, event: CustomEvent) => void,
+        viewed?: (this: HTMLElement, event: CustomEvent) => void,
         toolbar: {
             zoomIn: boolean,
             zoomOut: boolean,
@@ -166,6 +168,7 @@ declare class Viewer {
             flipHorizontal: boolean,
             flipVertical: boolean,
             copy?: () => void,
+            copyFile?: () => void,
             close: () => void
         }
     })

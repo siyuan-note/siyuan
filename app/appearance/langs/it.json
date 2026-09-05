@@ -1,4 +1,7 @@
 {
+	"imageViewerPlay": "Avvia presentazione",
+	"imageFlipHorizontal": "Capovolgi orizzontalmente",
+	"imageFlipVertical": "Capovolgi verticalmente",
 	"imageCopyFailed": "Impossibile copiare l’immagine. Verifica che possa essere caricata e riprova.",
 	"syncAssetSnapshotIncomplete": "Il contenuto di alcune risorse dipende dall’archiviazione cloud; questa istantanea locale è incompleta",
 	"syncAssetDownloadMode": "Download delle risorse",

@@ -1,4 +1,7 @@
 {
+	"imageViewerPlay": "स्लाइड शो चलाएँ",
+	"imageFlipHorizontal": "क्षैतिज रूप से पलटें",
+	"imageFlipVertical": "लंबवत रूप से पलटें",
 	"imageCopyFailed": "चित्र कॉपी नहीं किया जा सका। जाँचें कि इसे लोड किया जा सकता है और फिर से प्रयास करें।",
 	"syncAssetSnapshotIncomplete": "कुछ संसाधनों की सामग्री क्लाउड स्टोरेज पर निर्भर है; यह स्थानीय स्नैपशॉट अधूरा है",
 	"syncAssetDownloadMode": "संसाधन फ़ाइल डाउनलोड",

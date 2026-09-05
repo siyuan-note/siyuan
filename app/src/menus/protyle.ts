@@ -1242,6 +1242,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             // The file name encoding is abnormal after copying the image and pasting it https://github.com/siyuan-note/siyuan/issues/11246
             content = content.replace(/%20/g, " ");
             writeText(content);
+            showMessage(window.siyuan.languages.copied);
         }
     }).element);
     if (protyle.disabled) {

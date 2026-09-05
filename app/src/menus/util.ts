@@ -241,6 +241,11 @@ export const copyPNGByLink = (link: string) => {
         return;
     }
     const showCopyError = () => showMessage(window.siyuan.languages.imageCopyFailed, 6000, "error");
+    const copyBlob = async (blob: Blob) => {
+        if (await writePNGBlob(blob)) {
+            showMessage(window.siyuan.languages.copied);
+        }
+    };
     const imageToPNGClipboard = (image: HTMLImageElement) => {
         try {
             const canvas = document.createElement("canvas");
@@ -249,7 +254,7 @@ export const copyPNGByLink = (link: string) => {
             canvas.getContext("2d").drawImage(image, 0, 0);
             canvas.toBlob((blob) => {
                 if (blob) {
-                    writePNGBlob(blob);
+                    copyBlob(blob);
                 } else {
                     showCopyError();
                 }
@@ -263,7 +268,7 @@ export const copyPNGByLink = (link: string) => {
     // 把任意图片 blob 画进 canvas 再导出为 PNG；blob URL 为同源，不会污染 canvas
     const blobToPNGClipboard = (blob: Blob) => {
         if (blob.type === "image/png") {
-            writePNGBlob(blob);
+            copyBlob(blob);
             return;
         }
         const objectURL = URL.createObjectURL(blob);

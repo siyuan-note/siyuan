@@ -1,4 +1,7 @@
 {
+	"imageViewerPlay": "播放幻灯片",
+	"imageFlipHorizontal": "水平翻转",
+	"imageFlipVertical": "垂直翻转",
 	"imageCopyFailed": "无法复制图片，请确认图片能够加载后重试。",
 	"syncAssetSnapshotIncomplete": "部分资源文件内容依赖云端，本地快照尚不完整",
 	"syncAssetDownloadMode": "资源文件下载",

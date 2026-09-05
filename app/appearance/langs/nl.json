@@ -1,4 +1,7 @@
 {
+	"imageViewerPlay": "Diavoorstelling afspelen",
+	"imageFlipHorizontal": "Horizontaal spiegelen",
+	"imageFlipVertical": "Verticaal spiegelen",
 	"imageCopyFailed": "De afbeelding kan niet worden gekopieerd. Controleer of deze kan worden geladen en probeer het opnieuw.",
 	"syncAssetSnapshotIncomplete": "De inhoud van sommige bronbestanden is afhankelijk van cloudopslag; deze lokale momentopname is onvolledig",
 	"syncAssetDownloadMode": "Bronbestanden downloaden",

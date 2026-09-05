@@ -1,4 +1,7 @@
 {
+	"imageViewerPlay": "スライドショーを再生",
+	"imageFlipHorizontal": "左右反転",
+	"imageFlipVertical": "上下反転",
 	"imageCopyFailed": "画像をコピーできません。画像を読み込めることを確認して、もう一度お試しください。",
 	"syncAssetSnapshotIncomplete": "一部のリソースファイルはクラウドに依存しているため、このローカルスナップショットは不完全です",
 	"syncAssetDownloadMode": "リソースファイルのダウンロード",

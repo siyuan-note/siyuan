@@ -1,4 +1,7 @@
 {
+	"imageViewerPlay": "تشغيل عرض الشرائح",
+	"imageFlipHorizontal": "قلب أفقي",
+	"imageFlipVertical": "قلب عمودي",
 	"imageCopyFailed": "تعذر نسخ الصورة. تحقق من إمكانية تحميلها وحاول مرة أخرى.",
 	"syncAssetSnapshotIncomplete": "يعتمد محتوى بعض الموارد على التخزين السحابي؛ هذه اللقطة المحلية غير مكتملة",
 	"syncAssetDownloadMode": "تنزيل ملفات الموارد",

@@ -1,4 +1,7 @@
 {
+	"imageViewerPlay": "Odtwórz pokaz slajdów",
+	"imageFlipHorizontal": "Odwróć w poziomie",
+	"imageFlipVertical": "Odwróć w pionie",
 	"imageCopyFailed": "Nie można skopiować obrazu. Sprawdź, czy można go załadować, i spróbuj ponownie.",
 	"syncAssetSnapshotIncomplete": "Zawartość niektórych zasobów zależy od pamięci w chmurze; ta lokalna migawka jest niekompletna",
 	"syncAssetDownloadMode": "Pobieranie zasobów",

@@ -252,6 +252,9 @@ export class AgentChat extends Model {
     private selectedReasoningEffort = "";
     private permissionButton: HTMLButtonElement;
     private permissionMode: AgentPermissionMode = "confirm";
+    private buttonOptions: HTMLElement;
+    private buttonOptionsResizeObserver: ResizeObserver | null = null;
+    private buttonOptionsLabelObserver: MutationObserver | null = null;
     private userScrolledUp = false;
     private programmaticScroll = false;
     private programmaticScrollGeneration = 0;
@@ -380,7 +383,7 @@ export class AgentChat extends Model {
             '<circle class="agent-chat__tokens-arc" cx="12" cy="12" r="9" stroke-width="3" stroke-dasharray="0 56.55"></circle>' +
             "</svg>" +
             "</span>" +
-            '<button class="b3-select b3-select--noborder agent-chat__model-picker" data-type="groupedModelPicker" data-group="agent" data-model-id="" data-menu="true" type="button">' +
+            '<button class="b3-select b3-select--noborder agent-chat__model-picker ariaLabel" data-type="groupedModelPicker" data-group="agent" data-model-id="" data-menu="true" data-position="n" type="button">' +
             '<svg class="agent-chat__model-picker-icon"><use xlink:href="#iconAtom"></use></svg>' +
             '<span class="agent-chat__model-picker-label" data-type="groupedModelPickerLabel"></span></button>' +
             '<button class="b3-select b3-select--noborder agent-chat__reasoning-effort ariaLabel" data-menu="true" aria-label="' +
@@ -410,6 +413,7 @@ export class AgentChat extends Model {
         this.modelSelect = panel.querySelector('[data-type="groupedModelPicker"]') as HTMLButtonElement;
         this.reasoningEffortButton = panel.querySelector(".agent-chat__reasoning-effort") as HTMLButtonElement;
         this.permissionButton = panel.querySelector(".agent-chat__permission") as HTMLButtonElement;
+        this.buttonOptions = panel.querySelector(".agent-chat__button-options") as HTMLElement;
         this.initPermissionMenu();
         this.initReasoningEffortMenu();
         this.scrollBottomBtn = panel.querySelector(".agent-chat__scroll-bottom") as HTMLElement;
@@ -498,6 +502,13 @@ export class AgentChat extends Model {
             }
         });
         this.layoutResizeObserver.observe(this.messagesContainer);
+
+        // 仅在三个选项的文字都能完整显示时保留标签，避免窄侧栏中出现零碎的截断文字。
+        this.buttonOptionsResizeObserver = new ResizeObserver(() => this.updateButtonOptionsLayout());
+        this.buttonOptionsResizeObserver.observe(this.buttonOptions);
+        this.buttonOptionsLabelObserver = new MutationObserver(() => this.updateButtonOptionsLayout());
+        this.buttonOptionsLabelObserver.observe(this.buttonOptions, {childList: true, characterData: true, subtree: true});
+        this.updateButtonOptionsLayout();
 
         this.initSessions();
     }
@@ -594,6 +605,34 @@ export class AgentChat extends Model {
 
     private updateModelLabel() {
         this.groupedModelPicker?.update();
+    }
+
+    private updateButtonOptionsLayout() {
+        const options = [
+            {
+                button: this.permissionButton,
+                label: this.permissionButton.querySelector<HTMLElement>(".agent-chat__permission-label"),
+            },
+            {
+                button: this.modelSelect,
+                label: this.modelSelect.querySelector<HTMLElement>(".agent-chat__model-picker-label"),
+            },
+            {
+                button: this.reasoningEffortButton,
+                label: this.reasoningEffortButton.querySelector<HTMLElement>(".agent-chat__reasoning-effort-label"),
+            },
+        ];
+        options.forEach(({button, label}) => {
+            const text = label?.textContent?.trim();
+            if (text) {
+                button.setAttribute("aria-label", text);
+            }
+        });
+
+        // 每次都以完整标签布局测量，避免紧凑状态自身触发来回切换。
+        this.buttonOptions.classList.remove("agent-chat__button-options--compact");
+        const compact = options.some(({label}) => label && label.scrollWidth > label.clientWidth);
+        this.buttonOptions.classList.toggle("agent-chat__button-options--compact", compact);
     }
 
     private getSelectedModel(): string {

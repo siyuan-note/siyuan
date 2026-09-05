@@ -23,7 +23,8 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 
 ### Encrypted notebook compatibility
 
-- Encrypted notebooks are preparing for release. Existing encrypted data is a compatibility baseline, not disposable development data; do not require users to delete or recreate it after an upgrade
+- Encrypted notebook development is complete. Maintain it as a released feature
+- Existing encrypted data is the compatibility baseline. Upgrades must preserve access and recovery; do not treat it as disposable development data or require users to delete or recreate it
 - Changes to document, asset, attribute-view, key-envelope, backup, history, or sync formats must retain authenticated reads of supported existing formats or provide a recoverable migration before removing a reader
 - Changes to envelopes, AAD semantics, or key derivation must use an explicit format version and a compatibility plan. Migration must authenticate the source, preserve recovery material, and remain recoverable after failure or interruption; never regenerate MasterSalt or discard keys to work around incompatibility
 - Unknown formats, corruption, and authentication failures must preserve the original data and return an error; compatibility must not bypass authentication or fall back to plaintext. Derived indexes may be rebuilt after the source ciphertext authenticates

@@ -352,6 +352,15 @@ func TestBlockPublishAccessGuards(t *testing.T) {
 		if response := blockGuardRequest(model.RoleAdministrator, `{"id":"`+disabledID+`"}`, checkBlockExist); !response["data"].(bool) {
 			t.Fatalf("disabled block should be visible to the administrator, got %v", response["data"])
 		}
+		missingID := "20260905120000-missing"
+		response := blockGuardRequest(model.RoleAdministrator, `{"id":"`+missingID+`"}`, checkBlockExist)
+		if response["code"].(float64) != 0 || response["data"] != false {
+			t.Fatalf("missing block should report false without an API error: %v", response)
+		}
+		response = blockGuardRequest(model.RoleAdministrator, `{"ids":["`+missingID+`"]}`, checkBlocksExist)
+		if response["code"].(float64) != 0 || response["data"].(map[string]any)[missingID] != false {
+			t.Fatalf("missing blocks should report false without an API error: %v", response)
+		}
 	})
 }
 

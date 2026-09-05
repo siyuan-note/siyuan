@@ -72,7 +72,7 @@ export class MobileOutline extends Model {
     <svg data-type="expandLevel" class="toolbar__icon"><use xlink:href="#iconList"></use></svg>
     <svg data-type="expand" class="toolbar__icon"><use xlink:href="#iconExpand"></use></svg>
     <svg data-type="collapse" class="toolbar__icon"><use xlink:href="#iconContract"></use></svg>
-    <button data-type="headingBatch" disabled class="toolbar__button" aria-label="${window.siyuan.languages.headingBatch}"><svg><use xlink:href="#iconRefresh"></use></svg></button>
+    <button data-type="headingBatch" disabled class="toolbar__button" aria-label="${window.siyuan.languages.headingBatch}"><svg><use xlink:href="#iconHeadings"></use></svg></button>
 </div>
 <div class="b3-list-item fn__none" data-type="doc-title"></div>
 <div class="fn__flex-1" style="padding: 3px 0 8px"></div>`;

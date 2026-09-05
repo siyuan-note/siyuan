@@ -92,7 +92,7 @@ export class Outline extends Model {
         <svg><use xlink:href="#iconContract"></use></svg>
     </span>
     <span class="${this.type === "local" ? "fn__none " : ""}fn__space"></span>
-    <button data-type="headingBatch" disabled class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.headingBatch}"><svg><use xlink:href="#iconRefresh"></use></svg></button>
+    <button data-type="headingBatch" disabled class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.headingBatch}"><svg><use xlink:href="#iconHeadings"></use></svg></button>
     <span class="fn__space"></span>
     <span data-type="min" class="${this.type === "local" ? "fn__none " : ""}block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}">
         <svg><use xlink:href='#iconMin'></use></svg>

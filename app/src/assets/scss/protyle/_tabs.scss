@@ -73,6 +73,10 @@
     pointer-events: none;
   }
 
+  .tabs-tab--dragging {
+    opacity: .36;
+  }
+
   .tabs-control svg {
     display: block;
     width: 1em;

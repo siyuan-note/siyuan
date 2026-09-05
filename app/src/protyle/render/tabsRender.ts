@@ -1,4 +1,5 @@
 import {resolveTabID, tabKeyboardTarget} from "./tabsState";
+import {bindTabsDrag, cancelTabsDrag, isDraggingTabs} from "./tabsDrag";
 
 export interface ITabsRenderOptions {
     readonly?: (tabs?: Element) => boolean;
@@ -36,7 +37,6 @@ const roots = new WeakMap<Element, ITabsRoot>();
 const states = new WeakMap<HTMLElement, ITabState>();
 const boundHeaders = new WeakSet<Element>();
 let instanceID = 0;
-let draggedTab: HTMLElement;
 
 export const getTabItems = (tabs: Element): HTMLElement[] =>
     Array.from(tabs.children).filter(item => item.classList.contains("tab-item")) as HTMLElement[];
@@ -102,6 +102,9 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
             controller.render();
         },
         render() {
+            if (isDraggingTabs(element)) {
+                return;
+            }
             controller.observer.disconnect();
             controller.resize.disconnect();
             const shown: HTMLElement[] = [];
@@ -159,6 +162,12 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                     list.setAttribute("role", "tablist");
                     list.setAttribute("aria-label", controller.options.label || "Tabs");
                     header.appendChild(list);
+                    bindTabsDrag(list, {
+                        tabs,
+                        readonly: () => (controller.options.readonly?.(tabs) ?? true) || !controller.options.move,
+                        move: (source, target, after) => controller.options.move?.(source, target, after),
+                        render: schedule,
+                    });
                     items.forEach((item, index) => {
                         const button = document.createElement("button");
                         button.type = "button";
@@ -218,30 +227,6 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                             (Array.from(list.children).find(child => (child as HTMLElement).dataset.tabId === target) as HTMLElement)?.focus();
                         });
                         button.draggable = !readonly && !!controller.options.move;
-                        button.addEventListener("dragstart", event => {
-                            draggedTab = item;
-                            event.dataTransfer.setData("application/x-siyuan-tab", itemID(item));
-                            event.dataTransfer.effectAllowed = "move";
-                            event.stopPropagation();
-                        });
-                        button.addEventListener("dragover", event => {
-                            if (draggedTab && !readonly) {
-                                event.preventDefault();
-                                event.stopPropagation();
-                            }
-                        });
-                        button.addEventListener("drop", event => {
-                            if (draggedTab && !readonly) {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                const rect = button.getBoundingClientRect();
-                                const after = tabs.getAttribute("data-tabs-orientation") === "vertical" ?
-                                    event.clientY > rect.top + rect.height / 2 : event.clientX > rect.left + rect.width / 2;
-                                controller.options.move?.(draggedTab, item, after);
-                                draggedTab = undefined;
-                            }
-                        });
-                        button.addEventListener("dragend", () => draggedTab = undefined);
                         list.appendChild(button);
                     });
                     if (!readonly) {
@@ -334,6 +319,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
             }
         }),
         destroy() {
+            cancelTabsDrag(element);
             destroyed = true;
             controller.observer.disconnect();
             controller.resize.disconnect();

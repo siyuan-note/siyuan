@@ -106,6 +106,17 @@ describe("getCalloutTitleNavigationTarget", () => {
         assert.equal(getCalloutTitleNavigationTarget(asElement(second), false, "ArrowUp"), undefined);
     });
 
+    it("moves upward from the first leaf in a callout container to the title", () => {
+        const {title, first, callout} = createCallout();
+        const content = callout.children[1];
+        const list = block("list", "NodeList").addClass("list");
+        const item = block("item", "NodeListItem").addClass("li");
+        content.children = [];
+        content.append(list.append(item.append(first)));
+
+        assert.equal(getCalloutTitleNavigationTarget(asElement(first), false, "ArrowUp"), asElement(title));
+    });
+
     it("moves downward into the title of an adjacent callout", () => {
         const {callout, title} = createCallout();
         const previous = block("previous");
@@ -119,6 +130,17 @@ describe("getCalloutTitleNavigationTarget", () => {
         const list = block("list", "NodeList").addClass("list");
         const item = block("item", "NodeListItem").addClass("li");
         list.append(item.append(callout));
+
+        assert.equal(getCalloutTitleNavigationTarget(asElement(block("previous")), asElement(list), "ArrowDown"),
+            asElement(title));
+    });
+
+    it("finds a callout nested through multiple adjacent containers", () => {
+        const {callout, title} = createCallout();
+        const list = block("list", "NodeList").addClass("list");
+        const item = block("item", "NodeListItem").addClass("li");
+        const quote = block("quote", "NodeBlockquote").addClass("bq");
+        list.append(item.append(quote.append(callout)));
 
         assert.equal(getCalloutTitleNavigationTarget(asElement(block("previous")), asElement(list), "ArrowDown"),
             asElement(title));

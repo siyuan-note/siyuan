@@ -13,6 +13,7 @@ import {queueTransaction} from "../util/transactionQueue";
 import {remapTabsDOMIDs} from "../util/tabsCopy";
 import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
+import {getTabsTitleMarkdown, renderTabsTitleMarkdown} from "./tabsTitle";
 
 const canEdit = (protyle: IProtyle, element: Element) => !protyle.disabled &&
     !protyle.options.action.includes(Constants.CB_GET_HISTORY) && !element.closest(".protyle-wysiwyg__embed");
@@ -44,7 +45,7 @@ export const renameTab = (protyle: IProtyle, item: HTMLElement) => {
     }
     revealTabAncestors(protyle.wysiwyg.element, item);
     const title = getTabTitle(item);
-    const initialTitle = title.textContent || "";
+    const initialTitle = getTabsTitleMarkdown(protyle.lute, title);
     const dialog = new Dialog({
         title: window.siyuan.languages.rename,
         content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block"></div>
@@ -60,7 +61,7 @@ export const renameTab = (protyle: IProtyle, item: HTMLElement) => {
         const value = input.value.trim();
         if (value !== initialTitle) {
             changeTabs(protyle, [item.parentElement], () => {
-                title.textContent = value;
+                title.innerHTML = renderTabsTitleMarkdown(protyle.lute, value);
             });
         }
         dialog.destroy();

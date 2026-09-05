@@ -75,7 +75,7 @@ export class MobileOutline extends Model {
     <button data-type="headingBatch" disabled class="toolbar__button" aria-label="${window.siyuan.languages.headingBatch}"><svg><use xlink:href="#iconHeadings"></use></svg></button>
 </div>
 <div class="b3-list-item fn__none" data-type="doc-title"></div>
-<div class="fn__flex-1" style="padding: 3px 0 8px"></div>`;
+<div class="fn__flex-1" style="padding: 3px 0 calc(8px + env(safe-area-inset-bottom))"></div>`;
         const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
         this.element.querySelector('[data-type="headingBatch"]').addEventListener("click", () => {
             const protyle = window.siyuan.mobile.editor?.protyle;

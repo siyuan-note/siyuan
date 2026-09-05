@@ -16,6 +16,11 @@ body {
 
 body.body--android {
   --mobile-top-safe-area: 0px;
+
+  .protyle-wysiwyg[data-readonly="false"] span[data-type~="inline-math"] {
+    // 继承父节点的编辑状态，避免原生光标经过公式时断开输入法连接；输入前由编辑器校正公式边界。
+    -webkit-user-modify: inherit;
+  }
 }
 
 body.mobile-keyboard--open {

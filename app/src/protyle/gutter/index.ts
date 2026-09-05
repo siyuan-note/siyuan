@@ -3575,6 +3575,11 @@ export class Gutter {
         }
         let html = "";
         let nodeElement = selectedElement || element;
+        const tabsHeader = !isMultiSelect && nodeElement.getAttribute("data-type") === "NodeTabs" ?
+            nodeElement.querySelector(":scope > .tabs-header") : null;
+        if (tabsHeader) {
+            element = tabsHeader;
+        }
         this.element.classList.toggle("protyle-gutters--sb-column",
             !!getHorizontalSuperBlockChild(nodeElement, protyle.wysiwyg.element));
         let space = 0;
@@ -3629,7 +3634,7 @@ export class Gutter {
                         }
                     }
 
-                    let topElement = selectedElement || getTopAloneElement(nodeElement);
+                    let topElement = selectedElement || (tabsHeader ? nodeElement : getTopAloneElement(nodeElement));
                     if (embedContext && !embedContext.boundaryElement.contains(topElement)) {
                         // 单独查询列表项时，渲染器生成的无 ID 列表包装节点不属于可操作边界。
                         topElement = embedContext.targetElement || nodeElement;
@@ -3644,7 +3649,7 @@ export class Gutter {
                         getParentBlock(nodeElement) !== topElement) {
                         topElement = topElement.querySelector("[data-node-id]");
                     }
-                    listItem = topElement.querySelector(".li") || topElement.querySelector(".list");
+                    listItem = tabsHeader ? undefined : topElement.querySelector(".li") || topElement.querySelector(".list");
                     // 嵌入块中有列表时块标显示位置错误 https://github.com/siyuan-note/siyuan/issues/6254
                     if ((!embedContext && isInEmbedBlock(listItem)) || isInAVBlock(listItem) ||
                         hasClosestByClassName(nodeElement, "callout")) {

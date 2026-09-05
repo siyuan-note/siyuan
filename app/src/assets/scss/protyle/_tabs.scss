@@ -97,6 +97,10 @@
   }
 
   .tabs[data-tabs-ready="true"] {
+    &.protyle-wysiwyg--hl::after {
+      display: none;
+    }
+
     > .tabs-header {
       display: flex;
     }

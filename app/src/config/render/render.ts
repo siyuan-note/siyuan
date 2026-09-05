@@ -35,6 +35,7 @@ const genSelectOptionsHtml = <T extends number | string>(
     current: T,
 ): string =>
     `<select class="b3-select fn__flex-center fn__size200" id="${id}">
+    <button type="button"><selectedcontent></selectedcontent></button>
     ${options
         .map((o) => `<option value="${o.value}" ${current === o.value ? "selected" : ""}>${o.label ?? String(o.value)}</option>`)
         .join("")}

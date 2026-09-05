@@ -8,7 +8,7 @@ import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
 import {initAssets, setInlineStyle} from "../util/assets";
 import {renderSnippet} from "../config/util/snippets";
 import {getSearch} from "../util/functions";
-import {initWindow} from "../boot/onGetConfig";
+import {initDesktopHost, initWindow} from "../boot/onGetConfig";
 import type {App} from "../index";
 import {afterLayoutReady} from "../plugin/loader";
 import {Tab} from "../layout/Tab";
@@ -20,7 +20,8 @@ import {initWindowEvent} from "../boot/globalEvent/event";
 import {getAllEditor} from "../layout/getAll";
 
 
-export const init = (app: App) => {
+export const init = async (app: App) => {
+    await initDesktopHost();
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
     const position = Constants.SIZE_ZOOM.find((item) => item.zoom === window.siyuan.storage[Constants.LOCAL_ZOOM]).position;
     ipcRenderer.send(Constants.SIYUAN_CMD, {

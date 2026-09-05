@@ -34,6 +34,10 @@ export const shouldRequireLongPress = (isLongPressTarget: boolean, isMouse: bool
     return isLongPressTarget && (!isMouse || isAndroid);
 };
 
+export const shouldCancelPointerDragOnBlur = (isAndroid: boolean, isDragging: boolean, hasRelay: boolean) => {
+    return isAndroid || !isDragging || !hasRelay;
+};
+
 export const getWheelScrollDelta = (delta: number, deltaMode: number, lineSize: number, pageSize: number) => {
     if (deltaMode === 1) {
         return delta * lineSize;

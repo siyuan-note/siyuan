@@ -141,6 +141,19 @@ const normalizeBlockDragPoint = (point) => {
     };
 };
 
+const updateBlockDragCursorPoint = (dragSession, point) => {
+    if (!point) {
+        return;
+    }
+    // 跨 BrowserWindow 拖拽时以主进程获取的全局指针位置为准，避免渲染进程失焦后上报的 screen 坐标被窗口边界截断。
+    const cursorPoint = screen.getCursorScreenPoint();
+    dragSession.point = {
+        ...point,
+        screenX: cursorPoint.x,
+        screenY: cursorPoint.y,
+    };
+};
+
 const normalizeBlockDragPayload = (payload) => {
     if (!payload || typeof payload !== "object" || !Array.isArray(payload.items) ||
         !payload.items.every((item) => item && typeof item.type === "string" && typeof item.data === "string")) {
@@ -3662,7 +3675,7 @@ app.whenReady().then(() => {
         }
         const point = normalizeBlockDragPoint(data.point);
         if (point) {
-            dragSession.point = point;
+            updateBlockDragCursorPoint(dragSession, point);
         }
         if (data.payload !== undefined) {
             const payload = normalizeBlockDragPayload(data.payload);

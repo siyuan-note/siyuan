@@ -9,6 +9,7 @@ import {
     hasActiveTouchGesture,
     isDragRelaySource,
     restoreNativeDrag,
+    shouldCancelPointerDragOnBlur,
     shouldRequireLongPress,
     shouldSuppressNativeContextMenu,
     suspendNativeDrag,
@@ -136,6 +137,13 @@ describe("desktop mouse drag candidates", () => {
         assert.equal(shouldRequireLongPress(true, true, false), false);
         assert.equal(shouldRequireLongPress(true, true, true), true);
         assert.equal(shouldRequireLongPress(true, false, false), true);
+    });
+
+    it("keeps an active desktop relay alive when its source window loses focus", () => {
+        assert.equal(shouldCancelPointerDragOnBlur(false, true, true), false);
+        assert.equal(shouldCancelPointerDragOnBlur(false, false, true), true);
+        assert.equal(shouldCancelPointerDragOnBlur(false, true, false), true);
+        assert.equal(shouldCancelPointerDragOnBlur(true, true, true), true);
     });
 });
 

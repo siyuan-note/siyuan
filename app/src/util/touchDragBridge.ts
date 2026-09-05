@@ -13,6 +13,7 @@ import {
     hasActiveTouchGesture,
     isDragRelaySource,
     restoreNativeDrag,
+    shouldCancelPointerDragOnBlur,
     shouldRequireLongPress,
     shouldSuppressNativeContextMenu,
     suspendNativeDrag,
@@ -1063,16 +1064,10 @@ export const initTouchDragBridge = () => {
         document.addEventListener("lostpointercapture", handleLostPointerCapture, {capture: true, passive: true});
         document.addEventListener("click", handleMouseClick, {capture: true, passive: false});
         window.addEventListener("blur", () => {
-            if (isInAndroid() && dragState?.inputType === "pointer") {
+            if (dragState?.inputType === "pointer" &&
+                shouldCancelPointerDragOnBlur(!!isInAndroid(), dragState.isDragging, !!dragState.relayId)) {
                 completeBridgeDrag(undefined, true);
-                return;
             }
-            window.setTimeout(() => {
-                if (dragState?.inputType === "pointer" && !dragState.relayRemote &&
-                    !dragState.pendingDropPoint) {
-                    completeBridgeDrag(undefined, true);
-                }
-            }, Constants.TIMEOUT_MOUSE_DRAG_DELAY);
         });
     }
 

@@ -630,6 +630,11 @@ test("tab conversion belongs to the single block conversion menu", () => {
     assert.equal(getEntryCatalogNode("gutter.single.turnInto.tabs")?.simple, true);
     assert.equal(getEntryCatalogNode("gutter.single.turnInto.tabs")?.type, "entry");
     assert.equal(getEntryCatalogNode("gutter.multi.turnInto.tabs"), undefined);
+    assert.equal(keys[keys.indexOf("superBlock") - 1], "check");
+    assert.equal(keys[keys.indexOf("superBlock") + 1], "code");
+    assert.equal(getEntryCatalogNode("gutter.single.turnInto.superBlock")?.simple, true);
+    assert.equal(getEntryCatalogNode("gutter.single.turnInto.superBlock")?.type, "entry");
+    assert.equal(getEntryCatalogNode("gutter.multi.turnInto.superBlock"), undefined);
 });
 
 test("conditional block resource menus have distinct configuration labels", () => {

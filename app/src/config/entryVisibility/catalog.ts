@@ -221,6 +221,7 @@ const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), tr
         node("list", lang("list")),
         node("orderedList", lang("ordered-list")),
         node("check", lang("check")),
+        ...(!multi ? [node("superBlock", lang("superBlock"))] : []),
         node("code", lang("code")),
         node("table", lang("table")),
         node("line", lang("line")),

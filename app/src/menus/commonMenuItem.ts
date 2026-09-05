@@ -425,7 +425,7 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
 };
 
 export const openAttr = (nodeElement: Element, focusName = "bookmark", protyle: IProtyle) => {
-    if (nodeElement.getAttribute("data-type") === "NodeThematicBreak") {
+    if (protyle.lite || nodeElement.getAttribute("data-type") === "NodeThematicBreak") {
         return;
     }
     const id = nodeElement.getAttribute("data-node-id");

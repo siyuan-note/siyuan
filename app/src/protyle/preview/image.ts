@@ -2,6 +2,7 @@ import {Constants} from "../../constants";
 import {addScript} from "../util/addScript";
 import {fetchPost} from "../../util/fetch";
 import {isBrowserRenderableImagePath} from "../../util/imageURL";
+import {copyPNGByLink} from "../../menus/util";
 
 export const previewImages = (srcList: string[], currentSrc?: string, onHidden?: () => void) => {
     addScript(`${Constants.PROTYLE_CDN}/js/viewerjs/viewer.js?v=1.11.8`, "protyleViewerScript").then(() => {
@@ -17,7 +18,15 @@ export const previewImages = (srcList: string[], currentSrc?: string, onHidden?:
             }
         });
         imagesElement.innerHTML = html;
-        window.siyuan.viewer = new Viewer(imagesElement, {
+        let cleanedUp = false;
+        const close = () => {
+            viewer.destroy();
+            if (!cleanedUp) {
+                cleanedUp = true;
+                onHidden?.();
+            }
+        };
+        const viewer = new Viewer(imagesElement, {
             initialViewIndex: currentSrc ? initialViewIndex : 0,
             title: [1, (image: HTMLImageElement, imageData: IObject) => {
                 let name = image.alt;
@@ -29,12 +38,13 @@ export const previewImages = (srcList: string[], currentSrc?: string, onHidden?:
             }],
             button: false,
             transition: false,
-            hidden: function () {
-                window.siyuan.viewer.destroy();
-                if (onHidden) {
-                    onHidden();
-                }
+            ready: function (this: Viewer) {
+                const copyElement = this.toolbar.querySelector(".viewer-copy");
+                copyElement.innerHTML = '<svg><use xlink:href="#iconCopy"></use></svg>';
+                copyElement.setAttribute("title", window.siyuan.languages.copyAsPNG);
+                copyElement.setAttribute("aria-label", window.siyuan.languages.copyAsPNG);
             },
+            hidden: close,
             toolbar: {
                 zoomIn: true,
                 zoomOut: true,
@@ -47,12 +57,16 @@ export const previewImages = (srcList: string[], currentSrc?: string, onHidden?:
                 rotateRight: true,
                 flipHorizontal: true,
                 flipVertical: true,
-                close: function () {
-                    window.siyuan.viewer.destroy();
+                copy: () => {
+                    if (viewer.viewed && viewer.image) {
+                        copyPNGByLink(viewer.image.src);
+                    }
                 },
+                close,
             },
         });
-        window.siyuan.viewer.show();
+        window.siyuan.viewer = viewer;
+        viewer.show();
     });
 };
 

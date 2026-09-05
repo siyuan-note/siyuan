@@ -240,6 +240,24 @@ export const copyPNGByLink = (link: string) => {
         window.JSAndroid.writeImageClipboard(link);
         return;
     }
+    const showCopyError = () => showMessage(window.siyuan.languages.imageCopyFailed, 6000, "error");
+    const imageToPNGClipboard = (image: HTMLImageElement) => {
+        try {
+            const canvas = document.createElement("canvas");
+            canvas.width = image.naturalWidth;
+            canvas.height = image.naturalHeight;
+            canvas.getContext("2d").drawImage(image, 0, 0);
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    writePNGBlob(blob);
+                } else {
+                    showCopyError();
+                }
+            }, "image/png", 1);
+        } catch (e) {
+            showCopyError();
+        }
+    };
     // 通过 fetch 拿到 blob 后再写入剪贴板，避免跨域图片直接 drawImage 污染 canvas 导致 toBlob 失败
     // （浏览器访问 Docker 部署时常见，报错：Tainted canvases may not be exported）
     // 把任意图片 blob 画进 canvas 再导出为 PNG；blob URL 为同源，不会污染 canvas
@@ -249,21 +267,14 @@ export const copyPNGByLink = (link: string) => {
             return;
         }
         const objectURL = URL.createObjectURL(blob);
-        const canvas = document.createElement("canvas");
         const tempElement = document.createElement("img");
-        tempElement.onload = (e: Event & { target: HTMLImageElement }) => {
-            canvas.width = e.target.naturalWidth;
-            canvas.height = e.target.naturalHeight;
-            canvas.getContext("2d").drawImage(e.target, 0, 0);
+        tempElement.onload = () => {
+            imageToPNGClipboard(tempElement);
             URL.revokeObjectURL(objectURL);
-            canvas.toBlob((pngBlob) => {
-                if (pngBlob) {
-                    writePNGBlob(pngBlob);
-                }
-            }, "image/png", 1);
         };
         tempElement.onerror = () => {
             URL.revokeObjectURL(objectURL);
+            showCopyError();
         };
         tempElement.src = objectURL;
     };
@@ -274,19 +285,10 @@ export const copyPNGByLink = (link: string) => {
         blobToPNGClipboard(await response.blob());
     }).catch(() => {
         // fetch 失败时回退：以 CORS 模式加载后再导出（需目标服务器返回 ACAO）
-        const canvas = document.createElement("canvas");
         const tempElement = document.createElement("img");
         tempElement.crossOrigin = "anonymous";
-        tempElement.onload = (e: Event & { target: HTMLImageElement }) => {
-            canvas.width = e.target.naturalWidth;
-            canvas.height = e.target.naturalHeight;
-            canvas.getContext("2d").drawImage(e.target, 0, 0);
-            canvas.toBlob((blob) => {
-                if (blob) {
-                    writePNGBlob(blob);
-                }
-            }, "image/png", 1);
-        };
+        tempElement.onload = () => imageToPNGClipboard(tempElement);
+        tempElement.onerror = showCopyError;
         tempElement.src = link;
     });
 };

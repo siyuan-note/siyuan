@@ -12,6 +12,7 @@
   &-flip-vertical,
   &-fullscreen,
   &-fullscreen-exit,
+  &-copy,
   &-close {
     svg {
       height: 24px;
@@ -165,6 +166,13 @@
       overflow: hidden;
       padding: 6px 3px;
 
+      &:hover,
+      &:focus-within {
+        & > li svg {
+          color: #fff;
+        }
+      }
+
       & > li {
         background-color: var(--b3-tooltips-background);
         border-radius: 50%;
@@ -174,13 +182,6 @@
         overflow: hidden;
         transition: background-color .15s;
         width: 24px;
-
-        &:focus,
-        &:hover {
-          svg {
-            color: #fff;
-          }
-        }
 
         &:focus {
           box-shadow: 0 0 3px #fff;

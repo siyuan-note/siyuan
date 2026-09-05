@@ -1,4 +1,5 @@
 {
+	"imageCopyFailed": "De afbeelding kan niet worden gekopieerd. Controleer of deze kan worden geladen en probeer het opnieuw.",
 	"syncAssetSnapshotIncomplete": "De inhoud van sommige bronbestanden is afhankelijk van cloudopslag; deze lokale momentopname is onvolledig",
 	"syncAssetDownloadMode": "Bronbestanden downloaden",
 	"syncAssetDownloadModeTip": "Geldt alleen voor dit apparaat. Bronbestanden worden op aanvraag gedownload wanneer ze worden gebruikt en zijn tot die tijd offline niet beschikbaar. Gedownloade bestanden blijven bewaard en worden tijdens synchronisatie bijgewerkt. Bij het omschakelen naar Alles downloaden worden eerst de ontbrekende bestanden gedownload",

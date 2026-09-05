@@ -1,4 +1,5 @@
 {
+	"imageCopyFailed": "Obrázok sa nepodarilo skopírovať. Skontrolujte, či sa dá načítať, a skúste to znova.",
 	"syncAssetSnapshotIncomplete": "Obsah niektorých zdrojových súborov závisí od cloudového úložiska; táto lokálna snímka je neúplná",
 	"syncAssetDownloadMode": "Sťahovanie zdrojových súborov",
 	"syncAssetDownloadModeTip": "Platí iba pre toto zariadenie. Súbory na požiadanie sa sťahujú pri použití a dovtedy nie sú dostupné offline. Stiahnuté súbory sa uchovávajú a aktualizujú počas synchronizácie. Pri prepnutí na Stiahnuť všetky sa najprv stiahnu chýbajúce súbory",

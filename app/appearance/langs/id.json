@@ -1,4 +1,5 @@
 {
+	"imageCopyFailed": "Tidak dapat menyalin gambar. Pastikan gambar dapat dimuat dan coba lagi.",
 	"syncAssetSnapshotIncomplete": "Sebagian konten sumber daya bergantung pada penyimpanan awan; snapshot lokal ini belum lengkap",
 	"syncAssetDownloadMode": "Unduhan berkas sumber daya",
 	"syncAssetDownloadModeTip": "Hanya berlaku untuk perangkat ini. Sumber daya sesuai kebutuhan diunduh saat digunakan dan tidak tersedia luring sebelum diunduh. Sumber daya yang telah diunduh tetap disimpan dan diperbarui saat sinkronisasi. Beralih ke Unduh semua akan mengunduh sumber daya yang belum tersedia terlebih dahulu",

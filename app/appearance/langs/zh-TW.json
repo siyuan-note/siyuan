@@ -1,4 +1,5 @@
 {
+	"imageCopyFailed": "無法複製圖片，請確認圖片能夠載入後重試。",
 	"syncAssetSnapshotIncomplete": "部分資源檔案內容依賴雲端，本機快照尚不完整",
 	"syncAssetDownloadMode": "資源檔案下載",
 	"syncAssetDownloadModeTip": "僅套用於目前裝置；按需模式會在使用資源檔案時下載，尚未下載的資源檔案無法離線使用；已下載的資源檔案會保留並隨同步更新；切換為全部下載前會先補齊缺少的內容",

@@ -5,7 +5,7 @@ allowBuilds:
   esbuild: true
 blockExoticSubdeps: false
 minimumReleaseAgeExclude:
-  - electron@43.5.1
+  - electron@44.2.0
   - app-builder-lib@26.15.6
   - dmg-builder@26.15.6
   - electron-builder-squirrel-windows@26.15.6

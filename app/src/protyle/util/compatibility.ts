@@ -221,16 +221,11 @@ export const getLocalFiles = async () => {
         return localFiles;
     }
     if ("darwin" === window.siyuan.config.system.os) {
-        const xmlString = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
-            cmd: "clipboardRead",
-            format: "NSFilenamesPboardType",
+        const filePaths: string[] = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+            cmd: "clipboardReadFiles",
         });
-        if (xmlString) {
-            const domParser = new DOMParser();
-            const xmlDom = domParser.parseFromString(xmlString, "application/xml");
-            Array.from(xmlDom.getElementsByTagName("string")).forEach(item => {
-                localFiles.push({path: item.childNodes[0].nodeValue, size: null});
-            });
+        if (Array.isArray(filePaths)) {
+            localFiles = filePaths.map(path => ({path, size: null}));
         }
     } else {
         const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});

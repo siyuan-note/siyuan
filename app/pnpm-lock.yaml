@@ -13,7 +13,7 @@ importers:
     dependencies:
       '@electron/remote':
         specifier: ^2.1.3
-        version: 2.1.3(electron@43.5.1(supports-color@8.1.1))
+        version: 2.1.3(electron@44.2.0(supports-color@8.1.1))
       zxcvbn:
         specifier: 4.4.2
         version: 4.4.2
@@ -55,8 +55,8 @@ importers:
         specifier: ^1.11.5
         version: 1.11.20
       electron:
-        specifier: 43.5.1
-        version: 43.5.1(supports-color@8.1.1)
+        specifier: 44.2.0
+        version: 44.2.0(supports-color@8.1.1)
       electron-builder:
         specifier: 26.15.7
         version: 26.15.7(electron-builder-squirrel-windows@26.15.7)(supports-color@8.1.1)
@@ -1494,8 +1494,8 @@ packages:
     resolution: {integrity: sha512-bO3y10YikuUwUuDUQRM4KfwNkKhnpVO7IPdbsrejwN9/AABJzzTQ4GeHwyzNSrVO+tEH3/Np255a3sVZpZDjvg==}
     engines: {node: '>=8.0.0'}
 
-  electron@43.5.1:
-    resolution: {integrity: sha512-lRHSwzZimdWWeqcTHFRCpicWwxBE6kotKIyGTusums/jvmVVC27rLPFikUz8LsLwV7gVWlYaiEYQAWzitbN6nA==}
+  electron@44.2.0:
+    resolution: {integrity: sha512-oK1icjhapp3xsUZycO9WZaLmd3hJnA7ieobC4mpdtO1pEN+PPGWpA3m1Mgzzuc1wzSD2Wai4zcH4yfpGJqxFMA==}
     engines: {node: '>= 22.12.0'}
     hasBin: true
 
@@ -3071,9 +3071,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@electron/remote@2.1.3(electron@43.5.1(supports-color@8.1.1))':
+  '@electron/remote@2.1.3(electron@44.2.0(supports-color@8.1.1))':
     dependencies:
-      electron: 43.5.1(supports-color@8.1.1)
+      electron: 44.2.0(supports-color@8.1.1)
 
   '@electron/universal@2.0.3(supports-color@8.1.1)':
     dependencies:
@@ -4325,7 +4325,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  electron@43.5.1(supports-color@8.1.1):
+  electron@44.2.0(supports-color@8.1.1):
     dependencies:
       '@electron-internal/extract-zip': 1.0.3
       '@electron/get': 4.0.3(supports-color@8.1.1)

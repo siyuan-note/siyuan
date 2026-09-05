@@ -5,6 +5,7 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
                                  options?: {
                                      rootElement?: HTMLElement,
                                      currentElement?: Element,
+                                     excludeSelector?: string,
                                  }) => {
     if (!isSupportCSSHL() || ((!keys || keys.length === 0) && !hlId)) {
         return;
@@ -32,7 +33,9 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
         // 准备一个数组来保存所有文本节点
         const textNodes: Node[] = [];
         const textNodesSize: number[] = [];
+        const excludedTextNodeCounts: number[] = [];
         let currentSize = 0;
+        let excludedTextNodeCount = 0;
         const rootElement = options?.rootElement || protyle.contentElement;
 
         const treeWalker = document.createTreeWalker(rootElement, NodeFilter.SHOW_TEXT);
@@ -41,6 +44,10 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
             textNodes.push(currentNode);
             currentSize += currentNode.textContent.length;
             textNodesSize.push(currentSize);
+            if (options?.excludeSelector && currentNode.parentElement?.closest(options.excludeSelector)) {
+                excludedTextNodeCount++;
+            }
+            excludedTextNodeCounts.push(excludedTextNodeCount);
             currentNode = treeWalker.nextNode();
         }
 
@@ -61,13 +68,20 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
                         while (currentNodeIndex < textNodes.length && textNodesSize[currentNodeIndex] <= startIndex) {
                             currentNodeIndex++;
                         }
+                        const startNodeIndex = currentNodeIndex;
                         let currentTextNode = textNodes[currentNodeIndex];
-                        range.setStart(currentTextNode, startIndex - (currentNodeIndex ? textNodesSize[currentNodeIndex - 1] : 0));
 
                         while (currentNodeIndex < textNodes.length && textNodesSize[currentNodeIndex] < endIndex) {
                             currentNodeIndex++;
                         }
                         currentTextNode = textNodes[currentNodeIndex];
+                        const excludedCountBefore = startNodeIndex ? excludedTextNodeCounts[startNodeIndex - 1] : 0;
+                        if (excludedTextNodeCounts[currentNodeIndex] > excludedCountBefore) {
+                            startIndex = endIndex;
+                            continue;
+                        }
+                        range.setStart(textNodes[startNodeIndex], startIndex -
+                            (startNodeIndex ? textNodesSize[startNodeIndex - 1] : 0));
                         range.setEnd(currentTextNode, endIndex - (currentNodeIndex ? textNodesSize[currentNodeIndex - 1] : 0));
 
                         let isCurrent = false;

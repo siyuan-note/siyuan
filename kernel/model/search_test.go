@@ -526,9 +526,12 @@ func TestFromHPathSearchSQLBlockOnlyMarksHPath(t *testing.T) {
 func TestFromMixedHPathSearchSQLBlockMarksDirectContent(t *testing.T) {
 	setSearchCaseSensitive(t, true)
 	terms := "从这里" + search.TermSep + "会员"
-	contentTerms := matchedSearchTerms("会员特权", terms)
+	contentTerms, hPathTerms := partitionSearchTerms("会员特权", terms)
 	if "会员" != contentTerms {
 		t.Fatalf("文档自身直接命中的关键词错误：%q", contentTerms)
+	}
+	if "从这里" != hPathTerms {
+		t.Fatalf("路径补充命中的关键词错误：%q", hPathTerms)
 	}
 
 	sqlBlock := &sql.Block{
@@ -539,7 +542,7 @@ func TestFromMixedHPathSearchSQLBlockMarksDirectContent(t *testing.T) {
 		Content: "会员特权",
 		Type:    "d",
 	}
-	block := fromHPathSearchSQLBlockWithContentTerms(sqlBlock, terms, contentTerms, 36)
+	block := fromHPathSearchSQLBlockWithContentTerms(sqlBlock, hPathTerms, contentTerms, 36)
 	if "<mark>会员</mark>特权" != block.Content {
 		t.Fatalf("混合命中应高亮文档自身直接命中的关键词：%q", block.Content)
 	}
@@ -547,8 +550,36 @@ func TestFromMixedHPathSearchSQLBlockMarksDirectContent(t *testing.T) {
 		t.Fatalf("路径关键词不应扩展高亮到其他文档字段：%q", block.Name)
 	}
 	if !strings.Contains(block.HPath, "<mark>从这里</mark>") ||
-		!strings.Contains(block.HPath, "<mark>会员</mark>") {
-		t.Fatalf("混合命中应高亮全部路径关键词：%q", block.HPath)
+		strings.Contains(block.HPath, "<mark>会员</mark>") {
+		t.Fatalf("混合命中只应高亮路径补充的关键词：%q", block.HPath)
+	}
+}
+
+func TestFromFTSAndHPathMatchSQLBlockMarksMatchSource(t *testing.T) {
+	setSearchCaseSensitive(t, true)
+	sqlBlock := &sql.Block{
+		ID:      "20260905120000-direct1",
+		RootID:  "20260905120000-direct1",
+		HPath:   "/项目/工作总结",
+		Content: search.SearchMarkLeft + "工作总结" + search.SearchMarkRight,
+		Type:    "d",
+	}
+
+	directBlock := fromFTSAndHPathMatchSQLBlock(sqlBlock, 0, "工作总结", 36)
+	if "<mark>工作总结</mark>" != directBlock.Content {
+		t.Fatalf("FTS 直接命中应保留正文高亮：%q", directBlock.Content)
+	}
+	if strings.Contains(directBlock.HPath, "<mark>") {
+		t.Fatalf("FTS 直接命中不应重复高亮层级路径：%q", directBlock.HPath)
+	}
+
+	sqlBlock.Content = "其他内容"
+	hPathBlock := fromFTSAndHPathMatchSQLBlock(sqlBlock, 1, "工作总结", 36)
+	if strings.Contains(hPathBlock.Content, "<mark>") {
+		t.Fatalf("路径命中不应高亮正文：%q", hPathBlock.Content)
+	}
+	if !strings.Contains(hPathBlock.HPath, "<mark>工作总结</mark>") {
+		t.Fatalf("路径命中应高亮层级路径：%q", hPathBlock.HPath)
 	}
 }
 

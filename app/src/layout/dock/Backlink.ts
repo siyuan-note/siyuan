@@ -1029,7 +1029,9 @@ export class Backlink extends Model {
                             }
                         });
                     });
-                    searchMarkRender(editor.protyle, response.data.keywords);
+                    searchMarkRender(editor.protyle, response.data.keywords, undefined, undefined, {
+                        excludeSelector: ".protyle-breadcrumb__bar[data-backlink-id]"
+                    });
                 } else {
                     const editorElement = document.createElement("div");
                     editorElement.style.minHeight = "auto";
@@ -1059,7 +1061,9 @@ export class Backlink extends Model {
                     } else {
                         editor.protyle.element.removeAttribute("data-notebook-id");
                     }
-                    searchMarkRender(editor.protyle, response.data.keywords);
+                    searchMarkRender(editor.protyle, response.data.keywords, undefined, undefined, {
+                        excludeSelector: ".protyle-breadcrumb__bar[data-backlink-id]"
+                    });
                     this.editors.push(editor);
                     record.editor = editor;
                     const service = this.viewState;

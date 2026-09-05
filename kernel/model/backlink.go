@@ -458,6 +458,13 @@ func buildBacklink(refID string, refTree *parse.Tree, originalRefBlockIDs map[st
 	}
 
 	renderNodes, expand := getBacklinkRenderNodes(node, originalRefBlockIDs)
+	var blockPaths []*BlockPath
+	if (nil != node.Parent && ast.NodeDocument != node.Parent.Type) || (ast.NodeHeading != node.Type && 0 < treenode.HeadingLevel(node)) {
+		blockPaths = buildBlockBreadcrumb(node, nil, false)
+	}
+	if 1 > len(blockPaths) {
+		blockPaths = []*BlockPath{}
+	}
 
 	if highlight && 0 < len(keywords) {
 		for _, renderNode := range renderNodes {
@@ -486,13 +493,6 @@ func buildBacklink(refID string, refTree *parse.Tree, originalRefBlockIDs map[st
 	fillBlockRefCount(renderNodes, refTree.Box)
 
 	dom := renderVisibleBlockDOMByNodes(renderNodes, luteEngine)
-	var blockPaths []*BlockPath
-	if (nil != node.Parent && ast.NodeDocument != node.Parent.Type) || (ast.NodeHeading != node.Type && 0 < treenode.HeadingLevel(node)) {
-		blockPaths = buildBlockBreadcrumb(node, nil, false)
-	}
-	if 1 > len(blockPaths) {
-		blockPaths = []*BlockPath{}
-	}
 	ret = &Backlink{ID: refID, DOM: dom, BlockPaths: blockPaths, Expand: expand, node: node}
 	return
 }

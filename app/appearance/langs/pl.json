@@ -1,4 +1,5 @@
 {
+	"mobileMultiSelectTip": "Dotknij bloków, aby je zaznaczyć lub odznaczyć",
 	"headingBatchWithSubheadingsTip": "Przesuń podnagłówki o tę samą liczbę poziomów; poziomy poza zakresem H1–H6 zostaną ograniczone do H1 lub H6",
 	"newSiblingDoc": "Nowy dokument na tym samym poziomie",
 	"tabs": "Blok z kartami",

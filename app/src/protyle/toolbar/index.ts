@@ -2058,6 +2058,7 @@ export class Toolbar {
         setPosition(this.subElement, 8, 8);
         this.element.classList.add("fn__none");
         activeBlur();
+        showMessage(window.siyuan.languages.mobileMultiSelectTip);
     }
 
     public showTpl(protyle: IProtyle, nodeElement: HTMLElement, range: Range) {

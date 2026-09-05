@@ -1,4 +1,5 @@
 {
+	"mobileMultiSelectTip": "Touchez les blocs pour les sélectionner ou les désélectionner",
 	"headingBatchWithSubheadingsTip": "Décaler les sous-titres du même nombre de niveaux ; les niveaux hors de H1 à H6 sont limités à H1 ou H6",
 	"newSiblingDoc": "Nouveau document de même niveau",
 	"tabs": "Bloc à onglets",

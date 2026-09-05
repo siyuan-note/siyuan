@@ -1,4 +1,5 @@
 {
+	"mobileMultiSelectTip": "Blokları seçmek veya seçimlerini kaldırmak için dokunun",
 	"headingBatchWithSubheadingsTip": "Alt başlıkları aynı düzey farkıyla kaydır; H1 ile H6 aralığının dışındaki düzeyler H1 veya H6 ile sınırlandırılır",
 	"newSiblingDoc": "Aynı düzeyde yeni belge",
 	"tabs": "Sekmeli blok",

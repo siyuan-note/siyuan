@@ -1,4 +1,5 @@
 {
+	"mobileMultiSelectTip": "Tocca i blocchi per selezionarli o deselezionarli",
 	"headingBatchWithSubheadingsTip": "Sposta i sottotitoli dello stesso numero di livelli; i livelli al di fuori di H1–H6 vengono limitati a H1 o H6",
 	"newSiblingDoc": "Nuovo documento allo stesso livello",
 	"tabs": "Blocco con schede",

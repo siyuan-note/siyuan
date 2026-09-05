@@ -1,4 +1,5 @@
 {
+	"mobileMultiSelectTip": "Toca los bloques para seleccionarlos o deseleccionarlos",
 	"headingBatchWithSubheadingsTip": "Cambiar los subencabezados en la misma cantidad de niveles; los niveles fuera de H1 a H6 se limitan a H1 o H6",
 	"newSiblingDoc": "Nuevo documento del mismo nivel",
 	"tabs": "Bloque con pestañas",

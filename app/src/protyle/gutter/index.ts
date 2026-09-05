@@ -74,6 +74,7 @@ import {transferBlockRef} from "../../menus/block";
 import {isMobile} from "../../util/functions";
 import {AIActions} from "../../ai/actions";
 import {activeBlur, renderTextMenu, showKeyboardToolbarUtil} from "../../mobile/util/keyboardToolbar";
+import {getMobileBlockSelectionElement} from "../../mobile/util/blockSelection";
 import {hideTooltip} from "../../dialog/tooltip";
 import {appearanceMenu, limitRecentFontStyleRows} from "../toolbar/Font";
 import {setPosition} from "../../util/setPosition";
@@ -1638,6 +1639,19 @@ export class Gutter {
         hideElements(["select"], protyle);
         nodeElement.classList.add("protyle-wysiwyg--select");
         countBlockWord([id], protyle.block.rootID);
+        if (isMobile() && !protyle.toolbar.isMultiSelectMode()) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "multiSelect",
+                icon: "iconCheck",
+                label: window.siyuan.languages.multiSelect,
+                click: () => {
+                    const blockElement = getMobileBlockSelectionElement(nodeElement as HTMLElement);
+                    hideElements(["select"], protyle);
+                    window.getSelection()?.removeAllRanges();
+                    protyle.toolbar.showMultiSelectMode(protyle, blockElement);
+                }
+            }).element);
+        }
         // "heading1-6", "list", "ordered-list", "check", "quote", "code", "table", "line", "math", "paragraph"
         if (type === "NodeParagraph" && allowStructuralMutation) {
             turnIntoSubmenu.push(this.turnsIntoOne({

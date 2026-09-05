@@ -1,4 +1,5 @@
 {
+	"mobileMultiSelectTip": "Tippe auf Blöcke, um sie auszuwählen oder die Auswahl aufzuheben",
 	"headingBatchWithSubheadingsTip": "Unterüberschriften um denselben Abstand verschieben; Ebenen außerhalb von H1 bis H6 werden auf H1 oder H6 begrenzt",
 	"newSiblingDoc": "Neues Dokument auf gleicher Ebene",
 	"tabs": "Registerkartenblock",

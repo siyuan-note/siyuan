@@ -394,10 +394,13 @@ body.mobile-keyboard--open {
 }
 
 .mobile-safe-area {
-  position: relative;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
   z-index: 4;
   height: var(--mobile-top-safe-area);
-  flex-shrink: 0;
+  pointer-events: none;
   background-color: var(--b3-theme-background);
 }
 
@@ -591,13 +594,15 @@ body.mobile-topbar--merged {
 }
 
 #editor {
+  position: absolute;
+  inset: var(--mobile-top-safe-area) 0 0;
   box-sizing: border-box;
 
   > .protyle-breadcrumb {
     position: absolute;
     top: var(--mobile-topbar-height);
-    right: 0;
-    left: 0;
+    right: env(safe-area-inset-right);
+    left: env(safe-area-inset-left);
     // 需高于数据库吸顶工具栏，避免数据库离开吸顶区域时覆盖面包屑
     z-index: 5;
     height: var(--mobile-breadcrumb-height);
@@ -611,18 +616,38 @@ body.mobile-topbar--merged {
     height: calc(var(--mobile-topbar-height) + var(--mobile-breadcrumb-height));
     content: "";
   }
+
+  // 滚动视口延伸到屏幕底边，仅在文档末尾留出空间，确保末行可滚到导航栏上方。
+  > .protyle-content::after {
+    display: block;
+    height: var(--mobile-bottom-bar-offset);
+    content: "";
+  }
+
+  > .protyle-content,
+  > .protyle-preview {
+    margin-left: env(safe-area-inset-left);
+    margin-right: env(safe-area-inset-right);
+  }
 }
 
 .mobile-tabs {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: 1fr auto;
   height: 100%;
 
   &__list {
-    flex: 1;
+    grid-area: 1 / 1 / 3 / 2;
     min-height: 0;
-    padding: 12px;
+    padding: 12px max(12px, env(safe-area-inset-right)) 12px max(12px, env(safe-area-inset-left));
     overflow: auto;
+
+    // 列表延伸到屏幕底边，末尾留白确保最后一个页签可滚到操作区上方。
+    &::after {
+      display: block;
+      height: calc(100px + env(safe-area-inset-bottom));
+      content: "";
+    }
   }
 
   &__item {
@@ -674,10 +699,14 @@ body.mobile-topbar--merged {
   }
 
   &__actions {
+    grid-area: 2 / 1;
+    z-index: 1;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
-    padding: 12px max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    margin-bottom: max(12px, env(safe-area-inset-bottom));
+    padding: 12px max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left));
+    background-color: var(--b3-theme-surface);
     border-top: 1px solid var(--b3-border-color);
 
     .b3-button {
@@ -700,6 +729,10 @@ body.mobile-topbar--merged {
 
 .side-panel {
   position: fixed;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  padding-top: var(--mobile-top-safe-area);
   background-color: var(--b3-theme-surface);
   height: 100%;
   width: 100vw;
@@ -707,6 +740,23 @@ body.mobile-topbar--merged {
   transform: translateX(-100vw);
   transition: transform .15s cubic-bezier(0, 0, .2, 1) 0ms;
   will-change: transform;
+
+  > .toolbar {
+    padding-left: max(5px, env(safe-area-inset-left));
+    padding-right: max(5px, env(safe-area-inset-right));
+  }
+
+  > .b3-list--mobile {
+    padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left);
+
+    // 留白随列表内容滚动，避免在滚动视口底部形成固定空白。
+    > [data-type="sidebar-file"] > .fn__flex-1::after,
+    > [data-type="sidebar-file"] > .b3-list > .fn__flex-1::after {
+      display: block;
+      height: env(safe-area-inset-bottom);
+      content: "";
+    }
+  }
 
   &--all {
     transform: translateX(100vw);
@@ -1421,8 +1471,24 @@ body.mobile-topbar--merged {
 }
 
 .b3-dialog__container {
-  max-width: 100vw;
+  max-width: calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right));
   max-height: 100%;
+}
+
+.b3-dialog {
+  padding: var(--mobile-top-safe-area) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.b3-snackbars {
+  top: calc(var(--mobile-top-safe-area) + 35px);
+}
+
+.b3-menu--fullscreen:not(.b3-menu--sheet) {
+  padding-top: var(--mobile-top-safe-area);
+
+  > .b3-menu__items > .b3-menu__item > .b3-menu__submenu {
+    top: calc(var(--mobile-top-safe-area) + 48px);
+  }
 }
 
 @media (max-width: 620px) {

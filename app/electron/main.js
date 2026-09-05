@@ -29,6 +29,7 @@ const {
     screen,
     ipcMain,
     clipboard,
+    ClipboardItem,
     globalShortcut,
     Tray,
     dialog,
@@ -41,6 +42,9 @@ const {pathToFileURL} = require("url");
 const gNet = require("net");
 const childProcess = require("child_process");
 const remote = require("@electron/remote/main");
+const {
+    rawFormatType, readClipboardBuffer, readClipboardText, getClipboardFormats, parseClipboardFilePaths
+} = require("./clipboard");
 const {
     getAppleSiliconDownloadURL,
     shouldDownloadAppleSilicon,
@@ -2826,9 +2830,9 @@ app.whenReady().then(() => {
     ipcMain.on("siyuan-first-quit", () => {
         app.exit();
     });
-    ipcMain.handle("siyuan-get", (event, data) => {
+    ipcMain.handle("siyuan-get", async (event, data) => {
         const remoteSender = getWindowKernelTarget(event.sender.id)?.mode === "remote";
-        if (remoteSender && ["beginRichClipboard", "completeRichClipboard", "cancelRichClipboard", "clipboardRead"]
+        if (remoteSender && ["beginRichClipboard", "completeRichClipboard", "cancelRichClipboard", "clipboardRead", "clipboardReadFiles"]
             .includes(data.cmd)) {
             writeLog("ignored local file clipboard processing in remote kernel mode");
             return false;
@@ -2850,19 +2854,23 @@ app.whenReady().then(() => {
             return false;
         }
         if (data.cmd === "clipboardRead") {
-            return clipboard.read(data.format);
+            return readClipboardText(await clipboard.read(), rawFormatType(data.format));
+        }
+        if (data.cmd === "clipboardReadFiles") {
+            return parseClipboardFilePaths(await readClipboardText(await clipboard.read(), "text/uri-list"));
         }
         if (data.cmd === "clipboardReadMathML") {
+            const items = await clipboard.read();
             if (typeof data.text !== "string" ||
-                normalizeClipboardText(clipboard.readText()) !== normalizeClipboardText(data.text)) {
+                normalizeClipboardText(await readClipboardText(items, "text/plain")) !== normalizeClipboardText(data.text)) {
                 return "";
             }
-            const formats = clipboard.availableFormats().filter((format) =>
+            const formats = getClipboardFormats(items).filter((format) =>
                 /^mathml(?: presentation)?$/i.test(format));
             formats.push("MathML", "MathML Presentation");
-            // availableFormats 可能不包含 Office 原生 MathML 格式，需要直接尝试标准格式名
+            // 按原生格式读取 UTF-16 编码的 Office 公式。
             for (const format of new Set(formats)) {
-                const buffer = clipboard.readBuffer(format);
+                const buffer = await readClipboardBuffer(items, rawFormatType(format));
                 if (buffer.length === 0 || buffer.length > 1024 * 1024 || buffer.length % 2 !== 0) {
                     continue;
                 }
@@ -2877,11 +2885,12 @@ app.whenReady().then(() => {
             return "";
         }
         if (data.cmd === "clipboardReadOffice") {
+            const items = await clipboard.read();
             if (typeof data.text !== "string" ||
-                normalizeClipboardText(clipboard.readText()) !== normalizeClipboardText(data.text)) {
+                normalizeClipboardText(await readClipboardText(items, "text/plain")) !== normalizeClipboardText(data.text)) {
                 return "";
             }
-            const buffer = clipboard.readBuffer("Embed Source");
+            const buffer = await readClipboardBuffer(items, rawFormatType("Embed Source"));
             const compoundFileSignature = Buffer.from([0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1]);
             if (buffer.length === 0 || buffer.length > 8 * 1024 * 1024 ||
                 !buffer.subarray(0, compoundFileSignature.length).equals(compoundFileSignature)) {
@@ -2890,19 +2899,20 @@ app.whenReady().then(() => {
             return buffer.toString("base64");
         }
         if (data.cmd === "clipboardReadWPS") {
+            const items = await clipboard.read();
             if (typeof data.text !== "string" ||
-                normalizeClipboardText(clipboard.readText()) !== normalizeClipboardText(data.text)) {
+                normalizeClipboardText(await readClipboardText(items, "text/plain")) !== normalizeClipboardText(data.text)) {
                 return "";
             }
-            const formats = clipboard.availableFormats().filter((format) =>
+            const formats = getClipboardFormats(items).filter((format) =>
                 /kingsoft.*wps.*format/i.test(format));
             formats.push("Kingsoft WPS Format");
             for (let version = 6; version <= 20; version++) {
                 formats.push(`Kingsoft WPS ${version}.0 Format`);
             }
-            // availableFormats 可能不包含 WPS 原生格式，需要尝试常见格式名
+            // 按原生格式读取 WPS 的压缩包数据。
             for (const format of new Set(formats)) {
-                const buffer = clipboard.readBuffer(format);
+                const buffer = await readClipboardBuffer(items, rawFormatType(format));
                 if (buffer.length <= 8 * 1024 * 1024 && buffer[0] === 0x50 && buffer[1] === 0x4b) {
                     return buffer.toString("base64");
                 }
@@ -2911,15 +2921,19 @@ app.whenReady().then(() => {
         }
         if (data.cmd === "beginRichClipboard") {
             richClipboardOperation = undefined;
-            const text = clipboard.readText();
-            const html = clipboard.readHTML();
+            const sequence = ++richClipboardSequence;
+            const items = await clipboard.read();
+            const text = await readClipboardText(items, "text/plain");
+            const html = await readClipboardText(items, "text/html");
+            if (sequence !== richClipboardSequence) {
+                return;
+            }
             if (typeof data.text !== "string" || typeof data.marker !== "string" ||
                 normalizeClipboardText(text) !== normalizeClipboardText(data.text) ||
                 !data.marker || !html.includes(data.marker)) {
                 return;
             }
 
-            richClipboardSequence++;
             const token = `${Date.now()}-${richClipboardSequence}`;
             richClipboardOperation = {
                 token,
@@ -2935,8 +2949,14 @@ app.whenReady().then(() => {
             if (!operation || operation.token !== data.token || operation.senderId !== event.sender.id) {
                 return false;
             }
-            if (operation.requestedText !== data.text || clipboard.readText() !== operation.text ||
-                clipboard.readHTML() !== operation.html || typeof data.html !== "string" ||
+            const items = await clipboard.read();
+            const text = await readClipboardText(items, "text/plain");
+            const clipboardHTML = await readClipboardText(items, "text/html");
+            if (richClipboardOperation !== operation) {
+                return false;
+            }
+            if (operation.requestedText !== data.text || text !== operation.text ||
+                clipboardHTML !== operation.html || typeof data.html !== "string" ||
                 !Array.isArray(data.replacements) || 1024 < data.replacements.length) {
                 richClipboardOperation = undefined;
                 return false;
@@ -2962,10 +2982,7 @@ app.whenReady().then(() => {
             }
 
             richClipboardOperation = undefined;
-            clipboard.write({
-                text: data.text,
-                html
-            });
+            await clipboard.write([new ClipboardItem({"text/plain": data.text, "text/html": html})]);
             return true;
         }
         if (data.cmd === "cancelRichClipboard") {

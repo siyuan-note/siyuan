@@ -31,7 +31,7 @@ import {disabledWYSIWYG} from "./disabledWYSIWYG";
 import {getEmbeddedDocInfoResponse} from "./docInfo";
 import {updateWidgetCacheVersion} from "./widgetCache";
 import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
-import {hasFocusOffsets} from "./focusRestore";
+import {getSavedTabFocusTarget, hasFocusOffsets} from "./focusRestore";
 import {isIPhone} from "./compatibility";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {disposeCustomBlocksInElement, setCustomBlockRootReady} from "../../plugin/customBlockRender";
@@ -592,6 +592,11 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     } else if (!focusElement || action.includes(Constants.CB_GET_FOCUSFIRST)) {
         focusElement = protyle.wysiwyg.element.firstElementChild;
     }
+    const hasScrollTop = scrollAttr && typeof scrollAttr.scrollTop === "number";
+    const savedFocusElement = focusElement;
+    if (hasScrollTop && scrollAttr.focusId && !action.includes(Constants.CB_GET_HL)) {
+        focusElement = getSavedTabFocusTarget(focusElement);
+    }
     if (action.includes(Constants.CB_GET_HL)) {
         preventScroll(protyle); // 搜索页签滚动会导致再次请求
         bgFade(focusElement);
@@ -599,7 +604,7 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     if (!suppressFocus && (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_FOCUSFIRST))) {
         setTimeout(() => {
             let range: Range;
-            if (hasFocusOffsets(scrollAttr)) {
+            if (savedFocusElement === focusElement && hasFocusOffsets(scrollAttr)) {
                 range = focusByOffset(focusElement, scrollAttr.focusStart, scrollAttr.focusEnd) as Range;
             } else {
                 range = focusBlock(focusElement, undefined, !action.includes(Constants.CB_GET_OUTLINE),
@@ -612,7 +617,6 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
             /// #endif
         }, focusElement.getAttribute("data-type") === "NodeCodeBlock" ? Constants.TIMEOUT_TRANSITION : 0);
     }
-    const hasScrollTop = scrollAttr && typeof scrollAttr.scrollTop === "number";
     if (hasScrollTop) {
         protyle.contentElement.scrollTop = scrollAttr.scrollTop;
     }

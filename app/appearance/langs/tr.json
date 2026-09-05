@@ -5,7 +5,7 @@
 	"imageCopyFailed": "Görüntü kopyalanamadı. Yüklenebildiğini kontrol edip tekrar deneyin.",
 	"syncAssetSnapshotIncomplete": "Bazı kaynakların içeriği bulut depolamaya bağlıdır; bu yerel anlık görüntü eksiktir",
 	"syncAssetDownloadMode": "Kaynak dosyası indirmeleri",
-	"syncAssetDownloadModeTip": "Yalnızca bu cihaz için geçerlidir. İsteğe bağlı kaynaklar kullanıldıklarında indirilir ve indirilene kadar çevrimdışı kullanılamaz. İndirilen kaynaklar saklanır ve eşitleme sırasında güncellenir. Tümünü indir seçeneğine geçmeden önce eksik kaynaklar indirilir",
+	"syncAssetDownloadModeTip": "Yalnızca bu cihaz için geçerlidir. İsteğe bağlı kaynaklar kullanıldıklarında indirilir ve indirilene kadar çevrimdışı kullanılamaz. İndirilen kaynaklar saklanır ve eşitleme sırasında güncellenir. Tümünü indir seçeneğine geçmeden önce eksik kaynaklar indirilir. Dışa aktarmadan önce bunun için gereken eksik kaynaklar indirilir",
 	"syncAssetDownloadAll": "Tümünü indir",
 	"syncAssetDownloadOnDemand": "Gerektiğinde indir",
 	"syncAssetDownloadModeUpdating": "Kaynak indirme modu güncelleniyor...",

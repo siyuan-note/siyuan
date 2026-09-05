@@ -37,7 +37,7 @@ import {
     unregisterCustomFont
 } from "../../util/customFont";
 import {showMessage} from "../../dialog/message";
-import {getUniqueFontFamilies, IFontItem, loadSystemFonts} from "../../util/systemFont";
+import {IFontItem, loadSystemFonts} from "../../util/systemFont";
 import {
     shouldShowBootAppearanceSetting,
     type IBootAppearanceListItem,
@@ -337,9 +337,7 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
         );
     };
     bindSelectedFontList(selectedListElement, () => selectedFonts, persistFonts, (chip, index, event) => {
-        if (configKey !== "globalFontFamilies") {
-            openFontWeightMenu(chip, index, event);
-        }
+        openFontWeightMenu(chip, index, event);
     });
     mountedFontConfigUpdaters.set(fontConfigElement, updateFontInput);
     updateFontInput(getFontConfig());
@@ -351,9 +349,7 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
             console.warn("load font list failed", error);
             return;
         }
-        const {nativeMobile, customFonts} = availableFonts;
-        const fontItems = configKey === "globalFontFamilies" ?
-            getUniqueFontFamilies(availableFonts.fontItems) : availableFonts.fontItems;
+        const {nativeMobile, customFonts, fontItems} = availableFonts;
         selectedFonts = getConfiguredFonts(getFontConfig(), configKey).map((selectedFont) =>
             fontItems.find((font) => font.family === selectedFont.family && font.weight === selectedFont.weight) ||
             selectedFont);

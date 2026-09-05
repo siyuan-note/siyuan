@@ -2,10 +2,58 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     getPendingBlockFocusMode,
+    getSavedTabFocusTarget,
     getZoomFocusScrollAttr,
     hasFocusOffsets,
     shouldFocusAfterZoom
 } from "./focusRestore";
+
+class FocusElement {
+    children: FocusElement[] = [];
+    parentElement: FocusElement;
+    classList = {contains: (name: string) => this.kind === name};
+    constructor(private kind = "", private attrs: Record<string, string> = {}) {}
+    append(child: FocusElement) {
+        this.children.push(child);
+        child.parentElement = this;
+        return child;
+    }
+    closest(selector: string): FocusElement {
+        return this.kind === selector.substring(1) ? this : this.parentElement?.closest(selector);
+    }
+    getAttribute(name: string) {
+        return this.attrs[name];
+    }
+    asElement() {
+        return this as unknown as Element;
+    }
+}
+
+describe("saved focus respects persisted tab selection", () => {
+    it("redirects stale first-page focus before visual tab initialization", () => {
+        const tabs = new FocusElement("tabs", {"tabs-active-id": "second"});
+        const first = tabs.append(new FocusElement("tab-item", {"data-node-id": "first"}));
+        const second = tabs.append(new FocusElement("tab-item", {"data-node-id": "second"}));
+        const oldFocus = first.append(new FocusElement());
+        const activeFocus = second.append(new FocusElement());
+        assert.equal(getSavedTabFocusTarget(oldFocus.asElement()), tabs.asElement());
+        assert.equal(getSavedTabFocusTarget(activeFocus.asElement()), activeFocus.asElement());
+    });
+    it("uses the outermost hidden page in nested tabs", () => {
+        const outer = new FocusElement("tabs", {"tabs-active-id": "outer-active"});
+        const hidden = outer.append(new FocusElement("tab-item", {"data-node-id": "outer-hidden"}));
+        outer.append(new FocusElement("tab-item", {"data-node-id": "outer-active"}));
+        const inner = hidden.append(new FocusElement("tabs", {"tabs-active-id": "inner-active"}));
+        const first = inner.append(new FocusElement("tab-item", {"data-node-id": "inner-hidden"}));
+        inner.append(new FocusElement("tab-item", {"data-node-id": "inner-active"}));
+        assert.equal(getSavedTabFocusTarget(first.asElement()), outer.asElement());
+    });
+    it("leaves ordinary focus and a missing target unchanged", () => {
+        const paragraph = new FocusElement();
+        assert.equal(getSavedTabFocusTarget(paragraph.asElement()), paragraph.asElement());
+        assert.equal(getSavedTabFocusTarget(undefined), undefined);
+    });
+});
 
 describe("shouldFocusAfterZoom", () => {
     it("focuses a block entered through regular navigation", () => {

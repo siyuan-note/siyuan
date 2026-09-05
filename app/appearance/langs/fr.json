@@ -5,7 +5,7 @@
 	"imageCopyFailed": "Impossible de copier l’image. Vérifiez qu’elle peut être chargée et réessayez.",
 	"syncAssetSnapshotIncomplete": "Le contenu de certaines ressources dépend du stockage cloud ; cet instantané local est incomplet",
 	"syncAssetDownloadMode": "Téléchargement des ressources",
-	"syncAssetDownloadModeTip": "S’applique uniquement à cet appareil. Les ressources à la demande sont téléchargées lors de leur utilisation et restent indisponibles hors ligne jusque-là. Les ressources téléchargées sont conservées et mises à jour lors de la synchronisation. Le passage à Tout télécharger commence par télécharger les ressources manquantes",
+	"syncAssetDownloadModeTip": "S’applique uniquement à cet appareil. Les ressources à la demande sont téléchargées lors de leur utilisation et restent indisponibles hors ligne jusque-là. Les ressources téléchargées sont conservées et mises à jour lors de la synchronisation. Le passage à Tout télécharger commence par télécharger les ressources manquantes. Les ressources manquantes nécessaires à l’exportation sont téléchargées avant celle-ci",
 	"syncAssetDownloadAll": "Tout télécharger",
 	"syncAssetDownloadOnDemand": "Télécharger à la demande",
 	"syncAssetDownloadModeUpdating": "Mise à jour du mode de téléchargement des ressources...",

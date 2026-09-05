@@ -5,7 +5,7 @@
 	"imageCopyFailed": "Das Bild konnte nicht kopiert werden. Prüfe, ob es geladen werden kann, und versuche es erneut.",
 	"syncAssetSnapshotIncomplete": "Einige Ressourceninhalte sind vom Cloudspeicher abhängig; dieser lokale Schnappschuss ist unvollständig",
 	"syncAssetDownloadMode": "Ressourcendownloads",
-	"syncAssetDownloadModeTip": "Gilt nur für dieses Gerät. Ressourcen werden bei Bedarf heruntergeladen und sind bis dahin offline nicht verfügbar. Heruntergeladene Ressourcen bleiben gespeichert und werden bei der Synchronisierung aktualisiert. Beim Wechsel zu Alle herunterladen werden zuerst fehlende Ressourcen heruntergeladen",
+	"syncAssetDownloadModeTip": "Gilt nur für dieses Gerät. Ressourcen werden bei Bedarf heruntergeladen und sind bis dahin offline nicht verfügbar. Heruntergeladene Ressourcen bleiben gespeichert und werden bei der Synchronisierung aktualisiert. Beim Wechsel zu Alle herunterladen werden zuerst fehlende Ressourcen heruntergeladen. Vor dem Export werden die dafür benötigten fehlenden Ressourcen heruntergeladen",
 	"syncAssetDownloadAll": "Alle herunterladen",
 	"syncAssetDownloadOnDemand": "Bei Bedarf herunterladen",
 	"syncAssetDownloadModeUpdating": "Downloadmodus für Ressourcen wird aktualisiert...",

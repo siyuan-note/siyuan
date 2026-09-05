@@ -5,7 +5,7 @@
 	"imageCopyFailed": "无法复制图片，请确认图片能够加载后重试。",
 	"syncAssetSnapshotIncomplete": "部分资源文件内容依赖云端，本地快照尚不完整",
 	"syncAssetDownloadMode": "资源文件下载",
-	"syncAssetDownloadModeTip": "仅作用于当前设备；按需模式在使用资源文件时下载，未下载的资源文件离线不可用；已下载资源文件会保留并随同步更新；切换为全部下载前会先补齐缺失内容",
+	"syncAssetDownloadModeTip": "仅作用于当前设备；按需模式在使用资源文件时下载，未下载的资源文件离线不可用；已下载资源文件会保留并随同步更新；切换为全部下载前会先补齐缺失内容；导出前会先补齐所需资源文件",
 	"syncAssetDownloadAll": "全部下载",
 	"syncAssetDownloadOnDemand": "按需下载",
 	"syncAssetDownloadModeUpdating": "正在更新资源文件下载模式...",

@@ -5,7 +5,7 @@
 	"imageCopyFailed": "Nie można skopiować obrazu. Sprawdź, czy można go załadować, i spróbuj ponownie.",
 	"syncAssetSnapshotIncomplete": "Zawartość niektórych zasobów zależy od pamięci w chmurze; ta lokalna migawka jest niekompletna",
 	"syncAssetDownloadMode": "Pobieranie zasobów",
-	"syncAssetDownloadModeTip": "Dotyczy tylko tego urządzenia. Zasoby na żądanie są pobierane podczas użycia i do tego czasu są niedostępne offline. Pobrane zasoby są zachowywane i aktualizowane podczas synchronizacji. Przełączenie na Pobierz wszystkie najpierw pobiera brakujące zasoby",
+	"syncAssetDownloadModeTip": "Dotyczy tylko tego urządzenia. Zasoby na żądanie są pobierane podczas użycia i do tego czasu są niedostępne offline. Pobrane zasoby są zachowywane i aktualizowane podczas synchronizacji. Przełączenie na Pobierz wszystkie najpierw pobiera brakujące zasoby. Przed eksportem pobierane są brakujące zasoby potrzebne do eksportu",
 	"syncAssetDownloadAll": "Pobierz wszystkie",
 	"syncAssetDownloadOnDemand": "Pobieraj na żądanie",
 	"syncAssetDownloadModeUpdating": "Aktualizowanie trybu pobierania zasobów...",

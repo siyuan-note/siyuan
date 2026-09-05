@@ -1,4 +1,11 @@
 {
+	"headingBatch": "Convertir les niveaux de titre par lot",
+	"headingBatchSource": "Niveau d’origine",
+	"headingBatchTarget": "Niveau cible",
+	"headingBatchTip": "Convertir uniquement le niveau indiqué ; les autres niveaux de titre restent inchangés",
+	"headingBatchConvert": "Convertir {count} titres",
+	"headingBatchScope": "Document actuel : {title}",
+	"headingBatchOption": "{heading} ({count})",
 	"allChangelogs": "Tous les journaux des modifications",
 	"changelog": "Journal des modifications",
 	"checkBlockRef": "Vérifier les références de blocs avant de supprimer ou couper",

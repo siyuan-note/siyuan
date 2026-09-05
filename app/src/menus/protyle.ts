@@ -613,30 +613,32 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 }
             });
         }
-        submenu.push({
-            id: "defBlock",
-            iconHTML: "",
-            label: window.siyuan.languages.defBlock,
-            click() {
-                fetchPost("/api/block/swapBlockRef", {
-                    refID: id,
-                    defID: refBlockId,
-                    includeChildren: false
-                });
-            }
-        });
-        submenu.push({
-            id: "defBlockChildren",
-            iconHTML: "",
-            label: window.siyuan.languages.defBlockChildren,
-            click() {
-                fetchPost("/api/block/swapBlockRef", {
-                    refID: id,
-                    defID: refBlockId,
-                    includeChildren: true
-                });
-            }
-        });
+        if (!protyle.lite) {
+            submenu.push({
+                id: "defBlock",
+                iconHTML: "",
+                label: window.siyuan.languages.defBlock,
+                click() {
+                    fetchPost("/api/block/swapBlockRef", {
+                        refID: id,
+                        defID: refBlockId,
+                        includeChildren: false
+                    });
+                }
+            });
+            submenu.push({
+                id: "defBlockChildren",
+                iconHTML: "",
+                label: window.siyuan.languages.defBlockChildren,
+                click() {
+                    fetchPost("/api/block/swapBlockRef", {
+                        refID: id,
+                        defID: refBlockId,
+                        includeChildren: true
+                    });
+                }
+            });
+        }
         window.siyuan.menus.menu.append(new MenuItem({
             id: "turnInto",
             label: window.siyuan.languages.turnInto,
@@ -947,6 +949,9 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
 };
 
 export const enterBack = (protyle: IProtyle, id: string, focusPosition?: { start: number, end: number }) => {
+    if (protyle.lite) {
+        return;
+    }
     if (!protyle.block.showAll) {
         const parentDocumentID = getParentDocumentID({
             path: protyle.path,
@@ -980,7 +985,7 @@ export const zoomOut = (options: {
     reload?: boolean,
     dataDocType?: string
 }) => {
-    if (options.protyle.options.backlinkData) {
+    if (options.protyle.lite || options.protyle.options.backlinkData) {
         return;
     }
     if (options.id !== options.protyle.block.rootID) {

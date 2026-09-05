@@ -61,6 +61,7 @@ import {
     getAVRowDropTarget,
     getBlockDragInsertPosition,
     getBlockDragoverTarget,
+    getMissingDragIds,
     getSameSuperBlockEdgeTarget,
     getSuperBlockResizeDropTarget,
     getTopListDragTarget,
@@ -1531,15 +1532,19 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     window.siyuan.dragElement.querySelectorAll(queryClass.substring(0, queryClass.length - 1)).forEach(elementItem => {
                         appendSourceElement(elementItem);
                     });
-                } else if (window.siyuan.config.system.workspaceDir.toLowerCase() === gutterTypes[3]) {
-                    // 跨窗口拖拽
+                }
+                const missingSourceIds = getMissingDragIds(selectedIds, sourceElementIds);
+                if (missingSourceIds.length > 0 &&
+                    window.siyuan.config.system.workspaceDir.toLowerCase() === gutterTypes[3]) {
+                    // 跨窗口拖拽或动态加载卸载源块时，从拖拽快照中补齐源块
                     // 不能跨工作区域拖拽 https://github.com/siyuan-note/siyuan/issues/13582
                     const dragData = parseBlockDragData(event.dataTransfer.getData(gutterType));
                     const sourceProtyleElement = document.createElement("div");
                     sourceProtyleElement.setAttribute(DRAG_SOURCE_NOTEBOOK_ID, dragData.notebookID);
                     sourceProtyleElement.setAttribute(DRAG_SOURCE_ROOT_ID, dragData.rootID);
                     sourceProtyleElement.innerHTML = dragData.html;
-                    sourceProtyleElement.querySelectorAll(queryClass.substring(0, queryClass.length - 1)).forEach(elementItem => {
+                    const missingSourceSelector = missingSourceIds.map(id => `[data-node-id="${id}"]`).join(",");
+                    sourceProtyleElement.querySelectorAll(missingSourceSelector).forEach(elementItem => {
                         appendSourceElement(elementItem);
                     });
                 }
@@ -2390,7 +2395,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 操作提示：上半=操作对象名称，下半=操作文案
         const attributeViewTarget = getAttributeViewDropTarget(event);
         const isAvTarget = attributeViewTarget.isItem;
-        if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
+        const isFileTreeDrag = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE);
+        const fileTreeIds = isFileTreeDrag ? window.siyuan.dragElement?.innerText ||
+            event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE) : "";
+        if (isFileTreeDrag) {
             // 文档面板拖拽文档到编辑器
             if (attributeViewTarget.isAttributeView && !isAvTarget) {
                 event.preventDefault();
@@ -2450,12 +2458,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (!gutterType && !window.siyuan.dragElement) {
+        if (!gutterType && !window.siyuan.dragElement && !fileTreeIds) {
             // https://github.com/siyuan-note/siyuan/issues/6436
             event.preventDefault();
             return;
         }
-        const fileTreeIds = (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE) && window.siyuan.dragElement) ? window.siyuan.dragElement.innerText : "";
         const isFileTreeRef = fileTreeIds.indexOf("-") > -1 && !event.altKey && !isAvTarget;
         if (isFileTreeRef || (event.altKey && fileTreeIds.indexOf("-") === -1)) {
             // 插入引用（行级）时走光标定位语义，清除全部块级拖拽指示。
@@ -3088,11 +3095,16 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             hideDragTip();
         }
     });
-    editorElement.addEventListener("dragenter", (event) => {
+    editorElement.addEventListener("dragenter", (event: DragEvent) => {
         event.preventDefault();
+        if (!event.isTrusted) {
+            // 合成拖拽会在动态加载后重新命中节点，不依赖已被移除节点的 dragleave 来平衡计数。
+            counter = 0;
+        }
         counter++;
     });
     editorElement.addEventListener("dragend", () => {
+        counter = 0;
         if (window.siyuan.dragElement) {
             window.siyuan.dragElement.style.opacity = "";
             window.siyuan.dragElement = undefined;

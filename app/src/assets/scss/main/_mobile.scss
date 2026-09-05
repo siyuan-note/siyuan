@@ -219,6 +219,11 @@ body.mobile-keyboard--open {
     color: var(--b3-theme-on-surface);
     background: transparent;
 
+    &[disabled] {
+      opacity: .38;
+      cursor: not-allowed;
+    }
+
     svg {
       width: 20px;
       height: 20px;

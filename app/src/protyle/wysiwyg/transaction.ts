@@ -1389,6 +1389,9 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
         });
     });
     queueHeadingNumberRefresh(protyle, operations);
+    if (operations.some(operation => operation.context?.headingBatchRootID === protyle.block.rootID)) {
+        reloadProtyle(protyle, false);
+    }
 };
 
 export const turnsIntoOneTransaction = async (options: {

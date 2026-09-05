@@ -1,4 +1,11 @@
 {
+	"headingBatch": "Kopniveaus in één keer omzetten",
+	"headingBatchSource": "Oorspronkelijk niveau",
+	"headingBatchTarget": "Doelniveau",
+	"headingBatchTip": "Alleen het opgegeven niveau omzetten; andere kopniveaus blijven ongewijzigd",
+	"headingBatchConvert": "{count} koppen omzetten",
+	"headingBatchScope": "Huidig document: {title}",
+	"headingBatchOption": "{heading} ({count})",
 	"allChangelogs": "Alle wijzigingslogboeken",
 	"changelog": "Wijzigingslogboek",
 	"checkBlockRef": "Blokverwijzingen controleren vóór verwijderen of knippen",

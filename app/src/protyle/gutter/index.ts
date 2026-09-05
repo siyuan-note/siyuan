@@ -312,6 +312,7 @@ export class Gutter {
             setDragTipGhost(ghostElement, 0, 0);
             event.dataTransfer.setDragImage(ghostElement, 0, 0);
             if (window.siyuan.touchDragActive) {
+                // 合成拖拽保留 DOM ghost 供指针跟随。
                 window.siyuan.touchDragGhost = ghostElement;
             } else {
                 setTimeout(() => {
@@ -352,7 +353,11 @@ export class Gutter {
                 once: true,
                 signal: cleanupController.signal,
             });
-            window.addEventListener("blur", restoreGutter, {once: true, signal: cleanupController.signal});
+            window.addEventListener("blur", () => {
+                if (!window.siyuan.touchDragActive) {
+                    restoreGutter();
+                }
+            }, {once: true, signal: cleanupController.signal});
             setTimeout(() => {
                 if (isGutterDragging && dragCleanupController === cleanupController) {
                     this.element.classList.add("protyle-gutters--dragging");

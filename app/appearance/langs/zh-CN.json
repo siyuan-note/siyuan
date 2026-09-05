@@ -1,4 +1,11 @@
 {
+	"headingBatch": "批量转换标题级别",
+	"headingBatchSource": "原级别",
+	"headingBatchTarget": "目标级别",
+	"headingBatchTip": "仅转换指定级别，其他标题级别保持不变",
+	"headingBatchConvert": "转换 {count} 个标题",
+	"headingBatchScope": "当前文档：{title}",
+	"headingBatchOption": "{heading}（{count} 个）",
 	"allChangelogs": "所有日志",
 	"changelog": "更新日志",
 	"checkBlockRef": "删除或剪切前检查块引用",

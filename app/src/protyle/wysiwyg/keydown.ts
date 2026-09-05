@@ -982,6 +982,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
                 selectElements.push(nodeElement);
             }
+            if (!protyle.gutter) {
+                window.siyuan.menus.menu.remove();
+                return;
+            }
             if (selectElements.length === 1) {
                 protyle.gutter.renderMenu(protyle, selectElements[0]);
             } else {

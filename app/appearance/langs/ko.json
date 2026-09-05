@@ -1,4 +1,11 @@
 {
+	"headingBatch": "제목 수준 일괄 변환",
+	"headingBatchSource": "원본 수준",
+	"headingBatchTarget": "대상 수준",
+	"headingBatchTip": "지정한 수준만 변환하며 다른 제목 수준은 변경하지 않습니다",
+	"headingBatchConvert": "제목 {count}개 변환",
+	"headingBatchScope": "현재 문서: {title}",
+	"headingBatchOption": "{heading} ({count}개)",
 	"allChangelogs": "모든 변경 로그",
 	"changelog": "변경 로그",
 	"checkBlockRef": "삭제하거나 잘라내기 전에 블록 참조 확인",

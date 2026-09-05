@@ -1,4 +1,11 @@
 {
+	"headingBatch": "Hromadná zmena úrovní nadpisov",
+	"headingBatchSource": "Pôvodná úroveň",
+	"headingBatchTarget": "Cieľová úroveň",
+	"headingBatchTip": "Zmeniť iba zadanú úroveň; ostatné úrovne nadpisov zostanú nezmenené",
+	"headingBatchConvert": "Zmeniť nadpisy ({count})",
+	"headingBatchScope": "Aktuálny dokument: {title}",
+	"headingBatchOption": "{heading} ({count})",
 	"allChangelogs": "Všetky denníky zmien",
 	"changelog": "Denník zmien",
 	"checkBlockRef": "Kontrolovať odkazy na bloky pred odstránením alebo vystrihnutím",

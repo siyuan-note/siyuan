@@ -1,4 +1,11 @@
 {
+	"headingBatch": "המרת רמות כותרת באצווה",
+	"headingBatchSource": "רמת המקור",
+	"headingBatchTarget": "רמת היעד",
+	"headingBatchTip": "המרת הרמה שנבחרה בלבד, ללא שינוי ברמות הכותרת האחרות",
+	"headingBatchConvert": "המרת {count} כותרות",
+	"headingBatchScope": "המסמך הנוכחי: {title}",
+	"headingBatchOption": "{heading} ({count})",
 	"allChangelogs": "כל יומני השינויים",
 	"changelog": "יומן שינויים",
 	"checkBlockRef": "בדיקת הפניות לבלוקים לפני מחיקה או גזירה",

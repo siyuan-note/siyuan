@@ -1,4 +1,11 @@
 {
+	"headingBatch": "Массовое изменение уровней заголовков",
+	"headingBatchSource": "Исходный уровень",
+	"headingBatchTarget": "Целевой уровень",
+	"headingBatchTip": "Изменить только указанный уровень; остальные уровни заголовков останутся без изменений",
+	"headingBatchConvert": "Изменить заголовки ({count})",
+	"headingBatchScope": "Текущий документ: {title}",
+	"headingBatchOption": "{heading} ({count})",
 	"allChangelogs": "Все журналы изменений",
 	"changelog": "Журнал изменений",
 	"checkBlockRef": "Проверять ссылки на блоки перед удалением или вырезанием",

@@ -92,6 +92,250 @@ let workspaces = []; // workspaceDir, id, port, webContentsId, browserWindow, tr
 const windowKernelTargets = new Map();
 const initializedWindowIds = new Set();
 const pendingRemoteOpenURLs = [];
+const blockDragSessions = new Map();
+const blockDragWindowFocusOrder = new Map();
+let blockDragWindowFocusSequence = 0;
+
+const getBlockDragSessionKey = (sourceWebContentsId, dragId) => {
+    return sourceWebContentsId + ":" + dragId;
+};
+
+const getBlockDragWindow = (webContentsId) => {
+    return BrowserWindow.getAllWindows().find((item) => !item.isDestroyed() &&
+        !item.webContents.isDestroyed() && item.webContents.id === webContentsId);
+};
+
+const sendBlockDragMessage = (webContentsId, data) => {
+    const targetWindow = getBlockDragWindow(webContentsId);
+    if (!targetWindow) {
+        return false;
+    }
+    try {
+        targetWindow.webContents.send("siyuan-block-drag", data);
+        return true;
+    } catch {
+        return false;
+    }
+};
+
+const normalizeBlockDragPoint = (point) => {
+    if (!point || typeof point !== "object" || !Number.isFinite(point.screenX) ||
+        !Number.isFinite(point.screenY)) {
+        return;
+    }
+    return {
+        ...point,
+        screenX: point.screenX,
+        screenY: point.screenY,
+        clientX: Number.isFinite(point.clientX) ? point.clientX : 0,
+        clientY: Number.isFinite(point.clientY) ? point.clientY : 0,
+        altKey: !!point.altKey,
+        ctrlKey: !!point.ctrlKey,
+        metaKey: !!point.metaKey,
+        sequence: Number.isSafeInteger(point.sequence) ? point.sequence : 0,
+        shiftKey: !!point.shiftKey,
+    };
+};
+
+const normalizeBlockDragPayload = (payload) => {
+    if (!payload || typeof payload !== "object" || !Array.isArray(payload.items) ||
+        !payload.items.every((item) => item && typeof item.type === "string" && typeof item.data === "string")) {
+        return;
+    }
+    const normalizedPayload = {
+        items: payload.items.map((item) => ({type: item.type, data: item.data})),
+        dragTitle: typeof payload.dragTitle === "string" ? payload.dragTitle : "",
+    };
+    if (typeof payload.effectAllowed === "string") {
+        normalizedPayload.effectAllowed = payload.effectAllowed;
+    }
+    return normalizedPayload;
+};
+
+const isPointInBounds = (point, bounds) => {
+    return point.screenX >= bounds.x && point.screenX < bounds.x + bounds.width &&
+        point.screenY >= bounds.y && point.screenY < bounds.y + bounds.height;
+};
+
+const getBlockDragTarget = (dragSession) => {
+    if (!dragSession.point) {
+        return;
+    }
+    const sourceWindow = getBlockDragWindow(dragSession.sourceWebContentsId);
+    if (!sourceWindow) {
+        return;
+    }
+    const sourceContainsPoint = isPointInBounds(dragSession.point, sourceWindow.getBounds());
+    const candidates = BrowserWindow.getAllWindows().filter((item) => {
+        if (item.isDestroyed() || item.webContents.isDestroyed() ||
+            item.webContents.id === dragSession.sourceWebContentsId ||
+            !initializedWindowIds.has(item.webContents.id) || !item.isVisible() || item.isMinimized()) {
+            return false;
+        }
+        const kernelTarget = windowKernelTargets.get(item.webContents.id);
+        return kernelTarget?.origin === dragSession.kernelOrigin && isPointInBounds(dragSession.point,
+            item.getContentBounds());
+    });
+    candidates.sort((first, second) => {
+        const alwaysOnTopDiff = Number(second.isAlwaysOnTop()) - Number(first.isAlwaysOnTop());
+        if (alwaysOnTopDiff !== 0) {
+            return alwaysOnTopDiff;
+        }
+        return (blockDragWindowFocusOrder.get(second.webContents.id) || 0) -
+            (blockDragWindowFocusOrder.get(first.webContents.id) || 0);
+    });
+    const targetWindow = candidates[0];
+    if (!targetWindow || (sourceContainsPoint &&
+        (sourceWindow.isAlwaysOnTop() || !targetWindow.isAlwaysOnTop()))) {
+        // 普通目标窗口位于源窗口后方时，不应让指针穿透源窗口。
+        return;
+    }
+    const contentBounds = targetWindow.getContentBounds();
+    const zoomFactor = targetWindow.webContents.getZoomFactor() || 1;
+    return {
+        webContentsId: targetWindow.webContents.id,
+        point: {
+            ...dragSession.point,
+            clientX: (dragSession.point.screenX - contentBounds.x) / zoomFactor,
+            clientY: (dragSession.point.screenY - contentBounds.y) / zoomFactor,
+        },
+    };
+};
+
+const leaveBlockDragTarget = (dragSession) => {
+    if (!dragSession.targetWebContentsId) {
+        return;
+    }
+    sendBlockDragMessage(dragSession.targetWebContentsId, {
+        phase: "leave",
+        dragId: dragSession.dragId,
+    });
+    dragSession.targetWebContentsId = undefined;
+};
+
+const sendBlockDragRoute = (dragSession, remote, sequence = dragSession.point?.sequence) => {
+    sendBlockDragMessage(dragSession.sourceWebContentsId, {
+        phase: "route",
+        dragId: dragSession.dragId,
+        remote,
+        sequence,
+    });
+};
+
+const routeBlockDragMove = (dragSession, notifySource = true) => {
+    const target = getBlockDragTarget(dragSession);
+    if (!target) {
+        leaveBlockDragTarget(dragSession);
+        if (notifySource) {
+            sendBlockDragRoute(dragSession, false);
+        }
+        return;
+    }
+    if (!dragSession.payload) {
+        if (!dragSession.payloadRequested && sendBlockDragMessage(dragSession.sourceWebContentsId, {
+            phase: "request",
+            dragId: dragSession.dragId,
+        })) {
+            dragSession.payloadRequested = true;
+        }
+        if (notifySource) {
+            sendBlockDragRoute(dragSession, true);
+        }
+        return {target, ready: false};
+    }
+    if (dragSession.targetWebContentsId !== target.webContentsId) {
+        leaveBlockDragTarget(dragSession);
+        dragSession.targetWebContentsId = target.webContentsId;
+        if (!sendBlockDragMessage(target.webContentsId, {
+            phase: "enter",
+            dragId: dragSession.dragId,
+            point: target.point,
+            payload: dragSession.payload,
+        })) {
+            dragSession.targetWebContentsId = undefined;
+            if (notifySource) {
+                sendBlockDragRoute(dragSession, false);
+            }
+            return;
+        }
+    }
+    if (!sendBlockDragMessage(target.webContentsId, {
+        phase: "move",
+        dragId: dragSession.dragId,
+        point: target.point,
+    })) {
+        dragSession.targetWebContentsId = undefined;
+        if (notifySource) {
+            sendBlockDragRoute(dragSession, false);
+        }
+        return;
+    }
+    if (notifySource) {
+        sendBlockDragRoute(dragSession, true);
+    }
+    return {target, ready: true};
+};
+
+const dispatchBlockDragDrop = (dragSession) => {
+    const dragRoute = routeBlockDragMove(dragSession, false);
+    if (dragRoute?.target && !dragRoute.ready) {
+        dragSession.waitingForDropPayload = true;
+        return;
+    }
+    dragSession.waitingForDropPayload = false;
+    if (dragRoute?.ready && dragRoute.target.webContentsId === dragSession.targetWebContentsId &&
+        dragSession.payload) {
+        if (sendBlockDragMessage(dragRoute.target.webContentsId, {
+            phase: "drop",
+            dragId: dragSession.dragId,
+            point: dragRoute.target.point,
+            payload: dragSession.payload,
+            sequence: dragSession.pendingDropSequence,
+            sourceWebContentsId: dragSession.sourceWebContentsId,
+        })) {
+            dragSession.dropSent = true;
+            return;
+        }
+        leaveBlockDragTarget(dragSession);
+    }
+    const dropSequence = dragSession.pendingDropSequence;
+    dragSession.pendingDropSequence = undefined;
+    sendBlockDragRoute(dragSession, false, dropSequence);
+};
+
+const finishBlockDragSession = (sessionKey, dragSession) => {
+    if (dragSession.targetWebContentsId) {
+        sendBlockDragMessage(dragSession.targetWebContentsId, {
+            phase: "end",
+            dragId: dragSession.dragId,
+        });
+    }
+    blockDragSessions.delete(sessionKey);
+};
+
+const cleanupBlockDragSessions = (webContentsId) => {
+    for (const [sessionKey, dragSession] of blockDragSessions) {
+        if (dragSession.sourceWebContentsId === webContentsId) {
+            finishBlockDragSession(sessionKey, dragSession);
+        } else if (dragSession.targetWebContentsId === webContentsId) {
+            // 目标渲染上下文失效后保留源窗口的拖拽会话，以便指针继续进入其他窗口。
+            dragSession.targetWebContentsId = undefined;
+            if (dragSession.dropping) {
+                if (dragSession.pendingDropSequence !== undefined) {
+                    sendBlockDragRoute(dragSession, !!dragSession.dropSent, dragSession.pendingDropSequence);
+                    dragSession.pendingDropSequence = undefined;
+                }
+            } else {
+                routeBlockDragMove(dragSession);
+            }
+        }
+    }
+};
+
+const cleanupBlockDragWindow = (webContentsId) => {
+    blockDragWindowFocusOrder.delete(webContentsId);
+    cleanupBlockDragSessions(webContentsId);
+};
 
 const flushPendingRemoteOpenURLs = (window) => {
     if (!window || window.isDestroyed()) {
@@ -898,6 +1142,10 @@ const getKernelTarget = (target = kernelPort) => {
 const rememberWindowKernelTarget = (window, target) => {
     const webContentsId = window.webContents.id;
     windowKernelTargets.set(webContentsId, target);
+    blockDragWindowFocusOrder.set(webContentsId, ++blockDragWindowFocusSequence);
+    window.on("focus", () => {
+        blockDragWindowFocusOrder.set(webContentsId, ++blockDragWindowFocusSequence);
+    });
     if (target.mode === "remote") {
         window.webContents.on("will-frame-navigate", (event) => {
             if (shouldBlockRemoteFrameNavigation({isMainFrame: event.isMainFrame})) {
@@ -913,11 +1161,17 @@ const rememberWindowKernelTarget = (window, target) => {
     window.webContents.on("did-start-navigation", (details) => {
         if (details.isMainFrame && !details.isSameDocument) {
             initializedWindowIds.delete(webContentsId);
+            cleanupBlockDragSessions(webContentsId);
         }
+    });
+    window.webContents.on("render-process-gone", () => {
+        initializedWindowIds.delete(webContentsId);
+        cleanupBlockDragSessions(webContentsId);
     });
     window.webContents.once("destroyed", () => {
         initializedWindowIds.delete(webContentsId);
         windowKernelTargets.delete(webContentsId);
+        cleanupBlockDragWindow(webContentsId);
     });
 };
 
@@ -2384,6 +2638,7 @@ app.whenReady().then(() => {
     // 渲染进程崩溃监听，只有工作空间主窗口的非预期崩溃才会触发安全模式。
     app.on("render-process-gone", (event, webContents, details) => {
         writeLog("Render process gone [reason=" + details.reason + ", exitCode=" + details.exitCode + "]");
+        cleanupBlockDragSessions(webContents.id);
         if (updateInstallPromise) {
             writeLog("ignore renderer exit during update [webContentsId=" + webContents.id + "]");
             return;
@@ -3334,6 +3589,92 @@ app.whenReady().then(() => {
         BrowserWindow.getAllWindows().forEach(item => {
             item.webContents.send("siyuan-send-windows", data);
         });
+    });
+    ipcMain.on("siyuan-block-drag", (event, data) => {
+        if (!data || typeof data !== "object" || typeof data.dragId !== "string" || !data.dragId ||
+            !["begin", "move", "payload", "drop", "drop-ack", "end"].includes(data.phase)) {
+            return;
+        }
+        if (data.phase === "drop-ack") {
+            if (!Number.isSafeInteger(data.sourceWebContentsId) || !Number.isSafeInteger(data.sequence)) {
+                return;
+            }
+            const sourceSessionKey = getBlockDragSessionKey(data.sourceWebContentsId, data.dragId);
+            const sourceDragSession = blockDragSessions.get(sourceSessionKey);
+            if (!sourceDragSession || sourceDragSession.targetWebContentsId !== event.sender.id ||
+                sourceDragSession.pendingDropSequence !== data.sequence) {
+                return;
+            }
+            sourceDragSession.pendingDropSequence = undefined;
+            sourceDragSession.waitingForDropPayload = false;
+            sendBlockDragRoute(sourceDragSession, true, data.sequence);
+            return;
+        }
+        const sourceWebContentsId = event.sender.id;
+        const sessionKey = getBlockDragSessionKey(sourceWebContentsId, data.dragId);
+        if (data.phase === "begin") {
+            const kernelTarget = windowKernelTargets.get(sourceWebContentsId);
+            if (!kernelTarget || !initializedWindowIds.has(sourceWebContentsId)) {
+                return;
+            }
+            for (const [activeSessionKey, activeSession] of blockDragSessions) {
+                if (activeSession.sourceWebContentsId === sourceWebContentsId) {
+                    finishBlockDragSession(activeSessionKey, activeSession);
+                }
+            }
+            const point = normalizeBlockDragPoint(data.point);
+            const payload = normalizeBlockDragPayload(data.payload);
+            blockDragSessions.set(sessionKey, {
+                dragId: data.dragId,
+                sourceWebContentsId,
+                kernelOrigin: kernelTarget.origin,
+                point,
+                payload,
+                payloadRequested: false,
+                targetWebContentsId: undefined,
+            });
+            return;
+        }
+        const dragSession = blockDragSessions.get(sessionKey);
+        if (!dragSession) {
+            return;
+        }
+        if (dragSession.dropping && data.phase !== "end" &&
+            !(data.phase === "payload" && dragSession.waitingForDropPayload)) {
+            return;
+        }
+        const point = normalizeBlockDragPoint(data.point);
+        if (point) {
+            dragSession.point = point;
+        }
+        if (data.payload !== undefined) {
+            const payload = normalizeBlockDragPayload(data.payload);
+            if (payload) {
+                dragSession.payload = payload;
+                dragSession.payloadRequested = false;
+            }
+        }
+        switch (data.phase) {
+            case "move":
+                routeBlockDragMove(dragSession);
+                break;
+            case "payload":
+                if (dragSession.dropping) {
+                    dispatchBlockDragDrop(dragSession);
+                } else {
+                    routeBlockDragMove(dragSession);
+                }
+                break;
+            case "drop": {
+                dragSession.dropping = true;
+                dragSession.pendingDropSequence = dragSession.point?.sequence;
+                dispatchBlockDragDrop(dragSession);
+                break;
+            }
+            case "end":
+                finishBlockDragSession(sessionKey, dragSession);
+                break;
+        }
     });
     ipcMain.on("siyuan-auto-launch", (event, data) => {
         const kernelTarget = getWindowKernelTarget(event.sender.id);

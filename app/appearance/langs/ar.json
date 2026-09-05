@@ -1,4 +1,11 @@
 {
+	"headingBatch": "تحويل مستويات العناوين دفعة واحدة",
+	"headingBatchSource": "المستوى الأصلي",
+	"headingBatchTarget": "المستوى المستهدف",
+	"headingBatchTip": "تحويل المستوى المحدد فقط مع إبقاء مستويات العناوين الأخرى دون تغيير",
+	"headingBatchConvert": "تحويل العناوين ({count})",
+	"headingBatchScope": "المستند الحالي: {title}",
+	"headingBatchOption": "{heading} ({count})",
 	"allChangelogs": "جميع سجلات التغييرات",
 	"changelog": "سجل التغييرات",
 	"checkBlockRef": "التحقق من مراجع الكتل قبل الحذف أو القص",

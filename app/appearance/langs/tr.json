@@ -1,4 +1,11 @@
 {
+	"headingBatch": "Başlık düzeylerini toplu dönüştür",
+	"headingBatchSource": "Kaynak düzey",
+	"headingBatchTarget": "Hedef düzey",
+	"headingBatchTip": "Yalnızca belirtilen düzeyi dönüştür; diğer başlık düzeyleri değişmez",
+	"headingBatchConvert": "{count} başlığı dönüştür",
+	"headingBatchScope": "Geçerli belge: {title}",
+	"headingBatchOption": "{heading} ({count})",
 	"allChangelogs": "Tüm değişiklik günlükleri",
 	"changelog": "Değişiklik günlüğü",
 	"checkBlockRef": "Silmeden veya kesmeden önce blok başvurularını denetle",

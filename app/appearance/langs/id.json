@@ -1,4 +1,11 @@
 {
+	"headingBatch": "Konversi tingkat judul secara massal",
+	"headingBatchSource": "Tingkat asal",
+	"headingBatchTarget": "Tingkat tujuan",
+	"headingBatchTip": "Hanya konversi tingkat yang ditentukan; tingkat judul lainnya tidak berubah",
+	"headingBatchConvert": "Konversi {count} judul",
+	"headingBatchScope": "Dokumen saat ini: {title}",
+	"headingBatchOption": "{heading} ({count})",
 	"allChangelogs": "Semua catatan perubahan",
 	"changelog": "Catatan perubahan",
 	"checkBlockRef": "Periksa referensi blok sebelum menghapus atau memotong",

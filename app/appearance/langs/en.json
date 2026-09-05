@@ -1,4 +1,11 @@
 {
+	"headingBatch": "Batch convert heading levels",
+	"headingBatchSource": "Source level",
+	"headingBatchTarget": "Target level",
+	"headingBatchTip": "Only convert the specified level; leave other heading levels unchanged",
+	"headingBatchConvert": "Convert {count} headings",
+	"headingBatchScope": "Current document: {title}",
+	"headingBatchOption": "{heading} ({count})",
 	"allChangelogs": "All changelogs",
 	"changelog": "Changelog",
 	"checkBlockRef": "Check block references before deleting or cutting",

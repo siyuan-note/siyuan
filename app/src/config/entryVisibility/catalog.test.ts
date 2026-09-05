@@ -57,6 +57,7 @@ const slashMenuBuiltinOrder = [
     "orderedList",
     "check",
     "quote",
+    "tabs",
     "calloutNote",
     "calloutTip",
     "calloutImportant",
@@ -453,7 +454,7 @@ test("slash menu catalog follows the built-in hint order", () => {
     assert.deepEqual(section?.children.map((item) => item.key), ["menu"]);
     const children = getEntryCatalogChildren(SLASH_MENU_ROOT_PATH);
     assert.deepEqual(children.map((item) => item.key), slashMenuBuiltinOrder);
-    assert.equal(children.filter((item) => item.type === "entry").length, 63);
+    assert.equal(children.filter((item) => item.type === "entry").length, 64);
     assert.equal(children.filter((item) => item.type === "separator").length, 5);
     assert.equal(children.every((item) => item.simple), true);
 });
@@ -928,6 +929,27 @@ test("configuration labels distinguish block scopes and size controls", () => {
             Reflect.deleteProperty(globalThis, "window");
         }
     }
+});
+
+test("document tree creation entries match menu order and remain available in the Simple profile", () => {
+    const entries = getEntryCatalogChildren("docTree.document");
+    const creationKeys = ["newDocAbove", "newDocBelow", "newSiblingDoc"];
+    assert.deepEqual(entries.slice(0, 6).map((item) => item.key), [
+        "openDocument", ...creationKeys, "separator_1", "copy",
+    ]);
+    creationKeys.forEach((key) => {
+        const entry = getEntryCatalogNode(`docTree.document.${key}`);
+        assert.equal(entry?.type, "entry");
+        assert.equal(entry?.simple, true);
+    });
+    assert.equal(entries[4].type, "separator");
+    assert.equal(getEntryCatalogNode("docTree.documents.newSiblingDoc"), undefined);
+
+    const source = readFileSync(resolve(process.cwd(), "src/menus/navigation.ts"), "utf8");
+    const menuSource = source.slice(source.indexOf("export const initFileMenu"));
+    const ids = Array.from(menuSource.matchAll(/id: "([^"]+)"/g), (match) => match[1]);
+    const start = ids.indexOf("newDocAbove");
+    assert.deepEqual(ids.slice(start, start + 5), [...creationKeys, "separator_1", "copy"]);
 });
 
 test("document tree sort menus follow their scope inheritance options", () => {

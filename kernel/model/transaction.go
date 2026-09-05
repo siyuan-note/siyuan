@@ -297,6 +297,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewNewItemTemplates(op)
 			case "setAttrViewFilters":
 				ret = tx.doSetAttrViewFilters(op)
+			case "setAttrViewContextFilter":
+				ret = tx.doSetAttrViewContextFilter(op)
 			case "setAttrViewColRelationFilters":
 				ret = tx.doSetAttrViewColRelationFilters(op)
 			case "setAttrViewColRollupFilters":
@@ -343,7 +345,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				operations := []*Operation{op}
 				for nextIndex := operationIndex + 1; nextIndex < len(tx.DoOperations); nextIndex++ {
 					nextOperation := tx.DoOperations[nextIndex]
-					if "updateAttrViewCell" != nextOperation.Action || op.AvID != nextOperation.AvID {
+					if "updateAttrViewCell" != nextOperation.Action || op.AvID != nextOperation.AvID ||
+						op.BlockID != nextOperation.BlockID {
 						break
 					}
 					operations = append(operations, nextOperation)
@@ -1946,14 +1949,16 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	oldNode.InsertAfter(updatedNode)
 	oldNode.Unlink()
 
-	if needUnfoldParentHeading {
+	batchRootID, _ := operation.Context["headingBatchRootID"].(string)
+	preserveHeadingFold := batchRootID == tree.Root.ID && oldNode.Type == ast.NodeHeading && updatedNode.Type == ast.NodeHeading
+	if needUnfoldParentHeading && !preserveHeadingFold {
 		newParentFoldedHeading := treenode.GetParentFoldedHeading(updatedNode)
 		if nil == oldParentFoldedHeading || (nil != newParentFoldedHeading && oldParentFoldedHeading.ID != newParentFoldedHeading.ID) {
 			unfoldHeading(newParentFoldedHeading, updatedNode)
 		}
 	}
 
-	if needInsertAfterParentHeading {
+	if needInsertAfterParentHeading && !preserveHeadingFold {
 		insertDom := data
 		if 2 == len(tx.DoOperations) && "foldHeading" == tx.DoOperations[1].Action {
 			treenode.SetSelfFolded(updatedNode, true)
@@ -1998,7 +2003,7 @@ func unfoldHeading(heading, currentNode *ast.Node) {
 }
 
 func getRefDefIDs(node *ast.Node) (refDefIDs []string) {
-	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithTabTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
@@ -2424,6 +2429,10 @@ func (tx *Transaction) structureOperationSummary() string {
 }
 
 func (tx *Transaction) validateStructureChanges() (ret *TxErr) {
+	for _, tree := range tx.trees {
+		treenode.NormalizeTabs(tree.Root)
+		treenode.UpgradeSpec(tree)
+	}
 	for node := range tx.structureCheckNodes {
 		if !isNodeInDocument(node) {
 			continue
@@ -3003,7 +3012,7 @@ type changedDefNode struct {
 }
 
 func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (changed bool, defNodes []*changedDefNode) {
-	ast.Walk(refNode, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithTabTitles(refNode, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}

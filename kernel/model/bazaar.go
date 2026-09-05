@@ -557,7 +557,7 @@ func finishInstall(pkgType string, items []batchInstallItem, themeOptions *Theme
 			}
 		}
 		if 0 < reloadPluginSet.Size() {
-			PushReloadPlugin(nil, nil, reloadPluginSet, nil, "")
+			PushReloadPlugin(nil, nil, reloadPluginSet, nil, "", "")
 		}
 	case "themes":
 		for _, item := range items {
@@ -724,7 +724,7 @@ func UninstallPackage(pkgType, packageName string) error {
 		savePetals(petals)
 
 		uninstallPluginSet := hashset.New(packageName)
-		PushReloadPlugin(uninstallPluginSet, nil, nil, nil, "")
+		PushReloadPlugin(uninstallPluginSet, nil, nil, nil, "", "")
 	case "themes":
 		InitAppearance()
 		WatchThemes()

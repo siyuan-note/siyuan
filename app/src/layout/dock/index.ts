@@ -481,6 +481,7 @@ export class Dock {
 
     private applyFloatingState(isSaveLayout: boolean, preferredSize?: number) {
         this.clearDockHoverTimeout();
+        window.clearTimeout(this.hideResizeTimeout);
         const hasActive = this.hasActive();
         this.resetDockPosition(hasActive, preferredSize);
         this.layout.element.style.opacity = "";
@@ -902,7 +903,7 @@ export class Dock {
             if (!this.isFloating()) {
                 this.layout.element.style.opacity = "";
                 this.hideResizeTimeout = window.setTimeout(() => {
-                    if (this.panelVisible && this.hasActive()) {
+                    if (this.panelVisible && this.hasActive() && !this.isFloating()) {
                         this.resizeElement.classList.remove("fn__none");
                         adjustLayout();
                     }

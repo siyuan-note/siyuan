@@ -18,6 +18,13 @@ package conf
 
 import "testing"
 
+func TestNewEditorEnablesBlockRefCheck(t *testing.T) {
+	editor := NewEditor()
+	if nil == editor.CheckBlockRef || !*editor.CheckBlockRef {
+		t.Fatalf("block reference checks should be enabled by default: %#v", editor.CheckBlockRef)
+	}
+}
+
 func TestNormalizeBacklinkExpandCount(t *testing.T) {
 	tests := []struct {
 		name     string

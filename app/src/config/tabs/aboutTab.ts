@@ -5,6 +5,7 @@ import {getCloudURL} from "../util/about";
 import {openLink} from "../../editor/openLink";
 import {sendAppSetting} from "./appRuntime";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {openChangelog} from "../../boot/openChangelog";
 
 const registerAboutVersionGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("version", "");
@@ -18,6 +19,8 @@ const registerAboutVersionGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.checkUpdate,
             window.siyuan.languages.updateChannel,
             window.siyuan.languages.updateChannelTip,
+            window.siyuan.languages.changelog,
+            window.siyuan.languages.allChangelogs,
         ],
         html: genAboutVersionHtml,
         afterMount: mountAboutVersionSlot,
@@ -48,35 +51,53 @@ const registerAboutVersionGroup = (tab: SettingTabBuilder) => {
 
 const genAboutVersionHtml = (): string => {
     if (!getHostCapabilities().ownsKernel) {
-        return `<div class="fn__flex b3-label config-item config-wrap">
+        return `<div class="fn__flex b3-label config-item">
     <div class="fn__flex-1">
-        <div class="config-name">${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}</div>
+        ${genAboutVersionName()}
+        <div class="b3-label__text">${genAllChangelogsLink()}</div>
     </div>
+    <div class="fn__space"></div>
+    ${genAboutVersionActions(false)}
 </div>`;
     }
     if (window.siyuan.config.system.isMicrosoftStore) {
-        return `<div class="fn__flex b3-label config-item config-wrap">
+        return `<div class="fn__flex b3-label config-item">
     <div class="fn__flex-1">
-        <div class="config-name">${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}</div>
-        <div class="b3-label__text">${window.siyuan.languages.isMsStoreVerTip}</div>
-    </div>
-</div>`;
-    }
-    return `<div class="fn__flex b3-label config-item config-wrap">
-    <div class="fn__flex-1">
-        <div class="config-name">${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}</div>
-        <div class="b3-label__text">${window.siyuan.languages.downloadLatestVer}</div>
+        ${genAboutVersionName()}
+        <div class="b3-label__text">${window.siyuan.languages.isMsStoreVerTip}<span class="fn__space"></span>${genAllChangelogsLink()}</div>
     </div>
     <div class="fn__space"></div>
-    <div class="fn__flex-center fn__size200">
-        <button id="checkUpdateBtn" class="b3-button b3-button--outline fn__block">
-            <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}
-        </button>
+    ${genAboutVersionActions(false)}
+</div>`;
+    }
+    return `<div class="fn__flex b3-label config-item">
+    <div class="fn__flex-1">
+        ${genAboutVersionName()}
+        <div class="b3-label__text">${window.siyuan.languages.downloadLatestVer}<span class="fn__space"></span>${genAllChangelogsLink()}</div>
     </div>
+    <div class="fn__space"></div>
+    ${genAboutVersionActions(true)}
 </div>`;
 };
 
+const genAboutVersionName = () => `<div class="config-name">${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}</div>`;
+
+const genAllChangelogsLink = () => `<a href="https://github.com/siyuan-note/siyuan/releases" target="_blank">${window.siyuan.languages.allChangelogs}</a>`;
+
+const genAboutVersionActions = (showCheckUpdate: boolean) => `<div class="fn__flex-center fn__flex-column fn__size200">
+    ${showCheckUpdate ? `<button id="checkUpdateBtn" class="b3-button b3-button--outline fn__block">
+        <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}
+    </button>
+    <div class="fn__hr--small"></div>` : ""}
+    <button id="viewChangelogBtn" class="b3-button b3-button--outline fn__block">
+        <svg><use xlink:href="#iconFileText"></use></svg>${window.siyuan.languages.changelog}
+    </button>
+</div>`;
+
 const mountAboutVersionSlot = (root: HTMLElement) => {
+    root.querySelector("#viewChangelogBtn")?.addEventListener("click", () => {
+        openChangelog(true);
+    });
     const updateElement = root.querySelector("#checkUpdateBtn") as HTMLButtonElement | null;
     updateElement?.addEventListener("click", () => {
         const svgElement = updateElement.querySelector("svg");
@@ -104,7 +125,7 @@ const registerAboutInfoGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.sponsor,
             motto,
         ],
-        html: () => `<div class="fn__flex b3-label config-item config-wrap">
+        html: () => `<div class="fn__flex b3-label config-item">
     <div class="fn__flex-1">
         <div class="config-about__logo">
             <img src="/stage/icon.png">

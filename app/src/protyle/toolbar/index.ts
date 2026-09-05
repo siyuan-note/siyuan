@@ -98,6 +98,10 @@ import {
     normalizeCalloutTitleRange
 } from "./inlineRangeBoundary";
 import {resolvePluginToolbar} from "../../plugin/toolbarItem";
+import {
+    areProtylePluginExtensionsEnabled,
+    getProtyleLockedToolbar,
+} from "../runtimeCapabilities";
 
 const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) => {
     if (!lite) {
@@ -117,6 +121,9 @@ const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) 
 };
 
 const applyPluginToolbar = (toolbar: Array<string | IMenuItem>, protyle: IProtyle) => {
+    if (!areProtylePluginExtensionsEnabled(protyle)) {
+        return toolbarKeyToMenu(toolbar) as IMenuItem[];
+    }
     let result = toolbar;
     protyle.app.plugins.forEach((plugin) => {
         const previous = [...result];
@@ -183,13 +190,15 @@ export class Toolbar {
         });
         applyToolbarEntryVisibility(this.element);
         /// #if MOBILE
-        updateMobilePluginToolbar(protyle);
+        if (areProtylePluginExtensionsEnabled(protyle)) {
+            updateMobilePluginToolbar(protyle);
+        }
         /// #endif
     }
 
     public update(protyle: IProtyle) {
         this.element.innerHTML = "";
-        protyle.options.toolbar = toolbarKeyToMenu(getDefaultToolbar(isMobile()));
+        protyle.options.toolbar = toolbarKeyToMenu(getProtyleLockedToolbar(protyle) || getDefaultToolbar(isMobile()));
         protyle.options.toolbar = applyPluginToolbar(protyle.options.toolbar, protyle);
         if (!isMobile() && !protyle.lite) {
             refreshToolbarCatalog(protyle.options.toolbar);
@@ -200,7 +209,9 @@ export class Toolbar {
         });
         applyToolbarEntryVisibility(this.element);
         /// #if MOBILE
-        updateMobilePluginToolbar(protyle);
+        if (areProtylePluginExtensionsEnabled(protyle)) {
+            updateMobilePluginToolbar(protyle);
+        }
         /// #endif
     }
 
@@ -458,6 +469,9 @@ export class Toolbar {
                 if (snapshot.styles.fontFamily) {
                     applyMark("text", {type: "fontFamily", color: snapshot.styles.fontFamily});
                 }
+                if (snapshot.styles.direction) {
+                    applyMark("text", {type: "direction", color: snapshot.styles.direction});
+                }
                 if (snapshot.styles.shadow) {
                     applyMark("text", {type: "style4"});
                 }
@@ -580,7 +594,7 @@ export class Toolbar {
                     isInEmbedBlock(candidate)) {
                     return;
                 }
-                if (candidate.getAttribute("data-type") === "NodeCallout") {
+                if (["NodeCallout", "NodeTabItem"].includes(candidate.getAttribute("data-type"))) {
                     const titleElement = candidate.querySelector<HTMLElement>(
                         ":scope > .callout-info > .callout-title");
                     if (titleElement && !editableElements.has(titleElement)) {
@@ -1014,6 +1028,8 @@ export class Toolbar {
                             item.style.backgroundColor = "";
                             item.style.fontSize = "";
                             item.style.fontFamily = "";
+                            item.style.direction = "";
+                            item.style.unicodeBidi = "";
                         }
                         item.setAttribute("data-type", types.join(" "));
                         if (hasSemanticInlineType(types.join(" "))) {
@@ -1840,14 +1856,16 @@ export class Toolbar {
         if (!protyle.disabled) {
             textElement.select();
         }
-        forEachPluginSubscriber("open-noneditableblock", eventBus => {
-            eventBus.emit("open-noneditableblock", {
-                protyle,
-                toolbar: this,
-                blockElement: nodeElement,
-                renderElement,
+        if (areProtylePluginExtensionsEnabled(protyle)) {
+            forEachPluginSubscriber("open-noneditableblock", eventBus => {
+                eventBus.emit("open-noneditableblock", {
+                    protyle,
+                    toolbar: this,
+                    blockElement: nodeElement,
+                    renderElement,
+                });
             });
-        });
+        }
     }
 
     public showCodeLanguage(protyle: IProtyle, languageElements: HTMLElement[]) {
@@ -1874,7 +1892,7 @@ export class Toolbar {
         let html = `<div data-id="clearLanguage" class="b3-list-item">${window.siyuan.languages.clear}</div>`;
         let hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
 
-        if (hasPluginSubscriber("code-language-update")) {
+        if (areProtylePluginExtensionsEnabled(protyle) && hasPluginSubscriber("code-language-update")) {
             const eventDetail = {languages: hljsLanguages, type: "init", listElement};
             emitToPlugins("code-language-update", eventDetail);
             hljsLanguages = eventDetail.languages;
@@ -1946,7 +1964,7 @@ export class Toolbar {
                 }
             }
 
-            if (hasPluginSubscriber("code-language-update")) {
+            if (areProtylePluginExtensionsEnabled(protyle) && hasPluginSubscriber("code-language-update")) {
                 const eventDetail = {languages: value ? matchLanguages : hljsLanguages, type: "match", value, listElement};
                 emitToPlugins("code-language-update", eventDetail);
                 matchLanguages = eventDetail.languages;
@@ -2040,6 +2058,7 @@ export class Toolbar {
         setPosition(this.subElement, 8, 8);
         this.element.classList.add("fn__none");
         activeBlur();
+        showMessage(window.siyuan.languages.mobileMultiSelectTip);
     }
 
     public showTpl(protyle: IProtyle, nodeElement: HTMLElement, range: Range) {
@@ -2527,13 +2546,15 @@ export class Toolbar {
     private updateLanguage(languageElements: HTMLElement[], protyle: IProtyle, selectedLang: string) {
         const currentLang = selectedLang === window.siyuan.languages.clear ? "" : selectedLang;
 
-        forEachPluginSubscriber("code-language-change", eventBus => {
-            eventBus.emit("code-language-change", {
-                language: currentLang,
-                languageElements,
-                protyle: protyle
+        if (areProtylePluginExtensionsEnabled(protyle)) {
+            forEachPluginSubscriber("code-language-change", eventBus => {
+                eventBus.emit("code-language-change", {
+                    language: currentLang,
+                    languageElements,
+                    protyle: protyle
+                });
             });
-        });
+        }
 
         if (!Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(currentLang)) {
             window.siyuan.storage[Constants.LOCAL_CODELANG] = currentLang;

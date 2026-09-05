@@ -32,7 +32,9 @@ export const canInput = (element: Element) => {
     }
     const wysiwygElement = hasClosestByClassName(element, "protyle-wysiwyg", true);
     if (wysiwygElement && wysiwygElement.getAttribute("data-readonly") === "false") {
-        return hasClosestByAttribute(element, "contenteditable", "true", true);
+        // 按最近的编辑边界判断，避免点击不可编辑的渲染区域时唤起键盘并恢复旧光标位置。
+        const editableElement = hasClosestByAttribute(element, "contenteditable", null, true);
+        return editableElement && editableElement.getAttribute("contenteditable") === "true" && editableElement;
     }
     return false;
 };

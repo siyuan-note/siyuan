@@ -266,8 +266,8 @@ func TestParseDocVersionTreeNormalizesSpecAndRootID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected document version normalization to succeed: %s", err)
 	}
-	if treenode.CurrentSpec != normalized.Root.Spec {
-		t.Fatalf("expected spec [%s], got [%s]", treenode.CurrentSpec, normalized.Root.Spec)
+	if treenode.BaseSpec != normalized.Root.Spec {
+		t.Fatalf("expected spec [%s], got [%s]", treenode.BaseSpec, normalized.Root.Spec)
 	}
 	if "20260729000000-newroot" != normalized.Root.ID {
 		t.Fatalf("expected normalized root ID, got [%s]", normalized.Root.ID)

@@ -21,6 +21,85 @@ import (
 	"testing"
 )
 
+func createGraphTestBlocksTable(t *testing.T) *gosql.DB {
+	t.Helper()
+	testDB, err := gosql.Open("sqlite3_extended", ":memory:")
+	if err != nil {
+		t.Fatalf("open test database failed: %s", err)
+	}
+	testDB.SetMaxOpenConns(1)
+	t.Cleanup(func() {
+		testDB.Close()
+	})
+	if _, err = testDB.Exec("CREATE TABLE blocks (id TEXT, parent_id TEXT, root_id TEXT, hash TEXT, box TEXT, path TEXT, hpath TEXT, name TEXT, alias TEXT, memo TEXT, tag TEXT, content TEXT, fcontent TEXT, markdown TEXT, length INTEGER, type TEXT, subtype TEXT, ial TEXT, sort INTEGER, created TEXT, updated TEXT)"); err != nil {
+		t.Fatalf("create blocks table failed: %s", err)
+	}
+	if _, err = testDB.Exec("INSERT INTO blocks (id, parent_id, root_id, hash, box, path, hpath, name, alias, memo, tag, content, fcontent, markdown, length, type, subtype, ial, sort, created, updated) VALUES ('child', 'root', 'root', '', '', '/', '/', '', '', '', '', 'hello', '', '', 0, 'p', '', '', 0, '', '')"); err != nil {
+		t.Fatalf("insert block failed: %s", err)
+	}
+	return testDB
+}
+
+// TestGraphChildBlocksRejectNonSingleStatement 验证关系图查询条件无法通过多语句拼接执行写入语句，
+// 执行前由 CheckSingleStatement 拒绝 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-5rwv-4j4c-f954
+func TestGraphChildBlocksRejectNonSingleStatement(t *testing.T) {
+	testDB := createGraphTestBlocksTable(t)
+	previousDB := db
+	db = testDB
+	defer func() {
+		db = previousDB
+	}()
+
+	blocks := GetAllChildBlocks([]string{"root"}, "1=1); DELETE FROM blocks; --", 10)
+	if 0 != len(blocks) {
+		t.Fatalf("unexpected blocks returned for injected condition: %#v", blocks)
+	}
+	var count int
+	if err := testDB.QueryRow("SELECT COUNT(*) FROM blocks").Scan(&count); err != nil {
+		t.Fatalf("query block count failed: %s", err)
+	}
+	if 1 != count {
+		t.Fatalf("injected statement changed blocks, count: %d", count)
+	}
+}
+
+// TestGraphLocalChildBlocksRejectNonSingleStatement 验证局部关系图查询条件同样无法通过多语句拼接执行写入语句
+func TestGraphLocalChildBlocksRejectNonSingleStatement(t *testing.T) {
+	testDB := createGraphTestBlocksTable(t)
+	previousDB := db
+	db = testDB
+	defer func() {
+		db = previousDB
+	}()
+
+	blocks := GetChildBlocks("root", "1=1); DELETE FROM blocks; --", 10)
+	if 0 != len(blocks) {
+		t.Fatalf("unexpected blocks returned for injected condition: %#v", blocks)
+	}
+	var count int
+	if err := testDB.QueryRow("SELECT COUNT(*) FROM blocks").Scan(&count); err != nil {
+		t.Fatalf("query block count failed: %s", err)
+	}
+	if 1 != count {
+		t.Fatalf("injected statement changed blocks, count: %d", count)
+	}
+}
+
+// TestGraphChildBlocksAcceptNormalCondition 验证正常的只读查询条件不受校验影响
+func TestGraphChildBlocksAcceptNormalCondition(t *testing.T) {
+	testDB := createGraphTestBlocksTable(t)
+	previousDB := db
+	db = testDB
+	defer func() {
+		db = previousDB
+	}()
+
+	blocks := GetAllChildBlocks([]string{"root"}, "(content LIKE '%hello%')", 10)
+	if 1 != len(blocks) || "child" != blocks[0].ID {
+		t.Fatalf("unexpected blocks: %#v", blocks)
+	}
+}
+
 func TestRootBlockExactMatchCondition(t *testing.T) {
 	condition, arg := rootBlockExactMatchCondition("Math%_\\", true)
 	if "content = ?" != condition || "Math%_\\" != arg {

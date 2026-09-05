@@ -65,6 +65,8 @@ import {zoomOut} from "../../menus/protyle";
 import {getPlainText} from "../../protyle/util/paste";
 import {commandPanel} from "./command/panel";
 import {execByCommand} from "../../command/executor";
+import {captureCommandContext} from "../../command/context";
+import {resolvePluginCommandCallback, supportsPluginCommandSource} from "../../plugin/commandAdapter";
 import {filterHotkey} from "./commonHotkey";
 import {editorConfigApi} from "../../config/tabs/editorRuntime";
 import {copyPNGByLink} from "../../menus/util";
@@ -616,24 +618,31 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         return false;
     }
 
-    let matchCommand = false;
+    const liElements = Array.from(files.element.querySelectorAll(".b3-list-item--focus"));
+    let matchedCommand: ICommand | undefined;
     app.plugins.find(item => {
         item.commands.find(command => {
-            if (command.fileTreeCallback && matchHotKey(command.customHotkey, event)) {
-                matchCommand = true;
-                command.fileTreeCallback(files);
+            if (supportsPluginCommandSource(command, "fileTreeShortcut") &&
+                matchHotKey(command.customHotkey, event)) {
+                matchedCommand = command;
                 return true;
             }
         });
-        if (matchCommand) {
+        return Boolean(matchedCommand);
+    });
+    if (matchedCommand) {
+        const commandContext = captureCommandContext({
+            app,
+            source: "fileTreeShortcut",
+            fileLiElements: liElements,
+        });
+        const callback = resolvePluginCommandCallback(matchedCommand, commandContext);
+        if (callback) {
+            void callback();
             return true;
         }
-    });
-    if (matchCommand) {
-        return true;
     }
 
-    const liElements = Array.from(files.element.querySelectorAll(".b3-list-item--focus"));
     if (liElements.length === 0) {
         if (event.key.startsWith("Arrow") && isNotCtrl(event)) {
             const liElement = files.element.querySelector(".b3-list-item");
@@ -1038,23 +1047,30 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
         return false;
     }
 
-    let matchCommand = false;
+    let matchedCommand: ICommand | undefined;
     if (!bottomBacklink) {
         app.plugins.find(item => {
             item.commands.find(command => {
-                if (command.dockCallback && matchHotKey(command.customHotkey, event)) {
-                    matchCommand = true;
-                    command.dockCallback(activePanelElement as HTMLElement);
+                if (supportsPluginCommandSource(command, "dockShortcut") &&
+                    matchHotKey(command.customHotkey, event)) {
+                    matchedCommand = command;
                     return true;
                 }
             });
-            if (matchCommand) {
-                return true;
-            }
+            return Boolean(matchedCommand);
         });
     }
-    if (matchCommand) {
-        return true;
+    if (matchedCommand) {
+        const commandContext = captureCommandContext({
+            app,
+            source: "dockShortcut",
+            dockElement: activePanelElement as HTMLElement,
+        });
+        const callback = resolvePluginCommandCallback(matchedCommand, commandContext);
+        if (callback) {
+            void callback();
+            return true;
+        }
     }
     const matchCollapse = matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event);
     const matchExpand = matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event);
@@ -1838,25 +1854,25 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
 
-    let matchCommand = false;
+    let matchedCommand: ICommand | undefined;
     app.plugins.find(item => {
         item.commands.find(command => {
-            if (command.callback &&
-                !command.fileTreeCallback && !command.editorCallback && !command.dockCallback && !command.globalCallback
-                && matchHotKey(command.customHotkey, event)) {
-                matchCommand = true;
-                command.callback();
+            if (supportsPluginCommandSource(command, "shortcut") && matchHotKey(command.customHotkey, event)) {
+                matchedCommand = command;
                 return true;
             }
         });
-        if (matchCommand) {
+        return Boolean(matchedCommand);
+    });
+    if (matchedCommand) {
+        const commandContext = captureCommandContext({app, source: "shortcut"});
+        const callback = resolvePluginCommandCallback(matchedCommand, commandContext);
+        if (callback) {
+            void callback();
+            event.stopPropagation();
+            event.preventDefault();
             return true;
         }
-    });
-    if (matchCommand) {
-        event.stopPropagation();
-        event.preventDefault();
-        return true;
     }
 
     if (matchHotKey(window.siyuan.config.keymap.general.replace.custom, event)) {

@@ -20,11 +20,16 @@ import (
 	"time"
 
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-const CurrentSpec = 8
+const (
+	CurrentSpec   = 9
+	PlainTextSpec = 8
+	RichTextSpec  = 9
+)
 
 const MaxFilterNestingDepth = 3
 
@@ -41,6 +46,7 @@ func UpgradeSpec(av *AttributeView) {
 	upgradeSpec6(av)
 	upgradeSpec7(av)
 	upgradeSpec8(av)
+	upgradeSpec9(av)
 }
 
 func CheckSpec(av *AttributeView) (err error) {
@@ -48,6 +54,69 @@ func CheckSpec(av *AttributeView) (err error) {
 		logging.LogErrorf("attribute view [%s] spec [%d] is newer than current [%d]", av.ID, av.Spec, CurrentSpec)
 		err = ErrSpecTooNew
 		return
+	}
+	if av.Spec < RichTextSpec && av.HasRichText() {
+		logging.LogErrorf("attribute view [%s] rich text requires spec [%d], current is [%d]", av.ID, RichTextSpec, av.Spec)
+		err = ErrRichTextSpecMismatch
+		return
+	}
+	return
+}
+
+// upgradeSpec9 仅在首次保存富文本值时升级，避免纯文本数据库因为在新版中打开而失去旧版兼容性。
+func upgradeSpec9(av *AttributeView) {
+	if RichTextSpec <= av.Spec || !av.HasRichText() {
+		return
+	}
+
+	av.Spec = RichTextSpec
+}
+
+// HasRichText 返回属性视图是否包含富文本值。
+func (av *AttributeView) HasRichText() bool {
+	if nil == av {
+		return false
+	}
+	found := false
+	av.visitPersistedValues(func(value *Value) {
+		if nil != value.Text && value.Text.IsRich() {
+			found = true
+		}
+	})
+	return found
+}
+
+// NormalizeRichText 校验所有富文本载荷，并刷新对应的纯文本投影。
+func (av *AttributeView) NormalizeRichText() (err error) {
+	if nil == av {
+		return
+	}
+	type normalizedText struct {
+		value       *ValueText
+		content     string
+		richContent string
+	}
+	var normalized []normalizedText
+	av.visitPersistedValues(func(value *Value) {
+		if nil != err || nil == value.Text || !value.Text.IsRich() {
+			return
+		}
+		rich := *value.Text.Rich
+		var tree *parse.Tree
+		if tree, err = NormalizeValueTextRich(&rich); nil == err {
+			normalized = append(normalized, normalizedText{
+				value:       value.Text,
+				content:     valueTextRichPlainContent(tree),
+				richContent: rich.Content,
+			})
+		}
+	})
+	if nil != err {
+		return
+	}
+	for _, text := range normalized {
+		text.value.Content = text.content
+		text.value.Rich.Content = text.richContent
 	}
 	return
 }

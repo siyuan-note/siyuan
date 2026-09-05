@@ -70,6 +70,10 @@ export const initBlockPopover = (app: App) => {
         }
         const listItemActionElement = hasClosestByClassName(event.target, "protyle-action");
         const isListItemAction = isListItemActionElement(listItemActionElement);
+        if (isListItemAction && (listItemActionElement as HTMLElement).closest(".protyle-lite-fragment")) {
+            hideTooltip();
+            return;
+        }
         const aElement = (isListItemAction && listItemActionElement) ||
             hasClosestByAttribute(event.target, "data-type", "a", true) ||
             hasClosestByClassName(event.target, "ariaLabel") ||

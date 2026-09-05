@@ -1,4 +1,5 @@
 import {hideElements} from "../ui/hideElements";
+import {isTabTextBoundary} from "./tabsBoundary";
 import {isNotCtrl, isOnlyMeta, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
     focusBlock,
@@ -65,7 +66,6 @@ import {clearTableCell, fixTable, isIncludeCell} from "../util/table";
 import {
     transaction,
     insertEmptyBlockquote,
-    isEmptyParagraph,
     turnEmptyParagraphsIntoTransaction,
     turnsIntoGroupsTransaction,
     turnsIntoOneTransaction,
@@ -74,6 +74,7 @@ import {
     updateBatchTransaction,
     updateTransaction
 } from "./transaction";
+import {isEmptyParagraph} from "./emptyTextBlock";
 import {getBlockquoteContext, shouldCancelBlockquote} from "./blockquote";
 import {fontEvent} from "../toolbar/Font";
 import {applyTableCellStyleHotkey} from "../toolbar/tableCell";
@@ -119,6 +120,7 @@ import {preventScroll} from "../scroll/preventScroll";
 import {newFileBySelectRange} from "../../util/newFile";
 import {removeSearchMark} from "../toolbar/util";
 import {avKeydown} from "../render/av/keydown";
+import {shouldPreserveAVSelectionOnKeyup} from "../render/av/verticalNavigation";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {AIActions} from "../../ai/actions";
 import {openLink} from "../../editor/openLink";
@@ -127,12 +129,20 @@ import {AIChat} from "../../ai/chat";
 import {tabCodeBlock} from "./codeBlock";
 import {getTopBarHeight} from "../../layout/getTopBarHeight";
 import {getAVTemplateInteractiveElement} from "../render/av/attributeValue";
-import {focusAVByArrow} from "../render/av/focus";
+import {focusAVByArrow, getAVVerticalGoalX} from "../render/av/focus";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {isMobile} from "../../util/functions";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 import {scheduleCaretScroll, scheduleOffscreenCaretScroll} from "./caretScroll";
 import {scrollPage} from "../scroll/page";
+import {isCaretAtVerticalBoundary} from "./verticalCaret";
+import {
+    bindVerticalNavigationReset,
+    focusAdjacentVerticalRegion,
+    isAtomicVerticalNavigationTarget,
+    leaveAVVerticalRegion,
+    prepareVerticalNavigation,
+} from "./verticalNavigation";
 import {
     BLOCK_SELECTION_CLASS,
     clearBlockSelectionMode,
@@ -199,6 +209,14 @@ const showSelectAllTip = () => {
             }
         });
     });
+};
+
+const preserveAVSelectionOnKeyup = (protyle: IProtyle, event: KeyboardEvent) => {
+    const focusedElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
+    if (shouldPreserveAVSelectionOnKeyup(event.key,
+        !!focusedElement && focusedElement.classList.contains("av"))) {
+        protyle.wysiwyg.preventKeyup = true;
+    }
 };
 
 const showSelectAllIncompleteTip = () => {
@@ -275,6 +293,7 @@ const getRangeListItemElements = (editorElement: HTMLElement, range: Range) => {
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
     let forwardBlockRemovalPending = false;
+    bindVerticalNavigationReset(editorElement);
     editorElement.addEventListener("keydown", async (event: KeyboardEvent & { target: HTMLElement }) => {
         if (event.target.localName === "protyle-html" || event.target.localName === "input") {
             event.stopPropagation();
@@ -325,12 +344,26 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         const blockSelectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
+        if (!blockSelectionModeElement && !event.isComposing && !event.ctrlKey && !event.metaKey &&
+            ["Backspace", "Delete"].includes(event.key) &&
+            !protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") &&
+            isTabTextBoundary(range, event.key === "Backspace")) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         const calloutTitleElement = hasClosestByClassName(range.startContainer, "callout-title");
+        const verticalGoalX = prepareVerticalNavigation(editorElement, event, range, nodeElement,
+            nodeElement.classList.contains("av") ? getAVVerticalGoalX(nodeElement) : undefined);
 
         if (document.querySelector(".av__panel")) {
             return;
         }
-        if (avKeydown(event, nodeElement, protyle)) {
+        const avHandled = avKeydown(event, nodeElement, protyle, direction => {
+            leaveAVVerticalRegion(protyle, nodeElement, direction, verticalGoalX ?? 0);
+        });
+        if (avHandled) {
+            preserveAVSelectionOnKeyup(protyle, event);
             return;
         }
 
@@ -958,6 +991,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
                 selectElements.push(nodeElement);
             }
+            if (!protyle.gutter) {
+                window.siyuan.menus.menu.remove();
+                return;
+            }
             if (selectElements.length === 1) {
                 protyle.gutter.renderMenu(protyle, selectElements[0]);
             } else {
@@ -986,6 +1023,16 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
             }
             const nodeEditableElement = (tdElement || getContenteditableElement(nodeElement) || nodeElement) as HTMLElement;
+            const verticalDirection = event.key === "ArrowUp" ? "up" : event.key === "ArrowDown" ? "down" : undefined;
+            if (selectText === "" && range.collapsed && verticalDirection &&
+                isAtomicVerticalNavigationTarget(nodeElement)) {
+                focusAdjacentVerticalRegion(protyle, nodeElement, verticalDirection, verticalGoalX ?? 0,
+                    range.startContainer);
+                preserveAVSelectionOnKeyup(protyle, event);
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
             if (selectText === "" && range.collapsed && (event.key === "ArrowLeft" || event.key === "ArrowRight") &&
                 moveCaretAcrossSemanticMarker(range, event.key === "ArrowLeft" ? "left" : "right")) {
                 focusByRange(range);
@@ -1011,41 +1058,38 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 position.end -= 1;
 
             }
-            const selectionPosition = getSelectionPosition(nodeEditableElement, range);
-            const isFirstLine = (nodeEditableElement.innerText.substr(0, position.end).indexOf("\n") === -1 ||
-                position.start === 0) &&
-                selectionPosition.top - nodeEditableElement.getBoundingClientRect().top < 20;
-            const isLastLine = (nodeEditableElement.innerText.substr(position.end).indexOf("\n") === -1 ||
-                position.end >= nodeEditableElement.innerText.trimEnd().length) &&
-                nodeEditableElement.getBoundingClientRect().bottom - selectionPosition.top < 40;
+            const isFirstLine = isCaretAtVerticalBoundary(nodeEditableElement, range, "up");
+            const isLastLine = isCaretAtVerticalBoundary(nodeEditableElement, range, "down");
             const isStart = position.start === 0;
             const isEnd = position.end >= nodeEditableElement.textContent.replace(/\n$/, "").length;
             const toPrevious = (event.key === "ArrowUp" && isFirstLine) ||
                 (event.key === "ArrowLeft" && isStart);
             const toNext = (event.key === "ArrowDown" && isLastLine) ||
                 (event.key === "ArrowRight" && isEnd);
-            if (selectText === "" && range.collapsed && nodeElement.classList.contains("av") &&
-                hasClosestByClassName(range.startContainer, "av__title") && (toPrevious || toNext) &&
-                focusAVByArrow(protyle, nodeElement, event.key, true)) {
+            if (selectText === "" && range.collapsed && verticalDirection && (toPrevious || toNext)) {
+                focusAdjacentVerticalRegion(protyle, nodeElement, verticalDirection, verticalGoalX ?? 0,
+                    range.startContainer);
+                preserveAVSelectionOnKeyup(protyle, event);
                 event.stopPropagation();
                 event.preventDefault();
                 return;
             }
-            if (selectText === "" && range.collapsed && !nodeElement.classList.contains("av")) {
+            if (selectText === "" && range.collapsed && !verticalDirection && nodeElement.classList.contains("av") &&
+                hasClosestByClassName(range.startContainer, "av__title") && (toPrevious || toNext) &&
+                focusAVByArrow(protyle, nodeElement, event.key, true)) {
+                preserveAVSelectionOnKeyup(protyle, event);
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
+            if (selectText === "" && range.collapsed && !verticalDirection && !nodeElement.classList.contains("av")) {
                 let adjacentElement = toPrevious ? getPreviousBlock(nodeElement) :
                     (toNext ? getNextBlock(nodeElement) : undefined);
                 if (adjacentElement) {
                     adjacentElement = toPrevious ? getLastBlock(adjacentElement) : getFirstBlock(adjacentElement);
-                    // 显式聚焦空段落，避免浏览器跨越容器边界时跳过该块。
-                    // https://github.com/siyuan-note/siyuan/issues/18862
-                    if ((event.key === "ArrowUp" || event.key === "ArrowDown") && isEmptyParagraph(adjacentElement)) {
-                        focusBlock(adjacentElement, undefined, event.key === "ArrowDown");
-                        event.stopPropagation();
-                        event.preventDefault();
-                        return;
-                    }
                     if (adjacentElement.classList.contains("av") &&
                         focusAVByArrow(protyle, adjacentElement as HTMLElement, event.key)) {
+                        preserveAVSelectionOnKeyup(protyle, event);
                         event.stopPropagation();
                         event.preventDefault();
                         return;

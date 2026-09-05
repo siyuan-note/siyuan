@@ -64,7 +64,7 @@ export class Setting {
     </div>
 </${tagName}>`;
             } else {
-                html = `<${tagName} class="fn__flex b3-label config-item${tagName === "label" ? "" : " config-wrap"}">
+                html = `<${tagName} class="fn__flex b3-label config-item">
     <div class="fn__flex-1">
         ${titleBlock}
     </div>

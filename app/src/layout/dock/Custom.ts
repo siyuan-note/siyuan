@@ -8,11 +8,11 @@ export class Custom extends Model {
     public tab: Tab;
     public data: any;
     public type: string;
-    public init: (custom: Custom) => void;
-    public destroy: () => void;
-    public beforeDestroy: () => void;
-    public resize: () => void;
-    public update: () => void;
+    public init: (this: Custom, custom: Custom) => void;
+    public destroy: (this: Custom) => void;
+    public beforeDestroy: (this: Custom) => void;
+    public resize: (this: Custom) => void;
+    public update: (this: Custom) => void;
     public editors: Protyle[] = [];
 
     constructor(options: {
@@ -20,11 +20,11 @@ export class Custom extends Model {
         type: string,
         tab: Tab,
         data: any,
-        destroy?: () => void,
-        beforeDestroy?: () => void,
-        resize?: () => void,
-        update?: () => void,
-        init: (custom: Custom) => void
+        destroy?: (this: Custom) => void,
+        beforeDestroy?: (this: Custom) => void,
+        resize?: (this: Custom) => void,
+        update?: (this: Custom) => void,
+        init: (this: Custom, custom: Custom) => void
     }) {
         super({app: options.app});
         if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {

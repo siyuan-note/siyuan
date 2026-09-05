@@ -236,7 +236,7 @@ const genNetworkProxyHtml = (): string => {
     <div class="b3-label__text">
         ${window.siyuan.languages.about17}
     </div>
-    <div class="b3-label__text fn__flex config-wrap" style="overflow: visible !important;">
+    <div class="b3-label__text fn__flex" style="overflow: visible !important;">
         <select id="networkProxyScheme" class="b3-select">
             <option value="" ${proxy.scheme === "" ? "selected" : ""}>${window.siyuan.languages.directConnection}</option>
             <option value="system" ${proxy.scheme === "system" ? "selected" : ""}>${window.siyuan.languages.useSystemProxy}</option>
@@ -306,7 +306,7 @@ const registerAppDataGroup = (tab: SettingTabBuilder) => {
     group.slot({
         key: "importData",
         keywords: [window.siyuan.languages.import, window.siyuan.languages.importDataTip],
-        html: () => `<div class="fn__flex b3-label config-item config-wrap">
+        html: () => `<div class="fn__flex b3-label config-item">
     ${genConfigItemMainHtml(`${window.siyuan.languages.import} Data`, window.siyuan.languages.importDataTip)}
     <span class="fn__space"></span>
     ${genImportUploadButtonHtml("importData", window.siyuan.languages.import)}
@@ -337,7 +337,7 @@ const registerAppDataGroup = (tab: SettingTabBuilder) => {
     group.slot({
         key: "importConf",
         keywords: [window.siyuan.languages.importConf, window.siyuan.languages.importConfTip],
-        html: () => `<div class="fn__flex b3-label config-item config-wrap">
+        html: () => `<div class="fn__flex b3-label config-item">
     ${genConfigItemMainHtml(window.siyuan.languages.importConf, window.siyuan.languages.importConfTip)}
     <span class="fn__space"></span>
     ${genImportUploadButtonHtml("importConf", window.siyuan.languages.import)}

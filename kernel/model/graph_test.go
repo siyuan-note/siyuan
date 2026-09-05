@@ -8,7 +8,12 @@
 
 package model
 
-import "testing"
+import (
+	"strings"
+	"testing"
+
+	"github.com/siyuan-note/siyuan/kernel/conf"
+)
 
 func TestMarkLinkedNodesWithSize(t *testing.T) {
 	nodes := []*GraphNode{
@@ -70,5 +75,28 @@ func TestGrowLinkedNodesUsesIndexesAndStopsCycles(t *testing.T) {
 	growLinkedNodes(&forwardlinks, &backlinks, &nodes, visitedIDs, 10, &forwardDepth, &backDepth)
 	if len(nodes) != 3 || nodes[0].ID != "a" || nodes[1].ID != "b" || nodes[2].ID != "c" {
 		t.Fatalf("unexpected grown nodes: %+v", nodes)
+	}
+}
+
+// TestQuery2StmtEscapesTagQuote 验证行级标签文本中的单引号在拼接 SQL 前被转义，
+// 防止标签内容闭合字符串字面量注入查询 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-5rwv-4j4c-f954
+func TestQuery2StmtEscapesTagQuote(t *testing.T) {
+	oldConf := Conf
+	Conf = &AppConf{Search: conf.NewSearch()}
+	t.Cleanup(func() {
+		Conf = oldConf
+	})
+
+	stmt := query2Stmt(`<span data-type="tag">z') UNION SELECT null-- </span>`)
+	if strings.Contains(stmt, `z')`) {
+		t.Fatalf("tag content quote not escaped: %s", stmt)
+	}
+	if !strings.Contains(stmt, `z'')`) {
+		t.Fatalf("escaped tag content not found: %s", stmt)
+	}
+
+	stmt = query2Stmt(`#a' OR '1'='1#`)
+	if strings.Contains(stmt, `' OR '`) {
+		t.Fatalf("shorthand tag content quote not escaped: %s", stmt)
 	}
 }

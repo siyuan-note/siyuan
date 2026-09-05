@@ -102,6 +102,10 @@ export const uniqueDragIds = (ids: string[]) => {
     return Array.from(new Set(ids.filter(Boolean)));
 };
 
+export const getMissingDragIds = (selectedIds: string[], sourceIds: ReadonlySet<string>) => {
+    return selectedIds.filter(id => !sourceIds.has(id));
+};
+
 export const getAVRowDropTarget = (targetElement: HTMLElement | false): HTMLElement | false => {
     if (!targetElement || !targetElement.classList.contains("av__row--util")) {
         return targetElement;

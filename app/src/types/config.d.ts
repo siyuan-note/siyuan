@@ -281,6 +281,7 @@ declare namespace Config {
         env?: Record<string, string>;
         headers?: Record<string, string>;
         timeout: number;
+        disableStandaloneSSE: boolean;
         trustToolAnnotations: boolean;
     }
 
@@ -575,6 +576,10 @@ declare namespace Config {
          * The maximum length of the dynamic anchor text for block references
          */
         blockRefDynamicAnchorTextMaxLen: number;
+        /**
+         * Whether to check block references and database bindings before deleting or cutting
+         */
+        checkBlockRef: boolean;
         /**
          * Whether the code block has enabled ligatures
          */
@@ -1566,6 +1571,8 @@ declare namespace Config {
          * Whether to search callout
          */
         callout: boolean;
+        tabs?: boolean;
+        tabItem?: boolean;
         /**
          * Whether to distinguish between uppercase and lowercase letters when searching
          */
@@ -2776,6 +2783,8 @@ declare namespace Config {
          * @default false
          */
         callout: boolean;
+        tabs?: boolean;
+        tabItem?: boolean;
         /**
          * Search results contain code blocks
          * @default false

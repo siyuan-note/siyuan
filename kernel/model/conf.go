@@ -464,6 +464,9 @@ func InitConf() {
 	if nil == Conf.Editor.DatabaseAttrUseTabs {
 		Conf.Editor.DatabaseAttrUseTabs = defaultEditor.DatabaseAttrUseTabs
 	}
+	if nil == Conf.Editor.CheckBlockRef {
+		Conf.Editor.CheckBlockRef = defaultEditor.CheckBlockRef
+	}
 	Conf.Editor.AssetOpen = conf.NormalizeAssetOpen(Conf.Editor.AssetOpen)
 	Conf.Editor.NormalizeFontFamilies()
 	Conf.Editor.Emoji = util.FilterRecentIconValues(Conf.Editor.Emoji)

@@ -184,6 +184,7 @@ func NewAIEditorChatStream(ctx context.Context, ids []string, input, action stri
 		Stream:              true,
 	}
 	streamCtx, cancel := context.WithCancel(ctx)
+	streamCtx = util.ContextWithOpenAIResponsesBaseURL(streamCtx, prov.BaseURL)
 	requestTimeout := time.Duration(prov.RequestTimeout) * time.Second
 	requestTimer, requestTimerDone := startAIEditorCancelTimer(requestTimeout, cancel)
 	client := util.NewOpenAIClientWithModel(prov.APIKey, prov.BaseURL, m.Name)
@@ -260,6 +261,7 @@ func chatGPTComplete(msg string, contextMsgs []string, cloud bool) (ret string, 
 	} else {
 		gpt = &OpenAIGPT{
 			c:                   util.NewOpenAIClientWithModel(prov.APIKey, prov.BaseURL, m.Name),
+			apiBaseURL:          prov.BaseURL,
 			m:                   m,
 			protocol:            prov.Protocol,
 			timeout:             prov.RequestTimeout,
@@ -343,6 +345,7 @@ type GPT interface {
 
 type OpenAIGPT struct {
 	c                   *openai.Client
+	apiBaseURL          string
 	m                   *conf.Model
 	protocol            string
 	timeout             int
@@ -351,8 +354,8 @@ type OpenAIGPT struct {
 }
 
 func (gpt *OpenAIGPT) chat(msg string, contextMsgs []string) (partRet string, stop bool, err error) {
-	return util.ChatGPT(msg, contextMsgs, gpt.c, gpt.protocol, gpt.m.Name, gpt.maxCompletionTokens, gpt.temperature,
-		gpt.timeout)
+	return util.ChatGPT(msg, contextMsgs, gpt.c, gpt.apiBaseURL, gpt.protocol, gpt.m.Name, gpt.maxCompletionTokens,
+		gpt.temperature, gpt.timeout)
 }
 
 type CloudGPT struct {

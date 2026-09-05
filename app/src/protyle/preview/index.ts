@@ -20,6 +20,7 @@ import {getAllModels} from "../../layout/getAll";
 /// #endif
 import {fetchPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
+import {destroyTabsRender, tabsRender} from "../render/tabsRender";
 import {highlightRender} from "../render/highlightRender";
 import {speechRender} from "../render/speechRender";
 import {avRender} from "../render/av/render";
@@ -212,6 +213,7 @@ export class Preview {
     }
 
     public destroy() {
+        destroyTabsRender(this.previewElement);
         window.clearTimeout(this.mdTimeoutId);
         /// #if !BROWSER
         if (this.copyEventHandler) {
@@ -259,6 +261,8 @@ export class Preview {
                     ?.classList.add("protyle-preview__title");
                 /// #endif
                 processRender(protyle.preview.previewElement);
+                tabsRender(protyle.preview.previewElement, {label: window.siyuan.languages.tabItem,
+                    shown: item => processRender(item)});
                 highlightRender(protyle.preview.previewElement);
                 avRender(protyle.preview.previewElement, protyle);
                 speechRender(protyle.preview.previewElement, window.siyuan.config.appearance.lang);

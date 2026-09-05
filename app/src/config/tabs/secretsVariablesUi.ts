@@ -30,7 +30,7 @@ export const genSecretsBlockHtml = (): string => `<div class="b3-label config-it
     <div class="fn__hr--small"></div>
     <div id="secretList"></div>
     <div class="fn__hr"></div>
-    <div class="config-wrap">
+    <div class="fn__flex">
         <button class="b3-button b3-button--outline fn__flex-center fn__size200" data-type="addSecret">
             <svg><use xlink:href="#iconAdd"></use></svg>
             ${window.siyuan.languages.addSecret}
@@ -129,7 +129,7 @@ export const genVariablesBlockHtml = (): string => `<div class="b3-label config-
     <div class="fn__hr--small"></div>
     <div id="variableList"></div>
     <div class="fn__hr"></div>
-    <div class="config-wrap">
+    <div class="fn__flex">
         <button class="b3-button b3-button--outline fn__flex-center fn__size200" data-type="addVariable">
             <svg><use xlink:href="#iconAdd"></use></svg>
             ${window.siyuan.languages.addVariable}

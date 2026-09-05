@@ -357,7 +357,7 @@ export const getMcpServersBlockKeywords = (): string[] => [
 const openedMcpOAuthURLs = new Map<string, string>();
 
 export const genMcpServersBlockHtml = (): string => `<div class="b3-label config-item" id="aiMcpServersBlock">
-    <div class="fn__flex config-wrap">
+    <div class="fn__flex">
         <span class="b3-label__text">${window.siyuan.languages.aiMcpServersTip}</span>
         <span class="fn__flex-1"></span>
         <span id="aiMcpStatusSummary" class="b3-label__text ft__on-surface fn__none"></span>
@@ -744,6 +744,7 @@ const openMcpServerDialogWithEnvironment = (root: HTMLElement, serverName: strin
         url: "",
         headers: {},
         timeout: 30,
+        disableStandaloneSSE: false,
         trustToolAnnotations: false,
     } : existingServer;
     const mcpTypeHidden = (fieldType: string) => initialServer.type !== fieldType ? " fn__none" : "";
@@ -818,6 +819,14 @@ const openMcpServerDialogWithEnvironment = (root: HTMLElement, serverName: strin
         <div class="fn__hr"></div>
         <textarea class="b3-text-field fn__block" id="aiMcpServerHeaders" rows="3" style="resize: vertical;" placeholder='{"Authorization":"Bearer ..."}'>${Lute.EscapeHTMLStr(headersText)}</textarea>
     </div>
+    <div class="b3-label b3-label--inner fn__flex${mcpTypeHidden("http")}" data-mcp-type="http">
+        <div class="fn__flex-1">
+            <div class="config-name">${window.siyuan.languages.aiMcpDisableStandaloneSSE}</div>
+            <div class="b3-label__text">${window.siyuan.languages.aiMcpDisableStandaloneSSETip}</div>
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" id="aiMcpDisableStandaloneSSE" type="checkbox"${initialServer.disableStandaloneSSE ? " checked" : ""}/>
+    </div>
     <div class="b3-label b3-label--inner">
         <div class="config-name">${window.siyuan.languages.apiTimeout}</div>
         <div class="fn__hr"></div>
@@ -888,6 +897,7 @@ const openMcpServerDialogWithEnvironment = (root: HTMLElement, serverName: strin
             url: dialog.element.querySelector<HTMLInputElement>("#aiMcpServerUrl").value,
             headers,
             timeout: dialog.element.querySelector<HTMLInputElement>("#aiMcpServerTimeout").valueAsNumber,
+            disableStandaloneSSE: dialog.element.querySelector<HTMLInputElement>("#aiMcpDisableStandaloneSSE").checked,
             trustToolAnnotations: dialog.element.querySelector<HTMLInputElement>("#aiMcpTrustToolAnnotations").checked,
         };
         if (!nextServer.name) {

@@ -9,8 +9,10 @@ import { htmlRender } from "../protyle/render/htmlRender";
 import { mindmapRender } from "../protyle/render/mindmapRender";
 import { plantumlRender } from "../protyle/render/plantumlRender";
 import { avRender } from "../protyle/render/av/render";
+import {tabsRender} from "../protyle/render/tabsRender";
 
 export class ProtyleMethod {
+    public static tabsRender = tabsRender;
     /** 对 graphviz 进行渲染 */
     public static graphvizRender = graphvizRender;
     /** 为 element 中的代码块进行高亮渲染 */

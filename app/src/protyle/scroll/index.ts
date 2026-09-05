@@ -17,6 +17,7 @@ import {
 } from "./dynamicLoadState";
 import {saveScroll} from "./saveScroll";
 import {getScrollIndexFromPointer} from "./slider";
+import {refreshSyntheticDragTarget} from "../../util/touchDragBridge";
 
 export class Scroll {
     public element: HTMLElement;
@@ -243,6 +244,7 @@ export class Scroll {
         this.dynamicLoadFinish = undefined;
         protyle.wysiwyg.element.removeAttribute("data-top");
         onFinish?.(success);
+        refreshSyntheticDragTarget();
     }
 
     private async loadUntilBoundary(protyle: IProtyle, rootID: string, mode: TDynamicLoadMode, size: number) {

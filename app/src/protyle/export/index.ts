@@ -1082,6 +1082,9 @@ ${getIconScript(servePath)}
     Protyle.mindmapRender(previewElement, "stage/protyle");
     Protyle.abcRender(previewElement, "stage/protyle");
     Protyle.htmlRender(previewElement);
+    if (${exportOption.type !== "pdf"}) {
+        Protyle.tabsRender(previewElement);
+    }
     Protyle.plantumlRender(previewElement, "stage/protyle");
     document.querySelectorAll(".protyle-action__copy").forEach((item) => {
       item.addEventListener("click", (event) => {

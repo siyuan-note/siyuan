@@ -9,6 +9,79 @@ interface DragCompletionCallbacks {
     cleanup: () => void;
 }
 
+interface DragRelayMimeTypes {
+    block: string;
+    documents: string;
+    file: string;
+    gutterPrefix: string;
+}
+
+export const getDragRelayTypes = (types: readonly string[], mimeTypes: DragRelayMimeTypes) => {
+    return types.filter(type => type === mimeTypes.block || type === mimeTypes.file ||
+        type === mimeTypes.documents || type.startsWith(mimeTypes.gutterPrefix));
+};
+
+export const isDragRelaySource = (types: readonly string[], mimeTypes: DragRelayMimeTypes) => {
+    return types.includes(mimeTypes.file) ||
+        (types.includes(mimeTypes.block) && types.some(type => type.startsWith(mimeTypes.gutterPrefix)));
+};
+
+export const hasActiveTouchGesture = (states: readonly ({isMouse: boolean} | null | undefined)[]) => {
+    return states.some(state => !!state && !state.isMouse);
+};
+
+export const shouldRequireLongPress = (isLongPressTarget: boolean, isMouse: boolean, isAndroid: boolean) => {
+    return isLongPressTarget && (!isMouse || isAndroid);
+};
+
+export const getWheelScrollDelta = (delta: number, deltaMode: number, lineSize: number, pageSize: number) => {
+    if (deltaMode === 1) {
+        return delta * lineSize;
+    }
+    if (deltaMode === 2) {
+        return delta * pageSize;
+    }
+    return delta;
+};
+
+export const createDragRefreshQueue = (
+    refresh: () => void,
+    requestFrame: (callback: FrameRequestCallback) => number,
+    cancelFrame: (handle: number) => void,
+) => {
+    let scheduled = false;
+    let frameHandle = 0;
+    let generation = 0;
+
+    return {
+        schedule: () => {
+            if (scheduled) {
+                return;
+            }
+            scheduled = true;
+            const currentGeneration = ++generation;
+            const handle = requestFrame(() => {
+                if (!scheduled || generation !== currentGeneration) {
+                    return;
+                }
+                scheduled = false;
+                refresh();
+            });
+            if (scheduled && generation === currentGeneration) {
+                frameHandle = handle;
+            }
+        },
+        cancel: () => {
+            if (!scheduled) {
+                return;
+            }
+            scheduled = false;
+            generation++;
+            cancelFrame(frameHandle);
+        },
+    };
+};
+
 export const suspendNativeDrag = (state: NativeDragGuard) => {
     state.draggableElement.setAttribute("draggable", "false");
     state.restoreDraggable = true;

@@ -22,6 +22,8 @@ import {avRender} from "../render/av/render";
 import {cellScrollIntoView, getCellText} from "../render/av/cell";
 import {fixAdjacentTags, getCalloutInfo, getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
+import {remapTabsDOMIDs, wrapPastedTabItems} from "./tabsCopy";
+import {getTabItems, getTabTitle} from "../render/tabsRender";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL, showBase64ImageSizeLimit} from "../upload/base64";
 import {applyHTMLLocalAssetPaths, collectHTMLLocalAssets, removeHTMLLocalAssetPaths} from "../upload/htmlLocalAssets";
@@ -58,6 +60,12 @@ import {resetPastedQueryEmbedRenderState} from "../render/embedRenderState";
 import {getHostCapabilities, sanitizeKernelHTML} from "../../util/hostCapabilities";
 import {eventBusHas, hasPluginSubscriber} from "../../plugin/EventBusCore";
 import {normalizeSemanticInlineElements, stripSemanticMarkersFromRangeText} from "./inlineElementMarker";
+import {
+    areProtylePluginExtensionsEnabled,
+    getProtyleBlockDOMSanitizer,
+    getProtyleRestrictedPlainTextHTML,
+    restoreProtyleLuteMarkdownSyntax,
+} from "../runtimeCapabilities";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -135,6 +143,11 @@ export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
         });
     } else if ("NodeCallout" === dataType) {
         refText = getCalloutInfo(blockElement);
+    } else if ("NodeTabItem" === dataType) {
+        refText = getTabTitle(blockElement)?.innerHTML || "";
+    } else if ("NodeTabs" === dataType) {
+        const firstItem = getTabItems(blockElement)[0];
+        refText = firstItem ? getTextStar(firstItem, true) : "";
     }
     if (contentOnly) {
         return refText;
@@ -180,9 +193,13 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
             }
         });
         text = text.slice(0, -1);
-    } else if (!isNested && ["NodeBlockquote", "NodeCallout", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(dataType)) {
+    } else if (dataType === "NodeTabItem" && isNested) {
+        text += getTabTitle(blockElement)?.textContent || "";
+    } else if (!isNested && ["NodeBlockquote", "NodeCallout", "NodeList", "NodeSuperBlock", "NodeListItem", "NodeTabs", "NodeTabItem"].includes(dataType)) {
         if (dataType === "NodeCallout") {
             text += `${getCalloutInfo(blockElement)}\n`;
+        } else if (dataType === "NodeTabItem") {
+            text += `${getTabTitle(blockElement)?.textContent || ""}\n`;
         }
         blockElement.querySelectorAll("[data-node-id]").forEach((item: HTMLElement) => {
             const nestedText = getPlainText(item, true);
@@ -276,12 +293,15 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
         textPlain = textPlain.replace(/__@kbd@__/g, "<kbd>").replace(/__@\/kbd@__/g, "</kbd>");
         textPlain = textPlain.replace(/__@u@__/g, "<u>").replace(/__@\/u@__/g, "</u>");
 
-        // 临界区：Lute 已是所有编辑器共享的单例，此处临时把 inline-syntax 标志置 true 再恢复。
-        // enable/transform/restore 必须保持同步执行，中间不得插入 await，否则并发编辑器的
-        // 转换调用（如实时输入的 SpinBlockDOM）会读到被改写的标志而产生错误输出。
+        // 转换期间临时启用行级语法，并在同步转换完成后按当前编辑器的运行时配置恢复。
+        // enable/transform/restore 之间不得插入 await，避免其他同步转换读取到临时配置。
         enableLuteMarkdownSyntax(protyle);
-        const content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
-        restoreLuteMarkdownSyntax(protyle);
+        let content: string;
+        try {
+            content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
+        } finally {
+            restoreLuteMarkdownSyntax(protyle);
+        }
 
         // insertHTML 会进行内部反转义
         insertHTML(content, protyle, false, false, true);
@@ -299,11 +319,13 @@ export const enableLuteMarkdownSyntax = (protyle: IProtyle) => {
 };
 
 export const restoreLuteMarkdownSyntax = (protyle: IProtyle) => {
-    applyLuteMarkdownSyntax(protyle.lute, window.siyuan.config.editor.markdown);
+    restoreProtyleLuteMarkdownSyntax(protyle, (lute) => {
+        applyLuteMarkdownSyntax(lute, window.siyuan.config.editor.markdown);
+    });
 };
 
 const readLocalFile = async (protyle: IProtyle, localFiles: ILocalFiles[], options?: IUploadInsertOptions) => {
-    if (protyle && protyle.app && protyle.app.plugins && hasPluginSubscriber("paste")) {
+    if (areProtylePluginExtensionsEnabled(protyle) && protyle.app?.plugins && hasPluginSubscriber("paste")) {
         const plugins = Array.from(protyle.app.plugins);
         for (let i = 0; i < plugins.length; i++) {
             const plugin = plugins[i];
@@ -587,6 +609,7 @@ const insertConvertedBlockDOM = (protyle: IProtyle, dom: string, range: Range) =
 export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent | IClipboardData) & {
     target: HTMLElement
 }, uploadOptions?: IUploadInsertOptions) => {
+    const blockDOMSanitizer = getProtyleBlockDOMSanitizer(protyle);
     if ("clipboardData" in event || "dataTransfer" in event) {
         event.stopPropagation();
         event.preventDefault();
@@ -642,7 +665,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             files = event.dataTransfer.files;
         }
     } else {
-        if (event.localFiles?.length > 0) {
+        if (!blockDOMSanitizer && event.localFiles?.length > 0) {
             readLocalFile(protyle, event.localFiles, assetUploadOptions);
             return;
         }
@@ -650,6 +673,13 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         textPlain = event.textPlain;
         siyuanHTML = event.siyuanHTML;
         files = event.files;
+    }
+    if (blockDOMSanitizer) {
+        // 受限片段不解析外部 HTML 或文件；内部 BlockDOM 会在进入 DOM 前由专用白名单清洗。
+        textHTML = "";
+        files = [];
+        vscodeEditorData = "";
+        wpsPresentation = undefined;
     }
 
     // Improve the pasting of selected text in PDF rectangular annotation https://github.com/siyuan-note/siyuan/issues/11629
@@ -677,7 +707,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             return;
         }
     }
-    if (!siyuanHTML && !textHTML && !textPlain && !wpsPresentation && ("clipboardData" in event)) {
+    if (!blockDOMSanitizer && !siyuanHTML && !textHTML && !textPlain && !wpsPresentation &&
+        ("clipboardData" in event)) {
         const localFiles: ILocalFiles[] = await getLocalFiles();
         if (!isPasteInsertPositionAvailable()) {
             return;
@@ -730,7 +761,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         textHTML = Lute.Sanitize(textHTML);
     }
 
-    if (protyle && protyle.app && protyle.app.plugins && hasPluginSubscriber("paste")) {
+    if (areProtylePluginExtensionsEnabled(protyle) && protyle.app?.plugins && hasPluginSubscriber("paste")) {
         const plugins = Array.from(protyle.app.plugins);
         for (let i = 0; i < plugins.length; i++) {
             const plugin = plugins[i];
@@ -804,6 +835,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         siyuanHTML = Lute.Sanitize(siyuanHTML);
     }
 
+    if (blockDOMSanitizer) {
+        siyuanHTML = siyuanHTML ? blockDOMSanitizer(siyuanHTML) : "";
+    }
+
     if (!siyuanHTML && textHTML) {
         const officeList = convertOfficeLists(textHTML);
         textHTML = officeList.html;
@@ -841,6 +876,13 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl").forEach(item => {
         item.classList.remove("protyle-wysiwyg--hl");
     });
+    if (blockDOMSanitizer && !siyuanHTML) {
+        const plainHTML = getProtyleRestrictedPlainTextHTML(removeZWJ(textPlain));
+        if (plainHTML) {
+            insertAtPasteRange(plainHTML, range);
+        }
+        return;
+    }
     const code = processPasteCode(textHTML, textPlain, originalTextHTML, protyle);
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" ||
         protyle.toolbar.getCurrentType(range).includes("code")) {
@@ -943,6 +985,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             }
         }
         resetPastedQueryEmbedRenderState(tempElement);
+        wrapPastedTabItems(tempElement, protyle.lute);
         let isBlock = false;
         const pastedBlockElements = tempElement.querySelectorAll("[data-node-id]");
         if (pastedBlockElements.length > 0) {
@@ -958,6 +1001,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             if (!range) {
                 return;
             }
+            const pastedIDs = new Map<string, string>();
             pastedBlockElements.forEach((e) => {
                 const originalId = e.getAttribute("data-node-id");
                 const isCutPaste = existResponse.data[originalId] === false; // 剪切来的（原块已删）
@@ -965,8 +1009,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     // 复制粘贴：生成新 ID
                     e.setAttribute("data-node-id", Lute.NewNodeID());
                 }
+                pastedIDs.set(originalId, e.getAttribute("data-node-id"));
                 clearBlockElement(e, isCutPaste); // 剪切粘贴保留引用角标
             });
+            remapTabsDOMIDs(tempElement, pastedIDs);
             const updated = dayjs().format("YYYYMMDDHHmmss");
             pastedBlockElements.forEach((e) => {
                 e.setAttribute("updated", updated);

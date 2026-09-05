@@ -30,6 +30,7 @@ import {getCardCoverHTML, getCardCoverSource} from "./cover";
 import {getCardFieldsClass} from "./gallery/cardLayout";
 import {getAVFilteredTipContext} from "./filteredTip";
 import {clearAVItemSelectionState} from "./selectionState";
+import {renderAVRichTextElements} from "./richText";
 
 const getGalleryActionsHTML = (data: IAVGallery | IAVKanban, row: IAVGalleryItem, primaryHidden = false) => {
     const canPosition = Boolean(row.coverURL && !row.coverURL.startsWith("background") && getCardCoverSource(data));
@@ -483,6 +484,7 @@ ${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(
                         cellItem.innerHTML = renderCell(cellValue, 0, true, "table", undefined,
                             cellItem.dataset.dateFormat as TAVDateFormat);
                         renderCellAttr(cellItem, cellValue);
+                        renderAVRichTextElements(cellItem);
                     }
                 });
             });

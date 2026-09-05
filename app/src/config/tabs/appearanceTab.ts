@@ -82,7 +82,7 @@ const loadAvailableFonts = async () => {
 
 const genFontConfigHtml = (configKey: FontFamiliesConfigKey, title: string, description: string) => {
     const fonts = getEditorFonts(window.siyuan.config.editor, configKey);
-    return `<div class="fn__flex b3-label config-item config-wrap" data-font-config-key="${configKey}">
+    return `<div class="fn__flex b3-label config-item" data-font-config-key="${configKey}">
     <div class="fn__flex-1 config-item__main">
         <div class="config-name">${title}</div>
         <div class="b3-label__text">${description}</div>
@@ -638,7 +638,7 @@ const fontItemFromElement = (item: HTMLElement): IFontItem => ({
     spacing: item.dataset.spacing,
 });
 
-const genBootAppearanceHtml = () => `<label class="fn__flex b3-label config-item config-wrap fn__none">
+const genBootAppearanceHtml = () => `<label class="fn__flex b3-label config-item fn__none">
     <div class="fn__flex-1 config-item__main">
         <div class="config-name">${escapeHtml(window.siyuan.languages.bootAppearance)}</div>
         <div class="b3-label__text">${escapeHtml(window.siyuan.languages.bootAppearanceTip)}</div>

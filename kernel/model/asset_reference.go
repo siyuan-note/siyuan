@@ -166,7 +166,7 @@ func rewriteTreeAssetReferences(tree *parse.Tree, options assetReferenceRewriteO
 		tree.Root.SetIALAttr("title-img", strings.Replace(titleImg, titleImgPath, rewritten, 1))
 	}
 
-	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithTabTitles(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
@@ -227,31 +227,83 @@ func rewriteAttributeViewValueAssetReferences(value *av.Value, options assetRefe
 			updated = true
 		}
 	}
-	if value.Relation != nil {
-		for _, content := range value.Relation.Contents {
-			updated = rewriteAttributeViewValueAssetReferences(content, options) || updated
-		}
-	}
-	if value.Rollup != nil {
-		for _, content := range value.Rollup.Contents {
-			updated = rewriteAttributeViewValueAssetReferences(content, options) || updated
-		}
+	if rewriteAttributeViewRichAssetReferences(value, options) {
+		updated = true
 	}
 	return
+}
+
+func rewriteAttributeViewRichAssetReferences(value *av.Value, options assetReferenceRewriteOptions) (updated bool) {
+	if nil == value || nil == value.Text || nil == value.Text.Rich {
+		return
+	}
+	tree, err := av.ParseValueTextRich(value.Text.Rich)
+	if nil != err || nil == tree {
+		return
+	}
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+		switch node.Type {
+		case ast.NodeLinkDest:
+			reference := node.TokensStr()
+			if rewritten := rewriteAssetReference(reference, options); rewritten != reference {
+				node.Tokens = []byte(rewritten)
+				updated = true
+			}
+		case ast.NodeTextMark:
+			if node.IsTextMarkType("a") {
+				if rewritten := rewriteAssetReference(node.TextMarkAHref, options); rewritten != node.TextMarkAHref {
+					node.TextMarkAHref = rewritten
+					updated = true
+				}
+			}
+			if node.IsTextMarkType("file-annotation-ref") {
+				rewritten := rewriteAttributeViewFileAnnotationReference(node.TextMarkFileAnnotationRefID, options)
+				if rewritten != node.TextMarkFileAnnotationRefID {
+					node.TextMarkFileAnnotationRefID = rewritten
+					updated = true
+				}
+			}
+		case ast.NodeFileAnnotationRefID:
+			reference := node.TokensStr()
+			if rewritten := rewriteAttributeViewFileAnnotationReference(reference, options); rewritten != reference {
+				node.Tokens = []byte(rewritten)
+				updated = true
+			}
+		}
+		return ast.WalkContinue
+	})
+	if !updated {
+		return
+	}
+
+	oldRichContent, oldContent := value.Text.Rich.Content, value.Text.Content
+	richContent, err := av.RenderValueTextRich(tree)
+	if nil != err {
+		return false
+	}
+	value.Text.Rich.Content = richContent
+	if err = value.Text.NormalizeRichContent(); nil != err {
+		value.Text.Rich.Content, value.Text.Content = oldRichContent, oldContent
+		return false
+	}
+	return true
+}
+
+func rewriteAttributeViewFileAnnotationReference(reference string, options assetReferenceRewriteOptions) string {
+	options.bindTargetBox = false
+	return rewriteAssetReference(reference, options)
 }
 
 func rewriteAttributeViewAssetReferences(attrView *av.AttributeView, options assetReferenceRewriteOptions) (updated bool) {
 	if attrView == nil {
 		return
 	}
-	for _, keyValues := range attrView.KeyValues {
-		if keyValues == nil {
-			continue
-		}
-		for _, value := range keyValues.Values {
-			updated = rewriteAttributeViewValueAssetReferences(value, options) || updated
-		}
-	}
+	attrView.VisitPersistedValues(func(value *av.Value) {
+		updated = rewriteAttributeViewValueAssetReferences(value, options) || updated
+	})
 	return
 }
 

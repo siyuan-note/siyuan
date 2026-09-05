@@ -21,6 +21,7 @@ import {getAVColumnTextMeasurer, getAVRelationColumnWidth, getAVTableFitWidths} 
 import {getSearchAVFocus} from "./searchAVFocus";
 import {getAVTemplateHTML} from "./attributeValue";
 import {hasAVRenderTemplateResult} from "./cellValue";
+import {renderAVRichTextElements} from "./richText";
 
 interface IAVItem {
     avID: string;
@@ -438,9 +439,9 @@ style="${primaryCell.bgColor ? `background-color:${primaryCell.bgColor};` : ""}$
         data-position="north" aria-label="${window.siyuan.languages.openBy}"><svg><use xlink:href="#iconOpen"></use></svg></button>` : ""}
 </span>`;
         } else {
-            html += `<span class="av__relation-table-cell"
+            html += `<div class="av__relation-table-cell"
 style="${cell?.bgColor ? `background-color:${cell.bgColor};` : ""}${cell?.color ? `color:${cell.color};` : ""}">${cell?.value ?
-                renderCell(cell.value, 0, false, "table", column.options, column.dateFormat, column.renderTemplate) : ""}</span>`;
+                renderCell(cell.value, 0, false, "table", column.options, column.dateFormat, column.renderTemplate) : ""}</div>`;
         }
     });
     return html + "</div>";
@@ -653,6 +654,7 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
                 listElement.querySelector('[data-relation-type="candidateRows"]').insertAdjacentHTML("beforeend", candidateHTML);
             }
         }
+        renderAVRichTextElements(listElement);
         renderFooter(!!listElement.querySelector('[data-relation-type="candidate"]'));
         if (!listElement.querySelector(".b3-menu__item--current")) {
             listElement.querySelector('[data-type="setRelationCell"]')?.classList.add("b3-menu__item--current");

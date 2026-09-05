@@ -525,10 +525,17 @@ func SetIndexAssetPath(b bool) {
 }
 
 func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnnotationRef) {
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithTabTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering {
 			if ast.NodeCustomBlock == n.Type {
 				return ast.WalkSkipChildren
+			}
+			if ast.NodeAttributeView == n.Type {
+				for _, ref := range attributeViewRefsFromNode(tree, n) {
+					if !isRepeatedRef(refs, ref) {
+						refs = append(refs, ref)
+					}
+				}
 			}
 			return ast.WalkContinue
 		}
@@ -654,7 +661,7 @@ func fromTree(node *ast.Node, tree *parse.Tree) (blocks []*Block, spans []*Span,
 	rootID := tree.Root.ID
 	boxID := tree.Box
 	p := tree.Path
-	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithTabTitles(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}

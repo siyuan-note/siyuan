@@ -57,7 +57,15 @@ func docSaveAsTemplate(c *gin.Context) {
 	id := arg["id"].(string)
 	name := arg["name"].(string)
 	overwrite := arg["overwrite"].(bool)
-	code, err := model.DocSaveAsTemplate(id, name, overwrite)
+	databaseMode := model.TemplateDatabaseModeCopy
+	if value, exists := arg["databaseMode"]; exists {
+		if mode, ok := value.(string); ok {
+			databaseMode = model.TemplateDatabaseMode(mode)
+		} else {
+			databaseMode = model.TemplateDatabaseMode("invalid")
+		}
+	}
+	code, err := model.DocSaveAsTemplateWithDatabaseMode(id, name, overwrite, databaseMode)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = util.EscapeHTML(err.Error())

@@ -35,9 +35,9 @@ export const openExportOptionsDialog = (onConfirm: (options: IExportMdOptionsPay
             `<option value="${o.value}" ${conf[id] === o.value ? "selected" : ""}>${o.label}</option>`).join("");
         return `<select id="${id}" class="b3-select fn__flex-center fn__size200">${opts}</select>`;
     };
-    // 一行：左侧标题+说明，右侧控件。复用设置面板标准布局 class（config-item config-wrap）
+    // 一行：左侧标题+说明，右侧控件。复用设置面板标准布局 class（config-item）
     const row = (title: string, desc: string, control: string) =>
-        `<label class="fn__flex b3-label config-item config-wrap">
+        `<label class="fn__flex b3-label config-item">
             <div class="fn__flex-1">
                 <div class="config-name">${title}</div>
                 <div class="b3-label__text">${desc}</div>

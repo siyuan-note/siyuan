@@ -39,8 +39,8 @@ func TestUpgradeSpec6CardConfiguration(t *testing.T) {
 
 	UpgradeSpec(attrView)
 
-	if CurrentSpec != attrView.Spec {
-		t.Fatalf("expected spec %d, got %d", CurrentSpec, attrView.Spec)
+	if PlainTextSpec != attrView.Spec {
+		t.Fatalf("expected spec %d, got %d", PlainTextSpec, attrView.Spec)
 	}
 	if 180 != attrView.Views[0].Gallery.CardWidth {
 		t.Fatalf("expected gallery width 180, got %d", attrView.Views[0].Gallery.CardWidth)
@@ -62,8 +62,8 @@ func TestUpgradeSpec7RemovesPersistedCurrentView(t *testing.T) {
 		t.Fatal(err)
 	}
 	UpgradeSpec(attrView)
-	if CurrentSpec != attrView.Spec {
-		t.Fatalf("expected spec %d, got %d", CurrentSpec, attrView.Spec)
+	if PlainTextSpec != attrView.Spec {
+		t.Fatalf("expected spec %d, got %d", PlainTextSpec, attrView.Spec)
 	}
 	data, err := json.Marshal(attrView)
 	if nil != err {
@@ -81,7 +81,67 @@ func TestUpgradeSpec7RemovesPersistedCurrentView(t *testing.T) {
 func TestUpgradeSpec8(t *testing.T) {
 	attrView := &AttributeView{Spec: 7}
 	UpgradeSpec(attrView)
-	if CurrentSpec != attrView.Spec {
-		t.Fatalf("expected spec %d, got %d", CurrentSpec, attrView.Spec)
+	if PlainTextSpec != attrView.Spec {
+		t.Fatalf("expected spec %d, got %d", PlainTextSpec, attrView.Spec)
+	}
+}
+
+func TestUpgradeSpec9OnlyForRichText(t *testing.T) {
+	plain := &AttributeView{Spec: PlainTextSpec, KeyValues: []*KeyValues{{Values: []*Value{{
+		Type: KeyTypeText,
+		Text: &ValueText{Content: "**literal**"},
+	}}}}}
+	UpgradeSpec(plain)
+	if PlainTextSpec != plain.Spec {
+		t.Fatalf("plain text unexpectedly upgraded to spec %d", plain.Spec)
+	}
+
+	rich := &AttributeView{Spec: PlainTextSpec, KeyValues: []*KeyValues{{Values: []*Value{{
+		Type: KeyTypeText,
+		Text: &ValueText{Rich: &ValueTextRich{
+			Spec:    ValueTextRichSpec,
+			Format:  ValueTextRichFormatKramdown,
+			Content: "**rich**",
+		}},
+	}}}}}
+	UpgradeSpec(rich)
+	if RichTextSpec != rich.Spec {
+		t.Fatalf("expected rich text spec %d, got %d", RichTextSpec, rich.Spec)
+	}
+
+	rich.KeyValues[0].Values[0].Text.Rich = nil
+	UpgradeSpec(rich)
+	if RichTextSpec != rich.Spec {
+		t.Fatalf("rich text spec was downgraded to %d", rich.Spec)
+	}
+
+	templateRich := &AttributeView{
+		Spec: PlainTextSpec,
+		NewItemTemplates: []*NewItemTemplate{{
+			FieldValues: map[string]*NewItemFieldValue{
+				"text": {
+					Value: &Value{
+						Type: KeyTypeText,
+						Text: &ValueText{Rich: &ValueTextRich{
+							Spec:    ValueTextRichSpec,
+							Format:  ValueTextRichFormatKramdown,
+							Content: "**template**",
+						}},
+					},
+				},
+			},
+		}},
+	}
+	UpgradeSpec(templateRich)
+	if RichTextSpec != templateRich.Spec {
+		t.Fatalf("persisted template rich text did not upgrade spec: %d", templateRich.Spec)
+	}
+
+	mismatched := &AttributeView{Spec: PlainTextSpec, KeyValues: rich.KeyValues}
+	mismatched.KeyValues[0].Values[0].Text.Rich = &ValueTextRich{
+		Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown, Content: "rich",
+	}
+	if err := CheckSpec(mismatched); ErrRichTextSpecMismatch != err {
+		t.Fatalf("rich text in plain storage spec was accepted: %v", err)
 	}
 }

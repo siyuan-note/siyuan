@@ -18,6 +18,7 @@ package treenode
 
 import (
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"path/filepath"
@@ -73,7 +74,7 @@ func NewTree(boxID, p, hp, title string) *parse.Tree {
 	root.SetIALAttr("id", id)
 	root.SetIALAttr("updated", util.TimeFromID(id))
 	ret := &parse.Tree{Root: root, ID: id, Box: boxID, Path: p, HPath: hp}
-	ret.Root.Spec = CurrentSpec
+	ret.Root.Spec = BaseSpec
 	newPara := &ast.Node{Type: ast.NodeParagraph, ID: ast.NewNodeID(), Box: boxID, Path: p}
 	newPara.SetIALAttr("id", newPara.ID)
 	newPara.SetIALAttr("updated", util.TimeFromID(newPara.ID))
@@ -140,9 +141,22 @@ func ContainOnlyDefaultIAL(tree *parse.Tree) bool {
 	return 5 > len(tree.Root.KramdownIAL)
 }
 
-var CurrentSpec = "2"
+const BaseSpec = "2"
+
+var CurrentSpec = "3"
 
 var ErrSpecTooNew = fmt.Errorf("the document spec is too new")
+
+// CheckSpecJSON 在解析节点之前检查文档规范，避免未知节点被容错解析后覆盖原始内容。
+func CheckSpecJSON(data []byte) error {
+	var root struct {
+		Spec string
+	}
+	if err := json.Unmarshal(data, &root); nil != err {
+		return err
+	}
+	return CheckSpec(&parse.Tree{Root: &ast.Node{Spec: root.Spec}})
+}
 
 func CheckSpec(tree *parse.Tree) (err error) {
 	if CurrentSpec == tree.Root.Spec || "" == tree.Root.Spec {
@@ -154,6 +168,9 @@ func CheckSpec(tree *parse.Tree) (err error) {
 		logging.LogErrorf("parse spec [%s] failed: %s", tree.Root.Spec, err)
 		return
 	}
+	if 1 > spec {
+		return fmt.Errorf("invalid document spec [%s]", tree.Root.Spec)
+	}
 
 	currentSpec, _ := strconv.Atoi(CurrentSpec)
 	if spec > currentSpec {
@@ -164,13 +181,19 @@ func CheckSpec(tree *parse.Tree) (err error) {
 }
 
 func UpgradeSpec(tree *parse.Tree) (upgraded bool) {
-	if CurrentSpec == tree.Root.Spec {
-		return
-	}
-
+	oldSpec := tree.Root.Spec
 	upgradeSpec1(tree)
 	upgradeSpec2(tree)
-	return true
+	if "2" == tree.Root.Spec {
+		ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+			if entering && (ast.NodeTabs == node.Type || ast.NodeTabItem == node.Type) {
+				tree.Root.Spec = "3"
+				return ast.WalkStop
+			}
+			return ast.WalkContinue
+		})
+	}
+	return oldSpec != tree.Root.Spec
 }
 
 func upgradeSpec2(tree *parse.Tree) {

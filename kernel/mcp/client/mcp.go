@@ -618,9 +618,7 @@ func connectHTTP(ctx context.Context, client *mcp.Client, server conf.MCPServer,
 		return nil, nil, nil, fmt.Errorf("url is required for http server")
 	}
 
-	transport := &mcp.StreamableClientTransport{
-		Endpoint: server.URL,
-	}
+	transport := newStreamableClientTransport(server)
 	var oauthHandler *mcpOAuthHandler
 	if !hasAuthorizationHeader(server.Headers) {
 		oauthHandler = newMCPOAuthHandler(server, interactive)
@@ -651,6 +649,13 @@ func connectHTTP(ctx context.Context, client *mcp.Client, server conf.MCPServer,
 	}
 
 	return session, nil, oauthHandler, nil
+}
+
+func newStreamableClientTransport(server conf.MCPServer) *mcp.StreamableClientTransport {
+	return &mcp.StreamableClientTransport{
+		Endpoint:             server.URL,
+		DisableStandaloneSSE: server.DisableStandaloneSSE,
+	}
 }
 
 func hasAuthorizationHeader(headers map[string]string) bool {

@@ -52,6 +52,15 @@ type TemplateSearchResult struct {
 	Content      string `json:"content"`
 }
 
+type TemplateDatabaseMode string
+
+const (
+	TemplateDatabaseModeCopy      TemplateDatabaseMode = "copy"
+	TemplateDatabaseModeReference TemplateDatabaseMode = "reference"
+
+	templateDatabaseModeAttr = "custom-sy-av-template-mode"
+)
+
 func RenderGoTemplate(templateContent string) (ret string, err error) {
 	return RenderGoTemplateAtInBox(templateContent, time.Now(), "")
 }
@@ -244,12 +253,24 @@ func SearchTemplate(keyword string) (ret []*TemplateSearchResult) {
 }
 
 func DocSaveAsTemplate(id, name string, overwrite bool) (code int, err error) {
+	return DocSaveAsTemplateWithDatabaseMode(id, name, overwrite, TemplateDatabaseModeCopy)
+}
+
+func DocSaveAsTemplateWithDatabaseMode(id, name string, overwrite bool, databaseMode TemplateDatabaseMode) (code int, err error) {
+	if databaseMode == "" {
+		databaseMode = TemplateDatabaseModeCopy
+	}
+	if TemplateDatabaseModeCopy != databaseMode && TemplateDatabaseModeReference != databaseMode {
+		return 0, fmt.Errorf("unsupported template database mode [%s]", databaseMode)
+	}
+
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
 		return
 	}
 
 	tree := prepareExportTree(bt)
+	markTemplateAttributeViewModes(tree.Root, databaseMode)
 	addBlockIALNodes(tree, true)
 
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -324,6 +345,23 @@ func DocSaveAsTemplate(id, name string, overwrite bool) (code int, err error) {
 	return
 }
 
+func markTemplateAttributeViewModes(root *ast.Node, databaseMode TemplateDatabaseMode) {
+	if nil == root {
+		return
+	}
+	ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeAttributeView != n.Type {
+			return ast.WalkContinue
+		}
+		if TemplateDatabaseModeReference == databaseMode {
+			n.SetIALAttr(templateDatabaseModeAttr, string(databaseMode))
+		} else {
+			n.RemoveIALAttr(templateDatabaseModeAttr)
+		}
+		return ast.WalkContinue
+	})
+}
+
 func RenderDynamicIconContentTemplate(content, id string) (ret string) {
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {
@@ -379,6 +417,283 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 	}
 	tree, dom, _, err = RenderTemplateWithMode(p, id, mode)
 	return
+}
+
+type templateAttributeViewPlan struct {
+	mode          TemplateDatabaseMode
+	source        *av.AttributeView
+	target        *av.AttributeView
+	selectedView  *av.View
+	copiedViewIDs map[string]string
+}
+
+type templateAttributeViewCopy struct {
+	target        *av.AttributeView
+	copiedViewIDs map[string]string
+}
+
+func templateAttributeViewBoxID(tree *parse.Tree) string {
+	if nil != tree && IsEncryptedBox(tree.Box) {
+		return tree.Box
+	}
+	return ""
+}
+
+func templateAttributeViewMode(node *ast.Node) (ret TemplateDatabaseMode, err error) {
+	value := strings.TrimSpace(node.IALAttr(templateDatabaseModeAttr))
+	if "" == value {
+		return TemplateDatabaseModeCopy, nil
+	}
+	ret = TemplateDatabaseMode(value)
+	if TemplateDatabaseModeCopy != ret && TemplateDatabaseModeReference != ret {
+		return "", fmt.Errorf("unsupported template database mode [%s]", value)
+	}
+	return
+}
+
+func validateTemplateAttributeViewNode(node *ast.Node, attrView *av.AttributeView) (selectedView *av.View, err error) {
+	viewID := strings.TrimSpace(node.IALAttr(av.NodeAttrView))
+	if "" != viewID {
+		selectedView = attrView.GetView(viewID)
+		if nil == selectedView {
+			return nil, fmt.Errorf("attribute view [%s] view [%s] not found", attrView.ID, viewID)
+		}
+	} else if selectedView, err = attrView.GetFirstView(); nil != err {
+		return nil, fmt.Errorf("attribute view [%s] has no available view: %w", attrView.ID, err)
+	}
+
+	visibleViewIDs := strings.TrimSpace(node.IALAttr(av.NodeAttrVisibleViewIDs))
+	if "" == visibleViewIDs {
+		return
+	}
+	visibleViewCount := 0
+	for _, visibleViewID := range strings.Split(visibleViewIDs, ",") {
+		visibleViewID = strings.TrimSpace(visibleViewID)
+		if "" == visibleViewID {
+			continue
+		}
+		visibleViewCount++
+		if nil == attrView.GetView(visibleViewID) {
+			return nil, fmt.Errorf("attribute view [%s] visible view [%s] not found", attrView.ID, visibleViewID)
+		}
+	}
+	if 1 > visibleViewCount {
+		return nil, fmt.Errorf("attribute view [%s] has no available visible view", attrView.ID)
+	}
+	return
+}
+
+func resolveCopyTemplateAttributeView(node *ast.Node, attrView *av.AttributeView) *av.View {
+	if viewID := strings.TrimSpace(node.IALAttr(av.NodeAttrView)); "" != viewID {
+		if view := attrView.GetView(viewID); nil != view {
+			return view
+		}
+	}
+	view, _ := attrView.GetFirstView()
+	return view
+}
+
+func copyTemplateAttributeView(source *av.AttributeView) (ret *templateAttributeViewCopy, err error) {
+	target := source.Clone()
+	if nil == target {
+		return nil, fmt.Errorf("clone attribute view [%s] failed", source.ID)
+	}
+	if len(source.Views) != len(target.Views) {
+		return nil, fmt.Errorf("clone attribute view [%s] views failed", source.ID)
+	}
+	copiedViewIDs := map[string]string{}
+	for i, sourceView := range source.Views {
+		if nil == sourceView || nil == target.Views[i] {
+			return nil, fmt.Errorf("clone attribute view [%s] view failed", source.ID)
+		}
+		copiedViewIDs[sourceView.ID] = target.Views[i].ID
+	}
+	return &templateAttributeViewCopy{target: target, copiedViewIDs: copiedViewIDs}, nil
+}
+
+func prepareTemplateAttributeViews(tree *parse.Tree, preview bool) (plans map[*ast.Node]*templateAttributeViewPlan,
+	copies []*templateAttributeViewCopy, err error) {
+	plans = map[*ast.Node]*templateAttributeViewPlan{}
+	referenceSources := map[string]*av.AttributeView{}
+	copySources := map[string]*av.AttributeView{}
+	copyBySourceID := map[string]*templateAttributeViewCopy{}
+	boxID := templateAttributeViewBoxID(tree)
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeAttributeView != n.Type {
+			return ast.WalkContinue
+		}
+
+		mode, modeErr := templateAttributeViewMode(n)
+		if nil != modeErr {
+			err = modeErr
+			return ast.WalkStop
+		}
+		if TemplateDatabaseModeReference == mode {
+			source := referenceSources[n.AttributeViewID]
+			if nil == source {
+				source, modeErr = av.ParseAttributeViewInBox(n.AttributeViewID, boxID)
+				if nil != modeErr {
+					err = fmt.Errorf("parse attribute view [%s] in box [%s] failed: %w", n.AttributeViewID, boxID, modeErr)
+					return ast.WalkStop
+				}
+				if nil == source || source.ID != n.AttributeViewID {
+					err = fmt.Errorf("attribute view [%s] not found in box [%s]", n.AttributeViewID, boxID)
+					return ast.WalkStop
+				}
+				referenceSources[n.AttributeViewID] = source
+			}
+			selectedView, validateErr := validateTemplateAttributeViewNode(n, source)
+			if nil != validateErr {
+				err = validateErr
+				return ast.WalkStop
+			}
+			plans[n] = &templateAttributeViewPlan{
+				mode: mode, source: source, target: source, selectedView: selectedView,
+			}
+			return ast.WalkContinue
+		}
+
+		source := copySources[n.AttributeViewID]
+		if nil == source {
+			source, modeErr = av.ParseAttributeView(n.AttributeViewID)
+			if nil != modeErr || nil == source {
+				if nil == modeErr {
+					modeErr = av.ErrViewNotFound
+				}
+				logging.LogErrorf("parse attribute view [%s] failed: %s", n.AttributeViewID, modeErr)
+				plans[n] = &templateAttributeViewPlan{mode: mode}
+				return ast.WalkContinue
+			}
+			copySources[n.AttributeViewID] = source
+		}
+		selectedView := resolveCopyTemplateAttributeView(n, source)
+		plan := &templateAttributeViewPlan{mode: mode, source: source, target: source, selectedView: selectedView}
+		if !preview {
+			copied := copyBySourceID[source.ID]
+			if nil == copied {
+				copied, err = copyTemplateAttributeView(source)
+				if nil != err {
+					logging.LogErrorf("%s", err)
+					err = nil
+					plans[n] = &templateAttributeViewPlan{mode: mode}
+					return ast.WalkContinue
+				}
+				copyBySourceID[source.ID] = copied
+				copies = append(copies, copied)
+			}
+			plan.target = copied.target
+			plan.copiedViewIDs = copied.copiedViewIDs
+		}
+		plans[n] = plan
+		return ast.WalkContinue
+	})
+	return
+}
+
+func saveTemplateAttributeViewCopies(copies []*templateAttributeViewCopy, boxID string) {
+	for _, copied := range copies {
+		if "" != boxID {
+			av.SetAVBoxID(copied.target.ID, boxID)
+		}
+		err := av.SaveAttributeView(copied.target)
+		if "" != boxID {
+			av.SetAVBoxID(copied.target.ID, "")
+		}
+		if nil != err {
+			logging.LogErrorf("save attribute view [%s] failed: %s", copied.target.ID, err)
+		}
+	}
+}
+
+func applyTemplateAttributeViewPlan(node *ast.Node, plan *templateAttributeViewPlan) (*av.View, error) {
+	node.RemoveIALAttr(templateDatabaseModeAttr)
+	if TemplateDatabaseModeCopy == plan.mode {
+		// 完整复制会断开关联字段，实例上下文筛选不再有有效的目标数据库。
+		node.RemoveIALAttr(av.NodeAttrContextFilter)
+	}
+	if nil == plan.source || nil == plan.target || nil == plan.selectedView {
+		return nil, nil
+	}
+	node.AttributeViewID = plan.target.ID
+	viewID := plan.selectedView.ID
+	if TemplateDatabaseModeCopy == plan.mode && nil != plan.copiedViewIDs {
+		viewID = plan.copiedViewIDs[viewID]
+		if "" == viewID {
+			return nil, fmt.Errorf("copied attribute view [%s] view mapping not found", plan.source.ID)
+		}
+		if sourceViewID := strings.TrimSpace(node.IALAttr(av.NodeAttrView)); "" != sourceViewID {
+			if copiedViewID := plan.copiedViewIDs[sourceViewID]; "" != copiedViewID {
+				node.SetIALAttr(av.NodeAttrView, copiedViewID)
+			} else {
+				node.RemoveIALAttr(av.NodeAttrView)
+			}
+		}
+		if visibleViewIDs := strings.TrimSpace(node.IALAttr(av.NodeAttrVisibleViewIDs)); "" != visibleViewIDs {
+			var copiedVisibleViewIDs []string
+			for _, sourceViewID := range strings.Split(visibleViewIDs, ",") {
+				sourceViewID = strings.TrimSpace(sourceViewID)
+				if copiedViewID := plan.copiedViewIDs[sourceViewID]; "" != copiedViewID {
+					copiedVisibleViewIDs = append(copiedVisibleViewIDs, copiedViewID)
+				}
+			}
+			if 0 < len(copiedVisibleViewIDs) {
+				node.SetIALAttr(av.NodeAttrVisibleViewIDs, strings.Join(copiedVisibleViewIDs, ","))
+			} else {
+				node.RemoveIALAttr(av.NodeAttrVisibleViewIDs)
+			}
+		}
+	}
+	view := plan.target.GetView(viewID)
+	if nil == view {
+		return nil, fmt.Errorf("attribute view [%s] view [%s] not found", plan.target.ID, viewID)
+	}
+	node.AttributeViewType = string(view.LayoutType)
+	return view, nil
+}
+
+func templateAttributeViewPreviewTable(node *ast.Node, plan *templateAttributeViewPlan) *ast.Node {
+	view := *plan.selectedView
+	if nil != plan.selectedView.Table {
+		table := *plan.selectedView.Table
+		table.Columns = append([]*av.ViewTableColumn(nil), plan.selectedView.Table.Columns...)
+		view.Table = &table
+	}
+	var table *av.Table
+	if TemplateDatabaseModeReference == plan.mode {
+		// 引用数据库模板的预览只显示结构和表头，避免在预览中暴露被引用数据库的数据。
+		switch view.LayoutType {
+		case av.LayoutTypeGallery:
+			view.Table = av.NewLayoutTable()
+			for _, field := range view.Gallery.CardFields {
+				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
+			}
+		case av.LayoutTypeKanban:
+			view.Table = av.NewLayoutTable()
+			for _, field := range view.Kanban.Fields {
+				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
+			}
+		}
+		depth := 1
+		table = sql.RenderAttributeViewTable(plan.source, &view, "", &depth, map[string]*av.AttributeView{}, true)
+		table.Rows = nil
+		table.RowCount = 0
+	} else {
+		table = getAttrViewTable(plan.source, &view, "")
+	}
+
+	aligns := getAttrViewTableAligns(table, false)
+	mdTable := &ast.Node{Type: ast.NodeTable, TableAligns: aligns}
+	mdTableHead := &ast.Node{Type: ast.NodeTableHead}
+	mdTable.AppendChild(mdTableHead)
+	mdTableHeadRow := &ast.Node{Type: ast.NodeTableRow, TableAligns: aligns}
+	mdTableHead.AppendChild(mdTableHeadRow)
+	for _, col := range table.Columns {
+		cell := &ast.Node{Type: ast.NodeTableCell}
+		cell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(col.Name)})
+		mdTableHeadRow.AppendChild(cell)
+	}
+	node.InsertBefore(mdTable)
+	return mdTable
 }
 
 func RenderTemplateWithMode(p, id string, mode TemplateRenderMode) (tree *parse.Tree, dom string,
@@ -483,6 +798,11 @@ func RenderTemplateWithMode(p, id string, mode TemplateRenderMode) (tree *parse.
 			return
 		}
 	}
+	attributeViewPlans, attributeViewCopies, prepareErr := prepareTemplateAttributeViews(tree, preview)
+	if nil != prepareErr {
+		err = prepareErr
+		return
+	}
 
 	var nodesNeedAppendChild, unlinks []*ast.Node
 	// 模板内部块旧 ID 到新 ID 的映射，用于成套改写模板内部的自引用
@@ -523,58 +843,35 @@ func RenderTemplateWithMode(p, id string, mode TemplateRenderMode) (tree *parse.
 		}
 
 		if ast.NodeAttributeView == n.Type {
-			// 重新生成数据库视图
-			attrView, parseErr := av.ParseAttributeView(n.AttributeViewID)
-			if nil != parseErr {
-				logging.LogErrorf("parse attribute view [%s] failed: %s", n.AttributeViewID, parseErr)
-			} else {
-				cloned := attrView.Clone()
-				if nil == cloned {
-					logging.LogErrorf("clone attribute view [%s] failed", n.AttributeViewID)
-					return ast.WalkContinue
-				}
-
-				n.AttributeViewID = cloned.ID
-				if !preview {
-					// 非预览时持久化数据库
-					if saveErr := av.SaveAttributeView(cloned); nil != saveErr {
-						logging.LogErrorf("save attribute view [%s] failed: %s", cloned.ID, saveErr)
-					}
-				} else {
-					// 预览时使用简单表格渲染
-					viewID := n.IALAttr(av.NodeAttrView)
-					view, getErr := resolveAttributeViewView(attrView, viewID, "", "")
-					if nil != getErr {
-						logging.LogErrorf("get attribute view [%s] failed: %s", n.AttributeViewID, getErr)
-						return ast.WalkContinue
-					}
-
-					table := getAttrViewTable(attrView, view, "")
-
-					aligns := getAttrViewTableAligns(table, false)
-					mdTable := &ast.Node{Type: ast.NodeTable, TableAligns: aligns}
-					mdTableHead := &ast.Node{Type: ast.NodeTableHead}
-					mdTable.AppendChild(mdTableHead)
-					mdTableHeadRow := &ast.Node{Type: ast.NodeTableRow, TableAligns: aligns}
-					mdTableHead.AppendChild(mdTableHeadRow)
-					for _, col := range table.Columns {
-						cell := &ast.Node{Type: ast.NodeTableCell}
-						cell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(col.Name)})
-						mdTableHeadRow.AppendChild(cell)
-					}
-
-					n.InsertBefore(mdTable)
-					unlinks = append(unlinks, n)
-				}
+			plan := attributeViewPlans[n]
+			if nil == plan {
+				err = fmt.Errorf("attribute view [%s] template plan not found", n.AttributeViewID)
+				return ast.WalkStop
+			}
+			appliedView, applyErr := applyTemplateAttributeViewPlan(n, plan)
+			if nil != applyErr {
+				err = applyErr
+				return ast.WalkStop
+			}
+			if preview && nil != appliedView {
+				templateAttributeViewPreviewTable(n, plan)
+				unlinks = append(unlinks, n)
 			}
 		}
 
 		return ast.WalkContinue
 	})
+	if nil != err {
+		return
+	}
+	if !preview {
+		saveTemplateAttributeViewCopies(attributeViewCopies, templateAttributeViewBoxID(tree))
+	}
 
 	// 用映射成套改写模板内部的自引用，并补全指向外部块的引用锚文本
 	// 仅命中 blockIDs 的引用（模板内部块）才会改写 ID；未命中的（外部块）保持不变
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.RemapTabsActiveIDs(tree.Root, blockIDs)
+	treenode.WalkWithTabTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
@@ -771,7 +1068,11 @@ func applyDocContentTemplate(templatePath, docID string) error {
 		}
 	}
 	tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-	return indexWriteTreeUpsertQueue(tree)
+	if err = indexWriteTreeUpsertQueue(tree); nil != err {
+		return err
+	}
+	av.BatchUpsertBlockRel(tree.Root.ChildrenByType(ast.NodeAttributeView))
+	return nil
 }
 
 func resolveDocContentTemplatePath(templatePath string) (string, error) {

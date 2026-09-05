@@ -44,6 +44,7 @@ func init() {
 		}
 		return bt.BoxID
 	}
+	av.AttributeViewSaved = queueAttributeViewRefIndex
 	sql.IsEncryptedBoxFn = IsEncryptedBox
 	sql.IsBoxUnlockedFn = isBoxUnlockedForAccess
 	treenode.IsEncryptedBoxFn = IsEncryptedBox

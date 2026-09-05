@@ -60,6 +60,11 @@ const RENDER_MAP: Record<string, (previewPanel: Element) => void> = {
 };
 
 export const processRender = (previewPanel: Element) => {
+    // 受限 Lite 编辑器只渲染公式，代码围栏始终作为源码编辑，不能执行图表或 HTML。
+    if (previewPanel.closest('[data-protyle-lite-render="safe"]')) {
+        mathRender(previewPanel);
+        return;
+    }
     customBlockRender(previewPanel);
     const language = previewPanel.getAttribute("data-subtype");
     if (RENDER_MAP[language]) {

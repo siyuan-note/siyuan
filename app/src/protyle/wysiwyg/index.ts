@@ -1,3 +1,5 @@
+import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
+import {isTabTextBoundary} from "./tabsBoundary";
 import {
     beforePaste,
     convertPastedListItemSubtype,
@@ -184,6 +186,7 @@ import {
 import {addSpellcheckMenuItems, requestSpellcheckContext} from "../../menus/spellcheck";
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "../render/av/attributeValue";
 import {focusAVByArrow} from "../render/av/focus";
+import {shouldRunAVKeyupFallback} from "../render/av/verticalNavigation";
 import {applyAVDragSelection, clearAVDragSelection, isAVDragSelectSupported} from "../render/av/dragSelect";
 import {
     selectAVCellRange,
@@ -208,6 +211,7 @@ import {shouldOpenListItemAttr} from "./listContext";
 import {getBlockEdgeCaretRange, isCaretRangeInsideElement} from "./blockEdgeCaret";
 import {LargeListVirtualizer} from "./listVirtualization";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
+import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 import {syncRootAttributes} from "../util/syncRootAttributes";
 import {isDirectCalloutStructureClick} from "./calloutClick";
 import {
@@ -1035,6 +1039,10 @@ export class WYSIWYG {
                         textPlain = crossBlockTextPlain ?? textWithoutAttr ?? semanticRangeText;
                     }
                 }
+            }
+            if (selectElements.length === 0 && !selectionModeElement && html.includes("data-tabs-hidden")) {
+                html = visibleTabsSelectionHTML(html);
+                textPlain = "";
             }
             html = sanitizeViewFoldHTML(html);
             if (protyle.disabled) {
@@ -3485,6 +3493,11 @@ export class WYSIWYG {
             if (selectElements.length > 1 ||
                 getBlockSelectionModeElement(protyle.wysiwyg.element) && selectElements.length > 0) {
                 // 多选块
+                if (!protyle.gutter) {
+                    event.preventDefault();
+                    window.siyuan.menus.menu.remove();
+                    return;
+                }
                 hideElements(["util"], protyle);
                 protyle.gutter.renderMenu(protyle, selectElements[0]);
                 window.siyuan.menus.menu.popup({x, y});
@@ -3493,6 +3506,11 @@ export class WYSIWYG {
             const target = event.detail.target || event.target as HTMLElement;
             const embedElement = isInEmbedBlock(target);
             if (embedElement) {
+                if (!protyle.gutter) {
+                    event.preventDefault();
+                    window.siyuan.menus.menu.remove();
+                    return;
+                }
                 if (getSelection().rangeCount === 0) {
                     focusSideBlock(embedElement);
                 }
@@ -3688,6 +3706,11 @@ export class WYSIWYG {
                     }
                 }
             } else if (protyle.toolbar.range.toString() === "") {
+                if (!protyle.gutter) {
+                    event.preventDefault();
+                    window.siyuan.menus.menu.remove();
+                    return;
+                }
                 hideElements(["util"], protyle);
                 if (protyle.gutter) {
                     protyle.gutter.renderMenu(protyle, nodeElement);
@@ -4044,6 +4067,13 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("beforeinput", async (event: InputEvent) => {
+            if (!event.isComposing && ["deleteContentBackward", "deleteContentForward"].includes(event.inputType) &&
+                !getBlockSelectionModeElement(this.element) && !this.element.querySelector(".protyle-wysiwyg--select") &&
+                isTabTextBoundary(getEditorRange(this.element), event.inputType === "deleteContentBackward")) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             if (event.target === this.element &&
                 (event.inputType === "historyUndo" || event.inputType === "historyRedo")) {
                 event.preventDefault();
@@ -4233,7 +4263,8 @@ export class WYSIWYG {
             }
 
             if (!event.altKey && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.isComposing &&
-                event.key.startsWith("Arrow") && isArrowFromOutsideAV &&
+                event.key.startsWith("Arrow") && shouldRunAVKeyupFallback(this.preventKeyup,
+                    !!isArrowFromOutsideAV) &&
                 nodeElement && nodeElement.classList.contains("av") &&
                 !nodeElement.classList.contains("protyle-wysiwyg--select") &&
                 hasClosestByClassName(range.startContainer, "av__cursor") &&
@@ -4406,12 +4437,14 @@ export class WYSIWYG {
                 this.preventClick = false;
                 return;
             }
-            forEachPluginSubscriber("click-editorcontent", eventBus => {
-                eventBus.emit("click-editorcontent", {
-                    protyle,
-                    event
+            if (areProtylePluginExtensionsEnabled(protyle)) {
+                forEachPluginSubscriber("click-editorcontent", eventBus => {
+                    eventBus.emit("click-editorcontent", {
+                        protyle,
+                        event
+                    });
                 });
-            });
+            }
             const templateInteractiveElement = getAVTemplateInteractiveElement(event.target);
             if (templateInteractiveElement && !isAVTemplateLink(templateInteractiveElement)) {
                 event.stopPropagation();
@@ -4784,6 +4817,11 @@ export class WYSIWYG {
 
             const menuElement = hasClosestByClassName(event.target, "protyle-action__menu");
             if (menuElement) {
+                if (!protyle.gutter) {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
                 protyle.gutter.renderMenu(protyle, menuElement.parentElement.parentElement);
                 /// #if MOBILE
                 window.siyuan.menus.menu.fullscreen();

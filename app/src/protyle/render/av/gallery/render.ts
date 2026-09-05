@@ -22,6 +22,7 @@ import {
 } from "../locate";
 import {getCardStyle} from "./style";
 import {setGroupFoldedStates} from "../groupFold";
+import {renderAVRichTextElements} from "../richText";
 
 interface IIds {
     groupId: string,
@@ -115,6 +116,7 @@ export const afterRenderGallery = (options: ITableOptions) => {
     if (view.coverFrom === 1 || view.coverFrom === 3) {
         processRender(options.blockElement);
     }
+    renderAVRichTextElements(options.blockElement);
     if (typeof options.resetData.oldOffset === "number") {
         options.protyle.contentElement.scrollTop = options.resetData.oldOffset;
     }

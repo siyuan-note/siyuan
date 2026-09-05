@@ -58,7 +58,7 @@ export const clearHeadingNumberElements = (root: Element) => {
 };
 
 const isNumberedHeadingTarget = (element: Element) => {
-    return !element.closest(".bq, .callout, .protyle-wysiwyg__embed");
+    return !element.closest(".bq, .callout, .tab-item, .protyle-wysiwyg__embed");
 };
 
 const measureHeadingNumbers = (targets: IHeadingNumberTarget[]) => {

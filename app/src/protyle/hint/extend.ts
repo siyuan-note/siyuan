@@ -44,6 +44,7 @@ import {
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {buildSemanticInlineHTML} from "../util/inlineElementMarker";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 import {
     getBlockSelectionModeElement,
     getBlockSelectionStatusIDs,
@@ -200,6 +201,11 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         id: "quote",
         value: "> " + Lute.Caret,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconQuote"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.quote}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.insert.quote.custom, ">")}</div>`,
+    }, {
+        filter: [window.siyuan.languages.tabs, "tabs", "页签", "yeqian"],
+        id: "tabs",
+        value: `:::tabs\n:::tab\n${Lute.Caret}\n:::\n:::tab\n\n:::\n:::\n`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconTabs"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.tabs}</span></div>`,
     }, {
         filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi", "note"],
         id: "calloutNote",
@@ -457,23 +463,25 @@ export const hintSlash = (key: string, protyle: IProtyle, sourceOrHideConfigured
         entryKey: item.id || "",
     }));
     let hasPlugin = false;
-    protyle.app.plugins.forEach((plugin) => {
-        plugin.protyleSlash.forEach(slash => {
-            allList.push({
-                filter: slash.filter,
-                id: slash.id,
-                entryKey: getPluginSlashEntryKey(plugin.name, slash.id,
-                    slash.html === "separator" ? "separator" : "entry"),
-                value: `plugin${Constants.ZWSP}${plugin.name}${Constants.ZWSP}${slash.id}`,
-                html: slash.html
+    if (areProtylePluginExtensionsEnabled(protyle)) {
+        protyle.app.plugins.forEach((plugin) => {
+            plugin.protyleSlash.forEach(slash => {
+                allList.push({
+                    filter: slash.filter,
+                    id: slash.id,
+                    entryKey: getPluginSlashEntryKey(plugin.name, slash.id,
+                        slash.html === "separator" ? "separator" : "entry"),
+                    value: `plugin${Constants.ZWSP}${plugin.name}${Constants.ZWSP}${slash.id}`,
+                    html: slash.html
+                });
+                hasPlugin = true;
             });
-            hasPlugin = true;
         });
-    });
+    }
     if (!hasPlugin) {
         allList.pop();
     }
-    refreshSlashMenuCatalog(protyle.app.plugins);
+    refreshSlashMenuCatalog(areProtylePluginExtensionsEnabled(protyle) ? protyle.app.plugins : []);
     return resolveSlashMenuItems(allList.filter((item) => {
         const builtinStyleID = slashBuiltinStyleIDs[item.entryKey];
         return getEntryCatalogNode(getSlashMenuEntryPath(item.entryKey)) &&

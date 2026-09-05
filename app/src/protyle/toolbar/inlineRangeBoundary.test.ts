@@ -43,7 +43,7 @@ describe("inline range boundary", () => {
         });
     });
 
-    it("normalizes a browser select-all range to the callout title", () => {
+    ["NodeCallout", "NodeTabItem"].forEach(blockType => it(`normalizes a browser select-all range to the ${blockType} title`, () => {
         const infoElement = element("DIV");
         const titleElement = element("SPAN", infoElement);
         const titleText = text(titleElement);
@@ -51,7 +51,7 @@ describe("inline range boundary", () => {
         infoElement.contains = (node: Node) => node === titleElement || node === titleText;
         titleElement.contains = (node: Node) => node === titleText;
         const blockElement = {
-            getAttribute: (name: string) => name === "data-type" ? "NodeCallout" : null,
+            getAttribute: (name: string) => name === "data-type" ? blockType : null,
             querySelector: () => titleElement,
         } as unknown as Element;
         const fallbackEditableElement = element("DIV");
@@ -72,5 +72,5 @@ describe("inline range boundary", () => {
         assert.equal(normalizeCalloutTitleRange(range, blockElement, fallbackEditableElement), titleElement);
         assert.equal(range.startContainer, titleElement);
         assert.equal(range.endContainer, titleElement);
-    });
+    }));
 });

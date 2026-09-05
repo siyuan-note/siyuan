@@ -1,3 +1,5 @@
+import {revealTabsForTarget} from "../render/tabsRender";
+import {isHiddenTabContent} from "../render/tabsVisibility";
 import {
     getContenteditableElement,
     getNextBlock,
@@ -515,7 +517,7 @@ export const getBlockRanges = (editorElement: Element, selectedRange: Range, exc
     const blockWalker = document.createTreeWalker(editorElement, NodeFilter.SHOW_ELEMENT, {
         acceptNode(node) {
             const element = node as HTMLElement;
-            if (element.getAttribute("data-type") === "NodeBlockQueryEmbed") {
+            if (element.getAttribute("data-type") === "NodeBlockQueryEmbed" || isHiddenTabContent(element)) {
                 return NodeFilter.FILTER_REJECT;
             }
             return element.hasAttribute("data-node-id") ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
@@ -1044,6 +1046,14 @@ export const focusByRange = (range: Range) => {
     if (startNode && startNode.nodeType !== 3 && ["INPUT", "TEXTAREA"].includes(startNode.tagName)) {
         startNode.focus();
         return;
+    }
+    const target = range.startContainer.nodeType === Node.ELEMENT_NODE ? range.startContainer as Element : range.startContainer.parentElement;
+    if (target) {
+        const tabTitle = target.closest(".tab-item-title");
+        if (tabTitle) {
+            tabTitle.closest<HTMLElement>(".tab-item").dataset.tabsEditing = "true";
+        }
+        revealTabsForTarget(target);
     }
     const selection = window.getSelection();
     selection.removeAllRanges();

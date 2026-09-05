@@ -206,6 +206,9 @@ func GetDocHistoryContent(historyPath, keyword string, highlight bool) (id, root
 	isLargeDoc = 1024*1024*1 <= len(data)
 
 	luteEngine := NewLute()
+	if err = treenode.CheckSpecJSON(data); nil != err {
+		return
+	}
 	historyTree, err := dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if err != nil {
 		logging.LogErrorf("parse tree from file [%s] failed: %s", historyPath, err)
@@ -483,6 +486,9 @@ func RollbackDocHistory(historyPath string) (err error) {
 
 // loadTreeByData0 从已解密的 JSON 字节数据加载 tree（不走文件系统，不涉及加解密）。
 func loadTreeByData0(data []byte) (ret *parse.Tree, err error) {
+	if err = treenode.CheckSpecJSON(data); nil != err {
+		return
+	}
 	ret, err = dataparser.ParseJSONWithoutFix(data, util.NewLute().ParseOptions)
 	return
 }
@@ -680,7 +686,13 @@ func RollbackAttributeViewHistory(historyPath string) (err error) {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
 		return
 	}
-	cache.RemoveAVData(strings.TrimSuffix(filepath.Base(historyPath), ".json"))
+	avID := strings.TrimSuffix(filepath.Base(historyPath), ".json")
+	cache.RemoveAVData(avID)
+	avBoxID := ""
+	if len(pathParts) >= 2 && IsEncryptedBox(pathParts[1]) {
+		avBoxID = pathParts[1]
+	}
+	queueExternalAttributeViewRefIndex(avID, avBoxID)
 	IncSync()
 	util.PushMsg(Conf.Language(102), 3000)
 	return nil

@@ -736,6 +736,16 @@ func DefRefs(condition string, limit int) (ret []map[*Block]*Block) {
 		stmt += " AND " + condition
 	}
 
+	// 关系图查询条件由用户输入动态拼接，执行前校验单条只读语句，防止注入
+	if err := CheckSingleStatement(stmt); nil != err {
+		logging.LogErrorf("sql query [%s] rejected as non-single statement: %s", stmt, err)
+		return
+	}
+	if err := CheckReadonlyStatement(stmt); nil != err {
+		logging.LogErrorf("sql query [%s] rejected as non-readonly statement: %s", stmt, err)
+		return
+	}
+
 	rows, err := query(stmt)
 	if err != nil {
 		logging.LogErrorf("sql query failed: %s", err)

@@ -672,6 +672,7 @@ func TestRemoveExactRelationFiltersByColumn(t *testing.T) {
 	if !changed || 1 != len(got) || 1 != len(got[0].Filters) || got[0].Filters[0] != keyword {
 		t.Fatalf("only exact filters for the retargeted relation column should be removed")
 	}
+
 }
 
 func TestAttributeViewRemoveRelationFilterItems(t *testing.T) {
@@ -736,6 +737,8 @@ func TestCloneFilters(t *testing.T) {
 	endpointLeaf := leaf("c1")
 	endpointLeaf.DateEndpoint = DateEndpointEnd
 	endpointLeaf.ValueSource = ValueSourceRendered
+	endpointLeaf.Value.Text = &ValueText{Content: "original"}
+	endpointLeaf.RelativeDate = &RelativeDate{Count: 1, Unit: RelativeDateUnitDay}
 	original := []*ViewFilter{group(FilterCombinationAnd, endpointLeaf, group(FilterCombinationOr, leaf("c2")))}
 	cloned := CloneFilters(original)
 	if len(cloned) != len(original) {
@@ -755,6 +758,11 @@ func TestCloneFilters(t *testing.T) {
 	}
 	if ValueSourceRendered != cloned[0].Filters[0].ValueSource {
 		t.Fatalf("value source not cloned")
+	}
+	cloned[0].Filters[0].Value.Text.Content = "changed"
+	cloned[0].Filters[0].RelativeDate.Count = 2
+	if "original" != original[0].Filters[0].Value.Text.Content || 1 != original[0].Filters[0].RelativeDate.Count {
+		t.Fatal("filter values and relative dates should be deeply cloned")
 	}
 }
 
@@ -843,8 +851,8 @@ func TestUpgradeSpec5(t *testing.T) {
 	// spec 4 + 扁平叶子 → 包装成根组
 	av4 := &AttributeView{Spec: 4, Views: []*View{{Filters: []*ViewFilter{leaf("c1"), leaf("c2")}}}}
 	UpgradeSpec(av4)
-	if av4.Spec != CurrentSpec {
-		t.Fatalf("spec should be upgraded to %d, got %d", CurrentSpec, av4.Spec)
+	if av4.Spec != PlainTextSpec {
+		t.Fatalf("spec should be upgraded to %d, got %d", PlainTextSpec, av4.Spec)
 	}
 	filters := av4.Views[0].Filters
 	if len(filters) != 1 || !filters[0].IsGroup() || FilterCombinationAnd != filters[0].Combination {

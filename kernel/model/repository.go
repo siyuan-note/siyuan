@@ -382,6 +382,7 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 		if strings.Contains(file.Path, "/storage/av/") && strings.HasSuffix(file.Path, ".json") {
 			avID := strings.TrimSuffix(filepath.Base(file.Path), ".json")
 			cache.RemoveAVData(avID)
+			queueExternalAttributeViewRefIndexByRepoPath(file.Path)
 			ReloadAttrView(avID)
 		}
 
@@ -723,6 +724,9 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 		}
 
 		var tree *parse.Tree
+		if err = treenode.CheckSpecJSON(data); nil != err {
+			return
+		}
 		tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 		if err != nil {
 			logging.LogErrorf("parse file [%s] failed: %s", fileID, err)
@@ -792,6 +796,9 @@ func decryptRepoDataIfNeeded(data []byte, filePath string) ([]byte, error) {
 func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isLargeDoc bool, tree *parse.Tree, err error) {
 	isLargeDoc = 1024*1024*1 <= len(data)
 	// 调用方必须先根据快照路径完成解密，解析层不处理密文。
+	if err = treenode.CheckSpecJSON(data); nil != err {
+		return
+	}
 	tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if err != nil {
 		return
@@ -937,6 +944,9 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 	if strings.HasSuffix(file.Path, ".sy") {
 		var tree *parse.Tree
 		luteEngine := NewLute()
+		if err = treenode.CheckSpecJSON(data); nil != err {
+			return
+		}
 		tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 		if err != nil {
 			logging.LogErrorf("parse file [%s] failed: %s", id, err)
@@ -2306,6 +2316,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 	// 有数据变更，需要重建索引
 	var upserts, removes []string
+	changedAttributeViewPaths := map[string]bool{}
 	var upsertTrees int
 	// 可能需要重新加载部分功能
 	var needReloadFlashcard, needReloadInlineStyles, needReloadOcrTexts, needReloadPlugin, needReloadSnippet bool
@@ -2376,6 +2387,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 		if strings.Contains(file.Path, "/storage/av/") && strings.HasSuffix(file.Path, ".json") {
 			cache.RemoveAVData(strings.TrimSuffix(filepath.Base(file.Path), ".json"))
+			changedAttributeViewPaths[file.Path] = true
 		}
 	}
 
@@ -2457,6 +2469,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 		if strings.Contains(file.Path, "/storage/av/") && strings.HasSuffix(file.Path, ".json") {
 			cache.RemoveAVData(strings.TrimSuffix(filepath.Base(file.Path), ".json"))
+			changedAttributeViewPaths[file.Path] = true
 		}
 	}
 
@@ -2480,7 +2493,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	if needReloadPlugin {
-		PushReloadPlugin(uninstallPluginSet, unloadPluginSet, reloadPluginSet, dataChangePluginSet, "")
+		PushReloadPlugin(uninstallPluginSet, unloadPluginSet, reloadPluginSet, dataChangePluginSet, "",
+			DataChangeReasonSync)
 	}
 
 	if needReloadSnippet {
@@ -2544,6 +2558,9 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	upsertRootIDs, removeRootIDs := incReindex(upserts, removes)
+	for changedPath := range changedAttributeViewPaths {
+		queueExternalAttributeViewRefIndexByRepoPath(changedPath)
+	}
 	needReloadFiletree = !needReloadUI && (needReloadFiletree || 0 < len(upsertRootIDs) || 0 < len(removeRootIDs))
 	if needReloadFiletree {
 		ReloadFiletree()

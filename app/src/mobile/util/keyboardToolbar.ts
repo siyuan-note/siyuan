@@ -58,6 +58,7 @@ import {
     type TSelectionEndpoint,
 } from "./touchSelection";
 import {getVisibleViewportBounds} from "./visibleViewport";
+import {createInlineMathSelection} from "./inlineMathSelection";
 import {
     getTextWithoutSemanticMarkers,
     stripSemanticMarkersFromRangeText
@@ -85,6 +86,14 @@ type TAndroidTableCellSelectAll = {
 };
 
 const ANDROID_TABLE_CELL_SELECT_ALL_TIMEOUT = 2000;
+const inlineMathSelection = createInlineMathSelection((editor, math) => {
+    const protyle = getCurrentEditor()?.protyle;
+    if (!protyle || protyle.disabled || protyle.toolbar.isMultiSelectMode() || protyle.wysiwyg.element !== editor) {
+        return;
+    }
+    protyle.toolbar.range = getSelection().getRangeAt(0).cloneRange();
+    protyle.toolbar.showRender(protyle, math);
+});
 
 let renderKeyboardToolbarTimeout: number;
 let scrollSelectionIntoViewTimeout: number;
@@ -861,9 +870,10 @@ export const showKeyboardToolbar = () => {
     }
     const toolbarElement = document.getElementById("keyboardToolbar");
     const selection = getSelection();
-    if (selection.rangeCount > 0 &&
-        hasClosestByClassName(selection.getRangeAt(0).startContainer, "agent-chat__composer-host", true)) {
-        // 智能体发送框自带操作栏，不能显示会作用于下层文档的移动端编辑工具栏。
+    if (selection.rangeCount > 0 && (
+        hasClosestByClassName(selection.getRangeAt(0).startContainer, "protyle-lite-fragment", true) ||
+        hasClosestByClassName(selection.getRangeAt(0).startContainer, "agent-chat__composer-host", true))) {
+        // Lite 编辑器使用自己的工具栏，不能显示会作用于下层文档的移动端编辑工具栏。
         window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: true}));
         toolbarElement.classList.add("fn__none");
         return;
@@ -982,6 +992,7 @@ export const hideKeyboardToolbar = () => {
 };
 
 export const hideKeyboardToolbarByApp = (preserveSelection = false) => {
+    inlineMathSelection.reset();
     const tableCellSelectionRestored = preserveSelection && restoreRecentAndroidTableCellSelectAll();
     if (tableCellSelectionRestored) {
         return KeyboardHideResult.RestoreTableCellSelection;
@@ -1013,6 +1024,7 @@ export const activeBlur = (force = false) => {
         console.warn(`activeBlur blocked by lock (remaining: ${keyboardLockUntil - now}ms)`);
         return;
     }
+    inlineMathSelection.reset();
 
     if (window.JSAndroid && window.JSAndroid.hideKeyboard) {
         window.JSAndroid.hideKeyboard();
@@ -1024,6 +1036,41 @@ export const activeBlur = (force = false) => {
 };
 
 export const initKeyboardToolbar = () => {
+    let composing = false;
+    const getMathEditor = () => {
+        const protyle = getCurrentEditor()?.protyle;
+        return isInAndroid() && protyle && !protyle.disabled && !protyle.toolbar.isMultiSelectMode() &&
+            protyle.wysiwyg.element.contains(document.activeElement) ? protyle.wysiwyg.element : undefined;
+    };
+    document.addEventListener("beforeinput", () => {
+        if (!composing) {
+            inlineMathSelection.prepareInput(getMathEditor(), getSelection());
+        }
+    }, true);
+    document.addEventListener("keydown", (event) => {
+        if (!composing && ["Backspace", "Delete", "Enter"].includes(event.key)) {
+            inlineMathSelection.prepareInput(getMathEditor(), getSelection());
+        }
+    }, true);
+    ["copy", "cut", "paste"].forEach(type => {
+        document.addEventListener(type, () => {
+            if (!composing) {
+                inlineMathSelection.prepareInput(getMathEditor(), getSelection());
+            }
+        }, true);
+    });
+    document.addEventListener("compositionstart", () => {
+        inlineMathSelection.prepareInput(getMathEditor(), getSelection());
+        composing = true;
+        inlineMathSelection.reset();
+    }, true);
+    document.addEventListener("compositionend", () => {
+        composing = false;
+    }, true);
+    document.addEventListener("selectionchange", () => {
+        inlineMathSelection.update(getMathEditor(), getSelection(), composing);
+    }, true);
+    document.addEventListener("focusout", () => inlineMathSelection.reset(), true);
     if (!isInMobileApp() && window.visualViewport) {
         let pendingUpdate = false;
         const viewportHandler = () => {

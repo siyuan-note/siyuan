@@ -2,6 +2,7 @@ import {Constants} from "../../../constants";
 import {getRowHTML} from "./row";
 import {IAVSelectedCell, reconcileAVSelectedItemIDs, restoreAVCellSelection} from "./selectionState";
 import {getGroupTableViewportWindow} from "./groupTableVirtual";
+import {renderAVRichTextElements} from "./richText";
 
 const BUFFER_RATIO = 1;
 
@@ -436,6 +437,7 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
                 syncTableBottomSpacer(bodyEl, state, dataEnd);
             }
             bodyStates.set(bodyEl, state);
+            renderAVRichTextElements(bodyEl);
         }
     });
 };
@@ -552,6 +554,9 @@ export const ensureAVTableAdjacentRow = (rowElement: HTMLElement, direction: "pr
     }
     bodyStates.set(bodyElement, state);
     const newRowElement = bodyElement.querySelector<HTMLElement>(`.av__row[data-index="${targetIndex}"]`);
+    if (newRowElement) {
+        renderAVRichTextElements(newRowElement);
+    }
     if (newRowElement && state.selectedRowIds?.has(row.id)) {
         newRowElement.classList.add("av__row--select");
         newRowElement.querySelector(".av__firstcol use")?.setAttribute("xlink:href", "#iconCheck");

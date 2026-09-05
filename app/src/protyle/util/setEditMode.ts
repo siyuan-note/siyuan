@@ -3,6 +3,7 @@ import {getAllModels} from "../../layout/getAll";
 import {updateOutline} from "../../editor/util";
 import {resize} from "./resize";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
+import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 
 /// #if MOBILE
 export const updateMobileTitleReadonly = (protyle: IProtyle) => {
@@ -58,7 +59,9 @@ export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
     updateMobileTitleReadonly(protyle);
     /// #endif
     hideElements(["gutterOnly", "toolbar", "select", "hint", "util"], protyle);
-    forEachPluginSubscriber("switch-protyle-mode", eventBus => {
-        eventBus.emit("switch-protyle-mode", {protyle});
-    });
+    if (areProtylePluginExtensionsEnabled(protyle)) {
+        forEachPluginSubscriber("switch-protyle-mode", eventBus => {
+            eventBus.emit("switch-protyle-mode", {protyle});
+        });
+    }
 };

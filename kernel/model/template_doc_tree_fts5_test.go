@@ -447,16 +447,18 @@ func setupTemplateDocTreeTransactionTest(t *testing.T) *fileOperationTestFixture
 	originalTempDir := util.TempDir
 	originalQueueDir := util.QueueDir
 	originalConfDir := util.ConfDir
+	originalHistoryDir := util.HistoryDir
 	originalDBPath := util.DBPath
 	originalHistoryDBPath := util.HistoryDBPath
 	originalAssetContentDBPath := util.AssetContentDBPath
 	util.TempDir = t.TempDir()
 	util.QueueDir = filepath.Join(util.TempDir, "queue")
 	util.ConfDir = filepath.Join(util.TempDir, "conf")
+	util.HistoryDir = filepath.Join(util.TempDir, "history")
 	util.DBPath = filepath.Join(util.TempDir, util.DBName)
 	util.HistoryDBPath = filepath.Join(util.TempDir, "history.db")
 	util.AssetContentDBPath = filepath.Join(util.TempDir, "asset_content.db")
-	for _, dir := range []string{util.QueueDir, util.ConfDir} {
+	for _, dir := range []string{util.QueueDir, util.ConfDir, util.HistoryDir} {
 		if err := os.MkdirAll(dir, 0755); nil != err {
 			t.Fatalf("create transaction test directory [%s] failed: %v", dir, err)
 		}
@@ -480,6 +482,7 @@ func setupTemplateDocTreeTransactionTest(t *testing.T) *fileOperationTestFixture
 		util.TempDir = originalTempDir
 		util.QueueDir = originalQueueDir
 		util.ConfDir = originalConfDir
+		util.HistoryDir = originalHistoryDir
 		util.DBPath = originalDBPath
 		util.HistoryDBPath = originalHistoryDBPath
 		util.AssetContentDBPath = originalAssetContentDBPath

@@ -27,6 +27,7 @@ import {
 import {getAssetUploadResult, getAssetUploadSuccesses} from "./uploadResult";
 import {AssetUploadHandlerTimeoutError, waitForUploadHandler} from "./uploadHandler";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {isProtyleUploadDisabled} from "../runtimeCapabilities";
 
 interface FileWithPath extends File {
     path: string;
@@ -767,6 +768,10 @@ export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUplo
                                  options?: IUploadInsertOptions, successCB?: (response: IWebSocketData,
                                      result: Omit<IAssetUploadResult, "requestId" | "input">) => void,
                                  completeCB?: (succeeded: boolean) => void) => {
+    if (isProtyleUploadDisabled(protyle)) {
+        completeCB?.(false);
+        return;
+    }
     const uploadOptions = captureUploadInsertPosition(protyle, options);
     const callbacks: IAssetUploadCallbacks = {
         success(responseText, response, _input, result) {
@@ -805,6 +810,13 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
                                 result: Omit<IAssetUploadResult, "requestId" | "input">) => void,
                             completeCB?: (succeeded: boolean) => void,
                             options?: IUploadInsertOptions) => {
+    if (isProtyleUploadDisabled(protyle)) {
+        completeCB?.(false);
+        if (element) {
+            element.value = "";
+        }
+        return;
+    }
     const uploadOptions = captureUploadInsertPosition(protyle, options);
     let fileList: File[] = [];
     for (let i = 0; i < files.length; i++) {

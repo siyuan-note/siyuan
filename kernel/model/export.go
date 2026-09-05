@@ -162,26 +162,30 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	// Database block supports export as CSV https://github.com/siyuan-note/siyuan/issues/10072
 
 	err = withExportReadLockByBlockID(blockID, func() error {
+		bt := getExportBlockTree(blockID)
+		if nil == bt {
+			return ErrBlockNotFound
+		}
+		node, _, nodeErr := getNodeByBlockID(nil, blockID)
+		if nil != nodeErr {
+			return nodeErr
+		}
+		if nil == node || ast.NodeAttributeView != node.Type || node.AttributeViewID != avID {
+			return av.ErrAttributeViewNotFound
+		}
+
 		avBoxID := ""
-		if bt := getExportBlockTree(blockID); nil != bt && IsEncryptedBox(bt.BoxID) {
+		if IsEncryptedBox(bt.BoxID) {
 			avBoxID = bt.BoxID
 			av.SetAVBoxID(avID, avBoxID)
 		}
 
-		var attrView *av.AttributeView
-		if avBoxID != "" {
-			attrView, err = av.ParseAttributeViewInBox(avID, avBoxID)
-		} else {
-			attrView, err = av.ParseAttributeView(avID)
-		}
+		attrView, parseErr := av.ParseAttributeViewInBox(avID, avBoxID)
+		err = parseErr
 		if err != nil {
 			return err
 		}
 
-		node, _, nodeErr := getNodeByBlockID(nil, blockID)
-		if nil == node {
-			return nodeErr
-		}
 		viewID := node.IALAttr(av.NodeAttrView)
 		view, viewErr := resolveAttributeViewView(attrView, viewID, "", "")
 		if viewErr != nil {
@@ -194,7 +198,11 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 		// 遵循视图过滤和排序规则 Use filtering and sorting of current view settings when exporting database blocks https://github.com/siyuan-note/siyuan/issues/10474
 		cachedAttrViews := map[string]*av.AttributeView{}
 		rollupFurtherCollections := sql.GetFurtherCollections(attrView, cachedAttrViews)
-		av.Filter(table, attrView, rollupFurtherCollections, cachedAttrViews)
+		filterContext, contextErr := resolveAttributeViewFilterContext(attrView, view, blockID)
+		if nil != contextErr {
+			return contextErr
+		}
+		av.FilterWithContext(table, attrView, rollupFurtherCollections, cachedAttrViews, filterContext)
 		av.Sort(table, attrView)
 
 		exportFolder := filepath.Join(util.TempDir, "export")
@@ -2891,13 +2899,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string, i
 func exportAv(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap map[string]string) {
 	// 用 box-aware 路径解析 + 自动解密读取 AV 定义明文（加密笔记本的 AV 在 <boxID>/storage/av/，
 	// GetAttributeViewDataPath 只查全局路径会漏；filelock.Copy 会拷密文）。
-	var avData []byte
-	var readErr error
-	if boxID != "" {
-		avData, readErr = av.ReadAttributeViewDataInBox(avID, boxID)
-	} else {
-		avData, readErr = av.ReadAttributeViewData(avID)
-	}
+	avData, readErr := av.ReadAttributeViewDataInBox(avID, boxID)
 	if readErr != nil {
 		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
 		return
@@ -2919,13 +2921,7 @@ func exportAv(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap
 		}
 	}
 
-	var attrView *av.AttributeView
-	var parseErr error
-	if boxID != "" {
-		attrView, parseErr = av.ParseAttributeViewInBox(avID, boxID)
-	} else {
-		attrView, parseErr = av.ParseAttributeView(avID)
-	}
+	attrView, parseErr := av.ParseAttributeViewInBox(avID, boxID)
 	if parseErr != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, parseErr)
 		return
@@ -2938,7 +2934,7 @@ func exportAv(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap
 }
 
 func copyExportAttributeViewAssets(attrView *av.AttributeView, boxID, exportFolder string, assetPathMap map[string]string) {
-	// 导出资源文件列和指向本地资源的 URL 列 https://github.com/siyuan-note/siyuan/issues/9919
+	// 导出资源文件列、指向本地资源的 URL 列和富文本中的本地资源 https://github.com/siyuan-note/siyuan/issues/9919
 	for _, assetPath := range getAttributeViewAssetsLinkDests(attrView, false, nil) {
 		destPath := filepath.Join(exportFolder, AssetPathWithoutQuery(assetPath))
 		srcPath := ""
@@ -2968,13 +2964,7 @@ func exportRelationAvs(avID, boxID, exportStorageAvDir, exportFolder string, ass
 		if relAvID == avID {
 			continue
 		}
-		var relAvData []byte
-		var readErr error
-		if boxID != "" {
-			relAvData, readErr = av.ReadAttributeViewDataInBox(relAvID, boxID)
-		} else {
-			relAvData, readErr = av.ReadAttributeViewData(relAvID)
-		}
+		relAvData, readErr := av.ReadAttributeViewDataInBox(relAvID, boxID)
 		if readErr != nil {
 			logging.LogErrorf("read relation attribute view [%s] failed: %s", relAvID, readErr)
 			continue
@@ -2994,13 +2984,7 @@ func exportRelationAvs(avID, boxID, exportStorageAvDir, exportFolder string, ass
 			logging.LogErrorf("write av json failed: %s", writeErr)
 		}
 
-		var attrView *av.AttributeView
-		var parseErr error
-		if boxID != "" {
-			attrView, parseErr = av.ParseAttributeViewInBox(relAvID, boxID)
-		} else {
-			attrView, parseErr = av.ParseAttributeView(relAvID)
-		}
+		attrView, parseErr := av.ParseAttributeViewInBox(relAvID, boxID)
 		if parseErr != nil {
 			logging.LogErrorf("parse relation attribute view [%s] failed: %s", relAvID, parseErr)
 			continue
@@ -3014,12 +2998,7 @@ func walkRelationAvs(avID, boxID string, exportAvIDs *hashset.Set) {
 		return
 	}
 
-	var attrView *av.AttributeView
-	if boxID != "" {
-		attrView, _ = av.ParseAttributeViewInBox(avID, boxID)
-	} else {
-		attrView, _ = av.ParseAttributeView(avID)
-	}
+	attrView, _ := av.ParseAttributeViewInBox(avID, boxID)
 	if nil == attrView {
 		return
 	}
@@ -3109,6 +3088,8 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 		tagOpenMarker, tagCloseMarker,
 		blockRefTextLeft, blockRefTextRight,
 		addTitle, "", inlineMemo, 0 < len(defBlockIDs), singleFile, accessChecker...)
+	finishTabTitles := treenode.MaterializeTabTitles(tree.Root)
+	defer finishTabTitles()
 	if adjustHeadingLv {
 		bt := treenode.GetBlockTreeInBox(id, tree.Box)
 		adjustHeadingLevel(bt, tree, addTitle)
@@ -3227,6 +3208,7 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 	luteEngine.SetUnorderedListMarker("-")
 	luteEngine.SetImgTag(imgTag)
 	prepareMarkdownFontFamilyTextMarks(tree.Root)
+	finishTabTitles()
 	renderer := render.NewProtyleExportMdRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	ret = gulu.Str.FromBytes(renderer.Render())
 	return
@@ -3266,6 +3248,8 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	// 解析查询嵌入节点
 	depth := 0
 	resolveEmbedR(ret.Root, blockEmbedMode, luteEngine, &[]string{}, &depth, accessChecker...)
+	finishTabTitles := treenode.MaterializeTabTitles(ret.Root)
+	defer finishTabTitles()
 
 	// 将当前文档的块超链接转换为引用
 	blockLink2Ref(ret)
@@ -3582,12 +3566,16 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		}
 
 		avID := n.AttributeViewID
-		// 用 box-aware 路径解析（加密笔记本的 AV 在 <boxID>/storage/av/，GetAttributeViewDataPath 只查全局会漏）
-		if avJSONPath, _ := av.FindAttributeViewPath(avID); "" == avJSONPath {
+		avBoxID := ""
+		if IsEncryptedBox(tree.Box) {
+			avBoxID = tree.Box
+		}
+		// 数据库定义只能从文档所在的加密边界读取，普通文档不能回退到已解锁的加密笔记本。
+		if avJSONPath, _ := av.FindAttributeViewPathInBox(avID, avBoxID); "" == avJSONPath {
 			return ast.WalkContinue
 		}
 
-		attrView, err := av.ParseAttributeView(avID)
+		attrView, err := av.ParseAttributeViewInBox(avID, avBoxID)
 		if err != nil {
 			logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 			return ast.WalkContinue
@@ -3605,7 +3593,13 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		// 遵循视图过滤和排序规则 Use filtering and sorting of current view settings when exporting database blocks https://github.com/siyuan-note/siyuan/issues/10474
 		cachedAttrViews := map[string]*av.AttributeView{}
 		rollupFurtherCollections := sql.GetFurtherCollections(attrView, cachedAttrViews)
-		av.Filter(table, attrView, rollupFurtherCollections, cachedAttrViews)
+		filterContext, contextErr := resolveAttributeViewFilterContext(attrView, view, n.ID)
+		if nil != contextErr {
+			logging.LogErrorf("resolve attribute view [%s] filter context failed: %s", avID, contextErr)
+			table.Rows = nil
+		} else {
+			av.FilterWithContext(table, attrView, rollupFurtherCollections, cachedAttrViews, filterContext)
+		}
 		av.Sort(table, attrView)
 
 		aligns := getAttrViewTableAligns(table, avHiddenCol)
@@ -4486,6 +4480,8 @@ func resolveExportAssetPaths(asset string, assetsOldNew, assetsNewOld map[string
 }
 
 func removeAssetsID(tree *parse.Tree, assetsOldNew, assetsNewOld map[string]string) {
+	finishTabTitles := treenode.MaterializeTabTitles(tree.Root)
+	defer finishTabTitles()
 	assetNodes := getAssetsLinkDestsInTree(tree, false)
 	for _, node := range assetNodes {
 		dests := getAssetsLinkDests(node, false)
@@ -4597,7 +4593,7 @@ func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees map[string
 	}
 	retTrees[tree.ID] = tree
 
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	treenode.WalkWithTabTitles(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
@@ -4641,12 +4637,11 @@ func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees map[string
 				return ast.WalkContinue
 			}
 
-			var attrView *av.AttributeView
+			avBoxID := ""
 			if IsEncryptedBox(tree.Box) {
-				attrView, _ = av.ParseAttributeViewInBox(avID, tree.Box)
-			} else {
-				attrView, _ = av.ParseAttributeView(avID)
+				avBoxID = tree.Box
 			}
+			attrView, _ := av.ParseAttributeViewInBox(avID, avBoxID)
 			if nil == attrView {
 				return ast.WalkContinue
 			}

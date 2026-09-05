@@ -125,6 +125,7 @@ func agentChat(c *gin.Context) {
 		return
 	}
 	ctx, cancel := context.WithCancel(c.Request.Context())
+	ctx = util.ContextWithOpenAIResponsesBaseURL(ctx, selectedProvider.BaseURL)
 	running := &runningSession{app: app}
 	runningSessions[req.SessionID] = running
 	sessionsMu.Unlock()
@@ -397,7 +398,8 @@ func agentChatTitle(c *gin.Context) {
 	}
 	client := util.NewOpenAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name)
 
-	title := agent.GenerateTitle(client, selectedProvider.Protocol, selectedModel.Name, req.Message, req.Language)
+	title := agent.GenerateTitle(client, selectedProvider.BaseURL, selectedProvider.Protocol, selectedModel.Name,
+		req.Message, req.Language)
 	ret := gulu.Ret.NewResult()
 	ret.Data = title
 	c.JSON(http.StatusOK, ret)

@@ -120,6 +120,140 @@ func TestCancelFoldedHeadingSuperBlockKeepsUndoBoundary(t *testing.T) {
 	assertCancelledFoldedSuperBlock(t, fixture.sourceID, superBlockID, headingID, paragraphID, outsideID)
 }
 
+func TestDocHeadingBatchPreservesFoldedParentOnUndoRedo(t *testing.T) {
+	fixture := setupStructureTransactionTest(t)
+	setupFoldTransactionDatabase(t, fixture)
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for tree.Root.FirstChild != nil {
+		tree.Root.FirstChild.Unlink()
+	}
+	parent := newHeadingLevelTestNode("20260905000001-parent0", 4)
+	child := newHeadingLevelTestNode("20260905000002-child00", 3)
+	other := newHeadingLevelTestNode("20260905000003-other00", 3)
+	for _, node := range []*ast.Node{parent, child, other} {
+		node.SetIALAttr("id", node.ID)
+		node.SetIALAttr("custom-test", "preserved")
+		tree.Root.AppendChild(node)
+	}
+	treenode.SetSelfFolded(parent, true)
+	treenode.SetSelfFolded(child, true)
+	treenode.SetSelfFolded(other, true)
+	if _, err = filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(tree)
+	sql.IndexTreeQueue(tree)
+	sql.FlushQueue()
+
+	result, err := GetDocHeadingLevelTransaction(tree.Root.ID, tree.Box, 3, 5, false)
+	if err != nil || result.Counts[2] != 2 || result.Transaction == nil {
+		t.Fatalf("prepare conversion: result %v, error %v", result, err)
+	}
+	tx := result.Transaction
+	for i, operations := range [][]*Operation{tx.DoOperations, tx.UndoOperations, tx.DoOperations} {
+		if err = PerformTxSync(&Transaction{DoOperations: cloneOperations(operations)}); err != nil {
+			t.Fatal(err)
+		}
+		actual, loadErr := LoadTreeByBlockID(tree.Root.ID)
+		if loadErr != nil {
+			t.Fatal(loadErr)
+		}
+		level := 5
+		if i == 1 {
+			level = 3
+		}
+		for _, id := range []string{child.ID, other.ID} {
+			node := treenode.GetNodeInTree(actual, id)
+			if node == nil || node.HeadingLevel != level || !treenode.IsSelfFolded(node) || node.IALAttr("custom-test") != "preserved" {
+				t.Fatalf("step %d did not preserve heading %s", i, id)
+			}
+		}
+		actualParent := treenode.GetNodeInTree(actual, parent.ID)
+		if actualParent.HeadingLevel != 4 || !treenode.IsSelfFolded(actualParent) {
+			t.Fatal("nonmatching parent headings must retain their level and fold state")
+		}
+	}
+	for _, levels := range [][2]int{{5, 5}, {6, 1}, {0, 0}, {1, 7}} {
+		noOp, err := GetDocHeadingLevelTransaction(tree.Root.ID, tree.Box, levels[0], levels[1], false)
+		if err != nil || noOp.Transaction != nil {
+			t.Fatalf("expected no transaction for levels %v, got %v", levels, err)
+		}
+	}
+}
+
+func TestDocHeadingBatchWithSubheadingsDeduplicatesAndClamps(t *testing.T) {
+	fixture := setupStructureTransactionTest(t)
+	setupFoldTransactionDatabase(t, fixture)
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for tree.Root.FirstChild != nil {
+		tree.Root.FirstChild.Unlink()
+	}
+	ids := []string{"20260905000101-heading", "20260905000102-heading", "20260905000103-heading",
+		"20260905000104-heading", "20260905000105-heading", "20260905000106-heading", "20260905000107-heading"}
+	levels := []int{1, 2, 1, 5, 6, 1, 2}
+	quote := &ast.Node{Type: ast.NodeBlockquote, ID: "20260905000108-quote00"}
+	quote.SetIALAttr("id", quote.ID)
+	for i, id := range ids {
+		node := newHeadingLevelTestNode(id, levels[i])
+		node.SetIALAttr("id", id)
+		node.SetIALAttr("custom-test", "preserved")
+		treenode.SetSelfFolded(node, true)
+		if i >= 2 && i <= 4 {
+			if i == 2 {
+				tree.Root.AppendChild(quote)
+			}
+			quote.AppendChild(node)
+		} else {
+			tree.Root.AppendChild(node)
+		}
+	}
+	if _, err = filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(tree)
+	sql.IndexTreeQueue(tree)
+	sql.FlushQueue()
+	result, err := GetDocHeadingLevelTransaction(tree.Root.ID, tree.Box, 1, 2, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Counts[0] != 3 || result.WithSubheadingCounts[0] != 7 || result.Transaction == nil {
+		t.Fatalf("unexpected batch preview: %+v", result)
+	}
+	tx := result.Transaction
+	if len(tx.DoOperations) != len(ids) || len(tx.UndoOperations) != len(ids) {
+		t.Fatal("overlapping heading ranges must update each heading exactly once")
+	}
+	for i, operations := range [][]*Operation{tx.DoOperations, tx.UndoOperations, tx.DoOperations} {
+		if err = PerformTxSync(&Transaction{DoOperations: cloneOperations(operations)}); err != nil {
+			t.Fatal(err)
+		}
+		actual, err := LoadTreeByBlockID(tree.Root.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for j, id := range ids {
+			wantLevel := min(6, levels[j]+1)
+			if i == 1 {
+				wantLevel = levels[j]
+			}
+			node := treenode.GetNodeInTree(actual, id)
+			if node == nil || node.HeadingLevel != wantLevel || !treenode.IsSelfFolded(node) || node.IALAttr("custom-test") != "preserved" {
+				t.Fatalf("step %d did not preserve heading %s at level %d", i, id, wantLevel)
+			}
+			if j >= 2 && j <= 4 && node.Parent.ID != quote.ID {
+				t.Fatal("nested headings must remain in their container")
+			}
+		}
+	}
+}
+
 func TestReplayFoldedHeadingMoveUsesOriginalChildren(t *testing.T) {
 	const (
 		anchorID    = "20260819000000-anchor0"

@@ -104,6 +104,10 @@ func getUniqueFilename(c *gin.Context) {
 func globalCopyFiles(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
+	var changedPaths []string
+	defer func() {
+		model.IncSyncIfNeeded(changedPaths...)
+	}()
 
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
@@ -215,14 +219,17 @@ func globalCopyFiles(c *gin.Context) {
 			ret.Msg = err.Error()
 			return
 		}
+		changedPaths = append(changedPaths, dest)
 	}
-
-	model.IncSync()
 }
 
 func workspaceCopyFiles(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
+	var changedPaths []string
+	defer func() {
+		model.IncSyncIfNeeded(changedPaths...)
+	}()
 
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
@@ -334,9 +341,8 @@ func workspaceCopyFiles(c *gin.Context) {
 			ret.Msg = err.Error()
 			return
 		}
+		changedPaths = append(changedPaths, dest)
 	}
-
-	model.IncSync()
 }
 
 func copyFile(c *gin.Context) {
@@ -429,7 +435,7 @@ func copyFile(c *gin.Context) {
 		return
 	}
 
-	model.IncSync()
+	model.IncSyncIfNeeded(dest)
 }
 
 func getFile(c *gin.Context) {
@@ -719,6 +725,7 @@ func renameFile(c *gin.Context) {
 		ret.Msg = "Field [newPath]: cannot rename a directory into its own subdirectory"
 		return
 	}
+	affectsSync := model.PathsAffectSync(srcAbsPath)
 
 	destParent := filepath.Dir(destAbsPath)
 	if filelock.IsExist(destParent) {
@@ -750,7 +757,9 @@ func renameFile(c *gin.Context) {
 		return
 	}
 
-	model.IncSync()
+	if affectsSync || model.PathsAffectSync(destAbsPath) {
+		model.IncSync()
+	}
 }
 
 func removeFile(c *gin.Context) {
@@ -763,8 +772,9 @@ func removeFile(c *gin.Context) {
 		return
 	}
 
-	var filePath string
+	var app, filePath string
 	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("app", &app, false, false),
 		util.BindJsonArg("path", &filePath, true, true),
 	) {
 		return
@@ -794,6 +804,7 @@ func removeFile(c *gin.Context) {
 		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
 		return
 	}
+	affectsSync := model.PathsAffectSync(fileAbsPath)
 
 	if err = filelock.RemoveWithoutFatal(fileAbsPath); err != nil {
 		logging.LogErrorf("remove [%s] failed: %s", fileAbsPath, err)
@@ -801,8 +812,11 @@ func removeFile(c *gin.Context) {
 		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
 		return
 	}
+	model.PushPluginStorageDataChanged(fileAbsPath, app)
 
-	model.IncSync()
+	if affectsSync {
+		model.IncSync()
+	}
 }
 
 func putFile(c *gin.Context) {
@@ -811,6 +825,7 @@ func putFile(c *gin.Context) {
 
 	isDirStr := c.PostForm("isDir")
 	isDir, _ := strconv.ParseBool(isDirStr)
+	app := c.PostForm("app")
 
 	var err error
 	filePath := c.PostForm("path")
@@ -924,7 +939,10 @@ func putFile(c *gin.Context) {
 		return
 	}
 
-	model.IncSync()
+	if !isDir {
+		model.PushPluginStorageDataChanged(fileAbsPath, app)
+		model.IncSyncIfNeeded(fileAbsPath)
+	}
 }
 
 func millisecond2Time(t int64) time.Time {

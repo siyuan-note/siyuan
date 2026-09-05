@@ -284,6 +284,10 @@ const registerEditorBidirectionalGroup = (tab: SettingTabBuilder) => {
         min: 1,
         max: 5120,
     });
+    group.switch("editor.checkBlockRef", {
+        title: window.siyuan.languages.checkBlockRef,
+        desc: window.siyuan.languages.checkBlockRefTip,
+    });
     group.switch("editor.virtualBlockRef", {
         title: window.siyuan.languages.md33,
         desc: window.siyuan.languages.md34,

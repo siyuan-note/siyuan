@@ -15,6 +15,9 @@ export interface IBlockRefCheckOptions {
 const pendingChecks = new WeakSet<IProtyle>();
 
 export const checkBlockRef = async (options: IBlockRefCheckOptions, protyle?: IProtyle) => {
+    if (window.siyuan.config.editor.checkBlockRef === false) {
+        return false;
+    }
     try {
         if (protyle) {
             await waitForPendingTransactions(protyle);

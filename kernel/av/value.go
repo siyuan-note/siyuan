@@ -18,15 +18,23 @@ package av
 
 import (
 	"fmt"
+	"html"
 	"math"
+	"net/url"
+	"path"
 	"reflect"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
@@ -517,7 +525,1641 @@ func (value *Value) NormalizeBlockRefSubtype(avID string, attrs map[string]strin
 }
 
 type ValueText struct {
-	Content string `json:"content"`
+	Content string         `json:"content"`
+	Rich    *ValueTextRich `json:"rich,omitempty"`
+}
+
+const ValueTextRichSpec = 1
+
+type ValueTextRichFormat string
+
+const ValueTextRichFormatKramdown ValueTextRichFormat = "kramdown"
+
+// ValueTextRich 描述文本字段的富文本源，Content 是 SiYuan Kramdown 片段。
+type ValueTextRich struct {
+	Spec    int                 `json:"spec"`
+	Format  ValueTextRichFormat `json:"format"`
+	Content string              `json:"content"`
+}
+
+// IsRich 返回文本值是否包含富文本源。
+func (value *ValueText) IsRich() bool {
+	return nil != value && nil != value.Rich
+}
+
+// ParseValueTextRich 校验并解析文本字段的富文本源。
+func ParseValueTextRich(rich *ValueTextRich) (tree *parse.Tree, err error) {
+	_, tree, err = parseValueTextRich(rich)
+	return
+}
+
+func parseValueTextRich(rich *ValueTextRich) (blockDOM string, tree *parse.Tree, err error) {
+	if nil == rich {
+		return
+	}
+	if ValueTextRichSpec != rich.Spec {
+		err = fmt.Errorf("unsupported attribute view rich text spec [%d]", rich.Spec)
+		return
+	}
+	if ValueTextRichFormatKramdown != rich.Format {
+		err = fmt.Errorf("unsupported attribute view rich text format [%s]", rich.Format)
+		return
+	}
+
+	luteEngine := newValueTextRichLute()
+	content, protectedStyleEntities, protectErr := protectValueTextRichKramdownStyleEntities(rich.Content)
+	if nil != protectErr {
+		err = protectErr
+		return
+	}
+	blockDOM, tree = luteEngine.Md2BlockDOMTree(content, true)
+	if nil == tree || nil == tree.Root {
+		err = fmt.Errorf("parse attribute view rich text failed")
+		return
+	}
+	if 0 < len(protectedStyleEntities) {
+		if err = restoreValueTextRichTreeStyleEntities(tree, protectedStyleEntities); nil != err {
+			return
+		}
+		blockDOM = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+	}
+	err = validateValueTextRichTree(tree)
+	return
+}
+
+func validateValueTextRichTree(tree *parse.Tree) (err error) {
+	if nil == tree || nil == tree.Root {
+		return fmt.Errorf("attribute view rich text tree is missing")
+	}
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+		if !isAllowedValueTextRichNode(node) {
+			err = fmt.Errorf("unsupported attribute view rich text node [%s]", node.Type.String())
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
+	return
+}
+
+// newValueTextRichLute 固定启用存储格式支持的语法，避免编辑器开关变化后重解释既有数据。
+func newValueTextRichLute() *lute.Lute {
+	ret := lute.New()
+	ret.SetTextMark(true)
+	ret.SetEmoji(false)
+	ret.SetProtyleWYSIWYG(true)
+	ret.SetBlockRef(true)
+	ret.SetFileAnnotationRef(true)
+	ret.SetKramdownIAL(true)
+	ret.SetHTMLTag2TextMark(true)
+	ret.SetSuperBlock(true)
+	ret.SetCustomBlock(true)
+	ret.SetImgPathAllowSpace(true)
+	ret.SetGitConflict(true)
+	ret.SetInlineAsterisk(true)
+	ret.SetInlineUnderscore(true)
+	ret.SetSup(true)
+	ret.SetSub(true)
+	ret.SetTag(true)
+	ret.SetInlineMath(true)
+	ret.SetGFMStrikethrough(true)
+	ret.SetFullWidthStrikethrough(true)
+	ret.SetGFMStrikethrough1(false)
+	ret.SetMark(true)
+	ret.SetInlineMathAllowDigitAfterOpenMarker(true)
+	ret.SetFootnotes(false)
+	ret.SetToC(false)
+	ret.SetIndentCodeBlock(false)
+	ret.SetParagraphBeginningSpace(true)
+	ret.SetAutoSpace(false)
+	ret.SetHeadingID(false)
+	ret.SetSetext(false)
+	ret.SetYamlFrontMatter(false)
+	ret.SetLinkRef(false)
+	ret.SetCodeSyntaxHighlight(false)
+	ret.SetSanitize(true)
+	ret.SetUnorderedListMarker("-")
+	ret.SetCallout(true)
+	ret.SetDataTask(true)
+	ret.SetArbitraryTaskListItemMarker(true)
+	ret.SetExportNormalizeTaskListMarker(false)
+	ret.SetEnsureListItemParagraph(true)
+	return ret
+}
+
+func isAllowedValueTextRichNode(node *ast.Node) bool {
+	if nil == node {
+		return false
+	}
+	switch node.Type {
+	case ast.NodeDocument, ast.NodeParagraph, ast.NodeHeading, ast.NodeHeadingC8hMarker,
+		ast.NodeBlockquote, ast.NodeBlockquoteMarker,
+		ast.NodeList, ast.NodeListItem, ast.NodeTaskListItemMarker,
+		ast.NodeCodeBlockFenceOpenMarker, ast.NodeCodeBlockFenceCloseMarker, ast.NodeCodeBlockCode,
+		ast.NodeMathBlock, ast.NodeMathBlockOpenMarker, ast.NodeMathBlockContent, ast.NodeMathBlockCloseMarker,
+		ast.NodeText,
+		ast.NodeEmphasis, ast.NodeEmA6kOpenMarker, ast.NodeEmA6kCloseMarker, ast.NodeEmU8eOpenMarker,
+		ast.NodeEmU8eCloseMarker,
+		ast.NodeStrong, ast.NodeStrongA6kOpenMarker, ast.NodeStrongA6kCloseMarker, ast.NodeStrongU8eOpenMarker,
+		ast.NodeStrongU8eCloseMarker,
+		ast.NodeCodeSpan, ast.NodeCodeSpanOpenMarker, ast.NodeCodeSpanContent, ast.NodeCodeSpanCloseMarker,
+		ast.NodeHardBreak, ast.NodeSoftBreak,
+		ast.NodeLink, ast.NodeOpenBracket, ast.NodeCloseBracket, ast.NodeOpenParen,
+		ast.NodeCloseParen, ast.NodeLinkText, ast.NodeLinkTitle, ast.NodeLinkSpace,
+		ast.NodeHTMLEntity, ast.NodeLess, ast.NodeGreater,
+		ast.NodeStrikethrough, ast.NodeStrikethrough1OpenMarker, ast.NodeStrikethrough1CloseMarker,
+		ast.NodeStrikethrough2OpenMarker, ast.NodeStrikethrough2CloseMarker,
+		ast.NodeEmoji, ast.NodeEmojiUnicode, ast.NodeEmojiAlias,
+		ast.NodeInlineMath, ast.NodeInlineMathOpenMarker, ast.NodeInlineMathContent, ast.NodeInlineMathCloseMarker,
+		ast.NodeBackslash, ast.NodeBackslashContent,
+		ast.NodeBlockRef, ast.NodeBlockRefID, ast.NodeBlockRefSpace, ast.NodeBlockRefText,
+		ast.NodeBlockRefDynamicText,
+		ast.NodeMark, ast.NodeMark1OpenMarker, ast.NodeMark1CloseMarker, ast.NodeMark2OpenMarker,
+		ast.NodeMark2CloseMarker,
+		ast.NodeTag, ast.NodeTagOpenMarker, ast.NodeTagCloseMarker,
+		ast.NodeSup, ast.NodeSupOpenMarker, ast.NodeSupCloseMarker,
+		ast.NodeSub, ast.NodeSubOpenMarker, ast.NodeSubCloseMarker,
+		ast.NodeKbd, ast.NodeKbdOpenMarker, ast.NodeKbdCloseMarker,
+		ast.NodeUnderline, ast.NodeUnderlineOpenMarker, ast.NodeUnderlineCloseMarker,
+		ast.NodeBr,
+		ast.NodeFileAnnotationRef, ast.NodeFileAnnotationRefID, ast.NodeFileAnnotationRefSpace,
+		ast.NodeFileAnnotationRefText:
+		return true
+	case ast.NodeLinkDest:
+		return isAllowedValueTextRichLinkTarget(node.TokensStr())
+	case ast.NodeCodeBlock, ast.NodeCodeBlockFenceInfoMarker:
+		return !isValueTextRichExecutableCodeFence(node.CodeBlockInfo)
+	case ast.NodeKramdownBlockIAL:
+		return isAllowedValueTextRichBlockIAL(node)
+	case ast.NodeKramdownSpanIAL:
+		return isAllowedValueTextRichSpanIAL(node)
+	case ast.NodeTextMark:
+		return isAllowedValueTextMark(node)
+	}
+	return false
+}
+
+func isValueTextRichExecutableCodeFence(info []byte) bool {
+	fields := strings.Fields(strings.ToLower(string(info)))
+	if 1 > len(fields) {
+		return false
+	}
+	switch fields[0] {
+	case "abc", "echarts", "flowchart", "graphviz", "infographic", "mermaid", "mindmap", "plantuml":
+		return true
+	}
+	return false
+}
+
+func isAllowedValueTextMark(node *ast.Node) bool {
+	if !isAllowedValueTextMarkType(node) || !isAllowedValueTextMarkReferenceData(node) {
+		return false
+	}
+	if 1 > len(node.KramdownIAL) {
+		return nil == node.Next || ast.NodeKramdownSpanIAL != node.Next.Type
+	}
+	return nil != node.Next && ast.NodeKramdownSpanIAL == node.Next.Type &&
+		isAllowedValueTextRichSpanIAL(node.Next)
+}
+
+func isAllowedValueTextMarkType(node *ast.Node) bool {
+	if "" == node.TextMarkType || "" != node.TextMarkFlashcardOcclusionID {
+		return false
+	}
+	for _, typ := range strings.Fields(node.TextMarkType) {
+		switch typ {
+		case "text", "block-ref", "kbd", "file-annotation-ref", "a", "strong", "em", "u", "s", "mark",
+			"sup", "sub", "tag", "code", "inline-math", "inline-memo":
+		default:
+			return false
+		}
+	}
+	return true
+}
+
+func isAllowedValueTextMarkReferenceData(node *ast.Node) bool {
+	if node.IsTextMarkType("block-ref") {
+		if !ast.IsNodeIDPattern(node.TextMarkBlockRefID) ||
+			("d" != node.TextMarkBlockRefSubtype && "s" != node.TextMarkBlockRefSubtype) ||
+			node.IsTextMarkType("a") || node.IsTextMarkType("file-annotation-ref") ||
+			node.IsTextMarkType("inline-math") || "" != node.TextMarkAHref || "" != node.TextMarkATitle ||
+			"" != node.TextMarkFileAnnotationRefID || "" != node.TextMarkInlineMathContent {
+			return false
+		}
+	} else if "" != node.TextMarkBlockRefID || "" != node.TextMarkBlockRefSubtype {
+		return false
+	}
+
+	if node.IsTextMarkType("file-annotation-ref") {
+		if !isAllowedValueTextMarkFileAnnotationRefID(node.TextMarkFileAnnotationRefID) ||
+			node.IsTextMarkType("a") || node.IsTextMarkType("inline-math") || "" != node.TextMarkAHref ||
+			"" != node.TextMarkATitle || "" != node.TextMarkInlineMathContent {
+			return false
+		}
+	} else if "" != node.TextMarkFileAnnotationRefID {
+		return false
+	}
+
+	if node.IsTextMarkType("a") {
+		if !isAllowedValueTextRichLinkTarget(node.TextMarkAHref) {
+			return false
+		}
+	} else if "" != node.TextMarkAHref || "" != node.TextMarkATitle {
+		return false
+	}
+
+	if node.IsTextMarkType("inline-memo") {
+		if !isAllowedValueTextRichInlineMemoContent(node.TextMarkInlineMemoContent) {
+			return false
+		}
+	} else if "" != node.TextMarkInlineMemoContent {
+		return false
+	}
+	return true
+}
+
+func isAllowedValueTextRichLinkTarget(target string) bool {
+	if "" == target {
+		return true
+	}
+	if target != strings.TrimSpace(target) || !utf8.ValidString(target) {
+		return false
+	}
+	target, decodedTarget, ok := decodeValueTextRichLinkTarget(target)
+	if !ok || !utf8.ValidString(decodedTarget) || target != strings.TrimSpace(target) ||
+		containsValueTextRichUnsafeControl(target) ||
+		containsValueTextRichUnsafeControl(decodedTarget) || strings.ContainsRune(target, '\\') ||
+		strings.ContainsRune(decodedTarget, '\\') {
+		return false
+	}
+
+	parsed, err := url.Parse(target)
+	if nil != err {
+		return false
+	}
+	scheme := strings.ToLower(parsed.Scheme)
+	switch scheme {
+	case "http", "https":
+		return "" != parsed.Host && "" == parsed.Opaque &&
+			strings.HasPrefix(strings.ToLower(target), scheme+"://")
+	case "mailto", "tel":
+		return "" != parsed.Opaque && strings.HasPrefix(strings.ToLower(target), scheme+":")
+	case "siyuan", "web+siyuan":
+		return "" != parsed.Host && "" == parsed.Opaque &&
+			strings.HasPrefix(strings.ToLower(target), scheme+"://")
+	case "":
+		return isAllowedValueTextRichRelativeLinkTarget(target, decodedTarget, parsed)
+	default:
+		return false
+	}
+}
+
+func decodeValueTextRichLinkTarget(target string) (ret, decoded string, ok bool) {
+	ret = target
+	for iteration := 0; iteration < 8; iteration++ {
+		next := html.UnescapeString(ret)
+		if next == ret {
+			decoded, err := url.PathUnescape(ret)
+			if nil != err {
+				return "", "", false
+			}
+			return ret, decoded, true
+		}
+		ret = next
+	}
+	return "", "", false
+}
+
+func isAllowedValueTextRichRelativeLinkTarget(target, decodedTarget string, parsed *url.URL) bool {
+	if strings.HasPrefix(target, "//") {
+		return "" != parsed.Host
+	}
+	separator := strings.IndexAny(decodedTarget, "/?#")
+	if colon := strings.IndexByte(decodedTarget, ':'); 0 <= colon && (0 > separator || colon < separator) {
+		return false
+	}
+	if "" != parsed.Host {
+		return false
+	}
+	assetPath := strings.TrimPrefix(parsed.Path, "/")
+	if strings.HasPrefix(assetPath, "assets/") {
+		return path.Clean(assetPath) == assetPath
+	}
+	return true
+}
+
+func isAllowedValueTextRichInlineMemoContent(content string) bool {
+	if !utf8.ValidString(content) || containsValueTextRichMemoControl(content) {
+		return false
+	}
+	decoded := content
+	for iteration := 0; iteration < 8; iteration++ {
+		next := html.UnescapeString(decoded)
+		if next == decoded {
+			return !containsValueTextRichHTMLTag(decoded)
+		}
+		decoded = next
+		if containsValueTextRichMemoControl(decoded) {
+			return false
+		}
+	}
+	return false
+}
+
+func containsValueTextRichHTMLTag(content string) bool {
+	for cursor := 0; cursor < len(content); cursor++ {
+		if '<' != content[cursor] || cursor+1 >= len(content) {
+			continue
+		}
+		next := content[cursor+1]
+		if '!' == next || '?' == next || isValueTextRichASCIIAlpha(next) {
+			return true
+		}
+		if '/' == next && cursor+2 < len(content) && isValueTextRichASCIIAlpha(content[cursor+2]) {
+			return true
+		}
+	}
+	return false
+}
+
+func isValueTextRichASCIIAlpha(char byte) bool {
+	return 'a' <= char && char <= 'z' || 'A' <= char && char <= 'Z'
+}
+
+func containsValueTextRichMemoControl(value string) bool {
+	for _, char := range value {
+		if unicode.IsControl(char) && '\t' != char && '\n' != char && '\r' != char {
+			return true
+		}
+	}
+	return false
+}
+
+func containsValueTextRichUnsafeControl(value string) bool {
+	for _, char := range value {
+		if unicode.IsControl(char) || unicode.In(char, unicode.Cf) {
+			return true
+		}
+	}
+	return false
+}
+
+func isAllowedValueTextMarkFileAnnotationRefID(id string) bool {
+	const prefix = "assets/"
+	if !strings.HasPrefix(id, prefix) {
+		return false
+	}
+	parts := strings.Split(strings.TrimPrefix(id, prefix), "/")
+	if 2 != len(parts) {
+		return false
+	}
+	fileName := parts[0]
+	if !strings.Contains(fileName, "-") || !strings.HasSuffix(strings.ToLower(fileName), ".pdf") {
+		return false
+	}
+	fileBase := fileName[:len(fileName)-len(".pdf")]
+	if 23 > len(fileBase) || !ast.IsNodeIDPattern(fileBase[len(fileBase)-22:]) {
+		return false
+	}
+	return ast.IsNodeIDPattern(parts[1])
+}
+
+func isAllowedValueTextRichSpanIAL(node *ast.Node) bool {
+	if nil == node || nil == node.Previous || ast.NodeTextMark != node.Previous.Type ||
+		!isAllowedValueTextMarkType(node.Previous) || !node.Previous.IsTextMarkType("text") {
+		return false
+	}
+	markIAL := node.Previous.KramdownIAL
+	spanIAL := parse.Tokens2IAL(node.Tokens)
+	if 1 != len(markIAL) || 1 != len(spanIAL) || 2 != len(markIAL[0]) || 2 != len(spanIAL[0]) ||
+		"style" != markIAL[0][0] || "style" != spanIAL[0][0] {
+		return false
+	}
+	style := node.Previous.IALAttr("style")
+	if "" == style || style != parse.IALVal(node, "style") {
+		return false
+	}
+	return isAllowedValueTextRichStyle(style)
+}
+
+func isAllowedValueTextRichStyle(style string) bool {
+	_, ok := normalizeValueTextRichStyle(style)
+	return ok
+}
+
+func normalizeValueTextRichStyle(style string) (ret string, ok bool) {
+	declarations, ok := parseValueTextRichStyleDeclarations(style)
+	if !ok {
+		return "", false
+	}
+	for property, value := range declarations {
+		if declarations[property], ok = normalizeValueTextRichStyleValue(property, value); !ok {
+			return "", false
+		}
+	}
+	if !valueTextRichStylePairMatches(declarations, "direction", "unicode-bidi") ||
+		!valueTextRichStylePairMatches(declarations, "-webkit-text-stroke", "-webkit-text-fill-color") {
+		return "", false
+	}
+
+	var normalized []string
+	for _, property := range valueTextRichStylePropertyOrder {
+		if value, exists := declarations[property]; exists {
+			normalized = append(normalized, property+": "+value+";")
+		}
+	}
+	if len(normalized) != len(declarations) {
+		return "", false
+	}
+	return strings.Join(normalized, " "), true
+}
+
+func parseValueTextRichStyleDeclarations(style string) (ret map[string]string, ok bool) {
+	segments, ok := splitValueTextRichStyle(style, ';')
+	if !ok || 1 > len(segments) {
+		return nil, false
+	}
+	ret = make(map[string]string, len(segments))
+	for _, segment := range segments {
+		parts, valid := splitValueTextRichStyle(segment, ':')
+		if !valid || 2 != len(parts) {
+			return nil, false
+		}
+		property, value := strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
+		if "" == property || "" == value {
+			return nil, false
+		}
+		if _, exists := ret[property]; exists {
+			return nil, false
+		}
+		ret[property] = value
+	}
+	return ret, true
+}
+
+func splitValueTextRichStyle(value string, separator byte) (ret []string, ok bool) {
+	value = strings.TrimSpace(value)
+	if "" == value {
+		return nil, false
+	}
+	start, parentheses := 0, 0
+	var quote byte
+	escaped := false
+	for i := 0; i < len(value); i++ {
+		character := value[i]
+		if escaped {
+			escaped = false
+			continue
+		}
+		if '\\' == character {
+			escaped = true
+			continue
+		}
+		if 0 != quote {
+			if quote == character {
+				quote = 0
+			}
+			continue
+		}
+		if '\'' == character || '"' == character {
+			quote = character
+			continue
+		}
+		switch character {
+		case '(':
+			parentheses++
+		case ')':
+			if 1 > parentheses {
+				return nil, false
+			}
+			parentheses--
+		default:
+			if separator == character && 0 == parentheses {
+				part := strings.TrimSpace(value[start:i])
+				if "" == part {
+					if ';' == separator && i == len(value)-1 {
+						start = len(value)
+						continue
+					}
+					return nil, false
+				}
+				ret = append(ret, part)
+				start = i + 1
+				if ':' == separator {
+					part = strings.TrimSpace(value[start:])
+					if "" == part {
+						return nil, false
+					}
+					ret = append(ret, part)
+					return ret, true
+				}
+			}
+		}
+	}
+	if escaped || 0 != quote || 0 != parentheses {
+		return nil, false
+	}
+	if start < len(value) {
+		part := strings.TrimSpace(value[start:])
+		if "" == part {
+			return nil, false
+		}
+		ret = append(ret, part)
+	}
+	return ret, 0 < len(ret)
+}
+
+func valueTextRichStylePairMatches(declarations map[string]string, first, second string) bool {
+	_, hasFirst := declarations[first]
+	_, hasSecond := declarations[second]
+	return hasFirst == hasSecond
+}
+
+func normalizeValueTextRichStyleValue(property, value string) (ret string, ok bool) {
+	switch property {
+	case "color":
+		if ret, ok = normalizeValueTextRichBuiltinPaletteValue(property, value); ok {
+			return ret, true
+		}
+		if ret, ok = normalizeValueTextRichCustomStyleValue(property, valueTextRichCustomColorPattern, value); ok {
+			return ret, true
+		}
+		return normalizeValueTextRichBuiltinStyleValue(property, value)
+	case "background-color":
+		if ret, ok = normalizeValueTextRichBuiltinPaletteValue(property, value); ok {
+			return ret, true
+		}
+		if ret, ok = normalizeValueTextRichCustomStyleValue(property, valueTextRichCustomBackgroundPattern, value); ok {
+			return ret, true
+		}
+		return normalizeValueTextRichBuiltinStyleValue(property, value)
+	case "font-size":
+		return normalizeValueTextRichFontSize(value)
+	case "font-family":
+		return normalizeValueTextRichFontFamily(value)
+	case "direction":
+		return value, "ltr" == value || "rtl" == value
+	case "unicode-bidi":
+		return value, "isolate" == value
+	case "-webkit-text-stroke":
+		return value, valueTextRichHollowStroke == value
+	case "-webkit-text-fill-color":
+		return value, valueTextRichHollowFill == value
+	case "text-shadow":
+		return value, valueTextRichTextShadow == value
+	}
+	return "", false
+}
+
+func normalizeValueTextRichFontSize(value string) (ret string, ok bool) {
+	if match := valueTextRichFontSizePXPattern.FindStringSubmatch(value); 2 == len(match) {
+		size, err := strconv.Atoi(match[1])
+		if nil == err && 9 <= size && size <= 72 {
+			return strconv.Itoa(size) + "px", true
+		}
+		return "", false
+	}
+	if !valueTextRichFontSizeEMPattern.MatchString(value) {
+		return "", false
+	}
+	number := strings.TrimSuffix(value, "em")
+	size, err := strconv.ParseFloat(number, 64)
+	if nil != err || size < 0.56 || 4.5 < size {
+		return "", false
+	}
+	return strconv.FormatFloat(size, 'f', -1, 64) + "em", true
+}
+
+func normalizeValueTextRichFontFamily(value string) (ret string, ok bool) {
+	if 2048 < len(value) {
+		return "", false
+	}
+	parts, ok := splitValueTextRichStyle(value, ',')
+	if !ok || 4 != len(parts) || "var(--b3-font-family-emoji-reset)" != parts[0] ||
+		"var(--b3-font-family-editor)" != parts[2] || "var(--b3-font-family)" != parts[3] {
+		return "", false
+	}
+	quoted := parts[1]
+	if 2 > len(quoted) || quoted[0] != quoted[len(quoted)-1] || ('\'' != quoted[0] && '"' != quoted[0]) {
+		return "", false
+	}
+	escaped := quoted[1 : len(quoted)-1]
+	family, ok := unescapeValueTextRichCSSString(escaped)
+	if !ok || "" == family || 256 < utf8.RuneCountInString(family) {
+		return "", false
+	}
+	normalizedFamily := strings.ToLower(family)
+	if "emojis additional" == normalizedFamily || "emojis reset" == normalizedFamily ||
+		"inherit" == normalizedFamily || "initial" == normalizedFamily || "revert" == normalizedFamily ||
+		"revert-layer" == normalizedFamily || "unset" == normalizedFamily || strings.HasPrefix(normalizedFamily, "var(") {
+		return "", false
+	}
+	return "var(--b3-font-family-emoji-reset), '" + escapeValueTextRichCSSString(family) +
+		"', var(--b3-font-family-editor), var(--b3-font-family)", true
+}
+
+func unescapeValueTextRichCSSString(value string) (ret string, ok bool) {
+	var builder strings.Builder
+	for i := 0; i < len(value); {
+		if '\\' != value[i] {
+			character, size := utf8.DecodeRuneInString(value[i:])
+			if utf8.RuneError == character && 1 == size {
+				return "", false
+			}
+			builder.WriteRune(character)
+			i += size
+			continue
+		}
+		i++
+		if len(value) <= i {
+			return "", false
+		}
+		start := i
+		for i < len(value) && i-start < 6 && isValueTextRichCSSHex(value[i]) {
+			i++
+		}
+		if start < i {
+			codePoint, err := strconv.ParseInt(value[start:i], 16, 32)
+			if nil != err || 0 == codePoint || 0x10ffff < codePoint {
+				builder.WriteRune(utf8.RuneError)
+			} else {
+				builder.WriteRune(rune(codePoint))
+			}
+			if i < len(value) && isValueTextRichCSSWhitespace(value[i]) {
+				i++
+			}
+			continue
+		}
+		character, size := utf8.DecodeRuneInString(value[i:])
+		if utf8.RuneError == character && 1 == size {
+			return "", false
+		}
+		builder.WriteRune(character)
+		i += size
+	}
+	return builder.String(), true
+}
+
+func escapeValueTextRichCSSString(value string) string {
+	var builder strings.Builder
+	for _, character := range value {
+		switch {
+		case '"' == character:
+			builder.WriteString(`\22 `)
+		case '\'' == character || '\\' == character:
+			builder.WriteByte('\\')
+			builder.WriteRune(character)
+		case character < 32 || 127 == character:
+			builder.WriteByte('\\')
+			builder.WriteString(strconv.FormatInt(int64(character), 16))
+			builder.WriteByte(' ')
+		default:
+			builder.WriteRune(character)
+		}
+	}
+	return builder.String()
+}
+
+func isValueTextRichCSSHex(character byte) bool {
+	return '0' <= character && character <= '9' || 'a' <= character && character <= 'f' ||
+		'A' <= character && character <= 'F'
+}
+
+func isValueTextRichCSSWhitespace(character byte) bool {
+	switch character {
+	case ' ', '\t', '\n', '\r', '\f':
+		return true
+	}
+	return false
+}
+
+func normalizeValueTextRichCustomStyleValue(property string, pattern *regexp.Regexp, value string) (ret string, ok bool) {
+	match := pattern.FindStringSubmatch(value)
+	if 3 != len(match) || !ast.IsNodeIDPattern(match[1]) {
+		return "", false
+	}
+	return fmt.Sprintf("var(--b3-inline-style-%s-%s, %s)", match[1], property, strings.ToLower(match[2])), true
+}
+
+func normalizeValueTextRichBuiltinPaletteValue(property, value string) (ret string, ok bool) {
+	match := valueTextRichBuiltinPalettePattern.FindStringSubmatch(value)
+	if 3 != len(match) || "color" == property && "color" != match[1] ||
+		"background-color" == property && "background" != match[1] {
+		return "", false
+	}
+	index, err := strconv.Atoi(match[2])
+	if nil != err || 1 > index || 13 < index {
+		return "", false
+	}
+	return fmt.Sprintf("var(--b3-font-%s%d)", match[1], index), true
+}
+
+func normalizeValueTextRichBuiltinStyleValue(property, value string) (ret string, ok bool) {
+	valueSuffix, legacySuffix := "color", "color"
+	if "background-color" == property {
+		valueSuffix, legacySuffix = "background-color", "background"
+	}
+	match := valueTextRichBuiltinStylePattern.FindStringSubmatch(value)
+	if 5 != len(match) || match[1] != match[3] || match[2] != valueSuffix || match[4] != legacySuffix {
+		return "", false
+	}
+	return fmt.Sprintf("var(--b3-inline-builtin-%s-%s, var(--b3-card-%s-%s))",
+		match[1], valueSuffix, match[1], legacySuffix), true
+}
+
+func normalizeValueTextRichTreeStyles(tree *parse.Tree) (err error) {
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeTextMark != node.Type || 1 > len(node.KramdownIAL) {
+			return ast.WalkContinue
+		}
+		style := node.IALAttr("style")
+		var normalized string
+		var ok bool
+		if normalized, ok = normalizeValueTextRichStyle(style); !ok {
+			err = fmt.Errorf("unsupported attribute view rich text style")
+			return ast.WalkStop
+		}
+		node.SetIALAttr("style", normalized)
+		node.Next.Tokens = parse.IAL2Tokens(node.KramdownIAL)
+		return ast.WalkContinue
+	})
+	return
+}
+
+func isAllowedValueTextRichBlockIAL(node *ast.Node) bool {
+	ial := parse.Tokens2IAL(node.Tokens)
+	if 1 > len(ial) {
+		return false
+	}
+	hasID := false
+	for _, attr := range ial {
+		if 2 != len(attr) {
+			return false
+		}
+		switch attr[0] {
+		case "id":
+			if !ast.IsNodeIDPattern(attr[1]) {
+				return false
+			}
+			hasID = true
+		case "updated":
+			if !isValueTextRichTimestamp(attr[1]) {
+				return false
+			}
+		case "type":
+			if "doc" != attr[1] {
+				return false
+			}
+		default:
+			return false
+		}
+	}
+	return hasID
+}
+
+func isValueTextRichTimestamp(value string) bool {
+	if 14 != len(value) {
+		return false
+	}
+	for _, digit := range value {
+		if digit < '0' || '9' < digit {
+			return false
+		}
+	}
+	return true
+}
+
+var valueTextRichBlockDOMStructuralAttrs = regexp.MustCompile(`\s(?:data-node-id|data-node-index|updated)="[^"]*"`)
+
+const (
+	valueTextRichHollowStroke = "0.2px var(--b3-theme-on-background)"
+	valueTextRichHollowFill   = "transparent"
+	valueTextRichTextShadow   = "1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), " +
+		"3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)"
+)
+
+var valueTextRichStylePropertyOrder = []string{
+	"color",
+	"background-color",
+	"font-size",
+	"font-family",
+	"-webkit-text-stroke",
+	"-webkit-text-fill-color",
+	"text-shadow",
+	"direction",
+	"unicode-bidi",
+}
+
+var (
+	valueTextRichBuiltinPalettePattern = regexp.MustCompile(`^var\(--b3-font-(color|background)(\d+)\)$`)
+	valueTextRichBuiltinStylePattern   = regexp.MustCompile(
+		`^var\(--b3-inline-builtin-(error|warning|info|success)-(color|background-color),\s*` +
+			`var\(--b3-card-(error|warning|info|success)-(color|background)\)\)$`,
+	)
+	valueTextRichCustomColorPattern = regexp.MustCompile(
+		`^var\(--b3-inline-style-([0-9]{14}-[a-z0-9]{7})-color,\s*(#[0-9A-Fa-f]{6})\)$`,
+	)
+	valueTextRichCustomBackgroundPattern = regexp.MustCompile(
+		`^var\(--b3-inline-style-([0-9]{14}-[a-z0-9]{7})-background-color,\s*(#[0-9A-Fa-f]{6})\)$`,
+	)
+	valueTextRichFontSizePXPattern = regexp.MustCompile(`^(\d+)(?:\.0{1,2})?px$`)
+	valueTextRichFontSizeEMPattern = regexp.MustCompile(`^(?:(\d+)(?:\.(\d{1,2}))?|\.(\d{1,2}))em$`)
+)
+
+// RenderValueTextRich 将经过校验的富文本语法树序列化为 SiYuan Kramdown。
+func RenderValueTextRich(tree *parse.Tree) (content string, err error) {
+	if err = validateValueTextRichTree(tree); nil != err {
+		return
+	}
+	content, _, err = normalizeValueTextRichTreeSource(tree)
+	return
+}
+
+func valueTextRichBlockDOM2Kramdown(luteEngine *lute.Lute, blockDOM string) string {
+	blockDOM = valueTextRichBlockDOMStructuralAttrs.ReplaceAllString(blockDOM, "")
+	blockDOM, backslashSentinel, backtickSentinel := protectValueTextRichBlockDOMStyleCharacters(blockDOM)
+	markdown := strings.TrimSpace(luteEngine.BlockDOM2Md(blockDOM))
+	if "" != backtickSentinel {
+		markdown = strings.ReplaceAll(markdown, backtickSentinel, "&#96;")
+		markdown = strings.ReplaceAll(markdown, backslashSentinel, "&#92;")
+	}
+	return markdown
+}
+
+func protectValueTextRichBlockDOMStyleCharacters(blockDOM string) (ret, backslashSentinel, backtickSentinel string) {
+	if !strings.ContainsAny(blockDOM, "\\`") {
+		return blockDOM, "", ""
+	}
+	backslashSentinel = newValueTextRichBackslashSentinel(blockDOM)
+	backtickSentinel = newValueTextRichBackslashSentinel(blockDOM + backslashSentinel)
+
+	var builder strings.Builder
+	remaining := blockDOM
+	for {
+		start := strings.Index(remaining, "<span")
+		if 0 > start {
+			builder.WriteString(remaining)
+			break
+		}
+		builder.WriteString(remaining[:start])
+		remaining = remaining[start:]
+		end := valueTextRichBlockDOMTagEnd(remaining)
+		if 0 > end {
+			builder.WriteString(remaining)
+			break
+		}
+		tag := remaining[:end+1]
+		dataType, hasDataType := valueTextRichBlockDOMAttribute(tag, "data-type")
+		style, hasStyle := valueTextRichBlockDOMAttribute(tag, "style")
+		if hasDataType && hasStyle && containsValueTextRichDataType(dataType, "text") &&
+			strings.ContainsAny(style, "\\`") {
+			protectedStyle := strings.ReplaceAll(style, `\`, backslashSentinel)
+			protectedStyle = strings.ReplaceAll(protectedStyle, "`", backtickSentinel)
+			tag = strings.Replace(tag, `style="`+style+`"`, `style="`+protectedStyle+`"`, 1)
+		}
+		builder.WriteString(tag)
+		remaining = remaining[end+1:]
+	}
+	return builder.String(), backslashSentinel, backtickSentinel
+}
+
+func valueTextRichBlockDOMTagEnd(tag string) int {
+	var quote byte
+	for i := len("<span"); i < len(tag); i++ {
+		character := tag[i]
+		if 0 != quote {
+			if quote == character {
+				quote = 0
+			}
+			continue
+		}
+		if '\'' == character || '"' == character {
+			quote = character
+			continue
+		}
+		if '>' == character {
+			return i
+		}
+	}
+	return -1
+}
+
+func valueTextRichBlockDOMAttribute(tag, name string) (value string, ok bool) {
+	marker := " " + name + `="`
+	start := strings.Index(tag, marker)
+	if 0 > start {
+		return "", false
+	}
+	start += len(marker)
+	end := strings.IndexByte(tag[start:], '"')
+	if 0 > end {
+		return "", false
+	}
+	return tag[start : start+end], true
+}
+
+func containsValueTextRichDataType(dataType, expected string) bool {
+	for _, typ := range strings.Fields(dataType) {
+		if expected == typ {
+			return true
+		}
+	}
+	return false
+}
+
+type valueTextRichStyleEntityProtection struct {
+	sentinel string
+	token    string
+	encoded  string
+	decoded  string
+}
+
+type valueTextRichLiteralRange struct {
+	start int
+	end   int
+}
+
+func protectValueTextRichKramdownStyleEntities(markdown string) (ret string,
+	protections []valueTextRichStyleEntityProtection, err error) {
+	const marker = `</span>{:`
+	if !strings.Contains(markdown, marker) {
+		return markdown, nil, nil
+	}
+	sentinel := newValueTextRichBackslashSentinel(markdown)
+	literalRanges := valueTextRichLiteralMarkdownRanges(markdown)
+	literalRangeIndex := 0
+	var builder strings.Builder
+	cursor := 0
+	for {
+		start := strings.Index(markdown[cursor:], marker)
+		if 0 > start {
+			builder.WriteString(markdown[cursor:])
+			break
+		}
+		start += cursor
+		builder.WriteString(markdown[cursor:start])
+		for literalRangeIndex < len(literalRanges) && literalRanges[literalRangeIndex].end <= start {
+			literalRangeIndex++
+		}
+		if literalRangeIndex < len(literalRanges) && literalRanges[literalRangeIndex].start <= start {
+			builder.WriteString(marker)
+			cursor = start + len(marker)
+			continue
+		}
+		ialStart := start + len("</span>")
+		valueStart, valueEnd, ialEnd, ok := valueTextRichSpanIALStyleBounds(markdown[ialStart:])
+		if !ok {
+			return "", nil, fmt.Errorf("invalid attribute view rich text span style IAL")
+		}
+		valueStart += ialStart
+		valueEnd += ialStart
+		ialEnd += ialStart
+		builder.WriteString(markdown[start:valueStart])
+		style, protected := protectValueTextRichStyleEntities(markdown[valueStart:valueEnd],
+			sentinel, len(protections))
+		builder.WriteString(style)
+		protections = append(protections, protected...)
+		builder.WriteString(markdown[valueEnd:ialEnd])
+		cursor = ialEnd
+	}
+	return builder.String(), protections, nil
+}
+
+func valueTextRichSpanIALStyleBounds(ial string) (valueStart, valueEnd, end int, ok bool) {
+	if !strings.HasPrefix(ial, "{: ") && !strings.HasPrefix(ial, "{:\t") &&
+		!strings.HasPrefix(ial, "{:\n") && !strings.HasPrefix(ial, "{:\r") {
+		return 0, 0, 0, false
+	}
+	position := 2
+	for position < len(ial) && isValueTextRichCSSWhitespace(ial[position]) {
+		position++
+	}
+	nameStart := position
+	for position < len(ial) && ('a' <= ial[position] && ial[position] <= 'z' || '-' == ial[position]) {
+		position++
+	}
+	if "style" != ial[nameStart:position] {
+		return 0, 0, 0, false
+	}
+	for position < len(ial) && isValueTextRichCSSWhitespace(ial[position]) {
+		position++
+	}
+	if len(ial) <= position || '=' != ial[position] {
+		return 0, 0, 0, false
+	}
+	position++
+	for position < len(ial) && isValueTextRichCSSWhitespace(ial[position]) {
+		position++
+	}
+	if len(ial) <= position || ('\'' != ial[position] && '"' != ial[position]) {
+		return 0, 0, 0, false
+	}
+	quote := ial[position]
+	valueStart = position + 1
+	valueEnd = strings.IndexByte(ial[valueStart:], quote)
+	if 0 > valueEnd {
+		return 0, 0, 0, false
+	}
+	valueEnd += valueStart
+	position = valueEnd + 1
+	for position < len(ial) && isValueTextRichCSSWhitespace(ial[position]) {
+		position++
+	}
+	if len(ial) <= position || '}' != ial[position] {
+		return 0, 0, 0, false
+	}
+	return valueStart, valueEnd, position + 1, true
+}
+
+func valueTextRichLiteralMarkdownRanges(markdown string) (ret []valueTextRichLiteralRange) {
+	blockRanges := valueTextRichBlockLiteralMarkdownRanges(markdown)
+	cursor := 0
+	for _, blockRange := range blockRanges {
+		if cursor < blockRange.start {
+			ret = append(ret, valueTextRichCodeSpanRanges(markdown[cursor:blockRange.start], cursor)...)
+		}
+		ret = append(ret, blockRange)
+		cursor = blockRange.end
+	}
+	if cursor < len(markdown) {
+		ret = append(ret, valueTextRichCodeSpanRanges(markdown[cursor:], cursor)...)
+	}
+	return
+}
+
+func valueTextRichBlockLiteralMarkdownRanges(markdown string) (ret []valueTextRichLiteralRange) {
+	var fence byte
+	var fenceLength int
+	inMathBlock := false
+	literalStart := -1
+	for offset := 0; offset <= len(markdown); {
+		end := strings.IndexByte(markdown[offset:], '\n')
+		if 0 > end {
+			end = len(markdown)
+		} else {
+			end += offset
+		}
+		nextLine := end
+		if end < len(markdown) {
+			nextLine++
+		}
+		line := strings.TrimSpace(stripValueTextRichMarkdownContainer(markdown[offset:end]))
+		inLiteral := 0 != fence || inMathBlock
+		if 0 != fence {
+			if isValueTextRichClosingFence(line, fence, fenceLength) {
+				fence, fenceLength = 0, 0
+			}
+		} else if inMathBlock {
+			if "$$" == line {
+				inMathBlock = false
+			}
+		} else if marker, length := valueTextRichOpeningFence(line); 0 != marker {
+			fence, fenceLength, inLiteral = marker, length, true
+		} else if "$$" == line {
+			inMathBlock, inLiteral = true, true
+		}
+		if inLiteral {
+			if 0 > literalStart {
+				literalStart = offset
+			}
+			if 0 == fence && !inMathBlock {
+				ret = append(ret, valueTextRichLiteralRange{start: literalStart, end: nextLine})
+				literalStart = -1
+			}
+		}
+		if len(markdown) == end {
+			break
+		}
+		offset = nextLine
+	}
+	if 0 <= literalStart {
+		ret = append(ret, valueTextRichLiteralRange{start: literalStart, end: len(markdown)})
+	}
+	return
+}
+
+func stripValueTextRichMarkdownContainer(line string) string {
+	for {
+		line = strings.TrimLeft(line, " \t")
+		if strings.HasPrefix(line, ">") {
+			line = strings.TrimPrefix(line, ">")
+			continue
+		}
+		if 2 <= len(line) && ('-' == line[0] || '+' == line[0] || '*' == line[0]) &&
+			(' ' == line[1] || '\t' == line[1]) {
+			line = line[2:]
+			continue
+		}
+		orderedEnd := -1
+		for i := 0; i < len(line); i++ {
+			if '0' <= line[i] && line[i] <= '9' {
+				continue
+			}
+			if 0 < i && ('.' == line[i] || ')' == line[i]) && i+1 < len(line) &&
+				(' ' == line[i+1] || '\t' == line[i+1]) {
+				orderedEnd = i + 2
+			}
+			break
+		}
+		if 0 <= orderedEnd {
+			line = line[orderedEnd:]
+			continue
+		}
+		return line
+	}
+}
+
+func valueTextRichOpeningFence(line string) (marker byte, length int) {
+	if "" == line {
+		return 0, 0
+	}
+	marker = line[0]
+	if '`' != marker && '~' != marker {
+		return 0, 0
+	}
+	for length < len(line) && marker == line[length] {
+		length++
+	}
+	if 3 > length || ('`' == marker && strings.ContainsRune(line[length:], '`')) {
+		return 0, 0
+	}
+	return marker, length
+}
+
+func isValueTextRichClosingFence(line string, marker byte, openingLength int) bool {
+	if "" == line || marker != line[0] {
+		return false
+	}
+	length := 0
+	for length < len(line) && marker == line[length] {
+		length++
+	}
+	return openingLength <= length && "" == strings.TrimSpace(line[length:])
+}
+
+func valueTextRichCodeSpanRanges(content string, offset int) (ret []valueTextRichLiteralRange) {
+	type markerRun struct {
+		start  int
+		end    int
+		length int
+	}
+	var runs []markerRun
+	flushRuns := func() {
+		nextSame := make([]int, len(runs))
+		nextByLength := map[int]int{}
+		for i := len(runs) - 1; 0 <= i; i-- {
+			nextSame[i] = -1
+			if next, ok := nextByLength[runs[i].length]; ok {
+				nextSame[i] = next
+			}
+			nextByLength[runs[i].length] = i
+		}
+		for i := 0; i < len(runs); {
+			close := nextSame[i]
+			if 0 > close {
+				i++
+				continue
+			}
+			ret = append(ret, valueTextRichLiteralRange{
+				start: offset + runs[i].start,
+				end:   offset + runs[close].end,
+			})
+			i = close + 1
+		}
+		runs = nil
+	}
+
+	paragraphBreaks := valueTextRichParagraphBreakRanges(content)
+	paragraphBreakIndex := 0
+	backslashes := 0
+	for index := 0; index < len(content); {
+		for paragraphBreakIndex < len(paragraphBreaks) && paragraphBreaks[paragraphBreakIndex].end <= index {
+			paragraphBreakIndex++
+		}
+		var paragraphBreak *valueTextRichLiteralRange
+		if paragraphBreakIndex < len(paragraphBreaks) {
+			paragraphBreak = &paragraphBreaks[paragraphBreakIndex]
+			if paragraphBreak.start <= index {
+				flushRuns()
+				index = paragraphBreak.end
+				backslashes = 0
+				continue
+			}
+		}
+		limit := len(content)
+		if nil != paragraphBreak {
+			limit = paragraphBreak.start
+		}
+		if '<' == content[index] {
+			if end := valueTextRichQuotedDelimiterEnd(content, index+1, limit, '>'); 0 <= end {
+				index = end + 1
+				backslashes = 0
+				continue
+			}
+		} else if strings.HasPrefix(content[index:], "{:") {
+			if end := valueTextRichQuotedDelimiterEnd(content, index+2, limit, '}'); 0 <= end {
+				index = end + 1
+				backslashes = 0
+				continue
+			}
+		}
+		if '\\' == content[index] {
+			backslashes++
+			index++
+			continue
+		}
+		if '`' != content[index] {
+			backslashes = 0
+			index++
+			continue
+		}
+		length := valueTextRichMarkerRunLength(content, index, '`')
+		start := index
+		if 1 == backslashes%2 {
+			start++
+			length--
+		}
+		if 0 < length {
+			runs = append(runs, markerRun{start: start, end: start + length, length: length})
+		}
+		index += valueTextRichMarkerRunLength(content, index, '`')
+		backslashes = 0
+	}
+	flushRuns()
+	return
+}
+
+func valueTextRichParagraphBreakRanges(content string) (ret []valueTextRichLiteralRange) {
+	for cursor := 0; cursor < len(content); {
+		lineEnd := strings.IndexByte(content[cursor:], '\n')
+		if 0 > lineEnd {
+			break
+		}
+		lineEnd += cursor
+		start := lineEnd
+		if 0 < start && '\r' == content[start-1] {
+			start--
+		}
+		next := lineEnd + 1
+		for next < len(content) && (' ' == content[next] || '\t' == content[next]) {
+			next++
+		}
+		end := -1
+		if len(content) == next {
+			end = next
+		} else if '\n' == content[next] {
+			end = next + 1
+		} else if '\r' == content[next] && next+1 < len(content) && '\n' == content[next+1] {
+			end = next + 2
+		}
+		if 0 <= end {
+			ret = append(ret, valueTextRichLiteralRange{start: start, end: end})
+			cursor = end
+			continue
+		}
+		cursor = lineEnd + 1
+	}
+	return
+}
+
+func valueTextRichQuotedDelimiterEnd(content string, start, limit int, delimiter byte) int {
+	var quote byte
+	escaped := false
+	for i := start; i < limit; i++ {
+		character := content[i]
+		if escaped {
+			escaped = false
+			continue
+		}
+		if 0 != quote {
+			if '\\' == character {
+				escaped = true
+			} else if quote == character {
+				quote = 0
+			}
+			continue
+		}
+		if '\'' == character || '"' == character {
+			quote = character
+			continue
+		}
+		if delimiter == character {
+			return i
+		}
+	}
+	return -1
+}
+
+func valueTextRichMarkerRunLength(line string, start int, marker byte) int {
+	length := 0
+	for start+length < len(line) && marker == line[start+length] {
+		length++
+	}
+	return length
+}
+
+func protectValueTextRichStyleEntities(style, sentinel string, offset int) (ret string,
+	protections []valueTextRichStyleEntityProtection) {
+	var builder strings.Builder
+	remaining := style
+	for {
+		start := strings.IndexAny(remaining, "&`")
+		if 0 > start {
+			builder.WriteString(remaining)
+			break
+		}
+		builder.WriteString(remaining[:start])
+		remaining = remaining[start:]
+		if '`' == remaining[0] {
+			token := sentinel + strconv.Itoa(offset+len(protections)) + "\ue002"
+			builder.WriteString(token)
+			protections = append(protections, valueTextRichStyleEntityProtection{
+				sentinel: sentinel, token: token, encoded: "`", decoded: "`",
+			})
+			remaining = remaining[1:]
+			continue
+		}
+		end := strings.IndexByte(remaining, ';')
+		if 0 > end {
+			builder.WriteByte(remaining[0])
+			remaining = remaining[1:]
+			continue
+		}
+		encoded := remaining[:end+1]
+		decoded := html.UnescapeString(encoded)
+		if encoded == decoded {
+			builder.WriteByte(remaining[0])
+			remaining = remaining[1:]
+			continue
+		}
+		token := sentinel + strconv.Itoa(offset+len(protections)) + "\ue002"
+		builder.WriteString(token)
+		protections = append(protections, valueTextRichStyleEntityProtection{
+			sentinel: sentinel, token: token, encoded: encoded, decoded: decoded,
+		})
+		remaining = remaining[end+1:]
+	}
+	return builder.String(), protections
+}
+
+func restoreValueTextRichTreeStyleEntities(tree *parse.Tree,
+	protections []valueTextRichStyleEntityProtection) (err error) {
+	if 1 > len(protections) {
+		return
+	}
+	sentinel := protections[0].sentinel
+	stylePairs := make([]string, 0, len(protections)*2)
+	literalPairs := make([]string, 0, len(protections)*2)
+	textMarkCodePairs := make([]string, 0, len(protections)*2)
+	textMarkInlineMathPairs := make([]string, 0, len(protections)*2)
+	tokenIndexes := make(map[string]int, len(protections))
+	restored := make([]bool, len(protections))
+	for i, protection := range protections {
+		if sentinel != protection.sentinel {
+			return fmt.Errorf("inconsistent attribute view rich text style entity sentinel")
+		}
+		tokenIndexes[protection.token] = i
+		stylePairs = append(stylePairs, protection.token, protection.decoded)
+		literalPairs = append(literalPairs, protection.token, protection.encoded)
+		encoded := strings.ReplaceAll(protection.encoded, "&", "&amp;")
+		textMarkCodePairs = append(textMarkCodePairs, protection.token, encoded)
+		textMarkInlineMathPairs = append(textMarkInlineMathPairs, protection.token,
+			strings.ReplaceAll(encoded, "&", "&amp;"))
+	}
+	styleReplacer := strings.NewReplacer(stylePairs...)
+	literalReplacer := strings.NewReplacer(literalPairs...)
+	textMarkCodeReplacer := strings.NewReplacer(textMarkCodePairs...)
+	textMarkInlineMathReplacer := strings.NewReplacer(textMarkInlineMathPairs...)
+
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+		style := node.IALAttr("style")
+		styleProtected := strings.Contains(style, sentinel)
+		textProtected := ast.NodeTextMark == node.Type && strings.Contains(node.TextMarkTextContent, sentinel)
+		inlineMathProtected := ast.NodeTextMark == node.Type &&
+			strings.Contains(node.TextMarkInlineMathContent, sentinel)
+		tokens := string(node.Tokens)
+		tokensProtected := strings.Contains(tokens, sentinel)
+		if styleProtected {
+			if !node.IsTextMarkType("text") {
+				err = fmt.Errorf("encoded style entity is not attached to an attribute view rich text span")
+				return ast.WalkStop
+			}
+			if textProtected || inlineMathProtected || tokensProtected ||
+				!markValueTextRichStyleProtections(style, sentinel, tokenIndexes, restored) {
+				err = fmt.Errorf("invalid encoded style entity in attribute view rich text span")
+				return ast.WalkStop
+			}
+			style = styleReplacer.Replace(style)
+			node.SetIALAttr("style", style)
+			if nil != node.Next && ast.NodeKramdownSpanIAL == node.Next.Type {
+				node.Next.Tokens = parse.IAL2Tokens(node.KramdownIAL)
+			}
+			return ast.WalkContinue
+		}
+		if textProtected || inlineMathProtected {
+			if !node.IsTextMarkType("code") && !node.IsTextMarkType("inline-math") {
+				err = fmt.Errorf("invalid encoded style entity in attribute view rich text mark [%s]", node.TextMarkType)
+				return ast.WalkStop
+			}
+			if tokensProtected || textProtected &&
+				!markValueTextRichStyleProtections(node.TextMarkTextContent, sentinel, tokenIndexes, restored) ||
+				inlineMathProtected &&
+					!markValueTextRichStyleProtections(node.TextMarkInlineMathContent, sentinel, tokenIndexes, restored) {
+				err = fmt.Errorf("invalid encoded style entity in attribute view rich text mark [%s]", node.TextMarkType)
+				return ast.WalkStop
+			}
+			node.TextMarkTextContent = textMarkCodeReplacer.Replace(node.TextMarkTextContent)
+			node.TextMarkInlineMathContent = textMarkInlineMathReplacer.Replace(node.TextMarkInlineMathContent)
+			return ast.WalkContinue
+		}
+		if !tokensProtected {
+			return ast.WalkContinue
+		}
+		switch node.Type {
+		case ast.NodeCodeBlockCode, ast.NodeMathBlockContent, ast.NodeCodeSpanContent, ast.NodeInlineMathContent:
+			if !markValueTextRichStyleProtections(tokens, sentinel, tokenIndexes, restored) {
+				err = fmt.Errorf("invalid encoded style entity in attribute view rich text node [%s]", node.Type.String())
+				return ast.WalkStop
+			}
+			node.Tokens = []byte(literalReplacer.Replace(tokens))
+		default:
+			err = fmt.Errorf("invalid encoded style entity in attribute view rich text node [%s]", node.Type.String())
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
+	if nil != err {
+		return
+	}
+	for _, found := range restored {
+		if !found {
+			return fmt.Errorf("attribute view rich text style entity was not restored")
+		}
+	}
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && valueTextRichNodeContainsSentinel(node, sentinel) {
+			err = fmt.Errorf("attribute view rich text style entity sentinel was not removed from node [%s]",
+				node.Type.String())
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
+	return
+}
+
+func valueTextRichNodeContainsSentinel(node *ast.Node, sentinel string) bool {
+	values := []string{
+		node.ID, node.Spec, node.Data, string(node.Tokens), string(node.CodeBlockOpenFence),
+		string(node.CodeBlockInfo), string(node.CodeBlockCloseFence), string(node.LinkRefLabel),
+		string(node.FootnotesRefLabel), node.FootnotesRefId, string(node.HtmlEntityTokens),
+		node.TextMarkType, node.TextMarkAHref, node.TextMarkATitle, node.TextMarkInlineMathContent,
+		node.TextMarkInlineMemoContent, node.TextMarkBlockRefID, node.TextMarkBlockRefSubtype,
+		node.TextMarkFileAnnotationRefID, node.TextMarkFlashcardOcclusionID, node.TextMarkTextContent,
+	}
+	for _, value := range values {
+		if strings.Contains(value, sentinel) {
+			return true
+		}
+	}
+	for _, attr := range node.KramdownIAL {
+		for _, value := range attr {
+			if strings.Contains(value, sentinel) {
+				return true
+			}
+		}
+	}
+	for name, value := range node.Properties {
+		if strings.Contains(name, sentinel) || strings.Contains(value, sentinel) {
+			return true
+		}
+	}
+	return false
+}
+
+func markValueTextRichStyleProtections(value, sentinel string, tokenIndexes map[string]int, restored []bool) bool {
+	const suffix = "\ue002"
+	for cursor := 0; cursor < len(value); {
+		start := strings.Index(value[cursor:], sentinel)
+		if 0 > start {
+			return true
+		}
+		start += cursor
+		end := strings.Index(value[start+len(sentinel):], suffix)
+		if 0 > end {
+			return false
+		}
+		end += start + len(sentinel) + len(suffix)
+		index, ok := tokenIndexes[value[start:end]]
+		if !ok {
+			return false
+		}
+		restored[index] = true
+		cursor = end
+	}
+	return true
+}
+
+func newValueTextRichBackslashSentinel(content string) string {
+	const (
+		prefix = "\ue000siyuan-av-rich-text-backslash"
+		suffix = "\ue001"
+	)
+	maxSuffixes := 0
+	for cursor := 0; cursor < len(content); {
+		start := strings.Index(content[cursor:], prefix)
+		if 0 > start {
+			break
+		}
+		start += cursor + len(prefix)
+		suffixes := 0
+		for strings.HasPrefix(content[start:], suffix) {
+			suffixes++
+			start += len(suffix)
+		}
+		if maxSuffixes < suffixes {
+			maxSuffixes = suffixes
+		}
+		cursor = start
+	}
+	return prefix + strings.Repeat(suffix, maxSuffixes+1)
+}
+
+// NormalizeValueTextRich 校验并将文本字段的富文本源规范化为 SiYuan Kramdown。
+func NormalizeValueTextRich(rich *ValueTextRich) (tree *parse.Tree, err error) {
+	_, tree, err = parseValueTextRich(rich)
+	if nil != err || nil == rich {
+		return tree, err
+	}
+	var normalized string
+	if normalized, tree, err = normalizeValueTextRichTreeSource(tree); nil != err {
+		return nil, err
+	}
+	rich.Content = normalized
+	return tree, nil
+}
+
+func normalizeValueTextRichTreeSource(tree *parse.Tree) (content string, normalizedTree *parse.Tree, err error) {
+	normalizedTree = tree
+	previous := ""
+	for iteration := 0; iteration < 4; iteration++ {
+		if err = normalizeValueTextRichTreeStyles(normalizedTree); nil != err {
+			return "", nil, err
+		}
+		luteEngine := newValueTextRichLute()
+		blockDOM := luteEngine.Tree2BlockDOM(normalizedTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+		content = valueTextRichBlockDOM2Kramdown(luteEngine, blockDOM)
+		if 0 < iteration && previous == content {
+			return content, normalizedTree, nil
+		}
+		previous = content
+		candidate := &ValueTextRich{
+			Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown, Content: content,
+		}
+		if _, normalizedTree, err = parseValueTextRich(candidate); nil != err {
+			return "", nil, err
+		}
+	}
+	return "", nil, fmt.Errorf("attribute view rich text normalization did not converge")
+}
+
+// NormalizeRichContent 校验富文本载荷，并根据富文本源刷新纯文本投影。
+func (value *ValueText) NormalizeRichContent() (err error) {
+	if !value.IsRich() {
+		return
+	}
+	tree, err := NormalizeValueTextRich(value.Rich)
+	if nil != err {
+		return err
+	}
+	value.Content = valueTextRichPlainContent(tree)
+	return
+}
+
+func valueTextRichPlainContent(tree *parse.Tree) string {
+	if nil == tree || nil == tree.Root {
+		return ""
+	}
+	var blocks []string
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+		switch node.Type {
+		case ast.NodeParagraph, ast.NodeHeading, ast.NodeCodeBlock, ast.NodeMathBlock:
+			blocks = append(blocks, strings.TrimRight(node.Content(), "\n"))
+			return ast.WalkSkipChildren
+		}
+		return ast.WalkContinue
+	})
+	if 0 == len(blocks) {
+		return tree.Root.Content()
+	}
+	return strings.TrimRight(strings.Join(blocks, "\n"), "\n")
 }
 
 type ValueNumber struct {

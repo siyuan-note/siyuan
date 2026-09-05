@@ -177,6 +177,47 @@ func TestRenderReusedGroupViewPreservesFilterSortCalcAndPagination(t *testing.T)
 	}
 }
 
+func TestHideEmptyGroupViewsUsesUnpaginatedCounts(t *testing.T) {
+	view := &av.View{Group: &av.ViewGroup{Field: "field", HideEmpty: true}}
+	for _, layoutType := range []av.LayoutType{av.LayoutTypeTable, av.LayoutTypeGallery, av.LayoutTypeKanban} {
+		t.Run(string(layoutType), func(t *testing.T) {
+			base := &av.BaseInstance{GroupHidden: 0}
+			var viewable av.Viewable
+			switch layoutType {
+			case av.LayoutTypeTable:
+				viewable = &av.Table{BaseInstance: base, RowCount: 0}
+			case av.LayoutTypeGallery:
+				viewable = &av.Gallery{BaseInstance: base, CardCount: 0}
+			case av.LayoutTypeKanban:
+				viewable = &av.Kanban{BaseInstance: base, CardCount: 0}
+			}
+			hideEmptyGroupViews(view, viewable)
+			if 1 != viewable.GetGroupHidden() {
+				t.Fatal("an empty group should be hidden at runtime")
+			}
+
+			switch layoutType {
+			case av.LayoutTypeTable:
+				viewable.(*av.Table).RowCount = 2
+			case av.LayoutTypeGallery:
+				viewable.(*av.Gallery).CardCount = 2
+			case av.LayoutTypeKanban:
+				viewable.(*av.Kanban).CardCount = 2
+			}
+			hideEmptyGroupViews(view, viewable)
+			if 0 != viewable.GetGroupHidden() {
+				t.Fatal("an unpaginated non-empty group should remain visible when the current page has no items")
+			}
+
+			viewable.SetGroupHidden(2)
+			hideEmptyGroupViews(view, viewable)
+			if 2 != viewable.GetGroupHidden() {
+				t.Fatal("manual group hiding should be preserved")
+			}
+		})
+	}
+}
+
 func TestRenderedGroupsUseItemsBeforeParentPagination(t *testing.T) {
 	oldLang, oldAttrViewLangs := util.Lang, util.AttrViewLangs
 	util.Lang = "en"

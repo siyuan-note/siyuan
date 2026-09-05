@@ -11,6 +11,13 @@
   box-sizing: border-box;
   font-size: var(--b3-font-size);
 
+  // 菜单滚动容器使用默认滚动方式，避免 iOS 裁剪嵌套子菜单。
+  &,
+  &__submenu,
+  &__items {
+    -webkit-overflow-scrolling: auto;
+  }
+
   &::-webkit-scrollbar,
   &__submenu::-webkit-scrollbar {
     width: 5px;
@@ -67,9 +74,15 @@
         border-radius: 0;
         width: 100%;
         background-color: var(--b3-theme-surface);
-        overflow-x: hidden;
+        // 外壳仅负责定位和动画，避免滚动偏移影响嵌套的固定定位子菜单。
+        overflow: visible;
         transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
         display: block;
+
+        & > .b3-menu__items {
+          height: 100%;
+          box-sizing: border-box;
+        }
       }
 
       &__items {
@@ -246,7 +259,7 @@
     }
 
     & > .b3-menu__items,
-    & .b3-menu__submenu {
+    & .b3-menu__submenu > .b3-menu__items {
       overscroll-behavior: contain;
     }
 

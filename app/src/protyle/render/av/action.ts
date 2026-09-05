@@ -67,6 +67,12 @@ import {getAVCurrentViewID} from "./viewVisibility";
 import {cloneAVCellValueSnapshot} from "./cellValue";
 import {formatAVItemLinks, genAVItemLink} from "./itemLink";
 import {openLink} from "../../../editor/openLink";
+import {getAVRichTextSafeURL, renderAVRichTextElements} from "./richText";
+/// #if !MOBILE
+import {openGlobalSearch} from "../../../search/util";
+/// #else
+import {popSearch} from "../../../mobile/menu/search";
+/// #endif
 /// #if MOBILE
 import {activeBlur} from "../../../mobile/util/keyboardToolbar";
 /// #endif
@@ -293,10 +299,50 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         event.stopPropagation();
         return true;
     }
+    const richTextElement = event.target.closest<HTMLElement>(".av__celltext--rich");
+    if (richTextElement) {
+        const blockRefElement = event.target.closest<HTMLElement>('[data-type~="block-ref"][data-id]');
+        const fileAnnotationElement = event.target.closest<HTMLElement>('[data-type~="file-annotation-ref"][data-id]');
+        const tagElement = event.target.closest<HTMLElement>('[data-type~="tag"]');
+        const linkElement = event.target.closest<HTMLElement>('[data-type~="a"][data-href], a[href]');
+        let href = "";
+        if (blockRefElement && richTextElement.contains(blockRefElement)) {
+            href = getAVRichTextSafeURL(`siyuan://blocks/${blockRefElement.dataset.id}`);
+        } else if (fileAnnotationElement && richTextElement.contains(fileAnnotationElement)) {
+            href = getAVRichTextSafeURL(fileAnnotationElement.dataset.id);
+        } else if (tagElement && richTextElement.contains(tagElement)) {
+            /// #if !MOBILE
+            openGlobalSearch(protyle.app, `#${tagElement.textContent}#`, true, {method: 0});
+            /// #else
+            popSearch(protyle.app, {
+                hasReplace: false,
+                method: 0,
+                hPath: "",
+                idPath: [],
+                k: `#${tagElement.textContent}#`,
+                r: "",
+                page: 1,
+            });
+            /// #endif
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (linkElement && richTextElement.contains(linkElement)) {
+            href = getAVRichTextSafeURL(linkElement.dataset.href || linkElement.getAttribute("href"));
+        }
+        if (href) {
+            openLink(protyle.app, href, event, event.ctrlKey || event.metaKey);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
+    }
     if (isOnlyMeta(event)) {
         return false;
     }
-    const blockElement = hasClosestBlock(event.target);
+    // 富文本预览以 b3-typography 作为渲染边界，先回到单元格再查找数据库块。
+    const cellElement = hasClosestByClassName(event.target, "av__cell");
+    const blockElement = hasClosestBlock(cellElement || event.target);
     if (!blockElement) {
         return false;
     }
@@ -381,6 +427,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             return true;
         } else if (type === "av-sort" && !protyle.disabled) {
             openMenuPanel({protyle, blockElement, type: "sorts"});
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-context-filter" && !protyle.disabled) {
+            openMenuPanel({protyle, blockElement, type: "contextFilter"});
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -690,6 +741,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             previewAttrViewImages(
                 removeCompressURL((target as HTMLImageElement).getAttribute("src")),
                 blockElement.getAttribute("data-av-id"),
+                blockElement.getAttribute("data-node-id"),
                 blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
                 blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || ""
             );
@@ -1343,6 +1395,7 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
             addDragFill(cellElement);
         }
         renderCellAttr(cellElement, value);
+        renderAVRichTextElements(cellElement);
     }
 };
 

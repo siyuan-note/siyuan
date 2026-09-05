@@ -531,12 +531,12 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     ${builtin ? "" : `<div class="config-group">
         <div class="config-title">${creating ? window.siyuan.languages.entryCreateProfile : escapeHtml(draft.name)}</div>
         <div class="config-items">
-            <label class="fn__flex b3-label config-item config-wrap">
+            <label class="fn__flex b3-label config-item">
                 <div class="fn__flex-1"><div class="config-name">${window.siyuan.languages.name}</div></div>
                 <span class="fn__space"></span>
                 <input class="b3-text-field fn__flex-center fn__size200" data-profile-field="name" value="${escapeAttr(draft.name)}">
             </label>
-            ${creating ? `<label class="fn__flex b3-label config-item config-wrap">
+            ${creating ? `<label class="fn__flex b3-label config-item">
                 <div class="fn__flex-1"><div class="config-name">${window.siyuan.languages.entryBasedOn}</div></div>
                 <span class="fn__space"></span>
                 <select class="b3-select fn__flex-center fn__size200" data-profile-field="template">
@@ -886,7 +886,7 @@ const importProfiles = async (root: HTMLElement, file: File) => {
 };
 
 export const genEntryVisibilityHtml = () => `<div class="b3-label config-item" data-type="entry-visibility">
-    <div class="fn__flex config-wrap">
+    <div class="fn__flex">
         <div><div class="config-name">${window.siyuan.languages.entryVisibility}</div><div class="b3-label__text">${window.siyuan.languages.entryVisibilityTip}</div></div>
         <span class="fn__space fn__flex-1"></span>
         ${getHostCapabilities().importExport ? `<button class="b3-button b3-button--outline" data-action="import"><svg class="b3-button__icon"><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.import}</button>

@@ -140,3 +140,48 @@ func TestIsPathInTemplatesDir(t *testing.T) {
 		t.Errorf("isPathInTemplatesDir(symlink -> conf.json) = true, want false")
 	}
 }
+
+func TestDocSaveAsTemplateDatabaseMode(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	tests := []struct {
+		name         string
+		databaseMode any
+		includeMode  bool
+		wantCode     int
+	}{
+		{name: "legacy default", wantCode: 0},
+		{name: "copy", databaseMode: "copy", includeMode: true, wantCode: 0},
+		{name: "reference", databaseMode: "reference", includeMode: true, wantCode: 0},
+		{name: "unknown", databaseMode: "unknown", includeMode: true, wantCode: -1},
+		{name: "invalid type", databaseMode: true, includeMode: true, wantCode: -1},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			arg := map[string]any{
+				"id": "20260904000999-api0001", "name": "template", "overwrite": false,
+			}
+			if test.includeMode {
+				arg["databaseMode"] = test.databaseMode
+			}
+			body, err := json.Marshal(arg)
+			if nil != err {
+				t.Fatal(err)
+			}
+			recorder := httptest.NewRecorder()
+			context, _ := gin.CreateTestContext(recorder)
+			context.Request = httptest.NewRequest(http.MethodPost, "/api/template/docSaveAsTemplate", bytes.NewReader(body))
+			context.Request.Header.Set("Content-Type", "application/json")
+			docSaveAsTemplate(context)
+
+			response := &struct {
+				Code int `json:"code"`
+			}{}
+			if err = json.Unmarshal(recorder.Body.Bytes(), response); nil != err {
+				t.Fatal(err)
+			}
+			if test.wantCode != response.Code {
+				t.Fatalf("unexpected response code: got %d, want %d", response.Code, test.wantCode)
+			}
+		})
+	}
+}

@@ -7,6 +7,7 @@ import {
     getPluginCommandId,
     registerPluginCommand,
     resolvePluginCommandCallback,
+    supportsPluginCommandSource,
     unregisterPluginCommands,
 } from "./commandAdapter";
 
@@ -47,19 +48,66 @@ describe("plugin command adapter", () => {
 
     it("keeps the command panel callback precedence", () => {
         const calls: string[] = [];
+        const protyle = {} as IProtyle;
+        const range = {startContainer: {isConnected: true}} as unknown as Range;
+        let receivedContext: ICommandContext | undefined;
         const command = {
             langKey: "sample",
-            callback: () => calls.push("callback"),
+            callback: (context) => {
+                calls.push("callback");
+                receivedContext = context;
+            },
             editorCallback: () => calls.push("editor"),
             globalCallback: () => calls.push("global"),
         } as ICommand;
         const callback = resolvePluginCommandCallback(command, createContext({
             focus: "editor",
-            protyle: {} as IProtyle,
+            protyle,
+            range,
         }));
 
         callback?.();
         assert.deepEqual(calls, ["callback"]);
+        assert.deepEqual(receivedContext, {
+            source: "commandPanel",
+            focus: "editor",
+            protyle,
+            range,
+            fileTree: undefined,
+            dock: undefined,
+        });
+    });
+
+    it("prefers execute over legacy callbacks", async () => {
+        const calls: string[] = [];
+        const protyle = {} as IProtyle;
+        const range = {startContainer: {isConnected: true}} as unknown as Range;
+        let receivedContext: ICommandContext | undefined;
+        const command = {
+            langKey: "sample",
+            execute(context) {
+                calls.push("execute");
+                receivedContext = context;
+            },
+            callback: () => calls.push("callback"),
+            editorCallback: () => calls.push("editor"),
+        } as ICommand;
+
+        await resolvePluginCommandCallback(command, createContext({
+            focus: "editor",
+            protyle,
+            range,
+        }))?.();
+
+        assert.deepEqual(calls, ["execute"]);
+        assert.deepEqual(receivedContext, {
+            source: "commandPanel",
+            focus: "editor",
+            protyle,
+            range,
+            fileTree: undefined,
+            dock: undefined,
+        });
     });
 
     it("preserves the plugin command as the callback receiver", () => {
@@ -82,17 +130,28 @@ describe("plugin command adapter", () => {
 
     it("dispatches editor, file tree, and dock callbacks from the captured context", () => {
         const calls: unknown[] = [];
+        const contexts: Array<ICommandContext | undefined> = [];
         const protyle = {} as IProtyle;
+        const range = {startContainer: {isConnected: true}} as unknown as Range;
         const files = {} as import("../layout/dock/Files").Files;
         const dockElement = {} as HTMLElement;
         const command = {
             langKey: "sample",
-            editorCallback: value => calls.push(value),
-            fileTreeCallback: value => calls.push(value),
-            dockCallback: value => calls.push(value),
+            editorCallback: (value, context) => {
+                calls.push(value);
+                contexts.push(context);
+            },
+            fileTreeCallback: (value, context) => {
+                calls.push(value);
+                contexts.push(context);
+            },
+            dockCallback: (value, context) => {
+                calls.push(value);
+                contexts.push(context);
+            },
         } as ICommand;
 
-        resolvePluginCommandCallback(command, createContext({focus: "editor", protyle}))?.();
+        resolvePluginCommandCallback(command, createContext({focus: "editor", protyle, range}))?.();
         resolvePluginCommandCallback(command, createContext({
             focus: "fileTree",
             fileTree: {model: files, elements: [], ids: [], paths: []},
@@ -103,6 +162,102 @@ describe("plugin command adapter", () => {
         }))?.();
 
         assert.deepEqual(calls, [protyle, files, dockElement]);
+        assert.deepEqual(contexts, [{
+            source: "commandPanel",
+            focus: "editor",
+            protyle,
+            range,
+            fileTree: undefined,
+            dock: undefined,
+        }, {
+            source: "commandPanel",
+            focus: "fileTree",
+            protyle: undefined,
+            range: undefined,
+            fileTree: files,
+            dock: undefined,
+        }, {
+            source: "commandPanel",
+            focus: "dock",
+            protyle: undefined,
+            range: undefined,
+            fileTree: undefined,
+            dock: dockElement,
+        }]);
+    });
+
+    it("uses legacy callbacks as unified command scope markers", async () => {
+        const sources: ICommandContext["source"][] = [];
+        const command = {
+            langKey: "sample",
+            execute: (context) => {
+                sources.push(context.source);
+            },
+            editorCallback: () => undefined,
+            fileTreeCallback: () => undefined,
+            dockCallback: () => undefined,
+        } as ICommand;
+        const protyle = {} as IProtyle;
+        const files = {} as import("../layout/dock/Files").Files;
+        const dockElement = {} as HTMLElement;
+
+        await resolvePluginCommandCallback(command, createContext({
+            source: "editorShortcut",
+            focus: "editor",
+            protyle,
+        }))?.();
+        await resolvePluginCommandCallback(command, createContext({
+            source: "fileTreeShortcut",
+            focus: "fileTree",
+            fileTree: {model: files, elements: [], ids: [], paths: []},
+        }))?.();
+        await resolvePluginCommandCallback(command, createContext({
+            source: "dockShortcut",
+            focus: "dock",
+            dock: {element: dockElement},
+        }))?.();
+
+        assert.equal(resolvePluginCommandCallback(command, createContext({source: "shortcut"})), undefined);
+        assert.deepEqual(sources, ["editorShortcut", "fileTreeShortcut", "dockShortcut"]);
+    });
+
+    it("treats execute-only commands as generic shortcuts", async () => {
+        const sources: ICommandContext["source"][] = [];
+        const command = {
+            langKey: "sample",
+            execute: (context) => {
+                sources.push(context.source);
+            },
+        } as ICommand;
+
+        assert.equal(supportsPluginCommandSource(command, "editorShortcut"), false);
+        assert.equal(supportsPluginCommandSource(command, "fileTreeShortcut"), false);
+        assert.equal(supportsPluginCommandSource(command, "dockShortcut"), false);
+        assert.equal(supportsPluginCommandSource(command, "shortcut"), true);
+        assert.equal(resolvePluginCommandCallback(command, createContext({
+            source: "editorShortcut",
+            focus: "editor",
+            protyle: {} as IProtyle,
+        })), undefined);
+
+        await resolvePluginCommandCallback(command, createContext({source: "shortcut"}))?.();
+
+        assert.deepEqual(sources, ["shortcut"]);
+    });
+
+    it("omits a detached range from the plugin command context", () => {
+        const range = {startContainer: {isConnected: false}} as unknown as Range;
+        let receivedContext: ICommandContext | undefined;
+        const command = {
+            langKey: "sample",
+            callback: (context) => {
+                receivedContext = context;
+            },
+        } as ICommand;
+
+        resolvePluginCommandCallback(command, createContext({range}))?.();
+
+        assert.equal(receivedContext?.range, undefined);
     });
 
     it("does not enable specialized callbacks on mobile", () => {

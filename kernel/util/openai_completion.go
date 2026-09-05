@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"strings"
 
 	"github.com/sashabaranov/go-openai"
@@ -31,6 +32,57 @@ const (
 	OpenAIProtocolChatCompletions = "openai"
 	OpenAIProtocolResponses       = "openai-responses"
 )
+
+type openAIResponsesContextKey struct{}
+
+type openAIResponsesRequestOptions struct {
+	storeFalse                bool
+	includeEncryptedReasoning bool
+	reasoningSummary          string
+	nativeCompaction          bool
+}
+
+// ContextWithOpenAIResponsesBaseURL 根据端点附加 Responses 请求兼容选项。
+func ContextWithOpenAIResponsesBaseURL(ctx context.Context, baseURL string) context.Context {
+	return context.WithValue(ctx, openAIResponsesContextKey{}, openAIResponsesRequestOptionsForBaseURL(baseURL))
+}
+
+// SupportsOpenAIResponsesCompaction 判断当前端点是否支持原生 Responses 上下文压缩。
+func SupportsOpenAIResponsesCompaction(ctx context.Context) bool {
+	return openAIResponsesRequestOptionsFromContext(ctx).nativeCompaction
+}
+
+func openAIResponsesRequestOptionsFromContext(ctx context.Context) openAIResponsesRequestOptions {
+	options, _ := ctx.Value(openAIResponsesContextKey{}).(openAIResponsesRequestOptions)
+	return options
+}
+
+func openAIResponsesRequestOptionsForBaseURL(baseURL string) openAIResponsesRequestOptions {
+	parsed, err := url.Parse(strings.TrimSpace(baseURL))
+	if err != nil {
+		return openAIResponsesRequestOptions{}
+	}
+	host := strings.ToLower(parsed.Hostname())
+	switch host {
+	case "api.openai.com":
+		return openAIResponsesRequestOptions{
+			storeFalse:                true,
+			includeEncryptedReasoning: true,
+			reasoningSummary:          "auto",
+			nativeCompaction:          true,
+		}
+	case "openrouter.ai":
+		return openAIResponsesRequestOptions{
+			storeFalse:                true,
+			includeEncryptedReasoning: true,
+			reasoningSummary:          "auto",
+		}
+	case "dashscope.aliyuncs.com", "dashscope-intl.aliyuncs.com", "ark.cn-beijing.volces.com":
+		return openAIResponsesRequestOptions{storeFalse: true}
+	default:
+		return openAIResponsesRequestOptions{}
+	}
+}
 
 func IsOpenAIResponsesProtocol(protocol string) bool {
 	return strings.EqualFold(strings.TrimSpace(protocol), OpenAIProtocolResponses)
@@ -58,7 +110,7 @@ func CreateOpenAICompletionStream(ctx context.Context, client *openai.Client, pr
 		return &OpenAICompletionStream{chat: stream}, nil
 	}
 
-	stream, err := client.CreateResponseStream(ctx, responseRequestFromChat(request, responseInput))
+	stream, err := client.CreateResponseStream(ctx, responseRequestFromChat(ctx, request, responseInput))
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +125,7 @@ func CreateOpenAICompletion(ctx context.Context, client *openai.Client, protocol
 	if !IsOpenAIResponsesProtocol(protocol) {
 		return client.CreateChatCompletion(ctx, request)
 	}
-	response, err := client.CreateResponse(ctx, responseRequestFromChat(request, responseInput))
+	response, err := client.CreateResponse(ctx, responseRequestFromChat(ctx, request, responseInput))
 	if err != nil {
 		return openai.ChatCompletionResponse{}, err
 	}
@@ -196,22 +248,28 @@ func appendChatMessageToResponseInput(input []any, message openai.ChatCompletion
 	})
 }
 
-func responseRequestFromChat(request openai.ChatCompletionRequest, responseInput []any) openai.CreateResponseRequest {
+func responseRequestFromChat(ctx context.Context, request openai.ChatCompletionRequest,
+	responseInput []any) openai.CreateResponseRequest {
 	if responseInput == nil {
 		responseInput = ChatMessagesToOpenAIResponseInput(request.Messages)
 	}
-	store := false
+	options := openAIResponsesRequestOptionsFromContext(ctx)
 	responseRequest := openai.CreateResponseRequest{
 		Model:             request.Model,
 		Input:             responseInput,
 		Instructions:      firstSystemMessage(request.Messages),
 		MaxOutputTokens:   max(request.MaxCompletionTokens, request.MaxTokens),
-		Store:             &store,
-		Include:           []openai.ResponseInclude{openai.ResponseIncludeReasoningEncryptedContent},
 		Tools:             responseTools(request.Tools),
 		ToolChoice:        responseToolChoice(request.ToolChoice),
 		ParallelToolCalls: boolPointer(request.ParallelToolCalls),
 		User:              request.User,
+	}
+	if options.storeFalse {
+		store := false
+		responseRequest.Store = &store
+	}
+	if options.includeEncryptedReasoning {
+		responseRequest.Include = []openai.ResponseInclude{openai.ResponseIncludeReasoningEncryptedContent}
 	}
 	temperature := request.Temperature
 	responseRequest.Temperature = &temperature
@@ -222,7 +280,7 @@ func responseRequestFromChat(request openai.ChatCompletionRequest, responseInput
 	if request.ReasoningEffort != "" {
 		responseRequest.Reasoning = &openai.ResponseReasoning{
 			Effort:  request.ReasoningEffort,
-			Summary: "auto",
+			Summary: options.reasoningSummary,
 		}
 	}
 	if request.ResponseFormat != nil {

@@ -63,7 +63,7 @@ export const applySettingTabSearchVisibility = (
                 lastVisibleItem = itemEl;
             } else if (itemId && unavailableItem) {
                 const unavailableElement = document.createElement("div");
-                unavailableElement.className = "fn__flex b3-label config-item config-wrap";
+                unavailableElement.className = "fn__flex b3-label config-item";
                 unavailableElement.dataset.configSearchUnavailableId = itemId;
                 const mainElement = document.createElement("div");
                 mainElement.className = "fn__flex-1 config-item__main";

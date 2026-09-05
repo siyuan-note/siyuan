@@ -1366,6 +1366,34 @@ Note: To ensure data security, access to this interface is prohibited in Publish
             * `depth`: Depth relative to the document where the template is inserted
         * A single plan can contain at most 128 documents, and its declared child document tree can be at most 16 levels deep. The resulting absolute file tree depth remains subject to the setting that controls whether sub-documents deeper than 7 levels may be created
 
+### Save a document as a template
+
+* `/api/template/docSaveAsTemplate`
+* Parameters
+
+  ```json
+  {
+    "id": "20220724223548-j6g0o87",
+    "name": "Project",
+    "overwrite": false,
+    "databaseMode": "copy"
+  }
+  ```
+
+    * `id`: Source document ID
+    * `name`: Template name. The kernel sanitizes the name and adds the `.md` extension
+    * `overwrite`: Whether to replace an existing template with the same name. When `false` and the template exists, the response `code` is `1`
+    * `databaseMode`: Optional handling for all database blocks in the document. `copy` (the default) creates independent databases whenever the template is used and clears their block-level context filters; `reference` keeps the existing database IDs and context filters, so rendered blocks are mirrors that share data and view settings with the source databases. Rendering a reference-mode template fails if a source database is unavailable in the target document's encryption boundary
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
 ### Render Sprig
 
 * `/api/template/renderSprig`
@@ -1899,7 +1927,7 @@ The field types (`keyType`) are:
   ```
 
     * `id`: Database ID
-    * `blockID`: The database block that embeds this database. Used to resolve the active view and publish access. If its `custom-sy-av-view` is missing or invalid, the first available view is used. Omit when rendering a detached database
+    * `blockID`: The database block that embeds this database. Used to resolve the active view, publish access, and the block-level context filter. If its `custom-sy-av-view` is missing or invalid, the first available view is used. Omit when rendering a detached database; a configured context filter requires a valid block instance
     * `viewID`: An explicit view to render. An invalid value returns an error. When omitted, the view is resolved from `blockID`, then falls back to the first available view
     * `page`: Page number, 1-based. Defaults to `1`
     * `pageSize`: Items per page. `-1` or omitted means use the view's default (`50`)
@@ -1921,6 +1949,8 @@ The field types (`keyType`) are:
       "viewType": "table",
       "viewID": "20240118120204-7rnmyc1",
       "isMirror": false,
+      "contextFilter": null,
+      "contextFilterFields": [],
       "views": [
         {
           "id": "20240118120204-7rnmyc1",
@@ -2003,6 +2033,67 @@ The field types (`keyType`) are:
     * `data.view.rows[].cells[].value`: A `Value` object — see [Set a cell value](#Set-a-cell-value) for all value shapes. `createdAt`/`updatedAt` are int64 millisecond timestamps. When a normal field has a non-empty `renderTemplate`, its optional `renderedContent` property contains the runtime display-template result; this property is not persisted, and the original typed property continues to contain the stored value. Values under `data.view.cards[]` follow the same rule
     * `data.views`: Metadata of every view (no rows)
     * `data.isMirror`: `true` when the database block is a mirror (read-only copy) of the database
+    * `data.contextFilter`: The context filter configured for this database block, or `null` when disabled. The current specification is `{ "spec": 1, "keyID": "<relation-field-ID>" }`; it filters every view to rows whose selected relation field contains the database item bound to the root document containing `blockID`, and is combined with the selected view's filters using AND. If the selected field is deleted, changed to a non-relation field, or loses its relation target, the block-level configuration is retained but renders no rows until the field is repaired, replaced, or the context filter is disabled
+    * `data.contextFilterFields`: Lightweight metadata for every configured relation field in the database, independent of the selected view. Each item contains `id`, `name`, `icon`, and `targetAvID`; use this list to configure `contextFilter`. Publish read-only responses mask `contextFilter` as `null` and this list as `[]`, while the stored context filter still applies to rendered rows
+
+### Set a database block context filter
+
+* `/api/av/setAttrViewContextFilter`
+* Parameters
+
+  ```json
+  {
+    "avID": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "keyID": "20240118120300-relation"
+  }
+  ```
+
+    * `avID`: Database ID
+    * `blockID`: ID of the concrete database block whose context filter is changed. It must be an instance of `avID`
+    * `keyID`: ID of a configured relation field in the database. The filter uses fixed semantics equivalent to `Contains any item - Current document`. Pass an empty string to disable the context filter
+* Return value: the normalized configuration in `data.contextFilter`, or `null` after disabling it
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "contextFilter": {
+        "spec": 1,
+        "keyID": "20240118120300-relation"
+      }
+    }
+  }
+  ```
+
+### Get images in the current database view
+
+* `/api/av/getCurrentAttrViewImages`
+* Parameters
+
+  ```json
+  {
+    "id": "20240118120204-kwyzf77",
+    "blockID": "20240118120201-kldj15t",
+    "viewID": "20240118120204-7rnmyc1",
+    "query": ""
+  }
+  ```
+
+    * `id`: Database ID
+    * `blockID`: The database block that embeds the database. It resolves the active view, publish access, and the block-level context filter. Omit only for a detached database that does not require block context
+    * `viewID`: Optional explicit view ID. When omitted, the view is resolved from `blockID`, then falls back to the first available view
+    * `query`: Optional full-text filter for the primary-key values
+* Return value: an array of image asset paths from visible asset fields after applying the database block's context filter, the view's filters, and sorting
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": ["assets/example-20240118120201-abc1234.png"]
+  }
+  ```
 
 ### Get
 
@@ -2221,6 +2312,7 @@ Updates a single cell (one field of one row). This is the primary write endpoint
 |------------|----------------------------------------------------------------------------------------------------------------------|
 | `block`    | `{"block": {"content": "First row", "id": "<boundBlockID>"}, "isDetached": false}`                                  |
 | `text`     | `{"text": {"content": "Some text"}}`                                                                                 |
+| `text` (rich) | `{"text": {"content": "Some text", "rich": {"spec": 1, "format": "kramdown", "content": "**Some** text"}}}` |
 | `number`   | `{"number": {"content": 42, "isNotEmpty": true}}` (clear with `{"isNotEmpty": false}`)                               |
 | `date`     | `{"date": {"content": 1676042451000, "isNotEmpty": true}}` (millisecond timestamp)                                  |
 | `select`   | `{"mSelect": [{"content": "Done", "color": "1"}]}` (at most one option)                                             |
@@ -2234,6 +2326,8 @@ Updates a single cell (one field of one row). This is the primary write endpoint
 > ⚠️ `itemID` is the **item ID**, which is the rendered item's `id` from [Render](#Render): `rows[].id` for a table and `cards[].id` for a gallery or kanban, inside the corresponding view instance under `groups[]` when grouping is enabled. It also equals the primary-key value's `value.blockID`. For a bound item, the bound block ID is stored in the primary-key value's `value.block.id`; these are distinct concepts and must not be assumed equal. Passing the wrong ID stores the value as an orphan that does not appear in the rendered cell.
 
 For `mAsset`, each item uses `type: "image"` to render an image or `type: "file"` to render a file link. Updating the value replaces the entire `mAsset` array, so append operations must include the existing items.
+
+For rich text, `text.rich.content` is the authoritative Kramdown source. The kernel validates its supported structure and derives `text.content` as the plain-text projection; a caller-provided plain-text projection is ignored. For compatibility with existing API clients, omitting `text.rich` preserves the stored rich-text payload when `text.content` is unchanged, but replaces it with plain text when `text.content` changes. Send `"rich": null` to explicitly remove rich formatting even when the plain-text projection is unchanged. Attribute views containing rich text use storage spec 9 and cannot be opened by kernels that only support earlier attribute-view specs.
 
 * `/api/av/setAttributeViewBlockAttr`
 * Parameters

@@ -42,7 +42,10 @@ export const getTabItems = (tabs: Element): HTMLElement[] =>
     Array.from(tabs.children).filter(item => item.classList.contains("tab-item")) as HTMLElement[];
 
 export const getTabTitle = (item: Element) =>
-    item.querySelector<HTMLElement>(":scope > .tab-item-info > .tab-item-title");
+    item.querySelector<HTMLElement>(":scope > .tab-item-info > .tab-item-title, :scope > .tab-item-info > [tabs-title] > .tab-item-title");
+
+export const getTabTitleBlock = (item: Element) =>
+    item.querySelector<HTMLElement>(':scope > .tab-item-info > [data-type="NodeParagraph"][tabs-title="true"]');
 
 export const getTabContent = (item: Element) => item.querySelector<HTMLElement>(":scope > .tab-item-content");
 
@@ -355,6 +358,13 @@ export const revealTabsForTarget = (target: Element, persist = true) => {
 };
 
 export const revealTabAncestors = (root: Element, target: Element, persist = true) => {
+    const titleBlock = target.closest('[tabs-title="true"]');
+    if (titleBlock) {
+        const owner = titleBlock.closest<HTMLElement>(".tab-item");
+        if (owner && root.contains(owner)) {
+            owner.dataset.tabsEditing = "true";
+        }
+    }
     const path: HTMLElement[] = [];
     let item = target.closest<HTMLElement>(".tab-item");
     while (item && root.contains(item)) {

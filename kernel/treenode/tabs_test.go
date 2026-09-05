@@ -79,3 +79,41 @@ func TestTabTitleWalkerOwnershipAndRewrite(t *testing.T) {
 		t.Fatal("temporary title was not restored")
 	}
 }
+
+func TestTabsOriginalTitleOwnershipAndNormalization(t *testing.T) {
+	l := util.NewLute()
+	tree := parse.Parse("", []byte("**Title** ((20260905120000-ref0001 'Reference'))\n"), l.ParseOptions)
+	parse.NestedInlines2FlattedSpans(tree, false)
+	title := tree.Root.FirstChild
+	title.ID = ast.NewNodeID()
+	title.SetIALAttr("id", title.ID)
+	title.SetIALAttr("tabs-title", "true")
+	title.SetIALAttr("custom-test", "retained")
+	item := &ast.Node{Type: ast.NodeTabItem, ID: ast.NewNodeID(), TabItemTitle: "unused fallback"}
+	item.AppendChild(title)
+	if !NormalizeTabs(item) || title.Next == nil || title.Next.Type != ast.NodeParagraph {
+		t.Fatal("title must not replace the empty body caret")
+	}
+	if NormalizeTabs(item) {
+		t.Fatal("normalization must be stable")
+	}
+	references := 0
+	WalkWithTabTitles(item, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && IsBlockRef(n) {
+			references++
+			if ParentBlock(n) != title {
+				t.Fatal("original title paragraph must own its references")
+			}
+			n.TextMarkBlockRefID = "20260905120000-ref0002"
+		}
+		return ast.WalkContinue
+	})
+	if references != 1 || !strings.Contains(FormatNode(title, l), "ref0002") {
+		t.Fatal("title reference traversal or rewrite failed")
+	}
+	finish := MaterializeTabTitles(item)
+	finish()
+	if item.TabTitleBlock() != title || title.IALAttr("custom-test") != "retained" || TabTitleParagraph(item) != nil {
+		t.Fatal("title identity was replaced or synthesized twice")
+	}
+}

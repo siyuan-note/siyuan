@@ -4084,7 +4084,7 @@ export class WYSIWYG {
                 (event.inputType === "insertParagraph" || event.inputType === "insertLineBreak")) {
                 const blockElement = hasClosestBlock(calloutTitleElement);
                 if (blockElement) {
-                    focusBlock(blockElement);
+                    focusBlock(calloutTitleElement.closest(".tab-item") || blockElement);
                 }
                 event.preventDefault();
                 event.stopPropagation();

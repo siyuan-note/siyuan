@@ -1,3 +1,5 @@
+import {getTabTitle, getTabTitleBlock} from "../render/tabsRender";
+
 export type TTabsListConversion = "List2Tabs" | "Tabs2UL" | "Tabs2OL" | "Tabs2TL";
 
 export const isTabsListConversion = (type: string): type is TTabsListConversion =>
@@ -33,37 +35,6 @@ export const completeTabsListSource = (visible: Element, full: Element): Element
     return result;
 };
 
-export const tabsListText = (element: Element): string => {
-    if (!element) {
-        return "";
-    }
-    const clone = element.cloneNode(true) as Element;
-    clone.querySelectorAll("wbr, .protyle-attr, .protyle-action").forEach(item => item.remove());
-    clone.querySelectorAll("br").forEach(item => item.replaceWith(" "));
-    clone.querySelectorAll('[data-type="inline-math"]').forEach(item => item.replaceWith(item.getAttribute("data-content") || ""));
-    clone.querySelectorAll("img").forEach(item => item.replaceWith(item.getAttribute("alt") || ""));
-    return (clone.textContent || "").replace(/[\u200b\ufeff]/g, "").replace(/\s+/gu, " ").trim();
-};
-
-export const tabsListTitle = (text: string): string => {
-    const runes = Array.from(text);
-    return runes.slice(0, 12).join("") + (runes.length > 12 ? "..." : "");
-};
-
-const isRepeatedTitle = (title: Element, paragraph: Element): boolean => {
-    if (!paragraph || tabsListText(title) !== tabsListText(paragraph)) {
-        return false;
-    }
-    const clean = (element: Element) => {
-        const clone = element.cloneNode(true) as Element;
-        clone.querySelectorAll("wbr").forEach(caret => caret.remove());
-        return clone;
-    };
-    const titleContent = clean(title);
-    // 普通摘要可复用原正文，富格式标题只有内容完全一致时才省略，避免丢失引用等行级信息。
-    return titleContent.childElementCount === 0 || titleContent.innerHTML === clean(paragraph).innerHTML;
-};
-
 const skeleton = (lute: Lute, markdown: string): HTMLElement => {
     const template = document.createElement("template");
     template.innerHTML = lute.Md2BlockDOM(markdown);
@@ -74,6 +45,18 @@ const newParagraph = (lute: Lute): HTMLElement => {
     const paragraph = skeleton(lute, "x\n");
     paragraph.querySelector("[contenteditable]").replaceChildren();
     return paragraph;
+};
+
+// 只移除转换时补出的空白落点；用户已有段落及后来填写的正文继续保留。
+export const isEmptyTabPlaceholder = (paragraph: Element): boolean => {
+    if (paragraph.getAttribute("tabs-placeholder") !== "true" ||
+        Array.from(paragraph.attributes).some(attr => attr.name.startsWith("custom-") ||
+            ["name", "alias", "memo", "bookmark", "style", "refcount"].includes(attr.name))) {
+        return false;
+    }
+    const content = paragraph.querySelector(":scope > [contenteditable]");
+    return !!content && !(content.textContent || "").replace(/[\u200b\ufeff\s]/g, "") &&
+        !content.querySelector("span, img, audio, video, iframe");
 };
 
 const convertContainer = (source: Element, target: HTMLElement): HTMLElement => {
@@ -112,17 +95,36 @@ export const convertTabsList = (source: Element, type: TTabsListConversion, lute
     items.forEach((item, index) => {
         const converted = convertContainer(item, itemTemplate.cloneNode(true) as HTMLElement);
         const blocks = blockChildren(item).map(child => child.cloneNode(true) as Element);
-        const first = blocks[0];
-        const paragraph = first?.getAttribute("data-type") === "NodeParagraph" ?
-            first.querySelector(":scope > [contenteditable]") : undefined;
         if (toTabs) {
-            converted.querySelector(".tab-item-title").textContent = tabsListTitle(tabsListText(paragraph));
+            if (blocks[0]?.getAttribute("data-type") === "NodeParagraph") {
+                const titleBlock = blocks.shift();
+                titleBlock.setAttribute("tabs-title", "true");
+                titleBlock.querySelector(":scope > [contenteditable]").classList.add("tab-item-title", "callout-title");
+                converted.querySelector(".tab-item-info").replaceChildren(titleBlock);
+            }
             const body = converted.querySelector(".tab-item-content");
-            body.replaceChildren(...(blocks.length > 0 ? blocks : [newParagraph(lute)]));
+            if (blocks.length === 0) {
+                const placeholder = newParagraph(lute);
+                placeholder.setAttribute("tabs-placeholder", "true");
+                blocks.push(placeholder);
+            }
+            body.replaceChildren(...blocks);
         } else {
-            const title = item.querySelector(":scope > .tab-item-info > .tab-item-title");
-            const text = tabsListText(title);
-            if (text && !isRepeatedTitle(title, paragraph)) {
+            for (let i = blocks.length - 1; i >= 0; i--) {
+                if (isEmptyTabPlaceholder(blocks[i])) {
+                    blocks.splice(i, 1);
+                } else {
+                    blocks[i].removeAttribute("tabs-placeholder");
+                }
+            }
+            const originalTitle = getTabTitleBlock(item);
+            const title = getTabTitle(item);
+            if (originalTitle) {
+                const titleBlock = originalTitle.cloneNode(true) as Element;
+                titleBlock.removeAttribute("tabs-title");
+                titleBlock.querySelector(".tab-item-title").classList.remove("tab-item-title", "callout-title");
+                blocks.unshift(titleBlock);
+            } else if (title?.innerHTML) {
                 const titleBlock = newParagraph(lute);
                 titleBlock.querySelector("[contenteditable]").innerHTML = title.innerHTML;
                 titleBlock.querySelectorAll("wbr").forEach(caret => caret.remove());

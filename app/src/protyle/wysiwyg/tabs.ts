@@ -1,4 +1,4 @@
-import {getTabContent, getTabItems, getTabTitle, revealTabAncestors, tabsRender} from "../render/tabsRender";
+import {getTabContent, getTabItems, getTabTitle, getTabTitleBlock, revealTabAncestors, tabsRender} from "../render/tabsRender";
 import {repairActiveTab} from "./tabsRemoval";
 import {transaction} from "./transaction";
 import {Constants} from "../../constants";
@@ -107,7 +107,12 @@ export const unwrapTabs = (protyle: IProtyle, tabs: HTMLElement) => {
             const content = getTabContent(item);
             const title = getTabTitle(item);
             const blocks = Array.from(content.children);
-            if (title.innerHTML) {
+            const titleBlock = getTabTitleBlock(item);
+            if (titleBlock) {
+                titleBlock.removeAttribute("tabs-title");
+                title.classList.remove("tab-item-title", "callout-title");
+                blocks.unshift(titleBlock);
+            } else if (title.innerHTML) {
                 const paragraph = genEmptyElement(false, false);
                 paragraph.firstElementChild.innerHTML = title.innerHTML;
                 blocks.unshift(paragraph);

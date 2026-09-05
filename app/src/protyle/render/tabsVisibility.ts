@@ -11,5 +11,8 @@ export const visibleTabsSelectionHTML = (html: string) => {
             item.remove();
         }
     });
+    template.content.querySelectorAll(".tabs, .tab-item, .tab-item-info, .tab-item-content").forEach(item => {
+        item.replaceWith(...Array.from(item.childNodes));
+    });
     return template.innerHTML;
 };

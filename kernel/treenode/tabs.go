@@ -114,7 +114,7 @@ func NormalizeTabs(root *ast.Node) (changed bool) {
 
 func hasContentChild(node *ast.Node) bool {
 	for child := node.FirstChild; nil != child; child = child.Next {
-		if isContentBlock(child) {
+		if isContentBlock(child) && !child.IsTabTitleBlock() {
 			return true
 		}
 	}
@@ -135,7 +135,7 @@ func RemapTabsActiveIDs(root *ast.Node, ids map[string]string) {
 
 // TabTitleParagraph 将标题解析为临时行级内容，引用和资源仍归属于原页签项。
 func TabTitleParagraph(item *ast.Node) *ast.Node {
-	if nil == item || ast.NodeTabItem != item.Type || "" == item.TabItemTitle {
+	if nil == item || ast.NodeTabItem != item.Type || nil != item.TabTitleBlock() || "" == item.TabItemTitle {
 		return nil
 	}
 	luteEngine := util.NewLute()

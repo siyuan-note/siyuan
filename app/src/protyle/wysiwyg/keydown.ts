@@ -441,7 +441,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             if (event.key === "Enter" || event.key === "Tab") {
-                focusBlock(nodeElement);
+                focusBlock(calloutTitleElement.closest(".tab-item") || nodeElement);
                 event.preventDefault();
                 event.stopPropagation();
                 return;

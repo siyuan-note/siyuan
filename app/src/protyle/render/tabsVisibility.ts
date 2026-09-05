@@ -1,4 +1,5 @@
-export const isHiddenTabContent = (element: Element) => !!element.closest('.tab-item[data-tabs-hidden="true"]');
+export const isHiddenTabContent = (element: Element) =>
+    typeof element?.closest === "function" && !!element.closest(".tab-item[data-tabs-hidden=\"true\"]");
 
 // 普通文本选区只携带可见正文；块选择通过原始 BlockDOM 保留全部页签。
 export const visibleTabsSelectionHTML = (html: string) => {

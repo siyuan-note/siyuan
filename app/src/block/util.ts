@@ -357,8 +357,9 @@ export const insertEmptyBlock = async (protyle: IProtyle, position: InsertPositi
     const previousBlockElement = getPreviousBlockSibling(blockElement);
     if (blockElement.getAttribute("data-type") === "NodeTabItem") {
         const template = document.createElement("template");
-        template.innerHTML = protyle.lute.Md2BlockDOM(`:::tabs\n:::tab\n${Lute.Caret}\n:::\n:::\n`);
+        template.innerHTML = protyle.lute.Md2BlockDOM(":::tabs\n:::tab\n\n:::\n:::\n");
         newElement = template.content.querySelector<HTMLDivElement>(".tab-item");
+        newElement.querySelector<HTMLElement>(".tab-item-content [contenteditable=\"true\"]").innerHTML = "<wbr>";
     } else if (blockElement.getAttribute("data-type") === "NodeListItem") {
         newElement = genListItemElement(blockElement, 0, true) as HTMLDivElement;
         orderIndex = parseInt(blockElement.parentElement.firstElementChild.getAttribute("data-marker"));

@@ -153,7 +153,7 @@ export const openTabsMenu = (protyle: IProtyle, tabs: HTMLElement, item: HTMLEle
             getTabTitle(siblings[index + 1]).textContent || lang.tabItem),
         click: () => changeTabs(protyle, [tabs], () => siblings[index + 1].after(item))});
     }
-    menu.addItem({icon: "iconCopy", label: lang.duplicate, click: () => {
+    menu.addItem({icon: "iconCopy", label: lang.duplicateCopy, click: () => {
         const copy = item.cloneNode(true) as HTMLElement;
         const ids = new Map<string, string>();
         [copy, ...Array.from(copy.querySelectorAll<HTMLElement>("[data-node-id]"))].forEach(block => {

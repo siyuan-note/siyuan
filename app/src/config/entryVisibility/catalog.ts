@@ -161,6 +161,7 @@ const docTreeDocument = () => {
         node("openDocument", lang("openDocument")),
         node("newDocAbove", lang("newDocAbove")),
         node("newDocBelow", lang("newDocBelow")),
+        node("newSiblingDoc", lang("newSiblingDoc")),
         separator("separator_1"),
         copy,
         move,

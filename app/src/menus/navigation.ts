@@ -740,8 +740,17 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                     });
                 }
             }).element);
-            window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
+        } else {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "newSiblingDoc",
+                icon: "iconAddDoc",
+                label: window.siyuan.languages.newSiblingDoc,
+                click: () => {
+                    newFileInTree(app, notebookId, pathPosix().dirname(pathString));
+                }
+            }).element);
         }
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
             id: "copy",
             label: window.siyuan.languages.copy,

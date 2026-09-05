@@ -67,6 +67,8 @@ import {
     restoreBlockSelectionModeState
 } from "./blockSelection";
 import {isEmptyParagraph} from "./emptyTextBlock";
+import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
+import {waitForPendingTransactions} from "../util/transactionQueue";
 import {
     invalidateTrackedRangesByOperations,
     type ITrackedRangeInsertion,
@@ -2136,8 +2138,37 @@ export const turnsOneInto = async (options: {
     }
     const parentId = getEmbedChildOperationParentID(options.nodeElement) ||
         getParentBlock(options.nodeElement).getAttribute("data-node-id") || options.protyle.block.parentID;
-    // @ts-ignore
-    const newHTML = options.protyle.lute[options.type](options.nodeElement.outerHTML, options.level);
+    let newHTML: string;
+    if (isTabsListConversion(options.type)) {
+        let source = options.nodeElement;
+        if (!options.protyle.lite && source.querySelector('[fold="1"]')) {
+            await waitForPendingTransactions(options.protyle);
+            const snapshot = source.outerHTML;
+            const response = await fetchSyncPost("/api/block/getBlockDOM", {
+                id: options.id,
+                notebook: options.protyle.notebookId,
+            });
+            if (!source.isConnected || source.outerHTML !== snapshot) {
+                return;
+            }
+            const template = document.createElement("template");
+            template.innerHTML = normalizeHTMLAssetIFrameBlockDOM(response.data?.dom || "");
+            const full = template.content.firstElementChild;
+            if (full?.getAttribute("data-node-id") !== options.id) {
+                return;
+            }
+            source = completeTabsListSource(source, full);
+            oldHTML = source.outerHTML;
+        }
+        const converted = convertTabsList(source, options.type, options.protyle.lute);
+        if (!converted) {
+            return;
+        }
+        newHTML = converted.outerHTML;
+    } else {
+        // @ts-ignore
+        newHTML = options.protyle.lute[options.type](options.nodeElement.outerHTML, options.level);
+    }
     disposeCustomBlocksInElement(options.nodeElement);
     options.nodeElement.insertAdjacentHTML("afterend", newHTML);
     options.nodeElement = options.nodeElement.nextElementSibling as HTMLElement;

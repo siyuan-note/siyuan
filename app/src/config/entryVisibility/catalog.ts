@@ -201,7 +201,7 @@ const gutterCopyChildren = (includeCopyAsPNG = false) => [
     node("duplicateCompletely", lang("duplicateCompletely")),
 ];
 
-const gutterTurnInto = () => node("turnInto", lang("turnInto"), true, [
+const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), true, [
         node("paragraph", lang("paragraph")),
         node("heading1", lang("heading1")),
         node("heading2", lang("heading2")),
@@ -217,6 +217,7 @@ const gutterTurnInto = () => node("turnInto", lang("turnInto"), true, [
         node("calloutWarning", location(lang("callout"), literal("Warning"))),
         node("calloutCaution", location(lang("callout"), literal("Caution"))),
         node("calloutCustom", location(lang("callout"), () => `${window.siyuan.languages.custom}...`)),
+        ...(!multi ? [node("tabs", lang("tabs"))] : []),
         node("list", lang("list")),
         node("orderedList", lang("ordered-list")),
         node("check", lang("check")),
@@ -325,7 +326,7 @@ const gutterTable = () => node("table", lang("table"), true, [
 ]);
 
 const gutterBase = (multi: boolean) => [
-    gutterTurnInto(),
+    gutterTurnInto(multi),
     ...(multi ? [gutterHeadingTransform(), node("mergeSuperBlock", () => `${window.siyuan.languages.merge} ${window.siyuan.languages.superBlock}`, true, [
         node("hLayout", lang("hLayout")),
         node("vLayout", lang("vLayout")),

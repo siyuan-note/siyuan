@@ -1885,6 +1885,15 @@ export class Gutter {
                 selectsElement: [nodeElement],
                 type: "Blocks2Callout"
             }));
+            turnIntoSubmenu.push(this.turnsOneInto({
+                menuId: "tabs",
+                id,
+                icon: "iconTabs",
+                label: window.siyuan.languages.tabs,
+                protyle,
+                nodeElement,
+                type: "List2Tabs"
+            }));
             const listSubtype = nodeElement.getAttribute("data-subtype");
             if (listSubtype === "o") {
                 turnIntoSubmenu.push(this.turnsOneInto({
@@ -1953,6 +1962,18 @@ export class Gutter {
             if (this.hasSublist([nodeElement])) {
                 turnIntoSubmenu.push(this.recursiveListMenu(protyle, [nodeElement]));
             }
+        } else if (type === "NodeTabs" && allowStructuralMutation) {
+            [
+                {menuId: "list", icon: "iconList", label: "list", type: "Tabs2UL"},
+                {menuId: "orderedList", icon: "iconOrderedList", label: "ordered-list", type: "Tabs2OL"},
+                {menuId: "check", icon: "iconCheck", label: "check", type: "Tabs2TL"},
+            ].forEach(target => turnIntoSubmenu.push(this.turnsOneInto({
+                ...target,
+                id,
+                label: window.siyuan.languages[target.label],
+                protyle,
+                nodeElement,
+            })));
         } else if (type === "NodeBlockquote" && allowStructuralMutation) {
             turnIntoSubmenu.push(this.turnsOneInto({
                 menuId: "paragraph",

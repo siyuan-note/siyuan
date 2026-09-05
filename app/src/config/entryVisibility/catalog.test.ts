@@ -623,6 +623,15 @@ test("callout presets stay aligned across block menu scopes", () => {
     });
 });
 
+test("tab conversion belongs to the single block conversion menu", () => {
+    const keys = getEntryCatalogChildren("gutter.single.turnInto").map(item => item.key);
+    assert.equal(keys[keys.indexOf("tabs") - 1], "calloutCustom");
+    assert.equal(keys[keys.indexOf("tabs") + 1], "list");
+    assert.equal(getEntryCatalogNode("gutter.single.turnInto.tabs")?.simple, true);
+    assert.equal(getEntryCatalogNode("gutter.single.turnInto.tabs")?.type, "entry");
+    assert.equal(getEntryCatalogNode("gutter.multi.turnInto.tabs"), undefined);
+});
+
 test("conditional block resource menus have distinct configuration labels", () => {
     const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
     Object.defineProperty(globalThis, "window", {

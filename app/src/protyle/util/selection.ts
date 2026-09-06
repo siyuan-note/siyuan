@@ -63,6 +63,11 @@ export const fixTableRange = (range: Range) => {
 };
 
 export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range): boolean => {
+    const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
+    if (selectElements.length > 0 && protyle.wysiwyg.element.childElementCount === selectElements.length &&
+        selectElements[0].parentElement === protyle.wysiwyg.element) {
+        return false;
+    }
     const editElement = getContenteditableElement(nodeElement);
     if (editElement) {
         let position;
@@ -74,7 +79,7 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
                     range.setStart(cellElement.firstChild, 0);
                     range.setEndAfter(cellElement.lastChild);
                     protyle.toolbar.render(protyle, range);
-                    countSelectWord(range, protyle.block.rootID);
+                    countSelectWord(range, protyle);
                     return true;
                 }
             }
@@ -120,17 +125,12 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
                 // 列表回车后，左键全选无法选中
                 focusByRange(range);
                 protyle.toolbar.render(protyle, range);
-                countSelectWord(range, protyle.block.rootID);
+                countSelectWord(range, protyle);
                 return true;
             }
         }
     }
     range.collapse(true);
-    const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-    if (selectElements.length > 0 && protyle.wysiwyg.element.childElementCount === selectElements.length &&
-        selectElements[0].parentElement === protyle.wysiwyg.element) {
-        return false;
-    }
     hideElements(["select"], protyle);
     const ids: string[] = [];
     Array.from(protyle.wysiwyg.element.children).forEach(item => {
@@ -140,7 +140,7 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
             ids.push(nodeId);
         }
     });
-    countBlockWord(ids, protyle.block.rootID);
+    countBlockWord(ids, protyle);
     return false;
 };
 
@@ -171,7 +171,7 @@ export const selectBlocksByRange = (protyle: IProtyle, range: Range) => {
         });
     });
     range.collapse(false);
-    countBlockWord(selectElements.map(item => item.getAttribute("data-node-id")), protyle.block.rootID);
+    countBlockWord(selectElements.map(item => item.getAttribute("data-node-id")), protyle);
 };
 
 // https://github.com/siyuan-note/siyuan/issues/8196

@@ -87,6 +87,12 @@ func writeFilePath(c *gin.Context) {
 		return
 	}
 
+	if err = model.EnsureAssetPrefixLocal(absPath); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]any{"closeTimeout": 7000}
+		return
+	}
 	if err = util.WriteFilePaths([]string{absPath}); err != nil {
 		logging.LogErrorf("write file path to clipboard failed: %s", err)
 		ret.Code = -1

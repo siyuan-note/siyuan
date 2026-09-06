@@ -142,6 +142,9 @@ declare class Viz {
 
 declare class Viewer {
     public destroyed: boolean;
+    public image: HTMLImageElement;
+    public viewed: boolean;
+    public toolbar: HTMLElement;
 
     constructor(element: Element, options: {
         title: [number, (image: HTMLImageElement, imageData: IObject) => string],
@@ -149,6 +152,9 @@ declare class Viewer {
         initialViewIndex?: number,
         transition: boolean,
         hidden: () => void,
+        ready?: (this: HTMLElement, event: CustomEvent) => void,
+        view?: (this: HTMLElement, event: CustomEvent) => void,
+        viewed?: (this: HTMLElement, event: CustomEvent) => void,
         toolbar: {
             zoomIn: boolean,
             zoomOut: boolean,
@@ -161,6 +167,8 @@ declare class Viewer {
             rotateRight: boolean,
             flipHorizontal: boolean,
             flipVertical: boolean,
+            copy?: () => void,
+            copyFile?: () => void,
             close: () => void
         }
     })
@@ -286,6 +294,8 @@ declare class Lute {
     public Md2BlockDOM(html: string): string;
 
     public Md2BlockDOMWithAutoLink(html: string): string;
+
+    public InlineMd2BlockDOM(markdown: string): string;
 
     public SetProtyleWYSIWYG(wysiwyg: boolean): void;
 

@@ -80,6 +80,9 @@ import {setAVItemAnchor} from "../render/av/rangeSelect";
 import {getCaretRect} from "./caretRect";
 import {isBlockRefDropTargetDisabled} from "./blockRefDrop";
 import {appendCancelSuperBlockOperations} from "../../block/cancelSuperBlock";
+import {remapTabsDOMIDs} from "./tabsCopy";
+import {getTabItems} from "../render/tabsRender";
+import {repairActiveTab} from "../wysiwyg/tabsRemoval";
 
 const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`;
 const SHIFT_EMBED_INSERT_TARGET_TYPES = ["NodeParagraph", "NodeHeading", "NodeCodeBlock", "NodeAttributeView"];
@@ -281,7 +284,19 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     });
     let newListElement: Element;
     let newListId: string;
+    let tabsPlaceholderID: string;
     const orderListElements: { [key: string]: { element: Element, start?: number } } = {};
+    const sourceTabs = new Map<HTMLElement, {ids: string[], active: string}>();
+    if (!isCopy) {
+        sourceElements.filter(item => item.getAttribute("data-type") === "NodeTabItem").forEach(item => {
+            const tabs = item.parentElement;
+            if (tabs.getAttribute("data-type") !== "NodeTabs") {
+                return;
+            }
+            sourceTabs.set(tabs, {ids: getTabItems(tabs).map(tab => tab.dataset.nodeId),
+                active: tabs.getAttribute("tabs-active-id")});
+        });
+    }
     // 在 DOM 移动前显式捕获每个源块的位置，供 undoOperations 使用。
     // 不能依赖循环内 getParentBlock(item)（移动后 item 的父已变），否则撤销会移到错误位置。
     // 关键：对于文档顶层块，getParentBlock 返回 .protyle-wysiwyg 容器（无 data-node-id），
@@ -302,11 +317,24 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         const originalSubtype = item.getAttribute("data-subtype");
         const id = item.getAttribute("data-node-id");
         const parentID = getParentBlock(item).getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID;
-        if (item.getAttribute("data-type") === "NodeListItem" && !newListId && !isSameLi) {
+        const isTabItem = item.getAttribute("data-type") === "NodeTabItem";
+        const needsTabs = isTabItem && (position === "afterbegin" ?
+            targetElement.getAttribute("data-type") !== "NodeTabs" :
+            targetElement.parentElement.getAttribute("data-type") !== "NodeTabs");
+        if (!newListId && (needsTabs || (item.getAttribute("data-type") === "NodeListItem" && !isSameLi))) {
             newListId = Lute.NewNodeID();
             newListElement = document.createElement("div");
-            newListElement.innerHTML = `<div data-subtype="${item.getAttribute("data-subtype")}" data-node-id="${newListId}" data-type="NodeList" class="list"><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+            newListElement.innerHTML = needsTabs ?
+                `<div data-node-id="${newListId}" data-type="NodeTabs" class="tabs"><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>` :
+                `<div data-subtype="${item.getAttribute("data-subtype")}" data-node-id="${newListId}" data-type="NodeList" class="list"><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
             newListElement = newListElement.firstElementChild;
+            if (needsTabs) {
+                const template = document.createElement("template");
+                template.innerHTML = protyle.lute.Md2BlockDOM("::: tabs\n@tab\n\n:::\n");
+                const placeholder = template.content.querySelector<HTMLElement>(".tab-item");
+                tabsPlaceholderID = placeholder.dataset.nodeId;
+                newListElement.prepend(placeholder);
+            }
             doOperations.push({
                 action: "insert",
                 data: newListElement.outerHTML,
@@ -358,12 +386,15 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         }
         if (isCopy) {
             copyElement = item.cloneNode(true) as HTMLElement;
+            const copiedIDs = new Map<string, string>([[id, copyNewId]]);
             copyElement.setAttribute("data-node-id", copyNewId);
             copyElement.querySelectorAll("[data-node-id]").forEach((e) => {
                 const newId = Lute.NewNodeID();
+                copiedIDs.set(e.getAttribute("data-node-id"), newId);
                 e.setAttribute("data-node-id", newId);
                 e.setAttribute("updated", newId.split("-")[0]);
             });
+            remapTabsDOMIDs(copyElement, copiedIDs);
             const targetSubtype = targetElement.getAttribute("data-subtype");
             if (copyElement.getAttribute("data-type") === "NodeListItem" &&
                 targetElement.getAttribute("data-type") === "NodeListItem" && targetSubtype &&
@@ -565,9 +596,14 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         }
 
         if (newListId && (index === 0 ||
-            sourceElements[index - 1].getAttribute("data-type") !== "NodeListItem" ||
+            sourceElements[index - 1].getAttribute("data-type") !== item.getAttribute("data-type") ||
             sourceElements[index - 1].getAttribute("data-subtype") !== originalSubtype)
         ) {
+            if (tabsPlaceholderID) {
+                newListElement.querySelector(`[data-node-id="${tabsPlaceholderID}"]`).remove();
+                doOperations.push({action: "delete", id: tabsPlaceholderID});
+                tabsPlaceholderID = undefined;
+            }
             if (position === "beforebegin") {
                 tempTargetElement = newListElement;
             }
@@ -600,6 +636,27 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             tempTargetElement = isCopy ? copyElement : item;
         }
     }
+    sourceTabs.forEach(({ids, active}, tabs) => {
+        if (!tabs.isConnected) {
+            return;
+        }
+        const before = tabs.cloneNode(true) as HTMLElement;
+        // 撤销先恢复合法容器，再移回原页签项，最后移除临时占位项。
+        if (getTabItems(tabs).length === 0) {
+            const template = document.createElement("template");
+            template.innerHTML = protyle.lute.Md2BlockDOM("::: tabs\n@tab\n\n:::\n");
+            const placeholder = template.content.querySelector<HTMLElement>(".tab-item");
+            before.insertBefore(placeholder, before.querySelector(":scope > .protyle-attr"));
+            undoOperations.unshift({action: "delete", id: placeholder.dataset.nodeId});
+        }
+        repairActiveTab(tabs, ids, active);
+        doOperations.push({action: "update", id: tabs.dataset.nodeId, data: tabs.outerHTML});
+        if (active) {
+            undoOperations.unshift({action: "setAttrs", id: before.dataset.nodeId,
+                data: JSON.stringify({"tabs-active-id": active})});
+        }
+        undoOperations.push({action: "update", id: before.dataset.nodeId, data: before.outerHTML});
+    });
     Object.keys(orderListElements).forEach(key => {
         const orderList = orderListElements[key];
         Array.from(orderList.element.children).forEach((item) => {

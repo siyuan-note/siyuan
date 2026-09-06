@@ -42,12 +42,8 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
    - Use three ASCII periods (`...`) for ellipses in all localized strings; do not use Unicode ellipsis characters (`…` or `……`)
    - Setting description tip strings must not end with a period or equivalent sentence-ending mark (for example `.`, `。`, or `।`)
    - Domains: `ld246.com` only in `zh-CN.json`; use `liuyun.io` in all other languages
-   - In `zh-TW` localization and the Traditional Chinese user guide, translate SiYuan's content-model term Block as `區塊`; never abbreviate it as `塊`
-   - Use `區塊` consistently in compound terms, for example `內容區塊`, `子區塊`, `父區塊`, `嵌入區塊`, `程式碼區塊`, `區塊 ID`, `區塊標`, and `區塊級`
-   - Translate Block Reference as `區塊引用` and Blockquote as `引述區塊`; do not confuse them or reverse the word order
-   - When counting content blocks, use `個區塊` rather than using `塊` as a classifier or abbreviation
-   - Do not mechanically replace `塊` in ordinary words with `區塊`; preserve non-content-block terms such as `分塊` for data chunks and `覈取方塊` for Checkbox
-   - Keep block terminology consistent between the Traditional Chinese interface and user guide
+   - In `zh-TW` localization and the Traditional Chinese user guide, consistently translate the content-model term Block as `區塊`, including compounds (e.g. `子區塊`, `程式碼區塊`, `區塊 ID`); never abbreviate it as `塊`, and count blocks with `個區塊`
+   - Translate Block Reference as `區塊引用` and Blockquote as `引述區塊`; preserve non-content-block terms such as `分塊` (data chunks) and `覈取方塊` (Checkbox)
    - After modifying i18n files, run `python scripts/check-lang-keys.py` to verify key completeness across all language files
 2. **Cross-platform scripting:**
    - Do not assume the current shell is Bash, zsh, or PowerShell. Confirm the shell before using shell-specific syntax; otherwise avoid constructs such as `&&`, heredocs, and `/dev/null`
@@ -60,9 +56,7 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 4. **User guide:** When editing the user guide, follow `docs/SY-FORMAT.md`
    - When a feature adds or changes shortcuts, update the shortcut documentation in the user guide in the same change; if the appropriate section is unclear, ask the user where it should be placed
    - Represent in-app UI navigation paths as segmented `kbd` text marks: use one `NodeTextMark` with `TextMarkType: "kbd"` per navigation level, and place a plain `NodeText` containing ` - ` between adjacent levels
-   - When a `kbd` path is embedded in prose, use exactly one ASCII space outside the path on each side when adjacent ordinary text exists; do not add an outer space at the start or end of a block
-   - Omit the left outer space when the first `kbd` immediately follows full-width punctuation (for example, `，` or `、`); apply this rule to every language, including Chinese and Japanese, but do not apply it to half-width punctuation
-   - Omit the right outer space when `kbd` is immediately followed by punctuation, whether full-width or half-width; keep the internal ` - ` separators of segmented UI paths unchanged
+   - In every language, separate a `kbd` path from adjacent prose with exactly one ASCII space on each side, except at block boundaries, after full-width punctuation, or before any punctuation. Half-width punctuation before the path still requires a space; keep internal ` - ` separators unchanged
 5. **Git:**
    - When explicitly asked to commit, follow the style of recent commits (gitmoji prefix + subject, in English)
    - Append the full issue/PR URL to the end of the commit title (e.g. `https://github.com/siyuan-note/siyuan/issues/<NNN>`, not the `#NNN` short form — it is clickable) only when a related issue exists; never put the URL in the commit body, and do not fabricate one
@@ -76,7 +70,6 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
      4. Inspect the returned resource and read it back with `gh api` to verify the published text exactly, including line breaks and non-ASCII characters
      5. Delete the temporary JSON file and confirm that it no longer exists
    - For shell-independent read-back verification, query one field per `gh api --jq` call, for example `--jq .title` and `--jq .body`
-   - Example for an issue comment: write `{"body":"<comment text>"}` to the UTF-8 JSON file, run `gh api --method POST "repos/{owner}/{repo}/issues/<number>/comments" --input "<absolute-json-path>"`, then read the returned comment by its `id` before deleting the file
 7. **Issue titles:** Whenever the user asks to generate an issue title, provide it in English regardless of the wording of the request, and do not start it with `Fix`. These rules choose title wording from the issue's nature; they are not an instruction to apply GitHub labels
    - For a bug, objectively describe the problem or symptom instead of writing from a bug-fix perspective
    - For an improvement to existing functionality, write the title from an improvement perspective and prefer `Improve ...`
@@ -95,15 +88,12 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 
 ## 3. Coding conventions
 
-1. **Comments:** Wrap code comments at 120 characters
-2. **Comments:** Describe what the code does, not what it replaced — don't reference the old implementation in comments
-3. **Comments:** Write comments in Chinese
-4. **Punctuation:** Use language-appropriate punctuation (e.g. Chinese punctuation ，。：；！？「」 for Chinese, not ASCII); do not hard-code it in code — put it in the i18n language files so each locale renders its own. Applies to comments, user guide, `.md` docs, etc.
-5. **UI paths:** In all contexts, including code comments, UI text, i18n, user guides, documentation, issue/PR content, and responses, separate navigation levels with a hyphen surrounded by spaces (for example, `设置 - 快捷键 - 通用`); do not use arrow symbols such as `→`
-6. **Markdown:** Do not hand-wrap; keep each line (paragraphs, table rows, list items, etc.) on a single line
-7. **TypeScript/JavaScript:** Semicolons required, use double quotes, indent with spaces
-8. **CSS:** Do not use the `:has()` selector because of its performance impact
-9. **Go:** Format with `gofmt` after editing
+1. **Comments:** Write in Chinese, wrap at 120 characters, and describe what the code does without referencing the old implementation
+2. **Punctuation:** Use language-appropriate punctuation in UI text, comments, user guides, and documentation (e.g. Chinese punctuation ，。：；！？「」 for Chinese). Keep UI text and its punctuation in i18n language files rather than hard-coding them in code
+3. **UI paths:** In all contexts, including code comments, UI text, i18n, user guides, documentation, issue/PR content, and responses, separate navigation levels with a hyphen surrounded by spaces (for example, `设置 - 快捷键 - 通用`); do not use arrow symbols such as `→`
+4. **Markdown:** Do not hand-wrap; keep each line (paragraphs, table rows, list items, etc.) on a single line
+5. **TypeScript/JavaScript:** Semicolons required, use double quotes, indent with spaces
+6. **CSS:** Do not use the `:has()` selector because of its performance impact
 
 ---
 
@@ -118,7 +108,7 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 
 ## 5. Repository layout
 
-**Architecture:** Go kernel (`kernel/`) + TypeScript frontend (`app/`), plus a separate `export` bundle (global `Protyle`, entry `src/protyle/method.ts`) for rendering rich content in exported HTML / PDF preview. Read versions from `kernel/go.mod`, `app/package.json`, `kernel/util/working.go`.
+**Architecture:** Go kernel (`kernel/`) + TypeScript frontend (`app/`). Read versions from `kernel/go.mod`, `app/package.json`, `kernel/util/working.go`.
 
 Top level (repo root):
 
@@ -129,24 +119,24 @@ Top level (repo root):
 | `app/appearance/` | Themes, icons, **i18n** (`appearance/langs/*.json`) |
 | `app/stage/` | Build output served by the kernel |
 | `app/changelogs/` | Per-version changelog markdown |
-| `.github/` | `CONTRIBUTING.md` (+zh-CN), `SECURITY.md`, `CODE_OF_CONDUCT.md`, `PULL_REQUEST_TEMPLATE.md`, issue templates, `workflows/` |
-| `scripts/` | Release packaging: `win-build.bat`, `darwin-build.sh`, `linux-build.sh`, `parse-changelog.py`, `check-lang-keys.py` |
+| `.github/` | Contribution and security policies, issue/PR templates, CI workflows |
+| `scripts/` | Release packaging, changelog generation, language-key checks |
 
 ### Major `kernel/` packages (under `kernel/`)
 
 | Package | Responsibility |
 |---|---|
-| `main.go` (`//go:build !mobile`) | Desktop entry point → `cli/cmd` |
-| `cli/cmd/` | Cobra CLI subcommands (`serve`, `notebook`, `block`, `search`, `sql`, `export`, `repo`, `sync`, …) |
-| `model/` | **Core domain** (~70 files): blocks/trees, transactions, indexing, search, attribute views, export, history, sync, flashcards, AI, CalDAV/CardDAV, auth |
-| `treenode/` | In-memory tree over the Lute AST + `blocktree.db` (`BlockTree{ID,RootID,ParentID,BoxID,Path,HPath,Type,...}`) |
+| `main.go` (`//go:build !mobile`) | Desktop entry point, delegates to `cli/cmd` |
+| `cli/cmd/` | Cobra CLI subcommands |
+| `model/` | Core domain: blocks, transactions, indexing, search, attribute views, export, history, sync, flashcards, AI, CalDAV/CardDAV, auth |
+| `treenode/` | In-memory tree over the Lute AST + `blocktree.db` |
 | `av/` | **Attribute View** (database) engine: values, filters, sorts, layouts (table/kanban/gallery) |
 | `sql/` | **Embedded SQLite** (`siyuan.db`, `history.db`, `asset_content.db`) + FTS5; async index queues |
 | `search/` | FTS tokenizer helpers, CJK conversion (`hanconv.go`) |
 | `bazaar/` | Marketplace: plugins/widgets/themes/icons/templates |
 | `filesys/` | Read/write `.sy` files on disk (via `filelock`) |
 | `server/` | Gin server bootstrap (`serve.go`): middleware, TLS/cmux, WebDAV/CalDAV/CardDAV, WebSocket, MCP |
-| `api/` | HTTP route registration (`router.go::ServeAPI`, ~400 endpoints) + per-area handlers |
+| `api/` | HTTP route registration (`router.go::ServeAPI`) + per-area handlers |
 | `conf/` | Configuration structs |
 | `util/` | Cross-cutting: `working.go` (workspace, `Boot()`), `lute.go`, `i18n.go`, `websocket.go` (melody push), `result.go` (API envelope) |
 | `plugin/` | Plugin subsystem (kernel side) |
@@ -160,35 +150,28 @@ Top level (repo root):
 |---|---|
 | `index.ts` | Main `App` class — boots SPA, opens main WebSocket, handles WS push events |
 | `window/` | Detached Electron window variant |
-| `protyle/` | **The block editor** — `wysiwyg/`, `toolbar/`, `gutter/`, `breadcrumb/`, `hint/`, `scroll/`, `undo/`, `preview/`, `render/` (incl. `render/av/`) |
+| `protyle/` | Block editor; rich-content rendering in `render/`, attribute-view rendering in `render/av/` |
 | `editor/`, `layout/`, `menus/`, `dialog/`, `config/`, `mobile/`, `ai/`, `sync/`, `history/`, `search/`, `card/` | Feature modules |
 | `util/fetch.ts` | `fetchGet`/`fetchPost` — all kernel calls |
 | `layout/Model.ts` | WebSocket client all UI binds to |
 | `constants.ts` | Global constants (version, IDs, storage keys) |
 
-Four webpack configs each emit a separate bundle to `app/stage/build/{app,desktop,mobile,export}/`. The kernel's `serveAppearance` picks which bundle to serve based on User-Agent. The `export` bundle is different from the other three: it is not an app UI — it is a client-side library (global `Protyle`, entry `src/protyle/method.ts`) exposing renderers for code highlighting, math (KaTeX), and diagrams (Mermaid/flowchart/graphviz/…). It is loaded by the HTML pages assembled during export (`app/src/protyle/export/index.ts`) — the desktop PDF preview window and standalone exported HTML files — so rich content renders outside the editor.
+Four webpack configs emit bundles to `app/stage/build/{app,desktop,mobile,export}/`; the kernel's `serveAppearance` selects the app bundle by User-Agent. The `export` bundle is a rendering library (global `Protyle`, entry `app/src/protyle/method.ts`) for code, math, and diagrams. Pages assembled by `app/src/protyle/export/index.ts` load it for desktop PDF preview and standalone exported HTML.
 
 ---
 
 ## 6. Related repositories (navigation)
 
-SiYuan spans several repos. This repo (`siyuan`) holds the kernel + Electron/web frontend; the others are separate projects with their own tooling.
-
 | Repo | Role / what to know |
 |---|---|
-| `siyuan` | **This repo** — kernel + Electron/web/tablet UI |
-| `siyuan-android` / `siyuan-ios` / `siyuan-harmony` | Native apps wrapping the gomobile kernel; build steps differ per platform — see each project's README |
-| `siyuan-chrome` | Browser extension (web clipper); talks to the running kernel over HTTP only |
+| `siyuan-android` / `siyuan-ios` / `siyuan-harmony` | Native apps wrapping the gomobile kernel; read each project's README for platform-specific build, kernel-binding, and integration steps |
+| `siyuan-chrome` | Independent TypeScript browser extension (web clipper); interacts with the running kernel only through the HTTP API in `docs/API.md` |
 | `siyuan-testing` | Playwright end-to-end tests for a running SiYuan instance; test data belongs in the `SiYuan Testing` notebook — see that repository's `AGENTS.md` |
 | `petal` | SiYuan Plugin API declaration (the plugin system is named "petal"); consumed by plugins, not a kernel Go dependency |
-| `lute` | Markdown/Kramdown AST engine — the editor + `.sy` format; also the source of the bundled `lute.min.js` (a GopherJS build served to the frontend). **Lives under `$GOPATH/src/github.com/88250/lute`, not as a sibling repo** |
+| `lute` | Markdown/Kramdown AST engine for the editor and `.sy` format; source of `lute.min.js`. **Lives under `$GOPATH/src/github.com/88250/lute`, not as a sibling repo** |
 | `dejavu` | Data repo / sync engine (encrypted snapshots) |
 | `riff` | Spaced-repetition (SRS) flashcard scheduler |
-| `gulu` | General Go utility library (`gulu.Ret`, `gulu.JSON`, …) |
-| `eventbus` | In-process event bus |
-| `filelock` | Cross-platform file locking (`.sy` read/write) |
-| `httpclient` | HTTP client wrapper (cloud / sync / bazaar calls) |
-| `logging` | Leveled logging used throughout the kernel |
+| `gulu` / `eventbus` / `filelock` / `httpclient` / `logging` | General utilities, in-process events, file locking, HTTP client, and logging |
 | `go-sqlite3` / `pdfcpu` | Maintainer's forks, pulled in via permanent `replace` in `kernel/go.mod` (keep those) |
 | `epub` / `clipboard` / `go-humanize` / `vitess-sqlparser` / `dataparser` / `encryption` | Smaller Go libraries (export / clipboard / formatting / SQL parse / data parse / crypto) |
 
@@ -196,11 +179,9 @@ All Go libraries above are dependencies in `kernel/go.mod`. GitHub org: `siyuan-
 
 ### Cross-repo notes
 
-- **Editing any Go dependency (Lute / dejavu / gulu / eventbus / riff / filelock / httpclient / logging / go-sqlite3 / pdfcpu / epub / …):** these are imported by the kernel as Go modules (`kernel/go.mod`). To test a local change, add a temporary `replace` in `kernel/go.mod` pointing at your local checkout — but **never commit that `replace`**; it breaks builds for everyone else.
-- **Rebuilding `lute.min.js`:** it's the JS build of the Go `lute` project — generated upstream and checked into `app/stage/protyle/js/lute/`. Don't edit it here; change `lute`, rebuild, and copy the artifact in.
+- **Editing Go dependencies:** To test a local change, add a temporary `replace` in `kernel/go.mod` pointing at your local checkout; **never commit that temporary `replace`**.
+- **Rebuilding `lute.min.js`:** Change `lute`, rebuild with GopherJS, and copy the artifact into `app/stage/protyle/js/lute/`.
 - **Type declarations:** when changing files under `app/src/types/` or other TypeScript declarations and constants exposed to plugins, synchronize the corresponding declarations and constants in the `petal` repository in the same task.
-- **Mobile apps (`siyuan-android` / `siyuan-ios` / `siyuan-harmony`):** each is a separate native app that wraps the kernel built from this repo. For how to build, vendor the kernel binding, and wire everything up, **read each project's own README** — the toolchains and steps differ per platform and aren't documented here.
-- **`siyuan-chrome`:** independent TypeScript project; it only interacts with a running SiYuan instance through the public HTTP API documented in `docs/API.md`.
 
 ---
 

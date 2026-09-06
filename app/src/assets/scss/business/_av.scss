@@ -1116,38 +1116,41 @@
     overflow: hidden;
 
     &--rich {
+      display: block;
       width: 100%;
-      max-height: 8.125em;
+      max-height: 1.625em;
       overflow: hidden;
-      white-space: normal;
+      white-space: nowrap;
+      text-overflow: ellipsis;
       font: inherit;
 
-      > p,
-      > h1,
-      > h2,
-      > h3,
-      > h4,
-      > h5,
-      > h6,
-      > blockquote,
-      > ul,
-      > ol,
-      > .code-block,
-      > .language-math {
-        margin: 0;
-      }
-
-      li > p,
-      > p,
-      blockquote > p {
+      p,
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      blockquote,
+      ul,
+      ol,
+      li,
+      pre,
+      .render-node {
+        display: inline;
         min-height: 0;
-        padding: 0;
         margin: 0;
+        padding: 0;
+        font-size: inherit;
         line-height: inherit;
+        list-style: none;
       }
 
-      > :not(:first-child) {
-        margin-top: 4px;
+      > :not(:first-child),
+      li + li,
+      li > :not(:first-child),
+      blockquote > :not(:first-child) {
+        margin-left: .5em;
       }
     }
 
@@ -1175,10 +1178,6 @@
       height: 10px;
       width: 10px;
     }
-  }
-
-  &__cell[data-wrap="false"] > &__celltext--rich {
-    max-height: 1.625em;
   }
 
   &__checkbox {
@@ -2078,6 +2077,7 @@ img.av__cellassetimg {
     margin: 0 5px 0 -4px;
     vertical-align: top;
 
+    svg,
     img {
       height: calc(1.625em - 8px);
       font-size: 1em;

@@ -29,6 +29,7 @@ const {
     screen,
     ipcMain,
     clipboard,
+    ClipboardItem,
     globalShortcut,
     Tray,
     dialog,
@@ -41,6 +42,9 @@ const {pathToFileURL} = require("url");
 const gNet = require("net");
 const childProcess = require("child_process");
 const remote = require("@electron/remote/main");
+const {
+    rawFormatType, readClipboardBuffer, readClipboardText, getClipboardFormats, parseClipboardFilePaths
+} = require("./clipboard");
 const {
     getAppleSiliconDownloadURL,
     shouldDownloadAppleSilicon,
@@ -95,6 +99,7 @@ const pendingRemoteOpenURLs = [];
 const blockDragSessions = new Map();
 const blockDragWindowFocusOrder = new Map();
 let blockDragWindowFocusSequence = 0;
+const blockDragCursorPollInterval = 16;
 
 const getBlockDragSessionKey = (sourceWebContentsId, dragId) => {
     return sourceWebContentsId + ":" + dragId;
@@ -137,6 +142,19 @@ const normalizeBlockDragPoint = (point) => {
     };
 };
 
+const updateBlockDragCursorPoint = (dragSession, point) => {
+    if (!point) {
+        return;
+    }
+    // 跨 BrowserWindow 拖拽时以主进程获取的全局指针位置为准，避免渲染进程失焦后上报的 screen 坐标被窗口边界截断。
+    const cursorPoint = screen.getCursorScreenPoint();
+    dragSession.point = {
+        ...point,
+        screenX: cursorPoint.x,
+        screenY: cursorPoint.y,
+    };
+};
+
 const normalizeBlockDragPayload = (payload) => {
     if (!payload || typeof payload !== "object" || !Array.isArray(payload.items) ||
         !payload.items.every((item) => item && typeof item.type === "string" && typeof item.data === "string")) {
@@ -157,7 +175,7 @@ const isPointInBounds = (point, bounds) => {
         point.screenY >= bounds.y && point.screenY < bounds.y + bounds.height;
 };
 
-const getBlockDragTarget = (dragSession) => {
+const getBlockDragTarget = (dragSession, expectedTargetWebContentsId) => {
     if (!dragSession.point) {
         return;
     }
@@ -170,6 +188,9 @@ const getBlockDragTarget = (dragSession) => {
         if (item.isDestroyed() || item.webContents.isDestroyed() ||
             item.webContents.id === dragSession.sourceWebContentsId ||
             !initializedWindowIds.has(item.webContents.id) || !item.isVisible() || item.isMinimized()) {
+            return false;
+        }
+        if (expectedTargetWebContentsId !== undefined && item.webContents.id !== expectedTargetWebContentsId) {
             return false;
         }
         const kernelTarget = windowKernelTargets.get(item.webContents.id);
@@ -185,7 +206,7 @@ const getBlockDragTarget = (dragSession) => {
             (blockDragWindowFocusOrder.get(first.webContents.id) || 0);
     });
     const targetWindow = candidates[0];
-    if (!targetWindow || (sourceContainsPoint &&
+    if (!targetWindow || (expectedTargetWebContentsId === undefined && sourceContainsPoint &&
         (sourceWindow.isAlwaysOnTop() || !targetWindow.isAlwaysOnTop()))) {
         // 普通目标窗口位于源窗口后方时，不应让指针穿透源窗口。
         return;
@@ -222,8 +243,8 @@ const sendBlockDragRoute = (dragSession, remote, sequence = dragSession.point?.s
     });
 };
 
-const routeBlockDragMove = (dragSession, notifySource = true) => {
-    const target = getBlockDragTarget(dragSession);
+const routeBlockDragMove = (dragSession, notifySource = true, expectedTargetWebContentsId) => {
+    const target = getBlockDragTarget(dragSession, expectedTargetWebContentsId);
     if (!target) {
         leaveBlockDragTarget(dragSession);
         if (notifySource) {
@@ -276,8 +297,26 @@ const routeBlockDragMove = (dragSession, notifySource = true) => {
     return {target, ready: true};
 };
 
+const startBlockDragCursorPolling = (sessionKey, dragSession) => {
+    dragSession.cursorPollInterval = setInterval(() => {
+        if (blockDragSessions.get(sessionKey) !== dragSession || dragSession.dropping || !dragSession.point) {
+            return;
+        }
+        const cursorPoint = screen.getCursorScreenPoint();
+        if (cursorPoint.x === dragSession.point.screenX && cursorPoint.y === dragSession.point.screenY) {
+            return;
+        }
+        dragSession.point = {
+            ...dragSession.point,
+            screenX: cursorPoint.x,
+            screenY: cursorPoint.y,
+        };
+        routeBlockDragMove(dragSession);
+    }, blockDragCursorPollInterval);
+};
+
 const dispatchBlockDragDrop = (dragSession) => {
-    const dragRoute = routeBlockDragMove(dragSession, false);
+    const dragRoute = routeBlockDragMove(dragSession, false, dragSession.dropTargetWebContentsId);
     if (dragRoute?.target && !dragRoute.ready) {
         dragSession.waitingForDropPayload = true;
         return;
@@ -300,10 +339,23 @@ const dispatchBlockDragDrop = (dragSession) => {
     }
     const dropSequence = dragSession.pendingDropSequence;
     dragSession.pendingDropSequence = undefined;
+    if (dragSession.dropTargetWebContentsId !== undefined) {
+        sendBlockDragMessage(dragSession.sourceWebContentsId, {
+            phase: "complete",
+            dragId: dragSession.dragId,
+            canceled: true,
+        });
+        finishBlockDragSession(getBlockDragSessionKey(dragSession.sourceWebContentsId, dragSession.dragId),
+            dragSession);
+        return;
+    }
     sendBlockDragRoute(dragSession, false, dropSequence);
 };
 
 const finishBlockDragSession = (sessionKey, dragSession) => {
+    if (dragSession.cursorPollInterval) {
+        clearInterval(dragSession.cursorPollInterval);
+    }
     if (dragSession.targetWebContentsId) {
         sendBlockDragMessage(dragSession.targetWebContentsId, {
             phase: "end",
@@ -311,6 +363,33 @@ const finishBlockDragSession = (sessionKey, dragSession) => {
         });
     }
     blockDragSessions.delete(sessionKey);
+};
+
+const dropBlockDragFromTarget = (targetWebContentsId, data) => {
+    const targetKernel = windowKernelTargets.get(targetWebContentsId);
+    const point = normalizeBlockDragPoint(data.point);
+    if (!targetKernel || !initializedWindowIds.has(targetWebContentsId) || !point) {
+        return;
+    }
+    for (const dragSession of blockDragSessions.values()) {
+        if (dragSession.sourceWebContentsId === targetWebContentsId || dragSession.dropping ||
+            dragSession.kernelOrigin !== targetKernel.origin) {
+            continue;
+        }
+        updateBlockDragCursorPoint(dragSession, {
+            ...point,
+            sequence: dragSession.point?.sequence || 0,
+        });
+        const target = getBlockDragTarget(dragSession, targetWebContentsId);
+        if (!target) {
+            continue;
+        }
+        dragSession.dropping = true;
+        dragSession.dropTargetWebContentsId = targetWebContentsId;
+        dragSession.pendingDropSequence = dragSession.point?.sequence || 0;
+        dispatchBlockDragDrop(dragSession);
+        return;
+    }
 };
 
 const cleanupBlockDragSessions = (webContentsId) => {
@@ -2826,9 +2905,9 @@ app.whenReady().then(() => {
     ipcMain.on("siyuan-first-quit", () => {
         app.exit();
     });
-    ipcMain.handle("siyuan-get", (event, data) => {
+    ipcMain.handle("siyuan-get", async (event, data) => {
         const remoteSender = getWindowKernelTarget(event.sender.id)?.mode === "remote";
-        if (remoteSender && ["beginRichClipboard", "completeRichClipboard", "cancelRichClipboard", "clipboardRead"]
+        if (remoteSender && ["beginRichClipboard", "completeRichClipboard", "cancelRichClipboard", "clipboardRead", "clipboardReadFiles"]
             .includes(data.cmd)) {
             writeLog("ignored local file clipboard processing in remote kernel mode");
             return false;
@@ -2850,19 +2929,23 @@ app.whenReady().then(() => {
             return false;
         }
         if (data.cmd === "clipboardRead") {
-            return clipboard.read(data.format);
+            return readClipboardText(await clipboard.read(), rawFormatType(data.format));
+        }
+        if (data.cmd === "clipboardReadFiles") {
+            return parseClipboardFilePaths(await readClipboardText(await clipboard.read(), "text/uri-list"));
         }
         if (data.cmd === "clipboardReadMathML") {
+            const items = await clipboard.read();
             if (typeof data.text !== "string" ||
-                normalizeClipboardText(clipboard.readText()) !== normalizeClipboardText(data.text)) {
+                normalizeClipboardText(await readClipboardText(items, "text/plain")) !== normalizeClipboardText(data.text)) {
                 return "";
             }
-            const formats = clipboard.availableFormats().filter((format) =>
+            const formats = getClipboardFormats(items).filter((format) =>
                 /^mathml(?: presentation)?$/i.test(format));
             formats.push("MathML", "MathML Presentation");
-            // availableFormats 可能不包含 Office 原生 MathML 格式，需要直接尝试标准格式名
+            // 按原生格式读取 UTF-16 编码的 Office 公式。
             for (const format of new Set(formats)) {
-                const buffer = clipboard.readBuffer(format);
+                const buffer = await readClipboardBuffer(items, rawFormatType(format));
                 if (buffer.length === 0 || buffer.length > 1024 * 1024 || buffer.length % 2 !== 0) {
                     continue;
                 }
@@ -2877,11 +2960,12 @@ app.whenReady().then(() => {
             return "";
         }
         if (data.cmd === "clipboardReadOffice") {
+            const items = await clipboard.read();
             if (typeof data.text !== "string" ||
-                normalizeClipboardText(clipboard.readText()) !== normalizeClipboardText(data.text)) {
+                normalizeClipboardText(await readClipboardText(items, "text/plain")) !== normalizeClipboardText(data.text)) {
                 return "";
             }
-            const buffer = clipboard.readBuffer("Embed Source");
+            const buffer = await readClipboardBuffer(items, rawFormatType("Embed Source"));
             const compoundFileSignature = Buffer.from([0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1]);
             if (buffer.length === 0 || buffer.length > 8 * 1024 * 1024 ||
                 !buffer.subarray(0, compoundFileSignature.length).equals(compoundFileSignature)) {
@@ -2890,19 +2974,20 @@ app.whenReady().then(() => {
             return buffer.toString("base64");
         }
         if (data.cmd === "clipboardReadWPS") {
+            const items = await clipboard.read();
             if (typeof data.text !== "string" ||
-                normalizeClipboardText(clipboard.readText()) !== normalizeClipboardText(data.text)) {
+                normalizeClipboardText(await readClipboardText(items, "text/plain")) !== normalizeClipboardText(data.text)) {
                 return "";
             }
-            const formats = clipboard.availableFormats().filter((format) =>
+            const formats = getClipboardFormats(items).filter((format) =>
                 /kingsoft.*wps.*format/i.test(format));
             formats.push("Kingsoft WPS Format");
             for (let version = 6; version <= 20; version++) {
                 formats.push(`Kingsoft WPS ${version}.0 Format`);
             }
-            // availableFormats 可能不包含 WPS 原生格式，需要尝试常见格式名
+            // 按原生格式读取 WPS 的压缩包数据。
             for (const format of new Set(formats)) {
-                const buffer = clipboard.readBuffer(format);
+                const buffer = await readClipboardBuffer(items, rawFormatType(format));
                 if (buffer.length <= 8 * 1024 * 1024 && buffer[0] === 0x50 && buffer[1] === 0x4b) {
                     return buffer.toString("base64");
                 }
@@ -2911,15 +2996,19 @@ app.whenReady().then(() => {
         }
         if (data.cmd === "beginRichClipboard") {
             richClipboardOperation = undefined;
-            const text = clipboard.readText();
-            const html = clipboard.readHTML();
+            const sequence = ++richClipboardSequence;
+            const items = await clipboard.read();
+            const text = await readClipboardText(items, "text/plain");
+            const html = await readClipboardText(items, "text/html");
+            if (sequence !== richClipboardSequence) {
+                return;
+            }
             if (typeof data.text !== "string" || typeof data.marker !== "string" ||
                 normalizeClipboardText(text) !== normalizeClipboardText(data.text) ||
                 !data.marker || !html.includes(data.marker)) {
                 return;
             }
 
-            richClipboardSequence++;
             const token = `${Date.now()}-${richClipboardSequence}`;
             richClipboardOperation = {
                 token,
@@ -2935,8 +3024,14 @@ app.whenReady().then(() => {
             if (!operation || operation.token !== data.token || operation.senderId !== event.sender.id) {
                 return false;
             }
-            if (operation.requestedText !== data.text || clipboard.readText() !== operation.text ||
-                clipboard.readHTML() !== operation.html || typeof data.html !== "string" ||
+            const items = await clipboard.read();
+            const text = await readClipboardText(items, "text/plain");
+            const clipboardHTML = await readClipboardText(items, "text/html");
+            if (richClipboardOperation !== operation) {
+                return false;
+            }
+            if (operation.requestedText !== data.text || text !== operation.text ||
+                clipboardHTML !== operation.html || typeof data.html !== "string" ||
                 !Array.isArray(data.replacements) || 1024 < data.replacements.length) {
                 richClipboardOperation = undefined;
                 return false;
@@ -2962,10 +3057,7 @@ app.whenReady().then(() => {
             }
 
             richClipboardOperation = undefined;
-            clipboard.write({
-                text: data.text,
-                html
-            });
+            await clipboard.write([new ClipboardItem({"text/plain": data.text, "text/html": html})]);
             return true;
         }
         if (data.cmd === "cancelRichClipboard") {
@@ -3591,7 +3683,14 @@ app.whenReady().then(() => {
         });
     });
     ipcMain.on("siyuan-block-drag", (event, data) => {
-        if (!data || typeof data !== "object" || typeof data.dragId !== "string" || !data.dragId ||
+        if (!data || typeof data !== "object") {
+            return;
+        }
+        if (data.phase === "release") {
+            dropBlockDragFromTarget(event.sender.id, data);
+            return;
+        }
+        if (typeof data.dragId !== "string" || !data.dragId ||
             !["begin", "move", "payload", "drop", "drop-ack", "end"].includes(data.phase)) {
             return;
         }
@@ -3607,6 +3706,15 @@ app.whenReady().then(() => {
             }
             sourceDragSession.pendingDropSequence = undefined;
             sourceDragSession.waitingForDropPayload = false;
+            if (sourceDragSession.dropTargetWebContentsId !== undefined) {
+                sendBlockDragMessage(sourceDragSession.sourceWebContentsId, {
+                    phase: "complete",
+                    dragId: sourceDragSession.dragId,
+                    remote: true,
+                });
+                finishBlockDragSession(sourceSessionKey, sourceDragSession);
+                return;
+            }
             sendBlockDragRoute(sourceDragSession, true, data.sequence);
             return;
         }
@@ -3624,7 +3732,7 @@ app.whenReady().then(() => {
             }
             const point = normalizeBlockDragPoint(data.point);
             const payload = normalizeBlockDragPayload(data.payload);
-            blockDragSessions.set(sessionKey, {
+            const dragSession = {
                 dragId: data.dragId,
                 sourceWebContentsId,
                 kernelOrigin: kernelTarget.origin,
@@ -3632,7 +3740,9 @@ app.whenReady().then(() => {
                 payload,
                 payloadRequested: false,
                 targetWebContentsId: undefined,
-            });
+            };
+            blockDragSessions.set(sessionKey, dragSession);
+            startBlockDragCursorPolling(sessionKey, dragSession);
             return;
         }
         const dragSession = blockDragSessions.get(sessionKey);
@@ -3645,7 +3755,7 @@ app.whenReady().then(() => {
         }
         const point = normalizeBlockDragPoint(data.point);
         if (point) {
-            dragSession.point = point;
+            updateBlockDragCursorPoint(dragSession, point);
         }
         if (data.payload !== undefined) {
             const payload = normalizeBlockDragPayload(data.payload);

@@ -653,6 +653,31 @@ func getSyncLANStatus(c *gin.Context) {
 	ret.Data = model.GetSyncLANStatus()
 }
 
+func setSyncAssetDownloadMode(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	var mode float64
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("mode", &mode, true, false)) {
+		return
+	}
+	if mode != 0 && mode != 1 {
+		ret.Code = -1
+		ret.Msg = "invalid asset download mode"
+		return
+	}
+	if err := model.SetSyncAssetDownloadMode(int(mode)); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]any{"closeTimeout": 7000}
+		return
+	}
+	ret.Data = map[string]any{"assetDownloadMode": int(mode)}
+}
+
 func setSyncMode(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -839,5 +864,8 @@ func setCloudSyncDir(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", &name, true, true)) {
 		return
 	}
-	model.SetCloudSyncDir(name)
+	if err := model.SetCloudSyncDir(name); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
 }

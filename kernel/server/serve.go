@@ -1056,6 +1056,18 @@ func serveAssets(ginServer *gin.Engine) {
 			context.Status(http.StatusForbidden)
 			return
 		}
+		if model.IsEncryptedAssetPath(p) && !model.IsBoxUnlocked(model.ExtractBoxIDFromAssetsPath(p)) {
+			context.Status(http.StatusForbidden)
+			return
+		}
+		if err = model.EnsureAssetLocal(p); err != nil {
+			if os.IsNotExist(err) {
+				context.Status(http.StatusNotFound)
+			} else {
+				context.String(http.StatusServiceUnavailable, "%s", err)
+			}
+			return
+		}
 
 		if heif.IsPath(p) {
 			addHEIFVaryAccept(context)

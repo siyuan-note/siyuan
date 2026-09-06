@@ -21,7 +21,8 @@ import {
 import {setCodeTheme} from "../protyle/render/util";
 import {getBackend, getFrontend} from "./functions";
 import {getWorkspaceName} from "./processTitle";
-import {ensureSelectedCustomFonts} from "./customFont";
+import {ensureSelectedCustomFonts, getExportCustomFontStyle} from "./customFont";
+import {getGlobalFontStyle} from "./globalFont";
 import {isCurrentThemeSupported, shouldUnloadThemeScript} from "./themeCompatibility";
 import {
     getInlineStylesCSS,
@@ -293,6 +294,7 @@ export const initAssets = () => {
 
 export const setInlineStyle = async (set = true, servePath = "../../../") => {
     const allowCustomAppearance = getHostCapabilities().customAppearance;
+    const globalFonts = allowCustomAppearance ? window.siyuan.config.appearance.globalFontFamilies || [] : [];
     const editorFonts = allowCustomAppearance ? window.siyuan.config.editor.fontFamilies || [] : [];
     const codeFonts = allowCustomAppearance ? window.siyuan.config.editor.codeFontFamilies || [] : [];
     let inlineStylesCSS = "";
@@ -306,7 +308,7 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
         }
     }
     if (set && allowCustomAppearance) {
-        await ensureSelectedCustomFonts([...editorFonts, ...codeFonts]);
+        await ensureSelectedCustomFonts([...globalFonts, ...editorFonts, ...codeFonts]);
     }
     let style;
     // Emojis Reset: 字体中包含了 emoji，需重置
@@ -385,6 +387,10 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
   local("EmojiSymbols");
   size-adjust: 92%;
 }`;
+    }
+    style += getGlobalFontStyle(globalFonts);
+    if (!set && globalFonts.length > 0) {
+        style += "\n" + await getExportCustomFontStyle([...globalFonts, ...editorFonts, ...codeFonts]);
     }
     const editorFontFamilies = editorFonts.map((font) => CSS.escape(font.family)).join(", ");
     const editorFontWeight = editorFonts[0]?.weight;

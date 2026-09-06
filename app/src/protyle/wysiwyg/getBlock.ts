@@ -200,6 +200,9 @@ export const getContenteditableElement = (element: Element, target?: Node): Elem
     if (element.classList.contains("protyle-title__input")) {
         return element;
     }
+    if (element.classList.contains("tab-item")) {
+        return getContenteditableElement(element.querySelector(":scope > .tab-item-content > [data-node-id]"));
+    }
     let blockElement = element;
     if (!blockElement.getAttribute("data-node-id")) {
         blockElement = element.querySelector("[data-node-id]");

@@ -98,8 +98,10 @@ func syncDataDownloadLocked() (err error) {
 }
 
 func getSyncCloudLatestID() (ret string) {
+	assetDownloadSourceMu.RLock()
+	defer assetDownloadSourceMu.RUnlock()
 	// 同步感知消息不包含云端提交 ID，需要先读取最新索引，以便和局域网提交提示使用同一个去重键。
-	repo, err := newSyncRepository()
+	repo, err := newSyncRepositoryWithAssetSourceLocked()
 	if nil != err {
 		logging.LogWarnf("create repo before perceived sync failed: %s", err)
 		return
@@ -501,19 +503,24 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 	return
 }
 
-func SetCloudSyncDir(name string) {
+func SetCloudSyncDir(name string) error {
+	release := lockAssetSourceChange()
+	defer release()
 	if !cloud.IsValidCloudDirName(name) {
-		util.PushErrMsg(Conf.Language(37), 5000)
-		return
+		return errors.New(Conf.Language(37))
 	}
 
 	if Conf.Sync.CloudName == name {
-		return
+		return nil
+	}
+	if err := requireCompleteAssetDownloads(); err != nil {
+		return err
 	}
 
 	Conf.Sync.CloudName = name
 	Conf.Save()
 	refreshLANSyncManager()
+	return nil
 }
 
 func SetSyncGenerateConflictDoc(b bool) {
@@ -562,6 +569,13 @@ func SetSyncMode(mode int) {
 }
 
 func SetSyncProvider(provider int) (err error) {
+	release := lockAssetSourceChange()
+	defer release()
+	if provider != Conf.Sync.Provider {
+		if err = requireCompleteAssetDownloads(); err != nil {
+			return
+		}
+	}
 	Conf.Sync.Provider = provider
 	Conf.Save()
 	refreshLANSyncManager()
@@ -569,6 +583,8 @@ func SetSyncProvider(provider int) (err error) {
 }
 
 func SetSyncProviderS3(s3 *conf.S3) (err error) {
+	release := lockAssetSourceChange()
+	defer release()
 	s3.Endpoint = strings.TrimSpace(s3.Endpoint)
 	s3.Endpoint = util.NormalizeEndpoint(s3.Endpoint)
 	s3.AccessKey = strings.TrimSpace(s3.AccessKey)
@@ -577,6 +593,12 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 	s3.Region = strings.TrimSpace(s3.Region)
 	s3.Timeout = util.NormalizeTimeout(s3.Timeout)
 	s3.ConcurrentReqs = util.NormalizeConcurrentReqs(s3.ConcurrentReqs, conf.ProviderS3)
+	if Conf.Sync.Provider == conf.ProviderS3 && (Conf.Sync.S3 == nil ||
+		Conf.Sync.S3.Endpoint != s3.Endpoint || Conf.Sync.S3.Bucket != s3.Bucket) {
+		if err = requireCompleteAssetDownloads(); err != nil {
+			return
+		}
+	}
 
 	Conf.Sync.S3 = s3
 	Conf.Save()
@@ -585,6 +607,8 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 }
 
 func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
+	release := lockAssetSourceChange()
+	defer release()
 	webdav.Endpoint = strings.TrimSpace(webdav.Endpoint)
 	webdav.Endpoint = util.NormalizeEndpoint(webdav.Endpoint)
 
@@ -598,6 +622,12 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 	webdav.Password = strings.TrimSpace(webdav.Password)
 	webdav.Timeout = util.NormalizeTimeout(webdav.Timeout)
 	webdav.ConcurrentReqs = util.NormalizeConcurrentReqs(webdav.ConcurrentReqs, conf.ProviderWebDAV)
+	if Conf.Sync.Provider == conf.ProviderWebDAV && (Conf.Sync.WebDAV == nil ||
+		Conf.Sync.WebDAV.Endpoint != webdav.Endpoint || Conf.Sync.WebDAV.Username != webdav.Username) {
+		if err = requireCompleteAssetDownloads(); err != nil {
+			return
+		}
+	}
 
 	Conf.Sync.WebDAV = webdav
 	Conf.Save()
@@ -606,6 +636,8 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 }
 
 func SetSyncProviderLocal(local *conf.Local) (err error) {
+	release := lockAssetSourceChange()
+	defer release()
 	local.Endpoint = strings.TrimSpace(local.Endpoint)
 	local.Endpoint = util.NormalizeLocalPath(local.Endpoint)
 
@@ -638,6 +670,12 @@ func SetSyncProviderLocal(local *conf.Local) (err error) {
 
 	local.Timeout = util.NormalizeTimeout(local.Timeout)
 	local.ConcurrentReqs = util.NormalizeConcurrentReqs(local.ConcurrentReqs, conf.ProviderLocal)
+	if Conf.Sync.Provider == conf.ProviderLocal && (Conf.Sync.Local == nil ||
+		filepath.Clean(Conf.Sync.Local.Endpoint) != filepath.Clean(local.Endpoint)) {
+		if err = requireCompleteAssetDownloads(); err != nil {
+			return
+		}
+	}
 
 	Conf.Sync.Local = local
 	Conf.Save()
@@ -656,6 +694,8 @@ var (
 )
 
 func CreateCloudSyncDir(name string) (err error) {
+	assetDownloadSourceMu.RLock()
+	defer assetDownloadSourceMu.RUnlock()
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan, conf.ProviderLocal:
 		break
@@ -669,7 +709,7 @@ func CreateCloudSyncDir(name string) (err error) {
 		return errors.New(Conf.Language(37))
 	}
 
-	repo, err := newRepository()
+	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -683,6 +723,13 @@ func CreateCloudSyncDir(name string) (err error) {
 }
 
 func RemoveCloudSyncDir(name string) (err error) {
+	release := lockAssetSourceChange()
+	defer release()
+	if name == Conf.Sync.CloudName {
+		if err = requireCompleteAssetDownloads(); err != nil {
+			return
+		}
+	}
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan, conf.ProviderLocal:
 		break
@@ -693,7 +740,7 @@ func RemoveCloudSyncDir(name string) (err error) {
 
 	msgId := util.PushMsg(Conf.Language(116), 15000)
 
-	repo, err := newRepository()
+	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -715,11 +762,13 @@ func RemoveCloudSyncDir(name string) (err error) {
 }
 
 func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
+	assetDownloadSourceMu.RLock()
+	defer assetDownloadSourceMu.RUnlock()
 	syncDirs = []*Sync{}
 	var dirs []*cloud.Repo
 	var size int64
 
-	repo, err := newRepository()
+	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}

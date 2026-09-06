@@ -1123,7 +1123,13 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             }
 
             const textHTMLLowercase = textHTML.toLowerCase();
+            // 文本样式也是富文本信息，不能因为包含多个换行而退回纯文本粘贴。
+            const hasTextStyles = !!tempDiv.querySelector("small, font[color], font[face], font[size]") ||
+                Array.from(tempDiv.querySelectorAll<HTMLElement>("[style]")).some(element =>
+                    ["color", "background-color", "font-family", "font-size"].some(property =>
+                        element.style.getPropertyValue(property) !== ""));
             if (textPlain && "" !== textPlain.trim() && (textHTML.startsWith("<span") || textHTML.startsWith("<br")) && containsNewlines &&
+                !hasTextStyles &&
                 (0 > textHTMLLowercase.indexOf("class=\"katex") && 0 > textHTMLLowercase.indexOf("class=\"math") &&
                     0 > textHTMLLowercase.indexOf("</a>") && 0 > textHTMLLowercase.indexOf("</img>") && 0 > textHTMLLowercase.indexOf("</code>") &&
                     0 > textHTMLLowercase.indexOf("</b>") && 0 > textHTMLLowercase.indexOf("</strong>") &&

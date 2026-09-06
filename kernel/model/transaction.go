@@ -1786,6 +1786,10 @@ func (tx *Transaction) processGlobalAssets(tree *parse.Tree) {
 			}
 
 			// 只有全局 assets 才移动到相对 assets
+			if !filelock.IsExist(assetPath) {
+				// 未下载的资源保留全局引用，文档事务不触发网络请求。
+				return ast.WalkContinue
+			}
 			targetP := filepath.Join(tx.assetsDir, filepath.Base(assetPath))
 			if e = filelock.Rename(assetPath, targetP); e != nil {
 				logging.LogErrorf("copy path of asset from [%s] to [%s] failed: %s", assetPath, targetP, e)

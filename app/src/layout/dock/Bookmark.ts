@@ -3,6 +3,7 @@ import {Model} from "../Model";
 import {Tree} from "../../util/Tree";
 import {setPanelFocus} from "../util";
 import {getDockByType} from "../tabUtil";
+import {getTransactionOperations} from "../../util/transactionOperations";
 import {fetchPost} from "../../util/fetch";
 import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
@@ -201,7 +202,7 @@ export class Bookmark extends Model {
             switch (data.cmd) {
                 case "transactions": {
                     let needReload = false;
-                    data.data[0].doOperations.forEach((item: IOperation) => {
+                    getTransactionOperations(data.data).forEach((item: IOperation) => {
                         if ((item.action === "update" || item.action === "insert") && typeof item.data === "string" &&
                             item.data.indexOf('class="protyle-attr--bookmark"') > -1) {
                             needReload = true;

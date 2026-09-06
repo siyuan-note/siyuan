@@ -159,6 +159,10 @@ const scheduleStatusStat = (rootID: string, content?: string, ids?: string[]) =>
             if (signal.aborted) {
                 return;
             }
+            if (response.code !== 0 || !response.data?.stat) {
+                finishRequest();
+                return;
+            }
             renderStatusbarCounter(response.data.stat);
             finishRequest();
         };
@@ -175,6 +179,11 @@ const scheduleStatusStat = (rootID: string, content?: string, ids?: string[]) =>
                 if (signal.aborted) {
                     return;
                 }
+                if (response.code !== 0 || !response.data?.stat) {
+                    lastRootId = null;
+                    finishRequest();
+                    return;
+                }
                 renderStatusbarCounter(response.data.stat);
                 if (!response.data.containsEmbed) {
                     finishRequest();
@@ -182,6 +191,11 @@ const scheduleStatusStat = (rootID: string, content?: string, ids?: string[]) =>
                 }
                 fetchPost("/api/block/getTreeStat", {id: rootID, includeEmbed: true}, (embedResponse) => {
                     if (signal.aborted) {
+                        return;
+                    }
+                    if (embedResponse.code !== 0 || !embedResponse.data?.stat) {
+                        lastRootId = null;
+                        finishRequest();
                         return;
                     }
                     renderStatusbarCounter(
@@ -199,8 +213,12 @@ const scheduleStatusStat = (rootID: string, content?: string, ids?: string[]) =>
     }, Constants.TIMEOUT_COUNT);
 };
 
-export const countSelectWord = (range: Range, rootID?: string) => {
+export const countSelectWord = (range: Range, context?: string | IProtyle) => {
     /// #if !MOBILE
+    if (typeof context === "object" && context.lite) {
+        return;
+    }
+    const rootID = typeof context === "object" ? context.block.rootID : context;
     if (document.getElementById("status").classList.contains("fn__none")) {
         return;
     }
@@ -208,8 +226,12 @@ export const countSelectWord = (range: Range, rootID?: string) => {
     /// #endif
 };
 
-export const countBlockWord = (ids: string[], rootID?: string, clearCache = false) => {
+export const countBlockWord = (ids: string[], context?: string | IProtyle, clearCache = false) => {
     /// #if !MOBILE
+    if (typeof context === "object" && context.lite) {
+        return;
+    }
+    const rootID = typeof context === "object" ? context.block.rootID : context;
     if (document.getElementById("status").classList.contains("fn__none")) {
         return;
     }

@@ -35,7 +35,7 @@ import {
 } from "../../protyle/util/headingNumberCore";
 import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../../protyle/util/headingTransform";
 import {syncDocTitleIAL} from "../../protyle/util/docTitleIAL";
-import {canBatchConvertHeadings, showHeadingBatchDialog, updateHeadingBatchButton} from "../../protyle/util/headingBatch";
+import {canBatchConvertHeadings, showHeadingBatchDialog} from "../../protyle/util/headingBatch";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -92,8 +92,6 @@ export class Outline extends Model {
         <svg><use xlink:href="#iconContract"></use></svg>
     </span>
     <span class="${this.type === "local" ? "fn__none " : ""}fn__space"></span>
-    <button data-type="headingBatch" disabled class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.headingBatch}"><svg><use xlink:href="#iconHeadings"></use></svg></button>
-    <span class="fn__space"></span>
     <span data-type="min" class="${this.type === "local" ? "fn__none " : ""}block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}">
         <svg><use xlink:href='#iconMin'></use></svg>
     </span>
@@ -264,16 +262,6 @@ export class Outline extends Model {
                 if (target.classList.contains("block__icon")) {
                     const type = target.getAttribute("data-type");
                     switch (type) {
-                        case "headingBatch": {
-                            const protyle = getAllModels().editor.find(item =>
-                                item.editor.protyle.block.rootID === this.blockId)?.editor.protyle;
-                            if (canBatchConvertHeadings(protyle, this.blockId, this.isPreview)) {
-                                void showHeadingBatchDialog(protyle, () =>
-                                    canBatchConvertHeadings(protyle, this.blockId, this.isPreview) && protyle.element.isConnected);
-                            }
-                            isFocus = false;
-                            break;
-                        }
                         case "min":
                             getDockByType("outline").toggleModel("outline", false, true);
                             isFocus = false;
@@ -707,11 +695,6 @@ export class Outline extends Model {
             this.notebookId = typeof notebookId === "undefined" ? "" : notebookId;
         }
         this.tree.updateData(data.data);
-        const protyle = getAllModels().editor.find(item =>
-            item.editor.protyle.block.rootID === this.blockId)?.editor.protyle;
-        const rootID = this.blockId;
-        updateHeadingBatchButton(this.headerElement.querySelector('[data-type="headingBatch"]'), protyle,
-            !!data.data?.length, () => rootID === this.blockId && canBatchConvertHeadings(protyle, rootID, this.isPreview));
 
         if (this.isPreview) {
             this.tree.element.querySelectorAll(".popover__block").forEach(item => {
@@ -1078,6 +1061,20 @@ export class Outline extends Model {
                 }).element);
             }
 
+            const rootID = this.blockId;
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "headingBatch",
+                icon: "iconHeadings",
+                label: window.siyuan.languages.headingBatch,
+                click: () => {
+                    const protyle = getAllModels().editor.find(item =>
+                        item.editor.protyle.block.rootID === rootID)?.editor.protyle;
+                    if (canBatchConvertHeadings(protyle, rootID, this.isPreview)) {
+                        void showHeadingBatchDialog(protyle, () => rootID === this.blockId &&
+                            canBatchConvertHeadings(protyle, rootID, this.isPreview) && protyle.element.isConnected);
+                    }
+                }
+            }).element);
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
 
             // 在前面插入同级标题

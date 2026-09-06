@@ -20,10 +20,11 @@ export const createPaletteFocusLifecycle = (restore: () => void) => {
             commandSelected = true;
             restoreOnce();
         },
-        restoreAfterCancel() {
-            if (!commandSelected) {
+        restoreAfterCancel(shouldRestore = true) {
+            if (!commandSelected && shouldRestore) {
                 restoreOnce();
             }
+            return !commandSelected;
         },
     };
 };

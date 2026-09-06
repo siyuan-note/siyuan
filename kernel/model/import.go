@@ -1847,6 +1847,8 @@ func parseStdMd(markdown []byte) (ret *parse.Tree, yfmRootID, yfmTitle, yfmUpdat
 	if nil == ret {
 		return
 	}
+	parse.NormalizeInlineHTMLTextStyles(ret)
+	normalizeImportedHTMLTextStyles(ret)
 	yfmRootID, yfmTitle, yfmUpdated = normalizeTree(ret)
 	htmlBlock2Media(ret)
 	htmlBlock2Inline(ret)

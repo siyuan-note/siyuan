@@ -17,6 +17,7 @@
 package sql
 
 import (
+	gosql "database/sql"
 	"testing"
 
 	"github.com/88250/lute/ast"
@@ -25,6 +26,62 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestQueryAttributeViewRefDefIDsByBlockIDsInBox(t *testing.T) {
+	testDB, err := gosql.Open("sqlite3_extended", ":memory:")
+	if nil != err {
+		t.Fatalf("open test database failed: %s", err)
+	}
+	testDB.SetMaxOpenConns(1)
+	defer testDB.Close()
+	if _, err = testDB.Exec("CREATE TABLE refs (id TEXT, def_block_id TEXT, def_block_parent_id TEXT, " +
+		"def_block_root_id TEXT, def_block_path TEXT, block_id TEXT, root_id TEXT, box TEXT, path TEXT, " +
+		"content TEXT, markdown TEXT, type TEXT)"); nil != err {
+		t.Fatalf("create refs table failed: %s", err)
+	}
+	if _, err = testDB.Exec(`INSERT INTO refs VALUES
+		('av-a-1', 'def-a', '', '', '', 'block-a', '', '', '', '', '', 'av'),
+		('av-a-2', 'def-a', '', '', '', 'block-b', '', '', '', '', '', 'av'),
+		('av-b', 'def-b', '', '', '', 'block-b', '', '', '', '', '', 'av'),
+		('normal', 'def-normal', '', '', '', 'block-a', '', '', '', '', '', 'textmark'),
+		('other', 'def-other', '', '', '', 'block-other', '', '', '', '', '', 'av')`); nil != err {
+		t.Fatalf("insert refs failed: %s", err)
+	}
+
+	previousDB := db
+	db = testDB
+	defer func() {
+		db = previousDB
+	}()
+
+	defIDs := QueryAttributeViewRefDefIDsByBlockIDsInBox(
+		[]string{"block-a", "", "block-b", "block-a", `'); DELETE FROM refs --`}, "")
+	actual := map[string]bool{}
+	for _, defID := range defIDs {
+		actual[defID] = true
+	}
+	if len(actual) != 2 || !actual["def-a"] || !actual["def-b"] || actual["def-normal"] || actual["def-other"] {
+		t.Fatalf("unexpected attribute view definition IDs: %#v", actual)
+	}
+
+	var count int
+	if err = testDB.QueryRow("SELECT COUNT(*) FROM refs").Scan(&count); nil != err || 5 != count {
+		t.Fatalf("query argument changed stored refs: count=%d, err=%v", count, err)
+	}
+}
+
+func TestQueryAttributeViewRefDefIDsByBlockIDsInEncryptedBox(t *testing.T) {
+	testDB, boxID := useEncryptedQueryTestDB(t)
+	if _, err := testDB.Exec("INSERT INTO refs (id, def_block_id, block_id, root_id, type) VALUES (?, ?, ?, ?, ?)",
+		"encrypted-av-ref", "encrypted-def", "encrypted-database", "encrypted-root", AttributeViewRefType); nil != err {
+		t.Fatalf("insert encrypted attribute view ref failed: %s", err)
+	}
+
+	defIDs := QueryAttributeViewRefDefIDsByBlockIDsInBox([]string{"encrypted-database"}, boxID)
+	if len(defIDs) != 1 || "encrypted-def" != defIDs[0] {
+		t.Fatalf("unexpected encrypted attribute view definition IDs: %#v", defIDs)
+	}
+}
 
 func TestRefsFromTreeIncludesAttributeViewRichTextReferences(t *testing.T) {
 	const (

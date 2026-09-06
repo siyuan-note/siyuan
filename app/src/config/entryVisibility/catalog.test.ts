@@ -623,6 +623,30 @@ test("callout presets stay aligned across block menu scopes", () => {
     });
 });
 
+test("heading conversions follow list conversions across block menu scopes", () => {
+    const headingKeys = ["heading1", "heading2", "heading3", "heading4", "heading5", "heading6"];
+    ["gutter.single.turnInto", "gutter.multi.turnInto"].forEach((path) => {
+        const keys = getEntryCatalogChildren(path).map(item => item.key);
+        const headingIndex = keys.indexOf("heading1");
+        assert.equal(headingIndex, keys.indexOf("check") + 1);
+        assert.deepEqual(keys.slice(headingIndex, headingIndex + headingKeys.length), headingKeys);
+    });
+});
+
+test("tab conversion belongs to the single block conversion menu", () => {
+    const keys = getEntryCatalogChildren("gutter.single.turnInto").map(item => item.key);
+    assert.equal(keys[keys.indexOf("tabs") - 1], "calloutCustom");
+    assert.equal(keys[keys.indexOf("tabs") + 1], "list");
+    assert.equal(getEntryCatalogNode("gutter.single.turnInto.tabs")?.simple, true);
+    assert.equal(getEntryCatalogNode("gutter.single.turnInto.tabs")?.type, "entry");
+    assert.equal(getEntryCatalogNode("gutter.multi.turnInto.tabs"), undefined);
+    assert.equal(keys[keys.indexOf("superBlock") - 1], "heading6");
+    assert.equal(keys[keys.indexOf("superBlock") + 1], "code");
+    assert.equal(getEntryCatalogNode("gutter.single.turnInto.superBlock")?.simple, true);
+    assert.equal(getEntryCatalogNode("gutter.single.turnInto.superBlock")?.type, "entry");
+    assert.equal(getEntryCatalogNode("gutter.multi.turnInto.superBlock"), undefined);
+});
+
 test("conditional block resource menus have distinct configuration labels", () => {
     const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
     Object.defineProperty(globalThis, "window", {
@@ -684,6 +708,19 @@ test("list block submenu follows the base block entries", () => {
         "prependListItem",
         "appendListItem",
     ]);
+});
+
+test("tabs layout actions have their own configurable block menu", () => {
+    assert.deepEqual(getEntryCatalogChildren("gutter.single.tabs").map(item => item.key), [
+        "tabsPositionTop", "tabsPositionLeft",
+    ]);
+    const keys = getEntryCatalogChildren("gutter.single").map(item => item.key);
+    const index = keys.indexOf("tabs");
+    assert.deepEqual(keys.slice(index - 1, index + 3), [
+        "separator_tabs", "tabs", "separator_cancelSuperBlock", "superBlock",
+    ]);
+    assert.equal(getEntryCatalogNode("gutter.single.tabs")?.simple, true);
+    assert.equal(getEntryCatalogNode("gutter.single.separator_tabs")?.type, "separator");
 });
 
 test("super block actions and vertical alignment use their respective menu groups", () => {

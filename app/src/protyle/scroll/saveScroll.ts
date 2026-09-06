@@ -8,6 +8,7 @@ import {isSupportCSSHL} from "../render/searchMarkRender";
 import {isEncryptedBox} from "../../util/pathName";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {getSavedScrollRange, getScrollRequestParams} from "./scrollRequest";
+import {getSavedTabFocusTarget} from "../util/focusRestore";
 
 export const saveScroll = (protyle: IProtyle, getObject = false) => {
     if (!protyle.wysiwyg.element.firstElementChild || window.siyuan.config.readonly ||
@@ -40,10 +41,13 @@ export const saveScroll = (protyle: IProtyle, getObject = false) => {
         if (range && protyle.wysiwyg.element.contains(range.startContainer)) {
             const blockElement = hasClosestBlock(range.startContainer);
             if (blockElement) {
-                const position = getSelectionOffset(getContenteditableElement(blockElement) || blockElement, undefined, range);
-                attr.focusId = blockElement.getAttribute("data-node-id");
-                attr.focusStart = position.start;
-                attr.focusEnd = position.end;
+                const target = getSavedTabFocusTarget(blockElement);
+                attr.focusId = target.getAttribute("data-node-id");
+                if (target === blockElement) {
+                    const position = getSelectionOffset(getContenteditableElement(blockElement) || blockElement, undefined, range);
+                    attr.focusStart = position.start;
+                    attr.focusEnd = position.end;
+                }
             }
         }
     }

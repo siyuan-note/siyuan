@@ -204,7 +204,7 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
     }, {
         filter: [window.siyuan.languages.tabs, "tabs", "页签", "yeqian"],
         id: "tabs",
-        value: `:::tabs\n:::tab\n${Lute.Caret}\n:::\n:::tab\n\n:::\n:::\n`,
+        value: `::: tabs\n@tab\n\n${Lute.Caret}\n\n@tab\n\n:::\n`,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconTabs"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.tabs}</span></div>`,
     }, {
         filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi", "note"],
@@ -864,7 +864,7 @@ export const hintMoveBlock = async (pathString: string, sourceElements: Element[
                     if (targetElement) {
                         setBlockSelectionModeElement(editorElement, targetElement);
                         focusBlock(targetElement);
-                        countBlockWord(getBlockSelectionStatusIDs(editorElement), protyle.block.rootID);
+                        countBlockWord(getBlockSelectionStatusIDs(editorElement), protyle);
                     }
                 } : undefined,
             });
@@ -905,7 +905,7 @@ export const hintMoveBlock = async (pathString: string, sourceElements: Element[
         if (nextSelectionModeElement) {
             setBlockSelectionModeElement(editorElement, nextSelectionModeElement);
             focusBlock(nextSelectionModeElement);
-            countBlockWord(getBlockSelectionStatusIDs(editorElement), protyle.block.rootID);
+            countBlockWord(getBlockSelectionStatusIDs(editorElement), protyle);
         }
     }
     // 跨文档不支持撤销

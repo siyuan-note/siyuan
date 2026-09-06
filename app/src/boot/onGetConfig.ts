@@ -40,18 +40,27 @@ import {dispatchPluginGlobalShortcut} from "../plugin/globalShortcut";
 import {requestResponsiveDockLayout} from "../layout/dock/responsive";
 import {getHostCapabilities, setHostConnection, type TKernelConnection} from "../util/hostCapabilities";
 
+export const initDesktopHost = async () => {
+    /// #if !BROWSER
+    try {
+        const connection = await ipcRenderer.invoke(Constants.SIYUAN_INIT, {
+            languages: window.siyuan.languages["_trayMenu"],
+            workspaceDir: getHostCapabilities().workspaces ? window.siyuan.config.system.workspaceDir : "",
+            port: location.port,
+            remote: getHostCapabilities().remoteKernel,
+        }) as TKernelConnection | undefined;
+        setHostConnection(connection);
+    } catch (error) {
+        console.error("initialize desktop host failed:", error);
+    }
+    /// #endif
+};
+
 export const onGetConfig = (isStart: boolean, app: App) => {
     correctHotkey(app);
     document.body.classList.toggle("body--windows", isWindows());
     /// #if !BROWSER
-    void ipcRenderer.invoke(Constants.SIYUAN_INIT, {
-        languages: window.siyuan.languages["_trayMenu"],
-        workspaceDir: getHostCapabilities().workspaces ? window.siyuan.config.system.workspaceDir : "",
-        port: location.port,
-        remote: getHostCapabilities().remoteKernel,
-    }).then((connection: TKernelConnection | undefined) => setHostConnection(connection)).catch((error) => {
-        console.error("initialize desktop host failed:", error);
-    });
+    void initDesktopHost();
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
     const position = Constants.SIZE_ZOOM.find((item) => item.zoom === window.siyuan.storage[Constants.LOCAL_ZOOM]).position;
     ipcRenderer.send(Constants.SIYUAN_CMD, {

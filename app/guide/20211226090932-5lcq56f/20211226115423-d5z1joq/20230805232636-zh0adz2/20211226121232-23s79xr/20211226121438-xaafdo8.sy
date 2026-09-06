@@ -6,7 +6,7 @@
 		"id": "20211226121438-xaafdo8",
 		"title": "資料同步",
 		"type": "doc",
-		"updated": "20260803163402"
+		"updated": "20260905191024"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226121454-8vr6fgn",
-				"updated": "20250218121017"
+				"updated": "20260905184908"
 			},
 			"Children": [
 				{
@@ -29,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226121454-2wnvrmj",
-				"updated": "20250218121017"
+				"updated": "20260905184908"
 			},
 			"Children": [
 				{
@@ -43,7 +43,133 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 文件夾資料一致，包括資源檔案、自訂圖示、外掛程式、程式碼片段、範本、掛件和文件資料。"
+					"Data": "​ 資料夾中的資料在邏輯上保持一致，包括資源檔案、自訂圖示、外掛程式、程式碼片段、範本、掛件和文件資料。按需下載模式允許資源檔案的內容暫不儲存於本機。"
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-43b5is5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260905184908-43b5is5",
+				"updated": "20260905191024"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "資源檔案下載"
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-r2oumjv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905184908-r2oumjv",
+				"updated": "20260905184908"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "帳號與同步"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資源檔案下載"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中選擇全部下載或按需下載，設定僅套用於目前裝置。"
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-ydno2ri",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905184908-ydno2ri",
+				"updated": "20260905184908"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "全部下載是預設模式。按需下載仍會完整同步文件、資料庫定義和資源檔案清單，在顯示圖片、音訊、影片、PDF 等內容或開啟資源連結時下載所需資源檔案。加密筆記本資源仍需解鎖後存取。"
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-u69286b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905184908-u69286b",
+				"updated": "20260905184908"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "已下載的資源檔案會保留於本機，並在後續同步時繼續更新。啟用按需下載不會清理現有檔案，也不會立即釋放已佔用的空間。"
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-nspliig",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905184908-nspliig",
+				"updated": "20260905191024"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "尚未下載的資源檔案無法離線使用，無法取得時會回報錯誤。切換為全部下載會先補齊目前資源檔案及所有保留的本機快照所需內容，因此也可能下載歷史版本；下載失敗時保留原模式，可以恢復連線後重試。"
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-ihj48vx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905184908-ihj48vx",
+				"updated": "20260905184908"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按需模式的本機快照可能依賴雲端，不能視為完整離線備份。完整快照下載，以及需要資源檔案內容的匯出和復原操作，會先補齊對應資源檔案，無法取得時明確回報錯誤。"
+				}
+			]
+		},
+		{
+			"ID": "20260905184908-qskt7h0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260905184908-qskt7h0",
+				"updated": "20260905184908"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "更換同步目標、重設資料倉庫或使用舊版本開啟此工作空間前，請先切換為全部下載並完成下載，避免失去取得尚未下載資源檔案的途徑。"
 				}
 			]
 		},

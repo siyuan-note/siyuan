@@ -24,6 +24,7 @@ import {afterExport} from "../../protyle/export/util";
 import {genConfigItemMainHtml, genConfigItemName} from "../render/fragments";
 import {sendAppSetting} from "./appRuntime";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {fitSelectWidthToOptions} from "../../util/select";
 
 /// #if MOBILE
 const registerAppWorkspaceGroup = (tab: SettingTabBuilder) => {
@@ -258,6 +259,7 @@ const mountNetworkProxy = (root: HTMLElement) => {
     const schemeElement = root.querySelector("#networkProxyScheme") as HTMLSelectElement;
     const hostElement = root.querySelector("#networkProxyHost") as HTMLInputElement;
     const portElement = root.querySelector("#networkProxyPort") as HTMLInputElement;
+    fitSelectWidthToOptions(schemeElement);
     const updateInputs = () => {
         const disabled = schemeElement.value === "" || schemeElement.value === "system";
         hostElement.disabled = disabled;

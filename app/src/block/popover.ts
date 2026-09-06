@@ -6,6 +6,10 @@ import {isEncryptedBox, isLocalPath, parseSiYuanUriInfo} from "../util/pathName"
 import type {App} from "../index";
 import {Constants} from "../constants";
 import {getCellText} from "../protyle/render/av/cell";
+import {
+    hasAVCellContentOverflow,
+    shouldMeasureAVCellContentOverflow,
+} from "../protyle/render/av/cellOverflow";
 import {isTouchDevice} from "../util/functions";
 import {escapeAriaLabel, escapeHtml, escapeLessThans} from "../util/escape";
 import {isListItemActionElement} from "../protyle/wysiwyg/listContext";
@@ -108,9 +112,12 @@ export const initBlockPopover = (app: App) => {
                         }
                     }
                     tip = "";
-                    if (!tip && aElement.dataset.wrap !== "true" && event.target.dataset.type !== "block-more" && !hasClosestByClassName(event.target, "block__icon")) {
+                    const richTextElement = aElement.querySelector<HTMLElement>(".av__celltext--rich");
+                    if (!tip && shouldMeasureAVCellContentOverflow(aElement.dataset.wrap, Boolean(richTextElement)) &&
+                        event.target.dataset.type !== "block-more" &&
+                        !hasClosestByClassName(event.target, "block__icon")) {
                         aElement.style.overflow = "auto";
-                        if (aElement.scrollWidth > aElement.clientWidth + 2) {
+                        if (hasAVCellContentOverflow(aElement, richTextElement)) {
                             tip = Lute.EscapeHTMLStr(getCellText(aElement));
                         }
                         aElement.style.overflow = "";

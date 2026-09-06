@@ -1,6 +1,6 @@
 import {scrollSettingContent} from "./dragScroll";
 
-// 拖拽层仅覆盖首组标题及现有留白，随滚动和面板切换更新，避开控件及滚动条。
+// 顶部渐变毛玻璃固定覆盖边距，内容从其后方滚动，同时支持拖拽。
 export const initSettingDrag = (dialog: HTMLElement) => {
     const wrap = dialog.querySelector<HTMLElement>(".config__tab-wrap");
     const handle = document.createElement("div");
@@ -25,40 +25,27 @@ export const initSettingDrag = (dialog: HTMLElement) => {
         frame = 0;
         const panel = Array.from(wrap.querySelectorAll<HTMLElement>(":scope > .config__tab-container"))
             .find(element => element.getClientRects().length > 0);
-        let height = 0;
-        let width = 0;
-        if (panel) {
-            const top = wrap.getBoundingClientRect().top;
-            width = panel.clientWidth;
-            let first = Array.from(panel.children).find(element => element.getClientRects().length > 0);
-            // 穿过纯布局容器，找到实际首项；嵌套页面的工具栏也在此处形成边界。
-            while (first && !first.matches(".config-group, .layout-tab-bar, .b3-label, .b3-dialog__header")) {
-                const child = Array.from(first.children).find(element => element.getClientRects().length > 0);
-                if (!child) {
-                    break;
-                }
-                first = child;
-            }
-            if (first) {
-                height = Math.min(24, first.getBoundingClientRect().top - top);
-                if (first.matches(".layout-tab-bar")) {
-                    // 使用页签实际顶边识别内边距及外边距，热区不覆盖可点击的页签。
-                    const items = Array.from(first.children).filter(element => element.getClientRects().length > 0);
-                    if (items.length > 0) {
-                        height = Math.min(24, ...items.map(element => element.getBoundingClientRect().top - top));
-                    }
-                } else if (first.matches(".config-group")) {
-                    const title = first.querySelector<HTMLElement>(":scope > .config-title");
-                    const items = first.querySelector<HTMLElement>(":scope > .config-items");
-                    if (title?.getClientRects().length && items &&
-                        !title.querySelector("button, input, select, textarea, a, label, [contenteditable], [role], [tabindex], [data-type], [data-action], .block__icon")) {
-                        height = items.getBoundingClientRect().top - top;
-                    }
-                }
-            }
+        const className = `config__drag resize__move${panel ?
+            (["bazaar", "assets"].includes(panel.dataset.name) ? " config__drag--tabs" : "") : " fn__none"}`;
+        if (handle.className !== className) {
+            handle.className = className;
         }
-        handle.style.width = `${width}px`;
-        handle.style.height = `${Math.max(0, height)}px`;
+        if (panel && !["bazaar", "assets"].includes(panel.dataset.name)) {
+            // 搜索过滤后也只移除首尾可见分组的外侧间距，避免与固定留白叠加。
+            const visible = Array.from(panel.children).filter(element => element.getClientRects().length > 0);
+            const first = visible[0];
+            const last = visible[visible.length - 1];
+            panel.querySelectorAll(":scope > .config-group").forEach(group => {
+                const isFirst = group === first;
+                if (group.classList.contains("config-group--first") !== isFirst) {
+                    group.classList.toggle("config-group--first", isFirst);
+                }
+                const isLast = group === last;
+                if (group.classList.contains("config-group--last") !== isLast) {
+                    group.classList.toggle("config-group--last", isLast);
+                }
+            });
+        }
     };
     const schedule = () => {
         if (!frame) {
@@ -67,17 +54,10 @@ export const initSettingDrag = (dialog: HTMLElement) => {
     };
     const observer = new MutationObserver(schedule);
     observer.observe(wrap, {childList: true, subtree: true, attributes: true, attributeFilter: ["class"]});
-    const resizeObserver = new ResizeObserver(schedule);
-    resizeObserver.observe(wrap);
-    wrap.addEventListener("scroll", update, true);
-    dialog.addEventListener("transitionend", schedule);
     schedule();
     return () => {
         handle.removeEventListener("wheel", onWheel);
         cancelAnimationFrame(frame);
         observer.disconnect();
-        resizeObserver.disconnect();
-        wrap.removeEventListener("scroll", update, true);
-        dialog.removeEventListener("transitionend", schedule);
     };
 };

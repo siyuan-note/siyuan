@@ -6,7 +6,7 @@ import {exportLayout} from "../../layout/util";
 import {syncHideToolbarLayout, updateBarModeIcon} from "../../layout/topBar";
 /// #endif
 import {fetchPost} from "../../util/fetch";
-import {loadAssets, unloadThemeScript} from "../../util/assets";
+import {loadAssets, refreshHeadingNumberMeasurements, setInlineStyle, unloadThemeScript} from "../../util/assets";
 import {getFrontend} from "../../util/functions";
 import {shouldUnloadThemeScript} from "../../util/themeCompatibility";
 import {remountOpenSettingTab} from "../setting/mount";
@@ -79,6 +79,10 @@ const applyAppearanceConfig = async (data: Config.IAppearance) => {
     /// #endif
 
     loadAssets(data);
+    if (JSON.stringify(data.globalFontFamilies) !== JSON.stringify(prevAppearance.globalFontFamilies)) {
+        await setInlineStyle();
+        refreshHeadingNumberMeasurements();
+    }
     /// #if !MOBILE
     void remountOpenSettingTab("appearance");
     /// #endif

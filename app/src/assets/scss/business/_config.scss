@@ -15,8 +15,50 @@
     position: absolute;
     top: 0;
     left: 0;
+    right: 0;
     z-index: 1;
+    height: 24px;
     touch-action: none;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-color: color-mix(in srgb, var(--b3-theme-background) 80%, transparent);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 100%);
+    }
+
+    &--tabs {
+      height: 16px;
+    }
+  }
+
+  &__tab-wrap > .config__tab-container:not([data-name="bazaar"]):not([data-name="assets"]) {
+    margin: 0 24px;
+    padding: 24px 0;
+    scroll-padding-block: 24px;
+    height: 100%;
+    flex-shrink: 0;
+
+    > .config-group {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    > .config-group--first {
+      margin-top: 0;
+
+      > .config-title {
+        margin-top: 0;
+      }
+    }
+
+    > .config-group--last {
+      margin-bottom: 0;
+    }
   }
 
   &__tab-container {

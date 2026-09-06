@@ -197,7 +197,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 }
                 clearTimeout(statusTimeout);
                 statusElement.innerHTML = sanitizeKernelHTML(data.msg);
-                statusElement.style.bottom = "var(--mobile-bottom-bar-safe-area)";
+                statusElement.style.bottom = "0";
                 statusTimeout = window.setTimeout(() => {
                     statusElement.style.bottom = "";
                 }, 12000);

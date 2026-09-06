@@ -1,9 +1,9 @@
-import {getTabContent, getTabItems, getTabTitle, revealTabAncestors, tabsRender} from "../render/tabsRender";
+import {getTabContent, getTabItems, getTabTitle, getTabTitleBlock, revealTabAncestors, tabsRender} from "../render/tabsRender";
 import {repairActiveTab} from "./tabsRemoval";
 import {transaction} from "./transaction";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
-import {focusBlock} from "../util/selection";
+import {focusBlock, focusByRange} from "../util/selection";
 import {genEmptyElement, genSBElement} from "../../block/util";
 import {Menu} from "../../plugin/Menu";
 import {processRender} from "../util/processCode";
@@ -11,8 +11,7 @@ import {avRender} from "../render/av/render";
 import {isHiddenTabContent} from "../render/tabsVisibility";
 import {queueTransaction} from "../util/transactionQueue";
 import {remapTabsDOMIDs} from "../util/tabsCopy";
-import {Dialog} from "../../dialog";
-import {isMobile} from "../../util/functions";
+import {copyTextByType} from "../toolbar/util";
 
 const canEdit = (protyle: IProtyle, element: Element) => !protyle.disabled &&
     !protyle.options.action.includes(Constants.CB_GET_HISTORY) && !element.closest(".protyle-wysiwyg__embed");
@@ -34,7 +33,7 @@ const changeTabs = (protyle: IProtyle, elements: HTMLElement[], change: () => vo
 
 const newTab = (protyle: IProtyle) => {
     const template = document.createElement("template");
-    template.innerHTML = protyle.lute.Md2BlockDOM(":::tabs\n:::tab\n\n:::\n:::\n");
+    template.innerHTML = protyle.lute.Md2BlockDOM("::: tabs\n@tab\n\n:::\n");
     return template.content.querySelector<HTMLElement>(".tab-item");
 };
 
@@ -43,34 +42,13 @@ export const renameTab = (protyle: IProtyle, item: HTMLElement) => {
         return;
     }
     revealTabAncestors(protyle.wysiwyg.element, item);
+    item.dataset.tabsEditing = "true";
+    initEditorTabs(protyle);
     const title = getTabTitle(item);
-    const initialTitle = title.textContent || "";
-    const dialog = new Dialog({
-        title: window.siyuan.languages.rename,
-        content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block"></div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-        width: isMobile() ? "92vw" : "520px",
-    });
-    const input = dialog.element.querySelector("input") as HTMLInputElement;
-    const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-button");
-    const confirm = () => {
-        const value = input.value.trim();
-        if (value !== initialTitle) {
-            changeTabs(protyle, [item.parentElement], () => {
-                title.textContent = value;
-            });
-        }
-        dialog.destroy();
-    };
-    dialog.bindInput(input, confirm);
-    input.value = initialTitle;
-    input.focus();
-    input.select();
-    buttons[0].addEventListener("click", () => dialog.destroy());
-    buttons[1].addEventListener("click", confirm);
+    const range = document.createRange();
+    range.selectNodeContents(title);
+    title.focus();
+    focusByRange(range);
 };
 
 const addTab = (protyle: IProtyle, tabs: HTMLElement) => {
@@ -107,7 +85,12 @@ export const unwrapTabs = (protyle: IProtyle, tabs: HTMLElement) => {
             const content = getTabContent(item);
             const title = getTabTitle(item);
             const blocks = Array.from(content.children);
-            if (title.innerHTML) {
+            const titleBlock = getTabTitleBlock(item);
+            if (titleBlock) {
+                titleBlock.removeAttribute("tabs-title");
+                title.classList.remove("tab-item-title", "callout-title");
+                blocks.unshift(titleBlock);
+            } else if (title.innerHTML) {
                 const paragraph = genEmptyElement(false, false);
                 paragraph.firstElementChild.innerHTML = title.innerHTML;
                 blocks.unshift(paragraph);
@@ -127,56 +110,49 @@ export const unwrapTabs = (protyle: IProtyle, tabs: HTMLElement) => {
     });
 };
 
+export const setTabsPosition = (protyle: IProtyle, tabs: HTMLElement, position: "top" | "left") => {
+    if ((tabs.getAttribute("tabs-position") || "top") !== position) {
+        changeTabs(protyle, [tabs], () => tabs.setAttribute("tabs-position", position));
+    }
+};
+
 export const openTabsMenu = (protyle: IProtyle, tabs: HTMLElement, item: HTMLElement, anchor: HTMLElement) => {
-    if (!canEdit(protyle, tabs)) {
+    if (!item) {
         return;
     }
     const lang = window.siyuan.languages;
     const menu = new Menu();
-    menu.addItem({icon: "iconEdit", label: lang.rename, click: () => renameTab(protyle, item)});
-    menu.addItem({icon: "iconAdd", label: lang.tabItem, click: () => addTab(protyle, tabs)});
-    const siblings = getTabItems(tabs);
-    const index = siblings.indexOf(item);
-    if (index > 0) {
-        menu.addItem({icon: "iconLeft", label: lang.dragTipMoveTargetFront.replace("${x}",
-            getTabTitle(siblings[index - 1]).textContent || lang.tabItem),
-        click: () => moveTab(protyle, item, siblings[index - 1])});
+    menu.addItem({icon: "iconCopy", label: lang.copy, submenu: [{
+        icon: "iconRef",
+        label: lang.copyBlockRef,
+        click: () => {copyTextByType([item.dataset.nodeId], "ref");},
+    }]});
+    if (canEdit(protyle, tabs)) {
+        menu.addItem({icon: "iconEdit", label: lang.rename, click: () => renameTab(protyle, item)});
+        menu.addItem({icon: "iconCopy", label: lang.duplicateCopy, click: () => {
+            const copy = item.cloneNode(true) as HTMLElement;
+            const ids = new Map<string, string>();
+            [copy, ...Array.from(copy.querySelectorAll<HTMLElement>("[data-node-id]"))].forEach(block => {
+                const id = Lute.NewNodeID();
+                ids.set(block.dataset.nodeId, id);
+                block.dataset.nodeId = id;
+                block.setAttribute("updated", id.substring(0, 14));
+            });
+            remapTabsDOMIDs(copy, ids);
+            changeTabs(protyle, [tabs], () => {
+                item.after(copy);
+                tabs.setAttribute("tabs-active-id", copy.dataset.nodeId);
+            });
+        }});
+        menu.addItem({icon: "iconTrashcan", label: lang.delete, click: () => {
+            const ids = getTabItems(tabs).map(entry => entry.dataset.nodeId);
+            changeTabs(protyle, [tabs], () => {
+                item.remove();
+                repairActiveTab(tabs, ids, item.dataset.nodeId);
+            });
+            focusBlock(tabs);
+        }});
     }
-    if (index + 1 < siblings.length) {
-        menu.addItem({icon: "iconRight", label: lang.dragTipMoveTargetBack.replace("${x}",
-            getTabTitle(siblings[index + 1]).textContent || lang.tabItem),
-        click: () => changeTabs(protyle, [tabs], () => siblings[index + 1].after(item))});
-    }
-    menu.addItem({icon: "iconCopy", label: lang.duplicate, click: () => {
-        const copy = item.cloneNode(true) as HTMLElement;
-        const ids = new Map<string, string>();
-        [copy, ...Array.from(copy.querySelectorAll<HTMLElement>("[data-node-id]"))].forEach(block => {
-            const id = Lute.NewNodeID();
-            ids.set(block.dataset.nodeId, id);
-            block.dataset.nodeId = id;
-            block.setAttribute("updated", id.substring(0, 14));
-        });
-        remapTabsDOMIDs(copy, ids);
-        changeTabs(protyle, [tabs], () => {
-            item.after(copy);
-            tabs.setAttribute("tabs-active-id", copy.dataset.nodeId);
-        });
-    }});
-    menu.addItem({icon: "iconTrashcan", label: lang.delete, click: () => {
-        const ids = getTabItems(tabs).map(entry => entry.dataset.nodeId);
-        changeTabs(protyle, [tabs], () => {
-            item.remove();
-            repairActiveTab(tabs, ids, item.dataset.nodeId);
-        });
-        focusBlock(tabs);
-    }});
-    menu.addSeparator();
-    ["top", "left"].forEach(position => menu.addItem({
-        label: position === "top" ? lang.tabsPositionTop : lang.tabsPositionLeft,
-        icon: (tabs.getAttribute("tabs-position") || "top") === position ? "iconSelect" : undefined,
-        click: () => changeTabs(protyle, [tabs], () => tabs.setAttribute("tabs-position", position)),
-    }));
-    menu.addItem({icon: "iconSuper", label: lang.tabsUnwrap, click: () => unwrapTabs(protyle, tabs)});
     const rect = anchor.getBoundingClientRect();
     menu.open({x: rect.left, y: rect.bottom});
 };
@@ -188,7 +164,6 @@ export const initEditorTabs = (protyle: IProtyle) => {
         readonly: tabs => !canEdit(protyle, tabs || root),
         label: window.siyuan.languages.tabItem,
         addLabel: window.siyuan.languages.tabItem,
-        menuLabel: window.siyuan.languages.more,
         select: (tabs, id) => {
             if (!canEdit(protyle, tabs) || tabs.getAttribute("tabs-active-id") === id) {
                 return;
@@ -218,11 +193,5 @@ export const initEditorTabs = (protyle: IProtyle) => {
             avRender(item, protyle);
             protyle.contentElement?.dispatchEvent(new Event("scroll"));
         }),
-    });
-    root.addEventListener("focusout", event => {
-        const title = (event.target as Element).closest(".tab-item-title");
-        if (title && !title.contains(event.relatedTarget as Node)) {
-            title.closest<HTMLElement>(".tab-item").dataset.tabsEditing = "false";
-        }
     });
 };

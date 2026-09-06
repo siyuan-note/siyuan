@@ -8,17 +8,19 @@
 
 ## NPM dependencies
 
-Install pnpm: `npm install -g pnpm@11.18.0`
+Electron 44 requires macOS 13 or later and supports only 64-bit Windows and Linux builds.
+
+Install pnpm: `npm install -g pnpm@11.25.0`
 
 <details>
 <summary>For China mainland</summary>
 
 Set the Electron mirror environment variable and install Electron:
 
-* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@43.5.1 -D`
+* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@44.2.0 -D`
 * Windows:
   * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-  * `pnpm install electron@43.5.1 -D`
+  * `pnpm install electron@44.2.0 -D`
 
 NPM mirror:
 
@@ -28,7 +30,7 @@ NPM mirror:
 
 Enter the app folder and execute:
 
-* `pnpm install electron@43.5.1 -D`
+* `pnpm install electron@44.2.0 -D`
 * `pnpm run install:electron`
 * `pnpm run dev`
 * `pnpm run start`

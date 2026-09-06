@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260905124213"
+		"updated": "20260906013806"
 	},
 	"Children": [
 		{
@@ -3985,7 +3985,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20260905124213"
+				"updated": "20260906013806"
 			},
 			"Children": [
 				{
@@ -13250,7 +13250,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-avhukx7",
-				"updated": "20260905124213"
+				"updated": "20260906013806"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13265,12 +13265,34 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260905124213-w4xwhs9",
-				"updated": "20260905124213"
+				"updated": "20260906013806"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "页签栏获得焦点时，左右方向键移动顶部页签的焦点，上下方向键移动左侧页签的焦点；正文中的方向键保持文本编辑行为。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "编辑页签标题时，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 结束编辑并进入正文；点击正文也可结束编辑。"
 				}
 			]
 		},

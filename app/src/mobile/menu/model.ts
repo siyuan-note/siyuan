@@ -48,7 +48,9 @@ export const openModel = (obj: {
         iconElement.classList.add("fn__none");
     }
     iconElement.onclick = obj.backCallback ? backModel : null;
-    modelElement.querySelector(".toolbar__text").innerHTML = obj.title;
+    const titleElement = modelElement.querySelector(".toolbar__text");
+    titleElement.innerHTML = obj.title;
+    titleElement.classList.toggle("toolbar__text--search", !!titleElement.querySelector(".toolbar__search"));
     const modelMainElement = modelElement.querySelector("#modelMain") as HTMLElement;
     modelMainElement.innerHTML = obj.html;
     obj.bindEvent(modelMainElement);

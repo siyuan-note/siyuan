@@ -23,6 +23,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
@@ -67,6 +68,26 @@ func statAsset(c *gin.Context) {
 
 	info, err := os.Stat(p)
 	if err != nil {
+		if os.IsNotExist(err) {
+			files, readErr := model.DeferredSyncAssets()
+			if readErr != nil {
+				ret.Code = 1
+				ret.Msg = readErr.Error()
+				return
+			}
+			for _, file := range files {
+				if filepath.Clean(p) != filepath.Join(util.DataDir, filepath.FromSlash(strings.TrimPrefix(file.Path, "/"))) {
+					continue
+				}
+				updated := time.UnixMilli(file.Updated).Format("2006-01-02 15:04:05")
+				ret.Data = map[string]any{
+					"size": file.Size, "hSize": humanize.IBytesCustomCeil(uint64(file.Size), 2),
+					"created": file.Updated, "hCreated": updated, "updated": file.Updated, "hUpdated": updated,
+					"downloaded": false,
+				}
+				return
+			}
+		}
 		ret.Code = 1
 		return
 	}
@@ -175,10 +196,21 @@ func ocr(c *gin.Context) {
 	path := arg["path"].(string)
 
 	// 加密笔记本的资源不参与全局 OCR
-	if absPath, absErr := model.GetAssetAbsPathInBox(path, ""); absErr == nil && model.IsEncryptedAssetPath(absPath) {
+	absPath, err := model.GetAssetAbsPathInBox(path, "")
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	if model.IsEncryptedAssetPath(absPath) {
 		ret.Code = -1
 		ret.Msg = "OCR is not supported for assets in encrypted notebooks"
 		ret.Data = map[string]any{"closeTimeout": 3000}
+		return
+	}
+	if err = model.EnsureAssetLocal(absPath); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
 		return
 	}
 
@@ -521,6 +553,12 @@ func resolveAssetPath(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(314)
 		ret.Data = map[string]any{"closeTimeout": 3000}
+		return
+	}
+	if err = model.EnsureAssetPrefixLocal(p); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]any{"closeTimeout": 7000}
 		return
 	}
 	ret.Data = p

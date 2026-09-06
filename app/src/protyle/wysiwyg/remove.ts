@@ -1228,7 +1228,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                                     setBlockSelectionModeElement(protyle.wysiwyg.element, targetElement);
                                     focusBlock(targetElement);
                                     countBlockWord(getBlockSelectionStatusIDs(protyle.wysiwyg.element),
-                                        protyle.block.rootID);
+                                        protyle);
                                 }
                             } : undefined,
                         });
@@ -1851,7 +1851,7 @@ export const removeBlockPreservingSelectionMode = async (protyle: IProtyle, bloc
         setBlockSelectionModeElement(editorElement, nextSelectionModeElement);
         focusBlock(nextSelectionModeElement);
     }
-    countBlockWord(getBlockSelectionStatusIDs(editorElement), protyle.block.rootID);
+    countBlockWord(getBlockSelectionStatusIDs(editorElement), protyle);
     return removed;
 };
 

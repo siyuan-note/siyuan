@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260905124213"
+		"updated": "20260906013806"
 	},
 	"Children": [
 		{
@@ -3987,7 +3987,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20260905124213"
+				"updated": "20260906013806"
 			},
 			"Children": [
 				{
@@ -13264,7 +13264,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-pfrny4c",
-				"updated": "20260905124213"
+				"updated": "20260906013806"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13279,12 +13279,34 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260905124213-dh6bex8",
-				"updated": "20260905124213"
+				"updated": "20260906013806"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "When the tab bar has focus, Left and Right move focus between top tabs; Up and Down move focus between left tabs. Arrow keys in the content keep their normal editing behavior."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " While editing a tab title, press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to finish editing and move to the content. Clicking the content also ends title editing."
 				}
 			]
 		},

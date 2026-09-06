@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260905124213"
+		"updated": "20260906013806"
 	},
 	"Children": [
 		{
@@ -3979,7 +3979,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20260905124213"
+				"updated": "20260906013806"
 			},
 			"Children": [
 				{
@@ -13256,7 +13256,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-degzfbw",
-				"updated": "20260905124213"
+				"updated": "20260906013806"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13271,12 +13271,34 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260905124213-z6l8pda",
-				"updated": "20260905124213"
+				"updated": "20260906013806"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "頁籤列取得焦點時，左右方向鍵移動頂部頁籤的焦點，上下方向鍵移動左側頁籤的焦點；內文中的方向鍵維持文字編輯行為。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "編輯頁籤標題時，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 結束編輯並進入內文；點擊內文也可結束編輯。"
 				}
 			]
 		},

@@ -219,6 +219,9 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
                 }],
             },
         },
+        runtimeCapabilities: {
+            websocket: false,
+        },
         afterSetContent: (protyle, element) => {
             resetEmbedBlocks(element);
             blockRender(protyle, element);

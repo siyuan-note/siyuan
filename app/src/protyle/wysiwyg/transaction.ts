@@ -39,7 +39,7 @@ import {resize} from "../util/resize";
 import {scrollCenter} from "../../util/highlightById";
 import {consumeGutterFoldRestore} from "../ui/gutterVisibility";
 import {setFold} from "../util/blockFold";
-import {queueTransaction} from "../util/transactionQueue";
+import {queueTransaction, queueTransactionBatch} from "../util/transactionQueue";
 import {
     cleanHeadingNumberHTML,
     cleanHeadingNumberOperations,
@@ -67,6 +67,8 @@ import {
     restoreBlockSelectionModeState
 } from "./blockSelection";
 import {isEmptyParagraph} from "./emptyTextBlock";
+import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
+import {waitForPendingTransactions} from "../util/transactionQueue";
 import {
     invalidateTrackedRangesByOperations,
     type ITrackedRangeInsertion,
@@ -539,50 +541,64 @@ const promiseTransaction = (options: {
     if (!options.skipSync) {
         syncTrackedRanges(protyle, options.doOperations, options.trackedRangeInsertion);
     }
-    queueTransaction(protyle, () => fetchPost("/api/transactions", {
-        session: protyle.id,
-        app: Constants.SIYUAN_APPID,
-        transactions: [{
+    const queuedTransaction = {
+        transaction: {
             doOperations: options.doOperations,
             undoOperations: options.undoOperations,// 目前用于 ws 推送更新大纲
             templateDocTreePlanID: options.templateDocTreePlanID,
-        }]
-    }, (response) => {
-        invalidateViewFoldRequests(protyle);
-        const ids = getBlockSelectionStatusIDs(protyle.wysiwyg.element);
-        countBlockWord(ids, protyle.block.rootID, true);
-        if (!options.skipSync) {
-            response.data[0].doOperations.forEach((operation: IOperation) => {
-                if (handleViewFoldSourceOperation(protyle, operation)) {
-                    return;
-                }
-                if (operation.action === "unfoldHeading" || operation.action === "foldHeading") {
-                    processFold(operation, protyle);
-                    return;
-                }
-                if (operation.action === "setAttrs") {
-                    syncFoldAndStyleAttrs(protyle.wysiwyg.element, operation);
-                }
-                // 冻结范围依赖列的 DOM 分组，新增列事务落盘后使用完整数据重建分组。
-                if (operation.action === "addAttrViewCol" &&
-                    protyle.wysiwyg.element.querySelector(
-                        `.av[data-av-id="${operation.avID}"] [data-freeze="true"]`
-                    )) {
-                    refreshAV(protyle, operation);
+        },
+        callback: (responseTransaction: {doOperations: IOperation[]}) => {
+            invalidateViewFoldRequests(protyle);
+            const ids = getBlockSelectionStatusIDs(protyle.wysiwyg.element);
+            countBlockWord(ids, protyle, true);
+            if (!options.skipSync) {
+                responseTransaction.doOperations.forEach((operation: IOperation) => {
+                    if (handleViewFoldSourceOperation(protyle, operation)) {
+                        return;
+                    }
+                    if (operation.action === "unfoldHeading" || operation.action === "foldHeading") {
+                        processFold(operation, protyle);
+                        return;
+                    }
+                    if (operation.action === "setAttrs") {
+                        syncFoldAndStyleAttrs(protyle.wysiwyg.element, operation);
+                    }
+                    // 冻结范围依赖列的 DOM 分组，新增列事务落盘后使用完整数据重建分组。
+                    if (operation.action === "addAttrViewCol" &&
+                        protyle.wysiwyg.element.querySelector(
+                            `.av[data-av-id="${operation.avID}"] [data-freeze="true"]`
+                        )) {
+                        refreshAV(protyle, operation);
+                    }
+                });
+            }
+            // 事务提交后再渲染嵌入块，避免其查询请求早于写入到达内核而拿到旧数据
+            pendingEmbedElements.forEach(item => {
+                if (item.isConnected) {
+                    item.removeAttribute("data-render");
+                    blockRender(protyle, item);
                 }
             });
-        }
-        // 事务提交后再渲染嵌入块，避免其查询请求早于写入到达内核而拿到旧数据
-        pendingEmbedElements.forEach(item => {
-            if (item.isConnected) {
-                item.removeAttribute("data-render");
-                blockRender(protyle, item);
-            }
-        });
-        queueHeadingNumberRefresh(protyle, response.data[0].doOperations);
-        void applyViewFoldStates(protyle);
-        options.callback?.();
-    }));
+            queueHeadingNumberRefresh(protyle, responseTransaction.doOperations);
+            void applyViewFoldStates(protyle);
+            options.callback?.();
+        },
+    };
+    const submitTransactions = (items: typeof queuedTransaction[]) => fetchPost("/api/transactions", {
+        session: protyle.id,
+        app: Constants.SIYUAN_APPID,
+        transactions: items.map(item => item.transaction),
+    }, (response) => {
+        items.forEach((item, index) => item.callback(response.data[index]));
+    });
+    // 仅批量提交无回调的普通块更新，结构事务需要保持逐笔提交语义。
+    const batchable = !options.callback && !options.templateDocTreePlanID && options.doOperations.length === 1 &&
+        options.doOperations[0].action === "update";
+    if (batchable) {
+        queueTransactionBatch(protyle, "blockUpdates", queuedTransaction, submitTransactions);
+    } else {
+        queueTransaction(protyle, () => submitTransactions([queuedTransaction]));
+    }
 };
 
 const containsOperationAnchor = (element: Element, operation: IOperation) => {
@@ -2136,8 +2152,37 @@ export const turnsOneInto = async (options: {
     }
     const parentId = getEmbedChildOperationParentID(options.nodeElement) ||
         getParentBlock(options.nodeElement).getAttribute("data-node-id") || options.protyle.block.parentID;
-    // @ts-ignore
-    const newHTML = options.protyle.lute[options.type](options.nodeElement.outerHTML, options.level);
+    let newHTML: string;
+    if (isTabsListConversion(options.type)) {
+        let source = options.nodeElement;
+        if (!options.protyle.lite && source.querySelector('[fold="1"]')) {
+            await waitForPendingTransactions(options.protyle);
+            const snapshot = source.outerHTML;
+            const response = await fetchSyncPost("/api/block/getBlockDOM", {
+                id: options.id,
+                notebook: options.protyle.notebookId,
+            });
+            if (!source.isConnected || source.outerHTML !== snapshot) {
+                return;
+            }
+            const template = document.createElement("template");
+            template.innerHTML = normalizeHTMLAssetIFrameBlockDOM(response.data?.dom || "");
+            const full = template.content.firstElementChild;
+            if (full?.getAttribute("data-node-id") !== options.id) {
+                return;
+            }
+            source = completeTabsListSource(source, full);
+            oldHTML = source.outerHTML;
+        }
+        const converted = convertTabsList(source, options.type, options.protyle.lute);
+        if (!converted) {
+            return;
+        }
+        newHTML = converted.outerHTML;
+    } else {
+        // @ts-ignore
+        newHTML = options.protyle.lute[options.type](options.nodeElement.outerHTML, options.level);
+    }
     disposeCustomBlocksInElement(options.nodeElement);
     options.nodeElement.insertAdjacentHTML("afterend", newHTML);
     options.nodeElement = options.nodeElement.nextElementSibling as HTMLElement;

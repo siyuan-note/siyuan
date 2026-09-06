@@ -80,6 +80,54 @@ func TestAttributeViewRefCarrierTreesRequirePhysicalCarrier(t *testing.T) {
 	}
 }
 
+func TestAttributeViewRichTextRefDefIDs(t *testing.T) {
+	const (
+		firstDefID  = "20260906150000-def0001"
+		secondDefID = "20260906150001-def0002"
+	)
+	attrView := &av.AttributeView{KeyValues: []*av.KeyValues{
+		{
+			Key: &av.Key{ID: "text", Type: av.KeyTypeText},
+			Values: []*av.Value{
+				{Type: av.KeyTypeText, Text: &av.ValueText{Rich: &av.ValueTextRich{
+					Spec: av.ValueTextRichSpec, Format: av.ValueTextRichFormatKramdown,
+					Content: "((" + secondDefID + " \"Second\")) and ((" + firstDefID + " \"First\"))",
+				}}},
+				{Type: av.KeyTypeText, Text: &av.ValueText{Rich: &av.ValueTextRich{
+					Spec: av.ValueTextRichSpec, Format: av.ValueTextRichFormatKramdown,
+					Content: "((" + firstDefID + " \"Duplicate\"))",
+				}}},
+				{Type: av.KeyTypeText, Text: &av.ValueText{Content: "((" + secondDefID + " \"Plain\"))"}},
+			},
+		},
+		{
+			Key: &av.Key{ID: "rollup", Type: av.KeyTypeRollup},
+			Values: []*av.Value{{Type: av.KeyTypeText, Text: &av.ValueText{Rich: &av.ValueTextRich{
+				Spec: av.ValueTextRichSpec, Format: av.ValueTextRichFormatKramdown,
+				Content: "((" + secondDefID + " \"Derived\"))",
+			}}}},
+		},
+	}}
+
+	defIDs := attributeViewRichTextRefDefIDs(attrView)
+	if len(defIDs) != 2 || firstDefID != defIDs[0] || secondDefID != defIDs[1] {
+		t.Fatalf("unexpected rich text definition IDs: %#v", defIDs)
+	}
+}
+
+func TestChangedAttributeViewRefDefIDs(t *testing.T) {
+	changed := changedAttributeViewRefDefIDs(
+		[]string{"unchanged", "removed", "removed", ""},
+		[]string{"added", "unchanged", "added", ""},
+	)
+	if len(changed) != 2 || "added" != changed[0] || "removed" != changed[1] {
+		t.Fatalf("unexpected changed definition IDs: %#v", changed)
+	}
+	if unchanged := changedAttributeViewRefDefIDs([]string{"same"}, []string{"same"}); 0 != len(unchanged) {
+		t.Fatalf("unchanged references should not refresh counts: %#v", unchanged)
+	}
+}
+
 func TestSameAttributeViewRefBoundary(t *testing.T) {
 	const (
 		encryptedBox      = "20260904022000-encbox1"

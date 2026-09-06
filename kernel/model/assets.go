@@ -60,7 +60,12 @@ func GetAssetImgSize(assetPath string) (width, height int) {
 }
 
 func GetAssetImgSizeInBox(assetPath, boxID string) (width, height int) {
-	data, err := ReadAssetBytesInBox(boxID, assetPath)
+	absPath, resolveErr := GetAssetAbsPathInBox(assetPath, boxID)
+	if resolveErr != nil || !filelock.IsExist(absPath) {
+		// 计算布局尺寸不触发资源下载，展示图片或完整导出时再补齐内容。
+		return
+	}
+	data, err := readAssetBytesInBox(boxID, assetPath, false)
 	if err != nil {
 		logging.LogErrorf("get asset [%s] abs path failed: %s", assetPath, err)
 		return
@@ -88,9 +93,18 @@ func GetAssetImgSizeInBox(assetPath, boxID string) (width, height int) {
 // ReadAssetBytesInBox 读取指定 box 内的资源文件字节。若 box 为加密笔记本则自动解密返回明文。
 // relativePath 形如 "assets/xxx.png"，可带 ?box= 查询参数。
 func ReadAssetBytesInBox(boxID, relativePath string) ([]byte, error) {
+	return readAssetBytesInBox(boxID, relativePath, true)
+}
+
+func readAssetBytesInBox(boxID, relativePath string, download bool) ([]byte, error) {
 	absPath, err := GetAssetAbsPathInBox(relativePath, boxID)
 	if err != nil {
 		return nil, err
+	}
+	if download {
+		if err = ensureReadableAssetLocal(absPath); err != nil {
+			return nil, err
+		}
 	}
 	var data []byte
 	var readErr error
@@ -477,6 +491,9 @@ func PrepareAgentMessageImage(assetPath string) (PreparedDocumentImage, error) {
 	}
 	if !strings.HasPrefix(relativePath, "assets/") {
 		return PreparedDocumentImage{}, errors.New("only global assets/... images are supported")
+	}
+	if err = EnsureAssetLocal(absPath); err != nil {
+		return PreparedDocumentImage{}, err
 	}
 	data, err := os.ReadFile(absPath)
 	if err != nil {
@@ -894,7 +911,7 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 	}
 	pathHitCount := map[string]int{}
 	filterByExt := 0 < len(exts)
-	matchedAssets := cache.FilterAssets(func(path string, asset *cache.Asset) bool {
+	filterAsset := func(path string, asset *cache.Asset) bool {
 
 		// 扩展名过滤
 		if filterByExt {
@@ -942,7 +959,27 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 		// 记录命中次数用于排序
 		pathHitCount[asset.Path] = hitNameCount + hitPathCount
 		return true
-	})
+	}
+	matchedAssets := cache.FilterAssets(filterAsset)
+	if deferred, err := DeferredSyncAssets(); err == nil {
+		for _, file := range deferred {
+			if !strings.HasPrefix(file.Path, "/assets/") {
+				continue
+			}
+			absPath := filepath.Join(util.DataDir, filepath.FromSlash(strings.TrimPrefix(file.Path, "/")))
+			if IsEncryptedAssetPath(absPath) {
+				continue
+			}
+			assetPath, _, valid := AssetPathFromDataRelativePath(strings.TrimPrefix(file.Path, "/"))
+			if !valid || matchedAssets[assetPath] != nil {
+				continue
+			}
+			asset := &cache.Asset{HName: util.RemoveID(filepath.Base(assetPath)), Path: assetPath, Updated: file.SecUpdated()}
+			if filterAsset(assetPath, asset) {
+				matchedAssets[assetPath] = asset
+			}
+		}
+	}
 
 	// 添加高亮
 	for _, asset := range matchedAssets {
@@ -1037,7 +1074,7 @@ func ResolveDataAssetPath(assetPath string) (relativePath, absPath string, err e
 		return
 	}
 
-	resolvedRoot, evalErr := ResolveRealPath(assetRoot)
+	resolvedRoot, evalErr := ResolveAssetPathWithMissingLeaf(assetRoot)
 	if evalErr != nil {
 		err = fmt.Errorf("resolve assets directory [%s] failed: %w", assetRoot, evalErr)
 		return
@@ -1053,7 +1090,7 @@ func ResolveDataAssetPath(assetPath string) (relativePath, absPath string, err e
 			return
 		}
 	}
-	resolvedPath, evalErr := ResolveRealPath(absPath)
+	resolvedPath, evalErr := ResolveAssetPathWithMissingLeaf(absPath)
 	if evalErr != nil {
 		err = fmt.Errorf("resolve asset [%s] failed: %w", absPath, evalErr)
 		return
@@ -1082,10 +1119,10 @@ func ResolveUnusedDataAssetPath(assetPath string) (relativePath, absPath string,
 }
 
 func unusedAssetsContainPath(relativePath, absPath string, items []*UnusedItem) bool {
-	resolvedPath, _ := ResolveRealPath(absPath)
+	resolvedPath, _ := ResolveAssetPathWithMissingLeaf(absPath)
 	for _, item := range items {
 		if item.AbsPath != "" {
-			resolvedItemPath, evalErr := ResolveRealPath(item.AbsPath)
+			resolvedItemPath, evalErr := ResolveAssetPathWithMissingLeaf(item.AbsPath)
 			samePath, relErr := filepath.Rel(resolvedPath, resolvedItemPath)
 			if resolvedPath != "" && evalErr == nil && relErr == nil && samePath == "." {
 				return true
@@ -1215,6 +1252,9 @@ func GetAssetAbsPathInBox(relativePath, boxID string) (string, error) {
 		return p, nil
 	}
 	// 非加密 box 的资源可能回退到全局 data/assets（兼容旧笔记本结构）
+	if deferredPath, deferredErr := deferredAssetPath(relativePath, boxID, true); deferredErr != nil || deferredPath != "" {
+		return deferredPath, deferredErr
+	}
 	if !IsEncryptedBox(boxID) {
 		return GetAssetAbsPathWithOpt(relativePath, false)
 	}
@@ -1300,7 +1340,7 @@ func getAssetAbsPath(relativePath string, includeEncrypted bool) (absPath string
 			return absPath, nil
 		}
 	}
-	return "", nil
+	return deferredAssetPath(relativePath, "", includeEncrypted)
 }
 
 func UploadAssets2Cloud(id string, ignorePushMsg bool) (count int, err error) {
@@ -1404,6 +1444,9 @@ func uploadAssets2Cloud(assetPaths []string, bizType string, ignorePushMsg bool)
 	pushErrMsgCount := 0
 	var completedUploadAssets []string
 	for _, absAsset := range uploadAbsAssets {
+		if err = ensureReadableAssetLocal(absAsset); err != nil {
+			return count, err
+		}
 		fi, statErr := os.Stat(absAsset)
 		if nil != statErr {
 			logging.LogErrorf("stat file [%s] failed: %s", absAsset, statErr)
@@ -1479,6 +1522,12 @@ func RemoveUnusedAssets() (ret []string) {
 	}()
 
 	unusedAssets := UnusedAssets(false)
+	for _, unusedAsset := range unusedAssets {
+		if err := EnsureAssetPrefixLocal(filepath.Join(util.DataDir, unusedAsset.Item)); err != nil {
+			util.PushErrMsg(err.Error(), 7000)
+			return
+		}
+	}
 
 	historyDir, err := getHistoryDir(HistoryOpClean)
 	if err != nil {
@@ -1547,6 +1596,9 @@ func RemoveUnusedAssets() (ret []string) {
 func RemoveUnusedAsset(p string) (ret string, err error) {
 	relativePath, absPath, err := ResolveUnusedDataAssetPath(p)
 	if err != nil {
+		return
+	}
+	if err = EnsureAssetPrefixLocal(absPath); err != nil {
 		return
 	}
 	historyDir, err := getHistoryDir(HistoryOpClean)
@@ -1620,6 +1672,9 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	oldAbsPath, getErr := GetAssetAbsPathInBox(oldPath, "")
 	if getErr != nil {
 		logging.LogErrorf("get asset [%s] abs path failed: %s", oldPath, getErr)
+		return
+	}
+	if err = ensureReadableAssetLocal(oldAbsPath); err != nil {
 		return
 	}
 	newAbsPath := filepath.Join(filepath.Dir(oldAbsPath), newName)
@@ -2645,6 +2700,27 @@ func allAssetAbsPaths() (assetsAbsPathMap map[string]string, err error) {
 	}
 
 	assetsAbsPathMap = map[string]string{}
+	deferred, deferredErr := DeferredSyncAssets()
+	if deferredErr != nil {
+		return nil, deferredErr
+	}
+	for _, file := range deferred {
+		absPath := filepath.Join(util.DataDir, filepath.FromSlash(strings.TrimPrefix(file.Path, "/")))
+		if IsEncryptedAssetPath(absPath) {
+			continue
+		}
+		relativePath, _, resolveErr := ResolveDataAssetPath(strings.TrimPrefix(file.Path, "/"))
+		if resolveErr != nil {
+			return nil, resolveErr
+		}
+		assetPath, _, valid := AssetPathFromDataRelativePath(relativePath)
+		if valid {
+			assetsAbsPathMap[assetPath] = absPath
+			for dir, absDir := path.Dir(assetPath), filepath.Dir(absPath); dir != "assets" && dir != "."; dir, absDir = path.Dir(dir), filepath.Dir(absDir) {
+				assetsAbsPathMap[dir+"/"] = absDir
+			}
+		}
+	}
 	// 笔记本 assets（跳过加密 box，加密资产不参与全局去重/清理）
 	for _, notebook := range notebooks {
 		if IsEncryptedBox(notebook.ID) {
@@ -2760,22 +2836,25 @@ func assetPathMapKey(assetsDirPath, assetPath string, isDir bool) (ret string, e
 }
 
 // copyBoxAssetsToDataAssets 将笔记本路径下所有（包括子文档）的 assets 复制一份到 data/assets 中。
-func copyBoxAssetsToDataAssets(boxID string) {
+func copyBoxAssetsToDataAssets(boxID string) error {
 	boxLocalPath := filepath.Join(util.DataDir, boxID)
-	copyAssetsToDataAssets(boxLocalPath)
+	return copyAssetsToDataAssets(boxLocalPath)
 }
 
 // copyDocAssetsToDataAssets 将文档路径下所有（包括子文档）的 assets 复制一份到 data/assets 中。
-func copyDocAssetsToDataAssets(boxID, parentDocPath string) {
+func copyDocAssetsToDataAssets(boxID, parentDocPath string) error {
 	boxLocalPath := filepath.Join(util.DataDir, boxID)
 	parentDocDirAbsPath := filepath.Dir(filepath.Join(boxLocalPath, parentDocPath))
-	copyAssetsToDataAssets(parentDocDirAbsPath)
+	return copyAssetsToDataAssets(parentDocDirAbsPath)
 }
 
-func copyAssetsToDataAssets(rootPath string) {
+func copyAssetsToDataAssets(rootPath string) error {
 	var assetsDirPaths []string
-	filelock.Walk(rootPath, func(path string, d fs.DirEntry, err error) error {
-		if nil != err || rootPath == path || nil == d {
+	if err := filelock.Walk(rootPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if rootPath == path || nil == d {
 			return nil
 		}
 
@@ -2791,12 +2870,16 @@ func copyAssetsToDataAssets(rootPath string) {
 			assetsDirPaths = append(assetsDirPaths, path)
 		}
 		return nil
-	})
+	}); err != nil {
+		return err
+	}
 
 	dataAssetsPath := filepath.Join(util.DataDir, "assets")
 	for _, assetsDirPath := range assetsDirPaths {
 		if err := filelock.Copy(assetsDirPath, dataAssetsPath); err != nil {
 			logging.LogErrorf("copy tree assets from [%s] to [%s] failed: %s", assetsDirPaths, dataAssetsPath, err)
+			return err
 		}
 	}
+	return nil
 }

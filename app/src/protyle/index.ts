@@ -68,6 +68,7 @@ import {
 } from "./render/av/databaseRowRefresh";
 import {initEditorTabs} from "./wysiwyg/tabs";
 import {registerCustomBlockRoot} from "../plugin/customBlockRender";
+import {getTransactionOperations} from "../util/transactionOperations";
 import {
     invalidateTrackedRanges,
     releaseTrackedRange,
@@ -452,7 +453,8 @@ export class Protyle {
         if (data.context?.undoState) {
             syncMirrorFromBroadcast(data.context.undoState);
         }
-        queueDatabaseRowRefreshForOperations(this.protyle.id, data.data[0]?.doOperations || []);
+        const transactionOperations = getTransactionOperations(data.data);
+        queueDatabaseRowRefreshForOperations(this.protyle.id, transactionOperations);
         if (!this.protyle.preview.element.classList.contains("fn__none") &&
             data.context?.rootIDs?.includes(this.protyle.block.rootID)) {
             invalidateTrackedRanges(this.protyle);
@@ -464,7 +466,7 @@ export class Protyle {
         let hasDeleteOp = false;
         let skippedBacklinkStructure = false;
         const operations: IOperation[] = [];
-        data.data[0].doOperations.find((item: IOperation) => {
+        transactionOperations.find((item: IOperation) => {
             if (this.protyle.options.backlinkData && ["delete", "move"].includes(item.action)) {
                 // 反链上下文只展示源文档的一部分，结构操作等待索引提交后按内容版本增量同步。
                 skippedBacklinkStructure = true;

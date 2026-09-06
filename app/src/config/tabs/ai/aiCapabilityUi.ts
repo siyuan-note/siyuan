@@ -1,5 +1,6 @@
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {fetchPost} from "../../../util/fetch";
+import {fitSelectWidthToOptions} from "../../../util/select";
 import {listCapabilityManifests} from "../../../layout/dock/agent/frontendCapabilities";
 import {
     AgentActionApprovalDecision,
@@ -346,6 +347,7 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, backendCapabilities: 
         const selected = capabilities.filter((capability) => isCapabilityAllowed(capability.id, scope)).length;
         count.textContent = window.siyuan.languages.agentCapabilitiesSelected
             .replace("${selected}", String(selected)).replace("${total}", String(capabilities.length));
+        list.querySelectorAll<HTMLSelectElement>(".b3-select").forEach(fitSelectWidthToOptions);
 
         const groupEntries = Array.from(groups.values());
         list.querySelectorAll<HTMLElement>("[data-type='toggleAgentCapabilityGroup']").forEach((button) => {

@@ -4,6 +4,14 @@
     padding: 0;
     margin: 4px 0;
     position: relative;
+    border: 1px solid var(--b3-border-color);
+    border-radius: var(--b3-border-radius-b);
+
+    &.protyle-wysiwyg--select::after,
+    &.protyle-wysiwyg--select-mode::after,
+    &.protyle-wysiwyg--hl::after {
+      border-radius: inherit;
+    }
   }
 
   .tabs-header {
@@ -20,7 +28,7 @@
   .tabs-list {
     display: flex;
     align-items: center;
-    flex: 1;
+    flex: 0 1 auto;
     min-width: 0;
     overflow: auto;
     gap: 8px;
@@ -73,10 +81,22 @@
     pointer-events: none;
   }
 
-  .tabs-control svg {
-    display: block;
-    width: 1em;
-    height: 1em;
+  .tabs-tab--dragging {
+    opacity: .36;
+  }
+
+  .tabs-control {
+    width: 24px;
+    height: 24px;
+    min-height: 24px;
+    padding: 4px;
+
+    svg {
+      display: block;
+      width: 16px;
+      height: 16px;
+    }
+
   }
 
   .tab-item {
@@ -96,11 +116,66 @@
     min-width: 0;
   }
 
-  .tabs[data-tabs-ready="true"] {
-    &.protyle-wysiwyg--hl::after {
-      display: none;
+  .tabs-tab--editing > .tabs-tab-label {
+    visibility: hidden;
+  }
+
+  .tabs[data-tabs-orientation="horizontal"] > .tabs-header > .tabs-list > .tabs-tab--editing {
+    width: 186px;
+    max-width: 100%;
+    justify-content: flex-start;
+  }
+
+  .tabs-title-editor {
+    position: absolute;
+    z-index: 1;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    border-radius: var(--b3-border-radius);
+    background: var(--b3-theme-primary-lightest);
+    color: var(--b3-theme-on-background);
+    box-shadow: 0 0 0 1px var(--b3-theme-primary-lighter) inset;
+    font-size: 87.5%;
+    line-height: 22px;
+    user-select: text;
+
+    > [tabs-title] {
+      margin: 0;
+      padding: 0;
+      min-width: 0;
+      width: 100%;
+
+      > .protyle-attr {
+        display: none;
+      }
     }
 
+    .tab-item-title[spellcheck] {
+      margin: 0;
+      min-width: 0;
+      width: 100%;
+      min-height: 22px;
+      font-size: inherit;
+      font-weight: normal;
+      opacity: 1;
+      white-space: nowrap;
+      word-break: normal;
+      overflow-x: auto;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      br {
+        display: none;
+      }
+    }
+  }
+
+  .tabs[data-tabs-ready="true"] {
     > .tabs-header {
       display: flex;
     }
@@ -115,9 +190,13 @@
 
     &[data-tabs-orientation="vertical"] {
       display: grid;
-      grid-template-columns: minmax(80px, 25%) minmax(0, 1fr);
+      grid-template-columns: fit-content(min(200px, 40%)) minmax(0, 1fr);
+      // 正文左侧保留块标及折叠按钮的操作空间，避免与页签按钮重叠。
+      column-gap: 48px;
 
       > .tabs-header {
+        box-sizing: border-box;
+        min-width: 80px;
         flex-wrap: wrap;
         align-content: start;
         align-items: stretch;
@@ -153,6 +232,27 @@
 
       > .tab-item[data-tabs-hidden], > .tab-item > .tab-item-info {
         display: block !important;
+      }
+
+      > .tab-item > .tabs-title-editor {
+        position: static;
+        width: auto !important;
+        height: auto !important;
+        clip-path: none !important;
+        padding: 0;
+        background: transparent;
+        box-shadow: none;
+        font-size: inherit;
+
+        .tab-item-title[spellcheck] {
+          font-weight: bold;
+          white-space: normal;
+          overflow: visible;
+
+          br {
+            display: initial;
+          }
+        }
       }
     }
   }

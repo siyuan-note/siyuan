@@ -71,7 +71,7 @@ export class Editor extends Model {
                 if (window.siyuan.editorIsFullscreen) {
                     editor.setFullscreen(true);
                 }
-                countBlockWord([], editor.protyle.block.rootID);
+                countBlockWord([], editor.protyle);
                 /// #if !BROWSER
                 setModelsHash();
                 /// #endif

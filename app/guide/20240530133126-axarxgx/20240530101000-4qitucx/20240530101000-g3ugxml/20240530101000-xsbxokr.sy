@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260905124213"
+		"updated": "20260906013806"
 	},
 	"Children": [
 		{
@@ -3949,7 +3949,7 @@
 			"Properties": {
 				"ID": "20240530101000-twmuxke",
 				"id": "20240530101000-675gu9g",
-				"updated": "20260905124213"
+				"updated": "20260906013806"
 			},
 			"Children": [
 				{
@@ -13237,7 +13237,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-unrfwm9",
-				"updated": "20260905124213"
+				"updated": "20260906013806"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -13252,12 +13252,34 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260905124213-fem82m0",
-				"updated": "20260905124213"
+				"updated": "20260906013806"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "タブバーにフォーカスがあるとき、左右の矢印キーで上部タブ、上下の矢印キーで左側タブのフォーカスを移動します。本文では通常のテキスト編集として動作します。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "タブのタイトルを編集中に "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " または "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと編集を終了して本文に移動します。本文をクリックしてもタイトルの編集を終了できます。"
 				}
 			]
 		},

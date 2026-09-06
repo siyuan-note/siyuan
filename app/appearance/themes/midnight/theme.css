@@ -24,7 +24,8 @@
 
     /* 字体 */
     --b3-font-family-emoji-reset: "Emojis Additional", "Emojis Reset";
-    --b3-font-family: var(--b3-font-family-emoji-reset), BlinkMacSystemFont, Helvetica, "Luxi Sans", "DejaVu Sans", arial, sans-serif, emojis;
+    --b3-font-family-default: var(--b3-font-family-emoji-reset), BlinkMacSystemFont, Helvetica, "Luxi Sans", "DejaVu Sans", arial, sans-serif, emojis;
+    --b3-font-family: var(--b3-font-family-default);
     --b3-font-family-protyle: var(--b3-font-family);
     --b3-font-family-code: var(--b3-font-family-emoji-reset), "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", var(--b3-font-family);
     --b3-font-family-graph: arial;
@@ -227,15 +228,15 @@
 
 /* 微软字体斜体会被相邻背景遮挡，将 arial 放置其前 https://github.com/siyuan-note/siyuan/issues/11841；"Segoe UI" 和 Noto-COLRv1-2.047 冲突，故移除。 */
 :root:lang(zh-CN) {
-    --b3-font-family: var(--b3-font-family-emoji-reset), BlinkMacSystemFont, Helvetica, "PingFang SC", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Source Han Sans SC", arial, "Microsoft Yahei", sans-serif, emojis;
+    --b3-font-family-default: var(--b3-font-family-emoji-reset), BlinkMacSystemFont, Helvetica, "PingFang SC", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Source Han Sans SC", arial, "Microsoft Yahei", sans-serif, emojis;
 }
 
 :root:lang(zh-TW) {
-    --b3-font-family: var(--b3-font-family-emoji-reset), BlinkMacSystemFont, Helvetica, "PingFang TC", "Luxi Sans", "DejaVu Sans", "Hiragino Sans TC", "Source Han Sans TC", "Microsoft JhengHei", arial, sans-serif, emojis;
+    --b3-font-family-default: var(--b3-font-family-emoji-reset), BlinkMacSystemFont, Helvetica, "PingFang TC", "Luxi Sans", "DejaVu Sans", "Hiragino Sans TC", "Source Han Sans TC", "Microsoft JhengHei", arial, sans-serif, emojis;
 }
 
 :root:lang(ja) {
-    --b3-font-family: var(--b3-font-family-emoji-reset), BlinkMacSystemFont, Helvetica, "Luxi Sans", "DejaVu Sans", "Yu Gothic UI", arial, sans-serif, emojis;
+    --b3-font-family-default: var(--b3-font-family-emoji-reset), BlinkMacSystemFont, Helvetica, "Luxi Sans", "DejaVu Sans", "Yu Gothic UI", arial, sans-serif, emojis;
 }
 
 .b3-text-field::-webkit-calendar-picker-indicator {

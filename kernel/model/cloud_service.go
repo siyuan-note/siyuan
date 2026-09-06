@@ -128,6 +128,13 @@ func StartFreeTrial() (err error) {
 }
 
 func DeactivateUser() (err error) {
+	release := lockAssetSourceChange()
+	defer release()
+	if Conf.Sync.Provider == conf.ProviderSiYuan {
+		if err = requireCompleteAssetDownloads(); err != nil {
+			return
+		}
+	}
 	requestResult := gulu.Ret.NewResult()
 	request := httpclient.NewCloudRequest30s()
 	resp, err := request.
@@ -338,6 +345,8 @@ func refreshAnnouncement() {
 }
 
 func RefreshUser(token string) (ret *conf.User, err error) {
+	release := lockAssetSourceChange()
+	defer release()
 	previousUserID := ""
 	if previousUser := Conf.GetUser(); nil != previousUser {
 		previousUserID = previousUser.UserId
@@ -348,6 +357,9 @@ func RefreshUser(token string) (ret *conf.User, err error) {
 		if nil == user && "" != Conf.UserData {
 			user = loadUserFromConf()
 			if nil != user {
+				if err = validateCloudUserAssetSource(user); err != nil {
+					return nil, err
+				}
 				Conf.SetUser(user)
 				if previousUserID != user.UserId {
 					refreshLANSyncManager()
@@ -378,7 +390,7 @@ Net:
 	user, invalidUserName, invalid := resolveCloudUserRefresh(Conf.GetUser(), user, err)
 	if err != nil {
 		if invalid {
-			LogoutUser()
+			logoutUser()
 			util.BroadcastByType("main", "setCloudUser", 0, "", map[string]any{
 				"user":     nil,
 				"userName": invalidUserName,
@@ -388,6 +400,9 @@ Net:
 		return user, err
 	}
 
+	if err = validateCloudUserAssetSource(user); err != nil {
+		return Conf.GetUser(), err
+	}
 	Conf.SetUser(user)
 	data, _ := gulu.JSON.MarshalJSON(user)
 	Conf.UserData = util.AESEncrypt(string(data))
@@ -404,6 +419,39 @@ Net:
 		logging.LogInfof("get cloud user elapsed [%dms]", elapsed)
 	}
 	return user, nil
+}
+
+type cloudAssetSourceError struct {
+	cause error
+}
+
+func (err *cloudAssetSourceError) Error() string {
+	return err.cause.Error()
+}
+
+func (err *cloudAssetSourceError) Unwrap() error {
+	return err.cause
+}
+
+func IsCloudAssetSourceChange(err error) bool {
+	var sourceErr *cloudAssetSourceError
+	return errors.As(err, &sourceErr)
+}
+
+// 使用服务端返回的账号标识验证来源，允许过期登出后重新认证原账号。
+func validateCloudUserAssetSource(user *conf.User) error {
+	if Conf.Sync.Provider != conf.ProviderSiYuan {
+		return nil
+	}
+	cloudConf, err := buildCloudConf()
+	if err != nil {
+		return &cloudAssetSourceError{cause: err}
+	}
+	cloudConf.UserID = user.UserId
+	if err = validateAssetDownloadSourceScope(assetDownloadScope(Conf.Sync.Provider, cloudConf, Conf.Repo.Key)); err != nil {
+		return &cloudAssetSourceError{cause: err}
+	}
+	return nil
 }
 
 func IsInvalidUserRefresh(err error) bool {
@@ -665,7 +713,17 @@ func CheckActivationcode(code string) (retCode int, msg string) {
 }
 
 func Login(userName, password, captcha string, cloudRegion int) (ret *gulu.Result) {
+	release := lockAssetSourceChange()
+	defer release()
 	previousCloudRegion := util.CurrentCloudRegion
+	if Conf.Sync.Provider == conf.ProviderSiYuan && previousCloudRegion != cloudRegion {
+		if err := requireCompleteAssetDownloads(); err != nil {
+			ret = gulu.Ret.NewResult()
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+	}
 	Conf.CloudRegion = cloudRegion
 	Conf.Save()
 	util.CurrentCloudRegion = cloudRegion
@@ -764,6 +822,13 @@ func parseLogin2faResult(result map[string]any) (ret *gulu.Result, ok bool) {
 }
 
 func LogoutUser() {
+	release := lockAssetSourceChange()
+	defer release()
+	logoutUser()
+}
+
+// 登出只清除登录凭据，资源来源仍由已认证的下载状态保存。
+func logoutUser() {
 	hadUser := nil != Conf.GetUser()
 	Conf.UserData = ""
 	Conf.SetUser(nil)

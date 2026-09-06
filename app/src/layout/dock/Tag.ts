@@ -3,6 +3,7 @@ import {Model} from "../Model";
 import {Tree} from "../../util/Tree";
 import {setPanelFocus} from "../util";
 import {getDockByType} from "../tabUtil";
+import {getTransactionOperations} from "../../util/transactionOperations";
 import {fetchPost} from "../../util/fetch";
 import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openGlobalSearch} from "../../search/util";
@@ -190,7 +191,7 @@ export class Tag extends Model {
         if (data) {
             switch (data.cmd) {
                 case "transactions":
-                    data.data[0].doOperations.forEach((item: IOperation) => {
+                    getTransactionOperations(data.data).forEach((item: IOperation) => {
                         let needReload = false;
                         if ((item.action === "update" || item.action === "insert") && item.data.indexOf('data-type="tag"') > -1) {
                             needReload = true;

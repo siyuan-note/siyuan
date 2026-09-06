@@ -34,6 +34,9 @@ interface IAVSelectionState {
 
 const selectionStates = new WeakMap<HTMLElement, IAVSelectionState>();
 
+export const getAVSelectionRoot = (element?: Element | null) =>
+    element?.closest<HTMLElement>("[data-av-id][data-av-type]") || undefined;
+
 export const findAVItemPointIndex = <T extends {itemID: string, groupID: string}>(
     items: T[], itemID?: string, groupID?: string) => {
     return items.findIndex(item => item.itemID === itemID && item.groupID === groupID);

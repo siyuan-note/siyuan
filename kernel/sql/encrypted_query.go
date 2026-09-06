@@ -184,6 +184,64 @@ func QueryRefsByDefIDsInBox(defBlockIDs []string, boxID string) (ret []*Ref) {
 	return
 }
 
+// QueryAttributeViewRefDefIDsByBlockIDsInBox 按数据库载体块查询属性视图引用的定义块 ID。
+func QueryAttributeViewRefDefIDsByBlockIDsInBox(blockIDs []string, boxID string) (ret []string) {
+	uniqueBlockIDs := make([]string, 0, len(blockIDs))
+	seenBlockIDs := map[string]struct{}{}
+	for _, blockID := range blockIDs {
+		if "" == blockID {
+			continue
+		}
+		if _, ok := seenBlockIDs[blockID]; ok {
+			continue
+		}
+		seenBlockIDs[blockID] = struct{}{}
+		uniqueBlockIDs = append(uniqueBlockIDs, blockID)
+	}
+
+	seenDefIDs := map[string]struct{}{}
+	for start := 0; start < len(uniqueBlockIDs); start += queryRefsByDefIDsBatchSize {
+		end := min(start+queryRefsByDefIDsBatchSize, len(uniqueBlockIDs))
+		batch := uniqueBlockIDs[start:end]
+		placeholders := strings.TrimSuffix(strings.Repeat("?,", len(batch)), ",")
+		args := make([]any, 0, len(batch)+1)
+		args = append(args, AttributeViewRefType)
+		for _, blockID := range batch {
+			args = append(args, blockID)
+		}
+
+		rows, err := queryForBox(boxID,
+			"SELECT DISTINCT def_block_id FROM refs WHERE type = ? AND block_id IN ("+placeholders+")", args...)
+		if nil != err {
+			logging.LogErrorf("sql query failed: %s", err)
+			return
+		}
+		for rows.Next() {
+			var defID string
+			if err = rows.Scan(&defID); nil != err {
+				logging.LogErrorf("query scan field failed: %s", err)
+				rows.Close()
+				return
+			}
+			if "" == defID {
+				continue
+			}
+			if _, ok := seenDefIDs[defID]; ok {
+				continue
+			}
+			seenDefIDs[defID] = struct{}{}
+			ret = append(ret, defID)
+		}
+		if err = rows.Err(); nil != err {
+			logging.LogErrorf("query rows failed: %s", err)
+			rows.Close()
+			return
+		}
+		rows.Close()
+	}
+	return
+}
+
 // QueryRootChildrenRefCountInBox 按 defRootID 在指定 box 的 db 里查询根文档下各块的引用计数。
 func QueryRootChildrenRefCountInBox(defRootID, boxID string) (ret map[string]int) {
 	ret = map[string]int{}

@@ -717,6 +717,20 @@
   }
 }
 
+.agent-chat__button-options--compact {
+  .agent-chat__model-picker,
+  .agent-chat__permission,
+  .agent-chat__reasoning-effort {
+    flex: 0 0 auto;
+  }
+
+  .agent-chat__model-picker-label,
+  .agent-chat__permission-label,
+  .agent-chat__reasoning-effort-label {
+    display: none;
+  }
+}
+
 .agent-chat__send,
 .agent-chat__stop {
   flex-shrink: 0;

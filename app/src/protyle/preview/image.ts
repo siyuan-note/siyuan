@@ -2,6 +2,25 @@ import {Constants} from "../../constants";
 import {addScript} from "../util/addScript";
 import {fetchPost} from "../../util/fetch";
 import {isBrowserRenderableImagePath} from "../../util/imageURL";
+import {copyPNGByLink, writeAssetToClipboard} from "../../menus/util";
+import {isEncryptedBox} from "../../util/pathName";
+
+const getCopyFileMenu = (src: string) => {
+    try {
+        const url = new URL(src, window.location.href);
+        const path = decodeURIComponent(url.pathname);
+        const box = url.searchParams.get("box");
+        if (url.origin !== window.location.origin || !["http:", "https:"].includes(url.protocol) ||
+            !path.startsWith("/assets/") || path.includes("\\") || path.split("/").includes("..") ||
+            isEncryptedBox(box)) {
+            return;
+        }
+        const menu = writeAssetToClipboard(path.substring(1) + (box ? `?box=${encodeURIComponent(box)}` : ""));
+        return menu.ignore ? undefined : menu;
+    } catch {
+        return;
+    }
+};
 
 export const previewImages = (srcList: string[], currentSrc?: string, onHidden?: () => void) => {
     addScript(`${Constants.PROTYLE_CDN}/js/viewerjs/viewer.js?v=1.11.8`, "protyleViewerScript").then(() => {
@@ -17,7 +36,15 @@ export const previewImages = (srcList: string[], currentSrc?: string, onHidden?:
             }
         });
         imagesElement.innerHTML = html;
-        window.siyuan.viewer = new Viewer(imagesElement, {
+        let cleanedUp = false;
+        const close = () => {
+            viewer.destroy();
+            if (!cleanedUp) {
+                cleanedUp = true;
+                onHidden?.();
+            }
+        };
+        const viewer = new Viewer(imagesElement, {
             initialViewIndex: currentSrc ? initialViewIndex : 0,
             title: [1, (image: HTMLImageElement, imageData: IObject) => {
                 let name = image.alt;
@@ -29,11 +56,42 @@ export const previewImages = (srcList: string[], currentSrc?: string, onHidden?:
             }],
             button: false,
             transition: false,
-            hidden: function () {
-                window.siyuan.viewer.destroy();
-                if (onHidden) {
-                    onHidden();
-                }
+            ready: () => {
+                const copyElement = viewer.toolbar.querySelector(".viewer-copy");
+                copyElement.innerHTML = '<svg><use xlink:href="#iconImage"></use></svg>';
+                const copyFileElement = viewer.toolbar.querySelector(".viewer-copy-file");
+                copyFileElement.innerHTML = '<svg><use xlink:href="#iconFile"></use></svg>';
+                copyFileElement.classList.add("fn__none");
+                const languages = window.siyuan.languages;
+                const labels: Record<string, string> = {
+                    "zoom-in": languages.zoomIn,
+                    "zoom-out": languages.zoomOut,
+                    "one-to-one": languages.pageScaleActual,
+                    reset: languages.reset,
+                    prev: languages.previous,
+                    play: languages.imageViewerPlay,
+                    next: languages.next,
+                    "rotate-left": languages.rotateCcw,
+                    "rotate-right": languages.rotateCw,
+                    "flip-horizontal": languages.imageFlipHorizontal,
+                    "flip-vertical": languages.imageFlipVertical,
+                    copy: languages.copyAsPNG,
+                    "copy-file": languages.copyFile,
+                    close: languages.close,
+                };
+                Object.entries(labels).forEach(([action, label]) => {
+                    const button = viewer.toolbar.querySelector(`.viewer-${action}`);
+                    button.classList.add("ariaLabel");
+                    button.setAttribute("aria-label", label);
+                    button.setAttribute("data-position", "north");
+                });
+            },
+            hidden: close,
+            view: () => {
+                viewer.toolbar.querySelector(".viewer-copy-file").classList.add("fn__none");
+            },
+            viewed: () => {
+                viewer.toolbar.querySelector(".viewer-copy-file").classList.toggle("fn__none", !getCopyFileMenu(viewer.image.src));
             },
             toolbar: {
                 zoomIn: true,
@@ -47,12 +105,21 @@ export const previewImages = (srcList: string[], currentSrc?: string, onHidden?:
                 rotateRight: true,
                 flipHorizontal: true,
                 flipVertical: true,
-                close: function () {
-                    window.siyuan.viewer.destroy();
+                copy: () => {
+                    if (viewer.viewed && viewer.image) {
+                        copyPNGByLink(viewer.image.src);
+                    }
                 },
+                copyFile: () => {
+                    if (viewer.viewed && viewer.image) {
+                        getCopyFileMenu(viewer.image.src)?.click();
+                    }
+                },
+                close,
             },
         });
-        window.siyuan.viewer.show();
+        window.siyuan.viewer = viewer;
+        viewer.show();
     });
 };
 

@@ -17,6 +17,7 @@ export const highlightById = (protyle: IProtyle, id: string, position: ScrollLog
         // 预览定位
         nodeElement = document.getElementById(id);
         if (nodeElement) {
+            revealTabsForTarget(nodeElement, false);
             protyle.preview.element.scrollTop = nodeElement.offsetTop;
             bgFade(nodeElement);
         }

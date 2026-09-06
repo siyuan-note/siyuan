@@ -1,18 +1,11 @@
-import {hasClosestByClassName} from "../util/hasClosest";
+import {hasClosestByClassName, isInEmbedBlock} from "../util/hasClosest";
 import {focusBlock} from "../util/selection";
 import {scrollCenter} from "../../util/highlightById";
-import {
-    getContenteditableElement,
-    getFirstBlock,
-    getLastBlock,
-    getNextBlock,
-    getPreviousBlock,
-    isContainerBlock,
-    isNotEditBlock,
-} from "./getBlock";
+import {getContenteditableElement} from "./getBlock";
 import {getCalloutTitleNavigationTarget} from "./calloutCaret";
 import {focusEditableAtGoalX, getCaretGoalX, TVerticalDirection} from "./verticalCaret";
 import {focusAVTitleByVerticalArrow, focusAVVerticalRegion} from "../render/av/focus";
+import {getAdjacentVisibleBlock, getVisibleBoundaryBlock} from "./verticalTarget";
 
 export const VERTICAL_NAVIGATION_ATOMIC_CLASS = "protyle-wysiwyg--navigation";
 
@@ -59,44 +52,41 @@ export const isAtomicVerticalNavigationTarget = (element: Element) =>
     element.classList.contains(VERTICAL_NAVIGATION_ATOMIC_CLASS);
 
 const focusAtomicRegion = (editorElement: HTMLElement, element: HTMLElement, direction: TVerticalDirection) => {
+    if (!focusBlock(element, undefined, direction === "down")) {
+        return false;
+    }
     clearAtomicFocus(editorElement);
     element.classList.add(VERTICAL_NAVIGATION_ATOMIC_CLASS);
-    focusBlock(element, undefined, direction === "down");
+    return true;
 };
 
-const getAdjacentBlock = (element: Element, direction: TVerticalDirection) =>
-    direction === "up" ? getPreviousBlock(element) : getNextBlock(element);
-
-const getBoundaryBlock = (element: Element, direction: TVerticalDirection) => {
-    if (element.getAttribute("fold") === "1" || element.classList.contains("av") ||
-        (!isContainerBlock(element) && isNotEditBlock(element))) {
-        return element;
+const focusResolvedRegion = (protyle: IProtyle, element: Element | undefined,
+                             direction: TVerticalDirection, goalX: number) => {
+    if (!element) {
+        return false;
     }
-    const boundaryElement = direction === "up" ? getLastBlock(element) : getFirstBlock(element);
-    let parentElement = boundaryElement.parentElement?.closest("[data-node-id]");
-    while (parentElement && element.contains(parentElement)) {
-        if (!isContainerBlock(parentElement) && isNotEditBlock(parentElement)) {
-            return parentElement;
-        }
-        parentElement = parentElement.parentElement?.closest("[data-node-id]");
-    }
-    return boundaryElement;
-};
-
-const focusResolvedRegion = (protyle: IProtyle, element: Element, direction: TVerticalDirection, goalX: number) => {
     const targetElement = element as HTMLElement;
-    clearAtomicFocus(protyle.wysiwyg.element);
+    let focused = false;
     if (targetElement.classList.contains("av")) {
-        if (!focusAVVerticalRegion(targetElement, direction, goalX)) {
-            focusAtomicRegion(protyle.wysiwyg.element, targetElement, direction);
+        focused = focusAVVerticalRegion(targetElement, direction, goalX);
+        if (focused) {
+            clearAtomicFocus(protyle.wysiwyg.element);
+        } else {
+            focused = focusAtomicRegion(protyle.wysiwyg.element, targetElement, direction);
         }
     } else {
         const editableElement = getContenteditableElement(targetElement);
         if (editableElement) {
-            focusEditableAtGoalX(editableElement, direction, goalX);
+            focused = focusEditableAtGoalX(editableElement, direction, goalX);
+            if (focused) {
+                clearAtomicFocus(protyle.wysiwyg.element);
+            }
         } else {
-            focusAtomicRegion(protyle.wysiwyg.element, targetElement, direction);
+            focused = focusAtomicRegion(protyle.wysiwyg.element, targetElement, direction);
         }
+    }
+    if (!focused) {
+        return false;
     }
     scrollCenter(protyle, targetElement);
     return true;
@@ -107,8 +97,11 @@ const focusDocumentTitle = (protyle: IProtyle, direction: TVerticalDirection, go
         protyle.title.editElement.getClientRects().length === 0) {
         return false;
     }
-    clearAtomicFocus(protyle.wysiwyg.element);
-    return focusEditableAtGoalX(protyle.title.editElement, direction, goalX);
+    const focused = focusEditableAtGoalX(protyle.title.editElement, direction, goalX);
+    if (focused) {
+        clearAtomicFocus(protyle.wysiwyg.element);
+    }
+    return focused;
 };
 
 export const focusAdjacentVerticalRegion = (protyle: IProtyle, sourceElement: HTMLElement,
@@ -120,9 +113,18 @@ export const focusAdjacentVerticalRegion = (protyle: IProtyle, sourceElement: HT
         if (calloutElement && direction === "down") {
             const contentElement = calloutElement.querySelector(":scope > .callout-content");
             if (contentElement) {
-                const firstElement = getFirstBlock(contentElement);
-                if (firstElement !== contentElement) {
-                    return focusResolvedRegion(protyle, firstElement, direction, goalX);
+                const nestedCalloutTarget = getCalloutTitleNavigationTarget(sourceElement, contentElement, "ArrowDown");
+                if (nestedCalloutTarget) {
+                    const focused = focusEditableAtGoalX(nestedCalloutTarget, direction, goalX);
+                    if (focused) {
+                        clearAtomicFocus(protyle.wysiwyg.element);
+                        scrollCenter(protyle, hasClosestByClassName(nestedCalloutTarget, "callout") || calloutElement);
+                        return true;
+                    }
+                }
+                const targetElement = getVisibleBoundaryBlock(contentElement, direction);
+                if (targetElement && focusResolvedRegion(protyle, targetElement, direction, goalX)) {
+                    return true;
                 }
             }
         }
@@ -138,20 +140,28 @@ export const focusAdjacentVerticalRegion = (protyle: IProtyle, sourceElement: HT
         }
     }
 
-    const adjacentElement = getAdjacentBlock(sourceElement, direction);
-    const calloutTarget = getCalloutTitleNavigationTarget(sourceElement, adjacentElement,
-        direction === "up" ? "ArrowUp" : "ArrowDown");
-    if (calloutTarget) {
-        clearAtomicFocus(protyle.wysiwyg.element);
-        focusEditableAtGoalX(calloutTarget, direction, goalX);
-        scrollCenter(protyle, hasClosestByClassName(calloutTarget, "callout") || sourceElement);
-        return true;
+    let adjacentElement = getAdjacentVisibleBlock(sourceElement, direction);
+    while (adjacentElement) {
+        const calloutTarget = getCalloutTitleNavigationTarget(sourceElement, adjacentElement,
+            direction === "up" ? "ArrowUp" : "ArrowDown");
+        if (calloutTarget) {
+            const focused = focusEditableAtGoalX(calloutTarget, direction, goalX);
+            if (focused) {
+                clearAtomicFocus(protyle.wysiwyg.element);
+                scrollCenter(protyle, hasClosestByClassName(calloutTarget, "callout") || sourceElement);
+                return true;
+            }
+        }
+        const targetElement = getVisibleBoundaryBlock(adjacentElement, direction);
+        if (targetElement && focusResolvedRegion(protyle, targetElement, direction, goalX)) {
+            return true;
+        }
+        adjacentElement = getAdjacentVisibleBlock(adjacentElement, direction);
     }
-    if (!adjacentElement) {
-        focusDocumentTitle(protyle, direction, goalX);
-        return true;
+    if (isInEmbedBlock(sourceElement)) {
+        return false;
     }
-    return focusResolvedRegion(protyle, getBoundaryBlock(adjacentElement, direction), direction, goalX);
+    return focusDocumentTitle(protyle, direction, goalX);
 };
 
 export const leaveAVVerticalRegion = (protyle: IProtyle, sourceElement: HTMLElement,

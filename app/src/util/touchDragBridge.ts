@@ -13,6 +13,8 @@ import {
     hasActiveTouchGesture,
     isDragRelaySource,
     restoreNativeDrag,
+    shouldCancelPointerDragAfterWindowExit,
+    shouldRequestForeignMouseDrop,
     shouldRequireLongPress,
     shouldSuppressNativeContextMenu,
     suspendNativeDrag,
@@ -88,8 +90,9 @@ interface BlockDragRelayPayload {
 }
 
 interface BlockDragRelayMessage {
-    phase: "request" | "route" | "enter" | "move" | "leave" | "drop" | "drop-ack" | "end";
+    phase: "request" | "route" | "enter" | "move" | "leave" | "drop" | "drop-ack" | "complete" | "end";
     dragId: string;
+    canceled?: boolean;
     point?: DragPoint;
     payload?: BlockDragRelayPayload;
     remote?: boolean;
@@ -127,6 +130,7 @@ interface ForeignDragState {
     dataTransfer: DataTransfer;
     dragId: string;
     dropped: boolean;
+    dropRequested: boolean;
     idleTimeout?: number;
     lastDragOverElement: Element | null;
     lastPoint?: DragPoint;
@@ -860,6 +864,12 @@ const handleBlockDragRelay = (message: BlockDragRelayMessage) => {
         }
         return;
     }
+    if (message.phase === "complete") {
+        if (dragState?.relayId === message.dragId) {
+            completeBridgeDrag(undefined, !!message.canceled, !!message.remote);
+        }
+        return;
+    }
     if (message.phase === "enter") {
         const dataTransfer = createForeignDataTransfer(message.payload);
         if (!dataTransfer) {
@@ -874,6 +884,7 @@ const handleBlockDragRelay = (message: BlockDragRelayMessage) => {
             dataTransfer,
             dragId: message.dragId,
             dropped: false,
+            dropRequested: false,
             lastDragOverElement: null,
         };
         resetForeignDragIdleTimeout();
@@ -914,6 +925,18 @@ const handleBlockDragRelay = (message: BlockDragRelayMessage) => {
     } else if (message.phase === "end") {
         cleanupForeignDrag("end", message.point);
     }
+};
+
+const handleForeignMouseUp = (event: MouseEvent) => {
+    if (!shouldRequestForeignMouseDrop(!!isInAndroid(), event.button, !!foreignDragState,
+        !!foreignDragState?.dropRequested)) {
+        return;
+    }
+    foreignDragState.dropRequested = true;
+    sendBlockDragRelay({
+        phase: "release",
+        point: copyDragPoint(event),
+    });
 };
 
 let stopScrollAfterRefresh = false;
@@ -1004,7 +1027,8 @@ const handleDragKey = (event: KeyboardEvent) => {
 
 const handleLostPointerCapture = (event: PointerEvent) => {
     if (dragState?.inputType === "pointer" && dragState.pointerId === event.pointerId &&
-        !dragState.pendingDropPoint) {
+        !dragState.pendingDropPoint &&
+        shouldCancelPointerDragAfterWindowExit(!!isInAndroid(), dragState.isDragging, !!dragState.relayId)) {
         completeBridgeDrag(undefined, true);
     }
 };
@@ -1062,17 +1086,13 @@ export const initTouchDragBridge = () => {
         document.documentElement.addEventListener("pointerleave", handlePointerLeave, {passive: true});
         document.addEventListener("lostpointercapture", handleLostPointerCapture, {capture: true, passive: true});
         document.addEventListener("click", handleMouseClick, {capture: true, passive: false});
+        document.addEventListener("mouseup", handleForeignMouseUp, {capture: true, passive: true});
         window.addEventListener("blur", () => {
-            if (isInAndroid() && dragState?.inputType === "pointer") {
+            if (dragState?.inputType === "pointer" &&
+                shouldCancelPointerDragAfterWindowExit(!!isInAndroid(), dragState.isDragging,
+                    !!dragState.relayId)) {
                 completeBridgeDrag(undefined, true);
-                return;
             }
-            window.setTimeout(() => {
-                if (dragState?.inputType === "pointer" && !dragState.relayRemote &&
-                    !dragState.pendingDropPoint) {
-                    completeBridgeDrag(undefined, true);
-                }
-            }, Constants.TIMEOUT_MOUSE_DRAG_DELAY);
         });
     }
 

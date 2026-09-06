@@ -4,6 +4,7 @@ import {fetchPost} from "../../util/fetch";
 import {processRender} from "./processCode";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
+import {revealTabsForTarget} from "../render/tabsRender";
 import {bgFade, scrollCenter} from "../../util/highlightById";
 /// #if !MOBILE
 import {pushBack} from "../../util/backForward";
@@ -31,7 +32,7 @@ import {disabledWYSIWYG} from "./disabledWYSIWYG";
 import {getEmbeddedDocInfoResponse} from "./docInfo";
 import {updateWidgetCacheVersion} from "./widgetCache";
 import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
-import {hasFocusOffsets} from "./focusRestore";
+import {getSavedTabFocusTarget, hasFocusOffsets} from "./focusRestore";
 import {isIPhone} from "./compatibility";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {disposeCustomBlocksInElement, setCustomBlockRootReady} from "../../plugin/customBlockRender";
@@ -393,6 +394,11 @@ const setHTML = (options: {
     }
     setCustomBlockRootReady(protyle.wysiwyg.element, true);
 
+    const tabItem = protyle.wysiwyg.element.querySelector(`[data-type="NodeTabItem"][data-node-id="${protyle.block.id}"]`);
+    if (tabItem) {
+        // 浮窗和聚焦视图默认展示被引用的页签，不改写文档中的选中状态。
+        revealTabsForTarget(tabItem, false);
+    }
     focusElementById(protyle, options.action, options.scrollAttr, options.scrollPosition,
         options.focusAfterZoom, options.suppressFocus);
 
@@ -592,6 +598,11 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     } else if (!focusElement || action.includes(Constants.CB_GET_FOCUSFIRST)) {
         focusElement = protyle.wysiwyg.element.firstElementChild;
     }
+    const hasScrollTop = scrollAttr && typeof scrollAttr.scrollTop === "number";
+    const savedFocusElement = focusElement;
+    if (hasScrollTop && scrollAttr.focusId && !action.includes(Constants.CB_GET_HL)) {
+        focusElement = getSavedTabFocusTarget(focusElement);
+    }
     if (action.includes(Constants.CB_GET_HL)) {
         preventScroll(protyle); // 搜索页签滚动会导致再次请求
         bgFade(focusElement);
@@ -599,7 +610,7 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     if (!suppressFocus && (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_FOCUSFIRST))) {
         setTimeout(() => {
             let range: Range;
-            if (hasFocusOffsets(scrollAttr)) {
+            if (savedFocusElement === focusElement && hasFocusOffsets(scrollAttr)) {
                 range = focusByOffset(focusElement, scrollAttr.focusStart, scrollAttr.focusEnd) as Range;
             } else {
                 range = focusBlock(focusElement, undefined, !action.includes(Constants.CB_GET_OUTLINE),
@@ -612,7 +623,6 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
             /// #endif
         }, focusElement.getAttribute("data-type") === "NodeCodeBlock" ? Constants.TIMEOUT_TRANSITION : 0);
     }
-    const hasScrollTop = scrollAttr && typeof scrollAttr.scrollTop === "number";
     if (hasScrollTop) {
         protyle.contentElement.scrollTop = scrollAttr.scrollTop;
     }

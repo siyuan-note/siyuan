@@ -38,7 +38,7 @@ import * as dayjs from "dayjs";
 import {openCalcMenu} from "./calc";
 import {avRender, initUnfoldedGroupTables, setAVGroupFolded as setGroupFolded} from "./render";
 import {addView, openViewMenu} from "./view";
-import {isOnlyMeta, writeText} from "../../util/compatibility";
+import {isOnlyMeta, writeBlockDOMClipboard, writeText} from "../../util/compatibility";
 import {selectAVItemRange, setAVItemAnchor} from "./rangeSelect";
 import {openSearchAV} from "./relation";
 import {Constants} from "../../../constants";
@@ -67,7 +67,13 @@ import {getAVCurrentViewID} from "./viewVisibility";
 import {cloneAVCellValueSnapshot} from "./cellValue";
 import {formatAVItemLinks, genAVItemLink} from "./itemLink";
 import {openLink} from "../../../editor/openLink";
-import {getAVRichTextSafeURL, renderAVRichTextElements} from "./richText";
+import {
+    getAVRichTextBlockDOM,
+    getAVRichTextLute,
+    getAVRichTextSafeURL,
+    getAVTextSource,
+    renderAVRichTextElements
+} from "./richText";
 /// #if !MOBILE
 import {openGlobalSearch} from "../../../search/util";
 /// #else
@@ -758,8 +764,24 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "copy") {
-            writeText(getCellText(hasClosestByClassName(target, "av__cell")));
-            showMessage(window.siyuan.languages.copied);
+            const cellElement = hasClosestByClassName(target, "av__cell") as HTMLElement;
+            const source = getAVTextSource(genCellValueByElement("text", cellElement));
+            if (source.kind === "rich") {
+                const blockDOM = getAVRichTextBlockDOM(source.content);
+                if (blockDOM) {
+                    void writeBlockDOMClipboard(getAVRichTextLute(), blockDOM).then((copied) => {
+                        if (copied) {
+                            showMessage(window.siyuan.languages.copied);
+                        }
+                    });
+                } else {
+                    writeText(getCellText(cellElement));
+                    showMessage(window.siyuan.languages.copied);
+                }
+            } else {
+                writeText(getCellText(cellElement));
+                showMessage(window.siyuan.languages.copied);
+            }
             event.preventDefault();
             event.stopPropagation();
             return true;

@@ -5,6 +5,7 @@ import {
     findAVItemPointIndex,
     getAVCellSelection,
     getAVItemSelection,
+    getAVSelectionRoot,
     reconcileAVSelectedItemIDs,
     setAVCellSelection,
     setAVItemAnchorState,
@@ -12,6 +13,19 @@ import {
 } from "./selectionState";
 
 describe("database range selection helpers", () => {
+    it("resolves the selection root from an item instead of requiring a block ancestor", () => {
+        const root = {} as HTMLElement;
+        const item = {
+            closest: (selector: string) => {
+                assert.equal(selector, "[data-av-id][data-av-type]");
+                return root;
+            },
+        } as unknown as HTMLElement;
+
+        assert.equal(getAVSelectionRoot(item), root);
+        assert.equal(getAVSelectionRoot(), undefined);
+    });
+
     it("locates duplicate items by both group and item ID", () => {
         const items = [
             {groupID: "group-a", itemID: "item-1"},

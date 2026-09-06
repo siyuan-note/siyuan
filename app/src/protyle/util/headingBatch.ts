@@ -11,24 +11,6 @@ export const canBatchConvertHeadings = (protyle: IProtyle, rootID: string, previ
         !protyle.lite && !window.siyuan.config.readonly && !window.siyuan.isPublish;
 };
 
-export const updateHeadingBatchButton = (button: HTMLButtonElement, protyle: IProtyle,
-                                        hasHeadings: boolean, isCurrent: () => boolean) => {
-    button.disabled = !isCurrent();
-    if (button.disabled || hasHeadings) {
-        return;
-    }
-    button.disabled = true;
-    // 大纲不展示引述块等容器内的标题，空大纲仍需按完整文档判断。
-    fetchPost("/api/block/getDocHeadingLevelTransaction", {
-        id: protyle.block.rootID,
-        notebook: protyle.notebookId,
-    }, response => {
-        if (button.isConnected && isCurrent()) {
-            button.disabled = !response.data?.counts?.some((count: number) => count > 0);
-        }
-    });
-};
-
 export const showHeadingBatchDialog = async (protyle: IProtyle, isCurrent: () => boolean) => {
     const rootID = protyle.block.rootID;
     const available = () => isCurrent() && canBatchConvertHeadings(protyle, rootID, false);

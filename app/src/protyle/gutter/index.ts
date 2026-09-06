@@ -129,6 +129,7 @@ import {canShowGutterInsert, genGutterBlockButtonHTML} from "./button";
 import {getViewFoldOccurrenceID, hasViewFoldContext, setViewFold} from "../util/viewFold";
 import {exportImage} from "../export/util";
 import {CALLOUT_PRESETS, updateCalloutType, updateCustomCalloutType} from "../wysiwyg/callout";
+import {setTabsPosition, unwrapTabs} from "../wysiwyg/tabs";
 
 // 块类型 data-type 到本地化名称键的映射，用于块标提示中的 ${x}
 const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
@@ -500,7 +501,7 @@ export class Gutter {
                     return;
                 }
                 hideElements(["gutter"], protyle);
-                countBlockWord([], protyle.block.rootID);
+                countBlockWord([], protyle);
                 insertEmptyBlock(protyle, buttonElement.dataset.type === "gutterPlusBefore" ? "beforebegin" : "afterend", nodeElement);
                 return;
             }
@@ -793,7 +794,7 @@ export class Gutter {
             const type = buttonElement.getAttribute("data-type");
             const id = buttonElement.getAttribute("data-node-id");
             // 情况C：非有效块标（折叠箭头、数据库行等）→ 隐藏框线与+号
-            if (type === "fold" || type === "NodeAttributeViewRow" || type === "NodeAttributeViewRowMenu" || !id) {
+            if (type === "fold" || type === "NodeTabItem" || type === "NodeAttributeViewRow" || type === "NodeAttributeViewRowMenu" || !id) {
                 hideInsert();
                 return;
             }
@@ -1640,7 +1641,7 @@ export class Gutter {
         const turnIntoSubmenu: IMenu[] = [];
         hideElements(["select"], protyle);
         nodeElement.classList.add("protyle-wysiwyg--select");
-        countBlockWord([id], protyle.block.rootID);
+        countBlockWord([id], protyle);
         if (isMobile() && !protyle.toolbar.isMultiSelectMode()) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "multiSelect",
@@ -1887,6 +1888,15 @@ export class Gutter {
                 selectsElement: [nodeElement],
                 type: "Blocks2Callout"
             }));
+            turnIntoSubmenu.push(this.turnsOneInto({
+                menuId: "tabs",
+                id,
+                icon: "iconTabs",
+                label: window.siyuan.languages.tabs,
+                protyle,
+                nodeElement,
+                type: "List2Tabs"
+            }));
             const listSubtype = nodeElement.getAttribute("data-subtype");
             if (listSubtype === "o") {
                 turnIntoSubmenu.push(this.turnsOneInto({
@@ -1955,6 +1965,24 @@ export class Gutter {
             if (this.hasSublist([nodeElement])) {
                 turnIntoSubmenu.push(this.recursiveListMenu(protyle, [nodeElement]));
             }
+        } else if (type === "NodeTabs" && allowStructuralMutation) {
+            [
+                {menuId: "list", icon: "iconList", label: "list", type: "Tabs2UL"},
+                {menuId: "orderedList", icon: "iconOrderedList", label: "ordered-list", type: "Tabs2OL"},
+                {menuId: "check", icon: "iconCheck", label: "check", type: "Tabs2TL"},
+            ].forEach(target => turnIntoSubmenu.push(this.turnsOneInto({
+                ...target,
+                id,
+                label: window.siyuan.languages[target.label],
+                protyle,
+                nodeElement,
+            })));
+            turnIntoSubmenu.push({
+                id: "superBlock",
+                icon: "iconSuper",
+                label: window.siyuan.languages.superBlock,
+                click: () => unwrapTabs(protyle, nodeElement as HTMLElement),
+            });
         } else if (type === "NodeBlockquote" && allowStructuralMutation) {
             turnIntoSubmenu.push(this.turnsOneInto({
                 menuId: "paragraph",
@@ -2120,7 +2148,7 @@ export class Gutter {
                     accelerator: window.siyuan.config.keymap.editor.list.prependListItem.custom,
                     click() {
                         hideElements(["select"], protyle);
-                        countBlockWord([], protyle.block.rootID);
+                        countBlockWord([], protyle);
                         void prependListItem(protyle, nodeElement as HTMLElement, range);
                     }
                 }, {
@@ -2130,7 +2158,7 @@ export class Gutter {
                     accelerator: window.siyuan.config.keymap.editor.list.appendListItem.custom,
                     click() {
                         hideElements(["select"], protyle);
-                        countBlockWord([], protyle.block.rootID);
+                        countBlockWord([], protyle);
                         void appendListItem(protyle, nodeElement as HTMLElement, range);
                     }
                 });
@@ -2146,6 +2174,28 @@ export class Gutter {
                 loadSubmenu: continueListStartPromise ? async () => {
                     return genListBlockSubmenu(await continueListStartPromise);
                 } : undefined,
+            }).element);
+        } else if (type === "NodeTabs" && allowStructuralMutation) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "separator_tabs",
+                type: "separator",
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "tabs",
+                icon: "iconTabs",
+                label: window.siyuan.languages.tabs,
+                type: "submenu",
+                submenu: [{
+                    id: "tabsPositionTop",
+                    label: window.siyuan.languages.tabsPositionTop,
+                    icon: (nodeElement.getAttribute("tabs-position") || "top") === "top" ? "iconSelect" : undefined,
+                    click: () => setTabsPosition(protyle, nodeElement as HTMLElement, "top"),
+                }, {
+                    id: "tabsPositionLeft",
+                    label: window.siyuan.languages.tabsPositionLeft,
+                    icon: nodeElement.getAttribute("tabs-position") === "left" ? "iconSelect" : undefined,
+                    click: () => setTabsPosition(protyle, nodeElement as HTMLElement, "left"),
+                }],
             }).element);
         } else if (type === "NodeSuperBlock" && !protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({
@@ -2736,7 +2786,7 @@ export class Gutter {
             }).element);
             /// #endif
         }
-        if (allowStructuralMutation) {
+        if (allowStructuralMutation && nodeElement.getAttribute("data-type") !== "NodeTabItem") {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "insertBefore",
                 icon: "iconBefore",
@@ -2744,7 +2794,7 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.editor.general.insertBefore.custom,
                 click() {
                     hideElements(["select"], protyle);
-                    countBlockWord([], protyle.block.rootID);
+                    countBlockWord([], protyle);
                     insertEmptyBlock(protyle, "beforebegin", nodeElement);
                 }
             }).element);
@@ -2755,7 +2805,7 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.editor.general.insertAfter.custom,
                 click() {
                     hideElements(["select"], protyle);
-                    countBlockWord([], protyle.block.rootID);
+                    countBlockWord([], protyle);
                     insertEmptyBlock(protyle, "afterend", nodeElement);
                 }
             }).element);
@@ -2768,7 +2818,7 @@ export class Gutter {
                     accelerator: window.siyuan.config.keymap.editor.general.insertSuperBlockLeft.custom,
                     click() {
                         hideElements(["select"], protyle);
-                        countBlockWord([], protyle.block.rootID);
+                        countBlockWord([], protyle);
                         insertEmptySuperBlockColumn(protyle, "left", nodeElement);
                     }
                 }).element);
@@ -2779,7 +2829,7 @@ export class Gutter {
                     accelerator: window.siyuan.config.keymap.editor.general.insertSuperBlockRight.custom,
                     click() {
                         hideElements(["select"], protyle);
-                        countBlockWord([], protyle.block.rootID);
+                        countBlockWord([], protyle);
                         insertEmptySuperBlockColumn(protyle, "right", nodeElement);
                     }
                 }).element);
@@ -3840,7 +3890,8 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
             rect = nodeElement.getBoundingClientRect();
             space = 0;
         }
-        let horizontalAnchorLeft = rect.left;
+        // 页签栏只用于垂直定位；水平方向和其他块一样以整个块的外边界为基准。
+        let horizontalAnchorLeft = tabsHeader ? tabsHeader.parentElement.getBoundingClientRect().left : rect.left;
         if (listItem && element.classList.contains("protyle-action") &&
             element.parentElement.getAttribute("data-type") === "NodeListItem") {
             const listItemElement = element.parentElement;
@@ -3849,6 +3900,8 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
             horizontalAnchorLeft = getListGutterAnchorLeft(rect.left, contentLeft, isRTL);
         }
         const buttonCount = html.split("</button>").length - 1;
+        // 所有块标与内容统一留出间距，并在判断是否压缩时计入这段空间。
+        const gutterGap = 4;
         const getNaturalLeft = (width: number) => {
             let left = horizontalAnchorLeft - width - space;
             if (nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed" && buttonCount === 1) {
@@ -3858,7 +3911,7 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
                 // 为数据库行
                 left = nodeElement.getBoundingClientRect().left - width - space + parseInt(getComputedStyle(nodeElement).paddingLeft);
             }
-            return left;
+            return left - gutterGap;
         };
         let naturalLeft = getNaturalLeft(this.naturalWidth || this.element.clientWidth);
         let compressed = naturalLeft < this.element.parentElement.getBoundingClientRect().left;
@@ -3909,7 +3962,7 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
         const top = Math.max(rect.top + marginHeight, contentTop, foldElement ? foldElement.getBoundingClientRect().top : 0);
         this.element.style.top = `${getFixedGutterPosition(top, fixedContainerRect?.top)}px`;
         // 压缩模式需加 2，否则和折叠标题无法对齐
-        const left = compressed ? horizontalAnchorLeft - this.element.clientWidth - space / 2 + 3 :
+        const left = compressed ? horizontalAnchorLeft - this.element.clientWidth - space / 2 + 3 - gutterGap :
             getNaturalLeft(this.element.clientWidth);
         this.element.style.left = `${getFixedGutterPosition(left, fixedContainerRect?.left)}px`;
     }

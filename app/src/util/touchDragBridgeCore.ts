@@ -34,6 +34,15 @@ export const shouldRequireLongPress = (isLongPressTarget: boolean, isMouse: bool
     return isLongPressTarget && (!isMouse || isAndroid);
 };
 
+export const shouldCancelPointerDragAfterWindowExit = (isAndroid: boolean, isDragging: boolean, hasRelay: boolean) => {
+    return isAndroid || !isDragging || !hasRelay;
+};
+
+export const shouldRequestForeignMouseDrop = (isAndroid: boolean, button: number, hasForeignDrag: boolean,
+                                              dropRequested: boolean) => {
+    return !isAndroid && button === 0 && hasForeignDrag && !dropRequested;
+};
+
 export const getWheelScrollDelta = (delta: number, deltaMode: number, lineSize: number, pageSize: number) => {
     if (deltaMode === 1) {
         return delta * lineSize;

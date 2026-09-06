@@ -140,6 +140,7 @@ type summarizeFlashcardReviewSetsRequest struct {
 }
 
 type getFlashcardSessionQueueRequest struct {
+	flashcardv2.StudyDayOptions
 	SessionID string `json:"sessionID"`
 }
 
@@ -456,7 +457,7 @@ func getFlashcardSessionQueue(c *gin.Context) {
 	if !bindFlashcardRequest(c, ret, request) {
 		return
 	}
-	queue, err := model.GetFlashcardV2SessionQueue(c.Request.Context(), request.SessionID)
+	queue, err := model.GetFlashcardV2SessionQueue(c.Request.Context(), request.SessionID, request.StudyDayOptions)
 	if err != nil {
 		setFlashcardAPIError(ret, err)
 		return

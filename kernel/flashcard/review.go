@@ -30,16 +30,18 @@ import (
 
 // ReviewRequest 保存一次正常或强化复习的完整调用输入。
 type ReviewRequest struct {
-	OperationID  string          `json:"operationID"`
-	CardID       string          `json:"cardID"`
-	Rating       ReviewRating    `json:"rating"`
-	ReviewedAt   int64           `json:"reviewedAt"`
-	DurationMS   int64           `json:"durationMS"`
-	SessionID    string          `json:"sessionID,omitempty"`
-	ReviewSetID  string          `json:"reviewSetID,omitempty"`
-	ReviewMode   string          `json:"reviewMode"`
-	BuryUntil    int64           `json:"buryUntil,omitempty"`
-	AnswerResult json.RawMessage `json:"answerResult,omitempty"`
+	OperationID    string          `json:"operationID"`
+	CardID         string          `json:"cardID"`
+	Rating         ReviewRating    `json:"rating"`
+	ReviewedAt     int64           `json:"reviewedAt"`
+	ReviewDayStart int64           `json:"reviewDayStart,omitempty"`
+	ReviewDayEnd   int64           `json:"reviewDayEnd,omitempty"`
+	DurationMS     int64           `json:"durationMS"`
+	SessionID      string          `json:"sessionID,omitempty"`
+	ReviewSetID    string          `json:"reviewSetID,omitempty"`
+	ReviewMode     string          `json:"reviewMode"`
+	BuryUntil      int64           `json:"buryUntil,omitempty"`
+	AnswerResult   json.RawMessage `json:"answerResult,omitempty"`
 }
 
 // ReviewResult 返回持久化事件、前后状态和本次埋藏的兄弟卡。
@@ -170,6 +172,23 @@ func (store *Store) ReviewCard(ctx context.Context, request ReviewRequest) (Revi
 	if request.ReviewMode == "normal" && before.LastReview > request.ReviewedAt {
 		return ReviewResult{}, errors.New("flashcard review time precedes the current state")
 	}
+	if request.ReviewMode == "normal" {
+		start, end, dayErr := reviewDayBounds(request.ReviewedAt, request.ReviewDayStart, request.ReviewDayEnd)
+		if dayErr != nil {
+			return ReviewResult{}, dayErr
+		}
+		budget, budgetErr := store.projection.dailyPresetBudget(ctx, start, end)
+		if budgetErr != nil {
+			return ReviewResult{}, budgetErr
+		}
+		allowed, budgetErr := budget.selectCard(ctx, store.projection, card.ID, presetID, before.State)
+		if budgetErr != nil {
+			return ReviewResult{}, budgetErr
+		}
+		if !allowed {
+			return ReviewResult{}, errors.New("flashcard scheduler preset daily limit has been reached")
+		}
+	}
 	input := schedulerInput{
 		Rating: request.Rating, ReviewedAt: request.ReviewedAt, RequestRetention: preset.RequestRetention,
 		MaximumInterval: preset.MaximumInterval, Weights: append([]float64(nil), preset.Weights...),
@@ -226,7 +245,7 @@ func (store *Store) ReviewCard(ctx context.Context, request ReviewRequest) (Revi
 		}
 		eventPayload.AfterState = &after
 		result.AfterState = &after
-		buriedChanges, buriedIDs, buryErr := store.burySiblingCards(ctx, request, card, before, preset)
+		buriedChanges, buriedIDs, buryErr := store.burySiblingCards(ctx, request, card, preset)
 		if buryErr != nil {
 			return ReviewResult{}, buryErr
 		}
@@ -463,14 +482,9 @@ func scheduleReview(before ReviewStateSnapshot, preset SchedulerPreset,
 }
 
 func (store *Store) burySiblingCards(ctx context.Context, request ReviewRequest, reviewed Card,
-	before ReviewStateSnapshot, preset SchedulerPreset) ([]Change, []string, error) {
-	shouldBury := (before.State == "new" || before.State == "learning") && preset.BuryNewSiblings ||
-		(before.State == "review" || before.State == "relearning") && preset.BuryReviewSiblings
-	if !shouldBury {
+	preset SchedulerPreset) ([]Change, []string, error) {
+	if !preset.BuryNewSiblings && !preset.BuryReviewSiblings {
 		return nil, nil, nil
-	}
-	if request.BuryUntil <= request.ReviewedAt {
-		return nil, nil, errors.New("sibling burial requires the next review day boundary")
 	}
 	siblings, err := store.projection.cardRevisionsBySource(ctx, reviewed.SourceID)
 	if err != nil {
@@ -500,7 +514,18 @@ func (store *Store) burySiblingCards(ctx context.Context, request ReviewRequest,
 		if stateErr = decodeStrictJSON(stateRevision.Payload, &state); stateErr != nil {
 			return nil, nil, stateErr
 		}
-		if state.Suspended || state.BuriedUntil >= request.BuryUntil {
+		shouldBury := (state.State == "new" || state.State == "learning") && preset.BuryNewSiblings ||
+			(state.State == "review" || state.State == "relearning") && preset.BuryReviewSiblings
+		if !shouldBury {
+			continue
+		}
+		if state.Suspended {
+			continue
+		}
+		if request.BuryUntil <= request.ReviewedAt {
+			return nil, nil, errors.New("sibling burial requires the next review day boundary")
+		}
+		if state.BuriedUntil >= request.BuryUntil {
 			continue
 		}
 		state.BuriedUntil = request.BuryUntil

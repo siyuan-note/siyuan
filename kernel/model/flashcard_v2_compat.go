@@ -321,7 +321,7 @@ func AddLegacyFlashcardV2Cards(ctx context.Context, deckID string, blockIDs []st
 		return flashcardv2.LegacyReviewSetInfo{}, err
 	}
 	if _, err = store.AddLegacyQuickCards(ctx, flashcardv2.NewID(), deckID, blockIDs,
-		time.Now().UnixMilli()); err != nil {
+		time.Now().UnixMilli(), flashcardV2CreationMetadata(blockIDs)...); err != nil {
 		return flashcardv2.LegacyReviewSetInfo{}, err
 	}
 	return getLegacyFlashcardV2ReviewSet(ctx, store, deckID)
@@ -443,6 +443,9 @@ func GetLegacyFlashcardV2DueCards(ctx context.Context, deckID string, reviewedCa
 	if err != nil {
 		return nil, 0, 0, 0, err
 	}
+	if err = refreshFlashcardV2BlockMetadata(ctx, store, false); err != nil {
+		return nil, 0, 0, 0, err
+	}
 	if deckID == "" {
 		deckID = builtinDeckID
 	}
@@ -470,8 +473,7 @@ func GetLegacyFlashcardV2DueCards(ctx context.Context, deckID string, reviewedCa
 	}
 	legacyFlashcardV2SkipMu.Unlock()
 	now := time.Now()
-	var dueNew, dueOld []flashcardv2.LegacyQuickCard
-	unreviewedCount, unreviewedNew, unreviewedOld := 0, 0, 0
+	candidates := make([]flashcardv2.LegacyQuickCard, 0, len(cards))
 	for _, card := range cards {
 		if blockFilter != nil && !blockFilter(card.BlockID) || !isSupportedFlashcardBlock(card.BlockID) ||
 			card.ReviewState.Suspended || card.ReviewState.BuriedUntil > now.UnixMilli() ||
@@ -481,39 +483,14 @@ func GetLegacyFlashcardV2DueCards(ctx context.Context, deckID string, reviewedCa
 		if _, found := skipped[card.Card.ID]; found {
 			continue
 		}
-		if _, found := reviewed[card.Card.ID]; !found {
-			unreviewedCount++
-			if card.ReviewState.State == "new" {
-				unreviewedNew++
-			} else {
-				unreviewedOld++
-			}
-		}
-		if card.ReviewState.State == "new" {
-			dueNew = append(dueNew, card)
-		} else {
-			dueOld = append(dueOld, card)
-		}
+		candidates = append(candidates, card)
 	}
-	if len(dueNew) > Conf.Flashcard.NewCardLimit {
-		dueNew = dueNew[:Conf.Flashcard.NewCardLimit]
+	candidates, err = store.Projection().FilterLegacyQuickCardsByPreset(ctx, candidates, now.UnixMilli())
+	if err != nil {
+		return nil, 0, 0, 0, err
 	}
-	if len(dueOld) > Conf.Flashcard.ReviewCardLimit {
-		dueOld = dueOld[:Conf.Flashcard.ReviewCardLimit]
-	}
-	selected := append([]flashcardv2.LegacyQuickCard(nil), dueNew...)
-	selected = append(selected, dueOld...)
-	if Conf.Flashcard.ReviewMode == 2 {
-		selected = append([]flashcardv2.LegacyQuickCard(nil), dueOld...)
-		selected = append(selected, dueNew...)
-	} else if Conf.Flashcard.ReviewMode == 0 {
-		sort.SliceStable(selected, func(i, j int) bool {
-			if selected[i].ReviewState.Due == selected[j].ReviewState.Due {
-				return selected[i].Card.ID < selected[j].Card.ID
-			}
-			return selected[i].ReviewState.Due < selected[j].ReviewState.Due
-		})
-	}
+	selected, unreviewedCount, unreviewedNew, unreviewedOld := selectLegacyFlashcardV2DueCards(candidates,
+		reviewed, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit, Conf.Flashcard.ReviewMode)
 	ret := make([]*Flashcard, 0, len(selected))
 	for _, card := range selected {
 		nextDues, previewErr := store.PreviewReviewDues(ctx, card.Card.ID, now.UnixMilli())
@@ -530,8 +507,53 @@ func GetLegacyFlashcardV2DueCards(ctx context.Context, deckID string, reviewedCa
 			State:      riff.State(legacyFlashcardV2FSRSState(card.ReviewState.State)),
 			LastReview: card.ReviewState.LastReview, NextDues: formatted})
 	}
-	return ret, unreviewedCount, min(unreviewedNew, Conf.Flashcard.NewCardLimit),
-		min(unreviewedOld, Conf.Flashcard.ReviewCardLimit), nil
+	return ret, unreviewedCount, unreviewedNew, unreviewedOld, nil
+}
+
+func selectLegacyFlashcardV2DueCards(cards []flashcardv2.LegacyQuickCard, reviewed map[string]struct{},
+	newLimit, reviewLimit, reviewMode int) ([]flashcardv2.LegacyQuickCard, int, int, int) {
+	var dueNew, dueOld []flashcardv2.LegacyQuickCard
+	unreviewedCount := 0
+	for _, card := range cards {
+		if card.ReviewState.State == "new" && newLimit <= 0 || card.ReviewState.State != "new" && reviewLimit <= 0 {
+			continue
+		}
+		if _, found := reviewed[card.Card.ID]; !found {
+			unreviewedCount++
+		}
+		if card.ReviewState.State == "new" {
+			if len(dueNew) < newLimit {
+				dueNew = append(dueNew, card)
+			}
+		} else if len(dueOld) < reviewLimit {
+			dueOld = append(dueOld, card)
+		}
+	}
+	selected := append([]flashcardv2.LegacyQuickCard(nil), dueNew...)
+	selected = append(selected, dueOld...)
+	if reviewMode == 2 {
+		selected = append([]flashcardv2.LegacyQuickCard(nil), dueOld...)
+		selected = append(selected, dueNew...)
+	} else if reviewMode == 0 {
+		sort.SliceStable(selected, func(i, j int) bool {
+			if selected[i].ReviewState.Due == selected[j].ReviewState.Due {
+				return selected[i].Card.ID < selected[j].Card.ID
+			}
+			return selected[i].ReviewState.Due < selected[j].ReviewState.Due
+		})
+	}
+	unreviewedNew, unreviewedOld := 0, 0
+	for _, card := range selected {
+		if _, found := reviewed[card.Card.ID]; found {
+			continue
+		}
+		if card.ReviewState.State == "new" {
+			unreviewedNew++
+		} else {
+			unreviewedOld++
+		}
+	}
+	return selected, unreviewedCount, unreviewedNew, unreviewedOld
 }
 
 func legacyFlashcardV2Priority(card flashcardv2.LegacyQuickCard) string {
@@ -561,6 +583,9 @@ func ReviewLegacyFlashcardV2Card(ctx context.Context, deckID, cardID string, rat
 	if err != nil {
 		return err
 	}
+	if err = refreshFlashcardV2BlockMetadata(ctx, store, true); err != nil {
+		return err
+	}
 	if deckID == "" {
 		deckID = builtinDeckID
 	}
@@ -578,11 +603,7 @@ func ReviewLegacyFlashcardV2Card(ctx context.Context, deckID, cardID string, rat
 	if err != nil {
 		return err
 	}
-	now := time.Now()
-	nextDay := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, time.Local).UnixMilli()
-	_, err = store.ReviewCard(ctx, flashcardv2.ReviewRequest{OperationID: flashcardv2.NewID(),
-		CardID: card.Card.ID, Rating: reviewRating, ReviewedAt: now.UnixMilli(), DurationMS: durationMS,
-		ReviewSetID: flashcardv2.LegacyReviewSetID(deckID), ReviewMode: "normal", BuryUntil: nextDay})
+	_, err = store.ReviewLegacyQuickCard(ctx, flashcardv2.NewID(), card.Card.ID, reviewRating, time.Now().UnixMilli(), durationMS)
 	if err == nil {
 		legacyFlashcardV2SkipMu.Lock()
 		delete(legacyFlashcardV2Skips, card.Card.ID)

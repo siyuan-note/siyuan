@@ -43,12 +43,14 @@ var (
 
 // BasicSourceRequest 描述由有序块引用创建的普通问答卡源。
 type BasicSourceRequest struct {
-	OperationID  string   `json:"operationID"`
-	SourceID     string   `json:"sourceID"`
-	BlockIDs     []string `json:"blockIDs"`
-	Direction    string   `json:"direction"`
-	ReviewSetIDs []string `json:"reviewSetIDs,omitempty"`
-	CreatedAt    int64    `json:"createdAt"`
+	OperationID     string          `json:"operationID"`
+	SourceID        string          `json:"sourceID"`
+	BlockIDs        []string        `json:"blockIDs"`
+	Direction       string          `json:"direction"`
+	ReviewSetIDs    []string        `json:"reviewSetIDs,omitempty"`
+	CreatedAt       int64           `json:"createdAt"`
+	DefaultPresetID string          `json:"defaultPresetID,omitempty"`
+	BlockMetadata   []BlockMetadata `json:"-"`
 }
 
 // BasicSourceResult 返回卡源修订和由方向生成的独立卡片。
@@ -73,6 +75,11 @@ func (store *Store) CreateBasicSource(ctx context.Context, request BasicSourceRe
 		return BasicSourceResult{}, err
 	}
 	if err := store.ensureBasicEntities(ctx); err != nil {
+		return BasicSourceResult{}, err
+	}
+	presetID, err := store.resolveSourcePreset(ctx, request.OperationID, request.SourceID, request.DefaultPresetID,
+		request.BlockIDs[0], request.BlockMetadata)
+	if err != nil {
 		return BasicSourceResult{}, err
 	}
 	refs := make([]CardSourceRef, 0, len(request.BlockIDs))
@@ -101,7 +108,7 @@ func (store *Store) CreateBasicSource(ctx context.Context, request BasicSourceRe
 	}
 	source := CardSource{
 		ID: request.SourceID, SchemaID: basicSchemaID, SourceType: "qa", PrimaryRefID: refs[0].ID,
-		DefaultPresetID: legacyPresetID, GenerationConfig: json.RawMessage(`{"type":"basic"}`), Status: "active",
+		DefaultPresetID: presetID, GenerationConfig: json.RawMessage(`{"type":"basic"}`), Status: "active",
 		DisabledTemplateIDs: basicDisabledTemplates(request.Direction),
 	}
 	sourcePayload, err := CanonicalJSON(source)

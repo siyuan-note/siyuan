@@ -32,7 +32,7 @@ const (
 	FormatVersion = 2
 
 	// ProjectionSchemaVersion 是本地 SQLite 投影的结构版本。
-	ProjectionSchemaVersion = 5
+	ProjectionSchemaVersion = 6
 
 	// SchedulerVersionFSRS6 标识当前确定性 FSRS 状态转换实现。
 	SchedulerVersionFSRS6 = "go-fsrs-v3.3.1-fsrs6"
@@ -335,15 +335,16 @@ type SchedulerPreset struct {
 	LeechAction        string    `json:"leechAction"`
 }
 
-// StudyPolicy 保存文档或笔记本范围内的学习优先级与暂停策略。
+// StudyPolicy 保存文档或笔记本范围内的学习优先级、暂停策略和制卡默认预设。
 type StudyPolicy struct {
-	ID         string `json:"id"`
-	ScopeType  string `json:"scopeType"`
-	ScopeID    string `json:"scopeID"`
-	Priority   string `json:"priority"`
-	TargetDate *int64 `json:"targetDate,omitempty"`
-	CreatedAt  int64  `json:"createdAt"`
-	UpdatedAt  int64  `json:"updatedAt"`
+	ID              string `json:"id"`
+	ScopeType       string `json:"scopeType"`
+	ScopeID         string `json:"scopeID"`
+	Priority        string `json:"priority"`
+	DefaultPresetID string `json:"defaultPresetID,omitempty"`
+	TargetDate      *int64 `json:"targetDate,omitempty"`
+	CreatedAt       int64  `json:"createdAt"`
+	UpdatedAt       int64  `json:"updatedAt"`
 }
 
 // StudySession 保存一次连续复习过程的稳定参数和生命周期。
@@ -361,6 +362,8 @@ type StudySession struct {
 	IncludePaused    bool            `json:"includePaused"`
 	SelectionDigest  string          `json:"selectionDigest"`
 	StartedAt        int64           `json:"startedAt"`
+	ReviewDayStart   int64           `json:"reviewDayStart,omitempty"`
+	ReviewDayEnd     int64           `json:"reviewDayEnd,omitempty"`
 	EndedAt          *int64          `json:"endedAt,omitempty"`
 }
 

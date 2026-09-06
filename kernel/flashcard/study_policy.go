@@ -26,13 +26,14 @@ import (
 
 // SaveStudyPolicyRequest 创建或更新一个文档或笔记本范围策略。
 type SaveStudyPolicyRequest struct {
-	OperationID        string `json:"operationID"`
-	ScopeType          string `json:"scopeType"`
-	ScopeID            string `json:"scopeID"`
-	Priority           string `json:"priority"`
-	TargetDate         *int64 `json:"targetDate,omitempty"`
-	ExpectedRevisionID string `json:"expectedRevisionID,omitempty"`
-	UpdatedAt          int64  `json:"updatedAt"`
+	OperationID        string  `json:"operationID"`
+	ScopeType          string  `json:"scopeType"`
+	ScopeID            string  `json:"scopeID"`
+	Priority           string  `json:"priority"`
+	DefaultPresetID    *string `json:"defaultPresetID,omitempty"`
+	TargetDate         *int64  `json:"targetDate,omitempty"`
+	ExpectedRevisionID string  `json:"expectedRevisionID,omitempty"`
+	UpdatedAt          int64   `json:"updatedAt"`
 }
 
 // StudyPolicyRevision 按唯一范围返回当前策略修订。
@@ -65,13 +66,13 @@ func (store *Store) SaveStudyPolicy(ctx context.Context,
 	request.ExpectedRevisionID = strings.TrimSpace(request.ExpectedRevisionID)
 	if request.OperationID == "" || request.ScopeID == "" || request.UpdatedAt <= 0 ||
 		(request.ScopeType != "document" && request.ScopeType != "notebook") ||
-		!validStudyPriority(request.Priority) || request.TargetDate != nil && *request.TargetDate < 0 {
+		(request.Priority != "" && !validStudyPriority(request.Priority)) || request.TargetDate != nil && *request.TargetDate < 0 {
 		return EntityRevision{}, errors.New("flashcard study policy save request is invalid")
 	}
 	if existing, found, err := store.findAppliedOperationLocked(ctx, request.OperationID); err != nil {
 		return EntityRevision{}, err
 	} else if found {
-		return savedStudyPolicyFromBatch(existing, request)
+		return store.savedStudyPolicyFromBatch(ctx, existing, request)
 	}
 	current, found, err := store.projection.StudyPolicyRevision(ctx, request.ScopeType, request.ScopeID)
 	if err != nil {
@@ -80,6 +81,7 @@ func (store *Store) SaveStudyPolicy(ctx context.Context,
 	parents := []string(nil)
 	policyID := DeterministicID("study-policy", request.ScopeType, request.ScopeID)
 	createdAt := request.UpdatedAt
+	defaultPresetID := ""
 	if found {
 		if request.ExpectedRevisionID == "" || current.RevisionID != request.ExpectedRevisionID {
 			return EntityRevision{}, fmt.Errorf("%w: study policy [%s:%s]", ErrRevisionConflict,
@@ -92,12 +94,17 @@ func (store *Store) SaveStudyPolicy(ctx context.Context,
 			return EntityRevision{}, err
 		}
 		createdAt = currentPolicy.CreatedAt
+		defaultPresetID = currentPolicy.DefaultPresetID
 	} else if request.ExpectedRevisionID != "" {
 		return EntityRevision{}, fmt.Errorf("%w: study policy [%s:%s]", ErrRevisionConflict,
 			request.ScopeType, request.ScopeID)
 	}
+	if request.DefaultPresetID != nil {
+		defaultPresetID = strings.TrimSpace(*request.DefaultPresetID)
+	}
 	policy := StudyPolicy{ID: policyID, ScopeType: request.ScopeType, ScopeID: request.ScopeID,
-		Priority: request.Priority, TargetDate: request.TargetDate, CreatedAt: createdAt, UpdatedAt: request.UpdatedAt}
+		Priority: request.Priority, DefaultPresetID: defaultPresetID, TargetDate: request.TargetDate,
+		CreatedAt: createdAt, UpdatedAt: request.UpdatedAt}
 	revision, err := NewOperationEntityRevision(request.OperationID, EntityStudyPolicy, policy.ID, parents,
 		request.UpdatedAt, false, policy)
 	if err != nil {
@@ -111,10 +118,11 @@ func (store *Store) SaveStudyPolicy(ctx context.Context,
 	if err != nil {
 		return EntityRevision{}, err
 	}
-	return savedStudyPolicyFromBatch(batch, request)
+	return store.savedStudyPolicyFromBatch(ctx, batch, request)
 }
 
-func savedStudyPolicyFromBatch(batch OperationBatch, request SaveStudyPolicyRequest) (EntityRevision, error) {
+func (store *Store) savedStudyPolicyFromBatch(ctx context.Context, batch OperationBatch,
+	request SaveStudyPolicyRequest) (EntityRevision, error) {
 	if len(batch.Changes) != 1 || batch.Changes[0].Kind != RecordEntityRevision ||
 		batch.Changes[0].Revision == nil || batch.Changes[0].Revision.Deleted {
 		return EntityRevision{}, ErrOperationConflict
@@ -135,6 +143,24 @@ func savedStudyPolicyFromBatch(batch OperationBatch, request SaveStudyPolicyRequ
 		policy.ScopeType != request.ScopeType || policy.ScopeID != request.ScopeID ||
 		policy.Priority != request.Priority || !sameOptionalInt64(policy.TargetDate, request.TargetDate) ||
 		policy.UpdatedAt != request.UpdatedAt {
+		return EntityRevision{}, ErrOperationConflict
+	}
+	expectedPresetID := ""
+	if request.DefaultPresetID != nil {
+		expectedPresetID = strings.TrimSpace(*request.DefaultPresetID)
+	} else if request.ExpectedRevisionID != "" {
+		parent, found, err := store.projection.entityRevisionByID(ctx, request.ExpectedRevisionID)
+		if err != nil {
+			return EntityRevision{}, err
+		}
+		var previous StudyPolicy
+		if !found || parent.Deleted || parent.EntityType != EntityStudyPolicy || parent.EntityID != revision.EntityID ||
+			decodeStrictJSON(parent.Payload, &previous) != nil {
+			return EntityRevision{}, ErrOperationConflict
+		}
+		expectedPresetID = previous.DefaultPresetID
+	}
+	if policy.DefaultPresetID != expectedPresetID {
 		return EntityRevision{}, ErrOperationConflict
 	}
 	return revision, nil

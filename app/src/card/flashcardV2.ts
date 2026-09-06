@@ -10,6 +10,12 @@ import {openFlashcardV2ReviewSession} from "./flashcardV2Session";
 import type {App} from "../index";
 import {listFlashcardV2PluginTypes} from "./flashcardV2Plugin";
 import type {IFlashcardQueryAST, IFlashcardQueryExpression} from "./flashcardV2Query";
+import {flashcardV2FlagColors, flashcardV2FlagMenuItems} from "./flashcardV2Flag";
+import {
+    appendFlashcardV2ClozeTargets,
+    resolveFlashcardV2InlineOcclusions,
+    type IFlashcardV2InlineOcclusion,
+} from "./flashcardV2Occlusion";
 import {
     buildFlashcardV2TagAssignmentGroups,
     getFlashcardV2TagSelection,
@@ -177,6 +183,7 @@ interface IFlashcardStudyPolicy {
     scopeType: "document" | "notebook";
     scopeID: string;
     priority: string;
+    defaultPresetID?: string;
     targetDate?: number;
     createdAt: number;
     updatedAt: number;
@@ -245,14 +252,12 @@ interface IAnkiImportReport {
 
 const mergedTagIDs = (...sets: string[][]) => [...new Set(sets.flat())].sort();
 
-const flashcardFlagColors = ["", "#d14343", "#d97706", "#2f9e44", "#3b82f6", "#8b5cf6", "#0891b2", "#db2777"];
-
-const flashcardFlagStyle = (flag: number) => flag > 0 && flag < flashcardFlagColors.length ?
-    ` style="color:${flashcardFlagColors[flag]}"` : "";
+const flashcardFlagStyle = (flag: number) => flag > 0 && flag < flashcardV2FlagColors.length ?
+    ` style="color:${flashcardV2FlagColors[flag]}"` : "";
 
 const flashcardFlagLabel = (flag: number, definitions: IFlashcardFlagDefinition[]) => {
     if (flag === 0) {
-        return "○";
+        return window.siyuan.languages.flashcardNoFlag;
     }
     return `● ${definitions.find((definition) => definition.flag === flag)?.name || flag}`;
 };
@@ -271,9 +276,9 @@ const priorityLabel = (priority: string) => {
 const reviewStateLabel = (state: string) => {
     const labels: Record<string, string> = {
         new: window.siyuan.languages.flashcardNewCard,
-        learning: window.siyuan.languages.flashcardPriorityLearning,
+        learning: window.siyuan.languages.flashcardLearningCards,
         review: window.siyuan.languages.flashcardReviewCard,
-        relearning: `${window.siyuan.languages.flashcardPriorityLearning} - ${window.siyuan.languages.flashcardReviewCard}`,
+        relearning: window.siyuan.languages.flashcardRelearningCards,
     };
     return labels[state] || state;
 };
@@ -812,10 +817,10 @@ ${result.sourceType === "qa" ? `<span data-type="direction" class="b3-list-item_
 <span data-type="preset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardPreset}"><svg><use xlink:href="#iconSettings"></use></svg></span>
 <span data-type="priority" class="fn__none"></span>
 <span data-type="tags" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.tag}"><svg><use xlink:href="#iconTag"></use></svg></span>
-<span data-type="suspend" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${result.reviewState.suspended ? window.siyuan.languages.continueReview1 : window.siyuan.languages.flashcardDirectionClosed}"><svg><use xlink:href="#icon${result.reviewState.suspended ? "Play" : "Pause"}"></use></svg></span>
+<span data-type="suspend" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${result.reviewState.suspended ? window.siyuan.languages.continueReview1 : window.siyuan.languages.flashcardSuspendCard}"><svg><use xlink:href="#icon${result.reviewState.suspended ? "Play" : "Pause"}"></use></svg></span>
 <span data-type="bury" class="fn__none"></span>
 <span data-type="due" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.setDueTime}"><svg><use xlink:href="#iconCalendar"></use></svg></span>
-<span data-type="flag" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.cardStatus} - ${escapeAttr(flashcardFlagLabel(result.card.flag, flagDefinitions))}"${flashcardFlagStyle(result.card.flag)}><svg><use xlink:href="#iconBookmark"></use></svg></span>
+<span data-type="flag" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardFlag} - ${escapeAttr(flashcardFlagLabel(result.card.flag, flagDefinitions))}"${flashcardFlagStyle(result.card.flag)}><svg><use xlink:href="#iconBookmark"></use></svg></span>
 <span data-type="history" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.dataHistory}"><svg><use xlink:href="#iconHistory"></use></svg></span>
 ${reviewSetID ? `<span data-type="exclude" class="b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconClose"></use></svg></span>` : '<span data-type="membership" class="fn__none"></span>'}
 <span data-type="reset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.reset}"><svg><use xlink:href="#iconUndo"></use></svg></span>
@@ -844,8 +849,9 @@ const renderManagedCards = (cards: IFlashcardSearchResult[], grouped: boolean, r
 <span class="b3-list-item__meta">${sourceCards.length}</span>
 ${editable && !deleted ? `<span data-type="editSource" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></span>` : ""}
 <span data-type="sourceTags" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.tag}"><svg><use xlink:href="#iconTag"></use></svg></span>
-<span data-type="documentPolicy" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.doc} - ${window.siyuan.languages.flashcardPriority}"><svg><use xlink:href="#iconFile"></use></svg></span>
-<span data-type="notebookPolicy" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.notebook} - ${window.siyuan.languages.flashcardPriority}"><svg><use xlink:href="#iconFilesRoot"></use></svg></span>
+<span data-type="sourcePreset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardSourcePreset}"><svg><use xlink:href="#iconSettings"></use></svg></span>
+<span data-type="documentPolicy" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.doc} - ${window.siyuan.languages.flashcardScopeSettings}"><svg><use xlink:href="#iconFile"></use></svg></span>
+<span data-type="notebookPolicy" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.notebook} - ${window.siyuan.languages.flashcardScopeSettings}"><svg><use xlink:href="#iconFilesRoot"></use></svg></span>
 <span data-type="sourceLifecycle" class="b3-list-item__action${deleted ? "" : " b3-list-item__action--warning"} b3-tooltips b3-tooltips__w" aria-label="${deleted ? window.siyuan.languages.restore : window.siyuan.languages.delete}"><svg><use xlink:href="#icon${deleted ? "Undo" : "Trashcan"}"></use></svg></span>
 <span data-type="sourceMore" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>
 </li>${sourceCards.map((card) => renderManagedCard(card, reviewSetID, selectedCardIDs, flagDefinitions, true)).join("")}`;
@@ -946,19 +952,57 @@ const openFlashcardV2Direction = (sourceID: string, cards: IFlashcardSearchResul
 };
 
 const openFlashcardV2CardHistory = (cardID: string) => {
-    fetchPost("/api/flashcard/getCardHistory", {cardID, limit: 100, offset: 0}, (response) => {
-        const events = response.data.events as Array<{
-            eventType: string,
-            occurredAt: number,
-            payload: { rating?: string, action?: string }
-        }>;
-        new Dialog({
-            title: window.siyuan.languages.dataHistory,
-            width: isMobile() ? "92vw" : "640px",
-            height: "70vh",
-            content: `<div class="b3-dialog__content card__v2-panel"><ul class="b3-list b3-list--background fn__flex-1 card__v2-panel-list">${events.map((event) => `<li class="b3-list-item"><span class="b3-list-item__text">${escapeHtml(event.payload.rating || event.payload.action || event.eventType)}</span><span class="b3-list-item__meta">${new Date(event.occurredAt).toLocaleString()}</span></li>`).join("")}</ul></div>`,
-        });
+    const pageSize = 100;
+    let offset = 0;
+    let hasNext = false;
+    const dialog = new Dialog({
+        title: window.siyuan.languages.dataHistory,
+        width: isMobile() ? "92vw" : "640px",
+        height: "70vh",
+        content: `<div class="b3-dialog__content fn__flex-column card__v2-panel"><div class="card__v2-management-pagination"><button data-type="previous" class="b3-button b3-button--outline" disabled>${window.siyuan.languages.previous}</button><span data-type="page" class="b3-list-item__meta"></span><button data-type="next" class="b3-button b3-button--outline" disabled>${window.siyuan.languages.next}</button></div><ul class="b3-list b3-list--background fn__flex-1 card__v2-panel-list"></ul></div>`,
     });
+    const previous = dialog.element.querySelector<HTMLButtonElement>('[data-type="previous"]');
+    const next = dialog.element.querySelector<HTMLButtonElement>('[data-type="next"]');
+    const labels: Record<string, string> = {
+        again: window.siyuan.languages.cardRatingAgain,
+        hard: window.siyuan.languages.cardRatingHard,
+        good: window.siyuan.languages.cardRatingGood,
+        easy: window.siyuan.languages.cardRatingEasy,
+        reset: window.siyuan.languages.reset,
+        setDue: window.siyuan.languages.setDueTime,
+        suspend: window.siyuan.languages.flashcardSuspendCard,
+        resume: window.siyuan.languages.continueReview1,
+        bury: window.siyuan.languages.flashcardBury,
+        unbury: window.siyuan.languages.flashcardUnbury,
+    };
+    const load = (nextOffset: number) => {
+        previous.disabled = true;
+        next.disabled = true;
+        fetchPost("/api/flashcard/getCardHistory", {cardID, limit: pageSize + 1, offset: nextOffset}, (response) => {
+            const events = response.data.events as Array<{
+                eventType: string,
+                occurredAt: number,
+                payload: {rating?: string, action?: string, durationMS?: number | null}
+            }>;
+            offset = nextOffset;
+            hasNext = events.length > pageSize;
+            const page = events.slice(0, pageSize);
+            dialog.element.querySelector('[data-type="page"]').textContent =
+                `${page.length > 0 ? offset + 1 : 0} - ${offset + page.length}`;
+            dialog.element.querySelector("ul").innerHTML = page.length === 0 ?
+                `<li class="b3-list-item card__empty">${window.siyuan.languages.emptyContent}</li>` :
+                page.map((event) => {
+                    const type = event.payload.rating || event.payload.action || event.eventType;
+                    return `<li class="b3-list-item"><span class="b3-list-item__text">${escapeHtml(labels[type] || type)}</span>${typeof event.payload.durationMS !== "number" ? "" : `<span class="b3-list-item__meta">${(event.payload.durationMS / 1000).toFixed(1)} ${window.siyuan.languages.second}</span>`}<span class="b3-list-item__meta">${new Date(event.occurredAt).toLocaleString()}</span></li>`;
+                }).join("");
+        }).finally(() => {
+            previous.disabled = offset === 0;
+            next.disabled = !hasNext;
+        });
+    };
+    previous.addEventListener("click", () => load(Math.max(0, offset - pageSize)));
+    next.addEventListener("click", () => load(offset + pageSize));
+    load(0);
 };
 
 const updateManagedCard = (card: IFlashcardSearchResult, response: {
@@ -1093,9 +1137,9 @@ ${type === "preset" ? presetOptions : priorityOptions}
     });
 };
 
-const openFlashcardV2StudyPolicy = (card: IFlashcardSearchResult, scopeType: "document" | "notebook",
-    callback: (priority: string) => void) => {
-    const scopeID = scopeType === "document" ? card.sourceRootID : card.sourceNotebookID;
+const openFlashcardV2StudyPolicy = (scopeType: "document" | "notebook", scopeID: string,
+    presets: IFlashcardPreset[],
+    callback: () => void) => {
     if (!scopeID) {
         return;
     }
@@ -1108,14 +1152,17 @@ const openFlashcardV2StudyPolicy = (card: IFlashcardSearchResult, scopeType: "do
         const options = ["exam", "learning", "retaining", "paused", "unset"]
             .map((priority) => `<option value="${priority}">${escapeHtml(priorityLabel(priority))}</option>`).join("");
         const dialog = new Dialog({
-            title: `${scopeType === "document" ? window.siyuan.languages.doc : window.siyuan.languages.notebook} - ${window.siyuan.languages.flashcardPriority}`,
+            title: `${scopeType === "document" ? window.siyuan.languages.doc : window.siyuan.languages.notebook} - ${window.siyuan.languages.flashcardScopeSettings}`,
             width: isMobile() ? "92vw" : "440px",
-            content: `<div class="b3-dialog__content card__v2-form"><select data-type="priority" class="b3-select fn__block">${options}</select>
+            content: `<div class="b3-dialog__content card__v2-form"><label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardPriority}</div><select data-type="priority" class="b3-select fn__block"><option value="">${window.siyuan.languages.default}</option>${options}</select></label>
+<label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardDefaultPreset}</div><select data-type="defaultPreset" class="b3-select fn__block"><option value="">${window.siyuan.languages.default}</option>${presets.map((preset) => `<option value="${escapeAttr(preset.id)}">${escapeHtml(preset.name)}</option>`).join("")}</select><div class="b3-label__text">${window.siyuan.languages.flashcardDefaultPresetTip}</div></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.setDueTime}</div><input data-type="targetDate" class="b3-text-field fn__block" type="datetime-local" value="${current?.payload.targetDate ? flashcardV2LocalDateTime(current.payload.targetDate) : ""}"></label></div>
 <div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
         });
         const priority = dialog.element.querySelector('[data-type="priority"]') as HTMLSelectElement;
-        priority.value = current?.payload.priority || "unset";
+        priority.value = current?.payload.priority || "";
+        const defaultPreset = dialog.element.querySelector('[data-type="defaultPreset"]') as HTMLSelectElement;
+        defaultPreset.value = current?.payload.defaultPresetID || "";
         const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
         buttons[0].addEventListener("click", () => dialog.destroy());
         buttons[1].addEventListener("click", () => {
@@ -1130,13 +1177,51 @@ const openFlashcardV2StudyPolicy = (card: IFlashcardSearchResult, scopeType: "do
                 scopeType,
                 scopeID,
                 priority: priority.value,
+                defaultPresetID: defaultPreset.value,
                 targetDate,
                 expectedRevisionID: current?.revisionID,
                 updatedAt: now,
             }, () => {
-                callback(priority.value);
+                callback();
                 dialog.destroy();
             });
+        });
+    });
+};
+
+const openFlashcardV2SourcePreset = (sourceID: string, presets: IFlashcardPreset[], callback: () => void) => {
+    fetchPost("/api/flashcard/getEntity", {entityType: "cardSource", entityID: sourceID}, (response) => {
+        if (!response.data.found) {
+            return;
+        }
+        const revision = response.data.revision as IFlashcardEntityRevision<{defaultPresetID: string}>;
+        const dialog = new Dialog({
+            title: window.siyuan.languages.flashcardSourcePreset,
+            width: isMobile() ? "92vw" : "440px",
+            content: `<div class="b3-dialog__content card__v2-form"><select class="b3-select fn__block">${presets.map((preset) => `<option value="${escapeAttr(preset.id)}">${escapeHtml(preset.name)}</option>`).join("")}</select><div class="b3-label__text">${window.siyuan.languages.flashcardSourcePresetTip}</div></div><div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
+        });
+        const select = dialog.element.querySelector("select") as HTMLSelectElement;
+        select.value = revision.payload.defaultPresetID;
+        const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
+        buttons[0].addEventListener("click", () => dialog.destroy());
+        buttons[1].addEventListener("click", () => {
+            if (!select.value) {
+                return;
+            }
+            buttons[1].disabled = true;
+            fetchPost("/api/flashcard/mutateEntities", {
+                operationID: genUUID(),
+                mutations: [{
+                    entityType: "cardSource",
+                    entityID: sourceID,
+                    expectedRevisionID: revision.revisionID,
+                    updatedAt: Date.now(),
+                    payload: {...revision.payload, defaultPresetID: select.value},
+                }],
+            }, () => {
+                dialog.destroy();
+                callback();
+            }).finally(() => buttons[1].disabled = false);
         });
     });
 };
@@ -1375,7 +1460,7 @@ const openFlashcardV2FlagDefinitions = (
     revisions: Array<IFlashcardEntityRevision<IFlashcardFlagDefinition>>, callback: () => void) => {
     const byFlag = new Map(revisions.map((revision) => [revision.payload.flag, revision]));
     const dialog = new Dialog({
-        title: window.siyuan.languages.cardStatus,
+        title: window.siyuan.languages.flashcardFlag,
         width: isMobile() ? "92vw" : "480px",
         content: `<div class="b3-dialog__content card__v2-form card__v2-form--grid">${Array.from({length: 7}, (_, index) => {
             const flag = index + 1;
@@ -1457,7 +1542,7 @@ const openFlashcardV2ManagementFilter = (filters: IFlashcardManagementFilters,
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.type}</div><select data-filter="sourceType" class="b3-select fn__block"><option value="">${window.siyuan.languages.all}</option>${sourceTypeOptions}</select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.template}</div><select data-filter="templateID" class="b3-select fn__block"><option value="">${window.siyuan.languages.all}</option>${options.templates.map((template) => `<option value="${escapeAttr(template.id)}">${escapeHtml(template.name)}</option>`).join("")}</select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.tag}</div><select data-filter="tagID" class="b3-select fn__block"><option value="">${window.siyuan.languages.all}</option>${options.tags.map((tag) => `<option value="${escapeAttr(tag.id)}">${escapeHtml(flashcardTagPath(tag, tagMap))}</option>`).join("")}</select></label>
-<label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.cardStatus}</div><select data-filter="flag" class="b3-select fn__block"><option value="">${window.siyuan.languages.all}</option>${flagOptions}</select></label>
+<label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardFlag}</div><select data-filter="flag" class="b3-select fn__block"><option value="">${window.siyuan.languages.all}</option>${flagOptions}</select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardGenerationStatus}</div><select data-filter="generationStatus" class="b3-select fn__block">${generationOptions}</select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardReviewState}</div><select data-filter="reviewState" class="b3-select fn__block">${reviewStateOptions}</select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardSuspendCard}</div><select data-filter="suspended" class="b3-select fn__block">${booleanOptions}</select></label>
@@ -1586,6 +1671,9 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
     const now = Date.now();
     const managementQuery = flashcardManagementQuery(filters);
     const filterCount = flashcardManagementFilterCount(filters);
+    const policyScope = filters.rootIDs?.length === 1 ?
+        {type: "document" as const, id: filters.rootIDs[0]} : filters.notebookID ?
+            {type: "notebook" as const, id: filters.notebookID} : undefined;
     const queryCards = (cardIDs?: string[], total?: number, resolvedCards?: IFlashcardSearchResult[]) => {
         const renderCards = (fetchedCards: IFlashcardSearchResult[]) => {
             if (fetchedCards.length === 0 && offset > 0) {
@@ -1605,7 +1693,7 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
             const selectedCardIDs = new Set<string>();
             const flagDefinitions = managementOptions.flagDefinitions.map((revision) => revision.payload);
             const batchFlagOptions = Array.from({length: 8}, (_, flag) =>
-                `<option value="setFlag:${flag}"${flashcardFlagStyle(flag)}>${window.siyuan.languages.cardStatus} - ${escapeHtml(flashcardFlagLabel(flag, flagDefinitions))}</option>`).join("");
+                `<option value="setFlag:${flag}"${flashcardFlagStyle(flag)}>${window.siyuan.languages.flashcardFlag} - ${escapeHtml(flashcardFlagLabel(flag, flagDefinitions))}</option>`).join("");
             const batchPresetOptions = `<option value="setPreset:">${window.siyuan.languages.flashcardPreset} - ${window.siyuan.languages.default}</option>${managementOptions.presets.map((preset) => `<option value="${escapeAttr(`setPreset:${preset.id}`)}">${window.siyuan.languages.flashcardPreset} - ${escapeHtml(preset.name)}</option>`).join("")}`;
             const batchPriorityOptions = ["", "exam", "learning", "retaining", "paused"]
                 .map((priority) => `<option value="setPriority:${priority}">${window.siyuan.languages.flashcardPriority} - ${escapeHtml(priority === "" ? window.siyuan.languages.default : priorityLabel(priority))}</option>`).join("");
@@ -1624,8 +1712,9 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
 <button data-type="filter" class="b3-button b3-button--outline"><svg><use xlink:href="#iconFilter"></use></svg>${window.siyuan.languages.filter}${filterCount === 0 ? "" : ` (${filterCount})`}</button>
 <button data-type="conflicts" class="b3-button b3-button--outline"><svg><use xlink:href="#iconWarning"></use></svg>${window.siyuan.languages.conflict}</button>
 <button data-type="statistics" class="b3-button b3-button--outline"><svg><use xlink:href="#iconGraph"></use></svg>${window.siyuan.languages.flashcardStatistics}</button>
+${policyScope ? `<button data-type="scopePolicy" class="b3-button b3-button--outline"><svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.flashcardScopeSettings}</button>` : ""}
 ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.flashcardReviewSet}</button>` : ""}
-<button data-type="flagDefinitions" class="b3-button b3-button--outline"><svg><use xlink:href="#iconBookmark"></use></svg>${window.siyuan.languages.cardStatus}</button>
+<button data-type="flagDefinitions" class="b3-button b3-button--outline"><svg><use xlink:href="#iconBookmark"></use></svg>${window.siyuan.languages.flashcardFlag}</button>
 <button data-type="group" class="b3-button b3-button--outline">${window.siyuan.languages.group}</button>
 </div>
 </div>
@@ -1655,7 +1744,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
             };
             const reloadPage = () => {
                 dialog.destroy();
-                openFlashcardV2ReviewSetCards(reviewSetID, name, offset, filters, managementOptions, grouped);
+                openFlashcardV2ReviewSetCards(reviewSetID, name, offset, filters, undefined, grouped);
             };
             dialog.element.addEventListener("change", (event) => {
                 if ((event.target as HTMLElement).dataset.type === "batchAction") {
@@ -1685,6 +1774,10 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
                 }
                 if (type === "statistics") {
                     openFlashcardV2Statistics(reviewSetID, managementQuery);
+                    return;
+                }
+                if (type === "scopePolicy" && policyScope) {
+                    openFlashcardV2StudyPolicy(policyScope.type, policyScope.id, managementOptions.presets, reloadPage);
                     return;
                 }
                 if (type === "conflicts") {
@@ -1778,7 +1871,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
                 }
                 if (type === "sourceMore") {
                     const menu = new Menu();
-                    ["editSource", "sourceTags", "documentPolicy", "notebookPolicy", "sourceLifecycle"]
+                    ["editSource", "sourceTags", "sourcePreset", "documentPolicy", "notebookPolicy", "sourceLifecycle"]
                         .forEach((action) => {
                             const actionElement = item.querySelector(`[data-type="${action}"]`) as HTMLElement;
                             if (!actionElement) {
@@ -1825,7 +1918,17 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
                     addAction("flashcardV2Bury", (card.reviewState.buriedUntil || 0) > Date.now() ?
                         window.siyuan.languages.flashcardUnbury : window.siyuan.languages.flashcardBury, "bury");
                     addElementAction("flashcardV2Due", "due");
-                    addElementAction("flashcardV2Flag", "flag");
+                    menu.addItem({
+                        id: "flashcardV2Flag",
+                        icon: "iconBookmark",
+                        label: window.siyuan.languages.flashcardFlag,
+                        submenu: flashcardV2FlagMenuItems(card.card.flag, flagDefinitions, (flag) => {
+                            fetchPost("/api/flashcard/manageCards", {
+                                operationID: genUUID(), cardIDs: [card.card.id], action: "setFlag", flag,
+                                changedAt: Date.now(),
+                            }, reloadPage);
+                        }),
+                    });
                     addElementAction("flashcardV2History", "history");
                     if (reviewSetID) {
                         addElementAction("flashcardV2Exclude", "exclude");
@@ -1862,6 +1965,10 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
                             reloadPage();
                         });
                     }
+                    return;
+                }
+                if (type === "sourcePreset" && item.dataset.sourceId) {
+                    openFlashcardV2SourcePreset(item.dataset.sourceId, managementOptions.presets, reloadPage);
                     return;
                 }
                 if (type === "sourceLifecycle" && item.dataset.sourceId) {
@@ -1924,15 +2031,9 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
                     const sourceCards = cards.filter((card) => card.card.sourceID === item.dataset.sourceId);
                     if (sourceCards.length > 0) {
                         const scopeType = type === "documentPolicy" ? "document" : "notebook";
-                        openFlashcardV2StudyPolicy(sourceCards[0], scopeType, (priority) => {
-                            if (scopeType === "document") {
-                                sourceCards.filter((card) => !card.sourcePriority).forEach((card) => {
-                                    card.inheritedPriority = priority;
-                                    refreshEffectiveCardValues(card);
-                                });
-                            }
-                            reloadPage();
-                        });
+                        const scopeID = scopeType === "document" ? sourceCards[0].sourceRootID :
+                            sourceCards[0].sourceNotebookID;
+                        openFlashcardV2StudyPolicy(scopeType, scopeID, managementOptions.presets, reloadPage);
                     }
                     return;
                 }
@@ -1979,6 +2080,25 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
                     openFlashcardV2Due(selectedCard, reloadPage);
                     return;
                 }
+                if (type === "flag" && selectedCard) {
+                    const menu = new Menu();
+                    flashcardV2FlagMenuItems(selectedCard.card.flag, flagDefinitions, (flag) => {
+                        fetchPost("/api/flashcard/manageCards", {
+                            operationID: genUUID(),
+                            cardIDs: [selectedCard.card.id],
+                            action: "setFlag",
+                            flag,
+                            changedAt: Date.now(),
+                        }, reloadPage);
+                    }).forEach((option) => menu.addItem(option));
+                    if (isMobile()) {
+                        menu.fullscreen();
+                    } else {
+                        const rect = target.getBoundingClientRect();
+                        menu.open({x: rect.left, y: rect.bottom});
+                    }
+                    return;
+                }
                 let action = "";
                 const request: Record<string, unknown> = {};
                 if (type === "reset") {
@@ -1997,9 +2117,6 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
                         request.buriedUntil = tomorrow.getTime();
                         request.reason = "user";
                     }
-                } else if (type === "flag") {
-                    action = "setFlag";
-                    request.flag = (Number(item.dataset.flag) + 1) % 8;
                 }
                 if (action === "") {
                     return;
@@ -2341,46 +2458,31 @@ const flashcardV2BlockText = (blockID: string, dom: string) => {
     return text || blockID;
 };
 
-interface IFlashcardV2InlineOcclusion {
-    id: string;
-    blockID: string;
-    displayOrder: number;
-    label: string;
-}
-
 const prepareFlashcardV2InlineOcclusions = (blockIDs: string[], doms: Record<string, string>) => {
-    const targets: IFlashcardV2InlineOcclusion[] = [];
     const updates: Array<{ id: string, data: string, dataType: "dom" }> = [];
-    const seen = new Set<string>();
-    blockIDs.forEach((blockID) => {
+    const blocks = [...new Set(blockIDs)].map((blockID) => {
         const template = document.createElement("template");
         template.innerHTML = doms[blockID] || "";
+        return {blockID, template, marks: [...template.content.querySelectorAll<HTMLElement>('span[data-type~="mark"]')]};
+    });
+    const resolved = resolveFlashcardV2InlineOcclusions(blocks.flatMap(({blockID, marks}) =>
+        marks.map((mark) => ({id: mark.dataset.occlusionId, blockID, label: mark.textContent || ""}))),
+    () => Lute.NewNodeID());
+    let index = 0;
+    blocks.forEach(({blockID, template, marks}) => {
         let changed = false;
-        template.content.querySelectorAll<HTMLElement>('span[data-type~="mark"]').forEach((mark) => {
-            let id = mark.dataset.occlusionId;
-            if (!id) {
-                id = Lute.NewNodeID();
+        marks.forEach((mark) => {
+            const id = resolved.ids[index++];
+            if (mark.dataset.occlusionId !== id) {
                 mark.dataset.occlusionId = id;
                 changed = true;
             }
-            if (seen.has(id)) {
-                id = Lute.NewNodeID();
-                mark.dataset.occlusionId = id;
-                changed = true;
-            }
-            seen.add(id);
-            targets.push({
-                id,
-                blockID,
-                displayOrder: targets.length,
-                label: mark.textContent?.replace(/\s+/g, " ").trim() || blockID,
-            });
         });
         if (changed && template.content.firstElementChild) {
             updates.push({id: blockID, data: template.content.firstElementChild.outerHTML, dataType: "dom"});
         }
     });
-    return {targets, updates};
+    return {targets: resolved.targets, updates};
 };
 
 const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
@@ -2630,6 +2732,8 @@ export const openFlashcardV2AdvancedSource = (blockIDs: string[], edit?: IFlashc
                         initialOcclusionIDs.has(referenceOcclusionByBlock.get(target.blockID) || "")) :
                         preparedInline.targets;
                 const usesInlineTargets = preparedTargets.length > 0 || editingInlineOcclusions;
+                const newInlineTargets = edit?.sourceType === "cloze" && editingInlineOcclusions ?
+                    preparedInline.targets.filter((target) => !initialOcclusionIDs.has(target.id)) : [];
                 const clozeTargets = preparedTargets.length > 0 ? preparedTargets : editingInlineOcclusions ? [] :
                     blockIDs.map((blockID, displayOrder) => ({
                     id: blockID,
@@ -2647,12 +2751,20 @@ export const openFlashcardV2AdvancedSource = (blockIDs: string[], edit?: IFlashc
                     return new Set(edit?.generationConfig.occlusions?.find((occlusion) =>
                         occlusion.id === occlusionID)?.groupIDs || []);
                 };
+                const clozeTargetHTML = (target: IFlashcardV2InlineOcclusion, targetIndex: number,
+                    selected: ReadonlySet<string>) =>
+                    `<label class="b3-label b3-label--inner card__v2-advanced-field"><div class="b3-label__text">${escapeHtml(target.label)}</div><select data-type="clozeGroups" data-target-index="${targetIndex}" class="b3-select fn__block" multiple size="${Math.min(6, Math.max(2, clozeTargets.length))}">${clozeGroupOrder.map((groupID, groupIndex) => `<option value="${escapeAttr(groupID)}"${selected.has(groupID) ? " selected" : ""}>${groupIndex + 1}</option>`).join("")}</select></label>`;
                 const clozeEditorHTML = `<div data-type="clozeEditor" class="card__v2-advanced-section">
+<div data-type="clozeTargets" class="fn__flex-column" style="gap:12px">
 ${clozeTargets.map((target, targetIndex) => {
                     const selected = initialGroupIDs(target);
-                    return `<label class="b3-label b3-label--inner card__v2-advanced-field"><div class="b3-label__text">${escapeHtml(target.label)}</div><select data-type="clozeGroups" data-target-index="${targetIndex}" class="b3-select fn__block" multiple size="${Math.min(6, Math.max(2, clozeTargets.length))}">${clozeGroupOrder.map((groupID, groupIndex) => `<option value="${escapeAttr(groupID)}"${selected.size > 0 ? selected.has(groupID) ? " selected" : "" : groupIndex === targetIndex ? " selected" : ""}>${groupIndex + 1}</option>`).join("")}</select></label>`;
+                    return clozeTargetHTML(target, targetIndex, selected.size > 0 ? selected :
+                        new Set([clozeGroupOrder[targetIndex]]));
                 }).join("")}
-${clozeTargets.length === 0 ? `<div class="card__empty">${window.siyuan.languages.emptyContent}</div>` : ""}
+</div>
+${clozeTargets.length === 0 ? `<div data-type="clozeEmpty" class="card__empty">${window.siyuan.languages.emptyContent}</div>` : ""}
+${newInlineTargets.length > 0 ? `<div class="card__v2-advanced-section-action"><button data-type="includeNewMarks" class="b3-button b3-button--outline">${window.siyuan.languages.flashcardIncludeNewMarks} (${newInlineTargets.length})</button></div>` : ""}
+<div data-type="clozeGroupOrder" class="b3-list b3-list--background"></div>
 <div class="card__v2-advanced-section-action"><button data-type="addClozeGroup" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.group}</button></div>
 </div>`;
                 const imageEditorHTML = imageSource ? `<div data-type="imageEditor" class="fn__none card__v2-advanced-section">
@@ -2744,14 +2856,57 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                         imageMode && !imageEditor?.hasShapes() ||
                         choiceMode && !choiceInputs.some((input) => input.checked);
                 };
+                dialog.element.querySelector<HTMLButtonElement>('[data-type="includeNewMarks"]')
+                    ?.addEventListener("click", (event) => {
+                        const previousLength = clozeTargets.length;
+                        const appended = appendFlashcardV2ClozeTargets({
+                            targets: clozeTargets,
+                            groupOrder: clozeGroupOrder,
+                            assignments: Object.fromEntries(clozeSelects.map((select) =>
+                                [clozeTargets[Number(select.dataset.targetIndex)].id,
+                                    [...select.selectedOptions].map((option) => option.value)])),
+                        }, newInlineTargets, genUUID);
+                        clozeTargets.push(...appended.targets.slice(previousLength));
+                        clozeGroupOrder.splice(0, clozeGroupOrder.length, ...appended.groupOrder);
+                        const holder = dialog.element.querySelector('[data-type="clozeTargets"]');
+                        holder.insertAdjacentHTML("beforeend", clozeTargets.slice(previousLength)
+                            .map((target, index) => clozeTargetHTML(target, previousLength + index,
+                                new Set(appended.assignments[target.id]))).join(""));
+                        const addedSelects = [...holder.querySelectorAll<HTMLSelectElement>('[data-type="clozeGroups"]')]
+                            .slice(previousLength);
+                        addedSelects.forEach((select) => select.addEventListener("change", updateConfirm));
+                        clozeSelects.push(...addedSelects);
+                        dialog.element.querySelector('[data-type="clozeEmpty"]')?.remove();
+                        (event.currentTarget as HTMLButtonElement).disabled = true;
+                        renderClozeGroupOptions();
+                    });
                 const renderClozeGroupOptions = () => {
                     clozeSelects.forEach((select) => {
                         const selected = new Set([...select.selectedOptions].map((option) => option.value));
                         select.innerHTML = clozeGroupOrder.map((groupID, groupIndex) =>
                             `<option value="${escapeAttr(groupID)}"${selected.has(groupID) ? " selected" : ""}>${groupIndex + 1}</option>`).join("");
                     });
+                    dialog.element.querySelector('[data-type="clozeGroupOrder"]').innerHTML =
+                        clozeGroupOrder.map((groupID, groupIndex) => `<div class="b3-list-item" data-group-id="${escapeAttr(groupID)}"><span class="b3-list-item__text">${window.siyuan.languages.group} ${groupIndex + 1}</span><button data-type="moveClozeGroupUp" class="b3-button b3-button--outline"${groupIndex === 0 ? " disabled" : ""}>${window.siyuan.languages.up}</button><span class="fn__space"></span><button data-type="moveClozeGroupDown" class="b3-button b3-button--outline"${groupIndex === clozeGroupOrder.length - 1 ? " disabled" : ""}>${window.siyuan.languages.down}</button><span class="fn__space"></span><button data-type="removeClozeGroup" class="b3-button b3-button--outline">${window.siyuan.languages.delete}</button></div>`).join("");
                     updateConfirm();
                 };
+                dialog.element.querySelector('[data-type="clozeGroupOrder"]').addEventListener("click", (event) => {
+                    const button = (event.target as HTMLElement).closest<HTMLButtonElement>("button[data-type]");
+                    const groupID = button?.closest<HTMLElement>("[data-group-id]")?.dataset.groupId;
+                    const groupIndex = clozeGroupOrder.indexOf(groupID);
+                    if (!button || button.disabled || groupIndex < 0) {
+                        return;
+                    }
+                    if (button.dataset.type === "removeClozeGroup") {
+                        clozeGroupOrder.splice(groupIndex, 1);
+                    } else {
+                        const nextIndex = groupIndex + (button.dataset.type === "moveClozeGroupUp" ? -1 : 1);
+                        [clozeGroupOrder[groupIndex], clozeGroupOrder[nextIndex]] =
+                            [clozeGroupOrder[nextIndex], clozeGroupOrder[groupIndex]];
+                    }
+                    renderClozeGroupOptions();
+                });
+                renderClozeGroupOptions();
                 if (imageSource) {
                     imageEditor = bindFlashcardV2ImageEditor(imageElement, imageSource.assetID, updateConfirm,
                         edit?.sourceType === "image-occlusion" ? edit.generationConfig : undefined);
@@ -2856,7 +3011,7 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                         blockIDs: mode === "imageOcclusion" ? [imageSource.blockID] : blockIDs,
                         clozeGroups,
                         inlineOcclusions: (mode === "cloze" || mode === "orderedSingle" ||
-                            mode === "orderedCards") && preparedTargets.length > 0 ?
+                        mode === "orderedCards") && usesInlineTargets && clozeTargets.length > 0 ?
                             clozeTargets.map(({id, blockID, displayOrder}) => ({id, blockID, displayOrder})) :
                             undefined,
                         imageConfig: mode === "imageOcclusion" ? imageEditor.getConfig() : undefined,
@@ -3006,11 +3161,11 @@ const flashcardV2StatisticsDate = (date: Date) => {
 };
 
 const flashcardV2StatisticsBars = <T, >(values: T[], label: (value: T) => string,
-    count: (value: T) => number) => {
+    count: (value: T) => number, detail?: (value: T) => string) => {
     const maximum = Math.max(1, ...values.map(count));
     return `<div class="b3-list b3-list--background">${values.map((value) => {
         const current = count(value);
-        return `<div class="b3-list-item"><span class="b3-list-item__text" style="flex:0 0 112px">${escapeHtml(label(value))}</span><span class="fn__flex-1"><span class="fn__block" style="height:8px;width:${current / maximum * 100}%;min-width:${current > 0 ? "2px" : "0"};background:var(--b3-theme-primary);border-radius:4px"></span></span><span class="b3-list-item__meta" style="min-width:48px;text-align:right">${current}</span></div>`;
+        return `<div class="b3-list-item"><span class="b3-list-item__text" style="flex:0 0 112px">${escapeHtml(label(value))}</span><span class="fn__flex-1"><span class="fn__block" style="height:8px;width:${current / maximum * 100}%;min-width:${current > 0 ? "2px" : "0"};background:var(--b3-theme-primary);border-radius:4px"></span></span><span class="b3-list-item__meta" style="min-width:48px;text-align:right">${current}${detail ? ` · ${escapeHtml(detail(value))}` : ""}</span></div>`;
     }).join("")}</div>`;
 };
 
@@ -3022,24 +3177,34 @@ const flashcardV2StatisticsDistribution = (label: string, values: IFlashcardStat
 const renderFlashcardV2Statistics = (statistics: IFlashcardStatistics) => {
     const ratings = statistics.history.ratings;
     const state = statistics.overview.reviewStates;
+    const generation = statistics.overview.generationStatuses;
     const percent = (value: number) => `${(value * 100).toFixed(1)}%`;
     const averageDuration = statistics.history.averageDurationMS === undefined ? "-" :
         `${(statistics.history.averageDurationMS / 1000).toFixed(1)} ${window.siyuan.languages.second}`;
     return `<div class="card__v2-section-title">${window.siyuan.languages.cardStatus}</div>
 ${statisticsItem(window.siyuan.languages.riffCard, statistics.overview.currentCards)}
 ${statisticsItem(window.siyuan.languages.flashcardNewCard, state.new || 0)}
-${statisticsItem(window.siyuan.languages.flashcardReviewCard, (state.learning || 0) + (state.review || 0) + (state.relearning || 0))}
+${statisticsItem(window.siyuan.languages.flashcardLearningCards, state.learning || 0)}
+${statisticsItem(window.siyuan.languages.flashcardReviewCard, state.review || 0)}
+${statisticsItem(window.siyuan.languages.flashcardRelearningCards, state.relearning || 0)}
 ${statisticsItem(window.siyuan.languages.flashcardDueCard, statistics.overdue)}
 ${statisticsItem(window.siyuan.languages.flashcardSuspendedCards, statistics.overview.suspended)}
 ${statisticsItem(window.siyuan.languages.flashcardBuriedCards, statistics.overview.buried)}
+${statisticsItem(window.siyuan.languages.flashcardPausedCards, statistics.overview.paused)}
+${statisticsItem(window.siyuan.languages.flashcardDisabledCards, generation.disabledByTemplate || 0)}
+${statisticsItem(window.siyuan.languages.flashcardOrphanedCards, generation.orphaned || 0)}
+${statisticsItem(window.siyuan.languages.flashcardDeletedCards, statistics.overview.deletedCards)}
 ${statisticsItem(window.siyuan.languages.flashcardLeeches, statistics.overview.leeches)}
 <div class="fn__hr"></div>
 <div class="card__v2-section-title">${window.siyuan.languages.flashcardReviewHistory}</div>
 ${statisticsItem(window.siyuan.languages.total, statistics.history.reviews)}
 ${statisticsItem(window.siyuan.languages.flashcardReviewedCards, statistics.history.uniqueCards)}
-${statisticsItem(window.siyuan.languages.flashcardAccuracy, percent(statistics.history.accuracy))}
-${statisticsItem(window.siyuan.languages.flashcardTrueRetention, percent(statistics.history.trueRetention))}
+${statisticsItem(window.siyuan.languages.flashcardAccuracy, statistics.history.reviews > 0 ? percent(statistics.history.accuracy) : "-")}
+${statisticsItem(window.siyuan.languages.flashcardTrueRetention, statistics.history.retentionReviews > 0 ? percent(statistics.history.trueRetention) : "-")}
 ${statisticsItem(window.siyuan.languages.flashcardAverageReviewDuration, averageDuration)}
+${statisticsItem(window.siyuan.languages.flashcardTotalReviewDuration, statistics.history.durationKnown > 0 ? `${(statistics.history.durationTotalMS / 1000).toFixed(1)} ${window.siyuan.languages.second}` : "-")}
+${statisticsItem(window.siyuan.languages.flashcardKnownDurationReviews, statistics.history.durationKnown)}
+${statisticsItem(window.siyuan.languages.flashcardUnknownDurationReviews, statistics.history.durationUnknown)}
 ${statisticsItem(window.siyuan.languages.cardRatingAgain, ratings.again || 0)}
 ${statisticsItem(window.siyuan.languages.cardRatingHard, ratings.hard || 0)}
 ${statisticsItem(window.siyuan.languages.cardRatingGood, ratings.good || 0)}
@@ -3047,6 +3212,10 @@ ${statisticsItem(window.siyuan.languages.cardRatingEasy, ratings.easy || 0)}
 <div class="fn__hr"></div>
 ${flashcardV2StatisticsBars(statistics.series, (value) => new Date(value.start).toLocaleDateString(),
         (value) => value.reviews)}
+<div class="fn__hr"></div>
+<div class="card__v2-section-title">${window.siyuan.languages.flashcardReviewsByHour} - ${window.siyuan.languages.flashcardAccuracy}</div>
+${flashcardV2StatisticsBars(statistics.byHour, (value) => `${String(value.hour).padStart(2, "0")}:00`,
+        (value) => value.reviews, (value) => value.reviews > 0 ? percent(value.retention) : "-")}
 <div class="fn__hr"></div>
 <div class="card__v2-section-title">${window.siyuan.languages.flashcardUpcomingReviews}</div>
 ${flashcardV2StatisticsBars(statistics.futureDue, (value) => new Date(value.start).toLocaleDateString(),
@@ -3064,14 +3233,18 @@ ${flashcardV2StatisticsDistribution(window.siyuan.languages.flashcardRetrievabil
 export const openFlashcardV2Statistics = (reviewSetID = "", query?: IFlashcardQueryAST) => {
     ensureFlashcardV2(() => {
         const now = Date.now();
-        const fromDate = new Date(now - 29 * 86400000);
+        const fromDate = new Date(now);
+        fromDate.setDate(fromDate.getDate() - 29);
         const toDate = new Date(now);
+        let requestGeneration = 0;
         const dialog = new Dialog({
             title: window.siyuan.languages.flashcardStatistics,
             width: isMobile() ? "96vw" : "780px",
             height: "82vh",
+            destroyCallback: () => requestGeneration++,
             content: `<div class="b3-dialog__content fn__flex-column card__v2-statistics">
 <div class="card__v2-statistics-filter"><div class="card__v2-section-title">${window.siyuan.languages.flashcardStatisticsRange}</div><div class="card__v2-statistics-controls">
+<select data-type="statisticsRange" class="b3-select">${[1, 7, 30, 365].map((days) => `<option value="${days}"${days === 30 ? " selected" : ""}>${days} ${window.siyuan.languages.day}</option>`).join("")}<option value="all">${window.siyuan.languages.flashcardAllHistory}</option><option value="custom">${window.siyuan.languages.custom}</option></select>
 <input data-type="statisticsFrom" class="b3-text-field fn__flex-1" type="date" value="${flashcardV2StatisticsDate(fromDate)}">
 <input data-type="statisticsTo" class="b3-text-field fn__flex-1" type="date" value="${flashcardV2StatisticsDate(toDate)}">
 <select data-type="statisticsBucket" class="b3-select"><option value="day">${window.siyuan.languages.day}</option><option value="week">${window.siyuan.languages.week}</option><option value="month">${window.siyuan.languages.month}</option></select>
@@ -3080,17 +3253,19 @@ export const openFlashcardV2Statistics = (reviewSetID = "", query?: IFlashcardQu
         });
         const from = dialog.element.querySelector('[data-type="statisticsFrom"]') as HTMLInputElement;
         const to = dialog.element.querySelector('[data-type="statisticsTo"]') as HTMLInputElement;
+        const range = dialog.element.querySelector('[data-type="statisticsRange"]') as HTMLSelectElement;
         const bucket = dialog.element.querySelector('[data-type="statisticsBucket"]') as HTMLSelectElement;
         const content = dialog.element.querySelector('[data-type="statisticsContent"]');
         const apply = dialog.element.querySelector('[data-type="statisticsApply"]') as HTMLButtonElement;
         const load = () => {
-            const fromTime = new Date(`${from.value}T00:00:00`).getTime();
+            const fromTime = range.value === "all" ? 0 : new Date(`${from.value}T00:00:00`).getTime();
             const toExclusive = new Date(`${to.value}T00:00:00`);
             toExclusive.setDate(toExclusive.getDate() + 1);
             const toTime = toExclusive.getTime();
             if (!Number.isFinite(fromTime) || !Number.isFinite(toTime) || toTime <= fromTime) {
                 return;
             }
+            const generation = ++requestGeneration;
             apply.disabled = true;
             fetchPost("/api/flashcard/getStatistics", {
                 reviewSetID,
@@ -3102,10 +3277,37 @@ export const openFlashcardV2Statistics = (reviewSetID = "", query?: IFlashcardQu
                 timezoneOffsetMinutes: -new Date().getTimezoneOffset(),
                 futureDays: 30,
             }, (response) => {
+                if (generation !== requestGeneration) {
+                    return;
+                }
                 content.innerHTML = renderFlashcardV2Statistics(response.data as IFlashcardStatistics);
-                apply.disabled = false;
-            }).then(() => apply.disabled = false);
+            }).finally(() => {
+                if (generation === requestGeneration) {
+                    apply.disabled = false;
+                }
+            });
         };
+        range.addEventListener("change", () => {
+            from.disabled = range.value === "all";
+            if (range.value !== "custom") {
+                const today = new Date();
+                to.value = flashcardV2StatisticsDate(today);
+                if (range.value !== "all") {
+                    today.setDate(today.getDate() - Number(range.value) + 1);
+                    from.value = flashcardV2StatisticsDate(today);
+                } else {
+                    from.value = "";
+                }
+                load();
+            }
+        });
+        [from, to].forEach((input) => input.addEventListener("change", () => {
+            if (range.value === "all") {
+                return;
+            }
+            range.value = "custom";
+            from.disabled = false;
+        }));
         apply.addEventListener("click", load);
         load();
     });

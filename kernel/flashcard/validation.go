@@ -547,8 +547,11 @@ func (policy *StudyPolicy) validate(entityID string) error {
 	if strings.TrimSpace(policy.ScopeID) == "" || (policy.ScopeType != "document" && policy.ScopeType != "notebook") {
 		return errors.New("study policy scope is invalid")
 	}
-	if !validStudyPriority(policy.Priority) {
+	if policy.Priority != "" && !validStudyPriority(policy.Priority) {
 		return fmt.Errorf("unsupported study priority [%s]", policy.Priority)
+	}
+	if policy.DefaultPresetID != strings.TrimSpace(policy.DefaultPresetID) {
+		return errors.New("study policy scheduler preset is invalid")
 	}
 	if policy.TargetDate != nil && *policy.TargetDate < 0 {
 		return errors.New("study policy target date must not be negative")
@@ -593,6 +596,11 @@ func (session *StudySession) validate(entityID string) error {
 	if session.ReviewMode == "normal" &&
 		(session.IncludeSuspended || session.IncludeBuried || session.IncludePaused) {
 		return errors.New("normal study session cannot include paused, suspended or buried cards")
+	}
+	if session.ReviewDayStart != 0 || session.ReviewDayEnd != 0 {
+		if _, _, err := reviewDayBounds(session.StartedAt, session.ReviewDayStart, session.ReviewDayEnd); err != nil {
+			return err
+		}
 	}
 	if session.EndedAt != nil && *session.EndedAt < session.StartedAt {
 		return errors.New("study session end time precedes its start time")

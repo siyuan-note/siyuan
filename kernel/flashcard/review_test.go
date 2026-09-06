@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/open-spaced-repetition/go-fsrs/v3"
@@ -288,6 +289,72 @@ func testSchedulerPreset(id string, buryNew, buryReview bool) SchedulerPreset {
 		BuryReviewSiblings: buryReview,
 		LeechThreshold:     8,
 		LeechAction:        "tag",
+	}
+}
+
+func TestSiblingBurialUsesEachSiblingReviewState(t *testing.T) {
+	for _, buryNew := range []bool{true, false} {
+		t.Run(fmt.Sprintf("bury-new-%v", buryNew), func(t *testing.T) {
+			ctx := context.Background()
+			store := newGenerationTestStore(t, ctx)
+			defer store.Close()
+			now := int64(1786431600000)
+			preset := testSchedulerPreset("mixed-sibling-preset", buryNew, !buryNew)
+			source := testGenerationSource("mixed-sibling-source", "mixed-sibling-schema", "qa", json.RawMessage(`{}`))
+			source.DefaultPresetID = preset.ID
+			templates := []string{"mixed-main", "mixed-new", "mixed-learning", "mixed-review", "mixed-relearning"}
+			values := []any{testGenerationSchema(source.SchemaID, templates), source, preset}
+			for _, templateID := range templates {
+				values = append(values, testGenerationTemplate(templateID, source.SchemaID, GenerationStatic, "forward", true))
+			}
+			applyGenerationEntities(t, ctx, store, "setup-mixed-siblings", now-1000, values...)
+			if _, err := store.ReconcileSourceCards(ctx, "generate-mixed-siblings", source.ID, now-1000); err != nil {
+				t.Fatal(err)
+			}
+			states := []string{"new", "new", "learning", "review", "relearning"}
+			if buryNew {
+				states[0] = "review"
+			}
+			for index, stateName := range states {
+				if stateName == "new" {
+					continue
+				}
+				cardID := GeneratedCardID(source.ID, templates[index], "forward")
+				current, found, err := store.Projection().CurrentEntity(ctx, EntityReviewState, cardID)
+				if err != nil || !found {
+					t.Fatalf("mixed sibling state was not found: found=%v err=%v", found, err)
+				}
+				var state ReviewState
+				if err = decodeStrictJSON(current.Payload, &state); err != nil {
+					t.Fatal(err)
+				}
+				state.State, state.LastReview, state.Stability, state.Difficulty = stateName, now-500, 3, 5
+				operationID := "prepare-" + templates[index]
+				state.StateRevisionID = OperationRevisionID(operationID, EntityReviewState, cardID)
+				revision, revisionErr := NewOperationEntityRevision(operationID, EntityReviewState, cardID,
+					[]string{current.RevisionID}, now-500, false, state)
+				if revisionErr != nil {
+					t.Fatal(revisionErr)
+				}
+				if _, err = store.Apply(ctx, operationID, []Change{{Kind: RecordEntityRevision, Revision: &revision}}); err != nil {
+					t.Fatal(err)
+				}
+			}
+			reviewed, err := store.ReviewCard(ctx, ReviewRequest{OperationID: "review-mixed-siblings",
+				CardID: GeneratedCardID(source.ID, templates[0], "forward"), Rating: ReviewGood,
+				ReviewedAt: now, DurationMS: 100, ReviewMode: "normal", BuryUntil: now + 86400000})
+			if err != nil || len(reviewed.BuriedSiblingIDs) != 2 {
+				t.Fatalf("mixed sibling burial selected the wrong cards: result=%+v err=%v", reviewed, err)
+			}
+			for index := 1; index < len(templates); index++ {
+				shouldBury := (states[index] == "new" || states[index] == "learning") == buryNew
+				until, reason := int64(0), ""
+				if shouldBury {
+					until, reason = now+86400000, "sibling"
+				}
+				assertBuriedStateForTest(t, ctx, store, GeneratedCardID(source.ID, templates[index], "forward"), until, reason)
+			}
+		})
 	}
 }
 

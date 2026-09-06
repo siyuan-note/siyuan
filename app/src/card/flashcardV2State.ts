@@ -40,6 +40,25 @@ export const canUseFlashcardV2ReviewActions = (state: IFlashcardV2ReviewActionSt
         state.index >= 0 && state.index < state.queueLength;
 };
 
+export const getFlashcardV2ConfirmedQueueStatuses = (
+    queue: Array<{card: {id: string}, sessionCard: {status: string}}>,
+    refreshed: Array<{card: {id: string, generationStatus: string}, sessionCard: {status: string}}>) => {
+    const pending = new Set(queue.filter((item) => item.sessionCard.status === "queued" ||
+        item.sessionCard.status === "shown").map((item) => item.card.id));
+    const statuses: Record<string, "reviewed" | "skipped"> = {};
+    refreshed.forEach((item) => {
+        if (!pending.has(item.card.id)) {
+            return;
+        }
+        if (item.sessionCard.status === "reviewed" || item.sessionCard.status === "skipped") {
+            statuses[item.card.id] = item.sessionCard.status;
+        } else if (item.card.generationStatus !== "active") {
+            statuses[item.card.id] = "skipped";
+        }
+    });
+    return statuses;
+};
+
 export const shouldLoadFlashcardV2HeadingChildren = (nodeType: string | null, fold: string | null) => {
     return nodeType === "NodeHeading" && fold === "1";
 };

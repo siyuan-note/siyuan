@@ -96,7 +96,7 @@ const (
 		WHERE primary_ref.id = s.primary_ref_id AND primary_ref.entity_type = 'block' LIMIT 1)`
 	documentPolicyPrioritySQL = `(SELECT policy.priority FROM card_source_refs primary_ref
 		JOIN block_metadata source_metadata ON source_metadata.block_id = primary_ref.entity_id
-		JOIN study_policies policy ON policy.scope_type = 'document'
+		JOIN study_policies policy ON policy.scope_type = 'document' AND policy.priority <> ''
 		WHERE primary_ref.id = s.primary_ref_id AND primary_ref.entity_type = 'block'
 		AND (source_metadata.root_id = policy.scope_id OR
 			source_metadata.path LIKE '%/' || policy.scope_id || '/%')

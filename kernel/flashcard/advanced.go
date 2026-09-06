@@ -61,6 +61,8 @@ var (
 type AdvancedSourceRequest struct {
 	OperationID          string                    `json:"operationID"`
 	SourceID             string                    `json:"sourceID"`
+	DefaultPresetID      string                    `json:"defaultPresetID,omitempty"`
+	BlockMetadata        []BlockMetadata           `json:"-"`
 	Mode                 string                    `json:"mode"`
 	BlockIDs             []string                  `json:"blockIDs"`
 	ClozeGroups          []AdvancedClozeGroup      `json:"clozeGroups,omitempty"`
@@ -143,6 +145,11 @@ func (store *Store) CreateAdvancedSource(ctx context.Context,
 		return AdvancedSourceResult{}, err
 	}
 	source, references, template, err := buildAdvancedSource(request)
+	if err != nil {
+		return AdvancedSourceResult{}, err
+	}
+	source.DefaultPresetID, err = store.resolveSourcePreset(ctx, request.OperationID, request.SourceID, request.DefaultPresetID,
+		request.BlockIDs[0], request.BlockMetadata)
 	if err != nil {
 		return AdvancedSourceResult{}, err
 	}

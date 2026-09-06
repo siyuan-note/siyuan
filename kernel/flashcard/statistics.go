@@ -446,11 +446,15 @@ func collectReviewStatistics(request StatisticsRequest, reviews []statisticsRevi
 		if correct {
 			result.History.Correct++
 		}
-		if review.After != nil && review.Before != nil && review.After.Lapses > review.Before.Lapses {
-			result.History.Lapses += int(review.After.Lapses - review.Before.Lapses)
-		} else if review.Rating == ReviewAgain && (review.Before == nil || review.Before.State == "review" ||
-			review.Before.State == "relearning") {
-			result.History.Lapses++
+		if review.ReviewMode == "normal" {
+			if review.After != nil && review.Before != nil {
+				if review.After.Lapses > review.Before.Lapses {
+					result.History.Lapses += int(review.After.Lapses - review.Before.Lapses)
+				}
+			} else if review.Rating == ReviewAgain && (review.Before == nil || review.Before.State == "review" ||
+				review.Before.State == "relearning") {
+				result.History.Lapses++
+			}
 		}
 		retentionEligible := review.ReviewMode == "normal" && (review.Before == nil ||
 			review.Before.State == "review" || review.Before.State == "relearning")

@@ -198,6 +198,7 @@ var businessProjectionSchema = []string{
 		scope_type TEXT NOT NULL,
 		scope_id TEXT NOT NULL,
 		priority TEXT NOT NULL,
+		default_preset_id TEXT NOT NULL,
 		target_date INTEGER,
 		created_at INTEGER NOT NULL,
 		updated_at INTEGER NOT NULL,
@@ -523,11 +524,12 @@ func projectCurrentEntity(ctx context.Context, tx *sql.Tx, revision *EntityRevis
 			return err
 		}
 		_, err := tx.ExecContext(ctx, `INSERT INTO study_policies
-			(id, scope_type, scope_id, priority, target_date, created_at, updated_at, revision_id)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET scope_type = excluded.scope_type,
+			(id, scope_type, scope_id, priority, default_preset_id, target_date, created_at, updated_at, revision_id)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET scope_type = excluded.scope_type,
 			scope_id = excluded.scope_id, priority = excluded.priority, target_date = excluded.target_date,
+			default_preset_id = excluded.default_preset_id,
 			created_at = excluded.created_at, updated_at = excluded.updated_at, revision_id = excluded.revision_id`,
-			value.ID, value.ScopeType, value.ScopeID, value.Priority, value.TargetDate, value.CreatedAt, value.UpdatedAt,
+			value.ID, value.ScopeType, value.ScopeID, value.Priority, value.DefaultPresetID, value.TargetDate, value.CreatedAt, value.UpdatedAt,
 			revision.RevisionID)
 		return wrapProjectionError("study policy", err)
 	case EntityStudySession:

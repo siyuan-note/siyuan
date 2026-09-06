@@ -34,6 +34,8 @@ type StudyQueueRequest struct {
 	ReviewMode       string                                `json:"reviewMode,omitempty"`
 	Seed             string                                `json:"seed,omitempty"`
 	Now              int64                                 `json:"now"`
+	ReviewDayStart   int64                                 `json:"reviewDayStart,omitempty"`
+	ReviewDayEnd     int64                                 `json:"reviewDayEnd,omitempty"`
 	NewLimit         int                                   `json:"newLimit"`
 	ReviewLimit      int                                   `json:"reviewLimit"`
 	IncludeSuspended bool                                  `json:"includeSuspended"`
@@ -204,6 +206,12 @@ func (store *Store) StartStudySession(ctx context.Context, request StudyQueueReq
 		seed = request.SessionID
 	}
 	sortStudyQueue(results, reviewSetOrder, seed)
+	if mode == "normal" {
+		results, err = store.projection.limitStudyQueueByPreset(ctx, results, request.ReviewDayStart, request.ReviewDayEnd)
+		if err != nil {
+			return StudyQueueResult{}, err
+		}
+	}
 	selected := limitStudyQueue(results, newLimit, reviewLimit)
 	cardIDs := make([]string, len(selected))
 	for index := range selected {
@@ -223,6 +231,7 @@ func (store *Store) StartStudySession(ctx context.Context, request StudyQueueReq
 		Status: "active", Seed: seed, NewLimit: newLimit, ReviewLimit: reviewLimit,
 		IncludeSuspended: request.IncludeSuspended, IncludeBuried: request.IncludeBuried,
 		IncludePaused: request.IncludePaused, SelectionDigest: selectionDigest, StartedAt: request.Now,
+		ReviewDayStart: request.ReviewDayStart, ReviewDayEnd: request.ReviewDayEnd,
 	}
 	sessionRevision, err := NewOperationEntityRevision(request.OperationID, EntityStudySession, session.ID, nil,
 		request.Now, false, session)
@@ -428,6 +437,11 @@ func (request *StudyQueueRequest) validate() error {
 		request.NewLimit < 0 || request.ReviewLimit < 0 {
 		return errors.New("flashcard study queue identity, time and limits are invalid")
 	}
+	var err error
+	request.ReviewDayStart, request.ReviewDayEnd, err = reviewDayBounds(request.Now, request.ReviewDayStart, request.ReviewDayEnd)
+	if err != nil {
+		return err
+	}
 	if request.Query != nil {
 		if request.ReviewSetID != "" {
 			return errors.New("flashcard study queue cannot combine a review set with an ad hoc query")
@@ -540,6 +554,10 @@ func studyQueueResultFromBatch(batch OperationBatch, request StudyQueueRequest) 
 	}
 	if result.Session.ID != request.SessionID || result.Session.ReviewSetID != request.ReviewSetID ||
 		result.Session.StartedAt != request.Now || result.Session.Seed != seed {
+		return StudyQueueResult{}, ErrOperationConflict
+	}
+	if (result.Session.ReviewDayStart != 0 || result.Session.ReviewDayEnd != 0) && (result.Session.ReviewDayStart != request.ReviewDayStart ||
+		result.Session.ReviewDayEnd != request.ReviewDayEnd) {
 		return StudyQueueResult{}, ErrOperationConflict
 	}
 	if request.ReviewMode != "" && result.Session.ReviewMode != request.ReviewMode {

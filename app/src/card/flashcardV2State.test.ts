@@ -3,12 +3,33 @@ import * as assert from "node:assert/strict";
 import {
     buildFlashcardV2TagAssignmentGroups,
     canUseFlashcardV2ReviewActions,
+    getFlashcardV2ConfirmedQueueStatuses,
     getFlashcardV2ReviewShortcutAction,
     getFlashcardV2TagSelection,
     shouldLoadFlashcardV2HeadingChildren,
 } from "./flashcardV2State";
 
 describe("flashcardV2State", () => {
+    it("synchronizes only backend-confirmed terminal states after a failed rating", () => {
+        const item = (id: string, status: string, generationStatus = "active") => ({
+            card: {id, generationStatus}, sessionCard: {status},
+        });
+        const queue = [item("limited", "shown"), item("saved", "queued"), item("deleted", "queued"),
+            item("available", "queued"), item("missing", "queued"), item("finished", "reviewed")];
+        const refreshed = [item("limited", "skipped"), item("saved", "reviewed"), item("deleted", "queued", "deleted"),
+            item("available", "queued"), item("finished", "queued"), item("outside", "skipped")];
+        assert.deepEqual(getFlashcardV2ConfirmedQueueStatuses(queue, refreshed), {
+            limited: "skipped", saved: "reviewed", deleted: "skipped",
+        });
+        assert.equal(queue[0].sessionCard.status, "shown");
+    });
+
+    it("keeps the current card after an unrelated save failure or an unsuccessful queue refresh", () => {
+        const current = {card: {id: "current", generationStatus: "active"}, sessionCard: {status: "shown"}};
+        assert.deepEqual(getFlashcardV2ConfirmedQueueStatuses([current], [current]), {});
+        assert.deepEqual(getFlashcardV2ConfirmedQueueStatuses([current], []), {});
+    });
+
     it("blocks review actions until the current card finishes rendering", () => {
         const ready = {
             renderPending: false,

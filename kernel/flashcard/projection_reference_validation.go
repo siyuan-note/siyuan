@@ -29,6 +29,9 @@ type referenceCheck struct {
 }
 
 var businessReferenceChecks = []referenceCheck{
+	{name: "study policy scheduler preset", query: `SELECT s.id FROM study_policies s
+		LEFT JOIN scheduler_presets p ON p.id = s.default_preset_id
+		WHERE s.default_preset_id <> '' AND p.id IS NULL LIMIT 1`},
 	{name: "card template schema", query: `SELECT t.id FROM card_templates t
 		LEFT JOIN card_schemas s ON s.id = t.schema_id WHERE s.id IS NULL LIMIT 1`},
 	{name: "card source schema or primary reference", query: `SELECT s.id FROM card_sources s

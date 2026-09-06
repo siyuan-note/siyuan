@@ -128,6 +128,24 @@ func TestStatisticsRejectsAmbiguousScope(t *testing.T) {
 	}
 }
 
+func TestStatisticsLapsesFollowNormalSchedulingState(t *testing.T) {
+	now := int64(1786431600000)
+	request := StatisticsRequest{From: now - 10000, To: now + 1, Now: now, Bucket: StatisticsBucketDay}
+	result := newStatisticsResult(request, "global")
+	reviews := []statisticsReview{
+		{CardID: "normal-forgotten", Kind: "review", Rating: ReviewAgain, ReviewedAt: now - 3, ReviewMode: "normal",
+			Before: &ReviewStateSnapshot{State: "review", Lapses: 2}, After: &ReviewStateSnapshot{State: "relearning", Lapses: 3}},
+		{CardID: "normal-forgotten", Kind: "review", Rating: ReviewAgain, ReviewedAt: now - 2, ReviewMode: "normal",
+			Before: &ReviewStateSnapshot{State: "relearning", Lapses: 3}, After: &ReviewStateSnapshot{State: "relearning", Lapses: 3}},
+		{CardID: "practice-forgotten", Kind: "review", Rating: ReviewAgain, ReviewedAt: now - 1, ReviewMode: "reinforcement",
+			Before: &ReviewStateSnapshot{State: "review", Lapses: 1}},
+	}
+	collectReviewStatistics(request, reviews, &result)
+	if result.History.Reviews != 3 || result.History.Ratings[string(ReviewAgain)] != 3 || result.History.Lapses != 1 {
+		t.Fatalf("practice or repeated relearning inflated scheduling lapses: %+v", result.History)
+	}
+}
+
 func TestStatisticsIntersectsReviewSetAndQuery(t *testing.T) {
 	ctx := context.Background()
 	store := newGenerationTestStore(t, ctx)

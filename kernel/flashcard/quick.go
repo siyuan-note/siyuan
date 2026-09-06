@@ -25,10 +25,12 @@ import (
 
 // QuickSourceRequest 描述由块创建独立快速卡源的请求。
 type QuickSourceRequest struct {
-	OperationID string   `json:"operationID"`
-	BlockIDs    []string `json:"blockIDs"`
-	CreatedAt   int64    `json:"createdAt"`
-	Toggle      bool     `json:"toggle,omitempty"`
+	OperationID     string          `json:"operationID"`
+	BlockIDs        []string        `json:"blockIDs"`
+	CreatedAt       int64           `json:"createdAt"`
+	Toggle          bool            `json:"toggle,omitempty"`
+	DefaultPresetID string          `json:"defaultPresetID,omitempty"`
+	BlockMetadata   []BlockMetadata `json:"-"`
 }
 
 // QuickSourceResult 返回创建或已存在的卡源和卡片 ID。
@@ -187,7 +189,11 @@ func (store *Store) CreateQuickSources(ctx context.Context, request QuickSourceR
 				EntityID: blockID, Role: "content", Required: true}); err != nil {
 			return QuickSourceResult{}, err
 		}
-		if err := store.appendQuickSourceMutation(ctx, &mutations, sourceID, refID, request.CreatedAt); err != nil {
+		presetID, err := store.resolveSourcePreset(ctx, request.OperationID, sourceID, request.DefaultPresetID, blockID, request.BlockMetadata)
+		if err != nil {
+			return QuickSourceResult{}, err
+		}
+		if err := store.appendQuickSourceMutation(ctx, &mutations, sourceID, refID, presetID, request.CreatedAt); err != nil {
 			return QuickSourceResult{}, err
 		}
 		cardRevision, found, err := store.projection.CurrentEntity(ctx, EntityCard, cardID)
@@ -242,7 +248,7 @@ func quickSourceResult(blockIDs []string) QuickSourceResult {
 }
 
 func (store *Store) appendQuickSourceMutation(ctx context.Context, mutations *[]EntityMutation,
-	sourceID, refID string, updatedAt int64) error {
+	sourceID, refID, presetID string, updatedAt int64) error {
 	revision, found, err := store.projection.CurrentEntity(ctx, EntityCardSource, sourceID)
 	if err != nil {
 		return err
@@ -260,7 +266,7 @@ func (store *Store) appendQuickSourceMutation(ctx context.Context, mutations *[]
 		return nil
 	}
 	source := CardSource{ID: sourceID, SchemaID: legacyQuickSchemaID, SourceType: "block", PrimaryRefID: refID,
-		DefaultPresetID: legacyPresetID, GenerationConfig: json.RawMessage(`{"mode":"auto"}`), Status: "active"}
+		DefaultPresetID: presetID, GenerationConfig: json.RawMessage(`{"mode":"auto"}`), Status: "active"}
 	*mutations = append(*mutations, legacyMutation(EntityCardSource, sourceID, revision, found, updatedAt, source))
 	return nil
 }

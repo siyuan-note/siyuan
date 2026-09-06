@@ -41,10 +41,13 @@ import {
 import type {IFlashcardQueryAST} from "./flashcardV2Query";
 import {
     canUseFlashcardV2ReviewActions,
+    getFlashcardV2ConfirmedQueueStatuses,
     getFlashcardV2ReviewShortcutAction,
     shouldLoadFlashcardV2HeadingChildren,
 } from "./flashcardV2State";
 import {setFlashcardLocateBlockID} from "./flashcardLocate";
+import {flashcardV2FlagMenuItems} from "./flashcardV2Flag";
+import {flashcardV2ReviewDay} from "./flashcardV2Calendar";
 
 interface IFlashcardV2SessionQueueCard {
     sessionCard: {
@@ -114,7 +117,6 @@ export interface IFlashcardV2ReviewSessionOptions {
     includePaused?: boolean;
 }
 
-const flashcardV2FlagColors = ["", "#d14343", "#d97706", "#2f9e44", "#3b82f6", "#8b5cf6", "#0891b2", "#db2777"];
 let flashcardV2ReviewOpening = false;
 
 const nextLocalDay = (now: number) => {
@@ -732,6 +734,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
     }
     flashcardV2ReviewOpening = true;
     const sessionID = genUUID();
+    const now = Date.now();
     let sessionStarted = false;
     void fetchPost("/api/flashcard/startSession", {
         operationID: genUUID(),
@@ -740,7 +743,8 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
         query: options.query,
         reviewMode: options.reviewMode,
         seed: sessionID,
-        now: Date.now(),
+        now,
+        ...flashcardV2ReviewDay(now),
         newLimit: window.siyuan.config.flashcard.newCardLimit,
         reviewLimit: window.siyuan.config.flashcard.reviewCardLimit,
         includeSuspended: options.reviewMode === "reinforcement" && Boolean(options.includeSuspended),
@@ -749,7 +753,10 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
     }, () => {
         sessionStarted = true;
         let queueLoaded = false;
-        void fetchPost("/api/flashcard/getSessionQueue", {sessionID}, (queueResponse) => {
+        const queueNow = Date.now();
+        void fetchPost("/api/flashcard/getSessionQueue", {
+            sessionID, now: queueNow, ...flashcardV2ReviewDay(queueNow),
+        }, (queueResponse) => {
             queueLoaded = true;
             const queue = (queueResponse.data.cards as IFlashcardV2SessionQueueCard[])
                 .filter((item) => item.card.generationStatus === "active" &&
@@ -934,6 +941,35 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     return;
                 }
                 showCompletion();
+            };
+            const refreshQueueAfterFailedReview = (reviewedIndex: number) => {
+                if (sessionFinished || index !== reviewedIndex) {
+                    requestPending = false;
+                    return;
+                }
+                const queueNow = Date.now();
+                return fetchPost("/api/flashcard/getSessionQueue", {
+                    sessionID, now: queueNow, ...flashcardV2ReviewDay(queueNow),
+                }, (response) => {
+                    if (sessionFinished || index !== reviewedIndex) {
+                        return;
+                    }
+                    const statuses = getFlashcardV2ConfirmedQueueStatuses(queue,
+                        response.data.cards as IFlashcardV2SessionQueueCard[]);
+                    queue.forEach((item) => {
+                        if (statuses[item.card.id]) {
+                            item.sessionCard.status = statuses[item.card.id];
+                        }
+                    });
+                    if (statuses[queue[reviewedIndex].card.id]) {
+                        requestPending = false;
+                        if (statuses[queue[reviewedIndex].card.id] === "reviewed") {
+                            lastReview = undefined;
+                            setUndoVisible(dialog, false);
+                        }
+                        nextCard();
+                    }
+                }).finally(() => requestPending = false);
             };
             const reveal = () => {
                 if (!canUseReviewActions()) {
@@ -1145,16 +1181,10 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 menu.addItem({
                     id: "flashcardV2SetFlag",
                     icon: "iconBookmark",
-                    label: `${window.siyuan.languages.cardStatus} - ${flagDefinitions.get((current.card.flag + 1) % 8) || (current.card.flag + 1) % 8}`,
-                    bind: (element) => {
-                        const nextFlag = (current.card.flag + 1) % 8;
-                        if (nextFlag > 0) {
-                            (element.querySelector("svg") as SVGElement).style.color = flashcardV2FlagColors[nextFlag];
-                        }
-                    },
-                    click: () => manageWithoutSkipping([current.card.id], "setFlag", {
-                        flag: (current.card.flag + 1) % 8,
-                    }),
+                    label: window.siyuan.languages.flashcardFlag,
+                    submenu: flashcardV2FlagMenuItems(current.card.flag,
+                        [...flagDefinitions].map(([flag, name]) => ({flag, name})), (flag) =>
+                            manageWithoutSkipping([current.card.id], "setFlag", {flag})),
                 });
                 menu.addItem({
                     id: "flashcardV2CardTags",
@@ -1245,6 +1275,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         cardID: queue[index].card.id,
                         rating: ratingElement.dataset.rating,
                         reviewedAt,
+                        ...flashcardV2ReviewDay(reviewedAt),
                         durationMS: Math.max(0, Math.round(performance.now() - shownAt)),
                         sessionID,
                         reviewSetID,
@@ -1294,7 +1325,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         nextCard();
                     }).then(() => {
                         if (!reviewed) {
-                            requestPending = false;
+                            return refreshQueueAfterFailedReview(reviewedIndex);
                         }
                     });
                     return;

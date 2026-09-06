@@ -27,6 +27,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/siyuan-note/logging"
 	flashcardv2 "github.com/siyuan-note/siyuan/kernel/flashcard"
@@ -751,6 +752,16 @@ func ReconcileFlashcardV2Source(ctx context.Context, operationID, sourceID strin
 	return store.ReconcileSourceCards(ctx, operationID, sourceID, updatedAt)
 }
 
+// flashcardV2CreationMetadata 为新卡源解析普通块位置，不依赖已有闪卡的位置投影。
+func flashcardV2CreationMetadata(blockIDs []string) []flashcardv2.BlockMetadata {
+	ret := make([]flashcardv2.BlockMetadata, 0, len(blockIDs))
+	for _, blockTree := range treenode.GetBlockTrees(blockIDs) {
+		ret = append(ret, flashcardv2.BlockMetadata{BlockID: blockTree.ID, NotebookID: blockTree.BoxID,
+			RootID: blockTree.RootID, Path: blockTree.Path, HPath: blockTree.HPath})
+	}
+	return ret
+}
+
 // CreateFlashcardV2BasicSource 由有序普通块创建正向、反向或双向卡源。
 func CreateFlashcardV2BasicSource(ctx context.Context,
 	request flashcardv2.BasicSourceRequest) (flashcardv2.BasicSourceResult, error) {
@@ -761,6 +772,7 @@ func CreateFlashcardV2BasicSource(ctx context.Context,
 	if err != nil {
 		return flashcardv2.BasicSourceResult{}, err
 	}
+	request.BlockMetadata = flashcardV2CreationMetadata(request.BlockIDs)
 	return store.CreateBasicSource(ctx, request)
 }
 
@@ -774,6 +786,7 @@ func CreateFlashcardV2QuickSources(ctx context.Context,
 	if err != nil {
 		return flashcardv2.QuickSourceResult{}, err
 	}
+	request.BlockMetadata = flashcardV2CreationMetadata(request.BlockIDs)
 	if request.Toggle {
 		return store.ToggleQuickSources(ctx, request)
 	}
@@ -828,6 +841,7 @@ func CreateFlashcardV2AdvancedSource(ctx context.Context,
 	if err != nil {
 		return flashcardv2.AdvancedSourceResult{}, err
 	}
+	request.BlockMetadata = flashcardV2CreationMetadata(request.BlockIDs)
 	return store.CreateAdvancedSource(ctx, request)
 }
 
@@ -957,7 +971,8 @@ func applyFlashcardV2SessionDefaults(request flashcardv2.StudyQueueRequest, newL
 }
 
 // GetFlashcardV2SessionQueue 返回会话冻结顺序和当前状态。
-func GetFlashcardV2SessionQueue(ctx context.Context, sessionID string) ([]flashcardv2.SessionQueueCard, error) {
+func GetFlashcardV2SessionQueue(ctx context.Context, sessionID string,
+	dayOptions ...flashcardv2.StudyDayOptions) ([]flashcardv2.SessionQueueCard, error) {
 	store, err := requireFlashcardV2Store(ctx, false)
 	if err != nil {
 		return nil, err
@@ -965,7 +980,14 @@ func GetFlashcardV2SessionQueue(ctx context.Context, sessionID string) ([]flashc
 	if err = refreshFlashcardV2BlockMetadata(ctx, store, false); err != nil {
 		return nil, err
 	}
-	queue, err := store.Projection().SessionQueue(ctx, sessionID)
+	options := flashcardv2.StudyDayOptions{}
+	if len(dayOptions) != 0 {
+		options = dayOptions[0]
+	}
+	if options.Now == 0 {
+		options.Now = time.Now().UnixMilli()
+	}
+	queue, err := store.Projection().SessionQueueAt(ctx, sessionID, options)
 	if err != nil {
 		return nil, err
 	}

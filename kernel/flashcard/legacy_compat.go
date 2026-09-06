@@ -126,6 +126,66 @@ func (projection *Projection) LegacyQuickCards(ctx context.Context, deckID strin
 	return ret, nil
 }
 
+// FilterLegacyQuickCardsByPreset 在旧入口的范围筛选后应用当前可复习条件和共享预设日额度。
+func (projection *Projection) FilterLegacyQuickCardsByPreset(ctx context.Context, cards []LegacyQuickCard,
+	now int64) ([]LegacyQuickCard, error) {
+	cardIDs := make([]string, len(cards))
+	for index, card := range cards {
+		cardIDs[index] = card.Card.ID
+	}
+	eligible, err := projection.eligibleCardsByID(ctx, cardIDs, now)
+	if err != nil {
+		return nil, err
+	}
+	start, end, err := reviewDayBounds(now, 0, 0)
+	if err != nil {
+		return nil, err
+	}
+	budget, err := projection.dailyPresetBudget(ctx, start, end)
+	if err != nil {
+		return nil, err
+	}
+	candidates := make([]LegacyQuickCard, 0, len(cards))
+	for _, card := range cards {
+		current, found := eligible[card.Card.ID]
+		if !found || current.ReviewState.Due > now {
+			continue
+		}
+		card.Card, card.ReviewState = current.Card, current.ReviewState
+		candidates = append(candidates, card)
+	}
+	sort.Slice(candidates, func(i, j int) bool {
+		if candidates[i].ReviewState.Due == candidates[j].ReviewState.Due {
+			return candidates[i].Card.ID < candidates[j].Card.ID
+		}
+		return candidates[i].ReviewState.Due < candidates[j].ReviewState.Due
+	})
+	selected := make([]LegacyQuickCard, 0, len(candidates))
+	for _, card := range candidates {
+		allowed, selectErr := budget.selectCard(ctx, projection, card.Card.ID,
+			eligible[card.Card.ID].EffectivePresetID, card.ReviewState.State)
+		if selectErr != nil {
+			return nil, selectErr
+		}
+		if allowed {
+			selected = append(selected, card)
+		}
+	}
+	return selected, nil
+}
+
+// ReviewLegacyQuickCard 使用旧入口的内核本地复习日，不为没有新版会话的评分填入会话归属。
+func (store *Store) ReviewLegacyQuickCard(ctx context.Context, operationID, cardID string, rating ReviewRating,
+	reviewedAt, durationMS int64) (ReviewResult, error) {
+	start, end, err := reviewDayBounds(reviewedAt, 0, 0)
+	if err != nil {
+		return ReviewResult{}, err
+	}
+	return store.ReviewCard(ctx, ReviewRequest{OperationID: operationID, CardID: cardID, Rating: rating,
+		ReviewedAt: reviewedAt, DurationMS: durationMS, ReviewMode: "normal", BuryUntil: end,
+		ReviewDayStart: start, ReviewDayEnd: end})
+}
+
 // ResolveLegacyCard 将旧卡片 ID 或新版快速卡 ID 解析为唯一的当前卡片。
 func (projection *Projection) ResolveLegacyCard(ctx context.Context, deckID, legacyCardID string) (
 	LegacyQuickCard, bool, error) {
@@ -334,7 +394,7 @@ func (store *Store) RenameLegacyReviewSet(ctx context.Context, operationID, deck
 
 // AddLegacyQuickCards 将块原子加入旧卡包对应的静态复习集。
 func (store *Store) AddLegacyQuickCards(ctx context.Context, operationID, deckID string, blockIDs []string,
-	updatedAt int64) ([]LegacyQuickCard, error) {
+	updatedAt int64, metadata ...BlockMetadata) ([]LegacyQuickCard, error) {
 	if strings.TrimSpace(operationID) == "" || len(blockIDs) == 0 || updatedAt <= 0 {
 		return nil, errors.New("legacy flashcard add operation, blocks and time are required")
 	}
@@ -353,9 +413,13 @@ func (store *Store) AddLegacyQuickCards(ctx context.Context, operationID, deckID
 				EntityID: blockID, Role: "content", Required: true}); err != nil {
 			return nil, err
 		}
+		presetID, presetErr := store.resolveSourcePreset(ctx, operationID, sourceID, "", blockID, metadata)
+		if presetErr != nil {
+			return nil, presetErr
+		}
 		if err = store.appendLegacyEntityIfMissing(ctx, &mutations, EntityCardSource, sourceID, updatedAt,
 			CardSource{ID: sourceID, SchemaID: legacyQuickSchemaID, SourceType: "block", PrimaryRefID: refID,
-				DefaultPresetID: legacyPresetID, GenerationConfig: json.RawMessage(`{"mode":"auto"}`),
+				DefaultPresetID: presetID, GenerationConfig: json.RawMessage(`{"mode":"auto"}`),
 				Status: "active"}); err != nil {
 			return nil, err
 		}

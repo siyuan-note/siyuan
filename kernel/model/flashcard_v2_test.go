@@ -83,3 +83,24 @@ func TestFlashcardV2AuthorityStateBlocksLegacyFallback(t *testing.T) {
 		}
 	}
 }
+
+func TestLegacyFlashcardV2QueueCountsOnlySelectedUnreviewedCards(t *testing.T) {
+	card := func(id, state string, due int64) flashcardv2.LegacyQuickCard {
+		return flashcardv2.LegacyQuickCard{Card: flashcardv2.Card{ID: id},
+			ReviewState: flashcardv2.ReviewState{ReviewStateSnapshot: flashcardv2.ReviewStateSnapshot{State: state, Due: due}}}
+	}
+	cards := []flashcardv2.LegacyQuickCard{card("reviewed", "review", 1), card("old", "review", 2),
+		card("new-a", "new", 3), card("new-b", "new", 4)}
+	reviewed := map[string]struct{}{"reviewed": {}}
+	selected, total, newCount, oldCount := selectLegacyFlashcardV2DueCards(cards, reviewed, 1, 1, 0)
+	if len(selected) != 2 || selected[0].Card.ID != "reviewed" || selected[1].Card.ID != "new-a" ||
+		total != 3 || newCount != 1 || oldCount != 0 {
+		t.Fatalf("legacy queue counters include cards outside this round: selected=%+v total=%d new=%d old=%d",
+			selected, total, newCount, oldCount)
+	}
+	selected, total, newCount, oldCount = selectLegacyFlashcardV2DueCards(cards, reviewed, 0, 0, 1)
+	if len(selected) != 0 || total != 0 || newCount != 0 || oldCount != 0 {
+		t.Fatalf("disabled queue limits retained pending counts: selected=%+v total=%d new=%d old=%d",
+			selected, total, newCount, oldCount)
+	}
+}

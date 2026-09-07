@@ -38,7 +38,18 @@ import (
 )
 
 // errMsgSeeKernelLog 接在 API 错误提示末尾，引导用户查看内核日志以获取完整信息（避免在 Msg 暴露工作空间绝对路径）。
-const errMsgSeeKernelLog = ". For details, see the SiYuan kernel log."
+const (
+	errMsgSeeKernelLog = ". For details, see the SiYuan kernel log."
+	siyuanAppIDHeader  = "X-SiYuan-App-ID"
+)
+
+// resolveFileAPIAppID 优先使用宿主统一注入的应用标识，同时兼容旧请求体中的 app。
+func resolveFileAPIAppID(c *gin.Context, bodyApp string) string {
+	if headerApp := c.GetHeader(siyuanAppIDHeader); headerApp != "" {
+		return headerApp
+	}
+	return bodyApp
+}
 
 // rejectEncryptedBoxPath 检查 absPath 是否落在加密笔记本目录下（含 symlink 绕过），是则返回 true。
 // 原始文件 API（getFile/putFile/copyFile/renameFile/removeFile）是绕过加密层的逃生口，
@@ -827,6 +838,7 @@ func removeFile(c *gin.Context) {
 	) {
 		return
 	}
+	app = resolveFileAPIAppID(c, app)
 
 	fileAbsPath, err := util.GetAbsPathInWorkspace(filePath)
 	if err != nil {
@@ -878,7 +890,7 @@ func putFile(c *gin.Context) {
 
 	isDirStr := c.PostForm("isDir")
 	isDir, _ := strconv.ParseBool(isDirStr)
-	app := c.PostForm("app")
+	app := resolveFileAPIAppID(c, c.PostForm("app"))
 
 	var err error
 	filePath := c.PostForm("path")

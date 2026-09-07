@@ -58,6 +58,7 @@ import {ensureUILayout} from "./util/ensureUILayout";
 import {applyEntryVisibility} from "./config/entryVisibility/runtime";
 import {removeBlockPanelEditors} from "./block/panelRemoval";
 import {initializeEnglishCommandTranslations} from "./command/english";
+import {installPluginStorageFetchAppId} from "./util/fetchAppId";
 
 export class App {
     public plugins: import("./plugin").Plugin[] = [];
@@ -344,6 +345,7 @@ export class App {
     }
 }
 
+installPluginStorageFetchAppId(window, Constants.SIYUAN_APPID, window.location.href);
 const siyuanApp = new App();
 
 window.openFileByURL = (openURL) => {

@@ -13,6 +13,32 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestResolveFileAPIAppID(t *testing.T) {
+	tests := []struct {
+		name     string
+		header   string
+		body     string
+		expected string
+	}{
+		{name: "header takes precedence", header: "header-app", body: "body-app", expected: "header-app"},
+		{name: "body remains compatible", body: "body-app", expected: "body-app"},
+		{name: "missing app remains external", expected: ""},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			context, _ := gin.CreateTestContext(httptest.NewRecorder())
+			context.Request = httptest.NewRequest(http.MethodPost, "/api/file/putFile", nil)
+			if test.header != "" {
+				context.Request.Header.Set(siyuanAppIDHeader, test.header)
+			}
+			if actual := resolveFileAPIAppID(context, test.body); actual != test.expected {
+				t.Fatalf("expected app [%s], got [%s]", test.expected, actual)
+			}
+		})
+	}
+}
+
 func TestGetFileAllowsWorkspaceTemp(t *testing.T) {
 	originalWorkspaceDir := util.WorkspaceDir
 	originalTempDir := util.TempDir

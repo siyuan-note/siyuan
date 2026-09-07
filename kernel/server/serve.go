@@ -2074,7 +2074,7 @@ func corsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Credentials", "true")
-		c.Header("Access-Control-Allow-Headers", "origin, Content-Length, Content-Type, Authorization")
+		c.Header("Access-Control-Allow-Headers", "origin, Content-Length, Content-Type, Authorization, X-SiYuan-App-ID")
 		c.Header("Access-Control-Allow-Private-Network", "false")
 
 		if strings.HasPrefix(c.Request.RequestURI, "/webdav") {

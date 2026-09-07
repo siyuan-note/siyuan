@@ -477,6 +477,23 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
 
 export const destroyTabsRender = (element: Element) => roots.get(element)?.destroy();
 
+export const setTabTitleNavigationEditing = (item: HTMLElement, editing: boolean) => {
+    for (let root: Element = item; root; root = root.parentElement) {
+        const controller = roots.get(root);
+        if (controller) {
+            const tabs = item.parentElement as HTMLElement;
+            if (item.getAttribute("data-tabs-hidden") !== "false" ||
+                (controller.options.readonly?.(tabs) ?? true)) {
+                return false;
+            }
+            item.dataset.tabsEditing = editing ? "true" : "false";
+            controller.render();
+            return true;
+        }
+    }
+    return false;
+};
+
 export const revealTabsForTarget = (target: Element, persist = true) => {
     for (let root = target; root; root = root.parentElement) {
         if (roots.has(root)) {

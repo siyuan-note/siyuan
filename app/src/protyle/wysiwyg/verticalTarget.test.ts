@@ -101,7 +101,7 @@ const block = (id: string, type = "NodeParagraph") => new TestElement()
     .setAttribute("data-type", type);
 
 describe("vertical navigation targets", () => {
-    it("enters a folded list through its last visible leaf", () => {
+    it("enters a folded list item as one navigation region", () => {
         const list = block("list", "NodeList").addClass("list");
         const item = block("item", "NodeListItem").addClass("li").setAttribute("fold", "1");
         const summary = block("summary");
@@ -109,7 +109,7 @@ describe("vertical navigation targets", () => {
         hidden.visible = false;
         list.append(item.append(summary, hidden));
 
-        assert.equal(getVisibleBoundaryBlock(asElement(list), "up"), asElement(summary));
+        assert.equal(getVisibleBoundaryBlock(asElement(list), "up"), asElement(item));
     });
 
     it("skips hidden folded descendants when leaving the visible summary", () => {

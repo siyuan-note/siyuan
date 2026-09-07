@@ -1,9 +1,11 @@
 import {isInEmbedBlock} from "../util/hasClosest";
 import {getNextBlock, getPreviousBlock, isContainerBlock, isNotEditBlock} from "./getBlock";
 import type {TVerticalDirection} from "./verticalCaret";
+import {getFoldedNavigationOwner, getReachableVerticalRects} from "./verticalVisibility";
+import {getHostVerticalRegion} from "./verticalRegion";
 
 export const isVerticalNavigationElementVisible = (element: Element) =>
-    Array.from(element.getClientRects()).some(rect => rect.height > 0.5 || rect.width > 0.5);
+    getReachableVerticalRects(element, Array.from(element.getClientRects())).length > 0;
 
 const getAdjacentBlock = (element: Element, direction: TVerticalDirection) =>
     direction === "up" ? getPreviousBlock(element) : getNextBlock(element);
@@ -14,7 +16,7 @@ export const getAdjacentVisibleBlock = (element: Element, direction: TVerticalDi
     }
     const embedElement = isInEmbedBlock(element);
     const visited = new Set<Element>();
-    let adjacentElement = getAdjacentBlock(element, direction);
+    let adjacentElement = getAdjacentBlock(getFoldedNavigationOwner(element) || element, direction);
     while (adjacentElement && !visited.has(adjacentElement)) {
         visited.add(adjacentElement);
         if (embedElement && isInEmbedBlock(adjacentElement) !== embedElement) {
@@ -49,15 +51,22 @@ export const getVisibleBoundaryBlock = (element: Element, direction: TVerticalDi
     }
     const visited = new Set<Element>();
     for (const candidateElement of candidateElements) {
+        if (!candidateElement.hasAttribute("data-node-id")) {
+            continue;
+        }
         if (candidateElement !== element && isInEmbedBlock(candidateElement)) {
             continue;
         }
-        const targetElement = getAtomicOwner(candidateElement, element) || candidateElement;
+        const targetElement = getFoldedNavigationOwner(candidateElement) ||
+            getAtomicOwner(candidateElement, element) || candidateElement;
         if (visited.has(targetElement)) {
             continue;
         }
         visited.add(targetElement);
-        if (!isContainerBlock(targetElement) && isVerticalNavigationElementVisible(targetElement)) {
+        const region = getHostVerticalRegion(targetElement);
+        if ((targetElement.getAttribute("fold") === "1" || !isContainerBlock(targetElement) ||
+            (direction === "down" && region?.title && isVerticalNavigationElementVisible(region.title))) &&
+            isVerticalNavigationElementVisible(targetElement)) {
             return targetElement;
         }
     }

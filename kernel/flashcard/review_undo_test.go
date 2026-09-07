@@ -83,7 +83,8 @@ func TestUndoReviewRestoresReviewEffectsAndStatistics(t *testing.T) {
 	if result.Event.EventType != EventReviewUndone || result.RestoredState == nil ||
 		len(result.RestoredSiblingIDs) != 1 || result.RestoredSiblingIDs[0] != siblingID ||
 		len(result.RestoredSessionCardIDs) != 1 || result.RestoredSessionCardIDs[0] != siblingID ||
-		result.SessionCard == nil || result.SessionCard.Status != "queued" {
+		result.SessionCard == nil || result.SessionCard.Status != "queued" ||
+		result.SessionCard.StateRevisionID != OperationRevisionID(request.OperationID, EntityReviewState, cardID) {
 		t.Fatalf("unexpected review undo result: %+v", result)
 	}
 	after := currentReviewStateForUndoTest(t, ctx, store, cardID)
@@ -118,6 +119,13 @@ func TestUndoReviewRestoresReviewEffectsAndStatistics(t *testing.T) {
 	secondOperation.OperationID = "undo-review-again"
 	if _, err = store.UndoReview(ctx, secondOperation); err == nil {
 		t.Fatal("already undone review was accepted")
+	}
+	if _, err = store.ReviewCard(ctx, ReviewRequest{
+		OperationID: "review-after-undo", CardID: cardID, Rating: ReviewEasy, ReviewedAt: request.UndoneAt + 1000,
+		DurationMS: 800, SessionID: "session-review-undo", ReviewSetID: reviewSet.ID, ReviewMode: "normal",
+		BuryUntil: request.UndoneAt + 86400000,
+	}); err != nil {
+		t.Fatalf("flashcard could not be reviewed again in the same session after undo: %v", err)
 	}
 }
 

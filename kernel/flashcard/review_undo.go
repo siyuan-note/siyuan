@@ -229,6 +229,10 @@ func (store *Store) restoreReviewRevision(ctx context.Context, request ReviewUnd
 		if _, found := affectedCardIDs[sessionCard.CardID]; !found || sessionCard.SessionID != targetPayload.SessionID {
 			return EntityRevision{}, errors.New("flashcard session state does not match the review event")
 		}
+		if targetPayload.ReviewMode == "normal" {
+			sessionCard.StateRevisionID = OperationRevisionID(request.OperationID, EntityReviewState, sessionCard.CardID)
+			payload = sessionCard
+		}
 	}
 	if target.EntityType == EntityTagAssignment {
 		var assignment TagAssignment

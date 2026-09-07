@@ -477,10 +477,7 @@ const openFlashcardV2SessionDue = (cardID: string, due: number, callback: () => 
 
 const sessionCompletionContent = (canUndo: boolean) => `<div class="card__empty-icon">🔮</div>
 <span>${window.siyuan.languages.noDueCard}</span>
-<span class="card__v2-completion-actions">
-    ${canUndo ? `<button data-type="undo-review" class="b3-button b3-button--outline"><svg><use xlink:href="#iconUndo"></use></svg>${window.siyuan.languages.undo}</button>` : ""}
-    <button data-type="finish" class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</span>`;
+${canUndo ? `<span class="card__v2-completion-actions"><button data-type="undo-review" class="b3-button b3-button--outline"><svg><use xlink:href="#iconUndo"></use></svg>${window.siyuan.languages.undo}</button></span>` : ""}`;
 
 const sessionContent = () => `<div class="b3-dialog__content fn__flex-column card__v2-session">
 <div data-flashcard-toolbar class="fn__flex card__v2-session-toolbar">
@@ -523,17 +520,6 @@ const renderSessionCard = (dialog: Dialog, queue: IFlashcardV2SessionQueueCard[]
     const contextElement = dialog.element.querySelector("[data-flashcard-context]") as HTMLElement;
     const frontElement = dialog.element.querySelector("[data-flashcard-front]") as HTMLElement;
     const answerElement = dialog.element.querySelector("[data-flashcard-answer]") as HTMLElement;
-    dialog.element.querySelector("[data-flashcard-template-style]")?.remove();
-    dialog.element.querySelector("[data-flashcard-toolbar]").classList.remove("fn__none");
-    contextElement.classList.add("fn__none");
-    contextElement.innerHTML = "";
-    frontElement.className = "protyle-wysiwyg";
-    frontElement.innerHTML = "";
-    answerElement.classList.add("fn__none");
-    (answerElement.querySelector(".protyle-wysiwyg") as HTMLElement).innerHTML = "";
-    contentElement.className = "card__block fn__flex-1 card__v2-session-content";
-    dialog.element.querySelector("[data-flashcard-count]").textContent = `${index + 1} / ${queue.length}`;
-    setActionsVisible(dialog, false);
     setReviewActionsEnabled(dialog, false);
     let modelLoaded = false;
     void fetchPost("/api/flashcard/getRenderModel", {cardID: current.card.id}, (modelResponse) => {
@@ -541,10 +527,6 @@ const renderSessionCard = (dialog: Dialog, queue: IFlashcardV2SessionQueueCard[]
             return;
         }
         const model = modelResponse.data as IFlashcardV2RenderModel;
-        const templateStyle = createFlashcardV2TemplateStyle(model.template.style || "", contentElement);
-        if (templateStyle) {
-            dialog.element.appendChild(templateStyle);
-        }
         const dynamicReferences: IFlashcardV2SourceReference[] = (current.sessionCard.dynamicOptions || [])
             .filter((option) => option.entityType === "block")
             .map((option, optionIndex) => ({
@@ -562,6 +544,21 @@ const renderSessionCard = (dialog: Dialog, queue: IFlashcardV2SessionQueueCard[]
             if (!isCurrent()) {
                 return;
             }
+            dialog.element.querySelector("[data-flashcard-template-style]")?.remove();
+            const templateStyle = createFlashcardV2TemplateStyle(model.template.style || "", contentElement);
+            if (templateStyle) {
+                dialog.element.appendChild(templateStyle);
+            }
+            dialog.element.querySelector("[data-flashcard-toolbar]").classList.remove("fn__none");
+            contextElement.classList.add("fn__none");
+            contextElement.innerHTML = "";
+            frontElement.className = "protyle-wysiwyg";
+            frontElement.innerHTML = "";
+            answerElement.classList.add("fn__none");
+            (answerElement.querySelector(".protyle-wysiwyg") as HTMLElement).innerHTML = "";
+            contentElement.className = "card__block fn__flex-1 card__v2-session-content";
+            dialog.element.querySelector("[data-flashcard-count]").textContent = `${index + 1} / ${queue.length}`;
+            setActionsVisible(dialog, false);
             let frontReferences = selectReferences(references, model.template.frontSpec);
             if (frontReferences.length === 0) {
                 frontReferences = references.slice(0, 1);
@@ -784,9 +781,6 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     });
                     completionDialog.element.setAttribute("data-flashcard-v2-review", "");
                     flashcardV2ReviewOpening = false;
-                    completionDialog.element.querySelector('[data-type="finish"]').addEventListener("click", () => {
-                        completionDialog.destroy();
-                    });
                 }).then(() => {
                     if (!completionShown) {
                         flashcardV2ReviewOpening = false;

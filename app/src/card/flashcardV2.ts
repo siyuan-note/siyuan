@@ -2804,6 +2804,7 @@ ${blockIDs.slice(1).map((blockID, index) => `<label class="fn__flex card__v2-cho
                     title: window.siyuan.languages.configGroupAdvanced,
                     width: isMobile() ? "96vw" : "720px",
                     height: imageSource || blockIDs.length >= 3 ? "82vh" : undefined,
+                    containerClassName: "card__v2-advanced-dialog",
                     destroyCallback: () => imageEditor?.destroy(),
                     content: `<div class="b3-dialog__content card__v2-advanced">
 <label class="b3-label b3-label--inner card__v2-advanced-field">

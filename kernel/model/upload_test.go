@@ -119,6 +119,17 @@ func executeAssetUploadTestRequest(t *testing.T, request *http.Request) assetUpl
 	return response
 }
 
+func cleanupAssetUploadTestHashes(t *testing.T, successes []AssetUploadSuccess) {
+	t.Helper()
+	t.Cleanup(func() {
+		for _, success := range successes {
+			if hash := cache.GetAssetHashByPath(success.Path); hash != nil {
+				cache.RemoveAssetHash(hash.Hash)
+			}
+		}
+	})
+}
+
 func TestRecordAssetUploadSuccessPreservesDuplicateNames(t *testing.T) {
 	succMap := map[string]any{}
 	var succFiles []AssetUploadSuccess
@@ -250,6 +261,126 @@ func TestMultipartUploadContinuesAfterDuplicateMatch(t *testing.T) {
 	if len(response.Data.SuccFiles) != 2 || response.Data.SuccFiles[0].Index != 0 ||
 		response.Data.SuccFiles[1].Index != 1 {
 		t.Fatalf("unexpected successful files: %+v", response.Data.SuccFiles)
+	}
+}
+
+func TestMultipartUploadDoesNotOverwriteFilesWithTheSameAssetID(t *testing.T) {
+	assetsDir := setupAssetUploadTest(t)
+	name := "photo-20260828120000-abcdefg.png"
+	firstData := []byte("first file with an existing asset ID")
+	secondData := []byte("second file with an existing asset ID")
+	cacheAssetUploadTestFile(t, assetsDir, "first-seed.png", firstData)
+	cacheAssetUploadTestFile(t, assetsDir, "second-seed.png", secondData)
+	request := newAssetUploadTestRequest(t, []assetUploadTestFile{
+		{name: name, data: firstData},
+		{name: name, data: secondData},
+	}, nil)
+
+	response := executeAssetUploadTestRequest(t, request)
+	cleanupAssetUploadTestHashes(t, response.Data.SuccFiles)
+
+	if len(response.Data.FailedFiles) != 0 || len(response.Data.SuccFiles) != 2 {
+		t.Fatalf("unexpected upload response: %+v", response)
+	}
+	firstPath := response.Data.SuccFiles[0].Path
+	secondPath := response.Data.SuccFiles[1].Path
+	if firstPath == secondPath {
+		t.Fatalf("different files used the same asset path: %s", firstPath)
+	}
+	firstUploaded, err := os.ReadFile(filepath.Join(assetsDir, filepath.Base(firstPath)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	secondUploaded, err := os.ReadFile(filepath.Join(assetsDir, filepath.Base(secondPath)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(firstUploaded, firstData) || !bytes.Equal(secondUploaded, secondData) {
+		t.Fatalf("uploaded contents were overwritten: first=%q second=%q", firstUploaded, secondUploaded)
+	}
+}
+
+func TestMultipartUploadReusesSameContentWhenAssetIDsDiffer(t *testing.T) {
+	assetsDir := setupAssetUploadTest(t)
+	existingName := "photo-20260828120001-hijklmn.png"
+	uploadName := "photo-20260828120000-abcdefg.png"
+	data := []byte("same file with an existing asset ID")
+	cacheAssetUploadTestFile(t, assetsDir, existingName, data)
+	request := newAssetUploadTestRequest(t, []assetUploadTestFile{
+		{name: uploadName, data: data},
+		{name: uploadName, data: data},
+	}, nil)
+
+	response := executeAssetUploadTestRequest(t, request)
+
+	if len(response.Data.FailedFiles) != 0 || len(response.Data.SuccFiles) != 2 {
+		t.Fatalf("unexpected upload response: %+v", response)
+	}
+	expectedPath := "assets/" + existingName
+	if response.Data.SuccFiles[0].Path != expectedPath || response.Data.SuccFiles[1].Path != expectedPath {
+		t.Fatalf("identical files were not reused: %+v", response.Data.SuccFiles)
+	}
+	entries, err := os.ReadDir(assetsDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 1 {
+		t.Fatalf("identical files created %d assets", len(entries))
+	}
+}
+
+func TestInsertLocalAssetsDoesNotOverwriteFilesWithTheSameAssetID(t *testing.T) {
+	assetsDir := setupAssetUploadTest(t)
+	name := "photo-20260828120000-abcdefg.png"
+	firstData := []byte("first local file with an existing asset ID")
+	secondData := []byte("second local file with an existing asset ID")
+	cacheAssetUploadTestFile(t, assetsDir, "first-local-seed.png", firstData)
+	cacheAssetUploadTestFile(t, assetsDir, "second-local-seed.png", secondData)
+	firstPath := filepath.Join(t.TempDir(), name)
+	secondPath := filepath.Join(t.TempDir(), name)
+	if err := os.WriteFile(firstPath, firstData, 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(secondPath, secondData, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	_, successes, failures, err := InsertLocalAssets("", []string{firstPath, secondPath}, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cleanupAssetUploadTestHashes(t, successes)
+	if len(failures) != 0 || len(successes) != 2 {
+		t.Fatalf("unexpected local upload result: successes=%+v failures=%+v", successes, failures)
+	}
+	if successes[0].Path == successes[1].Path {
+		t.Fatalf("different local files used the same asset path: %+v", successes)
+	}
+	firstUploaded, err := os.ReadFile(filepath.Join(assetsDir, filepath.Base(successes[0].Path)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	secondUploaded, err := os.ReadFile(filepath.Join(assetsDir, filepath.Base(successes[1].Path)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(firstUploaded, firstData) || !bytes.Equal(secondUploaded, secondData) {
+		t.Fatalf("local uploaded contents were overwritten: first=%q second=%q", firstUploaded, secondUploaded)
+	}
+}
+
+func TestReadRTFDDirReturnsAnErrorForAFile(t *testing.T) {
+	filePath := filepath.Join(t.TempDir(), ".DS_Store")
+	if err := os.WriteFile(filePath, []byte("metadata"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	entries, err := readRTFDDir(filePath)
+	if err == nil {
+		t.Fatal("expected reading a file as an RTFD directory to fail")
+	}
+	if len(entries) != 0 {
+		t.Fatalf("unexpected RTFD entries: %+v", entries)
 	}
 }
 

@@ -66,18 +66,17 @@ func InsertAssetBytes(id, fileName string, data []byte) (assetPath string, creat
 		return "", false, err
 	}
 	if existAssetPath := GetAssetPathByHash(hash, bt.BoxID); existAssetPath != "" {
-		originalName := util.RemoveID(filepath.Base(existAssetPath))
-		if strings.EqualFold(fName, originalName) {
+		originalName := assetNameWithoutID(filepath.Base(existAssetPath))
+		if strings.EqualFold(assetNameWithoutID(fName), originalName) {
 			return strings.TrimPrefix(existAssetPath, "/"), false, nil
 		}
 		hash = "random_2_" + gulu.Rand.String(12)
 	}
 
-	blockID := ast.NewNodeID()
 	if IsEncryptedBox(bt.BoxID) {
-		fName = encryptedAssetName(util.Ext(fName), blockID)
+		fName = encryptedAssetName(util.Ext(fName), ast.NewNodeID())
 	} else {
-		fName = util.AssetName(fName, blockID)
+		fName = newAssetFileName(fName)
 	}
 	writePath := filepath.Join(assetsDirPath, fName)
 	if err = writeAssetFile(writePath, bytes.NewReader(data), bt.BoxID, baseName); err != nil {
@@ -115,6 +114,33 @@ func recordAssetUploadSuccess(succMap map[string]any, succFiles *[]AssetUploadSu
 
 func recordAssetUploadFailure(failedFiles *[]AssetUploadFailure, index int, name string, err error) {
 	*failedFiles = append(*failedFiles, AssetUploadFailure{Index: index, Name: name, Error: err.Error()})
+}
+
+// assetNameWithoutID 移除外部文件名携带的资源 ID，并为仅由 ID 组成的名称补充可读前缀。
+func assetNameWithoutID(name string) string {
+	ext := util.Ext(name)
+	base := strings.TrimSuffix(name, ext)
+	_, id := util.LastID(name)
+	if ast.IsNodeIDPattern(id) {
+		base = strings.TrimSuffix(base[:len(base)-len(id)], "-")
+	}
+	if base == "" || ast.IsNodeIDPattern(base) {
+		base = "asset"
+	}
+	return base + ext
+}
+
+// newAssetFileName 为新增资源生成新的资源 ID，避免外部文件名指定已有资源的写入路径。
+func newAssetFileName(name string) string {
+	return util.AssetName(assetNameWithoutID(name), ast.NewNodeID())
+}
+
+func readRTFDDir(dir string) ([]os.DirEntry, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		logging.LogErrorf("read dir [%s] failed: %s", dir, err)
+	}
+	return entries, err
 }
 
 func copyRTFDEntries(entries []os.DirEntry, srcDir, destDir string, copyFile func(string, string) error) error {
@@ -219,8 +245,8 @@ func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTML
 
 		existAssetPath := GetAssetPathByHash(hash, boxID)
 		if "" != existAssetPath {
-			originalName := util.RemoveID(filepath.Base(existAssetPath))
-			if strings.ToLower(fName) != strings.ToLower(originalName) {
+			originalName := assetNameWithoutID(filepath.Base(existAssetPath))
+			if !strings.EqualFold(assetNameWithoutID(fName), originalName) {
 				hash = "random_2_" + gulu.Rand.String(12)
 			}
 		}
@@ -229,12 +255,11 @@ func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTML
 			recordAssetUploadSuccess(succMap, &succFiles, index, baseName, strings.TrimPrefix(existAssetPath, "/"))
 			f.Close()
 		} else {
-			blockID := ast.NewNodeID()
 			if IsEncryptedBox(boxID) {
 				// 加密 box：磁盘文件名脱敏为 uuid-blockID.ext，原始名存加密映射
-				fName = encryptedAssetName(util.Ext(fName), blockID)
+				fName = encryptedAssetName(util.Ext(fName), ast.NewNodeID())
 			} else {
-				fName = util.AssetName(fName, blockID)
+				fName = newAssetFileName(fName)
 			}
 			writePath := filepath.Join(assetsDirPath, fName)
 			if _, seekErr := f.Seek(0, io.SeekStart); seekErr != nil {
@@ -382,8 +407,8 @@ func Upload(c *gin.Context) {
 
 		existAssetPath := GetAssetPathByHash(hash, uploadBoxID)
 		if "" != existAssetPath {
-			originalName := util.RemoveID(filepath.Base(existAssetPath))
-			if strings.ToLower(fName) != strings.ToLower(originalName) {
+			originalName := assetNameWithoutID(filepath.Base(existAssetPath))
+			if !strings.EqualFold(assetNameWithoutID(fName), originalName) {
 				hash = "random_2_" + gulu.Rand.String(12)
 			}
 		}
@@ -417,14 +442,14 @@ func Upload(c *gin.Context) {
 				}
 			}
 
-			if "" == lastID {
-				lastID = ast.NewNodeID()
-			}
 			if IsEncryptedBox(uploadBoxID) {
+				if "" == lastID {
+					lastID = ast.NewNodeID()
+				}
 				// 加密 box：磁盘文件名脱敏为 uuid-blockID.ext，原始名存加密映射
 				fName = encryptedAssetName(util.Ext(fName), lastID)
 			} else {
-				fName = util.AssetName(fName, lastID)
+				fName = newAssetFileName(fName)
 			}
 			writePath := filepath.Join(assetsDirPath, fName)
 			tmpDir := filepath.Join(util.TempDir, "convert", "zip", gulu.Rand.String(7))
@@ -466,7 +491,7 @@ func Upload(c *gin.Context) {
 				fName = strings.TrimSuffix(fName, ext)
 				ext = strings.ToLower(ext)
 				fName += ext
-				fName = util.AssetName(fName, ast.NewNodeID())
+				fName = newAssetFileName(fName)
 				tmpDir2 := filepath.Join(util.TempDir, "convert", "zip", gulu.Rand.String(7))
 				if err = gulu.Zip.Unzip(writePath, tmpDir2); err != nil {
 					recordFailure(index, file.Filename, fName, err)
@@ -475,9 +500,8 @@ func Upload(c *gin.Context) {
 					continue
 				}
 
-				entries, readErr := os.ReadDir(tmpDir2)
+				entries, readErr := readRTFDDir(tmpDir2)
 				if nil != readErr {
-					logging.LogErrorf("read dir [%s] failed: %s", tmpDir2, readErr)
 					recordFailure(index, file.Filename, fName, readErr)
 					_ = os.RemoveAll(tmpDir)
 					_ = os.RemoveAll(tmpDir2)
@@ -493,9 +517,8 @@ func Upload(c *gin.Context) {
 				}
 				dirName := entries[0].Name()
 				srcDir := filepath.Join(tmpDir2, dirName)
-				entries, readErr = os.ReadDir(srcDir)
+				entries, readErr = readRTFDDir(srcDir)
 				if nil != readErr {
-					logging.LogErrorf("read dir [%s] failed: %s", filepath.Join(tmpDir2, entries[0].Name()), readErr)
 					recordFailure(index, file.Filename, fName, readErr)
 					_ = os.RemoveAll(tmpDir)
 					_ = os.RemoveAll(tmpDir2)
@@ -644,7 +667,7 @@ func storeAssetForBox(boxID, assetDirPath, originalName string, data []byte) (di
 			name = "asset"
 		}
 		for {
-			diskName = util.AssetName(name+ext, ast.NewNodeID())
+			diskName = newAssetFileName(name + ext)
 			writePath = filepath.Join(assetDirPath, diskName)
 			if !filelock.IsExist(writePath) {
 				break

@@ -37,7 +37,7 @@ import {updatePanelByEditor} from "../../editor/util";
 /// #endif
 import {blockRender} from "../render/blockRender";
 /// #else
-import {uploadFiles, uploadLocalFiles} from "../upload";
+import {uploadLocalFiles} from "../upload";
 import {getLocalDropFiles, hasDataTransferFiles} from "../upload/localDropFiles";
 import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
@@ -50,6 +50,7 @@ import {isFoldedHeading, shouldUnfoldMovedHeading} from "./foldHeadingMove";
 import {webUtils} from "electron";
 import {dragUpload} from "../render/av/asset";
 /// #endif
+import {dragUploadFiles} from "../render/av/asset";
 import {addDragFill, getTypeByCellElement} from "../render/av/cell";
 import {insertGalleryItemAnimation} from "../render/av/gallery/item";
 import {clearSelect} from "./clear";
@@ -2201,32 +2202,23 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         /// #if !BROWSER
                         if (!getHostCapabilities().localFileSystem) {
                             focusBlock(hasClosestBlock(cellElement) as HTMLElement);
-                            uploadFiles(protyle, event.dataTransfer.files, undefined, undefined, undefined, {
-                                source: "drop",
-                                target: "av-cell",
-                                position: {x: event.clientX, y: event.clientY},
-                            });
+                            dragUploadFiles(event.dataTransfer.files, protyle, cellElement,
+                                {x: event.clientX, y: event.clientY});
                         } else {
                             const files = getLocalDropFiles(event.dataTransfer.files,
                                 file => webUtils.getPathForFile(file));
                             if (!files) {
                                 focusBlock(hasClosestBlock(cellElement) as HTMLElement);
-                                uploadFiles(protyle, event.dataTransfer.files, undefined, undefined, undefined, {
-                                    source: "drop",
-                                    target: "av-cell",
-                                    position: {x: event.clientX, y: event.clientY},
-                                });
+                                dragUploadFiles(event.dataTransfer.files, protyle, cellElement,
+                                    {x: event.clientX, y: event.clientY});
                             } else {
                                 dragUpload(files, protyle, cellElement, {x: event.clientX, y: event.clientY});
                             }
                         }
                         /// #else
                         focusBlock(hasClosestBlock(cellElement) as HTMLElement);
-                        uploadFiles(protyle, event.dataTransfer.files, undefined, undefined, undefined, {
-                            source: "drop",
-                            target: "av-cell",
-                            position: {x: event.clientX, y: event.clientY},
-                        });
+                        dragUploadFiles(event.dataTransfer.files, protyle, cellElement,
+                            {x: event.clientX, y: event.clientY});
                         /// #endif
                     }
                 }

@@ -820,11 +820,11 @@ ${result.sourceType === "qa" ? `<span data-type="direction" class="b3-list-item_
 <span data-type="suspend" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${result.reviewState.suspended ? window.siyuan.languages.continueReview1 : window.siyuan.languages.flashcardSuspendCard}"><svg><use xlink:href="#icon${result.reviewState.suspended ? "Play" : "Pause"}"></use></svg></span>
 <span data-type="bury" class="fn__none"></span>
 <span data-type="due" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.setDueTime}"><svg><use xlink:href="#iconCalendar"></use></svg></span>
-<span data-type="flag" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardFlag} - ${escapeAttr(flashcardFlagLabel(result.card.flag, flagDefinitions))}"${flashcardFlagStyle(result.card.flag)}><svg><use xlink:href="#iconBookmark"></use></svg></span>
+<span data-type="flag" data-menu="true" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardFlag} - ${escapeAttr(flashcardFlagLabel(result.card.flag, flagDefinitions))}"${flashcardFlagStyle(result.card.flag)}><svg><use xlink:href="#iconBookmark"></use></svg></span>
 <span data-type="history" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.dataHistory}"><svg><use xlink:href="#iconHistory"></use></svg></span>
 ${reviewSetID ? `<span data-type="exclude" class="b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconClose"></use></svg></span>` : '<span data-type="membership" class="fn__none"></span>'}
 <span data-type="reset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.reset}"><svg><use xlink:href="#iconUndo"></use></svg></span>
-<span data-type="more" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>
+<span data-type="more" data-menu="true" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>
 </li>`;
 };
 
@@ -853,7 +853,7 @@ ${editable && !deleted ? `<span data-type="editSource" class="b3-list-item__acti
 <span data-type="documentPolicy" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.doc} - ${window.siyuan.languages.flashcardScopeSettings}"><svg><use xlink:href="#iconFile"></use></svg></span>
 <span data-type="notebookPolicy" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.notebook} - ${window.siyuan.languages.flashcardScopeSettings}"><svg><use xlink:href="#iconFilesRoot"></use></svg></span>
 <span data-type="sourceLifecycle" class="b3-list-item__action${deleted ? "" : " b3-list-item__action--warning"} b3-tooltips b3-tooltips__w" aria-label="${deleted ? window.siyuan.languages.restore : window.siyuan.languages.delete}"><svg><use xlink:href="#icon${deleted ? "Undo" : "Trashcan"}"></use></svg></span>
-<span data-type="sourceMore" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>
+<span data-type="sourceMore" data-menu="true" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>
 </li>${sourceCards.map((card) => renderManagedCard(card, reviewSetID, selectedCardIDs, flagDefinitions, true)).join("")}`;
     }).join("");
 };

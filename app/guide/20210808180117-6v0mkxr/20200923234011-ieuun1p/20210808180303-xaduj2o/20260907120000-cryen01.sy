@@ -6,7 +6,7 @@
 		"id": "20260907120000-cryen01",
 		"title": "Encrypted Notebook",
 		"type": "doc",
-		"updated": "20260907120000"
+		"updated": "20260908100000"
 	},
 	"Children": [
 		{
@@ -14,13 +14,13 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00001",
-				"updated": "20260907120000"
+				"updated": "20260908100000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "What is an encrypted notebook?"
+					"Data": "Overview"
 				}
 			]
 		},
@@ -43,7 +43,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00003",
-				"updated": "20260907120000"
+				"updated": "20260908100000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-en00004",
-				"updated": "20260907120000"
+				"updated": "20260908100000"
 			},
 			"Children": [
 				{
@@ -71,7 +71,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00005",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -79,12 +79,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00006",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "The master password cannot be recovered. If you forget it, no one can recover the content."
+									"Data": "The master password cannot be recovered. If you forget it, no one can recover the content"
 								}
 							]
 						}
@@ -99,7 +99,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00007",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -107,12 +107,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00008",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "A key backup does not replace the master password. Recovery usually requires both the matching key backup and master password, so keep them separately and safely."
+									"Data": "A key backup does not replace the master password. Recovery usually requires both the matching key backup and master password, so keep them separately and safely"
 								}
 							]
 						}
@@ -127,7 +127,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00009",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -135,12 +135,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00010",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Protection is strongest while an encrypted notebook is locked. While it is unlocked, plugins, APIs, MCP tools, and AI agents authorized by the main application can read its content."
+									"Data": "Protection is strongest while an encrypted notebook is locked. While it is unlocked, plugins, APIs, MCP tools, and AI agents authorized by the main application can read its content"
 								}
 							]
 						}
@@ -153,7 +153,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00011",
-				"updated": "20260907120000"
+				"updated": "20260908100000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -210,7 +210,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-en00013",
-				"updated": "20260907120000"
+				"updated": "20260908100000"
 			},
 			"Children": [
 				{
@@ -222,7 +222,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00014",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -230,12 +230,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00015",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Export a key backup immediately after enabling the feature and keep an independent copy outside the workspace."
+									"Data": "Export a key backup immediately after enabling the feature and keep an independent copy outside the workspace"
 								}
 							]
 						}
@@ -250,7 +250,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00016",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -258,7 +258,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00017",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
@@ -287,10 +287,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "New encrypted notebook"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "."
 								}
 							]
 						}
@@ -305,7 +301,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00018",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -313,7 +309,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00019",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
@@ -342,10 +338,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "New encrypted notebook"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "."
 								}
 							]
 						}
@@ -360,7 +352,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00020",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -368,12 +360,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00021",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Enter a notebook name and the master password. The notebook opens when creation finishes."
+									"Data": "Enter a notebook name and the master password. The notebook opens when creation finishes"
 								}
 							]
 						}
@@ -386,7 +378,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00022",
-				"updated": "20260907120000"
+				"updated": "20260908100000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -402,7 +394,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-en00023",
-				"updated": "20260907120000"
+				"updated": "20260908100000"
 			},
 			"Children": [
 				{
@@ -414,7 +406,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00024",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -422,12 +414,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00025",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Click a closed encrypted notebook in the document panel and enter the master password to unlock and open it. Each encrypted notebook is unlocked separately."
+									"Data": "Click a closed encrypted notebook in the document panel and enter the master password to unlock and open it. Each encrypted notebook is unlocked separately"
 								}
 							]
 						}
@@ -442,7 +434,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00026",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -450,12 +442,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00027",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Closing an encrypted notebook locks it. Locking stops new content access and clears application-managed keys, indexes, and temporary data."
+									"Data": "Closing an encrypted notebook locks it. Locking stops new content access and clears application-managed keys, indexes, and temporary data"
 								}
 							]
 						}
@@ -470,7 +462,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00028",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -478,12 +470,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00029",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "All encrypted notebooks remain locked after the application restarts and require the master password again."
+									"Data": "All encrypted notebooks remain locked after the application restarts and require the master password again"
 								}
 							]
 						}
@@ -537,7 +529,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00031",
-				"updated": "20260907120000"
+				"updated": "20260908100000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -553,7 +545,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-en00032",
-				"updated": "20260907120000"
+				"updated": "20260908100000"
 			},
 			"Children": [
 				{
@@ -565,7 +557,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00033",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -573,12 +565,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00034",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "All encrypted notebooks share one master password, while each notebook has an independent data key. Unlocking one notebook does not unlock another."
+									"Data": "All encrypted notebooks share one master password, while each notebook has an independent data key. Unlocking one notebook does not unlock another"
 								}
 							]
 						}
@@ -593,7 +585,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00035",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -601,12 +593,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00036",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Export a fresh key backup immediately after changing the master password. The new backup retains the key information needed to recover existing history and snapshots."
+									"Data": "Export a fresh key backup immediately after changing the master password. The new backup retains the key information needed to recover existing history and snapshots"
 								}
 							]
 						}
@@ -621,7 +613,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00037",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -629,12 +621,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00038",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "If local configuration is lost, a new device needs recovery, or the interface reports that recovery is required, import the key backup and enter its matching master password. The key backup does not contain the master password."
+									"Data": "If local configuration is lost, a new device needs recovery, or the interface reports that recovery is required, import the key backup and enter its matching master password. The key backup does not contain the master password"
 								}
 							]
 						}
@@ -649,7 +641,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00039",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -657,12 +649,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00040",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "SiYuan refuses to disable encrypted notebooks while an encrypted notebook or recoverable history still depends on the current keys, preventing permanent loss of access."
+									"Data": "SiYuan refuses to disable encrypted notebooks while an encrypted notebook or recoverable history still depends on the current keys, preventing permanent loss of access"
 								}
 							]
 						}
@@ -716,7 +708,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00042",
-				"updated": "20260907120000"
+				"updated": "20260908100000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -732,7 +724,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-en00043",
-				"updated": "20260907120000"
+				"updated": "20260908100000"
 			},
 			"Children": [
 				{
@@ -744,7 +736,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00044",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -752,12 +744,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00045",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Data sync stores and transfers encrypted persistent data. An unlocked state is never synced to another device, which still requires the master password."
+									"Data": "Data sync stores and transfers encrypted persistent data. An unlocked state is never synced to another device, which still requires the master password"
 								}
 							]
 						}
@@ -772,7 +764,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00046",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -780,12 +772,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00047",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Document history and deleted-notebook recovery support encrypted data, but recovery requires the matching key backup and master password."
+									"Data": "Document history and deleted-notebook recovery support encrypted data, but recovery requires the matching key backup and master password"
 								}
 							]
 						}
@@ -800,7 +792,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00048",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -808,12 +800,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00049",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Exporting an encrypted notebook creates unencrypted files. Protect, move, or delete them as ordinary sensitive files after export."
+									"Data": "Exporting an encrypted notebook creates unencrypted files. Protect, move, or delete them as ordinary sensitive files after export"
 								}
 							]
 						}
@@ -826,7 +818,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00050",
-				"updated": "20260907120000"
+				"updated": "20260908100000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -841,7 +833,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00051",
-				"updated": "20260907120000"
+				"updated": "20260908100000"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -857,7 +849,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-en00052",
-				"updated": "20260907120000"
+				"updated": "20260908100000"
 			},
 			"Children": [
 				{
@@ -869,7 +861,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00053",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -877,12 +869,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00054",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "After unlocking, you can edit documents and use content block references, backlinks, notebook search, databases, import, history, and export within that notebook."
+									"Data": "After unlocking, you can edit documents and use content block references, backlinks, notebook search, databases, import, history, and export within that notebook"
 								}
 							]
 						}
@@ -897,7 +889,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00055",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -905,12 +897,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00056",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "While unlocked, plugins, APIs, MCP tools, and AI agents can access content in the same way as for a normal notebook."
+									"Data": "While unlocked, plugins, APIs, MCP tools, and AI agents can access content in the same way as for a normal notebook"
 								}
 							]
 						}
@@ -923,7 +915,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00057",
-				"updated": "20260907120000"
+				"updated": "20260908100000"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -939,7 +931,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-en00058",
-				"updated": "20260907120000"
+				"updated": "20260908100000"
 			},
 			"Children": [
 				{
@@ -951,7 +943,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00059",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -959,12 +951,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00060",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Encrypted content is excluded from global search and the global graph."
+									"Data": "Encrypted content is excluded from global search and the global graph"
 								}
 							]
 						}
@@ -979,7 +971,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00061",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -987,12 +979,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00062",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Content block references, moves, and database mirroring cannot cross between normal and encrypted notebooks or between two encrypted notebooks."
+									"Data": "Content block references, moves, and database mirroring cannot cross between normal and encrypted notebooks or between two encrypted notebooks"
 								}
 							]
 						}
@@ -1007,7 +999,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00063",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -1015,12 +1007,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00064",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Publishing, flashcards, bookmarks, tags, asset renaming, raw file APIs, and kernel CLI operations are not supported."
+									"Data": "Publishing, flashcards, bookmarks, tags, asset renaming, raw file APIs, and kernel CLI operations are not supported"
 								}
 							]
 						}
@@ -1033,7 +1025,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00065",
-				"updated": "20260907120000"
+				"updated": "20260908100000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -1049,7 +1041,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-en00066",
-				"updated": "20260907120000"
+				"updated": "20260908100000"
 			},
 			"Children": [
 				{
@@ -1061,7 +1053,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00067",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -1069,12 +1061,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00068",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Choose a suitable auto-lock period and close encrypted notebooks when they are not in use."
+									"Data": "Choose a suitable auto-lock period and close encrypted notebooks when they are not in use"
 								}
 							]
 						}
@@ -1089,7 +1081,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00069",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -1097,12 +1089,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00070",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Do not edit encrypted workspace files directly or rename encrypted assets in the file system."
+									"Data": "Do not edit encrypted workspace files directly or rename encrypted assets in the file system"
 								}
 							]
 						}
@@ -1117,7 +1109,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00071",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -1125,12 +1117,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00072",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "After changing the master password, moving to another device, or changing sync settings, confirm that a current key backup exists outside the workspace."
+									"Data": "After changing the master password, moving to another device, or changing sync settings, confirm that a current key backup exists outside the workspace"
 								}
 							]
 						}
@@ -1145,7 +1137,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00073",
-						"updated": "20260907120000"
+						"updated": "20260908100000"
 					},
 					"Children": [
 						{
@@ -1153,12 +1145,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00074",
-								"updated": "20260907120000"
+								"updated": "20260908100000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Do not store the master password and the only key backup in the same place."
+									"Data": "Do not store the master password and the only key backup in the same place"
 								}
 							]
 						}

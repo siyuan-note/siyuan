@@ -53,6 +53,17 @@ describe("mobile keyboard change", () => {
         assert.deepEqual(notifier.changes, [true]);
     });
 
+    it("keeps the keyboard open when a stale close arrives during reopening", () => {
+        const notifier = createNotifier();
+
+        notifier.notify(true);
+        notifier.notify(false);
+        notifier.notify(true);
+        notifier.runTimers();
+
+        assert.deepEqual(notifier.changes, [true, true]);
+    });
+
     it("restarts the close delay when another close notification arrives", () => {
         const notifier = createNotifier();
 

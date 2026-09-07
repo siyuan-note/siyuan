@@ -100,6 +100,8 @@ let renderKeyboardToolbarTimeout: number;
 let scrollSelectionIntoViewTimeout: number;
 let clearRenderGutterAfterScroll: () => void;
 let showUtil = false;
+let showUtilHeightTimeout: number | undefined;
+let showUtilTimeout: number | undefined;
 let preventRender = false;
 let preventRenderTimeout: number;
 let restoringAndroidBoundedSelection = false;
@@ -716,6 +718,8 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
 export const showKeyboardToolbarUtil = (oldScrollTop: number) => {
     window.siyuan.menus.menu.remove();
     showUtil = true;
+    clearTimeout(showUtilHeightTimeout);
+    clearTimeout(showUtilTimeout);
     const toolHeight = document.querySelector(".keyboard__bar").clientHeight;
     const toolbarElement = document.getElementById("keyboardToolbar");
     let keyboardHeight = window.innerHeight / 2 - toolHeight;
@@ -733,17 +737,27 @@ export const showKeyboardToolbarUtil = (oldScrollTop: number) => {
         editor.protyle.element.parentElement.style.paddingBottom = keyboardHeight + "px";
         editor.protyle.contentElement.scrollTop = oldScrollTop;
     }
-    setTimeout(() => {
+    showUtilHeightTimeout = window.setTimeout(() => {
+        showUtilHeightTimeout = undefined;
         toolbarElement.style.height = keyboardHeight + "px";
         updateKeyboardToolbarPosition();
     }, Constants.TIMEOUT_TRANSITION); // 防止抖动
-    setTimeout(() => {
+    showUtilTimeout = window.setTimeout(() => {
         showUtil = false;
+        showUtilTimeout = undefined;
     }, 1000);   // 防止光标改变后斜杆菜单消失
 };
 
 const hideKeyboardToolbarUtil = () => {
+    clearTimeout(showUtilHeightTimeout);
+    clearTimeout(showUtilTimeout);
+    showUtilHeightTimeout = undefined;
+    showUtilTimeout = undefined;
+    showUtil = false;
     const toolbarElement = document.getElementById("keyboardToolbar");
+    if (!toolbarElement) {
+        return;
+    }
     toolbarElement.style.height = "";
     updateKeyboardToolbarPosition();
     const editor = getCurrentEditor();
@@ -753,6 +767,14 @@ const hideKeyboardToolbarUtil = () => {
     toolbarElement.querySelector('.keyboard__action[data-type="add"]').classList.remove("protyle-toolbar__item--current");
     toolbarElement.querySelector('.keyboard__action[data-type="text"]').classList.remove("protyle-toolbar__item--current");
     toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconKeyboardHide");
+};
+
+export const hideKeyboardToolbarUtilOnEditorClick = () => {
+    const toolbarElement = document.getElementById("keyboardToolbar");
+    if (!showUtil && (!toolbarElement || toolbarElement.clientHeight <= 100)) {
+        return;
+    }
+    hideKeyboardToolbarUtil();
 };
 
 const renderKeyboardToolbar = () => {
@@ -872,23 +894,22 @@ export const showKeyboardToolbar = () => {
     }
     const toolbarElement = document.getElementById("keyboardToolbar");
     const selection = getSelection();
+    // 空块恢复焦点时 Selection 可能暂时为空，但原生键盘已经显示，仍需隐藏普通底栏。
+    notifyMobileKeyboardChange(true);
     if (selection.rangeCount > 0 && (
         hasClosestByClassName(selection.getRangeAt(0).startContainer, "protyle-lite-fragment", true) ||
         hasClosestByClassName(selection.getRangeAt(0).startContainer, "agent-chat__composer-host", true))) {
         // Lite 编辑器使用自己的工具栏，不能显示会作用于下层文档的移动端编辑工具栏。
-        notifyMobileKeyboardChange(true);
         toolbarElement.classList.add("fn__none");
         return;
     }
     if (!toolbarElement.classList.contains("fn__none")) {
-        notifyMobileKeyboardChange(true);
         return;
     }
     if (selection.rangeCount === 0) {
         return;
     }
     toolbarElement.classList.remove("fn__none");
-    notifyMobileKeyboardChange(true);
     toolbarElement.style.zIndex = (++window.siyuan.zIndex).toString();
     updateKeyboardToolbarPosition();
     const modelElement = document.getElementById("model");

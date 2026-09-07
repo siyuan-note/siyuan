@@ -155,7 +155,7 @@ interface IFlashcardTag {
 interface IFlashcardPreset {
     id: string;
     name: string;
-    schedulerVersion: "fsrs-6";
+    schedulerVersion: "go-fsrs-v3.3.1-fsrs6";
     requestRetention: number;
     maximumInterval: number;
     weights: number[];
@@ -665,7 +665,7 @@ const openFlashcardV2PresetEditor = (revision: IFlashcardEntityRevision<IFlashca
         const payload: IFlashcardPreset = {
             id: entityID,
             name,
-            schedulerVersion: "fsrs-6",
+            schedulerVersion: "go-fsrs-v3.3.1-fsrs6",
             requestRetention,
             maximumInterval,
             weights,

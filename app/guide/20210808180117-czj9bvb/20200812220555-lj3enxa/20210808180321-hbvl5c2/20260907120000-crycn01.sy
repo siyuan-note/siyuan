@@ -6,7 +6,7 @@
 		"id": "20260907120000-crycn01",
 		"title": "加密笔记本",
 		"type": "doc",
-		"updated": "20260908120000"
+		"updated": "20260908130000"
 	},
 	"Children": [
 		{
@@ -1053,13 +1053,13 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-cn00057",
-				"updated": "20260908100000"
+				"updated": "20260908130000"
 			},
 			"HeadingLevel": 3,
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "暂不支持的功能"
+					"Data": "不支持的功能"
 				}
 			]
 		},

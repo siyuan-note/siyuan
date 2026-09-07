@@ -6,7 +6,7 @@
 		"id": "20260907120000-crytw01",
 		"title": "加密筆記本",
 		"type": "doc",
-		"updated": "20260908120000"
+		"updated": "20260908130000"
 	},
 	"Children": [
 		{
@@ -1053,13 +1053,13 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-tw00057",
-				"updated": "20260908100000"
+				"updated": "20260908130000"
 			},
 			"HeadingLevel": 3,
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "暫不支援的功能"
+					"Data": "不支援的功能"
 				}
 			]
 		},

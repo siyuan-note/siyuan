@@ -2239,6 +2239,7 @@ export const openFlashcardV2ReviewSets = (app: App) => {
             };
             dialog.element.addEventListener("click", (event) => {
                 let target = event.target as HTMLElement;
+                const actionTarget = target.closest("[data-type]");
                 while (target && target !== dialog.element) {
                     const type = target.getAttribute("data-type");
                     if (type === "create") {
@@ -2286,7 +2287,7 @@ export const openFlashcardV2ReviewSets = (app: App) => {
                         }, undefined, true);
                         return;
                     }
-                    if (!type && item) {
+                    if (!type && item && !actionTarget) {
                         openFlashcardV2ReviewSetCards(item.dataset.id, item.querySelector(".b3-list-item__text").textContent);
                         return;
                     }

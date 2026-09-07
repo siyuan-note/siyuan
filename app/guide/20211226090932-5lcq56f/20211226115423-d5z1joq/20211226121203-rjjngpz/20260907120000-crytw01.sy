@@ -6,7 +6,7 @@
 		"id": "20260907120000-crytw01",
 		"title": "加密筆記本",
 		"type": "doc",
-		"updated": "20260908130000"
+		"updated": "20260908150000"
 	},
 	"Children": [
 		{
@@ -43,7 +43,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260908120000-twuse01",
-				"updated": "20260908120000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260908120000-twuse02",
-				"updated": "20260908120000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -147,6 +147,34 @@
 					]
 				},
 				{
+					"ID": "20260908150000-twrev01",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-twrev01",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-twrev02",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-twrev02",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "裝置與備份防護：在裝置遺失、遭竊或備份媒體外洩時，降低他人直接讀取鎖定筆記本內容的風險"
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20260908120000-twuse09",
 					"Type": "NodeListItem",
 					"ListData": {
@@ -181,7 +209,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-tw00003",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -197,7 +225,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-tw00004",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -283,6 +311,90 @@
 							]
 						}
 					]
+				},
+				{
+					"ID": "20260908150000-twrev03",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-twrev03",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-twrev04",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-twrev04",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密主要保護磁碟上的持久化內容，並在鎖定後阻止透過受支援入口存取內容；筆記本名稱、目錄結構、檔案數量和大小、修改時間、資料文件副檔名等中繼資料仍可能可見"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-twrev05",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-twrev05",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-twrev06",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-twrev06",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "鎖定只會盡力清理應用程式可控制的明文快取和暫存檔案，不保證抹除作業系統交換區、休眠檔案、當機傾印或儲存快照中的瞬時副本；主動導出的檔案、剪貼簿、螢幕截圖和列印內容需要自行保護"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-twrev07",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-twrev07",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-twrev08",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-twrev08",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "主密碼派生通常需要約 1 秒，解鎖時還會重建專用索引，大型筆記本可能需要更久；上傳大型資料文件會占用更多記憶體，瀏覽資料文件時每次請求都需要重新解密"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -291,7 +403,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-tw00011",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -306,7 +418,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260907120000-tw00012",
-				"updated": "20260907120000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -338,7 +450,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，開啟「啟用加密筆記本」，設定並確認主密碼，然後確認風險提示。建議使用密碼管理器產生並儲存高強度密碼。"
+					"Data": "，開啟「啟用加密筆記本」，設定並確認主密碼，然後確認風險提示。建議使用密碼管理器產生並儲存至少 12 位且混合大小寫字母、數字和符號的高強度密碼。"
 				}
 			]
 		},
@@ -516,7 +628,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-tw00022",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -532,7 +644,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-tw00023",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -572,7 +684,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-tw00026",
-						"updated": "20260908100000"
+						"updated": "20260908150000"
 					},
 					"Children": [
 						{
@@ -580,12 +692,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-tw00027",
-								"updated": "20260908100000"
+								"updated": "20260908150000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "關閉加密筆記本即鎖定。鎖定會停止新的內容存取，並清理應用程式管理的金鑰、索引和暫存資料"
+									"Data": "關閉加密筆記本即鎖定。關閉前會先儲存尚未寫入的編輯和檔案歷史；鎖定會停止新的內容存取，等待或取消進行中的任務，撤銷應用程式管理的金鑰存取並關閉資料庫連線，並盡力清理應用程式管理的明文快取、暫存檔案和存取權杖"
 								}
 							]
 						}
@@ -626,7 +738,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260907120000-tw00030",
-				"updated": "20260907120000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -658,7 +770,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中設定自動鎖定的閒置分鐘數。瀏覽、編輯或搜尋加密內容會重設計時；設定為 0 表示停用自動鎖定。"
+					"Data": " 中設定自動鎖定的閒置分鐘數。目前工作空間中的介面操作會重新整理所有已解鎖加密筆記本的計時，背景同步、索引等任務不會自動重新整理；設定為 0 表示停用自動鎖定。"
 				}
 			]
 		},
@@ -667,7 +779,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-tw00031",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -683,7 +795,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-tw00032",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -723,7 +835,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-tw00035",
-						"updated": "20260908100000"
+						"updated": "20260908150000"
 					},
 					"Children": [
 						{
@@ -731,12 +843,40 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-tw00036",
-								"updated": "20260908100000"
+								"updated": "20260908150000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "修改主密碼後應立即導出最新的金鑰備份。新備份會保留復原現有歷史和快照所需的金鑰資訊"
+									"Data": "修改主密碼前必須關閉所有加密筆記本。修改操作只會重新保護各筆記本的資料金鑰，不會重新加密文檔內容；完成後系統會自動更新工作空間中的金鑰備份，還應立即導出新的金鑰備份"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-twrev09",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-twrev09",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-twrev10",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-twrev10",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果舊主密碼和保留舊版金鑰資訊的同步副本、備份或歷史快照同時外洩，舊主密碼仍可能解密使用同一資料金鑰的現有內容。懷疑舊主密碼外洩時，應將內容導出為明文後導入使用新資料金鑰的新加密筆記本，並在確認遷移成功後安全刪除明文檔案"
 								}
 							]
 						}
@@ -765,6 +905,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "本機設定遺失、新裝置需要復原或介面提示設定需要復原時，導入金鑰備份並輸入與其相符的主密碼。金鑰備份本身不包含主密碼"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-twrev11",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-twrev11",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-twrev12",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-twrev12",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "系統可以驗證金鑰備份是否完整，但不能判斷哪個備份最新。應在工作空間之外保留帶有版本記錄的獨立金鑰備份"
 								}
 							]
 						}
@@ -846,13 +1014,13 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-tw00042",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "同步、歷史和導出"
+					"Data": "同步、歷史、導入和導出"
 				}
 			]
 		},
@@ -862,7 +1030,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-tw00043",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -874,7 +1042,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-tw00044",
-						"updated": "20260908100000"
+						"updated": "20260908150000"
 					},
 					"Children": [
 						{
@@ -882,12 +1050,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-tw00045",
-								"updated": "20260908100000"
+								"updated": "20260908150000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "資料同步儲存和傳輸加密後的持久化資料；筆記本的解鎖狀態不會同步到其他裝置。新裝置仍需使用主密碼解鎖"
+									"Data": "資料同步儲存和傳輸加密後的持久化資料，並同步金鑰備份；新裝置會自動復原啟用狀態，但解鎖狀態不會同步，仍需輸入主密碼"
 								}
 							]
 						}
@@ -915,7 +1083,35 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "文檔歷史和已刪除筆記本的復原支援加密資料，但復原時必須保留相符的金鑰備份和主密碼"
+									"Data": "文檔歷史支援加密資料，檢視或回復時需要先解鎖對應筆記本；復原已刪除筆記本還需要相符的金鑰備份和主密碼"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-twrev13",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-twrev13",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-twrev14",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-twrev14",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "支援向已解鎖的加密筆記本導入 .sy.zip 和 Markdown，內容會在寫入磁碟前加密"
 								}
 							]
 						}
@@ -930,7 +1126,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-tw00048",
-						"updated": "20260908100000"
+						"updated": "20260908150000"
 					},
 					"Children": [
 						{
@@ -938,12 +1134,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-tw00049",
-								"updated": "20260908100000"
+								"updated": "20260908150000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "導出加密筆記本會產生未加密檔案。導出完成後，應按一般敏感檔案保護、移動或刪除這些檔案"
+									"Data": "僅在解鎖狀態下支援導出，導出的 .sy.zip、HTML、Word、PDF 和 Markdown 等檔案均為明文；導出後應按一般敏感檔案保護、移動或刪除"
 								}
 							]
 						}
@@ -956,7 +1152,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-tw00050",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -971,7 +1167,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-tw00051",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -987,7 +1183,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-tw00052",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -1027,7 +1223,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-tw00055",
-						"updated": "20260908100000"
+						"updated": "20260908150000"
 					},
 					"Children": [
 						{
@@ -1035,12 +1231,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-tw00056",
-								"updated": "20260908100000"
+								"updated": "20260908150000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "解鎖期間，插件、API、MCP 工具和 AI 智能體可像處理一般筆記本一樣存取內容"
+									"Data": "解鎖期間，插件、API、MCP 工具和 AI 智能體可以讀取內容區塊、列出文檔並使用筆記本內全文搜尋"
 								}
 							]
 						}
@@ -1053,7 +1249,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-tw00057",
-				"updated": "20260908130000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -1069,7 +1265,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-tw00058",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -1081,7 +1277,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-tw00059",
-						"updated": "20260908100000"
+						"updated": "20260908150000"
 					},
 					"Children": [
 						{
@@ -1089,12 +1285,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-tw00060",
-								"updated": "20260908100000"
+								"updated": "20260908150000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "加密內容不進入全域搜尋和全域關係圖"
+									"Data": "加密內容不進入全局搜尋、全局關係圖、語意搜尋和嵌入向量化"
 								}
 							]
 						}
@@ -1122,7 +1318,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "不支援跨一般筆記本與加密筆記本邊界，或跨兩個加密筆記本進行內容區塊引用、移動和資料庫鏡像"
+									"Data": "不支援跨一般筆記本與加密筆記本邊界，或跨兩個加密筆記本進行內容區塊引用、移動、文檔轉標題和資料庫鏡像"
 								}
 							]
 						}
@@ -1150,7 +1346,35 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "不支援發布、閃卡、書籤、標籤、資料文件重新命名、原始檔案 API 和內核命令列操作"
+									"Data": "發布服務無論筆記本是否解鎖都無法列出或讀取其內容，發布密碼和可見性設定也無法為其啟用發布；此外不支援閃卡、書籤、標籤、資料文件重新命名、原始檔案 API、WebDAV 和內核命令列操作"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-twrev15",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-twrev15",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-twrev16",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-twrev16",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密筆記本不參與全局未引用資料文件和未引用資料庫清理"
 								}
 							]
 						}
@@ -1163,7 +1387,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-tw00065",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -1179,7 +1403,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-tw00066",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -1247,7 +1471,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-tw00071",
-						"updated": "20260908100000"
+						"updated": "20260908150000"
 					},
 					"Children": [
 						{
@@ -1255,12 +1479,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-tw00072",
-								"updated": "20260908100000"
+								"updated": "20260908150000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "修改主密碼、遷移裝置或調整同步設定後，確認工作空間之外儲存有最新的金鑰備份"
+									"Data": "修改主密碼、遷移裝置或調整同步設定後，確認工作空間之外儲存有帶版本記錄的最新金鑰備份"
 								}
 							]
 						}
@@ -1289,6 +1513,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "不要把主密碼和唯一一份金鑰備份儲存在同一個位置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-twrev17",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-twrev17",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-twrev18",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-twrev18",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "非敏感內容建議儲存在一般筆記本中，避免不必要的加解密、索引重建和資料文件處理開銷"
 								}
 							]
 						}

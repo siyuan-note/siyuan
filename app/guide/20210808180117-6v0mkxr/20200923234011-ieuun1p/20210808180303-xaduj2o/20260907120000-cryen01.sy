@@ -6,7 +6,7 @@
 		"id": "20260907120000-cryen01",
 		"title": "Encrypted Notebook",
 		"type": "doc",
-		"updated": "20260908120000"
+		"updated": "20260908150000"
 	},
 	"Children": [
 		{
@@ -43,7 +43,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260908120000-enuse01",
-				"updated": "20260908120000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260908120000-enuse02",
-				"updated": "20260908120000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -147,6 +147,34 @@
 					]
 				},
 				{
+					"ID": "20260908150000-enrev01",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-enrev01",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-enrev02",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-enrev02",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Device and backup protection: Reduce the risk of someone directly reading locked notebook content if a device is lost or stolen or backup media is exposed"
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20260908120000-enuse09",
 					"Type": "NodeListItem",
 					"ListData": {
@@ -181,7 +209,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00003",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -197,7 +225,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-en00004",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -283,6 +311,90 @@
 							]
 						}
 					]
+				},
+				{
+					"ID": "20260908150000-enrev03",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-enrev03",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-enrev04",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-enrev04",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Encryption mainly protects persistent content on disk and blocks access through supported entry points after locking; metadata such as the notebook name, directory structure, file count and sizes, modification times, and asset extensions may remain visible"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-enrev05",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-enrev05",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-enrev06",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-enrev06",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Locking cleans application-controlled plaintext caches and temporary files on a best-effort basis and does not guarantee erasure of transient copies in OS swap, hibernation files, crash dumps, or storage snapshots; protect files you export, clipboard content, screenshots, and printouts yourself"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-enrev07",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-enrev07",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-enrev08",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-enrev08",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Master-password derivation usually takes about one second, and unlocking also rebuilds dedicated indexes, so large notebooks may take longer; uploading large assets uses more memory, and every request to view an asset requires decryption"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -291,7 +403,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00011",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -306,7 +418,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260907120000-en00012",
-				"updated": "20260907120000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -338,7 +450,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", turn on Enable encrypted notebook, set and confirm the master password, and acknowledge the risk notice. A password manager is recommended for generating and storing a strong password."
+					"Data": ", turn on Enable encrypted notebook, set and confirm the master password, and acknowledge the risk notice. Use a password manager to generate and store a strong password of at least 12 characters with uppercase and lowercase letters, digits, and symbols."
 				}
 			]
 		},
@@ -516,7 +628,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00022",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -532,7 +644,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-en00023",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -572,7 +684,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00026",
-						"updated": "20260908100000"
+						"updated": "20260908150000"
 					},
 					"Children": [
 						{
@@ -580,12 +692,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00027",
-								"updated": "20260908100000"
+								"updated": "20260908150000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Closing an encrypted notebook locks it. Locking stops new content access and clears application-managed keys, indexes, and temporary data"
+									"Data": "Closing an encrypted notebook locks it. SiYuan first saves unwritten edits and file history; locking then stops new content access, waits for or cancels in-flight work, revokes application-managed key access, closes database connections, and cleans application-managed plaintext caches, temporary files, and access tokens on a best-effort basis"
 								}
 							]
 						}
@@ -626,7 +738,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260907120000-en00030",
-				"updated": "20260907120000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -658,7 +770,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". Viewing, editing, or searching encrypted content resets the timer; 0 disables auto-lock."
+					"Data": ". User interface activity in the current workspace refreshes the timer for every unlocked encrypted notebook; background synchronization, indexing, and other tasks do not. Set it to 0 to disable auto-lock."
 				}
 			]
 		},
@@ -667,7 +779,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00031",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -683,7 +795,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-en00032",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -723,7 +835,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00035",
-						"updated": "20260908100000"
+						"updated": "20260908150000"
 					},
 					"Children": [
 						{
@@ -731,12 +843,40 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00036",
-								"updated": "20260908100000"
+								"updated": "20260908150000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Export a fresh key backup immediately after changing the master password. The new backup retains the key information needed to recover existing history and snapshots"
+									"Data": "Close every encrypted notebook before changing the master password. The change only re-protects each notebook's data key and does not re-encrypt document content; after it completes, SiYuan refreshes the key backup in the workspace automatically, and you should export a new key backup immediately"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-enrev09",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-enrev09",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-enrev10",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-enrev10",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If an old master password is exposed together with a synced copy, backup, or historical snapshot that retains old key information, the old password may still decrypt current content that uses the same data key. If you suspect that an old password was exposed, export the content as plaintext, import it into a new encrypted notebook with a new data key, and securely delete the plaintext files after confirming the migration"
 								}
 							]
 						}
@@ -765,6 +905,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "If local configuration is lost, a new device needs recovery, or the interface reports that recovery is required, import the key backup and enter its matching master password. The key backup does not contain the master password"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-enrev11",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-enrev11",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-enrev12",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-enrev12",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "SiYuan can verify the integrity of a key backup but cannot determine which backup is newest. Keep an independent, versioned key backup outside the workspace"
 								}
 							]
 						}
@@ -846,13 +1014,13 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00042",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Sync, history, and export"
+					"Data": "Sync, history, import, and export"
 				}
 			]
 		},
@@ -862,7 +1030,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-en00043",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -874,7 +1042,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00044",
-						"updated": "20260908100000"
+						"updated": "20260908150000"
 					},
 					"Children": [
 						{
@@ -882,12 +1050,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00045",
-								"updated": "20260908100000"
+								"updated": "20260908150000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Data sync stores and transfers encrypted persistent data. An unlocked state is never synced to another device, which still requires the master password"
+									"Data": "Data sync stores and transfers encrypted persistent data and syncs the key backup; a new device restores the enabled state automatically, but the unlocked state is never synced and the master password is still required"
 								}
 							]
 						}
@@ -915,7 +1083,35 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Document history and deleted-notebook recovery support encrypted data, but recovery requires the matching key backup and master password"
+									"Data": "Document history supports encrypted data, and the corresponding notebook must be unlocked before viewing or rolling it back; restoring a deleted notebook also requires the matching key backup and master password"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-enrev13",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-enrev13",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-enrev14",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-enrev14",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "You can import .sy.zip and Markdown into an unlocked encrypted notebook; SiYuan encrypts the content before writing it to disk"
 								}
 							]
 						}
@@ -930,7 +1126,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00048",
-						"updated": "20260908100000"
+						"updated": "20260908150000"
 					},
 					"Children": [
 						{
@@ -938,12 +1134,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00049",
-								"updated": "20260908100000"
+								"updated": "20260908150000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Exporting an encrypted notebook creates unencrypted files. Protect, move, or delete them as ordinary sensitive files after export"
+									"Data": "Export is available only while the notebook is unlocked, and exported .sy.zip, HTML, Word, PDF, Markdown, and other files are plaintext; protect, move, or delete them as ordinary sensitive files after export"
 								}
 							]
 						}
@@ -956,7 +1152,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00050",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -971,7 +1167,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00051",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -987,7 +1183,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-en00052",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -1027,7 +1223,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00055",
-						"updated": "20260908100000"
+						"updated": "20260908150000"
 					},
 					"Children": [
 						{
@@ -1035,12 +1231,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00056",
-								"updated": "20260908100000"
+								"updated": "20260908150000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "While unlocked, plugins, APIs, MCP tools, and AI agents can access content in the same way as for a normal notebook"
+									"Data": "While unlocked, plugins, APIs, MCP tools, and AI agents can read content blocks, list documents, and use in-notebook full-text search"
 								}
 							]
 						}
@@ -1053,7 +1249,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00057",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -1069,7 +1265,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-en00058",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -1081,7 +1277,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00059",
-						"updated": "20260908100000"
+						"updated": "20260908150000"
 					},
 					"Children": [
 						{
@@ -1089,12 +1285,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00060",
-								"updated": "20260908100000"
+								"updated": "20260908150000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Encrypted content is excluded from global search and the global graph"
+									"Data": "Encrypted content is excluded from global search, the global graph, semantic search, and embedding vectorization"
 								}
 							]
 						}
@@ -1122,7 +1318,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Content block references, moves, and database mirroring cannot cross between normal and encrypted notebooks or between two encrypted notebooks"
+									"Data": "Content block references, moves, document-to-heading conversion, and database mirroring cannot cross between normal and encrypted notebooks or between two encrypted notebooks"
 								}
 							]
 						}
@@ -1150,7 +1346,35 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Publishing, flashcards, bookmarks, tags, asset renaming, raw file APIs, and kernel CLI operations are not supported"
+									"Data": "The publish service cannot list or read encrypted content whether the notebook is locked or unlocked, and publish passwords or visibility settings cannot enable it; flashcards, bookmarks, tags, asset renaming, raw file APIs, WebDAV, and kernel CLI operations are also unsupported"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-enrev15",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-enrev15",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-enrev16",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-enrev16",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Encrypted notebooks are excluded from global unused-asset and unused-database cleanup"
 								}
 							]
 						}
@@ -1163,7 +1387,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00065",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -1179,7 +1403,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-en00066",
-				"updated": "20260908100000"
+				"updated": "20260908150000"
 			},
 			"Children": [
 				{
@@ -1247,7 +1471,7 @@
 					},
 					"Properties": {
 						"id": "20260907120000-en00071",
-						"updated": "20260908100000"
+						"updated": "20260908150000"
 					},
 					"Children": [
 						{
@@ -1255,12 +1479,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260907120000-en00072",
-								"updated": "20260908100000"
+								"updated": "20260908150000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "After changing the master password, moving to another device, or changing sync settings, confirm that a current key backup exists outside the workspace"
+									"Data": "After changing the master password, moving to another device, or changing sync settings, confirm that a current, versioned key backup exists outside the workspace"
 								}
 							]
 						}
@@ -1289,6 +1513,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "Do not store the master password and the only key backup in the same place"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-enrev17",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-enrev17",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-enrev18",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-enrev18",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Store non-sensitive content in normal notebooks to avoid unnecessary encryption, decryption, index rebuilding, and asset-processing overhead"
 								}
 							]
 						}

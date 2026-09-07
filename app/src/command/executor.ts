@@ -3,6 +3,7 @@ import {captureCommandContext} from "./context";
 import {ensureNativeCommands, getNativeCommandId} from "./nativeCommands";
 import {executeLegacyNativeCommand} from "./nativeRuntime";
 import {getCommandRegistry} from "./service";
+import {ensureContextCommands} from "./contextCommands";
 import type {ICommandContextSnapshot, TCommandSource} from "./types";
 
 interface IExecByCommandOptions {
@@ -17,6 +18,7 @@ interface IExecByCommandOptions {
 
 export const ensureCommandSystem = (app: App) => {
     ensureNativeCommands(app, executeLegacyNativeCommand);
+    ensureContextCommands(app);
     return getCommandRegistry(app);
 };
 

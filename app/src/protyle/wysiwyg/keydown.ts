@@ -66,7 +66,6 @@ import {clearTableCell, fixTable, isIncludeCell} from "../util/table";
 import {
     transaction,
     insertEmptyBlockquote,
-    turnEmptyParagraphsIntoTransaction,
     turnsIntoGroupsTransaction,
     turnsIntoOneTransaction,
     turnsIntoTransaction,
@@ -75,6 +74,7 @@ import {
     updateTransaction
 } from "./transaction";
 import {isEmptyParagraph} from "./emptyTextBlock";
+import {turnParagraphIntoCode} from "./turnIntoCode";
 import {getBlockquoteContext, shouldCancelBlockquote} from "./blockquote";
 import {fontEvent} from "../toolbar/Font";
 import {applyTableCellStyleHotkey} from "../toolbar/tableCell";
@@ -112,7 +112,6 @@ import {fetchPost} from "../../util/fetch";
 import {scrollCenter} from "../../util/highlightById";
 import {BlockPanel} from "../../block/Panel";
 import * as dayjs from "dayjs";
-import {highlightRender} from "../render/highlightRender";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {moveToDown, moveToUp} from "./move";
 import {beforePaste, pasteAsPlainText} from "../util/paste";
@@ -2115,26 +2114,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey(window.siyuan.config.keymap.editor.insert.code.custom, event) &&
             !["NodeCodeBlock", "NodeHeading", "NodeTable"].includes(nodeType) &&
             !isInEmbedBlock(nodeElement)) {
-            if (isEmptyParagraph(nodeElement)) {
-                turnEmptyParagraphsIntoTransaction({
-                    protyle,
-                    nodeElements: [nodeElement],
-                    type: "code",
-                });
-                event.preventDefault();
-                event.stopPropagation();
-                return true;
-            }
-            const editElement = getContenteditableElement(nodeElement);
-            if (editElement) {
-                const html = nodeElement.outerHTML;
-                // 需要 EscapeHTMLStr https://github.com/siyuan-note/siyuan/issues/11451
-                editElement.innerHTML = "```" + window.siyuan.storage[Constants.LOCAL_CODELANG] + "\n" + Lute.EscapeHTMLStr(editElement.textContent) + "<wbr>\n```";
-                nodeElement.insertAdjacentHTML("afterend", protyle.lute.SpinBlockDOM(nodeElement.outerHTML));
-                const newNodeElement = nodeElement.nextElementSibling;
-                nodeElement.remove();
-                updateTransaction(protyle, newNodeElement, html);
-                highlightRender(newNodeElement);
+            if (turnParagraphIntoCode(protyle, nodeElement)) {
                 event.preventDefault();
                 event.stopPropagation();
                 return true;

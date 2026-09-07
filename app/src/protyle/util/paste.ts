@@ -209,9 +209,12 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
     return text;
 };
 
-export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
+export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element, prepareInsertion?: () => boolean) => {
     try {
         let clipText = await readText() || "";
+        if (prepareInsertion && !prepareInsertion()) {
+            return;
+        }
         // 删掉 <span data-type\="text".*>text</span> 标签，只保留文本
         clipText = clipText.replace(/<span data-type="text".*?>(.*?)<\/span>/g, "$1");
 
@@ -250,11 +253,14 @@ export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
     }
 };
 
-export const pasteAsPlainText = async (protyle: IProtyle) => {
+export const pasteAsPlainText = async (protyle: IProtyle, prepareInsertion?: () => boolean) => {
     let localFiles: ILocalFiles[] = [];
     /// #if !BROWSER
     localFiles = await getLocalFiles();
     if (localFiles.length > 0) {
+        if (prepareInsertion && !prepareInsertion()) {
+            return;
+        }
         uploadLocalFiles(localFiles, protyle, false);
         return;
     }
@@ -262,6 +268,9 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
     if (localFiles.length === 0) {
         // Inline-level elements support pasted as plain text https://github.com/siyuan-note/siyuan/issues/8010
         let textPlain = await readText() || "";
+        if (prepareInsertion && !prepareInsertion()) {
+            return;
+        }
         if (getSelection().rangeCount > 0) {
             const range = getSelection().getRangeAt(0);
             if (hasClosestByAttribute(range.startContainer, "data-type", "code") || hasClosestByClassName(range.startContainer, "hljs")) {

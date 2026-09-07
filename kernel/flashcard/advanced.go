@@ -729,10 +729,11 @@ func validateAdvancedClozeGroups(blockIDs []string, groups []AdvancedClozeGroup)
 	assigned := make(map[string]struct{}, len(blockIDs))
 	groupIDs := map[string]struct{}{}
 	orders := map[int]struct{}{}
+	hasOcclusionGroups := false
 	for _, group := range groups {
 		if strings.TrimSpace(group.ID) == "" || group.DisplayOrder < 0 ||
-			(len(group.BlockIDs) == 0) == (len(group.OcclusionIDs) == 0) {
-			return errors.New("advanced cloze group identity, order and blocks are required")
+			(len(group.BlockIDs) != 0 && len(group.OcclusionIDs) != 0) {
+			return errors.New("advanced cloze group identity and order are required")
 		}
 		if _, duplicate := groupIDs[group.ID]; duplicate {
 			return fmt.Errorf("duplicate advanced cloze group [%s]", group.ID)
@@ -743,6 +744,7 @@ func validateAdvancedClozeGroups(blockIDs []string, groups []AdvancedClozeGroup)
 		groupIDs[group.ID] = struct{}{}
 		orders[group.DisplayOrder] = struct{}{}
 		if len(group.OcclusionIDs) != 0 {
+			hasOcclusionGroups = true
 			if err := validateUniqueStrings("advanced cloze group occlusion IDs", group.OcclusionIDs, false); err != nil {
 				return err
 			}
@@ -760,7 +762,7 @@ func validateAdvancedClozeGroups(blockIDs []string, groups []AdvancedClozeGroup)
 			assigned[blockID] = struct{}{}
 		}
 	}
-	if len(groups) != 0 && len(groups[0].OcclusionIDs) != 0 {
+	if hasOcclusionGroups {
 		return nil
 	}
 	for _, blockID := range blockIDs {
@@ -806,7 +808,7 @@ func validateAdvancedInlineOcclusions(blockIDs []string, occlusions []AdvancedIn
 	}
 	assigned := map[string]struct{}{}
 	for _, group := range groups {
-		if len(group.BlockIDs) != 0 || len(group.OcclusionIDs) == 0 {
+		if len(group.BlockIDs) != 0 {
 			return errors.New("inline cloze groups must reference occlusion IDs")
 		}
 		for _, occlusionID := range group.OcclusionIDs {

@@ -592,11 +592,6 @@ func (config *ClozeGenerationConfig) validate() error {
 		occlusionIDs[occlusion.ID] = struct{}{}
 		occlusionOrders[occlusion.DisplayOrder] = struct{}{}
 	}
-	for groupID := range groupIDs {
-		if groupUse[groupID] == 0 {
-			return fmt.Errorf("cloze group [%s] has no occlusions", groupID)
-		}
-	}
 	variantIDs := map[string]struct{}{}
 	for _, variant := range config.Variants {
 		if strings.TrimSpace(variant.ID) == "" || len(variant.GroupIDs) == 0 {
@@ -615,6 +610,9 @@ func (config *ClozeGenerationConfig) validate() error {
 			if _, found := groupIDs[groupID]; !found {
 				return fmt.Errorf("cloze variant references unknown group [%s]", groupID)
 			}
+			if groupUse[groupID] == 0 {
+				return fmt.Errorf("cloze variant references empty group [%s]", groupID)
+			}
 		}
 		variantIDs[variant.ID] = struct{}{}
 	}
@@ -632,6 +630,9 @@ func enumerateClozeVariants(config ClozeGenerationConfig) ([]GeneratedVariant, e
 		})
 		ret := make([]GeneratedVariant, 0, len(groups))
 		for _, group := range groups {
+			if groupUseCount(config.Occlusions, group.ID) == 0 {
+				continue
+			}
 			data, err := CanonicalJSON(map[string]any{"groupIDs": []string{group.ID}, "mode": "hideGroups"})
 			if err != nil {
 				return nil, err
@@ -653,6 +654,18 @@ func enumerateClozeVariants(config ClozeGenerationConfig) ([]GeneratedVariant, e
 		ret = append(ret, GeneratedVariant{Key: "variant:" + variant.ID, Data: data})
 	}
 	return ret, nil
+}
+
+func groupUseCount(occlusions []ClozeOcclusion, groupID string) int {
+	ret := 0
+	for _, occlusion := range occlusions {
+		for _, assignedGroupID := range occlusion.GroupIDs {
+			if assignedGroupID == groupID {
+				ret++
+			}
+		}
+	}
+	return ret
 }
 
 func (config *OrderedGenerationConfig) validate() error {

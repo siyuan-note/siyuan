@@ -375,6 +375,65 @@ func TestCreateAdvancedSourceSupportsMultipleInlineOcclusionsInOneBlock(t *testi
 	}
 }
 
+func TestUpdateAdvancedSourcePreservesEmptyInlineClozeGroup(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	applyGenerationEntities(t, ctx, store, "advanced-empty-group-preset", 1,
+		testSchedulerPreset(legacyPresetID, false, false))
+	request := AdvancedSourceRequest{OperationID: "advanced-empty-group-create", SourceID: "source-empty-group",
+		Mode: AdvancedModeCloze, BlockIDs: []string{"block-a"}, CreatedAt: 10,
+		InlineOcclusions: []AdvancedInlineOcclusion{
+			{ID: "occlusion-first", BlockID: "block-a", DisplayOrder: 0},
+			{ID: "occlusion-second", BlockID: "block-a", DisplayOrder: 1},
+			{ID: "occlusion-third", BlockID: "block-a", DisplayOrder: 2},
+		},
+		ClozeGroups: []AdvancedClozeGroup{
+			{ID: "group-first", DisplayOrder: 0, OcclusionIDs: []string{"occlusion-first"}},
+			{ID: "group-second", DisplayOrder: 1, OcclusionIDs: []string{"occlusion-second"}},
+			{ID: "group-third", DisplayOrder: 2, OcclusionIDs: []string{"occlusion-third"}},
+		}}
+	created, err := store.CreateAdvancedSource(ctx, request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	updated, err := store.UpdateAdvancedSource(ctx, AdvancedSourceUpdateRequest{
+		OperationID: "advanced-empty-group-update", SourceID: request.SourceID,
+		ExpectedRevision: created.SourceRevision.RevisionID, Mode: AdvancedModeCloze,
+		BlockIDs: request.BlockIDs, InlineOcclusions: request.InlineOcclusions, UpdatedAt: 20,
+		ClozeGroups: []AdvancedClozeGroup{
+			{ID: "group-first", DisplayOrder: 0},
+			{ID: "group-second", DisplayOrder: 1,
+				OcclusionIDs: []string{"occlusion-first", "occlusion-second"}},
+			{ID: "group-third", DisplayOrder: 2, OcclusionIDs: []string{"occlusion-third"}},
+		}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var source CardSource
+	if err = decodeStrictJSON(updated.SourceRevision.Payload, &source); err != nil {
+		t.Fatal(err)
+	}
+	var config ClozeGenerationConfig
+	if err = decodeStrictJSON(source.GenerationConfig, &config); err != nil {
+		t.Fatal(err)
+	}
+	if len(config.Groups) != 3 || config.Groups[0].ID != "group-first" ||
+		!equalStrings(config.Occlusions[0].GroupIDs, []string{"group-second"}) {
+		t.Fatalf("empty cloze group or changed assignment was not preserved: %+v", config)
+	}
+	removedCardID := GeneratedCardID(request.SourceID, advancedClozeTemplateID, "group:group-first")
+	removedRevision, found, err := store.Projection().CurrentEntity(ctx, EntityCard, removedCardID)
+	if err != nil || !found {
+		t.Fatalf("empty group card was not retained: found=%v err=%v", found, err)
+	}
+	var removedCard Card
+	if err = decodeStrictJSON(removedRevision.Payload, &removedCard); err != nil ||
+		removedCard.GenerationStatus != GenerationDeleted {
+		t.Fatalf("empty group card did not become inactive: card=%+v err=%v", removedCard, err)
+	}
+}
+
 func TestCreateAdvancedSourceRejectsUngroupedClozeBlock(t *testing.T) {
 	ctx := context.Background()
 	store := newGenerationTestStore(t, ctx)

@@ -2415,6 +2415,17 @@ interface IFlashcardV2AdvancedEdit {
     modeHint?: string;
 }
 
+interface IFlashcardV2AdvancedCandidate {
+    edit: IFlashcardV2AdvancedEdit;
+    updatedAt: number;
+}
+
+interface IFlashcardV2AdvancedRenderModel {
+    source: {sourceType: string, generationConfig: IFlashcardV2AdvancedGenerationConfig};
+    references: Array<{entityType: string, entityID: string, role: string, sort: number}>;
+    template: {generationRule: {mode: string}};
+}
+
 const flashcardV2AdvancedEditMode = (edit?: IFlashcardV2AdvancedEdit) => {
     if (!edit) {
         return "cloze";
@@ -2434,6 +2445,96 @@ const flashcardV2AdvancedEditMode = (edit?: IFlashcardV2AdvancedEdit) => {
         default:
             return "cloze";
     }
+};
+
+const flashcardV2AdvancedModeLabel = (edit: IFlashcardV2AdvancedEdit) => {
+    const labels: Record<string, string> = {
+        cloze: window.siyuan.languages.flashcardClozeCards,
+        orderedSingle: window.siyuan.languages.flashcardOrderedSingle,
+        orderedCards: window.siyuan.languages.flashcardOrderedCards,
+        imageOcclusion: window.siyuan.languages.flashcardImageOcclusion,
+        choiceSingle: window.siyuan.languages.flashcardChoiceSingle,
+        choiceMultiple: window.siyuan.languages.flashcardChoiceMultiple,
+        multiLineAll: window.siyuan.languages.flashcardMultiLineAll,
+        multiLineSteps: window.siyuan.languages.flashcardMultiLineSteps,
+        typedAnswer: window.siyuan.languages.flashcardTypedAnswer,
+    };
+    return labels[flashcardV2AdvancedEditMode(edit)] || edit.sourceType;
+};
+
+const fetchFlashcardV2Data = <T>(url: string, data: unknown) => new Promise<T | undefined>((resolve) => {
+    let completed = false;
+    fetchPost(url, data, (response) => {
+        completed = true;
+        resolve(response.data as T);
+    }).finally(() => {
+        if (!completed) {
+            resolve(undefined);
+        }
+    });
+});
+
+const loadFlashcardV2AdvancedCandidates = async (blockIDs: string[]) => {
+    const advancedSourceTypes = ["cloze", "ordered", "image-occlusion", "choice", "multi-line", "typed-answer"];
+    const queryData = await fetchFlashcardV2Data<{cards: IFlashcardSearchResult[]}>("/api/flashcard/queryCards", {
+        query: {
+            version: 1,
+            root: {
+                operator: "and",
+                children: [
+                    {operator: "predicate", field: "blockID", comparator: "equal", value: blockIDs[0]},
+                    {operator: "predicate", field: "sourceType", comparator: "in", value: advancedSourceTypes},
+                ],
+            },
+        },
+        options: {
+            now: Date.now(),
+            includeInactive: true,
+            includeSuspended: true,
+            includeBuried: true,
+            includePaused: true,
+            groupBySource: true,
+            limit: 1000,
+            offset: 0,
+        },
+    });
+    const cardBySource = new Map<string, IFlashcardSearchResult>();
+    (queryData?.cards || []).forEach((card) => {
+        if (card.sourceStatus === "active" && !cardBySource.has(card.card.sourceID)) {
+            cardBySource.set(card.card.sourceID, card);
+        }
+    });
+    const candidates = await Promise.all([...cardBySource.values()].map(async (card) => {
+        const [model, entity] = await Promise.all([
+            fetchFlashcardV2Data<IFlashcardV2AdvancedRenderModel>("/api/flashcard/getRenderModel", {
+                cardID: card.card.id,
+            }),
+            fetchFlashcardV2Data<{found: boolean, revision: IFlashcardEntityRevision<unknown>}>(
+                "/api/flashcard/getEntity", {entityType: "cardSource", entityID: card.card.sourceID}),
+        ]);
+        if (!model || !entity?.found) {
+            return;
+        }
+        const references = model.references.filter((reference) => reference.entityType === "block")
+            .sort((left, right) => left.sort - right.sort);
+        if (references.length !== blockIDs.length ||
+            references.some((reference, index) => reference.entityID !== blockIDs[index])) {
+            return;
+        }
+        return {
+            edit: {
+                sourceID: card.card.sourceID,
+                expectedRevisionID: entity.revision.revisionID,
+                sourceType: model.source.sourceType,
+                generationConfig: model.source.generationConfig,
+                references,
+                modeHint: model.template.generationRule.mode,
+            },
+            updatedAt: entity.revision.updatedAt,
+        } as IFlashcardV2AdvancedCandidate;
+    }));
+    return candidates.filter((candidate): candidate is IFlashcardV2AdvancedCandidate => !!candidate)
+        .sort((left, right) => right.updatedAt - left.updatedAt);
 };
 
 const flashcardV2ImageSource = (blockID: string, dom: string) => {
@@ -2703,7 +2804,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     };
 };
 
-export const openFlashcardV2AdvancedSource = (blockIDs: string[], edit?: IFlashcardV2AdvancedEdit,
+const openFlashcardV2AdvancedSourceEditor = (blockIDs: string[], edit?: IFlashcardV2AdvancedEdit,
     callback?: () => void) => {
     if (blockIDs.length === 0) {
         return;
@@ -2984,8 +3085,7 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                                 [...select.selectedOptions].some((option) => option.value === groupID))
                                 .map((select) => clozeTargets[Number(select.dataset.targetIndex)].blockID),
                         }),
-                    })).filter((group) => ("occlusionIDs" in group ? group.occlusionIDs : group.blockIDs).length > 0) :
-                        undefined;
+                    })) : undefined;
                     if (mode.startsWith("plugin:")) {
                         const pluginType = pluginTypes.find((item) => item.sourceType === mode);
                         if (pluginType?.registration.create) {
@@ -3060,6 +3160,60 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                     flashcardV2ImageSource(blockIDs[0], doms[blockIDs[0]] || "") : undefined;
                 openDialog(doms, imageSource);
             });
+        });
+    });
+};
+
+const openFlashcardV2AdvancedSourcePicker = (blockIDs: string[], candidates: IFlashcardV2AdvancedCandidate[],
+    callback?: () => void) => {
+    const dialog = new Dialog({
+        title: window.siyuan.languages.configGroupAdvanced,
+        width: isMobile() ? "92vw" : "520px",
+        content: `<div class="b3-dialog__content"><ul class="b3-list b3-list--background">
+<li data-type="newAdvancedSource" class="b3-list-item b3-list-item--narrow">
+<svg class="b3-list-item__graphic"><use xlink:href="#iconAdd"></use></svg>
+<span class="b3-list-item__text">${window.siyuan.languages.new}</span>
+</li>
+${candidates.map((candidate, index) => `<li data-candidate-index="${index}" class="b3-list-item b3-list-item--narrow">
+<svg class="b3-list-item__graphic"><use xlink:href="#iconEdit"></use></svg>
+<span class="b3-list-item__text">${window.siyuan.languages.edit} - ${escapeHtml(flashcardV2AdvancedModeLabel(candidate.edit))}</span>
+<span class="b3-list-item__meta">${escapeHtml(new Date(candidate.updatedAt).toLocaleString())}</span>
+</li>`).join("")}
+</ul></div>
+<div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button></div>`,
+    });
+    dialog.element.querySelector(".b3-button--cancel").addEventListener("click", () => dialog.destroy());
+    dialog.element.addEventListener("click", (event) => {
+        const item = (event.target as HTMLElement).closest<HTMLElement>("[data-type='newAdvancedSource'], [data-candidate-index]");
+        if (!item) {
+            return;
+        }
+        const candidateIndex = item.dataset.candidateIndex;
+        dialog.destroy();
+        if (candidateIndex === undefined) {
+            openFlashcardV2AdvancedSourceEditor(blockIDs, undefined, callback);
+        } else {
+            openFlashcardV2AdvancedSourceEditor(blockIDs, candidates[Number(candidateIndex)].edit, callback);
+        }
+    });
+};
+
+export const openFlashcardV2AdvancedSource = (blockIDs: string[], edit?: IFlashcardV2AdvancedEdit,
+    callback?: () => void) => {
+    if (blockIDs.length === 0) {
+        return;
+    }
+    if (edit) {
+        openFlashcardV2AdvancedSourceEditor(blockIDs, edit, callback);
+        return;
+    }
+    ensureFlashcardV2(() => {
+        void loadFlashcardV2AdvancedCandidates(blockIDs).then((candidates) => {
+            if (candidates.length === 0) {
+                openFlashcardV2AdvancedSourceEditor(blockIDs, undefined, callback);
+                return;
+            }
+            openFlashcardV2AdvancedSourcePicker(blockIDs, candidates, callback);
         });
     });
 };

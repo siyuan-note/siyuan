@@ -1699,8 +1699,8 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
                 .map((priority) => `<option value="setPriority:${priority}">${window.siyuan.languages.flashcardPriority} - ${escapeHtml(priority === "" ? window.siyuan.languages.default : priorityLabel(priority))}</option>`).join("");
             const dialog = new Dialog({
                 title: name,
-                width: isMobile() ? "92vw" : "760px",
-                height: "70vh",
+                width: "min(1100px, 96vw)",
+                height: "min(800px, 90vh)",
                 content: `<div class="b3-dialog__content fn__flex-column card__v2-management">
 <div class="card__v2-management-toolbar">
 <div class="card__v2-management-pagination">

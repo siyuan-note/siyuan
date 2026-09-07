@@ -6,7 +6,7 @@
 		"id": "20260907120000-cryen01",
 		"title": "Encrypted Notebook",
 		"type": "doc",
-		"updated": "20260908100000"
+		"updated": "20260908120000"
 	},
 	"Children": [
 		{
@@ -35,6 +35,144 @@
 				{
 					"Type": "NodeText",
 					"Data": "Encrypted notebooks are designed for sensitive content. Their documents, assets and original filenames, database definitions, and dedicated indexes are encrypted on disk; normal notebooks keep their existing storage format. A locked encrypted notebook requires the master password to open."
+				}
+			]
+		},
+		{
+			"ID": "20260908120000-enuse01",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260908120000-enuse01",
+				"updated": "20260908120000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use cases"
+				}
+			]
+		},
+		{
+			"ID": "20260908120000-enuse02",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260908120000-enuse02",
+				"updated": "20260908120000"
+			},
+			"Children": [
+				{
+					"ID": "20260908120000-enuse03",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908120000-enuse03",
+						"updated": "20260908120000"
+					},
+					"Children": [
+						{
+							"ID": "20260908120000-enuse04",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908120000-enuse04",
+								"updated": "20260908120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Personal information: Store journals, medical records, financial information, identity documents, and other content that should not remain as plaintext on disk"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908120000-enuse05",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908120000-enuse05",
+						"updated": "20260908120000"
+					},
+					"Children": [
+						{
+							"ID": "20260908120000-enuse06",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908120000-enuse06",
+								"updated": "20260908120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Confidential work: Store project plans, meeting notes, client information, research materials, and other content that requires restricted local access"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908120000-enuse07",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908120000-enuse07",
+						"updated": "20260908120000"
+					},
+					"Children": [
+						{
+							"ID": "20260908120000-enuse08",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908120000-enuse08",
+								"updated": "20260908120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Sensitive knowledge bases with AI assistance: After unlocking, use AI for summaries, question answering, rewriting, and organization; when using a cloud AI service, relevant content may be sent to the configured provider, so choose a model and deployment method that meet your privacy requirements"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908120000-enuse09",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908120000-enuse09",
+						"updated": "20260908120000"
+					},
+					"Children": [
+						{
+							"ID": "20260908120000-enuse10",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908120000-enuse10",
+								"updated": "20260908120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Multi-device and long-term storage: Sync encrypted persistent data and use the master password together with a key backup to restore access on another device"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

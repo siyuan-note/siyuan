@@ -6,7 +6,7 @@
 		"id": "20260907120000-cryja01",
 		"title": "暗号化ノートブック",
 		"type": "doc",
-		"updated": "20260908100000"
+		"updated": "20260908120000"
 	},
 	"Children": [
 		{
@@ -35,6 +35,144 @@
 				{
 					"Type": "NodeText",
 					"Data": "暗号化ノートブックは機密コンテンツの保存に使用します。ドキュメント、アセットと元のファイル名、データベース定義、専用インデックスはディスク上で暗号化されます。通常のノートブックの保存形式は変わりません。ロック中の暗号化ノートブックを開くには、マスターパスワードが必要です。"
+				}
+			]
+		},
+		{
+			"ID": "20260908120000-jause01",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260908120000-jause01",
+				"updated": "20260908120000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "利用シーン"
+				}
+			]
+		},
+		{
+			"ID": "20260908120000-jause02",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260908120000-jause02",
+				"updated": "20260908120000"
+			},
+			"Children": [
+				{
+					"ID": "20260908120000-jause03",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908120000-jause03",
+						"updated": "20260908120000"
+					},
+					"Children": [
+						{
+							"ID": "20260908120000-jause04",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908120000-jause04",
+								"updated": "20260908120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "個人情報：日記、医療記録、財務情報、身分証明書類など、ディスク上に平文で残したくないコンテンツを保存する"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908120000-jause05",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908120000-jause05",
+						"updated": "20260908120000"
+					},
+					"Children": [
+						{
+							"ID": "20260908120000-jause06",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908120000-jause06",
+								"updated": "20260908120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "機密性の高い業務情報：プロジェクト計画、会議記録、顧客情報、研究資料など、ローカルでのアクセスを制限したいコンテンツを保存する"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908120000-jause07",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908120000-jause07",
+						"updated": "20260908120000"
+					},
+					"Children": [
+						{
+							"ID": "20260908120000-jause08",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908120000-jause08",
+								"updated": "20260908120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "機密知識ベースと AI 支援：ロック解除後に AI を使って要約、質疑応答、文章の推敲、整理を行う。クラウド AI サービスを利用すると、関連コンテンツが設定済みのサービスプロバイダーに送信される可能性があるため、プライバシー要件に合うモデルと配置方式を選択する"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908120000-jause09",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908120000-jause09",
+						"updated": "20260908120000"
+					},
+					"Children": [
+						{
+							"ID": "20260908120000-jause10",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908120000-jause10",
+								"updated": "20260908120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "複数デバイスと長期保存：暗号化された永続データを同期し、マスターパスワードとキーバックアップを組み合わせて別のデバイスでアクセスを復元する"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

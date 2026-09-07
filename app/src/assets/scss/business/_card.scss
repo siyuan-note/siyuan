@@ -395,6 +395,7 @@
       }
 
       &.fn__flex-center {
+        align-self: stretch;
         flex-direction: row;
         justify-content: flex-start;
         min-height: 28px;

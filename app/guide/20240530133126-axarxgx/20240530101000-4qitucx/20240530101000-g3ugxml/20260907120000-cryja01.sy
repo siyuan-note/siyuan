@@ -1,0 +1,1162 @@
+{
+	"ID": "20260907120000-cryja01",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260907120000-cryja01",
+		"title": "暗号化ノートブック",
+		"type": "doc",
+		"updated": "20260907120000"
+	},
+	"Children": [
+		{
+			"ID": "20260907120000-ja00001",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-ja00001",
+				"updated": "20260907120000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "暗号化ノートブックとは"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00002",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260907120000-ja00002",
+				"updated": "20260907120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "暗号化ノートブックは機密コンテンツの保存に使用します。ドキュメント、アセットと元のファイル名、データベース定義、専用インデックスはディスク上で暗号化されます。通常のノートブックの保存形式は変わりません。ロック中の暗号化ノートブックを開くには、マスターパスワードが必要です。"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00003",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-ja00003",
+				"updated": "20260907120000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用前の注意事項"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00004",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-ja00004",
+				"updated": "20260907120000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-ja00005",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00005",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00006",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00006",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "マスターパスワードは復元できません。忘れた場合、誰もコンテンツを復元できません。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00007",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00007",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00008",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00008",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "キーバックアップはマスターパスワードの代わりにはなりません。復元には通常、対応するキーバックアップとマスターパスワードの両方が必要なため、別々の安全な場所に保管してください。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00009",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00009",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00010",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00010",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "暗号化ノートブックはロック中に最も強く保護されます。ロック解除中は、メインアプリケーションによって許可されたプラグイン、API、MCP ツール、AI エージェントがコンテンツを読み取れます。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00011",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-ja00011",
+				"updated": "20260907120000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "有効化と作成"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00012",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260907120000-ja00012",
+				"updated": "20260907120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "認証"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "暗号化ノートブック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を開き、「暗号化ノートブックを有効化」をオンにします。マスターパスワードを設定して確認入力し、リスクに関する注意事項を確認してください。強力なパスワードの生成と保存には、パスワードマネージャーの使用を推奨します。"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00013",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-ja00013",
+				"updated": "20260907120000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-ja00014",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00014",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00015",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00015",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "有効化したら、すぐにキーバックアップをエクスポートし、ワークスペース外に独立したコピーを保管します。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00016",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00016",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00017",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00017",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デスクトップ版では、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "ドキュメント"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "詳細"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "新規暗号化ノートブック"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を選択します。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00018",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00018",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00019",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00019",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "モバイル版では、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "右側のサイドバー"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "作成"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "新規暗号化ノートブック"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を選択します。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00020",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00020",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00021",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00021",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ノートブック名とマスターパスワードを入力します。作成が完了すると、ノートブックが開きます。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00022",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-ja00022",
+				"updated": "20260907120000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ロック解除とロック"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00023",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-ja00023",
+				"updated": "20260907120000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-ja00024",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00024",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00025",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00025",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ドキュメントパネルで閉じている暗号化ノートブックをクリックし、マスターパスワードを入力してロックを解除します。各暗号化ノートブックは個別にロック解除します。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00026",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00026",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00027",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00027",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "暗号化ノートブックを閉じるとロックされます。ロックすると新しいコンテンツアクセスが停止し、アプリケーションが管理するキー、インデックス、一時データが消去されます。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00028",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00028",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00029",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00029",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "アプリケーションの再起動後、すべての暗号化ノートブックはロック状態になり、マスターパスワードの再入力が必要です。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00030",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260907120000-ja00030",
+				"updated": "20260907120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "認証"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "暗号化ノートブック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で自動ロックまでのアイドル時間を設定できます。暗号化コンテンツの閲覧、編集、検索でタイマーがリセットされます。0 に設定すると自動ロックは無効になります。"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00031",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-ja00031",
+				"updated": "20260907120000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マスターパスワードとキーバックアップ"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00032",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-ja00032",
+				"updated": "20260907120000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-ja00033",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00033",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00034",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00034",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "すべての暗号化ノートブックで 1 つのマスターパスワードを共有しますが、各ノートブックは独立したデータキーを使用します。1 つをロック解除しても、ほかのノートブックはロック解除されません。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00035",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00035",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00036",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00036",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "マスターパスワードを変更したら、すぐに最新のキーバックアップをエクスポートしてください。新しいバックアップには、既存の履歴とスナップショットの復元に必要なキー情報が保持されます。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00037",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00037",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00038",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00038",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ローカル設定が失われた場合、新しいデバイスで復元する場合、または設定の復元が必要と表示された場合は、キーバックアップをインポートして対応するマスターパスワードを入力します。キーバックアップにマスターパスワードは含まれません。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00039",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00039",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00040",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00040",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "暗号化ノートブックまたは復元可能な履歴が現在のキーに依存している間は、アクセスを永久に失わないように、暗号化ノートブック機能を無効化できません。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00041",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260907120000-ja00041",
+				"updated": "20260907120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "パスワードの変更とキーのエクスポートまたはインポートは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "認証"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "暗号化ノートブック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で行います。"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00042",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-ja00042",
+				"updated": "20260907120000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "同期、履歴、エクスポート"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00043",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-ja00043",
+				"updated": "20260907120000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-ja00044",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00044",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00045",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00045",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "データ同期では、暗号化された永続データを保存、転送します。ロック解除状態はほかのデバイスに同期されないため、新しいデバイスでもマスターパスワードが必要です。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00046",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00046",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00047",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00047",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ドキュメント履歴と削除済みノートブックの復元は暗号化データに対応していますが、復元には対応するキーバックアップとマスターパスワードが必要です。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00048",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00048",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00049",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00049",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "暗号化ノートブックをエクスポートすると、暗号化されていないファイルが生成されます。エクスポート後は、通常の機密ファイルとして保護、移動、または削除してください。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00050",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-ja00050",
+				"updated": "20260907120000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "機能範囲"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00051",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-ja00051",
+				"updated": "20260907120000"
+			},
+			"HeadingLevel": 3,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "対応している機能"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00052",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-ja00052",
+				"updated": "20260907120000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-ja00053",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00053",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00054",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00054",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ロック解除後は、ノートブック内でドキュメントの編集、コンテンツブロック参照、バックリンク、検索、データベース、インポート、履歴、エクスポートを利用できます。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00055",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00055",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00056",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00056",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ロック解除中は、プラグイン、API、MCP ツール、AI エージェントが通常のノートブックと同様にコンテンツへアクセスできます。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00057",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-ja00057",
+				"updated": "20260907120000"
+			},
+			"HeadingLevel": 3,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "対応していない機能"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00058",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-ja00058",
+				"updated": "20260907120000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-ja00059",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00059",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00060",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00060",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "暗号化コンテンツはグローバル検索とグローバルグラフの対象外です。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00061",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00061",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00062",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00062",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通常のノートブックと暗号化ノートブックの間、または 2 つの暗号化ノートブックの間では、コンテンツブロック参照、移動、データベースのミラーリングを利用できません。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00063",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00063",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00064",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00064",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "公開、フラッシュカード、ブックマーク、タグ、アセット名の変更、raw file API、カーネル CLI 操作には対応していません。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00065",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-ja00065",
+				"updated": "20260907120000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "利用上の推奨事項"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-ja00066",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-ja00066",
+				"updated": "20260907120000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-ja00067",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00067",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00068",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00068",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "適切な自動ロック時間を設定し、使用していない暗号化ノートブックは閉じてください。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00069",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00069",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00070",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00070",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ワークスペース内の暗号化ファイルを直接編集したり、ファイルシステム上で暗号化アセットの名前を変更したりしないでください。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00071",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00071",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00072",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00072",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "マスターパスワードの変更、デバイスの移行、同期設定の変更後は、最新のキーバックアップがワークスペース外に保存されていることを確認してください。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00073",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00073",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00074",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00074",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "マスターパスワードと唯一のキーバックアップを同じ場所に保管しないでください。"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

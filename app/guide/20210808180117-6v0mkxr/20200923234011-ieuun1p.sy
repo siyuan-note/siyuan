@@ -7,7 +7,7 @@
 		"id": "20200923234011-ieuun1p",
 		"title": "Please Start Here",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20260907120000"
 	},
 	"Children": [
 		{
@@ -2212,7 +2212,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201225220954-qtw7nfl",
-				"updated": "20260729215152"
+				"updated": "20260907120000"
 			},
 			"Children": [
 				{
@@ -2227,7 +2227,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20201225220954-kjfoqak",
-				"updated": "20260729215152"
+				"updated": "20260907120000"
 			},
 			"Children": [
 				{
@@ -2287,6 +2287,37 @@
 									"TextMarkBlockRefID": "20210117215840-jcl17fx",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "Data Security"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-en00075",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-en00075",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-en00076",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-en00076",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260907120000-cryen01",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "Encrypted Notebook"
 								}
 							]
 						}

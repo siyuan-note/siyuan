@@ -7,7 +7,7 @@
 		"id": "20200812220555-lj3enxa",
 		"title": "请从这里开始",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20260907120000"
 	},
 	"Children": [
 		{
@@ -2243,7 +2243,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201225220955-tkjiv18",
-				"updated": "20260729213849"
+				"updated": "20260907120000"
 			},
 			"Children": [
 				{
@@ -2258,7 +2258,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20201225220955-5tzog8p",
-				"updated": "20260729213849"
+				"updated": "20260907120000"
 			},
 			"Children": [
 				{
@@ -2318,6 +2318,37 @@
 									"TextMarkBlockRefID": "20210117211155-56n4odu",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "数据安全"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00075",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00075",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00076",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00076",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260907120000-crycn01",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "加密笔记本"
 								}
 							]
 						}

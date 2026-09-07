@@ -1709,12 +1709,12 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
 <button data-type="pageNext" class="b3-button b3-button--outline"${hasNext ? "" : " disabled"}>${window.siyuan.languages.next}</button>
 </div>
 <div class="card__v2-management-tools">
-<button data-type="filter" class="b3-button b3-button--outline"><svg><use xlink:href="#iconFilter"></use></svg>${window.siyuan.languages.filter}${filterCount === 0 ? "" : ` (${filterCount})`}</button>
-<button data-type="conflicts" class="b3-button b3-button--outline"><svg><use xlink:href="#iconWarning"></use></svg>${window.siyuan.languages.conflict}</button>
-<button data-type="statistics" class="b3-button b3-button--outline"><svg><use xlink:href="#iconGraph"></use></svg>${window.siyuan.languages.statistics}</button>
-${policyScope ? `<button data-type="scopePolicy" class="b3-button b3-button--outline"><svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.config}</button>` : ""}
-${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.flashcardReviewSet}</button>` : ""}
-<button data-type="flagDefinitions" class="b3-button b3-button--outline"><svg><use xlink:href="#iconBookmark"></use></svg>${window.siyuan.languages.flashcardFlag}</button>
+<button data-type="filter" class="b3-button b3-button--outline">${window.siyuan.languages.filter}${filterCount === 0 ? "" : ` (${filterCount})`}</button>
+<button data-type="conflicts" class="b3-button b3-button--outline">${window.siyuan.languages.conflict}</button>
+<button data-type="statistics" class="b3-button b3-button--outline">${window.siyuan.languages.statistics}</button>
+${policyScope ? `<button data-type="scopePolicy" class="b3-button b3-button--outline">${window.siyuan.languages.config}</button>` : ""}
+${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-button--outline">${window.siyuan.languages.flashcardReviewSet}</button>` : ""}
+<button data-type="flagDefinitions" class="b3-button b3-button--outline">${window.siyuan.languages.flashcardFlag}</button>
 <button data-type="group" class="b3-button b3-button--outline">${window.siyuan.languages.group}</button>
 </div>
 </div>

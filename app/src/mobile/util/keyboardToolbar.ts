@@ -70,6 +70,7 @@ import {
     renderMobileFontFamilyMenu,
 } from "../../protyle/toolbar/fontFamilyMenu";
 import {notifyMobileKeyboardChange} from "./mobileKeyboardChange";
+import {getEditorFocusRange, restoreEditorFocusRange} from "../../protyle/util/editorFocus";
 
 type TAndroidBoundedSelection = {
     container: HTMLElement,
@@ -777,6 +778,16 @@ export const hideKeyboardToolbarUtilOnEditorClick = () => {
     hideKeyboardToolbarUtil();
 };
 
+const restoreKeyboardToolbarRange = (protyle: IProtyle | undefined, range: Range) => {
+    if (protyle) {
+        const editorRange = getEditorFocusRange(protyle.wysiwyg.element, range, protyle.toolbar.range);
+        if (restoreEditorFocusRange(protyle.wysiwyg.element, editorRange)) {
+            return;
+        }
+    }
+    focusByRange(range);
+};
+
 const renderKeyboardToolbar = () => {
     clearTimeout(renderKeyboardToolbarTimeout);
     renderKeyboardToolbarTimeout = window.setTimeout(() => {
@@ -1357,9 +1368,9 @@ export const initKeyboardToolbar = () => {
         if (type === "done") {
             if (toolbarElement.clientHeight > 100) {
                 if (isInHarmony() || isInAndroid()) {
-                    setTimeout(() => focusByRange(range), Constants.TIMEOUT_TRANSITION);
+                    setTimeout(() => restoreKeyboardToolbarRange(protyle, range), Constants.TIMEOUT_TRANSITION);
                 } else {
-                    focusByRange(range);
+                    restoreKeyboardToolbarRange(protyle, range);
                 }
                 hideKeyboardToolbarUtil();
                 callMobileAppShowKeyboard();
@@ -1454,9 +1465,9 @@ export const initKeyboardToolbar = () => {
         } else if (type === "add") {
             if (buttonElement.classList.contains("protyle-toolbar__item--current")) {
                 if (isInHarmony() || isInAndroid()) {
-                    setTimeout(() => focusByRange(range), Constants.TIMEOUT_TRANSITION);
+                    setTimeout(() => restoreKeyboardToolbarRange(protyle, range), Constants.TIMEOUT_TRANSITION);
                 } else {
-                    focusByRange(range);
+                    restoreKeyboardToolbarRange(protyle, range);
                 }
                 hideKeyboardToolbarUtil();
                 callMobileAppShowKeyboard();

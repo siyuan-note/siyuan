@@ -1561,7 +1561,7 @@ const openFlashcardV2ManagementFilter = (filters: IFlashcardManagementFilters,
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardDifficulty} ≤</div><input data-filter="difficultyTo" class="b3-text-field fn__block" type="number" min="0" step="any" value="${escapeAttr(filters.difficultyTo || "")}"></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardRetrievability} ≥</div><input data-filter="retrievabilityFrom" class="b3-text-field fn__block" type="number" min="0" max="1" step="any" value="${escapeAttr(filters.retrievabilityFrom || "")}"></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardRetrievability} ≤</div><input data-filter="retrievabilityTo" class="b3-text-field fn__block" type="number" min="0" max="1" step="any" value="${escapeAttr(filters.retrievabilityTo || "")}"></label>
-</div><div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button data-type="clear" class="b3-button b3-button--outline">${window.siyuan.languages.removeFilters}</button><button data-type="confirm" class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
+</div><div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button data-type="clear" class="b3-button b3-button--cancel">${window.siyuan.languages.removeFilters}</button><button data-type="confirm" class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
     });
     const elements = [...dialog.element.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-filter]")];
     elements.forEach((element) => {
@@ -1711,8 +1711,8 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
 <div class="card__v2-management-tools">
 <button data-type="filter" class="b3-button b3-button--outline"><svg><use xlink:href="#iconFilter"></use></svg>${window.siyuan.languages.filter}${filterCount === 0 ? "" : ` (${filterCount})`}</button>
 <button data-type="conflicts" class="b3-button b3-button--outline"><svg><use xlink:href="#iconWarning"></use></svg>${window.siyuan.languages.conflict}</button>
-<button data-type="statistics" class="b3-button b3-button--outline"><svg><use xlink:href="#iconGraph"></use></svg>${window.siyuan.languages.flashcardStatistics}</button>
-${policyScope ? `<button data-type="scopePolicy" class="b3-button b3-button--outline"><svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.flashcardScopeSettings}</button>` : ""}
+<button data-type="statistics" class="b3-button b3-button--outline"><svg><use xlink:href="#iconGraph"></use></svg>${window.siyuan.languages.statistics}</button>
+${policyScope ? `<button data-type="scopePolicy" class="b3-button b3-button--outline"><svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.config}</button>` : ""}
 ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.flashcardReviewSet}</button>` : ""}
 <button data-type="flagDefinitions" class="b3-button b3-button--outline"><svg><use xlink:href="#iconBookmark"></use></svg>${window.siyuan.languages.flashcardFlag}</button>
 <button data-type="group" class="b3-button b3-button--outline">${window.siyuan.languages.group}</button>

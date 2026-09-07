@@ -31,7 +31,7 @@
 	"headingBatchWithSubheadingsTip": "子標題依相同層級差升降，超出 H1 至 H6 的層級以 H1 或 H6 處理",
 	"newSiblingDoc": "新增同級文件",
 	"tabs": "頁籤區塊",
-	"tabItem": "頁籤",
+	"tabItem": "頁籤項",
 	"tabsPositionTop": "頂部頁籤",
 	"tabsPositionLeft": "左側頁籤",
 	"tabsUnwrap": "取消頁籤版面配置",

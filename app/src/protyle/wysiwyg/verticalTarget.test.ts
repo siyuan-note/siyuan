@@ -2,6 +2,7 @@ import {before, describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 
 let getAdjacentVisibleBlock: typeof import("./verticalTarget").getAdjacentVisibleBlock;
+let getVerticalNavigationScope: typeof import("./verticalTarget").getVerticalNavigationScope;
 let getVisibleBoundaryBlock: typeof import("./verticalTarget").getVisibleBoundaryBlock;
 
 before(async () => {
@@ -9,7 +10,7 @@ before(async () => {
         SIYUAN_VERSION: "test",
         NODE_ENV: "test",
     });
-    ({getAdjacentVisibleBlock, getVisibleBoundaryBlock} = await import("./verticalTarget"));
+    ({getAdjacentVisibleBlock, getVerticalNavigationScope, getVisibleBoundaryBlock} = await import("./verticalTarget"));
 });
 
 class TestElement {
@@ -165,18 +166,21 @@ describe("vertical navigation targets", () => {
     });
 
     it("keeps adjacent navigation within the current editable embed", () => {
+        const editor = new TestElement().addClass("protyle-wysiwyg");
         const embed = block("embed", "NodeBlockQueryEmbed");
         const result = new TestElement().addClass("protyle-wysiwyg__embed")
             .setAttribute("data-allow-child-operation", "true");
         const first = block("first");
         const last = block("last");
-        embed.append(result.append(first, last));
+        editor.append(embed.append(result.append(first, last)));
 
+        assert.equal(getVerticalNavigationScope(asElement(first), asElement(editor) as HTMLElement), asElement(embed));
         assert.equal(getAdjacentVisibleBlock(asElement(first), "down"), asElement(last));
         assert.equal(getAdjacentVisibleBlock(asElement(last), "down"), false);
     });
 
     it("stops at a nested embed instead of entering its rendered result", () => {
+        const editor = new TestElement().addClass("protyle-wysiwyg");
         const outerEmbed = block("outer-embed", "NodeBlockQueryEmbed");
         const outerResult = new TestElement().addClass("protyle-wysiwyg__embed")
             .setAttribute("data-allow-child-operation", "true");
@@ -185,8 +189,13 @@ describe("vertical navigation targets", () => {
         const nestedResult = new TestElement().addClass("protyle-wysiwyg__embed")
             .setAttribute("data-allow-child-operation", "true");
         const nestedContent = block("nested-content");
-        outerEmbed.append(outerResult.append(list.append(nestedEmbed.append(nestedResult.append(nestedContent)))));
+        editor.append(outerEmbed.append(
+            outerResult.append(list.append(nestedEmbed.append(nestedResult.append(nestedContent))))));
 
         assert.equal(getVisibleBoundaryBlock(asElement(list), "up"), asElement(nestedEmbed));
+        assert.equal(getVerticalNavigationScope(asElement(nestedEmbed), asElement(editor) as HTMLElement),
+            asElement(outerEmbed));
+        assert.equal(getVerticalNavigationScope(asElement(nestedContent), asElement(editor) as HTMLElement),
+            asElement(nestedEmbed));
     });
 });

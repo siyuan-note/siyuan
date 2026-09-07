@@ -1,7 +1,9 @@
 import {focusByRange, getSelectionPosition, setFirstNodeRange, setLastNodeRange} from "../util/selection";
 import {
+    getCodeTrailingZeroWidthLineLimit,
     getNavigableVerticalRects,
     getRectsIntersectingVerticalLine,
+    getRevealDelta,
     isCaretRectAtVerticalBoundary,
 } from "./verticalGeometry";
 import {getFoldedNavigationOwner, getReachableVerticalRects} from "./verticalVisibility";
@@ -11,7 +13,7 @@ export type TVerticalDirection = "up" | "down";
 const isCaretHitReachable = (element: Element, rects: DOMRect[]) => {
     const onScreenRects = rects.filter(rect => rect.bottom > 0 && rect.top < window.innerHeight &&
         rect.right >= 0 && rect.left < window.innerWidth);
-    return onScreenRects.length === 0 || onScreenRects.some(rect => {
+    return onScreenRects.some(rect => {
         const y = Math.max(0, Math.min(window.innerHeight - 1, (rect.top + rect.bottom) / 2));
         return [rect.left + 0.25, rect.left - 0.25].some(x => {
             const hit = document.elementFromPoint(x, y);
@@ -80,11 +82,7 @@ const getCodeTrailingBlankLineCount = (element: Element) => {
     if (!element.closest(".code-block")) {
         return;
     }
-    const trailingNewlineCount = element.textContent.match(/\n+$/)?.[0].length || 0;
-    if (trailingNewlineCount === 0) {
-        return;
-    }
-    return Math.max(0, trailingNewlineCount - 1);
+    return getCodeTrailingZeroWidthLineLimit(element.textContent);
 };
 
 const getContentRects = (element: Element) => {
@@ -130,10 +128,18 @@ const getBoundaryLineRects = (element: Element, direction: TVerticalDirection) =
     return rects.filter(rect => Math.abs(rect.top - boundaryTop) <= tolerance);
 };
 
-export const focusEditableAtGoalX = (element: Element, direction: TVerticalDirection, goalX: number) => {
+interface IEditableVerticalNavigationTarget {
+    element: Element;
+    direction: TVerticalDirection;
+    range: Range;
+}
+
+// 目标解析只计算合法 Range，Selection 统一在滚动和复核完成后提交。
+const resolveEditableVerticalNavigationTarget = (element: Element, direction: TVerticalDirection, goalX: number,
+                                                  requireHit: boolean): IEditableVerticalNavigationTarget | undefined => {
     if (getFoldedNavigationOwner(element) ||
         getReachableVerticalRects(element, Array.from(element.getClientRects())).length === 0) {
-        return false;
+        return;
     }
     const lineRects = getBoundaryLineRects(element, direction);
     const range = document.createRange();
@@ -148,12 +154,11 @@ export const focusEditableAtGoalX = (element: Element, direction: TVerticalDirec
         const pointRangeRects = pointRange ? getRangeRectsOnLine(element, pointRange, lineRects) : [];
         const pointRangeHasOwnRects = !!pointRange && pointRange.getClientRects().length > 0;
         if (pointRange && element.contains(pointRange.startContainer) && pointRangeRects.length > 0 &&
-            isCaretHitReachable(element, pointRangeHasOwnRects ? pointRangeRects : lineRects) &&
+            (!requireHit || isCaretHitReachable(element, pointRangeHasOwnRects ? pointRangeRects : lineRects)) &&
             (!isZeroWidthLine || !pointRangeHasOwnRects ||
                 isCaretRectAtVerticalBoundary(getSelectionPosition(element, pointRange).top, lineRects, "up"))) {
             pointRange.collapse(true);
-            focusByRange(pointRange);
-            return true;
+            return {element, direction, range: pointRange};
         }
     }
     if (direction === "up" && getCodeTrailingBlankLineCount(element) !== undefined) {
@@ -177,22 +182,81 @@ export const focusEditableAtGoalX = (element: Element, direction: TVerticalDirec
         reachableRects = lineRects.length > 0 ? getRangeRectsOnLine(element, range, lineRects) :
             getReachableVerticalRects(element, caretRects);
         if (reachableRects.length === 0) {
-            return false;
+            return;
         }
     } else if (lineRects.length > 0) {
         reachableRects = getRangeRectsOnLine(element, range, lineRects);
-        if (reachableRects.length === 0 || !isCaretHitReachable(element, lineRects)) {
-            return false;
+        if (reachableRects.length === 0) {
+            return;
         }
-    } else if (element.textContent || element.querySelector("br, img, .render-node")) {
-        return false;
+    } else if (element.textContent || element.querySelector("img, .render-node")) {
+        return;
     } else {
         reachableRects = getReachableVerticalRects(element, Array.from(element.getClientRects()));
     }
-    // 屏幕内的回退落点必须实际命中编辑区，屏幕外的合法落点交由滚动逻辑展示。
-    if (!isCaretHitReachable(element, reachableRects)) {
+    if (requireHit && !isCaretHitReachable(element, reachableRects)) {
+        return;
+    }
+    return {element, direction, range};
+};
+
+const getEditableTargetRects = (target: IEditableVerticalNavigationTarget) => {
+    const lineRects = getBoundaryLineRects(target.element, target.direction);
+    if (lineRects.length > 0) {
+        return lineRects;
+    }
+    const contextElement = getRangeContextElement(target.range);
+    if (contextElement && target.element.contains(contextElement)) {
+        const contextRects = getReachableVerticalRects(contextElement,
+            getRangeContextRects(target.range, contextElement));
+        if (contextRects.length > 0) {
+            return contextRects;
+        }
+    }
+    return getReachableVerticalRects(target.element, Array.from(target.element.getClientRects()));
+};
+
+const revealEditableVerticalNavigationTarget = (target: IEditableVerticalNavigationTarget,
+                                                boundaryElement?: Element) => {
+    const closestBlock = target.element.closest("[data-node-id]");
+    const scrollBoundary = boundaryElement?.contains(target.element) ? boundaryElement : closestBlock || target.element;
+    let ancestor: Element | null = target.element;
+    while (ancestor) {
+        const scrollElement = ancestor as HTMLElement;
+        const view = ancestor.ownerDocument.defaultView;
+        const style = view?.getComputedStyle(ancestor);
+        const canScrollY = scrollElement.scrollHeight > scrollElement.clientHeight + 1 &&
+            (ancestor === scrollBoundary || ["auto", "scroll", "overlay"].includes(style?.overflowY));
+        if (canScrollY) {
+            const rects = getEditableTargetRects(target);
+            if (rects.length > 0) {
+                const bounds = ancestor.getBoundingClientRect();
+                const viewportTop = bounds.top + scrollElement.clientTop;
+                const delta = getRevealDelta(Math.min(...rects.map(rect => rect.top)),
+                    Math.max(...rects.map(rect => rect.bottom)), viewportTop, viewportTop + scrollElement.clientHeight);
+                if (delta !== 0) {
+                    scrollElement.scrollTop += delta;
+                }
+            }
+        }
+        if (ancestor === scrollBoundary) {
+            break;
+        }
+        ancestor = ancestor.parentElement;
+    }
+};
+
+export const focusEditableAtGoalX = (element: Element, direction: TVerticalDirection, goalX: number,
+                                     scrollBoundary?: Element) => {
+    const target = resolveEditableVerticalNavigationTarget(element, direction, goalX, false);
+    if (!target) {
         return false;
     }
-    focusByRange(range);
+    revealEditableVerticalNavigationTarget(target, scrollBoundary);
+    const verifiedTarget = resolveEditableVerticalNavigationTarget(element, direction, goalX, true);
+    if (!verifiedTarget) {
+        return false;
+    }
+    focusByRange(verifiedTarget.range);
     return true;
 };

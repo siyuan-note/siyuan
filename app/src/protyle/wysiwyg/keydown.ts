@@ -1035,12 +1035,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             const verticalDirection = event.key === "ArrowUp" ? "up" : event.key === "ArrowDown" ? "down" : undefined;
             if (selectText === "" && range.collapsed && verticalDirection &&
                 isAtomicVerticalNavigationTarget(nodeElement)) {
-                if (focusAdjacentVerticalRegion(protyle, nodeElement, verticalDirection, verticalGoalX ?? 0,
-                    range.startContainer)) {
+                const outcome = focusAdjacentVerticalRegion(protyle, nodeElement, verticalDirection,
+                    verticalGoalX ?? 0, range.startContainer);
+                if (outcome === "moved") {
                     preserveAVSelectionOnKeyup(protyle, event);
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return;
                 }
                 // 原子区域位于文档边界时保持选择，避免原生移动进入其内部。
                 event.stopPropagation();
@@ -1081,9 +1079,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             const toNext = (event.key === "ArrowDown" && isLastLine) ||
                 (event.key === "ArrowRight" && isEnd);
             if (selectText === "" && range.collapsed && verticalDirection && (toPrevious || toNext)) {
-                if (focusAdjacentVerticalRegion(protyle, nodeElement, verticalDirection, verticalGoalX ?? 0,
-                    range.startContainer)) {
-                    preserveAVSelectionOnKeyup(protyle, event);
+                const outcome = focusAdjacentVerticalRegion(protyle, nodeElement, verticalDirection,
+                    verticalGoalX ?? 0, range.startContainer);
+                if (outcome !== "none") {
+                    if (outcome === "moved") {
+                        preserveAVSelectionOnKeyup(protyle, event);
+                    }
                     event.stopPropagation();
                     event.preventDefault();
                     return;

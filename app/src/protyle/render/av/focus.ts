@@ -44,12 +44,12 @@ export const getAVVerticalGoalX = (blockElement: HTMLElement) => {
 };
 
 export const focusAVTitleByVerticalArrow = (blockElement: HTMLElement, direction: TVerticalDirection,
-                                            goalX: number) => {
+                                            goalX: number, scrollBoundary?: Element) => {
     const titleElement = getVisibleAVTitle(blockElement);
     if (!titleElement) {
         return false;
     }
-    if (!focusEditableAtGoalX(titleElement, direction, goalX)) {
+    if (!focusEditableAtGoalX(titleElement, direction, goalX, scrollBoundary)) {
         return false;
     }
     clearSelect(["av"], blockElement);
@@ -57,10 +57,10 @@ export const focusAVTitleByVerticalArrow = (blockElement: HTMLElement, direction
 };
 
 export const focusAVVerticalRegion = (blockElement: HTMLElement, direction: TVerticalDirection, goalX: number,
-                                      includeTitle = true) => {
+                                      includeTitle = true, scrollBoundary?: Element) => {
     const titleElement = includeTitle && getVisibleAVTitle(blockElement);
     if (direction === "down" && titleElement) {
-        return focusAVTitleByVerticalArrow(blockElement, direction, goalX);
+        return focusAVTitleByVerticalArrow(blockElement, direction, goalX, scrollBoundary);
     }
 
     if (blockElement.dataset.avType === "table") {
@@ -93,7 +93,7 @@ export const focusAVVerticalRegion = (blockElement: HTMLElement, direction: TVer
     }
 
     if (direction === "up" && titleElement) {
-        return focusAVTitleByVerticalArrow(blockElement, direction, goalX);
+        return focusAVTitleByVerticalArrow(blockElement, direction, goalX, scrollBoundary);
     }
     return false;
 };

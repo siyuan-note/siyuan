@@ -139,10 +139,10 @@ import {isCaretAtVerticalBoundary} from "./verticalCaret";
 import {
     bindVerticalNavigationReset,
     focusAdjacentVerticalRegion,
-    isAtomicVerticalNavigationTarget,
     leaveAVVerticalRegion,
     prepareVerticalNavigation,
 } from "./verticalNavigation";
+import {isAtomicVerticalNavigationTarget} from "./verticalNavigationState";
 import {
     BLOCK_SELECTION_CLASS,
     clearBlockSelectionMode,
@@ -212,7 +212,10 @@ const showSelectAllTip = () => {
 };
 
 const preserveAVSelectionOnKeyup = (protyle: IProtyle, event: KeyboardEvent) => {
-    const focusedElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
+    const selection = getSelection();
+    const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : undefined;
+    const focusedElement = range && protyle.wysiwyg.element.contains(range.startContainer) &&
+        hasClosestBlock(range.startContainer);
     if (shouldPreserveAVSelectionOnKeyup(event.key,
         !!focusedElement && focusedElement.classList.contains("av"))) {
         protyle.wysiwyg.preventKeyup = true;

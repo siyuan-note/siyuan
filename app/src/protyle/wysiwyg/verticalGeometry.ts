@@ -9,6 +9,11 @@ interface IVerticalRect {
     width: number;
 }
 
+export const getRectsIntersectingVerticalLine = <T extends IVerticalRect>(rects: T[], lineRects: IVerticalRect[]) =>
+    rects.filter(rect => lineRects.some(lineRect =>
+        Math.min(rect.bottom, lineRect.bottom) - Math.max(rect.top, lineRect.top) > 0.5
+    ));
+
 export const getNavigableVerticalRects = <T extends IVerticalRect>(rects: T[],
                                                                    maxTrailingZeroWidthLines?: number) => {
     const navigableRects = rects.filter(rect => rect.height > 0.5);

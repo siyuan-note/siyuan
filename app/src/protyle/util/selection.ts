@@ -16,6 +16,7 @@ import {
     hasClosestByTag,
     isInEmbedBlock
 } from "./hasClosest";
+import {isAtomicVerticalNavigationRange} from "../wysiwyg/verticalNavigationState";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {hideElements} from "../ui/hideElements";
 import {genRenderFrame} from "../render/util";
@@ -202,6 +203,10 @@ export const getEditorRange = (element: Element): Range => {
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
         if (element === range.startContainer || element.contains(range.startContainer)) {
+            // 纵向导航建立的原子 Range 已是合法位置，读取选区时不能再次聚焦其正文。
+            if (isAtomicVerticalNavigationRange(range)) {
+                return range;
+            }
             if (range.toString() === "" && range.startContainer.nodeType === 1) {
                 // 有时候点击编辑器头部需要矫正到第一个块中
                 if (range.startOffset === 0 && (range.startContainer as HTMLElement).classList.contains("protyle-wysiwyg")) {

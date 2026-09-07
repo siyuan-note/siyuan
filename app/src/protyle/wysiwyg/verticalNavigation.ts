@@ -7,8 +7,7 @@ import {focusAVTitleByVerticalArrow, focusAVVerticalRegion} from "../render/av/f
 import {getAdjacentVisibleBlock, getVisibleBoundaryBlock, isVerticalNavigationElementVisible} from "./verticalTarget";
 import {getHostVerticalRegion, getHostVerticalTitleRegion, IHostVerticalRegion} from "./verticalRegion";
 import {getFoldedNavigationOwner} from "./verticalVisibility";
-
-export const VERTICAL_NAVIGATION_ATOMIC_CLASS = "protyle-wysiwyg--navigation";
+import {VERTICAL_NAVIGATION_ATOMIC_CLASS} from "./verticalNavigationState";
 
 const navigationGoalX = new WeakMap<HTMLElement, number>();
 const resetBoundEditors = new WeakSet<HTMLElement>();
@@ -29,9 +28,23 @@ export const bindVerticalNavigationReset = (editorElement: HTMLElement) => {
         return;
     }
     resetBoundEditors.add(editorElement);
-    ["pointerdown", "input", "focusout"].forEach(type => {
+    ["pointerdown", "input"].forEach(type => {
         editorElement.addEventListener(type, () => resetVerticalNavigation(editorElement), true);
     });
+    editorElement.addEventListener("focusout", event => {
+        clearAtomicFocus(editorElement);
+        // 宿主标题与正文间的焦点切换仍属于同一次纵向导航，真正离开当前编辑器后再清除目标列。
+        const relatedElement = event.relatedTarget as Element | null;
+        if (relatedElement?.closest?.(".protyle-wysiwyg") === editorElement) {
+            return;
+        }
+        queueMicrotask(() => {
+            const activeElement = editorElement.ownerDocument.activeElement;
+            if (!activeElement?.closest || activeElement.closest(".protyle-wysiwyg") !== editorElement) {
+                navigationGoalX.delete(editorElement);
+            }
+        });
+    }, true);
 };
 
 export const prepareVerticalNavigation = (editorElement: HTMLElement, event: KeyboardEvent, range: Range,
@@ -48,9 +61,6 @@ export const prepareVerticalNavigation = (editorElement: HTMLElement, event: Key
     }
     return goalX;
 };
-
-export const isAtomicVerticalNavigationTarget = (element: Element) =>
-    !!element.closest(`.${VERTICAL_NAVIGATION_ATOMIC_CLASS}`);
 
 const focusAtomicRegion = (editorElement: HTMLElement, element: HTMLElement, direction: TVerticalDirection) => {
     if (element.getAttribute("fold") === "1") {

@@ -35,9 +35,22 @@ test("entry order ignores unknown and duplicate keys", () => {
 test("tab task action merges into saved layout menus while preserving plugin slots", () => {
     const defaults = getEntryCatalogChildren("gutter.single.tabs").map(item => item.key);
     const saved = ["tabsPositionLeft", "plugin:example:item", "tabsPositionTop"];
-    const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
-    assert.deepEqual(merged.filter(key => key !== "tabsTask"), saved);
-    assert.deepEqual(merged, ["tabsPositionLeft", "plugin:example:item", "tabsTask", "tabsPositionTop"]);
+    const separators = new Set(["separator_tabsTask"]);
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved, undefined, separators);
+    assert.deepEqual(merged.filter(key => key !== "tabsTask" && key !== "separator_tabsTask"), saved);
+    assert.deepEqual(merged, ["tabsPositionLeft", "plugin:example:item", "separator_tabsTask", "tabsTask", "tabsPositionTop"]);
+    assert.deepEqual(resolveEntryOrder(merged, merged, separators), merged);
+});
+
+test("tab task separator merges into existing task menus with valid placement", () => {
+    const defaults = getEntryCatalogChildren("gutter.single.tabs").map(item => item.key);
+    const separators = new Set(["separator_tabsTask"]);
+    const merged = mergeEntryOrderPreservingUnknown(defaults,
+        ["tabsPositionTop", "plugin:example:item", "tabsPositionLeft", "tabsTask"], undefined, separators);
+    assert.deepEqual(merged.filter(key => key !== "separator_tabsTask"),
+        ["tabsPositionTop", "plugin:example:item", "tabsPositionLeft", "tabsTask"]);
+    assert.notEqual(merged[0], "separator_tabsTask");
+    assert.notEqual(merged[merged.length - 1], "separator_tabsTask");
 });
 
 test("tab conversion merges into saved block menus without moving plugin slots", () => {

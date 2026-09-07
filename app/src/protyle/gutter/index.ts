@@ -2174,13 +2174,16 @@ export class Gutter {
                 submenu: [{
                     id: "tabsPositionTop",
                     label: window.siyuan.languages.tabsPositionTop,
-                    icon: (nodeElement.getAttribute("tabs-position") || "top") === "top" ? "iconSelect" : undefined,
+                    checked: (nodeElement.getAttribute("tabs-position") || "top") === "top",
                     click: () => setTabsPosition(protyle, nodeElement as HTMLElement, "top"),
                 }, {
                     id: "tabsPositionLeft",
                     label: window.siyuan.languages.tabsPositionLeft,
-                    icon: nodeElement.getAttribute("tabs-position") === "left" ? "iconSelect" : undefined,
+                    checked: nodeElement.getAttribute("tabs-position") === "left",
                     click: () => setTabsPosition(protyle, nodeElement as HTMLElement, "left"),
+                }, {
+                    id: "separator_tabsTask",
+                    type: "separator",
                 }, {
                     id: "tabsTask",
                     label: window.siyuan.languages.task,

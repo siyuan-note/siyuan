@@ -368,6 +368,7 @@ const gutterSingle = () => [
     node("tabs", lang("tabs"), true, [
         node("tabsPositionTop", lang("tabsPositionTop")),
         node("tabsPositionLeft", lang("tabsPositionLeft")),
+        separator("separator_tabsTask"),
         node("tabsTask", lang("task")),
     ]),
     separator("separator_cancelSuperBlock"),

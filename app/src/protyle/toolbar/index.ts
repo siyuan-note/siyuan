@@ -55,7 +55,8 @@ import {insertEmptyBlock} from "../../block/util";
 import {matchHotKey} from "../util/hotKey";
 import {hideElements} from "../ui/hideElements";
 import {electronUndo} from "../undo";
-import {mergeSameInlineElement, previewTemplate, toolbarKeyToMenu} from "./util";
+import {clearTemplatePreview, mergeSameInlineElement, previewTemplate, toolbarKeyToMenu} from "./util";
+import {openTemplateManager} from "../../template/manager";
 import {showMessage} from "../../dialog/message";
 import {InlineMath} from "./InlineMath";
 import {InlineMemo} from "./InlineMemo";
@@ -296,6 +297,7 @@ export class Toolbar {
             }
         });
         if (!hasText ||
+            !Array.from(range.getClientRects()).some(rect => rect.width > 0 && rect.height > 0) ||
             // 拖拽图片到最右侧
             (range.commonAncestorContainer.nodeType !== 3 && (range.commonAncestorContainer as HTMLElement).classList.contains("img"))) {
             this.element.classList.add("fn__none");
@@ -2081,6 +2083,7 @@ export class Toolbar {
         <span class="fn__space"></span>
         <span data-type="next" class="block__icon block__icon--show"><svg><use xlink:href="#iconRight"></use></svg></span>
     </div>
+    <button type="button" data-type="manage-templates" class="b3-button b3-button--outline" style="margin: 0 8px 4px">${window.siyuan.languages.templateManager}</button>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg"></div>
 </div>
 <div class="toolbarResize" style="    cursor: col-resize;
@@ -2090,8 +2093,23 @@ export class Toolbar {
 <div style="width: 520px;${isMobile() || window.outerWidth < window.outerWidth / 2 + 520 ? "display:none;" : ""}overflow: auto;"></div>
 </div>`;
         const listElement = this.subElement.querySelector(".b3-list");
+        this.subElement.querySelector("[data-type=manage-templates]").addEventListener("click", event => {
+            event.stopPropagation();
+            this.subElement.classList.add("fn__none");
+            openTemplateManager(protyle.block.parentID);
+        });
         resizeSide(this.subElement.querySelector(".toolbarResize"), listElement.parentElement);
         const previewElement = this.subElement.firstElementChild.lastElementChild;
+        const previewObserver = new MutationObserver(() => {
+            if (this.subElement.classList.contains("fn__none") || !this.subElement.contains(previewElement)) {
+                closeSubElement(this);
+            }
+        });
+        previewObserver.observe(this.subElement, {attributes: true, attributeFilter: ["class"], childList: true});
+        this.subElementCloseCB = () => {
+            previewObserver.disconnect();
+            clearTemplatePreview(previewElement);
+        };
         let previewPath: string;
         listElement.addEventListener("mouseover", (event) => {
             const target = event.target as HTMLElement;

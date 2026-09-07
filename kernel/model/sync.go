@@ -101,6 +101,7 @@ func getSyncCloudLatestID() (ret string) {
 	assetDownloadSourceMu.RLock()
 	defer assetDownloadSourceMu.RUnlock()
 	// 同步感知消息不包含云端提交 ID，需要先读取最新索引，以便和局域网提交提示使用同一个去重键。
+	handleCloudError := cloudRepoErrorHandler()
 	repo, err := newSyncRepositoryWithAssetSourceLocked()
 	if nil != err {
 		logging.LogWarnf("create repo before perceived sync failed: %s", err)
@@ -108,6 +109,7 @@ func getSyncCloudLatestID() (ret string) {
 	}
 	syncContext := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToNone}
 	latest, err := repo.GetCloudLatestFast(syncContext)
+	handleCloudError(err)
 	if nil != err {
 		logging.LogWarnf("get cloud latest before perceived sync failed: %s", err)
 		return
@@ -709,6 +711,8 @@ func CreateCloudSyncDir(name string) (err error) {
 		return errors.New(Conf.Language(37))
 	}
 
+	handleCloudError := cloudRepoErrorHandler()
+	defer func() { handleCloudError(err) }()
 	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
@@ -716,6 +720,7 @@ func CreateCloudSyncDir(name string) (err error) {
 
 	err = repo.CreateCloudRepo(name)
 	if err != nil {
+		handleCloudError(err)
 		err = errors.New(formatRepoErrorMsg(err))
 		return
 	}
@@ -740,6 +745,8 @@ func RemoveCloudSyncDir(name string) (err error) {
 
 	msgId := util.PushMsg(Conf.Language(116), 15000)
 
+	handleCloudError := cloudRepoErrorHandler()
+	defer func() { handleCloudError(err) }()
 	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
@@ -747,6 +754,7 @@ func RemoveCloudSyncDir(name string) (err error) {
 
 	err = repo.RemoveCloudRepo(name)
 	if err != nil {
+		handleCloudError(err)
 		err = errors.New(formatRepoErrorMsg(err))
 		return
 	}
@@ -768,6 +776,8 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 	var dirs []*cloud.Repo
 	var size int64
 
+	handleCloudError := cloudRepoErrorHandler()
+	defer func() { handleCloudError(err) }()
 	repo, err := newRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
@@ -775,6 +785,7 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 
 	dirs, size, err = repo.GetCloudRepos()
 	if err != nil {
+		handleCloudError(err)
 		err = errors.New(formatRepoErrorMsg(err))
 		return
 	}

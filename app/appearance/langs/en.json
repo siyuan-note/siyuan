@@ -18,6 +18,21 @@
 	"flashcardUnknownDurationReviews": "Reviews with unknown time",
 	"flashcardReviewsByHour": "Reviews by hour",
 	"flashcardAllHistory": "All history",
+	"templateSearch": "Search templates by name or path",
+	"templateContextSearch": "Search context documents",
+	"templateContextTip": "Run the template using the selected document's title, ID, and other information without modifying that document",
+	"fileTreeDragRemoveSorts": "This move conflicts with the current sort rule. Switch this list to custom sorting and save the complete order after dragging?",
+	"pasteAndKeepSourceFormat": "Paste and keep source formatting",
+	"templatePackageMoveTip": "Template package folders cannot be renamed or moved",
+	"avDragRemoveSorts": "This move conflicts with the current sort rules. Remove the sort rules for this view and save the complete order after dragging as the custom order?",
+	"templateManager": "Template manager",
+	"templateSource": "Template source",
+	"templatePreview": "Preview template",
+	"templateContext": "Preview context",
+	"templateNewFolder": "New folder",
+	"templateDeleteTip": "Delete this item and all its contents? Deleted files are retained in data/templates/.trash for recovery.",
+	"task": "Task",
+	"customTaskStatus": "Custom task status",
 	"imageViewerPlay": "Play slideshow",
 	"imageFlipHorizontal": "Flip horizontally",
 	"imageFlipVertical": "Flip vertically",
@@ -2799,6 +2814,7 @@
 		"374": "Database [%s], template field [%s], first affected item [%s] (item ID: %s), affected item count: %d, error: %s",
 		"375": "The shorthand save notebook is unavailable. Select an opened non-encrypted notebook in Settings - Document",
 		"376": "The asset has not been downloaded and cannot be retrieved right now",
-		"377": "Please switch to Download all before changing or resetting the data repository"
+		"377": "Please switch to Download all before changing or resetting the data repository",
+		"378": "Cross-site requests are not allowed"
 	}
 }

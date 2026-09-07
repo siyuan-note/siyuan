@@ -83,6 +83,7 @@ import {appendCancelSuperBlockOperations} from "../../block/cancelSuperBlock";
 import {remapTabsDOMIDs} from "./tabsCopy";
 import {getTabItems} from "../render/tabsRender";
 import {repairActiveTab} from "../wysiwyg/tabsRemoval";
+import {sortAVRows} from "../render/av/rowSort";
 
 const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`;
 const SHIFT_EMBED_INSERT_TARGET_TYPES = ["NodeParagraph", "NodeHeading", "NodeCodeBlock", "NodeAttributeView"];
@@ -1159,19 +1160,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else if (target.classList.contains("av__gallery-item")) {
                 const blockElement = hasClosestBlock(target);
                 if (blockElement) {
-                    if (blockElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active")) {
-                        const bodyElements = blockElement.querySelectorAll(".av__body");
-                        if (bodyElements.length === 1) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            return;
-                        } else if (getAVData(blockElement)?.view.group?.valueSource === "rendered" ||
-                            ["template", "created", "updated"].includes(bodyElements[0].getAttribute("data-dtype"))) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            return;
-                        }
-                    }
                     if (!target.classList.contains("av__gallery-item--select")) {
                         clearSelect(["galleryItem"], blockElement);
                         target.classList.add("av__gallery-item--select");
@@ -1728,7 +1716,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                     });
                                 }
                             });
-                            transaction(protyle, doOperations, undoOperations);
+                            sortAVRows(protyle, blockElement, selectedIds, targetGroupID, previousID,
+                                targetClass.includes("dragover__bottom") ? "" : targetElement.getAttribute("data-id") || "",
+                                doOperations, undoOperations);
                         } else {
                             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
                             const bodyElement = hasClosestByClassName(targetElement, "av__body");
@@ -1785,7 +1775,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 const items = item.split("@");
                                 const id = items[0];
                                 const groupID = items[1] || "";
-                                const undoPreviousId = blockElement.querySelector(`.av__body[data-group-id="${groupID}"] .av__gallery-item[data-id="${id}"]`).previousElementSibling?.getAttribute("data-id") || "";
+                                const undoPreviousId = getAVPreviousItemID(
+                                    blockElement.querySelector<HTMLElement>(`.av__body[data-group-id="${groupID}"]`), id);
                                 if (previousID !== item && undoPreviousId !== previousID || (
                                     (undoPreviousId === "" && previousID === "" && targetGroupID !== groupID)
                                 )) {
@@ -1809,7 +1800,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                     });
                                 }
                             });
-                            transaction(protyle, doOperations, undoOperations);
+                            sortAVRows(protyle, blockElement, selectedIds, targetGroupID, previousID,
+                                targetClass.includes("dragover__top") || targetClass.includes("dragover__left") ?
+                                    targetElement.getAttribute("data-id") || "" : "",
+                                doOperations, undoOperations);
                         } else {
                             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
                             const bodyElement = hasClosestByClassName(targetElement, "av__body");
@@ -2659,15 +2653,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     // https://github.com/siyuan-note/siyuan/issues/15553
                     const isTCU = getAVData(blockElement)?.view.group?.valueSource === "rendered" ||
                         ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
-                    // 排序只能夸组拖拽
-                    const hasSort = blockElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active");
                     gutterTypes[2].split(",").find(item => {
                         const sourceGroupID = item ? item.split("@")[1] : "";
                         if (sourceGroupID !== groupID && isTCU) {
-                            targetElement = false;
-                            return true;
-                        }
-                        if (sourceGroupID === groupID && hasSort) {
                             targetElement = false;
                             return true;
                         }
@@ -2689,15 +2677,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     // https://github.com/siyuan-note/siyuan/issues/15553
                     const isTCU = getAVData(blockElement)?.view.group?.valueSource === "rendered" ||
                         ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
-                    // 排序只能夸组拖拽
-                    const hasSort = blockElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active");
                     gutterTypes[2].split(",").find(item => {
                         const sourceGroupID = item ? item.split("@")[1] : "";
                         if (sourceGroupID !== groupID && isTCU) {
-                            targetElement = false;
-                            return true;
-                        }
-                        if (sourceGroupID === groupID && hasSort) {
                             targetElement = false;
                             return true;
                         }

@@ -16,3 +16,11 @@ export const shouldDeferCodeBlockCaretRestore = (options: {
     isCodeBlock: boolean,
     isRendered: boolean,
 }) => options.isRangeBlock && options.isReplay && options.hasCaret && options.isCodeBlock && !options.isRendered;
+
+export const shouldReloadForHeadingBatch = (
+    rootID: string | undefined,
+    operations: Array<{context?: {headingBatchRootID?: string}}>,
+) => operations.some(operation => {
+    const headingBatchRootID = operation.context?.headingBatchRootID;
+    return Boolean(headingBatchRootID) && headingBatchRootID === rootID;
+});

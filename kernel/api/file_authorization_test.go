@@ -21,11 +21,13 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestGetUniqueFilenameAuthorization(t *testing.T) {
@@ -79,5 +81,40 @@ func TestGetUniqueFilenameAuthorization(t *testing.T) {
 				t.Fatalf("unexpected path: got %q, want %q", response.Data.Path, filePath)
 			}
 		})
+	}
+}
+
+func TestGetUniqueFilenameRejectsEncryptedNotebook(t *testing.T) {
+	root, boxID := setupArchiveWorkspace(t)
+	oldConf := model.Conf
+	model.Conf = model.NewAppConf()
+	t.Cleanup(func() { model.Conf = oldConf })
+	for _, name := range []string{"existing.sy", "missing.sy"} {
+		filePath := filepath.Join(util.DataDir, boxID, name)
+		if name == "existing.sy" {
+			if err := os.WriteFile(filePath, []byte("ciphertext"), 0600); err != nil {
+				t.Fatal(err)
+			}
+		}
+		body, err := json.Marshal(map[string]string{"path": filePath})
+		if err != nil {
+			t.Fatal(err)
+		}
+		result := callArchiveAPI(t, getUniqueFilename, string(body))
+		if result.Code != -3 || result.Data != nil {
+			t.Fatalf("encrypted filename existence was exposed: %+v", result)
+		}
+	}
+	filePath := filepath.Join(root, "normal.txt")
+	if err := os.WriteFile(filePath, []byte("normal"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	body, err := json.Marshal(map[string]string{"path": filePath})
+	if err != nil {
+		t.Fatal(err)
+	}
+	result := callArchiveAPI(t, getUniqueFilename, string(body))
+	if result.Code != 0 || result.Data.(map[string]any)["path"] != filepath.Join(root, "normal (1).txt") {
+		t.Fatalf("normal filename allocation failed: %+v", result)
 	}
 }

@@ -185,3 +185,47 @@ func TestDocSaveAsTemplateDatabaseMode(t *testing.T) {
 		})
 	}
 }
+
+func TestTemplatePreviewSourceModeRestriction(t *testing.T) {
+	previousWorkspace, previousData := util.WorkspaceDir, util.DataDir
+	util.WorkspaceDir = t.TempDir()
+	util.DataDir = filepath.Join(util.WorkspaceDir, "data")
+	t.Cleanup(func() { util.WorkspaceDir, util.DataDir = previousWorkspace, previousData })
+	p := filepath.Join(util.DataDir, "templates", "preview.md")
+	if err := os.MkdirAll(filepath.Dir(p), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(p, []byte("original"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	for _, value := range []map[string]any{
+		{"mode": "editorInsert", "content": "draft"},
+		{"content": "draft"},
+		{"mode": "preview", "content": true},
+	} {
+		value["id"] = "20260904000999-api0001"
+		value["path"] = p
+		body, err := json.Marshal(value)
+		if err != nil {
+			t.Fatal(err)
+		}
+		recorder := httptest.NewRecorder()
+		context, _ := gin.CreateTestContext(recorder)
+		context.Request = httptest.NewRequest(http.MethodPost, "/api/template/render", bytes.NewReader(body))
+		context.Request.Header.Set("Content-Type", "application/json")
+		renderTemplate(context)
+		var response struct {
+			Code int `json:"code"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+			t.Fatal(err)
+		}
+		if response.Code != -1 {
+			t.Fatalf("source accepted outside preview: %s", recorder.Body.String())
+		}
+	}
+	content, err := os.ReadFile(p)
+	if err != nil || string(content) != "original" {
+		t.Fatal("rejected preview changed template file")
+	}
+}

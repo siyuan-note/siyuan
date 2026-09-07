@@ -1688,7 +1688,7 @@ func serveWebSocket(ginServer *gin.Engine) {
 	util.WebSocketServer = melody.New()
 	// 校验 Origin，防止跨站 WebSocket 劫持（CSWSH） https://github.com/siyuan-note/siyuan/security/advisories/GHSA-3cc2-h3v6-rqpq
 	util.WebSocketServer.Upgrader.CheckOrigin = func(r *http.Request) bool {
-		return util.IsSessionOriginAllowed(r.Header.Get("Origin"), r.Host)
+		return util.IsSessionOriginAllowedRequest(r)
 	}
 	util.WebSocketServer.Config.MaxMessageSize = 1024 * 1024 * 8
 
@@ -2074,7 +2074,7 @@ func corsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Credentials", "true")
-		c.Header("Access-Control-Allow-Headers", "origin, Content-Length, Content-Type, Authorization")
+		c.Header("Access-Control-Allow-Headers", "origin, Content-Length, Content-Type, Authorization, X-SiYuan-App-ID")
 		c.Header("Access-Control-Allow-Private-Network", "false")
 
 		if strings.HasPrefix(c.Request.RequestURI, "/webdav") {

@@ -1,6 +1,7 @@
 @use "util/keyframes" as *;
 @use "util/function" as *;
 @use "business/history" as *;
+@use "business/template-manager" as *;
 @use "component/chip" as *;
 @use "component/slider" as *;
 @use "component/switch" as *;

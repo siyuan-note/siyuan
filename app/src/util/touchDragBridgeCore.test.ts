@@ -5,6 +5,7 @@ import {
     createDragRefreshQueue,
     dispatchWithNativeDragEnabled,
     getDragRelayTypes,
+    getSourceDragGhostVisibility,
     getWheelScrollDelta,
     hasActiveTouchGesture,
     isDragRelaySource,
@@ -153,6 +154,11 @@ describe("desktop mouse drag candidates", () => {
         assert.equal(shouldRequestForeignMouseDrop(false, 0, false, false), false);
         assert.equal(shouldRequestForeignMouseDrop(false, 0, true, true), false);
         assert.equal(shouldRequestForeignMouseDrop(true, 0, true, false), false);
+    });
+
+    it("hides the source drag ghost after the pointer leaves its window", () => {
+        assert.equal(getSourceDragGhostVisibility(false), "");
+        assert.equal(getSourceDragGhostVisibility(true), "hidden");
     });
 });
 

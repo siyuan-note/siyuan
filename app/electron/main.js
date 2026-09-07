@@ -235,10 +235,13 @@ const leaveBlockDragTarget = (dragSession) => {
 };
 
 const sendBlockDragRoute = (dragSession, remote, sequence = dragSession.point?.sequence) => {
+    const sourceWindow = getBlockDragWindow(dragSession.sourceWebContentsId);
     sendBlockDragMessage(dragSession.sourceWebContentsId, {
         phase: "route",
         dragId: dragSession.dragId,
         remote,
+        outsideSource: !sourceWindow || !dragSession.point ||
+            !isPointInBounds(dragSession.point, sourceWindow.getContentBounds()),
         sequence,
     });
 };

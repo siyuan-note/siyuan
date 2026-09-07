@@ -1448,13 +1448,7 @@ func unlockBoxHeld(boxID string, password string, boxEnc *conf.BoxEncryption) (e
 
 	// 持锁保护"开 db + 缓存 DEK"的原子性，避免与并发的 LockBox 导致 db/DEK 不一致
 	cachedDEKsLock.Lock()
-	if err = sql.OpenEncryptedDB(boxID, dek); err != nil {
-		cachedDEKsLock.Unlock()
-		finalState = EncryptedBoxStateError
-		return err
-	}
-	if err = treenode.OpenEncryptedBlockTreeDB(boxID, dek); err != nil {
-		sql.RemoveEncryptedDBFile(boxID) // 清理已创建的 content db 文件，避免遗留空加密库
+	if err = openEncryptedBoxIndexes(boxID, dek); err != nil {
 		cachedDEKsLock.Unlock()
 		finalState = EncryptedBoxStateError
 		return err
@@ -2220,6 +2214,7 @@ func ExtractBoxIDFromHistoryPath(absPath string) string {
 // 与 filesys.encryptData/decryptData 共用同一 AAD 构造入口，保证加解密一致。
 func EncryptFile(boxID, relativePath string, dek, plaintext []byte) ([]byte, error) {
 	fileKey := util.DeriveSubKey(dek, "siyuan/file")
+	defer zeroAndClear(fileKey)
 	aad, err := filesys.SyAAD(boxID, relativePath)
 	if err != nil {
 		return nil, err
@@ -2230,6 +2225,7 @@ func EncryptFile(boxID, relativePath string, dek, plaintext []byte) ([]byte, err
 // DecryptFile 对应解密。
 func DecryptFile(boxID, relativePath string, dek, ciphertext []byte) ([]byte, error) {
 	fileKey := util.DeriveSubKey(dek, "siyuan/file")
+	defer zeroAndClear(fileKey)
 	aad, err := filesys.SyAAD(boxID, relativePath)
 	if err != nil {
 		return nil, err

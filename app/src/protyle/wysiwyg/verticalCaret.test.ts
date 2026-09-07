@@ -1,6 +1,10 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getNavigableVerticalRects, isCaretRectAtVerticalBoundary} from "./verticalGeometry";
+import {
+    getNavigableVerticalRects,
+    getRectsIntersectingVerticalLine,
+    isCaretRectAtVerticalBoundary,
+} from "./verticalGeometry";
 
 const rect = (top: number, height = 20) => ({
     top,
@@ -47,5 +51,14 @@ describe("vertical caret boundary", () => {
         const navigableRects = getNavigableVerticalRects(rects, 1);
 
         assert.deepEqual(navigableRects, rects.slice(0, 2));
+    });
+
+    it("accepts only range context rectangles that reach the target line", () => {
+        const lines = [rect(30)];
+
+        assert.deepEqual(getRectsIntersectingVerticalLine([rect(10)], lines), []);
+        assert.deepEqual(getRectsIntersectingVerticalLine([rect(10, 40)], lines), [rect(10, 40)]);
+        assert.deepEqual(getRectsIntersectingVerticalLine([{...rect(30), right: 10, width: 0}], lines),
+            [{...rect(30), right: 10, width: 0}]);
     });
 });

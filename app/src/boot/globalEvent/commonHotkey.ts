@@ -202,7 +202,7 @@ export const syncAppMenuShortcuts = () => {
             cut: window.siyuan.languages.cut,
             copy: window.siyuan.languages.copy,
             paste: window.siyuan.languages.paste,
-            pasteAndMatchStyle: window.siyuan.languages.appMenuPasteAndMatchStyle,
+            pasteAndMatchStyle: window.siyuan.languages.pasteAsPlainText,
             selectAll: window.siyuan.languages.selectAll,
             window: window.siyuan.languages.appMenuWindow,
             minimize: window.siyuan.languages.appMenuMinimize,

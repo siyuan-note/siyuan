@@ -72,6 +72,7 @@ import {
     updateFileTreeSortMode
 } from "../../util/fileTreeSort";
 import {clearDocumentTabMovePreview} from "../tabDrag";
+import {reorderSortedFileTree} from "../../util/fileTreeReorder";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 
 export class Files extends Model {
@@ -672,7 +673,7 @@ export class Files extends Model {
                     }
                     if ((dragOverLastObj.sourceOnlyRoot && targetType === "navigation-root" && window.siyuan.config.fileTree.sort === 6) ||
                         (!dragOverLastObj.sourceOnlyRoot && targetType !== "navigation-root" &&
-                            isCustomFileTreeList(targetListElement))
+                            (isCustomFileTreeList(targetListElement) || !gutterType))
                     ) {
                         const nodeRect = liElement.getBoundingClientRect();
                         const dragHeight = nodeRect.height * .2;
@@ -932,6 +933,17 @@ export class Files extends Model {
                         toURL,
                         !newElement.classList.contains("dragover__top")
                     ));
+                } else if (!isCustomFileTreeList(targetListElement) && selectFileElements.length > 0) {
+                    const after = newElement.classList.contains("dragover__bottom");
+                    newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
+                    const sourceNotebookIds = selectFileElements.map(item =>
+                        item.getAttribute("data-notebook-id") || item.closest("ul[data-url]")?.getAttribute("data-url") || "");
+                    if (!isMoveTargetAllowed(sourceNotebookIds, toURL)) {
+                        showMessage(window.siyuan.languages._kernel[313]);
+                        return;
+                    }
+                    await this.reorderSortedDocuments(selectFileElements.map(item => item.getAttribute("data-node-id")),
+                        newElement.getAttribute("data-node-id"), after, oldScrollTop);
                 } else if (isCustomFileTreeList(targetListElement) && selectFileElements.length > 0) {
                     const toDir = pathPosix().dirname(toPath);
                     const newElementClassList = newElement.getAttribute("class");
@@ -1031,6 +1043,21 @@ export class Files extends Model {
         this.init();
     }
 
+    private async reorderSortedDocuments(sourceIDs: string[], targetID: string, after: boolean, scrollTop: number) {
+        const result = await reorderSortedFileTree(sourceIDs, targetID, after);
+        if (!result) {
+            return;
+        }
+        const response = await fetchSyncPost("/api/filetree/listDocsByPath", {
+            notebook: result.notebook,
+            path: result.parentPath,
+            app: Constants.SIYUAN_APPID,
+        });
+        if (response.code === 0 && response.data?.files) {
+            this.onLsHTML(response.data, scrollTop);
+        }
+    }
+
     private async dropDocumentTab(
         documentTabData: IDocumentTabDragData,
         targetElement: HTMLElement,
@@ -1079,6 +1106,8 @@ export class Files extends Model {
         }
 
         if (!isCustomFileTreeList(targetElement.parentElement)) {
+            await this.reorderSortedDocuments([documentTabData.rootId], targetElement.getAttribute("data-node-id"),
+                insertAfter, oldScrollTop);
             return;
         }
         const targetDirectory = pathPosix().dirname(targetPath);
@@ -1591,7 +1620,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         const listPath = data.parentPath === "/" ? "/" : `${data.parentPath}.sy`;
         const liElement = notebookElement.querySelector(`li[data-path="${listPath}"]`);
         const listElement = liElement?.nextElementSibling;
-        if (!listElement || listElement.tagName !== "UL" || !isCustomFileTreeList(listElement)) {
+        if (!listElement || listElement.tagName !== "UL") {
             return;
         }
         fetchPost("/api/filetree/listDocsByPath", {

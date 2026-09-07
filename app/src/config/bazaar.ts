@@ -601,7 +601,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
     </div>
     <div class="b3-card__actions b3-card__actions--right">
         ${bazaar._genIncompatibleChipHTML(available, "bazaar", bazaarType)}
-        ${bazaar._genDeprecatedChipHTML(available, false)}
+        ${bazaar._genDeprecatedChipHTML(available)}
         ${bazaar._genFundingHTML(installed.preferredFunding, false)}
         <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
             <svg><use xlink:href="#iconFolder"></use></svg>
@@ -840,7 +840,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         ${bazaar._genUpdateButtonHTML(available, bazaarType, true)}
         ${genRatePackageActionHTML(bazaar._data.downloadedRatingKeys.has(ratingKey), bazaar._data.userRatings.get(ratingKey))}
         ${bazaar._genIncompatibleChipHTML(bazaarItem, "installed", bazaarType)}
-        ${bazaar._genDeprecatedChipHTML(bazaarItem, false)}
+        ${bazaar._genDeprecatedChipHTML(bazaarItem)}
         ${bazaar._genFundingHTML(bazaarItem.preferredFunding, false)}
         ${hasSetting ? `<span data-position="north" class="ariaLabel block__icon block__icon--show${window.siyuan.config.bazaar.petalDisabled ? " fn__none" : ""}" data-type="setting" aria-label="${window.siyuan.languages.config}">
             <svg><use xlink:href="#iconSettings"></use></svg>

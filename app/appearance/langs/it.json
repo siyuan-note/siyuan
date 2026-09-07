@@ -18,6 +18,21 @@
 	"flashcardUnknownDurationReviews": "Ripassi con durata sconosciuta",
 	"flashcardReviewsByHour": "Ripassi per ora",
 	"flashcardAllHistory": "Tutta la cronologia",
+	"templateSearch": "Cerca modelli per nome o percorso",
+	"templateContextSearch": "Cerca documenti di contesto",
+	"templateContextTip": "Esegui il modello usando il titolo, l’ID e le altre informazioni del documento selezionato senza modificarlo",
+	"fileTreeDragRemoveSorts": "Questo spostamento è in conflitto con la regola di ordinamento attuale. Passare questa lista all’ordinamento personalizzato e salvare l’ordine completo dopo il trascinamento?",
+	"pasteAndKeepSourceFormat": "Incolla mantenendo la formattazione originale",
+	"templatePackageMoveTip": "Le cartelle dei pacchetti di modelli non possono essere rinominate o spostate",
+	"avDragRemoveSorts": "Questo spostamento è in conflitto con le regole di ordinamento attuali. Rimuovere le regole di ordinamento di questa vista e salvare l’ordine completo dopo il trascinamento come ordine personalizzato?",
+	"templateManager": "Gestione modelli",
+	"templateSource": "Sorgente del modello",
+	"templatePreview": "Anteprima del modello",
+	"templateContext": "Contesto dell’anteprima",
+	"templateNewFolder": "Nuova cartella",
+	"templateDeleteTip": "Eliminare questo elemento e tutto il suo contenuto? I file eliminati vengono conservati in data/templates/.trash per il ripristino.",
+	"task": "Attività",
+	"customTaskStatus": "Stato attività personalizzato",
 	"imageViewerPlay": "Avvia presentazione",
 	"imageFlipHorizontal": "Capovolgi orizzontalmente",
 	"imageFlipVertical": "Capovolgi verticalmente",
@@ -2799,6 +2814,7 @@
 		"374": "Database [%s], campo modello [%s], primo elemento interessato [%s] (ID elemento: %s), numero di elementi interessati: %d, errore: %s",
 		"375": "Il taccuino per il salvataggio delle note rapide non è disponibile. Seleziona un taccuino aperto e non crittografato in Impostazioni - Documento",
 		"376": "La risorsa non è ancora stata scaricata e al momento non può essere recuperata",
-		"377": "Passa a Scarica tutto prima di cambiare o reimpostare il repository dei dati"
+		"377": "Passa a Scarica tutto prima di cambiare o reimpostare il repository dei dati",
+		"378": "Le richieste tra siti non sono consentite"
 	}
 }

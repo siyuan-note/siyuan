@@ -16,6 +16,7 @@ import {
 import {openByMobile, openLink} from "../editor/openLink";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
+import {loadTemplateDirectories, openTemplateManager} from "../template/manager";
 import {Dialog} from "../dialog";
 import {focusBlock, focusByRange, getEditorRange} from "../protyle/util/selection";
 /// #if !MOBILE
@@ -559,12 +560,12 @@ export const exportMd = (id: string) => {
             iconClass: "ft__error",
             icon: "iconMarkdown",
             click: async () => {
-                const result = await fetchSyncPost("/api/block/getRefText", {id: id});
-
-                const dialog = new Dialog({
-                    title: window.siyuan.languages.fileName,
-                    content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value="">
-<div class="fn__hr"></div>
+                const response = await fetchSyncPost("/api/template/getDocSaveAsTemplateInfo", {id});
+                if (response.code !== 0) {
+                    return;
+                }
+                const info = response.data as {name: string, directory: string, hasDatabase: boolean};
+                const databaseOptions = info.hasDatabase ? `<div class="fn__hr"></div>
 <div class="b3-label__text">${window.siyuan.languages.templateDatabaseMode}</div>
 <label class="fn__flex b3-label">
     <input type="radio" name="templateDatabaseMode" value="copy" checked>
@@ -575,7 +576,16 @@ export const exportMd = (id: string) => {
     <input type="radio" name="templateDatabaseMode" value="reference">
     <span class="fn__space"></span>
     <div>${window.siyuan.languages.duplicateMirror}<div class="b3-label__text">${window.siyuan.languages.templateDatabaseReferenceTip}</div></div>
-</label></div>
+</label>` : "";
+
+                const dialog = new Dialog({
+                    title: window.siyuan.languages.fileName,
+                    content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value="">
+<div class="fn__hr"></div>
+<label>${window.siyuan.languages.savePath}<select class="b3-select fn__block" data-template-directory><option value="">/</option></select></label>
+<div class="fn__hr"></div>
+<button type="button" class="b3-button b3-button--outline" data-template-manager>${window.siyuan.languages.templateManager}</button>
+${databaseOptions}</div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
@@ -583,13 +593,21 @@ export const exportMd = (id: string) => {
                     width: isMobile() ? "92vw" : "520px",
                 });
                 dialog.element.setAttribute("data-key", Constants.DIALOG_EXPORTTEMPLATE);
+                const directoryElement = dialog.element.querySelector<HTMLSelectElement>("[data-template-directory]");
+                directoryElement.value = info.directory || "";
+                void loadTemplateDirectories(directoryElement).catch(console.error);
+                dialog.element.querySelector("[data-template-manager]").addEventListener("click", () => {
+                    openTemplateManager(id, () => {
+                        void loadTemplateDirectories(directoryElement).catch(console.error);
+                    });
+                });
                 const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
-                const btnsElement = dialog.element.querySelectorAll(".b3-button");
+                const btnsElement = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
                 dialog.bindInput(inputElement, () => {
                     (btnsElement[1] as HTMLButtonElement).click();
                 });
-                let name = replaceFileName(result.data);
                 const maxNameLen = 32;
+                let name = replaceFileName(info.name);
                 if (name.length > maxNameLen) {
                     name = name.substring(0, maxNameLen);
                 }
@@ -600,17 +618,12 @@ export const exportMd = (id: string) => {
                     dialog.destroy();
                 });
                 btnsElement[1].addEventListener("click", () => {
-                    if (inputElement.value.trim() === "") {
-                        inputElement.value = window.siyuan.languages.untitled;
-                    } else {
-                        inputElement.value = replaceFileName(inputElement.value);
+                    let templateName = inputElement.value.trim() === "" ? window.siyuan.languages.untitled :
+                        replaceFileName(inputElement.value);
+                    if (templateName.length > maxNameLen) {
+                        templateName = templateName.substring(0, maxNameLen);
                     }
-
-                    if (name.length > maxNameLen) {
-                        name = name.substring(0, maxNameLen);
-                    }
-
-                    const templateName = inputElement.value;
+                    inputElement.value = templateName;
                     const selectedDatabaseMode = (dialog.element.querySelector(
                         "input[name=\"templateDatabaseMode\"]:checked") as HTMLInputElement)?.value;
                     const databaseMode: "copy" | "reference" = selectedDatabaseMode === "reference" ?
@@ -618,6 +631,7 @@ export const exportMd = (id: string) => {
                     const requestData = {
                         id,
                         name: templateName,
+                        directory: directoryElement.value,
                         overwrite: false,
                         databaseMode,
                     };

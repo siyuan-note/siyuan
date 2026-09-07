@@ -36,8 +36,10 @@ import {
 import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../../protyle/util/headingTransform";
 import {syncDocTitleIAL} from "../../protyle/util/docTitleIAL";
 import {canBatchConvertHeadings, showHeadingBatchDialog} from "../../protyle/util/headingBatch";
+import {waitForPendingTransactions} from "../../protyle/util/transactionQueue";
 
 export class Outline extends Model {
+    private currentRequestID = 0;
     public tree: Tree;
     public element: HTMLElement;
     public headerElement: HTMLElement;
@@ -594,7 +596,8 @@ export class Outline extends Model {
         }
     }
 
-    public setCurrent(nodeElement: HTMLElement) {
+    public async setCurrent(nodeElement: HTMLElement) {
+        const requestID = ++this.currentRequestID;
         if (!nodeElement) {
             return;
         }
@@ -621,10 +624,25 @@ export class Outline extends Model {
                     excludeTypes: []
                 };
                 const notebookId = this.getNotebookId();
-                if (isEncryptedBox(notebookId)) {
+                if (notebookId) {
                     breadcrumbParam.notebook = notebookId;
                 }
+                const blockID = this.blockId;
+                const protyle = getAllModels().editor.find(item =>
+                    item.editor.protyle.block.rootID === blockID &&
+                    item.editor.protyle.wysiwyg.element.contains(nodeElement))?.editor.protyle;
+                const isCurrent = () => requestID === this.currentRequestID && blockID === this.blockId &&
+                    nodeElement.isConnected;
+                if (protyle) {
+                    await waitForPendingTransactions(protyle);
+                }
+                if (!isCurrent()) {
+                    return;
+                }
                 fetchPost("/api/block/getBlockBreadcrumb", breadcrumbParam, (response) => {
+                    if (!isCurrent()) {
+                        return;
+                    }
                     response.data.reverse().find((item: IBreadcrumb) => {
                         if (item.type === "NodeHeading") {
                             this.setCurrentById(item.id);

@@ -166,6 +166,75 @@ func TestStaticFileNestedSymlinkEscape(t *testing.T) {
 	}
 }
 
+// TestStaticFileSymlinkWorkspace 验证工作空间父目录符号链接不影响资源访问及敏感路径拦截。
+func TestStaticFileSymlinkWorkspace(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	realHome, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	linkedHome := filepath.Join(t.TempDir(), "home")
+	if err = os.Symlink(realHome, linkedHome); err != nil {
+		t.Skipf("create directory symlink failed: %s", err)
+	}
+	originalWorkspace := util.WorkspaceDir
+	util.WorkspaceDir = filepath.Join(linkedHome, ".var", "app", "org.b3log.siyuan", "SiYuan")
+	t.Cleanup(func() { util.WorkspaceDir = originalWorkspace })
+	for _, rel := range []string{
+		"data/emojis/fontawesome-free-solid/robot.svg",
+		"data/widgets/listChildDocs/index.html",
+		"data/widgets/listChildDocs/app.js",
+		"data/widgets/listChildDocs/credentials.json",
+		"conf/conf.json",
+		"temp/private.txt",
+	} {
+		p := filepath.Join(util.WorkspaceDir, filepath.FromSlash(rel))
+		if err = os.MkdirAll(filepath.Dir(p), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err = os.WriteFile(p, []byte("content"), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	widgets := filepath.Join(util.WorkspaceDir, "data", "widgets")
+	for _, dir := range []string{"conf", "temp"} {
+		if err = os.Symlink(filepath.Join(util.WorkspaceDir, dir), filepath.Join(widgets, dir)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err = os.Symlink(filepath.Join(util.WorkspaceDir, "conf"), filepath.Join(widgets, "listChildDocs", "escape")); err != nil {
+		t.Fatal(err)
+	}
+	engine := gin.New()
+	registerStaticFileHandlers(engine.Group("/emojis"), filepath.Join(util.WorkspaceDir, "data", "emojis"), false, nil)
+	registerStaticFileHandlers(engine.Group("/widgets"), widgets, true, nil)
+	for _, test := range []struct {
+		path   string
+		status int
+	}{
+		{"/emojis/fontawesome-free-solid/robot.svg", http.StatusOK},
+		{"/widgets/listChildDocs/", http.StatusOK},
+		{"/widgets/listChildDocs/app.js", http.StatusOK},
+		{"/widgets/listChildDocs/credentials.json", http.StatusForbidden},
+		{"/widgets/conf/conf.json", http.StatusForbidden},
+		{"/widgets/temp/private.txt", http.StatusForbidden},
+		{"/widgets/listChildDocs/escape/conf.json", http.StatusForbidden},
+	} {
+		for _, method := range []string{http.MethodGet, http.MethodHead} {
+			t.Run(method+" "+test.path, func(t *testing.T) {
+				recorder := httptest.NewRecorder()
+				engine.ServeHTTP(recorder, httptest.NewRequest(method, test.path, nil))
+				if recorder.Code != test.status {
+					t.Fatalf("status = %d, want %d", recorder.Code, test.status)
+				}
+				if method == http.MethodGet && test.status == http.StatusOK && recorder.Body.String() != "content" {
+					t.Fatalf("unexpected response body: %q", recorder.Body.String())
+				}
+			})
+		}
+	}
+}
+
 func TestWidgetResponseCacheControl(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	originalDataDir, originalConf := util.DataDir, model.Conf

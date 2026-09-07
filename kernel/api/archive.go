@@ -139,7 +139,18 @@ func zip(c *gin.Context) {
 		return
 	}
 
-	zipFile, err := gulu.Zip.Create(zipAbsFilePath)
+	resolvedZipPath, err := resolveArchivePath(zipAbsFilePath)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	if err = rejectEncryptedArchivePath(resolvedZipPath); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	zipFile, err := gulu.Zip.Create(resolvedZipPath)
 	if err != nil {
 		logging.LogErrorf("create zip [%s] failed: %s", zipAbsFilePath, err)
 		ret.Code = -1
@@ -148,10 +159,10 @@ func zip(c *gin.Context) {
 	}
 
 	base := filepath.Base(entryAbsPath)
-	if gulu.File.IsDir(entryAbsPath) {
-		err = zipFile.AddDirectory(base, entryAbsPath)
+	if gulu.File.IsDir(resolvedEntryPath) {
+		err = zipFile.AddDirectory(base, resolvedEntryPath)
 	} else {
-		err = zipFile.AddEntry(base, entryAbsPath)
+		err = zipFile.AddEntry(base, resolvedEntryPath)
 	}
 	if err != nil {
 		logging.LogErrorf("zip add entry [%s] failed: %s", entryAbsPath, err)

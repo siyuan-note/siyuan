@@ -43,6 +43,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
@@ -216,6 +217,9 @@ func GetDocHistoryContent(historyPath, keyword string, highlight bool) (id, root
 	}
 	id = historyTree.Root.ID
 	rootID = historyTree.Root.ID
+	if ciphertext && rootID+".sy" != filepath.Base(historyPath) {
+		return "", "", "", false, errors.New("encrypted document history root ID does not match its filename")
+	}
 
 	if !isLargeDoc {
 		renderTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}}
@@ -285,6 +289,14 @@ func RollbackDocHistory(historyPath string) (err error) {
 	}
 	boxID := parts[1]
 	origBoxID := boxID // 保留原始 boxID 用于解密（getRollbackBox 可能返回不同的 box）
+	encrypted := IsEncryptedBox(origBoxID)
+	if encrypted {
+		// 整个回滚持有操作租约，内部文件读写可独立获取读锁，锁定等待租约结束后再申请写锁。
+		if err = AcquireEncryptedBoxOperation(origBoxID); err != nil {
+			return
+		}
+		defer ReleaseEncryptedBoxOperation(origBoxID)
+	}
 
 	// 加密笔记本的历史回滚要求原笔记本已挂载：
 	// WriteTree 根据 tree.Box 判断是否加密落盘。若原笔记本未挂载导致
@@ -330,9 +342,7 @@ func RollbackDocHistory(historyPath string) (err error) {
 	if !ciphertext && IsEncryptedBox(origBoxID) {
 		return fmt.Errorf("encrypted notebook document history is plaintext [%s]", origBoxID)
 	}
-	if IsEncryptedBox(origBoxID) {
-		HoldBoxReadLock(origBoxID)
-		defer ReleaseBoxReadLock(origBoxID)
+	if encrypted {
 		dek, dekErr := GetDEKIfUnlocked(origBoxID)
 		if dekErr != nil {
 			err = errors.New(Conf.Language(314))
@@ -355,6 +365,9 @@ func RollbackDocHistory(historyPath string) (err error) {
 	}
 	if tree == nil {
 		return errors.New("parse document history failed")
+	}
+	if encrypted && tree.Root.ID+".sy" != filepath.Base(historyPath) {
+		return errors.New("encrypted document history root ID does not match its filename")
 	}
 	if nil != tree {
 		historyDir := filepath.Join(util.HistoryDir, parts[0])
@@ -394,16 +407,6 @@ func RollbackDocHistory(historyPath string) (err error) {
 	}
 
 	// 重置重复的块 ID https://github.com/siyuan-note/siyuan/issues/14358
-	if nil != workingDoc && "d" == workingDoc.Type {
-		workingDocPath := filepath.Join(util.DataDir, boxID, workingDoc.Path)
-		if err = filelock.Remove(workingDocPath); err != nil {
-			return
-		}
-		logging.LogInfof("removed working doc file [%s]", workingDocPath)
-	}
-	if nil != workingDoc {
-		treenode.RemoveBlockTreesByRootID(boxID, rootID)
-	}
 	nodes := map[string]*ast.Node{}
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || !n.IsBlock() {
@@ -421,6 +424,13 @@ func RollbackDocHistory(historyPath string) (err error) {
 	var duplicatedIDs []string
 	for nodeID, exist := range idMap {
 		if exist {
+			// 被替换文档自身的块保留 ID，其他文档中的重复块才需要重新分配 ID。
+			if workingDoc != nil && workingDoc.Type == "d" {
+				bt := treenode.GetBlockTree(nodeID)
+				if bt != nil && bt.BoxID == boxID && bt.RootID == workingDoc.RootID {
+					continue
+				}
+			}
 			duplicatedIDs = append(duplicatedIDs, nodeID)
 		}
 	}
@@ -435,10 +445,21 @@ func RollbackDocHistory(historyPath string) (err error) {
 
 	// 仅重新索引该文档，不进行全量索引
 	// Reindex only the current document after rolling back the document https://github.com/siyuan-note/siyuan/issues/12320
-	sql.RemoveTreeQueue(boxID, rootID)
-	if writeErr := indexWriteTreeIndexQueue(tree); nil != writeErr {
+	// 写回成功后再替换索引和清理旧路径，失败时保留当前文档并向调用方返回错误。
+	if _, err = filesys.WriteTree(tree); err != nil {
 		return
 	}
+	if workingDoc != nil {
+		if workingDoc.Type == "d" && workingDoc.Path != tree.Path {
+			if err = filelock.Remove(filepath.Join(util.DataDir, boxID, workingDoc.Path)); err != nil {
+				return
+			}
+		}
+		treenode.RemoveBlockTreesByRootID(boxID, rootID)
+	}
+	sql.RemoveTreeQueue(boxID, rootID)
+	treenode.IndexBlockTree(tree)
+	sql.IndexTreeQueue(tree)
 	ReloadFiletree()
 	ReloadProtyle(rootID)
 
@@ -1339,7 +1360,7 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 		p := strings.TrimPrefix(database, util.HistoryDir)
 		p = filepath.ToSlash(p[1:])
 
-		// 加密笔记本的 AV 历史是密文，直接存密文作为 content
+		// 加密笔记本的 AV 历史不向全局历史索引写入内容。
 		relDb := strings.TrimPrefix(database, entryPath+string(os.PathSeparator))
 		relDb = filepath.ToSlash(relDb)
 		dbParts := strings.SplitN(relDb, "/", 2)

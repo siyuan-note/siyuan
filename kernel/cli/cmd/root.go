@@ -190,6 +190,29 @@ func rejectEncryptedNotebookCLI(cmd *cobra.Command, args []string) error {
 			}
 		}
 	}
+	if cmd == historyGetCmd || cmd == historyRollbackCmd {
+		historyPath, _ := cmd.Flags().GetString("path")
+		if historyPath != "" {
+			if !filepath.IsAbs(historyPath) {
+				historyPath = filepath.Join(util.WorkspaceDir, historyPath)
+			}
+			if model.IsEncryptedHistoryPath(filepath.Clean(historyPath)) {
+				return fmt.Errorf("CLI does not support encrypted notebook history")
+			}
+		}
+	}
+	if cmd.Parent() == repoFileCmd {
+		fileID, _ := cmd.Flags().GetString("id")
+		if fileID != "" {
+			boxID, err := model.ResolveRepoFileBoxID(fileID)
+			if err != nil {
+				return err
+			}
+			if boxID != "" {
+				return fmt.Errorf("CLI does not support encrypted notebook [%s]", boxID)
+			}
+		}
+	}
 	return nil
 }
 

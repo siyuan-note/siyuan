@@ -430,6 +430,17 @@ func forwardResponseHeaders(dst http.Header, src http.Header) {
 	}
 }
 
+// secureProxyResponseHeaders 为代理响应设置安全头和固定内容类型，
+// 防止上游可控内容被浏览器嗅探为 HTML 造成同源脚本执行
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
+func secureProxyResponseHeaders(w gin.ResponseWriter, contentType string, attachment bool) {
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("Content-Type", contentType)
+	if attachment {
+		w.Header().Set("Content-Disposition", "attachment")
+	}
+}
+
 // httpProxy proxies an HTTP request to a remote HTTP endpoint.
 //
 // Query params:
@@ -481,6 +492,7 @@ func httpProxy(c *gin.Context) {
 	}
 	defer resp.Body.Close()
 
+	secureProxyResponseHeaders(c.Writer, "application/octet-stream", true)
 	forwardResponseHeaders(c.Writer.Header(), resp.Header)
 	c.Writer.WriteHeader(resp.StatusCode)
 	if _, err := io.Copy(c.Writer, resp.Body); err != nil {
@@ -526,7 +538,7 @@ func wsProxy(c *gin.Context) {
 	upgrader := websocket.Upgrader{
 		// 校验 Origin，防止跨站 WebSocket 劫持（CSWSH） https://github.com/siyuan-note/siyuan/security/advisories/GHSA-3cc2-h3v6-rqpq
 		CheckOrigin: func(r *http.Request) bool {
-			return util.IsSessionOriginAllowed(r.Header.Get("Origin"), r.Host)
+			return util.IsSessionOriginAllowedRequest(r)
 		},
 	}
 	clientConn, upgradeErr := upgrader.Upgrade(c.Writer, c.Request, upgradeHeaders)
@@ -629,6 +641,7 @@ func esProxy(c *gin.Context) {
 	}
 	defer resp.Body.Close()
 
+	secureProxyResponseHeaders(c.Writer, "text/event-stream; charset=utf-8", false)
 	forwardResponseHeaders(c.Writer.Header(), resp.Header)
 	c.Writer.WriteHeader(resp.StatusCode)
 

@@ -18,6 +18,21 @@
 	"flashcardUnknownDurationReviews": "所要時間が不明な復習",
 	"flashcardReviewsByHour": "時間帯別の復習",
 	"flashcardAllHistory": "すべての履歴",
+	"templateSearch": "テンプレート名またはパスを検索",
+	"templateContextSearch": "コンテキスト用ドキュメントを検索",
+	"templateContextTip": "選択したドキュメントのタイトルや ID などの情報を使ってテンプレートを実行します。ドキュメントは変更されません",
+	"fileTreeDragRemoveSorts": "この移動は現在の並び替えルールと競合します。このリストをカスタム順に切り替え、ドラッグ後の全体の順序を保存しますか？",
+	"pasteAndKeepSourceFormat": "元の書式を保持して貼り付け",
+	"templatePackageMoveTip": "テンプレートパッケージのフォルダーは名前の変更や移動ができません",
+	"avDragRemoveSorts": "この移動は現在の並べ替えルールと競合します。このビューの並べ替えルールを削除し、ドラッグ後の全項目の順序をカスタム順序として保存しますか？",
+	"templateManager": "テンプレート管理",
+	"templateSource": "テンプレートのソース",
+	"templatePreview": "テンプレートをプレビュー",
+	"templateContext": "プレビューのコンテキスト",
+	"templateNewFolder": "新しいフォルダー",
+	"templateDeleteTip": "この項目とその内容をすべて削除しますか？削除したファイルは復元できるように data/templates/.trash に保持されます。",
+	"task": "タスク",
+	"customTaskStatus": "カスタムタスク状態",
 	"imageViewerPlay": "スライドショーを再生",
 	"imageFlipHorizontal": "左右反転",
 	"imageFlipVertical": "上下反転",
@@ -2799,6 +2814,7 @@
 		"374": "データベース [%s]、テンプレートフィールド [%s]、最初のエラー項目 [%s]（項目 ID: %s）、エラー項目数: %d、エラー: %s",
 		"375": "フラッシュメモの保存先ノートブックを使用できません。設定 - ドキュメントで、開いている暗号化されていないノートブックを選択してください",
 		"376": "リソースファイルはまだダウンロードされておらず、現在取得できません",
-		"377": "データリポジトリを変更またはリセットする前に、すべてダウンロードに切り替えてください"
+		"377": "データリポジトリを変更またはリセットする前に、すべてダウンロードに切り替えてください",
+		"378": "クロスサイトリクエストは許可されていません"
 	}
 }

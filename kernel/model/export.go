@@ -2621,7 +2621,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string, i
 			return
 		}
 	}
-	exportDir := filepath.Join(util.TempDir, "export", baseFolderName)
+	exportDir := filepath.Join(util.TempDir, "export", normalExportTempName(baseFolderName))
 	if encrypted {
 		exportDir = filepath.Join(util.TempDir, "export", boxID, "sy", exportID)
 	}
@@ -4377,7 +4377,7 @@ func exportPandocConvertZip0(boxID, baseFolderName string, docPaths, defBlockIDs
 			return
 		}
 	}
-	exportFolder := filepath.Join(util.TempDir, "export", baseFolderName+ext)
+	exportFolder := filepath.Join(util.TempDir, "export", normalExportTempName(baseFolderName+ext))
 	if encrypted {
 		exportFolder = filepath.Join(util.TempDir, "export", boxID, "markdown", exportID)
 	}

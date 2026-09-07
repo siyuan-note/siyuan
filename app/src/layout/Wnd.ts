@@ -420,7 +420,8 @@ export class Wnd {
                         openFileById({
                             app,
                             id: item,
-                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                            forceCurrentWindow: true,
                         });
                     }
                 });

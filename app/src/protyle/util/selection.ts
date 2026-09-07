@@ -16,6 +16,7 @@ import {
     hasClosestByTag,
     isInEmbedBlock
 } from "./hasClosest";
+import {isAtomicVerticalNavigationRange} from "../wysiwyg/verticalNavigationState";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {hideElements} from "../ui/hideElements";
 import {genRenderFrame} from "../render/util";
@@ -27,6 +28,7 @@ import {
     getSemanticMarkerPrefixLengthForNode,
     stripSemanticMarkersFromRangeText
 } from "./inlineElementMarker";
+import {getSelectAllBlockAction} from "../wysiwyg/blockSelection";
 
 const selectIsEditor = (editor: Element, range?: Range) => {
     if (!range) {
@@ -63,12 +65,15 @@ export const fixTableRange = (range: Range) => {
 };
 
 export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range): boolean => {
-    const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-    if (selectElements.length > 0 && protyle.wysiwyg.element.childElementCount === selectElements.length &&
-        selectElements[0].parentElement === protyle.wysiwyg.element) {
-        return false;
+    const blockSelectionAction = getSelectAllBlockAction(protyle.wysiwyg.element);
+    if (blockSelectionAction !== "none") {
+        range.collapse(true);
+        hideElements(["toolbar"], protyle);
+        if (blockSelectionAction === "keep") {
+            return false;
+        }
     }
-    const editElement = getContenteditableElement(nodeElement);
+    const editElement = blockSelectionAction === "none" ? getContenteditableElement(nodeElement) : undefined;
     if (editElement) {
         let position;
         if (editElement.tagName === "TABLE") {
@@ -131,7 +136,7 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
         }
     }
     range.collapse(true);
-    hideElements(["select"], protyle);
+    hideElements(["select", "toolbar"], protyle);
     const ids: string[] = [];
     Array.from(protyle.wysiwyg.element.children).forEach(item => {
         const nodeId = item.getAttribute("data-node-id");
@@ -198,6 +203,10 @@ export const getEditorRange = (element: Element): Range => {
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
         if (element === range.startContainer || element.contains(range.startContainer)) {
+            // 纵向导航建立的原子 Range 已是合法位置，读取选区时不能再次聚焦其正文。
+            if (isAtomicVerticalNavigationRange(range)) {
+                return range;
+            }
             if (range.toString() === "" && range.startContainer.nodeType === 1) {
                 // 有时候点击编辑器头部需要矫正到第一个块中
                 if (range.startOffset === 0 && (range.startContainer as HTMLElement).classList.contains("protyle-wysiwyg")) {

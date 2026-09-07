@@ -18,6 +18,21 @@
 	"flashcardUnknownDurationReviews": "Wiederholungen mit unbekannter Dauer",
 	"flashcardReviewsByHour": "Wiederholungen nach Stunde",
 	"flashcardAllHistory": "Gesamter Verlauf",
+	"templateSearch": "Vorlagen nach Name oder Pfad suchen",
+	"templateContextSearch": "Kontextdokumente suchen",
+	"templateContextTip": "Die Vorlage mit Titel, ID und weiteren Informationen des ausgewählten Dokuments ausführen, ohne dieses zu ändern",
+	"fileTreeDragRemoveSorts": "Diese Verschiebung widerspricht der aktuellen Sortierregel. Diese Liste auf benutzerdefinierte Sortierung umstellen und die vollständige Reihenfolge nach dem Ziehen speichern?",
+	"pasteAndKeepSourceFormat": "Einfügen und Quellformatierung beibehalten",
+	"templatePackageMoveTip": "Ordner von Vorlagenpaketen können nicht umbenannt oder verschoben werden",
+	"avDragRemoveSorts": "Diese Verschiebung widerspricht den aktuellen Sortierregeln. Möchtest du die Sortierregeln dieser Ansicht entfernen und die vollständige Reihenfolge nach dem Ziehen als benutzerdefinierte Reihenfolge speichern?",
+	"templateManager": "Vorlagenverwaltung",
+	"templateSource": "Vorlagenquelltext",
+	"templatePreview": "Vorlage anzeigen",
+	"templateContext": "Vorschaukontext",
+	"templateNewFolder": "Neuer Ordner",
+	"templateDeleteTip": "Dieses Element und seinen gesamten Inhalt löschen? Gelöschte Dateien bleiben zur Wiederherstellung unter data/templates/.trash erhalten.",
+	"task": "Aufgabe",
+	"customTaskStatus": "Benutzerdefinierter Aufgabenstatus",
 	"imageViewerPlay": "Diashow starten",
 	"imageFlipHorizontal": "Horizontal spiegeln",
 	"imageFlipVertical": "Vertikal spiegeln",
@@ -2799,6 +2814,7 @@
 		"374": "Datenbank [%s], Vorlagenfeld [%s], erster betroffener Eintrag [%s] (Element-ID: %s), Anzahl betroffener Einträge: %d, Fehler: %s",
 		"375": "Das Notizbuch zum Speichern von Kurznotizen ist nicht verfügbar. Wählen Sie unter Einstellungen - Dokument ein geöffnetes, unverschlüsseltes Notizbuch",
 		"376": "Die Ressource wurde noch nicht heruntergeladen und kann derzeit nicht abgerufen werden",
-		"377": "Bitte wechseln Sie zu Alle herunterladen, bevor Sie das Datenrepository ändern oder zurücksetzen"
+		"377": "Bitte wechseln Sie zu Alle herunterladen, bevor Sie das Datenrepository ändern oder zurücksetzen",
+		"378": "Websiteübergreifende Anfragen sind nicht zulässig"
 	}
 }

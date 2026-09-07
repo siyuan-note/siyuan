@@ -11,6 +11,7 @@ import {
     openPublishAccessDialog
 } from "../../protyle/util/publishAccess";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {reorderSortedFileTree} from "../../util/fileTreeReorder";
 import {genUUID} from "../../util/genID";
 import {openMobileFileById} from "../editor";
 import {
@@ -367,7 +368,7 @@ export class MobileFiles extends Model {
                     }
                     return;
                 }
-                if (isCustomFileTreeList(liElement.parentElement)) {
+                if (targetDataType === "navigation-file") {
                     const dragHeight = liRect.height * .2;
                     if (touch.clientY > liRect.bottom - dragHeight) {
                         liElement.classList.add("dragover__bottom");
@@ -465,6 +466,30 @@ export class MobileFiles extends Model {
                             toURL,
                             !newElement.classList.contains("dragover__top")
                         ));
+                    } else if (!isCustomFileTreeList(targetListElement) && selectFileElements.length > 0) {
+                        const after = newElement.classList.contains("dragover__bottom");
+                        const sourceNotebookId = state.selectedElement.getAttribute("data-notebook-id") ||
+                            state.selectedElement.closest("ul[data-url]")?.getAttribute("data-url") || "";
+                        this.clearDragIndicators();
+                        this.touchDragState = null;
+                        if (!isMoveTargetAllowed([sourceNotebookId], toURL)) {
+                            showMessage(window.siyuan.languages._kernel[313]);
+                            return;
+                        }
+                        const result = await reorderSortedFileTree(
+                            selectFileElements.map(item => item.getAttribute("data-node-id")),
+                            newElement.getAttribute("data-node-id"), after);
+                        if (result) {
+                            const response = await fetchSyncPost("/api/filetree/listDocsByPath", {
+                                notebook: result.notebook,
+                                path: result.parentPath,
+                                app: Constants.SIYUAN_APPID,
+                            });
+                            if (response.code === 0 && response.data?.files) {
+                                this.onLsHTML(response.data, oldScrollTop);
+                            }
+                        }
+                        return;
                     } else if (isCustomFileTreeList(targetListElement) && selectFileElements.length > 0) {
                         let hasMove = false;
                         const toDir = pathPosix().dirname(toPath);
@@ -1115,7 +1140,7 @@ export class MobileFiles extends Model {
         const listPath = data.parentPath === "/" ? "/" : `${data.parentPath}.sy`;
         const liElement = notebookElement.querySelector(`li[data-path="${listPath}"]`);
         const listElement = liElement?.nextElementSibling;
-        if (!listElement || listElement.tagName !== "UL" || !isCustomFileTreeList(listElement)) {
+        if (!listElement || listElement.tagName !== "UL") {
             return;
         }
         fetchPost("/api/filetree/listDocsByPath", {

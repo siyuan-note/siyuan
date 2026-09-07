@@ -81,7 +81,7 @@ import {appearanceMenu, limitRecentFontStyleRows} from "../toolbar/Font";
 import {setPosition} from "../../util/setPosition";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {insertAttrViewBlockAnimation, selectRow, updateHeader} from "../render/av/row";
-import {getAVData, getAVSelectedItemPoints} from "../render/av/virtualScroll";
+import {getAVSelectedItemPoints} from "../render/av/virtualScroll";
 import {setAVItemAnchor} from "../render/av/rangeSelect";
 import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
 import {avContextmenu, duplicateCompletely} from "../render/av/action";
@@ -129,7 +129,8 @@ import {canShowGutterInsert, genGutterBlockButtonHTML} from "./button";
 import {getViewFoldOccurrenceID, hasViewFoldContext, setViewFold} from "../util/viewFold";
 import {exportImage} from "../export/util";
 import {CALLOUT_PRESETS, updateCalloutType, updateCustomCalloutType} from "../wysiwyg/callout";
-import {setTabsPosition, unwrapTabs} from "../wysiwyg/tabs";
+import {setTabsPosition, toggleTabsTasks, unwrapTabs} from "../wysiwyg/tabs";
+import {getTabItems} from "../render/tabsRender";
 
 // 块类型 data-type 到本地化名称键的映射，用于块标提示中的 ${x}
 const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
@@ -245,19 +246,6 @@ export class Gutter {
                         return true;
                     }
                 });
-                if (avElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active")) {
-                    const bodyElements = avElement.querySelectorAll(".av__body");
-                    if (bodyElements.length === 1) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        return;
-                    } else if (getAVData(avElement)?.view.group?.valueSource === "rendered" ||
-                        ["template", "created", "updated"].includes(bodyElements[0].getAttribute("data-dtype"))) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        return;
-                    }
-                }
                 const rowElement = avElement.querySelector(`.av__body${buttonElement.dataset.groupId ? `[data-group-id="${buttonElement.dataset.groupId}"]` : ""} .av__row[data-id="${buttonElement.dataset.rowId}"]`);
                 if (!rowElement.classList.contains("av__row--select")) {
                     clearSelect(["row"], avElement);
@@ -2188,13 +2176,22 @@ export class Gutter {
                 submenu: [{
                     id: "tabsPositionTop",
                     label: window.siyuan.languages.tabsPositionTop,
-                    icon: (nodeElement.getAttribute("tabs-position") || "top") === "top" ? "iconSelect" : undefined,
+                    checked: (nodeElement.getAttribute("tabs-position") || "top") === "top",
                     click: () => setTabsPosition(protyle, nodeElement as HTMLElement, "top"),
                 }, {
                     id: "tabsPositionLeft",
                     label: window.siyuan.languages.tabsPositionLeft,
-                    icon: nodeElement.getAttribute("tabs-position") === "left" ? "iconSelect" : undefined,
+                    checked: nodeElement.getAttribute("tabs-position") === "left",
                     click: () => setTabsPosition(protyle, nodeElement as HTMLElement, "left"),
+                }, {
+                    id: "separator_tabsTask",
+                    type: "separator",
+                }, {
+                    id: "tabsTask",
+                    label: window.siyuan.languages.task,
+                    icon: "iconCheck",
+                    checked: getTabItems(nodeElement as HTMLElement).some(item => item.hasAttribute("tabs-task")),
+                    click: () => toggleTabsTasks(protyle, nodeElement as HTMLElement),
                 }],
             }).element);
         } else if (type === "NodeSuperBlock" && !protyle.disabled) {

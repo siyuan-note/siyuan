@@ -1215,7 +1215,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             if (protyle.block.showAll && sideElement.classList.contains("protyle-wysiwyg") && protyle.wysiwyg.element.childElementCount === 0) {
                 const focusID = protyle.block.parent2ID;
                 setTimeout(() => {
-                    if (document.contains(protyle.element)) {
+                    if (document.contains(protyle.element) && protyle.wysiwyg.element.childElementCount === 0) {
                         zoomOut({
                             protyle,
                             id: focusID,

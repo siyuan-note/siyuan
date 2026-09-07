@@ -806,7 +806,7 @@ func getBlocksWordCount(c *gin.Context) {
 		ids = append(ids, id.(string))
 	}
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID, arg) {
+	if !holdBlockRequest(c, ret, boxID, arg, true) {
 		return
 	}
 	ids = filterBlockIDsByPublishAccess(c, ids, boxID)
@@ -1038,7 +1038,7 @@ func getBlockBreadcrumb(c *gin.Context) {
 		}
 	}
 
-	boxID := encryptedNotebookFromArg(arg)
+	boxID, _ := arg["notebook"].(string)
 	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
@@ -1092,7 +1092,7 @@ func getBlockBreadcrumbChildren(c *gin.Context) {
 	if limitArg := arg["limit"]; nil != limitArg {
 		limit = int(limitArg.(float64))
 	}
-	boxID := encryptedNotebookFromArg(arg)
+	boxID, _ := arg["notebook"].(string)
 	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
@@ -1121,7 +1121,7 @@ func getBlockIndex(c *gin.Context) {
 
 	id := arg["id"].(string)
 	boxID := encryptedNotebookFromArg(arg)
-	if !holdBlockRequest(c, ret, boxID, arg) {
+	if !holdBlockRequest(c, ret, boxID, arg, true) {
 		return
 	}
 	if !isBlockPublishAccessible(c, id, boxID) {

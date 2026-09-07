@@ -571,7 +571,8 @@ const syncFixedRowPos = (item: HTMLElement, bodyRect: DOMRect, scrollLeft: numbe
 };
 
 export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement, status: "top" | "bottom" | "all") => {
-    const skipFixed = hasTopClosestByAttribute(blockElement, "fold", "1");
+    // 内部滚动的反链数据库不使用相对窗口固定的表头，避免占位和固定坐标干扰内部布局。
+    const skipFixed = blockElement.classList.contains("av--backlink") || hasTopClosestByAttribute(blockElement, "fold", "1");
     if (skipFixed) {
         const viewsElement = blockElement.querySelector(".av__views") as HTMLElement;
         if (viewsElement) {
@@ -581,7 +582,7 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
             removeFixedRow(item, "av__row--header--fixed", "av__row--header-placeholder");
         });
         blockElement.querySelectorAll(".av__row--footer--fixed").forEach((item: HTMLElement) => {
-            removeFixedRow(item, "av__row--footer--fixed", "av__row--footer-placeholder");
+            removeFixedRow(item, "av__row--footer--fixed", "av__row--footer--placeholder");
         });
         return;
     }

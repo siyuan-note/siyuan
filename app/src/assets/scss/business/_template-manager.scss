@@ -1,0 +1,174 @@
+.template-manager {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: 12px;
+  box-sizing: border-box;
+  gap: 8px;
+
+  input[type="search"] {
+    box-sizing: border-box;
+    min-width: 0;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__panels {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    gap: 12px;
+  }
+
+  &__sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 28%;
+    min-width: 0;
+    min-height: 0;
+    gap: 8px;
+    padding-inline-end: 8px;
+    border-right: 1px solid var(--b3-border-color);
+  }
+
+  &__search {
+    width: 100%;
+  }
+
+  &__files {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    .b3-list-item {
+      min-height: 36px;
+      height: auto;
+    }
+  }
+
+  &__file,
+  &__toggle {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 1px solid var(--b3-theme-primary);
+      outline-offset: -1px;
+    }
+  }
+
+  &__file {
+    flex: 1;
+    min-width: 0;
+    min-height: 36px;
+    text-align: start;
+
+    .b3-list-item__text {
+      text-align: start;
+    }
+  }
+
+  &__toggle {
+    flex: 0 0 24px;
+    height: 32px;
+    justify-content: center;
+
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    &:disabled {
+      cursor: default;
+    }
+  }
+
+  &__empty {
+    padding: 8px;
+  }
+
+  &__editor {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+    gap: 8px;
+  }
+
+  &__source {
+    flex: 1 0 180px;
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+    font-family: var(--b3-font-family-code);
+    tab-size: 4;
+  }
+
+  &__context {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-wrap: anywhere;
+
+    &-name {
+      margin-inline-start: 8px;
+    }
+  }
+
+  &__context-fields {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+
+    input, select {
+      min-width: 0;
+      flex: 1;
+    }
+  }
+
+  &__preview {
+    overflow: auto;
+    flex: 1 0 auto;
+    max-height: 45vh;
+  }
+}
+
+@media (max-width: 600px) {
+  .template-manager {
+    &__panels {
+      flex-direction: column;
+    }
+
+    &__sidebar {
+      width: 100%;
+      flex: 0 0 min(180px, 30vh);
+      padding-inline-end: 0;
+      border-right: 0;
+      border-bottom: 1px solid var(--b3-border-color);
+    }
+
+    &__context-fields {
+      input, select {
+        flex-basis: 100%;
+      }
+    }
+  }
+}

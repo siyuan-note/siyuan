@@ -15,7 +15,6 @@ import {useShell} from "../../util/pathName";
 import {previewImages} from "../../protyle/preview/image";
 import {isBazaarPackageRatingEditable, sortBazaarPackages} from "../../util/bazaarPackage";
 import {Constants} from "../../constants";
-import {fitSelectWidthToOptions} from "../../util/select";
 import {
     BAZAAR_PACKAGE_CONFIG,
     getBazaarTypeByMyType,
@@ -577,7 +576,6 @@ const bindBazaarSearchEvents = (
 
 const bindBazaarSelectEvents = (controller: TBazaarController) => {
     controller.element.querySelectorAll(".b3-select").forEach((selectElement: HTMLSelectElement) => {
-        fitSelectWidthToOptions(selectElement);
         selectElement.addEventListener("change", () => {
             if (selectElement.getAttribute("data-type") === "downloaded-sort") {
                 const activeBtn = controller.element.querySelector("#configBazaarDownloaded")?.previousElementSibling

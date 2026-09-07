@@ -18,6 +18,21 @@
 	"flashcardUnknownDurationReviews": "소요 시간을 알 수 없는 복습",
 	"flashcardReviewsByHour": "시간대별 복습",
 	"flashcardAllHistory": "전체 기록",
+	"templateSearch": "템플릿 이름 또는 경로 검색",
+	"templateContextSearch": "컨텍스트 문서 검색",
+	"templateContextTip": "선택한 문서의 제목, ID 등의 정보로 템플릿을 실행하며 해당 문서는 수정하지 않습니다",
+	"fileTreeDragRemoveSorts": "이 이동은 현재 정렬 규칙과 충돌합니다. 이 목록을 사용자 지정 정렬로 전환하고 드래그 후의 전체 순서를 저장하시겠습니까?",
+	"pasteAndKeepSourceFormat": "원본 서식을 유지하여 붙여넣기",
+	"templatePackageMoveTip": "템플릿 패키지 폴더는 이름을 변경하거나 이동할 수 없습니다",
+	"avDragRemoveSorts": "이 이동은 현재 정렬 규칙과 충돌합니다. 이 보기의 정렬 규칙을 제거하고 드래그 후의 전체 순서를 사용자 지정 순서로 저장할까요?",
+	"templateManager": "템플릿 관리",
+	"templateSource": "템플릿 소스",
+	"templatePreview": "템플릿 미리보기",
+	"templateContext": "미리보기 컨텍스트",
+	"templateNewFolder": "새 폴더",
+	"templateDeleteTip": "이 항목과 모든 내용을 삭제하시겠습니까? 삭제된 파일은 복구할 수 있도록 data/templates/.trash에 보관됩니다.",
+	"task": "작업",
+	"customTaskStatus": "사용자 지정 작업 상태",
 	"imageViewerPlay": "슬라이드 쇼 재생",
 	"imageFlipHorizontal": "좌우 반전",
 	"imageFlipVertical": "상하 반전",
@@ -2799,6 +2814,7 @@
 		"374": "데이터베이스 [%s], 템플릿 필드 [%s], 첫 번째 오류 항목 [%s](항목 ID: %s), 오류 항목 수: %d, 오류: %s",
 		"375": "플래시 메모 저장 노트북을 사용할 수 없습니다. 설정 - 문서에서 열려 있는 암호화되지 않은 노트북을 선택하세요",
 		"376": "리소스가 아직 다운로드되지 않았으며 현재 가져올 수 없습니다",
-		"377": "데이터 저장소를 변경하거나 초기화하기 전에 모두 다운로드로 전환하세요"
+		"377": "데이터 저장소를 변경하거나 초기화하기 전에 모두 다운로드로 전환하세요",
+		"378": "교차 사이트 요청은 허용되지 않습니다"
 	}
 }

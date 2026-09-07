@@ -43,6 +43,10 @@ export const shouldRequestForeignMouseDrop = (isAndroid: boolean, button: number
     return !isAndroid && button === 0 && hasForeignDrag && !dropRequested;
 };
 
+export const getSourceDragGhostVisibility = (outsideSourceWindow: boolean) => {
+    return outsideSourceWindow ? "hidden" : "";
+};
+
 export const getWheelScrollDelta = (delta: number, deltaMode: number, lineSize: number, pageSize: number) => {
     if (deltaMode === 1) {
         return delta * lineSize;

@@ -46,6 +46,7 @@ type GroupViewRenderSource struct {
 // AttributeViewRenderContext 收集一次属性视图渲染期间产生的模板错误。
 type AttributeViewRenderContext struct {
 	templateErrors map[string]*attributeViewTemplateRenderError
+	ReadOnly       bool // 预览只允许修正内存副本，不保存缺失字段等订正结果。
 }
 
 type attributeViewTemplateRenderError struct {
@@ -1180,7 +1181,7 @@ func getAttrViewName(attrView *av.AttributeView) string {
 	return ret
 }
 
-func removeMissingField(attrView *av.AttributeView, view *av.View, missingKeyID string) {
+func removeMissingField(attrView *av.AttributeView, view *av.View, missingKeyID string, context *AttributeViewRenderContext) {
 	logging.LogWarnf("key [%s] is missing", missingKeyID)
 
 	changed := false
@@ -1214,7 +1215,7 @@ func removeMissingField(attrView *av.AttributeView, view *av.View, missingKeyID 
 		}
 	}
 
-	if changed {
+	if changed && (nil == context || !context.ReadOnly) {
 		av.SaveAttributeView(attrView)
 	}
 }

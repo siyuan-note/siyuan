@@ -24,7 +24,6 @@ import {afterExport} from "../../protyle/export/util";
 import {genConfigItemMainHtml, genConfigItemName} from "../render/fragments";
 import {sendAppSetting} from "./appRuntime";
 import {getHostCapabilities} from "../../util/hostCapabilities";
-import {fitSelectWidthToOptions} from "../../util/select";
 
 /// #if MOBILE
 const registerAppWorkspaceGroup = (tab: SettingTabBuilder) => {
@@ -246,9 +245,9 @@ const genNetworkProxyHtml = (): string => {
             <option value="http" ${proxy.scheme === "http" ? "selected" : ""}>HTTP</option>
         </select>
         <span class="fn__space"></span>
-        <input id="networkProxyHost" placeholder="user:pass@IP" class="b3-text-field fn__block" value="${Lute.EscapeHTMLStr(proxy.host)}"/>
+        <input id="networkProxyHost" placeholder="user:pass@IP" class="b3-text-field fn__flex-1" value="${Lute.EscapeHTMLStr(proxy.host)}"/>
         <span class="fn__space"></span>
-        <input id="networkProxyPort" placeholder="Port" class="b3-text-field fn__block" value="${Lute.EscapeHTMLStr(proxy.port)}" type="number"/>
+        <input id="networkProxyPort" placeholder="Port" class="b3-text-field fn__flex-1" value="${Lute.EscapeHTMLStr(proxy.port)}" type="number"/>
         <span class="fn__space"></span>
         <button id="networkProxyConfirm" class="b3-button fn__size200 b3-button--outline">${window.siyuan.languages.confirm}</button>
     </div>
@@ -259,7 +258,6 @@ const mountNetworkProxy = (root: HTMLElement) => {
     const schemeElement = root.querySelector("#networkProxyScheme") as HTMLSelectElement;
     const hostElement = root.querySelector("#networkProxyHost") as HTMLInputElement;
     const portElement = root.querySelector("#networkProxyPort") as HTMLInputElement;
-    fitSelectWidthToOptions(schemeElement);
     const updateInputs = () => {
         const disabled = schemeElement.value === "" || schemeElement.value === "system";
         hostElement.disabled = disabled;

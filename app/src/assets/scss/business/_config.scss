@@ -1,6 +1,5 @@
 .config {
   &__tab-wrap {
-    position: relative;
     overflow: hidden;
     box-sizing: border-box;
     background-color: var(--b3-theme-background);
@@ -14,7 +13,6 @@
   &__drag {
     position: absolute;
     top: 0;
-    left: 0;
     right: 0;
     z-index: 1;
     height: 24px;

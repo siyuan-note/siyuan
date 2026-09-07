@@ -58,8 +58,16 @@ const (
 	TemplateDatabaseModeCopy      TemplateDatabaseMode = "copy"
 	TemplateDatabaseModeReference TemplateDatabaseMode = "reference"
 
-	templateDatabaseModeAttr = "custom-sy-av-template-mode"
+	templateDatabaseModeAttr    = "custom-sy-av-template-mode"
+	templateExportNameAttr      = "custom-sy-template-export-name"
+	templateExportDirectoryAttr = "custom-sy-template-export-directory"
 )
+
+type DocSaveAsTemplateInfo struct {
+	Name        string `json:"name"`
+	Directory   string `json:"directory"`
+	HasDatabase bool   `json:"hasDatabase"`
+}
 
 func RenderGoTemplate(templateContent string) (ret string, err error) {
 	return RenderGoTemplateAtInBox(templateContent, time.Now(), "")
@@ -256,7 +264,89 @@ func DocSaveAsTemplate(id, name string, overwrite bool) (code int, err error) {
 	return DocSaveAsTemplateWithDatabaseMode(id, name, overwrite, TemplateDatabaseModeCopy)
 }
 
+func GetDocSaveAsTemplateInfo(id string) (ret *DocSaveAsTemplateInfo, err error) {
+	FlushTxQueue()
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		return nil, ErrBlockNotFound
+	}
+
+	tree, err := filesys.LoadTree(bt.BoxID, bt.Path, NewLute())
+	if nil != err {
+		return nil, err
+	}
+	node := tree.Root
+	if "d" != bt.Type {
+		node = treenode.GetNodeInTree(tree, id)
+		if nil == node {
+			return nil, ErrBlockNotFound
+		}
+	}
+
+	exportNodes := []*ast.Node{node}
+	if ast.NodeHeading == node.Type {
+		exportNodes = append(exportNodes, treenode.HeadingChildren(node)...)
+	}
+	hasDatabase := false
+	for _, exportNode := range exportNodes {
+		ast.Walk(exportNode, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if entering && ast.NodeAttributeView == n.Type {
+				hasDatabase = true
+				return ast.WalkStop
+			}
+			return ast.WalkContinue
+		})
+		if hasDatabase {
+			break
+		}
+	}
+
+	attrs := parse.IAL2Map(tree.Root.KramdownIAL)
+	name := strings.TrimSpace(attrs[templateExportNameAttr])
+	if "" == name {
+		name = getNodeRefText(node)
+		if "" == name {
+			name = id
+		}
+	}
+	ret = &DocSaveAsTemplateInfo{
+		Name:        name,
+		Directory:   attrs[templateExportDirectoryAttr],
+		HasDatabase: hasDatabase,
+	}
+	return
+}
+
 func DocSaveAsTemplateWithDatabaseMode(id, name string, overwrite bool, databaseMode TemplateDatabaseMode) (code int, err error) {
+	return DocSaveAsTemplateInDirectory(id, name, "", overwrite, databaseMode)
+}
+
+func DocSaveAsTemplateInDirectoryAndRemember(id, name, directory string, overwrite bool,
+	databaseMode TemplateDatabaseMode) (code int, err error) {
+	code, err = DocSaveAsTemplateInDirectory(id, name, directory, overwrite, databaseMode)
+	if nil != err || 0 != code {
+		return
+	}
+
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		return
+	}
+	err = SetBlockAttrs(bt.RootID, map[string]string{
+		templateExportNameAttr:      name,
+		templateExportDirectoryAttr: directory,
+	})
+	if nil != err {
+		logging.LogErrorf("remember template export settings failed: %s", err)
+		err = nil
+	}
+	return
+}
+
+func DocSaveAsTemplateInDirectory(id, name, directory string, overwrite bool, databaseMode TemplateDatabaseMode) (code int, err error) {
+	if err = validateTemplateRelativePath(directory, true); err != nil {
+		return
+	}
 	if databaseMode == "" {
 		databaseMode = TemplateDatabaseModeCopy
 	}
@@ -270,6 +360,8 @@ func DocSaveAsTemplateWithDatabaseMode(id, name string, overwrite bool, database
 	}
 
 	tree := prepareExportTree(bt)
+	tree.Root.RemoveIALAttr(templateExportNameAttr)
+	tree.Root.RemoveIALAttr(templateExportDirectoryAttr)
 	markTemplateAttributeViewModes(tree.Root, databaseMode)
 	addBlockIALNodes(tree, true)
 
@@ -304,6 +396,16 @@ func DocSaveAsTemplateWithDatabaseMode(id, name string, overwrite bool, database
 
 		if ast.NodeCodeBlockFenceInfoMarker == n.Type {
 			if lang := string(n.CodeBlockInfo); "siyuan-template" == lang || "template" == lang {
+				if n.Parent.Parent == tree.Root {
+					if attrs := templateDocumentAttributes(n.Next.Tokens); len(attrs) > 0 {
+						n.CodeBlockInfo = []byte(templateDocumentAttributeMarker)
+						n.Parent.KramdownIAL = nil
+						if next := n.Parent.Next; next != nil && next.Type == ast.NodeKramdownBlockIAL {
+							unlinks = append(unlinks, next)
+						}
+						return ast.WalkContinue
+					}
+				}
 				// 将模板代码转换为段落文本 https://github.com/siyuan-note/siyuan/pull/15345
 				unlinks = append(unlinks, n.Parent)
 				p := treenode.NewParagraph(n.Parent.ID)
@@ -333,15 +435,34 @@ func DocSaveAsTemplateWithDatabaseMode(id, name string, overwrite bool, database
 
 	name = util.FilterFileName(name) + ".md"
 	name = util.TruncateLenFileName(name)
-	savePath := filepath.Join(util.DataDir, "templates", name)
-	if filelock.IsExist(savePath) {
+	templateFileLock.Lock()
+	defer templateFileLock.Unlock()
+	root, err := openTemplateRoot()
+	if err != nil {
+		return 0, err
+	}
+	defer root.Close()
+	relativePath := path.Join(directory, name)
+	if err = checkTemplateFilePath(root, relativePath); err != nil {
+		return 0, err
+	}
+	abs := filepath.Join(root.Name(), filepath.FromSlash(relativePath))
+	filelock.Lock(abs)
+	defer filelock.Unlock(abs)
+	_, statErr := root.Stat(relativePath)
+	if statErr == nil {
 		if !overwrite {
 			code = 1
 			return
 		}
+	} else if !errors.Is(statErr, os.ErrNotExist) {
+		return 0, statErr
 	}
 
-	err = filelock.WriteFile(savePath, md)
+	err = writeTemplateSource(root, relativePath, string(md), errors.Is(statErr, os.ErrNotExist))
+	if err == nil {
+		IncSyncIfNeeded(abs)
+	}
 	return
 }
 
@@ -698,6 +819,19 @@ func templateAttributeViewPreviewTable(node *ast.Node, plan *templateAttributeVi
 
 func RenderTemplateWithMode(p, id string, mode TemplateRenderMode) (tree *parse.Tree, dom string,
 	summary *TemplateDocTreePlanSummary, err error) {
+	return renderTemplateSource(p, id, mode, nil)
+}
+
+// 编辑器预览使用未保存的源码，文件路径仅用于解析同包子模板。
+func PreviewTemplateSource(p, id, content string) (tree *parse.Tree, dom string, summary *TemplateDocTreePlanSummary, err error) {
+	if len(content) > maxTemplateSourceSize {
+		return nil, "", nil, errors.New("template source is too large")
+	}
+	return renderTemplateSource(p, id, TemplateRenderModePreview, &content)
+}
+
+func renderTemplateSource(p, id string, mode TemplateRenderMode, content *string) (tree *parse.Tree, dom string,
+	summary *TemplateDocTreePlanSummary, err error) {
 	if TemplateRenderModeContent != mode && TemplateRenderModePreview != mode && TemplateRenderModeEditorInsert != mode {
 		err = fmt.Errorf("unsupported template render mode [%s]", mode)
 		return
@@ -715,9 +849,14 @@ func RenderTemplateWithMode(p, id string, mode TemplateRenderMode) (tree *parse.
 		return
 	}
 	block := sql.BuildBlockFromNode(node, tree)
-	md, err := os.ReadFile(p)
-	if err != nil {
-		return
+	var md []byte
+	if content == nil {
+		md, err = os.ReadFile(p)
+		if err != nil {
+			return
+		}
+	} else {
+		md = []byte(*content)
 	}
 
 	dataModel := map[string]string{}
@@ -778,11 +917,9 @@ func RenderTemplateWithMode(p, id string, mode TemplateRenderMode) (tree *parse.
 	}
 	collector.totalOutput = buf.Len()
 	md = buf.Bytes()
-	tree = parseKTree(md)
-	if nil == tree {
-		msg := fmt.Sprintf("parse tree [%s] failed", p)
-		logging.LogError(msg)
-		err = errors.New(msg)
+	tree, err = parseTemplateKTree(md)
+	if err != nil {
+		logging.LogErrorf("parse template [%s] failed: %s", p, err)
 		return
 	}
 	tree.Box = sourceTree.Box

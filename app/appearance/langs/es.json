@@ -18,6 +18,21 @@
 	"flashcardUnknownDurationReviews": "Repasos con duración desconocida",
 	"flashcardReviewsByHour": "Repasos por hora",
 	"flashcardAllHistory": "Todo el historial",
+	"templateSearch": "Buscar plantillas por nombre o ruta",
+	"templateContextSearch": "Buscar documentos de contexto",
+	"templateContextTip": "Ejecutar la plantilla con el título, el ID y otros datos del documento seleccionado sin modificarlo",
+	"fileTreeDragRemoveSorts": "Este movimiento entra en conflicto con la regla de ordenación actual. ¿Cambiar esta lista a ordenación personalizada y guardar el orden completo después de arrastrar?",
+	"pasteAndKeepSourceFormat": "Pegar y conservar el formato de origen",
+	"templatePackageMoveTip": "Las carpetas de paquetes de plantillas no se pueden renombrar ni mover",
+	"avDragRemoveSorts": "Este movimiento entra en conflicto con las reglas de ordenación actuales. ¿Quieres eliminar las reglas de ordenación de esta vista y guardar el orden completo resultante del arrastre como orden personalizado?",
+	"templateManager": "Gestor de plantillas",
+	"templateSource": "Código de la plantilla",
+	"templatePreview": "Vista previa de la plantilla",
+	"templateContext": "Contexto de vista previa",
+	"templateNewFolder": "Nueva carpeta",
+	"templateDeleteTip": "¿Eliminar este elemento y todo su contenido? Los archivos eliminados se conservan en data/templates/.trash para recuperarlos.",
+	"task": "Tarea",
+	"customTaskStatus": "Estado de tarea personalizado",
 	"imageViewerPlay": "Reproducir presentación",
 	"imageFlipHorizontal": "Voltear horizontalmente",
 	"imageFlipVertical": "Voltear verticalmente",
@@ -2799,6 +2814,7 @@
 		"374": "Base de datos [%s], campo de plantilla [%s], primer elemento afectado [%s] (ID del elemento: %s), cantidad de elementos afectados: %d, error: %s",
 		"375": "El cuaderno para guardar notas rápidas no está disponible. Seleccione un cuaderno abierto y sin cifrar en Configuración - Documento",
 		"376": "El recurso aún no se ha descargado y no se puede obtener en este momento",
-		"377": "Cambie a Descargar todos antes de cambiar o restablecer el repositorio de datos"
+		"377": "Cambie a Descargar todos antes de cambiar o restablecer el repositorio de datos",
+		"378": "No se permiten solicitudes entre sitios"
 	}
 }

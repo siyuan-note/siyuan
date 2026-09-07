@@ -139,10 +139,10 @@ import {isCaretAtVerticalBoundary} from "./verticalCaret";
 import {
     bindVerticalNavigationReset,
     focusAdjacentVerticalRegion,
-    isAtomicVerticalNavigationTarget,
     leaveAVVerticalRegion,
     prepareVerticalNavigation,
 } from "./verticalNavigation";
+import {isAtomicVerticalNavigationTarget} from "./verticalNavigationState";
 import {
     BLOCK_SELECTION_CLASS,
     clearBlockSelectionMode,
@@ -212,7 +212,10 @@ const showSelectAllTip = () => {
 };
 
 const preserveAVSelectionOnKeyup = (protyle: IProtyle, event: KeyboardEvent) => {
-    const focusedElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
+    const selection = getSelection();
+    const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : undefined;
+    const focusedElement = range && protyle.wysiwyg.element.contains(range.startContainer) &&
+        hasClosestBlock(range.startContainer);
     if (shouldPreserveAVSelectionOnKeyup(event.key,
         !!focusedElement && focusedElement.classList.contains("av"))) {
         protyle.wysiwyg.preventKeyup = true;
@@ -360,7 +363,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         const avHandled = avKeydown(event, nodeElement, protyle, direction => {
-            leaveAVVerticalRegion(protyle, nodeElement, direction, verticalGoalX ?? 0);
+            return leaveAVVerticalRegion(protyle, nodeElement, direction, verticalGoalX ?? 0);
         });
         if (avHandled) {
             preserveAVSelectionOnKeyup(protyle, event);
@@ -1040,6 +1043,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     event.preventDefault();
                     return;
                 }
+                // 原子区域位于文档边界时保持选择，避免原生移动进入其内部。
+                event.stopPropagation();
+                event.preventDefault();
+                return;
             }
             if (selectText === "" && range.collapsed && (event.key === "ArrowLeft" || event.key === "ArrowRight") &&
                 moveCaretAcrossSemanticMarker(range, event.key === "ArrowLeft" ? "left" : "right")) {
@@ -1084,6 +1091,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
             }
             if (calloutTitleElement && verticalDirection) {
+                if (range.collapsed && (toPrevious || toNext)) {
+                    event.preventDefault();
+                }
                 return;
             }
             if (selectText === "" && range.collapsed && !verticalDirection && nodeElement.classList.contains("av") &&

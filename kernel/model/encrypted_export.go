@@ -165,6 +165,15 @@ func IsManagedEncryptedExportPath(relativePath string) bool {
 	return len(parts) >= 1 && ast.IsNodeIDPattern(parts[0])
 }
 
+// normalExportTempName 避免普通导出使用加密导出的第一层归属目录，保留归档内部的原始名称。
+func normalExportTempName(name string) string {
+	parts := strings.SplitN(filepath.ToSlash(filepath.Clean(name)), "/", 2)
+	if ast.IsNodeIDPattern(parts[0]) {
+		parts[0] = "export-" + parts[0]
+	}
+	return filepath.FromSlash(strings.Join(parts, "/"))
+}
+
 // AcquireExportArtifactLease 为导出产物取得覆盖整个复制过程的生命周期租约。
 func AcquireExportArtifactLease(exportPath string) (lease *ExportArtifactLease, err error) {
 	if after, ok := strings.CutPrefix(exportPath, "/export/"); ok {

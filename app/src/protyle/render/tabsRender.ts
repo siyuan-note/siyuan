@@ -12,6 +12,10 @@ export interface ITabsRenderOptions {
     menu?: (tabs: HTMLElement, item: HTMLElement, anchor: HTMLElement) => void;
     move?: (source: HTMLElement, target: HTMLElement, after?: boolean) => void;
     shown?: (item: HTMLElement) => void;
+    task?: (item: HTMLElement) => void;
+    taskMenu?: (item: HTMLElement) => void;
+    taskLabel?: string;
+    endEdit?: () => void;
 }
 
 interface ITabState {
@@ -187,9 +191,15 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                     header.addEventListener("selectstart", event => event.preventDefault());
                 }
                 const signature = JSON.stringify([readonly, ...items.map(item => [itemID(item),
-                    item.dataset.tabsEditing === "true" ? null : getTabTitle(item)?.innerHTML])]);
+                    item.getAttribute("tabs-task"), item.dataset.tabsEditing === "true" ? null : getTabTitle(item)?.innerHTML])]);
+                let previousScroll: {left: number, top: number};
                 if (state.signature !== signature || !header.firstElementChild) {
+                    const previousList = header.querySelector<HTMLElement>(".tabs-list");
+                    if (previousList) {
+                        previousScroll = {left: previousList.scrollLeft, top: previousList.scrollTop};
+                    }
                     const focusedID = (document.activeElement as HTMLElement)?.dataset?.tabId;
+                    const focusedTask = document.activeElement?.classList.contains("tabs-task");
                     header.replaceChildren();
                     const list = document.createElement("div");
                     list.className = "tabs-list";
@@ -206,7 +216,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                     items.forEach((item, index) => {
                         const button = document.createElement("button");
                         button.type = "button";
-                        button.className = "tabs-tab";
+                        button.className = "tabs-tab ariaLabel";
                         button.setAttribute("role", "tab");
                         button.dataset.tabId = itemID(item);
                         button.id = `${state.instance}-tab-${index}`;
@@ -230,6 +240,45 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                             button.firstElementChild.textContent = label;
                         }
                         button.setAttribute("aria-label", escapeHtml(button.textContent));
+                        button.setAttribute("data-position", "north");
+                        const marker = item.getAttribute("tabs-task");
+                        if (marker !== null) {
+                            const task = document.createElement("span");
+                            task.className = "tabs-task";
+                            task.dataset.tabId = itemID(item);
+                            task.setAttribute("role", "checkbox");
+                            task.setAttribute("aria-label", controller.options.taskLabel || "Task");
+                            task.setAttribute("aria-checked", String(marker !== " "));
+                            task.setAttribute("aria-disabled", String(readonly));
+                            task.setAttribute("data-task", marker);
+                            task.tabIndex = readonly ? -1 : 0;
+                            task.addEventListener("pointerdown", event => event.stopPropagation());
+                            task.addEventListener("mousedown", event => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            });
+                            if (marker === " " || marker.toLowerCase() === "x") {
+                                task.innerHTML = `<svg><use xlink:href="#${marker === " " ? "iconUncheck" : "iconCheck"}"></use></svg>`;
+                            } else {
+                                task.textContent = marker;
+                                task.classList.add("tabs-task--custom");
+                            }
+                            ["click", "dblclick", "contextmenu", "keydown"].forEach(type => task.addEventListener(type, event => {
+                                event.stopPropagation();
+                                if (type === "keydown" && !["Enter", " "].includes((event as KeyboardEvent).key)) {
+                                    return;
+                                }
+                                event.preventDefault();
+                                if (!readonly) {
+                                    if (type === "contextmenu") {
+                                        controller.options.taskMenu?.(item);
+                                    } else if (type !== "dblclick") {
+                                        controller.options.task?.(item);
+                                    }
+                                }
+                            }));
+                            button.prepend(task);
+                        }
                         button.addEventListener("click", event => {
                             event.preventDefault();
                             event.stopPropagation();
@@ -283,7 +332,9 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                     }
                     state.signature = signature;
                     if (focusedID) {
-                        (Array.from(list.children).find(child => (child as HTMLElement).dataset.tabId === focusedID) as HTMLElement)?.focus();
+                        const focusedButton = Array.from(list.children).find(child =>
+                            (child as HTMLElement).dataset.tabId === focusedID) as HTMLElement;
+                        (focusedTask ? focusedButton?.querySelector<HTMLElement>(".tabs-task") : focusedButton)?.focus({preventScroll: true});
                     }
                 }
                 const list = header.querySelector<HTMLElement>(".tabs-list");
@@ -324,6 +375,9 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                     button.draggable = !readonly && !editing && !!controller.options.move;
                     const info = item.querySelector<HTMLElement>(":scope > .tab-item-info");
                     if (info) {
+                        if (!editing && info.classList.contains("tabs-title-editor")) {
+                            controller.options.endEdit?.();
+                        }
                         info.classList.toggle("tabs-title-editor", editing);
                         if (!editing) {
                             info.removeAttribute("style");
@@ -331,6 +385,10 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                     }
                 });
                 tabs.setAttribute("data-tabs-ready", "true");
+                if (previousScroll) {
+                    list.scrollLeft = previousScroll.left;
+                    list.scrollTop = previousScroll.top;
+                }
                 if (editingButton && !vertical) {
                     // 展开编辑标签后滚动到完整可见的位置，避免右侧页签的输入区域被裁切。
                     const listRect = list.getBoundingClientRect();
@@ -349,17 +407,18 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                     const parentRect = item.getBoundingClientRect();
                     const listRect = list.getBoundingClientRect();
                     const scale = parentRect.width ? item.offsetWidth / parentRect.width : 1;
-                    info.style.left = `${(rect.left - parentRect.left) * scale - item.clientLeft}px`;
+                    const task = button.querySelector<HTMLElement>(".tabs-task");
+                    const taskWidth = task ? task.offsetWidth + parseFloat(getComputedStyle(task).marginRight) +
+                        parseFloat(getComputedStyle(button).paddingLeft) : 0;
+                    info.style.paddingLeft = task ? "0px" : "";
+                    info.style.left = `${(rect.left - parentRect.left) * scale - item.clientLeft + taskWidth}px`;
                     info.style.top = `${(rect.top - parentRect.top) * scale - item.clientTop}px`;
-                    info.style.width = `${rect.width * scale}px`;
+                    info.style.width = `${rect.width * scale - taskWidth}px`;
                     info.style.height = `${rect.height * scale}px`;
                     info.style.clipPath = `inset(${Math.max(0, listRect.top - rect.top) * scale}px ` +
                         `${Math.max(0, rect.right - listRect.right) * scale}px ` +
                         `${Math.max(0, rect.bottom - listRect.bottom) * scale}px ` +
                         `${Math.max(0, listRect.left - rect.left) * scale}px)`;
-                });
-                list.querySelectorAll<HTMLElement>(".tabs-tab-label").forEach(label => {
-                    label.parentElement.classList.toggle("ariaLabel", label.scrollWidth > label.clientWidth);
                 });
                 controller.resize.observe(tabs);
                 if (!tabs.closest('.tab-item[data-tabs-hidden="true"]') && state.renderedActive !== state.active) {
@@ -379,7 +438,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
             });
             controller.observer.observe(element, {
                 childList: true, subtree: true, characterData: true, attributes: true,
-                attributeFilter: ["tabs-active-id", "tabs-position", "data-readonly", "data-tabs-editing", "contenteditable"],
+                attributeFilter: ["tabs-active-id", "tabs-position", "tabs-task", "data-readonly", "data-tabs-editing", "contenteditable"],
             });
             shown.forEach(item => controller.options.shown?.(item));
         },
@@ -417,6 +476,23 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
 };
 
 export const destroyTabsRender = (element: Element) => roots.get(element)?.destroy();
+
+export const setTabTitleNavigationEditing = (item: HTMLElement, editing: boolean) => {
+    for (let root: Element = item; root; root = root.parentElement) {
+        const controller = roots.get(root);
+        if (controller) {
+            const tabs = item.parentElement as HTMLElement;
+            if (item.getAttribute("data-tabs-hidden") !== "false" ||
+                (controller.options.readonly?.(tabs) ?? true)) {
+                return false;
+            }
+            item.dataset.tabsEditing = editing ? "true" : "false";
+            controller.render();
+            return true;
+        }
+    }
+    return false;
+};
 
 export const revealTabsForTarget = (target: Element, persist = true) => {
     for (let root = target; root; root = root.parentElement) {

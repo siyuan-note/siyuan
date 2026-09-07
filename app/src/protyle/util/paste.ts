@@ -7,7 +7,7 @@ import {
     isUploadInsertPositionAvailable,
 } from "../upload/insertPosition";
 import {processPasteCode, processRender} from "./processCode";
-import {getLocalFiles, getTextSiyuanFromTextHTML, readText} from "./compatibility";
+import {getLocalFiles, getTextSiyuanFromTextHTML, readClipboard, readText} from "./compatibility";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import {focusByOffset, getEditorRange, getSelectionOffset, getUndoFocusContext} from "./selection";
 import {blockRender} from "../render/blockRender";
@@ -26,7 +26,7 @@ import {remapTabsDOMIDs, wrapPastedTabItems} from "./tabsCopy";
 import {getTabItems, getTabTitle} from "../render/tabsRender";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL, showBase64ImageSizeLimit} from "../upload/base64";
-import {applyHTMLLocalAssetPaths, collectHTMLLocalAssets, removeHTMLLocalAssetPaths} from "../upload/htmlLocalAssets";
+import {applyHTMLLocalAssetPaths, collectHTMLLocalAssets, getHTMLAssetSourceURL, removeHTMLLocalAssetPaths, resolveHTMLAssetURLs} from "../upload/htmlLocalAssets";
 import {
     applyHTMLEmbeddedAssetPaths,
     collectHTMLEmbeddedAssets,
@@ -305,6 +305,15 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
 
         // insertHTML 会进行内部反转义
         insertHTML(content, protyle, false, false, true);
+    }
+};
+
+export const pasteAndKeepSourceFormat = async (protyle: IProtyle, target: HTMLElement) => {
+    try {
+        const data = await readClipboard();
+        await paste(protyle, {...data, target, preserveSourceFormat: true});
+    } catch (error) {
+        console.error(error);
     }
 };
 
@@ -643,6 +652,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     let wps = "";
     let wpsPresentation: IWPSPresentationClipboard | undefined;
     let officeListConverted = false;
+    const preserveSourceFormat = "preserveSourceFormat" in event && event.preserveSourceFormat === true;
     if ("clipboardData" in event) {
         textHTML = event.clipboardData.getData("text/html");
         textPlain = event.clipboardData.getData("text/plain");
@@ -751,6 +761,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     if (!siyuanHTML) {
         // process word
         const doc = new DOMParser().parseFromString(textHTML, "text/html");
+        // 在移除文档头之前解析来源，避免将网页根路径当成本地绝对路径。
+        resolveHTMLAssetURLs(doc, getHTMLAssetSourceURL(textHTML, doc.querySelector("base[href]")?.getAttribute("href")));
         if (doc.body && doc.body.innerHTML) {
             textHTML = doc.body.innerHTML;
         }
@@ -1203,6 +1215,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 office,
                 officeMathHTML,
                 wps,
+                preserveSourceFormat,
             };
             if (localAssets.length > 0 || hasHTMLEmbeddedAssets(tempElement)) {
                 try {

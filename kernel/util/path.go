@@ -467,17 +467,24 @@ func IsSensitivePath(p string) bool {
 	return false
 }
 
-// isSensitivePath 执行实际的敏感性黑名单匹配，不解析符号链接。
+// isSensitivePath 执行敏感性黑名单匹配，必要时解析工作空间路径，但不解析目标路径。
 func isSensitivePath(p string) bool {
 	toCheckPathLower := filepath.Clean(strings.ToLower(p))
 	toCheckNameLower := filepath.Base(toCheckPathLower)
+	workspaceDir := WorkspaceDir
+	inWorkspace := gulu.File.IsSubPath(workspaceDir, p)
+	if !inWorkspace && workspaceDir != "" {
+		// 静态资源使用解析后的真实路径，工作空间也需采用相同形式判断归属及 conf、temp 目录。
+		// 仅解析工作空间根目录，不能将指向外部敏感文件的资源符号链接视为工作空间内文件。
+		if resolved, err := filepath.EvalSymlinks(workspaceDir); err == nil && gulu.File.IsSubPath(resolved, p) {
+			workspaceDir = resolved
+			inWorkspace = true
+		}
+	}
 
-	// 系统目录前缀检查仅对工作空间外的路径执行。
-	// 调用方传入的工作空间内路径（如 assets、export）都已用 IsSubPath(WorkspaceDir) 校验过，
-	// 工作空间不可能位于 /etc、/var/log 等系统敏感目录；而 iOS 等沙箱平台的合法数据路径恰好以
-	// /var 开头（/var/mobile/Containers/Data/Application/...），对工作空间内路径执行系统目录前缀
-	// 检查会把 iOS 上正常的 assets/export 文件误判为敏感路径，导致伺服返回 403。
-	if !gulu.File.IsSubPath(WorkspaceDir, p) {
+	// 系统目录前缀检查仅对工作空间外的路径执行，工作空间内仍需检查配置、临时文件和凭据。
+	// iOS 沙箱及 Linux /var/home 下的合法工作空间可能位于 /var，需按工作空间边界判断。
+	if !inWorkspace {
 		// 敏感目录前缀（UNIX 风格）
 		prefixes := []string{
 			"/.",
@@ -527,14 +534,14 @@ func isSensitivePath(p string) bool {
 	}
 
 	// 工作空间/conf 目录（小写比较）
-	workspaceConfPrefix := strings.ToLower(filepath.Join(WorkspaceDir, "conf"))
+	workspaceConfPrefix := strings.ToLower(filepath.Join(workspaceDir, "conf"))
 	if strings.HasPrefix(toCheckPathLower, workspaceConfPrefix) {
 		return true
 	}
 
 	// 只允许导出工作空间/temp/export 目录，不允许导出工作空间/temp 目录（小写比较）
-	workspaceTempExportPrefix := strings.ToLower(filepath.Join(WorkspaceDir, "temp", "export"))
-	workspaceTempPrefix := strings.ToLower(filepath.Join(WorkspaceDir, "temp"))
+	workspaceTempExportPrefix := strings.ToLower(filepath.Join(workspaceDir, "temp", "export"))
+	workspaceTempPrefix := strings.ToLower(filepath.Join(workspaceDir, "temp"))
 	if strings.HasPrefix(toCheckPathLower, workspaceTempPrefix) && !strings.HasPrefix(toCheckPathLower, workspaceTempExportPrefix) {
 		return true
 	}
@@ -543,26 +550,33 @@ func isSensitivePath(p string) bool {
 	// 覆盖常见凭据 dotfile，防止通过 globalCopyFiles 等接受工作空间外绝对路径的接口把内核用户
 	// 家目录下的凭据复制进工作空间后外泄：Git push token、HTTP/API 凭据、Postgres 密码、
 	// K8s/Docker/容器仓库配置、GPG 私钥环、云厂商 CLI 凭据、包管理器 token 等。
-	homePrefixes := []string{
-		strings.ToLower(filepath.Join(HomeDir, ".ssh")),
-		strings.ToLower(filepath.Join(HomeDir, ".config")),
-		strings.ToLower(filepath.Join(HomeDir, ".bashrc")),
-		strings.ToLower(filepath.Join(HomeDir, ".zshrc")),
-		strings.ToLower(filepath.Join(HomeDir, ".profile")),
-		strings.ToLower(filepath.Join(HomeDir, ".git-credentials")),
-		strings.ToLower(filepath.Join(HomeDir, ".netrc")),
-		strings.ToLower(filepath.Join(HomeDir, ".pgpass")),
-		strings.ToLower(filepath.Join(HomeDir, ".kube")),
-		strings.ToLower(filepath.Join(HomeDir, ".docker")),
-		strings.ToLower(filepath.Join(HomeDir, ".gnupg")),
-		strings.ToLower(filepath.Join(HomeDir, ".aws")),
-		strings.ToLower(filepath.Join(HomeDir, ".azure")),
-		strings.ToLower(filepath.Join(HomeDir, ".npmrc")),
-		strings.ToLower(filepath.Join(HomeDir, ".pypirc")),
+	homeDirs := []string{HomeDir}
+	homeCheckPaths := []string{toCheckPathLower}
+	if HomeDir != "" && !gulu.File.IsSubPath(HomeDir, p) {
+		// 工作空间真实路径获得系统目录豁免后，仍需匹配家目录真实路径下的敏感位置。
+		if resolved, err := filepath.EvalSymlinks(HomeDir); err == nil && resolved != HomeDir {
+			homeDirs = append(homeDirs, resolved)
+		}
+		// 家目录已是真实路径而目标仍使用工作空间别名时，按工作空间根目录映射目标。
+		// 只映射根目录，保留对尚未创建的导出目标及工作空间内路径的检查。
+		if inWorkspace && workspaceDir == WorkspaceDir {
+			if resolved, err := filepath.EvalSymlinks(workspaceDir); err == nil && resolved != workspaceDir {
+				if rel, err := filepath.Rel(workspaceDir, p); err == nil {
+					homeCheckPaths = append(homeCheckPaths, strings.ToLower(filepath.Join(resolved, rel)))
+				}
+			}
+		}
 	}
-	for _, hp := range homePrefixes {
-		if strings.HasPrefix(toCheckPathLower, hp) {
-			return true
+	for _, homeDir := range homeDirs {
+		for _, name := range []string{
+			".ssh", ".config", ".bashrc", ".zshrc", ".profile", ".git-credentials", ".netrc", ".pgpass",
+			".kube", ".docker", ".gnupg", ".aws", ".azure", ".npmrc", ".pypirc",
+		} {
+			for _, checkPath := range homeCheckPaths {
+				if strings.HasPrefix(checkPath, strings.ToLower(filepath.Join(homeDir, name))) {
+					return true
+				}
+			}
 		}
 	}
 

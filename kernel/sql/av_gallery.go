@@ -57,7 +57,7 @@ func renderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 		if nil != getErr {
 			// 找不到字段则在视图中删除（元数据查询场景不写盘）
 			if !ignoreRows {
-				removeMissingField(attrView, view, field.ID)
+				removeMissingField(attrView, view, field.ID, renderContext)
 			}
 			continue
 		}

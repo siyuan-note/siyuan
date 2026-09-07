@@ -1,6 +1,10 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getPartialUpdateCleanupElements, shouldDeferCodeBlockCaretRestore} from "./transactionUpdate";
+import {
+    getPartialUpdateCleanupElements,
+    shouldDeferCodeBlockCaretRestore,
+    shouldReloadForHeadingBatch,
+} from "./transactionUpdate";
 
 describe("getPartialUpdateCleanupElements", () => {
     const breadcrumb = {id: "breadcrumb"};
@@ -44,5 +48,23 @@ describe("shouldDeferCodeBlockCaretRestore", () => {
 
     it("does not defer caret restoration for ordinary blocks", () => {
         assert.equal(shouldDeferCodeBlockCaretRestore({...replayCodeBlock, isCodeBlock: false}), false);
+    });
+});
+
+describe("shouldReloadForHeadingBatch", () => {
+    it("does not reload when both the Lite root and the operation context omit a root ID", () => {
+        assert.equal(shouldReloadForHeadingBatch(undefined, [{}]), false);
+    });
+
+    it("reloads when an operation targets the current heading batch root", () => {
+        assert.equal(shouldReloadForHeadingBatch("root", [{
+            context: {headingBatchRootID: "root"},
+        }]), true);
+    });
+
+    it("does not reload for another heading batch root", () => {
+        assert.equal(shouldReloadForHeadingBatch("root", [{
+            context: {headingBatchRootID: "other"},
+        }]), false);
     });
 });

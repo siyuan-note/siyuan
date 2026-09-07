@@ -139,10 +139,11 @@ func refreshCrossTreeMoveRefs(refreshes []crossTreeMoveRefRefresh) {
 }
 
 type Backlink struct {
-	ID         string       `json:"id"`
-	DOM        string       `json:"dom"`
-	BlockPaths []*BlockPath `json:"blockPaths"`
-	Expand     bool         `json:"expand"`
+	AttributeViewTargets []*BacklinkAttributeViewTarget `json:"attributeViewTargets,omitempty"`
+	ID                   string                         `json:"id"`
+	DOM                  string                         `json:"dom"`
+	BlockPaths           []*BlockPath                   `json:"blockPaths"`
+	Expand               bool                           `json:"expand"`
 
 	node *ast.Node // 仅用于按文档内容顺序排序
 }
@@ -232,7 +233,7 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren, highli
 	var refTree *parse.Tree
 	trees := filesys.LoadTrees(mentionBlockIDs)
 	for id, tree := range trees {
-		backlink := buildBacklink(id, tree, originalRefBlockIDs, mentionKeywords, highlight, luteEngine)
+		backlink := buildBacklink(id, tree, originalRefBlockIDs, mentionKeywords, highlight, luteEngine, nil)
 		if nil != backlink {
 			ret = append(ret, backlink)
 		}
@@ -299,9 +300,10 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight
 		return
 	}
 
+	avTargets := backlinkAttributeViewTargets(refTree, tmpRefs)
 	luteEngine := util.NewLute()
 	for _, linkRef := range linkRefs {
-		backlink := buildBacklink(linkRef.ID, refTree, originalRefBlockIDs, keywords, highlight, luteEngine)
+		backlink := buildBacklink(linkRef.ID, refTree, originalRefBlockIDs, keywords, highlight, luteEngine, avTargets)
 		if nil != backlink {
 			ret = append(ret, backlink)
 		}
@@ -345,9 +347,10 @@ func GetBacklinkDocInBox(defID, refTreeID, keyword string, containChildren, high
 		return
 	}
 
+	avTargets := backlinkAttributeViewTargets(refTree, tmpRefs)
 	luteEngine := util.NewLute()
 	for _, linkRef := range linkRefs {
-		backlink := buildBacklink(linkRef.ID, refTree, originalRefBlockIDs, keywords, highlight, luteEngine)
+		backlink := buildBacklink(linkRef.ID, refTree, originalRefBlockIDs, keywords, highlight, luteEngine, avTargets)
 		if nil != backlink {
 			ret = append(ret, backlink)
 		}
@@ -405,7 +408,7 @@ func GetBackmentionDocInBox(defID, refTreeID, keyword string, containChildren, h
 		if loadErr != nil || tree == nil {
 			continue
 		}
-		backlink := buildBacklink(id, tree, originalRefBlockIDs, mentionKeywords, highlight, luteEngine)
+		backlink := buildBacklink(id, tree, originalRefBlockIDs, mentionKeywords, highlight, luteEngine, nil)
 		if nil != backlink {
 			ret = append(ret, backlink)
 		}
@@ -451,7 +454,7 @@ func sortBacklinks(backlinks []*Backlink, tree *parse.Tree) {
 	})
 }
 
-func buildBacklink(refID string, refTree *parse.Tree, originalRefBlockIDs map[string]string, keywords []string, highlight bool, luteEngine *lute.Lute) (ret *Backlink) {
+func buildBacklink(refID string, refTree *parse.Tree, originalRefBlockIDs map[string]string, keywords []string, highlight bool, luteEngine *lute.Lute, avTargets map[string]*BacklinkAttributeViewTarget) (ret *Backlink) {
 	node := treenode.GetNodeInTree(refTree, refID)
 	if nil == node {
 		return
@@ -494,6 +497,9 @@ func buildBacklink(refID string, refTree *parse.Tree, originalRefBlockIDs map[st
 
 	dom := renderVisibleBlockDOMByNodes(renderNodes, luteEngine)
 	ret = &Backlink{ID: refID, DOM: dom, BlockPaths: blockPaths, Expand: expand, node: node}
+	if 0 < len(avTargets) {
+		appendBacklinkAttributeViewTargets(ret, renderNodes, avTargets)
+	}
 	return
 }
 

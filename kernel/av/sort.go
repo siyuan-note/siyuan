@@ -120,20 +120,8 @@ func Sort(viewable Viewable, attrView *AttributeView) {
 		}
 	}
 
-	sort.Slice(uneditedItems, func(i, j int) bool {
-		val1 := uneditedItems[i].GetBlockValue()
-		if nil == val1 {
-			return true
-		}
-		val2 := uneditedItems[j].GetBlockValue()
-		if nil == val2 {
-			return false
-		}
-		return val1.CreatedAt < val2.CreatedAt
-	})
-
-	sort.Slice(editedItems, func(i, j int) bool {
-		sorted := true
+	// 同值项目保留视图中的手动顺序，未编辑项目也保留各自的手动顺序。
+	sort.SliceStable(editedItems, func(i, j int) bool {
 		for _, fieldIndexSort := range fieldIndexSorts {
 			val1 := ResolveValueSource(editedItems[i].GetValues()[fieldIndexSort.Index], fieldIndexSort.ValueSource)
 			val2 := ResolveValueSource(editedItems[j].GetValues()[fieldIndexSort.Index], fieldIndexSort.ValueSource)
@@ -141,7 +129,6 @@ func Sort(viewable Viewable, attrView *AttributeView) {
 				if !isSortValueEmpty(val2, fieldIndexSort.DateEndpoint) {
 					return false
 				}
-				sorted = false
 				continue
 			} else {
 				if isSortValueEmpty(val2, fieldIndexSort.DateEndpoint) {
@@ -151,10 +138,8 @@ func Sort(viewable Viewable, attrView *AttributeView) {
 
 			result := val1.compare(val2, optionSortByIndex[fieldIndexSort.Index], fieldIndexSort.DateEndpoint)
 			if 0 == result {
-				sorted = false
 				continue
 			}
-			sorted = true
 
 			switch fieldIndexSort.Order {
 			case SortOrderAsc:
@@ -166,17 +151,6 @@ func Sort(viewable Viewable, attrView *AttributeView) {
 			}
 		}
 
-		if !sorted {
-			key1 := editedItems[i].GetBlockValue()
-			if nil == key1 {
-				return false
-			}
-			key2 := editedItems[j].GetBlockValue()
-			if nil == key2 {
-				return false
-			}
-			return key1.CreatedAt < key2.CreatedAt
-		}
 		return false
 	})
 

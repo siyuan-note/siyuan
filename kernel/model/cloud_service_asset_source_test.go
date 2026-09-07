@@ -12,6 +12,16 @@ import (
 )
 
 func TestCloudAssetSourceAllowsOriginalAccountAfterLogout(t *testing.T) {
+	testCloudAssetSourceAllowsOriginalAccountAfterLogout(t, LogoutUser)
+}
+
+func TestCloudAssetSourceAllowsOriginalAccountAfterAuthFailure(t *testing.T) {
+	testCloudAssetSourceAllowsOriginalAccountAfterLogout(t, func() {
+		cloudRepoErrorHandler()(cloud.ErrCloudAuthFailed)
+	})
+}
+
+func testCloudAssetSourceAllowsOriginalAccountAfterLogout(t *testing.T, logout func()) {
 	originalConf := Conf
 	originalData, originalRepo, originalConfDir := util.DataDir, util.RepoDir, util.ConfDir
 	originalHistory, originalTemp, originalRegion := util.HistoryDir, util.TempDir, util.CurrentCloudRegion
@@ -23,7 +33,7 @@ func TestCloudAssetSourceAllowsOriginalAccountAfterLogout(t *testing.T) {
 	base := t.TempDir()
 	remote := filepath.Join(base, "cloud")
 	key := []byte("0123456789abcdef0123456789abcdef")
-	owner := &conf.User{UserId: "asset-owner", UserName: "owner"}
+	owner := &conf.User{UserId: "asset-owner", UserName: "owner", UserToken: "asset-token"}
 	Conf = NewAppConf()
 	Conf.Sync, Conf.Repo, Conf.System = conf.NewSync(), conf.NewRepo(), conf.NewSystem()
 	Conf.Sync.Provider, Conf.Sync.CloudName, Conf.Sync.Enabled = conf.ProviderSiYuan, "main", true
@@ -85,7 +95,7 @@ func TestCloudAssetSourceAllowsOriginalAccountAfterLogout(t *testing.T) {
 	if err != nil || len(deferred) != 1 {
 		t.Fatalf("expected an undownloaded asset: %v, %v", deferred, err)
 	}
-	LogoutUser()
+	logout()
 	if Conf.GetUser() != nil {
 		t.Fatal("logout retained the cloud session")
 	}

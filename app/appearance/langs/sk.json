@@ -18,6 +18,21 @@
 	"flashcardUnknownDurationReviews": "Opakovania s neznámym časom",
 	"flashcardReviewsByHour": "Opakovania podľa hodín",
 	"flashcardAllHistory": "Celá história",
+	"templateSearch": "Hľadať šablóny podľa názvu alebo cesty",
+	"templateContextSearch": "Hľadať kontextové dokumenty",
+	"templateContextTip": "Spustiť šablónu s názvom, ID a ďalšími údajmi vybraného dokumentu bez jeho zmeny",
+	"fileTreeDragRemoveSorts": "Tento presun je v rozpore s aktuálnym pravidlom zoradenia. Prepnúť tento zoznam na vlastné zoradenie a uložiť úplné poradie po potiahnutí?",
+	"pasteAndKeepSourceFormat": "Prilepiť so zachovaním zdrojového formátovania",
+	"templatePackageMoveTip": "Priečinky balíkov šablón nemožno premenovať ani presunúť",
+	"avDragRemoveSorts": "Tento presun je v rozpore s aktuálnymi pravidlami zoradenia. Odstrániť pravidlá zoradenia tohto zobrazenia a uložiť úplné poradie po presunutí ako vlastné poradie?",
+	"templateManager": "Správca šablón",
+	"templateSource": "Zdrojový kód šablóny",
+	"templatePreview": "Náhľad šablóny",
+	"templateContext": "Kontext náhľadu",
+	"templateNewFolder": "Nový priečinok",
+	"templateDeleteTip": "Odstrániť túto položku a celý jej obsah? Odstránené súbory sa uchovajú v data/templates/.trash na obnovenie.",
+	"task": "Úloha",
+	"customTaskStatus": "Vlastný stav úlohy",
 	"imageViewerPlay": "Spustiť prezentáciu",
 	"imageFlipHorizontal": "Prevrátiť vodorovne",
 	"imageFlipVertical": "Prevrátiť zvislo",
@@ -2799,6 +2814,7 @@
 		"374": "Databáza [%s], pole šablóny [%s], prvá ovplyvnená položka [%s] (ID položky: %s), počet ovplyvnených položiek: %d, chyba: %s",
 		"375": "Zápisník na ukladanie rýchlych poznámok nie je k dispozícii. Vyberte otvorený nezašifrovaný zápisník v Nastavenia - Dokument",
 		"376": "Zdrojový súbor ešte nebol stiahnutý a momentálne ho nemožno získať",
-		"377": "Pred zmenou alebo obnovením dátového úložiska prepnite na Stiahnuť všetky"
+		"377": "Pred zmenou alebo obnovením dátového úložiska prepnite na Stiahnuť všetky",
+		"378": "Požiadavky medzi lokalitami nie sú povolené"
 	}
 }

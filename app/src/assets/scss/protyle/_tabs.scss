@@ -81,6 +81,28 @@
     pointer-events: none;
   }
 
+  .tabs-task {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    font-size: 12px;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    &--custom {
+      box-sizing: border-box;
+      border: 1px solid currentColor;
+      border-radius: 2px;
+    }
+  }
+
   .tabs-tab--dragging {
     opacity: .36;
   }
@@ -134,9 +156,8 @@
     align-items: center;
     padding: 0 8px;
     border-radius: var(--b3-border-radius);
-    background: var(--b3-theme-primary-lightest);
+    background: transparent;
     color: var(--b3-theme-on-background);
-    box-shadow: 0 0 0 1px var(--b3-theme-primary-lighter) inset;
     font-size: 87.5%;
     line-height: 22px;
     user-select: text;

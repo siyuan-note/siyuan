@@ -255,9 +255,9 @@ func templateTreeContainsAttributeView(tree *parse.Tree) bool {
 }
 
 func renderTemplateDocTreeMarkdown(markdown []byte, boxID string) (*parse.Tree, error) {
-	tree := parseKTree(markdown)
-	if nil == tree {
-		return nil, errors.New("parse child template tree failed")
+	tree, err := parseTemplateKTree(markdown)
+	if err != nil {
+		return nil, err
 	}
 	tree.Box = boxID
 	if templateTreeContainsAttributeView(tree) {

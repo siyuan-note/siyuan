@@ -1,23 +1,30 @@
 import {isInEmbedBlock} from "../util/hasClosest";
-import {getNextBlock, getPreviousBlock, isContainerBlock, isNotEditBlock} from "./getBlock";
+import {getNextBlock, getPreviousBlock, isContainerBlock} from "./getBlock";
 import type {TVerticalDirection} from "./verticalCaret";
+import {getFoldedNavigationOwner, getReachableVerticalRects} from "./verticalVisibility";
+import {getHostVerticalRegion} from "./verticalRegion";
 
 export const isVerticalNavigationElementVisible = (element: Element) =>
-    Array.from(element.getClientRects()).some(rect => rect.height > 0.5 || rect.width > 0.5);
+    getReachableVerticalRects(element, Array.from(element.getClientRects())).length > 0;
 
 const getAdjacentBlock = (element: Element, direction: TVerticalDirection) =>
     direction === "up" ? getPreviousBlock(element) : getNextBlock(element);
+
+const getEmbedNavigationScope = (element: Element) =>
+    element.getAttribute("data-type") === "NodeBlockQueryEmbed" ?
+        (element.parentElement ? isInEmbedBlock(element.parentElement, false) : false) :
+        isInEmbedBlock(element, false);
 
 export const getAdjacentVisibleBlock = (element: Element, direction: TVerticalDirection) => {
     if (!isVerticalNavigationElementVisible(element)) {
         return false;
     }
-    const embedElement = isInEmbedBlock(element);
+    const embedScope = getEmbedNavigationScope(element);
     const visited = new Set<Element>();
-    let adjacentElement = getAdjacentBlock(element, direction);
+    let adjacentElement = getAdjacentBlock(getFoldedNavigationOwner(element) || element, direction);
     while (adjacentElement && !visited.has(adjacentElement)) {
         visited.add(adjacentElement);
-        if (embedElement && isInEmbedBlock(adjacentElement) !== embedElement) {
+        if (getEmbedNavigationScope(adjacentElement) !== embedScope) {
             return false;
         }
         if (isVerticalNavigationElementVisible(adjacentElement)) {
@@ -28,40 +35,44 @@ export const getAdjacentVisibleBlock = (element: Element, direction: TVerticalDi
     return false;
 };
 
-const getAtomicOwner = (element: Element, boundaryElement: Element) => {
-    let currentElement: Element | null = element;
-    while (currentElement && boundaryElement.contains(currentElement)) {
-        if (currentElement.hasAttribute("data-node-id") && !isContainerBlock(currentElement) &&
-            isNotEditBlock(currentElement)) {
-            return currentElement;
-        }
-        if (currentElement === boundaryElement) {
-            break;
-        }
-        currentElement = currentElement.parentElement?.closest("[data-node-id]") || null;
+const findVisibleBoundaryBlock = (element: Element, direction: TVerticalDirection,
+                                  embedScope: Element | false, boundaryElement: Element): Element | undefined => {
+    if (element !== boundaryElement && element.classList.contains("protyle-wysiwyg")) {
+        return;
     }
-};
+    const isBlock = element.hasAttribute("data-node-id");
+    if (isBlock) {
+        if (element !== boundaryElement && getEmbedNavigationScope(element) !== embedScope) {
+            return;
+        }
+        if (!isVerticalNavigationElementVisible(element)) {
+            return;
+        }
+        const region = getHostVerticalRegion(element);
+        // 非容器块属于一个不透明导航区域，不能根据其内部渲染结果改变外部导航目标。
+        if (element.getAttribute("fold") === "1" || !isContainerBlock(element) ||
+            (direction === "down" && region?.title && isVerticalNavigationElementVisible(region.title))) {
+            return element;
+        }
+    }
 
-export const getVisibleBoundaryBlock = (element: Element, direction: TVerticalDirection) => {
-    const candidateElements = [element, ...Array.from(element.querySelectorAll("[data-node-id]"))];
+    const children = Array.from(element.children);
     if (direction === "up") {
-        candidateElements.reverse();
+        children.reverse();
     }
-    const visited = new Set<Element>();
-    for (const candidateElement of candidateElements) {
-        if (candidateElement !== element && isInEmbedBlock(candidateElement)) {
-            continue;
-        }
-        const targetElement = getAtomicOwner(candidateElement, element) || candidateElement;
-        if (visited.has(targetElement)) {
-            continue;
-        }
-        visited.add(targetElement);
-        if (!isContainerBlock(targetElement) && isVerticalNavigationElementVisible(targetElement)) {
+    for (const child of children) {
+        const targetElement = findVisibleBoundaryBlock(child, direction, embedScope, boundaryElement);
+        if (targetElement) {
             return targetElement;
         }
     }
-    if (isVerticalNavigationElementVisible(element)) {
-        return element;
+    return isBlock ? element : undefined;
+};
+
+export const getVisibleBoundaryBlock = (element: Element, direction: TVerticalDirection) => {
+    const foldedOwner = getFoldedNavigationOwner(element);
+    if (foldedOwner) {
+        return isVerticalNavigationElementVisible(foldedOwner) ? foldedOwner : undefined;
     }
+    return findVisibleBoundaryBlock(element, direction, getEmbedNavigationScope(element), element);
 };

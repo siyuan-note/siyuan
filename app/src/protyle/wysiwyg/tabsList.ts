@@ -96,6 +96,10 @@ export const convertTabsList = (source: Element, type: TTabsListConversion, lute
         const converted = convertContainer(item, itemTemplate.cloneNode(true) as HTMLElement);
         const blocks = blockChildren(item).map(child => child.cloneNode(true) as Element);
         if (toTabs) {
+            if (item.getAttribute("data-subtype") === "t") {
+                converted.setAttribute("tabs-task", item.getAttribute("data-task") ??
+                    (item.classList.contains("protyle-task--done") ? "X" : " "));
+            }
             if (blocks[0]?.getAttribute("data-type") === "NodeParagraph") {
                 const titleBlock = blocks.shift();
                 titleBlock.setAttribute("tabs-title", "true");
@@ -110,6 +114,14 @@ export const convertTabsList = (source: Element, type: TTabsListConversion, lute
             }
             body.replaceChildren(...blocks);
         } else {
+            const task = item.getAttribute("tabs-task");
+            converted.removeAttribute("tabs-task");
+            if (type === "Tabs2TL" && task !== null) {
+                converted.setAttribute("data-task", task);
+                converted.classList.toggle("protyle-task--done", task !== " ");
+                converted.querySelector(":scope > .protyle-action use")?.setAttribute("xlink:href",
+                    task === " " ? "#iconUncheck" : "#iconCheck");
+            }
             for (let i = blocks.length - 1; i >= 0; i--) {
                 if (isEmptyTabPlaceholder(blocks[i])) {
                     blocks.splice(i, 1);

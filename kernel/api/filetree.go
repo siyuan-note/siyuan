@@ -1148,9 +1148,12 @@ func reorderDocs(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	request := &struct {
-		SourceIDs []string `json:"sourceIDs"`
-		TargetID  string   `json:"targetID"`
-		Position  string   `json:"position"`
+		RespectSort bool     `json:"respectSort"`
+		Preview     bool     `json:"preview"`
+		RemoveSorts bool     `json:"removeSorts"`
+		SourceIDs   []string `json:"sourceIDs"`
+		TargetID    string   `json:"targetID"`
+		Position    string   `json:"position"`
 	}{}
 	if err := c.ShouldBindJSON(request); nil != err {
 		ret.Code = -1
@@ -1158,6 +1161,16 @@ func reorderDocs(c *gin.Context) {
 		return
 	}
 	if !validateReorderRequest(request.SourceIDs, request.TargetID, request.Position, ret) {
+		return
+	}
+
+	if request.RespectSort {
+		result, err := model.ReorderDocTree(request.SourceIDs, request.TargetID, request.Position, request.Preview, request.RemoveSorts)
+		ret.Data = result
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+		}
 		return
 	}
 

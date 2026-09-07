@@ -603,100 +603,9 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	}
 
 	start = time.Now()
-	switch sortMode {
-	case util.SortModeNameASC:
-		emptyKey := Conf.Language(16)
-		sort.Slice(docs, func(i, j int) bool {
-			ni, nj := docs[i].Name, docs[j].Name
-			if docs[i].TitleEmpty {
-				ni = emptyKey
-			}
-			if docs[j].TitleEmpty {
-				nj = emptyKey
-			}
-			return util.PinYinCompare4FileTree(ni, nj)
-		})
-	case util.SortModeNameDESC:
-		emptyKey := Conf.Language(16)
-		sort.Slice(docs, func(i, j int) bool {
-			ni, nj := docs[i].Name, docs[j].Name
-			if docs[i].TitleEmpty {
-				ni = emptyKey
-			}
-			if docs[j].TitleEmpty {
-				nj = emptyKey
-			}
-			return util.PinYinCompare4FileTree(nj, ni)
-		})
-	case util.SortModeUpdatedASC:
-		sort.Slice(docs, func(i, j int) bool { return docs[i].Mtime < docs[j].Mtime })
-	case util.SortModeUpdatedDESC:
-		sort.Slice(docs, func(i, j int) bool { return docs[i].Mtime > docs[j].Mtime })
-	case util.SortModeAlphanumASC:
-		emptyKey := Conf.Language(16)
-		sort.Slice(docs, func(i, j int) bool {
-			ni, nj := docs[i].Name, docs[j].Name
-			if docs[i].TitleEmpty {
-				ni = emptyKey
-			}
-			if docs[j].TitleEmpty {
-				nj = emptyKey
-			}
-			return util.NaturalCompare(ni, nj)
-		})
-	case util.SortModeAlphanumDESC:
-		emptyKey := Conf.Language(16)
-		sort.Slice(docs, func(i, j int) bool {
-			ni, nj := docs[i].Name, docs[j].Name
-			if docs[i].TitleEmpty {
-				ni = emptyKey
-			}
-			if docs[j].TitleEmpty {
-				nj = emptyKey
-			}
-			return util.NaturalCompare(nj, ni)
-		})
-	case util.SortModeCustom:
-		fileTreeFiles := docs
-		box.fillSort(&fileTreeFiles)
-		sort.Slice(fileTreeFiles, func(i, j int) bool {
-			if fileTreeFiles[i].Sort == fileTreeFiles[j].Sort {
-				leftTime, rightTime := util.TimeFromID(fileTreeFiles[i].ID), util.TimeFromID(fileTreeFiles[j].ID)
-				if leftTime != rightTime {
-					return leftTime > rightTime
-				}
-				return fileTreeFiles[i].ID > fileTreeFiles[j].ID
-			}
-			return fileTreeFiles[i].Sort < fileTreeFiles[j].Sort
-		})
-		ret = append(ret, fileTreeFiles...)
-		totals = len(ret)
-		if maxListCount < len(ret) {
-			ret = ret[:maxListCount]
-		}
-		ret = ret[:]
-		return
-	case util.SortModeRefCountASC:
-		sort.Slice(docs, func(i, j int) bool { return docs[i].Count < docs[j].Count })
-	case util.SortModeRefCountDESC:
-		sort.Slice(docs, func(i, j int) bool { return docs[i].Count > docs[j].Count })
-	case util.SortModeCreatedASC:
-		sort.Slice(docs, func(i, j int) bool { return docs[i].CTime < docs[j].CTime })
-	case util.SortModeCreatedDESC:
-		sort.Slice(docs, func(i, j int) bool { return docs[i].CTime > docs[j].CTime })
-	case util.SortModeSizeASC:
-		sort.Slice(docs, func(i, j int) bool { return docs[i].Size < docs[j].Size })
-	case util.SortModeSizeDESC:
-		sort.Slice(docs, func(i, j int) bool { return docs[i].Size > docs[j].Size })
-	case util.SortModeSubDocCountASC:
-		sort.Slice(docs, func(i, j int) bool { return docs[i].SubFileCount < docs[j].SubFileCount })
-	case util.SortModeSubDocCountDESC:
-		sort.Slice(docs, func(i, j int) bool { return docs[i].SubFileCount > docs[j].SubFileCount })
-	}
-
-	if util.SortModeCustom != sortMode {
-		ret = append(ret, docs...)
-	}
+	box.fillSort(&docs)
+	sortDocTreeFiles(docs, sortMode)
+	ret = append(ret, docs...)
 
 	totals = len(ret)
 	if maxListCount < len(ret) {
@@ -2537,7 +2446,10 @@ func readSortConfMap(confPath string) (map[string]int, error) {
 	ret := map[string]int{}
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		logging.LogWarnf("unmarshal sort conf [%s] failed: %s", confPath, err)
-		return map[string]int{}, nil
+		return nil, err
+	}
+	if ret == nil {
+		return nil, fmt.Errorf("invalid sort conf [%s]: expected an object", confPath)
 	}
 	return ret, nil
 }

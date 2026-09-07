@@ -13,6 +13,7 @@ import {Constants} from "../constants";
 import {updateHotkeyTip} from "../protyle/util/compatibility";
 import {escapeAriaLabel} from "../util/escape";
 import {openLink} from "../editor/openLink";
+import {waitForPendingTransactions} from "../protyle/util/transactionQueue";
 
 export const initStatus = (isWindow = false) => {
     /// #if !MOBILE
@@ -139,13 +140,13 @@ let countTimeout: number;
 let countAbortController: AbortController | null = null;
 let lastRootId: string;
 
-const scheduleStatusStat = (rootID: string, content?: string, ids?: string[]) => {
+const scheduleStatusStat = (rootID: string, content?: string, ids?: string[], protyle?: IProtyle) => {
     clearTimeout(countTimeout);
     if (countAbortController) {
         countAbortController.abort();
         countAbortController = null;
     }
-    countTimeout = window.setTimeout(() => {
+    countTimeout = window.setTimeout(async () => {
         countAbortController = new AbortController();
         const signal = countAbortController.signal;
         const capturedController = countAbortController;
@@ -167,6 +168,13 @@ const scheduleStatusStat = (rootID: string, content?: string, ids?: string[]) =>
             finishRequest();
         };
 
+        if (!content && protyle) {
+            await waitForPendingTransactions(protyle);
+            if (signal.aborted || rootID !== protyle.block.rootID) {
+                finishRequest();
+                return;
+            }
+        }
         if (content) {
             fetchPost("/api/block/getContentWordCount", {content}, onFetched, undefined, undefined, signal);
             lastRootId = null;
@@ -239,7 +247,7 @@ export const countBlockWord = (ids: string[], context?: string | IProtyle, clear
         lastRootId = null;
     }
     if (ids.length > 0) {
-        scheduleStatusStat(rootID, undefined, ids);
+        scheduleStatusStat(rootID, undefined, ids, typeof context === "object" ? context : undefined);
         return;
     }
     const selectText = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0).toString() : "";
@@ -247,7 +255,7 @@ export const countBlockWord = (ids: string[], context?: string | IProtyle, clear
         scheduleStatusStat(rootID, selectText);
         return;
     }
-    scheduleStatusStat(rootID);
+    scheduleStatusStat(rootID, undefined, undefined, typeof context === "object" ? context : undefined);
     /// #endif
 };
 

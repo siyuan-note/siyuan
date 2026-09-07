@@ -30,7 +30,8 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
     const protyleElement = hasClosestByClassName(event.target, "protyle", true);
     if (protyleElement) {
         const wysiwygElement = protyleElement.querySelector(".protyle-wysiwyg");
-        if (wysiwygElement.getAttribute("data-readonly") === "true" || !wysiwygElement.contains(event.target)) {
+        if (wysiwygElement &&
+            (wysiwygElement.getAttribute("data-readonly") === "true" || !wysiwygElement.contains(event.target))) {
             wysiwygElement.dispatchEvent(new Event("focusin"));
         }
     }

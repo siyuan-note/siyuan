@@ -7,7 +7,7 @@
 		"id": "20240530101000-35bbvcx",
 		"title": "コンテンツブロックの種類",
 		"type": "doc",
-		"updated": "20260906133808"
+		"updated": "20260906220233"
 	},
 	"Children": [
 		{
@@ -1422,7 +1422,7 @@
 			"Properties": {
 				"ID": "20240530101000-rjjxxn8",
 				"id": "20240530101000-p035stn",
-				"updated": "20260906133808"
+				"updated": "20260906220233"
 			},
 			"Children": [
 				{
@@ -2890,7 +2890,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-rmj1ui2",
-				"updated": "20260906133808"
+				"updated": "20260906202104"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -2905,12 +2905,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260905124213-q5thtxj",
-				"updated": "20260906003122"
+				"updated": "20260906202104"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "タブブロックは関連する内容をまとめ、選択したタブ項目の本文だけを表示します。タイトルのクリックで切り替え、ドラッグで並べ替えます。選択したタブと上部または左側の配置は保存・同期され、再読み込みや再起動後も復元されます。"
+					"Data": "タブブロックは内容をグループに分けて表示します。タイトルのクリックで切り替え、ドラッグで並べ替え、ダブルクリックで名前を変更できます。上部または左側に配置でき、選択したタブは保存・同期されます。"
 				}
 			]
 		},
@@ -2976,116 +2976,11 @@
 			]
 		},
 		{
-			"ID": "20260906003122-om7wyo8",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260906003122-om7wyo8",
-				"updated": "20260906133808"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "/ を入力してタブブロックを選択すると、タブのグループを作成できます。+ でタブを追加し、タブブロックのアイコンメニューを開き、タブブロックのサブメニューから上部タブまたは左側タブを選択します。タイトルをダブルクリックするか名前変更メニューを使うと、タブのタイトルをその場で直接編集できます。コールアウトのタイトルと同様に、見たままの状態で編集でき、インラインツールバーから太字や文字色などを設定できます。文字を変更しても既存の書式は保持されます。タイトルを右クリックし、"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "コピー"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "ブロック参照としてコピー"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " を選択すると、そのタブへのブロック参照をコピーできます。参照をクリックすると対象のタブに切り替わり、入れ子の場合は外側のタブから順に表示されます。モバイルでもエディターの挿入メニューからタブブロックを作成できます。"
-				}
-			]
-		},
-		{
-			"ID": "20260906003122-z3z90i9",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260906003122-z3z90i9",
-				"updated": "20260906003122"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "リストまたはタブの "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "ブロックアイコンメニュー"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "変換"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " から、リストとタブを相互に変換できます。リスト項目の最初の段落が省略なしでタイトルになり、本文には重複しません。リストに戻すと最初の段落として復元され、書式、ブロック ID、属性が保持されます。"
-				}
-			]
-		},
-		{
-			"ID": "20260906003122-x1ssv4a",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260906003122-x1ssv4a",
-				"updated": "20260906003122"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Markdown の例：::: と tabs の間には空白が必要です。@tab で項目を開始し、@tab:active で選択項目を指定します。閉じるフェンスは独立した行に置きます。入れ子では外側のフェンスを内側より長くし、字下げは任意です。例えば外側をコロン四つ、内側を三つにします。"
-				}
-			]
-		},
-		{
-			"ID": "20260906003122-o05eqs7",
-			"Type": "NodeCodeBlock",
-			"Properties": {
-				"id": "20260906003122-o05eqs7",
-				"updated": "20260906003122"
-			},
-			"Children": [
-				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```"
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker",
-					"CodeBlockInfo": "bWFya2Rvd24="
-				},
-				{
-					"Type": "NodeCodeBlockCode",
-					"Data": "::: tabs\n@tab 最初のタブ\n\n最初のタブの本文です。\n\n@tab:active 二つ目のタブ\n\n二つ目のタブをクリックすると、この内容が表示されます。\n:::\n"
-				},
-				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```"
-				}
-			],
-			"IsFencedCodeBlock": true
-		},
-		{
 			"ID": "20260906003122-3mia0g1",
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260906003122-3mia0g1",
-				"updated": "20260906003122"
+				"updated": "20260906220233"
 			},
 			"Children": [
 				{
@@ -3100,12 +2995,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260906003122-azyooos",
-				"updated": "20260906003122"
+				"updated": "20260906220233"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "タブ項目ブロックはタブブロックに属し、独立したブロック ID、タイトル、本文を持ちます。本文には段落やリスト、入れ子のタブブロックを含められます。タブブロックの直接の子はタブ項目だけで、タブ項目をドキュメント内に単独で置くことはできません。"
+					"Data": "タブ項目にはタイトルと本文があり、入れ子の内容とブロック参照に対応しています。ブロックアイコンのメニューで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "タブブロック"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "タスク"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択すると、グループ全体のタスクモードを切り替えられます。"
 				}
 			]
 		},

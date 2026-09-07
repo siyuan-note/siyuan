@@ -169,3 +169,57 @@ func TestIsSensitivePathWorkspaceFilesNotBlocked(t *testing.T) {
 		}
 	}
 }
+
+// TestIsSensitivePathSymlinkWorkspace 验证工作空间父目录为符号链接时的真实路径判定。
+func TestIsSensitivePathSymlinkWorkspace(t *testing.T) {
+	realHome, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	linkedHome := filepath.Join(t.TempDir(), "home")
+	if err = os.Symlink(realHome, linkedHome); err != nil {
+		t.Skipf("create directory symlink failed: %s", err)
+	}
+	relWorkspace := filepath.Join(".var", "app", "org.b3log.siyuan", "SiYuan")
+	realWorkspace := filepath.Join(realHome, relWorkspace)
+	if err = os.MkdirAll(realWorkspace, 0755); err != nil {
+		t.Fatal(err)
+	}
+	originalHome, originalWorkspace := HomeDir, WorkspaceDir
+	HomeDir, WorkspaceDir = realHome, filepath.Join(linkedHome, relWorkspace)
+	t.Cleanup(func() { HomeDir, WorkspaceDir = originalHome, originalWorkspace })
+
+	for _, test := range []struct {
+		rel       string
+		sensitive bool
+	}{
+		{"data/emojis/fontawesome-free-solid/robot.svg", false},
+		{"data/widgets/listChildDocs/index.html", false},
+		{"data/assets/image.png", false},
+		{"temp/export/document.html", false},
+		{"conf/conf.json", true},
+		{"temp/private.txt", true},
+		{"data/widgets/example/credentials.json", true},
+		{"data/widgets/example/id_rsa", true},
+	} {
+		t.Run(test.rel, func(t *testing.T) {
+			for _, root := range []string{WorkspaceDir, realWorkspace} {
+				p := filepath.Join(root, filepath.FromSlash(test.rel))
+				if got := IsSensitivePath(p); got != test.sensitive {
+					t.Errorf("IsSensitivePath(%q) = %v, want %v", p, got, test.sensitive)
+				}
+			}
+		})
+	}
+
+	// 工作空间外的凭据不能因工作空间解析成功而获得放行。
+	if p := filepath.Join(realHome, ".ssh", "id_rsa"); !IsSensitivePath(p) {
+		t.Errorf("external credential should be sensitive: %s", p)
+	}
+	if filepath.Separator == '/' {
+		// Linux 临时目录同样命中系统目录黑名单，可覆盖 /var/home 场景且不写入系统家目录。
+		if !isSensitivePath(filepath.Join(realWorkspace+"-outside", "public.txt")) {
+			t.Fatal("workspace prefix sibling should remain sensitive")
+		}
+	}
+}

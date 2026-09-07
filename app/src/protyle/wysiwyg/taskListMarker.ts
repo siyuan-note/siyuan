@@ -3,6 +3,8 @@ interface ITaskListMarker {
     marker: string;
 }
 
+export const nextTaskListMarker = (marker: string | null) => marker !== null && marker !== " " ? " " : "X";
+
 export const getTaskListMarker = (html: string, enableFullWidth: boolean): ITaskListMarker | undefined => {
     const dataTask = html.substring(0, 3).match(enableFullWidth ?
         /^[\[【]([^\x80-\uffff\[\]【】])[\]】]$/ :

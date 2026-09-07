@@ -18,6 +18,21 @@
 	"flashcardUnknownDurationReviews": "Herhalingen met onbekende tijd",
 	"flashcardReviewsByHour": "Herhalingen per uur",
 	"flashcardAllHistory": "Volledige geschiedenis",
+	"templateSearch": "Sjablonen zoeken op naam of pad",
+	"templateContextSearch": "Contextdocumenten zoeken",
+	"templateContextTip": "Voer het sjabloon uit met de titel, ID en andere informatie van het geselecteerde document zonder dat document te wijzigen",
+	"fileTreeDragRemoveSorts": "Deze verplaatsing is in strijd met de huidige sorteerregel. Deze lijst omzetten naar een aangepaste sortering en de volledige volgorde na het slepen opslaan?",
+	"pasteAndKeepSourceFormat": "Plakken met behoud van bronopmaak",
+	"templatePackageMoveTip": "Mappen van sjabloonpakketten kunnen niet worden hernoemd of verplaatst",
+	"avDragRemoveSorts": "Deze verplaatsing is in strijd met de huidige sorteerregels. Wil je de sorteerregels voor deze weergave verwijderen en de volledige volgorde na het slepen opslaan als aangepaste volgorde?",
+	"templateManager": "Sjabloonbeheer",
+	"templateSource": "Sjabloonbron",
+	"templatePreview": "Sjabloonvoorbeeld",
+	"templateContext": "Voorbeeldcontext",
+	"templateNewFolder": "Nieuwe map",
+	"templateDeleteTip": "Dit item en alle inhoud verwijderen? Verwijderde bestanden blijven voor herstel bewaard in data/templates/.trash.",
+	"task": "Taak",
+	"customTaskStatus": "Aangepaste taakstatus",
 	"imageViewerPlay": "Diavoorstelling afspelen",
 	"imageFlipHorizontal": "Horizontaal spiegelen",
 	"imageFlipVertical": "Verticaal spiegelen",
@@ -2799,6 +2814,7 @@
 		"374": "Database [%s], sjabloonveld [%s], eerste betrokken item [%s] (item-ID: %s), aantal betrokken items: %d, fout: %s",
 		"375": "Het notitieboek voor snelle notities is niet beschikbaar. Selecteer een geopend, niet-versleuteld notitieboek in Instellingen - Document",
 		"376": "Het bronbestand is nog niet gedownload en kan momenteel niet worden opgehaald",
-		"377": "Schakel over naar Alles downloaden voordat u de gegevensopslag wijzigt of opnieuw instelt"
+		"377": "Schakel over naar Alles downloaden voordat u de gegevensopslag wijzigt of opnieuw instelt",
+		"378": "Cross-siteverzoeken zijn niet toegestaan"
 	}
 }

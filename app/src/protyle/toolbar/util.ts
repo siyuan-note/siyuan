@@ -14,20 +14,44 @@ import {
     stripSemanticInternalMarkerPrefix
 } from "../util/inlineElementMarker";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
+import {destroyTabsRender, tabsRender} from "../render/tabsRender";
+import {genTemplateDocTreePlanHTML} from "../../template/docTree";
 
-export const previewTemplate = (pathString: string, element: Element, parentId: string) => {
-    if (!pathString) {
-        element.innerHTML = "";
+const templatePreviewRequests = new WeakMap<Element, object>();
+
+export const clearTemplatePreview = (element: Element) => {
+    templatePreviewRequests.delete(element);
+    if (element.firstElementChild) {
+        destroyTabsRender(element.firstElementChild);
+    }
+    element.innerHTML = "";
+};
+
+export const previewTemplate = (pathString: string, element: Element, parentId: string, source?: string) => {
+    clearTemplatePreview(element);
+    if (!pathString || !element.isConnected || element.closest(".fn__none")) {
         return;
     }
+    const request = {};
+    templatePreviewRequests.set(element, request);
     fetchPost("/api/template/render", {
         id: parentId,
         path: pathString,
         mode: "preview",
-        preview: true
+        preview: true,
+        ...(source === undefined ? {} : {content: source})
     }, (response) => {
+        // 切换模板或关闭预览后，忽略先前请求的返回结果。
+        if (templatePreviewRequests.get(element) !== request || !element.isConnected || response.code !== 0) {
+            return;
+        }
         const content = normalizeHTMLAssetIFrameBlockDOM(response.data.content.replace(/contenteditable="true"/g, ""));
         element.innerHTML = `<div class="protyle-wysiwyg" style="padding: 8px">${content}</div>`;
+        if (response.data.docTreePlan?.nodes?.length) {
+            element.insertAdjacentHTML("beforeend", genTemplateDocTreePlanHTML(response.data.docTreePlan,
+                window.siyuan.languages.newSubDoc));
+        }
+        tabsRender(element.firstElementChild, {label: window.siyuan.languages.tabItem});
     });
 };
 

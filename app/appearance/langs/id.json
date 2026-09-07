@@ -18,6 +18,21 @@
 	"flashcardUnknownDurationReviews": "Tinjauan dengan waktu tidak diketahui",
 	"flashcardReviewsByHour": "Tinjauan menurut jam",
 	"flashcardAllHistory": "Seluruh riwayat",
+	"templateSearch": "Cari templat berdasarkan nama atau jalur",
+	"templateContextSearch": "Cari dokumen konteks",
+	"templateContextTip": "Jalankan templat menggunakan judul, ID, dan informasi lain dari dokumen yang dipilih tanpa mengubah dokumen tersebut",
+	"fileTreeDragRemoveSorts": "Pemindahan ini bertentangan dengan aturan pengurutan saat ini. Alihkan daftar ini ke pengurutan khusus dan simpan urutan lengkap setelah menyeret?",
+	"pasteAndKeepSourceFormat": "Tempel dan pertahankan pemformatan sumber",
+	"templatePackageMoveTip": "Folder paket templat tidak dapat diganti namanya atau dipindahkan",
+	"avDragRemoveSorts": "Pemindahan ini bertentangan dengan aturan pengurutan saat ini. Hapus aturan pengurutan untuk tampilan ini dan simpan urutan lengkap setelah penyeretan sebagai urutan khusus?",
+	"templateManager": "Pengelola templat",
+	"templateSource": "Sumber templat",
+	"templatePreview": "Pratinjau templat",
+	"templateContext": "Konteks pratinjau",
+	"templateNewFolder": "Folder baru",
+	"templateDeleteTip": "Hapus item ini beserta seluruh isinya? Berkas yang dihapus disimpan di data/templates/.trash untuk dipulihkan.",
+	"task": "Tugas",
+	"customTaskStatus": "Status tugas kustom",
 	"imageViewerPlay": "Putar tayangan slide",
 	"imageFlipHorizontal": "Balik secara horizontal",
 	"imageFlipVertical": "Balik secara vertikal",
@@ -2799,6 +2814,7 @@
 		"374": "Basis data [%s], bidang templat [%s], item pertama yang terdampak [%s] (ID item: %s), jumlah item terdampak: %d, kesalahan: %s",
 		"375": "Buku catatan penyimpanan catatan cepat tidak tersedia. Pilih buku catatan terbuka dan tidak terenkripsi di Pengaturan - Dokumen",
 		"376": "Sumber daya belum diunduh dan saat ini tidak dapat diambil",
-		"377": "Beralihlah ke Unduh semua sebelum mengubah atau mengatur ulang repositori data"
+		"377": "Beralihlah ke Unduh semua sebelum mengubah atau mengatur ulang repositori data",
+		"378": "Permintaan lintas situs tidak diizinkan"
 	}
 }

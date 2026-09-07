@@ -40,6 +40,7 @@ import {getAllEditor} from "../../layout/getAll";
 import {genEmbedStatTip, type IBlockStat, type IEmbedStat} from "../../layout/status";
 import {mountBreadcrumbButtons} from "../../plugin/breadcrumbButton";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {waitForPendingTransactions} from "../util/transactionQueue";
 
 const genDocumentStatLabel = (stat: IBlockStat, statWithEmbed?: IBlockStat, embedStat?: IEmbedStat) => {
     const runeEmbedAttrs = statWithEmbed ? ` class="ariaLabel" data-position="north" aria-label="${escapeAriaLabel(genEmbedStatTip(window.siyuan.languages.runeCountWithEmbed, statWithEmbed.runeCount, embedStat))}"` : "";
@@ -58,6 +59,8 @@ export class Breadcrumb {
     private startingRecord = false;
     private stoppingRecord = false;
     private mobileMenuLoading = false;
+    private renderRequestID = 0;
+    private menuRequestID = 0;
     private previousFocusElement: HTMLElement;
     private previousRange: Range;
 
@@ -416,11 +419,17 @@ ${padHTML}
             offset,
             limit: 64,
             excludeTypes,
+            notebook: protyle.notebookId,
         };
-        if (isEncryptedBox(protyle.notebookId)) {
-            request.notebook = protyle.notebookId;
+        const rootID = protyle.block.rootID;
+        await waitForPendingTransactions(protyle);
+        if (rootID !== protyle.block.rootID) {
+            return [];
         }
         const response = await fetchSyncPost("/api/block/getBlockBreadcrumbChildren", request);
+        if (rootID !== protyle.block.rootID) {
+            return [];
+        }
         const data = response.data as {
             items: IBreadcrumb[],
             hasMore: boolean,
@@ -592,8 +601,8 @@ ${padHTML}
         });
     }
 
-    private genMobileMenu(protyle: IProtyle) {
-        if (protyle.toolbar.isMultiSelectMode() || this.mobileMenuLoading) {
+    private async genMobileMenu(protyle: IProtyle) {
+        if (protyle.lite || protyle.toolbar.isMultiSelectMode() || this.mobileMenuLoading) {
             return;
         }
         const menu = new Menu(Constants.MENU_BREADCRUMB_MOBILE_PATH);
@@ -616,12 +625,18 @@ ${padHTML}
             return;
         }
         const id = blockElement.getAttribute("data-node-id");
-        const breadcrumbParam: Record<string, any> = {id, excludeTypes: []};
-        if (isEncryptedBox(protyle.notebookId)) {
-            breadcrumbParam.notebook = protyle.notebookId;
-        }
+        const breadcrumbParam: Record<string, any> = {id, excludeTypes: [], notebook: protyle.notebookId};
         this.mobileMenuLoading = true;
+        const rootID = protyle.block.rootID;
+        await waitForPendingTransactions(protyle);
+        if (!blockElement.isConnected || rootID !== protyle.block.rootID) {
+            this.mobileMenuLoading = false;
+            return;
+        }
         fetchPost("/api/block/getBlockBreadcrumb", breadcrumbParam, (response) => {
+            if (!blockElement.isConnected || rootID !== protyle.block.rootID) {
+                return;
+            }
             response.data.forEach((item: IBreadcrumb) => {
                 let isCurrent = false;
                 if (!protyle.block.showAll && item.id === protyle.block.parentID) {
@@ -653,7 +668,8 @@ ${padHTML}
         }
     }
 
-    public showMenu(protyle: IProtyle, position: IPosition) {
+    public async showMenu(protyle: IProtyle, position: IPosition) {
+        const requestID = ++this.menuRequestID;
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
             window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_BREADCRUMB_MORE) {
             window.siyuan.menus.menu.remove();
@@ -670,7 +686,17 @@ ${padHTML}
         if (isEncryptedBox(protyle.notebookId)) {
             statRequest.notebook = protyle.notebookId;
         }
+        const rootID = protyle.block.rootID;
+        const isCurrent = () => requestID === this.menuRequestID && rootID === protyle.block.rootID &&
+            protyle.element.isConnected && (!cursorNodeElement || cursorNodeElement.isConnected);
+        await waitForPendingTransactions(protyle);
+        if (!isCurrent()) {
+            return;
+        }
         fetchPost("/api/block/getTreeStat", statRequest, (response) => {
+            if (!isCurrent()) {
+                return;
+            }
             window.siyuan.menus.menu.remove();
             window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BREADCRUMB_MORE);
             if (!protyle.contentElement.classList.contains("fn__none") && !protyle.disabled) {
@@ -1078,8 +1104,8 @@ ${padHTML}
         });
     }
 
-    public render(protyle: IProtyle, update = false, nodeElement?: Element | false) {
-        if (protyle.element.getAttribute("disabled-forever") === "true") {
+    public async render(protyle: IProtyle, update = false, nodeElement?: Element | false) {
+        if (protyle.lite || protyle.element.getAttribute("disabled-forever") === "true") {
             return;
         }
         refreshUndoButtons(protyle);
@@ -1122,16 +1148,25 @@ ${padHTML}
             return;
         }
         this.id = id;
+        const requestID = ++this.renderRequestID;
+        const rootID = protyle.block.rootID;
         const excludeTypes: string[] = [];
         if (this.element.parentElement?.parentElement && this.element.parentElement.parentElement.classList.contains("card__block")) {
             // 闪卡面包屑不能显示答案
             excludeTypes.push("NodeTextMark-mark");
         }
-        const breadcrumbParam: Record<string, any> = {id, excludeTypes};
-        if (isEncryptedBox(protyle.notebookId)) {
-            breadcrumbParam.notebook = protyle.notebookId;
+        const breadcrumbParam: Record<string, any> = {id, excludeTypes, notebook: protyle.notebookId};
+        // 等待当前块的创建事务完成，并丢弃切换文档或选择位置后过期的读取。
+        const isCurrent = () => requestID === this.renderRequestID && rootID === protyle.block.rootID &&
+            blockElement.isConnected;
+        await waitForPendingTransactions(protyle);
+        if (!isCurrent()) {
+            return;
         }
         fetchPost("/api/block/getBlockBreadcrumb", breadcrumbParam, (response) => {
+            if (!isCurrent()) {
+                return;
+            }
             let html = "";
             response.data.forEach((item: IBreadcrumb, index: number) => {
                 let isCurrent = false;

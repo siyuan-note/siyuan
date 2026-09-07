@@ -17,8 +17,10 @@ import {
     markViewFoldDefault,
 } from "../util/viewFold";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
+import {IBacklinkAVTarget, prepareBacklinkAV} from "../render/av/backlink";
 
 interface IBacklinkData {
+    attributeViewTargets?: IBacklinkAVTarget[],
     id?: string,
     revision?: string,
     blockPaths: IBreadcrumb[],
@@ -29,6 +31,7 @@ interface IBacklinkData {
 interface IBacklinkDOMRecord {
     revision: string,
     anchor: HTMLElement,
+    targets: IBacklinkAVTarget[],
 }
 
 const backlinkDOMRecords = new WeakMap<IProtyle, Map<string, IBacklinkDOMRecord>>();
@@ -60,22 +63,24 @@ const createBacklinkDOMRecord = (item: IBacklinkData, index: number, id: string)
         record: {
             revision: item.revision || "",
             anchor: nodes[0] as HTMLElement,
+            targets: item.attributeViewTargets || [],
         },
         nodes,
     };
 };
 
-const renderBacklinkDOMNodes = (protyle: IProtyle, nodes: Node[]) => {
-    nodes.forEach(item => {
+const renderBacklinkDOMNodes = (protyle: IProtyle, nodes: Node[], record: IBacklinkDOMRecord) => {
+    return Promise.all(nodes.map(async item => {
         if (!(item instanceof HTMLElement)) {
             return;
         }
         improveBreadcrumbAppearance(item);
         processRender(item);
         highlightRender(item);
-        avRender(item, protyle);
+        prepareBacklinkAV(item, record.targets);
+        await avRender(item, protyle);
         blockRender(protyle, item);
-    });
+    }));
 };
 
 export const renderBacklink = (protyle: IProtyle, backlinkData: IBacklinkData[]) => {
@@ -97,7 +102,7 @@ export const renderBacklink = (protyle: IProtyle, backlinkData: IBacklinkData[])
         }
     });
 
-    const changedNodes: Node[][] = [];
+    const changedNodes: {nodes: Node[], record: IBacklinkDOMRecord}[] = [];
     const orderedRecords: IBacklinkDOMRecord[] = [];
     backlinkData.forEach((item, index) => {
         const id = item.id || `legacy-${index}`;
@@ -117,7 +122,7 @@ export const renderBacklink = (protyle: IProtyle, backlinkData: IBacklinkData[])
             }
             record = created.record;
             records.set(id, record);
-            changedNodes.push(created.nodes);
+            changedNodes.push({nodes: created.nodes, record});
         }
         orderedRecords.push(record);
     });
@@ -139,13 +144,14 @@ export const renderBacklink = (protyle: IProtyle, backlinkData: IBacklinkData[])
         }
     });
     const applyPromises: Promise<void>[] = [];
-    changedNodes.forEach(nodes => {
-        renderBacklinkDOMNodes(protyle, nodes);
-        nodes.forEach(node => {
-            if (node instanceof HTMLElement) {
-                applyPromises.push(applyViewFoldStates(protyle, node));
-            }
-        });
+    changedNodes.forEach(({nodes, record}) => {
+        applyPromises.push(renderBacklinkDOMNodes(protyle, nodes, record).then(async () => {
+            await Promise.all(nodes.map(node => {
+                if (node instanceof HTMLElement) {
+                    return applyViewFoldStates(protyle, node);
+                }
+            }));
+        }));
     });
     removeLoading(protyle);
     if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
@@ -214,6 +220,12 @@ export const loadBreadcrumb = (protyle: IProtyle, element: HTMLElement) => {
             normalizeHTMLAssetIFrameBlockDOM(setBacklinkFold(getResponse.data.content, true)));
         clearViewFoldDefaults(protyle, element.parentElement.getAttribute("data-backlink-id"));
         processRender(element.parentElement.parentElement);
+        const record = backlinkDOMRecords.get(protyle)?.get(element.parentElement.dataset.backlinkId);
+        getBacklinkDOMNodes(element.parentElement).forEach(node => {
+            if (node instanceof HTMLElement) {
+                prepareBacklinkAV(node, record?.targets || []);
+            }
+        });
         avRender(element.parentElement.parentElement, protyle);
         blockRender(protyle, element.parentElement.parentElement);
         void applyViewFoldStates(protyle);

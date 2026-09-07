@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容區塊類型",
 		"type": "doc",
-		"updated": "20260906133808"
+		"updated": "20260906220233"
 	},
 	"Children": [
 		{
@@ -1365,7 +1365,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120227-esm6f20",
-				"updated": "20260906133808"
+				"updated": "20260906220233"
 			},
 			"Children": [
 				{
@@ -2696,7 +2696,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-371qsy7",
-				"updated": "20260906133808"
+				"updated": "20260906202104"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -2711,12 +2711,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260905124213-n1gggna",
-				"updated": "20260906003122"
+				"updated": "20260906202104"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "頁籤區塊將相關內容收納在同一組頁籤中，一次顯示一個頁籤項目的正文。點擊標題切換，拖曳標題排序；選取的頁籤和頂部或左側配置會儲存並同步，重新整理或重新啟動後可恢復。"
+					"Data": "頁籤區塊將內容分組顯示，點擊標題切換，拖曳標題排序，按兩下標題重新命名。支援頂部或左側配置，選取狀態會儲存並同步。"
 				}
 			]
 		},
@@ -2782,116 +2782,11 @@
 			]
 		},
 		{
-			"ID": "20260906003122-0jlwsyi",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260906003122-0jlwsyi",
-				"updated": "20260906133808"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "輸入 / 並選擇頁籤區塊可建立一組頁籤。透過 + 新增頁籤，點擊頁籤區塊的區塊圖示，在頁籤區塊子選單中選擇頂部頁籤或左側頁籤。按兩下標題或使用重新命名選單，即可在頁籤標題處直接編輯文字。標題與提示區塊一樣支援所見即所得編輯，可透過行級工具列設定粗體、顏色等樣式，修改文字時保留既有格式。在頁籤標題上按右鍵，選擇 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "複製"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "複製為區塊引用"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 可複製該頁籤的區塊引用。點擊引用會切換至對應頁籤；巢狀頁籤會逐層展開。行動端也可透過編輯器插入選單建立頁籤區塊。"
-				}
-			]
-		},
-		{
-			"ID": "20260906003122-n21xwrx",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260906003122-n21xwrx",
-				"updated": "20260906003122"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "透過列表或頁籤區塊的 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "區塊圖示選單"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "轉換為"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "，可以在列表和頁籤之間轉換。列表項目首段落作為完整標題，不重複出現在正文中；轉回列表時還原為首段落，保留其格式、區塊 ID 和屬性。"
-				}
-			]
-		},
-		{
-			"ID": "20260906003122-lcxok4v",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260906003122-lcxok4v",
-				"updated": "20260906003122"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Markdown 範例：::: 與 tabs 之間需要空格，@tab 開始一個頁籤項目，@tab:active 指定選取項目，結束圍欄獨占一行。巢狀使用時外層圍欄比內層長，縮排可選，例如外層使用四個冒號、內層使用三個。"
-				}
-			]
-		},
-		{
-			"ID": "20260906003122-6aj8ks9",
-			"Type": "NodeCodeBlock",
-			"Properties": {
-				"id": "20260906003122-6aj8ks9",
-				"updated": "20260906003122"
-			},
-			"Children": [
-				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```"
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker",
-					"CodeBlockInfo": "bWFya2Rvd24="
-				},
-				{
-					"Type": "NodeCodeBlockCode",
-					"Data": "::: tabs\n@tab 第一頁\n\n這是第一頁的正文。\n\n@tab:active 第二頁\n\n點擊第二個頁籤查看此內容。\n:::\n"
-				},
-				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```"
-				}
-			],
-			"IsFencedCodeBlock": true
-		},
-		{
 			"ID": "20260906003122-6qha4x8",
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260906003122-6qha4x8",
-				"updated": "20260906003122"
+				"updated": "20260906220233"
 			},
 			"Children": [
 				{
@@ -2906,12 +2801,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260906003122-6we2ve6",
-				"updated": "20260906003122"
+				"updated": "20260906220233"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "頁籤項目區塊屬於頁籤區塊，包含標題和正文，有獨立的區塊 ID。正文可以包含段落、列表等內容，也可以巢狀放置頁籤區塊。頁籤區塊只能直接包含頁籤項目區塊，頁籤項目不能獨立放在文件中。"
+					"Data": "頁籤項包含標題與正文，支援巢狀內容和區塊引用。在區塊圖示選單中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "頁籤區塊"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "任務"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可切換整組的任務模式。"
 				}
 			]
 		},

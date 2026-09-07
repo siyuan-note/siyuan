@@ -8,7 +8,7 @@ const compiled = transpileModule(readFileSync("src/layout/status.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
-const createStatus = () => {
+const createStatus = (pendingTransactions = Promise.resolve()) => {
     const timers = new Map<number, () => void>();
     const requests: {url: string, data: Record<string, unknown>, callback: (response: unknown) => void}[] = [];
     let timerID = 0;
@@ -22,6 +22,7 @@ const createStatus = () => {
         exports,
         require: () => ({
             Constants: {TIMEOUT_COUNT: 100},
+            waitForPendingTransactions: () => pendingTransactions,
             fetchPost: (url: string, data: Record<string, unknown>, callback: (response: unknown) => void) => {
                 requests.push({url, data, callback});
             },
@@ -45,7 +46,7 @@ const createStatus = () => {
         flush: () => {
             const callbacks = Array.from(timers.values());
             timers.clear();
-            callbacks.forEach(callback => callback());
+            return Promise.all(callbacks.map(callback => callback()));
         },
     };
 };
@@ -62,11 +63,11 @@ test("lite selection and deletion statistics never query temporary block IDs", (
     assert.equal(status.requests.length, 0);
 });
 
-test("normal editor block and text statistics remain available", () => {
+test("normal editor block and text statistics remain available", async () => {
     const status = createStatus();
     const protyle = {lite: false, block: {rootID: "document"}};
     status.countBlockWord(["block"], protyle);
-    status.flush();
+    await status.flush();
     assert.equal(status.requests[0].url, "/api/block/getBlocksWordCount");
     assert.deepEqual(status.requests[0].data.ids, ["block"]);
     const stat = {wordCount: 1};
@@ -76,6 +77,33 @@ test("normal editor block and text statistics remain available", () => {
     status.flush();
     assert.equal(status.requests[1].url, "/api/block/getContentWordCount");
     assert.equal(status.requests[1].data.content, "selected text");
+});
+
+test("statistics wait for pending block creation and discard a superseded selection", async () => {
+    let commit: () => void;
+    const status = createStatus(new Promise<void>(resolve => commit = resolve));
+    const protyle = {lite: false, block: {rootID: "document"}};
+    status.countBlockWord(["first-copy"], protyle);
+    const first = status.flush();
+    status.countBlockWord(["second-copy"], protyle);
+    const second = status.flush();
+    assert.equal(status.requests.length, 0);
+    commit();
+    await Promise.all([first, second]);
+    assert.equal(status.requests.length, 1);
+    assert.deepEqual(status.requests[0].data.ids, ["second-copy"]);
+});
+
+test("statistics abandon a document switched while its transaction is pending", async () => {
+    let commit: () => void;
+    const status = createStatus(new Promise<void>(resolve => commit = resolve));
+    const protyle = {lite: false, block: {rootID: "document"}};
+    status.countBlockWord([], protyle);
+    const pending = status.flush();
+    protyle.block.rootID = "another-document";
+    commit();
+    await pending;
+    assert.equal(status.requests.length, 0);
 });
 
 test("failed statistics responses do not render and document statistics can retry", () => {

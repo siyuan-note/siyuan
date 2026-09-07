@@ -267,7 +267,7 @@ func BlocksWordCount(ids []string) (ret *util.BlockStatResult) {
 		ret.LinkCount += linkCnt
 		ret.ImageCount += imgCnt
 		ret.RefCount += refCnt
+		ret.BlockCount++
 	}
-	ret.BlockCount = len(ids)
 	return
 }

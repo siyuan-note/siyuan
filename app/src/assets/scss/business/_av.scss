@@ -6,6 +6,13 @@
   margin-top: 4px !important;
   margin-bottom: 4px !important;
 
+  &--backlink {
+    max-height: min(400px, 60vh);
+    overflow: auto;
+    overscroll-behavior: contain;
+    align-items: flex-start;
+  }
+
   &:hover {
     .av__views .block__icon,
     .av__group-icon--hover {
@@ -1118,39 +1125,78 @@
     &--rich {
       display: block;
       width: 100%;
-      max-height: 1.625em;
       overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
       font: inherit;
 
-      p,
-      h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6,
-      blockquote,
-      ul,
-      ol,
-      li,
-      pre,
-      .render-node {
-        display: inline;
-        min-height: 0;
-        margin: 0;
-        padding: 0;
-        font-size: inherit;
-        line-height: inherit;
-        list-style: none;
+      .av__cell[data-wrap="true"] & {
+        white-space: normal;
+
+        p,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        li,
+        pre,
+        .render-node {
+          min-height: 0;
+          margin: 0;
+          padding: 0;
+          font-size: inherit;
+          line-height: inherit;
+        }
+
+        blockquote,
+        ul,
+        ol {
+          margin: 0;
+        }
+
+        ul,
+        ol {
+          padding-left: 1.5em;
+        }
+
+        > :not(:first-child) {
+          margin-top: .25em;
+        }
       }
 
-      > :not(:first-child),
-      li + li,
-      li > :not(:first-child),
-      blockquote > :not(:first-child) {
-        margin-left: .5em;
+      .av__cell:not([data-wrap="true"]) & {
+        max-height: 1.625em;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+
+        p,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        blockquote,
+        ul,
+        ol,
+        li,
+        pre,
+        .render-node {
+          display: inline;
+          min-height: 0;
+          margin: 0;
+          padding: 0;
+          font-size: inherit;
+          line-height: inherit;
+          list-style: none;
+        }
+
+        > :not(:first-child),
+        li + li,
+        li > :not(:first-child),
+        blockquote > :not(:first-child) {
+          margin-left: .5em;
+        }
       }
     }
 

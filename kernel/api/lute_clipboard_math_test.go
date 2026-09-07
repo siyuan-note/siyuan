@@ -95,13 +95,13 @@ func TestPrepareHTMLClipboardContentFreezesNormalizedHTML(t *testing.T) {
 	noMath := func(string, string, string) (string, bool) { return "", false }
 	noOfficeMath := func(string) (string, bool) { return "", false }
 	normalizedHTML, useHTML := prepareHTMLClipboardContent(util.NewLute(), htmlWithCommentImage, "", "", "", "", "",
-		false, noMath, noOfficeMath)
+		false, false, noMath, noOfficeMath)
 	if !useHTML || !strings.Contains(normalizedHTML, "kept") || strings.Contains(normalizedHTML, "data:image") {
 		t.Fatalf("unexpected normalized HTML: useHTML=%v dom=%q", useHTML, normalizedHTML)
 	}
 
 	preparedHTML, useHTML := prepareHTMLClipboardContent(util.NewLute(), normalizedHTML, "", "ignored", "", "", "",
-		true, func(string, string, string) (string, bool) {
+		false, true, func(string, string, string) (string, bool) {
 			t.Fatal("prepared HTML should not run clipboard math conversion")
 			return "", false
 		}, func(string) (string, bool) {

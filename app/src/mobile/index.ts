@@ -62,6 +62,7 @@ import {updateMobileTopBarLayout} from "./util/mobileTopBar";
 import {showMobileBars} from "./util/mobileBars";
 import {initializeEnglishCommandTranslations} from "../command/english";
 import {scrollInputIntoView} from "./util/visibleViewport";
+import {installPluginStorageFetchAppId} from "../util/fetchAppId";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -267,6 +268,7 @@ class App {
     }
 }
 
+installPluginStorageFetchAppId(window, Constants.SIYUAN_APPID, window.location.href);
 const siyuanApp = new App();
 
 initWindowOpenOverride(siyuanApp, openByMobile);

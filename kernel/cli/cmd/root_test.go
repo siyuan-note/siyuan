@@ -9,8 +9,12 @@
 package cmd
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/spf13/cobra"
 )
 
 func TestIsEncryptedNotebookWorkspacePathWith(t *testing.T) {
@@ -36,5 +40,45 @@ func TestIsEncryptedNotebookWorkspacePathWith(t *testing.T) {
 				t.Fatalf("isEncryptedNotebookWorkspacePathWith(%q) = %v, want %v", test.path, got, test.want)
 			}
 		})
+	}
+}
+
+func TestCLIRejectsEncryptedHistoryPaths(t *testing.T) {
+	oldWorkspace, oldData, oldHistory := util.WorkspaceDir, util.DataDir, util.HistoryDir
+	util.WorkspaceDir = t.TempDir()
+	util.DataDir = filepath.Join(util.WorkspaceDir, "data")
+	util.HistoryDir = filepath.Join(util.WorkspaceDir, "history")
+	t.Cleanup(func() {
+		util.WorkspaceDir, util.DataDir, util.HistoryDir = oldWorkspace, oldData, oldHistory
+	})
+	boxID := "20260907120000-history"
+	historyDir := filepath.Join(util.HistoryDir, "2026-09-07-120000-delete", boxID)
+	if err := os.MkdirAll(filepath.Join(historyDir, ".siyuan"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(historyDir, ".siyuan", "conf.json"), []byte(`{"encrypted":true}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	for _, cmd := range []*cobra.Command{historyGetCmd, historyRollbackCmd} {
+		flag := cmd.Flags().Lookup("path")
+		oldValue := flag.Value.String()
+		t.Cleanup(func() { _ = flag.Value.Set(oldValue) })
+		for _, historyPath := range []string{
+			filepath.Join(historyDir, "20260907120001-history.sy"),
+			filepath.Join("history", "2026-09-07-120000-delete", boxID, "20260907120001-history.sy"),
+		} {
+			if err := flag.Value.Set(historyPath); err != nil {
+				t.Fatal(err)
+			}
+			if err := rejectEncryptedNotebookCLI(cmd, nil); err == nil {
+				t.Fatalf("%s accepted encrypted history: %s", cmd.Name(), historyPath)
+			}
+		}
+		if err := flag.Value.Set(filepath.Join("history", "2026-09-07-120000-update", "20260907130000-normal1", "20260907120001-history.sy")); err != nil {
+			t.Fatal(err)
+		}
+		if err := rejectEncryptedNotebookCLI(cmd, nil); err != nil {
+			t.Fatalf("%s rejected ordinary history: %v", cmd.Name(), err)
+		}
 	}
 }

@@ -6,6 +6,7 @@ import {
     captureBlockSelectionModeState,
     getBlockSelectionToggle,
     getDeleteSelectionCandidate,
+    getSelectAllBlockAction,
     isContinuousBlockSelection,
     restoreBlockSelectionModeState,
     runBlockSelectionDelete
@@ -123,6 +124,47 @@ describe("getBlockSelectionToggle", () => {
             [asElement(sibling), asElement(child)]);
         assert.deepEqual(getBlockSelectionToggle([asElement(child), asElement(sibling)], asElement(parent)),
             [asElement(sibling), asElement(parent)]);
+    });
+});
+
+describe("getSelectAllBlockAction", () => {
+    it("continues with text selection when no block is selected", () => {
+        const editor = new TestElement("editor", false);
+        editor.append(new TestElement("first"), new TestElement("second"));
+
+        assert.equal(getSelectAllBlockAction(asElement(editor)), "none");
+    });
+
+    it("expands a partial block selection to all top-level blocks", () => {
+        const editor = new TestElement("editor", false);
+        const first = new TestElement("first");
+        const second = new TestElement("second");
+        editor.append(first, second);
+        first.classList.add(BLOCK_SELECTION_CLASS);
+
+        assert.equal(getSelectAllBlockAction(asElement(editor)), "select-all");
+    });
+
+    it("keeps the selection when every top-level block is selected", () => {
+        const editor = new TestElement("editor", false);
+        const decoration = new TestElement("decoration", false);
+        const first = new TestElement("first");
+        const second = new TestElement("second");
+        editor.append(decoration, first, second);
+        first.classList.add(BLOCK_SELECTION_CLASS);
+        second.classList.add(BLOCK_SELECTION_CLASS);
+
+        assert.equal(getSelectAllBlockAction(asElement(editor)), "keep");
+    });
+
+    it("expands a nested block selection instead of selecting text", () => {
+        const editor = new TestElement("editor", false);
+        const container = new TestElement("container");
+        const child = new TestElement("child");
+        editor.append(container.append(child));
+        child.classList.add(BLOCK_SELECTION_CLASS);
+
+        assert.equal(getSelectAllBlockAction(asElement(editor)), "select-all");
     });
 });
 

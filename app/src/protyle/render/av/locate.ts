@@ -8,9 +8,13 @@ import {setAVCellAnchor, setAVItemAnchor} from "./rangeSelect";
 import {updateAVRowSelect} from "./virtualScroll";
 import {getAVLocateViewChange} from "./locateView";
 import {applyAVColorPalette, getAVCustomColors} from "./color";
+import {getBacklinkScrollElement, revealBacklinkReference, scrollBacklinkTarget} from "./backlinkScroll";
 
 export interface IAVLocateRequest {
     itemID: string;
+    keyID?: string;
+    defIDs?: string[];
+    scroll?: boolean;
     groupID?: string;
     viewID?: string;
     select?: boolean;
@@ -389,11 +393,27 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         }
         return;
     }
-    if (data.viewType === "table" && data.target.index === 0 && !data.target.groupID) {
-        const contentRect = protyle.contentElement.getBoundingClientRect();
-        protyle.contentElement.scrollTop += blockElement.getBoundingClientRect().top - contentRect.top;
-    } else {
-        scrollCenter(protyle, targetElement, "center");
+    if (request.keyID) {
+        const item = bodyElement?.querySelector<HTMLElement>(`.av__row[data-id="${request.itemID}"], .av__gallery-item[data-id="${request.itemID}"]`);
+        const cell = item?.querySelector<HTMLElement>(`[data-col-id="${request.keyID}"], [data-field-id="${request.keyID}"]`);
+        if (cell) {
+            targetElement = cell;
+            const refs = Array.from(cell.querySelectorAll<HTMLElement>('[data-type~="block-ref"][data-id]'))
+                .filter(ref => request.defIDs?.includes(ref.dataset.id));
+            refs.forEach(ref => ref.classList.add("def--mark"));
+            if (refs[0] && getBacklinkScrollElement(blockElement)) {
+                revealBacklinkReference(refs[0], cell);
+            }
+            targetElement = refs[0] || cell;
+        }
+    }
+    if (request.scroll !== false && !scrollBacklinkTarget(blockElement, targetElement)) {
+        if (!request.keyID && data.viewType === "table" && data.target.index === 0 && !data.target.groupID) {
+            const contentRect = protyle.contentElement.getBoundingClientRect();
+            protyle.contentElement.scrollTop += blockElement.getBoundingClientRect().top - contentRect.top;
+        } else {
+            scrollCenter(protyle, targetElement, "center");
+        }
     }
     if (data.viewType === "kanban") {
         const kanbanElement = blockElement.querySelector(".av__kanban") as HTMLElement;
@@ -401,6 +421,14 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         const targetRect = targetElement.getBoundingClientRect();
         if (kanbanElement && (targetRect.left < kanbanRect.left || targetRect.right > kanbanRect.right)) {
             kanbanElement.scrollLeft += targetRect.left + targetRect.width / 2 - (kanbanRect.left + kanbanRect.width / 2);
+        }
+    }
+    if (data.viewType === "table" && request.keyID) {
+        const scroller = blockElement.querySelector<HTMLElement>(".av__scroll");
+        const rect = scroller?.getBoundingClientRect();
+        const targetRect = targetElement.getBoundingClientRect();
+        if (scroller && (targetRect.left < rect.left || targetRect.right > rect.right)) {
+            scroller.scrollLeft += targetRect.left - rect.left;
         }
     }
     if (request.highlight) {

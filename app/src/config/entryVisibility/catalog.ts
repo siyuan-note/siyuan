@@ -368,6 +368,8 @@ const gutterSingle = () => [
     node("tabs", lang("tabs"), true, [
         node("tabsPositionTop", lang("tabsPositionTop")),
         node("tabsPositionLeft", lang("tabsPositionLeft")),
+        separator("separator_tabsTask"),
+        node("tabsTask", lang("task")),
     ]),
     separator("separator_cancelSuperBlock"),
     node("superBlock", lang("superBlock"), true, [
@@ -817,6 +819,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("delete", lang("delete")),
             separator("separator_paste"),
             node("paste", lang("paste")),
+            node("pasteAndKeepSourceFormat", lang("pasteAndKeepSourceFormat")),
             node("pasteAsPlainText", lang("pasteAsPlainText")),
             node("pasteEscaped", lang("pasteEscaped"), false),
             node("selectAll", lang("selectAll")),

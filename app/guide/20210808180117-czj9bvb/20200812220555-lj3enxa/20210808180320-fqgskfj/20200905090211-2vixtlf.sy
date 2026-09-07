@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20260906133808"
+		"updated": "20260906220233"
 	},
 	"Children": [
 		{
@@ -1369,7 +1369,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090624-9qgquxh",
-				"updated": "20260906133808"
+				"updated": "20260906220233"
 			},
 			"Children": [
 				{
@@ -2778,7 +2778,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260905124213-9etkynq",
-				"updated": "20260906133808"
+				"updated": "20260906202104"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -2793,12 +2793,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260905124213-6mc5n1n",
-				"updated": "20260906003122"
+				"updated": "20260906202104"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "页签块将相关内容收纳在同一组页签中，一次显示一个页签项的正文。点击标题切换，拖拽标题排序；选中的页签和顶部或左侧布局会保存并同步，刷新或重启后可恢复。"
+					"Data": "页签块将内容分组显示，点击标题切换，拖拽标题排序，双击标题重命名。支持顶部或左侧布局，选中状态会保存并同步。"
 				}
 			]
 		},
@@ -2864,116 +2864,11 @@
 			]
 		},
 		{
-			"ID": "20260906003122-812ct16",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260906003122-812ct16",
-				"updated": "20260906133808"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "输入 / 并选择页签块可创建一组页签。通过 + 添加页签，点击页签块的块标，在页签块子菜单中选择顶部页签或左侧页签。双击标题或使用重命名菜单，可以在页签标题处直接编辑文字。标题与提示块一样支持所见即所得编辑，可通过行级工具栏设置加粗、颜色等样式，修改文字时保留已有格式。右键点击页签标题，选择 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "复制"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "复制为块引用"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 可复制该页签的块引用。点击引用会切换到对应页签；嵌套页签会逐层展开。移动端也可通过编辑器插入菜单新建页签块。"
-				}
-			]
-		},
-		{
-			"ID": "20260906003122-j2v89xm",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260906003122-j2v89xm",
-				"updated": "20260906003122"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "通过列表或页签块的 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "块标菜单"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " - "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "转换为"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "，可以在列表和页签之间转换。列表项首段落作为完整标题，不重复出现在正文中；转回列表时还原为首段落，保留其格式、块 ID 和属性。"
-				}
-			]
-		},
-		{
-			"ID": "20260906003122-t6toer8",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260906003122-t6toer8",
-				"updated": "20260906003122"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "Markdown 示例：::: 与 tabs 之间需要空格，@tab 开始一个页签项，@tab:active 指定选中项，结束围栏独占一行。嵌套时外层围栏比内层长，缩进可选，例如外层使用四个冒号、内层使用三个。"
-				}
-			]
-		},
-		{
-			"ID": "20260906003122-jdsnmej",
-			"Type": "NodeCodeBlock",
-			"Properties": {
-				"id": "20260906003122-jdsnmej",
-				"updated": "20260906003122"
-			},
-			"Children": [
-				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```"
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker",
-					"CodeBlockInfo": "bWFya2Rvd24="
-				},
-				{
-					"Type": "NodeCodeBlockCode",
-					"Data": "::: tabs\n@tab 第一页\n\n这是第一页的正文。\n\n@tab:active 第二页\n\n点击第二个页签查看此内容。\n:::\n"
-				},
-				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```"
-				}
-			],
-			"IsFencedCodeBlock": true
-		},
-		{
 			"ID": "20260906003122-tqc63mt",
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260906003122-tqc63mt",
-				"updated": "20260906003122"
+				"updated": "20260906220233"
 			},
 			"Children": [
 				{
@@ -2988,12 +2883,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260906003122-xun3tcl",
-				"updated": "20260906003122"
+				"updated": "20260906220233"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "页签项块属于页签块，包含标题和正文，有独立的块 ID。正文可以包含段落、列表等内容，也可以嵌套页签块。页签块只能直接包含页签项块，页签项不能独立放在文档中。"
+					"Data": "页签项包含标题和正文，支持嵌套内容和块引用。在块标菜单中选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "页签块"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "任务"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可切换整组的任务模式。"
 				}
 			]
 		},

@@ -18,6 +18,7 @@ import {
 import {saveScroll} from "./saveScroll";
 import {getScrollIndexFromPointer} from "./slider";
 import {refreshSyntheticDragTarget} from "../../util/touchDragBridge";
+import {waitForPendingTransactions} from "../util/transactionQueue";
 
 export class Scroll {
     public element: HTMLElement;
@@ -305,12 +306,16 @@ export class Scroll {
         });
     }
 
-    public updateIndex(protyle: IProtyle, id: string, cb?: (index: number) => void) {
+    public async updateIndex(protyle: IProtyle, id: string, cb?: (index: number) => void) {
         const requestID = ++this.indexRequestID;
         this.indexAbortController?.abort();
         const abortController = new AbortController();
         this.indexAbortController = abortController;
         const rootID = protyle.block.rootID;
+        await waitForPendingTransactions(protyle);
+        if (abortController.signal.aborted || rootID !== protyle.block.rootID) {
+            return;
+        }
         void fetchPost("/api/block/getBlockIndex", {id}, (response) => {
             if (requestID !== this.indexRequestID || rootID !== protyle.block.rootID) {
                 return;

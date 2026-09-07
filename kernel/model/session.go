@@ -253,6 +253,14 @@ func CheckAuth(c *gin.Context) {
 			return
 		}
 
+		// 浏览器标记的跨站请求直接拒绝，防止跨站 GET 导航不带 Origin 时绕过校验
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
+		if util.IsCrossSiteFetchSite(c.GetHeader("Sec-Fetch-Site")) {
+			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": Conf.Language(378)})
+			c.Abort()
+			return
+		}
+
 		// Authenticate requests with the Origin header other than 127.0.0.1 https://github.com/siyuan-note/siyuan/issues/9180
 		clientIP := c.ClientIP()
 		host := c.Request.Host
@@ -313,7 +321,9 @@ func CheckAuth(c *gin.Context) {
 	workspaceSession := util.GetWorkspaceSession(session)
 	if IsWorkspaceSessionAuthenticated(workspaceSession) {
 		// 校验 Origin 防止跨站请求伪造 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-hhm2-g993-p656
-		if !util.IsSessionOriginAllowed(c.GetHeader("Origin"), c.Request.Host) {
+		// 同时拒绝浏览器标记的跨站请求，防止跨站 GET 导航不带 Origin 时绕过校验
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
+		if !util.IsSessionOriginAllowedRequest(c.Request) {
 			logging.LogWarnf("invalid Origin [%s] for session auth [ip=%s]", c.GetHeader("Origin"), c.ClientIP())
 			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed: invalid Origin"})
 			c.Abort()

@@ -18,6 +18,21 @@
 	"flashcardUnknownDurationReviews": "Revisões com duração desconhecida",
 	"flashcardReviewsByHour": "Revisões por hora",
 	"flashcardAllHistory": "Todo o histórico",
+	"templateSearch": "Pesquisar modelos por nome ou caminho",
+	"templateContextSearch": "Pesquisar documentos de contexto",
+	"templateContextTip": "Executar o modelo usando o título, o ID e outras informações do documento selecionado sem modificá-lo",
+	"fileTreeDragRemoveSorts": "Este movimento entra em conflito com a regra de ordenação atual. Alterar esta lista para ordenação personalizada e salvar a ordem completa após arrastar?",
+	"pasteAndKeepSourceFormat": "Colar mantendo a formatação original",
+	"templatePackageMoveTip": "As pastas de pacotes de modelos não podem ser renomeadas ou movidas",
+	"avDragRemoveSorts": "Este movimento entra em conflito com as regras de ordenação atuais. Remover as regras de ordenação desta visualização e salvar a ordem completa após arrastar como ordem personalizada?",
+	"templateManager": "Gerenciador de modelos",
+	"templateSource": "Código-fonte do modelo",
+	"templatePreview": "Pré-visualizar modelo",
+	"templateContext": "Contexto da pré-visualização",
+	"templateNewFolder": "Nova pasta",
+	"templateDeleteTip": "Excluir este item e todo o seu conteúdo? Os arquivos excluídos são mantidos em data/templates/.trash para recuperação.",
+	"task": "Tarefa",
+	"customTaskStatus": "Status de tarefa personalizado",
 	"imageViewerPlay": "Reproduzir apresentação de slides",
 	"imageFlipHorizontal": "Inverter horizontalmente",
 	"imageFlipVertical": "Inverter verticalmente",
@@ -2799,6 +2814,7 @@
 		"374": "Banco de dados [%s], campo de modelo [%s], primeiro item afetado [%s] (ID do item: %s), quantidade de itens afetados: %d, erro: %s",
 		"375": "O caderno para salvar notas rápidas não está disponível. Selecione um caderno aberto e não criptografado em Configurações - Documento",
 		"376": "O recurso ainda não foi baixado e não pode ser obtido no momento",
-		"377": "Mude para Baixar todos antes de alterar ou redefinir o repositório de dados"
+		"377": "Mude para Baixar todos antes de alterar ou redefinir o repositório de dados",
+		"378": "Solicitações entre sites não são permitidas"
 	}
 }

@@ -46,7 +46,11 @@ import {
     queueHeadingNumberRefresh
 } from "../util/headingNumber";
 import {MERMAID_LAYOUT_ATTR} from "../render/mermaidLayout";
-import {getPartialUpdateCleanupElements, shouldDeferCodeBlockCaretRestore} from "./transactionUpdate";
+import {
+    getPartialUpdateCleanupElements,
+    shouldDeferCodeBlockCaretRestore,
+    shouldReloadForHeadingBatch,
+} from "./transactionUpdate";
 import {getMoveAffectedEmbedElements, shouldSyncMoveCopies} from "./transactionEmbed";
 import {cloneMoveElements, getVisibleMoveElements} from "./transactionMove";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
@@ -1405,7 +1409,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
         });
     });
     queueHeadingNumberRefresh(protyle, operations);
-    if (operations.some(operation => operation.context?.headingBatchRootID === protyle.block.rootID)) {
+    if (shouldReloadForHeadingBatch(protyle.block.rootID, operations)) {
         reloadProtyle(protyle, false);
     }
 };

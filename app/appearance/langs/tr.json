@@ -18,6 +18,21 @@
 	"flashcardUnknownDurationReviews": "Süresi bilinmeyen gözden geçirmeler",
 	"flashcardReviewsByHour": "Saate göre gözden geçirmeler",
 	"flashcardAllHistory": "Tüm geçmiş",
+	"templateSearch": "Şablonları ada veya yola göre ara",
+	"templateContextSearch": "Bağlam belgelerini ara",
+	"templateContextTip": "Şablonu, seçilen belgenin başlığını, kimliğini ve diğer bilgilerini kullanarak belgeyi değiştirmeden çalıştırın",
+	"fileTreeDragRemoveSorts": "Bu taşıma geçerli sıralama kuralıyla çakışıyor. Bu liste özel sıralamaya geçirilsin ve sürükleme sonrası tam sıralama kaydedilsin mi?",
+	"pasteAndKeepSourceFormat": "Kaynak biçimlendirmesini koruyarak yapıştır",
+	"templatePackageMoveTip": "Şablon paketi klasörleri yeniden adlandırılamaz veya taşınamaz",
+	"avDragRemoveSorts": "Bu taşıma mevcut sıralama kurallarıyla çelişiyor. Bu görünümün sıralama kuralları kaldırılsın ve sürükleme sonrasındaki tam sıra özel sıra olarak kaydedilsin mi?",
+	"templateManager": "Şablon yöneticisi",
+	"templateSource": "Şablon kaynağı",
+	"templatePreview": "Şablonu önizle",
+	"templateContext": "Önizleme bağlamı",
+	"templateNewFolder": "Yeni klasör",
+	"templateDeleteTip": "Bu öğe ve tüm içeriği silinsin mi? Silinen dosyalar kurtarma için data/templates/.trash içinde saklanır.",
+	"task": "Görev",
+	"customTaskStatus": "Özel görev durumu",
 	"imageViewerPlay": "Slayt gösterisini oynat",
 	"imageFlipHorizontal": "Yatay çevir",
 	"imageFlipVertical": "Dikey çevir",
@@ -2799,6 +2814,7 @@
 		"374": "Veritabanı [%s], şablon alanı [%s], etkilenen ilk öğe [%s] (öğe kimliği: %s), etkilenen öğe sayısı: %d, hata: %s",
 		"375": "Hızlı notların kaydedileceği not defteri kullanılamıyor. Ayarlar - Belge bölümünde açık ve şifrelenmemiş bir not defteri seçin",
 		"376": "Kaynak henüz indirilmedi ve şu anda alınamıyor",
-		"377": "Veri deposunu değiştirmeden veya sıfırlamadan önce Tümünü indir seçeneğine geçin"
+		"377": "Veri deposunu değiştirmeden veya sıfırlamadan önce Tümünü indir seçeneğine geçin",
+		"378": "Siteler arası isteklere izin verilmez"
 	}
 }

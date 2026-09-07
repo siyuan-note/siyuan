@@ -7044,7 +7044,8 @@ func (tx *Transaction) doSortAttrViewRow(operation *Operation) (ret *TxErr) {
 }
 
 func sortAttributeViewRow(operation *Operation) (err error) {
-	if operation.ID == operation.PreviousID {
+	rowOrderOperation := isAttributeViewRowOrderOperation(operation.Data)
+	if !rowOrderOperation && operation.ID == operation.PreviousID {
 		// 拖拽到自己的下方，不做任何操作 https://github.com/siyuan-note/siyuan/issues/11048
 		return
 	}
@@ -7067,6 +7068,12 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 		}
 	}
 
+	if rowOrderOperation {
+		if err = applyAttributeViewRowOrder(attrView, view, operation.Data); nil != err {
+			return err
+		}
+		return avSaveView(attrView, operation.BlockID)
+	}
 	var itemID string
 	var idx, previousIndex int
 

@@ -65,13 +65,45 @@ func docSaveAsTemplate(c *gin.Context) {
 			databaseMode = model.TemplateDatabaseMode("invalid")
 		}
 	}
-	code, err := model.DocSaveAsTemplateWithDatabaseMode(id, name, overwrite, databaseMode)
+	var directory string
+	if value, exists := arg["directory"]; exists {
+		var valid bool
+		directory, valid = value.(string)
+		if !valid {
+			ret.Code = -1
+			ret.Msg = "Invalid template directory"
+			return
+		}
+	}
+	code, err := model.DocSaveAsTemplateInDirectoryAndRemember(id, name, directory, overwrite, databaseMode)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = util.EscapeHTML(err.Error())
 		return
 	}
 	ret.Code = code
+}
+
+func getDocSaveAsTemplateInfo(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+	info, err := model.GetDocSaveAsTemplateInfo(id)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = util.EscapeHTML(err.Error())
+		return
+	}
+	ret.Data = info
 }
 
 func renderTemplate(c *gin.Context) {
@@ -116,7 +148,20 @@ func renderTemplate(c *gin.Context) {
 		mode = model.TemplateRenderModePreview
 	}
 
-	_, content, docTreePlan, err := model.RenderTemplateWithMode(p, id, mode)
+	var content string
+	var docTreePlan *model.TemplateDocTreePlanSummary
+	var err error
+	if source, exists := arg["content"]; exists {
+		text, ok := source.(string)
+		if !ok || mode != model.TemplateRenderModePreview {
+			ret.Code = -1
+			ret.Msg = "Source content is only supported for template preview"
+			return
+		}
+		_, content, docTreePlan, err = model.PreviewTemplateSource(p, id, text)
+	} else {
+		_, content, docTreePlan, err = model.RenderTemplateWithMode(p, id, mode)
+	}
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = util.EscapeHTML(err.Error())
@@ -131,6 +176,31 @@ func renderTemplate(c *gin.Context) {
 		data["docTreePlan"] = docTreePlan
 	}
 	ret.Data = data
+}
+
+func manageTemplateFiles(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	var request model.TemplateFileRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		ret.Code = -1
+		ret.Msg = "Invalid template request"
+		return
+	}
+	data, err := model.ManageTemplateFiles(request)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = util.EscapeHTML(err.Error())
+		return
+	}
+	ret.Data = data
+	if request.Action != "list" && request.Action != "read" {
+		changed := []string{filepath.Join(util.DataDir, "templates", filepath.FromSlash(request.Path))}
+		if request.Action == "move" {
+			changed = append(changed, filepath.Join(util.DataDir, "templates", filepath.FromSlash(request.Target)))
+		}
+		model.IncSyncIfNeeded(changed...)
+	}
 }
 
 // isPathInTemplatesDir 校验绝对路径是否位于 <data>/templates/ 目录内，解析符号链接后再次校验，

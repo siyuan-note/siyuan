@@ -36,7 +36,7 @@ import {Constants} from "../constants";
 import {copyPlainText, readClipboard, setStorageVal, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
-import {paste, pasteAsPlainText, pasteEscaped} from "../protyle/util/paste";
+import {paste, pasteAndKeepSourceFormat, pasteAsPlainText, pasteEscaped} from "../protyle/util/paste";
 /// #if !MOBILE
 import {openFileById, updateBacklinkGraph} from "../editor/util";
 import {openGlobalSearch} from "../search/util";
@@ -863,6 +863,14 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
                         console.log(e);
                     }
                 }
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "pasteAndKeepSourceFormat",
+            label: window.siyuan.languages.pasteAndKeepSourceFormat,
+            click() {
+                focusByRange(getEditorRange(nodeElement));
+                pasteAndKeepSourceFormat(protyle, nodeElement as HTMLElement);
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({

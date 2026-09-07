@@ -51,6 +51,22 @@ func TestCanonicalBacklinkKeywords(t *testing.T) {
 	}
 }
 
+func TestBacklinkContextRevisionIncludesAttributeViewTargets(t *testing.T) {
+	context := &model.Backlink{ID: "database", DOM: "unchanged"}
+	before := newBacklinkContextResponses([]*model.Backlink{context})[0].Revision
+	context.AttributeViewTargets = []*model.BacklinkAttributeViewTarget{{BlockID: "database", Matches: []*model.BacklinkAttributeViewMatch{
+		{ItemID: "row", KeyID: "field", ValueID: "cell", DefIDs: []string{"definition"}},
+	}}}
+	response := newBacklinkContextResponses([]*model.Backlink{context})[0]
+	if response.Revision == before || len(response.AttributeViewTargets) != 1 {
+		t.Fatal("target metadata must be returned and invalidate the context revision")
+	}
+	context.AttributeViewTargets[0].Matches[0].ItemID = "another-row"
+	if response.Revision == newBacklinkContextResponses([]*model.Backlink{context})[0].Revision {
+		t.Fatal("a changed target row must invalidate the context revision")
+	}
+}
+
 func TestNewBacklinkResponses(t *testing.T) {
 	paths := []*model.Path{{ID: "20260725000000-source", Name: "Source", Count: 2}}
 	pathResponses := newBacklinkPathResponses(paths)

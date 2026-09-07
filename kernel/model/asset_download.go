@@ -155,7 +155,9 @@ func EnsureAssetLocal(absPath string) error {
 				return repoErr
 			}
 			var downloaded bool
+			handleCloudError := cloudRepoErrorHandler()
 			if downloaded, err = repo.EnsureAsset(rel, newSyncContext()); err != nil {
+				handleCloudError(err)
 				return fmt.Errorf("%s: %w", Conf.Language(376), err)
 			}
 			if downloaded {
@@ -210,7 +212,9 @@ func EnsureAssetPrefixLocal(absPrefix string) error {
 			}
 		}
 		var downloaded bool
+		handleCloudError := cloudRepoErrorHandler()
 		if downloaded, err = repo.EnsureAsset(file.Path, newSyncContext()); err != nil {
+			handleCloudError(err)
 			return fmt.Errorf("%s: %w", Conf.Language(376), err)
 		}
 		if downloaded {
@@ -244,7 +248,9 @@ func ensureAllSyncAssets() error {
 	if err != nil {
 		return err
 	}
+	handleCloudError := cloudRepoErrorHandler()
 	if err = repo.EnsureAllAssets(newSyncContext()); err != nil {
+		handleCloudError(err)
 		return fmt.Errorf("%s: %w", Conf.Language(376), err)
 	}
 	return nil
@@ -318,7 +324,9 @@ func SetSyncAssetDownloadMode(mode int) error {
 				if err = checkAssetDownloadAccess(); err != nil {
 					return err
 				}
+				handleCloudError := cloudRepoErrorHandler()
 				if err = repo.EnsureAllSnapshotChunks(newSyncContext()); err != nil {
+					handleCloudError(err)
 					return fmt.Errorf("%s: %w", Conf.Language(376), err)
 				}
 			}
@@ -350,7 +358,9 @@ func openRepoFileWithAssets(repo *dejavu.Repo, file *entity.File) ([]byte, error
 	if err = checkAssetDownloadAccess(); err != nil {
 		return nil, err
 	}
+	handleCloudError := cloudRepoErrorHandler()
 	if err = repo.EnsureFileChunks(file, newSyncContext()); err != nil {
+		handleCloudError(err)
 		return nil, fmt.Errorf("%s: %w", Conf.Language(376), err)
 	}
 	return repo.OpenFile(file)
@@ -390,7 +400,10 @@ func ensureRepoSnapshotComplete(repo *dejavu.Repo, indexID string) error {
 		if err := checkAssetDownloadAccess(); err != nil {
 			return err
 		}
-		return repo.EnsureFileChunks(file, newSyncContext())
+		handleCloudError := cloudRepoErrorHandler()
+		err := repo.EnsureFileChunks(file, newSyncContext())
+		handleCloudError(err)
+		return err
 	})
 }
 

@@ -38,6 +38,7 @@ import {isBrowserRenderableImagePath} from "../util/imageURL";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 import {getHostCapabilities} from "../util/hostCapabilities";
 import {revealTabsForTarget} from "../protyle/render/tabsRender";
+import {shouldCheckOtherWindows} from "./openFileWindow";
 
 const isSameCustomTab = (type: string, data: any, options: IOpenFileOptions) => {
     if (!options.custom || (options.custom.id && options.custom.id !== type)) {
@@ -60,6 +61,7 @@ export const openFileById = async (options: {
     zoomIn?: boolean
     removeCurrentTab?: boolean
     openNewTab?: boolean
+    forceCurrentWindow?: boolean
     keepAVPanel?: boolean
     afterOpen?: (model: Model) => void,
     scrollPosition?: ScrollLogicalPosition
@@ -99,6 +101,7 @@ export const openFileById = async (options: {
         removeCurrentTab: options.removeCurrentTab,
         afterOpen: options.afterOpen,
         openNewTab: options.openNewTab,
+        forceCurrentWindow: options.forceCurrentWindow,
         keepAVPanel: options.keepAVPanel,
         scrollPosition: options.scrollPosition,
     });
@@ -250,7 +253,7 @@ export const openFile = async (options: IOpenFileOptions) => {
 
     /// #if !BROWSER
     // https://github.com/siyuan-note/siyuan/issues/7491
-    if (!options.position || (options.position === "right" && options.assetPath)) {
+    if (shouldCheckOtherWindows(options)) {
         let hasMatch = false;
         const optionsClone: IObject = {};
         Object.keys(options).forEach((key: keyof IOpenFileOptions) => {

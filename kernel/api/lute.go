@@ -127,11 +127,12 @@ func html2BlockDOM(c *gin.Context) {
 	skipInlineSVGAssets, _ := arg["skipInlineSVGAssets"].(bool)
 	preflight, _ := arg["preflight"].(bool)
 	preparedHTML, _ := arg["preparedHTML"].(bool)
+	preserveSourceFormat, _ := arg["preserveSourceFormat"].(bool)
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
 	luteEngine.SetHTML2MarkdownAttrs([]string{"alias", "memo", "bookmark", "custom-*"})
 	dom, useHTML := prepareHTMLClipboardContent(luteEngine, dom, text, mathML, office, officeMathHTML, wps,
-		preparedHTML, convertClipboardMath, convertOfficeHTMLClipboardMath)
+		preserveSourceFormat, preparedHTML, convertClipboardMath, convertOfficeHTMLClipboardMath)
 	if !useHTML {
 		if preflight {
 			ret.Data = map[string]any{"converted": true, "dom": dom, "useHTML": false}
@@ -268,6 +269,7 @@ func html2BlockDOM(c *gin.Context) {
 
 	parse.TextMarks2Inlines(tree) // 先将 TextMark 转换为 Inlines https://github.com/siyuan-note/siyuan/issues/13056
 	parse.NestedInlines2FlattedSpansHybrid(tree, false)
+	removeWhitespaceTextMarkStyles(tree)
 
 	md, err := lute.FormatNodeSync(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
 	if nil != err {
@@ -292,6 +294,23 @@ func html2BlockDOM(c *gin.Context) {
 		ret.Data = map[string]any{"converted": true, "normalizedHTML": normalizedHTML, "useHTML": true}
 	} else {
 		ret.Data = gulu.Str.FromBytes(output)
+	}
+}
+
+func removeWhitespaceTextMarkStyles(tree *parse.Tree) {
+	var unlinks []*ast.Node
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && n.Type == ast.NodeTextMark && strings.TrimSpace(n.TextMarkTextContent) == "" {
+			n.RemoveIALAttr("style")
+			// 空白文本无法绑定 Kramdown 行内属性，移除样式属性节点以免渲染为正文。
+			if n.Next != nil && n.Next.Type == ast.NodeKramdownSpanIAL && parse.IALVal(n.Next, "style") != "" {
+				unlinks = append(unlinks, n.Next)
+			}
+		}
+		return ast.WalkContinue
+	})
+	for _, n := range unlinks {
+		n.Unlink()
 	}
 }
 
@@ -339,7 +358,7 @@ type clipboardMathConverter func(mathML, office, wps string) (markdown string, c
 type officeHTMLClipboardMathConverter func(officeMathHTML string) (markdown string, converted bool)
 
 func prepareHTMLClipboardContent(luteEngine *lute.Lute, dom, text, mathML, office, officeMathHTML, wps string,
-	preparedHTML bool, mathConverter clipboardMathConverter,
+	preserveSourceFormat, preparedHTML bool, mathConverter clipboardMathConverter,
 	officeHTMLMathConverter officeHTMLClipboardMathConverter) (resolvedDOM string, useHTML bool) {
 	if preparedHTML {
 		return dom, true
@@ -351,7 +370,11 @@ func prepareHTMLClipboardContent(luteEngine *lute.Lute, dom, text, mathML, offic
 	}
 	// 将 Word 和 WPS 批注转换为行级备注 https://github.com/siyuan-note/siyuan/issues/18748
 	resolvedDOM = normalizeWPSComments(resolvedDOM, text, wps)
-	return normalizeMSWordComments(resolvedDOM), true
+	resolvedDOM = normalizeMSWordComments(resolvedDOM)
+	if !preserveSourceFormat {
+		resolvedDOM = matchHTMLClipboardElements(resolvedDOM)
+	}
+	return resolvedDOM, true
 }
 
 func resolveHTMLClipboardContent(luteEngine *lute.Lute, dom, mathML, office, officeMathHTML, wps string,

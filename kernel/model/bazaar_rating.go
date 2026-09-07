@@ -337,6 +337,8 @@ func requestBazaarPackageUserRatings(ctx context.Context, token string, packageN
 }
 
 func requestBazaarPackageRating[T any](ctx context.Context, endpoint string, body map[string]any, data *T) error {
+	token, _ := body["token"].(string)
+	invalidUser := cloudAccountAuthFailureHandler(token)
 	result := bazaarRatingCloudResult[T]{}
 	resp, err := httpclient.NewCloudRequest30s().SetContext(ctx).SetSuccessResult(&result).SetBody(body).
 		Post(bazaarRatingCloudServer() + endpoint)
@@ -345,6 +347,7 @@ func requestBazaarPackageRating[T any](ctx context.Context, endpoint string, bod
 		return ErrFailedToConnectCloudServer
 	}
 	if http.StatusUnauthorized == resp.StatusCode {
+		invalidUser()
 		return errors.New(Conf.Language(31))
 	}
 	if http.StatusTooManyRequests == resp.StatusCode {

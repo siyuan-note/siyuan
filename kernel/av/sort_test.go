@@ -252,3 +252,57 @@ func assertDateSortRowIDs(t *testing.T, table *Table, want []string) {
 		t.Fatalf("unexpected row order: got %v, want %v", got, want)
 	}
 }
+
+func TestSortPreservesManualOrderForEqualValues(t *testing.T) {
+	for _, order := range []SortOrder{SortOrderAsc, SortOrderDesc} {
+		t.Run(string(order), func(t *testing.T) {
+			table := newDateSortTestTable(map[string]dateSortTestValue{"a": {start: 100}, "b": {start: 100}}, order, DateEndpointStart)
+			table.Rows[0], table.Rows[1] = table.Rows[1], table.Rows[0]
+			Sort(table, &AttributeView{})
+			assertDateSortRowIDs(t, table, []string{"b", "a"})
+			Sort(table, &AttributeView{})
+			assertDateSortRowIDs(t, table, []string{"b", "a"})
+			// 后续规则仍然优先于手动顺序。
+			table.Sorts = append(table.Sorts, &ViewSort{Column: "block", Order: SortOrderAsc})
+			Sort(table, &AttributeView{})
+			assertDateSortRowIDs(t, table, []string{"a", "b"})
+		})
+	}
+}
+
+func TestSortKeepsEmptyAndUneditedRowsLast(t *testing.T) {
+	const createdAt = 1800000000000
+	for _, order := range []SortOrder{SortOrderAsc, SortOrderDesc} {
+		t.Run(string(order), func(t *testing.T) {
+			table := &Table{
+				BaseInstance: &BaseInstance{Sorts: []*ViewSort{{Column: "text", Order: order}}},
+				Columns: []*TableColumn{
+					{BaseInstanceField: &BaseInstanceField{ID: "block", Type: KeyTypeBlock}},
+					{BaseInstanceField: &BaseInstanceField{ID: "text", Type: KeyTypeText}},
+				},
+			}
+			for _, item := range []struct {
+				id, text string
+				edited   bool
+			}{
+				{id: "new-b"}, {id: "empty-b", edited: true}, {id: "filled", text: "value", edited: true},
+				{id: "new-a"}, {id: "empty-a", edited: true},
+			} {
+				updatedAt := int64(createdAt)
+				if item.edited {
+					updatedAt++
+				}
+				table.Rows = append(table.Rows, &TableRow{ID: item.id, Cells: []*TableCell{
+					{BaseValue: &BaseValue{ValueType: KeyTypeBlock, Value: &Value{
+						Type: KeyTypeBlock, CreatedAt: createdAt, UpdatedAt: createdAt, Block: &ValueBlock{Content: item.id},
+					}}},
+					{BaseValue: &BaseValue{ValueType: KeyTypeText, Value: &Value{
+						Type: KeyTypeText, CreatedAt: createdAt, UpdatedAt: updatedAt, Text: &ValueText{Content: item.text},
+					}}},
+				}})
+			}
+			Sort(table, &AttributeView{})
+			assertDateSortRowIDs(t, table, []string{"filled", "empty-b", "empty-a", "new-b", "new-a"})
+		})
+	}
+}

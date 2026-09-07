@@ -21,6 +21,7 @@ import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 import {captureCommandContext} from "../../command/context";
 import {resolvePluginCommandCallback, supportsPluginCommandSource} from "../../plugin/commandAdapter";
 import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
+import {waitForPendingTransactions} from "../util/transactionQueue";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement?: HTMLElement) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom, event)) {
@@ -271,6 +272,17 @@ export const getStartEndElement = (selectElements: NodeListOf<Element> | Element
 };
 
 export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle) => {
+    // 折叠内容需要从内核读取，先等待源块的创建与编辑事务完成。
+    if (!protyle.lite && nodeElements.some(item =>
+        item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1" ||
+        item.getAttribute("data-type") !== "NodeBlockQueryEmbed" &&
+        !!item.querySelector('[data-type="NodeHeading"][fold="1"]'))) {
+        const rootID = protyle.block.rootID;
+        await waitForPendingTransactions(protyle);
+        if (rootID !== protyle.block.rootID || nodeElements.some(item => !item.isConnected)) {
+            return;
+        }
+    }
     let focusElement: Element;
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];

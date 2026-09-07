@@ -25,6 +25,7 @@ import {isMobile} from "../../util/functions";
 import {showMessage} from "../../dialog/message";
 import {activateTrackedRangeInsertion, type ITrackedRangeInsertion} from "../util/trackedRange";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
+import {nextTaskListMarker} from "./taskListMarker";
 
 const getLastChildBlock = (element: Element) => {
     if (!element || !element.lastElementChild) {
@@ -144,9 +145,9 @@ export const openOrderedListStartDialog = (protyle: IProtyle, listElement: HTMLE
 
 export const toggleTaskListItem = (protyle: IProtyle, taskItemElement: Element): void => {
     const html = taskItemElement.outerHTML;
-    const marker = taskItemElement.getAttribute("data-task");
+    const marker = nextTaskListMarker(taskItemElement.getAttribute("data-task"));
     const useElement = taskItemElement.querySelector("use");
-    if (marker !== null && marker !== " ") {
+    if (marker === " ") {
         taskItemElement.setAttribute("data-task", " ");
         taskItemElement.classList.remove("protyle-task--done");
         useElement?.setAttribute("xlink:href", "#iconUncheck");

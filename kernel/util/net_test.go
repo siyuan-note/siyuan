@@ -19,6 +19,8 @@ package util
 import (
 	"context"
 	"net"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 )
@@ -49,6 +51,63 @@ func TestIsSessionOriginAllowed(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			if got := IsSessionOriginAllowed(test.origin, test.host); got != test.want {
 				t.Fatalf("IsSessionOriginAllowed(%q, %q) = %v, want %v", test.origin, test.host, got, test.want)
+			}
+		})
+	}
+}
+
+// TestIsCrossSiteFetchSite 验证 Sec-Fetch-Site 请求头的跨站判断逻辑
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
+func TestIsCrossSiteFetchSite(t *testing.T) {
+	tests := []struct {
+		name string
+		site string
+		want bool
+	}{
+		{name: "absent header", site: "", want: false},
+		{name: "same-origin", site: "same-origin", want: false},
+		{name: "none", site: "none", want: false},
+		{name: "same-site", site: "same-site", want: true},
+		{name: "cross-site", site: "cross-site", want: true},
+		{name: "unknown value", site: "unknown", want: true},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := IsCrossSiteFetchSite(test.site); got != test.want {
+				t.Fatalf("IsCrossSiteFetchSite(%q) = %v, want %v", test.site, got, test.want)
+			}
+		})
+	}
+}
+
+// TestIsSessionOriginAllowedRequest 验证会话认证请求校验：浏览器标记的跨站请求直接拒绝，
+// 其余请求回退到 Origin 校验
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
+func TestIsSessionOriginAllowedRequest(t *testing.T) {
+	tests := []struct {
+		name   string
+		site   string
+		origin string
+		host   string
+		want   bool
+	}{
+		{name: "cross-site navigation without Origin", site: "cross-site", origin: "", host: "127.0.0.1:6806", want: false},
+		{name: "same-site without Origin", site: "same-site", origin: "", host: "127.0.0.1:6806", want: false},
+		{name: "same-origin without Origin", site: "same-origin", origin: "", host: "127.0.0.1:6806", want: true},
+		{name: "none without Origin", site: "none", origin: "", host: "127.0.0.1:6806", want: true},
+		{name: "absent fetch site with local origin", site: "", origin: "http://127.0.0.1:6806", host: "127.0.0.1:6806", want: true},
+		{name: "absent fetch site with cross-site origin", site: "", origin: "https://evil.example", host: "127.0.0.1:6806", want: false},
+		{name: "cross-site with matching origin", site: "cross-site", origin: "http://127.0.0.1:6806", host: "127.0.0.1:6806", want: false},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			request := httptest.NewRequest(http.MethodGet, "http://"+test.host+"/", nil)
+			request.Header.Set("Sec-Fetch-Site", test.site)
+			request.Header.Set("Origin", test.origin)
+			if got := IsSessionOriginAllowedRequest(request); got != test.want {
+				t.Fatalf("IsSessionOriginAllowedRequest(site=%q, origin=%q, host=%q) = %v, want %v", test.site, test.origin, test.host, got, test.want)
 			}
 		})
 	}

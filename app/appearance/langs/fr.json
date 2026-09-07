@@ -18,6 +18,21 @@
 	"flashcardUnknownDurationReviews": "Révisions avec durée inconnue",
 	"flashcardReviewsByHour": "Révisions par heure",
 	"flashcardAllHistory": "Tout l'historique",
+	"templateSearch": "Rechercher des modèles par nom ou chemin",
+	"templateContextSearch": "Rechercher des documents de contexte",
+	"templateContextTip": "Exécuter le modèle avec le titre, l’identifiant et les autres informations du document sélectionné sans le modifier",
+	"fileTreeDragRemoveSorts": "Ce déplacement est incompatible avec la règle de tri actuelle. Passer cette liste au tri personnalisé et enregistrer l’ordre complet après le déplacement ?",
+	"pasteAndKeepSourceFormat": "Coller en conservant la mise en forme source",
+	"templatePackageMoveTip": "Les dossiers de paquets de modèles ne peuvent pas être renommés ni déplacés",
+	"avDragRemoveSorts": "Ce déplacement est incompatible avec les règles de tri actuelles. Supprimer les règles de tri de cette vue et enregistrer l’ordre complet après le déplacement comme ordre personnalisé ?",
+	"templateManager": "Gestionnaire de modèles",
+	"templateSource": "Source du modèle",
+	"templatePreview": "Aperçu du modèle",
+	"templateContext": "Contexte de l’aperçu",
+	"templateNewFolder": "Nouveau dossier",
+	"templateDeleteTip": "Supprimer cet élément et tout son contenu ? Les fichiers supprimés sont conservés dans data/templates/.trash pour permettre leur restauration.",
+	"task": "Tâche",
+	"customTaskStatus": "État de tâche personnalisé",
 	"imageViewerPlay": "Lancer le diaporama",
 	"imageFlipHorizontal": "Retourner horizontalement",
 	"imageFlipVertical": "Retourner verticalement",
@@ -2799,6 +2814,7 @@
 		"374": "Base de données [%s], champ de modèle [%s], premier élément affecté [%s] (ID de l’élément : %s), nombre d’éléments affectés : %d, erreur : %s",
 		"375": "Le carnet d’enregistrement des notes rapides n’est pas disponible. Sélectionnez un carnet ouvert et non chiffré dans Paramètres - Document",
 		"376": "La ressource n’a pas encore été téléchargée et ne peut pas être récupérée actuellement",
-		"377": "Veuillez passer à Tout télécharger avant de modifier ou de réinitialiser le dépôt de données"
+		"377": "Veuillez passer à Tout télécharger avant de modifier ou de réinitialiser le dépôt de données",
+		"378": "Les requêtes intersites ne sont pas autorisées"
 	}
 }

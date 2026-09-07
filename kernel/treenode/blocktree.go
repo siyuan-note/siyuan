@@ -949,6 +949,7 @@ func OpenEncryptedBlockTreeDB(boxID string, dek []byte) (err error) {
 	}
 	dbPath := util.EncryptedBlockTreeDBPath(boxID)
 	blocktreeKey := util.DeriveSubKey(dek, "siyuan/sqlcipher/blocktree")
+	defer clear(blocktreeKey)
 	dsn := dbPath + "?_journal_mode=WAL&_synchronous=OFF&_mmap_size=4294967296&_secure_delete=OFF" +
 		"&_cache_size=-128000&_page_size=32768&_busy_timeout=7000&_ignore_check_constraints=ON" +
 		"&_temp_store=MEMORY&_case_sensitive_like=OFF&_key=x'" + hex.EncodeToString(blocktreeKey) + "'"
@@ -959,6 +960,10 @@ func OpenEncryptedBlockTreeDB(boxID string, dek []byte) (err error) {
 	boxDB.SetMaxOpenConns(7)
 	boxDB.SetMaxIdleConns(3)
 	boxDB.SetConnMaxLifetime(365 * 24 * time.Hour)
+	if err = util.CheckEncryptedIndexCompatibility(boxDB, "blocktree", 1); err != nil {
+		boxDB.Close()
+		return err
+	}
 	if err = initEncryptedBlockTreeTables(boxDB); err != nil {
 		boxDB.Close()
 		return err
@@ -993,7 +998,7 @@ func GetOpenedEncryptedBoxIDs() (ret []string) {
 func RemoveEncryptedBlockTreeDBFile(boxID string) {
 	CloseEncryptedBlockTreeDB(boxID)
 	dbPath := util.EncryptedBlockTreeDBPath(boxID)
-	for _, suffix := range []string{"", "-wal", "-shm"} {
+	for _, suffix := range []string{"", "-wal", "-shm", "-journal"} {
 		if err := os.Remove(dbPath + suffix); err != nil && !os.IsNotExist(err) {
 			logging.LogErrorf("remove encrypted blocktree db file [%s] failed: %s", dbPath+suffix, err)
 		}

@@ -38,6 +38,7 @@ import {updateServerAddresses} from "../config/tabs/accessRuntime";
 import {applyCloudUserState} from "../config/tabs/accountUi";
 import {emitToPlugins} from "../plugin/EventBusCore";
 import {initializeEnglishCommandTranslations} from "../command/english";
+import {installPluginStorageFetchAppId} from "../util/fetchAppId";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -240,4 +241,5 @@ class App {
     }
 }
 
+installPluginStorageFetchAppId(window, Constants.SIYUAN_APPID, window.location.href);
 new App();

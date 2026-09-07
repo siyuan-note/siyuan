@@ -415,7 +415,7 @@ func ConstructBroadcastChannel(channel string) *BroadcastChannel {
 	websocket := melody.New()
 	// 校验 Origin，防止跨站 WebSocket 劫持（CSWSH） https://github.com/siyuan-note/siyuan/security/advisories/GHSA-3cc2-h3v6-rqpq
 	websocket.Upgrader.CheckOrigin = func(r *http.Request) bool {
-		return util.IsSessionOriginAllowed(r.Header.Get("Origin"), r.Host)
+		return util.IsSessionOriginAllowedRequest(r)
 	}
 	websocket.Config.MaxMessageSize = 1024 * 1024 * 128 // 128 MiB
 

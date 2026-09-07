@@ -9,6 +9,7 @@ import {
     createDragRefreshQueue,
     dispatchWithNativeDragEnabled,
     getDragRelayTypes,
+    getSourceDragGhostVisibility,
     getWheelScrollDelta,
     hasActiveTouchGesture,
     isDragRelaySource,
@@ -96,6 +97,7 @@ interface BlockDragRelayMessage {
     point?: DragPoint;
     payload?: BlockDragRelayPayload;
     remote?: boolean;
+    outsideSource?: boolean;
     sequence?: number;
     sourceWebContentsId?: number;
 }
@@ -507,6 +509,12 @@ const positionGhost = (clientX: number, clientY: number) => {
     }
 };
 
+const setSourceDragGhostOutside = (outsideSourceWindow: boolean) => {
+    if (dragState?.ghostElement) {
+        dragState.ghostElement.style.visibility = getSourceDragGhostVisibility(outsideSourceWindow);
+    }
+};
+
 const clearDragoverClasses = () => {
     document.querySelectorAll(".dragover__top, .dragover__bottom, .dragover__left, .dragover__right, .dragover").forEach((item) => {
         item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
@@ -577,6 +585,7 @@ const sendBlockDragRelayMove = (point: DragPoint) => {
     }
     if (isClearlyInsideWindow(point)) {
         dragState.relayRemote = false;
+        setSourceDragGhostOutside(false);
     }
     dragState.relaySequence = (dragState.relaySequence || 0) + 1;
     const relayPoint = copyDragPoint(point);
@@ -856,11 +865,13 @@ const handleBlockDragRelay = (message: BlockDragRelayMessage) => {
         if (dragState?.relayId === message.dragId && dragState.pendingDropPoint &&
             message.sequence === dragState.pendingDropSequence) {
             dragState.relayRemote = !!message.remote;
+            setSourceDragGhostOutside(message.outsideSource ?? !!message.remote);
             const pendingPoint = dragState.pendingDropPoint;
             completeBridgeDrag(pendingPoint, false, !!message.remote);
         } else if (dragState?.relayId === message.dragId && !dragState.pendingDropPoint &&
             message.sequence === dragState.relaySequence) {
             dragState.relayRemote = !!message.remote;
+            setSourceDragGhostOutside(message.outsideSource ?? !!message.remote);
         }
         return;
     }

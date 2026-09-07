@@ -20,7 +20,7 @@ export const loadTemplateDirectories = async (select: HTMLSelectElement) => {
     select.value = Array.from(select.options).some(option => option.value === value) ? value : "";
 };
 
-export const openTemplateManager = (contextID: string, onClose?: () => void) => {
+export const openTemplateManager = (contextID = "", onClose?: () => void) => {
     const lang = window.siyuan.languages;
     let selected: TemplateEntry;
     let entries: TemplateEntry[] = [];
@@ -73,10 +73,13 @@ ${button("rename", lang.rename)}${button("move", lang.move)}${button("remove", l
     const search = dialog.element.querySelector<HTMLInputElement>(".template-manager__context input");
     const context = dialog.element.querySelector<HTMLSelectElement>("select");
     const contextName = dialog.element.querySelector<HTMLElement>(".template-manager__context-name");
-    context.add(new Option(contextID, contextID));
+    if (contextID) {
+        context.add(new Option(contextID, contextID));
+    }
     const updateContextName = () => {
-        contextName.textContent = context.selectedOptions[0].text;
-        contextName.title = context.selectedOptions[0].text;
+        const selectedOption = context.selectedOptions[0];
+        contextName.textContent = selectedOption?.text || "";
+        contextName.title = selectedOption?.text || "";
     };
     updateContextName();
     const dirty = () => source.value !== saved;
@@ -111,7 +114,7 @@ ${button("rename", lang.rename)}${button("move", lang.move)}${button("remove", l
         list.setAttribute("aria-busy", String(busy));
         dialog.element.querySelectorAll<HTMLButtonElement>(".template-manager__actions > [data-action]").forEach(element => {
             const action = element.dataset.action;
-            const state = getTemplateActionState(action, selected, dirty(), busy);
+            const state = getTemplateActionState(action, selected, dirty(), busy, Boolean(context.value));
             element.title = state.packageMove ? lang.templatePackageMoveTip : "";
             element.disabled = state.disabled;
             // 请求期间保留按钮外观，由事件入口拦截重复操作。
@@ -305,6 +308,7 @@ ${button("rename", lang.rename)}${button("move", lang.move)}${button("remove", l
     context.addEventListener("change", () => {
         updateContextName();
         clearTemplatePreview(preview);
+        update();
     });
     let searchRequest = 0;
     search.addEventListener("input", async () => {
@@ -315,23 +319,31 @@ ${button("rename", lang.rename)}${button("move", lang.move)}${button("remove", l
                 return;
             }
             const selectedOption = context.selectedOptions[0];
-            context.replaceChildren(new Option(selectedOption.text, selectedOption.value));
+            context.replaceChildren();
+            if (selectedOption?.value) {
+                context.add(new Option(selectedOption.text, selectedOption.value));
+            }
             response.data.forEach((doc: {path: string, hPath: string}) => {
                 const id = doc.path.split("/").pop().replace(/\.sy$/, "");
                 if (id !== context.value) {
                     context.add(new Option(doc.hPath, id));
                 }
             });
+            updateContextName();
+            clearTemplatePreview(preview);
+            update();
         } catch (error) {
             showMessage(escapeHtml(String(error)), 5000, "error");
         }
     });
-    void fetchSyncPost("/api/block/getRefText", {id: contextID}).then(response => {
-        if (!closed && response.code === 0 && context.options[0]?.value === contextID) {
-            context.options[0].text = response.data || contextID;
-            updateContextName();
-        }
-    }).catch(() => {});
+    if (contextID) {
+        void fetchSyncPost("/api/block/getRefText", {id: contextID}).then(response => {
+            if (!closed && response.code === 0 && context.options[0]?.value === contextID) {
+                context.options[0].text = response.data || contextID;
+                updateContextName();
+            }
+        }).catch(() => {});
+    }
     dialog.element.addEventListener("click", event => {
         const target = (event.target as Element).closest<HTMLElement>(".template-manager__actions > [data-action]");
         const action = preview.contains(target) ? undefined : target?.dataset.action;

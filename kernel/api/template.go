@@ -75,13 +75,35 @@ func docSaveAsTemplate(c *gin.Context) {
 			return
 		}
 	}
-	code, err := model.DocSaveAsTemplateInDirectory(id, name, directory, overwrite, databaseMode)
+	code, err := model.DocSaveAsTemplateInDirectoryAndRemember(id, name, directory, overwrite, databaseMode)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = util.EscapeHTML(err.Error())
 		return
 	}
 	ret.Code = code
+}
+
+func getDocSaveAsTemplateInfo(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+	info, err := model.GetDocSaveAsTemplateInfo(id)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = util.EscapeHTML(err.Error())
+		return
+	}
+	ret.Data = info
 }
 
 func renderTemplate(c *gin.Context) {

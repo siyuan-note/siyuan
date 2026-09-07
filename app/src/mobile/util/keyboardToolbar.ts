@@ -69,6 +69,7 @@ import {
     getInlineFontFamilyValue,
     renderMobileFontFamilyMenu,
 } from "../../protyle/toolbar/fontFamilyMenu";
+import {notifyMobileKeyboardChange} from "./mobileKeyboardChange";
 
 type TAndroidBoundedSelection = {
     container: HTMLElement,
@@ -875,19 +876,19 @@ export const showKeyboardToolbar = () => {
         hasClosestByClassName(selection.getRangeAt(0).startContainer, "protyle-lite-fragment", true) ||
         hasClosestByClassName(selection.getRangeAt(0).startContainer, "agent-chat__composer-host", true))) {
         // Lite 编辑器使用自己的工具栏，不能显示会作用于下层文档的移动端编辑工具栏。
-        window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: true}));
+        notifyMobileKeyboardChange(true);
         toolbarElement.classList.add("fn__none");
         return;
     }
     if (!toolbarElement.classList.contains("fn__none")) {
-        window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: true}));
+        notifyMobileKeyboardChange(true);
         return;
     }
     if (selection.rangeCount === 0) {
         return;
     }
     toolbarElement.classList.remove("fn__none");
-    window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: true}));
+    notifyMobileKeyboardChange(true);
     toolbarElement.style.zIndex = (++window.siyuan.zIndex).toString();
     updateKeyboardToolbarPosition();
     const modelElement = document.getElementById("model");
@@ -989,7 +990,7 @@ export const hideKeyboardToolbar = () => {
     if (modelElement.style.transform === "translateX(0px)") {
         modelElement.style.paddingBottom = "";
     }
-    window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: false}));
+    notifyMobileKeyboardChange(false);
 };
 
 export const hideKeyboardToolbarByApp = (preserveSelection = false) => {

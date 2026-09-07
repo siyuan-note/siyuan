@@ -17,7 +17,7 @@ import {
 } from "../protyle/util/compatibility";
 import {openCard} from "../card/openCard";
 import {openSetting} from "../config";
-import {getAllDocks} from "../layout/getAll";
+import {getAllDocks, getAllModels} from "../layout/getAll";
 import {getDockHotkey} from "../layout/dock/hotkey";
 import {exportLayout, getAllLayout} from "../layout/util";
 import {getDockByType} from "../layout/tabUtil";
@@ -39,6 +39,7 @@ import {openDataMigration} from "./dataMigration";
 import {openLink} from "../editor/openLink";
 import {adjustEditorFontSize} from "../util/editorFontSize";
 import {getHostCapabilities} from "../util/hostCapabilities";
+import {openTemplateManager} from "../template/manager";
 
 const editLayout = (layoutName?: string) => {
     const dialog = new Dialog({
@@ -651,6 +652,18 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     openHistory(app);
                 }
             }).element);
+            if (getHostCapabilities().importExport) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "templateManager",
+                    label: window.siyuan.languages.templateManager,
+                    icon: "iconMarkdown",
+                    click: () => {
+                        const editor = getAllModels().editor.find(item =>
+                            item.parent.headElement.classList.contains("item--focus"));
+                        openTemplateManager(editor?.editor.protyle.block.rootID || "");
+                    }
+                }).element);
+            }
             if (!window.siyuan.config.readonly && getHostCapabilities().importExport) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "dataMigration",

@@ -58,8 +58,16 @@ const (
 	TemplateDatabaseModeCopy      TemplateDatabaseMode = "copy"
 	TemplateDatabaseModeReference TemplateDatabaseMode = "reference"
 
-	templateDatabaseModeAttr = "custom-sy-av-template-mode"
+	templateDatabaseModeAttr    = "custom-sy-av-template-mode"
+	templateExportNameAttr      = "custom-sy-template-export-name"
+	templateExportDirectoryAttr = "custom-sy-template-export-directory"
 )
+
+type DocSaveAsTemplateInfo struct {
+	Name        string `json:"name"`
+	Directory   string `json:"directory"`
+	HasDatabase bool   `json:"hasDatabase"`
+}
 
 func RenderGoTemplate(templateContent string) (ret string, err error) {
 	return RenderGoTemplateAtInBox(templateContent, time.Now(), "")
@@ -256,8 +264,83 @@ func DocSaveAsTemplate(id, name string, overwrite bool) (code int, err error) {
 	return DocSaveAsTemplateWithDatabaseMode(id, name, overwrite, TemplateDatabaseModeCopy)
 }
 
+func GetDocSaveAsTemplateInfo(id string) (ret *DocSaveAsTemplateInfo, err error) {
+	FlushTxQueue()
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		return nil, ErrBlockNotFound
+	}
+
+	tree, err := filesys.LoadTree(bt.BoxID, bt.Path, NewLute())
+	if nil != err {
+		return nil, err
+	}
+	node := tree.Root
+	if "d" != bt.Type {
+		node = treenode.GetNodeInTree(tree, id)
+		if nil == node {
+			return nil, ErrBlockNotFound
+		}
+	}
+
+	exportNodes := []*ast.Node{node}
+	if ast.NodeHeading == node.Type {
+		exportNodes = append(exportNodes, treenode.HeadingChildren(node)...)
+	}
+	hasDatabase := false
+	for _, exportNode := range exportNodes {
+		ast.Walk(exportNode, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if entering && ast.NodeAttributeView == n.Type {
+				hasDatabase = true
+				return ast.WalkStop
+			}
+			return ast.WalkContinue
+		})
+		if hasDatabase {
+			break
+		}
+	}
+
+	attrs := parse.IAL2Map(tree.Root.KramdownIAL)
+	name := strings.TrimSpace(attrs[templateExportNameAttr])
+	if "" == name {
+		name = getNodeRefText(node)
+		if "" == name {
+			name = id
+		}
+	}
+	ret = &DocSaveAsTemplateInfo{
+		Name:        name,
+		Directory:   attrs[templateExportDirectoryAttr],
+		HasDatabase: hasDatabase,
+	}
+	return
+}
+
 func DocSaveAsTemplateWithDatabaseMode(id, name string, overwrite bool, databaseMode TemplateDatabaseMode) (code int, err error) {
 	return DocSaveAsTemplateInDirectory(id, name, "", overwrite, databaseMode)
+}
+
+func DocSaveAsTemplateInDirectoryAndRemember(id, name, directory string, overwrite bool,
+	databaseMode TemplateDatabaseMode) (code int, err error) {
+	code, err = DocSaveAsTemplateInDirectory(id, name, directory, overwrite, databaseMode)
+	if nil != err || 0 != code {
+		return
+	}
+
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		return
+	}
+	err = SetBlockAttrs(bt.RootID, map[string]string{
+		templateExportNameAttr:      name,
+		templateExportDirectoryAttr: directory,
+	})
+	if nil != err {
+		logging.LogErrorf("remember template export settings failed: %s", err)
+		err = nil
+	}
+	return
 }
 
 func DocSaveAsTemplateInDirectory(id, name, directory string, overwrite bool, databaseMode TemplateDatabaseMode) (code int, err error) {
@@ -277,6 +360,8 @@ func DocSaveAsTemplateInDirectory(id, name, directory string, overwrite bool, da
 	}
 
 	tree := prepareExportTree(bt)
+	tree.Root.RemoveIALAttr(templateExportNameAttr)
+	tree.Root.RemoveIALAttr(templateExportDirectoryAttr)
 	markTemplateAttributeViewModes(tree.Root, databaseMode)
 	addBlockIALNodes(tree, true)
 

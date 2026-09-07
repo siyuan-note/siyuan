@@ -174,6 +174,103 @@ func TestExportTemplateDocumentAttributesAndDirectory(t *testing.T) {
 	}
 }
 
+func TestDocSaveAsTemplateInfoAndRememberedAttrs(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	Conf.Editor = conf.NewEditor()
+	Conf.Export = conf.NewExport()
+
+	info, err := GetDocSaveAsTemplateInfo(fixture.sourceID)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if "Source" != info.Name || "" != info.Directory || info.HasDatabase {
+		t.Fatalf("unexpected initial export info: %+v", info)
+	}
+
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if nil != err {
+		t.Fatal(err)
+	}
+	heading := &ast.Node{Type: ast.NodeHeading, ID: "20260907000000-heading", HeadingLevel: 2}
+	heading.SetIALAttr("id", heading.ID)
+	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("Database section")})
+	database := &ast.Node{
+		Type:            ast.NodeAttributeView,
+		ID:              "20260907000001-avblock",
+		AttributeViewID: "20260907000002-attrview",
+	}
+	database.SetIALAttr("id", database.ID)
+	tree.Root.AppendChild(heading)
+	tree.Root.AppendChild(database)
+	tree.Root.SetIALAttr(templateExportNameAttr, "weekly")
+	tree.Root.SetIALAttr(templateExportDirectoryAttr, "reviews")
+	if _, err = filesys.WriteTree(tree); nil != err {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(tree)
+
+	childInfo, err := GetDocSaveAsTemplateInfo(fixture.childID)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if "weekly" != childInfo.Name || "reviews" != childInfo.Directory || childInfo.HasDatabase {
+		t.Fatalf("unexpected child export info: %+v", childInfo)
+	}
+	headingInfo, err := GetDocSaveAsTemplateInfo(heading.ID)
+	if nil != err || !headingInfo.HasDatabase {
+		t.Fatalf("database in the exported heading subtree was not detected: %+v %v", headingInfo, err)
+	}
+	docInfo, err := GetDocSaveAsTemplateInfo(fixture.sourceID)
+	if nil != err || !docInfo.HasDatabase {
+		t.Fatalf("document database was not detected: %+v %v", docInfo, err)
+	}
+
+	if _, err = ManageTemplateFiles(TemplateFileRequest{Action: "mkdir", Path: "reviews"}); nil != err {
+		t.Fatal(err)
+	}
+	code, err := DocSaveAsTemplateInDirectory(fixture.sourceID, "weekly", "reviews", false,
+		TemplateDatabaseModeCopy)
+	if nil != err || 0 != code {
+		t.Fatalf("export failed: %d %v", code, err)
+	}
+	info, err = GetDocSaveAsTemplateInfo(fixture.childID)
+	if nil != err || "weekly" != info.Name || "reviews" != info.Directory {
+		t.Fatalf("document export settings were not remembered from a child: %+v %v", info, err)
+	}
+
+	if _, err = ManageTemplateFiles(TemplateFileRequest{Action: "write", Path: "existing.md", Content: "existing"}); nil != err {
+		t.Fatal(err)
+	}
+	code, err = DocSaveAsTemplateInDirectory(fixture.sourceID, "existing", "", false,
+		TemplateDatabaseModeCopy)
+	if nil != err || 1 != code {
+		t.Fatalf("existing template did not request overwrite: %d %v", code, err)
+	}
+	info, err = GetDocSaveAsTemplateInfo(fixture.sourceID)
+	if nil != err || "weekly" != info.Name || "reviews" != info.Directory {
+		t.Fatalf("rejected export changed remembered settings: %+v %v", info, err)
+	}
+
+	code, err = DocSaveAsTemplateInDirectory(fixture.sourceID, "weekly", "reviews", true,
+		TemplateDatabaseModeCopy)
+	if nil != err || 0 != code {
+		t.Fatalf("overwrite export failed: %d %v", code, err)
+	}
+	content, err := os.ReadFile(filepath.Join(util.DataDir, "templates", "reviews", "weekly.md"))
+	if nil != err {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(content), templateExportNameAttr) ||
+		strings.Contains(string(content), templateExportDirectoryAttr) {
+		t.Fatalf("remembered settings leaked into template: %s", content)
+	}
+	source, err := LoadTreeByBlockID(fixture.sourceID)
+	if nil != err || "weekly" != source.Root.IALAttr(templateExportNameAttr) ||
+		"reviews" != source.Root.IALAttr(templateExportDirectoryAttr) {
+		t.Fatalf("source document lost remembered settings: %+v %v", source.Root.KramdownIAL, err)
+	}
+}
+
 func TestTemplateExistingNames(t *testing.T) {
 	previous := util.DataDir
 	util.DataDir = t.TempDir()

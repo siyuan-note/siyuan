@@ -31,4 +31,11 @@ describe("template manager action state", () => {
             assert.equal(getTemplateActionState("preview", folder, false, busy).disabled, true);
         }
     });
+
+    it("requires a document context only for preview", () => {
+        const entry = {path: "note.md", isDir: false};
+        assert.equal(getTemplateActionState("preview", entry, false, false, false).disabled, true);
+        assert.equal(getTemplateActionState("save", entry, true, false, false).disabled, false);
+        assert.equal(getTemplateActionState("remove", entry, false, false, false).disabled, false);
+    });
 });

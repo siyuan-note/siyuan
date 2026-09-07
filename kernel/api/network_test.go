@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"compress/gzip"
+	"encoding/base64"
 	"errors"
 	"io"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/imroc/req/v3"
 )
 
@@ -62,6 +64,46 @@ func TestConfigureForwardProxyResponseEncoding(t *testing.T) {
 				t.Fatalf("body = %x, want %x", body, test.wantBody)
 			}
 		})
+	}
+}
+
+// TestHTTPProxyResponseSecurityHeaders 验证 /api/network/proxy 响应禁用内容嗅探并强制不可执行类型，
+// 防止上游可控内容被浏览器渲染为 HTML 造成同源脚本执行
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
+func TestHTTPProxyResponseSecurityHeaders(t *testing.T) {
+	upstreamBody := []byte("<html><body>SNIFFED-AS-HTML<script>alert(1)</script></body></html>")
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "text/html; charset=utf-8")
+		_, _ = writer.Write(upstreamBody)
+	}))
+	defer server.Close()
+
+	engine := gin.New()
+	engine.Any("/api/network/proxy", httpProxy)
+
+	request := httptest.NewRequest(http.MethodGet,
+		"/api/network/proxy?u="+base64.RawURLEncoding.EncodeToString([]byte(server.URL)), nil)
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
+	}
+	if recorder.Header().Get("X-Content-Type-Options") != "nosniff" {
+		t.Fatalf("X-Content-Type-Options = %q, want nosniff", recorder.Header().Get("X-Content-Type-Options"))
+	}
+	if recorder.Header().Get("Content-Type") != "application/octet-stream" {
+		t.Fatalf("Content-Type = %q, want application/octet-stream", recorder.Header().Get("Content-Type"))
+	}
+	if recorder.Header().Get("Content-Disposition") != "attachment" {
+		t.Fatalf("Content-Disposition = %q, want attachment", recorder.Header().Get("Content-Disposition"))
+	}
+	if recorder.Header().Get("Siyuan-Proxy-Content-Type") != "text/html; charset=utf-8" {
+		t.Fatalf("Siyuan-Proxy-Content-Type = %q, want upstream content type", recorder.Header().Get("Siyuan-Proxy-Content-Type"))
+	}
+	if !bytes.Equal(recorder.Body.Bytes(), upstreamBody) {
+		t.Fatalf("body = %q, want %q", recorder.Body.String(), upstreamBody)
 	}
 }
 

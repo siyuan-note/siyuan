@@ -138,6 +138,25 @@ func IsSessionOriginAllowed(origin, host string) bool {
 	return originHostEquals(origin, host)
 }
 
+// IsCrossSiteFetchSite 根据 Sec-Fetch-Site 请求头判断是否为浏览器发起的跨站请求。
+// 浏览器为所有请求携带 Sec-Fetch-Site，取值 same-origin（同源）、same-site（同站跨源）、
+// cross-site（跨站）、none（用户直接输入地址等）；跨站顶层 GET 导航不携带 Origin，
+// 仅凭 Origin 无法识别，因此需要结合该请求头判断。未携带时视为非浏览器客户端。
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
+func IsCrossSiteFetchSite(site string) bool {
+	return "" != site && "same-origin" != site && "none" != site
+}
+
+// IsSessionOriginAllowedRequest 校验会话认证请求是否允许放行：浏览器标记的跨站请求直接拒绝，
+// 其余请求继续校验 Origin。
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
+func IsSessionOriginAllowedRequest(r *http.Request) bool {
+	if IsCrossSiteFetchSite(r.Header.Get("Sec-Fetch-Site")) {
+		return false
+	}
+	return IsSessionOriginAllowed(r.Header.Get("Origin"), r.Host)
+}
+
 func originHostEquals(origin, host string) bool {
 	u, err := url.Parse(origin)
 	if nil != err {

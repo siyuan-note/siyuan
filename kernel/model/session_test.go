@@ -139,6 +139,110 @@ func TestIsLocalRequest(t *testing.T) {
 	}
 }
 
+// TestCheckAuthCrossSiteFetchSite 验证未设置锁屏密码时拒绝浏览器标记的跨站请求，
+// 防止跨站 GET 导航不带 Origin 绕过校验
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
+func TestCheckAuthCrossSiteFetchSite(t *testing.T) {
+	originalConf := Conf
+	Conf = NewAppConf()
+	t.Cleanup(func() { Conf = originalConf })
+
+	engine := gin.New()
+	engine.GET("/api/test", CheckAuth, func(c *gin.Context) {
+		c.Status(http.StatusNoContent)
+	})
+
+	newRequest := func(site string) *httptest.ResponseRecorder {
+		request := httptest.NewRequest(http.MethodGet, "http://127.0.0.1:6806/api/test", nil)
+		request.RemoteAddr = "127.0.0.1:1234"
+		if "" != site {
+			request.Header.Set("Sec-Fetch-Site", site)
+		}
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, request)
+		return recorder
+	}
+
+	if recorder := newRequest("cross-site"); recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("cross-site status = %d, want %d", recorder.Code, http.StatusUnauthorized)
+	}
+	if recorder := newRequest("same-site"); recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("same-site status = %d, want %d", recorder.Code, http.StatusUnauthorized)
+	}
+	if recorder := newRequest("same-origin"); recorder.Code != http.StatusNoContent {
+		t.Fatalf("same-origin status = %d, want %d", recorder.Code, http.StatusNoContent)
+	}
+	if recorder := newRequest("none"); recorder.Code != http.StatusNoContent {
+		t.Fatalf("none status = %d, want %d", recorder.Code, http.StatusNoContent)
+	}
+	if recorder := newRequest(""); recorder.Code != http.StatusNoContent {
+		t.Fatalf("absent header status = %d, want %d", recorder.Code, http.StatusNoContent)
+	}
+}
+
+// TestCheckAuthSessionCrossSiteFetchSite 验证会话认证下拒绝浏览器标记的跨站 GET 导航请求
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
+func TestCheckAuthSessionCrossSiteFetchSite(t *testing.T) {
+	originalConf := Conf
+	originalWorkspaceDir := util.WorkspaceDir
+	Conf = NewAppConf()
+	Conf.AccessAuthCode = "test-access-auth-code"
+	util.WorkspaceDir = "test-workspace"
+	t.Cleanup(func() {
+		Conf = originalConf
+		util.WorkspaceDir = originalWorkspaceDir
+	})
+
+	engine := gin.New()
+	store := cookie.NewStore([]byte("test-session-cookie-key"))
+	engine.Use(ginSessions.Sessions("siyuan", store))
+	engine.GET("/login", func(c *gin.Context) {
+		session := util.GetSession(c)
+		workspaceSession := util.GetWorkspaceSession(session)
+		workspaceSession.AccessAuthCode = Conf.AccessAuthCode
+		if err := session.Save(c); err != nil {
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+		c.Status(http.StatusNoContent)
+	})
+	engine.GET("/api/test", CheckAuth, func(c *gin.Context) {
+		c.Status(http.StatusNoContent)
+	})
+
+	loginRequest := httptest.NewRequest(http.MethodGet, "http://127.0.0.1:6806/login", nil)
+	loginRequest.RemoteAddr = "127.0.0.1:1234"
+	loginRecorder := httptest.NewRecorder()
+	engine.ServeHTTP(loginRecorder, loginRequest)
+	if loginRecorder.Code != http.StatusNoContent {
+		t.Fatalf("login status = %d, want %d", loginRecorder.Code, http.StatusNoContent)
+	}
+
+	request := func(site string) *httptest.ResponseRecorder {
+		request := httptest.NewRequest(http.MethodGet, "http://127.0.0.1:6806/api/test", nil)
+		request.RemoteAddr = "127.0.0.1:1234"
+		if "" != site {
+			request.Header.Set("Sec-Fetch-Site", site)
+		}
+		for _, responseCookie := range loginRecorder.Result().Cookies() {
+			request.AddCookie(responseCookie)
+		}
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, request)
+		return recorder
+	}
+
+	if recorder := request("cross-site"); recorder.Code != http.StatusUnauthorized {
+		t.Fatalf("cross-site status = %d, want %d", recorder.Code, http.StatusUnauthorized)
+	}
+	if recorder := request("same-origin"); recorder.Code != http.StatusNoContent {
+		t.Fatalf("same-origin status = %d, want %d", recorder.Code, http.StatusNoContent)
+	}
+	if recorder := request(""); recorder.Code != http.StatusNoContent {
+		t.Fatalf("absent header status = %d, want %d", recorder.Code, http.StatusNoContent)
+	}
+}
+
 // TestCheckAuthRemoteSessionOrigin 验证局域网浏览器登录后，同源 POST 请求可通过会话鉴权。
 func TestCheckAuthRemoteSessionOrigin(t *testing.T) {
 	originalConf := Conf

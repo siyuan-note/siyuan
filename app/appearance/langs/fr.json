@@ -2724,6 +2724,7 @@
 		"374": "Base de données [%s], champ de modèle [%s], premier élément affecté [%s] (ID de l’élément : %s), nombre d’éléments affectés : %d, erreur : %s",
 		"375": "Le carnet d’enregistrement des notes rapides n’est pas disponible. Sélectionnez un carnet ouvert et non chiffré dans Paramètres - Document",
 		"376": "La ressource n’a pas encore été téléchargée et ne peut pas être récupérée actuellement",
-		"377": "Veuillez passer à Tout télécharger avant de modifier ou de réinitialiser le dépôt de données"
+		"377": "Veuillez passer à Tout télécharger avant de modifier ou de réinitialiser le dépôt de données",
+		"378": "Les requêtes intersites ne sont pas autorisées"
 	}
 }

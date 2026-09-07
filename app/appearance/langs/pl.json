@@ -2724,6 +2724,7 @@
 		"374": "Baza danych [%s], pole szablonu [%s], pierwszy element z błędem [%s] (ID elementu: %s), liczba elementów z błędem: %d, błąd: %s",
 		"375": "Notatnik zapisu szybkich notatek jest niedostępny. Wybierz otwarty, niezaszyfrowany notatnik w Ustawienia - Dokument",
 		"376": "Zasób nie został jeszcze pobrany i obecnie nie można go uzyskać",
-		"377": "Przełącz na Pobierz wszystkie przed zmianą lub zresetowaniem repozytorium danych"
+		"377": "Przełącz na Pobierz wszystkie przed zmianą lub zresetowaniem repozytorium danych",
+		"378": "Żądania między witrynami są niedozwolone"
 	}
 }

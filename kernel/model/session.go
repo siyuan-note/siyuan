@@ -256,7 +256,7 @@ func CheckAuth(c *gin.Context) {
 		// 浏览器标记的跨站请求直接拒绝，防止跨站 GET 导航不带 Origin 时绕过校验
 		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
 		if util.IsCrossSiteFetchSite(c.GetHeader("Sec-Fetch-Site")) {
-			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed: cross-site requests are not allowed\n出于安全考虑，拒绝跨站请求"})
+			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": Conf.Language(378)})
 			c.Abort()
 			return
 		}

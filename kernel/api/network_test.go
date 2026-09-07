@@ -107,6 +107,45 @@ func TestHTTPProxyResponseSecurityHeaders(t *testing.T) {
 	}
 }
 
+// TestEventSourceProxyResponseSecurityHeaders 验证 /es/network/proxy 保留 EventSource 内容类型并禁用内容嗅探
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
+func TestEventSourceProxyResponseSecurityHeaders(t *testing.T) {
+	upstreamBody := []byte("data: test\n\n")
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "text/event-stream")
+		_, _ = writer.Write(upstreamBody)
+	}))
+	defer server.Close()
+
+	engine := gin.New()
+	engine.GET("/es/network/proxy", esProxy)
+
+	request := httptest.NewRequest(http.MethodGet,
+		"/es/network/proxy?u="+base64.RawURLEncoding.EncodeToString([]byte(server.URL)), nil)
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
+	}
+	if recorder.Header().Get("X-Content-Type-Options") != "nosniff" {
+		t.Fatalf("X-Content-Type-Options = %q, want nosniff", recorder.Header().Get("X-Content-Type-Options"))
+	}
+	if recorder.Header().Get("Content-Type") != "text/event-stream; charset=utf-8" {
+		t.Fatalf("Content-Type = %q, want text/event-stream; charset=utf-8", recorder.Header().Get("Content-Type"))
+	}
+	if recorder.Header().Get("Content-Disposition") != "" {
+		t.Fatalf("Content-Disposition = %q, want empty", recorder.Header().Get("Content-Disposition"))
+	}
+	if recorder.Header().Get("Siyuan-Proxy-Content-Type") != "text/event-stream" {
+		t.Fatalf("Siyuan-Proxy-Content-Type = %q, want upstream content type", recorder.Header().Get("Siyuan-Proxy-Content-Type"))
+	}
+	if !bytes.Equal(recorder.Body.Bytes(), upstreamBody) {
+		t.Fatalf("body = %q, want %q", recorder.Body.String(), upstreamBody)
+	}
+}
+
 func TestForwardProxyResponseSizeLimit(t *testing.T) {
 	const limit int64 = 64
 	body := bytes.Repeat([]byte("a"), int(limit)+1)

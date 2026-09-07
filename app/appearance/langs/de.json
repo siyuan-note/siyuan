@@ -2724,6 +2724,7 @@
 		"374": "Datenbank [%s], Vorlagenfeld [%s], erster betroffener Eintrag [%s] (Element-ID: %s), Anzahl betroffener Einträge: %d, Fehler: %s",
 		"375": "Das Notizbuch zum Speichern von Kurznotizen ist nicht verfügbar. Wählen Sie unter Einstellungen - Dokument ein geöffnetes, unverschlüsseltes Notizbuch",
 		"376": "Die Ressource wurde noch nicht heruntergeladen und kann derzeit nicht abgerufen werden",
-		"377": "Bitte wechseln Sie zu Alle herunterladen, bevor Sie das Datenrepository ändern oder zurücksetzen"
+		"377": "Bitte wechseln Sie zu Alle herunterladen, bevor Sie das Datenrepository ändern oder zurücksetzen",
+		"378": "Websiteübergreifende Anfragen sind nicht zulässig"
 	}
 }

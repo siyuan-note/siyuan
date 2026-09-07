@@ -2724,6 +2724,7 @@
 		"374": "Database [%s], campo modello [%s], primo elemento interessato [%s] (ID elemento: %s), numero di elementi interessati: %d, errore: %s",
 		"375": "Il taccuino per il salvataggio delle note rapide non è disponibile. Seleziona un taccuino aperto e non crittografato in Impostazioni - Documento",
 		"376": "La risorsa non è ancora stata scaricata e al momento non può essere recuperata",
-		"377": "Passa a Scarica tutto prima di cambiare o reimpostare il repository dei dati"
+		"377": "Passa a Scarica tutto prima di cambiare o reimpostare il repository dei dati",
+		"378": "Le richieste tra siti non sono consentite"
 	}
 }

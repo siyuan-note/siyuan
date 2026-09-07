@@ -430,13 +430,15 @@ func forwardResponseHeaders(dst http.Header, src http.Header) {
 	}
 }
 
-// secureProxyResponseHeaders 为代理响应设置安全头：禁用内容嗅探并强制不可执行类型，
-// 防止上游可控内容被浏览器渲染为 HTML 造成同源脚本执行
+// secureProxyResponseHeaders 为代理响应设置安全头和固定内容类型，
+// 防止上游可控内容被浏览器嗅探为 HTML 造成同源脚本执行
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2w6q-wgc8-q743
-func secureProxyResponseHeaders(w gin.ResponseWriter) {
+func secureProxyResponseHeaders(w gin.ResponseWriter, contentType string, attachment bool) {
 	w.Header().Set("X-Content-Type-Options", "nosniff")
-	w.Header().Set("Content-Type", "application/octet-stream")
-	w.Header().Set("Content-Disposition", "attachment")
+	w.Header().Set("Content-Type", contentType)
+	if attachment {
+		w.Header().Set("Content-Disposition", "attachment")
+	}
 }
 
 // httpProxy proxies an HTTP request to a remote HTTP endpoint.
@@ -490,7 +492,7 @@ func httpProxy(c *gin.Context) {
 	}
 	defer resp.Body.Close()
 
-	secureProxyResponseHeaders(c.Writer)
+	secureProxyResponseHeaders(c.Writer, "application/octet-stream", true)
 	forwardResponseHeaders(c.Writer.Header(), resp.Header)
 	c.Writer.WriteHeader(resp.StatusCode)
 	if _, err := io.Copy(c.Writer, resp.Body); err != nil {
@@ -639,7 +641,7 @@ func esProxy(c *gin.Context) {
 	}
 	defer resp.Body.Close()
 
-	secureProxyResponseHeaders(c.Writer)
+	secureProxyResponseHeaders(c.Writer, "text/event-stream; charset=utf-8", false)
 	forwardResponseHeaders(c.Writer.Header(), resp.Header)
 	c.Writer.WriteHeader(resp.StatusCode)
 

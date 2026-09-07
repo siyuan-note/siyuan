@@ -2724,6 +2724,7 @@
 		"374": "Basis data [%s], bidang templat [%s], item pertama yang terdampak [%s] (ID item: %s), jumlah item terdampak: %d, kesalahan: %s",
 		"375": "Buku catatan penyimpanan catatan cepat tidak tersedia. Pilih buku catatan terbuka dan tidak terenkripsi di Pengaturan - Dokumen",
 		"376": "Sumber daya belum diunduh dan saat ini tidak dapat diambil",
-		"377": "Beralihlah ke Unduh semua sebelum mengubah atau mengatur ulang repositori data"
+		"377": "Beralihlah ke Unduh semua sebelum mengubah atau mengatur ulang repositori data",
+		"378": "Permintaan lintas situs tidak diizinkan"
 	}
 }

@@ -842,6 +842,12 @@ export const openMenuPanel = (options: {
                 } else if (type === "go-config") {
                     if (options.filterOperation) {
                         avPanelElement.remove();
+                        openMenuPanel({
+                            protyle: options.protyle,
+                            blockElement: options.blockElement,
+                            type: "edit",
+                            colId: options.filterOperation.keyID,
+                        });
                         event.preventDefault();
                         event.stopPropagation();
                         break;

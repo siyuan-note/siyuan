@@ -1,4 +1,5 @@
 {
+	"aiProviderHeadersTip": "JSON-Objekt mit Zeichenfolgenwerten eingeben; eigene Header überschreiben gleichnamige Standardheader, einschließlich Authentifizierungsheadern",
 	"cellPasteUnsupported": "Einfügen abgebrochen: ${x}-Blöcke werden in dieser Zelle nicht unterstützt",
 	"templateNameTip": "Einen Namen ohne Pfadtrennzeichen eingeben",
 	"keymapUnset": "Nicht festgelegt",

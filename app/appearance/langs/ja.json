@@ -1,4 +1,5 @@
 {
+	"aiProviderHeadersTip": "文字列値を持つ JSON オブジェクトを入力してください。カスタムヘッダーは、認証ヘッダーを含む同名の既定ヘッダーを上書きします",
 	"cellPasteUnsupported": "貼り付けをキャンセルしました：このセルでは ${x} ブロックはサポートされていません",
 	"templateNameTip": "パス区切り文字を含まない名前を入力してください",
 	"keymapUnset": "未設定",

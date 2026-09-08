@@ -1,4 +1,5 @@
 {
+	"aiProviderHeadersTip": "문자열 값을 가진 JSON 객체를 입력하세요. 사용자 지정 헤더는 인증 헤더를 포함하여 이름이 같은 기본 헤더를 덮어씁니다",
 	"cellPasteUnsupported": "붙여넣기 취소: 이 셀에서는 ${x} 블록을 지원하지 않습니다",
 	"templateNameTip": "경로 구분자 없이 이름을 입력하세요",
 	"keymapUnset": "설정되지 않음",

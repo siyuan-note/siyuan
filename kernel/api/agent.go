@@ -93,7 +93,7 @@ func agentChat(c *gin.Context) {
 		c.JSON(http.StatusOK, ret)
 		return
 	}
-	client := util.NewOpenAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name)
+	client := util.NewOpenAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name, selectedProvider.Headers)
 
 	confirmTimeout := resolveAgentConfirmTimeout(model.Conf.AI.Agent.ConfirmTimeout)
 	maxRetries := model.Conf.AI.Agent.MaxRetries
@@ -396,7 +396,7 @@ func agentChatTitle(c *gin.Context) {
 		c.JSON(http.StatusOK, ret)
 		return
 	}
-	client := util.NewOpenAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name)
+	client := util.NewOpenAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name, selectedProvider.Headers)
 
 	title := agent.GenerateTitle(client, selectedProvider.BaseURL, selectedProvider.Protocol, selectedModel.Name,
 		req.Message, req.Language)

@@ -277,7 +277,7 @@ func testModel(c *gin.Context) {
 	}
 
 	available, matched, err := util.TestModel(
-		provider.APIKey, provider.BaseURL, provider.Protocol, modelName, provider.RequestTimeout)
+		provider.APIKey, provider.BaseURL, provider.Protocol, modelName, provider.RequestTimeout, provider.Headers)
 	// 可用模型清单裁剪到前 50 条，避免响应体过大
 	if 50 < len(available) {
 		available = available[:50]
@@ -381,7 +381,7 @@ func listModels(c *gin.Context) {
 		return
 	}
 
-	metadata, err := util.ListAvailableModelsWithContext(provider.APIKey, provider.BaseURL, provider.RequestTimeout)
+	metadata, err := util.ListAvailableModelsWithContext(provider.APIKey, provider.BaseURL, provider.RequestTimeout, provider.Headers)
 	models := make([]string, 0, len(metadata))
 	contextLengths := map[string]int{}
 	for _, item := range metadata {

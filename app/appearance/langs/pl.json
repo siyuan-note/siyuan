@@ -1,4 +1,5 @@
 {
+	"aiProviderHeadersTip": "Wprowadź obiekt JSON z wartościami tekstowymi; własne nagłówki zastępują domyślne nagłówki o tej samej nazwie, w tym nagłówki uwierzytelniania",
 	"cellPasteUnsupported": "Wklejanie anulowane: bloki typu ${x} nie są obsługiwane w tej komórce",
 	"templateNameTip": "Wpisz nazwę bez separatorów ścieżki",
 	"keymapUnset": "Nie ustawiono",

@@ -187,7 +187,7 @@ func NewAIEditorChatStream(ctx context.Context, ids []string, input, action stri
 	streamCtx = util.ContextWithOpenAIResponsesBaseURL(streamCtx, prov.BaseURL)
 	requestTimeout := time.Duration(prov.RequestTimeout) * time.Second
 	requestTimer, requestTimerDone := startAIEditorCancelTimer(requestTimeout, cancel)
-	client := util.NewOpenAIClientWithModel(prov.APIKey, prov.BaseURL, m.Name)
+	client := util.NewOpenAIClientWithModel(prov.APIKey, prov.BaseURL, m.Name, prov.Headers)
 	completionStream, err := util.CreateOpenAICompletionStream(streamCtx, client, prov.Protocol, req, nil)
 	requestTimedOut := stopAIEditorCancelTimer(requestTimer, requestTimerDone)
 	if requestTimedOut {
@@ -260,7 +260,7 @@ func chatGPTComplete(msg string, contextMsgs []string, cloud bool) (ret string, 
 		gpt = &CloudGPT{}
 	} else {
 		gpt = &OpenAIGPT{
-			c:                   util.NewOpenAIClientWithModel(prov.APIKey, prov.BaseURL, m.Name),
+			c:                   util.NewOpenAIClientWithModel(prov.APIKey, prov.BaseURL, m.Name, prov.Headers),
 			apiBaseURL:          prov.BaseURL,
 			m:                   m,
 			protocol:            prov.Protocol,

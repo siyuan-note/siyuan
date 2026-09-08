@@ -1,4 +1,5 @@
 {
+	"aiProviderHeadersTip": "Introduce un objeto JSON con valores de texto; las cabeceras personalizadas sustituyen a las predeterminadas del mismo nombre, incluidas las de autenticación",
 	"cellPasteUnsupported": "Pegado cancelado: esta celda no admite bloques de tipo ${x}",
 	"templateNameTip": "Introduce un nombre sin separadores de ruta",
 	"keymapUnset": "Sin asignar",

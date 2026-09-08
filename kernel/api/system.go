@@ -576,6 +576,7 @@ func exportConf(c *gin.Context) {
 		for _, provider := range clonedConf.AI.Providers {
 			if nil != provider {
 				provider.APIKey = ""
+				provider.Headers = nil
 			}
 		}
 		if nil != clonedConf.AI.Embedding {
@@ -779,15 +780,20 @@ func preserveImportedAISecrets(imported, current *conf.AI) {
 
 	currentProviders := map[string]*conf.Provider{}
 	for _, provider := range current.Providers {
-		if provider != nil && provider.ID != "" && provider.APIKey != "" {
+		if provider != nil && provider.ID != "" {
 			currentProviders[provider.ID] = provider
 		}
 	}
 	for _, provider := range imported.Providers {
-		if provider != nil && provider.APIKey == "" {
+		if provider != nil {
 			if currentProvider := currentProviders[provider.ID]; currentProvider != nil &&
 				currentProvider.BaseURL == provider.BaseURL && currentProvider.Protocol == provider.Protocol {
-				provider.APIKey = currentProvider.APIKey
+				if provider.APIKey == "" {
+					provider.APIKey = currentProvider.APIKey
+				}
+				if provider.Headers == nil {
+					provider.Headers = currentProvider.Headers
+				}
 			}
 		}
 	}

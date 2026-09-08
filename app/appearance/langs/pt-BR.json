@@ -1,4 +1,5 @@
 {
+	"aiProviderHeadersTip": "Insira um objeto JSON com valores de texto; cabeçalhos personalizados substituem os cabeçalhos padrão com o mesmo nome, incluindo os de autenticação",
 	"cellPasteUnsupported": "Colagem cancelada: blocos do tipo ${x} não são compatíveis com esta célula",
 	"templateNameTip": "Digite um nome sem separadores de caminho",
 	"keymapUnset": "Não definido",

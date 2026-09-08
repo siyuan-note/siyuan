@@ -1,4 +1,5 @@
 {
+	"aiProviderHeadersTip": "Inserisci un oggetto JSON con valori stringa; le intestazioni personalizzate sostituiscono quelle predefinite con lo stesso nome, incluse quelle di autenticazione",
 	"cellPasteUnsupported": "Incollaggio annullato: i blocchi di tipo ${x} non sono supportati in questa cella",
 	"templateNameTip": "Inserisci un nome senza separatori di percorso",
 	"keymapUnset": "Non impostato",

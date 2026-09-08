@@ -1,4 +1,5 @@
 {
+	"aiProviderHeadersTip": "Enter a JSON object with string values; custom headers override default headers with the same name, including authentication headers",
 	"cellPasteUnsupported": "Paste canceled: ${x} blocks are not supported in this cell",
 	"templateNameTip": "Enter a name without path separators",
 	"keymapUnset": "Not set",

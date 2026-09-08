@@ -1,4 +1,5 @@
 {
+	"aiProviderHeadersTip": "Voer een JSON-object met tekenreekswaarden in; aangepaste headers overschrijven standaardheaders met dezelfde naam, inclusief authenticatieheaders",
 	"cellPasteUnsupported": "Plakken geannuleerd: blokken van het type ${x} worden niet ondersteund in deze cel",
 	"templateNameTip": "Voer een naam in zonder padscheidingstekens",
 	"keymapUnset": "Niet ingesteld",

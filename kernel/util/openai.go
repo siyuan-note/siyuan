@@ -144,10 +144,10 @@ func ChatGPT(msg string, contextMsgs []string, c *openai.Client, apiBaseURL, pro
 	return
 }
 
-func NewOpenAIClient(apiKey, apiBaseURL string) *openai.Client {
+func NewOpenAIClient(apiKey, apiBaseURL string, headers ...map[string]string) *openai.Client {
 	config := openai.DefaultConfig(apiKey)
 	config.BaseURL = apiBaseURL
-	config.HTTPClient = httpclient.NewUserAgentClient(nil)
+	config.HTTPClient = newAIProviderHTTPClient(apiBaseURL, headers...)
 	return openai.NewClientWithConfig(config)
 }
 
@@ -218,15 +218,15 @@ func (t *extraBodyTransport) Do(req *http.Request) (*http.Response, error) {
 
 // NewOpenAIClientWithModel 创建 OpenAI client，并按模型与端点启用兼容适配。
 // 绝大多数模型走 NewOpenAIClient 路径；命中清单的模型会注入额外参数，官方 Gemini 端点会保留工具调用签名。
-func NewOpenAIClientWithModel(apiKey, apiBaseURL, model string) *openai.Client {
+func NewOpenAIClientWithModel(apiKey, apiBaseURL, model string, headers ...map[string]string) *openai.Client {
 	extra := ExtraBodyForModel(model)
 	geminiThoughtSignatures := isGoogleGeminiOpenAICompatibleEndpoint(apiBaseURL, model)
 	if len(extra) == 0 && !geminiThoughtSignatures {
-		return NewOpenAIClient(apiKey, apiBaseURL)
+		return NewOpenAIClient(apiKey, apiBaseURL, headers...)
 	}
 	config := openai.DefaultConfig(apiKey)
 	config.BaseURL = apiBaseURL
-	var transport openai.HTTPDoer = httpclient.NewUserAgentClient(nil)
+	var transport openai.HTTPDoer = newAIProviderHTTPClient(apiBaseURL, headers...)
 	if len(extra) > 0 {
 		transport = &extraBodyTransport{base: transport, extraBody: extra}
 	}
@@ -241,11 +241,11 @@ func NewOpenAIClientWithModel(apiKey, apiBaseURL, model string) *openai.Client {
 // 再按 Provider 协议发送极简文本生成请求，确认所选协议实际可用。
 // 返回值：available 为可用模型清单（仅 ListModels 成功时填充），matched 表示 model 是否可用，
 // err 为请求错误（鉴权失败、网络异常、模型不存在等，原样返回便于调用方展示原因）。
-func TestModel(apiKey, apiBaseURL, protocol, model string, timeout int) (available []string, matched bool, err error) {
+func TestModel(apiKey, apiBaseURL, protocol, model string, timeout int, headers ...map[string]string) (available []string, matched bool, err error) {
 	if 1 > timeout {
 		timeout = 30
 	}
-	client := NewOpenAIClient(apiKey, apiBaseURL)
+	client := NewOpenAIClientWithModel(apiKey, apiBaseURL, model, headers...)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
 	defer cancel()
 	ctx = ContextWithOpenAIResponsesBaseURL(ctx, apiBaseURL)
@@ -365,7 +365,7 @@ func ListAvailableModels(apiKey, apiBaseURL string, timeout int) (models []strin
 
 // ListAvailableModelsWithContext 拉取 Provider 的模型清单及可选上下文窗口。
 // 通用 OpenAI 兼容接口不保证返回上下文长度，缺失或非法时保留模型并将 ContextLength 置为 0。
-func ListAvailableModelsWithContext(apiKey, apiBaseURL string, timeout int) (models []AvailableModel, err error) {
+func ListAvailableModelsWithContext(apiKey, apiBaseURL string, timeout int, headers ...map[string]string) (models []AvailableModel, err error) {
 	if 1 > timeout {
 		timeout = 30
 	}
@@ -380,7 +380,7 @@ func ListAvailableModelsWithContext(apiKey, apiBaseURL string, timeout int) (mod
 	if apiKey != "" {
 		req.Header.Set("Authorization", "Bearer "+apiKey)
 	}
-	resp, err := httpclient.NewUserAgentClient(nil).Do(req)
+	resp, err := newAIProviderHTTPClient(apiBaseURL, headers...).Do(req)
 	if err != nil {
 		logging.LogErrorf("list models [%s] failed: %s", apiBaseURL, err)
 		return
@@ -835,12 +835,12 @@ func ValidateGeneratedImage(data []byte) (mimeType, extension string, err error)
 	return mimeType, extension, nil
 }
 
-func NewOpenAIImageAdapter(apiKey, apiBaseURL, model string, timeout int) *OpenAIImageAdapter {
+func NewOpenAIImageAdapter(apiKey, apiBaseURL, model string, timeout int, headers ...map[string]string) *OpenAIImageAdapter {
 	if timeout < 1 {
 		timeout = 30
 	}
 	return &OpenAIImageAdapter{
-		client:  NewOpenAIClientWithModel(apiKey, apiBaseURL, model),
+		client:  NewOpenAIClientWithModel(apiKey, apiBaseURL, model, headers...),
 		model:   model,
 		timeout: time.Duration(timeout) * time.Second,
 	}

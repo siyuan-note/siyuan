@@ -6,6 +6,7 @@ import {aiConfigApi} from "./aiRuntime";
 import {Menu} from "../../../plugin/Menu";
 import {upDownHint} from "../../../util/upDownHint";
 import {moveModelItem} from "./aiModelOrder";
+import {parseProviderHeaders} from "./aiProviderHeaders";
 import {
     findProviderPreset,
     getDefaultProviderProtocol,
@@ -377,6 +378,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         models: [],
     };
     draft.protocol ||= "openai";
+    const initialHeadersText = Object.keys(draft.headers || {}).length ? JSON.stringify(draft.headers, null, 2) : "";
     const initialJSON = JSON.stringify(draft);
     const openedFromCatalog = !existing && !!preset;
     const view = createProviderView(
@@ -421,6 +423,11 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                     <svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg>
                 </div>
             </label>
+            <label class="b3-label config-item">
+                ${genConfigItemMainHtml(window.siyuan.languages.aiMcpHttpHeaders, window.siyuan.languages.aiProviderHeadersTip)}
+                <div class="fn__hr"></div>
+                <textarea class="b3-text-field fn__block" data-type="providerHeaders" rows="3" spellcheck="false" style="resize: vertical;" placeholder='{"X-API-Key":"..."}'>${escapeHTML(initialHeadersText)}</textarea>
+            </label>
         </div>
     </div>
     <div class="config-group">
@@ -448,6 +455,21 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     <button class="b3-button b3-button--text" data-action="confirm">${window.siyuan.languages.confirm}</button>
 </div>`;
     bindPasswordIconaToggle(view, "aiProviderDetailApiKey");
+    const headersInput = view.querySelector<HTMLTextAreaElement>("[data-type='providerHeaders']");
+    const validateHeaders = () => {
+        const headers = parseProviderHeaders(headersInput.value);
+        if (headers === null) {
+            headersInput.focus();
+            showMessage(window.siyuan.languages.aiMcpHeadersInvalid, undefined, "error");
+            return false;
+        }
+        if (Object.keys(headers).length > 0) {
+            draft.headers = headers;
+        } else {
+            delete draft.headers;
+        }
+        return true;
+    };
     const modelsContainer = view.querySelector<HTMLElement>("[data-type='providerModels']");
     const addModelButton = view.querySelector<HTMLButtonElement>("[data-action='addModel']");
     const fetchModelsButton = view.querySelector<HTMLButtonElement>("[data-action='fetchModels']");
@@ -471,6 +493,9 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             : window.siyuan.languages.experimentalFeature;
     };
     const validateAPIKey = () => {
+        if (!validateHeaders()) {
+            return false;
+        }
         if (!requiresAPIKey(draft) || draft.apiKey.trim() !== "") {
             return true;
         }
@@ -694,7 +719,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     };
 
     const closeDetail = () => {
-        if (JSON.stringify(draft) !== initialJSON) {
+        if (JSON.stringify(draft) !== initialJSON || headersInput.value !== initialHeadersText) {
             confirmDialog(
                 window.siyuan.languages.confirm,
                 window.siyuan.languages.discardUnsavedChanges,
@@ -840,6 +865,9 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             return;
         }
         if (action === "confirm") {
+            if (!validateHeaders()) {
+                return;
+            }
             const emptyModel = draft.models.find((model) => !model.name.trim());
             if (!draft.baseURL.trim()) {
                 view.querySelector<HTMLInputElement>("[data-provider-field='baseURL']")?.focus();

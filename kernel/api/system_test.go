@@ -338,6 +338,31 @@ func TestPreserveImportedAISecrets(t *testing.T) {
 	}
 }
 
+func TestPreserveImportedAIProviderHeaders(t *testing.T) {
+	current := &conf.AI{Providers: []*conf.Provider{{
+		ID: "provider", BaseURL: "https://example.com", Headers: map[string]string{"X-Key": "local"},
+	}}}
+	for _, test := range []struct {
+		name    string
+		url     string
+		headers map[string]string
+		want    string
+	}{
+		{"matching", "https://example.com", nil, "local"},
+		{"changed endpoint", "https://other.example.com", nil, ""},
+		{"explicit headers", "https://example.com", map[string]string{"X-Key": "imported"}, "imported"},
+		{"explicit empty", "https://example.com", map[string]string{}, ""},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			imported := &conf.AI{Providers: []*conf.Provider{{ID: "provider", BaseURL: test.url, Headers: test.headers}}}
+			preserveImportedAISecrets(imported, current)
+			if imported.Providers[0].Headers["X-Key"] != test.want {
+				t.Fatal("unexpected imported provider headers")
+			}
+		})
+	}
+}
+
 func TestPreserveImportedMCPConfiguration(t *testing.T) {
 	currentMCP := &conf.MCP{Servers: []conf.MCPServer{{ID: "current"}}}
 	importedMCP := &conf.MCP{Servers: []conf.MCPServer{{ID: "imported"}}}

@@ -122,14 +122,15 @@ type Rerank struct {
 }
 
 type Provider struct {
-	ID             string   `json:"id"`
-	DisplayName    string   `json:"displayName,omitempty"`
-	Enabled        bool     `json:"enabled"`
-	APIKey         string   `json:"apiKey"`
-	BaseURL        string   `json:"baseURL"`
-	Protocol       string   `json:"protocol,omitempty"`
-	RequestTimeout int      `json:"requestTimeout"`
-	Models         []*Model `json:"models"`
+	Headers        map[string]string `json:"headers,omitempty"`
+	ID             string            `json:"id"`
+	DisplayName    string            `json:"displayName,omitempty"`
+	Enabled        bool              `json:"enabled"`
+	APIKey         string            `json:"apiKey"`
+	BaseURL        string            `json:"baseURL"`
+	Protocol       string            `json:"protocol,omitempty"`
+	RequestTimeout int               `json:"requestTimeout"`
+	Models         []*Model          `json:"models"`
 }
 
 // Model is the provider-scoped model registry entry. MaxTokens/Temperature/

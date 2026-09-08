@@ -1,4 +1,5 @@
 {
+	"aiProviderHeadersTip": "Dize değerleri içeren bir JSON nesnesi girin; özel başlıklar, kimlik doğrulama başlıkları dahil aynı adlı varsayılan başlıkların üzerine yazılır",
 	"cellPasteUnsupported": "Yapıştırma iptal edildi: bu hücrede ${x} blokları desteklenmiyor",
 	"templateNameTip": "Yol ayırıcıları içermeyen bir ad girin",
 	"keymapUnset": "Ayarlanmadı",

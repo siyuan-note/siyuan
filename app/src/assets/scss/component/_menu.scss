@@ -62,9 +62,13 @@
     }
 
     .b3-menu {
-      &__filter--font {
+      &__filter {
         min-width: 0;
         max-width: none;
+      }
+
+      &__filter,
+      &__custom {
         padding: 0 16px;
         box-sizing: border-box;
       }

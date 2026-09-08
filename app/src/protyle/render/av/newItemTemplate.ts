@@ -229,6 +229,7 @@ const openFieldSelectMenu = (target: HTMLElement, column: IAVColumn) => {
         type: "empty",
         label: `<div class="fn__flex fn__flex-column" style="max-height:calc(100vh - 60px)">${getFieldSelectMenuHTML(column, getSelectedOptionNames(target))}</div>`,
         bind: element => {
+            element.classList.add("b3-menu__custom");
             const panelElement = element.firstElementChild as HTMLElement;
             const render = (keyword = "") => {
                 panelElement.innerHTML = getFieldSelectMenuHTML(column, getSelectedOptionNames(target), keyword);
@@ -410,11 +411,12 @@ const openContentTemplateMenu = (target: HTMLElement) => {
     let searchRequest = 0;
     menu.addItem({
         type: "empty",
-        label: `<div data-menu="true" style="padding:4px;width:360px">
+        label: `<div data-menu="true" style="padding:4px;width:360px;max-width:100%;box-sizing:border-box">
     <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.searchPlaceholder}">
     <div class="b3-list b3-list--background" style="margin-top:4px;max-height:240px;overflow:auto"></div>
 </div>`,
         bind: menuElement => {
+            menuElement.classList.add("b3-menu__custom");
             const inputElement = menuElement.querySelector("input") as HTMLInputElement;
             const listElement = menuElement.querySelector(".b3-list") as HTMLElement;
             const selectItem = (item: HTMLElement) => {

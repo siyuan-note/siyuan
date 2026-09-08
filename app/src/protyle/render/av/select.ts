@@ -288,6 +288,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
 <div class="fn__hr--small"></div>`,
         bind(element) {
             const inputElement = element.querySelector("input");
+            element.classList.add("b3-menu__custom");
             inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (event.isComposing) {
                     return;
@@ -402,6 +403,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         iconHTML: "",
         label: html,
         bind(element) {
+            element.classList.add("b3-menu__custom");
             element.addEventListener("click", (event) => {
                 const colorTarget = (event.target as HTMLElement).closest<HTMLElement>("button");
                 if (colorTarget?.dataset.type === AV_MANAGE_CUSTOM_COLORS_TYPE) {

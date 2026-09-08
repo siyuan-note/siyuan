@@ -387,7 +387,7 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
         fontMenu.addItem({
             iconHTML: "",
             type: "empty",
-            label: `<div class="fn__flex-column b3-menu__filter b3-menu__filter--font">
+            label: `<div class="fn__flex-column b3-menu__filter">
     <div class="fn__flex">
         <input class="b3-text-field fn__flex-1" data-type="font-search" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}">
         ${canShowAllFonts ? `<span class="fn__space"></span><button class="b3-button b3-button--outline fn__flex-center" data-type="show-all-fonts">${escapeHtml(window.siyuan.languages.showAll)}</button>` : ""}

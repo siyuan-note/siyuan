@@ -87,6 +87,18 @@ const getRangeRectsOnLine = (element: Element, range: Range, lineRects: DOMRect[
         getReachableVerticalRects(contextElement, getRangeContextRects(range, element), requireVisible), lineRects);
 };
 
+// 光标驱动的滚动读取当前光标位置；无法测量时保留视口，不使用容器顶部替代光标。
+export const getVerticalCaretRect = (element: Element, range: Range): DOMRect | undefined => {
+    if (!element.isConnected || !range.collapsed || !element.contains(range.startContainer) ||
+        getFoldedNavigationOwner(element)) {
+        return;
+    }
+    const contextElement = getRangeContextElement(range);
+    const rect = contextElement && getReachableVerticalRects(contextElement,
+        getRangeContextRects(range, element))[0];
+    return rect && Number.isFinite(rect.top) && Number.isFinite(rect.left) ? rect : undefined;
+};
+
 const getCodeTrailingBlankLineCount = (element: Element) => {
     if (!element.closest(".code-block")) {
         return;

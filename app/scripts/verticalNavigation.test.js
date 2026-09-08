@@ -7,16 +7,82 @@ const rendererModules = () => {
     const ts = require("typescript");
     const root = path.join(__dirname, "../src/protyle");
     const modules = {};
-    for (const name of ["verticalGeometry", "verticalVisibility", "verticalCaret"]) {
-        modules[`./${name}`] = readFileSync(path.join(root, "wysiwyg", `${name}.ts`), "utf8");
+    for (const name of ["verticalGeometry", "verticalVisibility", "verticalCaret", "verticalTarget",
+        "verticalRegion", "verticalNavigation", "verticalNavigationState", "caretScroll", "caretScrollCore"]) {
+        modules[`wysiwyg/${name}`] = readFileSync(path.join(root, "wysiwyg", `${name}.ts`), "utf8");
     }
-    // 使用实际选区函数；这些几何用例不挂载页签控制器。
-    const selection = ts.createSourceFile("selection.ts",
-        readFileSync(path.join(root, "util/selection.ts"), "utf8"), ts.ScriptTarget.Latest, true);
-    const names = ["setFirstNodeRange", "setLastNodeRange", "focusByRange"];
-    modules["../util/selection"] = "const revealTabsForTarget = () => {};\n" + selection.statements.filter(statement =>
-        ts.isVariableStatement(statement) && statement.declarationList.declarations.some(declaration =>
-            names.includes(declaration.name.getText(selection)))).map(statement => statement.getText(selection)).join("\n");
+    const extract = (file, names) => {
+        const source = ts.createSourceFile(file, readFileSync(path.join(root, `${file}.ts`), "utf8"),
+            ts.ScriptTarget.Latest, true);
+        const statements = source.statements.filter(statement => ts.isVariableStatement(statement) &&
+            statement.declarationList.declarations.some(declaration => names.includes(declaration.name.getText(source))));
+        assert.equal(statements.length, names.length, file);
+        return statements.map(statement => statement.getText(source)).join("\n");
+    };
+    // 使用实际选区、区域解析与标题按键入口；不挂载无关的工具栏及页签控制器。
+    modules["util/selection"] = `const revealTabsForTarget = () => {};
+        import {isAtomicVerticalNavigationRange} from "../wysiwyg/verticalNavigationState";
+        import {getContenteditableElement} from "../wysiwyg/getBlock";
+        import {hasClosestBlock} from "./hasClosest";\n` +
+        extract("util/selection", ["setFirstNodeRange", "setLastNodeRange", "focusByRange", "focusBlock", "getEditorRange"]);
+    modules["util/hasClosest"] = readFileSync(path.join(root, "util/hasClosest.ts"), "utf8");
+    modules["wysiwyg/getBlock"] = 'import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";\n' +
+        extract("wysiwyg/getBlock", ["getContenteditableElement", "isContainerBlock", "getNextBlock", "getPreviousBlock"]);
+    modules["render/tabsRender"] = "export const setTabTitleNavigationEditing = () => false;";
+    modules["../util/highlightById"] = "export const scrollCenter = () => {};";
+    modules["render/av/focus"] = 'import {focusEditableAtGoalX} from "../../wysiwyg/verticalCaret";\n' +
+        "const clearSelect = () => {};\n" +
+        extract("render/av/focus", ["getVisibleAVTitle", "focusAVTitleByVerticalArrow", "focusAVVerticalRegion",
+            "getOwnVisibleElements", "getClosestCell"]);
+    const title = ts.createSourceFile("Title.ts", readFileSync(path.join(root, "header/Title.ts"), "utf8"),
+        ts.ScriptTarget.Latest, true);
+    let keydown;
+    const visit = node => {
+        if (ts.isCallExpression(node) && node.expression.getText(title) === "this.editElement.addEventListener" &&
+            node.arguments[0]?.text === "keydown") {
+            keydown = node.arguments[1].getText(title);
+        }
+        ts.forEachChild(node, visit);
+    };
+    visit(title);
+    assert.ok(keydown, "actual document title keydown handler");
+    modules["header/titleKeydown"] = title.statements.filter(statement => ts.isImportDeclaration(statement) &&
+        ["../wysiwyg/verticalCaret", "../wysiwyg/verticalNavigation", "../wysiwyg/caretScroll"]
+            .includes(statement.moduleSpecifier.text)).map(statement => statement.getText(title)).join("\n") +
+        `\nconst commonHotkey = () => false, matchHotKey = () => false, electronUndo = () => false;
+        const enterDocumentFromTitle = () => { window.titleEnterCalls++; };
+        export function bind(protyle, editElement) {
+            const handler = (function () { return ${keydown}; }).call({editElement});
+            editElement.addEventListener("keydown", handler);
+        }`;
+    // 保留正文 keyup 中实际的选区校正、数据库回退及 preventKeyup 分支，不挂载后续工具栏更新。
+    const wysiwyg = ts.createSourceFile("index.ts", readFileSync(path.join(root, "wysiwyg/index.ts"), "utf8"),
+        ts.ScriptTarget.Latest, true);
+    let keyupStatements;
+    const visitKeyup = node => {
+        if (ts.isCallExpression(node) && node.expression.getText(wysiwyg) === "this.element.addEventListener" &&
+            node.arguments[0]?.text === "keyup" && node.arguments[1].getText(wysiwyg).includes("shouldRunAVKeyupFallback")) {
+            const statements = Array.from(node.arguments[1].body.statements);
+            const end = statements.findIndex(statement => ts.isIfStatement(statement) &&
+                statement.expression.getText(wysiwyg) === "this.preventKeyup");
+            assert.ok(end >= 0);
+            keyupStatements = statements.slice(0, end + 1).map(statement => statement.getText(wysiwyg)).join("\n");
+        }
+        ts.forEachChild(node, visitKeyup);
+    };
+    visitKeyup(wysiwyg);
+    assert.ok(keyupStatements);
+    modules["wysiwyg/navigationKeyup"] = `import {getEditorRange} from "../util/selection";
+        import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
+        import {shouldRunAVKeyupFallback} from "../render/av/verticalNavigation";
+        const getAVTemplateInteractiveElement = () => false;
+        const focusAVByArrow = () => { throw new Error("Unexpected legacy AV keyup fallback"); };
+        export function bind(protyle) {
+            let arrowStartElement = protyle.wysiwyg.element;
+            const handler = function(event) { ${keyupStatements} };
+            protyle.wysiwyg.element.addEventListener("keyup", handler.bind(protyle.wysiwyg));
+        }`;
+    modules["render/av/verticalNavigation"] = readFileSync(path.join(root, "render/av/verticalNavigation.ts"), "utf8");
     return Object.fromEntries(Object.entries(modules).map(([name, source]) => [name,
         ts.transpileModule(source, {compilerOptions: {
             module: ts.ModuleKind.CommonJS,
@@ -223,6 +289,178 @@ const runGeometryCases = async () => {
     return cases;
 };
 
+const runEntryCases = async () => {
+    const assert = require("node:assert/strict");
+    const {ipcRenderer} = require("electron");
+    const {getVerticalCaretRect} = window.verticalCaret;
+    const {scheduleCaretScroll, scheduleOffscreenCaretScroll} = window.caretScroll;
+    const {focusAdjacentVerticalRegion, bindVerticalNavigationReset} = window.verticalNavigation;
+    window.siyuan = {config: {editor: {fontSize: 20, cursorSurroundingLines: 0},
+        keymap: {general: {enterBack: {custom: ""}}}}};
+    const frame = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const select = (element, offset = 0) => {
+        const range = document.createRange();
+        range.setStart(element.firstChild || element, offset);
+        range.collapse(true);
+        getSelection().removeAllRanges();
+        getSelection().addRange(range);
+    };
+    const paragraph = '<div data-node-id="p" data-type="NodeParagraph"><div id="body" contenteditable="true">body</div></div>';
+    const setup = markup => {
+        document.body.innerHTML = `<div id="protyle" style="height:240px;width:500px;overflow:hidden;font:20px/30px monospace">
+            <div class="protyle-content" style="height:100%;overflow:auto">
+                <div id="title" contenteditable="true">title</div>
+                <div class="protyle-wysiwyg" contenteditable="true">${markup}</div>
+                <div style="height:240px"></div>
+            </div></div>`;
+        const editor = document.querySelector(".protyle-wysiwyg");
+        const protyle = {element: document.getElementById("protyle"),
+            contentElement: document.querySelector(".protyle-content"), wysiwyg: {element: editor}, disabled: false};
+        const title = document.getElementById("title");
+        window.titleKeydown.bind(protyle, title);
+        bindVerticalNavigationReset(editor);
+        title.focus();
+        select(title);
+        return {protyle, editor, title};
+    };
+    const visibleCaret = (protyle, editable) => {
+        const caret = getVerticalCaretRect(editable, getSelection().getRangeAt(0));
+        const viewport = protyle.contentElement.getBoundingClientRect();
+        assert.ok(caret && caret.top >= viewport.top - 1 && caret.bottom <= viewport.bottom + 1,
+            `caret ${caret?.top}..${caret?.bottom}, viewport ${viewport.top}..${viewport.bottom}`);
+    };
+    let cases = 0;
+    for (const lines of [0, 1, 3]) {
+        window.siyuan.config.editor.cursorSurroundingLines = lines;
+        for (const whiteSpace of ["pre", "pre-wrap"]) {
+            for (const tail of ["\n", "text\n"]) {
+                const {protyle, editor} = setup(`<div data-node-id="code" data-type="NodeCodeBlock" class="code-block">
+                    <div class="hljs"><div contenteditable="true" style="white-space:${whiteSpace}"></div></div></div>${paragraph}`);
+                const code = editor.querySelector(".hljs").lastElementChild;
+                code.textContent = "line\n".repeat(30) + tail;
+                editor.focus();
+                select(document.getElementById("body"));
+                protyle.contentElement.scrollTop = 900;
+                let keyups = 0;
+                editor.addEventListener("keyup", () => keyups++);
+                editor.addEventListener("keydown", event => {
+                    if (event.key !== "ArrowUp") { return; }
+                    scheduleCaretScroll(protyle, "up");
+                    assert.equal(focusAdjacentVerticalRegion(protyle, editor.lastElementChild, "up", 30), "moved");
+                    event.preventDefault();
+                });
+                await ipcRenderer.invoke("vertical-navigation-key", "Up");
+                await frame();
+                assert.equal(keyups, 1);
+                assert.ok(code.contains(getSelection().anchorNode));
+                visibleCaret(protyle, code);
+                assert.ok(protyle.contentElement.scrollTop > 600,
+                    `${lines}/${whiteSpace}/${JSON.stringify(tail)}: scroll ${protyle.contentElement.scrollTop}, ` +
+                    `code height ${code.offsetHeight}, offset ${getSelection().anchorOffset}`);
+                if (lines > 0) {
+                    // 左右键的越界滚动与纵向按键使用同一空行坐标。
+                    protyle.contentElement.scrollTop = 0;
+                    scheduleOffscreenCaretScroll(protyle);
+                    await frame();
+                    visibleCaret(protyle, code);
+                    // 排队后更换选区，回调必须读取新光标，而不是上一次的位置。
+                    scheduleCaretScroll(protyle, "up");
+                    select(code, 0);
+                    await frame();
+                    visibleCaret(protyle, code);
+                    assert.ok(protyle.contentElement.scrollTop < 100);
+                }
+                cases++;
+            }
+        }
+    }
+    window.siyuan.config.editor.cursorSurroundingLines = 3;
+    for (const guard of ["disabled", "detached", "nested", "atomic"]) {
+        const {protyle, editor} = setup(paragraph);
+        const body = document.getElementById("body");
+        body.style.marginTop = "600px";
+        select(body);
+        scheduleCaretScroll(protyle, "down");
+        if (guard === "disabled") { protyle.disabled = true; }
+        if (guard === "detached") { protyle.element.remove(); }
+        if (guard === "nested") { body.parentElement.classList.add("protyle-wysiwyg"); }
+        if (guard === "atomic") { editor.firstElementChild.classList.add("protyle-wysiwyg--navigation"); }
+        await frame();
+        assert.equal(protyle.contentElement.scrollTop, 0, guard);
+        cases++;
+    }
+    const callout = `<div class="callout" data-node-id="callout" data-type="NodeCallout">
+        <div class="callout-info"><div id="target" class="callout-title" contenteditable="true">callout title</div></div>
+        <div class="callout-content">${paragraph}</div></div>`;
+    const variants = [
+        [paragraph, "body", false],
+        [callout, "target", false],
+        [`<div class="bq" data-node-id="quote">${callout}</div>`, "target", false],
+        [`<div id="target" class="bq" data-node-id="quote" fold="1">${paragraph}</div>`, "target", true],
+        [callout.replace('class="callout"', 'class="callout" fold="1" id="folded"'), "folded", true],
+        ["<div id=\"target\" class=\"custom-block\" data-type=\"NodeCustomBlock\" data-node-id=\"custom\">custom</div>", "target", true],
+        [`<div class="av" data-type="NodeAttributeView" data-node-id="av">
+            <div id="target" class="av__title" contenteditable="true">database title</div></div>`, "target", false],
+        [`<div class="bq" data-node-id="hidden" style="display:none">hidden</div>${paragraph}`, "body", false],
+        ["<div data-type=\"NodeTable\" data-node-id=\"table\"><table><tr><td id=\"target\" contenteditable=\"true\">cell</td></tr></table></div>", "target", false],
+    ];
+    window.titleEnterCalls = 0;
+    for (const [markup, id, atomic] of variants) {
+        const {protyle, editor} = setup(markup);
+        const html = editor.innerHTML;
+        let keyups = 0;
+        editor.addEventListener("keyup", () => keyups++);
+        window.navigationKeyup.bind(protyle);
+        await ipcRenderer.invoke("vertical-navigation-key", "Down");
+        await frame();
+        const target = document.getElementById(id);
+        assert.ok(target === getSelection().anchorNode || target.contains(getSelection().anchorNode), id);
+        assert.equal(keyups, 1);
+        assert.equal(protyle.wysiwyg.preventKeyup, false);
+        assert.equal(editor.querySelectorAll(".protyle-wysiwyg--navigation").length, atomic ? 1 : 0);
+        if (!atomic) { visibleCaret(protyle, target); }
+        editor.querySelectorAll(".protyle-wysiwyg--navigation").forEach(element => {
+            element.classList.remove("protyle-wysiwyg--navigation");
+        });
+        assert.equal(editor.innerHTML, html);
+        cases++;
+    }
+    for (const guard of ["altKey", "shiftKey", "ctrlKey", "metaKey", "isComposing", "disabled", "selection", "empty"]) {
+        const {protyle, title} = setup(guard === "empty" ? "" : callout);
+        if (guard === "disabled") { protyle.disabled = true; }
+        if (guard === "selection") { getSelection().getRangeAt(0).setEnd(title.firstChild, 3); }
+        const event = new KeyboardEvent("keydown", {key: "ArrowDown", bubbles: true, cancelable: true, [guard]: true});
+        title.dispatchEvent(event);
+        await frame();
+        assert.ok(title.contains(getSelection().anchorNode), guard);
+        assert.equal(protyle.wysiwyg.preventKeyup, undefined);
+        cases++;
+    }
+    assert.equal(window.titleEnterCalls, 0, "arrows must not execute the mutating Enter workflow");
+    for (const titleText of ["", "first\nlast"]) {
+        const {title} = setup(paragraph);
+        title.style.whiteSpace = "pre-wrap";
+        title.style.minHeight = "30px";
+        title.textContent = titleText;
+        select(title);
+        const firstDown = new KeyboardEvent("keydown", {key: "ArrowDown", cancelable: true});
+        title.dispatchEvent(firstDown);
+        if (titleText) {
+            assert.equal(firstDown.defaultPrevented, false, "allow native movement inside a multiline title");
+            assert.ok(title.contains(getSelection().anchorNode));
+            select(title, titleText.length);
+            title.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowDown", cancelable: true}));
+        }
+        await frame();
+        assert.ok(document.getElementById("body").contains(getSelection().anchorNode));
+        cases++;
+    }
+    const {title} = setup(paragraph);
+    title.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", cancelable: true}));
+    assert.equal(window.titleEnterCalls, 1, "Enter keeps its existing workflow");
+    return cases;
+};
+
 const runElectron = async () => {
     const {app, BrowserWindow, ipcMain} = require("electron");
     app.setPath("userData", process.argv[2]);
@@ -232,6 +470,7 @@ const runElectron = async () => {
         nodeIntegration: true,
         contextIsolation: false,
         backgroundThrottling: false,
+        offscreen: true,
     }});
     ipcMain.handle("vertical-navigation-key", async (event, keyCode) => {
         const key = `Arrow${keyCode}`;
@@ -253,16 +492,25 @@ const runElectron = async () => {
             const cache = {};
             const load = name => {
                 if (!cache[name]) {
+                    if (!sources[name]) { throw new Error("Unexpected module: " + name); }
                     cache[name] = {};
-                    new Function("require", "exports", sources[name])(load, cache[name]);
+                    const resolve = dependency => load(require("node:path").posix.normalize(
+                        require("node:path").posix.dirname(name) + "/" + dependency));
+                    new Function("require", "exports", sources[name])(resolve, cache[name]);
                 }
                 return cache[name];
             };
-            window.verticalCaret = load("./verticalCaret");
-            window.verticalVisibility = load("./verticalVisibility");
+            window.verticalCaret = load("wysiwyg/verticalCaret");
+            window.verticalVisibility = load("wysiwyg/verticalVisibility");
+            window.caretScroll = load("wysiwyg/caretScroll");
+            window.verticalNavigation = load("wysiwyg/verticalNavigation");
+            window.titleKeydown = load("header/titleKeydown");
+            window.navigationKeyup = load("wysiwyg/navigationKeyup");
         })()`);
         const cases = await win.webContents.executeJavaScript(`(${runGeometryCases.toString()})()`);
         console.log(`Vertical navigation: ${cases} Electron geometry cases passed`);
+        const entryCases = await win.webContents.executeJavaScript(`(${runEntryCases.toString()})()`);
+        console.log(`Vertical navigation: ${entryCases} Electron entry cases passed`);
     } catch (error) {
         console.error(error);
         exitCode = 1;
@@ -295,6 +543,7 @@ if (process.versions.electron && process.type === "browser") {
                 timeout: 40000,
             });
             assert.match(stdout, /Electron geometry cases passed/);
+            assert.match(stdout, /Electron entry cases passed/);
         } finally {
             rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});
         }

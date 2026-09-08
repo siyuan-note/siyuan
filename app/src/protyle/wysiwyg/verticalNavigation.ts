@@ -195,6 +195,13 @@ const focusResolvedRegion = (protyle: IProtyle, element: Element | undefined,
     return commitVerticalNavigationTarget(protyle, target, direction, goalX) ? "moved" : "blocked";
 };
 
+export const focusFirstVerticalRegion = (protyle: IProtyle, goalX: number): TVerticalNavigationOutcome => {
+    if (protyle.disabled || !protyle.wysiwyg.element.isConnected) {
+        return "blocked";
+    }
+    return focusResolvedRegion(protyle, getVisibleBoundaryBlock(protyle.wysiwyg.element, "down"), "down", goalX);
+};
+
 const focusDocumentTitle = (protyle: IProtyle, direction: TVerticalDirection,
                             goalX: number): TVerticalNavigationOutcome => {
     if (direction !== "up" || !protyle.title?.editElement ||

@@ -1,4 +1,5 @@
 {
+	"uploadInsertTargetUnavailable": "O destino original do envio não está mais disponível. O resultado não foi inserido; os arquivos enviados foram mantidos.",
 	"mobileToolbarEntryTip": "Configure a visibilidade e a ordem da barra de ferramentas móvel usando os mesmos perfis da versão para computador",
 	"keymapAssigned": "Atribuídos",
 	"keymapCustomized": "Personalizados por mim",

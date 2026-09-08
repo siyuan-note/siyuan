@@ -4,6 +4,7 @@ import {getTableCellRichPlainText} from "./tableCellRich";
 import {uploadFiles, uploadLocalFiles} from "../upload";
 import type {IUploadInsertOptions} from "../upload";
 import {
+    captureUploadDocument,
     createUploadInsertPosition,
     getAvailableUploadInsertRange,
     isUploadInsertPositionAvailable,
@@ -659,6 +660,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     };
     const assetUploadOptions: IUploadInsertOptions = {
         ...uploadOptions,
+        document: uploadOptions?.document || captureUploadDocument(protyle),
         insertPosition: pasteInsertPosition,
         source: uploadOptions?.source || ("dataTransfer" in event ? "drop" : "paste"),
         target: uploadOptions?.target || "editor",

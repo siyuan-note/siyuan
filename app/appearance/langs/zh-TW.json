@@ -1,4 +1,5 @@
 {
+	"uploadInsertTargetUnavailable": "原上傳目標已失效，未填入結果；已上傳的檔案會保留。",
 	"mobileToolbarEntryTip": "設定行動端工具列項目的顯示與排序，與桌面端共用方案",
 	"keymapAssigned": "已指派",
 	"keymapCustomized": "由我指派",

@@ -1,4 +1,5 @@
 {
+	"uploadInsertTargetUnavailable": "Das ursprüngliche Upload-Ziel ist nicht mehr verfügbar. Das Ergebnis wurde nicht eingefügt; hochgeladene Dateien bleiben erhalten.",
 	"mobileToolbarEntryTip": "Sichtbarkeit und Reihenfolge der mobilen Werkzeugleiste mit denselben Profilen wie auf dem Desktop konfigurieren",
 	"keymapAssigned": "Zugewiesen",
 	"keymapCustomized": "Von mir angepasst",

@@ -45,7 +45,8 @@ import {
 } from "../../emoji";
 import {blockRender} from "../render/blockRender";
 import {getUploadInsertRange, uploadFiles} from "../upload";
-import {createUploadInsertPosition} from "../upload/insertPosition";
+import {showMessage} from "../../dialog/message";
+import {captureUploadDocument, createUploadInsertPosition, isUploadDocumentAvailable} from "../upload/insertPosition";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
 /// #endif
@@ -449,17 +450,26 @@ export class Hint {
                     getUndoFocusContext(protyle.wysiwyg.element, range, true));
             };
             let insertPosition = captureInsertPosition();
+            let uploadDocument = captureUploadDocument(protyle);
             item.addEventListener("click", () => {
                 insertPosition = captureInsertPosition();
+                uploadDocument = captureUploadDocument(protyle);
             });
             item.addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
                 if (event.target.files.length === 0) {
                     return;
                 }
-                const range = getUploadInsertRange(protyle, insertPosition);
+                const range = isUploadDocumentAvailable(protyle, uploadDocument) ?
+                    getUploadInsertRange(protyle, insertPosition) : undefined;
+                if (!range) {
+                    event.target.value = "";
+                    showMessage(window.siyuan.languages.uploadInsertTargetUnavailable);
+                    return;
+                }
                 range.deleteContents();
                 range.collapse(true);
                 uploadFiles(protyle, event.target.files, event.target, undefined, undefined, {
+                    document: uploadDocument,
                     htmlAsIframe: event.target.dataset.uploadMode === "html-iframe",
                     insertPosition: createUploadInsertPosition(range,
                         getUndoFocusContext(protyle.wysiwyg.element, range, true)),

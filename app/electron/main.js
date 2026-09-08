@@ -42,6 +42,7 @@ const {pathToFileURL} = require("url");
 const gNet = require("net");
 const childProcess = require("child_process");
 const remote = require("@electron/remote/main");
+const {probeRemoteKernelAuthentication} = require("./remoteKernelAuth");
 const {
     rawFormatType, readClipboardBuffer, readClipboardText, getClipboardFormats, parseClipboardFilePaths
 } = require("./clipboard");
@@ -1415,25 +1416,8 @@ const installRemoteFrontendProtocol = (target) => {
             }
             if (localDocumentRequest &&
                 ["/stage/build/app/", "/stage/build/app/window.html"].includes(requestURL.pathname)) {
-                const authenticationResponse = await session.defaultSession.fetch(request, {
-                    bypassCustomProtocolHandlers: true,
-                    credentials: "include",
-                    redirect: "manual",
-                });
-                await authenticationResponse.body?.cancel();
-                if (!authenticationResponse.ok) {
-                    const responseLocation = authenticationResponse.headers.get("location");
-                    let authenticationRequired = authenticationResponse.status === 401;
-                    if (responseLocation && authenticationResponse.status >= 300 && authenticationResponse.status < 400) {
-                        try {
-                            const redirectURL = new URL(responseLocation, target.origin);
-                            authenticationRequired = redirectURL.origin === target.origin &&
-                                redirectURL.pathname === "/check-auth";
-                        } catch (error) {
-                            authenticationRequired = false;
-                        }
-                    }
-                    if (authenticationRequired) {
+                try {
+                    if (!await probeRemoteKernelAuthentication(net, session.defaultSession, requestURL.href)) {
                         const authURL = new URL("/check-auth", target.origin);
                         authURL.searchParams.set("to", requestURL.pathname + requestURL.search);
                         authURL.searchParams.set("lang", resolveAppLanguage(app.getPreferredSystemLanguages()));
@@ -1446,8 +1430,10 @@ const installRemoteFrontendProtocol = (target) => {
                             },
                         });
                     }
+                } catch (error) {
+                    writeLog("probe remote kernel authentication before loading local UI failed: " + error.message);
                     return new Response("Remote kernel UI probe failed.", {
-                        status: authenticationResponse.status >= 400 ? authenticationResponse.status : 502,
+                        status: error.statusCode >= 400 && error.statusCode <= 599 ? error.statusCode : 502,
                         headers: {
                             "Cache-Control": "no-store",
                             "Content-Type": "text/plain; charset=utf-8",
@@ -2587,22 +2573,8 @@ const requestRemoteKernelVersion = async (target) => {
     return response.json();
 };
 
-const isRemoteKernelAuthenticated = async (target) => {
-    const response = await fetchWithTimeout(target.origin + "/stage/build/app/", {
-        method: "GET",
-        redirect: "manual",
-    });
-    if (response.status === 401 || response.status >= 300 && response.status < 400) {
-        await response.body?.cancel();
-        return false;
-    }
-    if (!response.ok) {
-        await response.body?.cancel();
-        throw new Error("authentication probe returned HTTP " + response.status);
-    }
-    await response.body?.cancel();
-    return true;
-};
+const isRemoteKernelAuthenticated = (target) =>
+    probeRemoteKernelAuthentication(net, session.defaultSession, target.origin + "/stage/build/app/");
 
 const initRemoteKernel = async (target) => {
     createBootWindow();

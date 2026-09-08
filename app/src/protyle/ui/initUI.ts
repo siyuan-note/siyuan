@@ -1,5 +1,6 @@
 import {setEditMode} from "../util/setEditMode";
 import {isTabGutterBridge} from "../gutter/tabs";
+import {isContainerGutterBridge} from "../gutter/container";
 import {scrollEvent} from "../scroll/event";
 import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
@@ -246,6 +247,10 @@ export const initUI = (protyle: IProtyle) => {
         if (protyle.options.render.gutter && nodeElement) {
             if (!protyle.wysiwyg.element.contains(nodeElement)) {
                 hideElements(["gutter"], protyle);
+                return;
+            }
+            if (isContainerGutterBridge(protyle.gutter.element, nodeElement, event.target,
+                event.clientX, event.clientY, button => protyle.gutter.getNodeElement(protyle, button))) {
                 return;
             }
             if (nodeElement && (nodeElement.classList.contains("list") || nodeElement.classList.contains("li"))) {

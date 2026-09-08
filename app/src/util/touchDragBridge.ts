@@ -351,6 +351,7 @@ const createDragState = (draggableElement: HTMLElement, point: DragPoint, inputT
             draggableElement.closest(".sy__outline") !== null ||
             draggableElement.closest(".av__gallery-item") !== null ||
             draggableElement.closest(".av__group-title") !== null ||
+            draggableElement.closest(".av__cell--header") !== null ||
             draggableElement.closest(".layout-tab-bar") !== null ||
             draggableElement.closest(".protyle-action") !== null, isMouse, !!isInAndroid()),
         longPressCancelled: false,

@@ -6,7 +6,9 @@ import {showMessage} from "../dialog/message";
 import {clearTemplatePreview, previewTemplate} from "../protyle/toolbar/util";
 import {getTemplateRenameTarget, getTemplateTree, TemplateEntry} from "./fileTree";
 import {getTemplateActionEntry, getTemplateActionState} from "./actionState";
+/// #if !MOBILE
 import {openBy} from "../editor/util";
+/// #endif
 import {replaceFileName} from "../editor/rename";
 import {getHostCapabilities} from "../util/hostCapabilities";
 import {isBrowser, isMobile} from "../util/functions";
@@ -414,8 +416,10 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
                 }
             });
         } else if (action === "open") {
+            /// #if !MOBILE
             const root = window.siyuan.config.system.dataDir.replace(/\\/g, "/").replace(/\/$/, "") + "/templates";
             openBy(selected ? root + "/" + selected.path : root, selected ? "folder" : "app");
+            /// #endif
         } else if (action === "preview") {
             previewTemplate(previewPath, preview, context.value, source.value);
         } else {

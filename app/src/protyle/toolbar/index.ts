@@ -68,6 +68,7 @@ import {resizeSide} from "../../history/resizeSide";
 import {activeBlur, updateMobilePluginToolbar} from "../../mobile/util/keyboardToolbar";
 import {FormatPainter} from "./FormatPainter";
 import {IFormatPainterSnapshot} from "./formatPainterCore";
+import {getRangeInlineFormats, getRangesInlineFormats, INLINE_FORMAT_TYPES} from "./inlineFormat";
 import {clearDisallowedTextInputHotkey} from "../../util/hotKeyPolicy";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {closeSubElement, SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE} from "./subElementLifecycle";
@@ -316,7 +317,7 @@ export class Toolbar {
         });
         this.element.querySelector('[data-type="a"]')?.toggleAttribute("disabled", isCrossBlock || isCrossCell);
         this.element.querySelector('[data-type="block-ref"]')?.toggleAttribute("disabled", isCrossBlock || isCrossCell);
-        const types = this.getCurrentType();
+        const types = this.getCurrentToolbarType(protyle);
         types.forEach(item => {
             if (["search-mark", "a", "block-ref", "virtual-block-ref", "text", "file-annotation-ref", "inline-math",
                 "inline-memo", "", "backslash"].includes(item)) {
@@ -371,6 +372,26 @@ export class Toolbar {
             }
         });
         return types;
+    }
+
+    public getCurrentToolbarType(protyle: IProtyle, range = this.range) {
+        const types = this.getCurrentType(range);
+        if (range.collapsed) {
+            return types;
+        }
+        const nodeElement = hasClosestBlock(range.startContainer);
+        if (!nodeElement) {
+            return types;
+        }
+        const selectedRange = range.cloneRange();
+        const editableElement = normalizeCalloutTitleRange(selectedRange, nodeElement,
+            getContenteditableElement(nodeElement, selectedRange.startContainer));
+        const formats = editableElement?.contains(selectedRange.endContainer) &&
+            nodeElement.getAttribute("data-type") !== "NodeTable" ?
+            getRangeInlineFormats(editableElement, selectedRange) || [] :
+            getRangesInlineFormats(getBlockRanges(protyle.wysiwyg.element, selectedRange,
+                ["NodeCodeBlock", "NodeAttributeView"]));
+        return types.filter(type => !INLINE_FORMAT_TYPES.includes(type)).concat(formats);
     }
 
     private hasInlineMark(editableElement: Element, range: Range, type: string) {
@@ -549,6 +570,9 @@ export class Toolbar {
 
     public hasTableCellsInlineMark(cellElements: HTMLTableCellElement[], type: string) {
         const ranges = this.getTableCellRanges(cellElements);
+        if (INLINE_FORMAT_TYPES.includes(type)) {
+            return getRangesInlineFormats(ranges).includes(type);
+        }
         return ranges.length > 0 && ranges.every(item => this.hasInlineMark(item.editableElement, item.range, type));
     }
 
@@ -685,7 +709,9 @@ export class Toolbar {
 
         const toolbarElement = isMobile() ? document.querySelector("#keyboardToolbar .keyboard__dynamic").nextElementSibling : this.element;
         const actionBtn = action === "toolbar" ? toolbarElement.querySelector(`[data-type="${type}"]`) : undefined;
-        const remove = type === "clear" || actionBtn?.classList.contains("protyle-toolbar__item--current") ||
+        const remove = INLINE_FORMAT_TYPES.includes(type) && !textObj ?
+            getRangesInlineFormats(ranges).includes(type) :
+            type === "clear" || actionBtn?.classList.contains("protyle-toolbar__item--current") ||
             (!textObj && ranges.every(item => this.hasInlineMark(item.editableElement, item.range, type)));
         const visibleOffsets = new Map(ranges.map(item =>
             [item, getSelectionOffset(item.editableElement, undefined, item.range, true)]));
@@ -785,6 +811,9 @@ export class Toolbar {
         const editableElement = normalizeCalloutTitleRange(this.range, nodeElement,
             getContenteditableElement(nodeElement, this.range.startContainer));
         const isBatch = remove !== undefined;
+        // 在提取选区内容之前确定格式操作，空选区继续使用光标处的输入格式。
+        const removeFormat = !isBatch && !this.range.collapsed && INLINE_FORMAT_TYPES.includes(type) && !textObj ?
+            getRangeInlineFormats(editableElement, this.range)?.includes(type) : undefined;
         let rangeTypes: string[] = [];
         this.range.cloneContents().childNodes.forEach((item: HTMLElement) => {
             if (item.nodeType !== 3) {
@@ -955,7 +984,7 @@ export class Toolbar {
         let endContainer: Node;
         let startOffset: number;
         let endOffset: number;
-        const shouldRemove = remove ?? (type === "clear" ||
+        const shouldRemove = remove ?? removeFormat ?? (type === "clear" ||
             actionBtn?.classList.contains("protyle-toolbar__item--current") || (
             action === "range" && rangeTypes.length > 0 && rangeTypes.includes(type) && !textObj
         ));

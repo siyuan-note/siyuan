@@ -886,7 +886,7 @@ const renderKeyboardToolbar = () => {
             dynamicElements[1].querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
                 item.classList.remove("protyle-toolbar__item--current");
             });
-            const types = protyle.toolbar.getCurrentType(range);
+            const types = protyle.toolbar.getCurrentToolbarType(protyle, range);
             types.forEach(item => {
                 if (["search-mark", "a", "block-ref", "virtual-block-ref", "text", "file-annotation-ref", "inline-math",
                     "inline-memo", "", "backslash"].includes(item)) {

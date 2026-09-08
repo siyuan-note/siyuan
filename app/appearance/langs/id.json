@@ -1,4 +1,5 @@
 {
+	"templateNameTip": "Masukkan nama tanpa pemisah jalur",
 	"keymapUnset": "Belum diatur",
 	"keymapPrimary": "Jadikan pintasan utama",
 	"keymapRecording": "Tekan pintasan...",
@@ -31,7 +32,7 @@
 	"templatePreview": "Pratinjau templat",
 	"templateContext": "Konteks pratinjau",
 	"templateNewFolder": "Folder baru",
-	"templateDeleteTip": "Hapus item ini beserta seluruh isinya? Berkas yang dihapus disimpan di data/templates/.trash untuk dipulihkan.",
+	"templateDeleteTip": "Hapus item ini beserta seluruh isinya? Tindakan ini tidak dapat dibatalkan.",
 	"task": "Tugas",
 	"customTaskStatus": "Status tugas kustom",
 	"imageViewerPlay": "Putar tayangan slide",

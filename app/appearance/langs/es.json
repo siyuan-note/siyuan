@@ -1,4 +1,5 @@
 {
+	"templateNameTip": "Introduce un nombre sin separadores de ruta",
 	"keymapUnset": "Sin asignar",
 	"keymapPrimary": "Establecer como atajo principal",
 	"keymapRecording": "Pulsa un atajo...",
@@ -31,7 +32,7 @@
 	"templatePreview": "Vista previa de la plantilla",
 	"templateContext": "Contexto de vista previa",
 	"templateNewFolder": "Nueva carpeta",
-	"templateDeleteTip": "¿Eliminar este elemento y todo su contenido? Los archivos eliminados se conservan en data/templates/.trash para recuperarlos.",
+	"templateDeleteTip": "¿Eliminar este elemento y todo su contenido? Esta acción no se puede deshacer.",
 	"task": "Tarea",
 	"customTaskStatus": "Estado de tarea personalizado",
 	"imageViewerPlay": "Reproducir presentación",

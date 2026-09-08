@@ -1,4 +1,5 @@
 {
+	"templateNameTip": "Einen Namen ohne Pfadtrennzeichen eingeben",
 	"keymapUnset": "Nicht festgelegt",
 	"keymapPrimary": "Als primäres Tastenkürzel festlegen",
 	"keymapRecording": "Tastenkürzel drücken...",
@@ -31,7 +32,7 @@
 	"templatePreview": "Vorlage anzeigen",
 	"templateContext": "Vorschaukontext",
 	"templateNewFolder": "Neuer Ordner",
-	"templateDeleteTip": "Dieses Element und seinen gesamten Inhalt löschen? Gelöschte Dateien bleiben zur Wiederherstellung unter data/templates/.trash erhalten.",
+	"templateDeleteTip": "Dieses Element und seinen gesamten Inhalt löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
 	"task": "Aufgabe",
 	"customTaskStatus": "Benutzerdefinierter Aufgabenstatus",
 	"imageViewerPlay": "Diashow starten",

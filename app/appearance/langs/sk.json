@@ -1,4 +1,5 @@
 {
+	"templateNameTip": "Zadajte názov bez oddeľovačov cesty",
 	"keymapUnset": "Nenastavené",
 	"keymapPrimary": "Nastaviť ako hlavnú skratku",
 	"keymapRecording": "Stlačte klávesovú skratku...",
@@ -31,7 +32,7 @@
 	"templatePreview": "Náhľad šablóny",
 	"templateContext": "Kontext náhľadu",
 	"templateNewFolder": "Nový priečinok",
-	"templateDeleteTip": "Odstrániť túto položku a celý jej obsah? Odstránené súbory sa uchovajú v data/templates/.trash na obnovenie.",
+	"templateDeleteTip": "Odstrániť túto položku a celý jej obsah? Túto akciu nemožno vrátiť späť.",
 	"task": "Úloha",
 	"customTaskStatus": "Vlastný stav úlohy",
 	"imageViewerPlay": "Spustiť prezentáciu",

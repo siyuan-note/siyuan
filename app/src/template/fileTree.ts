@@ -4,6 +4,14 @@ export interface TemplateEntry {
     isPackage?: boolean;
 }
 
+// 重命名只接受单个名称，始终保留原父目录。
+export const getTemplateRenameTarget = (path: string, name: string): string | undefined => {
+    if (!name || name === "." || name === ".." || /[\\/:]/.test(name)) {
+        return undefined;
+    }
+    return path.substring(0, path.lastIndexOf("/") + 1) + name;
+};
+
 export interface TemplateTreeEntry extends TemplateEntry {
     name: string;
     depth: number;

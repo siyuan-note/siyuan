@@ -46,7 +46,6 @@ import {BlockRef} from "./BlockRef";
 import {hintRenderTemplate, hintRenderWidget} from "../hint/extend";
 import {blockRender} from "../render/blockRender";
 /// #if !BROWSER
-import {openBy} from "../../editor/util";
 /// #endif
 import {fetchPost} from "../../util/fetch";
 import {isMobile} from "../../util/functions";
@@ -63,7 +62,6 @@ import {InlineMemo} from "./InlineMemo";
 import {mathRender} from "../render/mathRender";
 import {linkMenu} from "../../menus/protyle";
 import {addScript} from "../util/addScript";
-import {confirmDialog} from "../../dialog/confirmDialog";
 import {paste, pasteAsPlainText, pasteEscaped} from "../util/paste";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {resizeSide} from "../../history/resizeSide";
@@ -2091,7 +2089,6 @@ export class Toolbar {
         <span class="fn__space"></span>
         <span data-type="next" class="block__icon block__icon--show"><svg><use xlink:href="#iconRight"></use></svg></span>
     </div>
-    <button type="button" data-type="manage-templates" class="b3-button b3-button--outline" style="margin: 0 8px 4px">${window.siyuan.languages.templateManager}</button>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg"></div>
 </div>
 <div class="toolbarResize" style="    cursor: col-resize;
@@ -2101,11 +2098,6 @@ export class Toolbar {
 <div style="width: 520px;${isMobile() || window.outerWidth < window.outerWidth / 2 + 520 ? "display:none;" : ""}overflow: auto;"></div>
 </div>`;
         const listElement = this.subElement.querySelector(".b3-list");
-        this.subElement.querySelector("[data-type=manage-templates]").addEventListener("click", event => {
-            event.stopPropagation();
-            this.subElement.classList.add("fn__none");
-            openTemplateManager(protyle.block.parentID);
-        });
         resizeSide(this.subElement.querySelector(".toolbarResize"), listElement.parentElement);
         const previewElement = this.subElement.firstElementChild.lastElementChild;
         const previewObserver = new MutationObserver(() => {
@@ -2169,18 +2161,11 @@ export class Toolbar {
                 k: inputElement.value,
             }, (response) => {
                 let searchHTML = "";
-                response.data.templates.forEach((item: { path: string, content: string }, index: number) => {
-                    searchHTML += `<div data-value="${item.path}" class="b3-list-item--hide-action b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
+                response.data.templates.forEach((item: { path: string, relativePath: string, content: string }, index: number) => {
+                    searchHTML += `<div data-value="${escapeAttr(escapeHtml(item.path))}" data-template-path="${escapeAttr(escapeHtml(item.relativePath))}" class="b3-list-item--hide-action b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
 <span class="b3-list-item__text">${item.content}</span>`;
-                    /// #if !BROWSER
-                    if (getHostCapabilities().localFileSystem) {
-                        searchHTML += `<span data-type="open" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.showInFolder}">
-    <svg><use xlink:href="#iconFolder"></use></svg>
-</span>`;
-                    }
-                    /// #endif
-                    searchHTML += `<span data-type="remove" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}">
-    <svg><use xlink:href="#iconTrashcan"></use></svg>
+                    searchHTML += `<span data-type="manage" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.templateManager}">
+    <svg><use xlink:href="#iconSettings"></use></svg>
 </span></div>`;
                 });
                 listElement.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
@@ -2221,34 +2206,10 @@ export class Toolbar {
                 return;
             }
             const iconElement = hasClosestByClassName(target, "b3-list-item__action");
-            /// #if !BROWSER
-            if (iconElement && iconElement.getAttribute("data-type") === "open") {
-                openBy(iconElement.parentElement.getAttribute("data-value"), "folder");
-                event.stopPropagation();
-                return;
-            }
-            /// #endif
-            if (iconElement && iconElement.getAttribute("data-type") === "remove") {
-                confirmDialog(window.siyuan.languages.remove, window.siyuan.languages.confirmDelete + "?", () => {
-                    fetchPost("/api/search/removeTemplate", {path: iconElement.parentElement.getAttribute("data-value")}, () => {
-                        if (iconElement.parentElement.parentElement.childElementCount === 1) {
-                            iconElement.parentElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                            previewTemplate("", previewElement, protyle.block.parentID);
-                        } else {
-                            if (iconElement.parentElement.classList.contains("b3-list-item--focus")) {
-                                const sideElement = iconElement.parentElement.previousElementSibling || iconElement.parentElement.nextElementSibling;
-                                sideElement.classList.add("b3-list-item--focus");
-                                const currentPath = sideElement.getAttribute("data-value");
-                                if (previewPath === currentPath) {
-                                    return;
-                                }
-                                previewPath = currentPath;
-                                previewTemplate(previewPath, previewElement, protyle.block.parentID);
-                            }
-                            iconElement.parentElement.remove();
-                        }
-                    });
-                });
+            if (iconElement && iconElement.getAttribute("data-type") === "manage") {
+                const path = iconElement.parentElement.getAttribute("data-template-path");
+                this.subElement.classList.add("fn__none");
+                openTemplateManager(protyle.block.parentID, undefined, path);
                 event.stopPropagation();
                 return;
             }

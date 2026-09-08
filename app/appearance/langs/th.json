@@ -1,4 +1,5 @@
 {
+	"templateNameTip": "ป้อนชื่อโดยไม่มีตัวคั่นเส้นทาง",
 	"keymapUnset": "ยังไม่ได้ตั้งค่า",
 	"keymapPrimary": "ตั้งเป็นปุ่มลัดหลัก",
 	"keymapRecording": "กดปุ่มลัด...",
@@ -31,7 +32,7 @@
 	"templatePreview": "ดูตัวอย่างแม่แบบ",
 	"templateContext": "บริบทการดูตัวอย่าง",
 	"templateNewFolder": "โฟลเดอร์ใหม่",
-	"templateDeleteTip": "ลบรายการนี้และเนื้อหาทั้งหมดหรือไม่? ไฟล์ที่ลบจะเก็บไว้ใน data/templates/.trash เพื่อให้กู้คืนได้",
+	"templateDeleteTip": "ลบรายการนี้และเนื้อหาทั้งหมดหรือไม่? การดำเนินการนี้ไม่สามารถเลิกทำได้",
 	"task": "งาน",
 	"customTaskStatus": "สถานะงานแบบกำหนดเอง",
 	"imageViewerPlay": "เล่นสไลด์โชว์",

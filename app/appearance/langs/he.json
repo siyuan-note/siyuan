@@ -1,4 +1,5 @@
 {
+	"templateNameTip": "יש להזין שם ללא מפרידי נתיב",
 	"keymapUnset": "לא הוגדר",
 	"keymapPrimary": "הגדר כקיצור ראשי",
 	"keymapRecording": "הקש קיצור מקשים...",
@@ -31,7 +32,7 @@
 	"templatePreview": "תצוגה מקדימה של התבנית",
 	"templateContext": "הקשר לתצוגה מקדימה",
 	"templateNewFolder": "תיקייה חדשה",
-	"templateDeleteTip": "למחוק פריט זה ואת כל תוכנו? הקבצים שנמחקו נשמרים ב־data/templates/.trash לצורך שחזור.",
+	"templateDeleteTip": "למחוק פריט זה ואת כל תוכנו? לא ניתן לבטל פעולה זו.",
 	"task": "משימה",
 	"customTaskStatus": "מצב משימה מותאם אישית",
 	"imageViewerPlay": "הפעלת מצגת",

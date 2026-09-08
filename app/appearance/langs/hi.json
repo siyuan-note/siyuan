@@ -1,4 +1,5 @@
 {
+	"templateNameTip": "पथ विभाजकों के बिना नाम दर्ज करें",
 	"keymapUnset": "सेट नहीं है",
 	"keymapPrimary": "मुख्य शॉर्टकट बनाएँ",
 	"keymapRecording": "शॉर्टकट दबाएँ...",
@@ -31,7 +32,7 @@
 	"templatePreview": "टेम्पलेट पूर्वावलोकन",
 	"templateContext": "पूर्वावलोकन संदर्भ",
 	"templateNewFolder": "नया फ़ोल्डर",
-	"templateDeleteTip": "क्या यह आइटम और इसकी सारी सामग्री हटाएँ? हटाई गई फ़ाइलें पुनर्स्थापना के लिए data/templates/.trash में रखी जाती हैं।",
+	"templateDeleteTip": "क्या यह आइटम और इसकी सारी सामग्री हटाएँ? इस कार्रवाई को पूर्ववत नहीं किया जा सकता।",
 	"task": "कार्य",
 	"customTaskStatus": "कस्टम कार्य स्थिति",
 	"imageViewerPlay": "स्लाइड शो चलाएँ",

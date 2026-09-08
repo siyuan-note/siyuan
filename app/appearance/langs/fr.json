@@ -1,4 +1,5 @@
 {
+	"templateNameTip": "Saisissez un nom sans séparateur de chemin",
 	"keymapUnset": "Non défini",
 	"keymapPrimary": "Définir comme raccourci principal",
 	"keymapRecording": "Appuyez sur un raccourci...",
@@ -31,7 +32,7 @@
 	"templatePreview": "Aperçu du modèle",
 	"templateContext": "Contexte de l’aperçu",
 	"templateNewFolder": "Nouveau dossier",
-	"templateDeleteTip": "Supprimer cet élément et tout son contenu ? Les fichiers supprimés sont conservés dans data/templates/.trash pour permettre leur restauration.",
+	"templateDeleteTip": "Supprimer cet élément et tout son contenu ? Cette action est irréversible.",
 	"task": "Tâche",
 	"customTaskStatus": "État de tâche personnalisé",
 	"imageViewerPlay": "Lancer le diaporama",

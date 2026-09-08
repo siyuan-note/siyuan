@@ -1,4 +1,5 @@
 {
+	"templateNameTip": "Введіть назву без розділювачів шляху",
 	"keymapUnset": "Не призначено",
 	"keymapPrimary": "Зробити основним сполученням",
 	"keymapRecording": "Натисніть сполучення клавіш...",
@@ -31,7 +32,7 @@
 	"templatePreview": "Перегляд шаблону",
 	"templateContext": "Контекст попереднього перегляду",
 	"templateNewFolder": "Нова папка",
-	"templateDeleteTip": "Видалити цей елемент і весь його вміст? Видалені файли зберігаються в data/templates/.trash для відновлення.",
+	"templateDeleteTip": "Видалити цей елемент і весь його вміст? Цю дію неможливо скасувати.",
 	"task": "Завдання",
 	"customTaskStatus": "Власний стан завдання",
 	"imageViewerPlay": "Запустити показ слайдів",

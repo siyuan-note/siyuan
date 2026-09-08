@@ -1075,8 +1075,7 @@ func ExportPreview(id string, fillCSSVar bool, accessChecker ...EmbedBlockAccess
 			return ast.WalkContinue
 		})
 
-		md := treenode.FormatNode(tree.Root, luteEngine)
-		tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
+		tree = normalizeExportPreviewTree(tree, luteEngine)
 		// 使用实际主题样式值替换样式变量 Use real theme style value replace var in preview mode https://github.com/siyuan-note/siyuan/issues/11458
 		if fillCSSVar {
 			fillThemeStyleVar(tree)

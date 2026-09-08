@@ -122,6 +122,60 @@ func TestTableCellRichHTMLAndMarkdownExports(t *testing.T) {
 	}
 }
 
+func TestTableCellRichPreviewNormalization(t *testing.T) {
+	luteEngine := util.NewLute()
+	tree := parse.Parse("", []byte("| 1 | 2 | 3 |\n| --- | --- | --- |\n| 123 | text | next |\n\n| Key | Text |\n| --- | --- |\n| 111 | value |"), luteEngine.ParseOptions)
+	table := tree.Root.FirstChild
+	var cell *ast.Node
+	index := 0
+	ast.Walk(table, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && node.Type == ast.NodeTableCell {
+			if index == 2 {
+				cell = node
+			}
+			index++
+		}
+		return ast.WalkContinue
+	})
+	cell.TableCellRich = &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: "3\n\n## 4\n\n5"}
+	var lastTable *ast.Node
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && node.Type == ast.NodeTable {
+			lastTable = node
+		}
+		return ast.WalkContinue
+	})
+	second := lastTable.LastChild.LastChild
+	second.TableCellRich = &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: "- first\n- second"}
+	if err := treenode.MaterializeTableCellRichExport(tree.Root); err != nil {
+		t.Fatal(err)
+	}
+	previewTree := normalizeExportPreviewTree(tree, luteEngine)
+	tableCount := 0
+	ast.Walk(previewTree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && node.Type == ast.NodeTable {
+			tableCount++
+		}
+		if entering && node.Type == ast.NodeHeading && node.Parent.Type != ast.NodeTableCell {
+			t.Fatal("cell heading escaped the table")
+		}
+		return ast.WalkContinue
+	})
+	if tableCount != 2 || table.Parent != previewTree.Root || cell.ChildByType(ast.NodeHeading) == nil ||
+		second.ChildByType(ast.NodeList) == nil {
+		t.Fatalf("preview normalization changed rich table structure: tables=%d parent=%v heading=%v list=%v html=%s", tableCount, table.Parent == previewTree.Root, cell.ChildByType(ast.NodeHeading) != nil, second.ChildByType(ast.NodeList) != nil, luteEngine.ProtylePreview(previewTree, luteEngine.RenderOptions, luteEngine.ParseOptions))
+	}
+	html := luteEngine.ProtylePreview(previewTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+	for _, expected := range []string{"<table", "<h2", "<ul", "first", "second", "123"} {
+		if !strings.Contains(html, expected) {
+			t.Fatalf("preview missing %q: %s", expected, html)
+		}
+	}
+	if strings.Contains(html, "table-cell-preview-") || strings.Contains(html, "## 4") {
+		t.Fatalf("preview leaked normalization markers: %s", html)
+	}
+}
+
 func TestTableCellRichFootnoteExport(t *testing.T) {
 	fixture, _, _, _ := prepareAssetDownloadDocumentTest(t)
 	luteEngine := util.NewLute()

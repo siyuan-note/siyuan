@@ -100,17 +100,21 @@ export const createFontSizePicker = (protyle: IProtyle, onApply: (size: string) 
 };
 
 export const updateFontControls = (protyle: IProtyle) => {
+    const setLabel = (button: HTMLButtonElement, label: string, name: string) => {
+        button.querySelector(".protyle-toolbar__font-label").textContent = label;
+        button.setAttribute("aria-label", `${window.siyuan.languages[name]} ${label}`);
+    };
     const familyButton = protyle.toolbar.element.querySelector<HTMLButtonElement>('[data-type="font-family"]');
     const sizeButton = protyle.toolbar.element.querySelector<HTMLButtonElement>('[data-type="font-size"]');
     if (familyButton) {
         const state = getInlineFontFamilyState(protyle, getFontNodeElements(protyle));
-        familyButton.textContent = getInlineFontFamilyLabel(state);
+        setLabel(familyButton, getInlineFontFamilyLabel(state), "fontFamily");
         familyButton.disabled = state.disabled;
     }
     if (sizeButton) {
         const state = getFontSizeState(protyle);
-        sizeButton.textContent = state.mixed ? window.siyuan.languages.mixed : state.fontSize.endsWith("em") ?
-            `${Math.round(parseFloat(state.fontSize) * 100)}%` : state.fontSize;
+        setLabel(sizeButton, state.mixed ? window.siyuan.languages.mixed : state.fontSize.endsWith("em") ?
+            `${Math.round(parseFloat(state.fontSize) * 100)}%` : state.fontSize, "fontSize");
         sizeButton.disabled = state.disabled;
     }
 };
@@ -119,7 +123,8 @@ export class FontControl extends ToolbarItem {
     constructor(protyle: IProtyle, item: IMenuItem) {
         super(protyle, item);
         this.element.classList.add("protyle-toolbar__font");
-        this.element.textContent = window.siyuan.languages[item.lang];
+        this.element.innerHTML = '<span class="protyle-toolbar__font-label"></span><svg aria-hidden="true"><use xlink:href="#iconDown"></use></svg>';
+        this.element.querySelector(".protyle-toolbar__font-label").textContent = window.siyuan.languages[item.lang];
         this.element.setAttribute("aria-haspopup", "true");
         this.element.addEventListener("mousedown", event => event.preventDefault());
         this.element.addEventListener("click", () => {

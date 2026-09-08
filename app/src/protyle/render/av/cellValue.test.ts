@@ -10,9 +10,66 @@ import {
     getAVBlockRefSubtype,
     getConvertedEmptyAVCellValue,
     hasAVRenderTemplateResult,
+    updateAVCachedCellValue,
 } from "./cellValue";
+import {resolveAVSelectedCell, setAVCellSelection} from "./selectionState";
 import {createAVRichTextValue} from "./richTextValue";
 import {rebindAVCellValue} from "./dragFillValue";
+
+describe("cached asset cell updates", () => {
+    it("preserves consecutive uploads after the selection moves without a data refresh", () => {
+        const column = {id: "assets", type: "mAsset"} as IAVColumn;
+        const initialValue = {type: "mAsset", mAsset: [{content: "original.png"}]} as IAVCellValue;
+        const data = {view: {columns: [column], rows: [
+            {id: "row-1", cells: [{id: "cell-1", value: initialValue}]},
+            {id: "row-2", cells: [{id: "cell-2", value: cloneAVCellValueSnapshot(initialValue)}]},
+        ]}} as unknown as IAV;
+        const target = {groupID: "", rowID: "row-1", colID: "assets"};
+        const other = {groupID: "", rowID: "row-2", colID: "assets"};
+        const block = {} as HTMLElement;
+        setAVCellSelection(block, {anchor: other, focus: other, cells: [resolveAVSelectedCell(data, other)]});
+        const snapshots: IAVCellValue[] = [];
+        for (const content of ["first.png", "second.png"]) {
+            const cell = resolveAVSelectedCell(data, target);
+            const oldValue = cloneAVCellValueSnapshot(cell.cell.value);
+            snapshots.push(oldValue);
+            updateAVCachedCellValue(data.view, target.rowID, target.colID, {
+                ...oldValue, mAsset: oldValue.mAsset.concat({content} as IAVCellAssetValue),
+            });
+        }
+        assert.deepEqual(resolveAVSelectedCell(data, target).cell.value.mAsset.map(item => item.content),
+            ["original.png", "first.png", "second.png"]);
+        assert.deepEqual(snapshots[0].mAsset.map(item => item.content), ["original.png"]);
+        assert.deepEqual(snapshots[1].mAsset.map(item => item.content), ["original.png", "first.png"]);
+        assert.deepEqual(resolveAVSelectedCell(data, other).cell.value.mAsset.map(item => item.content), ["original.png"]);
+    });
+
+    it("updates every loaded group occurrence and card without sharing the operation value", () => {
+        const tableCell = {id: "old"} as IAVCell;
+        const cardCell = {id: "old"} as IAVCell;
+        const untouched = {id: "untouched"} as IAVCell;
+        const view = {groups: [
+            {columns: [{id: "other"}, {id: "assets", hidden: true}], rows: [
+                {id: "row", cells: [untouched, tableCell]},
+            ]},
+            {fields: [{id: "assets"}], cards: [{id: "row", values: [cardCell]}]},
+        ]} as unknown as IAVView;
+        const value = {id: "new", type: "mAsset", mAsset: [{content: "image.png"}]} as IAVCellValue;
+        updateAVCachedCellValue(view, "row", "assets", value);
+        for (const cell of [tableCell, cardCell]) {
+            assert.equal(cell.id, "new");
+            assert.equal(cell.valueType, "mAsset");
+            assert.deepEqual(cell.value, value);
+            assert.notEqual(cell.value, value);
+        }
+        updateAVCachedCellValue(view, "missing", "assets", value);
+        updateAVCachedCellValue(view, "row", "missing", value);
+        assert.deepEqual(untouched, {id: "untouched"});
+        value.mAsset[0].content = "changed.png";
+        assert.equal(tableCell.value.mAsset[0].content, "image.png");
+        assert.equal(cardCell.value.mAsset[0].content, "image.png");
+    });
+});
 
 describe("getAVBlockRefSubtype", () => {
     it("uses only a valid dynamic subtype and safely falls back to static", () => {

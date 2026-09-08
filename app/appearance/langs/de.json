@@ -2746,6 +2746,7 @@
 		"376": "Die Ressource wurde noch nicht heruntergeladen und kann derzeit nicht abgerufen werden",
 		"377": "Bitte wechseln Sie zu Alle herunterladen, bevor Sie das Datenrepository ändern oder zurücksetzen",
 		"378": "Websiteübergreifende Anfragen sind nicht zulässig",
-		"379": "Der Agent wurde gestoppt, weil das Zeitlimit der Sitzung erreicht wurde. Senden Sie eine Nachricht, um fortzufahren, oder passen Sie das Zeitlimit unter Einstellungen - KI an"
+		"379": "Der Agent wurde gestoppt, weil das Zeitlimit der Sitzung erreicht wurde. Senden Sie eine Nachricht, um fortzufahren, oder passen Sie das Zeitlimit unter Einstellungen - KI an",
+		"380": "OCR wird für Ressourcen in verschlüsselten Notizbüchern nicht unterstützt"
 	}
 }

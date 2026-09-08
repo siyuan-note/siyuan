@@ -6,7 +6,7 @@
 		"id": "20260907120000-crycn01",
 		"title": "加密笔记本",
 		"type": "doc",
-		"updated": "20260908150000"
+		"updated": "20260908162209"
 	},
 	"Children": [
 		{
@@ -1152,7 +1152,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-cn00050",
-				"updated": "20260908150000"
+				"updated": "20260908162209"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -1249,7 +1249,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-cn00057",
-				"updated": "20260908150000"
+				"updated": "20260908162209"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -1265,7 +1265,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-cn00058",
-				"updated": "20260908150000"
+				"updated": "20260908162209"
 			},
 			"Children": [
 				{
@@ -1347,6 +1347,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "发布服务无论笔记本是否解锁都无法列出或读取其内容，发布密码和可见性设置也无法为其启用发布；此外不支持闪卡、书签、标签、资源重命名、原始文件 API、WebDAV 和内核命令行操作"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908162209-r4tk6xx",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20260908162209-r4tk6xx",
+						"updated": "20260908162209"
+					},
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20260908162209-lcnpsdy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908162209-lcnpsdy",
+								"updated": "20260908162209"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密笔记本中的资源文件不支持文字识别"
 								}
 							]
 						}

@@ -204,7 +204,7 @@ func ocr(c *gin.Context) {
 	}
 	if model.IsEncryptedAssetPath(absPath) {
 		ret.Code = -1
-		ret.Msg = "OCR is not supported for assets in encrypted notebooks"
+		ret.Msg = model.Conf.Language(380)
 		ret.Data = map[string]any{"closeTimeout": 3000}
 		return
 	}

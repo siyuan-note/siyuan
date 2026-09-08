@@ -2746,6 +2746,7 @@
 		"376": "Zasób nie został jeszcze pobrany i obecnie nie można go uzyskać",
 		"377": "Przełącz na Pobierz wszystkie przed zmianą lub zresetowaniem repozytorium danych",
 		"378": "Żądania między witrynami są niedozwolone",
-		"379": "Agent został zatrzymany z powodu przekroczenia limitu czasu sesji. Wyślij wiadomość, aby kontynuować, lub zmień limit czasu w Ustawienia - AI"
+		"379": "Agent został zatrzymany z powodu przekroczenia limitu czasu sesji. Wyślij wiadomość, aby kontynuować, lub zmień limit czasu w Ustawienia - AI",
+		"380": "OCR nie jest obsługiwane dla zasobów w zaszyfrowanych notatnikach"
 	}
 }

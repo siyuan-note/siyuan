@@ -2746,6 +2746,7 @@
 		"376": "Sumber daya belum diunduh dan saat ini tidak dapat diambil",
 		"377": "Beralihlah ke Unduh semua sebelum mengubah atau mengatur ulang repositori data",
 		"378": "Permintaan lintas situs tidak diizinkan",
-		"379": "Agen berhenti karena batas waktu sesi tercapai. Kirim pesan untuk melanjutkan, atau sesuaikan batas waktu di Pengaturan - AI"
+		"379": "Agen berhenti karena batas waktu sesi tercapai. Kirim pesan untuk melanjutkan, atau sesuaikan batas waktu di Pengaturan - AI",
+		"380": "OCR tidak didukung untuk sumber daya dalam buku catatan terenkripsi"
 	}
 }

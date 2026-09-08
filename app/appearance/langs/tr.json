@@ -2746,6 +2746,7 @@
 		"376": "Kaynak henüz indirilmedi ve şu anda alınamıyor",
 		"377": "Veri deposunu değiştirmeden veya sıfırlamadan önce Tümünü indir seçeneğine geçin",
 		"378": "Siteler arası isteklere izin verilmez",
-		"379": "Oturum süresi sınırına ulaşıldığı için ajan durduruldu. Devam etmek için bir mesaj gönderin veya Ayarlar - Yapay Zeka bölümünden zaman aşımını ayarlayın"
+		"379": "Oturum süresi sınırına ulaşıldığı için ajan durduruldu. Devam etmek için bir mesaj gönderin veya Ayarlar - Yapay Zeka bölümünden zaman aşımını ayarlayın",
+		"380": "Şifrelenmiş not defterlerindeki kaynaklar için OCR desteklenmiyor"
 	}
 }

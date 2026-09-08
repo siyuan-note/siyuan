@@ -216,18 +216,27 @@ func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTML
 			continue
 		}
 
-		if gulu.File.IsSubPath(assetsDirPath, assetAbsPath) {
-			// 已经位于 assets 目录下的资源文件不处理
-			// Dragging a file from the assets folder into the editor causes the kernel to exit https://github.com/siyuan-note/siyuan/issues/15355
-			recordAssetUploadSuccess(succMap, &succFiles, index, baseName, "assets/"+baseName)
-			continue
-		}
-
 		fi, statErr := os.Stat(assetAbsPath)
 		if nil != statErr {
 			recordAssetUploadFailure(&failedFiles, index, baseName, statErr)
 			continue
 		}
+		if gulu.File.IsSubPath(assetsDirPath, assetAbsPath) {
+			// 已经位于 assets 目录下的资源文件不处理
+			// Dragging a file from the assets folder into the editor causes the kernel to exit https://github.com/siyuan-note/siyuan/issues/15355
+			rel, relErr := filepath.Rel(assetsDirPath, assetAbsPath)
+			if relErr != nil {
+				recordAssetUploadFailure(&failedFiles, index, baseName, relErr)
+				continue
+			}
+			p := path.Join("assets", filepath.ToSlash(rel))
+			if IsEncryptedBox(boxID) {
+				p += "?box=" + boxID
+			}
+			recordAssetUploadSuccess(succMap, &succFiles, index, baseName, p)
+			continue
+		}
+
 		f, openErr := os.Open(assetAbsPath)
 		if nil != openErr {
 			recordAssetUploadFailure(&failedFiles, index, baseName, openErr)
@@ -425,14 +434,12 @@ func Upload(c *gin.Context) {
 			recordAssetUploadSuccess(succMap, &succFiles, index, baseName, strings.TrimPrefix(existAssetPath, "/"))
 			f.Close()
 		} else {
-			if skipIfDuplicated {
+			// 加密资源的随机磁盘名无法区分截图的旋转和生成配置，不按文件名复用。
+			if skipIfDuplicated && !IsEncryptedBox(uploadBoxID) {
 				// 复制 PDF 矩形注解时不再重复插入图片 No longer upload image repeatedly when copying PDF rectangle annotation https://github.com/siyuan-note/siyuan/issues/10666
 				pattern := assetsDirPath + string(os.PathSeparator) + strings.TrimSuffix(fName, ext)
 				_, patternLastID := util.LastID(fName)
-				if IsEncryptedBox(uploadBoxID) && lastID != "" {
-					// 加密资源的磁盘名称使用随机前缀，通过标注 ID 查找已生成的截图。
-					pattern = assetsDirPath + string(os.PathSeparator) + "*" + lastID + ext
-				} else if lastID != "" && lastID != patternLastID {
+				if lastID != "" && lastID != patternLastID {
 					// 文件名太长被截断了，通过之前的 lastID 来匹配 PDF files with too long file names cannot generate annotated images https://github.com/siyuan-note/siyuan/issues/15739
 					pattern = assetsDirPath + string(os.PathSeparator) + "*" + lastID + ext
 				} else {
@@ -446,9 +453,6 @@ func Upload(c *gin.Context) {
 					if 0 < len(matches) {
 						fName = filepath.Base(matches[0])
 						p := strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/")
-						if uploadBoxID != "" && IsEncryptedBox(uploadBoxID) {
-							p += "?box=" + uploadBoxID
-						}
 						recordAssetUploadSuccess(succMap, &succFiles, index, baseName, p)
 						f.Close()
 						continue

@@ -2746,6 +2746,7 @@
 		"376": "The asset has not been downloaded and cannot be retrieved right now",
 		"377": "Please switch to Download all before changing or resetting the data repository",
 		"378": "Cross-site requests are not allowed",
-		"379": "The agent stopped because the session time limit was reached. Send a message to continue, or adjust the timeout in Settings - AI"
+		"379": "The agent stopped because the session time limit was reached. Send a message to continue, or adjust the timeout in Settings - AI",
+		"380": "OCR is not supported for assets in encrypted notebooks"
 	}
 }

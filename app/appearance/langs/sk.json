@@ -2746,6 +2746,7 @@
 		"376": "Zdrojový súbor ešte nebol stiahnutý a momentálne ho nemožno získať",
 		"377": "Pred zmenou alebo obnovením dátového úložiska prepnite na Stiahnuť všetky",
 		"378": "Požiadavky medzi lokalitami nie sú povolené",
-		"379": "Agent sa zastavil, pretože bol dosiahnutý časový limit relácie. Ak chcete pokračovať, odošlite správu alebo upravte časový limit v Nastavenia - AI"
+		"379": "Agent sa zastavil, pretože bol dosiahnutý časový limit relácie. Ak chcete pokračovať, odošlite správu alebo upravte časový limit v Nastavenia - AI",
+		"380": "OCR nie je podporované pre zdroje v šifrovaných zápisníkoch"
 	}
 }

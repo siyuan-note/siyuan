@@ -6,7 +6,7 @@
 		"id": "20260907120000-cryja01",
 		"title": "暗号化ノートブック",
 		"type": "doc",
-		"updated": "20260908150000"
+		"updated": "20260908162209"
 	},
 	"Children": [
 		{
@@ -1152,7 +1152,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-ja00050",
-				"updated": "20260908150000"
+				"updated": "20260908162209"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -1249,7 +1249,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-ja00057",
-				"updated": "20260908150000"
+				"updated": "20260908162209"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -1265,7 +1265,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-ja00058",
-				"updated": "20260908150000"
+				"updated": "20260908162209"
 			},
 			"Children": [
 				{
@@ -1347,6 +1347,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "公開サービスはノートブックのロック状態にかかわらず暗号化コンテンツを一覧表示または読み取ることができず、公開パスワードや公開範囲の設定でも有効にできません。フラッシュカード、ブックマーク、タグ、アセット名の変更、raw file API、WebDAV、カーネル CLI 操作にも対応していません"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908162209-rulvdi4",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20260908162209-rulvdi4",
+						"updated": "20260908162209"
+					},
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20260908162209-2ptqzrx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908162209-2ptqzrx",
+								"updated": "20260908162209"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "暗号化されたノートブック内のリソースは文字認識（OCR）に対応していません"
 								}
 							]
 						}

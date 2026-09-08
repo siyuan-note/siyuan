@@ -6,7 +6,7 @@
 		"id": "20260907120000-cryen01",
 		"title": "Encrypted Notebook",
 		"type": "doc",
-		"updated": "20260908150000"
+		"updated": "20260908162209"
 	},
 	"Children": [
 		{
@@ -1152,7 +1152,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00050",
-				"updated": "20260908150000"
+				"updated": "20260908162209"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -1249,7 +1249,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-en00057",
-				"updated": "20260908150000"
+				"updated": "20260908162209"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -1265,7 +1265,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-en00058",
-				"updated": "20260908150000"
+				"updated": "20260908162209"
 			},
 			"Children": [
 				{
@@ -1347,6 +1347,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "The publish service cannot list or read encrypted content whether the notebook is locked or unlocked, and publish passwords or visibility settings cannot enable it; flashcards, bookmarks, tags, asset renaming, raw file APIs, WebDAV, and kernel CLI operations are also unsupported"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908162209-25s92pb",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20260908162209-25s92pb",
+						"updated": "20260908162209"
+					},
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20260908162209-p9i8d26",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908162209-p9i8d26",
+								"updated": "20260908162209"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Text recognition (OCR) is not supported for assets in encrypted notebooks"
 								}
 							]
 						}

@@ -56,6 +56,7 @@ Table-cell rich text uses document `Spec: "4"` and an optional `TableCellRich` s
 | **Doc to heading (Doc2Heading)** | Supported | Forbidden across encrypted boundary |
 | **database mirroring (cross-notebook)** | Supported | Forbidden across encrypted boundary |
 | **Asset file rename** | Supported | Not supported (desensitized filename rename breaks the mapping) |
+| **Asset text recognition (OCR)** | Supported | Not supported, regardless of lock state |
 | **Import** | Supported | Supported (.sy.zip and Markdown, auto DEK-encrypted before writing to disk) |
 | **In-notebook search** | Via global SQLite database | Via encrypted SQLite database |
 | **Backlinks panel** | Via global SQLite database | Via encrypted SQLite database (incl. mention subquery) |
@@ -404,6 +405,8 @@ Sync endpoints and offline backups are storage that may be lost, copied, or roll
 | Icon, sorting, document title/count, relation count, tags, bookmarks, history and snapshot names | Must not be exposed while locked by default; if compatibility requires exposure, list each field here and explain it in the UI |
 
 ## 20. Feature Boundaries, Plaintext Temporaries, and Interface Rules
+
+Text recognition (OCR) is not supported for assets in encrypted notebooks, regardless of lock state. Manual recognition returns a localized "unsupported" message, and automatic recognition skips encrypted-notebook assets. No OCR text may be generated for these assets or written to the global OCR store or search index.
 
 Unsupported publishing, flashcards, bookmarks, tags, asset rename, unused-asset cleanup, and unused-database cleanup must be handled uniformly by the frontend, HTTP API, plugin API, MCP, and import paths: return an explicit "unsupported" error for encrypted-notebook targets and create no global index, global attribute, or deferred task. Existing legacy data must not be loaded, aggregated, or written back. Publish authorization is independent of lock state and takes precedence over `publishAccess.json`; existing publish configuration cannot make an encrypted notebook visible again. Error codes and localized messages remain stable for callers.
 

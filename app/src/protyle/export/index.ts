@@ -15,6 +15,7 @@ import {getScreenWidth, isInMobileApp, saveExportFile, setStorageVal} from "../u
 import {getFrontend} from "../../util/functions";
 import {isEncryptedBox} from "../../util/pathName";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {getLastExportPath, setLastExportPath} from "./path";
 
 const getPluginStyle = async () => {
     const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
@@ -182,6 +183,18 @@ const getSnippetJS = () => {
 };
 
 /// #if !BROWSER
+const getAvailableExportPath = async () => {
+    const exportPath = getLastExportPath();
+    if (!exportPath) {
+        return "";
+    }
+    try {
+        return (await fs.promises.stat(exportPath)).isDirectory() ? exportPath : "";
+    } catch (e) {
+        return "";
+    }
+};
+
 const renderPDF = async (id: string) => {
     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
     if (typeof localData.paged === "undefined") {
@@ -197,6 +210,7 @@ const renderPDF = async (id: string) => {
     const currentWindowId = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
         cmd: "getContentsId",
     });
+    const defaultExportPath = await getAvailableExportPath();
     // data-theme-mode="light" https://github.com/siyuan-note/siyuan/issues/7379
     const html = `<!DOCTYPE html>
 <html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="light" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">
@@ -868,11 +882,16 @@ ${getIconScript(servePath)}
         }));
         actionElement.querySelector('.b3-button--text').addEventListener('click', async () => {
             const {ipcRenderer}  = require("electron");
-            const result = await ipcRenderer.invoke("${Constants.SIYUAN_GET}", {
+            const defaultPath = decodeURIComponent(${JSON.stringify(encodeURIComponent(defaultExportPath))});
+            const dialogOptions = {
                 cmd: "showOpenDialog",
                 title: "${window.siyuan.languages.export} PDF",
                 properties: ["createDirectory", "openDirectory"],
-            });
+            };
+            if (defaultPath) {
+                dialogOptions.defaultPath = defaultPath;
+            }
+            const result = await ipcRenderer.invoke("${Constants.SIYUAN_GET}", dialogOptions);
             if (result.canceled || result.filePaths.length === 0) {
                 return;
             }
@@ -965,12 +984,15 @@ const getExportPath = (
                 break;
         }
 
+        const defaultPath = await getAvailableExportPath();
         const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
             cmd: "showOpenDialog",
             title: window.siyuan.languages.export + " " + exportType,
             properties: ["createDirectory", "openDirectory"],
+            ...(defaultPath ? {defaultPath} : {}),
         });
         if (!result.canceled) {
+            setLastExportPath(result.filePaths[0]);
             const msgId = showMessage(window.siyuan.languages.exporting, -1);
             let url = "/api/export/exportHTML";
             if (option.type === "htmlmd") {

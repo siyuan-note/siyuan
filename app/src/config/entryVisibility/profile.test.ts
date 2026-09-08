@@ -9,15 +9,15 @@ import {
     normalizeEntryVisibilityImportProfile,
 } from "./profile";
 
-test("font toolbar entries default to hidden while preserving explicit profile choices", () => {
+test("font toolbar entries are visible in Full, hidden in Simple and preserve explicit profile choices", () => {
     for (const key of ["font-family", "font-size"]) {
         const path = `${TOOLBAR_ENTRY_ROOT_PATH}.${key}`;
         const defaultVisible = getEntryCatalogDefaultVisibility(path);
         const entry = getEntryCatalogNode(path);
-        assert.equal(defaultVisible, false);
-        assert.equal(getBuiltinProfileEntryVisibility("full", entry.simple, defaultVisible), false);
+        assert.equal(defaultVisible, true);
+        assert.equal(getBuiltinProfileEntryVisibility("full", entry.simple, defaultVisible), true);
         assert.equal(getBuiltinProfileEntryVisibility("simple", entry.simple, defaultVisible), false);
-        assert.equal(getProfileEntryVisibility({entries: {}}, path, defaultVisible), false);
+        assert.equal(getProfileEntryVisibility({entries: {}}, path, defaultVisible), true);
         assert.equal(getProfileEntryVisibility({entries: {[path]: true}}, path, defaultVisible), true);
         assert.equal(getProfileEntryVisibility({entries: {[path]: false}}, path, defaultVisible), false);
     }

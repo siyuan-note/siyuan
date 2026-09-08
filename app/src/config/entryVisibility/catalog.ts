@@ -468,14 +468,9 @@ const gutterSingle = () => [
 
 export const SLASH_MENU_ROOT_PATH = "editor.slash.menu";
 
-const toolbarBuiltinChildren = DESKTOP_TOOLBAR_ENTRIES.map((item) => {
-    if (item.separator) {
-        return separator(item.key);
-    }
-    const fontControl = ["font-family", "font-size"].includes(item.key);
-    return node(item.key, lang(item.lang), !fontControl, undefined, undefined,
-        fontControl ? {defaultVisible: () => false} : undefined);
-});
+const toolbarBuiltinChildren = DESKTOP_TOOLBAR_ENTRIES.map((item) => item.separator
+    ? separator(item.key)
+    : node(item.key, lang(item.lang), !["font-family", "font-size"].includes(item.key)));
 const toolbarBuiltinNodeMap = new Map(toolbarBuiltinChildren.map((item) => [item.key, item]));
 
 const slashMenuBuiltinChildren = [

@@ -860,6 +860,10 @@
   min-height: 0;
   white-space: normal;
 
+  [contenteditable="true"]:focus {
+    outline: none;
+  }
+
   &.protyle {
     background-color: transparent;
   }

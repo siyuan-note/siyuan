@@ -1981,9 +1981,9 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
         height: defaultHeight,
     }, oldWindowState);
 
-    writeLog("window stat [x=" + windowState.x + ", y=" + windowState.y + ", width=" + windowState.width + ", height=" + windowState.height + "], " +
+    writeLog("window stat [x=" + windowState.x + ", y=" + windowState.y + ", width=" + windowState.width + ", height=" + windowState.height + ", isMaximized=" + windowState.isMaximized + "], " +
         "default [x=0, y=0, width=" + defaultWidth + ", height=" + defaultHeight + "], " +
-        "old [x=" + oldWindowState.x + ", y=" + oldWindowState.y + ", width=" + oldWindowState.width + ", height=" + oldWindowState.height + "]");
+        "old [x=" + oldWindowState.x + ", y=" + oldWindowState.y + ", width=" + oldWindowState.width + ", height=" + oldWindowState.height + ", isMaximized=" + oldWindowState.isMaximized + "]");
 
     let resetToCenter = false;
     let x = windowState.x;
@@ -2217,6 +2217,12 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
     ipcMain.once("siyuan-ready-to-show", () => {
         clearTimeout(readyToShowTimeout); // 正常收到信号则取消超时兜底
         if (isOpenAsHidden()) {
+            if (windowState.isMaximized) {
+                // 隐藏启动时延迟到首次还原再最大化，避免最大化操作提前显示窗口。
+                currentWindow.once("restore", () => {
+                    currentWindow.maximize();
+                });
+            }
             currentWindow.minimize();
         } else {
             currentWindow.show();

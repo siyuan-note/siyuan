@@ -3,6 +3,7 @@ import {showMessage} from "../../dialog/message";
 import {hintRef, hintSlash} from "../hint/extend";
 import {mountProtyleLiteFragment} from "../lite/fragmentEditor";
 import {getDefaultToolbar} from "../toolbar/defaults";
+import {hideElements} from "../ui/hideElements";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {configureAVRichTextLute, getAVRichTextLute, sanitizeAVRichTextBlockDOM} from "./av/richText";
 import {highlightRender} from "./highlightRender";
@@ -89,6 +90,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     }
     owner.wysiwyg.tableControl?.clear();
     owner.wysiwyg.tableControl?.setHidden(true);
+    hideElements(["gutter"], owner);
     table.setAttribute(TABLE_RICH_ATTRIBUTE, "1");
     const initialHTML = table.outerHTML;
     if (!cell.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE)) {
@@ -106,6 +108,10 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         "copy", "cut", "paste", "pointerdown", "pointerup", "pointermove", "mousedown", "mouseup", "mousemove",
         "click", "dblclick", "contextmenu", "dragstart", "dragover", "drop", "focusin", "focusout"];
     events.forEach(type => host.addEventListener(type, event => event.stopPropagation()));
+    ["mouseover", "pointerover"].forEach(type => host.addEventListener(type, event => {
+        hideElements(["gutter"], owner);
+        event.stopPropagation();
+    }));
     const toolbar = getDefaultToolbar(isMobile()).filter(item => typeof item === "string" ? item !== "ai" : item.name !== "ai");
     const safeSlash = (key: string, protyle: IProtyle, hintSource: THintSource) =>
         hintSlash(key, protyle, hintSource).filter(item => SAFE_SLASH_IDS.has(item.id));

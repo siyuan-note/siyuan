@@ -15,7 +15,8 @@
   pointer-events: none;
 }
 
-.protyle-wysiwyg {
+.protyle-wysiwyg,
+.table__cell-rich {
   padding: 16px 16px 16px 24px;
   box-sizing: border-box;
   // 移除三击无法选中整个 https://github.com/siyuan-note/siyuan/issues/8511
@@ -44,7 +45,8 @@
     cursor: text;
   }
 
-  [data-node-id] {
+  [data-node-id],
+  [data-table-cell-node] {
     position: relative;
 
     &.protyle-wysiwyg--navigation {
@@ -181,11 +183,11 @@
         border-left-color: var(--b3-scroll-color);
       }
 
-      & > [data-node-id] {
+      & > :is([data-node-id], [data-table-cell-node]) {
         margin-left: 34px;
       }
 
-      & > [data-node-id]:not(.p):not(.code-block) {
+      & > :is([data-node-id], [data-table-cell-node]):not(.p):not(.code-block) {
         padding-right: 0;
       }
 
@@ -303,8 +305,8 @@
         direction: rtl;
       }
 
-      .li > [data-node-id],
-      & > [data-node-id] {
+      .li > :is([data-node-id], [data-table-cell-node]),
+      & > :is([data-node-id], [data-table-cell-node]) {
         margin-right: 34px;
         margin-left: 0;
       }

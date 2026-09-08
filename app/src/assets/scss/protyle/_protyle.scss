@@ -838,29 +838,20 @@
 }
 
 .table__cell-rich {
+  min-width: 180px;
   min-height: 1.6em;
   white-space: normal;
   cursor: text;
+  padding: 4px !important;
 
-  &.b3-typography {
-    font-size: inherit;
-    line-height: inherit;
+  .protyle-action {
+    pointer-events: none;
   }
 
-  > :first-child {
-    margin-top: 0;
-  }
-
-  > :last-child {
-    margin-bottom: 0;
-  }
-
-  p {
-    margin: 0.25em 0;
-  }
-
-  pre {
-    white-space: pre-wrap;
+  .protyle-icons,
+  .protyle-icon,
+  .protyle-action__language {
+    display: none !important;
   }
 }
 
@@ -875,8 +866,6 @@
   .protyle-wysiwyg {
     padding: 4px !important;
     min-height: 1.6em;
-    box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
-    border-radius: var(--b3-border-radius);
   }
 }
 

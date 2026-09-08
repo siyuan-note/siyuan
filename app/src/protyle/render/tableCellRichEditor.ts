@@ -14,12 +14,8 @@ import {TABLE_CELL_RICH_ATTRIBUTE} from "../util/tableCellRichValue";
 import {focusByOffset, getSelectionOffset} from "../util/selection";
 import {fixTable} from "../util/table";
 import {updateTableCellContentLayout} from "../util/tableCellRich";
+import {TABLE_CELL_SLASH_IDS} from "../util/tableCellRichMenu";
 
-const SAFE_SLASH_IDS = new Set([
-    "ref", "heading1", "heading2", "heading3", "heading4", "heading5", "heading6", "list", "orderedList", "check",
-    "quote", "code", "math", "link", "bold", "italic", "underline", "strike", "mark", "sup", "sub", "inlineCode",
-    "kbd", "tag", "inlineMath",
-]);
 let activeEditor: {cell: Element, finish: () => void} | undefined;
 
 export const applyTableCellRichInlineMark = (owner: IProtyle, cells: HTMLTableCellElement[], type: string,
@@ -119,7 +115,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     }));
     const toolbar = getDefaultToolbar(isMobile()).filter(item => typeof item === "string" ? item !== "ai" : item.name !== "ai");
     const safeSlash = (key: string, protyle: IProtyle, hintSource: THintSource) =>
-        hintSlash(key, protyle, hintSource).filter(item => SAFE_SLASH_IDS.has(item.id));
+        hintSlash(key, protyle, hintSource).filter(item => TABLE_CELL_SLASH_IDS.has(item.id));
     const hint: IProtyleOptions["hint"] = {
         extend: [{key: "((", hint: hintRef}, {key: "【【", hint: hintRef}, {key: "（（", hint: hintRef},
             {key: "[[", hint: hintRef}, {key: "/", hint: safeSlash}, {key: "、", hint: safeSlash}],

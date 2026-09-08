@@ -1,5 +1,6 @@
 import {fetchPost} from "../../util/fetch";
 import {insertHTML} from "../util/insertHTML";
+import {TABLE_CELL_SLASH_IDS} from "../util/tableCellRichMenu";
 import {getIconByType} from "../../editor/getIcon";
 import {isDisabledFeature, updateHotkeyTip} from "../util/compatibility";
 import {blockRender} from "../render/blockRender";
@@ -454,9 +455,15 @@ export const hintSlash = (key: string, protyle: IProtyle, sourceOrHideConfigured
         allList.pop();
     }
     refreshSlashMenuCatalog(areProtylePluginExtensionsEnabled(protyle) ? protyle.app.plugins : []);
+    const selection = getSelection();
+    const focus = selection?.focusNode;
+    const focusElement = focus instanceof Element ? focus : focus?.parentElement;
+    const cell = focusElement?.closest("td, th");
+    const inTableCell = cell && cell.closest(".protyle-wysiwyg") === protyle.wysiwyg.element;
     return resolveSlashMenuItems(allList.filter((item) => {
         const builtinStyleID = slashBuiltinStyleIDs[item.entryKey];
-        return getEntryCatalogNode(getSlashMenuEntryPath(item.entryKey)) &&
+        return (!inTableCell || TABLE_CELL_SLASH_IDS.has(item.id)) &&
+            getEntryCatalogNode(getSlashMenuEntryPath(item.entryKey)) &&
             (!builtinStyleID || isBuiltinInlineStyleVisible("style1", builtinStyleID));
     }), {
         enabled,

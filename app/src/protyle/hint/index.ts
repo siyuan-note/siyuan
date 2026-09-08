@@ -1197,6 +1197,19 @@ ${genHintItemHTML(item)}
                 }
             }
         }
+        // 新建表格后直接接管当前单元格，后续输入与鼠标点击进入编辑使用相同的限制。
+        const selection = getSelection();
+        const focus = selection?.focusNode;
+        const focusElement = focus instanceof Element ? focus : focus?.parentElement;
+        const cell = focusElement?.closest<HTMLTableCellElement>("td, th");
+        if (cell && cell.closest(".protyle-wysiwyg") === protyle.wysiwyg.element &&
+            cell.contains(selection.anchorNode)) {
+            void import("../render/tableCellRichEditor").then(module => {
+                if (cell.contains(getSelection()?.focusNode)) {
+                    module.openTableCellRichEditor(protyle, cell);
+                }
+            });
+        }
     }
 
     public select(event: KeyboardEvent, protyle: IProtyle) {

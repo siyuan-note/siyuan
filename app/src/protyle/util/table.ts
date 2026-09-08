@@ -5,12 +5,12 @@ import {
     focusByWbr,
     getEditorRange,
     getSelectionOffset,
-    getSelectionPosition,
     getUndoFocusContext,
 } from "./selection";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "./hasClosest";
 import {matchHotKey} from "./hotKey";
 import {isNotCtrl} from "./compatibility";
+import {focusEditableAtGoalX, getCaretGoalX, isCaretAtVerticalBoundary} from "../wysiwyg/verticalCaret";
 import {scrollCenter} from "../../util/highlightById";
 import {insertEmptyBlock} from "../../block/util";
 import {removeBlock} from "../wysiwyg/remove";
@@ -513,103 +513,17 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
             return true;
         }
 
-        if (event.key === "ArrowUp" && isNotCtrl(event) && !event.shiftKey && !event.altKey) {
-            if (cellElement.firstChild) {
-                let firstChild = cellElement.firstChild;
-                while (firstChild) {
-                    if (firstChild.textContent === "" && firstChild.nodeType === 3) {
-                        if (!firstChild.nextSibling) {
-                            break;
-                        }
-                        firstChild = firstChild.nextSibling;
-                    } else {
-                        break;
-                    }
-                }
-                const rangeTemp = document.createRange();
-                rangeTemp.selectNodeContents(firstChild);
-                rangeTemp.collapse(true);
-                const rangeRects = range.getClientRects().length === 0 ? getSelectionPosition(cellElement, range) : range.getClientRects()[0];
-                const rangeTempRects = rangeTemp.getClientRects().length === 0 ? getSelectionPosition(cellElement, rangeTemp) : rangeTemp.getClientRects()[0];
-                if (rangeTempRects.top < rangeRects.top) {
-                    return false;
-                }
-            }
-            const trElement = cellElement.parentElement as HTMLTableRowElement;
-            let previousElement = trElement.previousElementSibling as HTMLTableRowElement;
-            if (!previousElement) {
-                previousElement = trElement.parentElement.previousElementSibling.lastElementChild as HTMLTableRowElement;
-            }
-            if (!previousElement || previousElement?.tagName === "COL") {
+        if (["ArrowUp", "ArrowDown"].includes(event.key) && isNotCtrl(event) &&
+            !event.shiftKey && !event.altKey && !event.isComposing && range.collapsed) {
+            const direction = event.key === "ArrowUp" ? "up" : "down";
+            if (!isCaretAtVerticalBoundary(cellElement, range, direction)) {
                 return false;
             }
-            const currentColIndex = getColIndex(cellElement);
-            let newCellElement = previousElement.cells[currentColIndex];
-            while (previousElement) {
-                let i = 0;
-                while (newCellElement && newCellElement.classList.contains("fn__none")) {
-                    i++;
-                    newCellElement = newCellElement.previousElementSibling as HTMLTableCellElement;
-                }
-                if (newCellElement.colSpan < 2 && i !== 0) {
-                    previousElement = previousElement.previousElementSibling as HTMLTableRowElement;
-                    newCellElement = previousElement.cells[currentColIndex];
-                } else if (newCellElement.colSpan > i) {
-                    break;
-                }
-            }
-
-            range.selectNodeContents(newCellElement);
-            range.collapse(false);
-            scrollCenter(protyle);
-            event.preventDefault();
-            return true;
-        }
-
-        if (event.key === "ArrowDown" && isNotCtrl(event) && !event.shiftKey && !event.altKey) {
-            if (cellElement.lastChild) {
-                let lastChild = cellElement.lastChild;
-                while (lastChild) {
-                    if (lastChild.textContent === "" && lastChild.nodeType === 3) {
-                        if (!lastChild.previousSibling) {
-                            break;
-                        }
-                        lastChild = lastChild.previousSibling;
-                    } else {
-                        break;
-                    }
-                }
-                const rangeTemp = document.createRange();
-                rangeTemp.selectNodeContents(lastChild);
-                rangeTemp.collapse(false);
-                if (getSelectionPosition(cellElement, rangeTemp).top > getSelectionPosition(cellElement, range).top) {
-                    return false;
-                }
-            }
-            const trElement = cellElement.parentElement as HTMLTableRowElement;
-            if ((!trElement.nextElementSibling && trElement.parentElement.tagName === "TBODY") ||
-                (trElement.parentElement.tagName === "THEAD" && !trElement.parentElement.nextElementSibling)) {
+            const target = getVerticalTableCell(cellElement, direction);
+            if (!target) {
                 return false;
             }
-            let nextElement = trElement.nextElementSibling as HTMLTableRowElement;
-            if (!nextElement) {
-                nextElement = trElement.parentElement.nextElementSibling.firstChild as HTMLTableRowElement;
-            }
-            if (!nextElement) {
-                return false;
-            }
-            let rowSpan = cellElement.rowSpan;
-            while (rowSpan > 1) {
-                rowSpan--;
-                nextElement = nextElement.nextElementSibling as HTMLTableRowElement;
-            }
-            let nextCellElement = nextElement.cells[getColIndex(cellElement)];
-            while (nextCellElement.classList.contains("fn__none") && nextCellElement.nextElementSibling) {
-                nextCellElement = nextCellElement.previousElementSibling as HTMLTableCellElement;
-            }
-            range.selectNodeContents(nextCellElement);
-            range.collapse(true);
-            scrollCenter(protyle);
+            focusEditableAtGoalX(target, direction, getCaretGoalX(range), protyle.contentElement);
             event.preventDefault();
             return true;
         }
@@ -990,6 +904,21 @@ export const buildTableGrid = (tableElement: HTMLElement): ITableGrid => {
         columnCount: grid.reduce((count, row) => Math.max(count, row.length), 0),
         grid,
     };
+};
+
+// 合并占位由逻辑网格确定，跨行单元格从其占据区域的外侧查找相邻行。
+export const getVerticalTableCell = (cell: HTMLTableCellElement, direction: "up" | "down") => {
+    const table = cell.closest("table");
+    if (!table) {
+        return;
+    }
+    const {grid, cellInfos} = buildTableGrid(table);
+    const info = cellInfos.find(item => item.cell === cell);
+    if (!info) {
+        return;
+    }
+    const row = direction === "up" ? info.row - 1 : info.row + info.rowspan;
+    return grid[row]?.[info.col] || undefined;
 };
 
 export const getTableCellSelectionIndexes = (

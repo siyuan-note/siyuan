@@ -206,6 +206,8 @@ export class AgentChat extends Model {
     private currentRoundID = "";
     private recoveryCommitTurnIDs = new Map<string, string>();
     private pendingRecoverySessionIDs = new Set<string>();
+    // 错误提示按会话和用户轮次保留，恢复重绘时重新显示，不参与模型上下文。
+    private sessionErrors = new Map<string, {message: string; userEntryID?: string}>();
     private recoveryInFlightSessionIDs = new Set<string>();
     private lute: Lute;
     private currentContent = "";
@@ -1067,6 +1069,8 @@ export class AgentChat extends Model {
     }
 
     private beginSessionRun(): ManagedAgentSessionRun {
+        this.sessionErrors.delete(this.sessionId);
+        this.messagesContainer.querySelectorAll(".agent-chat__msg--error").forEach(el => el.remove());
         const run = this.sessionRuns.begin(this.sessionId);
         this.abortController = run.controller;
         this.sessionRuns.markRead(this.sessionId);
@@ -1762,6 +1766,7 @@ export class AgentChat extends Model {
         this.pendingSessionTitle = null;
         this.applyPermissionMode("confirm");
         this.pendingRecoverySessionIDs.delete(deletedSessionID);
+        this.sessionErrors.delete(deletedSessionID);
         this.recoveryCommitTurnIDs.delete(deletedSessionID);
         this.pendingSessionTitles.delete(deletedSessionID);
         this.hasTitled = false;
@@ -2201,6 +2206,15 @@ export class AgentChat extends Model {
                     break;
             }
         }
+        const error = this.sessionErrors.get(session.id);
+        if (error) {
+            const lastUser = [...displayEntries].reverse().find(entry => entry.type === "user");
+            if (error.userEntryID === lastUser?.id) {
+                this.renderError(error.message);
+            } else {
+                this.sessionErrors.delete(session.id);
+            }
+        }
     }
 
     private buildEntriesFromSession(session: AgentSession): SessionEntry[] {
@@ -2345,6 +2359,7 @@ export class AgentChat extends Model {
             await SessionStore.remove(id);
         }
         this.pendingRecoverySessionIDs.delete(id);
+        this.sessionErrors.delete(id);
         this.recoveryCommitTurnIDs.delete(id);
         this.pendingSessionTitles.delete(id);
     }
@@ -3730,18 +3745,25 @@ export class AgentChat extends Model {
     }
 
     private appendError(message: string) {
+        const lastUser = [...this.entries].reverse().find(entry => entry.type === "user");
+        this.sessionErrors.set(this.sessionId, {message, userEntryID: lastUser?.id});
         this.finishActiveThinking();
         this.clearThinking();
         if (this.currentAIElement && !this.currentContent) {
             this.currentAIElement.remove();
         }
         this.currentAIElement = null;
+        this.renderError(message);
+        this.scrollToBottom(true);
+        this.flushThinkingStep();
+    }
+
+    private renderError(message: string) {
+        this.messagesContainer.querySelectorAll(".agent-chat__msg--error").forEach(el => el.remove());
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--error";
         el.innerHTML = '<div class="agent-chat__body agent-chat__body--error"><svg class="agent-chat__error-icon"><use xlink:href="#iconTriangleAlert"></use></svg><span>' + escapeHtml(message) + "</span></div>";
         this.messagesContainer.appendChild(el);
-        this.scrollToBottom(true);
-        this.flushThinkingStep();
     }
 
     private appendRetry(attempt: number, maxRetries: number) {

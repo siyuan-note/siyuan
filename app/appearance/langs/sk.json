@@ -3,6 +3,9 @@
 	"keymapCustomized": "Upravené mnou",
 	"keymapUnassigned": "Nepriradené",
 	"keymapAdd": "Pridať klávesovú skratku",
+	"aiProviderHeadersTip": "Zadajte objekt JSON s textovými hodnotami; vlastné hlavičky prepíšu predvolené hlavičky s rovnakým názvom vrátane autentifikačných hlavičiek; Podporuje {{secrets.NAME}} a {{vars.NAME}}; tajomstvá musia povoľovať hostiteľa poskytovateľa a priamo zadané hodnoty sa ukladajú ako obyčajný text",
+	"cellPasteUnsupported": "Prilepenie zrušené: bloky typu ${x} nie sú v tejto bunke podporované",
+	"templateNameTip": "Zadajte názov bez oddeľovačov cesty",
 	"keymapUnset": "Nenastavené",
 	"keymapPrimary": "Nastaviť ako hlavnú skratku",
 	"keymapRecording": "Stlačte klávesovú skratku...",
@@ -32,7 +35,7 @@
 	"templatePreview": "Náhľad šablóny",
 	"templateContext": "Kontext náhľadu",
 	"templateNewFolder": "Nový priečinok",
-	"templateDeleteTip": "Odstrániť túto položku a celý jej obsah? Odstránené súbory sa uchovajú v data/templates/.trash na obnovenie.",
+	"templateDeleteTip": "Odstrániť túto položku a celý jej obsah? Túto akciu nemožno vrátiť späť.",
 	"task": "Úloha",
 	"customTaskStatus": "Vlastný stav úlohy",
 	"imageViewerPlay": "Spustiť prezentáciu",
@@ -2746,6 +2749,8 @@
 		"375": "Zápisník na ukladanie rýchlych poznámok nie je k dispozícii. Vyberte otvorený nezašifrovaný zápisník v Nastavenia - Dokument",
 		"376": "Zdrojový súbor ešte nebol stiahnutý a momentálne ho nemožno získať",
 		"377": "Pred zmenou alebo obnovením dátového úložiska prepnite na Stiahnuť všetky",
-		"378": "Požiadavky medzi lokalitami nie sú povolené"
+		"378": "Požiadavky medzi lokalitami nie sú povolené",
+		"379": "Agent sa zastavil, pretože bol dosiahnutý časový limit relácie. Ak chcete pokračovať, odošlite správu alebo upravte časový limit v Nastavenia - AI",
+		"380": "OCR nie je podporované pre zdroje v šifrovaných zápisníkoch"
 	}
 }

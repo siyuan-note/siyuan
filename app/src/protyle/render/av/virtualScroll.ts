@@ -24,15 +24,14 @@ interface IBodyState {
     selectedRowIds?: Set<string>;
 }
 
-const dataStore = new Map<string, {
+const dataStore = new WeakMap<HTMLElement, {
     protyle: IProtyle;
     data: IAV;
+    lastScrollTop?: number;
 }>();
 const blockDataStore = new WeakMap<HTMLElement, IAV>();
 const bodyStates = new WeakMap<HTMLElement, IBodyState>();
 const trimPending = new WeakSet<HTMLElement>();
-let lastScrollTop: number;
-const localScrollTops = new WeakMap<HTMLElement, number>();
 
 // 测量 DOM 变更前后容器 scrollHeight 的差值，用于精确计算 gallery 多列网格中行移除/回填的实际高度（含 gap）
 const measureHeightDiff = (el: HTMLElement, mutate: () => void): number => {
@@ -83,19 +82,16 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
 
     // AV 重渲/新增分组/局部更新未走完整 initVirtualScroll 时 dataStore 可能缺失，跳过本次 trim，
     // 等下次 initVirtualScroll 重新登记后再处理，避免解引用 undefined.protyle
-    const stored = dataStore.get(blockElement.getAttribute("data-av-id") + blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW));
+    const stored = dataStore.get(blockElement);
     if (!stored) {
         return;
     }
     const protyle = stored.protyle;
     const scrollTop = (localScroller || protyle.contentElement).scrollTop;
-    const previousScrollTop = localScroller ? localScrollTops.get(localScroller) : lastScrollTop;
+    const previousScrollTop = stored.lastScrollTop;
     const isScrollingUp = previousScrollTop !== undefined && previousScrollTop > scrollTop;
-    if (localScroller) {
-        localScrollTops.set(localScroller, scrollTop);
-    } else {
-        lastScrollTop = scrollTop;
-    }
+    // 每个显示实例独立消费滚动位置，避免同帧中其他数据库先更新方向。
+    stored.lastScrollTop = scrollTop;
 
     if ((blockRect.bottom < elementRect.top && !isScrollingUp) || (blockRect.top > elementRect.bottom && isScrollingUp)) {
         return;
@@ -494,7 +490,7 @@ export const getBodyVirtualData = (bodyEl: HTMLElement, endSelector: string, fir
 const getBodyData = (bodyEl: HTMLElement) => {
     const avEl = bodyEl.closest(".av") as HTMLElement;
     if (!avEl) return null;
-    const stored = dataStore.get(avEl.getAttribute("data-av-id") + avEl.getAttribute(Constants.CUSTOM_SY_AV_VIEW));
+    const stored = dataStore.get(avEl);
     const data = blockDataStore.get(avEl) || stored?.data;
     if (!data) return null;
 
@@ -877,15 +873,14 @@ export const initVirtualScroll = (options: {
     setAVData(options.blockElement, options.data);
     const virtualized = options.blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) === "true";
     const needsGroupedTableState = options.data.viewType === "table" && options.data.view.groups?.length > 0;
-    const storeKey = options.blockElement.getAttribute("data-av-id") +
-        options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
     if (virtualized) {
-        dataStore.set(storeKey, {
+        dataStore.set(options.blockElement, {
             protyle: options.protyle,
             data: options.data,
+            lastScrollTop: (getBacklinkScrollElement(options.blockElement) || options.protyle.contentElement).scrollTop,
         });
     } else {
-        dataStore.delete(storeKey);
+        dataStore.delete(options.blockElement);
     }
     if (!virtualized && !needsGroupedTableState) {
         return;

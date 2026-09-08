@@ -79,3 +79,14 @@ export const getVisibleBoundaryBlock = (element: Element, direction: TVerticalDi
     }
     return findVisibleBoundaryBlock(element, direction, getEmbedNavigationScope(element), element);
 };
+
+export const getAdjacentVerticalBlock = (element: Element, direction: TVerticalDirection) => {
+    let adjacent = getAdjacentVisibleBlock(element, direction);
+    while (adjacent) {
+        const target = getVisibleBoundaryBlock(adjacent, direction);
+        if (target) {
+            return target as HTMLElement;
+        }
+        adjacent = getAdjacentVisibleBlock(adjacent, direction);
+    }
+};

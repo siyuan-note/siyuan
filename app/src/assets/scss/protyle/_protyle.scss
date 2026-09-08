@@ -857,7 +857,12 @@
 
 .table__cell-editor {
   min-width: 180px;
+  min-height: 0;
   white-space: normal;
+
+  &.protyle {
+    background-color: transparent;
+  }
 
   .protyle-content {
     overflow: visible;
@@ -866,6 +871,51 @@
   .protyle-wysiwyg {
     padding: 4px !important;
     min-height: 1.6em;
+  }
+}
+
+.table__cell-rich.table__cell--inline,
+.table__cell-editor.table__cell--inline {
+  min-width: 0;
+  min-height: 0;
+  padding: 0 !important;
+
+  &,
+  .protyle-wysiwyg {
+    padding: 0 !important;
+    min-height: 0;
+
+    > .p {
+      margin: 0;
+      padding: 0;
+      line-height: inherit;
+
+      > [contenteditable] {
+        min-height: 1lh;
+      }
+    }
+  }
+}
+
+.protyle-wysiwyg [data-type="NodeTable"] {
+  td[tabindex="-1"]:focus,
+  th[tabindex="-1"]:focus {
+    outline: none;
+  }
+
+  td:empty::after,
+  th:empty::after {
+    // 空单元格与输入文字共用行盒高度，避免输入第一个字符时改变整行高度。
+    content: "\200b";
+    display: block;
+    height: auto;
+  }
+}
+
+.table__cell-editor .protyle-wysiwyg > .p > [contenteditable]:empty {
+  &::before,
+  &::after {
+    content: none !important;
   }
 }
 

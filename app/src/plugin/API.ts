@@ -39,8 +39,8 @@ import {adjustEditorFontSize, setEditorFontSize} from "../util/editorFontSize";
 import {isDockPanelVisible, toggleDockPanel} from "../layout/dock/panel";
 /// #endif
 
-let openTab;
-let openWindow;
+let openTab: (options: any) => any;
+let openWindow: (options: any) => void;
 /// #if MOBILE
 openTab = () => {
     // TODO: Mobile
@@ -393,7 +393,7 @@ const isBottomDockVisible = () => {
     /// #endif
 };
 
-export const API = {
+const createAPI = () => ({
     adaptHotkey: updateHotkeyTip,
     confirm: confirmDialog,
     Constants,
@@ -439,4 +439,14 @@ export const API = {
     isLeftDockVisible,
     isRightDockVisible,
     isBottomDockVisible,
+});
+
+let api: ReturnType<typeof createAPI>;
+
+export const getAPI = () => {
+    // 在插件首次请求接口时初始化，避免循环依赖读取尚未初始化的模块成员。
+    if (!api) {
+        api = createAPI();
+    }
+    return api;
 };

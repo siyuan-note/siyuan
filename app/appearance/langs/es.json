@@ -3,6 +3,9 @@
 	"keymapCustomized": "Personalizados por mí",
 	"keymapUnassigned": "Sin asignar",
 	"keymapAdd": "Añadir atajo de teclado",
+	"aiProviderHeadersTip": "Introduce un objeto JSON con valores de texto; las cabeceras personalizadas sustituyen a las predeterminadas del mismo nombre, incluidas las de autenticación; Admite {{secrets.NAME}} y {{vars.NAME}}; los secretos deben permitir el host del proveedor y los valores directos se guardan en texto sin cifrar",
+	"cellPasteUnsupported": "Pegado cancelado: esta celda no admite bloques de tipo ${x}",
+	"templateNameTip": "Introduce un nombre sin separadores de ruta",
 	"keymapUnset": "Sin asignar",
 	"keymapPrimary": "Establecer como atajo principal",
 	"keymapRecording": "Pulsa un atajo...",
@@ -32,7 +35,7 @@
 	"templatePreview": "Vista previa de la plantilla",
 	"templateContext": "Contexto de vista previa",
 	"templateNewFolder": "Nueva carpeta",
-	"templateDeleteTip": "¿Eliminar este elemento y todo su contenido? Los archivos eliminados se conservan en data/templates/.trash para recuperarlos.",
+	"templateDeleteTip": "¿Eliminar este elemento y todo su contenido? Esta acción no se puede deshacer.",
 	"task": "Tarea",
 	"customTaskStatus": "Estado de tarea personalizado",
 	"imageViewerPlay": "Reproducir presentación",
@@ -2746,6 +2749,8 @@
 		"375": "El cuaderno para guardar notas rápidas no está disponible. Seleccione un cuaderno abierto y sin cifrar en Configuración - Documento",
 		"376": "El recurso aún no se ha descargado y no se puede obtener en este momento",
 		"377": "Cambie a Descargar todos antes de cambiar o restablecer el repositorio de datos",
-		"378": "No se permiten solicitudes entre sitios"
+		"378": "No se permiten solicitudes entre sitios",
+		"379": "El agente se detuvo porque se alcanzó el límite de tiempo de la sesión. Envía un mensaje para continuar o ajusta el tiempo de espera en Ajustes - IA",
+		"380": "No se admite OCR para los recursos de los cuadernos cifrados"
 	}
 }

@@ -1140,6 +1140,14 @@ export class WYSIWYG {
             const documentSelf = document;
             documentSelf.onmouseup = null;
             let target = event.target as HTMLElement;
+            const emptyCell = target.closest<HTMLTableCellElement>("td:empty, th:empty");
+            if (emptyCell && event.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey &&
+                !event.altKey && !protyle.disabled && emptyCell.closest(".protyle-wysiwyg") === this.element) {
+                // 空单元格直接进入编辑，阻止浏览器先在单元格顶部绘制临时光标。
+                event.preventDefault();
+                void import("../render/tableCellRichEditor").then(module => module.openTableCellRichEditor(protyle, emptyCell));
+                return;
+            }
             const customElement = hasClosestByClassName(target, "protyle-custom");
             let nodeElement = hasClosestBlock(target) as HTMLElement;
             let clickedTableNode = !customElement && nodeElement && nodeElement.dataset.type === "NodeTable" ?
@@ -1166,6 +1174,7 @@ export class WYSIWYG {
                 const nodeRect = clickedTableNode.getBoundingClientRect();
                 if (event.clientX > tableRect.right &&
                     event.clientY >= nodeRect.top && event.clientY <= nodeRect.bottom) {
+                    this.preventClick = true;
                     event.preventDefault();
                     event.stopPropagation();
                     return;
@@ -3876,6 +3885,20 @@ export class WYSIWYG {
             }
             return keyState;
         };
+        this.element.addEventListener("keyup", (event: KeyboardEvent) => {
+            if (event.isComposing || protyle.disabled || event.ctrlKey || event.metaKey || event.altKey ||
+                !["Tab", "Enter", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key) ||
+                (event.shiftKey && event.key !== "Tab")) {
+                return;
+            }
+            const selection = getSelection();
+            const target = selection?.focusNode;
+            const element = target instanceof Element ? target : target?.parentElement;
+            const cell = element?.closest<HTMLTableCellElement>("th, td");
+            if (cell && cell.closest(".protyle-wysiwyg") === this.element && cell.contains(selection.anchorNode)) {
+                void import("../render/tableCellRichEditor").then(module => module.openTableCellRichEditor(protyle, cell));
+            }
+        });
         this.element.addEventListener("keydown", (event: KeyboardEvent) => {
             if (event.key === "F2" && !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey &&
                 !event.isComposing && !protyle.disabled) {

@@ -12,6 +12,7 @@ import {
     createAVRichTextValue,
     getAVRichTextLute,
     getAVRichTextBlockDOM,
+    getAVRichTextUnsupportedPasteBlocks,
     getAVTextSource,
     sanitizeAVRichTextBlockDOM,
     serializeAVRichTextBlockDOM,
@@ -136,6 +137,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             pluginExtensions: false,
             customBlockRender: false,
             sanitizeBlockDOM: sanitizeAVRichTextBlockDOM,
+            getUnsupportedPasteBlocks: getAVRichTextUnsupportedPasteBlocks,
             restoreLuteMarkdownSyntax: configureAVRichTextLute,
         },
         afterSetContent: (protyle, element) => {

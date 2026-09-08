@@ -1,11 +1,12 @@
 import {isInEmbedBlock} from "../util/hasClosest";
+import {isDocumentBoundaryLoaded} from "../util/documentRange";
 import {focusBlock, focusByRange} from "../util/selection";
 import {scrollCenter} from "../../util/highlightById";
 import {getContenteditableElement} from "./getBlock";
 import {focusEditableAtGoalX, getCaretGoalX, TVerticalDirection} from "./verticalCaret";
 import {focusAVTitleByVerticalArrow, focusAVVerticalRegion} from "../render/av/focus";
 import {
-    getAdjacentVisibleBlock,
+    getAdjacentVerticalBlock,
     getVerticalNavigationScope,
     getVisibleBoundaryBlock,
     isVerticalNavigationElementVisible,
@@ -91,7 +92,14 @@ export const prepareVerticalNavigation = (editorElement: HTMLElement, event: Key
 };
 
 const focusAtomicRegion = (editorElement: HTMLElement, element: HTMLElement, direction: TVerticalDirection) => {
-    if (element.getAttribute("fold") === "1") {
+    if (element.classList.contains("custom-block")) {
+        editorElement.focus({preventScroll: true});
+        const range = document.createRange();
+        // 非编辑外壳内的折叠 Range 会被浏览器归一化，使用外侧边界并由原子标记解释所有者。
+        range.setStartBefore(element);
+        range.collapse(true);
+        focusByRange(range);
+    } else if (element.getAttribute("fold") === "1") {
         const range = document.createRange();
         range.setStart(element, 0);
         range.collapse(true);
@@ -103,6 +111,10 @@ const focusAtomicRegion = (editorElement: HTMLElement, element: HTMLElement, dir
     element.classList.add(VERTICAL_NAVIGATION_ATOMIC_CLASS);
     return true;
 };
+
+export const focusVerticalBlockSelection = (editorElement: HTMLElement, element: HTMLElement,
+                                            direction: TVerticalDirection) =>
+    focusAtomicRegion(editorElement, element, direction);
 
 type TVerticalNavigationOutcome = "moved" | "blocked" | "none";
 
@@ -196,7 +208,8 @@ const focusResolvedRegion = (protyle: IProtyle, element: Element | undefined,
 };
 
 export const focusFirstVerticalRegion = (protyle: IProtyle, goalX: number): TVerticalNavigationOutcome => {
-    if (protyle.disabled || !protyle.wysiwyg.element.isConnected) {
+    if (protyle.disabled || !protyle.wysiwyg.element.isConnected ||
+        !isDocumentBoundaryLoaded(protyle.wysiwyg.element, "before")) {
         return "blocked";
     }
     return focusResolvedRegion(protyle, getVisibleBoundaryBlock(protyle.wysiwyg.element, "down"), "down", goalX);
@@ -207,6 +220,9 @@ const focusDocumentTitle = (protyle: IProtyle, direction: TVerticalDirection,
     if (direction !== "up" || !protyle.title?.editElement ||
         protyle.title.editElement.getClientRects().length === 0) {
         return "none";
+    }
+    if (!isDocumentBoundaryLoaded(protyle.wysiwyg.element, "before")) {
+        return "blocked";
     }
     const target: TVerticalNavigationTarget = {
         type: "text",
@@ -270,13 +286,9 @@ export const focusAdjacentVerticalRegion = (protyle: IProtyle, sourceElement: HT
         }
     }
 
-    let adjacentElement = getAdjacentVisibleBlock(sourceElement, direction);
-    while (adjacentElement) {
-        const targetElement = getVisibleBoundaryBlock(adjacentElement, direction);
-        if (targetElement) {
-            return focusResolvedRegion(protyle, targetElement, direction, goalX);
-        }
-        adjacentElement = getAdjacentVisibleBlock(adjacentElement, direction);
+    const targetElement = getAdjacentVerticalBlock(sourceElement, direction);
+    if (targetElement) {
+        return focusResolvedRegion(protyle, targetElement, direction, goalX);
     }
     if (isInEmbedBlock(sourceElement)) {
         return "blocked";

@@ -3,6 +3,9 @@
 	"keymapCustomized": "Door mij aangepast",
 	"keymapUnassigned": "Niet toegewezen",
 	"keymapAdd": "Sneltoets toevoegen",
+	"aiProviderHeadersTip": "Voer een JSON-object met tekenreekswaarden in; aangepaste headers overschrijven standaardheaders met dezelfde naam, inclusief authenticatieheaders; Ondersteunt {{secrets.NAME}} en {{vars.NAME}}; geheimen moeten de providerhost toestaan en directe waarden worden als platte tekst opgeslagen",
+	"cellPasteUnsupported": "Plakken geannuleerd: blokken van het type ${x} worden niet ondersteund in deze cel",
+	"templateNameTip": "Voer een naam in zonder padscheidingstekens",
 	"keymapUnset": "Niet ingesteld",
 	"keymapPrimary": "Instellen als primaire sneltoets",
 	"keymapRecording": "Druk op een sneltoets...",
@@ -32,7 +35,7 @@
 	"templatePreview": "Sjabloonvoorbeeld",
 	"templateContext": "Voorbeeldcontext",
 	"templateNewFolder": "Nieuwe map",
-	"templateDeleteTip": "Dit item en alle inhoud verwijderen? Verwijderde bestanden blijven voor herstel bewaard in data/templates/.trash.",
+	"templateDeleteTip": "Dit item en alle inhoud verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
 	"task": "Taak",
 	"customTaskStatus": "Aangepaste taakstatus",
 	"imageViewerPlay": "Diavoorstelling afspelen",
@@ -2746,6 +2749,8 @@
 		"375": "Het notitieboek voor snelle notities is niet beschikbaar. Selecteer een geopend, niet-versleuteld notitieboek in Instellingen - Document",
 		"376": "Het bronbestand is nog niet gedownload en kan momenteel niet worden opgehaald",
 		"377": "Schakel over naar Alles downloaden voordat u de gegevensopslag wijzigt of opnieuw instelt",
-		"378": "Cross-siteverzoeken zijn niet toegestaan"
+		"378": "Cross-siteverzoeken zijn niet toegestaan",
+		"379": "De agent is gestopt omdat de tijdslimiet van de sessie is bereikt. Stuur een bericht om door te gaan of pas de time-out aan via Instellingen - AI",
+		"380": "OCR wordt niet ondersteund voor bronnen in versleutelde notitieboeken"
 	}
 }

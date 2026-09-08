@@ -7,8 +7,13 @@ describe("getUndoFocusElement", () => {
         assert.equal(getUndoFocusElement(["source", "embed"], "1", item => item === "source"), "embed");
     });
 
-    it("uses the target embed element when the global duplicate index is outside its scope", () => {
-        assert.equal(getUndoFocusElement(["embed"], "1", item => item === "source"), "embed");
+    it("does not silently reuse the first copy when the recorded index is missing", () => {
+        assert.equal(getUndoFocusElement(["embed"], "1", item => item === "source"), undefined);
+    });
+
+    it("requires an unambiguous candidate for older contexts without an index", () => {
+        assert.equal(getUndoFocusElement(["source", "embed"], undefined, item => item === "source"), "source");
+        assert.equal(getUndoFocusElement(["embed-a", "embed-b"], undefined, () => true), undefined);
     });
 
     it("does not fall back to another scope while the target embed is rendering", () => {

@@ -576,6 +576,7 @@ func exportConf(c *gin.Context) {
 		for _, provider := range clonedConf.AI.Providers {
 			if nil != provider {
 				provider.APIKey = ""
+				provider.Headers = nil
 			}
 		}
 		if nil != clonedConf.AI.Embedding {
@@ -750,6 +751,11 @@ func importConf(c *gin.Context) {
 		return
 	}
 	preserveImportedAISecrets(importedConf.AI, model.Conf.AI)
+	if err = validateAIProviderHeaders(importedConf.AI); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 	if nil != importedConf.System && nil != model.Conf.System {
 		// 更新通道是应用级全局设置，导入工作空间配置时保持不变。
 		importedConf.System.UpdateChannel = model.Conf.System.UpdateChannel
@@ -779,15 +785,20 @@ func preserveImportedAISecrets(imported, current *conf.AI) {
 
 	currentProviders := map[string]*conf.Provider{}
 	for _, provider := range current.Providers {
-		if provider != nil && provider.ID != "" && provider.APIKey != "" {
+		if provider != nil && provider.ID != "" {
 			currentProviders[provider.ID] = provider
 		}
 	}
 	for _, provider := range imported.Providers {
-		if provider != nil && provider.APIKey == "" {
+		if provider != nil {
 			if currentProvider := currentProviders[provider.ID]; currentProvider != nil &&
 				currentProvider.BaseURL == provider.BaseURL && currentProvider.Protocol == provider.Protocol {
-				provider.APIKey = currentProvider.APIKey
+				if provider.APIKey == "" {
+					provider.APIKey = currentProvider.APIKey
+				}
+				if provider.Headers == nil {
+					provider.Headers = currentProvider.Headers
+				}
 			}
 		}
 	}

@@ -1605,11 +1605,17 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
 
     public onRename(data: { path: string, title: string, box: string }) {
         const fileItemElement = this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${data.path}"]`);
-        if (!fileItemElement) {
-            return;
+        if (fileItemElement) {
+            fileItemElement.setAttribute("data-name", data.title);
+            fileItemElement.querySelector(".b3-list-item__text").innerHTML = escapeHtml(data.title);
         }
-        fileItemElement.setAttribute("data-name", data.title);
-        fileItemElement.querySelector(".b3-list-item__text").innerHTML = escapeHtml(data.title);
+        const parentPath = pathPosix().dirname(data.path);
+        const listPath = parentPath === "/" ? "/" : `${parentPath}.sy`;
+        const parentElement = this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${listPath}"]`);
+        const listElement = parentElement?.nextElementSibling;
+        if (listElement?.tagName === "UL" && !isCustomFileTreeList(listElement)) {
+            this.onFiletreeSortChanged({notebook: data.box, parentPath});
+        }
     }
 
     public onFiletreeSortChanged(data: { notebook: string, parentPath: string }) {

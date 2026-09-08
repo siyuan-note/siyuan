@@ -778,14 +778,16 @@ export const hideKeyboardToolbarUtilOnEditorClick = () => {
     hideKeyboardToolbarUtil();
 };
 
-const restoreKeyboardToolbarRange = (protyle: IProtyle | undefined, range: Range) => {
+const restoreKeyboardToolbarRange = (protyle: IProtyle | undefined, range?: Range) => {
     if (protyle) {
         const editorRange = getEditorFocusRange(protyle.wysiwyg.element, range, protyle.toolbar.range);
         if (restoreEditorFocusRange(protyle.wysiwyg.element, editorRange)) {
             return;
         }
     }
-    focusByRange(range);
+    if (range?.startContainer.isConnected && range.endContainer.isConnected) {
+        focusByRange(range);
+    }
 };
 
 const renderKeyboardToolbar = () => {
@@ -884,7 +886,7 @@ const renderKeyboardToolbar = () => {
             dynamicElements[1].querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
                 item.classList.remove("protyle-toolbar__item--current");
             });
-            const types = protyle.toolbar.getCurrentType(range);
+            const types = protyle.toolbar.getCurrentToolbarType(protyle, range);
             types.forEach(item => {
                 if (["search-mark", "a", "block-ref", "virtual-block-ref", "text", "file-annotation-ref", "inline-math",
                     "inline-memo", "", "backslash"].includes(item)) {
@@ -1360,25 +1362,31 @@ export const initKeyboardToolbar = () => {
 
         event.preventDefault();
         event.stopPropagation();
-        if (getSelection().rangeCount === 0) {
-            return;
-        }
-
-        const range = getSelection().getRangeAt(0);
-        if (type === "done") {
-            if (toolbarElement.clientHeight > 100) {
+        const selection = getSelection();
+        const currentRange = selection.rangeCount > 0 ? selection.getRangeAt(0) : undefined;
+        // 收起菜单不依赖实时选区，编辑器失焦后使用保存的选区恢复光标。
+        const closeAddMenu = type === "add" && buttonElement.classList.contains("protyle-toolbar__item--current");
+        if (type === "done" || closeAddMenu) {
+            if (closeAddMenu || toolbarElement.clientHeight > 100 ||
+                toolbarElement.querySelector('.keyboard__action.protyle-toolbar__item--current[data-type="add"]')) {
+                const range = protyle ? getEditorFocusRange(protyle.wysiwyg.element,
+                    currentRange, protyle.toolbar.range) : currentRange?.cloneRange();
+                hideKeyboardToolbarUtil();
                 if (isInHarmony() || isInAndroid()) {
                     setTimeout(() => restoreKeyboardToolbarRange(protyle, range), Constants.TIMEOUT_TRANSITION);
                 } else {
                     restoreKeyboardToolbarRange(protyle, range);
                 }
-                hideKeyboardToolbarUtil();
                 callMobileAppShowKeyboard();
             } else {
                 activeBlur();
             }
             return;
         }
+        if (!currentRange) {
+            return;
+        }
+        const range = currentRange;
         if (window.siyuan.config.readonly || !protyle || protyle.disabled) {
             return;
         }
@@ -1463,23 +1471,14 @@ export const initKeyboardToolbar = () => {
             focusByRange(range);
             return;
         } else if (type === "add") {
-            if (buttonElement.classList.contains("protyle-toolbar__item--current")) {
-                if (isInHarmony() || isInAndroid()) {
-                    setTimeout(() => restoreKeyboardToolbarRange(protyle, range), Constants.TIMEOUT_TRANSITION);
-                } else {
-                    restoreKeyboardToolbarRange(protyle, range);
-                }
-                hideKeyboardToolbarUtil();
-                callMobileAppShowKeyboard();
-            } else {
-                (document.activeElement as HTMLElement)?.blur();
-                buttonElement.classList.add("protyle-toolbar__item--current");
-                toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconCloseRound");
-                const oldScrollTop = protyle.contentElement.scrollTop;
-                renderSlashMenu(protyle, toolbarElement);
-                showKeyboardToolbarUtil(oldScrollTop);
-                window.JSAndroid?.hideKeyboard();
-            }
+            protyle.toolbar.range = range.cloneRange();
+            (document.activeElement as HTMLElement)?.blur();
+            buttonElement.classList.add("protyle-toolbar__item--current");
+            toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconCloseRound");
+            const oldScrollTop = protyle.contentElement.scrollTop;
+            renderSlashMenu(protyle, toolbarElement);
+            showKeyboardToolbarUtil(oldScrollTop);
+            window.JSAndroid?.hideKeyboard();
             return;
         } else if (type === "block") {
             protyle.gutter.renderMenu(protyle, nodeElement);

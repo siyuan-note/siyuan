@@ -3,6 +3,9 @@
 	"keymapCustomized": "Customized by me",
 	"keymapUnassigned": "Unassigned",
 	"keymapAdd": "Add shortcut",
+	"aiProviderHeadersTip": "Enter a JSON object with string values; custom headers override default headers with the same name, including authentication headers; Supports {{secrets.NAME}} and {{vars.NAME}}; secrets must allow the provider host, and direct values are stored in plaintext",
+	"cellPasteUnsupported": "Paste canceled: ${x} blocks are not supported in this cell",
+	"templateNameTip": "Enter a name without path separators",
 	"keymapUnset": "Not set",
 	"keymapPrimary": "Set as primary shortcut",
 	"keymapRecording": "Press shortcut...",
@@ -32,7 +35,7 @@
 	"templatePreview": "Preview template",
 	"templateContext": "Preview context",
 	"templateNewFolder": "New folder",
-	"templateDeleteTip": "Delete this item and all its contents? Deleted files are retained in data/templates/.trash for recovery.",
+	"templateDeleteTip": "Delete this item and all its contents? This action cannot be undone.",
 	"task": "Task",
 	"customTaskStatus": "Custom task status",
 	"imageViewerPlay": "Play slideshow",
@@ -2746,6 +2749,8 @@
 		"375": "The shorthand save notebook is unavailable. Select an opened non-encrypted notebook in Settings - Document",
 		"376": "The asset has not been downloaded and cannot be retrieved right now",
 		"377": "Please switch to Download all before changing or resetting the data repository",
-		"378": "Cross-site requests are not allowed"
+		"378": "Cross-site requests are not allowed",
+		"379": "The agent stopped because the session time limit was reached. Send a message to continue, or adjust the timeout in Settings - AI",
+		"380": "OCR is not supported for assets in encrypted notebooks"
 	}
 }

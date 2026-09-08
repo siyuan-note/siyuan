@@ -266,6 +266,36 @@ func TestMultipartUploadContinuesAfterDuplicateMatch(t *testing.T) {
 	}
 }
 
+func TestInsertLocalAssetsReusesCompleteRelativePaths(t *testing.T) {
+	assetsDir := setupAssetUploadTest(t)
+	names := []string{"photo.png", "scans/photo.png", "scans/pages/photo.png"}
+	inputs := make([]string, 0, len(names)+1)
+	for _, name := range names {
+		filePath := filepath.Join(assetsDir, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filePath, []byte(name), 0644); err != nil {
+			t.Fatal(err)
+		}
+		inputs = append(inputs, filePath)
+	}
+	inputs = append(inputs, filepath.Join(assetsDir, "scans", "missing.png"))
+	_, successes, failures, err := InsertLocalAssets("", inputs, true)
+	if err != nil || len(successes) != len(names) || len(failures) != 1 || failures[0].Index != len(names) {
+		t.Fatalf("unexpected result: successes=%+v failures=%+v err=%v", successes, failures, err)
+	}
+	for index, success := range successes {
+		if success.Path != "assets/"+names[index] {
+			t.Fatalf("unexpected reused path: %+v", success)
+		}
+		content, readErr := os.ReadFile(filepath.Join(util.DataDir, filepath.FromSlash(success.Path)))
+		if readErr != nil || string(content) != names[index] {
+			t.Fatalf("reused path changed content: %q, %v", content, readErr)
+		}
+	}
+}
+
 func TestMultipartUploadUsesEncryptedDirectoryAttribution(t *testing.T) {
 	setupAssetUploadTest(t)
 	originalWorkspaceDir := util.WorkspaceDir
@@ -298,43 +328,51 @@ func TestMultipartUploadUsesEncryptedDirectoryAttribution(t *testing.T) {
 	})
 
 	plainData := []byte("private PDF rectangle capture")
-	request := newAssetUploadTestRequest(t, []assetUploadTestFile{
-		{name: "annotation-20260908000001-hijklmn.png", data: plainData},
-		{name: "annotation-20260908000001-hijklmn.png", data: plainData},
-	}, map[string]string{"assetsDirPath": boxID + "/assets/", "skipIfDuplicated": "true"})
+	files := []assetUploadTestFile{
+		{name: "annotation-capture-v2-20260908000001-hijklmn.png", data: plainData},
+		{name: "annotation-capture-v2-20260908000001-hijklmn.png", data: plainData},
+		{name: "annotation-90-capture-v2-20260908000001-hijklmn.png", data: []byte("rotated capture")},
+		{name: "annotation-capture-v3-20260908000001-hijklmn.png", data: []byte("new capture profile")},
+	}
+	request := newAssetUploadTestRequest(t, files,
+		map[string]string{"assetsDirPath": boxID + "/assets/", "skipIfDuplicated": "true"})
 	response := executeAssetUploadTestRequest(t, request)
 
-	if response.Code != 0 || len(response.Data.FailedFiles) != 0 || len(response.Data.SuccFiles) != 2 {
+	if response.Code != 0 || len(response.Data.FailedFiles) != 0 || len(response.Data.SuccFiles) != len(files) {
 		t.Fatalf("unexpected encrypted upload response: %+v", response)
 	}
-	assetPath := response.Data.SuccFiles[0].Path
-	if !strings.HasPrefix(assetPath, "assets/") || !strings.HasSuffix(assetPath, "?box="+boxID) {
-		t.Fatalf("unexpected encrypted asset path: %s", assetPath)
-	}
-	if response.Data.SuccFiles[1].Path != assetPath {
-		t.Fatalf("duplicate PDF capture was not reused: %+v", response.Data.SuccFiles)
-	}
-	diskName := filepath.Base(strings.SplitN(assetPath, "?", 2)[0])
-	ciphertext, err := os.ReadFile(filepath.Join(util.DataDir, boxID, "assets", diskName))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if bytes.Equal(ciphertext, plainData) {
-		t.Fatal("encrypted notebook upload was stored as plaintext")
-	}
-	decrypted, originalName, err := DecryptAssetWithName(boxID, diskName, dek, ciphertext)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !bytes.Equal(decrypted, plainData) || originalName != "annotation-20260908000001-hijklmn.png" {
-		t.Fatalf("unexpected decrypted upload: name=%q data=%q", originalName, decrypted)
+	paths := map[string]bool{}
+	for index, success := range response.Data.SuccFiles {
+		assetPath := success.Path
+		if !strings.HasPrefix(assetPath, "assets/") || !strings.HasSuffix(assetPath, "?box="+boxID) {
+			t.Fatalf("unexpected encrypted asset path: %s", assetPath)
+		}
+		if paths[assetPath] {
+			t.Fatalf("encrypted captures reused a filename match: %s", assetPath)
+		}
+		paths[assetPath] = true
+		diskName := filepath.Base(strings.SplitN(assetPath, "?", 2)[0])
+		ciphertext, err := os.ReadFile(filepath.Join(util.DataDir, boxID, "assets", diskName))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if bytes.Equal(ciphertext, files[index].data) {
+			t.Fatal("encrypted notebook upload was stored as plaintext")
+		}
+		decrypted, originalName, err := DecryptAssetWithName(boxID, diskName, dek, ciphertext)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !bytes.Equal(decrypted, files[index].data) || originalName != files[index].name {
+			t.Fatalf("unexpected decrypted upload: name=%q data=%q", originalName, decrypted)
+		}
 	}
 	entries, err := os.ReadDir(filepath.Join(util.DataDir, boxID, "assets"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(entries) != 1 {
-		t.Fatalf("duplicate PDF capture created %d encrypted assets", len(entries))
+	if len(entries) != len(files) {
+		t.Fatalf("unexpected encrypted asset count: %d", len(entries))
 	}
 	if entries, readErr := os.ReadDir(filepath.Join(util.DataDir, "assets")); readErr == nil && len(entries) > 0 {
 		t.Fatalf("encrypted upload created global assets: %+v", entries)

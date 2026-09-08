@@ -38,6 +38,19 @@ type aiEditorChatReq struct {
 	History []model.AIEditorMessage `json:"history"`
 }
 
+func validateAIProviderHeaders(ai *conf.AI) error {
+	if ai != nil {
+		for _, provider := range ai.Providers {
+			if provider != nil {
+				if err := util.ValidateAIProviderHeaders(provider.Headers); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func resolveAIProvider(arg map[string]any) (*conf.Provider, error) {
 	if providerConfig, ok := arg["providerConfig"]; ok && providerConfig != nil {
 		data, err := gulu.JSON.MarshalJSON(providerConfig)
@@ -50,6 +63,9 @@ func resolveAIProvider(arg map[string]any) (*conf.Provider, error) {
 		}
 		if strings.TrimSpace(provider.BaseURL) == "" {
 			return nil, errors.New("provider base URL is required")
+		}
+		if err = util.ValidateAIProviderHeaders(provider.Headers); err != nil {
+			return nil, err
 		}
 		ai := &conf.AI{Providers: []*conf.Provider{provider}}
 		ai.Normalize()
@@ -277,7 +293,7 @@ func testModel(c *gin.Context) {
 	}
 
 	available, matched, err := util.TestModel(
-		provider.APIKey, provider.BaseURL, provider.Protocol, modelName, provider.RequestTimeout)
+		provider.APIKey, provider.BaseURL, provider.Protocol, modelName, provider.RequestTimeout, model.ResolveAIProviderHeaders(provider))
 	// 可用模型清单裁剪到前 50 条，避免响应体过大
 	if 50 < len(available) {
 		available = available[:50]
@@ -381,7 +397,7 @@ func listModels(c *gin.Context) {
 		return
 	}
 
-	metadata, err := util.ListAvailableModelsWithContext(provider.APIKey, provider.BaseURL, provider.RequestTimeout)
+	metadata, err := util.ListAvailableModelsWithContext(provider.APIKey, provider.BaseURL, provider.RequestTimeout, model.ResolveAIProviderHeaders(provider))
 	models := make([]string, 0, len(metadata))
 	contextLengths := map[string]int{}
 	for _, item := range metadata {

@@ -655,15 +655,6 @@ export const workspaceMenu = async (app: App, rect: DOMRect) => {
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
-                id: "lockScreen",
-                label: window.siyuan.languages.lockScreen,
-                icon: "iconLock",
-                accelerator: window.siyuan.config.keymap.general.lockScreen.custom,
-                click: () => {
-                    lockScreen();
-                }
-            }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
                 id: "dataHistory",
                 label: window.siyuan.languages.dataHistory,
                 icon: "iconHistory",
@@ -672,6 +663,16 @@ export const workspaceMenu = async (app: App, rect: DOMRect) => {
                     openHistory(app);
                 }
             }).element);
+            if (!window.siyuan.config.readonly && getHostCapabilities().importExport) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "dataMigration",
+                    label: window.siyuan.languages.dataMigration,
+                    icon: "iconDatabaseBackup",
+                    click: () => {
+                        openDataMigration();
+                    }
+                }).element);
+            }
             if (getHostCapabilities().importExport) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "templateManager",
@@ -684,16 +685,15 @@ export const workspaceMenu = async (app: App, rect: DOMRect) => {
                     }
                 }).element);
             }
-            if (!window.siyuan.config.readonly && getHostCapabilities().importExport) {
-                window.siyuan.menus.menu.append(new MenuItem({
-                    id: "dataMigration",
-                    label: window.siyuan.languages.dataMigration,
-                    icon: "iconDatabaseBackup",
-                    click: () => {
-                        openDataMigration();
-                    }
-                }).element);
-            }
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "lockScreen",
+                label: window.siyuan.languages.lockScreen,
+                icon: "iconLock",
+                accelerator: window.siyuan.config.keymap.general.lockScreen.custom,
+                click: () => {
+                    lockScreen();
+                }
+            }).element);
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
         }
         window.siyuan.menus.menu.append(new MenuItem({

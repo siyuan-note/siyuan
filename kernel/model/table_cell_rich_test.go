@@ -9,6 +9,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -119,6 +120,98 @@ func TestTableCellRichHTMLAndMarkdownExports(t *testing.T) {
 				t.Fatal("export used stale source")
 			}
 		})
+	}
+}
+
+func TestTableCellRichPreviewNormalization(t *testing.T) {
+	luteEngine := util.NewLute()
+	tree := parse.Parse("", []byte("| 1 | 2 | 3 |\n| --- | --- | --- |\n| 123 | text | next |\n\n| Key | Text |\n| --- | --- |\n| 111 | value |"), luteEngine.ParseOptions)
+	table := tree.Root.FirstChild
+	var cell *ast.Node
+	index := 0
+	ast.Walk(table, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && node.Type == ast.NodeTableCell {
+			if index == 2 {
+				cell = node
+			}
+			index++
+		}
+		return ast.WalkContinue
+	})
+	cell.TableCellRich = &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: "3\n\n## 4\n\n5"}
+	var lastTable *ast.Node
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && node.Type == ast.NodeTable {
+			lastTable = node
+		}
+		return ast.WalkContinue
+	})
+	second := lastTable.LastChild.LastChild
+	second.TableCellRich = &ast.TableCellRich{Spec: 1, Format: "kramdown", Content: "- first\n- second"}
+	if err := treenode.MaterializeTableCellRichExport(tree.Root); err != nil {
+		t.Fatal(err)
+	}
+	previewTree := normalizeExportPreviewTree(tree, luteEngine)
+	tableCount := 0
+	ast.Walk(previewTree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && node.Type == ast.NodeTable {
+			tableCount++
+		}
+		if entering && node.Type == ast.NodeHeading && node.Parent.Type != ast.NodeTableCell {
+			t.Fatal("cell heading escaped the table")
+		}
+		return ast.WalkContinue
+	})
+	if tableCount != 2 || table.Parent != previewTree.Root || cell.ChildByType(ast.NodeHeading) == nil ||
+		second.ChildByType(ast.NodeList) == nil {
+		t.Fatalf("preview normalization changed rich table structure: tables=%d parent=%v heading=%v list=%v html=%s", tableCount, table.Parent == previewTree.Root, cell.ChildByType(ast.NodeHeading) != nil, second.ChildByType(ast.NodeList) != nil, luteEngine.ProtylePreview(previewTree, luteEngine.RenderOptions, luteEngine.ParseOptions))
+	}
+	html := luteEngine.ProtylePreview(previewTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+	for _, expected := range []string{"<table", "<h2", "<ul", "first", "second", "123"} {
+		if !strings.Contains(html, expected) {
+			t.Fatalf("preview missing %q: %s", expected, html)
+		}
+	}
+	if strings.Contains(html, "table-cell-preview-") || strings.Contains(html, "## 4") {
+		t.Fatalf("preview leaked normalization markers: %s", html)
+	}
+}
+
+func TestAttributeViewRichTextExport(t *testing.T) {
+	luteEngine := util.NewLute()
+	tree := parse.Parse("", []byte("| Key | Text |\n| --- | --- |\n| 111 | |"), luteEngine.ParseOptions)
+	cell := tree.Root.FirstChild.LastChild.LastChild
+	value := &av.ValueText{Content: "foo\n123\n123", Rich: &av.ValueTextRich{
+		Spec: av.ValueTextRichSpec, Format: av.ValueTextRichFormatKramdown,
+		Content: "**foo**\n\n- 123\n  - 123",
+	}}
+	if err := appendAttributeViewRichTextExport(cell, value); err != nil {
+		t.Fatal(err)
+	}
+	preview := normalizeExportPreviewTree(tree, luteEngine)
+	for name, output := range map[string]string{
+		"preview": luteEngine.ProtylePreview(preview, luteEngine.RenderOptions, luteEngine.ParseOptions),
+		"html":    string(render.NewProtyleExportRenderer(preview, luteEngine.RenderOptions, luteEngine.ParseOptions).Render()),
+		"word":    string(render.NewProtyleExportDocxRenderer(preview, luteEngine.RenderOptions, luteEngine.ParseOptions).Render()),
+	} {
+		t.Run(name, func(t *testing.T) {
+			listMarker, boldMarker := "<ul", "<strong"
+			if name == "preview" {
+				boldMarker = `data-type="strong"`
+			}
+			if name == "html" {
+				listMarker, boldMarker = `data-type="NodeList"`, `data-type="strong"`
+			}
+			if strings.Count(output, listMarker) != 2 || !strings.Contains(output, boldMarker) ||
+				!strings.Contains(output, "foo") || strings.Count(output, "123") != 2 {
+				t.Fatalf("database rich text lost nested lists or formatting: %s", output)
+			}
+		})
+	}
+	invalid := &av.ValueText{Rich: &av.ValueTextRich{Spec: 99, Format: av.ValueTextRichFormatKramdown}}
+	empty := &ast.Node{Type: ast.NodeTableCell}
+	if err := appendAttributeViewRichTextExport(empty, invalid); err == nil || empty.FirstChild != nil {
+		t.Fatal("invalid rich text must return an error without populating the cell")
 	}
 }
 

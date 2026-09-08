@@ -4,8 +4,11 @@ import {fetchSyncPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
 import {showMessage} from "../dialog/message";
 import {clearTemplatePreview, previewTemplate} from "../protyle/toolbar/util";
-import {getTemplateTree, TemplateEntry} from "./fileTree";
-import {getTemplateActionState} from "./actionState";
+import {getTemplateRenameTarget, getTemplateTree, TemplateEntry} from "./fileTree";
+import {getTemplateActionEntry, getTemplateActionState} from "./actionState";
+import {openBy} from "../editor/util";
+import {getHostCapabilities} from "../util/hostCapabilities";
+import {isBrowser, isMobile} from "../util/functions";
 
 export const loadTemplateDirectories = async (select: HTMLSelectElement) => {
     const response = await fetchSyncPost("/api/template/manage", {action: "list"});
@@ -20,9 +23,11 @@ export const loadTemplateDirectories = async (select: HTMLSelectElement) => {
     select.value = Array.from(select.options).some(option => option.value === value) ? value : "";
 };
 
-export const openTemplateManager = (contextID = "", onClose?: () => void) => {
+export const openTemplateManager = (contextID = "", onClose?: () => void, initialPath = "") => {
     const lang = window.siyuan.languages;
     let selected: TemplateEntry;
+    let editing: TemplateEntry;
+    let editingRevision = "";
     let entries: TemplateEntry[] = [];
     let saved = "";
     let useCRLF = false;
@@ -38,8 +43,9 @@ export const openTemplateManager = (contextID = "", onClose?: () => void) => {
         height: "min(800px, 90vh)",
         content: `<div class="template-manager">
 <div class="template-manager__actions">
-${button("new", lang.new + " " + lang.template)}${button("mkdir", lang.templateNewFolder)}
+${button("new", lang.newTemplate)}${button("mkdir", lang.templateNewFolder)}
 ${button("rename", lang.rename)}${button("move", lang.move)}${button("remove", lang.remove)}${button("refresh", lang.refresh)}
+${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button("open", lang.showInFolder) : ""}
 </div>
 <div class="template-manager__panels">
 <div class="template-manager__sidebar">
@@ -107,14 +113,15 @@ ${button("rename", lang.rename)}${button("move", lang.move)}${button("remove", l
         destroy();
     });
     const update = () => {
-        pathLabel.textContent = (selected?.path || "") + (dirty() ? " *" : "");
-        pathLabel.classList.toggle("fn__none", !selected);
-        source.disabled = !selected || selected.isDir;
+        pathLabel.textContent = (editing?.path || "") + (dirty() ? " *" : "");
+        pathLabel.classList.toggle("fn__none", !editing);
+        source.disabled = !editing;
         source.readOnly = busy;
         list.setAttribute("aria-busy", String(busy));
         dialog.element.querySelectorAll<HTMLButtonElement>(".template-manager__actions > [data-action]").forEach(element => {
             const action = element.dataset.action;
-            const state = getTemplateActionState(action, selected, dirty(), busy, Boolean(context.value));
+            const state = getTemplateActionState(action, getTemplateActionEntry(action, selected, editing),
+                dirty(), busy, Boolean(context.value));
             element.title = state.packageMove ? lang.templatePackageMoveTip : "";
             element.disabled = state.disabled;
             // 请求期间保留按钮外观，由事件入口拦截重复操作。
@@ -190,7 +197,27 @@ ${button("rename", lang.rename)}${button("move", lang.move)}${button("remove", l
             element.append(name);
             element.title = entry.path;
             element.addEventListener("click", () => {
-                if (entry.path !== selected?.path) {
+                if (busy || closed) {
+                    return;
+                }
+                if (entry.isDir) {
+                    void run(async () => {
+                        await select(entry, true);
+                        if (!fileSearch.value.trim()) {
+                            if (expandedPaths.has(entry.path)) {
+                                expandedPaths.delete(entry.path);
+                            } else {
+                                expandedPaths.add(entry.path);
+                            }
+                        }
+                        renderList();
+                    });
+                } else if (entry.path === editing?.path) {
+                    selected = entry;
+                    revision = editingRevision;
+                    renderList();
+                    update();
+                } else if (entry.path !== selected?.path) {
                     guard(() => run(() => select(entry)));
                 }
             });
@@ -199,25 +226,30 @@ ${button("rename", lang.rename)}${button("move", lang.move)}${button("remove", l
         });
         list.scrollTop = scrollTop;
     };
-    const select = async (entry?: TemplateEntry) => {
+    const select = async (entry?: TemplateEntry, preserveEditor = false) => {
+        let content = "";
+        let absolutePath = "";
         if (entry) {
             const response = await api({action: "read", path: entry.path});
             if (!response) {
                 return;
             }
             revision = response.data.revision;
-            saved = response.data.content;
-            useCRLF = saved.includes("\r\n") && !saved.replace(/\r\n/g, "").includes("\n");
-            previewPath = response.data.path || "";
+            content = response.data.content;
+            absolutePath = response.data.path || "";
         } else {
-            saved = "";
             revision = "";
-            previewPath = "";
         }
         selected = entry;
-        source.value = saved;
-        saved = source.value;
-        clearTemplatePreview(preview);
+        if (!preserveEditor) {
+            editing = entry && !entry.isDir ? entry : undefined;
+            editingRevision = editing ? revision : "";
+            useCRLF = content.includes("\r\n") && !content.replace(/\r\n/g, "").includes("\n");
+            previewPath = absolutePath;
+            source.value = content;
+            saved = source.value;
+            clearTemplatePreview(preview);
+        }
         list.querySelectorAll<HTMLElement>("li[data-path]").forEach(row => {
             const active = row.dataset.path === selected?.path;
             row.classList.toggle("b3-list-item--focus", active);
@@ -245,12 +277,14 @@ ${button("rename", lang.rename)}${button("move", lang.move)}${button("remove", l
             list.querySelector(".b3-list-item--focus")?.scrollIntoView({block: "nearest", inline: "nearest"});
         }
     };
-    const inputPath = (title: string, value: string, callback: (value: string) => Promise<void>) => {
+    const inputPath = (title: string, value: string, callback: (value: string) => Promise<void>, nameOnly = false) => {
         const prompt = new Dialog({
             title,
             width: "min(520px, 92vw)",
-            content: `<div class="b3-dialog__content"><label>${lang.savePath}<input class="b3-text-field fn__block" spellcheck="false"></label></div>
-<div class="b3-dialog__action">${button("cancel", lang.cancel)}<div class="fn__space"></div>${button("confirm", lang.confirm)}</div>`
+            content: `<div class="b3-dialog__content"><label>${nameOnly ? lang.name : lang.savePath}<div class="fn__hr"></div><input class="b3-text-field fn__block" spellcheck="false"></label></div>
+<div class="b3-dialog__action">
+<button type="button" class="b3-button b3-button--cancel" data-action="cancel">${lang.cancel}</button><div class="fn__space"></div>
+<button type="button" class="b3-button b3-button--text" data-action="confirm">${lang.confirm}</button></div>`
         });
         const input = prompt.element.querySelector<HTMLInputElement>("input");
         input.value = value;
@@ -262,17 +296,25 @@ ${button("rename", lang.rename)}${button("move", lang.move)}${button("remove", l
                 input.focus();
                 return;
             }
+            if (nameOnly && getTemplateRenameTarget(selected.path, input.value.trim()) === undefined) {
+                input.setCustomValidity(lang.templateNameTip);
+                input.reportValidity();
+                return;
+            }
             prompt.destroy();
             void run(() => callback(input.value.trim()));
         });
+        input.addEventListener("input", () => input.setCustomValidity(""));
     };
     const move = () => {
         const entry = selected;
         const prompt = new Dialog({
             title: lang.move,
             width: "min(520px, 92vw)",
-            content: `<div class="b3-dialog__content"><label>${lang.savePath}<select class="b3-select fn__block"></select></label></div>
-<div class="b3-dialog__action">${button("cancel", lang.cancel)}<div class="fn__space"></div>${button("confirm", lang.confirm)}</div>`
+            content: `<div class="b3-dialog__content"><label>${lang.savePath}<div class="fn__hr"></div><select class="b3-select fn__block"></select></label></div>
+<div class="b3-dialog__action">
+<button type="button" class="b3-button b3-button--cancel" data-action="cancel">${lang.cancel}</button><div class="fn__space"></div>
+<button type="button" class="b3-button b3-button--text" data-action="confirm">${lang.confirm}</button></div>`
         });
         const destination = prompt.element.querySelector<HTMLSelectElement>("select");
         destination.add(new Option("/", ""));
@@ -353,12 +395,23 @@ ${button("rename", lang.rename)}${button("move", lang.move)}${button("remove", l
         if (action === "save") {
             void run(async () => {
                 const content = useCRLF ? source.value.replace(/\n/g, "\r\n") : source.value;
-                const response = await api({action: "write", path: selected.path, content, revision});
+                const response = await api({action: "write", path: editing.path, content, revision: editingRevision});
                 if (response) {
                     saved = source.value;
-                    revision = response.data.revision;
+                    editingRevision = response.data.revision;
+                    if (selected?.path === editing.path) {
+                        revision = editingRevision;
+                    } else if (selected?.isDir && editing.path.startsWith(selected.path + "/")) {
+                        const directory = await api({action: "read", path: selected.path});
+                        if (directory) {
+                            revision = directory.data.revision;
+                        }
+                    }
                 }
             });
+        } else if (action === "open") {
+            const root = window.siyuan.config.system.dataDir.replace(/\\/g, "/").replace(/\/$/, "") + "/templates";
+            openBy(selected ? root + "/" + selected.path : root, selected ? "folder" : "app");
         } else if (action === "preview") {
             previewTemplate(previewPath, preview, context.value, source.value);
         } else {
@@ -377,8 +430,8 @@ ${button("rename", lang.rename)}${button("move", lang.move)}${button("remove", l
                     }, undefined, true);
                 } else {
                     const directory = selected?.isDir ? selected.path + "/" : (selected?.path.substring(0, selected.path.lastIndexOf("/") + 1) || "");
-                    const initial = ["rename", "move"].includes(action) ? selected.path : directory + (action === "new" ? lang.untitled + ".md" : lang.untitled);
-                    inputPath(action === "mkdir" ? lang.templateNewFolder : (action === "rename" ? lang.rename : lang.template), initial, async value => {
+                    const initial = action === "rename" ? selected.path.split("/").pop() : directory + (action === "new" ? lang.untitled + ".md" : lang.untitled);
+                    inputPath(action === "mkdir" ? lang.templateNewFolder : (action === "rename" ? lang.rename : lang.newTemplate), initial, async value => {
                         let response;
                         if (action === "new") {
                             value = /\.md$/i.test(value) ? value : value + ".md";
@@ -386,16 +439,20 @@ ${button("rename", lang.rename)}${button("move", lang.move)}${button("remove", l
                         } else if (action === "mkdir") {
                             response = await api({action: "mkdir", path: value});
                         } else {
+                            value = getTemplateRenameTarget(selected.path, value);
+                            if (value === selected.path) {
+                                return;
+                            }
                             response = await api({action: "move", path: selected.path, target: value, revision});
                         }
                         if (response) {
                             await reload(value, true);
                         }
-                    });
+                    }, action === "rename");
                 }
             });
         }
     });
     update();
-    void run(() => reload());
+    void run(() => reload(initialPath, Boolean(initialPath)));
 };

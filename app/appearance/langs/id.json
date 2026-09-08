@@ -3,6 +3,9 @@
 	"keymapCustomized": "Disesuaikan oleh saya",
 	"keymapUnassigned": "Belum ditetapkan",
 	"keymapAdd": "Tambah pintasan keyboard",
+	"aiProviderHeadersTip": "Masukkan objek JSON dengan nilai string; header khusus menggantikan header bawaan dengan nama yang sama, termasuk header autentikasi; Mendukung {{secrets.NAME}} dan {{vars.NAME}}; rahasia harus mengizinkan host penyedia, dan nilai langsung disimpan sebagai teks biasa",
+	"cellPasteUnsupported": "Penempelan dibatalkan: blok ${x} tidak didukung dalam sel ini",
+	"templateNameTip": "Masukkan nama tanpa pemisah jalur",
 	"keymapUnset": "Belum diatur",
 	"keymapPrimary": "Jadikan pintasan utama",
 	"keymapRecording": "Tekan pintasan...",
@@ -32,7 +35,7 @@
 	"templatePreview": "Pratinjau templat",
 	"templateContext": "Konteks pratinjau",
 	"templateNewFolder": "Folder baru",
-	"templateDeleteTip": "Hapus item ini beserta seluruh isinya? Berkas yang dihapus disimpan di data/templates/.trash untuk dipulihkan.",
+	"templateDeleteTip": "Hapus item ini beserta seluruh isinya? Tindakan ini tidak dapat dibatalkan.",
 	"task": "Tugas",
 	"customTaskStatus": "Status tugas kustom",
 	"imageViewerPlay": "Putar tayangan slide",
@@ -2746,6 +2749,8 @@
 		"375": "Buku catatan penyimpanan catatan cepat tidak tersedia. Pilih buku catatan terbuka dan tidak terenkripsi di Pengaturan - Dokumen",
 		"376": "Sumber daya belum diunduh dan saat ini tidak dapat diambil",
 		"377": "Beralihlah ke Unduh semua sebelum mengubah atau mengatur ulang repositori data",
-		"378": "Permintaan lintas situs tidak diizinkan"
+		"378": "Permintaan lintas situs tidak diizinkan",
+		"379": "Agen berhenti karena batas waktu sesi tercapai. Kirim pesan untuk melanjutkan, atau sesuaikan batas waktu di Pengaturan - AI",
+		"380": "OCR tidak didukung untuk sumber daya dalam buku catatan terenkripsi"
 	}
 }

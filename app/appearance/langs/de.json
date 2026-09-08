@@ -3,6 +3,9 @@
 	"keymapCustomized": "Von mir angepasst",
 	"keymapUnassigned": "Nicht zugewiesen",
 	"keymapAdd": "Tastenkürzel hinzufügen",
+	"aiProviderHeadersTip": "JSON-Objekt mit Zeichenfolgenwerten eingeben; eigene Header überschreiben gleichnamige Standardheader, einschließlich Authentifizierungsheadern; Unterstützt {{secrets.NAME}} und {{vars.NAME}}; der Anbieterhost muss für das Geheimnis erlaubt sein, direkt eingegebene Werte werden im Klartext gespeichert",
+	"cellPasteUnsupported": "Einfügen abgebrochen: ${x}-Blöcke werden in dieser Zelle nicht unterstützt",
+	"templateNameTip": "Einen Namen ohne Pfadtrennzeichen eingeben",
 	"keymapUnset": "Nicht festgelegt",
 	"keymapPrimary": "Als primäres Tastenkürzel festlegen",
 	"keymapRecording": "Tastenkürzel drücken...",
@@ -32,7 +35,7 @@
 	"templatePreview": "Vorlage anzeigen",
 	"templateContext": "Vorschaukontext",
 	"templateNewFolder": "Neuer Ordner",
-	"templateDeleteTip": "Dieses Element und seinen gesamten Inhalt löschen? Gelöschte Dateien bleiben zur Wiederherstellung unter data/templates/.trash erhalten.",
+	"templateDeleteTip": "Dieses Element und seinen gesamten Inhalt löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
 	"task": "Aufgabe",
 	"customTaskStatus": "Benutzerdefinierter Aufgabenstatus",
 	"imageViewerPlay": "Diashow starten",
@@ -2746,6 +2749,8 @@
 		"375": "Das Notizbuch zum Speichern von Kurznotizen ist nicht verfügbar. Wählen Sie unter Einstellungen - Dokument ein geöffnetes, unverschlüsseltes Notizbuch",
 		"376": "Die Ressource wurde noch nicht heruntergeladen und kann derzeit nicht abgerufen werden",
 		"377": "Bitte wechseln Sie zu Alle herunterladen, bevor Sie das Datenrepository ändern oder zurücksetzen",
-		"378": "Websiteübergreifende Anfragen sind nicht zulässig"
+		"378": "Websiteübergreifende Anfragen sind nicht zulässig",
+		"379": "Der Agent wurde gestoppt, weil das Zeitlimit der Sitzung erreicht wurde. Senden Sie eine Nachricht, um fortzufahren, oder passen Sie das Zeitlimit unter Einstellungen - KI an",
+		"380": "OCR wird für Ressourcen in verschlüsselten Notizbüchern nicht unterstützt"
 	}
 }

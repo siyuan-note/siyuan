@@ -3,6 +3,9 @@
 	"keymapCustomized": "Personalizados por mim",
 	"keymapUnassigned": "Não atribuídos",
 	"keymapAdd": "Adicionar atalho de teclado",
+	"aiProviderHeadersTip": "Insira um objeto JSON com valores de texto; cabeçalhos personalizados substituem os cabeçalhos padrão com o mesmo nome, incluindo os de autenticação; Suporta {{secrets.NAME}} e {{vars.NAME}}; os segredos devem permitir o host do provedor, e valores diretos são armazenados em texto simples",
+	"cellPasteUnsupported": "Colagem cancelada: blocos do tipo ${x} não são compatíveis com esta célula",
+	"templateNameTip": "Digite um nome sem separadores de caminho",
 	"keymapUnset": "Não definido",
 	"keymapPrimary": "Definir como atalho principal",
 	"keymapRecording": "Pressione um atalho...",
@@ -32,7 +35,7 @@
 	"templatePreview": "Pré-visualizar modelo",
 	"templateContext": "Contexto da pré-visualização",
 	"templateNewFolder": "Nova pasta",
-	"templateDeleteTip": "Excluir este item e todo o seu conteúdo? Os arquivos excluídos são mantidos em data/templates/.trash para recuperação.",
+	"templateDeleteTip": "Excluir este item e todo o seu conteúdo? Esta ação não pode ser desfeita.",
 	"task": "Tarefa",
 	"customTaskStatus": "Status de tarefa personalizado",
 	"imageViewerPlay": "Reproduzir apresentação de slides",
@@ -2746,6 +2749,8 @@
 		"375": "O caderno para salvar notas rápidas não está disponível. Selecione um caderno aberto e não criptografado em Configurações - Documento",
 		"376": "O recurso ainda não foi baixado e não pode ser obtido no momento",
 		"377": "Mude para Baixar todos antes de alterar ou redefinir o repositório de dados",
-		"378": "Solicitações entre sites não são permitidas"
+		"378": "Solicitações entre sites não são permitidas",
+		"379": "O agente parou porque o limite de tempo da sessão foi atingido. Envie uma mensagem para continuar ou ajuste o tempo limite em Configurações - IA",
+		"380": "OCR não é compatível com recursos em cadernos criptografados"
 	}
 }

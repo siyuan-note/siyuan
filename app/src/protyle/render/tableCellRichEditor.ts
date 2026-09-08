@@ -5,7 +5,7 @@ import {mountProtyleLiteFragment} from "../lite/fragmentEditor";
 import {getDefaultToolbar} from "../toolbar/defaults";
 import {hideElements} from "../ui/hideElements";
 import {updateTransaction} from "../wysiwyg/transaction";
-import {configureAVRichTextLute, getAVRichTextLute, sanitizeAVRichTextBlockDOM} from "./av/richText";
+import {configureAVRichTextLute, getAVRichTextLute, getAVRichTextUnsupportedPasteBlocks, sanitizeAVRichTextBlockDOM} from "./av/richText";
 import {highlightRender} from "./highlightRender";
 import {mathRender} from "./mathRender";
 import {renderTableCellRichElements} from "./tableCellRich";
@@ -13,6 +13,7 @@ import {cleanTableCellRichHTML, getTableCellInlineHTML, getTableCellRichBlockDOM
 import {TABLE_CELL_RICH_ATTRIBUTE} from "../util/tableCellRichValue";
 import {focusByOffset, getSelectionOffset} from "../util/selection";
 import {fixTable} from "../util/table";
+import {updateTableCellContentLayout} from "../util/tableCellRich";
 
 const SAFE_SLASH_IDS = new Set([
     "ref", "heading1", "heading2", "heading3", "heading4", "heading5", "heading6", "list", "orderedList", "check",
@@ -39,6 +40,7 @@ export const applyTableCellRichInlineMark = (owner: IProtyle, cells: HTMLTableCe
             upload: false, websocket: false, pluginExtensions: false, customBlockRender: false,
             lute: getAVRichTextLute(),
             sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true),
+            getUnsupportedPasteBlocks: html => getAVRichTextUnsupportedPasteBlocks(html, true),
             restoreLuteMarkdownSyntax: configureAVRichTextLute,
         },
     });
@@ -93,7 +95,6 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         return;
     }
     owner.wysiwyg.tableControl?.clear();
-    owner.wysiwyg.tableControl?.setHidden(true);
     hideElements(["gutter"], owner);
     const selection = getSelection();
     const initialRange = selection.rangeCount ? selection.getRangeAt(0) : undefined;
@@ -130,7 +131,6 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     const fragment = mountProtyleLiteFragment(host, {
         app: owner.app,
         initialBlockHTML,
-        placeholder: window.siyuan.languages.empty,
         protyleOptions: {notebookId: owner.notebookId, toolbar, hint},
         runtimeCapabilities: {
             upload: false,
@@ -140,14 +140,17 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             lute: getAVRichTextLute(),
             lockedOptions: {toolbar, hint},
             sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true),
+            getUnsupportedPasteBlocks: html => getAVRichTextUnsupportedPasteBlocks(html, true),
             restoreLuteMarkdownSyntax: configureAVRichTextLute,
         },
         afterSetContent: (protyle, element) => {
+            updateTableCellContentLayout(host, element.innerHTML);
             highlightRender(element);
             mathRender(element);
             protyle.undo.clear();
         },
         onChange: () => {
+            updateTableCellContentLayout(host, fragment.getBlockHTML());
             window.clearTimeout(timer);
             if (!finished && !composing) {
                 timer = window.setTimeout(commit, 200);
@@ -192,7 +195,6 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         controller.abort();
         observer.disconnect();
         fragment.destroy();
-        owner.wysiwyg.tableControl?.setHidden(false);
         if (cell.isConnected && host.isConnected) {
             renderTableCellRich(cell);
             renderTableCellRichElements(cell);
@@ -207,6 +209,17 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         fragment.protyle.toolbar.element.contains(target) || fragment.protyle.toolbar.subElement.contains(target) ||
         !!(target instanceof Element && target.closest("#commonMenu, .b3-dialog"));
     document.addEventListener("pointerdown", event => {
+        // 表格右侧空白由外层编辑器忽略，保持单元格编辑状态，避免销毁编辑器后留下失效光标。
+        const target = event.target instanceof Element ? event.target : undefined;
+        if (target && owner.wysiwyg.element.contains(target) &&
+            (!target.closest("[data-node-id]") || target.closest("[data-node-id]") === table)) {
+            const tableRect = table.querySelector("table")?.getBoundingClientRect();
+            const nodeRect = table.getBoundingClientRect();
+            if (tableRect && event.clientX > tableRect.right &&
+                event.clientY >= nodeRect.top && event.clientY <= nodeRect.bottom) {
+                return;
+            }
+        }
         if (!belongsToEditor(event.target as Node)) {
             finish();
         }

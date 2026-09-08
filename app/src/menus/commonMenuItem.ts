@@ -582,7 +582,7 @@ export const exportMd = (id: string) => {
                     title: window.siyuan.languages.fileName,
                     content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value="">
 <div class="fn__hr"></div>
-<label>${window.siyuan.languages.savePath}<select class="b3-select fn__block" data-template-directory><option value="">/</option></select></label>
+<label>${window.siyuan.languages.savePath}<div class="fn__hr"></div><select class="b3-select fn__block" data-template-directory><option value="">/</option></select></label>
 <div class="fn__hr"></div>
 <button type="button" class="b3-button b3-button--outline" data-template-manager>${window.siyuan.languages.templateManager}</button>
 ${databaseOptions}</div>

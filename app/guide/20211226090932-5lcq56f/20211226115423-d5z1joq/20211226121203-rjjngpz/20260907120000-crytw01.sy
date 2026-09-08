@@ -6,7 +6,7 @@
 		"id": "20260907120000-crytw01",
 		"title": "加密筆記本",
 		"type": "doc",
-		"updated": "20260908150000"
+		"updated": "20260908162209"
 	},
 	"Children": [
 		{
@@ -1152,7 +1152,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-tw00050",
-				"updated": "20260908150000"
+				"updated": "20260908162209"
 			},
 			"HeadingLevel": 2,
 			"Children": [
@@ -1249,7 +1249,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20260907120000-tw00057",
-				"updated": "20260908150000"
+				"updated": "20260908162209"
 			},
 			"HeadingLevel": 3,
 			"Children": [
@@ -1265,7 +1265,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260907120000-tw00058",
-				"updated": "20260908150000"
+				"updated": "20260908162209"
 			},
 			"Children": [
 				{
@@ -1347,6 +1347,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "發布服務無論筆記本是否解鎖都無法列出或讀取其內容，發布密碼和可見性設定也無法為其啟用發布；此外不支援閃卡、書籤、標籤、資料文件重新命名、原始檔案 API、WebDAV 和內核命令列操作"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908162209-0500uig",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20260908162209-0500uig",
+						"updated": "20260908162209"
+					},
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20260908162209-zqfy1am",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908162209-zqfy1am",
+								"updated": "20260908162209"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密筆記本中的資源檔案不支援文字辨識"
 								}
 							]
 						}

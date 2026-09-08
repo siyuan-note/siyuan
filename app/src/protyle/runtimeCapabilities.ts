@@ -8,6 +8,7 @@ export interface ProtyleRuntimeCapabilities {
     pluginExtensions?: boolean;
     customBlockRender?: boolean;
     sanitizeBlockDOM?: (blockDOM: string) => string;
+    getUnsupportedPasteBlocks?: (blockDOM: string) => string[];
     restoreLuteMarkdownSyntax?: (lute: Lute) => void;
 }
 
@@ -40,6 +41,9 @@ export const getProtyleLockedToolbar = (protyle: IProtyle) =>
 
 export const getProtyleBlockDOMSanitizer = (protyle: IProtyle) =>
     protyleRuntimeCapabilities.get(protyle)?.sanitizeBlockDOM;
+
+export const getProtyleUnsupportedPasteBlocks = (protyle: IProtyle) =>
+    protyleRuntimeCapabilities.get(protyle)?.getUnsupportedPasteBlocks;
 
 export const restoreProtyleLuteMarkdownSyntax = (protyle: IProtyle, restoreDefault: (lute: Lute) => void) => {
     const restore = protyleRuntimeCapabilities.get(protyle)?.restoreLuteMarkdownSyntax || restoreDefault;

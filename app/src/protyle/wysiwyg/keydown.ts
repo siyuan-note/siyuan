@@ -143,6 +143,9 @@ import {
     prepareVerticalNavigation,
 } from "./verticalNavigation";
 import {isAtomicVerticalNavigationTarget} from "./verticalNavigationState";
+import {getAdjacentVerticalBlock} from "./verticalTarget";
+import {focusVerticalBlockSelection} from "./verticalNavigation";
+import {isDocumentBoundaryLoaded} from "../util/documentRange";
 import {
     BLOCK_SELECTION_CLASS,
     clearBlockSelectionMode,
@@ -503,30 +506,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (event.key === "ArrowDown") {
                     const currentSelectElement = blockSelectionModeElement ||
                         selectElements[selectElements.length - 1] as HTMLElement;
-                    let nextElement = getNextBlock(currentSelectElement) as HTMLElement;
-                    if (nextElement) {
-                        if (nextElement.getBoundingClientRect().width === 0) {
-                            // https://github.com/siyuan-note/siyuan/issues/4294
-                            const foldElement = hasTopClosestByAttribute(nextElement, "fold", "1");
-                            if (foldElement) {
-                                nextElement = getNextBlock(foldElement) as HTMLElement;
-                                if (nextElement) {
-                                    nextElement = getFirstBlock(nextElement) as HTMLElement;
-                                } else {
-                                    nextElement = currentSelectElement;
-                                }
-                            } else {
-                                nextElement = currentSelectElement;
-                            }
-                        } else if (nextElement.getAttribute("fold") === "1"
-                            && (nextElement.classList.contains("sb") || nextElement.classList.contains("bq"))) {
-                            // https://github.com/siyuan-note/siyuan/issues/3913
-                        } else {
-                            nextElement = getFirstBlock(nextElement) as HTMLElement;
-                        }
-                    } else {
-                        nextElement = currentSelectElement;
-                    }
+                    const nextElement = getAdjacentVerticalBlock(currentSelectElement, "down") || currentSelectElement;
 
                     if (blockSelectionModeElement) {
                         setBlockSelectionModeElement(protyle.wysiwyg.element, nextElement);
@@ -540,29 +520,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + bottom;
                         protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop - 1;
                     }
-                    focusBlock(nextElement);
+                    focusVerticalBlockSelection(protyle.wysiwyg.element, nextElement, "down");
                 } else if (event.key === "ArrowUp") {
                     const currentSelectElement = blockSelectionModeElement || selectElements[0] as HTMLElement;
-                    let previousElement: HTMLElement = getPreviousBlock(currentSelectElement) as HTMLElement;
-                    if (previousElement) {
-                        previousElement = getLastBlock(previousElement) as HTMLElement;
-                        if (previousElement.getBoundingClientRect().width === 0) {
-                            // https://github.com/siyuan-note/siyuan/issues/4294
-                            const foldElement = hasTopClosestByAttribute(previousElement, "fold", "1");
-                            if (foldElement) {
-                                previousElement = getFirstBlock(foldElement) as HTMLElement;
-                            } else {
-                                previousElement = currentSelectElement;
-                            }
-                        } else if (previousElement) {
-                            // https://github.com/siyuan-note/siyuan/issues/3913
-                            const foldElement = hasTopClosestByAttribute(previousElement, "fold", "1");
-                            if (foldElement && (foldElement.classList.contains("sb") || foldElement.classList.contains("bq"))) {
-                                previousElement = foldElement;
-                            }
-                        }
-                    } else if (protyle.title && protyle.title.editElement &&
-                        (protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" || protyle.contentElement.scrollTop === 0)) {
+                    let previousElement = getAdjacentVerticalBlock(currentSelectElement, "up");
+                    if (!previousElement && protyle.title?.editElement &&
+                        !isInEmbedBlock(currentSelectElement) &&
+                        isDocumentBoundaryLoaded(protyle.wysiwyg.element, "before")) {
                         const titleRange = setLastNodeRange(protyle.title.editElement, range, false);
                         titleRange.collapse(false);
                         focusByRange(titleRange);
@@ -572,10 +536,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             clearBlockSelectionMode(protyle.wysiwyg.element, true);
                             countBlockWord([], protyle);
                         }
-                    } else if (protyle.contentElement.scrollTop !== 0) {
+                    } else if (!previousElement && protyle.contentElement.scrollTop !== 0) {
                         protyle.contentElement.scrollTop = 0;
                         protyle.scroll.lastScrollTop = 8;
-                    } else {
+                    } else if (!previousElement) {
                         previousElement = currentSelectElement;
                     }
                     if (previousElement) {
@@ -591,7 +555,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + top;
                             protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop + 1;
                         }
-                        focusBlock(previousElement);
+                        focusVerticalBlockSelection(protyle.wysiwyg.element, previousElement, "up");
                     }
                 }
                 return;

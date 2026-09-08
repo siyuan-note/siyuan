@@ -307,16 +307,11 @@ func ManageTemplateFiles(request TemplateFileRequest) (ret any, err error) {
 		}
 		return nil, root.Rename(request.Path, request.Target)
 	case "remove":
-		// 将整个目录连同包资源移入隐藏恢复目录，保留误删后的恢复材料。
-		trash := ".trash/" + ast.NewNodeID()
-		if err = root.MkdirAll(trash, 0700); err != nil {
-			return nil, err
+		// 路径边界和版本校验完成后，直接删除选中项目及其内容。
+		if info.IsDir() {
+			return nil, root.RemoveAll(request.Path)
 		}
-		target := path.Join(trash, path.Base(request.Path))
-		if err = root.Rename(request.Path, target); err != nil {
-			return nil, err
-		}
-		return map[string]string{"recoveryPath": target}, nil
+		return nil, root.Remove(request.Path)
 	default:
 		return nil, errors.New("unsupported template operation")
 	}

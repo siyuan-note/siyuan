@@ -132,7 +132,9 @@ func assetNameWithoutID(name string) string {
 
 // newAssetFileName 为新增资源生成新的资源 ID，避免外部文件名指定已有资源的写入路径。
 func newAssetFileName(name string) string {
-	return util.AssetName(assetNameWithoutID(name), ast.NewNodeID())
+	name = assetNameWithoutID(name)
+	ext := util.Ext(name)
+	return strings.TrimSuffix(name, ext) + "-" + ast.NewNodeID() + ext
 }
 
 func readRTFDDir(dir string) ([]os.DirEntry, error) {
@@ -335,6 +337,12 @@ func Upload(c *gin.Context) {
 		// assetsDirPath 可能指向加密 box（调用方未传 id），反查 boxID 让文件名脱敏和内容加密生效
 		if pathBox := ExtractBoxIDFromAssetsPath(assetsDirPath); pathBox != "" && IsEncryptedBox(pathBox) {
 			uploadBoxID = pathBox
+			boxAssetsDir := filepath.Join(util.DataDir, pathBox, "assets")
+			if rel, relErr := filepath.Rel(boxAssetsDir, assetsDirPath); relErr == nil && rel != ".." &&
+				!strings.HasPrefix(rel, ".."+string(os.PathSeparator)) {
+				// 加密资源通过 box 查询参数定位，响应转换为 box 内的标准 assets 相对路径。
+				relAssetsDirPath = path.Join("assets", filepath.ToSlash(rel))
+			}
 		}
 	}
 	if !gulu.File.IsExist(assetsDirPath) {
@@ -421,7 +429,10 @@ func Upload(c *gin.Context) {
 				// 复制 PDF 矩形注解时不再重复插入图片 No longer upload image repeatedly when copying PDF rectangle annotation https://github.com/siyuan-note/siyuan/issues/10666
 				pattern := assetsDirPath + string(os.PathSeparator) + strings.TrimSuffix(fName, ext)
 				_, patternLastID := util.LastID(fName)
-				if lastID != "" && lastID != patternLastID {
+				if IsEncryptedBox(uploadBoxID) && lastID != "" {
+					// 加密资源的磁盘名称使用随机前缀，通过标注 ID 查找已生成的截图。
+					pattern = assetsDirPath + string(os.PathSeparator) + "*" + lastID + ext
+				} else if lastID != "" && lastID != patternLastID {
 					// 文件名太长被截断了，通过之前的 lastID 来匹配 PDF files with too long file names cannot generate annotated images https://github.com/siyuan-note/siyuan/issues/15739
 					pattern = assetsDirPath + string(os.PathSeparator) + "*" + lastID + ext
 				} else {
@@ -434,8 +445,11 @@ func Upload(c *gin.Context) {
 				} else {
 					if 0 < len(matches) {
 						fName = filepath.Base(matches[0])
-						recordAssetUploadSuccess(succMap, &succFiles, index, baseName,
-							strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/"))
+						p := strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/")
+						if uploadBoxID != "" && IsEncryptedBox(uploadBoxID) {
+							p += "?box=" + uploadBoxID
+						}
+						recordAssetUploadSuccess(succMap, &succFiles, index, baseName, p)
 						f.Close()
 						continue
 					}

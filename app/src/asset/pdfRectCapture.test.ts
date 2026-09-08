@@ -4,6 +4,7 @@ import {
     getCaptureCanvasBounds,
     getCaptureDisplayWidth,
     getLimitedCaptureScale,
+    getPdfAnnotationAssetsDirPath,
     normalizePdfRect,
     PDF_RECT_CAPTURE_MAX_EDGE,
     PDF_RECT_CAPTURE_MAX_PIXELS,
@@ -66,5 +67,20 @@ describe("PDF rectangle capture", () => {
     it("keeps a stable display width", () => {
         assert.equal(getCaptureDisplayWidth([10, 20, 130.126, 70]), 120.13);
         assert.equal(getCaptureDisplayWidth([10, 20, 10, 70]), 1);
+    });
+
+    it("derives the encrypted notebook asset directory from the source PDF", () => {
+        const origin = "http://127.0.0.1:6806";
+        assert.equal(
+            getPdfAnnotationAssetsDirPath(`${origin}/assets/document.pdf?box=20260908000000-abcdefg`, origin),
+            "20260908000000-abcdefg/assets/",
+        );
+        assert.equal(getPdfAnnotationAssetsDirPath(`${origin}/assets/document.pdf`, origin), undefined);
+        assert.equal(getPdfAnnotationAssetsDirPath(
+            "https://example.com/assets/document.pdf?box=20260908000000-abcdefg", origin), null);
+        assert.equal(getPdfAnnotationAssetsDirPath(
+            `${origin}/assets/document.pdf?box=invalid`, origin), null);
+        assert.equal(getPdfAnnotationAssetsDirPath(
+            `${origin}/assets/document.pdf?box=20260908000000-abcdefg&box=20260908000001-hijklmn`, origin), null);
     });
 });

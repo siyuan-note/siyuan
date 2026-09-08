@@ -30,8 +30,9 @@ import {base64ToURL, showBase64ImageSizeLimit} from "../../upload/base64";
 import {isBrowserRenderableImagePath} from "../../../util/imageURL";
 import {genNetworkImageAssetValue} from "./assetValue";
 import {getAssetUploadSuccesses} from "../../upload/uploadResult";
-import {getAVSelectedCells, type IAVSelectedCell} from "./selectionState";
-import {getAVSelectedTableCells} from "./virtualScroll";
+import {getAVSelectedCells, resolveAVSelectedCell, type IAVSelectedCell} from "./selectionState";
+import {getAVData, getAVSelectedTableCells} from "./virtualScroll";
+import {getAVAssetUploadTargets} from "./assetUploadTarget";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -606,9 +607,7 @@ export const captureAVAssetUploadHandler = (protyle: IProtyle, blockElement: HTM
                 }
             });
         }
-        if (stableCellCandidates.length > cellElements.length) {
-            stableCells = stableCellCandidates;
-        }
+        stableCells = stableCellCandidates;
     }
 
     const targetCellElements = Array.from(cellElements);
@@ -623,6 +622,7 @@ export const captureAVAssetUploadHandler = (protyle: IProtyle, blockElement: HTM
             }
         }
     }
+    const targets = getAVAssetUploadTargets(stableCells, targetCellElements);
 
     return async (result: Omit<IAssetUploadResult, "requestId" | "input">) => {
         if (!document.body.contains(blockElement)) {
@@ -641,24 +641,37 @@ export const captureAVAssetUploadHandler = (protyle: IProtyle, blockElement: HTM
             }
             return;
         }
-        if (stableCells.length === 1 || cellElements.length === 1) {
-            await updateCellsValue(protyle, blockElement, values, cellElements, undefined, undefined,
-                false, false, false, stableCells);
+        if (targets.length === 0) {
             return;
         }
-        if (stableCells.length === 0 && cellElements.length === 0) {
+        const data = targets[0].stableCell ? getAVData(blockElement) : undefined;
+        if (targets.length === 1) {
+            const target = targets[0];
+            const selectedCell = data && target.stableCell ? resolveAVSelectedCell(data, target.stableCell) : undefined;
+            if (selectedCell?.column.type === "mAsset") {
+                await updateCellsValue(protyle, blockElement, values, undefined, undefined, undefined,
+                    false, false, false, [selectedCell]);
+            } else if (target.cellElement) {
+                await updateCellsValue(protyle, blockElement, values, [target.cellElement]);
+            }
             return;
         }
         const doOperations: IOperation[] = [];
         const undoOperations: IOperation[] = [];
         for (let i = 0; i < values.length; i++) {
-            const selectedCell = stableCells[i];
-            const cellElement = targetCellElements[i];
-            if (!selectedCell && !cellElement) {
+            const target = targets[i];
+            if (!target) {
                 break;
             }
+            let selectedCell: IAVSelectedCell | undefined;
+            if (target.stableCell) {
+                selectedCell = data ? resolveAVSelectedCell(data, target.stableCell) : undefined;
+                if (selectedCell?.column.type !== "mAsset") {
+                    continue;
+                }
+            }
             const operations = await updateCellsValue(protyle, blockElement, [values[i]],
-                cellElement ? [cellElement] : undefined, undefined, undefined,
+                target.cellElement ? [target.cellElement] : undefined, undefined, undefined,
                 true, false, false, selectedCell ? [selectedCell] : undefined);
             doOperations.push(...operations.doOperations);
             undoOperations.push(...operations.undoOperations);

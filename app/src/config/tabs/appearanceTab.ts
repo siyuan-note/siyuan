@@ -800,11 +800,13 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
         }, (stack) => {
             stack.title(window.siyuan.languages.theme);
             /// #if !BROWSER
-            stack.button({
-                id: "appearanceOpenTheme",
-                label: window.siyuan.languages.appearance9,
-                icon: "iconFolder",
-            });
+            if (getHostCapabilities().localFileSystem) {
+                stack.button({
+                    id: "appearanceOpenTheme",
+                    label: window.siyuan.languages.appearance9,
+                    icon: "iconFolder",
+                });
+            }
             /// #endif
             stack.select("appearance.themeLight", {
                 desc: window.siyuan.languages.theme11,
@@ -840,11 +842,13 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
         }, (stack) => {
             stack.title(window.siyuan.languages.icon);
             /// #if !BROWSER
-            stack.button({
-                id: "appearanceOpenIcon",
-                label: window.siyuan.languages.appearance8,
-                icon: "iconFolder",
-            });
+            if (getHostCapabilities().localFileSystem) {
+                stack.button({
+                    id: "appearanceOpenIcon",
+                    label: window.siyuan.languages.appearance8,
+                    icon: "iconFolder",
+                });
+            }
             /// #endif
             stack.select("appearance.icon", {
                 desc: window.siyuan.languages.theme2,
@@ -1197,18 +1201,20 @@ const registerAppearancePersonalizationGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("personalization", window.siyuan.languages.configGroupPersonalization);
 
     /// #if !BROWSER
-    group.button({
-        id: "appearanceOpenEmoji",
-        title: window.siyuan.languages.customEmoji,
-        desc: window.siyuan.languages.customEmojiTip,
-        label: window.siyuan.languages.showInFolder,
-        icon: "iconFolder",
-        afterMount: (root) => {
-            root.querySelector("#appearanceOpenEmoji")?.addEventListener("click", () => {
-                useShell("openPath", path.join(window.siyuan.config.system.dataDir, "emojis"));
-            });
-        },
-    });
+    if (getHostCapabilities().localFileSystem) {
+        group.button({
+            id: "appearanceOpenEmoji",
+            title: window.siyuan.languages.customEmoji,
+            desc: window.siyuan.languages.customEmojiTip,
+            label: window.siyuan.languages.showInFolder,
+            icon: "iconFolder",
+            afterMount: (root) => {
+                root.querySelector("#appearanceOpenEmoji")?.addEventListener("click", () => {
+                    useShell("openPath", path.join(window.siyuan.config.system.dataDir, "emojis"));
+                });
+            },
+        });
+    }
     /// #endif
     group.stack({
         key: "codeSnippet",

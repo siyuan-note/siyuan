@@ -40,6 +40,17 @@ import {dispatchPluginGlobalShortcut} from "../plugin/globalShortcut";
 import {requestResponsiveDockLayout} from "../layout/dock/responsive";
 import {getHostCapabilities, setHostConnection, type TKernelConnection} from "../util/hostCapabilities";
 
+export const loadDesktopHostConnection = async () => {
+    /// #if !BROWSER
+    try {
+        // 加载扩展前先读取主进程的连接能力，信任状态不从远程配置或页面参数获取。
+        setHostConnection(await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "kernelConnection"}));
+    } catch (error) {
+        console.error("load desktop host connection failed:", error);
+    }
+    /// #endif
+};
+
 export const initDesktopHost = async () => {
     /// #if !BROWSER
     try {

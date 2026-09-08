@@ -1,7 +1,7 @@
 import {Constants} from "./constants";
 import {Menus} from "./menus";
 import {Model} from "./layout/Model";
-import {onGetConfig} from "./boot/onGetConfig";
+import {loadDesktopHostConnection, onGetConfig} from "./boot/onGetConfig";
 import {initBlockPopover} from "./block/popover";
 import {applyCloudUserState, onSetaccount} from "./config/tabs/accountUi";
 import {addScript, addScriptSync} from "./protyle/util/addScript";
@@ -305,6 +305,7 @@ export class App {
             await addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = response.data.conf;
+            await loadDesktopHostConnection();
             ensureUILayout();
             window.siyuan.isPublish = response.data.isPublish;
             setBodyHighlight();

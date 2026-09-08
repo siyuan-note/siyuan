@@ -6,7 +6,7 @@
 		"id": "20260903150000-u4065fm",
 		"title": "连接远程内核",
 		"type": "doc",
-		"updated": "20260903205342"
+		"updated": "20260908082237"
 	},
 	"Children": [
 		{
@@ -82,7 +82,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260903150000-fjznin7",
-				"updated": "20260903150000"
+				"updated": "20260908082237"
 			},
 			"Children": [
 				{
@@ -96,22 +96,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260903150000-54fwkfr",
-				"updated": "20260903150000"
+				"updated": "20260908082237"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "仅支持 HTTPS 远程地址，客户端操作系统必须信任服务器使用的 TLS 证书。请只连接你信任的服务器；桌面客户端与远程内核的版本必须完全一致，否则无法连接。桌面客户端只加载安装包内置前端，不加载远端服务器提供的 HTML、脚本等可执行前端资源，因此同源的远端 HTML 嵌入内容也不可用。"
+					"Data": "仅支持 HTTPS 远程地址，客户端操作系统必须信任服务器使用的 TLS 证书。请只连接你信任的服务器；桌面客户端与远程内核的版本必须完全一致，否则无法连接。桌面客户端始终使用安装包内置的核心前端和登录页，默认不加载远程扩展代码；远程 HTML 嵌入内容不可用。"
 				}
 			]
 		},
+		{"ID": "20260908082237-1yxgmt2", "Type": "NodeHeading", "Properties": {"id": "20260908082237-1yxgmt2", "updated": "20260908082237"}, "Children": [{"Type": "NodeText", "Data": "信任远程扩展"}], "HeadingLevel": 2},
+		{"ID": "20260908082237-t1800dj", "Type": "NodeParagraph", "Properties": {"id": "20260908082237-t1800dj", "updated": "20260908082237"}, "Children": [{"Type": "NodeText", "Data": "完全退出桌面客户端后，可使用参数 "}, {"Type": "NodeTextMark", "TextMarkType": "code", "TextMarkTextContent": "--remote=https://host[:port] --trust-remote-extensions"}, {"Type": "NodeText", "Data": " 启动。该选项默认关闭，只信任本次指定的服务器，不会保存为信任列表，也不会自动加入开机启动参数。运行中的实例不会因再次启动而改变信任状态；如需撤销，请完全退出后去掉该参数重新启动。"}]},
+		{"ID": "20260908082237-6wn2z6e", "Type": "NodeParagraph", "Properties": {"id": "20260908082237-6wn2z6e", "updated": "20260908082237"}, "Children": [{"Type": "NodeText", "Data": "开启后，远程工作空间中的插件、主题脚本、图标脚本和 JavaScript 代码片段会在本机桌面环境中执行，能够通过 Node.js 读写本机文件和执行程序。请仅在信任服务器及其提供的扩展代码（包括后续更新）时使用。"}]},
+		{"ID": "20260908082237-cfxcjm5", "Type": "NodeParagraph", "Properties": {"id": "20260908082237-cfxcjm5", "updated": "20260908082237"}, "Children": [{"Type": "NodeText", "Data": "该选项开放插件、集市、自定义主题、图标、字体和代码片段。内置前端、主题和图标仍由客户端提供，小部件及其他远程模式限制保持不变。插件代码在客户端运行，工作空间位于服务器；依赖本地工作空间路径、原生模块或外部程序的插件可能需要适配，不能保证所有桌面插件都兼容。"}]},
 		{
 			"ID": "20260903150000-bh8cy8d",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260903150000-bh8cy8d",
-				"updated": "20260903205342"
+				"updated": "20260908082237"
 			},
 			"Children": [
 				{
@@ -140,7 +144,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260903150000-kvy0i58",
-				"updated": "20260903150000"
+				"updated": "20260908082237"
 			},
 			"Children": [
 				{
@@ -236,7 +240,7 @@
 					},
 					"Properties": {
 						"id": "20260903150000-5k7d57t",
-						"updated": "20260903150000"
+						"updated": "20260908082237"
 					},
 					"Children": [
 						{
@@ -244,12 +248,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260903150000-4p58ioe",
-								"updated": "20260903150000"
+								"updated": "20260908082237"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "桌面端插件、集市和挂件不可用；仅使用客户端内置外观，不加载远端自定义主题、图标、字体和代码片段"
+									"Data": "默认不支持桌面端插件、集市和自定义外观；可通过上述信任参数开启远程插件、集市、自定义主题、图标、字体和代码片段，小部件仍不可用"
 								}
 							]
 						}

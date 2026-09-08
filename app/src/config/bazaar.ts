@@ -4,6 +4,7 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {highlightRender} from "../protyle/render/highlightRender";
 import {Constants} from "../constants";
 import {getFrontend, isBrowser, isMobile} from "../util/functions";
+import {getHostCapabilities} from "../util/hostCapabilities";
 import {hasPluginSetting, Plugin} from "../plugin";
 import type {App} from "../index";
 import {escapeAttr, escapeHtml} from "../util/escape";
@@ -400,7 +401,7 @@ export const bazaar = {
         <span data-position="north" class="ariaLabel block__icon block__icon--show" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
         </span>
-        <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
+        <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() || !getHostCapabilities().localFileSystem ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
         ${bazaar._genOpenStorageHTML(item, bazaarType)}
@@ -411,7 +412,7 @@ export const bazaar = {
         if (bazaarType !== "plugins" || !item.hasStorageData) {
             return "";
         }
-        return `<span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open-storage" aria-label="${window.siyuan.languages.openStorageLocation}">
+        return `<span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() || !getHostCapabilities().localFileSystem ? " fn__none" : ""}" data-type="open-storage" aria-label="${window.siyuan.languages.openStorageLocation}">
     <svg><use xlink:href="#iconDatabase"></use></svg>
 </span>`;
     },
@@ -603,7 +604,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         ${bazaar._genIncompatibleChipHTML(available, "bazaar", bazaarType)}
         ${bazaar._genDeprecatedChipHTML(available)}
         ${bazaar._genFundingHTML(installed.preferredFunding, false)}
-        <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
+        <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() || !getHostCapabilities().localFileSystem ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
         ${bazaar._genOpenStorageHTML(installed, bazaarType)}
@@ -848,7 +849,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         <span data-position="north" class="ariaLabel block__icon block__icon--show" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
         </span>
-        <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
+        <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() || !getHostCapabilities().localFileSystem ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
         ${bazaar._genOpenStorageHTML(bazaarItem, bazaarType)}

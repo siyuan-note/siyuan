@@ -53,7 +53,9 @@ const {
 } = require("./appleSilicon");
 const {
     createRemoteDocumentContentSecurityPolicy,
+    createRemoteKernelTarget,
     getArgFrom,
+    getKernelConnection,
     getRemoteKernelRedirectDecision,
     getRemoteKernelRequestPolicy,
     getRemoteKernelWebRequestDestination,
@@ -483,13 +485,7 @@ let remoteKernelArgError;
 const remoteKernelArg = getArg("--remote");
 if (remoteKernelArg !== undefined) {
     try {
-        const origin = normalizeRemoteKernelOrigin(remoteKernelArg);
-        remoteKernelTarget = {
-            mode: "remote",
-            origin,
-            ownsKernel: false,
-            port: "",
-        };
+        remoteKernelTarget = createRemoteKernelTarget(remoteKernelArg, process.argv);
     } catch (error) {
         remoteKernelArgError = error;
     }
@@ -697,7 +693,8 @@ for (let i = argStart; i < process.argv.length; i++) {
     let arg = process.argv[i];
     if (arg.startsWith("--workspace=") || arg.startsWith("--openAsHidden") || arg.startsWith("--port=") ||
         arg.startsWith("--safe-mode=") || arg.startsWith("--lang=") || arg === "--remote" ||
-        arg.startsWith("--remote=") ||
+        arg.startsWith("--remote=") || arg === "--trust-remote-extensions" ||
+        arg.startsWith("--trust-remote-extensions=") ||
         arg.startsWith("siyuan://")) {
         // 跳过内置参数
         if (arg.startsWith("--openAsHidden")) {
@@ -1330,6 +1327,7 @@ const installRemoteFrontendProtocol = (target) => {
                     destination,
                     localResourceAvailable: Boolean(localResource),
                     isTargetOrigin,
+                    trustRemoteExtensions: target.trustRemoteExtensions,
                 });
             } catch (error) {
                 requestPolicy = "deny-active-content";
@@ -1367,6 +1365,7 @@ const installRemoteFrontendProtocol = (target) => {
             destination: requestDestination,
             localResourceAvailable: Boolean(localResource),
             isTargetOrigin,
+            trustRemoteExtensions: target.trustRemoteExtensions,
         });
         if (requestPolicy === "deny-api") {
             writeLog("blocked remote kernel lifecycle request [path=" + requestPathname + "]");
@@ -1446,7 +1445,8 @@ const installRemoteFrontendProtocol = (target) => {
                 const responseHeaders = new Headers(localResponse.headers);
                 responseHeaders.set("Cache-Control", "no-store");
                 responseHeaders.set("Content-Security-Policy",
-                    createRemoteDocumentContentSecurityPolicy(fs.readFileSync(localResource, "utf8"), target.origin));
+                    createRemoteDocumentContentSecurityPolicy(fs.readFileSync(localResource, "utf8"), target.origin,
+                        requestURL.pathname === "/check-auth" ? undefined : target.extensionScriptNonce));
                 return new Response(localResponse.body, {
                     status: localResponse.status,
                     statusText: localResponse.statusText,
@@ -1488,6 +1488,7 @@ const installRemoteFrontendProtocol = (target) => {
             destination: requestDestination,
             localResourceAvailable: Boolean(redirectLocalResource),
             isTargetOrigin: true,
+            trustRemoteExtensions: target.trustRemoteExtensions,
         });
         if (redirectPolicy === "deny-api" || redirectPolicy === "deny-active-content" ||
             redirectPolicy === "not-found") {
@@ -2881,6 +2882,9 @@ app.whenReady().then(() => {
         app.exit();
     });
     ipcMain.handle("siyuan-get", async (event, data) => {
+        if (data.cmd === "kernelConnection") {
+            return getKernelConnection(getWindowKernelTarget(event.sender.id));
+        }
         const remoteSender = getWindowKernelTarget(event.sender.id)?.mode === "remote";
         if (remoteSender && ["beginRichClipboard", "completeRichClipboard", "cancelRichClipboard", "clipboardRead", "clipboardReadFiles"]
             .includes(data.cmd)) {
@@ -3543,11 +3547,7 @@ app.whenReady().then(() => {
         if (kernelTarget) {
             initializedWindowIds.add(event.sender.id);
         }
-        const capabilities = kernelTarget ? {
-            kernelMode: kernelTarget.mode,
-            ownsKernel: kernelTarget.ownsKernel,
-            kernelOrigin: kernelTarget.origin,
-        } : undefined;
+        const capabilities = getKernelConnection(kernelTarget);
         const exitWS = workspaces.find(item => {
             if (event.sender.id === item.webContentsId && item.initialized) {
                 if (item.tray && ("win32" === process.platform || "linux" === process.platform)) {

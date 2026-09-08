@@ -27,6 +27,28 @@ const normalizeRemoteKernelOrigin = (value) => {
     return url.origin;
 };
 
+const createRemoteKernelTarget = (value, args) => {
+    const origin = normalizeRemoteKernelOrigin(value);
+    const trustRemoteExtensions = args.includes("--trust-remote-extensions");
+    return {
+        mode: "remote",
+        origin,
+        ownsKernel: false,
+        port: "",
+        trustRemoteExtensions,
+        extensionScriptNonce: trustRemoteExtensions ? crypto.randomBytes(32).toString("base64") : undefined,
+    };
+};
+
+const getKernelConnection = (target) => target ? {
+    kernelMode: target.mode,
+    ownsKernel: target.ownsKernel,
+    kernelOrigin: target.origin,
+    trustRemoteExtensions: target.mode === "remote" && target.trustRemoteExtensions === true,
+    extensionScriptNonce: target.mode === "remote" && target.trustRemoteExtensions === true
+        ? target.extensionScriptNonce : undefined,
+} : undefined;
+
 const insecureCertificateSwitchNames = Object.freeze([
     "allow-insecure-localhost",
     "ignore-certificate-errors",
@@ -150,7 +172,13 @@ const isProtectedLocalPath = (pathname) => pathname === "/check-auth" || pathnam
     pathname === "/stage" || pathname.startsWith("/stage/") || pathname === "/widgets" ||
     pathname.startsWith("/widgets/");
 
-const getRemoteKernelRequestPolicy = ({method, pathname, destination, localResourceAvailable, isTargetOrigin = true}) => {
+// 内置外观和前端始终由客户端提供，自定义扩展只从当前远程内核加载。
+const isRemoteExtensionPath = (pathname) => !pathname.split("/").some(part => part === "." || part === "..") &&
+    (pathname.startsWith("/plugins/") || (/^\/appearance\/(themes|icons)\//.test(pathname) &&
+        !/^\/appearance\/(themes\/(daylight|midnight)|icons\/litheness)(\/|$)/.test(pathname)));
+
+const getRemoteKernelRequestPolicy = ({method, pathname, destination, localResourceAvailable, isTargetOrigin = true,
+    trustRemoteExtensions = false}) => {
     const requestedPathname = pathname;
     const normalizedPathnames = normalizeRequestPathname(pathname);
     if (isTargetOrigin && normalizedPathnames.some((candidate) => deniedAPIPaths.has(candidate))) {
@@ -158,12 +186,17 @@ const getRemoteKernelRequestPolicy = ({method, pathname, destination, localResou
     }
     pathname = normalizedPathnames[normalizedPathnames.length - 1];
     const safeMethod = method === "GET" || method === "HEAD";
+    const remoteExtension = trustRemoteExtensions && isTargetOrigin && safeMethod &&
+        normalizedPathnames.every(isRemoteExtensionPath);
     if (documentDestinations.has(destination)) {
         return isTargetOrigin && safeMethod && localResourceAvailable && localDocumentPaths.has(requestedPathname)
             ? "local"
             : "deny-active-content";
     }
     if (executableDestinations.has(destination)) {
+        if (remoteExtension && localExecutableDestinations.has(destination)) {
+            return "remote";
+        }
         return isTargetOrigin && safeMethod && localResourceAvailable && localExecutableDestinations.has(destination)
             ? "local"
             : "deny-active-content";
@@ -172,6 +205,9 @@ const getRemoteKernelRequestPolicy = ({method, pathname, destination, localResou
         return "remote";
     }
     if (!safeMethod) {
+        return "remote";
+    }
+    if (remoteExtension) {
         return "remote";
     }
     if (localResourceAvailable) {
@@ -372,7 +408,7 @@ const getRemoteDocumentInlineScriptSources = (html) => {
     return {eventHandlers, inlineScripts};
 };
 
-const createRemoteDocumentContentSecurityPolicy = (html, origin) => {
+const createRemoteDocumentContentSecurityPolicy = (html, origin, extensionScriptNonce) => {
     const {inlineScripts} = getRemoteDocumentInlineScriptSources(html);
     const hashes = [...new Set(inlineScripts.map((source) =>
         "'sha256-" + crypto.createHash("sha256").update(source, "utf8").digest("base64") + "'"))];
@@ -380,6 +416,12 @@ const createRemoteDocumentContentSecurityPolicy = (html, origin) => {
     const appearanceSource = new URL("/appearance/", origin).href;
     const defaultIconSource = new URL("/appearance/icons/litheness/icon.js", origin).href;
     const scriptSources = [stageSource, defaultIconSource, "blob:", "'wasm-unsafe-eval'", ...hashes];
+    const extensionSources = ["/plugins/", "/appearance/themes/", "/appearance/icons/"]
+        .map((pathname) => new URL(pathname, origin).href);
+    if (extensionScriptNonce) {
+        // 插件加载器需要动态求值，代码片段通过本地主进程提供的随机数授权。
+        scriptSources.push(...extensionSources, "'unsafe-eval'", "'nonce-" + extensionScriptNonce + "'");
+    }
     return [
         "base-uri " + new URL("/", origin).href,
         "child-src 'none'",
@@ -387,14 +429,17 @@ const createRemoteDocumentContentSecurityPolicy = (html, origin) => {
         "object-src 'none'",
         "script-src " + scriptSources.join(" "),
         "script-src-attr 'none'",
-        "style-src 'unsafe-inline' " + stageSource + " " + appearanceSource,
-        "worker-src " + stageSource,
+        "style-src 'unsafe-inline' " + stageSource + " " + appearanceSource +
+            (extensionScriptNonce ? " " + new URL("/plugins/", origin).href : ""),
+        "worker-src " + stageSource + (extensionScriptNonce ? " " + extensionSources.join(" ") : ""),
     ].join("; ");
 };
 
 module.exports = {
+    createRemoteKernelTarget,
     createRemoteDocumentContentSecurityPolicy,
     getArgFrom,
+    getKernelConnection,
     getInsecureCertificateSwitchName,
     getRemoteKernelRedirectDecision,
     getRemoteKernelRequestPolicy,

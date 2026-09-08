@@ -1,4 +1,5 @@
 {
+	"cellPasteUnsupported": "ההדבקה בוטלה: בלוקים מסוג ${x} אינם נתמכים בתא זה",
 	"templateNameTip": "יש להזין שם ללא מפרידי נתיב",
 	"keymapUnset": "לא הוגדר",
 	"keymapPrimary": "הגדר כקיצור ראשי",

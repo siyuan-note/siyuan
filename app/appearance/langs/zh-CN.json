@@ -1,4 +1,5 @@
 {
+	"cellPasteUnsupported": "已取消粘贴：此单元格不支持 ${x} 块",
 	"templateNameTip": "请输入名称，不要包含路径分隔符",
 	"keymapUnset": "未设置",
 	"keymapPrimary": "设为主快捷键",

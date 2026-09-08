@@ -1,4 +1,5 @@
 {
+	"cellPasteUnsupported": "Collage annulé : les blocs de type ${x} ne sont pas pris en charge dans cette cellule",
 	"templateNameTip": "Saisissez un nom sans séparateur de chemin",
 	"keymapUnset": "Non défini",
 	"keymapPrimary": "Définir comme raccourci principal",

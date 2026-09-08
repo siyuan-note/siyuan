@@ -1,4 +1,5 @@
 {
+	"cellPasteUnsupported": "Colagem cancelada: blocos do tipo ${x} não são compatíveis com esta célula",
 	"templateNameTip": "Digite um nome sem separadores de caminho",
 	"keymapUnset": "Não definido",
 	"keymapPrimary": "Definir como atalho principal",

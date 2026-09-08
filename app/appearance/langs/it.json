@@ -1,4 +1,5 @@
 {
+	"cellPasteUnsupported": "Incollaggio annullato: i blocchi di tipo ${x} non sono supportati in questa cella",
 	"templateNameTip": "Inserisci un nome senza separatori di percorso",
 	"keymapUnset": "Non impostato",
 	"keymapPrimary": "Imposta come scorciatoia principale",

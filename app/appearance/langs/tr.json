@@ -1,4 +1,5 @@
 {
+	"cellPasteUnsupported": "Yapıştırma iptal edildi: bu hücrede ${x} blokları desteklenmiyor",
 	"templateNameTip": "Yol ayırıcıları içermeyen bir ad girin",
 	"keymapUnset": "Ayarlanmadı",
 	"keymapPrimary": "Birincil kısayol olarak ayarla",

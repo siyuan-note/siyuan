@@ -1,4 +1,5 @@
 {
+	"cellPasteUnsupported": "Pegado cancelado: esta celda no admite bloques de tipo ${x}",
 	"templateNameTip": "Introduce un nombre sin separadores de ruta",
 	"keymapUnset": "Sin asignar",
 	"keymapPrimary": "Establecer como atajo principal",

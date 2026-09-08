@@ -1,4 +1,5 @@
 {
+	"cellPasteUnsupported": "Einfügen abgebrochen: ${x}-Blöcke werden in dieser Zelle nicht unterstützt",
 	"templateNameTip": "Einen Namen ohne Pfadtrennzeichen eingeben",
 	"keymapUnset": "Nicht festgelegt",
 	"keymapPrimary": "Als primäres Tastenkürzel festlegen",

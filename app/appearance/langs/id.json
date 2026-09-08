@@ -1,4 +1,5 @@
 {
+	"cellPasteUnsupported": "Penempelan dibatalkan: blok ${x} tidak didukung dalam sel ini",
 	"templateNameTip": "Masukkan nama tanpa pemisah jalur",
 	"keymapUnset": "Belum diatur",
 	"keymapPrimary": "Jadikan pintasan utama",

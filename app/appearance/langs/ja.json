@@ -1,4 +1,5 @@
 {
+	"cellPasteUnsupported": "貼り付けをキャンセルしました：このセルでは ${x} ブロックはサポートされていません",
 	"templateNameTip": "パス区切り文字を含まない名前を入力してください",
 	"keymapUnset": "未設定",
 	"keymapPrimary": "メインのショートカットに設定",

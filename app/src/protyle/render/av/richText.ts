@@ -107,29 +107,51 @@ const removeUnsupportedBlockAttributes = (element: HTMLElement) => {
     });
 };
 
+const isSupportedAVRichTextBlock = (element: HTMLElement) => {
+    const type = element.dataset.type;
+    return ALLOWED_BLOCK_TYPES.has(type) &&
+        (type !== "NodeHeading" || /^h[1-6]$/.test(element.dataset.subtype || "")) &&
+        (type !== "NodeCodeBlock" || !element.classList.contains("render-node") &&
+            !isAVRichTextExecutableCodeLanguage(element.dataset.subtype || ""));
+};
+
+export const getAVRichTextUnsupportedPasteBlocks = (blockDOM: string, images = false) => {
+    const template = document.createElement("template");
+    template.innerHTML = blockDOM;
+    const names = new Set<string>();
+    const keys: Record<string, string> = {
+        NodeTable: "table", NodeBlockQueryEmbed: "blockEmbed", NodeThematicBreak: "line",
+        NodeVideo: "video", NodeAudio: "audio", NodeWidget: "widget", NodeAttributeView: "database",
+        NodeCustomBlock: "custom", NodeSuperBlock: "superBlock", NodeCallout: "callout",
+        NodeTabs: "tabs", NodeTabItem: "tabItem", NodeCodeBlock: "code", NodeHeading: "headings",
+    };
+    template.content.querySelectorAll<HTMLElement>('[data-type^="Node"]').forEach(element => {
+        const type = element.dataset.type;
+        if (!isSupportedAVRichTextBlock(element)) {
+            names.add(type === "NodeHTMLBlock" ? "HTML" : type === "NodeIFrame" ? "IFrame" :
+                type === "NodeCodeBlock" && element.dataset.subtype ? element.dataset.subtype :
+                    window.siyuan.languages[keys[type]] || window.siyuan.languages.agentCatBlock);
+        }
+    });
+    if (!images && template.content.querySelector(".img, img")) {
+        names.add(window.siyuan.languages.image);
+    }
+    return Array.from(names);
+};
+
 export const sanitizeAVRichTextBlockDOM = (blockDOM: string, images = false) => {
     const template = document.createElement("template");
     template.innerHTML = blockDOM;
     template.content.querySelectorAll<HTMLElement>('[data-type^="Node"]').forEach((element) => {
         const type = element.dataset.type;
-        if (type === "NodeCodeBlock" && (element.classList.contains("render-node") ||
-            isAVRichTextExecutableCodeLanguage(element.dataset.subtype || ""))) {
+        if (!isSupportedAVRichTextBlock(element)) {
             element.remove();
             return;
         }
         if (type === "NodeHeading") {
-            const subtype = element.dataset.subtype || "";
-            if (!/^h[1-6]$/.test(subtype)) {
-                element.remove();
-                return;
-            }
-            element.className = subtype;
+            element.className = element.dataset.subtype;
         }
-        if (ALLOWED_BLOCK_TYPES.has(type)) {
-            removeUnsupportedBlockAttributes(element);
-            return;
-        }
-        element.remove();
+        removeUnsupportedBlockAttributes(element);
     });
     template.content.querySelectorAll(
         (images ? "" : ".img, img, ") +

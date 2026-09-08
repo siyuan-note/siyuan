@@ -1,4 +1,5 @@
 {
+	"cellPasteUnsupported": "Plakken geannuleerd: blokken van het type ${x} worden niet ondersteund in deze cel",
 	"templateNameTip": "Voer een naam in zonder padscheidingstekens",
 	"keymapUnset": "Niet ingesteld",
 	"keymapPrimary": "Instellen als primaire sneltoets",

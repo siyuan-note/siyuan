@@ -5,7 +5,7 @@ import {mountProtyleLiteFragment} from "../lite/fragmentEditor";
 import {getDefaultToolbar} from "../toolbar/defaults";
 import {hideElements} from "../ui/hideElements";
 import {updateTransaction} from "../wysiwyg/transaction";
-import {configureAVRichTextLute, getAVRichTextLute, sanitizeAVRichTextBlockDOM} from "./av/richText";
+import {configureAVRichTextLute, getAVRichTextLute, getAVRichTextUnsupportedPasteBlocks, sanitizeAVRichTextBlockDOM} from "./av/richText";
 import {highlightRender} from "./highlightRender";
 import {mathRender} from "./mathRender";
 import {renderTableCellRichElements} from "./tableCellRich";
@@ -40,6 +40,7 @@ export const applyTableCellRichInlineMark = (owner: IProtyle, cells: HTMLTableCe
             upload: false, websocket: false, pluginExtensions: false, customBlockRender: false,
             lute: getAVRichTextLute(),
             sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true),
+            getUnsupportedPasteBlocks: html => getAVRichTextUnsupportedPasteBlocks(html, true),
             restoreLuteMarkdownSyntax: configureAVRichTextLute,
         },
     });
@@ -139,6 +140,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             lute: getAVRichTextLute(),
             lockedOptions: {toolbar, hint},
             sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true),
+            getUnsupportedPasteBlocks: html => getAVRichTextUnsupportedPasteBlocks(html, true),
             restoreLuteMarkdownSyntax: configureAVRichTextLute,
         },
         afterSetContent: (protyle, element) => {

@@ -1,4 +1,5 @@
 import {Constants} from "../../constants";
+import {escapeHtml} from "../../util/escape";
 import {getTableCellRichPlainText} from "./tableCellRich";
 import {uploadFiles, uploadLocalFiles} from "../upload";
 import type {IUploadInsertOptions} from "../upload";
@@ -65,6 +66,7 @@ import {normalizeSemanticInlineElements, stripSemanticMarkersFromRangeText} from
 import {
     areProtylePluginExtensionsEnabled,
     getProtyleBlockDOMSanitizer,
+    getProtyleUnsupportedPasteBlocks,
     getProtyleRestrictedPlainTextHTML,
     restoreProtyleLuteMarkdownSyntax,
 } from "../runtimeCapabilities";
@@ -75,9 +77,13 @@ import {ipcRenderer} from "electron";
 const PASTE_PLUGIN_TIMEOUT = 120_000;
 const PASTE_PLUGIN_TIMED_OUT = Symbol("paste-plugin-timed-out");
 
-export const beforePaste = (protyle: IProtyle, blockElement: HTMLElement) => {
+export const beforePaste = (protyle: IProtyle, blockElement: HTMLElement, validatedRange?: Range) => {
+    // 受限单元格须先验证载荷，拒绝粘贴时保持行内元素边界处的光标不变。
+    if (!validatedRange && getProtyleUnsupportedPasteBlocks(protyle)) {
+        return;
+    }
     // 链接，备注，样式，引用，pdf标注粘贴 https://github.com/siyuan-note/siyuan/issues/11572
-    const range = getSelection().getRangeAt(0);
+    const range = validatedRange || getSelection().getRangeAt(0);
     protyle.toolbar.range = range;
     const inlineElement = range.startContainer.parentElement;
     if (range.toString() === "" && inlineElement.tagName === "SPAN") {
@@ -707,6 +713,20 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         files = event.files;
     }
     if (blockDOMSanitizer) {
+        // 在清洗和修改选区前检查完整载荷，避免不支持的块被静默删除后只粘贴部分内容。
+        const getUnsupportedBlocks = getProtyleUnsupportedPasteBlocks(protyle);
+        if (getUnsupportedBlocks) {
+            const source = siyuanHTML || (textHTML ? protyle.lute.HTML2BlockDOM(textHTML) :
+                protyle.lute.Md2BlockDOM(textPlain));
+            const unsupported = getUnsupportedBlocks(source);
+            if (unsupported.length > 0) {
+                showMessage(window.siyuan.languages.cellPasteUnsupported.replace("${x}", escapeHtml(unsupported.join(", "))));
+                return;
+            }
+            if (initialBlockElement) {
+                beforePaste(protyle, initialBlockElement, pasteInsertPosition.range);
+            }
+        }
         // 受限片段不解析外部 HTML 或文件；内部 BlockDOM 会在进入 DOM 前由专用白名单清洗。
         textHTML = "";
         files = [];

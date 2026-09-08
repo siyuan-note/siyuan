@@ -1,4 +1,5 @@
 {
+	"cellPasteUnsupported": "Paste canceled: ${x} blocks are not supported in this cell",
 	"templateNameTip": "Enter a name without path separators",
 	"keymapUnset": "Not set",
 	"keymapPrimary": "Set as primary shortcut",

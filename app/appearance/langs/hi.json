@@ -1,4 +1,5 @@
 {
+	"cellPasteUnsupported": "पेस्ट रद्द किया गया: इस सेल में ${x} ब्लॉक समर्थित नहीं हैं",
 	"templateNameTip": "पथ विभाजकों के बिना नाम दर्ज करें",
 	"keymapUnset": "सेट नहीं है",
 	"keymapPrimary": "मुख्य शॉर्टकट बनाएँ",

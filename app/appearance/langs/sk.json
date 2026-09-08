@@ -1,4 +1,5 @@
 {
+	"cellPasteUnsupported": "Prilepenie zrušené: bloky typu ${x} nie sú v tejto bunke podporované",
 	"templateNameTip": "Zadajte názov bez oddeľovačov cesty",
 	"keymapUnset": "Nenastavené",
 	"keymapPrimary": "Nastaviť ako hlavnú skratku",

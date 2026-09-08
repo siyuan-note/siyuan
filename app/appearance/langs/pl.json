@@ -1,4 +1,5 @@
 {
+	"cellPasteUnsupported": "Wklejanie anulowane: bloki typu ${x} nie są obsługiwane w tej komórce",
 	"templateNameTip": "Wpisz nazwę bez separatorów ścieżki",
 	"keymapUnset": "Nie ustawiono",
 	"keymapPrimary": "Ustaw jako główny skrót",

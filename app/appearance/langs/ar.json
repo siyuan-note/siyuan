@@ -1,4 +1,5 @@
 {
+	"cellPasteUnsupported": "تم إلغاء اللصق: كتل ${x} غير مدعومة في هذه الخلية",
 	"templateNameTip": "أدخل اسمًا دون فواصل مسار",
 	"keymapUnset": "غير معيّن",
 	"keymapPrimary": "تعيين كاختصار رئيسي",

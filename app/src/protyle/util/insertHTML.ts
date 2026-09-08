@@ -934,10 +934,14 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             return;
         }
     }
-    const tablePasteTarget = getTablePasteTarget(range);
-    fixTableRange(range);
+    const tableElement = hasClosestByAttribute(range.startContainer, "data-type", "NodeTable");
+    const isEditorTable = tableElement && protyle.wysiwyg.element.contains(tableElement);
+    const tablePasteTarget = isEditorTable ? getTablePasteTarget(range) : undefined;
+    if (isEditorTable) {
+        fixTableRange(range);
+    }
     let unSpinHTML;
-    if (hasClosestByAttribute(range.startContainer, "data-type", "NodeTable") && !isBlock) {
+    if (isEditorTable && !isBlock) {
         if (hasClosestByTag(range.startContainer, "TABLE")) {
             unSpinHTML = protyle.lute.BlockDOM2InlineBlockDOM(html);
         } else {

@@ -3,6 +3,14 @@ interface IPluginDockOwner {
     docks: Record<string, unknown>;
 }
 
+export const getDockKeymap = (dock: Config.IUILayoutDockTab) => {
+    if (dock.hotkeyLangId) {
+        return window.siyuan.config.keymap.general[dock.hotkeyLangId];
+    }
+    const plugin = window.siyuan.ws.app.plugins.find(item => Object.prototype.hasOwnProperty.call(item.docks, dock.type));
+    return plugin ? window.siyuan.config.keymap.plugin?.[plugin.name]?.[dock.type] : undefined;
+};
+
 interface IDockKeymap {
     general: Config.IKeys;
     plugin?: Config.IKeymapPlugin;

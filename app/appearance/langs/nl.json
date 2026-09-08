@@ -1,4 +1,12 @@
 {
+	"keymapUnset": "Niet ingesteld",
+	"keymapPrimary": "Instellen als primaire sneltoets",
+	"keymapRecording": "Druk op een sneltoets...",
+	"keymapShared": "Gedeelde sneltoets",
+	"keymapSharedTip": "Lokale opdrachten hebben voorrang. Per context worden opdrachten in de getoonde volgorde geprobeerd; zodra een opdracht begint, wordt geen andere uitgevoerd",
+	"keymapLegacyConflict": "Deze sneltoets conflicteert met een actie die gedeelde toewijzingen nog niet ondersteunt",
+	"keymapSystemScope": "Systeembreed",
+	"keymapSaveFailed": "Sneltoetsen konden niet worden opgeslagen",
 	"templateSearch": "Sjablonen zoeken op naam of pad",
 	"templateContextSearch": "Contextdocumenten zoeken",
 	"templateContextTip": "Voer het sjabloon uit met de titel, ID en andere informatie van het geselecteerde document zonder dat document te wijzigen",

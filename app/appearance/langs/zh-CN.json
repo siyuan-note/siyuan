@@ -1,4 +1,12 @@
 {
+	"keymapUnset": "未设置",
+	"keymapPrimary": "设为主快捷键",
+	"keymapRecording": "按下快捷键...",
+	"keymapShared": "共用快捷键",
+	"keymapSharedTip": "局部命令优先。同一上下文按显示顺序匹配；命令开始执行后，不再执行其他命令",
+	"keymapLegacyConflict": "此快捷键与尚不支持共用绑定的操作冲突",
+	"keymapSystemScope": "系统全局",
+	"keymapSaveFailed": "无法保存快捷键",
 	"templateSearch": "搜索模板名称或路径",
 	"templateContextSearch": "搜索上下文文档",
 	"templateContextTip": "使用所选文档的标题、ID 等信息运行模板，不会修改该文档",

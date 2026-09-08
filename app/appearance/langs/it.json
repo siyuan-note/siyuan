@@ -1,4 +1,12 @@
 {
+	"keymapUnset": "Non impostato",
+	"keymapPrimary": "Imposta come scorciatoia principale",
+	"keymapRecording": "Premi una scorciatoia...",
+	"keymapShared": "Scorciatoia condivisa",
+	"keymapSharedTip": "I comandi locali hanno la precedenza. In ogni contesto vengono valutati nell’ordine mostrato; quando un comando inizia, nessun altro viene eseguito",
+	"keymapLegacyConflict": "Questa scorciatoia è in conflitto con un’azione che non supporta ancora le assegnazioni condivise",
+	"keymapSystemScope": "A livello di sistema",
+	"keymapSaveFailed": "Impossibile salvare le scorciatoie",
 	"templateSearch": "Cerca modelli per nome o percorso",
 	"templateContextSearch": "Cerca documenti di contesto",
 	"templateContextTip": "Esegui il modello usando il titolo, l’ID e le altre informazioni del documento selezionato senza modificarlo",

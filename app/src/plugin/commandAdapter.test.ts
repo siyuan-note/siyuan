@@ -13,6 +13,14 @@ import {
 
 const owners: object[] = [];
 
+it("preserves async legacy callback results so execution failures reach the dispatcher", async () => {
+    const command: ICommand = {langKey: "async", editorCallback: async () => {
+        throw new Error("editor failed");
+    }};
+    const callback = resolvePluginCommandCallback(command, createContext({source: "editorShortcut", protyle: {} as IProtyle}));
+    await assert.rejects(async () => callback(), /editor failed/);
+});
+
 afterEach(() => {
     owners.forEach(owner => unregisterPluginCommands(owner));
     owners.length = 0;

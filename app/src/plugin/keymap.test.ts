@@ -44,3 +44,16 @@ test("setting a custom plugin hotkey creates a missing editable item", () => {
     setPluginKeymapCustom(plugin, "plugin", "item", "⌘J", "⌘K");
     assert.deepEqual(plugin, {plugin: {item: {default: "⌘K", custom: "⌘J"}}});
 });
+
+test("plugin default lists are available on first registration and preserve custom lists on reload", () => {
+    withKeymap({}, () => {
+        const item = updatePluginKeymap("test", "command", "", ["⌘K", "⌘L", "⌘K", "A"]);
+        assert.deepEqual(item.bindings.keys, ["⌘K", "⌘L"]);
+        item.bindings.keys = ["⌘M", "⌘N"];
+        item.custom = "⌘M";
+        const reloaded = updatePluginKeymap("test", "command", "", ["⌘O"]);
+        assert.deepEqual(reloaded.bindings.keys, ["⌘M", "⌘N"]);
+        assert.deepEqual(reloaded.bindings.defaults, ["⌘O"]);
+        assert.equal(reloaded.custom, "⌘M");
+    });
+});

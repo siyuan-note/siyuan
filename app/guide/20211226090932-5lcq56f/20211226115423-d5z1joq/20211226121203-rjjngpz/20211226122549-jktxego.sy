@@ -7,9 +7,55 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260906013806"
+		"updated": "20260908092714"
 	},
 	"Children": [
+		{
+			"ID": "20260908092714-e1q4nu2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908092714-e1q4nu2",
+				"updated": "20260908092714"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "快捷鍵"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中為同一個操作設定多個快捷鍵。點擊列末的加號後按下組合鍵即可儲存；點擊既有快捷鍵可修改，點擊其關閉按鈕可刪除，點擊還原按鈕可還原該操作的全部預設快捷鍵。按 Esc 或點擊外部可取消輸入。第一項用於選單提示，右擊其他快捷鍵可將其設為主要快捷鍵。"
+				}
+			]
+		},
+		{
+			"ID": "20260908092714-g928py1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908092714-g928py1",
+				"updated": "20260908092714"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "點擊「共用快捷鍵」可查看適用上下文和執行順序，並以上下按鈕調整同一上下文內的順序。局部命令優先，不可用時繼續比對；命令開始執行後，即使取消或失敗，也不會執行其他命令。部分操作暫不支援共用綁定，輸入時會提示衝突，此時請使用其他快捷鍵。"
+				}
+			]
+		},
 		{
 			"ID": "20260813143408-r6w3j9h",
 			"Type": "NodeParagraph",

@@ -19,6 +19,8 @@ import {initHarmonyTextSelectionMenu} from "../../util/harmonyTextSelectionMenu"
 import {clearDragTipGhost, hideDragTip} from "../../protyle/util/dragTip";
 import {formatPainter} from "../../protyle/toolbar/FormatPainter";
 import {SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE} from "../../protyle/toolbar/subElementLifecycle";
+import {dispatchSharedShortcut} from "../../command/shortcutRuntime";
+import {ensureCommandSystem} from "../../command/executor";
 
 const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`.toLowerCase();
 
@@ -252,6 +254,10 @@ export const initWindowEvent = (app: App) => {
     window.addEventListener("keyup", (event) => {
         windowKeyUp(app, event);
     });
+
+    window.addEventListener("keydown", (event) => {
+        dispatchSharedShortcut(app, event, () => ensureCommandSystem(app));
+    }, true);
 
     window.addEventListener("keydown", (event) => {
         windowKeyDown(app, event);

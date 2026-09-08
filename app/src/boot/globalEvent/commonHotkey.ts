@@ -1,3 +1,4 @@
+import {mergeKeymapDefault} from "../../util/keymapBindings";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
 /// #if !BROWSER
@@ -55,7 +56,7 @@ const matchKeymap = (keymap: Config.IKeys, key1: "general" | "editor", key2?: "g
                 });
                 /// #endif
                 match = false;
-                window.siyuan.config.keymap[key1][key] = keymap[key];
+                window.siyuan.config.keymap[key1][key] = mergeKeymapDefault(window.siyuan.config.keymap[key1][key], keymap[key]);
             }
         } else {
             if (!window.siyuan.config.keymap[key1][key2][key] || window.siyuan.config.keymap[key1][key2][key].default !== keymap[key].default) {
@@ -66,7 +67,7 @@ const matchKeymap = (keymap: Config.IKeys, key1: "general" | "editor", key2?: "g
                 });
                 /// #endif
                 match = false;
-                window.siyuan.config.keymap[key1][key2][key] = keymap[key];
+                window.siyuan.config.keymap[key1][key2][key] = mergeKeymapDefault(window.siyuan.config.keymap[key1][key2][key], keymap[key]);
             }
         }
     });
@@ -162,7 +163,7 @@ export const correctHotkey = (app: App) => {
 
 let lastHotkeys: Record<string, string>;
 
-export const syncAppMenuShortcuts = () => {
+export const syncAppMenuShortcuts = (suspended = false) => {
     /// #if !BROWSER
     if (!isMac()) {
         return;
@@ -176,7 +177,7 @@ export const syncAppMenuShortcuts = () => {
     const hotkey: Record<string, string> = {};
     Object.keys(appMenuHotkeyItems).forEach(id => {
         const item = appMenuHotkeyItems[id];
-        hotkey[id] = item.custom ?? item.default ?? "";
+        hotkey[id] = suspended ? "" : item.custom ?? item.default ?? "";
     });
     if (lastHotkeys && Object.keys(appMenuHotkeyItems).every(id => lastHotkeys[id] === hotkey[id])) {
         return;

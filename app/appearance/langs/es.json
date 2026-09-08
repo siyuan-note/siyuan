@@ -1,4 +1,12 @@
 {
+	"keymapUnset": "Sin asignar",
+	"keymapPrimary": "Establecer como atajo principal",
+	"keymapRecording": "Pulsa un atajo...",
+	"keymapShared": "Atajo compartido",
+	"keymapSharedTip": "Los comandos locales tienen prioridad. En cada contexto se prueban en el orden mostrado; una vez iniciado un comando, no se ejecuta ningún otro",
+	"keymapLegacyConflict": "Este atajo entra en conflicto con una acción que aún no admite asignaciones compartidas",
+	"keymapSystemScope": "En todo el sistema",
+	"keymapSaveFailed": "No se pudieron guardar los atajos",
 	"templateSearch": "Buscar plantillas por nombre o ruta",
 	"templateContextSearch": "Buscar documentos de contexto",
 	"templateContextTip": "Ejecutar la plantilla con el título, el ID y otros datos del documento seleccionado sin modificarlo",

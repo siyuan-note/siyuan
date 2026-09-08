@@ -1,3 +1,4 @@
+import {getKeymapBindings, getKeymapItem} from "../../../util/keymapBindings";
 import {Dialog} from "../../../dialog";
 import type {App} from "../../../index";
 import {upDownHint} from "../../../util/upDownHint";
@@ -27,7 +28,9 @@ const renderCommands = (listElement: HTMLElement, commands: ICommandDefinition[]
         textElement.textContent = command.label();
         const hotkeyElement = document.createElement("span");
         hotkeyElement.className = `b3-list-item__meta${isMobile() ? " fn__none" : ""}`;
-        hotkeyElement.textContent = updateHotkeyTip(command.hotkey?.() || "");
+        hotkeyElement.textContent = command.keymapPath ?
+            getKeymapBindings(getKeymapItem(window.siyuan.config.keymap, command.keymapPath)).map(key => updateHotkeyTip(key)).join(" / ") :
+            updateHotkeyTip(command.hotkey?.() || "");
         itemElement.append(textElement, hotkeyElement);
         fragment.append(itemElement);
     });
@@ -110,7 +113,7 @@ export const commandPanel = (app: App) => {
         if (event.isComposing) {
             return;
         }
-        if (!event.repeat && matchHotKey(window.siyuan.config.keymap.general.commandPanel.custom, event)) {
+        if (!event.repeat && matchHotKey(window.siyuan.config.keymap.general.commandPanel, event)) {
             dialog.destroy();
             event.preventDefault();
             return;

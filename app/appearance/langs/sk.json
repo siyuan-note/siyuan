@@ -1,4 +1,12 @@
 {
+	"keymapUnset": "Nenastavené",
+	"keymapPrimary": "Nastaviť ako hlavnú skratku",
+	"keymapRecording": "Stlačte klávesovú skratku...",
+	"keymapShared": "Zdieľaná skratka",
+	"keymapSharedTip": "Miestne príkazy majú prednosť. V každom kontexte sa príkazy skúšajú v zobrazenom poradí; po spustení jedného sa ďalší nevykoná",
+	"keymapLegacyConflict": "Táto skratka je v konflikte s akciou, ktorá zatiaľ nepodporuje zdieľané priradenia",
+	"keymapSystemScope": "Celý systém",
+	"keymapSaveFailed": "Klávesové skratky sa nepodarilo uložiť",
 	"templateSearch": "Hľadať šablóny podľa názvu alebo cesty",
 	"templateContextSearch": "Hľadať kontextové dokumenty",
 	"templateContextTip": "Spustiť šablónu s názvom, ID a ďalšími údajmi vybraného dokumentu bez jeho zmeny",

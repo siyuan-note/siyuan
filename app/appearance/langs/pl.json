@@ -1,4 +1,12 @@
 {
+	"keymapUnset": "Nie ustawiono",
+	"keymapPrimary": "Ustaw jako główny skrót",
+	"keymapRecording": "Naciśnij skrót...",
+	"keymapShared": "Wspólny skrót",
+	"keymapSharedTip": "Polecenia lokalne mają pierwszeństwo. W każdym kontekście polecenia są sprawdzane w wyświetlonej kolejności; po rozpoczęciu jednego żadne inne nie zostanie wykonane",
+	"keymapLegacyConflict": "Ten skrót koliduje z działaniem, które nie obsługuje jeszcze wspólnych przypisań",
+	"keymapSystemScope": "Cały system",
+	"keymapSaveFailed": "Nie można zapisać skrótów",
 	"templateSearch": "Szukaj szablonów według nazwy lub ścieżki",
 	"templateContextSearch": "Szukaj dokumentów kontekstowych",
 	"templateContextTip": "Uruchom szablon, używając tytułu, ID i innych informacji z wybranego dokumentu, bez jego modyfikowania",

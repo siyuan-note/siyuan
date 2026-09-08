@@ -1,4 +1,12 @@
 {
+	"keymapUnset": "Belum diatur",
+	"keymapPrimary": "Jadikan pintasan utama",
+	"keymapRecording": "Tekan pintasan...",
+	"keymapShared": "Pintasan bersama",
+	"keymapSharedTip": "Perintah lokal diprioritaskan. Dalam setiap konteks, perintah dicoba sesuai urutan yang ditampilkan; setelah satu perintah dimulai, perintah lain tidak dijalankan",
+	"keymapLegacyConflict": "Pintasan ini bertentangan dengan tindakan yang belum mendukung pintasan bersama",
+	"keymapSystemScope": "Seluruh sistem",
+	"keymapSaveFailed": "Tidak dapat menyimpan pintasan",
 	"templateSearch": "Cari templat berdasarkan nama atau jalur",
 	"templateContextSearch": "Cari dokumen konteks",
 	"templateContextTip": "Jalankan templat menggunakan judul, ID, dan informasi lain dari dokumen yang dipilih tanpa mengubah dokumen tersebut",

@@ -1,4 +1,12 @@
 {
+	"keymapUnset": "Ayarlanmadı",
+	"keymapPrimary": "Birincil kısayol olarak ayarla",
+	"keymapRecording": "Kısayola basın...",
+	"keymapShared": "Paylaşılan kısayol",
+	"keymapSharedTip": "Yerel komutlar önceliklidir. Her bağlamda komutlar gösterilen sırayla denenir; bir komut başladığında başka bir komut çalıştırılmaz",
+	"keymapLegacyConflict": "Bu kısayol, henüz paylaşılan atamaları desteklemeyen bir işlemle çakışıyor",
+	"keymapSystemScope": "Sistem genelinde",
+	"keymapSaveFailed": "Kısayollar kaydedilemedi",
 	"templateSearch": "Şablonları ada veya yola göre ara",
 	"templateContextSearch": "Bağlam belgelerini ara",
 	"templateContextTip": "Şablonu, seçilen belgenin başlığını, kimliğini ve diğer bilgilerini kullanarak belgeyi değiştirmeden çalıştırın",

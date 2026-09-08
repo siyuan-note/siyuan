@@ -1,4 +1,12 @@
 {
+	"keymapUnset": "설정되지 않음",
+	"keymapPrimary": "기본 단축키로 설정",
+	"keymapRecording": "단축키를 누르세요...",
+	"keymapShared": "공유 단축키",
+	"keymapSharedTip": "로컬 명령이 우선합니다. 각 컨텍스트에서 표시된 순서대로 명령을 확인하며, 명령이 실행되기 시작하면 다른 명령은 실행하지 않습니다",
+	"keymapLegacyConflict": "이 단축키는 아직 공유 할당을 지원하지 않는 작업과 충돌합니다",
+	"keymapSystemScope": "시스템 전체",
+	"keymapSaveFailed": "단축키를 저장할 수 없습니다",
 	"templateSearch": "템플릿 이름 또는 경로 검색",
 	"templateContextSearch": "컨텍스트 문서 검색",
 	"templateContextTip": "선택한 문서의 제목, ID 등의 정보로 템플릿을 실행하며 해당 문서는 수정하지 않습니다",

@@ -1,8 +1,12 @@
 import {isMac, isNotCtrl, isOnlyMeta} from "./compatibility";
 import {Constants} from "../../constants";
+import {getKeymapBindings, IShortcutKeymap, normalizeShortcutKey, visitKeymapItems} from "../../util/keymapBindings";
 
 // 是否匹配辅助键 ⌃⌥⇧⌘
-export const matchAuxiliaryHotKey = (hotKey: string, event: KeyboardEvent) => {
+export const matchAuxiliaryHotKey = (hotKey: string | IShortcutKeymap, event: KeyboardEvent): boolean => {
+    if (typeof hotKey !== "string") {
+        return getKeymapBindings(hotKey).some(key => matchAuxiliaryHotKey(key, event));
+    }
     if (hotKey.includes("⌃")) {
         if (!event.ctrlKey) {
             return false;
@@ -42,21 +46,17 @@ export const matchAuxiliaryHotKey = (hotKey: string, event: KeyboardEvent) => {
     return true;
 };
 
-export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
+export const matchHotKey = (hotKey: string | IShortcutKeymap, event: KeyboardEvent): boolean => {
+    if (typeof hotKey !== "string") {
+        return getKeymapBindings(hotKey).some(key => matchHotKey(key, event));
+    }
     if (!hotKey) {
         return false;
     }
 
-    // https://github.com/siyuan-note/siyuan/issues/9770
-    if (hotKey.startsWith("⌃") && !isMac()) {
-        if (hotKey === "⌃D") {
-            // https://github.com/siyuan-note/siyuan/issues/9841
-            return false;
-        }
-        hotKey = hotKey.replace("⌘", "").replace("⌃", "⌘")
-            .replace("⌘⇧", "⇧⌘")
-            .replace("⌘⌥⇧", "⌥⇧⌘")
-            .replace("⌘⌥", "⌥⌘");
+    hotKey = normalizeShortcutKey(hotKey, isMac());
+    if (!hotKey) {
+        return false;
     }
 
     // []
@@ -166,34 +166,11 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
 };
 
 export const isIncludesHotKey = (hotKey: string) => {
-    let isInclude = false;
-    Object.keys(window.siyuan.config.keymap).find(key => {
-        const item = window.siyuan.config.keymap[key as "editor"];
-        Object.keys(item).find(key2 => {
-            const item2 = item[key2 as "general"];
-            if (typeof item2.custom === "string") {
-                if (item2.custom === hotKey) {
-                    isInclude = true;
-                    return true;
-                }
-            } else {
-                Object.keys(item2).forEach(key3 => {
-                    const item3: Config.IKey = item2[key3];
-                    if (item3.custom === hotKey) {
-                        isInclude = true;
-                        return true;
-                    }
-                });
-                if (isInclude) {
-                    return true;
-                }
-            }
-        });
-
-        if (isInclude) {
-            return true;
+    let included = false;
+    visitKeymapItems(window.siyuan.config.keymap, item => {
+        if (getKeymapBindings(item).includes(hotKey)) {
+            included = true;
         }
     });
-
-    return isInclude;
+    return included;
 };

@@ -1,4 +1,12 @@
 {
+	"keymapUnset": "Não definido",
+	"keymapPrimary": "Definir como atalho principal",
+	"keymapRecording": "Pressione um atalho...",
+	"keymapShared": "Atalho compartilhado",
+	"keymapSharedTip": "Comandos locais têm prioridade. Em cada contexto, os comandos são avaliados na ordem exibida; após o início de um comando, nenhum outro é executado",
+	"keymapLegacyConflict": "Este atalho entra em conflito com uma ação que ainda não aceita atribuições compartilhadas",
+	"keymapSystemScope": "Todo o sistema",
+	"keymapSaveFailed": "Não foi possível salvar os atalhos",
 	"templateSearch": "Pesquisar modelos por nome ou caminho",
 	"templateContextSearch": "Pesquisar documentos de contexto",
 	"templateContextTip": "Executar o modelo usando o título, o ID e outras informações do documento selecionado sem modificá-lo",

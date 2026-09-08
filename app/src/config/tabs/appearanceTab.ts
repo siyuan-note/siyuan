@@ -47,9 +47,7 @@ import {
 import {genMobileBottomBarSettingHTML, mountMobileBottomBarSetting} from "../../mobile/util/mobileBottomBar";
 import {genMobileSidePanelSettingHTML, mountMobileSidePanelSetting} from "../../mobile/util/mobileSidePanelSetting";
 /// #endif
-/// #if !MOBILE
 import {genEntryVisibilityHtml, mountEntryVisibility} from "../entryVisibility/ui";
-/// #endif
 
 interface IBootAppearanceListData {
     appearances: IBootAppearanceListItem[];

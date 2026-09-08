@@ -6,7 +6,7 @@
 		"id": "20260903150000-u4065fm",
 		"title": "连接远程内核",
 		"type": "doc",
-		"updated": "20260908100338"
+		"updated": "20260908104736"
 	},
 	"Children": [
 		{
@@ -38,23 +38,24 @@
 				}
 			]
 		},
-		{"ID": "20260908100338-b5ef1sw", "Type": "NodeHeading", "Properties": {"id": "20260908100338-b5ef1sw", "updated": "20260908100338"}, "Children": [{"Type": "NodeText", "Data": "图形界面连接与切换"}], "HeadingLevel": 2},
+		{"ID": "20260908100338-b5ef1sw", "Type": "NodeHeading", "Properties": {"id": "20260908100338-b5ef1sw", "updated": "20260908104736"}, "Children": [{"Type": "NodeText", "Data": "连接方式"}], "HeadingLevel": 2},
+		{"ID": "20260908104736-5cp1hsm", "Type": "NodeHeading", "HeadingLevel": 3, "Properties": {"id": "20260908104736-5cp1hsm", "updated": "20260908104736"}, "Children": [{"Type": "NodeText", "Data": "图形界面"}]},
 		{"ID": "20260908100338-7lr3clk", "Type": "NodeParagraph", "Properties": {"id": "20260908100338-7lr3clk", "updated": "20260908100338"}, "Children": [{"Type": "NodeText", "Data": "在桌面端的工作空间菜单中选择 "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "工作空间"}, {"Type": "NodeText", "Data": " - "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "连接远程内核..."}, {"Type": "NodeText", "Data": "，输入远程服务器的 HTTPS 地址，然后连接。地址不能包含路径、查询参数或用户名和密码。客户端会检查内核版本和登录状态，需要鉴权时显示访问授权码输入框；可选择记住登录状态。"}]},
-		{"ID": "20260908100338-yvellnc", "Type": "NodeParagraph", "Properties": {"id": "20260908100338-yvellnc", "updated": "20260908100338"}, "Children": [{"Type": "NodeText", "Data": "连接窗口统一列出本地工作空间和远程连接历史。点击远程地址可重新连接，也可选择已有的本地工作空间或返回上次使用的本地工作空间。移除远程历史只删除地址记录，不删除服务器上的数据或清除登录状态。"}]},
+		{"ID": "20260908100338-yvellnc", "Type": "NodeParagraph", "Properties": {"id": "20260908100338-yvellnc", "updated": "20260908103205"}, "Children": [{"Type": "NodeText", "Data": "连接窗口列出远程连接历史。点击地址可重新连接，也可移除历史记录。移除只删除地址记录，不删除服务器上的数据或清除登录状态。"}]},
 		{"ID": "20260908100338-5tea9ns", "Type": "NodeParagraph", "Properties": {"id": "20260908100338-5tea9ns", "updated": "20260908100338"}, "Children": [{"Type": "NodeText", "Data": "切换连接时，客户端会通过保存和安全退出流程关闭当前打开的工作空间，然后自动重启并连接所选目标。远程内核不会因此停止或重启。请等待保存和退出完成。"}]},
-		{"ID": "20260908100338-ri3ltil", "Type": "NodeParagraph", "Properties": {"id": "20260908100338-ri3ltil", "updated": "20260908100338"}, "Children": [{"Type": "NodeText", "Data": "首次启动页、远程启动等待页和鉴权页提供工作空间入口。连接失败时会打开连接窗口，可修改地址、重试或返回本地；检查过程中可取消。远程连接历史保存在客户端，授权码不会作为明文配置保存。图形界面连接默认不启用远程扩展信任；命令行启动方式仍可使用。"}]},
+		{"ID": "20260908100338-ri3ltil", "Type": "NodeParagraph", "Properties": {"id": "20260908100338-ri3ltil", "updated": "20260908104736"}, "Children": [{"Type": "NodeText", "Data": "首次启动页、远程启动等待页和鉴权页提供远程连接入口。连接失败时会打开连接窗口，可修改地址或重试，也可选择其他远程连接；检查过程中可取消。远程连接历史保存在客户端，授权码不会作为明文配置保存。图形界面连接默认不启用远程扩展信任。"}]},
 		{
 			"ID": "20260903150000-15zokfv",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260903150000-15zokfv",
-				"updated": "20260903150000"
+				"updated": "20260908104736"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "启动方式"
+					"Data": "命令行"
 				}
 			]
 		},

@@ -1,6 +1,7 @@
 const {ipcRenderer} = require("electron");
 const element = (id) => document.getElementById(id);
 const invoke = (cmd, data = {}) => ipcRenderer.invoke("siyuan-connections", {cmd, ...data});
+window.initWindowChrome({close: () => invoke("close"), minimize: () => invoke("minimize")});
 let languages;
 let checked = false;
 let authenticated = false;
@@ -37,17 +38,11 @@ const renderHistory = (entries) => {
         row.className = "entry";
         const open = document.createElement("button");
         open.type = "button";
-        open.textContent = (entry.mode === "remote" ? languages.remoteConnection : languages.localConnection) +
-            " · " + (entry.origin || entry.path);
-        open.addEventListener("click", async () => {
+        open.textContent = entry.origin;
+        open.addEventListener("click", () => {
             reset();
-            if (entry.mode === "remote") {
-                element("origin").value = entry.origin;
-                element("connectionForm").requestSubmit();
-            } else {
-                const result = await invoke("local", {path: entry.path});
-                message(result.error);
-            }
+            element("origin").value = entry.origin;
+            element("connectionForm").requestSubmit();
         });
         row.append(open);
         if (entry.mode === "remote") {
@@ -77,14 +72,6 @@ ipcRenderer.on("siyuan-connection-target", (event, data) => {
 });
 element("cancel").addEventListener("click", reset);
 element("refreshCaptcha").addEventListener("click", refreshCaptcha);
-element("local").addEventListener("click", async () => {
-    reset();
-    message((await invoke("local")).error);
-});
-element("localDefault").addEventListener("click", async () => {
-    reset();
-    message((await invoke("local", {path: ""})).error);
-});
 element("connectionForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     const requestSequence = ++sequence;
@@ -140,16 +127,14 @@ void invoke("init").then(result => {
     languages = result.languages;
     document.documentElement.lang = result.lang;
     document.documentElement.dir = ["ar", "he"].includes(result.lang) ? "rtl" : "ltr";
-    document.title = languages.workspaceList;
+    document.title = languages.connectRemoteKernel;
     element("title").textContent = languages.connectRemoteKernel;
     element("addressLabel").textContent = languages.remoteConnection;
     element("addressTip").textContent = languages.remoteKernelAddressTip;
     element("restartTip").textContent = languages.switchConnectionRestartTip;
     element("connect").textContent = languages.connectRemoteKernel;
     element("cancel").textContent = languages.cancel;
-    element("historyTitle").textContent = languages.workspaceList;
-    element("local").textContent = languages.localConnection + " · " + languages.openBy;
-    element("localDefault").textContent = languages.backToLocalWorkspace;
+    element("historyTitle").textContent = languages.remoteConnectionHistory;
     element("authCode").placeholder = languages._kernel["173"];
     element("authCode").ariaLabel = languages._kernel["173"];
     element("captcha").placeholder = languages._kernel["175"];

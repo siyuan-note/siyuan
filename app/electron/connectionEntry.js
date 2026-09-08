@@ -17,10 +17,10 @@
         }
         try {
             button.textContent = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "appearance", "langs", lang + ".json"),
-                "utf8")).workspaceList;
+                "utf8")).connectRemoteKernel;
         } catch (error) {
             button.textContent = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "appearance", "langs", "en.json"),
-                "utf8")).workspaceList;
+                "utf8")).connectRemoteKernel;
         }
     };
     button.style.cssText = "position:fixed;bottom:16px;right:16px;z-index:1000;-webkit-app-region:no-drag;width:auto";

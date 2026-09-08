@@ -38,6 +38,7 @@ if (!process.versions.electron) {
         const requests = [];
         const restarts = [];
         let handler;
+        let dialogHost;
         const handle = ipcMain.handle.bind(ipcMain);
         ipcMain.handle = (name, callback) => {
             if (name === "siyuan-connections") {
@@ -80,6 +81,8 @@ if (!process.versions.electron) {
             await session.defaultSession.cookies.set({url: origin, name: "legacy", value: "retained", secure: true});
             const manager = createConnectionManager({confDir: profile, languageDir: path.join(__dirname, "../appearance/langs"),
                 version: "1.0.0", currentTarget: () => ({origin}), log: () => {},
+                isTrustedDialogSender: event => dialogHost && event.sender === dialogHost.webContents &&
+                    event.senderFrame === dialogHost.webContents.mainFrame && event.senderFrame.url.startsWith("data:text/html,"),
                 restart: target => restarts.push(target), showWindow: false});
             await manager.prepareSession({origin});
             assert.equal((await remoteSession.cookies.get({url: origin}))[0].value, "retained");
@@ -97,6 +100,10 @@ if (!process.versions.electron) {
                 ready();
             })`);
             const invoke = data => evaluate(`require("electron").ipcRenderer.invoke("siyuan-connections", ${JSON.stringify(data)})`);
+            assert.equal(await evaluate('document.querySelectorAll("#min, #close, .drag").length'), 3);
+            assert.equal(await evaluate('document.querySelectorAll("#local, #localDefault").length'), 0);
+            fs.writeFileSync(path.join(profile, "workspace.json"), JSON.stringify(["D:/local-workspace"]));
+            assert.deepEqual((await invoke({cmd: "init"})).entries, []);
             assert.ok(await evaluate('document.getElementById("restartTip").textContent.length > 10'));
             fs.writeFileSync(path.join(os.tmpdir(), "siyuan-connections-preview.png"), (await window.webContents.capturePage()).toPNG());
             assert.match((await invoke({cmd: "open", origin})).error, /./);
@@ -139,7 +146,91 @@ if (!process.versions.electron) {
             assert.ok((await pending).error);
             assert.ok((await invoke({cmd: "open", origin})).error);
             assert.ok(requests.every(item => item.url.startsWith(origin + "/api/system/")));
-            window.destroy();
+            const otherWindow = new BrowserWindow({show: false});
+            const closed = new Promise(resolve => window.once("closed", resolve));
+            await handler({sender: window.webContents, senderFrame: window.webContents.mainFrame}, {cmd: "close"});
+            await closed;
+            assert.equal(window.isDestroyed(), true);
+            assert.equal(otherWindow.isDestroyed(), false);
+            slow = false;
+            authenticated = false;
+            dialogHost = new BrowserWindow({show: false, width: 900, height: 700,
+                webPreferences: {nodeIntegration: true, contextIsolation: false, backgroundThrottling: false, offscreen: true}});
+            await dialogHost.loadURL("data:text/html,<html><body></body></html>");
+            const runDialog = code => dialogHost.webContents.executeJavaScript(code);
+            const ts = require("typescript");
+            const compile = name => ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src", name), "utf8"), {
+                compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
+            }).outputText;
+            const strings = JSON.parse(fs.readFileSync(path.join(__dirname, "../appearance/langs/en.json"), "utf8"));
+            await runDialog(`(() => {
+                window.siyuan = {languages: ${JSON.stringify(strings)}, config: {lang: "en"}, dialogs: [], zIndex: 1,
+                    menus: {menu: {element: document.createElement("div"), remove() {}}}};
+                const modules = {
+                    electron: require("electron"),
+                    "../util/genID": {genUUID: () => "test-dialog"},
+                    "./moveResize": {moveResize() {}},
+                    "../util/functions": {isMobile: () => false},
+                    "../protyle/util/compatibility": {isNotCtrl: event => !event.ctrlKey && !event.metaKey},
+                    "../constants": {Constants: {TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}},
+                };
+                const load = source => {
+                    const exports = {};
+                    new Function("require", "exports", source)(name => {
+                        if (!(name in modules)) { throw new Error(name); }
+                        return modules[name];
+                    }, exports);
+                    return exports;
+                };
+                modules["../util/escape"] = load(${JSON.stringify(compile("util/escape.ts"))});
+                modules["./index"] = load(${JSON.stringify(compile("dialog/index.ts"))});
+                window.openRemoteConnection = load(${JSON.stringify(compile("dialog/remoteConnection.ts"))}).openRemoteConnection;
+                window.openRemoteConnection(${JSON.stringify(origin)});
+            })()`);
+            const waitDialog = condition => runDialog(`new Promise((resolve, reject) => {
+                const timer = setTimeout(() => reject(new Error("Dialog timeout")), 5000);
+                const ready = () => {
+                    if (${condition}) { clearTimeout(timer); resolve(); } else { setTimeout(ready, 20); }
+                };
+                ready();
+            })`);
+            await waitDialog('!document.querySelector("[data-field=connect]").disabled');
+            assert.equal(await runDialog('document.querySelectorAll(".b3-dialog").length'), 1);
+            assert.equal(await runDialog('document.querySelector("[data-field=historySection]").classList.contains("fn__none")'), true);
+            if (process.env.SIYUAN_CONNECTION_PREVIEW) {
+                const buildDir = path.join(__dirname, "../stage/build/app");
+                const index = fs.readFileSync(path.join(buildDir, "index.html"), "utf8");
+                const css = index.match(/href="(base\.[^"]+\.css)"/)[1];
+                for (const stylesheet of [path.join(buildDir, css), path.join(__dirname, "../appearance/themes/daylight/theme.css")]) {
+                    await runDialog(`(() => {
+                        const style = document.createElement("style");
+                        style.textContent = ${JSON.stringify(fs.readFileSync(stylesheet, "utf8"))};
+                        document.head.append(style);
+                    })()`);
+                }
+                assert.equal(await runDialog('getComputedStyle(document.querySelector("[data-field=auth]")).display'), "none");
+                await waitDialog('document.querySelector(".b3-dialog--open")');
+                await dialogHost.webContents.insertCSS(":root {--b3-font-size:14px;--b3-font-family:Arial,sans-serif} .b3-dialog__container, .b3-dialog__scrim {transition:none}");
+                await new Promise(resolve => setTimeout(resolve, 300));
+                fs.writeFileSync(path.join(os.tmpdir(), "siyuan-connection-dialog-preview.png"), (await dialogHost.webContents.capturePage()).toPNG());
+            }
+            const windowCount = BrowserWindow.getAllWindows().length;
+            await runDialog('window.openRemoteConnection(); document.querySelector("[data-field=connect]").click()');
+            await waitDialog('!document.querySelector("[data-field=auth]").classList.contains("fn__none")');
+            assert.equal(BrowserWindow.getAllWindows().length, windowCount);
+            assert.equal(await runDialog('document.querySelectorAll(".b3-dialog").length'), 1);
+            await waitDialog('!document.querySelector("[data-field=connect]").disabled');
+            await runDialog('document.querySelector("[data-field=authCode]").value = "valid"; document.querySelector("[data-field=connect]").click()');
+            await waitDialog('!document.querySelector("[data-field=connect]").disabled');
+            assert.equal(restarts.length, 2);
+            assert.equal(restarts[1].origin, origin);
+            assert.ok((await handler({sender: dialogHost.webContents, senderFrame: {}}, {cmd: "init", dialog: true})).error);
+            await runDialog('document.querySelector("[data-field=cancel]").click()');
+            await waitDialog('!document.querySelector(".b3-dialog")');
+            assert.equal(dialogHost.isDestroyed(), false);
+            assert.ok((await handler({sender: dialogHost.webContents, senderFrame: dialogHost.webContents.mainFrame}, {cmd: "open", origin})).error);
+            dialogHost.destroy();
+            otherWindow.destroy();
             console.log("Connection manager passed");
             app.exit(0);
         } catch (error) {

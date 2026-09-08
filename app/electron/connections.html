@@ -5,6 +5,7 @@
     <meta name="color-scheme" content="light dark">
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src data:">
     <title>SiYuan</title>
+    <link rel="stylesheet" href="window.css">
     <link rel="stylesheet" href="connections.css">
 </head>
 <body>
@@ -25,8 +26,15 @@
         <p id="message" role="status" aria-live="polite"></p>
         <h2 id="historyTitle"></h2>
         <div id="history"></div>
-        <div class="actions"><button id="local" type="button"></button><button id="localDefault" type="button"></button></div>
     </main>
+<svg class="svg" id="min" viewBox="0 0 32 32">
+    <path d="M1.333 14.667h29.333q1.333 0 1.333 1.333v0q0 1.333-1.333 1.333h-29.333q-1.333 0-1.333-1.333v0q0-1.333 1.333-1.333z"></path>
+</svg>
+<svg class="svg" id="close" viewBox="0 0 32 32">
+    <path d="M32 3.221l-12.779 12.779 12.779 12.779-3.221 3.221-12.779-12.779-12.779 12.779-3.221-3.221 12.779-12.779-12.779-12.779 3.221-3.221 12.779 12.779 12.779-12.779z"></path>
+</svg>
+<div class="drag"></div>
+    <script src="window.js"></script>
     <script src="connections.js"></script>
 </body>
 </html>

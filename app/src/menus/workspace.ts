@@ -1,6 +1,7 @@
 import {MenuItem} from "./Menu";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
+import {openRemoteConnection} from "../dialog/remoteConnection";
 /// #endif
 import {openHistory} from "../history/history";
 import {getOpenNotebookCount, originalPath, pathPosix, useShell} from "../util/pathName";
@@ -253,9 +254,7 @@ export const workspaceMenu = async (app: App, rect: DOMRect) => {
     let remoteConnections: string[] = [];
     /// #if !BROWSER
     remoteConnections = await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "remoteConnections"});
-    const manageConnections = (origin?: string) => ipcRenderer.send("siyuan-manage-connections", {
-        lang: window.siyuan.config.lang, origin,
-    });
+    const manageConnections = (origin?: string) => openRemoteConnection(origin);
     /// #endif
     const renderMenu = (workspaces: IWorkspace[]) => {
         window.siyuan.menus.menu.remove();
@@ -299,16 +298,12 @@ export const workspaceMenu = async (app: App, rect: DOMRect) => {
         if ((!window.siyuan.config.readonly && getHostCapabilities().workspaces) || !isBrowser()) {
             let workspaceSubMenu: IMenu[];
             /// #if !BROWSER
-            workspaceSubMenu = [{
+            workspaceSubMenu = getHostCapabilities().workspaces ? [{
                 id: "newOrOpenBy",
                 label: getHostCapabilities().workspaces
                     ? `${window.siyuan.languages.new} / ${window.siyuan.languages.openBy}` : window.siyuan.languages.openBy,
                 iconHTML: "",
                 click: async () => {
-                    if (!getHostCapabilities().workspaces) {
-                        manageConnections();
-                        return;
-                    }
                     const localPath = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
                         cmd: "showOpenDialog",
                         defaultPath: window.siyuan.config.system.homeDir,
@@ -327,7 +322,7 @@ export const workspaceMenu = async (app: App, rect: DOMRect) => {
                         }
                     });
                 }
-            }];
+            }] : [];
             workspaceSubMenu.push({
                 id: "connectRemoteKernel",
                 label: window.siyuan.languages.connectRemoteKernel,

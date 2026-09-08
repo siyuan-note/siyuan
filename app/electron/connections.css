@@ -1,5 +1,5 @@
-body { margin: 0; font: 14px/1.6 system-ui, sans-serif; color: #222; background: #fff; }
-main { max-width: 680px; margin: auto; padding: 24px; }
+body { font-size: 14px; line-height: 1.6; text-align: start; }
+main { max-width: 680px; margin: auto; padding: 48px 24px 24px; }
 h1 { font-size: 22px; margin: 0 0 12px; }
 h2 { font-size: 16px; }
 p { margin: 8px 0; }

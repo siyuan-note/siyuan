@@ -6,17 +6,18 @@
 		"id": "20260903150000-3qa6edk",
 		"title": "連線至遠端內核",
 		"type": "doc",
-		"updated": "20260908100358"
+		"updated": "20260908104736"
 	},
 	"Children": [
 		{"ID": "20260903150000-jrf9aw4", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-jrf9aw4", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "概述"}]},
 		{"ID": "20260903150000-6shebfx", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-6shebfx", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "桌面端可以連線至其他裝置上執行的思源內核，並使用本機桌面介面進行編輯。遠端模式僅用於連線至現有內核，不會在本機啟動內核。"}]},
-		{"ID": "20260908100358-u9jb6fe", "Type": "NodeHeading", "Properties": {"id": "20260908100358-u9jb6fe", "updated": "20260908100358"}, "Children": [{"Type": "NodeText", "Data": "圖形介面連線與切換"}], "HeadingLevel": 2},
+		{"ID": "20260908100358-u9jb6fe", "Type": "NodeHeading", "Properties": {"id": "20260908100358-u9jb6fe", "updated": "20260908104736"}, "Children": [{"Type": "NodeText", "Data": "連線方式"}], "HeadingLevel": 2},
+		{"ID": "20260908104736-q8215x7", "Type": "NodeHeading", "HeadingLevel": 3, "Properties": {"id": "20260908104736-q8215x7", "updated": "20260908104736"}, "Children": [{"Type": "NodeText", "Data": "圖形介面"}]},
 		{"ID": "20260908100358-1qurfwt", "Type": "NodeParagraph", "Properties": {"id": "20260908100358-1qurfwt", "updated": "20260908100358"}, "Children": [{"Type": "NodeText", "Data": "在桌面端的工作空間選單中選擇 "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "工作空間"}, {"Type": "NodeText", "Data": " - "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "連線至遠端核心..."}, {"Type": "NodeText", "Data": "，輸入遠端伺服器的 HTTPS 網址，然後連線。網址不能包含路徑、查詢參數或使用者名稱和密碼。用戶端會檢查核心版本與登入狀態，需要驗證時顯示存取授權碼輸入框；可選擇記住登入狀態。"}]},
-		{"ID": "20260908100358-es7xe07", "Type": "NodeParagraph", "Properties": {"id": "20260908100358-es7xe07", "updated": "20260908100358"}, "Children": [{"Type": "NodeText", "Data": "連線視窗統一列出本機工作空間與遠端連線記錄。點選遠端網址可重新連線，也可選擇既有的本機工作空間或返回上次使用的本機工作空間。移除遠端記錄只刪除網址記錄，不刪除伺服器上的資料或清除登入狀態。"}]},
+		{"ID": "20260908100358-es7xe07", "Type": "NodeParagraph", "Properties": {"id": "20260908100358-es7xe07", "updated": "20260908103205"}, "Children": [{"Type": "NodeText", "Data": "連線視窗列出遠端連線記錄。點選網址可重新連線，也可移除記錄。移除只刪除網址記錄，不刪除伺服器上的資料或清除登入狀態。"}]},
 		{"ID": "20260908100358-wba4bpx", "Type": "NodeParagraph", "Properties": {"id": "20260908100358-wba4bpx", "updated": "20260908100358"}, "Children": [{"Type": "NodeText", "Data": "切換連線時，用戶端會透過儲存與安全結束流程關閉目前開啟的工作空間，然後自動重新啟動並連線至所選目標。遠端核心不會因此停止或重新啟動。請等待儲存與結束完成。"}]},
-		{"ID": "20260908100358-f7rav2z", "Type": "NodeParagraph", "Properties": {"id": "20260908100358-f7rav2z", "updated": "20260908100358"}, "Children": [{"Type": "NodeText", "Data": "首次啟動頁、遠端啟動等待頁與驗證頁提供工作空間入口。連線失敗時會開啟連線視窗，可修改網址、重試或返回本機；檢查過程中可取消。遠端連線記錄儲存在用戶端，授權碼不會以明文設定儲存。圖形介面連線預設不啟用遠端擴充套件信任；命令列啟動方式仍可使用。"}]},
-		{"ID": "20260903150000-o9vrit3", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-o9vrit3", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "啟動方式"}]},
+		{"ID": "20260908100358-f7rav2z", "Type": "NodeParagraph", "Properties": {"id": "20260908100358-f7rav2z", "updated": "20260908104736"}, "Children": [{"Type": "NodeText", "Data": "首次啟動頁、遠端啟動等待頁與驗證頁提供遠端連線入口。連線失敗時會開啟連線視窗，可修改網址或重試，也可選擇其他遠端連線；檢查過程中可取消。遠端連線記錄儲存在用戶端，授權碼不會以明文設定儲存。圖形介面連線預設不啟用遠端擴充套件信任。"}]},
+		{"ID": "20260903150000-o9vrit3", "Type": "NodeHeading", "HeadingLevel": 3, "Properties": {"id": "20260903150000-o9vrit3", "updated": "20260908104736"}, "Children": [{"Type": "NodeText", "Data": "命令列"}]},
 		{"ID": "20260903150000-m5fkfh5", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-m5fkfh5", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "完全結束思源桌面用戶端後，從命令列啟動桌面端並加入參數 "}, {"Type": "NodeTextMark", "TextMarkType": "code", "TextMarkTextContent": "--remote=https://host[:port]"}, {"Type": "NodeText", "Data": "。如果已有執行中的實例，單一實例機制不會切換目前的連線。"}]},
 		{"ID": "20260903150000-l1lghrh", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-l1lghrh", "updated": "20260908082237"}, "Children": [{"Type": "NodeText", "Data": "安全性與版本"}]},
 		{"ID": "20260903150000-dk8m7z0", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-dk8m7z0", "updated": "20260908082237"}, "Children": [{"Type": "NodeText", "Data": "僅支援 HTTPS 遠端位址，用戶端作業系統必須信任伺服器使用的 TLS 憑證。請只連線至你信任的伺服器；桌面用戶端與遠端內核的版本必須完全一致，否則無法連線。桌面用戶端始終使用安裝套件內建的核心前端與登入頁面，預設不載入遠端擴充程式碼；遠端 HTML 嵌入內容不可用。"}]},

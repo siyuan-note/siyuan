@@ -239,7 +239,7 @@
             .catch(() => fetch("/appearance/langs/en.json", {cache: "no-store"}).then((response) => response.json()))
             .then((languages) => {
                 document.title = languages._kernel["178"];
-                document.getElementById("connections").textContent = languages.workspaceList;
+                document.getElementById("connections").textContent = languages.connectRemoteKernel;
                 document.getElementById("closeWindow").ariaLabel = languages._kernel["177"];
                 document.getElementById("title").textContent = languages._kernel["176"];
                 document.getElementById("origin").textContent = window.location.origin;

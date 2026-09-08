@@ -1,4 +1,4 @@
-const {app, BrowserWindow, ipcMain, session, net, dialog, safeStorage} = require("electron");
+const {app, BrowserWindow, ipcMain, session, net, safeStorage} = require("electron");
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -9,7 +9,8 @@ const {readConnections, writeConnections, remotePartition} = require("./connecti
 
 const getRemoteSession = (target) => session.fromPartition(remotePartition(target.origin));
 
-const createConnectionManager = ({confDir, languageDir, restart, currentTarget, version, log, showWindow = true}) => {
+const createConnectionManager = ({confDir, languageDir, restart, currentTarget, version, log, showWindow = true,
+    isTrustedDialogSender = () => false}) => {
     const file = path.join(confDir, "connections.json");
     const page = pathToFileURL(path.join(__dirname, "connections.html")).href;
     let window;
@@ -19,6 +20,16 @@ const createConnectionManager = ({confDir, languageDir, restart, currentTarget, 
     let controller;
     let checkedOrigin;
     let authenticatedOrigin;
+    let dialogSender;
+    let dialogFrame;
+    const releaseDialog = () => {
+        dialogSender?.removeListener("destroyed", releaseDialog);
+        dialogSender = undefined;
+        dialogFrame = undefined;
+        controller?.abort();
+        checkedOrigin = undefined;
+        authenticatedOrigin = undefined;
+    };
     try {
         for (const name of fs.readdirSync(confDir)) {
             if (/^connection-session-[a-f0-9]{48}\.bin$/.test(name)) {
@@ -120,25 +131,43 @@ const createConnectionManager = ({confDir, languageDir, restart, currentTarget, 
         }
         return response;
     };
-    const list = () => {
-        let local = [];
-        try {
-            local = JSON.parse(fs.readFileSync(path.join(confDir, "workspace.json"), "utf8"));
-        } catch (error) {
-            if (error.code !== "ENOENT") {
-                throw error;
-            }
-        }
-        return [...local.filter(item => typeof item === "string").reverse().map(item => ({mode: "local", path: item})),
-            ...readConnections(file).origins.map(origin => ({mode: "remote", origin}))];
-    };
+    const list = () => readConnections(file).origins.map(origin => ({mode: "remote", origin}));
     ipcMain.handle("siyuan-connections", async (event, data) => {
-        // 管理操作仅接受本机管理窗口主框架发出的请求。
-        if (!window || window.isDestroyed() || event.sender !== window.webContents ||
-            event.senderFrame !== window.webContents.mainFrame || event.senderFrame.url !== page) {
+        if (data.cmd === "init" && data.dialog && isTrustedDialogSender(event)) {
+            releaseDialog();
+            if (window && !window.isDestroyed()) {
+                window.close();
+            }
+            dialogSender = event.sender;
+            dialogFrame = event.senderFrame;
+            dialogSender.once("destroyed", releaseDialog);
+            language = /^[a-z]{2}(?:-[A-Z]{2})?$/.test(data.lang || "") ? data.lang : app.getLocale();
+            initialOrigin = data.origin || currentTarget()?.origin || "";
+            initialError = "";
+        }
+        // 仅接受已登记的主界面对话框或本机连接页主框架发出的请求。
+        const fromDialog = event.sender === dialogSender && event.senderFrame === dialogFrame &&
+            isTrustedDialogSender(event);
+        const fromWindow = !dialogSender && window && !window.isDestroyed() && event.sender === window.webContents &&
+            event.senderFrame === window.webContents.mainFrame && event.senderFrame.url === page;
+        if (!fromDialog && !fromWindow) {
             return {error: "Invalid connection manager sender"};
         }
         try {
+            if (data.cmd === "close") {
+                if (fromDialog) {
+                    releaseDialog();
+                } else {
+                    window.close();
+                }
+                return {};
+            }
+            if (data.cmd === "minimize") {
+                if (fromWindow) {
+                    window.minimize();
+                }
+                return {};
+            }
             if (data.cmd === "init") {
                 let entries = [];
                 let error = initialError;
@@ -161,28 +190,6 @@ const createConnectionManager = ({confDir, languageDir, restart, currentTarget, 
                     history.origins = history.origins.filter(item => item !== origin);
                 });
                 return {entries: list()};
-            }
-            if (data.cmd === "local") {
-                let workspacePath = data.path;
-                if (workspacePath === undefined) {
-                    const selected = await dialog.showOpenDialog(window, {properties: ["openDirectory"]});
-                    if (selected.canceled) {
-                        return {};
-                    }
-                    workspacePath = selected.filePaths[0];
-                }
-                if (workspacePath) {
-                    try {
-                        if (!path.isAbsolute(workspacePath) || !fs.statSync(workspacePath).isDirectory() ||
-                            !fs.readFileSync(path.join(workspacePath, "conf", "conf.json"), "utf8").includes("kernelVersion")) {
-                            throw new Error("Invalid workspace");
-                        }
-                    } catch (error) {
-                        throw new Error(languages().invalidLocalWorkspace);
-                    }
-                }
-                await restart({mode: "local", path: workspacePath, lang: language});
-                return {};
             }
             let origin;
             try {
@@ -253,6 +260,7 @@ const createConnectionManager = ({confDir, languageDir, restart, currentTarget, 
         }
     });
     const show = (options = {}) => {
+        releaseDialog();
         if (window && !window.isDestroyed()) {
             if (options.origin || options.error) {
                 window.webContents.send("siyuan-connection-target", {origin: options.origin, error: options.error});
@@ -267,7 +275,9 @@ const createConnectionManager = ({confDir, languageDir, restart, currentTarget, 
         checkedOrigin = undefined;
         authenticatedOrigin = undefined;
         window = new BrowserWindow({width: 720, height: 600, minWidth: 560, minHeight: 480, show: showWindow,
-            title: languages().workspaceList, autoHideMenuBar: true,
+            title: languages().connectRemoteKernel, autoHideMenuBar: true,
+            frame: process.platform === "darwin", titleBarStyle: "hidden", fullscreenable: false,
+            icon: path.join(__dirname, "..", "stage", "icon-large.png"),
             webPreferences: {nodeIntegration: true, contextIsolation: false, webSecurity: true,
                 partition: "siyuan-connection-manager"}});
         window.webContents.on("will-navigate", event => event.preventDefault());

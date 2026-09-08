@@ -2721,6 +2721,9 @@ app.whenReady().then(() => {
         languageDir: path.join(appDir, "appearance", "langs"),
         version: appVer,
         currentTarget: () => remoteKernelTarget,
+        isTrustedDialogSender: event => event.senderFrame === event.sender.mainFrame &&
+            !!getWindowKernelTarget(event.sender.id) &&
+            getWindowPathname(BrowserWindow.fromWebContents(event.sender)) === "/stage/build/app/",
         log: writeLog,
         restart: async (target) => {
             if (pendingConnectionArgs || updateInstallPromise || systemShutdownState !== systemShutdownNone) {

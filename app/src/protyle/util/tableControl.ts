@@ -214,6 +214,7 @@ export const getTableCellBackgroundMenus = (cells: HTMLTableCellElement[],
         type: "empty",
         label: `<div class="fn__flex fn__flex-wrap" style="width: 238px">${colorHTML}</div>`,
         bind: element => {
+            element.classList.add("b3-menu__custom");
             element.addEventListener("click", event => {
                 const colorTarget = (event.target as Element).closest<HTMLElement>(".color__square");
                 if (!colorTarget || !element.contains(colorTarget)) {

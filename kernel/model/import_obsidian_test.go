@@ -244,6 +244,122 @@ func TestResolveObsidianTarget(t *testing.T) {
 	}
 }
 
+func TestResolveObsidianSubdirectoryPaths(t *testing.T) {
+	current := newObsidianTestDoc("Folder/Current")
+	local := newObsidianTestDoc("Folder/Sub/Note")
+	root := newObsidianTestDoc("Sub/Note")
+	localAsset := &obsidianAssetPlan{Source: &obsidianSourceFile{RelPath: "Folder/Sub/image.png"}}
+	rootAsset := &obsidianAssetPlan{Source: &obsidianSourceFile{RelPath: "Sub/image.png"}}
+	vault := &obsidianVaultContext{
+		DocsByRel: map[string]*obsidianDocPlan{obsidianPathKey(local.RelPath): local},
+		Assets:    map[string]*obsidianAssetPlan{obsidianPathKey(localAsset.Source.RelPath): localAsset},
+	}
+	for _, withRoot := range []bool{false, true} {
+		if withRoot {
+			vault.DocsByRel[obsidianPathKey(root.RelPath)] = root
+			vault.Assets[obsidianPathKey(rootAsset.Source.RelPath)] = rootAsset
+		}
+		for _, prefix := range []string{"Sub/", "./Sub/", "../Folder/Sub/", "/Sub/", "Missing/", "../../Sub/", "Sub/../../../../Sub/"} {
+			t.Run(fmt.Sprintf("root=%v/%s", withRoot, prefix), func(t *testing.T) {
+				status := "resolved"
+				expectedDoc, expectedAsset := local, localAsset
+				switch prefix {
+				case "Sub/":
+					if withRoot {
+						expectedDoc, expectedAsset = root, rootAsset
+					}
+				case "/Sub/":
+					if withRoot {
+						expectedDoc, expectedAsset = root, rootAsset
+					} else {
+						status = "missing"
+					}
+				case "Missing/":
+					status = "missing"
+				case "../../Sub/", "Sub/../../../../Sub/":
+					status = "unsupported"
+				}
+				for _, markdown := range []bool{false, true} {
+					resolve := resolveObsidianTarget
+					expectedStatus := status
+					if markdown {
+						resolve = resolveObsidianMarkdownDestination
+						if strings.HasPrefix(prefix, "/") {
+							expectedStatus = "unsupported"
+						}
+					}
+					doc := resolve(vault, current, prefix+"Note.md")
+					asset := resolve(vault, current, prefix+"image.png")
+					if doc.Status != expectedStatus || asset.Status != expectedStatus {
+						t.Fatalf("markdown=%v: expected %s, got doc=%+v asset=%+v", markdown, expectedStatus, doc, asset)
+					}
+					if expectedStatus == "resolved" && (doc.Doc != expectedDoc || asset.Asset != expectedAsset) {
+						t.Fatalf("markdown=%v: incorrect target: doc=%+v asset=%+v", markdown, doc, asset)
+					}
+				}
+			})
+		}
+	}
+}
+
+func TestImportObsidianRelativeSubdirectoryLinks(t *testing.T) {
+	root := t.TempDir()
+	source := "![[Note-assets/image.png]]\n\n[[Sub/Target]]\n\n![[Sub/Target]]\n\n![image](Note-assets/image.png)\n\n[Target](Sub/Target.md)\n"
+	for name, content := range map[string]string{
+		"Folder/Current.md":            source,
+		"Folder/Sub/Target.md":         "# Target\n",
+		"Folder/Note-assets/image.png": "image",
+	} {
+		filename := filepath.Join(root, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(filename), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filename, []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := os.Mkdir(filepath.Join(root, ".obsidian"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	vault, err := analyzeObsidianVault(context.Background(), root, func(int, string) {})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if vault.Analysis.MissingCount != 0 || vault.Analysis.UnreferencedFileCount != 0 || len(vault.ReferencedAssets) != 1 {
+		t.Fatalf("unexpected analysis: %+v", vault.Analysis)
+	}
+	current := vault.DocsByRel[obsidianPathKey("Folder/Current")]
+	target := vault.DocsByRel[obsidianPathKey("Folder/Sub/Target")]
+	asset := vault.Assets[obsidianPathKey("Folder/Note-assets/image.png")]
+	transformed, stats := transformObsidianMarkdown(vault, current, []byte(source))
+	if stats.PreservedUnresolved != 0 || stats.ConvertedLinks != 2 || stats.ConvertedEmbeds != 1 {
+		t.Fatalf("unexpected transform stats: %+v", stats)
+	}
+	tree, err := parseObsidianMd(transformed, vault, current, stats)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var images, refs, embeds int
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+		if node.Type == ast.NodeImage && string(node.ChildByType(ast.NodeLinkDest).Tokens) == "assets/"+asset.FinalName {
+			images++
+		}
+		if treenode.IsBlockRef(node) && node.TextMarkBlockRefID == target.ID {
+			refs++
+		}
+		if node.Type == ast.NodeBlockQueryEmbed && treenode.GetEmbedBlockRef(node) == target.ID {
+			embeds++
+		}
+		return ast.WalkContinue
+	})
+	if images != 2 || refs != 2 || embeds != 1 {
+		t.Fatalf("unexpected parsed links: images=%d refs=%d embeds=%d", images, refs, embeds)
+	}
+}
+
 func TestResolveObsidianAmbiguousTargetUsesFirstMatch(t *testing.T) {
 	current := newObsidianTestDoc("Current")
 	first := newObsidianTestDoc("A/Note")

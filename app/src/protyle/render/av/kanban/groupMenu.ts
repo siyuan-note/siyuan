@@ -98,6 +98,7 @@ export const openKanbanGroupMenu = (options: {
         iconHTML: "",
         label: colorHTML,
         bind(element) {
+            element.classList.add("b3-menu__custom");
             element.addEventListener("click", (event) => {
                 const colorTarget = (event.target as HTMLElement).closest<HTMLElement>("button");
                 if (colorTarget?.dataset.type === AV_MANAGE_CUSTOM_COLORS_TYPE) {

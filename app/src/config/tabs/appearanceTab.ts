@@ -387,7 +387,7 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
         fontMenu.addItem({
             iconHTML: "",
             type: "empty",
-            label: `<div class="fn__flex-column b3-menu__filter">
+            label: `<div class="fn__flex-column b3-menu__filter b3-menu__filter--font">
     <div class="fn__flex">
         <input class="b3-text-field fn__flex-1" data-type="font-search" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}">
         ${canShowAllFonts ? `<span class="fn__space"></span><button class="b3-button b3-button--outline fn__flex-center" data-type="show-all-fonts">${escapeHtml(window.siyuan.languages.showAll)}</button>` : ""}
@@ -477,7 +477,9 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                     showAllFonts = true;
                     (event.currentTarget as HTMLElement).remove();
                     filterFontList();
-                    inputElement.focus();
+                    if (!isMobile()) {
+                        inputElement.focus();
+                    }
                 });
                 inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                     event.stopPropagation();
@@ -573,7 +575,9 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
         fontMenu.open({x: rect.left, y: rect.bottom, h: rect.height});
         // 内部列表自行滚动，搜索框保持固定
         fontMenu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
-        fontMenu.element.querySelector<HTMLInputElement>('[data-type="font-search"]').focus();
+        if (!isMobile()) {
+            fontMenu.element.querySelector<HTMLInputElement>('[data-type="font-search"]').focus();
+        }
     });
 
     async function openFontWeightMenu(chipElement: HTMLElement, index: number, event: MouseEvent) {

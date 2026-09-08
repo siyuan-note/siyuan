@@ -62,6 +62,13 @@
     }
 
     .b3-menu {
+      &__filter--font {
+        min-width: 0;
+        max-width: none;
+        padding: 0 16px;
+        box-sizing: border-box;
+      }
+
       &__submenu {
         top: 48px;
         left: 100vw;

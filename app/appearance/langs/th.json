@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "การเชื่อมต่อเคอร์เนล",
+	"kernelConnectionTip": "สลับระหว่างเคอร์เนลภายในเครื่องและเคอร์เนลระยะไกล แอปเดสก์ท็อปจะเริ่มใหม่โดยอัตโนมัติ",
+	"localKernel": "เคอร์เนลภายในเครื่อง",
+	"remoteKernel": "เคอร์เนลระยะไกล",
+	"remoteKernelAddressTip": "เคอร์เนลระยะไกลต้องใช้ HTTPS origin ที่เชื่อถือได้ เช่น https://host:6806",
+	"switchAndRestart": "สลับและเริ่มใหม่",
+	"invalidRemoteKernelAddress": "ป้อน HTTPS origin ของเคอร์เนลระยะไกลที่ถูกต้องโดยไม่มีพาธ คิวรี แฟรกเมนต์ หรือข้อมูลรับรอง",
+	"kernelConnectionSwitchFailed": "บันทึกการตั้งค่าการเชื่อมต่อเคอร์เนลไม่สำเร็จ",
 	"templateSearch": "ค้นหาเทมเพลตตามชื่อหรือเส้นทาง",
 	"templateContextSearch": "ค้นหาเอกสารบริบท",
 	"templateContextTip": "เรียกใช้เทมเพลตโดยใช้ชื่อ ID และข้อมูลอื่นจากเอกสารที่เลือก โดยไม่แก้ไขเอกสารนั้น",

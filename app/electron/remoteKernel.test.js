@@ -4,6 +4,8 @@ const path = require("node:path");
 const test = require("node:test");
 const {
     createRemoteDocumentContentSecurityPolicy,
+
+    buildKernelConnectionRelaunchArgs,
     getArgFrom,
     getInsecureCertificateSwitchName,
     getRemoteKernelRedirectDecision,
@@ -15,6 +17,8 @@ const {
     insecureCertificateSwitchNames,
     isAllowedRemoteExternalURL,
     normalizeRemoteKernelOrigin,
+
+    normalizeKernelConnection,
     remoteKernelActiveStorageTypes,
     shouldBlockRemoteFrameNavigation,
     shouldForwardRemoteDeepLink,
@@ -44,6 +48,43 @@ test("normalizeRemoteKernelOrigin rejects insecure or non-origin URLs", () => {
         "https://example.com/#fragment",
         "https://example.com#",
     ].forEach((value) => assert.throws(() => normalizeRemoteKernelOrigin(value)));
+});
+
+
+test("kernel connection settings normalize local and remote modes", () => {
+    assert.deepEqual(normalizeKernelConnection(undefined), {mode: "local", origin: ""});
+    assert.deepEqual(normalizeKernelConnection({mode: "local", origin: "https://ignored.example"}), {
+        mode: "local",
+        origin: "",
+    });
+    assert.deepEqual(normalizeKernelConnection({mode: "remote", origin: "https://example.com:8443/"}), {
+        mode: "remote",
+        origin: "https://example.com:8443",
+    });
+    assert.throws(() => normalizeKernelConnection({mode: "remote", origin: "http://example.com"}));
+    assert.throws(() => normalizeKernelConnection({mode: "invalid"}));
+});
+
+test("kernel connection relaunch args replace an existing remote target", () => {
+    assert.deepEqual(buildKernelConnectionRelaunchArgs([
+        "main.js",
+        "--openAsHidden",
+        "--remote=https://old.example",
+        "--lang=en_US",
+    ], {mode: "remote", origin: "https://new.example:8443/"}), [
+        "main.js",
+        "--openAsHidden",
+        "--lang=en_US",
+        "--remote=https://new.example:8443",
+    ]);
+    assert.deepEqual(buildKernelConnectionRelaunchArgs([
+        "main.js",
+        "--remote=https://old.example",
+        "--safe-mode=manual",
+    ], {mode: "local"}), [
+        "main.js",
+        "--safe-mode=manual",
+    ]);
 });
 
 test("remote kernel request policy rejects lifecycle and workspace APIs", () => {

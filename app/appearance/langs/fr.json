@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "Connexion au noyau",
+	"kernelConnectionTip": "Basculez entre le noyau local et un noyau distant ; l’application de bureau redémarre automatiquement",
+	"localKernel": "Noyau local",
+	"remoteKernel": "Noyau distant",
+	"remoteKernelAddressTip": "Les noyaux distants nécessitent une origine HTTPS approuvée telle que https://host:6806",
+	"switchAndRestart": "Basculer et redémarrer",
+	"invalidRemoteKernelAddress": "Saisissez une origine HTTPS valide du noyau distant sans chemin, requête, fragment ni identifiants",
+	"kernelConnectionSwitchFailed": "Impossible d’enregistrer le paramètre de connexion au noyau",
 	"templateSearch": "Rechercher des modèles par nom ou chemin",
 	"templateContextSearch": "Rechercher des documents de contexte",
 	"templateContextTip": "Exécuter le modèle avec le titre, l’identifiant et les autres informations du document sélectionné sans le modifier",

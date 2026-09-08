@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "核心連線",
+	"kernelConnectionTip": "在本機核心和遠端核心之間切換，桌面應用程式會自動重新啟動",
+	"localKernel": "本機核心",
+	"remoteKernel": "遠端核心",
+	"remoteKernelAddressTip": "遠端核心需要使用作業系統信任的 HTTPS origin，例如 https://host:6806",
+	"switchAndRestart": "切換並重新啟動",
+	"invalidRemoteKernelAddress": "請輸入不包含路徑、查詢、片段或認證資訊的有效 HTTPS 遠端核心 origin",
+	"kernelConnectionSwitchFailed": "儲存核心連線設定失敗",
 	"templateSearch": "搜尋範本名稱或路徑",
 	"templateContextSearch": "搜尋上下文文件",
 	"templateContextTip": "使用所選文件的標題、ID 等資訊執行範本，不會修改該文件",

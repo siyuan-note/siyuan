@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "Conexão com o kernel",
+	"kernelConnectionTip": "Alterne entre o kernel local e um kernel remoto; o aplicativo para desktop reinicia automaticamente",
+	"localKernel": "Kernel local",
+	"remoteKernel": "Kernel remoto",
+	"remoteKernelAddressTip": "Kernels remotos exigem uma origem HTTPS confiável, como https://host:6806",
+	"switchAndRestart": "Alternar e reiniciar",
+	"invalidRemoteKernelAddress": "Insira uma origem HTTPS válida do kernel remoto sem caminho, consulta, fragmento ou credenciais",
+	"kernelConnectionSwitchFailed": "Não foi possível salvar a configuração de conexão com o kernel",
 	"templateSearch": "Pesquisar modelos por nome ou caminho",
 	"templateContextSearch": "Pesquisar documentos de contexto",
 	"templateContextTip": "Executar o modelo usando o título, o ID e outras informações do documento selecionado sem modificá-lo",

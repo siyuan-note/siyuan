@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "Kernel connection",
+	"kernelConnectionTip": "Switch between the local kernel and a remote kernel; the desktop app restarts automatically",
+	"localKernel": "Local kernel",
+	"remoteKernel": "Remote kernel",
+	"remoteKernelAddressTip": "Remote kernels require a trusted HTTPS origin such as https://host:6806",
+	"switchAndRestart": "Switch and restart",
+	"invalidRemoteKernelAddress": "Enter a valid HTTPS remote kernel origin without a path, query, fragment, or credentials",
+	"kernelConnectionSwitchFailed": "Failed to save the kernel connection setting",
 	"templateSearch": "Search templates by name or path",
 	"templateContextSearch": "Search context documents",
 	"templateContextTip": "Run the template using the selected document's title, ID, and other information without modifying that document",

@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "Koneksi kernel",
+	"kernelConnectionTip": "Beralih antara kernel lokal dan kernel jarak jauh; aplikasi desktop dimulai ulang secara otomatis",
+	"localKernel": "Kernel lokal",
+	"remoteKernel": "Kernel jarak jauh",
+	"remoteKernelAddressTip": "Kernel jarak jauh memerlukan origin HTTPS tepercaya seperti https://host:6806",
+	"switchAndRestart": "Alihkan dan mulai ulang",
+	"invalidRemoteKernelAddress": "Masukkan origin HTTPS kernel jarak jauh yang valid tanpa path, query, fragmen, atau kredensial",
+	"kernelConnectionSwitchFailed": "Gagal menyimpan pengaturan koneksi kernel",
 	"templateSearch": "Cari templat berdasarkan nama atau jalur",
 	"templateContextSearch": "Cari dokumen konteks",
 	"templateContextTip": "Jalankan templat menggunakan judul, ID, dan informasi lain dari dokumen yang dipilih tanpa mengubah dokumen tersebut",

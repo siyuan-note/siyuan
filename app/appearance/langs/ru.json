@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "Подключение к ядру",
+	"kernelConnectionTip": "Переключайтесь между локальным и удалённым ядром; настольное приложение перезапускается автоматически",
+	"localKernel": "Локальное ядро",
+	"remoteKernel": "Удалённое ядро",
+	"remoteKernelAddressTip": "Для удалённого ядра требуется доверенный HTTPS origin, например https://host:6806",
+	"switchAndRestart": "Переключить и перезапустить",
+	"invalidRemoteKernelAddress": "Введите допустимый HTTPS origin удалённого ядра без пути, запроса, фрагмента или учётных данных",
+	"kernelConnectionSwitchFailed": "Не удалось сохранить настройку подключения к ядру",
 	"templateSearch": "Поиск шаблонов по имени или пути",
 	"templateContextSearch": "Поиск документов контекста",
 	"templateContextTip": "Выполнить шаблон с заголовком, ID и другими данными выбранного документа, не изменяя сам документ",

@@ -209,6 +209,17 @@ const registerAppGeneralGroup = (tab: SettingTabBuilder) => {
             save: (value) => sendAppSetting("system.autoLaunch2", value),
         });
     }
+    group.slot({
+        key: "kernelConnection",
+        keywords: [
+            window.siyuan.languages.kernelConnection,
+            window.siyuan.languages.localKernel,
+            window.siyuan.languages.remoteKernel,
+            "HTTPS",
+        ],
+        html: genKernelConnectionHtml,
+        afterMount: mountKernelConnection,
+    });
     /// #endif
     group.slot({
         key: "networkProxy",
@@ -228,6 +239,70 @@ const registerAppGeneralGroup = (tab: SettingTabBuilder) => {
         afterMount: mountNetworkProxy,
     });
 };
+/// #if !BROWSER
+const genKernelConnectionHtml = (): string => `<div class="b3-label config-item">
+    ${genConfigItemName(window.siyuan.languages.kernelConnection)}
+    <div class="b3-label__text">${window.siyuan.languages.kernelConnectionTip}</div>
+    <div class="b3-label__text fn__flex" style="overflow: visible !important;">
+        <select id="kernelConnectionMode" class="b3-select">
+            <option value="local">${window.siyuan.languages.localKernel}</option>
+            <option value="remote">${window.siyuan.languages.remoteKernel}</option>
+        </select>
+        <span class="fn__space"></span>
+        <input id="remoteKernelOrigin" class="b3-text-field fn__flex-1" placeholder="https://host[:port]">
+        <span class="fn__space"></span>
+        <button id="kernelConnectionSwitch" class="b3-button fn__size200 b3-button--outline">${window.siyuan.languages.switchAndRestart}</button>
+    </div>
+    <div class="b3-label__text">${window.siyuan.languages.remoteKernelAddressTip}</div>
+</div>`;
+
+const mountKernelConnection = (root: HTMLElement) => {
+    const modeElement = root.querySelector("#kernelConnectionMode") as HTMLSelectElement;
+    const originElement = root.querySelector("#remoteKernelOrigin") as HTMLInputElement;
+    const switchElement = root.querySelector("#kernelConnectionSwitch") as HTMLButtonElement;
+    const updateOriginState = () => {
+        originElement.disabled = modeElement.value !== "remote";
+    };
+    modeElement.addEventListener("change", updateOriginState);
+    updateOriginState();
+    ipcRenderer.invoke(Constants.SIYUAN_KERNEL_CONNECTION, {action: "get"}).then((result) => {
+        if (!result?.connection) {
+            return;
+        }
+        modeElement.value = result.connection.mode;
+        originElement.value = result.connection.origin || "";
+        updateOriginState();
+    });
+    switchElement.addEventListener("click", async () => {
+        switchElement.disabled = true;
+        try {
+            const result = await ipcRenderer.invoke(Constants.SIYUAN_KERNEL_CONNECTION, {
+                action: "switch",
+                connection: {
+                    mode: modeElement.value,
+                    origin: originElement.value.trim(),
+                },
+                autoLaunchMode: window.siyuan.config.system.autoLaunch2,
+            });
+            if (result?.error) {
+                const message = result.error === "invalid-connection"
+                    ? window.siyuan.languages.invalidRemoteKernelAddress
+                    : window.siyuan.languages.kernelConnectionSwitchFailed;
+                showMessage(message, 7000, "error");
+                switchElement.disabled = false;
+                return;
+            }
+            if (!result?.changed) {
+                switchElement.disabled = false;
+            }
+        } catch (error) {
+            console.error(error);
+            showMessage(window.siyuan.languages.kernelConnectionSwitchFailed, 7000, "error");
+            switchElement.disabled = false;
+        }
+    });
+};
+/// #endif
 
 const genNetworkProxyHtml = (): string => {
     const proxy = window.siyuan.config.system.networkProxy;

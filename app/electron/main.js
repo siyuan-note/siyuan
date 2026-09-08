@@ -52,6 +52,7 @@ const {
 } = require("./appleSilicon");
 const {
     createRemoteDocumentContentSecurityPolicy,
+    buildKernelConnectionRelaunchArgs,
     getArgFrom,
     getRemoteKernelRedirectDecision,
     getRemoteKernelRequestPolicy,
@@ -60,6 +61,7 @@ const {
     getUnsafeRemoteChromiumSwitchName,
     isAllowedRemoteExternalURL,
     normalizeRemoteKernelOrigin,
+    normalizeKernelConnection,
     remoteKernelActiveStorageTypes,
     shouldBlockRemoteFrameNavigation,
     shouldForwardRemoteDeepLink,
@@ -74,6 +76,7 @@ const simulateRosetta = process.argv.includes("--simulate-rosetta");
 const appVer = app.getVersion();
 const confDir = path.join(app.getPath("home"), ".config", "siyuan");
 const windowStatePath = path.join(confDir, "windowState.json");
+const kernelConnectionPath = path.join(confDir, "kernelConnection.json");
 const appCrashLogPath = path.join(confDir, "app.crash.log");
 const appCrashMarkerPath = path.join(confDir, "app.crash.json");
 const systemShutdownNone = 0;
@@ -476,10 +479,36 @@ const createLocalKernelTarget = (port = kernelPort) => ({
     ownsKernel: true,
     port: port.toString(),
 });
+const readKernelConnectionSetting = () => {
+    try {
+        return normalizeKernelConnection(JSON.parse(fs.readFileSync(kernelConnectionPath, "utf8")));
+    } catch (error) {
+        if (error.code !== "ENOENT") {
+            writeLog("read kernel connection setting failed: " + error);
+        }
+        return {mode: "local", origin: ""};
+    }
+};
+
+const writeKernelConnectionSetting = (connection) => {
+    const normalized = normalizeKernelConnection(connection);
+    fs.mkdirSync(confDir, {recursive: true});
+    const tempPath = kernelConnectionPath + ".tmp";
+    fs.writeFileSync(tempPath, JSON.stringify(normalized));
+    fs.renameSync(tempPath, kernelConnectionPath);
+    return normalized;
+};
 
 let remoteKernelTarget;
 let remoteKernelArgError;
-const remoteKernelArg = getArg("--remote");
+const commandLineRemoteKernelArg = getArg("--remote");
+const localKernelTargetRequested = getArg("--workspace") !== undefined || getArg("--port") !== undefined;
+const savedKernelConnection = commandLineRemoteKernelArg === undefined && !localKernelTargetRequested
+    ? readKernelConnectionSetting()
+    : {mode: "local", origin: ""};
+const remoteKernelArg = commandLineRemoteKernelArg !== undefined
+    ? commandLineRemoteKernelArg
+    : savedKernelConnection.mode === "remote" ? savedKernelConnection.origin : undefined;
 if (remoteKernelArg !== undefined) {
     try {
         const origin = normalizeRemoteKernelOrigin(remoteKernelArg);
@@ -2907,6 +2936,59 @@ app.whenReady().then(() => {
     });
     ipcMain.on("siyuan-first-quit", () => {
         app.exit();
+    });
+
+    ipcMain.handle("siyuan-kernel-connection", (event, data = {}) => {
+        const current = remoteKernelTarget
+            ? {mode: "remote", origin: remoteKernelTarget.origin}
+            : {mode: "local", origin: ""};
+        if (data.action === "get") {
+            return {connection: current};
+        }
+        if (data.action !== "switch") {
+            return {error: "invalid-action"};
+        }
+        let connection;
+        try {
+            connection = normalizeKernelConnection(data.connection);
+        } catch (error) {
+            writeLog("invalid kernel connection setting: " + error);
+            return {error: "invalid-connection"};
+        }
+        if (connection.mode === current.mode && connection.origin === current.origin) {
+            try {
+                writeKernelConnectionSetting(connection);
+            } catch (error) {
+                writeLog("save kernel connection setting failed: " + error);
+                return {error: "save-failed"};
+            }
+            return {connection, changed: false};
+        }
+        try {
+            writeKernelConnectionSetting(connection);
+            if (Number.isInteger(data.autoLaunchMode) && process.platform !== "linux") {
+                const loginArgs = [];
+                if (connection.mode === "remote") {
+                    loginArgs.push("--remote=" + connection.origin);
+                }
+                if (data.autoLaunchMode === 2) {
+                    loginArgs.push("--openAsHidden");
+                }
+                app.setLoginItemSettings({
+                    openAtLogin: data.autoLaunchMode !== 0,
+                    args: loginArgs,
+                });
+            }
+            const args = buildKernelConnectionRelaunchArgs(process.argv.slice(1), connection);
+            setImmediate(() => {
+                app.relaunch({args});
+                app.quit();
+            });
+            return {connection, changed: true};
+        } catch (error) {
+            writeLog("switch kernel connection failed: " + error);
+            return {error: "save-failed"};
+        }
     });
     ipcMain.handle("siyuan-get", async (event, data) => {
         const remoteSender = getWindowKernelTarget(event.sender.id)?.mode === "remote";

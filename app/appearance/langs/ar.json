@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "اتصال النواة",
+	"kernelConnectionTip": "التبديل بين النواة المحلية ونواة بعيدة؛ يُعاد تشغيل تطبيق سطح المكتب تلقائيًا",
+	"localKernel": "النواة المحلية",
+	"remoteKernel": "النواة البعيدة",
+	"remoteKernelAddressTip": "تتطلب النواة البعيدة أصل HTTPS موثوقًا مثل https://host:6806",
+	"switchAndRestart": "التبديل وإعادة التشغيل",
+	"invalidRemoteKernelAddress": "أدخل أصل HTTPS صالحًا للنواة البعيدة بدون مسار أو استعلام أو جزء أو بيانات اعتماد",
+	"kernelConnectionSwitchFailed": "تعذر حفظ إعداد اتصال النواة",
 	"templateSearch": "البحث عن القوالب بالاسم أو المسار",
 	"templateContextSearch": "البحث عن مستندات السياق",
 	"templateContextTip": "تشغيل القالب باستخدام عنوان المستند المحدد ومعرّفه ومعلوماته الأخرى دون تعديل المستند",

@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "कर्नेल कनेक्शन",
+	"kernelConnectionTip": "स्थानीय कर्नेल और रिमोट कर्नेल के बीच स्विच करें; डेस्कटॉप ऐप अपने आप पुनः शुरू होगा",
+	"localKernel": "स्थानीय कर्नेल",
+	"remoteKernel": "रिमोट कर्नेल",
+	"remoteKernelAddressTip": "रिमोट कर्नेल के लिए https://host:6806 जैसा विश्वसनीय HTTPS origin आवश्यक है",
+	"switchAndRestart": "स्विच करें और पुनः शुरू करें",
+	"invalidRemoteKernelAddress": "पथ, क्वेरी, फ़्रैगमेंट या क्रेडेंशियल के बिना वैध HTTPS रिमोट कर्नेल origin दर्ज करें",
+	"kernelConnectionSwitchFailed": "कर्नेल कनेक्शन सेटिंग सहेजी नहीं जा सकी",
 	"templateSearch": "नाम या पथ से टेम्पलेट खोजें",
 	"templateContextSearch": "संदर्भ दस्तावेज़ खोजें",
 	"templateContextTip": "चुने हुए दस्तावेज़ में बदलाव किए बिना उसके शीर्षक, ID और अन्य जानकारी का उपयोग करके टेम्पलेट चलाएँ",

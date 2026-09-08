@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "Çekirdek bağlantısı",
+	"kernelConnectionTip": "Yerel çekirdek ile uzak çekirdek arasında geçiş yapın; masaüstü uygulaması otomatik olarak yeniden başlatılır",
+	"localKernel": "Yerel çekirdek",
+	"remoteKernel": "Uzak çekirdek",
+	"remoteKernelAddressTip": "Uzak çekirdekler https://host:6806 gibi güvenilen bir HTTPS origin gerektirir",
+	"switchAndRestart": "Değiştir ve yeniden başlat",
+	"invalidRemoteKernelAddress": "Yol, sorgu, parça veya kimlik bilgisi içermeyen geçerli bir HTTPS uzak çekirdek origin'i girin",
+	"kernelConnectionSwitchFailed": "Çekirdek bağlantı ayarı kaydedilemedi",
 	"templateSearch": "Şablonları ada veya yola göre ara",
 	"templateContextSearch": "Bağlam belgelerini ara",
 	"templateContextTip": "Şablonu, seçilen belgenin başlığını, kimliğini ve diğer bilgilerini kullanarak belgeyi değiştirmeden çalıştırın",

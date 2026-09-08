@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "커널 연결",
+	"kernelConnectionTip": "로컬 커널과 원격 커널 사이를 전환합니다. 데스크톱 앱은 자동으로 다시 시작됩니다",
+	"localKernel": "로컬 커널",
+	"remoteKernel": "원격 커널",
+	"remoteKernelAddressTip": "원격 커널에는 https://host:6806 같은 신뢰할 수 있는 HTTPS 오리진이 필요합니다",
+	"switchAndRestart": "전환 후 다시 시작",
+	"invalidRemoteKernelAddress": "경로, 쿼리, 프래그먼트 또는 자격 증명이 없는 유효한 HTTPS 원격 커널 오리진을 입력하세요",
+	"kernelConnectionSwitchFailed": "커널 연결 설정을 저장하지 못했습니다",
 	"templateSearch": "템플릿 이름 또는 경로 검색",
 	"templateContextSearch": "컨텍스트 문서 검색",
 	"templateContextTip": "선택한 문서의 제목, ID 등의 정보로 템플릿을 실행하며 해당 문서는 수정하지 않습니다",

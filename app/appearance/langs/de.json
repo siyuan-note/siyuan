@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "Kernelverbindung",
+	"kernelConnectionTip": "Zwischen lokalem Kernel und Remote-Kernel wechseln; die Desktop-App startet automatisch neu",
+	"localKernel": "Lokaler Kernel",
+	"remoteKernel": "Remote-Kernel",
+	"remoteKernelAddressTip": "Remote-Kernel erfordern einen vertrauenswürdigen HTTPS-Ursprung wie https://host:6806",
+	"switchAndRestart": "Wechseln und neu starten",
+	"invalidRemoteKernelAddress": "Gib einen gültigen HTTPS-Ursprung des Remote-Kernels ohne Pfad, Abfrage, Fragment oder Anmeldedaten ein",
+	"kernelConnectionSwitchFailed": "Kernelverbindung konnte nicht gespeichert werden",
 	"templateSearch": "Vorlagen nach Name oder Pfad suchen",
 	"templateContextSearch": "Kontextdokumente suchen",
 	"templateContextTip": "Die Vorlage mit Titel, ID und weiteren Informationen des ausgewählten Dokuments ausführen, ohne dieses zu ändern",

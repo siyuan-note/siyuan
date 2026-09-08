@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "カーネル接続",
+	"kernelConnectionTip": "ローカルカーネルとリモートカーネルを切り替えます。デスクトップアプリは自動的に再起動します",
+	"localKernel": "ローカルカーネル",
+	"remoteKernel": "リモートカーネル",
+	"remoteKernelAddressTip": "リモートカーネルには https://host:6806 のような OS から信頼される HTTPS オリジンが必要です",
+	"switchAndRestart": "切り替えて再起動",
+	"invalidRemoteKernelAddress": "パス、クエリ、フラグメント、認証情報を含まない有効な HTTPS リモートカーネルオリジンを入力してください",
+	"kernelConnectionSwitchFailed": "カーネル接続設定を保存できませんでした",
 	"templateSearch": "テンプレート名またはパスを検索",
 	"templateContextSearch": "コンテキスト用ドキュメントを検索",
 	"templateContextTip": "選択したドキュメントのタイトルや ID などの情報を使ってテンプレートを実行します。ドキュメントは変更されません",

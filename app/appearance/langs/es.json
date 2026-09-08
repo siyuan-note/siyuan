@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "Conexión del kernel",
+	"kernelConnectionTip": "Cambia entre el kernel local y un kernel remoto; la aplicación de escritorio se reinicia automáticamente",
+	"localKernel": "Kernel local",
+	"remoteKernel": "Kernel remoto",
+	"remoteKernelAddressTip": "Los kernels remotos requieren un origen HTTPS de confianza como https://host:6806",
+	"switchAndRestart": "Cambiar y reiniciar",
+	"invalidRemoteKernelAddress": "Introduce un origen HTTPS válido del kernel remoto sin ruta, consulta, fragmento ni credenciales",
+	"kernelConnectionSwitchFailed": "No se pudo guardar la configuración de conexión del kernel",
 	"templateSearch": "Buscar plantillas por nombre o ruta",
 	"templateContextSearch": "Buscar documentos de contexto",
 	"templateContextTip": "Ejecutar la plantilla con el título, el ID y otros datos del documento seleccionado sin modificarlo",

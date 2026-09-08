@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "内核连接",
+	"kernelConnectionTip": "在本地内核和远程内核之间切换，桌面应用会自动重启",
+	"localKernel": "本地内核",
+	"remoteKernel": "远程内核",
+	"remoteKernelAddressTip": "远程内核需要使用受操作系统信任的 HTTPS origin，例如 https://host:6806",
+	"switchAndRestart": "切换并重启",
+	"invalidRemoteKernelAddress": "请输入不包含路径、查询、片段或凭据的有效 HTTPS 远程内核 origin",
+	"kernelConnectionSwitchFailed": "保存内核连接设置失败",
 	"templateSearch": "搜索模板名称或路径",
 	"templateContextSearch": "搜索上下文文档",
 	"templateContextTip": "使用所选文档的标题、ID 等信息运行模板，不会修改该文档",

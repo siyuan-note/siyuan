@@ -49,6 +49,8 @@ export abstract class Constants {
     public static readonly SIYUAN_BLOCK_DRAG: string = "siyuan-block-drag"; // 跨窗口合成拖拽通信
     public static readonly SIYUAN_AUTO_LAUNCH: string = "siyuan-auto-launch";
 
+    public static readonly SIYUAN_KERNEL_CONNECTION: string = "siyuan-kernel-connection";
+
     public static readonly SIYUAN_OPEN_WORKSPACE: string = "siyuan-open-workspace";
     public static readonly SIYUAN_OPEN_WINDOW: string = "siyuan-open-window";
 

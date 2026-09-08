@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "Kernelverbinding",
+	"kernelConnectionTip": "Schakel tussen de lokale kernel en een externe kernel; de desktopapp wordt automatisch opnieuw gestart",
+	"localKernel": "Lokale kernel",
+	"remoteKernel": "Externe kernel",
+	"remoteKernelAddressTip": "Externe kernels vereisen een vertrouwde HTTPS-origin zoals https://host:6806",
+	"switchAndRestart": "Wisselen en opnieuw starten",
+	"invalidRemoteKernelAddress": "Voer een geldige HTTPS-origin van de externe kernel in zonder pad, query, fragment of aanmeldgegevens",
+	"kernelConnectionSwitchFailed": "Kan de instelling voor de kernelverbinding niet opslaan",
 	"templateSearch": "Sjablonen zoeken op naam of pad",
 	"templateContextSearch": "Contextdocumenten zoeken",
 	"templateContextTip": "Voer het sjabloon uit met de titel, ID en andere informatie van het geselecteerde document zonder dat document te wijzigen",

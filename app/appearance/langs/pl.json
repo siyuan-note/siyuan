@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "Połączenie z kernelem",
+	"kernelConnectionTip": "Przełączaj między lokalnym a zdalnym kernelem; aplikacja komputerowa uruchomi się ponownie automatycznie",
+	"localKernel": "Lokalny kernel",
+	"remoteKernel": "Zdalny kernel",
+	"remoteKernelAddressTip": "Zdalny kernel wymaga zaufanego źródła HTTPS, np. https://host:6806",
+	"switchAndRestart": "Przełącz i uruchom ponownie",
+	"invalidRemoteKernelAddress": "Wprowadź prawidłowe źródło HTTPS zdalnego kernela bez ścieżki, zapytania, fragmentu ani danych logowania",
+	"kernelConnectionSwitchFailed": "Nie udało się zapisać ustawienia połączenia z kernelem",
 	"templateSearch": "Szukaj szablonów według nazwy lub ścieżki",
 	"templateContextSearch": "Szukaj dokumentów kontekstowych",
 	"templateContextTip": "Uruchom szablon, używając tytułu, ID i innych informacji z wybranego dokumentu, bez jego modyfikowania",

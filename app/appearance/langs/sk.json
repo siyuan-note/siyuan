@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "Pripojenie jadra",
+	"kernelConnectionTip": "Prepínajte medzi lokálnym a vzdialeným jadrom; desktopová aplikácia sa automaticky reštartuje",
+	"localKernel": "Lokálne jadro",
+	"remoteKernel": "Vzdialené jadro",
+	"remoteKernelAddressTip": "Vzdialené jadro vyžaduje dôveryhodný HTTPS origin, napríklad https://host:6806",
+	"switchAndRestart": "Prepnúť a reštartovať",
+	"invalidRemoteKernelAddress": "Zadajte platný HTTPS origin vzdialeného jadra bez cesty, dotazu, fragmentu alebo prihlasovacích údajov",
+	"kernelConnectionSwitchFailed": "Nastavenie pripojenia jadra sa nepodarilo uložiť",
 	"templateSearch": "Hľadať šablóny podľa názvu alebo cesty",
 	"templateContextSearch": "Hľadať kontextové dokumenty",
 	"templateContextTip": "Spustiť šablónu s názvom, ID a ďalšími údajmi vybraného dokumentu bez jeho zmeny",

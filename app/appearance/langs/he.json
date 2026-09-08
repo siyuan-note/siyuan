@@ -1,4 +1,12 @@
 {
+	"kernelConnection": "חיבור ליבה",
+	"kernelConnectionTip": "מעבר בין הליבה המקומית לליבה מרוחקת; יישום שולחן העבודה מופעל מחדש אוטומטית",
+	"localKernel": "ליבה מקומית",
+	"remoteKernel": "ליבה מרוחקת",
+	"remoteKernelAddressTip": "ליבות מרוחקות דורשות מקור HTTPS מהימן כגון https://host:6806",
+	"switchAndRestart": "החלף והפעל מחדש",
+	"invalidRemoteKernelAddress": "הזן מקור HTTPS תקין של ליבה מרוחקת ללא נתיב, שאילתה, מקטע או פרטי התחברות",
+	"kernelConnectionSwitchFailed": "שמירת הגדרת חיבור הליבה נכשלה",
 	"templateSearch": "חיפוש תבניות לפי שם או נתיב",
 	"templateContextSearch": "חיפוש מסמכי הקשר",
 	"templateContextTip": "הפעלת התבנית באמצעות הכותרת, המזהה ומידע נוסף מהמסמך שנבחר, ללא שינוי המסמך",

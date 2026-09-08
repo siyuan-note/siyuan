@@ -26,6 +26,27 @@ const normalizeRemoteKernelOrigin = (value) => {
     }
     return url.origin;
 };
+const normalizeKernelConnection = (value) => {
+    if (!value || value.mode === "local") {
+        return {mode: "local", origin: ""};
+    }
+    if (value.mode !== "remote") {
+        throw new Error("kernel connection mode must be local or remote");
+    }
+    return {
+        mode: "remote",
+        origin: normalizeRemoteKernelOrigin(value.origin),
+    };
+};
+
+const buildKernelConnectionRelaunchArgs = (args, connection) => {
+    const normalized = normalizeKernelConnection(connection);
+    const relaunchArgs = args.filter((arg) => arg !== "--remote" && !arg.startsWith("--remote="));
+    if (normalized.mode === "remote") {
+        relaunchArgs.push("--remote=" + normalized.origin);
+    }
+    return relaunchArgs;
+};
 
 const insecureCertificateSwitchNames = Object.freeze([
     "allow-insecure-localhost",
@@ -402,7 +423,9 @@ module.exports = {
     getRemoteKernelVersionStatus,
     getUnsafeRemoteChromiumSwitchName,
     getRemoteDocumentInlineScriptSources,
+    buildKernelConnectionRelaunchArgs,
     normalizeRemoteKernelOrigin,
+    normalizeKernelConnection,
     remoteKernelActiveStorageTypes,
     insecureCertificateSwitchNames,
     isAllowedRemoteExternalURL,

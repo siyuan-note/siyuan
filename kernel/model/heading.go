@@ -428,6 +428,9 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 
 	luteEngine := util.NewLute()
 	newTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument, ID: srcHeadingID}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
+	if paragraph := headingDocParagraph(headingNode, headingText); nil != paragraph {
+		newTree.Root.AppendChild(paragraph)
+	}
 	for _, c := range children {
 		newTree.Root.AppendChild(c)
 	}
@@ -477,4 +480,32 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string, toT
 		ResetVirtualBlockRefCache()
 	}()
 	return
+}
+
+// headingDocParagraph 在文档名无法完整表达标题内容时，将原标题的行内节点移入新段落。
+func headingDocParagraph(heading *ast.Node, title string) *ast.Node {
+	var text strings.Builder
+	preserve := false
+	for c := heading.FirstChild; nil != c; c = c.Next {
+		if ast.NodeHeadingC8hMarker == c.Type || ast.NodeHeadingID == c.Type {
+			continue
+		}
+		if ast.NodeText != c.Type {
+			preserve = true
+		}
+		text.Write(c.Tokens)
+	}
+	if !preserve && util.EscapeHTML(util.UnescapeHTML(text.String())) == title {
+		return nil
+	}
+
+	paragraph := treenode.NewParagraph("")
+	for c := heading.FirstChild; nil != c; {
+		next := c.Next
+		if ast.NodeHeadingC8hMarker != c.Type && ast.NodeHeadingID != c.Type {
+			paragraph.AppendChild(c)
+		}
+		c = next
+	}
+	return paragraph
 }

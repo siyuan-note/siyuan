@@ -43,6 +43,8 @@ const gNet = require("net");
 const childProcess = require("child_process");
 const remote = require("@electron/remote/main");
 const {probeRemoteKernelAuthentication} = require("./remoteKernelAuth");
+const {createConnectionManager, getRemoteSession} = require("./connectionManager");
+const {connectionArgs, readConnections, closeConnectionWindows} = require("./connectionStore");
 const {
     rawFormatType, readClipboardBuffer, readClipboardText, getClipboardFormats, parseClipboardFilePaths
 } = require("./clipboard");
@@ -482,6 +484,15 @@ const createLocalKernelTarget = (port = kernelPort) => ({
 
 let remoteKernelTarget;
 let remoteKernelArgError;
+let connectionManager;
+let remoteBootCanceled = false;
+let pendingConnectionArgs;
+const relaunchConnection = () => {
+    if (pendingConnectionArgs) {
+        app.relaunch({args: pendingConnectionArgs});
+        pendingConnectionArgs = undefined;
+    }
+};
 const remoteKernelArg = getArg("--remote");
 if (remoteKernelArg !== undefined) {
     try {
@@ -692,7 +703,7 @@ if (!app.isPackaged) {
 for (let i = argStart; i < process.argv.length; i++) {
     let arg = process.argv[i];
     if (arg.startsWith("--workspace=") || arg.startsWith("--openAsHidden") || arg.startsWith("--port=") ||
-        arg.startsWith("--safe-mode=") || arg.startsWith("--lang=") || arg === "--remote" ||
+        arg.startsWith("--safe-mode=") || arg.startsWith("--lang=") || arg.startsWith("--connection-session=") || arg === "--remote" ||
         arg.startsWith("--remote=") || arg === "--trust-remote-extensions" ||
         arg.startsWith("--trust-remote-extensions=") ||
         arg.startsWith("siyuan://")) {
@@ -1190,6 +1201,7 @@ const exitWorkspace = (workspace, errorWindowId) => {
             if (keepAppOpenDuringSystemShutdown || keepAppOpenDuringUpdate) {
                 mainWindow.destroy();
             } else {
+                relaunchConnection();
                 app.exit();
             }
         }
@@ -1313,7 +1325,8 @@ const installRemoteFrontendProtocol = (target) => {
         return;
     }
     const scheme = new URL(target.origin).protocol.slice(0, -1);
-    session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
+    const remoteSession = getRemoteSession(target);
+    remoteSession.webRequest.onBeforeRequest((details, callback) => {
         const destination = getRemoteKernelWebRequestDestination(details.resourceType);
         let requestPolicy = "remote";
         if (destination) {
@@ -1338,8 +1351,8 @@ const installRemoteFrontendProtocol = (target) => {
                 requestPolicy === "deny-active-content",
         });
     });
-    session.defaultSession.protocol.handle(scheme, async (request) => {
-        const forwardRequest = (includeCredentials = false) => session.defaultSession.fetch(request, {
+    remoteSession.protocol.handle(scheme, async (request) => {
+        const forwardRequest = (includeCredentials = false) => remoteSession.fetch(request, {
             bypassCustomProtocolHandlers: true,
             redirect: "manual",
             ...(includeCredentials ? {credentials: "include"} : {}),
@@ -1416,7 +1429,7 @@ const installRemoteFrontendProtocol = (target) => {
             if (localDocumentRequest &&
                 ["/stage/build/app/", "/stage/build/app/window.html"].includes(requestURL.pathname)) {
                 try {
-                    if (!await probeRemoteKernelAuthentication(net, session.defaultSession, requestURL.href)) {
+                    if (!await probeRemoteKernelAuthentication(net, remoteSession, requestURL.href)) {
                         const authURL = new URL("/check-auth", target.origin);
                         authURL.searchParams.set("to", requestURL.pathname + requestURL.search);
                         authURL.searchParams.set("lang", resolveAppLanguage(app.getPreferredSystemLanguages()));
@@ -1896,6 +1909,10 @@ const sleep = (ms) => {
 };
 
 const showErrorWindow = (titleZh, titleEn, content, emoji = "⚠️", logPath = "") => {
+    if (connectionManager && (remoteKernelTarget || remoteKernelArgError)) {
+        return connectionManager.show({lang: getArg("--lang"), error: titleZh + "\n" + titleEn + "\n" +
+            content.replace(/<[^>]*>/g, " ")});
+    }
     let errorHTMLPath = path.join(appDir, "app", "electron", "error.html");
     if (isDevEnv) {
         errorHTMLPath = path.join(appDir, "electron", "error.html");
@@ -2023,6 +2040,7 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
             nodeIntegrationInWorker: false,
             webviewTag: kernelTarget.mode !== "remote",
             webSecurity: kernelTarget.mode === "remote",
+            ...(kernelTarget.mode === "remote" ? {session: getRemoteSession(kernelTarget)} : {}),
             contextIsolation: false,
             autoplayPolicy: "user-gesture-required" // 桌面端禁止自动播放多媒体 https://github.com/siyuan-note/siyuan/issues/7587
         },
@@ -2298,7 +2316,7 @@ const loadBootWindow = (disableAppearance = false) => {
     if (disableAppearance) {
         bootAppearanceFallback = true;
     }
-    const query = {v: appVer, port: kernelPort};
+    const query = {v: appVer, port: kernelPort, lang: getArg("--lang") || resolveAppLanguage(app.getPreferredSystemLanguages())};
     if (remoteKernelTarget) {
         query.remote = remoteKernelTarget.origin;
         query.appearance = "0";
@@ -2555,7 +2573,7 @@ const fetchWithTimeout = async (url, options = {}, timeout = 5000) => {
     const abortController = new AbortController();
     const timer = setTimeout(() => abortController.abort(), timeout);
     try {
-        return await session.defaultSession.fetch(url, Object.assign({
+        return await getRemoteSession({origin: new URL(url).origin}).fetch(url, Object.assign({
             credentials: "include",
             bypassCustomProtocolHandlers: true,
             redirect: "manual",
@@ -2575,9 +2593,12 @@ const requestRemoteKernelVersion = async (target) => {
 };
 
 const isRemoteKernelAuthenticated = (target) =>
-    probeRemoteKernelAuthentication(net, session.defaultSession, target.origin + "/stage/build/app/");
+    probeRemoteKernelAuthentication(net, getRemoteSession(target), target.origin + "/stage/build/app/");
 
 const initRemoteKernel = async (target) => {
+    remoteBootCanceled = false;
+    await connectionManager.prepareSession(target);
+    await connectionManager.restoreSession(target, getArg("--connection-session"));
     createBootWindow();
     if (!await showAppleSiliconWarning(getArg("--lang") || "")) {
         bootWindow.destroy();
@@ -2592,7 +2613,7 @@ const initRemoteKernel = async (target) => {
     }
 
     try {
-        await session.defaultSession.clearStorageData({
+        await getRemoteSession(target).clearStorageData({
             origin: target.origin,
             storages: remoteKernelActiveStorageTypes,
         });
@@ -2602,22 +2623,31 @@ const initRemoteKernel = async (target) => {
 
     writeLog("connecting to remote kernel [origin=" + target.origin + "]");
     let versionData;
+    let connectionError = "";
     for (let count = 0; count < 5; count++) {
+        if (remoteBootCanceled) {
+            return;
+        }
         try {
             versionData = await requestRemoteKernelVersion(target);
             break;
         } catch (error) {
+            connectionError = error.message;
             writeLog("get remote kernel version failed: " + error.message);
             if (count < 4) {
                 await sleep(500);
             }
         }
     }
+    if (remoteBootCanceled) {
+        return;
+    }
     const versionStatus = getRemoteKernelVersionStatus(versionData, appVer);
     if (versionStatus === "invalid") {
         showErrorWindow("连接远程内核失败", "Failed to connect to the remote kernel",
             "<div>无法连接远程内核，请检查地址、网络和 TLS 证书。</div>" +
-            "<div>Unable to connect to the remote kernel. Check the address, network, and TLS certificate.</div>");
+            "<div>Unable to connect to the remote kernel. Check the address, network, and TLS certificate.</div>" +
+            "<div>" + escapeHTML(connectionError) + "</div>");
         bootWindow.destroy();
         return;
     }
@@ -2633,7 +2663,7 @@ const initRemoteKernel = async (target) => {
 
     const bootShowStart = Date.now();
     let booted = false;
-    while (Date.now() - bootShowStart <= 300000) {
+    while (!remoteBootCanceled && Date.now() - bootShowStart <= 300000) {
         try {
             const response = await fetchWithTimeout(target.origin + "/api/system/bootProgress");
             if (!response.ok) {
@@ -2650,6 +2680,9 @@ const initRemoteKernel = async (target) => {
         }
         await sleep(500);
     }
+    if (remoteBootCanceled) {
+        return;
+    }
     if (!booted) {
         showErrorWindow("连接远程内核超时", "Remote kernel connection timed out",
             "<div>等待远程内核完成启动超时。</div><div>Timed out waiting for the remote kernel to finish booting.</div>");
@@ -2662,11 +2695,19 @@ const initRemoteKernel = async (target) => {
         authenticated = await isRemoteKernelAuthenticated(target);
     } catch (error) {
         writeLog("probe remote kernel authentication failed: " + error.message);
+        if (remoteBootCanceled) {
+            return;
+        }
         showErrorWindow("检查远程内核鉴权失败", "Failed to check remote kernel authentication",
-            "<div>无法检查远程内核的鉴权状态。</div><div>Unable to check the remote kernel authentication state.</div>");
+            "<div>无法检查远程内核的鉴权状态。</div><div>Unable to check the remote kernel authentication state.</div>" +
+            "<div>" + escapeHTML(error.message) + "</div>");
         bootWindow.destroy();
         return;
     }
+    if (remoteBootCanceled) {
+        return;
+    }
+    connectionManager.remember(target.origin);
     installRemoteFrontendProtocol(target);
     return {
         target,
@@ -2675,6 +2716,43 @@ const initRemoteKernel = async (target) => {
 };
 
 app.whenReady().then(() => {
+    connectionManager = createConnectionManager({
+        confDir,
+        languageDir: path.join(appDir, "appearance", "langs"),
+        version: appVer,
+        currentTarget: () => remoteKernelTarget,
+        log: writeLog,
+        restart: async (target) => {
+            if (pendingConnectionArgs || updateInstallPromise || systemShutdownState !== systemShutdownNone) {
+                return;
+            }
+            pendingConnectionArgs = connectionArgs(process.argv.slice(1), target, remoteKernelTarget?.origin);
+            try {
+                await closeConnectionWindows(BrowserWindow.getAllWindows().filter(window =>
+                    windowKernelTargets.has(window.webContents.id) &&
+                    getWindowPathname(window) === "/stage/build/app/window.html"));
+            } catch (error) {
+                pendingConnectionArgs = undefined;
+                throw error;
+            }
+            // 先通过现有保存与退出流程关闭全部工作空间，最后一个窗口退出后再安排重启。
+            app.quit();
+        },
+    });
+    ipcMain.on("siyuan-manage-connections", (event, options) => {
+        const target = getWindowKernelTarget(event.sender.id);
+        const localPages = ["init.html", "workspace.html", ...(remoteKernelTarget ? ["boot.html"] : [])].map(name =>
+            pathToFileURL(path.join(__dirname, name)).href);
+        const localPage = localPages.includes(event.senderFrame?.url.split("?")[0]);
+        if (event.senderFrame === event.sender.mainFrame && (localPage || (target &&
+            ["/stage/build/app/", "/check-auth"].includes(getWindowPathname(BrowserWindow.fromWebContents(event.sender)))))) {
+            connectionManager.show({lang: options?.lang, origin: options?.origin});
+            if (remoteKernelTarget && bootWindow && !bootWindow.isDestroyed()) {
+                remoteBootCanceled = true;
+                bootWindow.destroy();
+            }
+        }
+    });
     if ("darwin" === process.platform) {
         Menu.setApplicationMenu(Menu.buildFromTemplate([{role: "appMenu"}]));
     } else {
@@ -2882,6 +2960,17 @@ app.whenReady().then(() => {
         app.exit();
     });
     ipcMain.handle("siyuan-get", async (event, data) => {
+        if (data.cmd === "remoteConnections") {
+            if (!getWindowKernelTarget(event.sender.id) || event.senderFrame !== event.sender.mainFrame) {
+                return [];
+            }
+            try {
+                return readConnections(path.join(confDir, "connections.json")).origins;
+            } catch (error) {
+                writeLog("read connection history failed: " + error.message);
+                return [];
+            }
+        }
         if (data.cmd === "kernelConnection") {
             return getKernelConnection(getWindowKernelTarget(event.sender.id));
         }
@@ -3484,6 +3573,7 @@ app.whenReady().then(() => {
                 nodeIntegrationInWorker: false,
                 webviewTag: kernelTarget.mode !== "remote",
                 webSecurity: kernelTarget.mode === "remote",
+                ...(kernelTarget.mode === "remote" ? {session: getRemoteSession(kernelTarget)} : {}),
                 autoplayPolicy: "user-gesture-required" // 桌面端禁止自动播放多媒体 https://github.com/siyuan-note/siyuan/issues/7587
             },
         });
@@ -3985,7 +4075,7 @@ app.whenReady().then(() => {
         workspaces.forEach(item => {
             const server = item.kernelTarget.origin;
             writeLog("sync after system resume [" + server + "/api/sync/performSync" + "]");
-            session.defaultSession.fetch(server + "/api/sync/performSync", {
+            (item.ownsKernel ? session.defaultSession : getRemoteSession(item.kernelTarget)).fetch(server + "/api/sync/performSync", {
                 method: "POST",
                 credentials: item.ownsKernel ? "omit" : "include",
                 bypassCustomProtocolHandlers: !item.ownsKernel,
@@ -4205,6 +4295,8 @@ app.on("before-quit", (event) => {
         }
     });
 });
+
+app.on("will-quit", relaunchConnection);
 
 function writeLog(out) {
     console.log(out);

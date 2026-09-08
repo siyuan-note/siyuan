@@ -1,0 +1,162 @@
+const {ipcRenderer} = require("electron");
+const element = (id) => document.getElementById(id);
+const invoke = (cmd, data = {}) => ipcRenderer.invoke("siyuan-connections", {cmd, ...data});
+let languages;
+let checked = false;
+let authenticated = false;
+let sequence = 0;
+const message = (value) => { element("message").textContent = value || ""; };
+const reset = () => {
+    sequence++;
+    checked = false;
+    authenticated = false;
+    element("auth").hidden = true;
+    element("captchaRow").hidden = true;
+    element("authCode").value = "";
+    element("captcha").value = "";
+    element("connect").disabled = false;
+    message("");
+    void invoke("cancel");
+};
+const refreshCaptcha = async () => {
+    const requestSequence = sequence;
+    const result = await invoke("captcha", {origin: element("origin").value.trim()});
+    if (sequence !== requestSequence) {
+        return;
+    }
+    if (result.image) {
+        element("captchaImage").src = result.image;
+    } else {
+        message(result.error);
+    }
+};
+const renderHistory = (entries) => {
+    element("history").replaceChildren();
+    entries.forEach(entry => {
+        const row = document.createElement("div");
+        row.className = "entry";
+        const open = document.createElement("button");
+        open.type = "button";
+        open.textContent = (entry.mode === "remote" ? languages.remoteConnection : languages.localConnection) +
+            " · " + (entry.origin || entry.path);
+        open.addEventListener("click", async () => {
+            reset();
+            if (entry.mode === "remote") {
+                element("origin").value = entry.origin;
+                element("connectionForm").requestSubmit();
+            } else {
+                const result = await invoke("local", {path: entry.path});
+                message(result.error);
+            }
+        });
+        row.append(open);
+        if (entry.mode === "remote") {
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.textContent = languages.remove;
+            remove.addEventListener("click", async () => {
+                const result = await invoke("remove", {origin: entry.origin});
+                if (result.entries) {
+                    renderHistory(result.entries);
+                }
+                message(result.error);
+            });
+            row.append(remove);
+        }
+        element("history").append(row);
+    });
+};
+element("origin").addEventListener("input", reset);
+ipcRenderer.on("siyuan-connection-target", (event, data) => {
+    reset();
+    if (data.origin) {
+        element("origin").value = data.origin;
+    }
+    message(data.error);
+    element("origin").focus();
+});
+element("cancel").addEventListener("click", reset);
+element("refreshCaptcha").addEventListener("click", refreshCaptcha);
+element("local").addEventListener("click", async () => {
+    reset();
+    message((await invoke("local")).error);
+});
+element("localDefault").addEventListener("click", async () => {
+    reset();
+    message((await invoke("local", {path: ""})).error);
+});
+element("connectionForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const requestSequence = ++sequence;
+    const origin = element("origin").value.trim();
+    element("connect").disabled = true;
+    message(languages.checkingRemoteKernel);
+    try {
+        let result;
+        if (!checked) {
+            result = await invoke("check", {origin});
+        } else if (!authenticated) {
+            result = await invoke("login", {origin, authCode: element("authCode").value.trim(),
+                captcha: element("captcha").value, rememberMe: element("rememberMe").checked});
+            element("authCode").value = "";
+        } else {
+            result = {authenticated: true};
+        }
+        if (sequence !== requestSequence) {
+            return;
+        }
+        if (typeof result.authenticated === "boolean") {
+            checked = true;
+            authenticated = result.authenticated;
+        }
+        if (authenticated) {
+            message((await invoke("open", {origin})).error || languages.switchConnectionRestartTip);
+        } else {
+            message(result.error);
+            element("auth").hidden = !checked;
+            if (result.captcha) {
+                element("captchaRow").hidden = false;
+                await refreshCaptcha();
+            }
+            if (checked) {
+                element("authCode").focus();
+            }
+        }
+    } catch (error) {
+        if (sequence === requestSequence) {
+            message(String(error.message));
+        }
+    } finally {
+        if (sequence === requestSequence) {
+            element("connect").disabled = false;
+        }
+    }
+});
+void invoke("init").then(result => {
+    if (!result.languages) {
+        message(result.error);
+        return;
+    }
+    languages = result.languages;
+    document.documentElement.lang = result.lang;
+    document.documentElement.dir = ["ar", "he"].includes(result.lang) ? "rtl" : "ltr";
+    document.title = languages.workspaceList;
+    element("title").textContent = languages.connectRemoteKernel;
+    element("addressLabel").textContent = languages.remoteConnection;
+    element("addressTip").textContent = languages.remoteKernelAddressTip;
+    element("restartTip").textContent = languages.switchConnectionRestartTip;
+    element("connect").textContent = languages.connectRemoteKernel;
+    element("cancel").textContent = languages.cancel;
+    element("historyTitle").textContent = languages.workspaceList;
+    element("local").textContent = languages.localConnection + " · " + languages.openBy;
+    element("localDefault").textContent = languages.backToLocalWorkspace;
+    element("authCode").placeholder = languages._kernel["173"];
+    element("authCode").ariaLabel = languages._kernel["173"];
+    element("captcha").placeholder = languages._kernel["175"];
+    element("captcha").ariaLabel = languages._kernel["175"];
+    element("refreshCaptcha").ariaLabel = languages.refresh;
+    element("rememberLabel").textContent = languages._kernel["257"];
+    element("origin").value = result.origin;
+    message(result.error);
+    renderHistory(result.entries);
+});

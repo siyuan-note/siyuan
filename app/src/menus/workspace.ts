@@ -244,12 +244,19 @@ const getZoomSubMenu = () => {
     return submenu;
 };
 
-export const workspaceMenu = (app: App, rect: DOMRect) => {
+export const workspaceMenu = async (app: App, rect: DOMRect) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
         window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_BAR_WORKSPACE) {
         window.siyuan.menus.menu.remove();
         return;
     }
+    let remoteConnections: string[] = [];
+    /// #if !BROWSER
+    remoteConnections = await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "remoteConnections"});
+    const manageConnections = (origin?: string) => ipcRenderer.send("siyuan-manage-connections", {
+        lang: window.siyuan.config.lang, origin,
+    });
+    /// #endif
     const renderMenu = (workspaces: IWorkspace[]) => {
         window.siyuan.menus.menu.remove();
         window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BAR_WORKSPACE);
@@ -289,14 +296,19 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             type: "submenu",
             submenu: dockMenu
         }).element);
-        if (!window.siyuan.config.readonly && getHostCapabilities().workspaces) {
+        if ((!window.siyuan.config.readonly && getHostCapabilities().workspaces) || !isBrowser()) {
             let workspaceSubMenu: IMenu[];
             /// #if !BROWSER
             workspaceSubMenu = [{
                 id: "newOrOpenBy",
-                label: `${window.siyuan.languages.new} / ${window.siyuan.languages.openBy}`,
+                label: getHostCapabilities().workspaces
+                    ? `${window.siyuan.languages.new} / ${window.siyuan.languages.openBy}` : window.siyuan.languages.openBy,
                 iconHTML: "",
                 click: async () => {
+                    if (!getHostCapabilities().workspaces) {
+                        manageConnections();
+                        return;
+                    }
                     const localPath = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
                         cmd: "showOpenDialog",
                         defaultPath: window.siyuan.config.system.homeDir,
@@ -316,10 +328,23 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     });
                 }
             }];
-            workspaceSubMenu.push({id: "separator_1", type: "separator"});
+            workspaceSubMenu.push({
+                id: "connectRemoteKernel",
+                label: window.siyuan.languages.connectRemoteKernel,
+                icon: "iconCloud",
+                click: () => manageConnections(),
+            });
+            if (workspaces.length + remoteConnections.length > 0) {
+                workspaceSubMenu.push({id: "separator_1", type: "separator"});
+            }
             workspaces.forEach((item: IWorkspace) => {
                 workspaceSubMenu.push(workspaceItem(item) as IMenu);
             });
+            remoteConnections.forEach(origin => workspaceSubMenu.push({
+                label: escapeHtml(window.siyuan.languages.remoteConnection + " · " + origin),
+                icon: "iconCloud",
+                click: () => manageConnections(origin),
+            }));
             /// #else
             workspaceSubMenu = [{
                 id: "new",

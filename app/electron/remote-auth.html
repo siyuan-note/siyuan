@@ -123,6 +123,7 @@
         <button id="submit" type="submit"></button>
     </form>
     <p id="message" role="alert"></p>
+    <button id="connections" type="button"></button>
 </main>
 <script>
     (() => {
@@ -184,6 +185,9 @@
                 ipcRenderer.send("siyuan-quit", window.location.port);
             }
         });
+        document.getElementById("connections").addEventListener("click", () => {
+            ipcRenderer?.send("siyuan-manage-connections", {lang: language});
+        });
 
         const refreshCaptcha = () => {
             captchaImageElement.src = "/api/system/getCaptcha?v=" + Date.now();
@@ -235,6 +239,7 @@
             .catch(() => fetch("/appearance/langs/en.json", {cache: "no-store"}).then((response) => response.json()))
             .then((languages) => {
                 document.title = languages._kernel["178"];
+                document.getElementById("connections").textContent = languages.workspaceList;
                 document.getElementById("closeWindow").ariaLabel = languages._kernel["177"];
                 document.getElementById("title").textContent = languages._kernel["176"];
                 document.getElementById("origin").textContent = window.location.origin;

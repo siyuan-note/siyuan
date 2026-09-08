@@ -200,8 +200,9 @@ const renderPDF = async (id: string) => {
     if (typeof localData.paged === "undefined") {
         localData.paged = true;
     }
-    const servePathWithoutTrailingSlash = window.location.protocol + "//" + window.location.host;
-    const servePath = servePathWithoutTrailingSlash + "/";
+    // 导出预览临时页可能由不同于主窗口的内核端口提供，使用相对路径可确保资源和接口保持同源。
+    const servePathWithoutTrailingSlash = "";
+    const servePath = "/";
     const isDefault = (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight === "daylight");
     let themeStyle = "";
     if (!isDefault) {

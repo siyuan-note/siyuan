@@ -532,6 +532,10 @@ export class Menu {
     }
 
     public popup(options: IPosition) {
+        if (isMobile()) {
+            this.fullscreen("bottom");
+            return;
+        }
         applyMenuConfig(this.element);
         if (this.element.lastElementChild.innerHTML === "") {
             return;
@@ -551,7 +555,14 @@ export class Menu {
     }
 
     public resetPosition() {
-        if (this.element.classList.contains("fn__none") || !this.position) {
+        if (this.element.classList.contains("fn__none")) {
+            return;
+        }
+        if (this.element.classList.contains("b3-menu--sheet")) {
+            this.setSheetHeight();
+            return;
+        }
+        if (!this.position) {
             return;
         }
         if (this.position.target?.isConnected) {
@@ -594,6 +605,8 @@ export class Menu {
         if (this.element.lastElementChild.innerHTML === "") {
             return;
         }
+        this.stopTrackingTargetPosition();
+        this.position = undefined;
         this.emitCommonMenu("common-menu-open", {
             name: this.element.getAttribute("data-name"),
             from: this.element.getAttribute("data-from"),

@@ -1403,6 +1403,17 @@ body.mobile-topbar--merged {
 }
 
 .b3-menu {
+  &--sheet {
+    // 菜单入口可能指定宽度，移动端底部菜单始终铺满视口
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
   &__accelerator--hotkey {
     display: none;
   }
@@ -1412,6 +1423,38 @@ body.mobile-topbar--merged {
 
     & > .b3-menu__icon {
       color: var(--b3-theme-error);
+    }
+  }
+}
+
+.av__panel {
+  > .b3-dialog__scrim {
+    background-color: rgba(0, 0, 0, .2);
+  }
+
+  > .b3-menu {
+    // 数据库面板切换内容时会重新写入锚点坐标，底部布局不随锚点变化
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 56vh;
+    max-height: 90vh !important;
+    max-height: 90dvh !important;
+    box-sizing: border-box;
+    border: 0;
+    border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;
+    padding: 16px 8px max(16px, env(safe-area-inset-bottom));
+    overflow: auto;
+    overscroll-behavior: contain;
+    animation: bottom2Top .15s cubic-bezier(0, 0, .2, 1);
+
+    > .b3-menu__items {
+      max-height: none;
+      min-height: 0;
     }
   }
 }

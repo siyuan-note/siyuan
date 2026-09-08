@@ -287,24 +287,37 @@ const loadFontFamilies = async (currentFamily?: string) => {
 };
 
 let desktopRequestID = 0;
+const desktopMenuIDs = new WeakMap<HTMLElement, string>();
 
 export const openFontFamilyMenu = async (target: HTMLElement, options: IFontFamilyPickerOptions) => {
     if (options.disabled) {
         return;
     }
     const requestID = ++desktopRequestID;
+    if (!desktopMenuIDs.has(target)) {
+        desktopMenuIDs.set(target, `inlineFontFamily${requestID}`);
+    }
+    let closed = false;
+    let cleanup: () => void;
+    const menu = new Menu(desktopMenuIDs.get(target), () => {
+        closed = true;
+        cleanup?.();
+        target.setAttribute("aria-expanded", "false");
+    });
+    if (menu.isOpen) {
+        return;
+    }
     const fonts = await loadFontFamilies(options.family);
+    if (closed) {
+        return;
+    }
     if (requestID !== desktopRequestID || !target.isConnected || options.isOpenValid?.() === false) {
+        menu.close();
         return;
     }
     if (target.tagName === "INPUT") {
         (target as HTMLInputElement).value = getInlineFontFamilyLabel(options);
     }
-    let cleanup: () => void;
-    const menu = new Menu(undefined, () => {
-        cleanup?.();
-        target.setAttribute("aria-expanded", "false");
-    });
     menu.addItem({
         iconHTML: "",
         type: "empty",

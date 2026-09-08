@@ -104,6 +104,7 @@ const genFontConfigHtml = (configKey: FontFamiliesConfigKey, title: string, desc
     <input
         class="b3-select fn__flex-center fn__size200"
         id="${getFontConfigPath(configKey)}"
+        data-menu="true"
         value="${escapeAttr(getEditorFontDisplay(fonts) || window.siyuan.languages.default)}"
         readonly
     >
@@ -341,12 +342,34 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
     });
     mountedFontConfigUpdaters.set(fontConfigElement, updateFontInput);
     updateFontInput(getFontConfig());
-    fontFamiliesElement.addEventListener("click", async () => {
+    fontFamiliesElement.addEventListener("click", async (event) => {
+        // 在异步加载前阻止冒泡，避免同一次点击关闭字体菜单。
+        event.stopPropagation();
+        let closed = false;
+        let fontPreviewObserver: IntersectionObserver;
+        const fontMenu = new Menu(`appearanceFontFamily-${configKey}`, () => {
+            closed = true;
+            fontPreviewObserver?.disconnect();
+            refreshOpenMenu = undefined;
+        });
+        if (fontMenu.isOpen) {
+            return;
+        }
         let availableFonts: Awaited<ReturnType<typeof loadAvailableFonts>>;
         try {
             availableFonts = await loadAvailableFonts();
         } catch (error) {
             console.warn("load font list failed", error);
+            if (!closed) {
+                fontMenu.close();
+            }
+            return;
+        }
+        if (closed) {
+            return;
+        }
+        if (!fontFamiliesElement.isConnected) {
+            fontMenu.close();
             return;
         }
         const {nativeMobile, customFonts, fontItems} = availableFonts;
@@ -361,11 +384,6 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
         const canManageCustomFonts = nativeMobile && !window.siyuan.config.readonly;
         const canShowAllFonts = configKey === "codeFontFamilies" && fontItems.some((font) => !isCodeFont(font));
         const customFontsByID = new Map(customFonts.map((font) => [font.id, font]));
-        let fontPreviewObserver: IntersectionObserver;
-        const fontMenu = new Menu(undefined, () => {
-            fontPreviewObserver?.disconnect();
-            refreshOpenMenu = undefined;
-        });
         fontMenu.addItem({
             iconHTML: "",
             type: "empty",

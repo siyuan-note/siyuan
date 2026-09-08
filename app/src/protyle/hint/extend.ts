@@ -175,7 +175,7 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         value: "> " + Lute.Caret,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconQuote"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.quote}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.insert.quote.custom, ">")}</div>`,
     }, {
-        filter: [window.siyuan.languages.tabs, "tabs", "页签", "yeqian"],
+        filter: [window.siyuan.languages.tabs, "tabs", "页签", "yeqian", "yq"],
         id: "tabs",
         value: `::: tabs\n@tab\n\n${Lute.Caret}\n\n@tab\n\n:::\n`,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconTabs"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.tabs}</span></div>`,

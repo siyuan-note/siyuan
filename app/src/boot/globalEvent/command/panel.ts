@@ -45,6 +45,11 @@ const executePaletteCommand = (app: App, commandId: string, context: ICommandCon
 };
 
 export const commandPanel = (app: App) => {
+    const menu = window.siyuan.menus.menu;
+    if (isMobile() && menu.element.getAttribute("data-name") === Constants.DIALOG_COMMANDPANEL) {
+        menu.remove();
+        return;
+    }
     const openCommandPanelDialog = window.siyuan.dialogs.find(item =>
         item.element.getAttribute("data-key") === Constants.DIALOG_COMMANDPANEL);
     if (openCommandPanelDialog) {
@@ -59,11 +64,7 @@ export const commandPanel = (app: App) => {
             focusByRange(context.range);
         }
     });
-    const dialog = new Dialog({
-        width: isMobile() ? "92vw" : "80vw",
-        height: isMobile() ? "80vh" : "70vh",
-        title: window.siyuan.languages.commandPanel,
-        content: `<div class="fn__flex-column">
+    const content = `<div class="fn__flex-column${isMobile() ? " mobile-command-panel" : ""}">
     <div class="b3-form__icon search__header" style="border-top: 0;border-bottom: 1px solid var(--b3-theme-surface-lighter);">
         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
         <input class="b3-text-field b3-text-field--text" style="padding-left: 32px !important;">
@@ -74,20 +75,47 @@ export const commandPanel = (app: App) => {
         <kbd>${window.siyuan.languages.enterKey}/${window.siyuan.languages.click}</kbd> ${window.siyuan.languages.confirm}
         <kbd>Esc</kbd> ${window.siyuan.languages.close}
     </div>
-</div>`,
-        disableAnimation: true,
-        destroyCallback() {
-            const canceled = focusLifecycle.restoreAfterCancel(restoreFocusAfterCancel);
-            /// #if MOBILE
-            if (canceled && !restoreFocusAfterCancel) {
-                activeBlur(true);
-            }
-            /// #endif
-        },
-    });
-    dialog.element.setAttribute("data-key", Constants.DIALOG_COMMANDPANEL);
+</div>`;
+    const onClose = () => {
+        const canceled = focusLifecycle.restoreAfterCancel(restoreFocusAfterCancel);
+        /// #if MOBILE
+        if (canceled && !restoreFocusAfterCancel) {
+            activeBlur(true);
+        }
+        /// #endif
+    };
+    let dialog: {element: HTMLElement, destroy: () => void};
+    if (isMobile()) {
+        menu.remove();
+        const element = document.createElement("div");
+        element.innerHTML = content;
+        element.className = "fn__flex-column fn__flex-1";
+        menu.append(element);
+        const itemsElement = menu.element.lastElementChild as HTMLElement;
+        itemsElement.style.display = "flex";
+        itemsElement.style.overflow = "hidden";
+        menu.element.setAttribute("data-name", Constants.DIALOG_COMMANDPANEL);
+        menu.removeCB = onClose;
+        menu.fullscreen("bottom");
+        dialog = {element, destroy: () => menu.remove()};
+    } else {
+        const desktopDialog = new Dialog({
+            width: "80vw",
+            height: "70vh",
+            title: window.siyuan.languages.commandPanel,
+            content,
+            disableAnimation: true,
+            destroyCallback: onClose,
+        });
+        desktopDialog.element.setAttribute("data-key", Constants.DIALOG_COMMANDPANEL);
+        dialog = desktopDialog;
+    }
     const listElement = dialog.element.querySelector("#commands") as HTMLElement;
     const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
+    inputElement.setAttribute("aria-label", window.siyuan.languages.commandPanel);
+    if (isMobile()) {
+        inputElement.placeholder = window.siyuan.languages.commandPanel;
+    }
     const refresh = () => {
         renderCommands(listElement, queryCommandPalette(registry, context, inputElement.value));
     };
@@ -96,8 +124,8 @@ export const commandPanel = (app: App) => {
 
     const run = (commandId: string, event?: Event) => {
         focusLifecycle.prepareCommand(() => event?.preventDefault());
-        executePaletteCommand(app, commandId, context);
         dialog.destroy();
+        executePaletteCommand(app, commandId, context);
     };
 
     listElement.addEventListener("click", (event: MouseEvent) => {

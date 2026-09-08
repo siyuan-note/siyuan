@@ -1544,6 +1544,21 @@ body.mobile-topbar--merged {
   padding: var(--mobile-top-safe-area) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
+.mobile-command-panel {
+  flex: 1;
+  min-height: 0;
+
+  .search__header {
+    flex-shrink: 0;
+  }
+
+  .search__list {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+  }
+}
+
 .b3-snackbars {
   top: calc(var(--mobile-top-safe-area) + 35px);
 }

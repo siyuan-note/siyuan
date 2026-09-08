@@ -1,3 +1,7 @@
+export const hasProviderHeaderAuth = (headers?: Record<string, string>): boolean =>
+    Object.entries(headers || {}).some(([name, value]) =>
+        ["authorization", "x-api-key", "api-key"].includes(name.toLowerCase()) && value.trim() !== "");
+
 export const parseProviderHeaders = (value: string): Record<string, string> | null => {
     if (!value.trim()) {
         return {};

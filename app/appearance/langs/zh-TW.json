@@ -1,5 +1,5 @@
 {
-	"aiProviderHeadersTip": "輸入值為字串的 JSON 物件，自訂請求標頭會覆寫同名預設請求標頭，包括驗證請求標頭",
+	"aiProviderHeadersTip": "輸入值為字串的 JSON 物件，自訂請求標頭會覆寫同名預設請求標頭，包括驗證請求標頭；支援 {{secrets.NAME}} 和 {{vars.NAME}} 引用，金鑰需允許供應商主機，直接填寫的值以明文儲存",
 	"cellPasteUnsupported": "已取消貼上：此儲存格不支援 ${x} 區塊",
 	"templateNameTip": "請輸入名稱，不要包含路徑分隔符號",
 	"keymapUnset": "未設定",

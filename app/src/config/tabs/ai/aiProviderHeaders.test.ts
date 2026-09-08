@@ -1,6 +1,15 @@
 import * as assert from "node:assert/strict";
 import {test} from "node:test";
-import {parseProviderHeaders} from "./aiProviderHeaders";
+import {hasProviderHeaderAuth, parseProviderHeaders} from "./aiProviderHeaders";
+
+test("provider authentication headers replace the API key requirement", () => {
+    for (const name of ["Authorization", "authorization", "X-API-Key", "api-key"]) {
+        assert.equal(hasProviderHeaderAuth({[name]: "{{secrets.API_KEY}}"}), true);
+        assert.equal(hasProviderHeaderAuth({[name]: "  "}), false);
+    }
+    assert.equal(hasProviderHeaderAuth({"User-Agent": "SiYuan", "X-Route": "test"}), false);
+    assert.equal(hasProviderHeaderAuth(), false);
+});
 
 test("provider headers accept empty configuration and string values", () => {
     assert.deepEqual(parseProviderHeaders(" "), {});

@@ -751,6 +751,11 @@ func importConf(c *gin.Context) {
 		return
 	}
 	preserveImportedAISecrets(importedConf.AI, model.Conf.AI)
+	if err = validateAIProviderHeaders(importedConf.AI); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 	if nil != importedConf.System && nil != model.Conf.System {
 		// 更新通道是应用级全局设置，导入工作空间配置时保持不变。
 		importedConf.System.UpdateChannel = model.Conf.System.UpdateChannel

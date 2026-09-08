@@ -1,5 +1,5 @@
 {
-	"aiProviderHeadersTip": "Inserisci un oggetto JSON con valori stringa; le intestazioni personalizzate sostituiscono quelle predefinite con lo stesso nome, incluse quelle di autenticazione",
+	"aiProviderHeadersTip": "Inserisci un oggetto JSON con valori stringa; le intestazioni personalizzate sostituiscono quelle predefinite con lo stesso nome, incluse quelle di autenticazione; Supporta {{secrets.NAME}} e {{vars.NAME}}; i segreti devono autorizzare l’host del fornitore e i valori diretti vengono salvati in chiaro",
 	"cellPasteUnsupported": "Incollaggio annullato: i blocchi di tipo ${x} non sono supportati in questa cella",
 	"templateNameTip": "Inserisci un nome senza separatori di percorso",
 	"keymapUnset": "Non impostato",

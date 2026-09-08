@@ -31,6 +31,32 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestSetAIRejectsInvalidProviderHeaders(t *testing.T) {
+	previousConf := model.Conf
+	model.Conf = &model.AppConf{AI: &conf.AI{}}
+	t.Cleanup(func() { model.Conf = previousConf })
+	initialAI := model.Conf.AI
+	for _, headers := range []string{
+		`{"Bad Name":"private-value"}`, `{"X-Key":"private-value\r\ninjected: yes"}`, `{"X-Key":"a","x-key":"b"}`,
+	} {
+		recorder := httptest.NewRecorder()
+		context, _ := gin.CreateTestContext(recorder)
+		context.Request = httptest.NewRequest(http.MethodPost, "/api/setting/setAI",
+			strings.NewReader(`{"providers":[{"baseURL":"https://example.com","headers":`+headers+`}]}`))
+		context.Request.Header.Set("Content-Type", "application/json")
+		setAI(context)
+		var result struct {
+			Code int `json:"code"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+			t.Fatal(err)
+		}
+		if result.Code != -1 || model.Conf.AI != initialAI || strings.Contains(recorder.Body.String(), "private-value") {
+			t.Fatal("invalid provider headers must be rejected without changing configuration or exposing values")
+		}
+	}
+}
+
 func TestSetBazaarPetalDisabledSerializesTransitions(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	previousConf := model.Conf

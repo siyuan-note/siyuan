@@ -1,5 +1,5 @@
 {
-	"aiProviderHeadersTip": "JSON-Objekt mit Zeichenfolgenwerten eingeben; eigene Header überschreiben gleichnamige Standardheader, einschließlich Authentifizierungsheadern",
+	"aiProviderHeadersTip": "JSON-Objekt mit Zeichenfolgenwerten eingeben; eigene Header überschreiben gleichnamige Standardheader, einschließlich Authentifizierungsheadern; Unterstützt {{secrets.NAME}} und {{vars.NAME}}; der Anbieterhost muss für das Geheimnis erlaubt sein, direkt eingegebene Werte werden im Klartext gespeichert",
 	"cellPasteUnsupported": "Einfügen abgebrochen: ${x}-Blöcke werden in dieser Zelle nicht unterstützt",
 	"templateNameTip": "Einen Namen ohne Pfadtrennzeichen eingeben",
 	"keymapUnset": "Nicht festgelegt",

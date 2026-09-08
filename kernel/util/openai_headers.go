@@ -17,6 +17,19 @@ type aiProviderHeaderTransport struct {
 	err     error
 }
 
+// ValidateAIProviderHeaders 在保存配置和发送请求前校验请求头，不在错误中包含凭据。
+func ValidateAIProviderHeaders(headers map[string]string) error {
+	names := map[string]bool{}
+	for name, value := range headers {
+		key := http.CanonicalHeaderKey(name)
+		if !httpguts.ValidHeaderFieldName(name) || !httpguts.ValidHeaderFieldValue(value) || names[key] {
+			return errors.New("invalid AI provider HTTP headers")
+		}
+		names[key] = true
+	}
+	return nil
+}
+
 // newAIProviderHTTPClient 为供应商请求注入自定义头，覆盖同名默认头，并限制在配置的源站内。
 func newAIProviderHTTPClient(baseURL string, headers ...map[string]string) *http.Client {
 	if len(headers) == 0 || len(headers[0]) == 0 {
@@ -26,14 +39,11 @@ func newAIProviderHTTPClient(baseURL string, headers ...map[string]string) *http
 	transport := &aiProviderHeaderTransport{
 		base: httpclient.NewTransport(false), origin: origin, headers: http.Header{}, err: err,
 	}
+	if err := ValidateAIProviderHeaders(headers[0]); err != nil {
+		transport.err = err
+	}
 	for name, value := range headers[0] {
-		key := http.CanonicalHeaderKey(name)
-		if !httpguts.ValidHeaderFieldName(name) || !httpguts.ValidHeaderFieldValue(value) ||
-			transport.headers[key] != nil {
-			transport.err = errors.New("invalid AI provider HTTP headers")
-			break
-		}
-		transport.headers.Set(key, value)
+		transport.headers.Set(name, value)
 	}
 	return httpclient.NewUserAgentClient(transport)
 }

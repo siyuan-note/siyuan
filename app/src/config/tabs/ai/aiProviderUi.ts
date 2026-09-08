@@ -6,7 +6,7 @@ import {aiConfigApi} from "./aiRuntime";
 import {Menu} from "../../../plugin/Menu";
 import {upDownHint} from "../../../util/upDownHint";
 import {moveModelItem} from "./aiModelOrder";
-import {parseProviderHeaders} from "./aiProviderHeaders";
+import {hasProviderHeaderAuth, parseProviderHeaders} from "./aiProviderHeaders";
 import {
     findProviderPreset,
     getDefaultProviderProtocol,
@@ -423,11 +423,11 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                     <svg class="b3-form__icona-icon" data-action="togglePassword"><use xlink:href="#iconEye"></use></svg>
                 </div>
             </label>
-            <label class="b3-label config-item">
+            <div class="b3-label config-item">
                 ${genConfigItemMainHtml(window.siyuan.languages.aiMcpHttpHeaders, window.siyuan.languages.aiProviderHeadersTip)}
                 <div class="fn__hr"></div>
-                <textarea class="b3-text-field fn__block" data-type="providerHeaders" rows="3" spellcheck="false" style="resize: vertical;" placeholder='{"X-API-Key":"..."}'>${escapeHTML(initialHeadersText)}</textarea>
-            </label>
+                <textarea class="b3-text-field fn__block" data-type="providerHeaders" rows="3" spellcheck="false" style="resize: vertical;" placeholder='{"Authorization":"Bearer {{secrets.API_KEY}}"}'>${escapeHTML(initialHeadersText)}</textarea>
+            </div>
         </div>
     </div>
     <div class="config-group">
@@ -496,7 +496,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         if (!validateHeaders()) {
             return false;
         }
-        if (!requiresAPIKey(draft) || draft.apiKey.trim() !== "") {
+        if (!requiresAPIKey(draft) || draft.apiKey.trim() !== "" || hasProviderHeaderAuth(draft.headers)) {
             return true;
         }
         view.querySelector<HTMLInputElement>("[data-provider-field='apiKey']")?.focus();

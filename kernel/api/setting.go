@@ -263,6 +263,11 @@ func setAI(c *gin.Context) {
 			}
 		}
 	}
+	if err = validateAIProviderHeaders(ai); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 
 	var oldServers []conf.MCPServer
 	if model.Conf.AI != nil && model.Conf.AI.MCP != nil {

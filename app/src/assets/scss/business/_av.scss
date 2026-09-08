@@ -1038,13 +1038,14 @@
         text-overflow: ellipsis;
       }
 
-      img.av__cellheadericon {
-        height: calc(1.625em - 8px);
-      }
-
       .av__cellheadericon {
-        height: 1.625em;
-        width: calc(1.625em - 8px);
+        height: 1.25em;
+        width: 1.25em;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        object-fit: contain;
+        line-height: 1;
         color: var(--b3-theme-on-surface);
         margin: 0 5px 0 0;
         flex-shrink: 0;

@@ -1087,6 +1087,7 @@ func resolveObsidianTarget(vault *obsidianVaultContext, current *obsidianDocPlan
 }
 
 func resolveObsidianDocument(vault *obsidianVaultContext, current *obsidianDocPlan, target string) (*obsidianDocPlan, string) {
+	rootRelative := strings.HasPrefix(target, "/")
 	target = strings.TrimSpace(strings.TrimPrefix(target, "/"))
 	if target == "" {
 		return current, "resolved"
@@ -1105,6 +1106,16 @@ func resolveObsidianDocument(vault *obsidianVaultContext, current *obsidianDocPl
 	if strings.Contains(target, "/") {
 		if doc := vault.DocsByRel[obsidianPathKey(path.Clean(target))]; doc != nil {
 			return doc, "resolved"
+		}
+		if !rootRelative {
+			// 库根路径未匹配时，尝试相对当前文档目录的路径。
+			candidate := path.Clean(path.Join(path.Dir(current.RelPath), target))
+			if candidate == ".." || strings.HasPrefix(candidate, "../") {
+				return nil, "unsupported"
+			}
+			if doc := vault.DocsByRel[obsidianPathKey(candidate)]; doc != nil {
+				return doc, "resolved"
+			}
 		}
 		return nil, "missing"
 	}
@@ -1159,6 +1170,7 @@ func resolveObsidianDocumentFragment(doc *obsidianDocPlan, fragment string) obsi
 }
 
 func resolveObsidianAsset(vault *obsidianVaultContext, current *obsidianDocPlan, target string) (*obsidianAssetPlan, string) {
+	rootRelative := strings.HasPrefix(target, "/")
 	target = strings.TrimSpace(strings.TrimPrefix(target, "/"))
 	if target == "" || path.Ext(target) == "" {
 		return nil, "unsupported"
@@ -1176,6 +1188,16 @@ func resolveObsidianAsset(vault *obsidianVaultContext, current *obsidianDocPlan,
 	if strings.Contains(target, "/") {
 		if asset := vault.Assets[obsidianPathKey(path.Clean(target))]; asset != nil {
 			return asset, "resolved"
+		}
+		if !rootRelative {
+			// 库根路径未匹配时，尝试相对当前文档目录的路径。
+			candidate := path.Clean(path.Join(path.Dir(current.RelPath), target))
+			if candidate == ".." || strings.HasPrefix(candidate, "../") {
+				return nil, "unsupported"
+			}
+			if asset := vault.Assets[obsidianPathKey(candidate)]; asset != nil {
+				return asset, "resolved"
+			}
 		}
 		return nil, "missing"
 	}

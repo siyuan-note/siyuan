@@ -1,4 +1,5 @@
 {
+	"connect": "Conectar",
 	"trustRemoteExtensions": "Confiar nos plugins e na aparência remotos e carregá-los",
 	"trustRemoteExtensionsTip": "Extensões remotas podem ler e gravar arquivos locais e executar programas. Confie apenas em servidores confiáveis e nas futuras atualizações de suas extensões. A confiança é salva localmente por endereço e aplicada na próxima conexão",
 	"remoteConnectionHistory": "Histórico de conexões remotas",

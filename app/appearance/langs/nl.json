@@ -1,4 +1,5 @@
 {
+	"connect": "Verbinden",
 	"trustRemoteExtensions": "Externe plug-ins en vormgeving vertrouwen en laden",
 	"trustRemoteExtensionsTip": "Externe uitbreidingen kunnen lokale bestanden lezen en schrijven en programma’s uitvoeren. Vertrouw alleen betrouwbare servers en toekomstige updates van hun uitbreidingen. De instelling wordt lokaal per adres opgeslagen en geldt vanaf de volgende verbinding",
 	"remoteConnectionHistory": "Geschiedenis van externe verbindingen",

@@ -57,7 +57,7 @@ export const openRemoteConnection = (initialOrigin = "") => {
 <div class="b3-dialog__action">
     <button data-field="cancel" class="b3-button b3-button--cancel">${escapeHtml(languages.cancel)}</button>
     <div class="fn__space"></div>
-    <button data-field="connect" class="b3-button b3-button--text" disabled>${escapeHtml(languages.connectRemoteKernel)}</button>
+    <button data-field="connect" class="b3-button b3-button--text" disabled>${escapeHtml(languages.connect)}</button>
 </div>`,
         destroyCallback: () => {
             closed = true;

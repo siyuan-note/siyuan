@@ -1128,7 +1128,8 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
     });
     const movedListItemElements = [...liItemElements] as HTMLElement[];
     if (parentLiItemElement.classList.contains("protyle-wysiwyg") || parentLiItemElement.classList.contains("sb") ||
-        parentLiItemElement.classList.contains("bq") || parentLiItemElement.classList.contains("callout")) {
+        parentLiItemElement.classList.contains("bq") || parentLiItemElement.classList.contains("callout") ||
+        parentLiItemElement.classList.contains("tab-item")) {
         // 顶层列表
         const topDoOperations: IOperation[] = [];
         const topUndoOperations: IOperation[] = [];

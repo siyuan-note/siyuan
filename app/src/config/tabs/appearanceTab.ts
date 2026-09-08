@@ -168,7 +168,7 @@ const genFontListItemHtml = (item: IFontItem, checked: boolean) => {
     return `<div class="b3-list-item b3-list-item--narrow" data-id="${escapeAttr(item.id || "")}">
     <span class="b3-menu__label" data-family="${escapeAttr(item.family)}" data-name="${escapeAttr(item.displayName)}" data-search="${escapeAttr(searchText)}" data-spacing="${escapeAttr(item.spacing || "")}" data-weight="${item.weight || 400}">${escapeHtml(item.displayName)}</span>
     ${checked ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
-    ${item.id && !window.siyuan.config.readonly ? `<span class="b3-menu__action ariaLabel" data-type="delete-font" aria-label="${escapeAttr(window.siyuan.languages.delete)}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>` : ""}
+    ${item.id && !window.siyuan.config.readonly ? `<svg class="b3-menu__action b3-menu__action--show fn__flex-shrink ariaLabel" data-type="delete-font" aria-label="${escapeAttr(window.siyuan.languages.delete)}"><use xlink:href="#iconTrashcan"></use></svg>` : ""}
 </div>`;
 };
 

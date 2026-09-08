@@ -872,6 +872,10 @@ ${genHintItemHTML(item)}
         } else if (this.splitChar === "/" || this.splitChar === "、") {
             if (protyle.lite) {
                 insertHTML(value, protyle, false, false, false, undefined, undoContext);
+                if (Constants.BLOCK_HINT_KEYS.includes(value)) {
+                    this.enableExtend = true;
+                    this.render(protyle);
+                }
             } else if (value === "((" || value === "{{") {
                 this.enableExtend = true;
                 if (value === "((") {

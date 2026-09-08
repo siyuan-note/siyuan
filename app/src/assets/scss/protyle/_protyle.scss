@@ -860,6 +860,10 @@
   min-height: 0;
   white-space: normal;
 
+  &.protyle {
+    background-color: transparent;
+  }
+
   .protyle-content {
     overflow: visible;
   }

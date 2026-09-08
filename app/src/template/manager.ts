@@ -282,7 +282,9 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
             title,
             width: "min(520px, 92vw)",
             content: `<div class="b3-dialog__content"><label>${nameOnly ? lang.name : lang.savePath}<div class="fn__hr"></div><input class="b3-text-field fn__block" spellcheck="false"></label></div>
-<div class="b3-dialog__action">${button("cancel", lang.cancel)}<div class="fn__space"></div>${button("confirm", lang.confirm)}</div>`
+<div class="b3-dialog__action">
+<button type="button" class="b3-button b3-button--cancel" data-action="cancel">${lang.cancel}</button><div class="fn__space"></div>
+<button type="button" class="b3-button b3-button--text" data-action="confirm">${lang.confirm}</button></div>`
         });
         const input = prompt.element.querySelector<HTMLInputElement>("input");
         input.value = value;
@@ -310,7 +312,9 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
             title: lang.move,
             width: "min(520px, 92vw)",
             content: `<div class="b3-dialog__content"><label>${lang.savePath}<div class="fn__hr"></div><select class="b3-select fn__block"></select></label></div>
-<div class="b3-dialog__action">${button("cancel", lang.cancel)}<div class="fn__space"></div>${button("confirm", lang.confirm)}</div>`
+<div class="b3-dialog__action">
+<button type="button" class="b3-button b3-button--cancel" data-action="cancel">${lang.cancel}</button><div class="fn__space"></div>
+<button type="button" class="b3-button b3-button--text" data-action="confirm">${lang.confirm}</button></div>`
         });
         const destination = prompt.element.querySelector<HTMLSelectElement>("select");
         destination.add(new Option("/", ""));

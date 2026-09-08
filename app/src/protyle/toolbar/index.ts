@@ -683,7 +683,8 @@ export class Toolbar {
             return;
         }
 
-        const actionBtn = action === "toolbar" ? this.element.querySelector(`[data-type="${type}"]`) : undefined;
+        const toolbarElement = isMobile() ? document.querySelector("#keyboardToolbar .keyboard__dynamic").nextElementSibling : this.element;
+        const actionBtn = action === "toolbar" ? toolbarElement.querySelector(`[data-type="${type}"]`) : undefined;
         const remove = type === "clear" || actionBtn?.classList.contains("protyle-toolbar__item--current") ||
             (!textObj && ranges.every(item => this.hasInlineMark(item.editableElement, item.range, type)));
         const visibleOffsets = new Map(ranges.map(item =>
@@ -1054,7 +1055,7 @@ export class Toolbar {
             });
         } else {
             // 添加
-            if (!this.element.classList.contains("fn__none") && type !== "text" && actionBtn) {
+            if (!toolbarElement.classList.contains("fn__none") && type !== "text" && actionBtn) {
                 actionBtn.classList.add("protyle-toolbar__item--current");
             }
             if (selectText === "" || (type === "text" && textObj?.type === "fontFamily" &&

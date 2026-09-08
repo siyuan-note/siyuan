@@ -2048,8 +2048,8 @@ export class TableControl {
         this.scheduleRender();
     }
 
-    private splitCell(cell: HTMLTableCellElement) {
-        if (!this.selection) {
+    public splitCell(cell: HTMLTableCellElement) {
+        if (!this.wysiwygElement.contains(cell) || !this.selectCellRange(cell, cell)) {
             return;
         }
         const grid = buildTableGrid(this.selection.table);

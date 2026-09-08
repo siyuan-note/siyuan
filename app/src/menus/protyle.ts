@@ -2258,6 +2258,10 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             icon: "iconTableCellsSplit",
             label: window.siyuan.languages.cancelMerged,
             click: () => {
+                if (protyle.wysiwyg.tableControl) {
+                    protyle.wysiwyg.tableControl.splitCell(cellElement);
+                    return;
+                }
                 const oldHTML = nodeElement.outerHTML;
                 let rowSpan = cellElement.rowSpan;
                 let currentRowElement: Element = cellElement.parentElement;

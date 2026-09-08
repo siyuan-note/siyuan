@@ -337,12 +337,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         protyle.wysiwyg.preventKeyup = false;
-        const historyCell = event.target.closest("th, td");
-        if (!event.isComposing && historyCell?.closest(".protyle-wysiwyg") === editorElement) {
+        if (!event.isComposing && event.target.closest(".protyle-wysiwyg") === editorElement) {
             const undo = matchHotKey(window.siyuan.config.keymap.editor.general.undo, event);
             const redo = matchHotKey(window.siyuan.config.keymap.editor.general.redo, event);
             if (undo || redo) {
-                // 单元格预览不参与输入处理，撤销不应先改写其中的光标标记。
+                // 撤销使用所属文档的历史栈，不依赖重新聚焦后浏览器是否已恢复块内选区。
                 event.preventDefault();
                 event.stopPropagation();
                 if (undo) {
@@ -1704,20 +1703,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 showSelectAllIncompleteTip();
             }
             return true;
-        }
-
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.undo, event)) {
-            protyle.undo.undo(protyle);
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.redo, event)) {
-            protyle.undo.redo(protyle);
-            event.preventDefault();
-            event.stopPropagation();
-            return;
         }
 
         /// #if !MOBILE

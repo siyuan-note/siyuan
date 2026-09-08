@@ -619,6 +619,11 @@ body.mobile-topbar--merged {
     will-change: transform;
   }
 
+  > .protyle-content {
+    // 将正文高亮和吸顶元素限制在独立层叠上下文内，避免滚动时覆盖导航栏。
+    isolation: isolate;
+  }
+
   > .protyle-content::before {
     display: block;
     height: calc(var(--mobile-topbar-height) + var(--mobile-breadcrumb-height));

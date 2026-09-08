@@ -49,7 +49,7 @@ const renderDragTip = () => {
             dragTipState.titleElement.style.cssText = "max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--b3-tooltips-color);";
             dragTipState.actionElement = document.createElement("div");
             dragTipState.actionElement.className = "drag-tip__action";
-            dragTipState.actionElement.style.cssText = "color:var(--b3-tooltips-second-color);font-size:12px;";
+            dragTipState.actionElement.style.cssText = "max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--b3-tooltips-second-color);font-size:12px;";
             dragTipState.element.append(dragTipState.titleElement, dragTipState.actionElement);
             document.body.append(dragTipState.element);
         } else {

@@ -7,6 +7,7 @@ import {clearTemplatePreview, previewTemplate} from "../protyle/toolbar/util";
 import {getTemplateRenameTarget, getTemplateTree, TemplateEntry} from "./fileTree";
 import {getTemplateActionEntry, getTemplateActionState} from "./actionState";
 import {openBy} from "../editor/util";
+import {replaceFileName} from "../editor/rename";
 import {getHostCapabilities} from "../util/hostCapabilities";
 import {isBrowser, isMobile} from "../util/functions";
 
@@ -292,6 +293,9 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
         input.select();
         prompt.element.querySelector("[data-action=cancel]").addEventListener("click", () => prompt.destroy());
         prompt.element.querySelector("[data-action=confirm]").addEventListener("click", () => {
+            if (nameOnly) {
+                input.value = replaceFileName(input.value);
+            }
             if (!input.value.trim()) {
                 input.focus();
                 return;

@@ -1,10 +1,12 @@
 import {MenuItem} from "../../menus/Menu";
 import {clearTableCellContent, getTableCellRichPlainText, mergeTableCellContents} from "./tableCellRich";
+import {renderTableCellRichElements} from "../render/tableCellRich";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {copyPlainText, encodeBase64, isMac, readClipboard} from "./compatibility";
 import {removeZWJ} from "./normalizeText";
 import {paste} from "./paste";
 import {focusByRange, getEditorRange} from "./selection";
+import {matchHotKey} from "./hotKey";
 import {
     buildTableGrid,
     deleteTableColumns,
@@ -524,6 +526,26 @@ export class TableControl {
         }, {capture: true, signal});
         document.addEventListener("keydown", event => {
             if (!this.selection || this.protyle.disabled) {
+                return;
+            }
+            const keymap = window.siyuan.config.keymap.editor.general;
+            const undo = matchHotKey(keymap.undo, event);
+            const redo = matchHotKey(keymap.redo, event);
+            if (!event.isComposing && (undo || redo)) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                // 单元格选择不持有文字选区，撤销前将焦点交回所属编辑器。
+                const range = document.createRange();
+                range.selectNodeContents(this.selection.activeCell);
+                range.collapse(true);
+                this.wysiwygElement.focus({preventScroll: true});
+                focusByRange(range);
+                this.clear();
+                if (undo) {
+                    this.protyle.undo.undo(this.protyle);
+                } else {
+                    this.protyle.undo.redo(this.protyle);
+                }
                 return;
             }
             if (!event.isComposing && !event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey &&
@@ -2018,6 +2040,7 @@ export class TableControl {
         first.rowSpan = rowEnd - rowStart + 1;
         first.colSpan = colEnd - colStart + 1;
         updateTransaction(this.protyle, this.selection.node, oldHTML);
+        renderTableCellRichElements(first);
         this.selection.cells = new Set([first]);
         this.selection.activeCell = first;
         this.hoverCell = first;

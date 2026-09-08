@@ -898,6 +898,11 @@
 }
 
 .protyle-wysiwyg [data-type="NodeTable"] {
+  td[tabindex="-1"]:focus,
+  th[tabindex="-1"]:focus {
+    outline: none;
+  }
+
   td:empty::after,
   th:empty::after {
     // 空单元格与输入文字共用行盒高度，避免输入第一个字符时改变整行高度。

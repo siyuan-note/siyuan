@@ -14,11 +14,11 @@ export const showPanelMask = () => {
     return maskElement;
 };
 
-export const closePanel = () => {
+export const closePanel = (options: {preserveKeyboard?: boolean} = {}) => {
     destroyModel();
     const menuElement = document.getElementById("menu");
     if (menuElement) {
-        menuElement.dispatchEvent(new CustomEvent(MOBILE_MENU_CLOSE_EVENT));
+        menuElement.dispatchEvent(new CustomEvent(MOBILE_MENU_CLOSE_EVENT, {detail: options}));
         menuElement.style.removeProperty("transform");
         menuElement.style.removeProperty("z-index");
     }

@@ -299,8 +299,7 @@ export const initMobileBottomBar = (app: App) => {
         if (isMobileBlockSelecting()) {
             return;
         }
-        activeBlur();
-        closePanel();
+        closePanel({preserveKeyboard: true});
         commandPanel(app);
     });
 };

@@ -408,8 +408,11 @@ export const initRightMenu = (app: App) => {
             }
         }
     };
-    const resetSearch = () => {
-        activeBlur();
+    const resetSearch = (preserveKeyboard = false) => {
+        // 转入输入型弹窗时保留键盘，避免 Android 异步隐藏键盘回调清除新输入框的焦点。
+        if (!preserveKeyboard) {
+            activeBlur();
+        }
         selectedTabId = undefined;
         searchMountQueue.invalidate();
         searchElement.value = "";
@@ -424,8 +427,8 @@ export const initRightMenu = (app: App) => {
             syncSearch();
         }
     });
-    menuElement.addEventListener(MOBILE_MENU_CLOSE_EVENT, () => {
-        resetSearch();
+    menuElement.addEventListener(MOBILE_MENU_CLOSE_EVENT, (event: CustomEvent<{preserveKeyboard?: boolean}>) => {
+        resetSearch(event.detail?.preserveKeyboard);
         const callback = takeMobileMenuReturnCallback();
         if (callback) {
             window.setTimeout(callback);
@@ -520,7 +523,7 @@ export const initRightMenu = (app: App) => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "menuCommand") {
-                closePanel();
+                closePanel({preserveKeyboard: true});
                 commandPanel(app);
                 event.preventDefault();
                 event.stopPropagation();

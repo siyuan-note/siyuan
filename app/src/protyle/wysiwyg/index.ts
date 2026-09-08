@@ -1140,6 +1140,14 @@ export class WYSIWYG {
             const documentSelf = document;
             documentSelf.onmouseup = null;
             let target = event.target as HTMLElement;
+            const emptyCell = target.closest<HTMLTableCellElement>("td:empty, th:empty");
+            if (emptyCell && event.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey &&
+                !event.altKey && !protyle.disabled && emptyCell.closest(".protyle-wysiwyg") === this.element) {
+                // 空单元格直接进入编辑，阻止浏览器先在单元格顶部绘制临时光标。
+                event.preventDefault();
+                void import("../render/tableCellRichEditor").then(module => module.openTableCellRichEditor(protyle, emptyCell));
+                return;
+            }
             const customElement = hasClosestByClassName(target, "protyle-custom");
             let nodeElement = hasClosestBlock(target) as HTMLElement;
             let clickedTableNode = !customElement && nodeElement && nodeElement.dataset.type === "NodeTable" ?
@@ -1166,6 +1174,7 @@ export class WYSIWYG {
                 const nodeRect = clickedTableNode.getBoundingClientRect();
                 if (event.clientX > tableRect.right &&
                     event.clientY >= nodeRect.top && event.clientY <= nodeRect.bottom) {
+                    this.preventClick = true;
                     event.preventDefault();
                     event.stopPropagation();
                     return;

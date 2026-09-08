@@ -14,10 +14,9 @@ import type {Plugin} from "../../plugin";
 import {isDisallowedTextInputHotkey, isReservedKeymap} from "../../util/hotKeyPolicy";
 import {resolvePluginToolbar} from "../../plugin/toolbarItem";
 import {ensurePluginKeymap} from "../../plugin/keymap";
-import {getKeymapBindings, getKeymapItem, setKeymapBindings, visitKeymapItems, normalizeShortcutKey} from "../../util/keymapBindings";
+import {getKeymapBindings, getKeymapItem, setKeymapBindings, normalizeShortcutKey} from "../../util/keymapBindings";
 import {genKeymapRowHtml, getRowBindings, renderRowBindings} from "./keymapRow";
-import {escapeAttr, escapeHtml} from "../../util/escape";
-import {canShareShortcutPaths, getShortcutScopes, compareShortcutBindings, getShortcutId} from "../../command/shortcutCatalog";
+import {escapeHtml} from "../../util/escape";
 import {Menu} from "../../plugin/Menu";
 
 const keymapToolbarSearchStrings = (): string[] => [
@@ -25,6 +24,14 @@ const keymapToolbarSearchStrings = (): string[] => [
     window.siyuan.languages.keymapTip2,
     window.siyuan.languages.refresh,
     window.siyuan.languages.reset,
+];
+
+const keymapFilters = () => [
+    ["all", window.siyuan.languages.all],
+    ["assigned", window.siyuan.languages.keymapAssigned],
+    ["customized", window.siyuan.languages.keymapCustomized],
+    ["unassigned", window.siyuan.languages.keymapUnassigned],
+    ["conflict", window.siyuan.languages.conflict],
 ];
 
 const genKeymapToolbarHtml = () => genConfigGroup(
@@ -124,6 +131,7 @@ const buildKeymapKeywords = (): string[] => [
     window.siyuan.languages.search,
     window.siyuan.languages.keymap,
     window.siyuan.languages.clear,
+    ...keymapFilters().map(([, label]) => label),
     // 命令分组标题
     window.siyuan.languages.general,
     window.siyuan.languages.editor,
@@ -202,7 +210,7 @@ const genKeymapListHtml = () => {
     }
     const pluginHtml = pluginHtmlParts.join("");
 
-    return `<div class="b3-label file-tree config-keymap config-item" id="keymapList">
+    return `<div class="b3-label file-tree config-keymap config-item" id="keymapList" data-keymap-filter="all">
     <div class="fn__flex">
         <input id="keymapInput" class="b3-text-field fn__flex-1" placeholder="${window.siyuan.languages.searchPlaceholder}">
         <div class="fn__space"></div>
@@ -217,6 +225,8 @@ const genKeymapListHtml = () => {
         </button>
     </div>
     <div class="fn__hr"></div>
+    <div class="config-keymap__filters">${keymapFilters().map(([value, label]) =>
+        `<button type="button" data-keymap-filter-value="${value}" aria-pressed="${value === "all"}" class="b3-chip b3-chip--middle b3-chip--pointer${value === "all" ? " b3-chip--current" : ""}${value === "conflict" ? " fn__none" : ""}">${escapeHtml(label)}</button>`).join("")}</div>
     ${genKeymapListBlock(window.siyuan.languages.general, generalHtml)}
     ${genKeymapListBlock(window.siyuan.languages.editor, editorHtml, true)}
     ${genKeymapListBlock(window.siyuan.languages.plugin, pluginHtml, true)}
@@ -351,12 +361,12 @@ const bindKeymapList = (root: HTMLElement) => {
         searchKeymapElement.dataset.keymap = "";
         resetKeymapList(keymapListElement);
     });
-    let recording: {row: HTMLElement; input: HTMLInputElement; index: number} | undefined;
+    let recording: {row: HTMLElement; element: HTMLElement} | undefined;
     const outsideRecording = (event: PointerEvent) => {
-        if (recording && event.target !== recording.input &&
+        if (recording && event.target !== recording.element &&
             !(event.target as HTMLElement).closest(".config-keymap__controls")) {
             cancelRecording();
-            refreshShared();
+            refreshBindings();
         }
     };
     const cancelRecording = (restoreFocus = false) => {
@@ -367,24 +377,33 @@ const bindKeymapList = (root: HTMLElement) => {
         recording = undefined;
         document.removeEventListener("pointerdown", outsideRecording, true);
         renderRowBindings(row, getRowBindings(row));
+        refreshKeymapBindings(root);
         hideMessage("keymapInvalid");
-        hideMessage("keymapConflict");
         sendGlobalShortcut(window.siyuan.ws.app);
         if (restoreFocus) {
             row.querySelector<HTMLButtonElement>('[data-type="add"]').focus();
         }
     };
-    const refreshShared = () => refreshSharedBindings(root);
+    const refreshBindings = () => refreshKeymapBindings(root);
+    root.querySelector(".config-keymap__filters").addEventListener("click", (event) => {
+        const button = (event.target as HTMLElement).closest<HTMLElement>("[data-keymap-filter-value]");
+        if (!button) {
+            return;
+        }
+        cancelRecording();
+        keymapListElement.dataset.keymapFilter = button.dataset.keymapFilterValue;
+        refreshBindings();
+    });
     const saveRow = (row: HTMLElement, keys: string[], reset = false) => {
         renderRowBindings(row, keys);
         saveKeymapRow(root, row, keys, reset ? data => {
             delete getKeymapItem(data, row.dataset.key.split(Constants.ZWSP)).bindings.priority;
         } : undefined);
-        refreshShared();
+        refreshBindings();
     };
     keymapListElement.addEventListener("pointerdown", (event) => {
         if (recording && (event.target as HTMLElement).closest(".config-keymap__controls") &&
-            event.target !== recording.input) {
+            event.target !== recording.element) {
             event.preventDefault();
         }
     });
@@ -432,36 +451,23 @@ const bindKeymapList = (root: HTMLElement) => {
             keys.splice(index, 1);
             saveRow(row, keys);
             row.querySelector<HTMLButtonElement>('[data-type="add"]').focus();
-        } else if (type === "add" || type === "update") {
-            const input = document.createElement("input");
-            input.className = "b3-text-field config-keymap__record";
-            input.readOnly = true;
-            input.spellcheck = false;
-            input.autocomplete = "off";
-            input.inputMode = "none";
-            input.placeholder = window.siyuan.languages.keymapRecording;
-            input.setAttribute("aria-label", window.siyuan.languages.keymapRecording);
-            if (type === "update") {
-                row.querySelector(`[data-index="${index}"]`).replaceWith(input);
-            } else {
-                row.querySelector(".config-keymap__bindings").append(input);
-            }
-            recording = {row, input, index: type === "update" ? index : -1};
+        } else if (type === "add") {
+            const recorder = document.createElement("span");
+            recorder.className = "config-keymap__key config-keymap__record";
+            recorder.tabIndex = 0;
+            recorder.setAttribute("role", "button");
+            recorder.textContent = window.siyuan.languages.keymapRecording;
+            recorder.setAttribute("aria-label", window.siyuan.languages.keymapRecording);
+            row.querySelector(".config-keymap__bindings").append(recorder);
+            recording = {row, element: recorder};
             document.addEventListener("pointerdown", outsideRecording, true);
             row.querySelector('[data-type="add"]').classList.add("config-keymap__action--active");
             sendUnregisterGlobalShortcut(window.siyuan.ws.app);
-            input.focus();
-        } else if (type === "shared") {
-            const detail = row.querySelector<HTMLElement>(".config-keymap__shared");
-            const hidden = detail.classList.toggle("fn__none");
-            action.setAttribute("aria-expanded", String(!hidden));
-        } else if (type === "priority-up" || type === "priority-down") {
-            moveSharedBinding(root, row, action, type === "priority-up" ? -1 : 1);
-            refreshShared();
+            recorder.focus();
         }
     });
     keymapListElement.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (!recording || event.target !== recording.input) {
+        if (!recording || event.target !== recording.element) {
             return;
         }
         event.preventDefault();
@@ -477,41 +483,21 @@ const bindKeymapList = (root: HTMLElement) => {
         if (!hotkey || ["⌘", "⇧", "⌥", "⌃"].includes(hotkey.at(-1))) {
             return;
         }
-        const {row, index, input} = recording;
+        const {row, element} = recording;
         const path = row.dataset.key.split(Constants.ZWSP);
         if (isDisallowedTextInputHotkey(hotkey) || isReservedKeymap(hotkey, path) ||
             !matchHotKey(hotkey, event) ||
             (isMac() && path[0] === "general" && ["goToEditTabNext", "goToEditTabPrev"].includes(path[1]) && hotkey.includes("⌘"))) {
-            input.setAttribute("aria-invalid", "true");
+            element.setAttribute("aria-invalid", "true");
             showMessage(`${window.siyuan.languages.invalid} [${updateHotkeyTip(hotkey)}]`, undefined, undefined, "keymapInvalid");
             return;
         }
-        const conflicts: string[] = [];
-        visitKeymapItems(window.siyuan.config.keymap, (item, otherPath) => {
-            if (otherPath.join(Constants.ZWSP) !== row.dataset.key &&
-                getKeymapBindings(item).some(key => matchHotKey(key, event)) &&
-                !canShareShortcutPaths([path, otherPath])) {
-                const otherRow = Array.from(root.querySelectorAll<HTMLElement>(".config-keymap__row"))
-                    .find(candidate => candidate.dataset.key === otherPath.join(Constants.ZWSP));
-                conflicts.push(otherRow?.querySelector(".b3-list-item__text").textContent || otherPath.join(" - "));
-            }
-        });
-        if (conflicts.length) {
-            showMessage(`${window.siyuan.languages.keymapLegacyConflict} [${conflicts.map(escapeHtml).join("] [")}]`, undefined, undefined, "keymapConflict");
-            return;
-        }
         const keys = getRowBindings(row);
-        const duplicate = keys.findIndex((key, keyIndex) => keyIndex !== index && matchHotKey(key, event));
-        cancelRecording();
-        if (duplicate !== -1) {
-            row.querySelector<HTMLButtonElement>(`[data-index="${duplicate}"] [data-type="update"]`).focus();
+        if (keys.some(key => matchHotKey(key, event))) {
             return;
         }
-        if (index < 0) {
-            keys.push(hotkey);
-        } else {
-            keys[index] = hotkey;
-        }
+        cancelRecording();
+        keys.push(hotkey);
         saveRow(row, keys);
         row.querySelector<HTMLButtonElement>('[data-type="add"]').focus();
     }, true);
@@ -521,17 +507,17 @@ const bindKeymapList = (root: HTMLElement) => {
         }
     });
     keymapListElement.addEventListener("focusout", (event: FocusEvent) => {
-        if (recording && event.target === recording.input) {
+        if (recording && event.target === recording.element) {
             // 等待当前点击完成，避免移除目标按钮后丢失添加、删除或恢复操作。
             setTimeout(() => {
-                if (recording && document.activeElement !== recording.input) {
+                if (recording && document.activeElement !== recording.element) {
                     cancelRecording();
-                    refreshShared();
+                    refreshBindings();
                 }
             }, 0);
         }
     });
-    refreshShared();
+    refreshBindings();
 };
 
 const getKeymapString = (event: KeyboardEvent) => {
@@ -572,6 +558,10 @@ const getKeymapString = (event: KeyboardEvent) => {
 };
 
 const resetKeymapList = (keymapListElement: HTMLElement) => {
+    if (keymapListElement.dataset.keymapFilter !== "all") {
+        searchKeymapList(keymapListElement, "", "");
+        return;
+    }
     keymapListElement.querySelectorAll(".b3-list-item--hide-action").forEach((liElement) => {
         liElement.classList.remove("fn__none");
         liElement.parentElement.classList.remove("fn__none");
@@ -593,13 +583,18 @@ const resetKeymapList = (keymapListElement: HTMLElement) => {
 const searchKeymapList = (keymapListElement: HTMLElement, keywords: string, keymapStr: string) => {
     const keywordsLower = keywords.trim().toLowerCase();
     const keymapStrLower = keymapStr.trim().toLowerCase();
-    if (!keywordsLower && !keymapStrLower) {
+    const filter = keymapListElement.dataset.keymapFilter;
+    if (!keywordsLower && !keymapStrLower && filter === "all") {
         resetKeymapList(keymapListElement);
         return;
     }
     keymapListElement.querySelectorAll(".b3-list-item--hide-action > .b3-list-item__text").forEach((item) => {
         const liElement = item.parentElement;
-        let matchedKeymap = true;
+        const keys = getRowBindings(liElement);
+        let matchedKeymap = filter === "assigned" ? keys.length > 0 :
+            filter === "unassigned" ? keys.length === 0 :
+                filter === "customized" ? liElement.dataset.customized === "true" :
+                    filter === "conflict" ? liElement.dataset.conflict === "true" : true;
         if (keymapStrLower) {
             const dataValue = getRowBindings(liElement).join(" ");
             if (!dataValue || dataValue.toLowerCase().indexOf(keymapStrLower) === -1) {
@@ -652,118 +647,53 @@ const toggleKeymapSearchItem = (editorKeymapElement: HTMLElement, isFiltering: b
     }
 };
 
-const scopeLabel = (scope: string) => {
-    const languages = window.siyuan.languages;
-    return ({editor: languages.editor, fileTree: languages.fileTree, dock: languages.entryDock,
-        global: languages.general, system: languages.keymapSystemScope})[scope] || scope;
-};
-
-const getRowHotkey = (row: HTMLElement, hotkey: string) => getRowBindings(row)
-    .find(key => normalizeShortcutKey(key, isMac()) === normalizeShortcutKey(hotkey, isMac()));
-
-const sharedRows = (root: HTMLElement, hotkey: string) =>
-    Array.from(root.querySelectorAll<HTMLElement>(".config-keymap__row"))
-        .filter(row => getRowBindings(row).some(key => normalizeShortcutKey(key, isMac()) === normalizeShortcutKey(hotkey, isMac())));
-
-const refreshSharedBindings = (root: HTMLElement) => {
-    root.querySelectorAll<HTMLElement>(".config-keymap__row").forEach(row => {
-        const keys = getRowBindings(row).filter(key => sharedRows(root, key).length > 1);
-        const controls = row.querySelector(".config-keymap__controls");
+const refreshKeymapBindings = (root: HTMLElement) => {
+    const rows = Array.from(root.querySelectorAll<HTMLElement>(".config-keymap__row"));
+    const owners = new Map<string, Set<HTMLElement>>();
+    rows.forEach(row => getRowBindings(row).forEach(key => {
+        const normalized = normalizeShortcutKey(key, isMac());
+        if (normalized) {
+            const matches = owners.get(normalized) || new Set<HTMLElement>();
+            matches.add(row);
+            owners.set(normalized, matches);
+        }
+    }));
+    rows.forEach(row => {
+        const keys = getRowBindings(row);
         const config = getKeymapItem(window.siyuan.config.keymap, row.dataset.key.split(Constants.ZWSP));
-        const resetButton = controls.querySelector<HTMLButtonElement>('[data-type="reset"]');
+        const controls = row.querySelector(".config-keymap__controls");
         if (config?.bindings && config.bindings.version !== 1) {
             controls.querySelectorAll<HTMLButtonElement>("button").forEach(button => {
                 button.disabled = true;
                 button.title = window.siyuan.languages.invalid;
             });
         }
-        const changed = JSON.stringify(getRowBindings(row)) !== row.dataset.defaults ||
-            Object.keys(config?.bindings?.priority || {}).length > 0;
-        resetButton.style.display = changed ? "" : "none";
-        resetButton.tabIndex = changed ? 0 : -1;
-        controls.querySelector('[data-type="shared"]')?.remove();
-        const detail = row.querySelector<HTMLElement>(".config-keymap__shared");
-        if (!keys.length) {
-            detail.classList.add("fn__none");
-            detail.innerHTML = "";
-            return;
-        }
-        const button = document.createElement("button");
-        button.type = "button";
-        button.dataset.type = "shared";
-        button.className = "config-keymap__shared-button";
-        button.textContent = window.siyuan.languages.keymapShared;
-        const ambiguous = keys.some(hotkey => {
-            const seen = new Set<string>();
-            return sharedRows(root, hotkey).some(item => {
-                const path = item.dataset.key.split(Constants.ZWSP);
-                const config = getKeymapItem(window.siyuan.config.keymap, path);
-                return getShortcutScopes(path).some(scope => {
-                    const priority = config?.bindings?.priority?.[`${scope}:${getRowHotkey(item, hotkey)}`] || 0;
-                    const identity = `${scope}:${priority}`;
-                    if (seen.has(identity)) {
-                        return true;
-                    }
-                    seen.add(identity);
-                    return false;
-                });
-            });
+        const changed = JSON.stringify(keys) !== row.dataset.defaults;
+        row.dataset.customized = String(changed);
+        const reset = controls.querySelector<HTMLButtonElement>('[data-type="reset"]');
+        reset.style.display = changed ? "" : "none";
+        reset.tabIndex = changed ? 0 : -1;
+        const conflicts = keys.map(key => (owners.get(normalizeShortcutKey(key, isMac()))?.size || 0) > 1);
+        row.dataset.conflict = String(conflicts.some(Boolean));
+        row.querySelectorAll<HTMLElement>(".config-keymap__chip").forEach(chip => {
+            chip.classList.toggle("config-keymap__chip--conflict", conflicts[Number(chip.dataset.index)]);
         });
-        button.classList.toggle("config-keymap__shared-button--conflict", ambiguous);
-        button.title = ambiguous ? window.siyuan.languages.conflict : window.siyuan.languages.keymapShared;
-        button.setAttribute("aria-expanded", String(!detail.classList.contains("fn__none")));
-        controls.prepend(button);
-        detail.innerHTML = keys.map(hotkey => {
-            const rows = sharedRows(root, hotkey);
-            const supported = canShareShortcutPaths(rows.map(item => item.dataset.key.split(Constants.ZWSP)));
-            const groups = new Map<string, HTMLElement[]>();
-            rows.forEach(item => {
-                const scopes = getShortcutScopes(item.dataset.key.split(Constants.ZWSP));
-                (scopes.length ? scopes : ["global"]).forEach(scope => {
-                    const group = groups.get(scope) || [];
-                    group.push(item);
-                    groups.set(scope, group);
-                });
-            });
-            return `<div class="config-keymap__shared-title">${escapeHtml(updateHotkeyTip(hotkey))}</div>` +
-                Array.from(groups, ([scope, items]) => {
-                    items.sort((first, second) => compareShortcutBindings(
-                        {id: getShortcutId(first.dataset.key.split(Constants.ZWSP)), scope: "global", priority: getKeymapItem(window.siyuan.config.keymap,
-                            first.dataset.key.split(Constants.ZWSP))?.bindings?.priority?.[`${scope}:${getRowHotkey(first, hotkey)}`]},
-                        {id: getShortcutId(second.dataset.key.split(Constants.ZWSP)), scope: "global", priority: getKeymapItem(window.siyuan.config.keymap,
-                            second.dataset.key.split(Constants.ZWSP))?.bindings?.priority?.[`${scope}:${getRowHotkey(second, hotkey)}`]},
-                    ));
-                    return `<div class="ft__on-surface">${escapeHtml(scopeLabel(scope))}</div>` + items.map((item, index) =>
-                        `<div class="config-keymap__candidate"><span class="fn__flex-1">${index + 1}. ${escapeHtml(item.querySelector(".b3-list-item__text").textContent)}</span>${supported ?
-                            ["up", "down"].map(direction => `<button type="button" class="config-keymap__action b3-list-item__action" data-type="priority-${direction}" data-path="${escapeAttr(escapeHtml(item.dataset.key))}" data-hotkey="${escapeAttr(escapeHtml(hotkey))}" data-scope="${scope}" aria-label="${escapeAttr(window.siyuan.languages[direction])}" ${((direction === "up" && index === 0) || (direction === "down" && index === items.length - 1)) ? "disabled" : ""}><svg><use xlink:href="#${direction === "up" ? "iconUp" : "iconDown"}"></use></svg></button>`).join("") : ""}</div>`).join("");
-                }).join("") + `<div class="ft__on-surface">${escapeHtml(window.siyuan.languages[supported ? "keymapSharedTip" : "keymapLegacyConflict"])}</div>`;
-        }).join("");
     });
-};
-
-const moveSharedBinding = (root: HTMLElement, row: HTMLElement, action: HTMLElement, direction: number) => {
-    const hotkey = action.dataset.hotkey;
-    const items = sharedRows(root, hotkey).filter(item =>
-        getShortcutScopes(item.dataset.key.split(Constants.ZWSP)).includes(action.dataset.scope as "global"));
-    items.sort((first, second) => compareShortcutBindings(
-        {id: getShortcutId(first.dataset.key.split(Constants.ZWSP)), scope: "global", priority: getKeymapItem(window.siyuan.config.keymap,
-            first.dataset.key.split(Constants.ZWSP))?.bindings?.priority?.[`${action.dataset.scope}:${getRowHotkey(first, hotkey)}`]},
-        {id: getShortcutId(second.dataset.key.split(Constants.ZWSP)), scope: "global", priority: getKeymapItem(window.siyuan.config.keymap,
-            second.dataset.key.split(Constants.ZWSP))?.bindings?.priority?.[`${action.dataset.scope}:${getRowHotkey(second, hotkey)}`]},
-    ));
-    const index = items.findIndex(item => item.dataset.key === action.dataset.path);
-    const next = index + direction;
-    if (index < 0 || next < 0 || next >= items.length) {
-        return;
+    const list = root.querySelector<HTMLElement>("#keymapList");
+    const hasConflict = Boolean(list.querySelector('[data-conflict="true"]'));
+    if (!hasConflict && list.dataset.keymapFilter === "conflict") {
+        list.dataset.keymapFilter = "all";
     }
-    [items[index], items[next]] = [items[next], items[index]];
-    saveKeymapRow(root, row, getRowBindings(row), data => {
-        items.forEach((item, position) => {
-            const config = getKeymapItem(data, item.dataset.key.split(Constants.ZWSP));
-            setKeymapBindings(config, getKeymapBindings(config));
-            config.bindings.priority[`${action.dataset.scope}:${getRowHotkey(item, hotkey)}`] = items.length - position;
-        });
+    list.querySelectorAll<HTMLElement>("[data-keymap-filter-value]").forEach(button => {
+        const active = button.dataset.keymapFilterValue === list.dataset.keymapFilter;
+        button.classList.toggle("b3-chip--current", active);
+        button.setAttribute("aria-pressed", String(active));
+        if (button.dataset.keymapFilterValue === "conflict") {
+            button.classList.toggle("fn__none", !hasConflict);
+        }
     });
+    searchKeymapList(list, list.querySelector<HTMLInputElement>("#keymapInput").value,
+        list.querySelector<HTMLInputElement>("#searchByKey").dataset.keymap || "");
 };
 
 let keymapSaveQueue = Promise.resolve();
@@ -810,7 +740,7 @@ const saveKeymapRow = (root: HTMLElement, row: HTMLElement, keys: string[], chan
             root.querySelectorAll<HTMLElement>(".config-keymap__row").forEach(element => {
                 renderRowBindings(element, getKeymapBindings(getKeymapItem(savedKeymap, element.dataset.key.split(Constants.ZWSP))));
             });
-            refreshSharedBindings(root);
+            refreshKeymapBindings(root);
             showMessage(window.siyuan.languages.keymapSaveFailed);
         }
     });

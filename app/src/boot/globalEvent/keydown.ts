@@ -611,12 +611,6 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
 
-    if (matchHotKey(window.siyuan.config.keymap.general.selectOpen1, event)) {
-        event.preventDefault();
-        globalCommand("selectOpen1", app);
-        return;
-    }
-
     if (!files.element.parentElement.classList.contains("layout__tab--active")) {
         return false;
     }
@@ -1024,15 +1018,9 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
     const bottomBacklinkElement = hasClosestByClassName(target, "sy__backlink--bottom", true);
     const bottomBacklink = bottomBacklinkElement ? getAllModels().backlink.find(item =>
         item.type === "bottom" && item.element === bottomBacklinkElement) : undefined;
-    let activePanelElement = bottomBacklinkElement || document.querySelector(".layout__tab--active");
-    if (!activePanelElement) {
-        Array.from(document.querySelectorAll(".layout__wnd--active .layout-tab-container > div")).find(item => {
-            if (!item.classList.contains("fn__none") && item.className.indexOf("sy__") > -1) {
-                activePanelElement = item;
-                return true;
-            }
-        });
-    }
+    const activePanelElement = bottomBacklinkElement ||
+        target.closest(".layout__tab--active, .layout__wnd--active .layout-tab-container > div") ||
+        (target === document.body ? document.querySelector(".layout__tab--active") : undefined);
     if (!activePanelElement) {
         return false;
     }
@@ -1257,7 +1245,7 @@ const panelTreeKeydown = (app: App, event: KeyboardEvent) => {
 
 let switchDialog: Dialog;
 export const windowKeyDown = (app: App, event: KeyboardEvent) => {
-    if (filterHotkey(event, app)) {
+    if (event.defaultPrevented || filterHotkey(event, app)) {
         return;
     }
     if (switchDialog &&
@@ -1274,6 +1262,35 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
 
     const isTabWindow = isWindow();
+    if (bindMenuKeydown(event)) {
+        event.preventDefault();
+        return;
+    }
+
+    if (bindAVPanelKeydown(event)) {
+        event.preventDefault();
+        return;
+    }
+
+    // 当前焦点范围先处理快捷键，未命中再按固定顺序处理通用操作。
+    // 面板通过活动样式记录焦点，点击后按键事件的目标可能是 body。
+    const shortcutTarget = event.target === document.body ?
+        document.querySelector<HTMLElement>(".layout__tab--active") || document.body : event.target as HTMLElement;
+    if (!shortcutTarget.closest("input, textarea, .b3-menu, .av__panel, .av__mask")) {
+        if (shortcutTarget.closest(".protyle") && editKeydown(app, event)) {
+            return;
+        }
+        if (!isTabWindow && shortcutTarget.closest(".sy__file") && fileTreeKeydown(app, event)) {
+            return;
+        }
+        if (!shortcutTarget.closest(".protyle, .sy__file") &&
+            (!isTabWindow || shortcutTarget.closest(".sy__backlink--bottom")) &&
+            shortcutTarget.closest(".layout__tab--active, .sy__backlink--bottom, .layout__wnd--active .layout-tab-container > div") &&
+            panelTreeKeydown(app, event)) {
+            return;
+        }
+    }
+
     const switchHotkey = [...getKeymapBindings(window.siyuan.config.keymap.general.goToEditTabNext),
         ...getKeymapBindings(window.siyuan.config.keymap.general.goToEditTabPrev)].find(key => matchHotKey(key, event));
     if (switchHotkey) {
@@ -1367,16 +1384,6 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
 
     if (matchHotKey(window.siyuan.config.keymap.general.recentDocs, event)) {
         openRecentDocs();
-        event.preventDefault();
-        return;
-    }
-
-    if (bindMenuKeydown(event)) {
-        event.preventDefault();
-        return;
-    }
-
-    if (bindAVPanelKeydown(event)) {
         event.preventDefault();
         return;
     }
@@ -1815,20 +1822,11 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         globalCommand("unsplitAll", app);
         return;
     }
-    if (editKeydown(app, event)) {
+    if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.selectOpen1, event)) {
+        event.preventDefault();
+        globalCommand("selectOpen1", app);
         return;
     }
-
-    // 文件树的操作
-    if (!isTabWindow && fileTreeKeydown(app, event)) {
-        return;
-    }
-
-    // 面板的操作
-    if ((!isTabWindow || hasClosestByClassName(target, "sy__backlink--bottom", true)) && panelTreeKeydown(app, event)) {
-        return;
-    }
-
     if (dispatchPluginShortcut(app, event, "shortcut", () => captureShortcutContext(app, event))) {
         return true;
     }

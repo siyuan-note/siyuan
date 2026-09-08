@@ -32,6 +32,9 @@ export const updatePluginKeymap = (pluginName: string, key: string, hotkey: unkn
         setKeymapBindings(item, keymapItem ? getKeymapBindings(item) : defaults);
         item.bindings.defaults = defaults;
         item.default = defaults[0] || "";
+    } else if (!Array.isArray(hotkeys) && item.bindings?.version === 1) {
+        // 未声明默认列表时，重置使用本次注册的单个默认快捷键。
+        delete item.bindings.defaults;
     }
     return item;
 };

@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260908092714"
+		"updated": "20260908202901"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260908092714-3tm4lvq",
-				"updated": "20260908092714"
+				"updated": "20260908202901"
 			},
 			"Children": [
 				{
@@ -38,7 +38,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", you can assign multiple shortcuts to the same action. Click the plus button at the end of a row and press a key combination to save it. Click an existing shortcut to edit it, its close button to remove it, or the reset button to restore all defaults for that action. Press Esc or click outside to cancel recording. The first shortcut appears in menu hints; right-click another shortcut to make it the primary shortcut."
+					"Data": ", you can assign multiple shortcuts to the same action. Click the plus button in a row and press a key combination to save it. Click a shortcut’s close button to remove it, or the reset button to restore all defaults for that action. To replace a shortcut, remove it and add another. Press Esc or click outside to cancel recording. The first shortcut appears in menu hints; right-click another shortcut to make it the primary shortcut. If you enter a shortcut already assigned to the same action, it is not saved and recording stays active so you can enter another key combination."
 				}
 			]
 		},
@@ -47,12 +47,26 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260908092714-jbgcc13",
-				"updated": "20260908092714"
+				"updated": "20260908180419"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Click “Shared shortcut” to see contexts and execution order. Use the up and down buttons to reorder commands within the same context. Local commands take priority, with unavailable commands skipped. Once a command starts, cancellation or failure does not trigger another command. Some actions do not support shared bindings yet; if recording reports a conflict, choose another shortcut."
+					"Data": "Different actions can use the same shortcut. Duplicate bindings are highlighted as conflicts. The currently focused local scope takes precedence over the general scope. Actions within a scope follow a fixed order, and execution priority cannot be customized. Built-in actions use their fixed handler order; plugin actions are sorted by plugin name and command identifier. Each keypress runs only the first available action. Once it starts, cancellation or failure does not trigger another action."
+				}
+			]
+		},
+		{
+			"ID": "20260908172944-uu4n5dl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908172944-uu4n5dl",
+				"updated": "20260908180419"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Below the search fields, filter by “All”, “Assigned”, “Customized by me”, or “Unassigned”, together with a name or key search. “Assigned” means at least one shortcut is set. “Customized by me” means bindings differ from the defaults, including added, changed, or removed bindings. “Unassigned” means no shortcut is set. The “Conflict” filter appears only when unresolved conflicts exist, and the affected shortcuts are highlighted individually. Results update after edits. If the active “Conflict” filter has no conflicts left, it automatically switches to “All”."
 				}
 			]
 		},

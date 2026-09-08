@@ -1,5 +1,4 @@
 import {getKeymapBindings, IShortcutKeymap, normalizeShortcutKey} from "../util/keymapBindings";
-import {compareShortcutBindings} from "../command/shortcutCatalog";
 
 interface IPluginGlobalShortcutCommand {
     langKey?: string;
@@ -22,9 +21,9 @@ export const dispatchPluginGlobalShortcut = (plugins: IPluginGlobalShortcutOwner
         const item = keymap?.[plugin.name]?.[command.langKey];
         const key = getKeymapBindings(item || {custom: command.customHotkey})
             .find(key => normalizeShortcutKey(key, mac) === normalizeShortcutKey(hotkey, mac));
-        return {command, item, id: `plugin/${encodeURIComponent(plugin.name ?? String(index))}/${encodeURIComponent(command.langKey ?? String(commandIndex))}`,
-            scope: "system" as const, priority: item?.bindings?.priority?.[`system:${key}`], key};
-    })).filter(({command, key}) => command.globalCallback && key).sort(compareShortcutBindings);
+        return {command, key, id: `plugin/${encodeURIComponent(plugin.name ?? String(index))}/${encodeURIComponent(command.langKey ?? String(commandIndex))}`};
+    })).filter(({command, key}) => command.globalCallback && key)
+        .sort((first, second) => first.id < second.id ? -1 : first.id > second.id ? 1 : 0);
     for (const {command} of candidates) {
         try {
             if ((command.when && !command.when(context)) || (command.enabled && !command.enabled(context))) {

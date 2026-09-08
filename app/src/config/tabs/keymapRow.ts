@@ -12,11 +12,11 @@ export const keymapBindingsHtml = (keys: string[], defaults: string[]) => {
     const changed = JSON.stringify(keys) !== JSON.stringify(defaults);
     return `<div class="config-keymap__bindings">${keys.map((key, index) =>
         `<span class="config-keymap__key config-keymap__chip" data-index="${index}">
-            <button type="button" data-type="update" class="config-keymap__text" aria-label="${attr(languages.keymap + ": " + updateHotkeyTip(key))}">${escapeHtml(updateHotkeyTip(key))}</button>
+            <span class="config-keymap__text">${escapeHtml(updateHotkeyTip(key))}</span>
             <button type="button" data-type="remove" class="b3-chip__close config-keymap__remove ariaLabel" aria-label="${attr(languages.remove)}"><svg><use xlink:href="#iconClose"></use></svg></button>
         </span>`).join("")}</div>
         ${keymapActionHtml("reset", "iconUndo", languages.reset, changed ? "" : 'style="display:none" tabindex="-1"')}
-        ${keymapActionHtml("add", "iconAdd", languages.keymapRecording)}`;
+        ${keymapActionHtml("add", "iconAdd", languages.keymapAdd)}`;
 };
 
 export const genKeymapRowHtml = (label: string, dataKey: string, item: IShortcutKeymap) => {
@@ -24,7 +24,6 @@ export const genKeymapRowHtml = (label: string, dataKey: string, item: IShortcut
     return `<div class="b3-list-item b3-list-item--narrow b3-list-item--hide-action config-keymap__row" data-key="${attr(dataKey)}" data-keys="${attr(JSON.stringify(keys))}" data-defaults="${attr(JSON.stringify(getDefaultKeymapBindings(item)))}">
         <span class="b3-list-item__text">${escapeHtml(label)}</span>
         <div class="config-keymap__controls">${keymapBindingsHtml(keys, getDefaultKeymapBindings(item))}</div>
-        <div class="config-keymap__shared fn__none"></div>
     </div>`;
 };
 

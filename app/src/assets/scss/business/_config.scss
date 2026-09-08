@@ -399,6 +399,17 @@
   }
 
   &-keymap {
+    &__filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+
+      button {
+        border: 0;
+      }
+    }
+
     &__row {
       flex-wrap: wrap;
 
@@ -417,6 +428,10 @@
     &__controls {
       max-width: 70%;
       margin-left: auto;
+
+      > .b3-list-item__action {
+        display: flex;
+      }
     }
 
     &__bindings {
@@ -429,6 +444,7 @@
       display: inline-flex;
       align-items: center;
       white-space: nowrap;
+
     }
 
     &__text {
@@ -437,7 +453,7 @@
       background: transparent;
       color: inherit;
       font: inherit;
-      cursor: pointer;
+      cursor: default;
     }
 
     &__remove {
@@ -470,65 +486,6 @@
       }
     }
 
-    &__shared-button {
-      border: 0;
-      background: transparent;
-      color: var(--b3-theme-on-surface);
-      cursor: pointer;
-      flex-shrink: 0;
-      padding: 4px;
-      border-radius: var(--b3-border-radius);
-
-      &:hover,
-      &--active {
-        color: var(--b3-theme-primary);
-      }
-
-      &:focus-visible {
-        outline: 2px solid var(--b3-theme-primary);
-      }
-
-      &:disabled {
-        opacity: .35;
-        cursor: default;
-      }
-
-      svg {
-        display: block;
-        width: 16px;
-        height: 16px;
-      }
-    }
-
-    &__record {
-      width: 150px;
-      max-width: 100%;
-    }
-
-    &__shared {
-      flex-basis: 100%;
-      padding: 8px 12px;
-      background: var(--b3-theme-surface);
-      border-radius: var(--b3-border-radius);
-      white-space: normal;
-    }
-
-    &__shared-title {
-      margin: 8px 0;
-      font-weight: bold;
-    }
-
-    &__shared-button--conflict {
-      color: var(--b3-card-warning-color);
-    }
-
-    &__candidate {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 4px 0;
-    }
-
     &__key {
       padding: 2px 4px;
       font-family: var(--b3-font-family-kbd);
@@ -539,7 +496,7 @@
       background-color: var(--b3-theme-background);
       border: solid 1px var(--b3-theme-surface-lighter);
       border-radius: var(--b3-border-radius);
-      box-shadow: inset 0 -1px 0 var(--b3-theme-surface-lighter);
+      box-shadow: inset 0 -1px 0 var(--b3-theme-on-surface-lighter);
       margin-left: 4px;
       cursor: pointer;
       height: 14px;
@@ -550,6 +507,20 @@
       &:focus-visible {
         outline: 2px solid var(--b3-theme-primary);
       }
+    }
+
+    &__record {
+      display: inline-flex;
+      align-items: center;
+      max-width: 100%;
+      background-color: var(--b3-font-background3);
+      color: var(--b3-font-color3);
+      white-space: nowrap;
+    }
+
+    &__chip--conflict {
+      background-color: var(--b3-font-background1);
+      color: var(--b3-font-color1);
     }
 
     .b3-list__panel .b3-text-field {

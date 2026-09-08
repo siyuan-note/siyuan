@@ -1,6 +1,7 @@
 import * as assert from "node:assert/strict";
 import test from "node:test";
 import {ensurePluginKeymap, setPluginKeymapCustom, updatePluginKeymap} from "./keymap";
+import {getDefaultKeymapBindings, getKeymapBindings, setKeymapBindings} from "../util/keymapBindings";
 
 const withKeymap = (plugin: Config.IKeymapPlugin, callback: () => void) => {
     const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
@@ -56,4 +57,21 @@ test("plugin default lists are available on first registration and preserve cust
         assert.deepEqual(reloaded.bindings.defaults, ["⌘O"]);
         assert.equal(reloaded.custom, "⌘M");
     });
+});
+
+test("switching from a default list to a single or empty default preserves custom bindings and updates reset", () => {
+    for (const hotkey of ["⌘M", ""]) {
+        for (const keys of [["⌘J", "⌘N"], []]) {
+            withKeymap({}, () => {
+                const item = updatePluginKeymap("test", "command", "", ["⌘K", "⌘L"]);
+                setKeymapBindings(item, keys);
+                const updated = updatePluginKeymap("test", "command", hotkey);
+                assert.deepEqual(getKeymapBindings(updated), keys);
+                assert.equal(updated.custom, keys[0] || "");
+                assert.deepEqual(getDefaultKeymapBindings(updated), hotkey ? [hotkey] : []);
+                setKeymapBindings(updated, getDefaultKeymapBindings(updated));
+                assert.deepEqual(getKeymapBindings(updated), hotkey ? [hotkey] : []);
+            });
+        }
+    }
 });

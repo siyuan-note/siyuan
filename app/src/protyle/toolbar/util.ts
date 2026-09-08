@@ -290,6 +290,16 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
         icon: "iconFont",
         tipPosition: "n",
     }, {
+        name: "font-family",
+        lang: "fontFamily",
+        icon: "iconFont",
+        tipPosition: "n",
+    }, {
+        name: "font-size",
+        lang: "fontSize",
+        icon: "iconFont",
+        tipPosition: "n",
+    }, {
         name: "clear",
         lang: "clearInline",
         hotkey: window.siyuan.config.keymap.editor.insert.clearInline.custom,

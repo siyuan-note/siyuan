@@ -63,6 +63,23 @@
       margin: 6px 4px;
     }
 
+    &__font {
+      font-size: 12px;
+      max-width: 96px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+  }
+
+  &-font-size {
+    padding: 8px;
+    width: 220px;
+
+    input[type="number"] {
+      min-width: 0;
+      width: 120px;
+    }
   }
 
   &-hint {

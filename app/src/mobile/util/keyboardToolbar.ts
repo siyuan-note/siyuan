@@ -71,6 +71,17 @@ import {
 } from "../../protyle/toolbar/fontFamilyMenu";
 import {notifyMobileKeyboardChange} from "./mobileKeyboardChange";
 import {getEditorFocusRange, restoreEditorFocusRange} from "../../protyle/util/editorFocus";
+import {createFontSizePicker} from "../../protyle/toolbar/fontControls";
+import {applyMobileToolbarEntries} from "./toolbarEntries";
+import {getEntryOrder, isEntryVisible} from "../../config/entryVisibility/runtime";
+import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
+
+const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string | IMenuItem>) => {
+    applyMobileToolbarEntries(element, toolbar, {
+        order: getEntryOrder(TOOLBAR_ENTRY_ROOT_PATH),
+        isVisible: key => isEntryVisible(`${TOOLBAR_ENTRY_ROOT_PATH}.${key}`),
+    });
+};
 
 type TAndroidBoundedSelection = {
     container: HTMLElement,
@@ -122,7 +133,7 @@ export const updateMobilePluginToolbar = (protyle: IProtyle) => {
         return;
     }
     inlineToolbarElement.querySelectorAll('[data-plugin-toolbar="true"]').forEach(item => item.remove());
-    getMobilePluginToolbarItems(protyle.options.toolbar, Constants.INLINE_TYPE).forEach(toolbarItem => {
+    getMobilePluginToolbarItems(protyle.options.toolbar, Constants.INLINE_TYPE.concat("font-family", "font-size")).forEach(toolbarItem => {
         const itemElement = document.createElement("button");
         itemElement.className = "keyboard__action";
         itemElement.dataset.type = toolbarItem.name;
@@ -134,6 +145,7 @@ export const updateMobilePluginToolbar = (protyle: IProtyle) => {
         }
         inlineToolbarElement.append(itemElement);
     });
+    applyKeyboardToolbarEntries(inlineToolbarElement, protyle.options.toolbar);
 };
 
 const clearAndroidBoundedSelection = () => {
@@ -767,6 +779,8 @@ const hideKeyboardToolbarUtil = () => {
     }
     toolbarElement.querySelector('.keyboard__action[data-type="add"]').classList.remove("protyle-toolbar__item--current");
     toolbarElement.querySelector('.keyboard__action[data-type="text"]').classList.remove("protyle-toolbar__item--current");
+    toolbarElement.querySelectorAll('[data-type="font-family"], [data-type="font-size"]').forEach(item =>
+        item.classList.remove("protyle-toolbar__item--current"));
     toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconKeyboardHide");
 };
 
@@ -1219,7 +1233,10 @@ export const initKeyboardToolbar = () => {
             <button class="keyboard__action" data-type="goback"><svg><use xlink:href="#iconBack"></use></svg></button>
             <button class="keyboard__action" data-type="block-ref"><svg><use xlink:href="#iconRef"></use></svg></button>
             <button class="keyboard__action" data-type="a"><svg><use xlink:href="#iconLink"></use></svg></button>
+            <span class="keyboard__split" data-id="separator_1"></span>
             <button class="keyboard__action" data-type="text"><svg><use xlink:href="#iconFont"></use></svg></button>
+            <button class="keyboard__action" data-type="font-family" aria-label="${window.siyuan.languages.fontFamily}">${window.siyuan.languages.fontFamily}</button>
+            <button class="keyboard__action" data-type="font-size" aria-label="${window.siyuan.languages.fontSize}">${window.siyuan.languages.fontSize}</button>
             <button class="keyboard__action" data-type="strong"><svg><use xlink:href="#iconBold"></use></svg></button>
             <button class="keyboard__action" data-type="em"><svg><use xlink:href="#iconItalic"></use></svg></button>
             <button class="keyboard__action" data-type="u"><svg><use xlink:href="#iconUnderline"></use></svg></button>
@@ -1227,18 +1244,27 @@ export const initKeyboardToolbar = () => {
             <button class="keyboard__action" data-type="mark"><svg><use xlink:href="#iconMark"></use></svg></button>
             <button class="keyboard__action" data-type="sup"><svg><use xlink:href="#iconSup"></use></svg></button>
             <button class="keyboard__action" data-type="sub"><svg><use xlink:href="#iconSub"></use></svg></button>
-            <button class="keyboard__action" data-type="clear"><svg><use xlink:href="#iconClear"></use></svg></button>
             <button class="keyboard__action" data-type="code"><svg><use xlink:href="#iconInlineCode"></use></svg></button>
-            <button class="keyboard__action" data-type="kbd"<use xlink:href="#iconKeymap"></use></svg></button>
+            <button class="keyboard__action" data-type="kbd"><svg><use xlink:href="#iconKeymap"></use></svg></button>
             <button class="keyboard__action" data-type="tag"><svg><use xlink:href="#iconTag"></use></svg></button>
             <button class="keyboard__action" data-type="inline-math"><svg><use xlink:href="#iconMath"></use></svg></button>
             <button class="keyboard__action" data-type="inline-memo"><svg><use xlink:href="#iconM"></use></svg></button>
+            <span class="keyboard__split" data-id="separator_2"></span>
+            <button class="keyboard__action" data-type="clear"><svg><use xlink:href="#iconClear"></use></svg></button>
         </div>
     </div>
     <span class="keyboard__split"></span>
     <button class="keyboard__action" data-type="done"><svg style="width: 36px"><use xlink:href="#iconKeyboardHide"></use></svg></button>
 </div>
 <div class="keyboard__util"></div>`;
+    const refreshEntries = () => {
+        const protyle = getCurrentEditor()?.protyle;
+        const inline = toolbarElement.querySelector<HTMLElement>('.keyboard__action[data-type="goback"]').parentElement;
+        applyKeyboardToolbarEntries(inline, protyle?.options.toolbar || []);
+        hideKeyboardToolbarUtil();
+    };
+    refreshEntries();
+    window.addEventListener("siyuan-entry-visibility", refreshEntries);
     let startY = 0;
     let startX = 0;
     let moved = false;
@@ -1434,11 +1460,70 @@ export const initKeyboardToolbar = () => {
                 protyle.toolbar.setInlineMark(protyle, type, "toolbar");
             }
             return;
+        } else if (type === "font-family" || type === "font-size") {
+            if (buttonElement.classList.contains("protyle-toolbar__item--current")) {
+                hideKeyboardToolbarUtil();
+                focusByRange(range);
+                return;
+            }
+            hideKeyboardToolbarUtil();
+            buttonElement.classList.add("protyle-toolbar__item--current");
+            toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconCloseRound");
+            const savedRange = range.cloneRange();
+            protyle.toolbar.range = savedRange;
+            const nodes = getFontNodeElements(protyle);
+            const util = toolbarElement.querySelector<HTMLElement>(".keyboard__util");
+            const valid = () => getCurrentEditor()?.protyle === protyle && !protyle.disabled &&
+                savedRange.startContainer.isConnected && savedRange.endContainer.isConnected &&
+                buttonElement.classList.contains("protyle-toolbar__item--current");
+            const finish = () => {
+                hideKeyboardToolbarUtil();
+                focusByRange(protyle.toolbar.range);
+            };
+            const apply = (style: string, value: string) => {
+                if (!valid()) {
+                    return;
+                }
+                protyle.toolbar.range = savedRange;
+                fontEvent(protyle, nodes, style, value, false);
+                finish();
+            };
+            preventKeyboardToolbarRender();
+            if (type === "font-family") {
+                const state = getInlineFontFamilyState(protyle, nodes);
+                if (state.disabled) {
+                    finish();
+                    return;
+                }
+                void renderMobileFontFamilyMenu(util, {
+                    ...state,
+                    isOpenValid: valid,
+                    onInteraction: preventKeyboardToolbarRender,
+                    onBack() {
+                        if (valid()) {
+                            protyle.toolbar.range = savedRange;
+                            finish();
+                        }
+                    },
+                    onSelect: family => apply("fontFamily", getInlineFontFamilyValue(family)),
+                });
+            } else {
+                util.replaceChildren(createFontSizePicker(protyle, value => apply("fontSize", value), preventKeyboardToolbarRender, () => {
+                    if (valid()) {
+                        protyle.toolbar.range = savedRange;
+                        finish();
+                    }
+                }));
+            }
+            showKeyboardToolbarUtil(protyle.contentElement.scrollTop);
+            window.JSAndroid?.hideKeyboard();
+            return;
         } else if (type === "text") {
             if (buttonElement.classList.contains("protyle-toolbar__item--current")) {
                 hideKeyboardToolbarUtil();
                 focusByRange(range);
             } else {
+                hideKeyboardToolbarUtil();
                 buttonElement.classList.add("protyle-toolbar__item--current");
                 toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconCloseRound");
                 const oldScrollTop = protyle.contentElement.scrollTop;

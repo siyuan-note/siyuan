@@ -1284,6 +1284,20 @@ body.mobile-topbar--merged {
     border: 0;
     color: var(--b3-theme-on-surface);
 
+    &[data-type="font-family"],
+    &[data-type="font-size"] {
+      padding: 0 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      &.protyle-toolbar__item--current {
+        color: var(--b3-theme-primary);
+      }
+    }
+
     span {
       padding: 6px;
       white-space: nowrap;

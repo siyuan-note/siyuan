@@ -1145,6 +1145,25 @@
   }
 
   &-entry-visibility {
+    &__view--mobile {
+      .config-entry-visibility__column {
+        flex: 1 0 100%;
+      }
+
+      .config-entry-visibility__browser {
+        margin: 0 8px 8px;
+      }
+
+      .config-entry-visibility__drag,
+      .config-entry-visibility__arrow-space {
+        display: none;
+      }
+
+      .config-entry-visibility__row {
+        min-height: 44px;
+      }
+    }
+
     &__content {
       box-sizing: border-box;
       display: flex;

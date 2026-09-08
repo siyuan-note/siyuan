@@ -24,6 +24,7 @@ import {applyCloudUserState} from "../../config/tabs/accountUi";
 import {isInMobileApp} from "../../protyle/util/compatibility";
 import {handleMobileKernelExit} from "./kernelExit";
 import {sanitizeKernelHTML} from "../../util/hostCapabilities";
+import {applyEntryVisibility} from "../../config/entryVisibility/runtime";
 
 let statusTimeout: number;
 const statusElement = document.querySelector("#status") as HTMLElement;
@@ -35,6 +36,9 @@ const dispatchMobileSidePanelConfigChange = () => {
 export const onMessage = (app: App, data: IWebSocketData) => {
     if (data) {
         switch (data.cmd) {
+            case "setEntryVisibility":
+                applyEntryVisibility(data.data);
+                break;
             case "logoutAuth":
                 redirectToCheckAuth();
                 break;

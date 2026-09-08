@@ -928,13 +928,13 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
         afterMount: mountMobileSidePanelSetting,
     });
     /// #endif
-    /// #if !MOBILE
     group.slot({
         key: "entryVisibility",
         keywords: [window.siyuan.languages.entryVisibility, window.siyuan.languages.entryVisibilityTip],
         html: genEntryVisibilityHtml,
         afterMount: mountEntryVisibility,
     });
+    /// #if !MOBILE
     group.select("editor.floatWindowMode", {
         title: window.siyuan.languages.floatWindowMode,
         desc: window.siyuan.languages.floatWindowModeTip,

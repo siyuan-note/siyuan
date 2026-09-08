@@ -56,8 +56,14 @@ const getTemplateVisibility = (path: string, template: TEntryVisibilityTemplate)
 
 export const isEntryVisible = (path: string): boolean => {
     /// #if MOBILE
-    return true;
-    /// #else
+    if (!path.startsWith(`${TOOLBAR_ENTRY_ROOT_PATH}.`)) {
+        return true;
+    }
+    /// #endif
+    return getConfiguredEntryVisibility(path);
+};
+
+export const getConfiguredEntryVisibility = (path: string): boolean => {
     const config = getConfig();
     const active = config.active;
     let visible: boolean;
@@ -73,10 +79,9 @@ export const isEntryVisible = (path: string): boolean => {
     }
     const parentPath = getEntryParentPath(path);
     if (parentPath && getEntryCatalogNode(parentPath)) {
-        return isEntryVisible(parentPath);
+        return getConfiguredEntryVisibility(parentPath);
     }
     return true;
-    /// #endif
 };
 
 export const createEntryProfileSnapshot = (template: TEntryVisibilityTemplate) => {
@@ -442,8 +447,8 @@ const applyEntryVisibilityLocal = (config: Config.IEntryVisibility) => {
     applyTopBarEntryVisibility();
     applyDockEntryVisibility();
     document.querySelectorAll<HTMLElement>(".protyle-toolbar").forEach(applyToolbarEntryVisibility);
-    window.dispatchEvent(new CustomEvent("siyuan-entry-visibility"));
     /// #endif
+    window.dispatchEvent(new CustomEvent("siyuan-entry-visibility"));
 };
 
 export const applyEntryVisibility = (config: Config.IEntryVisibility) => {

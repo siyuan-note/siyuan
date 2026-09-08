@@ -53,6 +53,23 @@ class FakeDockItem {
     }
 }
 
+test("entry settings can read dock defaults without a desktop layout", () => {
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
+    Object.defineProperty(globalThis, "window", {configurable: true, value: {siyuan: {}}});
+    try {
+        assert.equal(getDockOrderContainer(DOCK_ORDER_SCOPE_BY_POSITION.LeftTop), undefined);
+        const snapshot = getCurrentDockEntryOrderSnapshot();
+        assert.equal(DOCK_ORDER_SCOPES.every(scope => snapshot[scope].length === 0), true);
+        assert.doesNotThrow(() => getDockEntryOrderSnapshot());
+    } finally {
+        if (descriptor) {
+            Object.defineProperty(globalThis, "window", descriptor);
+        } else {
+            Reflect.deleteProperty(globalThis, "window");
+        }
+    }
+});
+
 class FakeDockContainer {
     public children: FakeDockItem[] = [];
 

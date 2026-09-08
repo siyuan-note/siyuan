@@ -308,7 +308,7 @@ test("toolbar catalog follows the default toolbar declaration", () => {
     const children = getEntryCatalogChildren(TOOLBAR_ENTRY_ROOT_PATH);
     assert.deepEqual(children.map((item) => item.key), DESKTOP_TOOLBAR_ENTRIES.map((item) => item.key));
     assert.equal(children.filter((item) => item.type === "separator").length, 2);
-    assert.equal(children.every((item) => item.simple), true);
+    assert.deepEqual(children.filter((item) => !item.simple).map(item => item.key), ["font-family", "font-size"]);
 });
 
 test("inline text paste entries follow the menu order", () => {

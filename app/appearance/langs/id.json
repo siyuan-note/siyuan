@@ -1,4 +1,6 @@
 {
+	"trustRemoteExtensions": "Percayai dan muat plugin serta tampilan jarak jauh",
+	"trustRemoteExtensionsTip": "Ekstensi jarak jauh dapat membaca dan menulis berkas lokal serta menjalankan program. Hanya percayai server tepercaya dan pembaruan ekstensinya di masa mendatang. Pengaturan kepercayaan disimpan secara lokal per alamat dan berlaku pada koneksi berikutnya",
 	"remoteConnectionHistory": "Riwayat koneksi jarak jauh",
 	"connectRemoteKernel": "Hubungkan ke kernel jarak jauh...",
 	"remoteConnection": "Jarak jauh",

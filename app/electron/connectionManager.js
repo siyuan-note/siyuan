@@ -131,7 +131,17 @@ const createConnectionManager = ({confDir, languageDir, restart, currentTarget, 
         }
         return response;
     };
-    const list = () => readConnections(file).origins.map(origin => ({mode: "remote", origin}));
+    const list = () => {
+        const history = readConnections(file);
+        return history.origins.map(origin => ({mode: "remote", origin,
+            trustRemoteExtensions: history.trustedOrigins.includes(origin)}));
+    };
+    const setTrust = (history, origin, trusted) => {
+        history.trustedOrigins = history.trustedOrigins.filter(item => item !== origin && history.origins.includes(item));
+        if (trusted === true) {
+            history.trustedOrigins.push(origin);
+        }
+    };
     ipcMain.handle("siyuan-connections", async (event, data) => {
         if (data.cmd === "init" && data.dialog && isTrustedDialogSender(event)) {
             releaseDialog();
@@ -188,6 +198,7 @@ const createConnectionManager = ({confDir, languageDir, restart, currentTarget, 
                 const origin = normalizeRemoteKernelOrigin(data.origin);
                 updateHistory(history => {
                     history.origins = history.origins.filter(item => item !== origin);
+                    setTrust(history, origin, false);
                 });
                 return {entries: list()};
             }
@@ -197,13 +208,30 @@ const createConnectionManager = ({confDir, languageDir, restart, currentTarget, 
             } catch (error) {
                 throw new Error(languages().remoteKernelAddressTip);
             }
+            if (data.cmd === "trust") {
+                if (typeof data.trustRemoteExtensions !== "boolean") {
+                    throw new Error(languages().remoteKernelConnectionFailed);
+                }
+                updateHistory(history => {
+                    if (!history.origins.includes(origin)) {
+                        throw new Error(languages().remoteKernelConnectionFailed);
+                    }
+                    setTrust(history, origin, data.trustRemoteExtensions);
+                });
+                return {entries: list()};
+            }
             if (data.cmd === "open") {
                 if (checkedOrigin !== origin || authenticatedOrigin !== origin) {
                     throw new Error(languages().remoteKernelConnectionFailed);
                 }
                 await getRemoteSession({origin}).cookies.flushStore();
-                remember(origin);
-                await restart({mode: "remote", origin, lang: language, sessionHandoff: await stageSession(origin)});
+                const trustRemoteExtensions = data.trustRemoteExtensions === true;
+                updateHistory(history => {
+                    history.origins = [origin, ...history.origins.filter(item => item !== origin)].slice(0, 50);
+                    setTrust(history, origin, trustRemoteExtensions);
+                });
+                await restart({mode: "remote", origin, lang: language, trustRemoteExtensions,
+                    sessionHandoff: await stageSession(origin)});
                 return {};
             }
             controller?.abort();

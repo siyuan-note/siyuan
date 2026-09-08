@@ -8,7 +8,7 @@ button { padding: 6px 12px; border: 1px solid #888; border-radius: 4px; backgrou
 button:hover { background: #8882; }
 button:disabled { opacity: .5; cursor: default; }
 #connect { background: #3573f0; color: white; border-color: #3573f0; }
-#addressTip, #restartTip { opacity: .75; }
+#addressTip, #restartTip, #trustTip { opacity: .75; }
 #message { overflow-wrap: anywhere; min-height: 24px; }
 fieldset { border: 0; padding: 8px 0; margin: 0; }
 .actions, .entry { display: flex; gap: 8px; margin-top: 12px; }

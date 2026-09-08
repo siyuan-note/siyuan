@@ -16,16 +16,21 @@ export const openRemoteConnection = (initialOrigin = "") => {
     let checked = false;
     let authenticated = false;
     let initialized = false;
+    let history: {origin: string, trustRemoteExtensions: boolean}[] = [];
     const dialog = new Dialog({
         title: escapeHtml(languages.connectRemoteKernel),
         width: "600px",
-        content: `<div class="b3-dialog__content">
+        content: `<div class="b3-dialog__content" style="word-break:normal;overflow-wrap:anywhere">
     <div class="ft__on-surface">${escapeHtml(languages.switchConnectionRestartTip)}</div>
     <div class="fn__hr"></div>
     <form>
         <input data-field="origin" class="b3-text-field fn__block" type="url" placeholder="https://siyuan.example.com" required aria-label="${escapeAttr(escapeHtml(languages.remoteConnection))}">
         <div class="fn__hr"></div>
         <div class="ft__on-surface">${escapeHtml(languages.remoteKernelAddressTip)}</div>
+        <div class="fn__hr"></div>
+        <label class="fn__flex"><input data-field="trust" type="checkbox" class="b3-switch"><span class="fn__space"></span>${escapeHtml(languages.trustRemoteExtensions)}</label>
+        <div class="fn__hr"></div>
+        <div class="ft__on-surface">${escapeHtml(languages.trustRemoteExtensionsTip)}</div>
         <div data-field="auth" class="fn__none">
             <div class="fn__hr"></div>
             <input data-field="authCode" class="b3-text-field fn__block" type="password" autocomplete="current-password">
@@ -68,6 +73,17 @@ export const openRemoteConnection = (initialOrigin = "") => {
     const authCode = field<HTMLInputElement>("authCode");
     const captcha = field<HTMLInputElement>("captcha");
     const connect = field<HTMLButtonElement>("connect");
+    const trust = field<HTMLInputElement>("trust");
+    const selectedOrigin = () => {
+        try {
+            return new URL(origin.value.trim()).origin;
+        } catch (error) {
+            return "";
+        }
+    };
+    const restoreTrust = () => {
+        trust.checked = history.some(entry => entry.origin === selectedOrigin() && entry.trustRemoteExtensions);
+    };
     const form = dialog.element.querySelector("form");
     const message = (value = "", error = true) => {
         field("message").textContent = value;
@@ -103,7 +119,8 @@ export const openRemoteConnection = (initialOrigin = "") => {
             }
         }
     };
-    const renderHistory = (entries: {origin: string}[]) => {
+    const renderHistory = (entries: {origin: string, trustRemoteExtensions: boolean}[]) => {
+        history = entries;
         field("historySection").classList.toggle("fn__none", entries.length === 0);
         field("history").replaceChildren();
         entries.forEach(entry => {
@@ -115,7 +132,41 @@ export const openRemoteConnection = (initialOrigin = "") => {
             open.addEventListener("click", () => {
                 reset();
                 origin.value = entry.origin;
+                restoreTrust();
                 form.requestSubmit();
+            });
+            const trustLabel = document.createElement("label");
+            trustLabel.className = "fn__flex";
+            trustLabel.title = languages.trustRemoteExtensionsTip;
+            const trustEntry = document.createElement("input");
+            trustEntry.type = "checkbox";
+            trustEntry.className = "b3-switch";
+            trustEntry.checked = entry.trustRemoteExtensions;
+            const space = document.createElement("span");
+            space.className = "fn__space";
+            trustLabel.append(trustEntry, space, document.createTextNode(languages.trustRemoteExtensions));
+            trustEntry.addEventListener("change", async () => {
+                trustEntry.disabled = true;
+                try {
+                    const result = await invoke("trust", {origin: entry.origin, trustRemoteExtensions: trustEntry.checked});
+                    if (!closed) {
+                        if (result.entries) {
+                            renderHistory(result.entries);
+                            if (selectedOrigin() === entry.origin) {
+                                reset();
+                                restoreTrust();
+                            }
+                        } else {
+                            trustEntry.checked = entry.trustRemoteExtensions;
+                        }
+                        message(result.error);
+                    }
+                } catch (error) {
+                    trustEntry.checked = entry.trustRemoteExtensions;
+                    message(String(error.message));
+                } finally {
+                    trustEntry.disabled = false;
+                }
             });
             const remove = document.createElement("button");
             remove.className = "b3-button b3-button--outline";
@@ -126,6 +177,10 @@ export const openRemoteConnection = (initialOrigin = "") => {
                     if (!closed) {
                         if (result.entries) {
                             renderHistory(result.entries);
+                            if (selectedOrigin() === entry.origin) {
+                                reset();
+                                restoreTrust();
+                            }
                         }
                         message(result.error);
                     }
@@ -136,7 +191,7 @@ export const openRemoteConnection = (initialOrigin = "") => {
                 }
             });
             row.append(open, remove);
-            field("history").append(row);
+            field("history").append(row, trustLabel);
         });
     };
     form.addEventListener("submit", async event => {
@@ -146,6 +201,7 @@ export const openRemoteConnection = (initialOrigin = "") => {
         }
         const requestSequence = ++sequence;
         const address = origin.value.trim();
+        const trustRemoteExtensions = trust.checked;
         connect.disabled = true;
         message(languages.checkingRemoteKernel, false);
         try {
@@ -167,7 +223,7 @@ export const openRemoteConnection = (initialOrigin = "") => {
                 authenticated = result.authenticated;
             }
             if (authenticated) {
-                const opened = await invoke("open", {origin: address});
+                const opened = await invoke("open", {origin: address, trustRemoteExtensions});
                 if (!closed && sequence === requestSequence) {
                     message(opened.error || languages.switchConnectionRestartTip, !!opened.error);
                 }
@@ -192,7 +248,11 @@ export const openRemoteConnection = (initialOrigin = "") => {
             }
         }
     });
-    origin.addEventListener("input", reset);
+    origin.addEventListener("input", () => {
+        reset();
+        restoreTrust();
+    });
+    trust.addEventListener("change", reset);
     field("cancel").addEventListener("click", () => dialog.destroy());
     field("refreshCaptcha").addEventListener("click", refreshCaptcha);
     connect.addEventListener("click", () => form.requestSubmit());
@@ -216,6 +276,7 @@ export const openRemoteConnection = (initialOrigin = "") => {
         origin.value = result.origin;
         message(result.error);
         renderHistory(result.entries);
+        restoreTrust();
         initialized = true;
         connect.disabled = false;
     }).catch(error => {

@@ -1,4 +1,6 @@
 {
+	"trustRemoteExtensions": "Dôverovať vzdialeným doplnkom a vzhľadu a načítať ich",
+	"trustRemoteExtensionsTip": "Vzdialené rozšírenia môžu čítať a zapisovať lokálne súbory a spúšťať programy. Dôverujte iba spoľahlivým serverom a budúcim aktualizáciám ich rozšírení. Nastavenie sa ukladá lokálne pre každú adresu a platí od ďalšieho pripojenia",
 	"remoteConnectionHistory": "História vzdialených pripojení",
 	"connectRemoteKernel": "Pripojiť k vzdialenému jadru...",
 	"remoteConnection": "Vzdialené",

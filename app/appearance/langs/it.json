@@ -1,4 +1,6 @@
 {
+	"trustRemoteExtensions": "Considera attendibili e carica i plugin e l’aspetto remoti",
+	"trustRemoteExtensionsTip": "Le estensioni remote possono leggere e scrivere file locali ed eseguire programmi. Considera attendibili solo i server affidabili e i futuri aggiornamenti delle loro estensioni. La scelta viene salvata localmente per indirizzo e applicata alla connessione successiva",
 	"remoteConnectionHistory": "Cronologia delle connessioni remote",
 	"connectRemoteKernel": "Connetti a un kernel remoto...",
 	"remoteConnection": "Remoto",

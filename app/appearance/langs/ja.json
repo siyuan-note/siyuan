@@ -1,4 +1,6 @@
 {
+	"trustRemoteExtensions": "リモートのプラグインと外観を信頼して読み込む",
+	"trustRemoteExtensionsTip": "リモート拡張機能はローカルファイルの読み書きやプログラムの実行ができます。信頼できるサーバーと今後の拡張機能の更新のみを許可してください。信頼設定はアドレスごとにローカルに保存され、次回の接続時に適用されます",
 	"remoteConnectionHistory": "リモート接続履歴",
 	"connectRemoteKernel": "リモートカーネルに接続...",
 	"remoteConnection": "リモート",

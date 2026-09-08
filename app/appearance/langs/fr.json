@@ -1,4 +1,6 @@
 {
+	"trustRemoteExtensions": "Faire confiance aux plugins et à l’apparence distants et les charger",
+	"trustRemoteExtensionsTip": "Les extensions distantes peuvent lire et écrire des fichiers locaux et exécuter des programmes. Ne faites confiance qu’aux serveurs fiables et aux futures mises à jour de leurs extensions. Ce choix est enregistré localement par adresse et prend effet à la prochaine connexion",
 	"remoteConnectionHistory": "Historique des connexions distantes",
 	"connectRemoteKernel": "Se connecter à un noyau distant...",
 	"remoteConnection": "Distant",

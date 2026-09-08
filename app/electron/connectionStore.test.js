@@ -32,6 +32,10 @@ test("switching removes stale connection flags and keeps unrelated launch settin
     assert.equal(connectionArgs(args, {mode: "local"}).some(arg => arg.startsWith("--remote")), false);
     assert.equal(connectionArgs(args, {mode: "remote", origin: "https://a.example"}, "https://a.example")
         .includes("--trust-remote-extensions"), true);
+    assert.equal(connectionArgs(args, {mode: "remote", origin: "https://a.example", trustRemoteExtensions: false}, "https://a.example")
+        .includes("--trust-remote-extensions"), false);
+    assert.equal(connectionArgs(args, {mode: "remote", origin: "https://b.example", trustRemoteExtensions: true}, "https://a.example")
+        .includes("--trust-remote-extensions"), true);
     assert.throws(() => connectionArgs(args, {mode: "remote", origin: "http://example.com"}));
     assert.throws(() => connectionArgs(args, {mode: "local", path: "relative"}));
     const localPath = path.join(os.tmpdir(), "notes with spaces");
@@ -49,12 +53,17 @@ test("connection history preserves corrupt or unsupported files and writes atomi
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), "siyuan-connections-test-"));
     const file = path.join(directory, "connections.json");
     try {
-        assert.deepEqual(readConnections(file), {version: 1, origins: [], migrated: []});
+        assert.deepEqual(readConnections(file), {version: 1, origins: [], migrated: [], trustedOrigins: []});
         writeConnections(file, {version: 1, origins: ["https://EXAMPLE.com:443/", "https://example.com"], migrated: []});
         assert.deepEqual(readConnections(file).origins, ["https://example.com"]);
+        assert.deepEqual(readConnections(file).trustedOrigins, []);
+        writeConnections(file, {...readConnections(file), trustedOrigins: ["https://EXAMPLE.com:443/", "https://example.com:8443"]});
+        assert.deepEqual(readConnections(file).trustedOrigins, ["https://example.com"]);
         assert.deepEqual(fs.readdirSync(directory), ["connections.json"]);
         for (const contents of ["corrupt", '{"version":2,"origins":[]}',
-            '{"version":1,"origins":["http://example.com"]}']) {
+            '{"version":1,"origins":["http://example.com"]}',
+            '{"version":1,"origins":[],"trustedOrigins":true}',
+            '{"version":1,"origins":[],"trustedOrigins":["http://example.com"]}']) {
             fs.writeFileSync(file, contents);
             assert.throws(() => readConnections(file));
             assert.equal(fs.readFileSync(file, "utf8"), contents);

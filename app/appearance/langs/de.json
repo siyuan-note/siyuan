@@ -1,4 +1,6 @@
 {
+	"trustRemoteExtensions": "Remote-Plugins und Erscheinungsbild vertrauen und laden",
+	"trustRemoteExtensionsTip": "Remote-Erweiterungen können lokale Dateien lesen und schreiben sowie Programme ausführen. Vertrauen Sie nur zuverlässigen Servern und ihren zukünftigen Erweiterungsupdates. Die Einstellung wird lokal je Adresse gespeichert und gilt ab der nächsten Verbindung",
 	"remoteConnectionHistory": "Verlauf der Remoteverbindungen",
 	"connectRemoteKernel": "Mit entferntem Kernel verbinden...",
 	"remoteConnection": "Remote",

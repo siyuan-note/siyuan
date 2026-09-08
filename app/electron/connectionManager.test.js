@@ -124,6 +124,11 @@ if (!process.versions.electron) {
             assert.equal((await invoke({cmd: "login", origin, authCode: "valid", rememberMe: true})).authenticated, true);
             assert.deepEqual(await invoke({cmd: "open", origin}), {});
             assert.equal(restarts[0].origin, origin);
+            assert.equal(restarts[0].trustRemoteExtensions, false);
+            assert.ok((await invoke({cmd: "trust", origin, trustRemoteExtensions: "true"})).error);
+            assert.ok((await invoke({cmd: "trust", origin: "https://example.com:8443", trustRemoteExtensions: true})).error);
+            assert.equal((await invoke({cmd: "trust", origin, trustRemoteExtensions: true})).entries[0].trustRemoteExtensions, true);
+            assert.deepEqual(readConnections(path.join(profile, "connections.json")).trustedOrigins, [origin]);
             if (restarts[0].sessionHandoff) {
                 const token = restarts[0].sessionHandoff;
                 const handoff = path.join(profile, "connection-session-" + token + ".bin");
@@ -138,6 +143,7 @@ if (!process.versions.electron) {
             assert.deepEqual(readConnections(path.join(profile, "connections.json")).origins, [origin]);
             assert.ok((await invoke({cmd: "remove", origin})).entries);
             assert.deepEqual(readConnections(path.join(profile, "connections.json")).origins, []);
+            assert.deepEqual(readConnections(path.join(profile, "connections.json")).trustedOrigins, []);
             slow = true;
             const pending = invoke({cmd: "check", origin});
             await new Promise(resolve => setTimeout(resolve, 50));
@@ -215,6 +221,8 @@ if (!process.versions.electron) {
                 fs.writeFileSync(path.join(os.tmpdir(), "siyuan-connection-dialog-preview.png"), (await dialogHost.webContents.capturePage()).toPNG());
             }
             const windowCount = BrowserWindow.getAllWindows().length;
+            assert.equal(await runDialog('document.querySelector("[data-field=trust]").checked'), false);
+            await runDialog('document.querySelector("[data-field=trust]").checked = true; document.querySelector("[data-field=trust]").dispatchEvent(new Event("change"))');
             await runDialog('window.openRemoteConnection(); document.querySelector("[data-field=connect]").click()');
             await waitDialog('!document.querySelector("[data-field=auth]").classList.contains("fn__none")');
             assert.equal(BrowserWindow.getAllWindows().length, windowCount);
@@ -224,11 +232,32 @@ if (!process.versions.electron) {
             await waitDialog('!document.querySelector("[data-field=connect]").disabled');
             assert.equal(restarts.length, 2);
             assert.equal(restarts[1].origin, origin);
+            assert.equal(restarts[1].trustRemoteExtensions, true);
+            assert.deepEqual(readConnections(path.join(profile, "connections.json")).trustedOrigins, [origin]);
             assert.ok((await handler({sender: dialogHost.webContents, senderFrame: {}}, {cmd: "init", dialog: true})).error);
             await runDialog('document.querySelector("[data-field=cancel]").click()');
             await waitDialog('!document.querySelector(".b3-dialog")');
             assert.equal(dialogHost.isDestroyed(), false);
             assert.ok((await handler({sender: dialogHost.webContents, senderFrame: dialogHost.webContents.mainFrame}, {cmd: "open", origin})).error);
+            await runDialog(`window.openRemoteConnection(${JSON.stringify(origin)})`);
+            await waitDialog('!document.querySelector("[data-field=connect]").disabled');
+            assert.equal(await runDialog('document.querySelector("[data-field=trust]").checked'), true);
+            assert.equal(await runDialog('document.querySelector("[data-field=history] input").checked'), true);
+            if (process.env.SIYUAN_CONNECTION_PREVIEW) {
+                await waitDialog('document.querySelector(".b3-dialog--open")');
+                await new Promise(resolve => setTimeout(resolve, 200));
+                fs.writeFileSync(path.join(os.tmpdir(), "siyuan-connection-trust-preview.png"), (await dialogHost.webContents.capturePage()).toPNG());
+            }
+            await runDialog('document.querySelector("[data-field=origin]").value = "https://example.com:8443"; document.querySelector("[data-field=origin]").dispatchEvent(new Event("input"))');
+            assert.equal(await runDialog('document.querySelector("[data-field=trust]").checked'), false);
+            await runDialog(`document.querySelector("[data-field=origin]").value = ${JSON.stringify(origin)}; document.querySelector("[data-field=origin]").dispatchEvent(new Event("input"))`);
+            assert.equal(await runDialog('document.querySelector("[data-field=trust]").checked'), true);
+            await runDialog('document.querySelector("[data-field=history] input").click()');
+            await waitDialog('!document.querySelector("[data-field=trust]").checked');
+            assert.deepEqual(readConnections(path.join(profile, "connections.json")).trustedOrigins, []);
+            await runDialog('document.querySelector("[data-field=connect]").click()');
+            await waitDialog('!document.querySelector("[data-field=connect]").disabled');
+            assert.equal(restarts[2].trustRemoteExtensions, false);
             dialogHost.destroy();
             otherWindow.destroy();
             console.log("Connection manager passed");

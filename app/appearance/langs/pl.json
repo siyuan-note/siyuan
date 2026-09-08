@@ -1,4 +1,6 @@
 {
+	"trustRemoteExtensions": "Ufaj zdalnym wtyczkom i wyglądowi oraz je wczytuj",
+	"trustRemoteExtensionsTip": "Zdalne rozszerzenia mogą odczytywać i zapisywać pliki lokalne oraz uruchamiać programy. Ufaj tylko wiarygodnym serwerom i przyszłym aktualizacjom ich rozszerzeń. Ustawienie jest zapisywane lokalnie dla każdego adresu i obowiązuje od następnego połączenia",
 	"remoteConnectionHistory": "Historia połączeń zdalnych",
 	"connectRemoteKernel": "Połącz ze zdalnym jądrem...",
 	"remoteConnection": "Zdalne",

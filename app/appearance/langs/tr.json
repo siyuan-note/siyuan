@@ -1,4 +1,6 @@
 {
+	"trustRemoteExtensions": "Uzak eklentilere ve görünüme güven ve bunları yükle",
+	"trustRemoteExtensionsTip": "Uzak uzantılar yerel dosyaları okuyup yazabilir ve program çalıştırabilir. Yalnızca güvenilir sunuculara ve uzantılarının gelecekteki güncellemelerine güvenin. Güven ayarı her adres için yerel olarak kaydedilir ve sonraki bağlantıda geçerli olur",
 	"remoteConnectionHistory": "Uzak bağlantı geçmişi",
 	"connectRemoteKernel": "Uzak çekirdeğe bağlan...",
 	"remoteConnection": "Uzak",

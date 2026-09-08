@@ -6,19 +6,23 @@ const {normalizeRemoteKernelOrigin, getUnsafeRemoteChromiumSwitchName} = require
 const remotePartition = (origin) => "persist:siyuan-remote-" +
     crypto.createHash("sha256").update(normalizeRemoteKernelOrigin(origin)).digest("hex");
 
-// 只保留地址记录，会话凭据由 Electron 会话存储管理。
+// 保存地址和逐地址信任选项，会话凭据由 Electron 会话存储管理。
 const readConnections = (file) => {
     try {
         const data = JSON.parse(fs.readFileSync(file, "utf8"));
         if (data.version !== 1 || !Array.isArray(data.origins) ||
-            (data.migrated !== undefined && !Array.isArray(data.migrated))) {
+            (data.migrated !== undefined && !Array.isArray(data.migrated)) ||
+            (data.trustedOrigins !== undefined && !Array.isArray(data.trustedOrigins))) {
             throw new Error("Unsupported connection history");
         }
-        return {...data, origins: [...new Set(data.origins.map(normalizeRemoteKernelOrigin))],
-            migrated: (data.migrated || []).map(normalizeRemoteKernelOrigin)};
+        const origins = [...new Set(data.origins.map(normalizeRemoteKernelOrigin))];
+        return {...data, origins,
+            migrated: (data.migrated || []).map(normalizeRemoteKernelOrigin),
+            trustedOrigins: [...new Set((data.trustedOrigins || []).map(normalizeRemoteKernelOrigin))]
+                .filter(origin => origins.includes(origin))};
     } catch (error) {
         if (error.code === "ENOENT") {
-            return {version: 1, origins: [], migrated: []};
+            return {version: 1, origins: [], migrated: [], trustedOrigins: []};
         }
         throw error;
     }
@@ -49,7 +53,8 @@ const connectionArgs = (args, target, currentOrigin) => {
         if (/^[a-f0-9]{48}$/.test(target.sessionHandoff || "")) {
             result.push("--connection-session=" + target.sessionHandoff);
         }
-        if (origin === currentOrigin && args.includes("--trust-remote-extensions")) {
+        if (target.trustRemoteExtensions === true || (target.trustRemoteExtensions === undefined &&
+            origin === currentOrigin && args.includes("--trust-remote-extensions"))) {
             result.push("--trust-remote-extensions");
         }
     } else if (target.mode === "local") {

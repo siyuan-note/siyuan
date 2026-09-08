@@ -6,6 +6,17 @@ let languages;
 let checked = false;
 let authenticated = false;
 let sequence = 0;
+let history = [];
+const selectedOrigin = () => {
+    try {
+        return new URL(element("origin").value.trim()).origin;
+    } catch (error) {
+        return "";
+    }
+};
+const restoreTrust = () => {
+    element("trust").checked = history.some(entry => entry.origin === selectedOrigin() && entry.trustRemoteExtensions);
+};
 const message = (value) => { element("message").textContent = value || ""; };
 const reset = () => {
     sequence++;
@@ -32,6 +43,7 @@ const refreshCaptcha = async () => {
     }
 };
 const renderHistory = (entries) => {
+    history = entries;
     element("history").replaceChildren();
     entries.forEach(entry => {
         const row = document.createElement("div");
@@ -42,6 +54,7 @@ const renderHistory = (entries) => {
         open.addEventListener("click", () => {
             reset();
             element("origin").value = entry.origin;
+            restoreTrust();
             element("connectionForm").requestSubmit();
         });
         row.append(open);
@@ -53,20 +66,56 @@ const renderHistory = (entries) => {
                 const result = await invoke("remove", {origin: entry.origin});
                 if (result.entries) {
                     renderHistory(result.entries);
+                    if (selectedOrigin() === entry.origin) {
+                        reset();
+                        restoreTrust();
+                    }
                 }
                 message(result.error);
             });
             row.append(remove);
         }
-        element("history").append(row);
+        const trustLabel = document.createElement("label");
+        trustLabel.title = languages.trustRemoteExtensionsTip;
+        const trust = document.createElement("input");
+        trust.type = "checkbox";
+        trust.checked = entry.trustRemoteExtensions;
+        trustLabel.append(trust, document.createTextNode(languages.trustRemoteExtensions));
+        trust.addEventListener("change", async () => {
+            trust.disabled = true;
+            try {
+                const result = await invoke("trust", {origin: entry.origin, trustRemoteExtensions: trust.checked});
+                if (result.entries) {
+                    renderHistory(result.entries);
+                    if (selectedOrigin() === entry.origin) {
+                        reset();
+                        restoreTrust();
+                    }
+                } else {
+                    trust.checked = entry.trustRemoteExtensions;
+                }
+                message(result.error);
+            } catch (error) {
+                trust.checked = entry.trustRemoteExtensions;
+                message(String(error.message));
+            } finally {
+                trust.disabled = false;
+            }
+        });
+        element("history").append(row, trustLabel);
     });
 };
-element("origin").addEventListener("input", reset);
+element("origin").addEventListener("input", () => {
+    reset();
+    restoreTrust();
+});
+element("trust").addEventListener("change", reset);
 ipcRenderer.on("siyuan-connection-target", (event, data) => {
     reset();
     if (data.origin) {
         element("origin").value = data.origin;
     }
+    restoreTrust();
     message(data.error);
     element("origin").focus();
 });
@@ -76,6 +125,7 @@ element("connectionForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     const requestSequence = ++sequence;
     const origin = element("origin").value.trim();
+    const trustRemoteExtensions = element("trust").checked;
     element("connect").disabled = true;
     message(languages.checkingRemoteKernel);
     try {
@@ -97,7 +147,7 @@ element("connectionForm").addEventListener("submit", async (event) => {
             authenticated = result.authenticated;
         }
         if (authenticated) {
-            message((await invoke("open", {origin})).error || languages.switchConnectionRestartTip);
+            message((await invoke("open", {origin, trustRemoteExtensions})).error || languages.switchConnectionRestartTip);
         } else {
             message(result.error);
             element("auth").hidden = !checked;
@@ -131,6 +181,8 @@ void invoke("init").then(result => {
     element("title").textContent = languages.connectRemoteKernel;
     element("addressLabel").textContent = languages.remoteConnection;
     element("addressTip").textContent = languages.remoteKernelAddressTip;
+    element("trustLabel").textContent = languages.trustRemoteExtensions;
+    element("trustTip").textContent = languages.trustRemoteExtensionsTip;
     element("restartTip").textContent = languages.switchConnectionRestartTip;
     element("connect").textContent = languages.connectRemoteKernel;
     element("cancel").textContent = languages.cancel;
@@ -144,4 +196,5 @@ void invoke("init").then(result => {
     element("origin").value = result.origin;
     message(result.error);
     renderHistory(result.entries);
+    restoreTrust();
 });

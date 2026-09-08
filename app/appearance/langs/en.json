@@ -1,4 +1,6 @@
 {
+	"trustRemoteExtensions": "Trust and load remote plugins and appearance",
+	"trustRemoteExtensionsTip": "Remote extensions can read and write local files and execute programs. Only trust reliable servers and their future extension updates. Trust is saved locally per address and takes effect on the next connection",
 	"remoteConnectionHistory": "Remote connection history",
 	"connectRemoteKernel": "Connect to remote kernel...",
 	"remoteConnection": "Remote",

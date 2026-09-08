@@ -18,6 +18,7 @@ import {fixTable} from "../util/table";
 import {updateTableCellContentLayout} from "../util/tableCellRich";
 import {TABLE_CELL_SLASH_IDS} from "../util/tableCellRichMenu";
 import {captureRichCellSelection, restoreRichCellSelection} from "../util/tableCellRichSelection";
+import {matchHotKey} from "../util/hotKey";
 
 let activeEditor: {cell: Element, finish: () => void} | undefined;
 
@@ -94,7 +95,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         showMessage(window.siyuan.languages.tableCellRichInvalid);
         return;
     }
-    hideElements(["gutter"], owner);
+    hideElements(["gutter", "toolbar"], owner);
     const selection = getSelection();
     const initialRange = selection.rangeCount ? selection.getRangeAt(0) : undefined;
     const richSelection = cell.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE) ? captureRichCellSelection(cell, selection) : undefined;
@@ -208,6 +209,11 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     };
     activeEditor = {cell, finish};
     const signal = controller.signal;
+    host.addEventListener("pointerdown", event => {
+        if (fragment.wysiwyg.contains(event.target as Node)) {
+            hideElements(["toolbar"], fragment.protyle);
+        }
+    }, {capture: true, signal});
     const belongsToEditor = (target: Node) => host.contains(target) || fragment.hintElement.contains(target) ||
         fragment.protyle.toolbar.element.contains(target) || fragment.protyle.toolbar.subElement.contains(target) ||
         !!(target instanceof Element && target.closest("#commonMenu, .b3-dialog"));
@@ -243,6 +249,26 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         }
     }, {signal});
     host.addEventListener("keydown", event => {
+        const keymap = window.siyuan.config.keymap.editor.general;
+        const undo = matchHotKey(keymap.undo, event);
+        const redo = matchHotKey(keymap.redo, event);
+        if (!event.isComposing && !composing && (undo || redo)) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            // 先提交当前单元格，再由所属文档撤销，保证切换单元格后仍可连续回退。
+            finish();
+            const range = document.createRange();
+            range.selectNodeContents(cell);
+            range.collapse(true);
+            owner.wysiwyg.element.focus({preventScroll: true});
+            focusByRange(range);
+            if (undo) {
+                owner.undo.undo(owner);
+            } else {
+                owner.undo.redo(owner);
+            }
+            return;
+        }
         if (!event.isComposing && !composing && !event.ctrlKey && !event.metaKey && !event.altKey &&
             fragment.hintElement.classList.contains("fn__none") &&
             fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {

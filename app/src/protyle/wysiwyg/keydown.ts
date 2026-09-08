@@ -337,6 +337,22 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         protyle.wysiwyg.preventKeyup = false;
+        const historyCell = event.target.closest("th, td");
+        if (!event.isComposing && historyCell?.closest(".protyle-wysiwyg") === editorElement) {
+            const undo = matchHotKey(window.siyuan.config.keymap.editor.general.undo, event);
+            const redo = matchHotKey(window.siyuan.config.keymap.editor.general.redo, event);
+            if (undo || redo) {
+                // 单元格预览不参与输入处理，撤销不应先改写其中的光标标记。
+                event.preventDefault();
+                event.stopPropagation();
+                if (undo) {
+                    protyle.undo.undo(protyle);
+                } else {
+                    protyle.undo.redo(protyle);
+                }
+                return;
+            }
+        }
         hideElements(["util"], protyle);
         if (event.shiftKey && event.key.indexOf("Arrow") > -1) {
             // 防止连续选中的时候抖动 https://github.com/siyuan-note/insider/issues/657#issuecomment-851391217

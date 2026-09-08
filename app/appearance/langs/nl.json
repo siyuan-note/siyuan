@@ -1,4 +1,12 @@
 {
+	"keymapUnset": "Niet ingesteld",
+	"keymapPrimary": "Instellen als primaire sneltoets",
+	"keymapRecording": "Druk op een sneltoets...",
+	"keymapShared": "Gedeelde sneltoets",
+	"keymapSharedTip": "Lokale opdrachten hebben voorrang. Per context worden opdrachten in de getoonde volgorde geprobeerd; zodra een opdracht begint, wordt geen andere uitgevoerd",
+	"keymapLegacyConflict": "Deze sneltoets conflicteert met een actie die gedeelde toewijzingen nog niet ondersteunt",
+	"keymapSystemScope": "Systeembreed",
+	"keymapSaveFailed": "Sneltoetsen konden niet worden opgeslagen",
 	"connect": "Verbinden",
 	"trustRemoteExtensions": "Externe plug-ins en vormgeving vertrouwen en laden",
 	"trustRemoteExtensionsTip": "Externe uitbreidingen kunnen lokale bestanden lezen en schrijven en programma’s uitvoeren. Vertrouw alleen betrouwbare servers en toekomstige updates van hun uitbreidingen. De instelling wordt lokaal per adres opgeslagen en geldt vanaf de volgende verbinding",

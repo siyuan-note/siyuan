@@ -1,4 +1,5 @@
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {markToolbarHotkey} from "./hotkey";
 import {Constants} from "../../constants";
 import {focusByRange, focusByWbr} from "../util/selection";
 import {isDisabledFeature, writeText} from "../util/compatibility";
@@ -308,10 +309,12 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
         toolbarItem.find((defaultMenuItem: IMenuItem) => {
             if (typeof menuItem === "string" && defaultMenuItem.name === menuItem) {
                 currentMenuItem = defaultMenuItem;
+                markToolbarHotkey(currentMenuItem, menuItem);
                 return true;
             }
             if (typeof menuItem === "object" && defaultMenuItem.name === menuItem.name) {
                 currentMenuItem = Object.assign({}, defaultMenuItem, menuItem);
+                markToolbarHotkey(currentMenuItem, menuItem);
                 return true;
             }
         });

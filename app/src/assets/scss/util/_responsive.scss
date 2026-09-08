@@ -124,19 +124,8 @@
     }
 
     &-keymap {
-      label.b3-list-item {
-        flex-wrap: wrap;
-      }
-
-      .b3-list-item__action {
-        display: flex;
-      }
-
-      .config-keymap__key,
-      .b3-text-field {
-        width: 100%;
-        margin-left: 0 !important;
-        text-align: center;
+      .config-keymap__controls {
+        max-width: 100%;
       }
     }
   }

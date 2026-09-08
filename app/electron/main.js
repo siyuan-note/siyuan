@@ -36,6 +36,7 @@ const {
     systemPreferences,
     powerMonitor
 } = require("electron");
+const {updateGlobalShortcutBindings} = require("./globalShortcutBindings");
 const path = require("path");
 const fs = require("fs");
 const {pathToFileURL} = require("url");
@@ -3689,7 +3690,7 @@ app.whenReady().then(() => {
         return capabilities;
     });
     ipcMain.on("siyuan-hotkey", (event, data) => {
-        if (!data.hotkeys || data.hotkeys.length === 0) {
+        if (!Array.isArray(data.hotkeys)) {
             return;
         }
         const ownerWorkspace = workspaces.find(workspaceItem =>
@@ -3697,53 +3698,22 @@ app.whenReady().then(() => {
         if (!ownerWorkspace) {
             return;
         }
-        ownerWorkspace.hotkeys = data.hotkeys;
-        data.hotkeys.forEach((item, index) => {
-            const shortcut = hotKey2Electron(item);
-            if (!shortcut) {
-                return;
-            }
-            if (globalShortcut.isRegistered(shortcut)) {
-                globalShortcut.unregister(shortcut);
-            }
-            if (index === 0) {
-                globalShortcut.register(shortcut, () => {
-                    let currentWorkspace;
-                    const currentWebContentsId = (latestActiveWindow && !latestActiveWindow.isDestroyed()) ? latestActiveWindow.webContents.id : undefined;
-                    workspaces.find(workspaceItem => {
-                        if (currentWebContentsId === workspaceItem.browserWindow.webContents.id && workspaceItem.hotkeys[0] === item) {
-                            currentWorkspace = workspaceItem;
-                            return true;
-                        }
-                    });
-                    if (!currentWorkspace) {
-                        workspaces.find(workspaceItem => {
-                            if (workspaceItem.hotkeys[0] === item && event.sender.id === workspaceItem.browserWindow.webContents.id) {
-                                currentWorkspace = workspaceItem;
-                                return true;
-                            }
-                        });
-                    }
-                    if (!currentWorkspace) {
-                        return;
-                    }
-                    const mainWindow = currentWorkspace.browserWindow;
-                    toggleMainWindow(mainWindow);
-                    if ("win32" === process.platform || "linux" === process.platform) {
-                        resetTrayMenu(currentWorkspace.tray, data.languages, mainWindow);
-                    }
-                });
-            } else {
-                globalShortcut.register(shortcut, () => {
-                    const targetWorkspace = getGlobalShortcutWorkspace(ownerWorkspace);
-                    if (targetWorkspace) {
-                        targetWorkspace.browserWindow.webContents.send("siyuan-hotkey", {
-                            hotkey: item
-                        });
-                    }
-                });
-            }
+        const failed = updateGlobalShortcutBindings(ownerWorkspace, data, {
+            workspaces,
+            globalShortcut,
+            convert: hotKey2Electron,
+            getActiveId: () => latestActiveWindow && !latestActiveWindow.isDestroyed() ?
+                latestActiveWindow.webContents.id : undefined,
+            toggle: workspace => {
+                toggleMainWindow(workspace.browserWindow);
+                if (process.platform === "win32" || process.platform === "linux") {
+                    resetTrayMenu(workspace.tray, workspace.hotkeyLanguages, workspace.browserWindow);
+                }
+            },
+            dispatch: (workspace, hotkey) => workspace.browserWindow.webContents.send("siyuan-hotkey", {hotkey}),
+            reportError: error => console.error("Global shortcut registration failed:", error),
         });
+        event.sender.send("siyuan-hotkey", {failed});
     });
     ipcMain.on("siyuan-send-windows", (event, data) => {
         BrowserWindow.getAllWindows().forEach(item => {

@@ -1,4 +1,12 @@
 {
+	"keymapUnset": "未設定",
+	"keymapPrimary": "メインのショートカットに設定",
+	"keymapRecording": "ショートカットを入力...",
+	"keymapShared": "共有ショートカット",
+	"keymapSharedTip": "局所的なコマンドが優先されます。同じコンテキストでは表示順に判定し、コマンドの実行開始後は他のコマンドを実行しません",
+	"keymapLegacyConflict": "このショートカットは、共有割り当てにまだ対応していない操作と競合しています",
+	"keymapSystemScope": "システム全体",
+	"keymapSaveFailed": "ショートカットを保存できませんでした",
 	"connect": "接続",
 	"trustRemoteExtensions": "リモートのプラグインと外観を信頼して読み込む",
 	"trustRemoteExtensionsTip": "リモート拡張機能はローカルファイルの読み書きやプログラムの実行ができます。信頼できるサーバーと今後の拡張機能の更新のみを許可してください。信頼設定はアドレスごとにローカルに保存され、次回の接続時に適用されます",

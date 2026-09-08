@@ -32,8 +32,8 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         event.preventDefault();
         return true;
     }
-    const isNewNameFile = matchHotKey(window.siyuan.config.keymap.editor.general.newNameFile.custom, event);
-    const isNewNameSettingFile = matchHotKey(window.siyuan.config.keymap.editor.general.newNameSettingFile.custom, event);
+    const isNewNameFile = matchHotKey(window.siyuan.config.keymap.editor.general.newNameFile, event);
+    const isNewNameSettingFile = matchHotKey(window.siyuan.config.keymap.editor.general.newNameSettingFile, event);
     if (isNewNameFile || isNewNameSettingFile) {
         if (event.repeat) {
             event.preventDefault();

@@ -1,4 +1,12 @@
 {
+	"keymapUnset": "Sin asignar",
+	"keymapPrimary": "Establecer como atajo principal",
+	"keymapRecording": "Pulsa un atajo...",
+	"keymapShared": "Atajo compartido",
+	"keymapSharedTip": "Los comandos locales tienen prioridad. En cada contexto se prueban en el orden mostrado; una vez iniciado un comando, no se ejecuta ningún otro",
+	"keymapLegacyConflict": "Este atajo entra en conflicto con una acción que aún no admite asignaciones compartidas",
+	"keymapSystemScope": "En todo el sistema",
+	"keymapSaveFailed": "No se pudieron guardar los atajos",
 	"connect": "Conectar",
 	"trustRemoteExtensions": "Confiar en los complementos y la apariencia remotos y cargarlos",
 	"trustRemoteExtensionsTip": "Las extensiones remotas pueden leer y escribir archivos locales y ejecutar programas. Confía solo en servidores fiables y en las futuras actualizaciones de sus extensiones. La confianza se guarda localmente por dirección y se aplica en la próxima conexión",

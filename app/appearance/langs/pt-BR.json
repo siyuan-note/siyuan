@@ -1,4 +1,12 @@
 {
+	"keymapUnset": "Não definido",
+	"keymapPrimary": "Definir como atalho principal",
+	"keymapRecording": "Pressione um atalho...",
+	"keymapShared": "Atalho compartilhado",
+	"keymapSharedTip": "Comandos locais têm prioridade. Em cada contexto, os comandos são avaliados na ordem exibida; após o início de um comando, nenhum outro é executado",
+	"keymapLegacyConflict": "Este atalho entra em conflito com uma ação que ainda não aceita atribuições compartilhadas",
+	"keymapSystemScope": "Todo o sistema",
+	"keymapSaveFailed": "Não foi possível salvar os atalhos",
 	"connect": "Conectar",
 	"trustRemoteExtensions": "Confiar nos plugins e na aparência remotos e carregá-los",
 	"trustRemoteExtensionsTip": "Extensões remotas podem ler e gravar arquivos locais e executar programas. Confie apenas em servidores confiáveis e nas futuras atualizações de suas extensões. A confiança é salva localmente por endereço e aplicada na próxima conexão",

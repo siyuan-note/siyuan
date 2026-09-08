@@ -122,7 +122,7 @@ export class Title {
                     }
                     return;
                 }
-                if (matchHotKey(window.siyuan.config.keymap.general.enterBack.custom, event)) {
+                if (matchHotKey(window.siyuan.config.keymap.general.enterBack, event)) {
                     const parentDocumentID = getParentDocumentID({
                         path: protyle.path,
                         notebookID: protyle.notebookId,
@@ -164,7 +164,7 @@ export class Title {
                     enterDocumentFromTitle(protyle);
                     event.preventDefault();
                     event.stopPropagation();
-                } else if (matchHotKey(window.siyuan.config.keymap.editor.general.attr.custom, event)) {
+                } else if (matchHotKey(window.siyuan.config.keymap.editor.general.attr, event)) {
                     const docInfoParam: IObject = {
                         id: protyle.block.rootID
                     };

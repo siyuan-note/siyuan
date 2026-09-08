@@ -69,7 +69,14 @@ export class CommandRegistry {
 
     public list(context: ICommandContextSnapshot) {
         return Array.from(this.entries.values())
-            .filter(entry => isAvailable(entry.command, context))
+            .filter(entry => {
+                try {
+                    return isAvailable(entry.command, context);
+                } catch (error) {
+                    console.error(`Command "${entry.command.id}" availability check failed:`, error);
+                    return false;
+                }
+            })
             .sort((first, second) => {
                 const order = (first.command.order ?? 0) - (second.command.order ?? 0);
                 return order || first.sequence - second.sequence;
@@ -78,20 +85,27 @@ export class CommandRegistry {
     }
 
     public async execute(id: string, context: ICommandContextSnapshot, args?: unknown): Promise<ICommandExecutionResult> {
+        const prepared = this.prepare(id, context, args);
+        return prepared.run ? prepared.run() : prepared.result;
+    }
+
+    public prepare(id: string, context: ICommandContextSnapshot, args?: unknown): {
+        result: ICommandExecutionResult;
+        run?: () => Promise<ICommandExecutionResult>;
+    } {
         const command = this.get(id);
         if (!command) {
-            return {status: "notFound"};
+            return {result: {status: "notFound"}};
         }
         if (!isAvailable(command, context)) {
-            return {status: "unavailable", command};
+            return {result: {status: "unavailable", command}};
         }
         if (command.enabled && !command.enabled(context)) {
-            return {status: "disabled", command};
+            return {result: {status: "disabled", command}};
         }
         return {
-            status: "executed",
-            command,
-            value: await command.execute(context, args),
+            result: {status: "executed", command},
+            run: async () => ({status: "executed", command, value: await command.execute(context, args)}),
         };
     }
 }

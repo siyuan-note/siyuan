@@ -1,4 +1,12 @@
 {
+	"keymapUnset": "Non défini",
+	"keymapPrimary": "Définir comme raccourci principal",
+	"keymapRecording": "Appuyez sur un raccourci...",
+	"keymapShared": "Raccourci partagé",
+	"keymapSharedTip": "Les commandes locales sont prioritaires. Dans chaque contexte, les commandes sont examinées dans l’ordre affiché ; dès qu’une commande démarre, aucune autre n’est exécutée",
+	"keymapLegacyConflict": "Ce raccourci entre en conflit avec une action qui ne prend pas encore en charge les raccourcis partagés",
+	"keymapSystemScope": "À l’échelle du système",
+	"keymapSaveFailed": "Impossible d’enregistrer les raccourcis",
 	"connect": "Se connecter",
 	"trustRemoteExtensions": "Faire confiance aux plugins et à l’apparence distants et les charger",
 	"trustRemoteExtensionsTip": "Les extensions distantes peuvent lire et écrire des fichiers locaux et exécuter des programmes. Ne faites confiance qu’aux serveurs fiables et aux futures mises à jour de leurs extensions. Ce choix est enregistré localement par adresse et prend effet à la prochaine connexion",

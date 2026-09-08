@@ -1,4 +1,12 @@
 {
+	"keymapUnset": "Belum diatur",
+	"keymapPrimary": "Jadikan pintasan utama",
+	"keymapRecording": "Tekan pintasan...",
+	"keymapShared": "Pintasan bersama",
+	"keymapSharedTip": "Perintah lokal diprioritaskan. Dalam setiap konteks, perintah dicoba sesuai urutan yang ditampilkan; setelah satu perintah dimulai, perintah lain tidak dijalankan",
+	"keymapLegacyConflict": "Pintasan ini bertentangan dengan tindakan yang belum mendukung pintasan bersama",
+	"keymapSystemScope": "Seluruh sistem",
+	"keymapSaveFailed": "Tidak dapat menyimpan pintasan",
 	"connect": "Hubungkan",
 	"trustRemoteExtensions": "Percayai dan muat plugin serta tampilan jarak jauh",
 	"trustRemoteExtensionsTip": "Ekstensi jarak jauh dapat membaca dan menulis berkas lokal serta menjalankan program. Hanya percayai server tepercaya dan pembaruan ekstensinya di masa mendatang. Pengaturan kepercayaan disimpan secara lokal per alamat dan berlaku pada koneksi berikutnya",

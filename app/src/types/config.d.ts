@@ -1282,6 +1282,13 @@ declare namespace Config {
      * SiYuan shortcut key
      */
     export interface IKey {
+        /** 多快捷键配置，custom 保留第一项以兼容单快捷键调用方。 */
+        bindings?: {
+            version: 1;
+            keys: string[];
+            defaults?: string[];
+            priority?: Record<string, number>;
+        };
         /**
          * Custom shortcut key
          */

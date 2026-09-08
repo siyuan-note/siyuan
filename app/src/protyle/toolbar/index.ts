@@ -1698,7 +1698,7 @@ export class Toolbar {
         textElement.addEventListener("keydown", (event: KeyboardEvent) => {
             event.stopPropagation();
             // 阻止 ctrl+m 缩小窗口 https://github.com/siyuan-note/siyuan/issues/5541
-            if (matchHotKey(window.siyuan.config.keymap.editor.insert["inline-math"].custom, event)) {
+            if (matchHotKey(window.siyuan.config.keymap.editor.insert["inline-math"], event)) {
                 event.preventDefault();
                 return;
             }

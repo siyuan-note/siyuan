@@ -1,4 +1,12 @@
 {
+	"keymapUnset": "Ayarlanmadı",
+	"keymapPrimary": "Birincil kısayol olarak ayarla",
+	"keymapRecording": "Kısayola basın...",
+	"keymapShared": "Paylaşılan kısayol",
+	"keymapSharedTip": "Yerel komutlar önceliklidir. Her bağlamda komutlar gösterilen sırayla denenir; bir komut başladığında başka bir komut çalıştırılmaz",
+	"keymapLegacyConflict": "Bu kısayol, henüz paylaşılan atamaları desteklemeyen bir işlemle çakışıyor",
+	"keymapSystemScope": "Sistem genelinde",
+	"keymapSaveFailed": "Kısayollar kaydedilemedi",
 	"connect": "Bağlan",
 	"trustRemoteExtensions": "Uzak eklentilere ve görünüme güven ve bunları yükle",
 	"trustRemoteExtensionsTip": "Uzak uzantılar yerel dosyaları okuyup yazabilir ve program çalıştırabilir. Yalnızca güvenilir sunuculara ve uzantılarının gelecekteki güncellemelerine güvenin. Güven ayarı her adres için yerel olarak kaydedilir ve sonraki bağlantıda geçerli olur",

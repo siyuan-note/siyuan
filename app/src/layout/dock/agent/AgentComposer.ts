@@ -266,7 +266,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
             return;
         }
 
-        if (matchHotKey(window.siyuan.config.keymap.general.agentSend.custom, event)) {
+        if (matchHotKey(window.siyuan.config.keymap.general.agentSend, event)) {
             event.preventDefault();
             event.stopPropagation();
             onSend();

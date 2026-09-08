@@ -1,6 +1,6 @@
 import {adjustLayout, exportLayout, JSONToLayout, resetLayout, resizeTopBar} from "../layout/util";
 import {resizeTabs, setTabPosition} from "../layout/tabUtil";
-import {initWindowOpenOverride, isWindows, setStorageVal} from "../protyle/util/compatibility";
+import {initWindowOpenOverride, isMac, isWindows, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {initNativeDialogOverride} from "../protyle/util/compatibility";
 /// #endif
@@ -235,8 +235,13 @@ export const initWindow = async (app: App) => {
         onWindowsMsg(ipcData);
     });
     ipcRenderer.on(Constants.SIYUAN_HOTKEY, (e, data) => {
-        if (!isWindow()) {
-            dispatchPluginGlobalShortcut(app.plugins, data.hotkey);
+        if (Array.isArray(data.failed)) {
+            if (data.failed.length) {
+                showMessage(window.siyuan.languages.keymapSystemScope + " " + window.siyuan.languages.conflict +
+                    " [" + data.failed.map(updateHotkeyTip).join("] [") + "]");
+            }
+        } else if (!isWindow()) {
+            dispatchPluginGlobalShortcut(app.plugins, data.hotkey, window.siyuan.config.keymap.plugin, isMac());
         }
     });
     ipcRenderer.on(Constants.SIYUAN_EXPORT_PDF, async (e, ipcData) => {

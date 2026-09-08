@@ -1,4 +1,12 @@
 {
+	"keymapUnset": "Not set",
+	"keymapPrimary": "Set as primary shortcut",
+	"keymapRecording": "Press shortcut...",
+	"keymapShared": "Shared shortcut",
+	"keymapSharedTip": "Local commands take priority. Within each context, commands are tried in the displayed order; once a command starts, no other command runs",
+	"keymapLegacyConflict": "This shortcut conflicts with an action that does not support shared bindings yet",
+	"keymapSystemScope": "System-wide",
+	"keymapSaveFailed": "Unable to save shortcuts",
 	"connect": "Connect",
 	"trustRemoteExtensions": "Trust and load remote plugins and appearance",
 	"trustRemoteExtensionsTip": "Remote extensions can read and write local files and execute programs. Only trust reliable servers and their future extension updates. Trust is saved locally per address and takes effect on the next connection",

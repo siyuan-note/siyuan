@@ -17,7 +17,7 @@ import {clearSelect} from "../../util/clear";
 import {isCustomAttr} from "./blockAttr";
 import {getColIconByType, getColNameByType} from "./col";
 import {unicode2Emoji} from "../../../emoji";
-import {escapeAttr} from "../../../util/escape";
+import {escapeAriaLabel, escapeAttr} from "../../../util/escape";
 import {getCompressURL} from "../../../util/image";
 import {
     getAVSelectStat,
@@ -111,7 +111,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
                 html += `<div class="av__gallery-field av__gallery-field--name${fullRowClass}" data-empty="${isEmpty}">
     <div class="av__gallery-name">
         ${galleryData.fields[fieldsIndex].icon ? unicode2Emoji(galleryData.fields[fieldsIndex].icon, "av__gallery-fieldicon", true) : `<svg><use xlink:href="#${getColIconByType(galleryData.fields[fieldsIndex].type)}"></use></svg>`}${Lute.EscapeHTMLStr(galleryData.fields[fieldsIndex].name)}
-        ${galleryData.fields[fieldsIndex].desc ? `<svg aria-label="${galleryData.fields[fieldsIndex].desc}" data-position="north" class="ariaLabel"><use xlink:href="#iconInfo"></use></svg>` : ""}
+        ${galleryData.fields[fieldsIndex].desc ? `<svg aria-label="${escapeAriaLabel(galleryData.fields[fieldsIndex].desc)}" data-position="north" class="ariaLabel"><use xlink:href="#iconInfo"></use></svg>` : ""}
     </div>
     ${cellHTML}
 </div>`;
@@ -180,7 +180,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, options.ro
                 html += `<div class="av__gallery-field av__gallery-field--name${fullRowClass}" data-empty="${isEmpty}">
     <div class="av__gallery-name">
         ${kanbanData.fields[fieldsIndex].icon ? unicode2Emoji(kanbanData.fields[fieldsIndex].icon, "av__gallery-fieldicon", true) : `<svg><use xlink:href="#${getColIconByType(kanbanData.fields[fieldsIndex].type)}"></use></svg>`}${Lute.EscapeHTMLStr(kanbanData.fields[fieldsIndex].name)}
-        ${kanbanData.fields[fieldsIndex].desc ? `<svg aria-label="${kanbanData.fields[fieldsIndex].desc}" data-position="north" class="ariaLabel"><use xlink:href="#iconInfo"></use></svg>` : ""}
+        ${kanbanData.fields[fieldsIndex].desc ? `<svg aria-label="${escapeAriaLabel(kanbanData.fields[fieldsIndex].desc)}" data-position="north" class="ariaLabel"><use xlink:href="#iconInfo"></use></svg>` : ""}
     </div>
     ${cellHTML}
 </div>`;

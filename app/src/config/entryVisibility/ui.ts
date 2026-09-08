@@ -5,7 +5,7 @@ import {genUUID} from "../../util/genID";
 import {
     entryCatalog,
     getEntryCatalogChildren,
-    getEntryCatalogDefaultVisibility,
+    getEntryCatalogCustomDefaultVisibility,
     getEntryCatalogPathChain,
     getEntryPaths,
     IEntryCatalogNode,
@@ -247,7 +247,7 @@ const renderEntrySwitch = (profile: Config.IEntryVisibilityProfile, path: string
     return `<input class="b3-switch" type="checkbox"
     aria-label="${escapeAttr(label)}" data-entry-path="${escapeAttr(path)}"${readOnly ? ' data-entry-readonly aria-disabled="true"' : ""}
     ${!parentEnabled && !readOnly ? " disabled" : ""}${getProfileEntryVisibility(profile, path,
-        getEntryCatalogDefaultVisibility(path)) ? " checked" : ""}>`;
+        getEntryCatalogCustomDefaultVisibility(path)) ? " checked" : ""}>`;
 };
 
 const renderEntryRows = (profile: Config.IEntryVisibilityProfile, prefix: string,
@@ -451,7 +451,7 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
     let title = directDisplayRoot?.label() || section.label();
     let parentEnabled = directDisplayRoot
         ? getProfileEntryVisibility(profile, directDisplayRootPath,
-            getEntryCatalogDefaultVisibility(directDisplayRootPath))
+            getEntryCatalogCustomDefaultVisibility(directDisplayRootPath))
         : true;
     let depth = 0;
     while (nodes.length > 0) {
@@ -470,7 +470,7 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
             break;
         }
         parentEnabled = parentEnabled && getProfileEntryVisibility(profile, selectedPath,
-            getEntryCatalogDefaultVisibility(selectedPath));
+            getEntryCatalogCustomDefaultVisibility(selectedPath));
         nodes = selectedNode.children;
         prefix = selectedPath;
         title = selectedNode.label();

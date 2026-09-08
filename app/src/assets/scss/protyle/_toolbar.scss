@@ -9,6 +9,9 @@
     display: flex;
 
     &__item {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       color: var(--b3-theme-on-background);
       border: 0;
       background-color: transparent;

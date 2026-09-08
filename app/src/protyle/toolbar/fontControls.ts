@@ -2,36 +2,23 @@ import {Menu} from "../../plugin/Menu";
 import {ToolbarItem} from "./ToolbarItem";
 import {convertFontSize, fontEvent, getFontNodeElements, getFontSizeInfo} from "./Font";
 import {getInlineFontFamilyLabel, getInlineFontFamilyState, getInlineFontFamilyValue, openFontFamilyMenu} from "./fontFamilyMenu";
-import {focusByRange} from "../util/selection";
+import {focusByRange, getBlockRanges} from "../util/selection";
 import {escapeAttr} from "../../util/escape";
 import {isMixedFontSize, normalizeFontSizeInput} from "./fontSizeCore";
 import {closeSubElement} from "./subElementLifecycle";
+import {getSelectedFontSize} from "./fontSizeSelection";
 
 export const getFontSizeState = (protyle: IProtyle) => {
     const nodes = getFontNodeElements(protyle);
     const info = getFontSizeInfo(protyle, nodes);
     const sizes: string[] = [];
     const range = protyle.toolbar.range;
-    const root = range.commonAncestorContainer;
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-    const collect = (node: Node) => {
-        const start = node === range.startContainer ? range.startOffset : 0;
-        const end = node === range.endContainer ? range.endOffset : node.textContent?.length;
-        if (start === end) {
-            return;
-        }
-        if (node.textContent?.trim() && range.intersectsNode(node) && node.parentElement) {
-            sizes.push(getComputedStyle(node.parentElement).fontSize);
-        }
-    };
     if (nodes?.length) {
         nodes.forEach(node => sizes.push(getComputedStyle(node).fontSize));
     } else if (!range.collapsed) {
-        if (root.nodeType === Node.TEXT_NODE) {
-            collect(root);
-        }
-        while (walker.nextNode()) {
-            collect(walker.currentNode);
+        const selected = getSelectedFontSize(getBlockRanges(protyle.wysiwyg.element, range));
+        if (selected) {
+            return {...selected, disabled: false};
         }
     }
     return {...info, mixed: isMixedFontSize(sizes), disabled: nodes?.some(node => node.classList.contains("li")) || false};

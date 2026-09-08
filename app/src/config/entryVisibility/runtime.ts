@@ -2,6 +2,7 @@ import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {
     getEntryCatalogDefaultVisibility,
+    getEntryCatalogCustomDefaultVisibility,
     getEntryCatalogChildren,
     getEntryCatalogNode,
     getDockEntryKey,
@@ -72,7 +73,7 @@ export const getConfiguredEntryVisibility = (path: string): boolean => {
     } else if (active === ENTRY_PROFILE_SIMPLE) {
         visible = getTemplateVisibility(path, ENTRY_PROFILE_SIMPLE);
     } else {
-        visible = getProfileEntryVisibility(getActiveEntryProfile(), path, getEntryCatalogDefaultVisibility(path));
+        visible = getProfileEntryVisibility(getActiveEntryProfile(), path, getEntryCatalogCustomDefaultVisibility(path));
     }
     if (!visible) {
         return false;

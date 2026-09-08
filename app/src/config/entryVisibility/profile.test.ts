@@ -1,6 +1,6 @@
 import * as assert from "node:assert/strict";
 import test from "node:test";
-import {getEntryCatalogDefaultVisibility, getEntryCatalogNode} from "./catalog";
+import {getEntryCatalogCustomDefaultVisibility, getEntryCatalogDefaultVisibility, getEntryCatalogNode} from "./catalog";
 import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {
     getBuiltinProfileEntryVisibility,
@@ -17,11 +17,14 @@ test("font toolbar entries are visible in Full, hidden in Simple and preserve ex
         assert.equal(defaultVisible, true);
         assert.equal(getBuiltinProfileEntryVisibility("full", entry.simple, defaultVisible), true);
         assert.equal(getBuiltinProfileEntryVisibility("simple", entry.simple, defaultVisible), false);
-        assert.equal(getProfileEntryVisibility({entries: {}}, path, defaultVisible), true);
-        assert.equal(getProfileEntryVisibility({entries: {[path]: true}}, path, defaultVisible), true);
-        assert.equal(getProfileEntryVisibility({entries: {[path]: false}}, path, defaultVisible), false);
+        const customDefaultVisible = getEntryCatalogCustomDefaultVisibility(path);
+        assert.equal(customDefaultVisible, false);
+        assert.equal(getProfileEntryVisibility({entries: {}}, path, customDefaultVisible), false);
+        assert.equal(getProfileEntryVisibility({entries: {[path]: true}}, path, customDefaultVisible), true);
+        assert.equal(getProfileEntryVisibility({entries: {[path]: false}}, path, customDefaultVisible), false);
     }
     assert.equal(getEntryCatalogDefaultVisibility(`${TOOLBAR_ENTRY_ROOT_PATH}.text`), true);
+    assert.equal(getEntryCatalogCustomDefaultVisibility(`${TOOLBAR_ENTRY_ROOT_PATH}.text`), true);
 });
 
 test("built-in profiles honor entry defaults", () => {

@@ -857,6 +857,7 @@
 
 .table__cell-editor {
   min-width: 180px;
+  min-height: 0;
   white-space: normal;
 
   .protyle-content {
@@ -867,6 +868,31 @@
     padding: 4px !important;
     min-height: 1.6em;
   }
+}
+
+.table__cell-rich.table__cell--inline,
+.table__cell-editor.table__cell--inline {
+  min-width: 0;
+  min-height: 0;
+  padding: 0 !important;
+
+  &,
+  .protyle-wysiwyg {
+    padding: 0 !important;
+    min-height: 0;
+
+    > .p {
+      margin: 0;
+      padding: 0;
+      line-height: inherit;
+    }
+  }
+}
+
+.table__cell-rich.table__cell--empty > .p,
+.table__cell-editor.table__cell--empty .protyle-wysiwyg > .p {
+  // 空单元格的光标占位与表格 td:empty 的 16px 占位高度一致。
+  line-height: 16px;
 }
 
 table[contenteditable="false"] + .protyle-action__table > .table__resize {

@@ -3,6 +3,16 @@ import {decodeTableCellRich, encodeTableCellRich, TABLE_CELL_RICH_ATTRIBUTE, TAB
 
 export const TABLE_CELL_INLINE_ATTRIBUTE = "data-sy-table-cell-inline";
 
+export const updateTableCellContentLayout = (element: HTMLElement, blockDOM: string) => {
+    const inline = getTableCellInlineHTML(blockDOM);
+    element.classList.toggle("table__cell--inline", inline !== null);
+    const template = document.createElement("template");
+    template.innerHTML = inline || "";
+    const empty = inline !== null && (template.content.textContent || "").replace(/\u200b/g, "") === "" &&
+        !template.content.querySelector("br, img, [data-type~='inline-math']");
+    element.classList.toggle("table__cell--empty", empty);
+};
+
 export const getTableCellInlineHTML = (blockDOM: string): string | null => {
     const template = document.createElement("template");
     template.innerHTML = blockDOM;
@@ -42,6 +52,10 @@ export const getTableCellRichBlockDOM = (cell: Element) => {
         `${(cell.getAttribute(TABLE_CELL_INLINE_ATTRIBUTE) ?? cell.innerHTML) || "\u200b"}</div></div>`;
     const template = document.createElement("template");
     template.innerHTML = blockDOM;
+    if (!template.content.childNodes.length) {
+        template.innerHTML = `<div class="p" data-type="NodeParagraph" data-node-id="${Lute.NewNodeID()}">` +
+            '<div contenteditable="true">\u200b</div></div>';
+    }
     const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_TEXT);
     const texts: Text[] = [];
     while (walker.nextNode()) {

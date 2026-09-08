@@ -1,6 +1,6 @@
 import {highlightRender} from "./highlightRender";
 import {mathRender} from "./mathRender";
-import {getTableCellRichBlockDOM} from "../util/tableCellRich";
+import {getTableCellRichBlockDOM, updateTableCellContentLayout} from "../util/tableCellRich";
 import {TABLE_CELL_RICH_ATTRIBUTE} from "../util/tableCellRichValue";
 
 export const renderTableCellRichElements = (root: Element) => {
@@ -16,6 +16,7 @@ export const renderTableCellRichElements = (root: Element) => {
         // 预览复用编辑结构，但不携带文档块身份或编辑能力。
         const template = document.createElement("template");
         template.innerHTML = getTableCellRichBlockDOM(cell);
+        updateTableCellContentLayout(element, template.innerHTML);
         template.content.querySelectorAll<HTMLElement>("*").forEach(node => {
             if (node.hasAttribute("data-node-id")) {
                 node.setAttribute("data-table-cell-node", "");

@@ -3876,6 +3876,20 @@ export class WYSIWYG {
             }
             return keyState;
         };
+        this.element.addEventListener("keyup", (event: KeyboardEvent) => {
+            if (event.isComposing || protyle.disabled || event.ctrlKey || event.metaKey || event.altKey ||
+                !["Tab", "Enter", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key) ||
+                (event.shiftKey && event.key !== "Tab")) {
+                return;
+            }
+            const selection = getSelection();
+            const target = selection?.focusNode;
+            const element = target instanceof Element ? target : target?.parentElement;
+            const cell = element?.closest<HTMLTableCellElement>("th, td");
+            if (cell && cell.closest(".protyle-wysiwyg") === this.element && cell.contains(selection.anchorNode)) {
+                void import("../render/tableCellRichEditor").then(module => module.openTableCellRichEditor(protyle, cell));
+            }
+        });
         this.element.addEventListener("keydown", (event: KeyboardEvent) => {
             if (event.key === "F2" && !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey &&
                 !event.isComposing && !protyle.disabled) {

@@ -13,6 +13,7 @@ import {cleanTableCellRichHTML, getTableCellInlineHTML, getTableCellRichBlockDOM
 import {TABLE_CELL_RICH_ATTRIBUTE} from "../util/tableCellRichValue";
 import {focusByOffset, getSelectionOffset} from "../util/selection";
 import {fixTable} from "../util/table";
+import {updateTableCellContentLayout} from "../util/tableCellRich";
 
 const SAFE_SLASH_IDS = new Set([
     "ref", "heading1", "heading2", "heading3", "heading4", "heading5", "heading6", "list", "orderedList", "check",
@@ -130,7 +131,6 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     const fragment = mountProtyleLiteFragment(host, {
         app: owner.app,
         initialBlockHTML,
-        placeholder: window.siyuan.languages.empty,
         protyleOptions: {notebookId: owner.notebookId, toolbar, hint},
         runtimeCapabilities: {
             upload: false,
@@ -143,11 +143,13 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             restoreLuteMarkdownSyntax: configureAVRichTextLute,
         },
         afterSetContent: (protyle, element) => {
+            updateTableCellContentLayout(host, element.innerHTML);
             highlightRender(element);
             mathRender(element);
             protyle.undo.clear();
         },
         onChange: () => {
+            updateTableCellContentLayout(host, fragment.getBlockHTML());
             window.clearTimeout(timer);
             if (!finished && !composing) {
                 timer = window.setTimeout(commit, 200);

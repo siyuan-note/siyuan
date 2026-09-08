@@ -2745,6 +2745,7 @@
 		"375": "Le carnet d’enregistrement des notes rapides n’est pas disponible. Sélectionnez un carnet ouvert et non chiffré dans Paramètres - Document",
 		"376": "La ressource n’a pas encore été téléchargée et ne peut pas être récupérée actuellement",
 		"377": "Veuillez passer à Tout télécharger avant de modifier ou de réinitialiser le dépôt de données",
-		"378": "Les requêtes intersites ne sont pas autorisées"
+		"378": "Les requêtes intersites ne sont pas autorisées",
+		"379": "L’agent s’est arrêté car la limite de durée de la session a été atteinte. Envoyez un message pour continuer ou ajustez le délai dans Paramètres - IA"
 	}
 }

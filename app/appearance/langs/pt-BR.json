@@ -2745,6 +2745,7 @@
 		"375": "O caderno para salvar notas rápidas não está disponível. Selecione um caderno aberto e não criptografado em Configurações - Documento",
 		"376": "O recurso ainda não foi baixado e não pode ser obtido no momento",
 		"377": "Mude para Baixar todos antes de alterar ou redefinir o repositório de dados",
-		"378": "Solicitações entre sites não são permitidas"
+		"378": "Solicitações entre sites não são permitidas",
+		"379": "O agente parou porque o limite de tempo da sessão foi atingido. Envie uma mensagem para continuar ou ajuste o tempo limite em Configurações - IA"
 	}
 }

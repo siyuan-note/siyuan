@@ -2745,6 +2745,7 @@
 		"375": "Het notitieboek voor snelle notities is niet beschikbaar. Selecteer een geopend, niet-versleuteld notitieboek in Instellingen - Document",
 		"376": "Het bronbestand is nog niet gedownload en kan momenteel niet worden opgehaald",
 		"377": "Schakel over naar Alles downloaden voordat u de gegevensopslag wijzigt of opnieuw instelt",
-		"378": "Cross-siteverzoeken zijn niet toegestaan"
+		"378": "Cross-siteverzoeken zijn niet toegestaan",
+		"379": "De agent is gestopt omdat de tijdslimiet van de sessie is bereikt. Stuur een bericht om door te gaan of pas de time-out aan via Instellingen - AI"
 	}
 }

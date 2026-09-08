@@ -188,7 +188,7 @@ func agentChat(c *gin.Context) {
 		case <-c.Request.Context().Done():
 			return
 		case <-deadline:
-			writeSSEInterrupted(c, model.Conf.Language(24))
+			writeSSEInterrupted(c, model.Conf.Language(379))
 			flusher.Flush()
 			return
 		}

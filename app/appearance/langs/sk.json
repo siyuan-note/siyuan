@@ -2745,6 +2745,7 @@
 		"375": "Zápisník na ukladanie rýchlych poznámok nie je k dispozícii. Vyberte otvorený nezašifrovaný zápisník v Nastavenia - Dokument",
 		"376": "Zdrojový súbor ešte nebol stiahnutý a momentálne ho nemožno získať",
 		"377": "Pred zmenou alebo obnovením dátového úložiska prepnite na Stiahnuť všetky",
-		"378": "Požiadavky medzi lokalitami nie sú povolené"
+		"378": "Požiadavky medzi lokalitami nie sú povolené",
+		"379": "Agent sa zastavil, pretože bol dosiahnutý časový limit relácie. Ak chcete pokračovať, odošlite správu alebo upravte časový limit v Nastavenia - AI"
 	}
 }

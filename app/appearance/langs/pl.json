@@ -2745,6 +2745,7 @@
 		"375": "Notatnik zapisu szybkich notatek jest niedostępny. Wybierz otwarty, niezaszyfrowany notatnik w Ustawienia - Dokument",
 		"376": "Zasób nie został jeszcze pobrany i obecnie nie można go uzyskać",
 		"377": "Przełącz na Pobierz wszystkie przed zmianą lub zresetowaniem repozytorium danych",
-		"378": "Żądania między witrynami są niedozwolone"
+		"378": "Żądania między witrynami są niedozwolone",
+		"379": "Agent został zatrzymany z powodu przekroczenia limitu czasu sesji. Wyślij wiadomość, aby kontynuować, lub zmień limit czasu w Ustawienia - AI"
 	}
 }

@@ -2745,6 +2745,7 @@
 		"375": "Il taccuino per il salvataggio delle note rapide non è disponibile. Seleziona un taccuino aperto e non crittografato in Impostazioni - Documento",
 		"376": "La risorsa non è ancora stata scaricata e al momento non può essere recuperata",
 		"377": "Passa a Scarica tutto prima di cambiare o reimpostare il repository dei dati",
-		"378": "Le richieste tra siti non sono consentite"
+		"378": "Le richieste tra siti non sono consentite",
+		"379": "L’agente si è fermato perché è stato raggiunto il limite di tempo della sessione. Invia un messaggio per continuare o modifica il timeout in Impostazioni - IA"
 	}
 }

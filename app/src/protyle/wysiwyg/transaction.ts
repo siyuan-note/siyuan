@@ -787,9 +787,6 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
     }
     invalidateViewFoldRequests(protyle);
     const undoFocusContext = isUndo ? operations.find(item => item.context?.undoFocusId)?.context : undefined;
-    const undoFocusEmbedElement = undoFocusContext?.undoFocusEmbedId ? protyle.wysiwyg.element.querySelector(
-        `[data-type="NodeBlockQueryEmbed"][data-node-id="${undoFocusContext.undoFocusEmbedId}"]`
-    ) : undefined;
     const deferUndoFocus = !!undoFocusContext?.undoFocusEmbedId;
     const pendingUndoEmbedElements = new Set<Element>();
     operations.forEach(operation => {
@@ -1222,7 +1219,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                 protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]'),
                 operation,
             ).forEach(item => {
-                if (item === undoFocusEmbedElement) {
+                if (undoFocusContext?.undoFocusEmbedId === item.getAttribute("data-node-id")) {
                     // 当前嵌入块需在撤销操作全部回放后渲染，否则中途移除选区会把光标带到源块
                     pendingUndoEmbedElements.add(item);
                 } else {

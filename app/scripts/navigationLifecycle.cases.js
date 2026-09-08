@@ -137,6 +137,30 @@ module.exports = async () => {
             cases++;
         }
     }
+    for (const count of [1, 2, 3]) {
+        const {protyle, editor} = setup(Array.from({length: count}, (_, i) =>
+            `<div data-type="NodeBlockQueryEmbed" data-node-id="outer${i}"><div data-node-id="container">
+                <div data-type="NodeBlockQueryEmbed" data-node-id="embed">${p("same", "copy" + i)}</div>
+            </div></div>`).join(""));
+        const copies = Array.from(editor.querySelectorAll('[data-node-id="same"]'));
+        copies.forEach((expected, index) => {
+            const context = {undoFocusId: "same", undoFocusEndId: "same", undoFocusStart: "0", undoFocusEnd: "0",
+                undoFocusIndex: String(index), undoFocusEndIndex: String(index), undoFocusEmbedId: "embed"};
+            const restore = load("util/restoreNavigationFocus").restoreFocusContext;
+            assert.equal(restore(protyle, context), true);
+            assert.equal(window.restoredFocusElement, expected);
+            assert.equal(restore(protyle, {...context, undoFocusEmbedId: "outer" + index}), false);
+            if (count > 1) {
+                assert.equal(restore(protyle, {...context, undoFocusEndIndex: String((index + 1) % count)}), false);
+            }
+            cases++;
+        });
+        copies.at(-1).parentElement.remove();
+        assert.equal(load("util/restoreNavigationFocus").restoreFocusContext(protyle, {
+            undoFocusId: "same", undoFocusIndex: String(count - 1), undoFocusEndIndex: String(count - 1),
+            undoFocusStart: "0", undoFocusEnd: "0", undoFocusEmbedId: "embed",
+        }), false);
+    }
     for (const before of [true, false]) {
         for (const protect of [true, false]) {
             const {protyle, editor} = setup(Array.from({length: 100}, (_, i) => p("p" + i)).join(""));
@@ -161,7 +185,7 @@ module.exports = async () => {
     const virtual = load("render/av/virtualScroll");
     const avState = load("render/av/selectionState");
     const constants = load("../constants").Constants;
-    const createAV = (id, protyle, editor) => {
+    const createAV = (id, protyle, editor, count = 100, offset = 0) => {
         const block = document.createElement("div");
         block.className = "av";
         block.dataset.avId = id;
@@ -171,14 +195,66 @@ module.exports = async () => {
         block.setAttribute(constants.ATTRIBUTE_V_SCROLL, "true");
         block.setAttribute(constants.CUSTOM_SY_AV_VIEW, "view");
         const data = {viewType: "table", view: {id: "view", columns: [{id: "c0", type: "text"}],
-            rows: Array.from({length: 100}, (_, i) => ({id: "r" + i, cells: [{id: "v" + i}]}))}};
-        block.innerHTML = '<div class="av__cursor"> </div><div class="av__body">' +
-            data.view.rows.map((row, rowIndex) => load("render/av/row").getRowHTML({row, rowIndex})).join("") +
+            rows: Array.from({length: count}, (_, i) => ({id: "r" + i, cells: [{id: "v" + i}]}))},
+            target: {offset}};
+        block.innerHTML = '<div class="av__cursor"> </div><div class="av__header"></div><div class="av__body">' +
+            '<div class="av__row av__row--header" style="position:sticky;top:0;height:30px"></div>' +
+            data.view.rows.slice(0, 100).map((row, rowIndex) =>
+                load("render/av/row").getRowHTML({row, rowIndex: rowIndex + offset})).join("") +
             '<div class="av__row av__row--util"></div></div>';
         editor.append(block);
+        if (offset) {
+            block.querySelector(".av__body").dataset.avLocateWindow = "true";
+        }
         virtual.initVirtualScroll({protyle, blockElement: block, data});
         return block;
     };
+    for (const count of [200, 1000]) {
+        for (const offset of [0, 500]) {
+            const {protyle, editor} = setup("");
+            const block = createAV("boundary", protyle, editor, count, offset);
+            assert.equal(load("render/av/focus").focusAVVerticalRegion(block, "up", 20, false), true);
+            assert.equal(avState.getAVCellSelection(block).anchor.rowID, "r" + (count - 1));
+            assert.equal(Number(block.querySelector(".av__cell--select").parentElement.dataset.index), count - 1 + offset);
+            assert.ok(block.querySelectorAll(".av__row[data-id]").length < 100);
+            assert.ok(protyle.contentElement.scrollTop > 0, "entry reveals the loaded boundary");
+            virtual.trimAVRowsSync(block, protyle.contentElement.getBoundingClientRect());
+            await new Promise(resolve => requestAnimationFrame(resolve));
+            assert.equal(avState.getAVCellSelection(block).anchor.rowID, "r" + (count - 1));
+            load("render/av/navigationKeydown").run(block, new KeyboardEvent("keydown", {key: "ArrowUp"}));
+            assert.equal(avState.getAVCellSelection(block).anchor.rowID, "r" + (count - 2));
+            assert.equal(load("render/av/focus").focusAVVerticalRegion(block, "down", 20, false), true);
+            assert.equal(avState.getAVCellSelection(block).anchor.rowID, "r0");
+            cases++;
+        }
+    }
+    {
+        const {protyle, editor} = setup("");
+        const block = createAV("groups", protyle, editor, 200);
+        const data = virtual.getAVData(block);
+        const body = block.querySelector(".av__body");
+        body.dataset.groupId = "visible";
+        const hidden = body.cloneNode(true);
+        hidden.dataset.groupId = "hidden";
+        hidden.classList.add("fn__none");
+        hidden.style.display = "none";
+        const empty = body.cloneNode(true);
+        empty.dataset.groupId = "empty";
+        empty.querySelectorAll(".av__row[data-id]").forEach(row => row.remove());
+        block.append(hidden, empty);
+        data.view.groups = [{...data.view, id: "visible"}, {...data.view, id: "hidden", groupFolded: true},
+            {...data.view, id: "empty", rows: []}];
+        virtual.initVirtualScroll({protyle, blockElement: block, data});
+        const last = virtual.ensureAVTableBoundaryRow(block, "up");
+        assert.equal(last.dataset.id, "r199");
+        assert.equal(last.closest(".av__body"), body);
+        assert.ok(body.querySelectorAll(".av__row[data-id]").length < 100);
+        virtual.setAVData(block, {...data, view: {...data.view, groups: [{...data.view.groups[0]}]}});
+        hidden.remove();
+        empty.remove();
+        assert.equal(virtual.ensureAVTableBoundaryRow(block, "up"), undefined, "reject stale body state");
+        cases++;
+    }
     // 相同持久 ID 的副本也必须独立；不同数据库交错 trim 不得污染滚动方向。
     const {protyle, editor} = setup("");
     const block = createAV("database", protyle, editor);

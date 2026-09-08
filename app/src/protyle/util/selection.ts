@@ -666,12 +666,6 @@ export const restoreFocusContext = (protyle: IProtyle, context: Record<string, s
     if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end < 0) {
         return false;
     }
-    const focusScopeElement = context.undoFocusEmbedId ? protyle.wysiwyg.element.querySelector(
-        `[data-type="NodeBlockQueryEmbed"][data-node-id="${context.undoFocusEmbedId}"]`
-    ) : protyle.wysiwyg.element;
-    if (!focusScopeElement) {
-        return false;
-    }
     // 副本序号以整个编辑器为参照保存；恢复时保留同一候选顺序，再校验嵌入作用域。
     const startBlockElements = Array.from(protyle.wysiwyg.element.querySelectorAll(
         `[data-node-id="${context.undoFocusId}"]`
@@ -690,8 +684,14 @@ export const restoreFocusContext = (protyle: IProtyle, context: Record<string, s
         context.undoFocusEndIndex,
         item => !isInEmbedBlock(item, false),
     );
-    if (!startBlockElement || !endBlockElement ||
-        !focusScopeElement.contains(startBlockElement) || !focusScopeElement.contains(endBlockElement)) {
+    if (!startBlockElement || !endBlockElement) {
+        return false;
+    }
+    // 持久 ID 可对应多个嵌入副本；作用域由已定位的端点所属显示实例确定。
+    const startEmbed = isInEmbedBlock(startBlockElement, false);
+    const endEmbed = isInEmbedBlock(endBlockElement, false);
+    if (startEmbed !== endEmbed || (context.undoFocusEmbedId &&
+        (!startEmbed || startEmbed.getAttribute("data-node-id") !== context.undoFocusEmbedId))) {
         return false;
     }
     const startFocusElement = context.undoFocusCalloutTitle === "true" ?

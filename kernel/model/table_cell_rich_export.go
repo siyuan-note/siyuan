@@ -4,8 +4,36 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
+
+// appendAttributeViewRichTextExport 将数据库富文本源作为单元格子块导出，保留列表和行级样式。
+func appendAttributeViewRichTextExport(cell *ast.Node, value *av.ValueText) error {
+	fragment, err := av.ParseValueTextRich(value.Rich)
+	if err != nil {
+		return err
+	}
+	var unlinks []*ast.Node
+	ast.Walk(fragment.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering {
+			node.ID = ""
+			node.RemoveIALAttr("id")
+			node.RemoveIALAttr("updated")
+			if node.Type == ast.NodeKramdownBlockIAL {
+				unlinks = append(unlinks, node)
+			}
+		}
+		return ast.WalkContinue
+	})
+	for _, node := range unlinks {
+		node.Unlink()
+	}
+	for fragment.Root.FirstChild != nil {
+		cell.AppendChild(fragment.Root.FirstChild)
+	}
+	return nil
+}
 
 // normalizeExportPreviewTree 保留包含块级内容的单元格，避免 Markdown 往返将其拆到表格外。
 func normalizeExportPreviewTree(tree *parse.Tree, luteEngine *lute.Lute) *parse.Tree {

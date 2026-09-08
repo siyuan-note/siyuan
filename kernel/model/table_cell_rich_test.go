@@ -9,6 +9,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -173,6 +174,44 @@ func TestTableCellRichPreviewNormalization(t *testing.T) {
 	}
 	if strings.Contains(html, "table-cell-preview-") || strings.Contains(html, "## 4") {
 		t.Fatalf("preview leaked normalization markers: %s", html)
+	}
+}
+
+func TestAttributeViewRichTextExport(t *testing.T) {
+	luteEngine := util.NewLute()
+	tree := parse.Parse("", []byte("| Key | Text |\n| --- | --- |\n| 111 | |"), luteEngine.ParseOptions)
+	cell := tree.Root.FirstChild.LastChild.LastChild
+	value := &av.ValueText{Content: "foo\n123\n123", Rich: &av.ValueTextRich{
+		Spec: av.ValueTextRichSpec, Format: av.ValueTextRichFormatKramdown,
+		Content: "**foo**\n\n- 123\n  - 123",
+	}}
+	if err := appendAttributeViewRichTextExport(cell, value); err != nil {
+		t.Fatal(err)
+	}
+	preview := normalizeExportPreviewTree(tree, luteEngine)
+	for name, output := range map[string]string{
+		"preview": luteEngine.ProtylePreview(preview, luteEngine.RenderOptions, luteEngine.ParseOptions),
+		"html":    string(render.NewProtyleExportRenderer(preview, luteEngine.RenderOptions, luteEngine.ParseOptions).Render()),
+		"word":    string(render.NewProtyleExportDocxRenderer(preview, luteEngine.RenderOptions, luteEngine.ParseOptions).Render()),
+	} {
+		t.Run(name, func(t *testing.T) {
+			listMarker, boldMarker := "<ul", "<strong"
+			if name == "preview" {
+				boldMarker = `data-type="strong"`
+			}
+			if name == "html" {
+				listMarker, boldMarker = `data-type="NodeList"`, `data-type="strong"`
+			}
+			if strings.Count(output, listMarker) != 2 || !strings.Contains(output, boldMarker) ||
+				!strings.Contains(output, "foo") || strings.Count(output, "123") != 2 {
+				t.Fatalf("database rich text lost nested lists or formatting: %s", output)
+			}
+		})
+	}
+	invalid := &av.ValueText{Rich: &av.ValueTextRich{Spec: 99, Format: av.ValueTextRichFormatKramdown}}
+	empty := &ast.Node{Type: ast.NodeTableCell}
+	if err := appendAttributeViewRichTextExport(empty, invalid); err == nil || empty.FirstChild != nil {
+		t.Fatal("invalid rich text must return an error without populating the cell")
 	}
 }
 

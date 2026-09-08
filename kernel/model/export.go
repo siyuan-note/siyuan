@@ -3651,6 +3651,7 @@ func exportTree(tree *parse.Tree, wysiwyg, richTableCells, keepFold, avHiddenCol
 
 	unlinks = nil
 	// Attribute View export https://github.com/siyuan-note/siyuan/issues/8710
+	var attrViewRichErr error
 	ast.Walk(ret.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -3775,6 +3776,12 @@ func exportTree(tree *parse.Tree, wysiwyg, richTableCells, keepFold, avHiddenCol
 						}
 					} else if av.KeyTypeText == cell.Value.Type {
 						if nil != cell.Value.Text {
+							if richTableCells && cell.Value.Text.IsRich() {
+								if attrViewRichErr = appendAttributeViewRichTextExport(mdTableCell, cell.Value.Text); attrViewRichErr != nil {
+									return ast.WalkStop
+								}
+								continue
+							}
 							val = cell.Value.Text.Content
 							if !wysiwyg {
 								val = string(lex.EscapeProtyleMarkers([]byte(val)))
@@ -3942,6 +3949,15 @@ func exportTree(tree *parse.Tree, wysiwyg, richTableCells, keepFold, avHiddenCol
 							if nil == v {
 								continue
 							}
+							if richTableCells && av.KeyTypeText == v.Type && v.Text.IsRich() {
+								if attrViewRichErr = appendAttributeViewRichTextExport(mdTableCell, v.Text); attrViewRichErr != nil {
+									return ast.WalkStop
+								}
+								if i < len(cell.Value.Rollup.Contents)-1 {
+									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(", ")})
+								}
+								continue
+							}
 
 							if av.KeyTypeBlock == v.Type {
 								if nil != v.Block {
@@ -4006,6 +4022,9 @@ func exportTree(tree *parse.Tree, wysiwyg, richTableCells, keepFold, avHiddenCol
 		unlinks = append(unlinks, n)
 		return ast.WalkContinue
 	})
+	if attrViewRichErr != nil {
+		return nil, attrViewRichErr
+	}
 	for _, n := range unlinks {
 		n.Unlink()
 	}

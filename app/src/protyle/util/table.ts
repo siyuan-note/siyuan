@@ -409,7 +409,7 @@ export const moveColumnToRight = (protyle: IProtyle, range: Range, cellElement: 
 export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) => {
     const cellElement = (hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH")) as HTMLTableCellElement;
     const nodeElement = hasClosestBlock(range.startContainer) as HTMLTableElement;
-    if (!cellElement || !nodeElement) {
+    if (!cellElement || !nodeElement || !protyle.wysiwyg.element.contains(cellElement)) {
         return false;
     }
     // 光标在表格中，选中其他块标后按删除按钮无效

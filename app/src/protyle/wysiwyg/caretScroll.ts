@@ -1,5 +1,5 @@
 import {getVerticalCaretRect} from "./verticalCaret";
-import {isAtomicVerticalNavigationTarget} from "./verticalNavigationState";
+import {isAtomicVerticalNavigationTarget, isAtomicVerticalNavigationRange} from "./verticalNavigationState";
 import {
     getCaretOverflowDirection,
     getCaretScrollDelta,
@@ -44,6 +44,9 @@ const getCaretScrollGeometry = (protyle: IProtyle): ICaretScrollGeometry | undef
         return;
     }
     range.collapse(true);
+    if (isAtomicVerticalNavigationRange(range)) {
+        return;
+    }
     const caretPosition = getVerticalCaretRect(editableElement, range);
     if (!caretPosition) {
         return;

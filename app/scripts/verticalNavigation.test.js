@@ -21,11 +21,13 @@ const rendererModules = () => {
     };
     // 使用实际选区、区域解析与标题按键入口；不挂载无关的工具栏及页签控制器。
     modules["util/selection"] = `const revealTabsForTarget = () => {};
-        import {isAtomicVerticalNavigationRange} from "../wysiwyg/verticalNavigationState";
+        import {getAtomicVerticalNavigationOwner} from "../wysiwyg/verticalNavigationState";
         import {getContenteditableElement} from "../wysiwyg/getBlock";
         import {hasClosestBlock} from "./hasClosest";\n` +
-        extract("util/selection", ["setFirstNodeRange", "setLastNodeRange", "focusByRange", "focusBlock", "getEditorRange"]);
+        extract("util/selection", ["setFirstNodeRange", "setLastNodeRange", "focusByRange", "focusBlock", "getEditorRange"])
+            .replace(/\/\/\/ #else[\s\S]*?\/\/\/ #endif/g, "");
     modules["util/hasClosest"] = readFileSync(path.join(root, "util/hasClosest.ts"), "utf8");
+    modules["util/documentRange"] = readFileSync(path.join(root, "util/documentRange.ts"), "utf8");
     modules["wysiwyg/getBlock"] = 'import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";\n' +
         extract("wysiwyg/getBlock", ["getContenteditableElement", "isContainerBlock", "getNextBlock", "getPreviousBlock"]);
     modules["render/tabsRender"] = "export const setTabTitleNavigationEditing = () => false;";
@@ -83,6 +85,101 @@ const rendererModules = () => {
             protyle.wysiwyg.element.addEventListener("keyup", handler.bind(protyle.wysiwyg));
         }`;
     modules["render/av/verticalNavigation"] = readFileSync(path.join(root, "render/av/verticalNavigation.ts"), "utf8");
+    modules["util/tableNavigation"] = extract("util/table", ["buildTableGrid", "getVerticalTableCell"]);
+    modules["util/selectionFocus"] = readFileSync(path.join(root, "util/selectionFocus.ts"), "utf8");
+    modules["util/restoreNavigationFocus"] = `import {getUndoFocusElement} from "./selectionFocus";
+        import {isInEmbedBlock} from "./hasClosest";
+        const focusByOffset = element => { window.restoredFocusElement = element; return true; };\n` +
+        extract("util/selection", ["restoreFocusContext"]);
+    for (const name of ["virtualScroll", "selectionState", "rangeSelect", "groupTableVirtual", "backlinkScroll"]) {
+        modules[`render/av/${name}`] = readFileSync(path.join(root, "render/av", `${name}.ts`), "utf8");
+    }
+    modules["../constants"] = "const SIYUAN_VERSION = 'test', NODE_ENV = 'test';\n" +
+        readFileSync(path.join(root, "../constants.ts"), "utf8");
+    modules["render/av/richText"] = "export const renderAVRichTextElements = () => {};";
+    modules["render/av/row"] = `export const updateAVSelectionStatus = () => {};
+        export const getRowHTML = ({row, rowIndex}) =>
+            '<div class="av__row" data-id="' + row.id + '" data-index="' + rowIndex +
+            '" style="height:30px"><div class="av__cell" data-col-id="c0" data-dtype="text">' + row.id + '</div></div>';`;
+    modules["render/av/focus"] = 'import {setAVCellAnchor} from "./rangeSelect";\n' +
+        'import {focusBlock} from "../../util/selection";\n' +
+        "const addDragFill = () => {}, cellScrollIntoView = () => {};\n" + modules["render/av/focus"];
+    const avKeydown = ts.createSourceFile("avKeydown.ts", readFileSync(path.join(root, "render/av/keydown.ts"), "utf8"),
+        ts.ScriptTarget.Latest, true);
+    let cellMoves;
+    const visitCellMoves = node => {
+        if (ts.isBlock(node)) {
+            const index = node.statements.findIndex(statement => statement.getText(avKeydown) === "let newCellElement;");
+            if (index >= 0) {
+                cellMoves = Array.from(node.statements).slice(index, index + 5).map(item => item.getText(avKeydown)).join("\n");
+            }
+        }
+        ts.forEachChild(node, visitCellMoves);
+    };
+    visitCellMoves(avKeydown);
+    assert.ok(cellMoves);
+    modules["render/av/navigationKeydown"] = `import {setAVCellAnchor} from "./rangeSelect";
+        import {ensureAVTableAdjacentRow} from "./virtualScroll";
+        import {getAVVerticalNavigationAction} from "./verticalNavigation";
+        const matchHotKey = () => false, leaveVerticalRegion = () => false;
+        const addDragFill = () => {}, cellScrollIntoView = () => {};
+        export const run = (nodeElement, event) => {
+            const selectCellElement = nodeElement.querySelector(".av__cell--select");
+            const rowElement = selectCellElement.closest(".av__row");
+            ${cellMoves}
+        };`;
+    const keydownSource = ts.createSourceFile("keydown.ts", readFileSync(path.join(root, "wysiwyg/keydown.ts"), "utf8"),
+        ts.ScriptTarget.Latest, true);
+    let selectedBranch;
+    const visitSelected = node => {
+        if (ts.isIfStatement(node) && node.expression.getText(keydownSource).includes('event.key === "ArrowDown" || event.key === "ArrowUp"') &&
+            node.thenStatement.getText(keydownSource).startsWith(
+            "{\n            const selectElements = protyle.wysiwyg.element.querySelectorAll(")) {
+            selectedBranch = node.getText(keydownSource);
+        }
+        ts.forEachChild(node, visitSelected);
+    };
+    visitSelected(keydownSource);
+    assert.ok(selectedBranch);
+    modules["wysiwyg/blockSelection"] = readFileSync(path.join(root, "wysiwyg/blockSelection.ts"), "utf8");
+    modules["wysiwyg/selectedNavigationKeydown"] = `import {getEditorRange, focusByRange, setLastNodeRange} from "../util/selection";
+        import {getAdjacentVerticalBlock} from "./verticalTarget";
+        import {focusVerticalBlockSelection} from "./verticalNavigation";
+        import {isDocumentBoundaryLoaded} from "../util/documentRange";
+        import {isInEmbedBlock} from "../util/hasClosest";
+        import {BLOCK_SELECTION_CLASS, getBlockSelectionModeElement, setBlockSelectionModeElement,
+            clearBlockSelectionMode} from "./blockSelection";
+        const countBlockWord = () => {}, countBlockSelectionMode = () => {};
+        const isNotCtrl = event => !event.ctrlKey && !event.metaKey;
+        const hideElements = (types, protyle) => protyle.wysiwyg.element.querySelectorAll("." + BLOCK_SELECTION_CLASS)
+            .forEach(element => element.classList.remove(BLOCK_SELECTION_CLASS));
+        export const bind = protyle => protyle.wysiwyg.element.addEventListener("keydown", event => {
+            const range = getEditorRange(protyle.wysiwyg.element);
+            const blockSelectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
+            ${selectedBranch}
+        });`;
+    // 原样抽取加载后的增删分支，隔离渲染、网络与销毁回调。
+    const onGet = ts.createSourceFile("onGet.ts", readFileSync(path.join(root, "util/onGet.ts"), "utf8"),
+        ts.ScriptTarget.Latest, true);
+    let trimBranch;
+    const visitTrim = node => {
+        if (ts.isIfStatement(node) &&
+            node.expression.getText(onGet) === "options.action.includes(Constants.CB_GET_APPEND)") {
+            trimBranch = node;
+        }
+        ts.forEachChild(node, visitTrim);
+    };
+    visitTrim(onGet);
+    assert.ok(trimBranch?.elseStatement && ts.isIfStatement(trimBranch.elseStatement));
+    modules["util/navigationTrim"] = `import {containsCurrentSelection} from "./documentRange";
+        import {Constants} from "../../constants";
+        const invalidateTrackedRangesInElement = () => {}, disposeCustomBlocksInElement = () => {}, hideElements = () => {};
+        export const run = (protyle, content, before) => {
+            const options = {content, action: [before ? Constants.CB_GET_BEFORE : Constants.CB_GET_APPEND]};
+            const REMOVED_OVER_HEIGHT = protyle.contentElement.clientHeight * 8;
+            if (${trimBranch.expression.getText(onGet)}) ${trimBranch.thenStatement.getText(onGet)}
+            else ${trimBranch.elseStatement.thenStatement.getText(onGet)}
+        };`;
     return Object.fromEntries(Object.entries(modules).map(([name, source]) => [name,
         ts.transpileModule(source, {compilerOptions: {
             module: ts.ModuleKind.CommonJS,
@@ -317,6 +414,7 @@ const runEntryCases = async () => {
         const protyle = {element: document.getElementById("protyle"),
             contentElement: document.querySelector(".protyle-content"), wysiwyg: {element: editor}, disabled: false};
         const title = document.getElementById("title");
+        editor.firstElementChild?.setAttribute("data-eof", "1");
         window.titleKeydown.bind(protyle, title);
         bindVerticalNavigationReset(editor);
         title.focus();
@@ -405,6 +503,8 @@ const runEntryCases = async () => {
         ["<div data-type=\"NodeTable\" data-node-id=\"table\"><table><tr><td id=\"target\" contenteditable=\"true\">cell</td></tr></table></div>", "target", false],
     ];
     window.titleEnterCalls = 0;
+    variants.push([`<div id="target" class="custom-block" data-type="NodeCustomBlock" data-node-id="custom" contenteditable="false">
+        <div contenteditable="true">plugin editor</div></div>`, "target", true]);
     for (const [markup, id, atomic] of variants) {
         const {protyle, editor} = setup(markup);
         const html = editor.innerHTML;
@@ -414,7 +514,10 @@ const runEntryCases = async () => {
         await ipcRenderer.invoke("vertical-navigation-key", "Down");
         await frame();
         const target = document.getElementById(id);
-        assert.ok(target === getSelection().anchorNode || target.contains(getSelection().anchorNode), id);
+        assert.ok(target === getSelection().anchorNode || target.contains(getSelection().anchorNode) ||
+            window.navigationState.getAtomicVerticalNavigationOwner(getSelection().getRangeAt(0)) === target,
+        id + ": " + markup + " selection: " + getSelection().anchorNode?.parentElement?.outerHTML +
+            "/" + getSelection().anchorOffset + " editor: " + editor.innerHTML);
         assert.equal(keyups, 1);
         assert.equal(protyle.wysiwyg.preventKeyup, false);
         assert.equal(editor.querySelectorAll(".protyle-wysiwyg--navigation").length, atomic ? 1 : 0);
@@ -504,13 +607,18 @@ const runElectron = async () => {
             window.verticalVisibility = load("wysiwyg/verticalVisibility");
             window.caretScroll = load("wysiwyg/caretScroll");
             window.verticalNavigation = load("wysiwyg/verticalNavigation");
+            window.navigationState = load("wysiwyg/verticalNavigationState");
             window.titleKeydown = load("header/titleKeydown");
             window.navigationKeyup = load("wysiwyg/navigationKeyup");
+            window.navigationModules = load;
         })()`);
         const cases = await win.webContents.executeJavaScript(`(${runGeometryCases.toString()})()`);
         console.log(`Vertical navigation: ${cases} Electron geometry cases passed`);
         const entryCases = await win.webContents.executeJavaScript(`(${runEntryCases.toString()})()`);
         console.log(`Vertical navigation: ${entryCases} Electron entry cases passed`);
+        const lifecycleCases = await win.webContents.executeJavaScript(
+            `(${require("./navigationLifecycle.cases.js").toString()})()`);
+        console.log(`Vertical navigation: ${lifecycleCases} Electron lifecycle cases passed`);
     } catch (error) {
         console.error(error);
         exitCode = 1;
@@ -544,6 +652,7 @@ if (process.versions.electron && process.type === "browser") {
             });
             assert.match(stdout, /Electron geometry cases passed/);
             assert.match(stdout, /Electron entry cases passed/);
+            assert.match(stdout, /Electron lifecycle cases passed/);
         } finally {
             rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});
         }

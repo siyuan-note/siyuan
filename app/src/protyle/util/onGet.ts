@@ -27,7 +27,7 @@ import {
     queueHeadingNumberRefresh,
     renderHeadingNumbers
 } from "./headingNumber";
-import {updateDocumentBottomEof} from "./documentRange";
+import {containsCurrentSelection, updateDocumentBottomEof} from "./documentRange";
 import {disabledWYSIWYG} from "./disabledWYSIWYG";
 import {getEmbeddedDocInfoResponse} from "./docInfo";
 import {updateWidgetCacheVersion} from "./widgetCache";
@@ -265,8 +265,11 @@ const setHTML = (options: {
             !protyle.scroll.shouldKeepLoadedContent() && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT) {
             let removeElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
             const removeElements = [];
-            while (protyle.wysiwyg.element.childElementCount > 2 && removeElements &&
+            while (protyle.wysiwyg.element.childElementCount - removeElements.length > 2 &&
             protyle.wysiwyg.element.lastElementChild !== removeElement) {
+                if (containsCurrentSelection(removeElement)) {
+                    break;
+                }
                 if (protyle.contentElement.scrollHeight - removeElement.offsetTop > REMOVED_OVER_HEIGHT) {
                     removeElements.push(removeElement);
                 } else {
@@ -274,15 +277,17 @@ const setHTML = (options: {
                 }
                 removeElement = removeElement.nextElementSibling as HTMLElement;
             }
-            const lastRemoveTop = removeElement.getBoundingClientRect().top;
-            removeElements.forEach(item => {
-                invalidateTrackedRangesInElement(protyle, item);
-                disposeCustomBlocksInElement(item);
-                item.remove();
-            });
-            protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (removeElement.getBoundingClientRect().top - lastRemoveTop) - 1;
-            protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop;
-            hideElements(["toolbar"], protyle);
+            if (removeElements.length > 0) {
+                const lastRemoveTop = removeElement.getBoundingClientRect().top;
+                removeElements.forEach(item => {
+                    invalidateTrackedRangesInElement(protyle, item);
+                    disposeCustomBlocksInElement(item);
+                    item.remove();
+                });
+                protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (removeElement.getBoundingClientRect().top - lastRemoveTop) - 1;
+                protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop;
+                hideElements(["toolbar"], protyle);
+            }
         }
         protyle.wysiwyg.element.insertAdjacentHTML("beforeend", options.content);
     } else if (options.action.includes(Constants.CB_GET_BEFORE)) {
@@ -299,6 +304,9 @@ const setHTML = (options: {
             let scrollHeight = protyle.contentElement.scrollHeight;
             let lastElement = protyle.wysiwyg.element.lastElementChild;
             while (childCount > 2 && scrollHeight > REMOVED_OVER_HEIGHT && lastElement.getBoundingClientRect().top > window.innerHeight) {
+                if (containsCurrentSelection(lastElement)) {
+                    break;
+                }
                 removeElements.push(lastElement);
                 lastElement = lastElement.previousElementSibling;
                 childCount--;

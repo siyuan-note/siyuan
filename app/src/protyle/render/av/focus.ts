@@ -4,7 +4,7 @@ import {focusBlock, focusByRange} from "../../util/selection";
 import {getFirstBlock, getLastBlock, getNextBlock, getPreviousBlock} from "../../wysiwyg/getBlock";
 import {scrollCenter} from "../../../util/highlightById";
 import {focusEditableAtGoalX, TVerticalDirection} from "../../wysiwyg/verticalCaret";
-import {selectAVItemRange, setAVItemAnchor} from "./rangeSelect";
+import {selectAVItemRange, setAVItemAnchor, setAVCellAnchor} from "./rangeSelect";
 
 const isForwardArrow = (key: string) => key === "ArrowDown" || key === "ArrowRight";
 
@@ -71,8 +71,9 @@ export const focusAVVerticalRegion = (blockElement: HTMLElement, direction: TVer
             if (!focusBlock(blockElement)) {
                 return false;
             }
-            clearSelect(["av"], blockElement);
-            cellElement.classList.add("av__cell--select");
+            if (!setAVCellAnchor(blockElement, cellElement)) {
+                return false;
+            }
             addDragFill(cellElement);
             cellScrollIntoView(blockElement, cellElement);
             return true;
@@ -127,8 +128,9 @@ export const focusAVByArrow = (protyle: IProtyle, blockElement: HTMLElement, key
         if (!focusBlock(blockElement)) {
             return false;
         }
-        clearSelect(["av"], blockElement);
-        cellElement.classList.add("av__cell--select");
+        if (!setAVCellAnchor(blockElement, cellElement)) {
+            return false;
+        }
         addDragFill(cellElement);
         cellScrollIntoView(blockElement, cellElement);
         return true;

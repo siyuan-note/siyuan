@@ -16,7 +16,7 @@ import {
     hasClosestByTag,
     isInEmbedBlock
 } from "./hasClosest";
-import {isAtomicVerticalNavigationRange} from "../wysiwyg/verticalNavigationState";
+import {getAtomicVerticalNavigationOwner} from "../wysiwyg/verticalNavigationState";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {hideElements} from "../ui/hideElements";
 import {genRenderFrame} from "../render/util";
@@ -204,8 +204,16 @@ export const getEditorRange = (element: Element): Range => {
         range = getSelection().getRangeAt(0);
         if (element === range.startContainer || element.contains(range.startContainer)) {
             // 纵向导航建立的原子 Range 已是合法位置，读取选区时不能再次聚焦其正文。
-            if (isAtomicVerticalNavigationRange(range)) {
-                return range;
+            const atomicOwner = getAtomicVerticalNavigationOwner(range);
+            if (atomicOwner) {
+                if (range.startContainer === atomicOwner) {
+                    return range;
+                }
+                // 对调用方保持块所有者坐标，不改写浏览器中稳定的外侧选区。
+                const ownerRange = document.createRange();
+                ownerRange.setStart(atomicOwner, 0);
+                ownerRange.collapse(true);
+                return ownerRange;
             }
             if (range.toString() === "" && range.startContainer.nodeType === 1) {
                 // 有时候点击编辑器头部需要矫正到第一个块中
@@ -664,7 +672,8 @@ export const restoreFocusContext = (protyle: IProtyle, context: Record<string, s
     if (!focusScopeElement) {
         return false;
     }
-    const startBlockElements = Array.from(focusScopeElement.querySelectorAll(
+    // 副本序号以整个编辑器为参照保存；恢复时保留同一候选顺序，再校验嵌入作用域。
+    const startBlockElements = Array.from(protyle.wysiwyg.element.querySelectorAll(
         `[data-node-id="${context.undoFocusId}"]`
     ));
     const startBlockElement = getUndoFocusElement(
@@ -673,7 +682,7 @@ export const restoreFocusContext = (protyle: IProtyle, context: Record<string, s
         item => !isInEmbedBlock(item, false),
     );
     const endBlockElements = context.undoFocusEndId === context.undoFocusId ?
-        startBlockElements : Array.from(focusScopeElement.querySelectorAll(
+        startBlockElements : Array.from(protyle.wysiwyg.element.querySelectorAll(
             `[data-node-id="${context.undoFocusEndId || context.undoFocusId}"]`
         ));
     const endBlockElement = getUndoFocusElement(
@@ -681,7 +690,8 @@ export const restoreFocusContext = (protyle: IProtyle, context: Record<string, s
         context.undoFocusEndIndex,
         item => !isInEmbedBlock(item, false),
     );
-    if (!startBlockElement || !endBlockElement) {
+    if (!startBlockElement || !endBlockElement ||
+        !focusScopeElement.contains(startBlockElement) || !focusScopeElement.contains(endBlockElement)) {
         return false;
     }
     const startFocusElement = context.undoFocusCalloutTitle === "true" ?

@@ -219,6 +219,8 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 					if nil == inputTree {
 						continue
 					}
+					// 将速记行内语法转换为文本标记，确保追加到文档后可直接建立索引。
+					parse.NestedInlines2FlattedSpansHybrid(inputTree, false)
 					for c := inputTree.Root.FirstChild; nil != c; c = c.Next {
 						resetBlockIDsByTime(c, s.created)
 						nodes = append(nodes, c)

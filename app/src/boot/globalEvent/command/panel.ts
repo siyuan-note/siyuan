@@ -69,7 +69,7 @@ export const commandPanel = (app: App) => {
         <input class="b3-text-field b3-text-field--text" style="padding-left: 32px !important;">
     </div>
     <ul class="b3-list b3-list--background search__list" id="commands"></ul>
-    <div class="search__tip">
+    <div class="search__tip${isMobile() ? " fn__none" : ""}">
         <kbd>↑/↓</kbd> ${window.siyuan.languages.searchTip1}
         <kbd>${window.siyuan.languages.enterKey}/${window.siyuan.languages.click}</kbd> ${window.siyuan.languages.confirm}
         <kbd>Esc</kbd> ${window.siyuan.languages.close}

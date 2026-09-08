@@ -1,4 +1,8 @@
 {
+	"tableCellRichEnable": "Konwertuj na tekst sformatowany",
+	"tableCellRichEdit": "Edytuj tekst sformatowany",
+	"tableCellRichDisable": "Konwertuj na treść w wierszu",
+	"tableCellRichInvalid": "Nieobsługiwany lub uszkodzony format tekstu komórki; oryginalna treść została zachowana",
 	"templateSearch": "Szukaj szablonów według nazwy lub ścieżki",
 	"templateContextSearch": "Szukaj dokumentów kontekstowych",
 	"templateContextTip": "Uruchom szablon, używając tytułu, ID i innych informacji z wybranego dokumentu, bez jego modyfikowania",

@@ -1,4 +1,8 @@
 {
+	"tableCellRichEnable": "轉換為富文字",
+	"tableCellRichEdit": "編輯富文字",
+	"tableCellRichDisable": "轉換為行內內容",
+	"tableCellRichInvalid": "儲存格富文字格式不受支援或已損壞，原始內容已保留",
 	"templateSearch": "搜尋範本名稱或路徑",
 	"templateContextSearch": "搜尋上下文文件",
 	"templateContextTip": "使用所選文件的標題、ID 等資訊執行範本，不會修改該文件",

@@ -215,6 +215,9 @@ func GetDocHistoryContent(historyPath, keyword string, highlight bool) (id, root
 		logging.LogErrorf("parse tree from file [%s] failed: %s", historyPath, err)
 		return
 	}
+	if err = treenode.RefreshTableCellRichProjection(historyTree.Root); nil != err {
+		return
+	}
 	id = historyTree.Root.ID
 	rootID = historyTree.Root.ID
 	if ciphertext && rootID+".sy" != filepath.Base(historyPath) {
@@ -511,6 +514,9 @@ func loadTreeByData0(data []byte) (ret *parse.Tree, err error) {
 		return
 	}
 	ret, err = dataparser.ParseJSONWithoutFix(data, util.NewLute().ParseOptions)
+	if nil == err {
+		err = treenode.RefreshTableCellRichProjection(ret.Root)
+	}
 	return
 }
 

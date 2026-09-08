@@ -1,4 +1,5 @@
 import {Constants} from "../../constants";
+import {getTableCellRichPlainText} from "./tableCellRich";
 import {uploadFiles, uploadLocalFiles} from "../upload";
 import type {IUploadInsertOptions} from "../upload";
 import {
@@ -188,7 +189,7 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
         text += removeZWJ(blockElement.querySelector("[spellcheck]").textContent);
     } else if (dataType === "NodeTable") {
         blockElement.querySelectorAll("th, td").forEach((item) => {
-            text += item.textContent.trim() + "\t";
+            text += (item.hasAttribute("data-sy-table-cell-rich") ? getTableCellRichPlainText(item) : item.textContent.trim()) + "\t";
             if (!item.nextElementSibling) {
                 text = text.slice(0, -1) + "\n";
             }

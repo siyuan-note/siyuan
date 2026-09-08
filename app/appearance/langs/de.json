@@ -1,4 +1,8 @@
 {
+	"tableCellRichEnable": "In Rich Text umwandeln",
+	"tableCellRichEdit": "Rich Text bearbeiten",
+	"tableCellRichDisable": "In Inline-Inhalt umwandeln",
+	"tableCellRichInvalid": "Nicht unterstütztes oder beschädigtes Rich-Text-Format der Zelle; Originalinhalt beibehalten",
 	"templateSearch": "Vorlagen nach Name oder Pfad suchen",
 	"templateContextSearch": "Kontextdokumente suchen",
 	"templateContextTip": "Die Vorlage mit Titel, ID und weiteren Informationen des ausgewählten Dokuments ausführen, ohne dieses zu ändern",

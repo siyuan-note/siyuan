@@ -1,0 +1,26 @@
+{
+  "ID": "20260908000000-root001",
+  "Type": "NodeDocument",
+  "Spec": "2",
+  "Properties": {"id": "20260908000000-root001", "title": "Table compatibility"},
+  "Children": [{
+    "ID": "20260908000001-table01",
+    "Type": "NodeTable",
+    "Properties": {"id": "20260908000001-table01", "colgroup": "|"},
+    "TableAligns": [0, 0],
+    "Children": [
+      {"Type": "NodeTableHead", "Children": [{"Type": "NodeTableRow", "Children": [
+        {"Type": "NodeTableCell", "Children": [{"Type": "NodeText", "Data": "Header"}]},
+        {"Type": "NodeTableCell", "Children": [{"Type": "NodeText", "Data": "Other"}]}
+      ]}]},
+      {"Type": "NodeTableRow", "Children": [
+        {"Type": "NodeTableCell", "Properties": {"colspan": "2", "style": "background-color: var(--b3-font-background1);"}, "Children": [
+          {"Type": "NodeText", "Data": "**literal** - list"},
+          {"Type": "NodeTextMark", "TextMarkType": "strong", "TextMarkTextContent": "bold"},
+          {"Type": "NodeBr", "Data": "<br />"}
+        ]},
+        {"Type": "NodeTableCell", "Properties": {"class": "fn__none"}}
+      ]}
+    ]
+  }]
+}

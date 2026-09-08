@@ -1,4 +1,8 @@
 {
+	"tableCellRichEnable": "Converti in testo formattato",
+	"tableCellRichEdit": "Modifica testo formattato",
+	"tableCellRichDisable": "Converti in contenuto in linea",
+	"tableCellRichInvalid": "Formato del testo della cella non supportato o danneggiato; contenuto originale conservato",
 	"templateSearch": "Cerca modelli per nome o percorso",
 	"templateContextSearch": "Cerca documenti di contesto",
 	"templateContextTip": "Esegui il modello usando il titolo, l’ID e le altre informazioni del documento selezionato senza modificarlo",

@@ -8,6 +8,7 @@ import {
 } from "../protyle/util/hasClosest";
 import {MenuItem} from "./Menu";
 import {getTableCellVerticalAlignmentMenus, setTableCellStyle} from "../protyle/util/tableControl";
+import {getTableCellRichMenus} from "../protyle/toolbar/tableCellRich";
 import {focusBlock, focusByOffset, focusByRange, focusByWbr, getEditorRange, selectAll,} from "../protyle/util/selection";
 import {getViewFoldOccurrenceID, hasViewFoldContext, setViewFoldTransient} from "../protyle/util/viewFold";
 import {
@@ -2249,7 +2250,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
 
 export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: HTMLTableCellElement, range: Range,
                           alignWholeTable = false) => {
-    const otherMenus: IMenu[] = [];
+    const otherMenus: IMenu[] = alignWholeTable ? [] : getTableCellRichMenus(protyle, [cellElement]);
     const colIndex = getColIndex(cellElement);
     const tableElement = nodeElement.querySelector("table");
     if (cellElement.rowSpan > 1 || cellElement.colSpan > 1) {

@@ -1,4 +1,8 @@
 {
+	"tableCellRichEnable": "Omzetten naar opgemaakte tekst",
+	"tableCellRichEdit": "Opgemaakte tekst bewerken",
+	"tableCellRichDisable": "Omzetten naar inline-inhoud",
+	"tableCellRichInvalid": "Niet-ondersteunde of beschadigde tekstopmaak in de cel; oorspronkelijke inhoud behouden",
 	"templateSearch": "Sjablonen zoeken op naam of pad",
 	"templateContextSearch": "Contextdocumenten zoeken",
 	"templateContextTip": "Voer het sjabloon uit met de titel, ID en andere informatie van het geselecteerde document zonder dat document te wijzigen",

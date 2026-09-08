@@ -197,8 +197,11 @@ func prepareExportAssets(boxID string, docPaths []string, includeFootnotes ...bo
 			footnotes := map[string]*refAsFootnotes{}
 			depth := 0
 			collectFootnotesDefs(tree, tree.ID, &order, footnotes, &depth)
-			defs := resolveFootnotesDefs(&order, footnotes, tree, map[string]bool{},
-				Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight)
+			defs, defsErr := resolveFootnotesDefs(&order, footnotes, tree, map[string]bool{},
+				Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight, false)
+			if defsErr != nil {
+				return defsErr
+			}
 			if defs != nil {
 				footnoteTree := *tree
 				footnoteTree.ID, footnoteTree.Root = tree.ID+"-footnotes", defs

@@ -1,4 +1,8 @@
 {
+	"tableCellRichEnable": "Previesť na formátovaný text",
+	"tableCellRichEdit": "Upraviť formátovaný text",
+	"tableCellRichDisable": "Previesť na obsah v riadku",
+	"tableCellRichInvalid": "Nepodporovaný alebo poškodený formát textu bunky; pôvodný obsah bol zachovaný",
 	"templateSearch": "Hľadať šablóny podľa názvu alebo cesty",
 	"templateContextSearch": "Hľadať kontextové dokumenty",
 	"templateContextTip": "Spustiť šablónu s názvom, ID a ďalšími údajmi vybraného dokumentu bez jeho zmeny",

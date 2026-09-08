@@ -1,4 +1,8 @@
 {
+	"tableCellRichEnable": "Zengin metne dönüştür",
+	"tableCellRichEdit": "Zengin metni düzenle",
+	"tableCellRichDisable": "Satır içi içeriğe dönüştür",
+	"tableCellRichInvalid": "Hücrenin zengin metin biçimi desteklenmiyor veya bozuk; özgün içerik korundu",
 	"templateSearch": "Şablonları ada veya yola göre ara",
 	"templateContextSearch": "Bağlam belgelerini ara",
 	"templateContextTip": "Şablonu, seçilen belgenin başlığını, kimliğini ve diğer bilgilerini kullanarak belgeyi değiştirmeden çalıştırın",

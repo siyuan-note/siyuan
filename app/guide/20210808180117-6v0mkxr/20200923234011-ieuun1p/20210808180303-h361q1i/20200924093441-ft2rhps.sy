@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260905124213"
+		"updated": "20260908091355"
 	},
 	"Children": [
 		{
@@ -2554,6 +2554,102 @@
 				{
 					"Type": "NodeText",
 					"Data": "Table"
+				}
+			]
+		},
+		{
+			"ID": "20260908091355-rch0007",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908091355-rch0007",
+				"updated": "20260908091355"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Right-click a cell and choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Convert to rich text"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to edit paragraphs, headings, lists, blockquotes, code, and math directly inside it. Existing cells require explicit conversion; Markdown-looking text keeps its literal meaning."
+				}
+			]
+		},
+		{
+			"ID": "20260908091355-rch0008",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908091355-rch0008",
+				"updated": "20260908091355"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Click a rich text cell, or place the caret in it and press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "F2"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to edit. While editing, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " creates a paragraph or list item inside the fragment; "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " control indentation. Close any suggestion first, then press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Escape"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or click outside to finish. Changes are saved automatically, and table navigation resumes."
+				}
+			]
+		},
+		{
+			"ID": "20260908091355-rch0009",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908091355-rch0009",
+				"updated": "20260908091355"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Internal paragraphs and list items have no independent block IDs. References to existing blocks, images, and inline formatting are supported; databases, superblocks, tabs, and embedded blocks are not supported. Standard Markdown exports readable inline content; HTML, PDF, and Word preserve rich formatting."
 				}
 			]
 		},

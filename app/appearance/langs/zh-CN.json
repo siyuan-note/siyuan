@@ -1,4 +1,8 @@
 {
+	"tableCellRichEnable": "转换为富文本",
+	"tableCellRichEdit": "编辑富文本",
+	"tableCellRichDisable": "转换为行级内容",
+	"tableCellRichInvalid": "单元格富文本格式不受支持或已损坏，原始内容已保留",
 	"templateSearch": "搜索模板名称或路径",
 	"templateContextSearch": "搜索上下文文档",
 	"templateContextTip": "使用所选文档的标题、ID 等信息运行模板，不会修改该文档",

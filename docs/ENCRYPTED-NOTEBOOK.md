@@ -8,6 +8,8 @@ Implement an "encrypted notebook" in SiYuan — a special notebook whose `.sy` d
 
 Existing encrypted data is the compatibility baseline. Format and key-management changes must preserve access to existing data and its recovery paths; development status must never justify requiring users to delete or recreate their data. This covers documents, assets and their original names, attribute-view definitions, key envelopes, backups, history, and sync snapshots.
 
+Table-cell rich text uses document `Spec: "4"` and an optional `TableCellRich` source envelope inside the authenticated plaintext AST. Existing document versions remain readable without converting their cells. Document encryption envelopes, AAD, subkey derivation, and recovery keys are unchanged. Reads, exports, history, snapshots, and recovery authenticate ciphertext first, then validate the document and rich text versions; unknown or damaged source is rejected while preserving the original data. Inline projections may be rebuilt only after authentication and source validation succeed.
+
 ## 2. Core Constraints
 
 | Aspect | Design Decision |

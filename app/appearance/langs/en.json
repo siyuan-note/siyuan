@@ -1,4 +1,8 @@
 {
+	"tableCellRichEnable": "Convert to rich text",
+	"tableCellRichEdit": "Edit rich text",
+	"tableCellRichDisable": "Convert to inline content",
+	"tableCellRichInvalid": "Unsupported or damaged cell rich text; original content preserved",
 	"templateSearch": "Search templates by name or path",
 	"templateContextSearch": "Search context documents",
 	"templateContextTip": "Run the template using the selected document's title, ID, and other information without modifying that document",

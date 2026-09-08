@@ -1,4 +1,6 @@
 import {MenuItem} from "../../menus/Menu";
+import {clearTableCellContent, getTableCellRichPlainText, mergeTableCellContents} from "./tableCellRich";
+import {getTableCellRichMenus} from "../toolbar/tableCellRich";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {copyPlainText, encodeBase64, isMac, readClipboard} from "./compatibility";
 import {removeZWJ} from "./normalizeText";
@@ -101,7 +103,8 @@ interface ITableEdgeHover {
 
 const getCell = (target: EventTarget | Node) => {
     const element = target instanceof Element ? target : (target as Node)?.parentElement;
-    return element?.closest?.("th, td") as HTMLTableCellElement;
+    const cell = element?.closest?.("th, td") as HTMLTableCellElement;
+    return cell && element.closest(".protyle-wysiwyg") === cell.closest(".protyle-wysiwyg") ? cell : undefined;
 };
 
 const getTableNode = (cell: HTMLTableCellElement) => {
@@ -165,7 +168,8 @@ const replaceCellTag = (cell: HTMLTableCellElement, tag: "th" | "td") => {
     return newCell;
 };
 
-const getCellText = (cell: HTMLTableCellElement) => cell.innerText.replace(/\n+$/g, "");
+const getCellText = (cell: HTMLTableCellElement) => cell.hasAttribute("data-sy-table-cell-rich") ?
+    getTableCellRichPlainText(cell) : cell.innerText.replace(/\n+$/g, "");
 
 export const getCommonTableCellStyle = (cells: HTMLTableCellElement[], property: string) => {
     if (cells.length === 0) {
@@ -1734,6 +1738,9 @@ export class TableControl {
 
     private appendCellMenus(rectangle: boolean) {
         const cells = this.getSelectedCells();
+        getTableCellRichMenus(this.protyle, cells).forEach(menu => {
+            window.siyuan.menus.menu.append(new MenuItem(menu).element);
+        });
         this.appendAlignmentMenu();
         const cellSelection = getTableCellSelectionIndexes(this.selection.table, cells);
         if (cellSelection.rowIndexes.length > 0 || cellSelection.columnIndexes.length > 0) {
@@ -1866,7 +1873,7 @@ export class TableControl {
             return;
         }
         const oldHTML = this.selection.node.outerHTML;
-        this.getSelectedCells().forEach(cell => cell.innerHTML = "");
+        this.getSelectedCells().forEach(clearTableCellContent);
         updateTransaction(this.protyle, this.selection.node, oldHTML);
         this.scheduleRender();
     }
@@ -2003,12 +2010,10 @@ export class TableControl {
         const colEnd = Math.max(...infos.map(info => info.col + info.colspan - 1));
         const oldHTML = this.selection.node.outerHTML;
         const first = infos[0].cell;
-        const contents = infos.map(info => info.cell.innerHTML.trim().replace(/<br>$/, "")).filter(Boolean);
+        mergeTableCellContents(infos.map(info => info.cell));
         infos.slice(1).forEach(info => {
-            info.cell.innerHTML = "";
             info.cell.classList.add("fn__none");
         });
-        first.innerHTML = contents.join("<br>");
         first.rowSpan = rowEnd - rowStart + 1;
         first.colSpan = colEnd - colStart + 1;
         updateTransaction(this.protyle, this.selection.node, oldHTML);

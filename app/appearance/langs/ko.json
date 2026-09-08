@@ -1,4 +1,8 @@
 {
+	"tableCellRichEnable": "서식 있는 텍스트로 변환",
+	"tableCellRichEdit": "서식 있는 텍스트 편집",
+	"tableCellRichDisable": "인라인 콘텐츠로 변환",
+	"tableCellRichInvalid": "셀의 서식 있는 텍스트 형식이 지원되지 않거나 손상되었습니다. 원본 콘텐츠는 보존됩니다",
 	"templateSearch": "템플릿 이름 또는 경로 검색",
 	"templateContextSearch": "컨텍스트 문서 검색",
 	"templateContextTip": "선택한 문서의 제목, ID 등의 정보로 템플릿을 실행하며 해당 문서는 수정하지 않습니다",

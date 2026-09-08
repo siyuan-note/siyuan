@@ -1835,6 +1835,14 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		logging.LogErrorf("resolve updated block [%s] failed: %s", id, resolveErr)
 		return &TxErr{code: TxErrCodePushMsg, msg: resolveErr.Error(), id: id}
 	}
+	if ast.NodeTable == oldNode.Type && ast.NodeTable == updatedNode.Type &&
+		(treenode.HasTableCellRich(oldNode) || "1" == oldNode.IALAttr(treenode.TableCellRichTableAttribute)) &&
+		"1" != updatedNode.IALAttr(treenode.TableCellRichTableAttribute) {
+		return &TxErr{code: TxErrCodeReloadUI, msg: "table update omitted rich text format metadata", id: id}
+	}
+	if err = treenode.ValidateTableCellRich(updatedNode); nil != err {
+		return &TxErr{code: TxErrCodeReloadUI, msg: err.Error(), id: id}
+	}
 	if err = treenode.ValidateBlockReplacement(oldNode, updatedNode); err != nil {
 		logging.LogErrorf("validate updated block [%s] structure failed: %s", id, err)
 		return &TxErr{code: TxErrCodeReloadUI, msg: err.Error(), id: id}

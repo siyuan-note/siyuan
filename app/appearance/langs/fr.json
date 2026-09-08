@@ -1,4 +1,8 @@
 {
+	"tableCellRichEnable": "Convertir en texte enrichi",
+	"tableCellRichEdit": "Modifier le texte enrichi",
+	"tableCellRichDisable": "Convertir en contenu en ligne",
+	"tableCellRichInvalid": "Format de texte enrichi de cellule non pris en charge ou endommagé ; contenu original conservé",
 	"templateSearch": "Rechercher des modèles par nom ou chemin",
 	"templateContextSearch": "Rechercher des documents de contexte",
 	"templateContextTip": "Exécuter le modèle avec le titre, l’identifiant et les autres informations du document sélectionné sans le modifier",

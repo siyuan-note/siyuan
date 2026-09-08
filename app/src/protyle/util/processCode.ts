@@ -10,6 +10,7 @@ import {htmlRender} from "../render/htmlRender";
 import {escapeHtml} from "../../util/escape";
 import {customBlockRender} from "../../plugin/customBlockRender";
 import {buildSemanticInlineHTML} from "./inlineElementMarker";
+import {renderTableCellRichElements} from "../render/tableCellRich";
 
 export const processPasteCode = (html: string, text: string, originalTextHTML: string, protyle: IProtyle) => {
     const tempElement = document.createElement("div");
@@ -60,6 +61,7 @@ const RENDER_MAP: Record<string, (previewPanel: Element) => void> = {
 };
 
 export const processRender = (previewPanel: Element) => {
+    renderTableCellRichElements(previewPanel);
     // 受限 Lite 编辑器只渲染公式，代码围栏始终作为源码编辑，不能执行图表或 HTML。
     if (previewPanel.closest('[data-protyle-lite-render="safe"]')) {
         mathRender(previewPanel);

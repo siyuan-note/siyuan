@@ -1,4 +1,8 @@
 {
+	"tableCellRichEnable": "リッチテキストに変換",
+	"tableCellRichEdit": "リッチテキストを編集",
+	"tableCellRichDisable": "インラインコンテンツに変換",
+	"tableCellRichInvalid": "セルのリッチテキスト形式が未対応または破損しています。元の内容は保持されています",
 	"templateSearch": "テンプレート名またはパスを検索",
 	"templateContextSearch": "コンテキスト用ドキュメントを検索",
 	"templateContextTip": "選択したドキュメントのタイトルや ID などの情報を使ってテンプレートを実行します。ドキュメントは変更されません",

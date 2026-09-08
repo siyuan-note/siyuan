@@ -1,6 +1,6 @@
 # SiYuan `.sy` File JSON Structure — AI Read/Write Guide
 
-> Canonical Spec baseline: `2` for ordinary documents, `3` for documents containing tabs; compatible readers may upgrade older or missing versions.
+> Canonical Spec baseline: `2` for ordinary documents, `3` for documents containing tabs, `4` for documents using table-cell rich text; compatible readers may upgrade older or missing versions.
 > Verified against samples: `20200825162036-4dx365o.sy` (formatting elements), `20200905090211-2vixtlf.sy` (block types).
 > All conclusions are based on real samples and the current Lute / SiYuan kernel source. The cited samples contain a few known legacy artifacts; canonical write rules follow the current source when a sample differs.
 > This guide describes plaintext `.sy` JSON in an ordinary notebook, or the decrypted AST of an unlocked encrypted notebook. An encrypted notebook's on-disk `.sy` file is ciphertext and must not be edited as JSON.
@@ -413,6 +413,12 @@ Notes:
 - `Properties.colgroup` stores a `|`-separated CSS style string for each column; empty segments represent columns without an explicit style.
 - A table's optional `Properties.caption` stores its caption HTML.
 - A `NodeTableCell` may carry `Properties.colspan`, `Properties.rowspan`, and `Properties.style` for merged-cell and cell-style state.
+
+An explicitly converted rich text cell additionally carries `"TableCellRich": {"spec": 1, "format": "kramdown", "content": "- first\n- second"}`. This source is authoritative; `Children` remains an inline projection with readable list markers and line breaks. Internal paragraphs, lists, code, and math do not become document blocks and have no persistent block IDs. Images, references to existing blocks, and supported inline formatting remain in the projection for indexing and resource handling. A rich table retains `Properties.custom-sy-table-rich = "1"`; BlockDOM updates must retain this marker even after converting all cells back to inline content, so a writer that omits the source cannot silently replace a rich table.
+
+Only paragraphs, headings, lists, blockquotes, ordinary code, and math are supported inside the fragment. Nested tables, databases, superblocks, tabs, callouts, query embeds, executable diagrams, media, widgets, and HTML blocks are rejected. BlockDOM stores the source envelope as UTF-8 JSON encoded with unpadded URL-safe Base64 in the cell's `data-sy-table-cell-rich` attribute. Internal Kramdown uses the corresponding `table-cell-rich` cell IAL; neither representation is a standard Markdown interchange format.
+
+Readers validate the source version and content before rebuilding the projection. Missing, null, unknown, or malformed envelope fields are errors, and unsupported input must remain unchanged. Ordinary cells have no envelope and are never reinterpreted as Markdown. The first explicit conversion raises the document `Spec` to `4`; removing the feature does not lower it. Standard Markdown uses a readable inline projection, while HTML, PDF, and Word exports expand the fragment only in a transient export tree. Encrypted notebooks authenticate the existing document envelope before parsing this same JSON; key derivation, AAD, and recovery material are unchanged.
 
 ### 5.14 AttributeView block (database; leaf)
 

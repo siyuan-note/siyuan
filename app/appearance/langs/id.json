@@ -1,4 +1,8 @@
 {
+	"tableCellRichEnable": "Ubah menjadi teks kaya",
+	"tableCellRichEdit": "Edit teks kaya",
+	"tableCellRichDisable": "Ubah menjadi konten sebaris",
+	"tableCellRichInvalid": "Format teks kaya sel tidak didukung atau rusak; konten asli dipertahankan",
 	"templateSearch": "Cari templat berdasarkan nama atau jalur",
 	"templateContextSearch": "Cari dokumen konteks",
 	"templateContextTip": "Jalankan templat menggunakan judul, ID, dan informasi lain dari dokumen yang dipilih tanpa mengubah dokumen tersebut",

@@ -7,6 +7,7 @@ import {
 } from "./hasClosest";
 import * as dayjs from "dayjs";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
+import {copyTableCellContent} from "./tableCellRich";
 import {
     fixAdjacentTags,
     getContenteditableElement,
@@ -887,7 +888,7 @@ const processTable = (range: Range, html: string, protyle: IProtyle, blockElemen
     const oldHTML = blockElement.outerHTML;
     blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
     matchedCells.forEach((item, index) => {
-        item.target.innerHTML = item.source.innerHTML;
+        copyTableCellContent(item.target, item.source);
         if (index === matchedCells.length - 1) {
             setLastNodeRange(item.target, range, false);
         }

@@ -556,6 +556,13 @@ export class Toolbar {
 
     public setTableCellsInlineMark(protyle: IProtyle, cellElements: HTMLTableCellElement[], type: string,
                                    textObj?: ITextOption) {
+        const richCells = cellElements.filter(cell => cell.hasAttribute("data-sy-table-cell-rich"));
+        if (richCells.length > 0) {
+            void import("../render/tableCellRichEditor").then(module => {
+                module.applyTableCellRichInlineMark(protyle, richCells, type, textObj);
+            });
+            cellElements = cellElements.filter(cell => !cell.hasAttribute("data-sy-table-cell-rich"));
+        }
         return this.setRangesInlineMark(protyle, this.getTableCellRanges(cellElements), type, "range", textObj);
     }
 

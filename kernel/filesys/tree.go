@@ -227,6 +227,9 @@ func NormalizeTreeForRead(tree *parse.Tree) (err error) {
 	if err = treenode.CheckSpec(tree); nil != err {
 		return
 	}
+	if err = treenode.RefreshTableCellRichProjection(tree.Root); nil != err {
+		return
+	}
 	treenode.UpgradeSpec(tree)
 	escapeAttributeValues(tree)
 	return
@@ -444,6 +447,9 @@ func writeTreeByWriteFile(filePath string, data []byte) (err error) {
 }
 
 func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error) {
+	if err = treenode.SyncTableCellRichInlineChanges(tree.Root); nil != err {
+		return
+	}
 	if err = treenode.CheckSpec(tree); nil != err {
 		return
 	}
@@ -542,10 +548,10 @@ func afterWriteTree(tree *parse.Tree) {
 
 // fixTreeJSONData 订正树 JSON 数据。
 func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, dek []byte, encrypted bool) (data []byte, needFix bool, err error) {
-	jsonData, needFix = removeUnescapedUnicodeNull(jsonData)
 	if err = treenode.CheckSpecJSON(jsonData); nil != err {
 		return
 	}
+	jsonData, needFix = removeUnescapedUnicodeNull(jsonData)
 	ret, parseNeedFix, err := dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
 	if parseNeedFix {
 		needFix = true
@@ -559,7 +565,10 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, de
 	ret.Box = boxID
 	ret.Path = p
 
-	if err = treenode.CheckSpec(ret); errors.Is(err, treenode.ErrSpecTooNew) {
+	if err = treenode.CheckSpec(ret); nil != err {
+		return
+	}
+	if err = treenode.RefreshTableCellRichProjection(ret.Root); nil != err {
 		return
 	}
 
@@ -641,9 +650,10 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 	ret.Box = boxID
 	ret.Path = p
 
-	if err = treenode.CheckSpec(ret); errors.Is(err, treenode.ErrSpecTooNew) {
+	if err = treenode.CheckSpec(ret); nil != err {
 		return
 	}
+	err = treenode.RefreshTableCellRichProjection(ret.Root)
 	return
 }
 

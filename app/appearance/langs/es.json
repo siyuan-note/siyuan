@@ -1,4 +1,8 @@
 {
+	"tableCellRichEnable": "Convertir a texto enriquecido",
+	"tableCellRichEdit": "Editar texto enriquecido",
+	"tableCellRichDisable": "Convertir a contenido en línea",
+	"tableCellRichInvalid": "Formato de texto enriquecido de celda no compatible o dañado; se conserva el contenido original",
 	"templateSearch": "Buscar plantillas por nombre o ruta",
 	"templateContextSearch": "Buscar documentos de contexto",
 	"templateContextTip": "Ejecutar la plantilla con el título, el ID y otros datos del documento seleccionado sin modificarlo",

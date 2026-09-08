@@ -1,4 +1,8 @@
 {
+	"tableCellRichEnable": "Converter em texto formatado",
+	"tableCellRichEdit": "Editar texto formatado",
+	"tableCellRichDisable": "Converter em conteúdo em linha",
+	"tableCellRichInvalid": "Formato de texto da célula não suportado ou danificado; conteúdo original preservado",
 	"templateSearch": "Pesquisar modelos por nome ou caminho",
 	"templateContextSearch": "Pesquisar documentos de contexto",
 	"templateContextTip": "Executar o modelo usando o título, o ID e outras informações do documento selecionado sem modificá-lo",

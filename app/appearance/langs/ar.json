@@ -1,4 +1,8 @@
 {
+	"tableCellRichEnable": "تحويل إلى نص منسق",
+	"tableCellRichEdit": "تحرير النص المنسق",
+	"tableCellRichDisable": "تحويل إلى محتوى ضمن السطر",
+	"tableCellRichInvalid": "تنسيق النص المنسق للخلية غير مدعوم أو تالف؛ تم الاحتفاظ بالمحتوى الأصلي",
 	"templateSearch": "البحث عن القوالب بالاسم أو المسار",
 	"templateContextSearch": "البحث عن مستندات السياق",
 	"templateContextTip": "تشغيل القالب باستخدام عنوان المستند المحدد ومعرّفه ومعلوماته الأخرى دون تعديل المستند",

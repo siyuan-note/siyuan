@@ -64,7 +64,7 @@ describe("vertical caret boundary", () => {
             [emptyLine]);
         assert.equal(getCodeTrailingZeroWidthLineLimit("x\n"), 0);
         assert.equal(getCodeTrailingZeroWidthLineLimit("x\n\n"), 1);
-        assert.equal(getCodeTrailingZeroWidthLineLimit("\n\n\n"), 2);
+        assert.equal(getCodeTrailingZeroWidthLineLimit("\n\n\n"), 3);
     });
 
     it("accepts only range context rectangles that reach the target line", () => {

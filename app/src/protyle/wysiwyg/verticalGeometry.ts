@@ -41,7 +41,7 @@ export const getCodeTrailingZeroWidthLineLimit = (text: string) => {
         return;
     }
     const hasVisiblePrefix = text.substring(0, text.length - trailingNewlineCount).length > 0;
-    return Math.max(hasVisiblePrefix ? 0 : 1, trailingNewlineCount - 1);
+    return hasVisiblePrefix ? trailingNewlineCount - 1 : trailingNewlineCount;
 };
 
 export const getNavigableVerticalRects = <T extends IVerticalRect>(rects: T[],

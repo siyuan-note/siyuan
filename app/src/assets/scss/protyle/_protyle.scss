@@ -885,14 +885,29 @@
       margin: 0;
       padding: 0;
       line-height: inherit;
+
+      > [contenteditable] {
+        min-height: 1lh;
+      }
     }
   }
 }
 
-.table__cell-rich.table__cell--empty > .p,
-.table__cell-editor.table__cell--empty .protyle-wysiwyg > .p {
-  // 空单元格的光标占位与表格 td:empty 的 16px 占位高度一致。
-  line-height: 16px;
+.protyle-wysiwyg [data-type="NodeTable"] {
+  td:empty::after,
+  th:empty::after {
+    // 空单元格与输入文字共用行盒高度，避免输入第一个字符时改变整行高度。
+    content: "\200b";
+    display: block;
+    height: auto;
+  }
+}
+
+.table__cell-editor .protyle-wysiwyg > .p > [contenteditable]:empty {
+  &::before,
+  &::after {
+    content: none !important;
+  }
 }
 
 table[contenteditable="false"] + .protyle-action__table > .table__resize {

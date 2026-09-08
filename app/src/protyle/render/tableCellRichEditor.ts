@@ -94,7 +94,6 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         return;
     }
     owner.wysiwyg.tableControl?.clear();
-    owner.wysiwyg.tableControl?.setHidden(true);
     hideElements(["gutter"], owner);
     const selection = getSelection();
     const initialRange = selection.rangeCount ? selection.getRangeAt(0) : undefined;
@@ -194,7 +193,6 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         controller.abort();
         observer.disconnect();
         fragment.destroy();
-        owner.wysiwyg.tableControl?.setHidden(false);
         if (cell.isConnected && host.isConnected) {
             renderTableCellRich(cell);
             renderTableCellRichElements(cell);

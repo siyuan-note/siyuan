@@ -581,10 +581,10 @@ export const getBlockRanges = (editorElement: Element, selectedRange: Range, exc
         } else {
             const blockRange = document.createRange();
             blockRange.selectNodeContents(editableElement);
-            if (item === startElement) {
+            if (item === startElement && editableElement.contains(selectedRange.startContainer)) {
                 blockRange.setStart(selectedRange.startContainer, selectedRange.startOffset);
             }
-            if (item === endElement) {
+            if (item === endElement && editableElement.contains(selectedRange.endContainer)) {
                 blockRange.setEnd(selectedRange.endContainer, selectedRange.endOffset);
             }
             if (!blockRange.collapsed) {

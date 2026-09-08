@@ -640,8 +640,9 @@ export class Toolbar {
             return includeEmpty ? [] : undefined;
         }
 
-        const currentRange = this.range.cloneRange();
-        const currentItem = ranges.find(item => item.editableElement.contains(currentRange.startContainer) &&
+        // 临时片段编辑器可在没有光标选区时批量设置样式，仅在存在选区时恢复位置。
+        const currentRange = this.range?.cloneRange();
+        const currentItem = currentRange && ranges.find(item => item.editableElement.contains(currentRange.startContainer) &&
             item.editableElement.contains(currentRange.endContainer));
         const currentPosition = currentItem ?
             getSelectionOffset(currentItem.editableElement, undefined, currentRange, true) : undefined;
@@ -656,7 +657,7 @@ export class Toolbar {
             if (restoredRange) {
                 this.range = restoredRange;
             }
-        } else if (currentRange.startContainer.isConnected && currentRange.endContainer.isConnected) {
+        } else if (currentRange?.startContainer.isConnected && currentRange.endContainer.isConnected) {
             this.range = currentRange;
         }
         return nodes;

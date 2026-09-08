@@ -295,7 +295,7 @@ export class Hint {
             if (protyle.lite) {
                 protyle.options.hint.extend.find((item) => {
                     if (item.key === "/" && item.hint) {
-                        item.hint(key, protyle, "hint");
+                        this.genHTML(item.hint(key, protyle, "hint"), protyle, true, "hint");
                         return true;
                     }
                 });

@@ -103,7 +103,9 @@ interface ITableEdgeHover {
 const getCell = (target: EventTarget | Node) => {
     const element = target instanceof Element ? target : (target as Node)?.parentElement;
     const cell = element?.closest?.("th, td") as HTMLTableCellElement;
-    return cell && element.closest(".protyle-wysiwyg") === cell.closest(".protyle-wysiwyg") ? cell : undefined;
+    const editor = element?.closest?.(".table__cell-editor");
+    return cell && (element.closest(".protyle-wysiwyg") === cell.closest(".protyle-wysiwyg") ||
+        editor?.parentElement === cell) ? cell : undefined;
 };
 
 const getTableNode = (cell: HTMLTableCellElement) => {
@@ -635,7 +637,9 @@ export class TableControl {
         if (event.buttons !== 0) {
             return;
         }
-        const targetCell = getCell(event.target);
+        const eventCell = getCell(event.target);
+        // 内嵌编辑器只处理自身表格，避免将外层单元格识别为自己的内容。
+        const targetCell = eventCell && this.wysiwygElement.contains(eventCell) ? eventCell : undefined;
         const targetTable = targetCell?.closest("table") as HTMLTableElement;
         const targetViewportRect = targetTable ? this.getTableGridViewportRect(targetTable) : undefined;
         const edgeHover = !targetCell || (targetViewportRect &&
@@ -645,9 +649,10 @@ export class TableControl {
         const node = getTableNode(cell);
         if (cell && node && !this.protyle.disabled) {
             const nodeID = node.getAttribute("data-node-id");
-            if (nodeID && !this.protyle.gutter.element.querySelector(`[data-node-id="${CSS.escape(nodeID)}"]`)) {
+            const gutter = this.protyle.gutter;
+            if (nodeID && gutter && !gutter.element.querySelector(`[data-node-id="${CSS.escape(nodeID)}"]`)) {
                 // 初次移入时块标可能因编辑器仍在完成渲染而跳过，指针继续移动时补充渲染
-                this.protyle.gutter.render(this.protyle, node, cell);
+                gutter.render(this.protyle, node, cell);
             }
             const hoverType = edgeHover?.type || "cell";
             if (cell === this.hoverCell && hoverType === this.hoverType) {

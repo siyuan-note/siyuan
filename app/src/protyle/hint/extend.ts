@@ -25,7 +25,6 @@ import {zoomOut} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {genAssetHTML} from "../../asset/renderAssets";
 import {unicode2Emoji} from "../../emoji";
-import {avRender} from "../render/av/render";
 import {addWidgetCacheVersion} from "../util/widgetCache";
 import {
     getEntryCatalogNode,
@@ -675,7 +674,6 @@ export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement
             blockRender(protyle, protyle.wysiwyg.element);
             processRender(protyle.wysiwyg.element);
             highlightRender(protyle.wysiwyg.element);
-            avRender(protyle.wysiwyg.element, protyle);
             hideElements(["util"], protyle);
         };
         const docTreePlan = response.data.docTreePlan as ITemplateDocTreePlan | undefined;

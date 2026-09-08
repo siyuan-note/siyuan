@@ -192,6 +192,7 @@ const promiseTransaction = (options: {
     const protyle = options.protyle;
     // 受影响的嵌入块需推迟到事务提交后再渲染，否则其查询请求会早于写入到达内核而拿到旧数据
     const pendingEmbedElements = new Set<Element>();
+    const pendingAVElements = new Set<Element>();
     /// #if MOBILE
     if (((0 !== window.siyuan.config.sync.provider && isPaidUser()) ||
             (0 === window.siyuan.config.sync.provider && !needSubscribe(""))) &&
@@ -279,7 +280,7 @@ const promiseTransaction = (options: {
                 if (updatedEmbed) {
                     processRender(protyle.wysiwyg.element);
                     highlightRender(protyle.wysiwyg.element);
-                    avRender(protyle.wysiwyg.element, protyle);
+                    pendingAVElements.add(protyle.wysiwyg.element);
                 }
                 focusRestoredBlockSelectionMode(restoredSelectionModeElement);
                 return;
@@ -488,7 +489,7 @@ const promiseTransaction = (options: {
                 cursorElements.forEach(item => {
                     processRender(item);
                     highlightRender(item);
-                    avRender(item, protyle);
+                    pendingAVElements.add(item);
                     blockRender(protyle, item);
                     item.querySelectorAll("wbr").forEach(wbrItem => {
                         wbrItem.remove();
@@ -553,6 +554,29 @@ const promiseTransaction = (options: {
             templateDocTreePlanID: options.templateDocTreePlanID,
         },
         callback: (responseTransaction: {doOperations: IOperation[]}) => {
+            // 新增和更新的数据库载体必须在事务成功后渲染，确保内核已登记块及其笔记本归属。
+            responseTransaction.doOperations.forEach(operation => {
+                if (operation.action === "insert" || operation.action === "update") {
+                    protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
+                        pendingAVElements.add(item);
+                    });
+                }
+            });
+            const avElements = new Set<Element>();
+            pendingAVElements.forEach(item => {
+                if (item.getAttribute("data-type") === "NodeAttributeView") {
+                    avElements.add(item);
+                } else {
+                    item.querySelectorAll('[data-type="NodeAttributeView"]').forEach(avElement => {
+                        avElements.add(avElement);
+                    });
+                }
+            });
+            avElements.forEach(item => {
+                if (item.isConnected) {
+                    avRender(item, protyle);
+                }
+            });
             invalidateViewFoldRequests(protyle);
             const ids = getBlockSelectionStatusIDs(protyle.wysiwyg.element);
             countBlockWord(ids, protyle, true);

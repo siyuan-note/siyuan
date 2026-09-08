@@ -28,7 +28,7 @@ export const openRemoteConnection = (initialOrigin = "") => {
         <div class="fn__hr"></div>
         <div class="ft__on-surface">${escapeHtml(languages.remoteKernelAddressTip)}</div>
         <div class="fn__hr"></div>
-        <label class="fn__flex"><input data-field="trust" type="checkbox" class="b3-switch"><span class="fn__space"></span>${escapeHtml(languages.trustRemoteExtensions)}</label>
+        <label class="fn__flex" style="align-items:center"><input data-field="trust" type="checkbox" class="b3-switch"><span class="fn__space"></span>${escapeHtml(languages.trustRemoteExtensions)}</label>
         <div class="fn__hr"></div>
         <div class="ft__on-surface">${escapeHtml(languages.trustRemoteExtensionsTip)}</div>
         <div data-field="auth" class="fn__none">
@@ -43,7 +43,7 @@ export const openRemoteConnection = (initialOrigin = "") => {
                 </div>
             </div>
             <div class="fn__hr"></div>
-            <label class="fn__flex"><input data-field="rememberMe" type="checkbox" class="b3-switch"><span class="fn__space"></span><span data-field="rememberLabel"></span></label>
+            <label class="fn__flex" style="align-items:center"><input data-field="rememberMe" type="checkbox" class="b3-switch"><span class="fn__space"></span><span data-field="rememberLabel"></span></label>
         </div>
         <button type="submit" class="fn__none" tabindex="-1"></button>
     </form>
@@ -137,6 +137,7 @@ export const openRemoteConnection = (initialOrigin = "") => {
             });
             const trustLabel = document.createElement("label");
             trustLabel.className = "fn__flex";
+            trustLabel.style.alignItems = "center";
             trustLabel.title = languages.trustRemoteExtensionsTip;
             const trustEntry = document.createElement("input");
             trustEntry.type = "checkbox";

@@ -2557,16 +2557,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "以滑鼠右鍵點選儲存格，選擇 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "轉換為富文字"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 後即可直接在儲存格內編輯段落、標題、清單、引述、程式碼和公式。既有儲存格需手動轉換，內容中的 Markdown 標記保持原樣。"
+					"Data": "儲存格預設支援編輯段落、標題、列表、引述、程式碼和公式，無需手動轉換。既有文字中的 Markdown 標記保持原樣，原有粗體、連結等格式也會保留。"
 				}
 			]
 		},
@@ -2580,7 +2571,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "點選富文字儲存格，或將游標移入後按 "
+					"Data": "點擊儲存格，或將游標移入後按 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2589,7 +2580,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 開始編輯。編輯時 "
+					"Data": " 開始編輯。一般內容維持表格導覽："
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2598,7 +2589,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 建立片段內的新段落或清單項目，"
+					"Data": " 移到下一列，"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2607,16 +2598,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 和 "
+					"Data": " 切換儲存格，"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift+Tab"
+					"TextMarkTextContent": "Shift+Enter"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 用於縮排。關閉提示後按 "
+					"Data": " 在儲存格內換行。列表和程式碼區塊內使用對應的換行與縮排操作。關閉提示後按 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2625,7 +2616,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 或點選儲存格外結束編輯，內容自動儲存，隨後恢復表格導覽。"
+					"Data": " 或點擊儲存格外結束編輯，內容自動儲存。"
 				}
 			]
 		},

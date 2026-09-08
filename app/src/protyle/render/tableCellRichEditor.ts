@@ -9,8 +9,10 @@ import {configureAVRichTextLute, getAVRichTextLute, sanitizeAVRichTextBlockDOM} 
 import {highlightRender} from "./highlightRender";
 import {mathRender} from "./mathRender";
 import {renderTableCellRichElements} from "./tableCellRich";
-import {cleanTableCellRichHTML, getTableCellRichBlockDOM, renderTableCellRich, serializeTableCellRich, setTableCellRich} from "../util/tableCellRich";
-import {decodeTableCellRich, encodeTableCellRich, TABLE_CELL_RICH_ATTRIBUTE, TABLE_RICH_ATTRIBUTE} from "../util/tableCellRichValue";
+import {cleanTableCellRichHTML, getTableCellInlineHTML, getTableCellRichBlockDOM, renderTableCellRich, serializeTableCellRich, setTableCellRich, TABLE_CELL_INLINE_ATTRIBUTE, updateTableCellEditingValue} from "../util/tableCellRich";
+import {TABLE_CELL_RICH_ATTRIBUTE} from "../util/tableCellRichValue";
+import {focusByOffset, getSelectionOffset} from "../util/selection";
+import {fixTable} from "../util/table";
 
 const SAFE_SLASH_IDS = new Set([
     "ref", "heading1", "heading2", "heading3", "heading4", "heading5", "heading6", "list", "orderedList", "check",
@@ -81,8 +83,10 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         return;
     }
     let initialBlockHTML: string;
+    let source: string;
     try {
         initialBlockHTML = getTableCellRichBlockDOM(cell);
+        source = serializeTableCellRich(initialBlockHTML).markdown;
     } catch (error) {
         console.error(error);
         showMessage(window.siyuan.languages.tableCellRichInvalid);
@@ -91,14 +95,14 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     owner.wysiwyg.tableControl?.clear();
     owner.wysiwyg.tableControl?.setHidden(true);
     hideElements(["gutter"], owner);
-    table.setAttribute(TABLE_RICH_ATTRIBUTE, "1");
-    const initialHTML = table.outerHTML;
+    const selection = getSelection();
+    const initialRange = selection.rangeCount ? selection.getRangeAt(0) : undefined;
+    const initialOffset = !cell.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE) && initialRange &&
+        cell.contains(initialRange.startContainer) && cell.contains(initialRange.endContainer) ?
+        getSelectionOffset(cell, owner.wysiwyg.element, initialRange) : undefined;
     if (!cell.hasAttribute(TABLE_CELL_RICH_ATTRIBUTE)) {
-        cell.setAttribute(TABLE_CELL_RICH_ATTRIBUTE, encodeTableCellRich(serializeTableCellRich(initialBlockHTML).markdown));
-        table.setAttribute(TABLE_RICH_ATTRIBUTE, "1");
-        updateTransaction(owner, table, initialHTML);
+        cell.setAttribute(TABLE_CELL_INLINE_ATTRIBUTE, cell.innerHTML);
     }
-    let source = decodeTableCellRich(cell.getAttribute(TABLE_CELL_RICH_ATTRIBUTE)).content;
     const host = document.createElement("div");
     host.className = "table__cell-editor";
     host.dataset.protyleLiteRender = "safe";
@@ -162,7 +166,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             }
             const oldHTML = cleanTableCellRichHTML(table.outerHTML);
             source = serialized.markdown;
-            cell.setAttribute(TABLE_CELL_RICH_ATTRIBUTE, encodeTableCellRich(source));
+            updateTableCellEditingValue(cell, serialized);
             updateTransaction(owner, table, oldHTML);
         } catch (error) {
             console.error(error);
@@ -223,6 +227,33 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         }
     }, {signal});
     host.addEventListener("keydown", event => {
+        if (!event.isComposing && !composing && !event.ctrlKey && !event.metaKey && !event.altKey &&
+            fragment.hintElement.classList.contains("fn__none") &&
+            fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {
+            const range = getSelection().rangeCount ? getSelection().getRangeAt(0) : undefined;
+            const target = range?.startContainer instanceof Element ? range.startContainer : range?.startContainer.parentElement;
+            const inListOrCode = target?.closest('[data-type="NodeList"], [data-type="NodeCodeBlock"]');
+            const navigate = !inListOrCode && (event.key === "Tab" ||
+                (event.key === "Enter" && !event.shiftKey && getTableCellInlineHTML(fragment.getBlockHTML()) !== null));
+            if (navigate) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                finish();
+                const tableRange = document.createRange();
+                tableRange.selectNodeContents(cell);
+                tableRange.collapse(true);
+                getSelection().removeAllRanges();
+                getSelection().addRange(tableRange);
+                fixTable(owner, event, tableRange);
+                const next = getSelection().focusNode;
+                const nextElement = next instanceof Element ? next : next?.parentElement;
+                const nextCell = nextElement?.closest<HTMLTableCellElement>("td, th");
+                if (nextCell && nextCell !== cell && nextCell.closest(".protyle-wysiwyg") === owner.wysiwyg.element) {
+                    openTableCellRichEditor(owner, nextCell);
+                }
+                return;
+            }
+        }
         if (event.key === "Escape" && !event.isComposing &&
             fragment.hintElement.classList.contains("fn__none") &&
             fragment.protyle.toolbar.subElement.classList.contains("fn__none")) {
@@ -240,4 +271,10 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     }, {capture: true, signal});
     observer.observe(owner.element, {childList: true, subtree: true});
     fragment.focus(true);
+    if (initialOffset) {
+        const edit = fragment.wysiwyg.querySelector('[contenteditable="true"]');
+        if (edit) {
+            focusByOffset(edit, initialOffset.start, initialOffset.end);
+        }
+    }
 };

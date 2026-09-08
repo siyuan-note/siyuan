@@ -35,7 +35,6 @@ import {
 } from "../util/selection";
 import {Constants} from "../../constants";
 import {mergeTableCellContents} from "../util/tableCellRich";
-import {TABLE_CELL_RICH_ATTRIBUTE} from "../util/tableCellRichValue";
 import {isMobile} from "../../util/functions";
 import {previewDocImage} from "../preview/image";
 import {getDiagramBlock, previewDiagram} from "../preview/diagram";
@@ -3883,7 +3882,7 @@ export class WYSIWYG {
                 const selection = getSelection();
                 const target = selection?.focusNode;
                 const element = target instanceof Element ? target : target?.parentElement;
-                const cell = element?.closest<HTMLTableCellElement>(`th[${TABLE_CELL_RICH_ATTRIBUTE}], td[${TABLE_CELL_RICH_ATTRIBUTE}]`);
+                const cell = element?.closest<HTMLTableCellElement>("th, td");
                 if (cell && cell.closest(".protyle-wysiwyg") === this.element) {
                     event.preventDefault();
                     event.stopPropagation();
@@ -4460,7 +4459,7 @@ export class WYSIWYG {
                 this.preventClick = false;
                 return;
             }
-            const richCell = event.target.closest<HTMLTableCellElement>(`th[${TABLE_CELL_RICH_ATTRIBUTE}], td[${TABLE_CELL_RICH_ATTRIBUTE}]`);
+            const richCell = event.target.closest<HTMLTableCellElement>("th, td");
             if (richCell && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && !protyle.disabled &&
                 richCell.closest(".protyle-wysiwyg") === this.element &&
                 !event.target.closest("a, [data-type~='block-ref'], [data-type~='a'], img")) {

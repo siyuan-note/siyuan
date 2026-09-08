@@ -2567,16 +2567,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Right-click a cell and choose "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Convert to rich text"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to edit paragraphs, headings, lists, blockquotes, code, and math directly inside it. Existing cells require explicit conversion; Markdown-looking text keeps its literal meaning."
+					"Data": "Table cells support paragraphs, headings, lists, blockquotes, code, and math without manual conversion. Existing Markdown-looking text stays literal, and existing bold text, links, and other inline formatting are preserved."
 				}
 			]
 		},
@@ -2590,7 +2581,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Click a rich text cell, or place the caret in it and press "
+					"Data": "Click a cell, or place the caret in it and press "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2599,7 +2590,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to edit. While editing, "
+					"Data": " to edit. Ordinary content keeps table navigation: "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2608,7 +2599,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " creates a paragraph or list item inside the fragment; "
+					"Data": " moves to the next row, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2617,16 +2608,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " and "
+					"Data": " switches cells, and "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift+Tab"
+					"TextMarkTextContent": "Shift+Enter"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " control indentation. Close any suggestion first, then press "
+					"Data": " inserts a line break within the cell. Lists and code blocks use their own line-break and indentation behavior. Close suggestions, then press "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2635,7 +2626,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " or click outside to finish. Changes are saved automatically, and table navigation resumes."
+					"Data": " or click outside the cell to finish editing and save automatically."
 				}
 			]
 		},

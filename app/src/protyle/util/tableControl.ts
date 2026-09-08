@@ -1,6 +1,5 @@
 import {MenuItem} from "../../menus/Menu";
 import {clearTableCellContent, getTableCellRichPlainText, mergeTableCellContents} from "./tableCellRich";
-import {getTableCellRichMenus} from "../toolbar/tableCellRich";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {copyPlainText, encodeBase64, isMac, readClipboard} from "./compatibility";
 import {removeZWJ} from "./normalizeText";
@@ -1738,9 +1737,6 @@ export class TableControl {
 
     private appendCellMenus(rectangle: boolean) {
         const cells = this.getSelectedCells();
-        getTableCellRichMenus(this.protyle, cells).forEach(menu => {
-            window.siyuan.menus.menu.append(new MenuItem(menu).element);
-        });
         this.appendAlignmentMenu();
         const cellSelection = getTableCellSelectionIndexes(this.selection.table, cells);
         if (cellSelection.rowIndexes.length > 0 || cellSelection.columnIndexes.length > 0) {

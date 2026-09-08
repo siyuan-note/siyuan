@@ -3603,6 +3603,20 @@ export class Gutter {
     }
 
     public render(protyle: IProtyle, element: Element, target?: Element) {
+        const cellFragment = element.closest(".table__cell-rich, .table__cell-editor") ||
+            target?.closest(".table__cell-rich, .table__cell-editor");
+        if (cellFragment) {
+            if (cellFragment.classList.contains("table__cell-editor")) {
+                hideElements(["gutter"], protyle);
+                return;
+            }
+            // 单元格预览中的片段不提供块级操作，块标始终定位到所属表格。
+            const table = cellFragment.closest('[data-type="NodeTable"][data-node-id]');
+            if (!table) {
+                return;
+            }
+            element = table;
+        }
         // https://github.com/siyuan-note/siyuan/issues/4659
         if (protyle.title && protyle.title.element.getAttribute("data-render") !== "true") {
             return;
@@ -3713,6 +3727,7 @@ export class Gutter {
                     listItem = tabsHeader ? undefined : topElement.querySelector(".li") || topElement.querySelector(".list");
                     // 嵌入块中有列表时块标显示位置错误 https://github.com/siyuan-note/siyuan/issues/6254
                     if ((!embedContext && isInEmbedBlock(listItem)) || isInAVBlock(listItem) ||
+                        listItem?.closest(".table__cell-rich, .table__cell-editor") ||
                         hasClosestByClassName(nodeElement, "callout")) {
                         listItem = undefined;
                     }

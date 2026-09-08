@@ -12981,7 +12981,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Edit a rich text cell"
+									"Data": "Edit a table cell"
 								}
 							]
 						},
@@ -13005,7 +13005,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Finish rich text cell editing (close suggestions first)"
+									"Data": "Finish table cell editing (close suggestions first)"
 								}
 							]
 						},
@@ -13029,7 +13029,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Rich text cell editing: new paragraph or list item"
+									"Data": "Ordinary cell content: next row; lists or code: new item or line"
 								}
 							]
 						},
@@ -13053,7 +13053,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Rich text cell editing: indent or outdent"
+									"Data": "Ordinary cell content: switch cells; lists or code: indent or outdent"
 								}
 							]
 						},

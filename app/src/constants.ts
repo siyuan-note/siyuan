@@ -180,6 +180,7 @@ export abstract class Constants {
     public static readonly LOCAL_EXPORTPDF = "local-exportpdf";
     public static readonly LOCAL_EXPORTWORD = "local-exportword";
     public static readonly LOCAL_EXPORTIMG = "local-exportimg";
+    public static readonly LOCAL_EXPORTPATH = "local-exportpath";
     public static readonly LOCAL_BAZAAR = "local-bazaar";
     public static readonly LOCAL_PDFTHEME = "local-pdftheme";
     public static readonly LOCAL_LAYOUTS = "local-layouts";

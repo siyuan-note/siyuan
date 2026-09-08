@@ -11,7 +11,8 @@
 }
 
 .b3-typography,
-.protyle-wysiwyg {
+.protyle-wysiwyg,
+.table__cell-rich {
   font-variant-ligatures: no-common-ligatures;
   display: flex;
   flex-direction: column;
@@ -27,7 +28,8 @@
   li > p,
   & > p,
   blockquote > p,
-  [data-node-id] {
+  [data-node-id],
+  [data-table-cell-node] {
     line-height: 1.625;
     padding: 4px;
     margin: 2px 0;

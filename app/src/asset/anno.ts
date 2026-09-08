@@ -18,6 +18,7 @@ import {
     getCaptureCanvasBounds,
     getCaptureDisplayWidth,
     getLimitedCaptureScale,
+    getPdfAnnotationAssetsDirPath,
     PDF_RECT_CAPTURE_PROFILE,
     PDF_RECT_CAPTURE_SCALE,
     PDF_RECT_DISPLAY_SCALE,
@@ -1055,13 +1056,20 @@ const copyAnno = (idPath: string, fileName: string, pdf: any) => {
                 confirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
                     const imageName = getRectImageName(content, imageData.rotation, positionHash,
                         PDF_RECT_CAPTURE_PROFILE);
+                    const assetsDirPath = getPdfAnnotationAssetsDirPath(pdf.appConfig.file, location.origin);
+                    if (assetsDirPath === null) {
+                        return;
+                    }
                     void uploadStandaloneAssetFiles([
                         new File([imageData.blob], imageName, {type: imageData.blob.type}),
                     ], {
                         source: "programmatic",
                         target: "pdf-annotation",
                         requiredFileCount: 1,
-                        extraData: {skipIfDuplicated: "true"},
+                        extraData: {
+                            skipIfDuplicated: "true",
+                            ...(assetsDirPath ? {assetsDirPath} : {}),
+                        },
                     }).then(response => {
                         const path = getAssetUploadSuccesses(response?.data)[0]?.path;
                         if (path) {

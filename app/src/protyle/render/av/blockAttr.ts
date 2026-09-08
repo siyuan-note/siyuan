@@ -7,9 +7,8 @@ import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
 import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
-import {uploadFiles} from "../../upload";
 import {openLink} from "../../../editor/openLink";
-import {dragUpload, dragUploadFiles, editAssetItem} from "./asset";
+import {dragUpload, dragUploadFiles, editAssetItem, uploadFilesToAssetCell} from "./asset";
 import {previewImages} from "../../preview/image";
 /// #if !BROWSER
 import {webUtils} from "electron";
@@ -343,10 +342,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     event.preventDefault();
                     event.stopPropagation();
                     if (files && files.length > 0) {
-                        uploadFiles(protyle, files, undefined, undefined, undefined, {
-                            source: "paste",
-                            target: "av-cell",
-                        });
+                        uploadFilesToAssetCell(files, protyle, assetCellElement, {source: "paste"});
                     } else {
                         const textPlain = event.clipboardData.getData("text/plain");
                         const blockElement = hasClosestBlock(assetCellElement);

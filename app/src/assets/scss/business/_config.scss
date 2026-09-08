@@ -35,8 +35,7 @@
   }
 
   &__tab-wrap > .config__tab-container:not([data-name="bazaar"]):not([data-name="assets"]) {
-    margin: 0 24px;
-    padding: 24px 0;
+    padding: 24px;
     scroll-padding-block: 24px;
     height: 100%;
     flex-shrink: 0;

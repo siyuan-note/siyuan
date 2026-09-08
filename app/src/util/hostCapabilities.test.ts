@@ -1,6 +1,47 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {detectRemoteKernel, hasRemoteArgument, isExternalURLAllowed, resolveRemoteKernel} from "./hostCapabilities";
+import {
+    detectRemoteKernel, hasRemoteArgument, isExternalURLAllowed, resolveHostCapabilities, resolveRemoteKernel,
+    type TKernelConnection,
+} from "./hostCapabilities";
+
+describe("trusted remote extension capabilities", () => {
+    const connection: TKernelConnection = {
+        kernelMode: "remote", ownsKernel: false, kernelOrigin: "https://example.com",
+        trustRemoteExtensions: true,
+    };
+
+    it("only enables plugins and appearance for the matching host connection", () => {
+        const restricted = resolveHostCapabilities(true, undefined, connection.kernelOrigin);
+        assert.equal(restricted.plugins, false);
+        assert.equal(restricted.customAppearance, false);
+        assert.deepEqual(resolveHostCapabilities(true, connection, connection.kernelOrigin), {
+            ...restricted, plugins: true, customAppearance: true,
+        });
+        for (const origin of ["https://other.example.com", "https://example.com:8443", "http://example.com"]) {
+            assert.deepEqual(resolveHostCapabilities(true, connection, origin), restricted);
+        }
+        assert.deepEqual(resolveHostCapabilities(true, {...connection, trustRemoteExtensions: false},
+            connection.kernelOrigin), restricted);
+        assert.deepEqual(resolveHostCapabilities(true, {...connection, kernelMode: "local"},
+            connection.kernelOrigin), restricted);
+    });
+
+    it("does not grant trust from query strings or renderer command line arguments", () => {
+        const remote = detectRemoteKernel("?remote=1&trustRemoteExtensions=true", ["--trust-remote-extensions"]);
+        assert.equal(resolveHostCapabilities(remote, undefined, connection.kernelOrigin).plugins, false);
+    });
+
+    it("preserves local capabilities", () => {
+        const local = resolveHostCapabilities(false, undefined, "https://127.0.0.1:6806");
+        assert.equal(local.remoteKernel, false);
+        for (const [name, value] of Object.entries(local)) {
+            if (name !== "remoteKernel") {
+                assert.equal(value, true, name);
+            }
+        }
+    });
+});
 
 describe("remote kernel detection", () => {
     it("detects the remote query", () => {

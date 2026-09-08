@@ -4,7 +4,7 @@ import {isMobile, objEquals} from "../../util/functions";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {Constants} from "../../constants";
 import {refreshHeadingNumberMeasurements} from "../../util/assets";
-import {getHostCapabilities} from "../../util/hostCapabilities";
+import {getExtensionScriptNonce, getHostCapabilities} from "../../util/hostCapabilities";
 
 export const renderSnippet = (timeout = 0) => {
     if (!getHostCapabilities().customAppearance) {
@@ -50,6 +50,10 @@ export const renderSnippet = (timeout = 0) => {
             } else if (item.type === "js") {
                 exitElement = document.createElement("script");
                 exitElement.type = "text/javascript";
+                const nonce = getExtensionScriptNonce();
+                if (nonce) {
+                    exitElement.nonce = nonce;
+                }
                 exitElement.text = item.content;
                 exitElement.id = id;
                 document.head.appendChild(exitElement);

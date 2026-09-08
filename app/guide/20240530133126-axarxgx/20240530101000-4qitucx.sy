@@ -8,7 +8,7 @@
 		"id": "20240530101000-4qitucx",
 		"title": "スタートガイド",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20260907120000"
 	},
 	"Children": [
 		{
@@ -2267,7 +2267,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240530101000-uuvmlfo",
-				"updated": "20260729215152"
+				"updated": "20260907120000"
 			},
 			"Children": [
 				{
@@ -2283,7 +2283,7 @@
 			"Properties": {
 				"ID": "20240530101000-mjsoysi",
 				"id": "20240530101000-x13cm9r",
-				"updated": "20260729215152"
+				"updated": "20260907120000"
 			},
 			"Children": [
 				{
@@ -2345,6 +2345,37 @@
 									"TextMarkBlockRefID": "20240530101000-hkgs92c",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "データセキュリティ"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-ja00075",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-ja00075",
+						"updated": "20260907120000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-ja00076",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-ja00076",
+								"updated": "20260907120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260907120000-cryja01",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "暗号化ノートブック"
 								}
 							]
 						}

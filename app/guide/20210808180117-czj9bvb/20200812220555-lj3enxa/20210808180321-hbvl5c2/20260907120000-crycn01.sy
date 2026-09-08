@@ -1,0 +1,1552 @@
+{
+	"ID": "20260907120000-crycn01",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260907120000-crycn01",
+		"title": "加密笔记本",
+		"type": "doc",
+		"updated": "20260908150000"
+	},
+	"Children": [
+		{
+			"ID": "20260907120000-cn00001",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-cn00001",
+				"updated": "20260908100000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00002",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260907120000-cn00002",
+				"updated": "20260907120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "加密笔记本用于保存敏感内容。其文档、资源文件及原始文件名、数据库定义和专用索引会加密存储在磁盘上；普通笔记本保持原有存储方式。锁定后，必须使用主密码才能打开。"
+				}
+			]
+		},
+		{
+			"ID": "20260908120000-cnuse01",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260908120000-cnuse01",
+				"updated": "20260908150000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用场景"
+				}
+			]
+		},
+		{
+			"ID": "20260908120000-cnuse02",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260908120000-cnuse02",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"ID": "20260908120000-cnuse03",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908120000-cnuse03",
+						"updated": "20260908120000"
+					},
+					"Children": [
+						{
+							"ID": "20260908120000-cnuse04",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908120000-cnuse04",
+								"updated": "20260908120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "个人隐私资料：保存日记、医疗记录、财务信息、证件资料等不希望以明文留在磁盘上的内容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908120000-cnuse05",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908120000-cnuse05",
+						"updated": "20260908120000"
+					},
+					"Children": [
+						{
+							"ID": "20260908120000-cnuse06",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908120000-cnuse06",
+								"updated": "20260908120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "工作机密资料：保存项目规划、会议记录、客户资料、研究材料和其他需要限制本地访问的内容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908120000-cnuse07",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908120000-cnuse07",
+						"updated": "20260908120000"
+					},
+					"Children": [
+						{
+							"ID": "20260908120000-cnuse08",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908120000-cnuse08",
+								"updated": "20260908120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "敏感知识库与 AI 辅助：在解锁后使用 AI 进行总结、问答、润色和整理；使用云端 AI 服务时，相关内容可能发送给所配置的服务提供商，请根据隐私要求选择模型和部署方式"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-cnrev01",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-cnrev01",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-cnrev02",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-cnrev02",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "设备与备份防护：在设备遗失、被盗或备份介质泄露时，降低他人直接读取锁定笔记本内容的风险"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908120000-cnuse09",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908120000-cnuse09",
+						"updated": "20260908120000"
+					},
+					"Children": [
+						{
+							"ID": "20260908120000-cnuse10",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908120000-cnuse10",
+								"updated": "20260908120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "多设备与长期保存：通过数据同步使用加密后的持久化数据，并配合主密码和密钥备份在其他设备上恢复访问"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00003",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-cn00003",
+				"updated": "20260908150000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用前须知"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00004",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-cn00004",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-cn00005",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00005",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00006",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00006",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "主密码无法找回。忘记主密码后，任何人都无法恢复内容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00007",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00007",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00008",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00008",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "密钥备份不能替代主密码。恢复数据时通常需要匹配的密钥备份和主密码，请分别妥善保管"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00009",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00009",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00010",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00010",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密笔记本在锁定状态下保护最强。解锁期间，获得主应用授权的插件、API、MCP 工具和 AI 智能体可以读取其中内容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-cnrev03",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-cnrev03",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-cnrev04",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-cnrev04",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密主要保护磁盘上的持久化内容，并在锁定后阻止通过受支持入口访问内容；笔记本名称、目录结构、文件数量和大小、修改时间、资源扩展名等元数据仍可能可见"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-cnrev05",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-cnrev05",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-cnrev06",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-cnrev06",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "锁定只会尽力清理应用可控的明文缓存和临时文件，不保证抹除操作系统交换区、休眠文件、崩溃转储或存储快照中的瞬时副本；主动导出的文件、剪贴板、截图和打印内容需要自行保护"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-cnrev07",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-cnrev07",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-cnrev08",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-cnrev08",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "主密码派生通常需要约 1 秒，解锁时还会重建专用索引，大型笔记本可能需要更久；上传大型资源会占用更多内存，浏览资源时每次请求都需要重新解密"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00011",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-cn00011",
+				"updated": "20260908150000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "启用并创建"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00012",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260907120000-cn00012",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "前往 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "鉴权"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "加密笔记本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，开启“启用加密笔记本”，设置并确认主密码，然后确认风险提示。建议使用密码管理器生成并保存至少 12 位且混合大小写字母、数字和符号的强密码。"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00013",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-cn00013",
+				"updated": "20260908100000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-cn00014",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00014",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00015",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00015",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "启用后立即导出密钥备份，并在工作空间之外保存一份独立副本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00016",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00016",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00017",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00017",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "桌面端前往 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "文档"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "更多"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "新建加密笔记本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00018",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00018",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00019",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00019",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "移动端前往 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "右侧栏"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "创建"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "新建加密笔记本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00020",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00020",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00021",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00021",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "输入笔记本名称和主密码。创建完成后，笔记本会直接打开"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00022",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-cn00022",
+				"updated": "20260908150000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "解锁和锁定"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00023",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-cn00023",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-cn00024",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00024",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00025",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00025",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在文档面板中点击已关闭的加密笔记本，输入主密码即可解锁并打开。每个加密笔记本分别解锁"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00026",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00026",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00027",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00027",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "关闭加密笔记本即锁定。关闭前会先保存未写入的编辑和文件历史；锁定会停止新的内容访问，等待或取消进行中的任务，撤销应用管理的密钥访问并关闭数据库连接，并尽力清理应用管理的明文缓存、临时文件和访问令牌"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00028",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00028",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00029",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00029",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "应用重启后，所有加密笔记本均保持锁定，需要重新输入主密码"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00030",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260907120000-cn00030",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可以在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "鉴权"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "加密笔记本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中设置自动锁定的空闲分钟数。当前工作区中的界面操作会刷新所有已解锁加密笔记本的计时，后台同步、索引等任务不会自动刷新；设置为 0 表示禁用自动锁定。"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00031",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-cn00031",
+				"updated": "20260908150000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "主密码和密钥备份"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00032",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-cn00032",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-cn00033",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00033",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00034",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00034",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "所有加密笔记本共用一个主密码，但每个笔记本使用独立的数据密钥。解锁一个笔记本不会解锁其他笔记本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00035",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00035",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00036",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00036",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "修改主密码前必须关闭所有加密笔记本。修改操作只会重新保护各笔记本的数据密钥，不会重新加密文档内容；完成后系统会自动刷新工作空间中的密钥备份，还应立即导出新的密钥备份"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-cnrev09",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-cnrev09",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-cnrev10",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-cnrev10",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果旧主密码和保留旧版密钥信息的同步副本、备份或历史快照同时泄露，旧主密码仍可能解密使用同一数据密钥的现有内容。怀疑旧主密码泄露时，应将内容导出为明文后导入使用新数据密钥的新加密笔记本，并在确认迁移成功后安全删除明文文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00037",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00037",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00038",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00038",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "本机配置丢失、新设备需要恢复或界面提示配置需要恢复时，导入密钥备份并输入与其匹配的主密码。密钥备份本身不包含主密码"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-cnrev11",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-cnrev11",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-cnrev12",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-cnrev12",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "系统可以校验密钥备份是否完整，但不能判断哪个备份最新。应在工作空间之外保留带有版本记录的独立密钥备份"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00039",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00039",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00040",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00040",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "存在加密笔记本或仍依赖当前密钥的可恢复历史时，系统会拒绝禁用加密笔记本功能，以免数据永久失去访问能力"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00041",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260907120000-cn00041",
+				"updated": "20260907120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "修改、导出或导入密钥均在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "鉴权"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "加密笔记本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中进行。"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00042",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-cn00042",
+				"updated": "20260908150000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "同步、历史、导入和导出"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00043",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-cn00043",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-cn00044",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00044",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00045",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00045",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "数据同步保存和传输加密后的持久化数据，并同步密钥备份；新设备会自动恢复启用状态，但解锁状态不会同步，仍需输入主密码"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00046",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00046",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00047",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00047",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文档历史支持加密数据，查看或回滚时需要先解锁对应笔记本；恢复已删除笔记本还需要匹配的密钥备份和主密码"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-cnrev13",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-cnrev13",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-cnrev14",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-cnrev14",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "支持向已解锁的加密笔记本导入 .sy.zip 和 Markdown，内容会在落盘前加密"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00048",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00048",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00049",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00049",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "仅在解锁状态下支持导出，导出的 .sy.zip、HTML、Word、PDF 和 Markdown 等文件均为明文；导出后应按普通敏感文件保护、移动或删除"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00050",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-cn00050",
+				"updated": "20260908150000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "功能范围"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00051",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-cn00051",
+				"updated": "20260908150000"
+			},
+			"HeadingLevel": 3,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "支持的功能"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00052",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-cn00052",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-cn00053",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00053",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00054",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00054",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "解锁后可在笔记本内正常编辑文档、使用内容块引用、反链、搜索、数据库、导入、历史和导出"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00055",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00055",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00056",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00056",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "解锁期间，插件、API、MCP 工具和 AI 智能体可以读取内容块、列出文档并使用笔记本内全文搜索"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00057",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-cn00057",
+				"updated": "20260908150000"
+			},
+			"HeadingLevel": 3,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "不支持的功能"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00058",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-cn00058",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-cn00059",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00059",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00060",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00060",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密内容不进入全局搜索、全局关系图、语义搜索和嵌入向量化"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00061",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00061",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00062",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00062",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支持跨普通笔记本与加密笔记本边界，或跨两个加密笔记本进行内容块引用、移动、文档转标题和数据库镜像"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00063",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00063",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00064",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00064",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "发布服务无论笔记本是否解锁都无法列出或读取其内容，发布密码和可见性设置也无法为其启用发布；此外不支持闪卡、书签、标签、资源重命名、原始文件 API、WebDAV 和内核命令行操作"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-cnrev15",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-cnrev15",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-cnrev16",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-cnrev16",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密笔记本不参与全局未引用资源和未引用数据库清理"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00065",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-cn00065",
+				"updated": "20260908150000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用建议"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-cn00066",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-cn00066",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-cn00067",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00067",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00068",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00068",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "设置合适的自动锁定时间，不使用时及时关闭加密笔记本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00069",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00069",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00070",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00070",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不要直接编辑工作空间中的加密文件，也不要在文件系统中重命名加密资源"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00071",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00071",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00072",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00072",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "修改主密码、迁移设备或调整同步配置后，确认工作空间之外保存有带版本记录的最新密钥备份"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-cn00073",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-cn00073",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-cn00074",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-cn00074",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不要把主密码和唯一一份密钥备份保存在同一个位置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-cnrev17",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-cnrev17",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-cnrev18",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-cnrev18",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "非敏感内容建议存放在普通笔记本中，避免不必要的加解密、索引重建和资源处理开销"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

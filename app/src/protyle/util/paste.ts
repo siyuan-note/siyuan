@@ -1,4 +1,5 @@
 import {Constants} from "../../constants";
+import {getTableCellRichPlainText} from "./tableCellRich";
 import {uploadFiles, uploadLocalFiles} from "../upload";
 import type {IUploadInsertOptions} from "../upload";
 import {
@@ -20,6 +21,7 @@ import {hideElements} from "../ui/hideElements";
 import {showMessage} from "../../dialog/message";
 import {avRender} from "../render/av/render";
 import {cellScrollIntoView, getCellText} from "../render/av/cell";
+import {captureAVAssetUploadHandler} from "../render/av/asset";
 import {fixAdjacentTags, getCalloutInfo, getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
 import {remapTabsDOMIDs, wrapPastedTabItems} from "./tabsCopy";
@@ -187,7 +189,7 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
         text += removeZWJ(blockElement.querySelector("[spellcheck]").textContent);
     } else if (dataType === "NodeTable") {
         blockElement.querySelectorAll("th, td").forEach((item) => {
-            text += item.textContent.trim() + "\t";
+            text += (item.hasAttribute("data-sy-table-cell-rich") ? getTableCellRichPlainText(item) : item.textContent.trim()) + "\t";
             if (!item.nextElementSibling) {
                 text = text.slice(0, -1) + "\n";
             }
@@ -342,7 +344,9 @@ export const restoreLuteMarkdownSyntax = (protyle: IProtyle) => {
     });
 };
 
-const readLocalFile = async (protyle: IProtyle, localFiles: ILocalFiles[], options?: IUploadInsertOptions) => {
+const readLocalFile = async (protyle: IProtyle, localFiles: ILocalFiles[], options?: IUploadInsertOptions,
+                            successCB?: (response: IWebSocketData,
+                                result: Omit<IAssetUploadResult, "requestId" | "input">) => void) => {
     if (areProtylePluginExtensionsEnabled(protyle) && protyle.app?.plugins && hasPluginSubscriber("paste")) {
         const plugins = Array.from(protyle.app.plugins);
         for (let i = 0; i < plugins.length; i++) {
@@ -402,7 +406,7 @@ const readLocalFile = async (protyle: IProtyle, localFiles: ILocalFiles[], optio
         !isUploadInsertPositionAvailable(protyle.wysiwyg.element, options.insertPosition)) {
         return;
     }
-    uploadLocalFiles(localFiles, protyle, true, options);
+    uploadLocalFiles(localFiles, protyle, true, options, successCB);
 };
 
 export const convertPastedListItemSubtype = (listItemElement: HTMLElement, subtype: string) => {
@@ -634,6 +638,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     }
     const pasteInsertPosition = uploadOptions?.insertPosition ||
         createUploadInsertPosition(getEditorRange(protyle.wysiwyg.element));
+    const initialBlockElement = (hasClosestBlock(event.target) ||
+        hasClosestBlock(pasteInsertPosition.range.startContainer)) as HTMLElement;
+    const avAssetUploadHandler = initialBlockElement?.classList.contains("av") ?
+        captureAVAssetUploadHandler(protyle, initialBlockElement) : undefined;
     const isPasteInsertPositionAvailable = () =>
         isUploadInsertPositionAvailable(protyle.wysiwyg.element, pasteInsertPosition);
     const restorePasteInsertRange = () => {
@@ -650,6 +658,11 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         target: uploadOptions?.target || "editor",
         position: uploadOptions?.position || ("dataTransfer" in event ? {x: event.clientX, y: event.clientY} : undefined),
     };
+    const directAssetUploadOptions: IUploadInsertOptions = avAssetUploadHandler ?
+        {...assetUploadOptions, target: "av-cell"} : assetUploadOptions;
+    const avAssetUploadSuccess = avAssetUploadHandler ?
+        (_response: unknown, result: Omit<IAssetUploadResult, "requestId" | "input">) => avAssetUploadHandler(result) :
+        undefined;
     let textHTML: string;
     let textPlain: string;
     let siyuanHTML: string;
@@ -685,7 +698,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         }
     } else {
         if (!blockDOMSanitizer && event.localFiles?.length > 0) {
-            readLocalFile(protyle, event.localFiles, assetUploadOptions);
+            readLocalFile(protyle, event.localFiles, directAssetUploadOptions, avAssetUploadSuccess);
             return;
         }
         textHTML = event.textHTML;
@@ -733,7 +746,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             return;
         }
         if (localFiles.length > 0) {
-            readLocalFile(protyle, localFiles, assetUploadOptions);
+            readLocalFile(protyle, localFiles, directAssetUploadOptions, avAssetUploadSuccess);
             return;
         }
     }
@@ -888,7 +901,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     }
     if (!nodeElement) {
         if (files && files.length > 0) {
-            uploadFiles(protyle, files, undefined, undefined, undefined, assetUploadOptions);
+            uploadFiles(protyle, files, undefined, avAssetUploadSuccess, undefined, directAssetUploadOptions);
         }
         return;
     }
@@ -1112,7 +1125,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             }
             const fallback = getWPSPresentationFallback(wpsPresentation.type, Boolean(files?.length));
             if (fallback === "files") {
-                uploadFiles(protyle, files, undefined, undefined, undefined, assetUploadOptions);
+                uploadFiles(protyle, files, undefined, avAssetUploadSuccess, undefined, directAssetUploadOptions);
                 return;
             }
             files = [];
@@ -1368,7 +1381,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             insertConvertedBlockDOM(protyle, conversionResponse.data, range);
             return;
         } else if (files && files.length > 0) {
-            uploadFiles(protyle, files, undefined, undefined, undefined, assetUploadOptions);
+            uploadFiles(protyle, files, undefined, avAssetUploadSuccess, undefined, directAssetUploadOptions);
             return;
         } else if (textPlain.trim() !== "" && (files && files.length === 0 || !files)) {
             const selectedText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");

@@ -55,6 +55,7 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
    - When adding an icon to `app/appearance/icons/litheness/icon.js`, add its preview entry to `app/appearance/icons/index.html` in the same change and keep the order aligned
 4. **User guide:** When editing the user guide, follow `docs/SY-FORMAT.md`
    - When a feature adds or changes shortcuts, update the shortcut documentation in the user guide in the same change; if the appropriate section is unclear, ask the user where it should be placed
+   - List item text must not end with a period or equivalent sentence-ending mark (for example `.`, `。`, or `।`)
    - Represent in-app UI navigation paths as segmented `kbd` text marks: use one `NodeTextMark` with `TextMarkType: "kbd"` per navigation level, and place a plain `NodeText` containing ` - ` between adjacent levels
    - In every language, separate a `kbd` path from adjacent prose with exactly one ASCII space on each side, except at block boundaries, after full-width punctuation, or before any punctuation. Half-width punctuation before the path still requires a space; keep internal ` - ` separators unchanged
 5. **Git:**

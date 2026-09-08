@@ -1,4 +1,6 @@
 import {setTabTitleNavigationEditing} from "../render/tabsRender";
+import type {TVerticalDirection} from "./verticalCaret";
+import {getHorizontalDistanceToRect} from "./verticalGeometry";
 
 export interface IHostVerticalRegion {
     owner: HTMLElement;
@@ -40,4 +42,44 @@ export const getHostVerticalTitleRegion = (node: Node): IHostVerticalRegion | un
         }
         ancestor = ancestor.parentElement;
     }
+};
+
+const getLayoutRect = (element: Element) => Array.from(element.getClientRects())
+    .find(rect => rect.width > 0.5 && rect.height > 0.5);
+
+export const getTableBoundaryCell = (table: HTMLTableElement, direction: TVerticalDirection,
+                                     goalX: number): HTMLTableCellElement | undefined => {
+    const rows = Array.from(table.rows).filter(row => row.closest("table") === table && getLayoutRect(row));
+    const boundaryRow = rows[direction === "down" ? 0 : rows.length - 1];
+    const rowRect = boundaryRow && getLayoutRect(boundaryRow);
+    if (!rowRect) {
+        return;
+    }
+    let cells = Array.from(table.querySelectorAll<HTMLTableCellElement>("th, td")).filter(cell => {
+        if (cell.closest("table") !== table || cell.classList.contains("fn__none")) {
+            return false;
+        }
+        const rect = getLayoutRect(cell);
+        return rect && Math.min(rect.bottom, rowRect.bottom) - Math.max(rect.top, rowRect.top) > 0.5;
+    });
+    if (cells.length === 0) {
+        cells = Array.from(boundaryRow.cells).filter(cell => !cell.classList.contains("fn__none") && getLayoutRect(cell));
+    }
+    let closestCell: HTMLTableCellElement | undefined;
+    let closestDistance = Number.POSITIVE_INFINITY;
+    let closestCenterDistance = Number.POSITIVE_INFINITY;
+    cells.forEach(cell => {
+        const rect = getLayoutRect(cell);
+        if (!rect) {
+            return;
+        }
+        const distance = getHorizontalDistanceToRect(goalX, rect);
+        const centerDistance = Math.abs(goalX - (rect.left + rect.right) / 2);
+        if (distance < closestDistance || (distance === closestDistance && centerDistance < closestCenterDistance)) {
+            closestCell = cell;
+            closestDistance = distance;
+            closestCenterDistance = centerDistance;
+        }
+    });
+    return closestCell;
 };

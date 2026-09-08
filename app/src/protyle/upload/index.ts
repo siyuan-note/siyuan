@@ -7,16 +7,11 @@ import {fetchSyncPost} from "../../util/fetch";
 import {getEditorRange, getUndoFocusContext, restoreFocusContext} from "../util/selection";
 import {pathPosix} from "../../util/pathName";
 import {genAssetHTML} from "../../asset/renderAssets";
-import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
+import {hasClosestBlock} from "../util/hasClosest";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
-import {getTypeByCellElement, updateCellsValue} from "../render/av/cell";
 import {scrollCenter} from "../../util/highlightById";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {filesize} from "filesize";
-import {transaction} from "../wysiwyg/transaction";
-import * as dayjs from "dayjs";
-import {getAVSelectedCells} from "../render/av/selectionState";
-import {getAVSelectedTableCells} from "../render/av/virtualScroll";
 import {createUploadInsertPosition, isUploadInsertPositionAvailable} from "./insertPosition";
 import type {IUploadInsertPosition} from "./insertPosition";
 import {
@@ -143,6 +138,9 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle, options
     if (errorTip) {
         showMessage(errorTip);
     }
+    if ((options?.target || "editor") !== "editor") {
+        return;
+    }
     let insertBlock = true;
     const range = getUploadInsertRange(protyle, options?.insertPosition);
     if (range.toString() === "" && range.startContainer.nodeType === 3 && protyle.toolbar.getCurrentType(range).length > 0) {
@@ -167,18 +165,12 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle, options
     let successFileText = "";
     // 插入多个资源文件时按文件名自然升序排列 Use natural ascending order when inserting multiple assets https://github.com/siyuan-note/siyuan/issues/14643
     successes.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}) || a.index - b.index);
-    const avAssets: IAVCellAssetValue[] = [];
     let hasImage = false;
     successes.forEach((success, index) => {
         const type = pathPosix().extname(success.name).toLowerCase();
         const filename = protyle.options.upload.filename(success.name);
         const name = filename.substring(0, filename.length - type.length);
         hasImage = Constants.SIYUAN_ASSETS_IMAGE.includes(type);
-        avAssets.push({
-            type: Constants.SIYUAN_ASSETS_IMAGE.includes(type) ? "image" : "file",
-            content: success.path,
-            name: name
-        });
         successFileText += genAssetHTML(type, success.path, name, filename,
             getHostCapabilities().localFileSystem && options?.htmlAsIframe);
         if (!Constants.SIYUAN_ASSETS_AUDIO.includes(type) && !Constants.SIYUAN_ASSETS_VIDEO.includes(type) &&
@@ -193,105 +185,6 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle, options
         }
     });
 
-    if (document.querySelector(".av__panel")) {
-        const cellElements: HTMLElement[] = [document.querySelector('.custom-attr__avvalue[data-type="mAsset"][data-active="true"]')];
-        if (!cellElements[0]) {
-            cellElements.splice(0, 1);
-            protyle.wysiwyg.element.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
-                if (getTypeByCellElement(item) === "mAsset") {
-                    cellElements.push(item);
-                }
-            });
-            if (cellElements.length === 0) {
-                document.querySelector(".av__panel .b3-menu__items")?.getAttribute("data-ids")?.split(",").forEach((id: string) => {
-                    const item = protyle.wysiwyg.element.querySelector(`.av__gallery-fields [data-dtype="mAsset"][data-id="${id}"]`) as HTMLElement;
-                    if (item) {
-                        cellElements.push(item);
-                    }
-                });
-            }
-        }
-        if (cellElements.length > 0) {
-            const blockElement = hasClosestBlock(cellElements[0]);
-            if (blockElement) {
-                await updateCellsValue(protyle, blockElement, avAssets, cellElements);
-                document.querySelector(".av__panel")?.remove();
-                return;
-            }
-        } else {
-            return;
-        }
-    } else if (nodeElement && nodeElement.classList.contains("av")) {
-        const selectedCells = getAVSelectedCells(nodeElement);
-        const stableCellCandidates = (selectedCells.length > 0 ? selectedCells :
-            getAVSelectedTableCells(nodeElement)).filter(item => item.column.type === "mAsset");
-        const cellElements: HTMLElement[] = [];
-        nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(item => {
-            item.querySelectorAll(".av__cell").forEach((cellItem: HTMLElement) => {
-                if (getTypeByCellElement(cellItem) === "mAsset") {
-                    cellElements.push(cellItem);
-                }
-            });
-        });
-        if (cellElements.length === 0) {
-            nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
-                if (getTypeByCellElement(item) === "mAsset") {
-                    cellElements.push(item);
-                }
-            });
-        }
-        const stableCells = stableCellCandidates.length > cellElements.length ? stableCellCandidates : [];
-        if (stableCells.length === 1 || cellElements.length === 1) {
-            await updateCellsValue(protyle, nodeElement, avAssets, cellElements, undefined, undefined,
-                false, false, false, stableCells);
-        } else if (stableCells.length > 1 || cellElements.length > 1) {
-            const doOperations: IOperation[] = [];
-            const undoOperations: IOperation[] = [];
-            let currentRowElement;
-            const colId = cellElements[0]?.getAttribute("data-col-id");
-            for (let i = 0; i < avAssets.length; i++) {
-                const selectedCell = stableCells[i];
-                if (stableCells.length > 0 && !selectedCell) {
-                    break;
-                }
-                let cellElement = cellElements[i];
-                if (!cellElement && stableCells.length === 0) {
-                    if (!currentRowElement) {
-                        currentRowElement = hasClosestByClassName(cellElements[i - 1], "av__row") as HTMLElement;
-                    }
-                    if (currentRowElement) {
-                        currentRowElement = currentRowElement.nextElementSibling;
-                        if (currentRowElement && currentRowElement.classList.contains("av__row")) {
-                            cellElement = currentRowElement.querySelector(`.av__cell[data-col-id="${colId}"]`);
-                        }
-                    }
-                }
-                if (!cellElement && !selectedCell) {
-                    break;
-                }
-                const operations = await updateCellsValue(protyle, nodeElement,
-                    [avAssets[i]], cellElement ? [cellElement] : undefined, undefined, undefined,
-                    true, false, false, selectedCell ? [selectedCell] : undefined);
-                doOperations.push(...operations.doOperations);
-                undoOperations.push(...operations.undoOperations);
-            }
-            if (doOperations.length > 0) {
-                const id = nodeElement.dataset.nodeId;
-                doOperations.push({
-                    action: "doUpdateUpdated",
-                    id,
-                    data: dayjs().format("YYYYMMDDHHmmss"),
-                });
-                undoOperations.push({
-                    action: "doUpdateUpdated",
-                    id,
-                    data: nodeElement.getAttribute("updated"),
-                });
-                transaction(protyle, doOperations, undoOperations);
-            }
-        }
-        return;
-    }
     // 避免插入代码块中，其次因为都要独立成块 https://github.com/siyuan-note/siyuan/issues/7607
     if (options?.insertPosition) {
         protyle.toolbar.range = range;

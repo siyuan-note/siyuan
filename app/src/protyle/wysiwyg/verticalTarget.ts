@@ -15,6 +15,9 @@ const getEmbedNavigationScope = (element: Element) =>
         (element.parentElement ? isInEmbedBlock(element.parentElement, false) : false) :
         isInEmbedBlock(element, false);
 
+export const getVerticalNavigationScope = (element: Element, editorElement: HTMLElement) =>
+    getEmbedNavigationScope(element) || editorElement;
+
 export const getAdjacentVisibleBlock = (element: Element, direction: TVerticalDirection) => {
     if (!isVerticalNavigationElementVisible(element)) {
         return false;

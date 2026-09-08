@@ -39,6 +39,18 @@ import {ensureUILayout} from "../util/ensureUILayout";
 import {dispatchPluginGlobalShortcut} from "../plugin/globalShortcut";
 import {requestResponsiveDockLayout} from "../layout/dock/responsive";
 import {getHostCapabilities, setHostConnection, type TKernelConnection} from "../util/hostCapabilities";
+import {setLastExportPath} from "../protyle/export/path";
+
+export const loadDesktopHostConnection = async () => {
+    /// #if !BROWSER
+    try {
+        // 加载扩展前先读取主进程的连接能力，信任状态不从远程配置或页面参数获取。
+        setHostConnection(await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "kernelConnection"}));
+    } catch (error) {
+        console.error("load desktop host connection failed:", error);
+    }
+    /// #endif
+};
 
 export const initDesktopHost = async () => {
     /// #if !BROWSER
@@ -236,6 +248,8 @@ export const initWindow = async (app: App) => {
         if (!getHostCapabilities().importExport) {
             return;
         }
+        const savePath = ipcData.filePaths[0];
+        setLastExportPath(savePath);
         const msgId = showMessage(window.siyuan.languages.exporting, -1);
         window.siyuan.storage[Constants.LOCAL_EXPORTPDF] = {
             removeAssets: ipcData.removeAssets,
@@ -269,7 +283,6 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                 pdfOptions: ipcData.pdfOptions,
                 webContentsId: ipcData.webContentsId
             });
-            const savePath = ipcData.filePaths[0];
             let pdfFilePath = path.join(savePath, replaceLocalPath(ipcData.rootTitle) + ".pdf");
             const responseUnique = await fetchSyncPost("/api/file/getUniqueFilename", {path: pdfFilePath});
             pdfFilePath = responseUnique.data.path;

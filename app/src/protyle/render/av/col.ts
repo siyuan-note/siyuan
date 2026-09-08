@@ -1474,12 +1474,16 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             }
         });
     }
-    const cellRect = cellElement.getBoundingClientRect();
-    menu.open({
-        x: cellRect.left,
-        y: cellRect.bottom,
-        h: cellRect.height
-    });
+    if (isMobile()) {
+        menu.fullscreen("bottom");
+    } else {
+        const cellRect = cellElement.getBoundingClientRect();
+        menu.open({
+            x: cellRect.left,
+            y: cellRect.bottom,
+            h: cellRect.height
+        });
+    }
     /// #if !MOBILE
     const inputElement = window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement;
     if (inputElement) {

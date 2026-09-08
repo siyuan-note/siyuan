@@ -837,6 +837,38 @@
   }
 }
 
+.table__cell-rich {
+  min-width: 180px;
+  min-height: 1.6em;
+  white-space: normal;
+  cursor: text;
+  padding: 4px !important;
+
+  .protyle-action {
+    pointer-events: none;
+  }
+
+  .protyle-icons,
+  .protyle-icon,
+  .protyle-action__language {
+    display: none !important;
+  }
+}
+
+.table__cell-editor {
+  min-width: 180px;
+  white-space: normal;
+
+  .protyle-content {
+    overflow: visible;
+  }
+
+  .protyle-wysiwyg {
+    padding: 4px !important;
+    min-height: 1.6em;
+  }
+}
+
 table[contenteditable="false"] + .protyle-action__table > .table__resize {
   display: none !important;
 }

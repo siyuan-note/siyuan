@@ -7,6 +7,7 @@ import {
     getAVItemSelection,
     getAVSelectionRoot,
     reconcileAVSelectedItemIDs,
+    resolveAVSelectedCell,
     setAVCellSelection,
     setAVItemAnchorState,
     setAVItemSelectionState,
@@ -125,5 +126,38 @@ describe("database range selection helpers", () => {
             focus: point,
             cells: [],
         });
+    });
+
+    it("resolves a captured cell identity against the current database data", () => {
+        const previousCell = {id: "old-cell"} as IAVCell;
+        const currentCell = {id: "current-cell"} as IAVCell;
+        const column = {id: "asset-column", type: "mAsset", hidden: false} as IAVColumn;
+        const capturedCell = {
+            groupID: "",
+            rowID: "row-1",
+            colID: "asset-column",
+            rowIndex: 0,
+            colIndex: 0,
+            cell: previousCell,
+            column,
+        };
+        const data = {
+            view: {
+                id: "view",
+                groups: [],
+                columns: [column],
+                rows: [{id: "row-1", cells: [currentCell]}],
+            },
+        } as unknown as IAV;
+
+        const resolved = resolveAVSelectedCell(data, capturedCell);
+
+        assert.equal(resolved?.cell, currentCell);
+        assert.notEqual(resolved?.cell, previousCell);
+        assert.equal(resolveAVSelectedCell(data, {
+            groupID: "",
+            rowID: "missing-row",
+            colID: "asset-column",
+        }), undefined);
     });
 });

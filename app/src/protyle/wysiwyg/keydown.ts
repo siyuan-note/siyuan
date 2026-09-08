@@ -1036,12 +1036,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             const verticalDirection = event.key === "ArrowUp" ? "up" : event.key === "ArrowDown" ? "down" : undefined;
             if (selectText === "" && range.collapsed && verticalDirection &&
                 isAtomicVerticalNavigationTarget(nodeElement)) {
-                if (focusAdjacentVerticalRegion(protyle, nodeElement, verticalDirection, verticalGoalX ?? 0,
-                    range.startContainer)) {
+                const outcome = focusAdjacentVerticalRegion(protyle, nodeElement, verticalDirection,
+                    verticalGoalX ?? 0, range.startContainer);
+                if (outcome === "moved") {
                     preserveAVSelectionOnKeyup(protyle, event);
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return;
                 }
                 // 原子区域位于文档边界时保持选择，避免原生移动进入其内部。
                 event.stopPropagation();
@@ -1082,9 +1080,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             const toNext = (event.key === "ArrowDown" && isLastLine) ||
                 (event.key === "ArrowRight" && isEnd);
             if (selectText === "" && range.collapsed && verticalDirection && (toPrevious || toNext)) {
-                if (focusAdjacentVerticalRegion(protyle, nodeElement, verticalDirection, verticalGoalX ?? 0,
-                    range.startContainer)) {
-                    preserveAVSelectionOnKeyup(protyle, event);
+                const outcome = focusAdjacentVerticalRegion(protyle, nodeElement, verticalDirection,
+                    verticalGoalX ?? 0, range.startContainer);
+                if (outcome !== "none") {
+                    if (outcome === "moved") {
+                        preserveAVSelectionOnKeyup(protyle, event);
+                    }
                     event.stopPropagation();
                     event.preventDefault();
                     return;
@@ -1125,10 +1126,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         nodeElement.contains(firstEditElement)
                     ) ||
                     (!firstEditElement && nodeElement === protyle.wysiwyg.element.firstElementChild)) {
-                    // 不能用\n判断，否则文字过长折行将错误 https://github.com/siyuan-note/siyuan/issues/6156
-                    // 空行 getSelectionPosition 计算有问题导致 https://github.com/siyuan-note/siyuan/issues/17602
-                    const diff = getSelectionPosition(nodeEditableElement, range).top - nodeEditableElement.getBoundingClientRect().top;
-                    if ((diff < 20 && diff !== 0) || nodeElement.classList.contains("av")) {
+                    if (isFirstLine || nodeElement.classList.contains("av")) {
                         if (protyle.title && protyle.title.editElement &&
                             (protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" ||
                                 protyle.contentElement.scrollTop === 0)) {
@@ -1143,8 +1141,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
                 } else {
-                    if (((nodeEditableElement?.innerText.substr(0, position.end).indexOf("\n") === -1 || position.start === 0) &&
-                        getSelectionPosition(nodeEditableElement, range).top - nodeEditableElement.getBoundingClientRect().top < 20)) {
+                    if (isFirstLine) {
                         let previousElement: HTMLElement = getPreviousBlock(nodeElement) as HTMLElement;
                         if (previousElement) {
                             previousElement = getLastBlock(previousElement) as HTMLElement;

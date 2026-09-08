@@ -71,6 +71,7 @@ import {
     restoreBlockSelectionModeState
 } from "./blockSelection";
 import {isEmptyParagraph} from "./emptyTextBlock";
+import {cleanTableCellRichHTML, retainTableCellRichMetadata} from "../util/tableCellRich";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {
@@ -83,7 +84,7 @@ const cleanBlockSelectionModeOperations = (operations?: IOperation[]) => {
     operations?.forEach(operation => {
         if (["appendInsert", "insert", "prependInsert", "update"].includes(operation.action) &&
             typeof operation.data === "string") {
-            operation.data = cleanBlockSelectionModeHTML(operation.data);
+            operation.data = cleanTableCellRichHTML(cleanBlockSelectionModeHTML(operation.data));
         }
         if (operation.action === "unfoldHeading" && typeof operation.retData === "string") {
             operation.retData = cleanBlockSelectionModeHTML(operation.retData);
@@ -2264,6 +2265,12 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
     }
     cleanBlockSelectionModeOperations(doOperations);
     cleanBlockSelectionModeOperations(undoOperations);
+    doOperations.forEach(operation => {
+        if (operation.action === "update" && typeof operation.data === "string") {
+            undoOperations?.filter(undo => undo.action === "update" && undo.id === operation.id && typeof undo.data === "string")
+                .forEach(undo => undo.data = retainTableCellRichMetadata(undo.data, operation.data));
+        }
+    });
     cleanHeadingNumberOperations(doOperations);
     cleanHeadingNumberOperations(undoOperations);
     if (!protyle) {
@@ -2408,8 +2415,8 @@ export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: 
         refreshSbResize(element);
     }
     const id = element.getAttribute("data-node-id");
-    const newHTML = cleanHeadingNumberHTML(cleanBlockSelectionModeHTML(element.outerHTML));
-    const cleanOldHTML = cleanHeadingNumberHTML(cleanBlockSelectionModeHTML(oldHTML));
+    const newHTML = cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(element.outerHTML)));
+    const cleanOldHTML = cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(oldHTML)));
     if (newHTML === cleanOldHTML.replace("<wbr>", "") && !additionalOperations) {
         return;
     }

@@ -5,6 +5,7 @@ export const PDF_RECT_DISPLAY_SCALE = 2;
 export const PDF_RECT_CAPTURE_MAX_EDGE = 8192;
 export const PDF_RECT_CAPTURE_MAX_PIXELS = 16 * 1024 * 1024;
 export const PDF_RECT_CAPTURE_PROFILE = "capture-v2";
+const BOX_ID_PATTERN = /^\d{14}-[0-9a-z]{7}$/;
 
 interface IRectBounds {
     left: number;
@@ -66,4 +67,22 @@ export const getCaptureCanvasBounds = (viewportRect: number[]) => {
 export const getCaptureDisplayWidth = (viewportRect: number[]) => {
     const width = normalizePdfRect(viewportRect).width;
     return Math.max(1, Math.round(width * 100) / 100);
+};
+
+export const getPdfAnnotationAssetsDirPath = (file: string, origin: string) => {
+    try {
+        const baseURL = new URL(origin);
+        const fileURL = new URL(file, `${baseURL.origin}/`);
+        const boxIDs = fileURL.searchParams.getAll("box");
+        if (boxIDs.length === 0) {
+            return;
+        }
+        if (fileURL.origin !== baseURL.origin || !fileURL.pathname.startsWith("/assets/") ||
+            boxIDs.length !== 1 || !BOX_ID_PATTERN.test(boxIDs[0])) {
+            return null;
+        }
+        return `${boxIDs[0]}/assets/`;
+    } catch {
+        return null;
+    }
 };

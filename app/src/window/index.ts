@@ -22,6 +22,7 @@ import {initMessage} from "../dialog/message";
 import {getAllTabs} from "../layout/getAll";
 import {getLocalStorage} from "../protyle/util/compatibility";
 import {init} from "./init";
+import {loadDesktopHostConnection} from "../boot/onGetConfig";
 import {loadPlugins} from "../plugin/loader";
 import {applyPluginReload, syncGlobalPluginConfig} from "../plugin/globalState";
 import {hideAllElements} from "../protyle/ui/hideElements";
@@ -212,6 +213,7 @@ class App {
             await addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = response.data.conf;
+            await loadDesktopHostConnection();
             ensureUILayout();
             setBodyHighlight();
             window.siyuan.isPublish = response.data.isPublish;

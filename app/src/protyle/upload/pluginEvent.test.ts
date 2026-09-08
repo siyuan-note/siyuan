@@ -387,6 +387,28 @@ describe("asset upload plugin event", () => {
         }
     });
 
+    it("fails closed when a listener throws a falsy value", async () => {
+        for (const thrownValue of [null, undefined, false, 0, ""]) {
+            let laterPluginCalled = false;
+            const prepared = await prepareAssetUpload({
+                plugins: [
+                    createPlugin(() => {
+                        throw thrownValue;
+                    }),
+                    createPlugin(() => {
+                        laterPluginCalled = true;
+                    }),
+                ],
+                protyle,
+                input: {kind: "files", files: [createFile("a.png")]},
+                context,
+            });
+
+            assert.equal(prepared.state, "failed");
+            assert.equal(laterPluginCalled, false);
+        }
+    });
+
     it("rejects an async listener that does not claim the request synchronously", async () => {
         const originalConsoleError = console.error;
         console.error = () => undefined;

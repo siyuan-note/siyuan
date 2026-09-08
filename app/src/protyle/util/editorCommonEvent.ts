@@ -37,7 +37,7 @@ import {updatePanelByEditor} from "../../editor/util";
 /// #endif
 import {blockRender} from "../render/blockRender";
 /// #else
-import {uploadFiles, uploadLocalFiles} from "../upload";
+import {uploadLocalFiles} from "../upload";
 import {getLocalDropFiles, hasDataTransferFiles} from "../upload/localDropFiles";
 import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
@@ -50,6 +50,7 @@ import {isFoldedHeading, shouldUnfoldMovedHeading} from "./foldHeadingMove";
 import {webUtils} from "electron";
 import {dragUpload} from "../render/av/asset";
 /// #endif
+import {dragUploadFiles} from "../render/av/asset";
 import {addDragFill, getTypeByCellElement} from "../render/av/cell";
 import {insertGalleryItemAnimation} from "../render/av/gallery/item";
 import {clearSelect} from "./clear";
@@ -2201,32 +2202,23 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         /// #if !BROWSER
                         if (!getHostCapabilities().localFileSystem) {
                             focusBlock(hasClosestBlock(cellElement) as HTMLElement);
-                            uploadFiles(protyle, event.dataTransfer.files, undefined, undefined, undefined, {
-                                source: "drop",
-                                target: "av-cell",
-                                position: {x: event.clientX, y: event.clientY},
-                            });
+                            dragUploadFiles(event.dataTransfer.files, protyle, cellElement,
+                                {x: event.clientX, y: event.clientY});
                         } else {
                             const files = getLocalDropFiles(event.dataTransfer.files,
                                 file => webUtils.getPathForFile(file));
                             if (!files) {
                                 focusBlock(hasClosestBlock(cellElement) as HTMLElement);
-                                uploadFiles(protyle, event.dataTransfer.files, undefined, undefined, undefined, {
-                                    source: "drop",
-                                    target: "av-cell",
-                                    position: {x: event.clientX, y: event.clientY},
-                                });
+                                dragUploadFiles(event.dataTransfer.files, protyle, cellElement,
+                                    {x: event.clientX, y: event.clientY});
                             } else {
                                 dragUpload(files, protyle, cellElement, {x: event.clientX, y: event.clientY});
                             }
                         }
                         /// #else
                         focusBlock(hasClosestBlock(cellElement) as HTMLElement);
-                        uploadFiles(protyle, event.dataTransfer.files, undefined, undefined, undefined, {
-                            source: "drop",
-                            target: "av-cell",
-                            position: {x: event.clientX, y: event.clientY},
-                        });
+                        dragUploadFiles(event.dataTransfer.files, protyle, cellElement,
+                            {x: event.clientX, y: event.clientY});
                         /// #endif
                     }
                 }
@@ -2243,6 +2235,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     });
     let dragCache: { nodeId: string, indent: number, rgb: { r: number, g: number, b: number }, guides: string };
     let disabledPosition: string;
+    const getDragTargetText = (element: HTMLElement) => {
+        const text = getContenteditableElement(element)?.textContent?.trim() || "";
+        const characters = Array.from(text);
+        return characters.length > 20 ? characters.slice(0, 20).join("") + "..." : text;
+    };
     // 列表项目标的插入点与提示处理：设置 class、CSS 变量、showDragTip
     const applyLiTarget = (htmlTarget: HTMLElement, event: DragEvent, canDropAsSibling = true): void => {
         clearBlockDragoverTarget();
@@ -2315,7 +2312,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`);
         highlightByLevel(editorElement, htmlTarget);
         // 提示文案：修饰键显示对应操作，无修饰键显示插入位置
-        const targetText = (getContenteditableElement(htmlTarget)?.textContent?.trim() || "").slice(0, 20);
+        const targetText = getDragTargetText(htmlTarget);
         let action: string;
         if (event.altKey || (event.shiftKey && protyle.lite)) {
             // Alt=引用；lite 模式 Shift 也为引用
@@ -2887,7 +2884,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     let displayText = cachedTargetText;
                     if (!displayText && targetElement.classList.contains("list")) {
                         const firstLi = targetElement.querySelector(":scope > .li");
-                        displayText = getContenteditableElement(firstLi as HTMLElement)?.textContent?.trim() || "";
+                        displayText = getDragTargetText(firstLi as HTMLElement);
                     }
                     // 默认移动（无修饰键、非 AV 目标、普通块源、非超级块本身）时，更新下半为带目标名的位置文案
                     if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb")) {
@@ -2960,7 +2957,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     targetElement.classList.add(edgeClass);
                     addDragover(targetElement);
                     const sbFirstBlock = targetElement.querySelector("[data-node-id]") as HTMLElement;
-                    const sbText = getContenteditableElement(sbFirstBlock)?.textContent?.trim() || "";
+                    const sbText = getDragTargetText(sbFirstBlock);
                     if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && sbText) {
                         const key = isSbLeftEdge
                             ? window.siyuan.languages.dragTipMoveTargetFront
@@ -3101,13 +3098,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             dragoverElement = targetElement;
             // 目标变化时更新缓存
-            cachedTargetText = getContenteditableElement(targetElement as HTMLElement)?.textContent?.trim() || "";
+            cachedTargetText = getDragTargetText(targetElement as HTMLElement);
             cachedIsCol = !!hasClosestByAttribute(targetElement as HTMLElement, "data-sb-layout", "col");
             highlightColColumn(targetElement as HTMLElement);
         }
         // 默认移动（无修饰键、非 AV 目标、普通块源）时，更新下半为带目标名的位置文案
         if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && targetElement && !isAvTarget && point.className) {
-            const targetText = getContenteditableElement(targetElement as HTMLElement)?.textContent?.trim() || "";
+            const targetText = getDragTargetText(targetElement as HTMLElement);
             const isFront = point.className === "dragover__top" || point.className === "dragover__left";
             const isBack = point.className === "dragover__bottom" || point.className === "dragover__right";
             if (targetText && (isFront || isBack)) {

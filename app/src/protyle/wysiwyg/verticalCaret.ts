@@ -1,7 +1,9 @@
-import {focusByRange, getSelectionPosition, setFirstNodeRange, setLastNodeRange} from "../util/selection";
+import {focusByRange, setFirstNodeRange, setLastNodeRange} from "../util/selection";
 import {
+    getCodeTrailingZeroWidthLineLimit,
     getNavigableVerticalRects,
     getRectsIntersectingVerticalLine,
+    getRevealDelta,
     isCaretRectAtVerticalBoundary,
 } from "./verticalGeometry";
 import {getFoldedNavigationOwner, getReachableVerticalRects} from "./verticalVisibility";
@@ -11,7 +13,7 @@ export type TVerticalDirection = "up" | "down";
 const isCaretHitReachable = (element: Element, rects: DOMRect[]) => {
     const onScreenRects = rects.filter(rect => rect.bottom > 0 && rect.top < window.innerHeight &&
         rect.right >= 0 && rect.left < window.innerWidth);
-    return onScreenRects.length === 0 || onScreenRects.some(rect => {
+    return onScreenRects.some(rect => {
         const y = Math.max(0, Math.min(window.innerHeight - 1, (rect.top + rect.bottom) / 2));
         return [rect.left + 0.25, rect.left - 0.25].some(x => {
             const hit = document.elementFromPoint(x, y);
@@ -23,68 +25,85 @@ const isCaretHitReachable = (element: Element, rects: DOMRect[]) => {
 const getRangeContextElement = (range: Range) => range.startContainer.nodeType === Node.ELEMENT_NODE ?
     range.startContainer as Element : range.startContainer.parentElement;
 
-// 折叠 Range 可能没有自身矩形，用相邻内容验证其所在行，不向正文插入占位字符。
+// 缺少光标矩形时，优先测量偏移之后的字符，避免把换行后的空行解释成前一行。
 const getRangeContextRects = (range: Range, contextElement: Element) => {
-    const rangeRects = Array.from(range.getClientRects());
+    const rangeRects = Array.from(range.getClientRects()).filter(rect => rect.height > 0.5);
     if (rangeRects.length > 0) {
-        return rangeRects;
+        return [rangeRects[range.collapsed ? rangeRects.length - 1 : 0]];
     }
-    const contextRects: DOMRect[] = [];
-    if (range.startContainer.nodeType === Node.TEXT_NODE) {
-        const textNode = range.startContainer as Text;
-        const offsets = [
-            [Math.max(0, range.startOffset - 1), range.startOffset],
-            [range.startOffset, Math.min(textNode.length, range.startOffset + 1)],
-        ];
-        offsets.forEach(([start, end]) => {
-            if (start === end) {
-                return;
+    for (const forward of [true, false]) {
+        const adjacent = (node: Node): Node | null => {
+            while (node && node !== contextElement) {
+                const sibling = forward ? node.nextSibling : node.previousSibling;
+                if (sibling) {
+                    return sibling;
+                }
+                node = node.parentNode;
             }
-            const probeRange = contextElement.ownerDocument.createRange();
-            probeRange.setStart(textNode, start);
-            probeRange.setEnd(textNode, end);
-            contextRects.push(...Array.from(probeRange.getClientRects()));
-        });
-        if (contextRects.length === 0) {
-            contextRects.push(...Array.from(contextElement.getClientRects()));
+            return null;
+        };
+        let node: Node = range.startContainer;
+        if (node.nodeType !== Node.TEXT_NODE) {
+            node = node.childNodes[range.startOffset - (forward ? 0 : 1)] || adjacent(node);
         }
-    } else if (range.startContainer.nodeType === Node.ELEMENT_NODE) {
-        const container = range.startContainer as Element;
-        [container.childNodes[range.startOffset - 1], container.childNodes[range.startOffset]].forEach(node => {
-            if (!node) {
-                return;
+        while (node && contextElement.contains(node)) {
+            const probeRange = contextElement.ownerDocument.createRange();
+            if (node.nodeType === Node.TEXT_NODE) {
+                const offset = node === range.startContainer ? range.startOffset :
+                    forward ? 0 : node.textContent.length;
+                const start = forward ? offset : Math.max(0, offset - 1);
+                const end = forward ? Math.min(node.textContent.length, offset + 1) : offset;
+                if (start === end) {
+                    node = adjacent(node);
+                    continue;
+                }
+                probeRange.setStart(node, start);
+                probeRange.setEnd(node, end);
+            } else if (node.nodeType === Node.ELEMENT_NODE && node.hasChildNodes() &&
+                !(node as Element).matches(".render-node, [contenteditable=\"false\"]")) {
+                node = forward ? node.firstChild : node.lastChild;
+                continue;
+            } else {
+                probeRange.selectNode(node);
             }
-            const probeRange = contextElement.ownerDocument.createRange();
-            probeRange.selectNode(node);
-            contextRects.push(...Array.from(probeRange.getClientRects()));
-        });
-        if (contextRects.length === 0) {
-            contextRects.push(...Array.from(container.getClientRects()));
+            const rects = Array.from(probeRange.getClientRects()).filter(rect => rect.height > 0.5);
+            const rect = rects[forward ? 0 : rects.length - 1];
+            if (rect) {
+                return [new DOMRect(forward ? rect.left : rect.right, rect.top, 0, rect.height)];
+            }
+            node = adjacent(node);
         }
-    } else {
-        contextRects.push(...Array.from(contextElement.getClientRects()));
     }
-    return contextRects;
+    return contextElement.textContent || contextElement.querySelector("img, .render-node") ? [] :
+        Array.from(contextElement.getClientRects());
 };
 
-const getRangeRectsOnLine = (element: Element, range: Range, lineRects: DOMRect[]) => {
+const getRangeRectsOnLine = (element: Element, range: Range, lineRects: DOMRect[], requireVisible = false) => {
     const contextElement = getRangeContextElement(range);
     if (!contextElement || !element.contains(contextElement)) {
         return [];
     }
     return getRectsIntersectingVerticalLine(
-        getReachableVerticalRects(contextElement, getRangeContextRects(range, contextElement)), lineRects);
+        getReachableVerticalRects(contextElement, getRangeContextRects(range, element), requireVisible), lineRects);
+};
+
+// 光标驱动的滚动读取当前光标位置；无法测量时保留视口，不使用容器顶部替代光标。
+export const getVerticalCaretRect = (element: Element, range: Range): DOMRect | undefined => {
+    if (!element.isConnected || !range.collapsed || !element.contains(range.startContainer) ||
+        getFoldedNavigationOwner(element)) {
+        return;
+    }
+    const contextElement = getRangeContextElement(range);
+    const rect = contextElement && getReachableVerticalRects(contextElement,
+        getRangeContextRects(range, element))[0];
+    return rect && Number.isFinite(rect.top) && Number.isFinite(rect.left) ? rect : undefined;
 };
 
 const getCodeTrailingBlankLineCount = (element: Element) => {
     if (!element.closest(".code-block")) {
         return;
     }
-    const trailingNewlineCount = element.textContent.match(/\n+$/)?.[0].length || 0;
-    if (trailingNewlineCount === 0) {
-        return;
-    }
-    return Math.max(0, trailingNewlineCount - 1);
+    return getCodeTrailingZeroWidthLineLimit(element.textContent);
 };
 
 const getContentRects = (element: Element) => {
@@ -98,21 +117,18 @@ export const isCaretAtVerticalBoundary = (element: Element, range: Range, direct
     if (!element.contains(range.startContainer)) {
         return false;
     }
-    const position = getSelectionPosition(element, range);
-    return isCaretRectAtVerticalBoundary(position.top, getContentRects(element), direction);
+    const rects = getRangeContextRects(range, element);
+    return rects.length > 0 && isCaretRectAtVerticalBoundary(rects[0].top, getContentRects(element), direction);
 };
 
 export const getCaretGoalX = (range: Range, fallbackElement?: Element) => {
-    const rects = Array.from(range.getClientRects());
-    const rect = rects[0] || range.getBoundingClientRect();
-    if (rect && Number.isFinite(rect.left) && rect.left > 0) {
+    const contextElement = getRangeContextElement(range);
+    const editable = contextElement?.closest("[contenteditable=\"true\"]");
+    const rect = contextElement && getRangeContextRects(range, editable || contextElement)[0];
+    if (rect && Number.isFinite(rect.left)) {
         return rect.left;
     }
     if (fallbackElement) {
-        const position = getSelectionPosition(fallbackElement, range);
-        if (Number.isFinite(position.left) && position.left > 0) {
-            return position.left;
-        }
         return fallbackElement.getBoundingClientRect().left;
     }
     return 0;
@@ -130,10 +146,18 @@ const getBoundaryLineRects = (element: Element, direction: TVerticalDirection) =
     return rects.filter(rect => Math.abs(rect.top - boundaryTop) <= tolerance);
 };
 
-export const focusEditableAtGoalX = (element: Element, direction: TVerticalDirection, goalX: number) => {
-    if (getFoldedNavigationOwner(element) ||
+interface IEditableVerticalNavigationTarget {
+    element: Element;
+    direction: TVerticalDirection;
+    range: Range;
+}
+
+// 目标解析只计算合法 Range，Selection 统一在滚动和复核完成后提交。
+const resolveEditableVerticalNavigationTarget = (element: Element, direction: TVerticalDirection, goalX: number,
+                                                  requireHit: boolean): IEditableVerticalNavigationTarget | undefined => {
+    if (!element.isConnected || getFoldedNavigationOwner(element) ||
         getReachableVerticalRects(element, Array.from(element.getClientRects())).length === 0) {
-        return false;
+        return;
     }
     const lineRects = getBoundaryLineRects(element, direction);
     const range = document.createRange();
@@ -143,17 +167,29 @@ export const focusEditableAtGoalX = (element: Element, direction: TVerticalDirec
         const lineTop = Math.min(...lineRects.map(rect => rect.top));
         const lineBottom = Math.max(...lineRects.map(rect => rect.bottom));
         const x = Math.max(lineLeft + 1, Math.min(goalX, lineRight - 1));
-        const pointRange = document.caretRangeFromPoint(x, (lineTop + lineBottom) / 2);
-        const isZeroWidthLine = lineRects.every(rect => rect.width <= 0.5);
-        const pointRangeRects = pointRange ? getRangeRectsOnLine(element, pointRange, lineRects) : [];
-        const pointRangeHasOwnRects = !!pointRange && pointRange.getClientRects().length > 0;
-        if (pointRange && element.contains(pointRange.startContainer) && pointRangeRects.length > 0 &&
-            isCaretHitReachable(element, pointRangeHasOwnRects ? pointRangeRects : lineRects) &&
-            (!isZeroWidthLine || !pointRangeHasOwnRects ||
-                isCaretRectAtVerticalBoundary(getSelectionPosition(element, pointRange).top, lineRects, "up"))) {
-            pointRange.collapse(true);
-            focusByRange(pointRange);
-            return true;
+        let pointRange = document.caretRangeFromPoint(x, (lineTop + lineBottom) / 2);
+        for (let attempt = 0; pointRange && attempt < 2; attempt++) {
+            const pointRangeRects = getRangeRectsOnLine(element, pointRange, lineRects, requireHit);
+            if (element.contains(pointRange.startContainer) && pointRangeRects.length > 0 &&
+                (!requireHit || isCaretHitReachable(element, pointRangeRects))) {
+                pointRange.collapse(true);
+                return {element, direction, range: pointRange};
+            }
+            // 自动折行处可能同时带有前后两行矩形，改用前一字形的另一侧建立明确的行内位置。
+            if (attempt > 0 || pointRangeRects.length > 0 || pointRange.getClientRects().length < 2 ||
+                !element.contains(pointRange.startContainer) ||
+                pointRange.startContainer.nodeType !== Node.TEXT_NODE || pointRange.startOffset === 0) {
+                break;
+            }
+            const probeRange = pointRange.cloneRange();
+            probeRange.setStart(pointRange.startContainer, pointRange.startOffset - 1);
+            const rect = getRectsIntersectingVerticalLine(Array.from(probeRange.getClientRects()), lineRects)
+                .find(item => item.width > 0.5);
+            if (!rect) {
+                break;
+            }
+            const probeX = Math.abs(rect.left - x) > Math.abs(rect.right - x) ? rect.left + 0.25 : rect.right - 0.25;
+            pointRange = document.caretRangeFromPoint(probeX, (rect.top + rect.bottom) / 2);
         }
     }
     if (direction === "up" && getCodeTrailingBlankLineCount(element) !== undefined) {
@@ -174,25 +210,98 @@ export const focusEditableAtGoalX = (element: Element, direction: TVerticalDirec
     const caretRects = Array.from(range.getClientRects());
     let reachableRects: DOMRect[];
     if (caretRects.length > 0) {
-        reachableRects = lineRects.length > 0 ? getRangeRectsOnLine(element, range, lineRects) :
-            getReachableVerticalRects(element, caretRects);
+        reachableRects = lineRects.length > 0 ? getRangeRectsOnLine(element, range, lineRects, requireHit) :
+            getReachableVerticalRects(element, caretRects, requireHit);
         if (reachableRects.length === 0) {
-            return false;
+            return;
         }
     } else if (lineRects.length > 0) {
-        reachableRects = getRangeRectsOnLine(element, range, lineRects);
-        if (reachableRects.length === 0 || !isCaretHitReachable(element, lineRects)) {
-            return false;
+        reachableRects = getRangeRectsOnLine(element, range, lineRects, requireHit);
+        if (reachableRects.length === 0) {
+            return;
         }
-    } else if (element.textContent || element.querySelector("br, img, .render-node")) {
-        return false;
+    } else if (element.textContent || element.querySelector("img, .render-node")) {
+        return;
     } else {
-        reachableRects = getReachableVerticalRects(element, Array.from(element.getClientRects()));
+        reachableRects = getReachableVerticalRects(element, Array.from(element.getClientRects()), requireHit);
     }
-    // 屏幕内的回退落点必须实际命中编辑区，屏幕外的合法落点交由滚动逻辑展示。
-    if (!isCaretHitReachable(element, reachableRects)) {
+    if (requireHit && !isCaretHitReachable(element, reachableRects)) {
+        return;
+    }
+    return {element, direction, range};
+};
+
+const getEditableTargetRects = (target: IEditableVerticalNavigationTarget) => {
+    const lineRects = getBoundaryLineRects(target.element, target.direction);
+    if (lineRects.length > 0) {
+        return lineRects;
+    }
+    const contextElement = getRangeContextElement(target.range);
+    if (contextElement && target.element.contains(contextElement)) {
+        const contextRects = getReachableVerticalRects(contextElement,
+            getRangeContextRects(target.range, target.element));
+        if (contextRects.length > 0) {
+            return contextRects;
+        }
+    }
+    return getReachableVerticalRects(target.element, Array.from(target.element.getClientRects()));
+};
+
+const revealEditableVerticalNavigationTarget = (target: IEditableVerticalNavigationTarget,
+                                                goalX: number, boundaryElement?: Element) => {
+    const closestBlock = target.element.closest("[data-node-id]");
+    const scrollBoundary = boundaryElement?.contains(target.element) ? boundaryElement : closestBlock || target.element;
+    let ancestor: Element | null = target.element;
+    while (ancestor) {
+        const scrollElement = ancestor as HTMLElement;
+        const view = ancestor.ownerDocument.defaultView;
+        const style = view?.getComputedStyle(ancestor);
+        const canScrollX = scrollElement.scrollWidth > scrollElement.clientWidth + 1 &&
+            ["auto", "scroll", "overlay"].includes(style?.overflowX);
+        const canScrollY = scrollElement.scrollHeight > scrollElement.clientHeight + 1 &&
+            (ancestor === scrollBoundary || ["auto", "scroll", "overlay"].includes(style?.overflowY));
+        if (canScrollX || canScrollY) {
+            const rects = getEditableTargetRects(target);
+            if (rects.length > 0) {
+                const bounds = ancestor.getBoundingClientRect();
+                if (canScrollX) {
+                    const viewportLeft = bounds.left + scrollElement.clientLeft;
+                    const lineLeft = Math.min(...rects.map(rect => rect.left));
+                    const lineRight = Math.max(...rects.map(rect => rect.right));
+                    const x = Math.max(lineLeft, Math.min(goalX, lineRight));
+                    const fitsLine = lineRight - lineLeft + 2 <= scrollElement.clientWidth;
+                    scrollElement.scrollLeft += getRevealDelta(fitsLine ? lineLeft - 1 : x - 1,
+                        fitsLine ? lineRight + 1 : x + 1, viewportLeft, viewportLeft + scrollElement.clientWidth);
+                }
+                if (canScrollY) {
+                    const viewportTop = bounds.top + scrollElement.clientTop;
+                    scrollElement.scrollTop += getRevealDelta(Math.min(...rects.map(rect => rect.top)),
+                        Math.max(...rects.map(rect => rect.bottom)), viewportTop, viewportTop + scrollElement.clientHeight);
+                }
+            }
+        }
+        if (ancestor === scrollBoundary) {
+            break;
+        }
+        ancestor = ancestor.parentElement;
+    }
+};
+
+export const focusEditableAtGoalX = (element: Element, direction: TVerticalDirection, goalX: number,
+                                     scrollBoundary?: Element) => {
+    const target = resolveEditableVerticalNavigationTarget(element, direction, goalX, false);
+    if (!target) {
         return false;
     }
-    focusByRange(range);
+    const parentElement = element.parentElement;
+    revealEditableVerticalNavigationTarget(target, goalX, scrollBoundary);
+    if (!element.isConnected || element.parentElement !== parentElement || !element.contains(target.range.startContainer)) {
+        return false;
+    }
+    const verifiedTarget = resolveEditableVerticalNavigationTarget(element, direction, goalX, true);
+    if (!verifiedTarget) {
+        return false;
+    }
+    focusByRange(verifiedTarget.range);
     return true;
 };

@@ -34,6 +34,7 @@ import {
     setLastNodeRange,
 } from "../util/selection";
 import {Constants} from "../../constants";
+import {mergeTableCellContents} from "../util/tableCellRich";
 import {isMobile} from "../../util/functions";
 import {previewDocImage} from "../preview/image";
 import {getDiagramBlock, previewDiagram} from "../preview/diagram";
@@ -2657,15 +2658,10 @@ export class WYSIWYG {
                                             }
                                             index++;
                                         }
-                                        let html = "";
+                                        mergeTableCellContents(selectCellElements);
                                         let rowElement: Element = selectCellElements[0].parentElement;
                                         let rowSpan = selectCellElements[0].rowSpan;
                                         selectCellElements.forEach((item, index) => {
-                                            let cellHTML = item.innerHTML.trim();
-                                            if (cellHTML.endsWith("<br>")) {
-                                                cellHTML = cellHTML.substr(0, cellHTML.length - 4);
-                                            }
-                                            html += cellHTML + ((!cellHTML || index === selectCellElements.length - 1) ? "" : "<br>");
                                             if (index !== 0) {
                                                 if (rowElement !== item.parentElement) {
                                                     if (!item.classList.contains("fn__none")) { // https://github.com/siyuan-note/insider/issues/1011
@@ -2705,7 +2701,10 @@ export class WYSIWYG {
                                         // 合并背景色不会修改，需要等计算完毕
                                         setTimeout(() => {
                                             if (tableBlockElement) {
-                                                selectCellElements[0].innerHTML = (html.replace(/<br>$/, "") || "<br>") + "<wbr>";
+                                                if (!selectCellElements[0].innerHTML) {
+                                                    selectCellElements[0].innerHTML = "<br>";
+                                                }
+                                                selectCellElements[0].insertAdjacentHTML("beforeend", "<wbr>");
                                                 selectCellElements[0].colSpan = colSpan;
                                                 selectCellElements[0].rowSpan = rowSpan;
                                                 focusByWbr(selectCellElements[0], document.createRange());
@@ -3878,6 +3877,19 @@ export class WYSIWYG {
             return keyState;
         };
         this.element.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (event.key === "F2" && !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey &&
+                !event.isComposing && !protyle.disabled) {
+                const selection = getSelection();
+                const target = selection?.focusNode;
+                const element = target instanceof Element ? target : target?.parentElement;
+                const cell = element?.closest<HTMLTableCellElement>("th, td");
+                if (cell && cell.closest(".protyle-wysiwyg") === this.element) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    void import("../render/tableCellRichEditor").then(module => module.openTableCellRichEditor(protyle, cell));
+                    return;
+                }
+            }
             if (isInAndroid()) {
                 if (event.key === "Unidentified") {
                     mobileUnidentifiedInputRange = undefined;
@@ -4445,6 +4457,14 @@ export class WYSIWYG {
             }
             if (this.preventClick) {
                 this.preventClick = false;
+                return;
+            }
+            const richCell = event.target.closest<HTMLTableCellElement>("th, td");
+            if (richCell && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && !protyle.disabled &&
+                richCell.closest(".protyle-wysiwyg") === this.element &&
+                !event.target.closest("a, [data-type~='block-ref'], [data-type~='a'], img")) {
+                event.preventDefault();
+                void import("../render/tableCellRichEditor").then(module => module.openTableCellRichEditor(protyle, richCell));
                 return;
             }
             if (areProtylePluginExtensionsEnabled(protyle)) {

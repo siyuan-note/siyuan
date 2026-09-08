@@ -413,7 +413,7 @@ export const prepareAssetUpload = (options: {
             return fail(error);
         }
         acceptingRegistrations = false;
-        if (emitResult.error) {
+        if (Object.prototype.hasOwnProperty.call(emitResult, "error")) {
             discardResponse();
             return fail(new Error(`Plugin ${pluginLabel} failed during before-upload-assets: ${getErrorMessage(emitResult.error)}`));
         }

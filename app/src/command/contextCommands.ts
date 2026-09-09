@@ -19,6 +19,7 @@ import {newFileInTree} from "../util/newFile";
 import {newNotebook} from "../util/mount";
 import {pathPosix} from "../util/pathName";
 import {isCustomFileTreeList} from "../util/fileTreeSort";
+import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
 import {Tab} from "../layout/Tab";
 /// #endif
@@ -99,6 +100,7 @@ export const ensureContextCommands = (app: App) => {
     }, context => key === "pin" ? getTab(context).pin() : getTab(context).unpin()));
     /// #endif
 
+    add("reloadUI", ["reloadUI"], () => true, () => fetchPost("/api/ui/reloadUI", {}));
     add("notebook.new", ["newNotebook"], () => !window.siyuan.config.readonly, () => newNotebook());
     ["newDocAbove", "newDocBelow"].forEach(key => add(`document.${key}`, ["doc", key], context => {
         if (!documentWritable(context)) {

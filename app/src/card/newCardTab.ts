@@ -1,129 +1,80 @@
 import {Tab} from "../layout/Tab";
 import {Custom} from "../layout/dock/Custom";
-import {bindCardEvent, genCardHTML} from "./openCard";
-import {fetchPost} from "../util/fetch";
-import {Protyle} from "../protyle";
 import {setPanelFocus} from "../layout/util";
 import type {App} from "../index";
 import {clearOBG} from "../layout/dock/util";
+import {ensureFlashcardV2} from "./flashcardV2";
+import {openFlashcardV2ReviewSession} from "./flashcardV2Session";
+import {normalizeFlashcardTabData, type IFlashcardTabData} from "./flashcardTab";
+import {fetchPost} from "../util/fetch";
+import {showMessage} from "../dialog/message";
 
 export const newCardModel = (options: {
     app: App,
     tab: Tab,
-    data: {
-        cardType: TCardType,
-        id: string,
-        title?: string
-        cardsData?: ICardData,
-        index?: number,
-    }
+    data: IFlashcardTabData,
 }) => {
-    let editor: Protyle;
+    const controller = new AbortController();
     const customObj = new Custom({
         app: options.app,
         type: "siyuan-card",
         tab: options.tab,
-        data: options.data,
-        async init() {
-            if (options.data.cardsData) {
-                let cardsData = options.data.cardsData;
-                for (let i = 0; i < options.app.plugins.length; i++) {
-                    cardsData = await options.app.plugins[i].updateCards(options.data.cardsData);
-                }
-                this.element.innerHTML = genCardHTML({
-                    id: this.data.id,
-                    cardType: this.data.cardType,
-                    cardsData,
-                    isTab: true,
-                });
-
-                editor = await bindCardEvent({
-                    app: options.app,
-                    element: this.element,
-                    id: this.data.id,
-                    title: this.data.title,
-                    cardType: this.data.cardType,
-                    cardsData,
-                    index: options.data.index,
-                });
-                customObj.editors.push(editor);
-                editor.resize();
-                // https://github.com/siyuan-note/siyuan/issues/9561#issuecomment-1794473512
-                delete options.data.cardsData;
-                delete options.data.index;
-            } else {
-                fetchPost(this.data.cardType === "all" ? "/api/riff/getRiffDueCards" :
-                    (this.data.cardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
-                    rootID: this.data.id,
-                    deckID: this.data.id,
-                    notebook: this.data.id,
-                }, async (response) => {
-                    let cardsData = response.data;
-                    for (let i = 0; i < options.app.plugins.length; i++) {
-                        cardsData = await options.app.plugins[i].updateCards(cardsData);
+        data: {
+            cardType: options.data.cardType,
+            id: options.data.id,
+            title: options.data.title,
+            review: options.data.review,
+        },
+        init() {
+            this.element.classList.add("fn__flex-column");
+            ensureFlashcardV2(() => {
+                const open = (reviewSetID?: string) => {
+                    if (controller.signal.aborted) {
+                        return;
                     }
-                    this.element.innerHTML = genCardHTML({
-                        id: this.data.id,
-                        cardType: this.data.cardType,
-                        cardsData,
-                        isTab: true,
-                    });
-
-                    editor = await bindCardEvent({
-                        app: options.app,
-                        element: this.element,
-                        id: this.data.id,
-                        title: this.data.title,
-                        cardType: this.data.cardType,
-                        cardsData,
-                    });
-                    editor.resize();
-                    customObj.editors.push(editor);
-                });
-            }
+                    this.data = normalizeFlashcardTabData(this.data, reviewSetID);
+                    openFlashcardV2ReviewSession(options.app, "", this.data.title || window.siyuan.languages.riffCard,
+                        this.data.review, {
+                            element: this.element as HTMLElement,
+                            signal: controller.signal,
+                            close: () => this.tab.parent.removeTab(this.tab.id),
+                        });
+                };
+                if (!this.data.review && this.data.cardType === "all" && this.data.id) {
+                    const loadDeck = (offset: number) => {
+                        if (controller.signal.aborted) {
+                            return;
+                        }
+                        void fetchPost("/api/flashcard/listEntities", {
+                            entityType: "reviewSet", options: {offset, limit: 1000},
+                        }, (response) => {
+                            if (controller.signal.aborted) {
+                                return;
+                            }
+                            const sets = response.data.entities as Array<{entityID: string, payload: {legacyDeckID?: string}}>;
+                            const set = sets.find((item) => item.payload.legacyDeckID === this.data.id || item.entityID === this.data.id);
+                            if (set) {
+                                open(set.entityID);
+                            } else if (sets.length === 1000) {
+                                loadDeck(offset + sets.length);
+                            } else {
+                                showMessage(window.siyuan.languages.emptyContent);
+                            }
+                        });
+                    };
+                    loadDeck(0);
+                } else {
+                    open();
+                }
+            });
         },
         destroy() {
-            if (editor) {
-                editor.destroy();
-            }
+            controller.abort();
         },
         resize() {
-            if (editor) {
-                editor.resize();
-            }
         },
         update() {
-            fetchPost(this.data.cardType === "all" ? "/api/riff/getRiffDueCards" :
-                (this.data.cardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
-                rootID: this.data.id,
-                deckID: this.data.id,
-                notebook: this.data.id,
-            }, async (response) => {
-                let cardsData = response.data;
-                for (let i = 0; i < options.app.plugins.length; i++) {
-                    cardsData = await options.app.plugins[i].updateCards(cardsData);
-                }
-                customObj.editors.forEach(item => {
-                    item.destroy();
-                });
-                this.element.innerHTML = genCardHTML({
-                    id: this.data.id,
-                    cardType: this.data.cardType,
-                    cardsData,
-                    isTab: true,
-                });
-                editor = await bindCardEvent({
-                    app: options.app,
-                    element: this.element,
-                    id: this.data.id,
-                    title: this.data.title,
-                    cardType: this.data.cardType,
-                    cardsData,
-                });
-                customObj.editors.push(editor);
-                editor.resize();
-            });
-        }
+        },
     });
     customObj.element.addEventListener("click", () => {
         clearOBG();

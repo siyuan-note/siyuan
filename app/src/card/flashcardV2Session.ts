@@ -111,11 +111,40 @@ interface IFlashcardV2RenderedCard {
 
 export interface IFlashcardV2ReviewSessionOptions {
     reviewMode: "normal" | "reinforcement";
+    reviewSetIDs?: string[];
     query?: IFlashcardQueryAST;
     includeSuspended?: boolean;
     includeBuried?: boolean;
     includePaused?: boolean;
 }
+
+interface IFlashcardSessionSurface {
+    element: HTMLElement;
+    destroy: () => void;
+}
+
+export interface IFlashcardSessionMount {
+    element: HTMLElement;
+    signal: AbortSignal;
+    close: () => void;
+}
+
+const createSessionSurface = (options: ConstructorParameters<typeof Dialog>[0],
+    mount?: IFlashcardSessionMount): IFlashcardSessionSurface => {
+    if (!mount) {
+        return new Dialog(options);
+    }
+    const element = document.createElement("div");
+    element.className = "fn__flex-column fn__flex-1";
+    element.style.minHeight = "0";
+    element.innerHTML = options.content;
+    mount.element.replaceChildren(element);
+    mount.signal.addEventListener("abort", () => {
+        options.destroyCallback?.();
+        element.remove();
+    }, {once: true});
+    return {element, destroy: mount.close};
+};
 
 let flashcardV2ReviewOpening = false;
 
@@ -344,13 +373,13 @@ const prepareFlashcardV2Playback = (model: IFlashcardV2RenderModel, front: Eleme
     };
 };
 
-const setActionsVisible = (dialog: Dialog, revealed: boolean) => {
+const setActionsVisible = (dialog: IFlashcardSessionSurface, revealed: boolean) => {
     dialog.element.querySelector('[data-flashcard-action="reveal"]').classList.toggle("fn__none", revealed);
     dialog.element.querySelector('[data-flashcard-action="ratings"]').classList.toggle("fn__none", !revealed);
     dialog.element.querySelector('[data-flashcard-action="finish"]').classList.add("fn__none");
 };
 
-const setReviewActionsEnabled = (dialog: Dialog, enabled: boolean) => {
+const setReviewActionsEnabled = (dialog: IFlashcardSessionSurface, enabled: boolean) => {
     const contentElement = dialog.element.querySelector(".card__block");
     contentElement?.setAttribute("aria-busy", enabled ? "false" : "true");
     dialog.element.querySelectorAll<HTMLButtonElement>("[data-type=show], [data-rating]").forEach((button) => {
@@ -358,7 +387,7 @@ const setReviewActionsEnabled = (dialog: Dialog, enabled: boolean) => {
     });
 };
 
-const setUndoVisible = (dialog: Dialog, visible: boolean) => {
+const setUndoVisible = (dialog: IFlashcardSessionSurface, visible: boolean) => {
     dialog.element.querySelector('[data-type="undo-review"]').classList.toggle("fn__none", !visible);
 };
 
@@ -512,7 +541,7 @@ const sessionContent = () => `<div class="b3-dialog__content fn__flex-column car
 </div>
 </div>`;
 
-const renderSessionCard = (dialog: Dialog, queue: IFlashcardV2SessionQueueCard[], index: number,
+const renderSessionCard = (dialog: IFlashcardSessionSurface, queue: IFlashcardV2SessionQueueCard[], index: number,
     isCurrent: () => boolean, callback: (rendered: IFlashcardV2RenderedCard) => void,
     unavailable: () => void) => {
     const current = queue[index];
@@ -718,18 +747,28 @@ const openFlashcardV2SourceEditor = (app: App, blockID: string, callback: () => 
 };
 
 export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name: string,
-    options: IFlashcardV2ReviewSessionOptions = {reviewMode: "normal"}) => {
-    const existing = window.siyuan.dialogs.find((item) =>
+    options: IFlashcardV2ReviewSessionOptions = {reviewMode: "normal"}, mount?: IFlashcardSessionMount) => {
+    if (mount?.signal.aborted) {
+        return;
+    }
+    const existing = !mount && window.siyuan.dialogs.find((item) =>
         item.element.getAttribute("data-key") === Constants.DIALOG_OPENCARD ||
         item.element.hasAttribute("data-flashcard-v2-review"));
     if (existing) {
         existing.destroy();
         return;
     }
-    if (flashcardV2ReviewOpening) {
+    if (!mount && flashcardV2ReviewOpening) {
         return;
     }
-    flashcardV2ReviewOpening = true;
+    if (!mount) {
+        flashcardV2ReviewOpening = true;
+    }
+    const releaseOpening = () => {
+        if (!mount) {
+            flashcardV2ReviewOpening = false;
+        }
+    };
     const sessionID = genUUID();
     const now = Date.now();
     let sessionStarted = false;
@@ -737,6 +776,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
         operationID: genUUID(),
         sessionID,
         reviewSetID,
+        reviewSetIDs: options.reviewSetIDs,
         query: options.query,
         reviewMode: options.reviewMode,
         seed: sessionID,
@@ -749,12 +789,20 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
         includePaused: options.reviewMode === "reinforcement" && Boolean(options.includePaused),
     }, () => {
         sessionStarted = true;
+        if (mount?.signal.aborted) {
+            void finishSession(sessionID, "abandoned");
+            return;
+        }
         let queueLoaded = false;
         const queueNow = Date.now();
         void fetchPost("/api/flashcard/getSessionQueue", {
             sessionID, now: queueNow, ...flashcardV2ReviewDay(queueNow),
         }, (queueResponse) => {
             queueLoaded = true;
+            if (mount?.signal.aborted) {
+                void finishSession(sessionID, "abandoned");
+                return;
+            }
             const queue = (queueResponse.data.cards as IFlashcardV2SessionQueueCard[])
                 .filter((item) => item.card.generationStatus === "active" &&
                     (item.sessionCard.status === "queued" || item.sessionCard.status === "shown"));
@@ -764,6 +812,10 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 reviewMode: options.reviewMode,
                 cardCount: queue.length,
             });
+            if (mount?.signal.aborted) {
+                void finishSession(sessionID, "abandoned");
+                return;
+            }
             if (queue.length === 0) {
                 let completionShown = false;
                 void finishSession(sessionID, "completed", () => {
@@ -774,16 +826,19 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         reviewMode: options.reviewMode,
                         status: "completed",
                     });
-                    const completionDialog = new Dialog({
+                    if (mount?.signal.aborted) {
+                        return;
+                    }
+                    const completionDialog = createSessionSurface({
                         title: name,
                         width: isMobile() ? "92vw" : "520px",
                         content: `<div class="b3-dialog__content card__empty card__empty--space card__v2-completion">${sessionCompletionContent(false)}</div>`,
-                    });
+                    }, mount);
                     completionDialog.element.setAttribute("data-flashcard-v2-review", "");
-                    flashcardV2ReviewOpening = false;
+                    releaseOpening();
                 }).then(() => {
                     if (!completionShown) {
-                        flashcardV2ReviewOpening = false;
+                        releaseOpening();
                     }
                 });
                 return;
@@ -827,7 +882,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     status,
                 });
             };
-            const dialog = new Dialog({
+            const dialog = createSessionSurface({
                 title: name,
                 positionId: Constants.DIALOG_OPENCARD,
                 width: isMobile() ? "100vw" : "860px",
@@ -842,10 +897,10 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         finishSession(sessionID, status, () => emitSessionEnded(status));
                     }
                 },
-            });
+            }, mount);
             dialog.element.setAttribute("data-key", Constants.DIALOG_OPENCARD);
             dialog.element.setAttribute("data-flashcard-v2-review", "");
-            flashcardV2ReviewOpening = false;
+            releaseOpening();
             const canUseReviewActions = () => canUseFlashcardV2ReviewActions({
                 renderPending,
                 requestPending,
@@ -1466,13 +1521,13 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             renderCurrent();
         }).then(() => {
             if (!queueLoaded) {
-                flashcardV2ReviewOpening = false;
+                releaseOpening();
                 void finishSession(sessionID, "abandoned");
             }
         });
     }).then(() => {
         if (!sessionStarted) {
-            flashcardV2ReviewOpening = false;
+            releaseOpening();
         }
     });
 };

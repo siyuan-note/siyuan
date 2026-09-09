@@ -70,7 +70,6 @@ export const genCardHTML = (options: {
     id: string,
     cardType: TCardType,
     cardsData: ICardData,
-    isTab: boolean
 }) => {
     let iconsHTML: string;
     /// #if MOBILE
@@ -84,9 +83,9 @@ export const genCardHTML = (options: {
 </div>`;
     /// #else
     iconsHTML = `<div class="block__icons">
-        ${options.isTab ? '<div class="fn__flex-1"></div>' : `<div class="block__logo block__logo--icon">
+        <div class="block__logo block__logo--icon">
             <svg class="block__logoicon"><use xlink:href="#iconRiffCard"></use></svg>${window.siyuan.languages.riffCard}
-        </div>`}
+        </div>
         <span class="fn__flex-1 resize__move" style="min-height: 100%"></span>
         <div data-type="count" class="ft__on-surface ft__smaller fn__flex-center${options.cardsData.cards.length === 0 ? " fn__none" : " fn__flex"}">${genCardCount(options.cardsData)}</span></div>
         <div class="fn__space"></div>
@@ -101,8 +100,8 @@ export const genCardHTML = (options: {
         <div data-type="more" class="${options.cardsData.cards.length === 0 ? "fn__none " : ""}b3-tooltips b3-tooltips__sw block__icon block__icon--show" aria-label="${window.siyuan.languages.more}">
             <svg><use xlink:href="#iconMore"></use></svg>
         </div>
-        <div class="fn__space${options.isTab ? " fn__none" : ""}"></div>
-        <div data-type="sticktab" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show${options.isTab ? " fn__none" : ""}" aria-label="${window.siyuan.languages.openBy}">
+        <div class="fn__space"></div>
+        <div data-type="sticktab" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show" aria-label="${window.siyuan.languages.openBy}">
             <svg><use xlink:href="#iconOpen"></use></svg>
         </div>
     </div>`;
@@ -532,6 +531,11 @@ export const bindCardEvent = async (options: {
             /// #if !MOBILE
             const sticktabElement = hasClosestByAttribute(target, "data-type", "sticktab");
             if (sticktabElement) {
+                const tabData = () => ({
+                    cardType: filterElement.getAttribute("data-cardtype") as TCardType,
+                    id: docId,
+                    title: options.title,
+                });
                 const stickMenu = new Menu();
                 stickMenu.addItem({
                     id: "openInNewTab",
@@ -543,13 +547,7 @@ export const bindCardEvent = async (options: {
                             custom: {
                                 icon: "iconRiffCard",
                                 title: window.siyuan.languages.spaceRepetition,
-                                data: {
-                                    cardsData: options.cardsData,
-                                    index,
-                                    cardType: filterElement.getAttribute("data-cardtype") as TCardType,
-                                    id: docId,
-                                    title: options.title
-                                },
+                                data: tabData(),
                                 id: "siyuan-card"
                             },
                         });
@@ -567,13 +565,7 @@ export const bindCardEvent = async (options: {
                             custom: {
                                 icon: "iconRiffCard",
                                 title: window.siyuan.languages.spaceRepetition,
-                                data: {
-                                    cardsData: options.cardsData,
-                                    index,
-                                    cardType: filterElement.getAttribute("data-cardtype") as TCardType,
-                                    id: docId,
-                                    title: options.title
-                                },
+                                data: tabData(),
                                 id: "siyuan-card"
                             },
                         });
@@ -593,13 +585,7 @@ export const bindCardEvent = async (options: {
                             "children": {
                                 "instance": "Custom",
                                 "customModelType": "siyuan-card",
-                                "customModelData": {
-                                    "cardsData": options.cardsData,
-                                    "index": index,
-                                    "cardType": filterElement.getAttribute("data-cardtype"),
-                                    "id": docId,
-                                    "title": options.title
-                                }
+                                "customModelData": tabData()
                             }
                         }];
                         const url = new URL("/stage/build/app/window.html", window.location.origin);
@@ -883,7 +869,7 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
     const dialog = new Dialog({
         hideCloseIcon: true,
         positionId: Constants.DIALOG_OPENCARD,
-        content: genCardHTML({id, cardType, cardsData, isTab: false}),
+        content: genCardHTML({id, cardType, cardsData}),
         width: isMobile() ? "100vw" : "80vw",
         height: isMobile() ? "100dvh" : "70vh",
         destroyCallback() {

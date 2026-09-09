@@ -30,6 +30,7 @@ type StudyQueueRequest struct {
 	OperationID      string                                `json:"operationID"`
 	SessionID        string                                `json:"sessionID"`
 	ReviewSetID      string                                `json:"reviewSetID,omitempty"`
+	ReviewSetIDs     []string                              `json:"reviewSetIDs,omitempty"`
 	Query            *QueryAST                             `json:"query,omitempty"`
 	ReviewMode       string                                `json:"reviewMode,omitempty"`
 	Seed             string                                `json:"seed,omitempty"`
@@ -175,6 +176,32 @@ func (store *Store) StartStudySession(ctx context.Context, request StudyQueueReq
 	if err != nil {
 		return StudyQueueResult{}, err
 	}
+	if len(request.ReviewSetIDs) > 0 {
+		members := map[string]bool{}
+		for _, setID := range request.ReviewSetIDs {
+			revision, found, setErr := store.projection.CurrentEntity(ctx, EntityReviewSet, setID)
+			if setErr != nil {
+				return StudyQueueResult{}, setErr
+			}
+			if !found || revision.Deleted {
+				return StudyQueueResult{}, errors.New("flashcard review set was not found")
+			}
+			ids, setErr := store.projection.ReviewSetCardIDs(ctx, setID, options)
+			if setErr != nil {
+				return StudyQueueResult{}, setErr
+			}
+			for _, id := range ids {
+				members[id] = true
+			}
+		}
+		filtered := results[:0]
+		for _, result := range results {
+			if members[result.Card.ID] {
+				filtered = append(filtered, result)
+			}
+		}
+		results = filtered
+	}
 	if request.ReviewSetID != "" {
 		memberIDs, memberErr := store.projection.ReviewSetCardIDs(ctx, request.ReviewSetID, options)
 		if memberErr != nil {
@@ -227,7 +254,7 @@ func (store *Store) StartStudySession(ctx context.Context, request StudyQueueReq
 		return StudyQueueResult{}, err
 	}
 	session := StudySession{
-		ID: request.SessionID, ReviewSetID: request.ReviewSetID, QueryAST: queryJSON, ReviewMode: mode,
+		ID: request.SessionID, ReviewSetID: request.ReviewSetID, ReviewSetIDs: request.ReviewSetIDs, QueryAST: queryJSON, ReviewMode: mode,
 		Status: "active", Seed: seed, NewLimit: newLimit, ReviewLimit: reviewLimit,
 		IncludeSuspended: request.IncludeSuspended, IncludeBuried: request.IncludeBuried,
 		IncludePaused: request.IncludePaused, SelectionDigest: selectionDigest, StartedAt: request.Now,
@@ -437,10 +464,32 @@ func (request *StudyQueueRequest) validate() error {
 		request.NewLimit < 0 || request.ReviewLimit < 0 {
 		return errors.New("flashcard study queue identity, time and limits are invalid")
 	}
+	if request.ReviewSetIDs != nil && len(request.ReviewSetIDs) == 0 {
+		return errors.New("flashcard review set selection is empty")
+	}
 	var err error
 	request.ReviewDayStart, request.ReviewDayEnd, err = reviewDayBounds(request.Now, request.ReviewDayStart, request.ReviewDayEnd)
 	if err != nil {
 		return err
+	}
+	if len(request.ReviewSetIDs) > 0 {
+		if request.ReviewSetID != "" {
+			return errors.New("flashcard study queue cannot combine single and multiple review sets")
+		}
+		unique := map[string]bool{}
+		for _, id := range request.ReviewSetIDs {
+			if strings.TrimSpace(id) == "" {
+				return errors.New("flashcard review set ID is empty")
+			}
+			unique[id] = true
+		}
+		request.ReviewSetIDs = make([]string, 0, len(unique))
+		for id := range unique {
+			request.ReviewSetIDs = append(request.ReviewSetIDs, id)
+		}
+		sort.Strings(request.ReviewSetIDs)
+	} else {
+		request.ReviewSetIDs = nil
 	}
 	if request.Query != nil {
 		if request.ReviewSetID != "" {
@@ -556,6 +605,11 @@ func studyQueueResultFromBatch(batch OperationBatch, request StudyQueueRequest) 
 		result.Session.StartedAt != request.Now || result.Session.Seed != seed {
 		return StudyQueueResult{}, ErrOperationConflict
 	}
+	storedSets, _ := CanonicalJSON(result.Session.ReviewSetIDs)
+	requestedSets, _ := CanonicalJSON(request.ReviewSetIDs)
+	if string(storedSets) != string(requestedSets) {
+		return StudyQueueResult{}, ErrOperationConflict
+	}
 	if (result.Session.ReviewDayStart != 0 || result.Session.ReviewDayEnd != 0) && (result.Session.ReviewDayStart != request.ReviewDayStart ||
 		result.Session.ReviewDayEnd != request.ReviewDayEnd) {
 		return StudyQueueResult{}, ErrOperationConflict
@@ -576,6 +630,8 @@ func studyQueueResultFromBatch(batch OperationBatch, request StudyQueueRequest) 
 		if err != nil || string(queryJSON) != string(result.Session.QueryAST) {
 			return StudyQueueResult{}, ErrOperationConflict
 		}
+	} else if len(result.Session.QueryAST) > 0 {
+		return StudyQueueResult{}, ErrOperationConflict
 	}
 	sort.Slice(result.SessionCards, func(i, j int) bool { return result.SessionCards[i].Sort < result.SessionCards[j].Sort })
 	cardIDs := make([]string, len(result.SessionCards))

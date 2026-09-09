@@ -2,6 +2,7 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {Plugin} from "./index";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
+import {flashcardTabQuery, type IFlashcardTabOptions} from "../card/flashcardTab";
 import {fetchGet, fetchPost, fetchSyncPost} from "../util/fetch";
 import {getBackend, getFrontend} from "../util/functions";
 /// #if !MOBILE
@@ -96,11 +97,7 @@ openTab = (options: {
         path: string,
     },
     search?: Config.IUILayoutTabSearchConfig
-    card?: {
-        type: TCardType,
-        id?: string, //  cardType 为 all 时不传，否则传文档或笔记本 id
-        title?: string //  cardType 为 all 时不传，否则传文档或笔记本名称
-    },
+    card?: IFlashcardTabOptions,
     custom?: {
         title: string,
         icon: string,
@@ -174,6 +171,7 @@ openTab = (options: {
         });
     }
     if (options.card) {
+        const query = flashcardTabQuery(options.card);
         return openFile({
             app: options.app,
             keepCursor: options.keepCursor,
@@ -185,6 +183,11 @@ openTab = (options: {
                 title: window.siyuan.languages.spaceRepetition,
                 data: {
                     cardType: options.card.type,
+                    review: {
+                        reviewMode: options.card.reviewMode || "normal",
+                        reviewSetIDs: options.card.reviewSetIDs,
+                        query,
+                    },
                     id: options.card.id || "",
                     title: options.card.title,
                 },

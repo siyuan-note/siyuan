@@ -351,6 +351,7 @@ type StudyPolicy struct {
 type StudySession struct {
 	ID               string          `json:"id"`
 	ReviewSetID      string          `json:"reviewSetID,omitempty"`
+	ReviewSetIDs     []string        `json:"reviewSetIDs,omitempty"`
 	QueryAST         json.RawMessage `json:"queryAST,omitempty"`
 	ReviewMode       string          `json:"reviewMode"`
 	Status           string          `json:"status"`

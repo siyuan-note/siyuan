@@ -46,7 +46,11 @@
   }
 
   [data-node-id],
-  [data-table-cell-node] {
+  [data-table-cell-node],
+  td.dragover__top,
+  td.dragover__bottom,
+  th.dragover__top,
+  th.dragover__bottom {
     position: relative;
 
     &.protyle-wysiwyg--navigation {

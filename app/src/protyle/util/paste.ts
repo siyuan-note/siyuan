@@ -715,6 +715,12 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         siyuanHTML = event.siyuanHTML;
         files = event.files;
     }
+    // 先提取网页剪贴板中的内部块数据，再执行受限片段校验和清洗。
+    if (blockDOMSanitizer && !siyuanHTML && textHTML) {
+        const clipboard = getTextSiyuanFromTextHTML(textHTML);
+        siyuanHTML = clipboard.textSiyuan;
+        textHTML = clipboard.textHtml;
+    }
     if (blockDOMSanitizer && !siyuanHTML && !isProtyleUploadDisabled(protyle)) {
         // 受限片段中的图片走附件上传，避免被后续纯文本降级丢弃。
         const isImage = (name: string) => Constants.SIYUAN_ASSETS_IMAGE.includes(

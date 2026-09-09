@@ -19,6 +19,7 @@ import {updateTableCellContentLayout} from "../util/tableCellRich";
 import {TABLE_CELL_SLASH_IDS} from "../util/tableCellRichMenu";
 import {captureRichCellSelection, restoreRichCellSelection} from "../util/tableCellRichSelection";
 import {matchHotKey} from "../util/hotKey";
+import {bindTableCellRichDrag} from "../util/tableCellRichDrag";
 
 let activeEditor: {cell: Element, finish: () => void} | undefined;
 
@@ -129,7 +130,6 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         extend: [{key: "((", hint: hintRef}, {key: "【【", hint: hintRef}, {key: "（（", hint: hintRef},
             {key: "[[", hint: hintRef}, {key: "/", hint: safeSlash}, {key: "、", hint: safeSlash}],
     };
-    let timer: number;
     let finished = false;
     let composing = false;
     let finishAfterComposition = false;
@@ -159,15 +159,13 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         onChange: () => {
             contentChanged = true;
             updateTableCellContentLayout(host, fragment.getBlockHTML());
-            window.clearTimeout(timer);
             if (!finished && !composing) {
-                timer = window.setTimeout(commit, 200);
+                commit();
             }
         },
     });
     fragment.protyle.block.rootID = owner.block.rootID;
     const commit = () => {
-        window.clearTimeout(timer);
         if (!cell.isConnected || !table.isConnected || !host.isConnected || owner.disabled || composing) {
             return;
         }
@@ -230,6 +228,8 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     };
     activeEditor = {cell, finish};
     const signal = controller.signal;
+    bindTableCellRichDrag(owner, cell, fragment.wysiwyg, finish, signal,
+        target => openTableCellRichEditor(owner, target));
     const captureBeforeChange = () => {
         if (!contentChanged || serializeTableCellRich(fragment.getBlockHTML()).markdown === source) {
             undoSelection = captureRichCellSelection(fragment.wysiwyg, getSelection());
@@ -268,14 +268,20 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             commit();
         }
     }, {signal});
-    host.addEventListener("compositionstart", () => composing = true, {signal});
+    host.addEventListener("compositionstart", () => {
+        captureBeforeChange();
+        composing = true;
+    }, {capture: true, signal});
     host.addEventListener("compositionend", () => {
-        composing = false;
-        commit();
-        if (finishAfterComposition) {
-            finish();
-        }
-    }, {signal});
+        // 等待内部编辑器处理组合输入，再提交最终文字。
+        queueMicrotask(() => {
+            composing = false;
+            commit();
+            if (finishAfterComposition) {
+                finish();
+            }
+        });
+    }, {capture: true, signal});
     host.addEventListener("keydown", event => {
         captureBeforeChange();
         const keymap = window.siyuan.config.keymap.editor.general;

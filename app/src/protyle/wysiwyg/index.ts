@@ -3823,12 +3823,15 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
-            if (!hasClosestByAttribute(event.target, "contenteditable", "true")) {
+            if (event.target !== this.element && !hasClosestByAttribute(event.target, "contenteditable", "true")) {
                 event.stopPropagation();
                 event.preventDefault();
                 return;
             }
-            const blockElement = hasClosestBlock(event.target);
+            let blockElement = hasClosestBlock(event.target);
+            if (!blockElement) {
+                blockElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
+            }
             const calloutTitleElement = hasClosestByClassName(event.target, "callout-title");
             if (blockElement && calloutTitleElement) {
                 const range = getEditorRange(protyle.wysiwyg.element);

@@ -933,7 +933,7 @@ export class TableControl {
         return getRangeIndexes(start, start + span - 1).some(index => this.selection.indexes.has(index));
     }
 
-    private getSelectedCells() {
+    public getSelectedCells() {
         return this.selectedCells.filter(cell => cell.isConnected);
     }
 

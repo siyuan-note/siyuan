@@ -264,6 +264,12 @@ export class Toolbar {
     }
 
     public render(protyle: IProtyle, range: Range, position?: IPosition & {detail?: number}) {
+        const belongsToEditor = (node: Node) => node.isConnected &&
+            (node instanceof Element ? node : node.parentElement)?.closest(".protyle-wysiwyg") === protyle.wysiwyg.element;
+        if (!belongsToEditor(range.startContainer) || !belongsToEditor(range.endContainer)) {
+            this.element.classList.add("fn__none");
+            return;
+        }
         this.range = range;
         this.rangePosition = undefined;
         this.isMultipleClick = (position?.detail || 0) > 1;

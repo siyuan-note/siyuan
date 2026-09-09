@@ -242,6 +242,36 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             hideElements(["toolbar"], fragment.protyle);
         }
     }, {capture: true, signal});
+    host.addEventListener("mousedown", event => {
+        if (event.button !== 0 || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey ||
+            !(event.target instanceof Element) || event.target.closest(".protyle-action, .protyle-toolbar, .protyle-table-control")) {
+            return;
+        }
+        const drag = new AbortController();
+        let selectingCells = false;
+        document.addEventListener("mousemove", move => {
+            const target = document.elementFromPoint(move.clientX, move.clientY)?.closest<HTMLTableCellElement>("td, th");
+            if (!target || target.closest('[data-type="NodeTable"]') !== table || (!selectingCells && target === cell)) {
+                return;
+            }
+            if (!selectingCells) {
+                selectingCells = true;
+                finish();
+                hideElements(["toolbar"], owner);
+            }
+            move.preventDefault();
+            move.stopImmediatePropagation();
+            owner.wysiwyg.tableControl?.selectCellRange(cell, target);
+        }, {capture: true, signal: drag.signal});
+        document.addEventListener("mouseup", up => {
+            drag.abort();
+            if (selectingCells) {
+                up.preventDefault();
+            }
+        }, {capture: true, once: true, signal: drag.signal});
+        document.addEventListener("dragstart", () => drag.abort(), {capture: true, once: true, signal: drag.signal});
+        window.addEventListener("blur", () => drag.abort(), {once: true, signal: drag.signal});
+    }, {capture: true, signal});
     const belongsToEditor = (target: Node) => host.contains(target) || fragment.hintElement.contains(target) ||
         fragment.protyle.toolbar.element.contains(target) || fragment.protyle.toolbar.subElement.contains(target) ||
         !!(target instanceof Element && target.closest("#commonMenu, .b3-dialog"));

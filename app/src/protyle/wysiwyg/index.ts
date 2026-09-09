@@ -1148,10 +1148,8 @@ export class WYSIWYG {
             const emptyCell = target.closest<HTMLTableCellElement>("td:empty, th:empty");
             if (emptyCell && event.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey &&
                 !event.altKey && !protyle.disabled && emptyCell.closest(".protyle-wysiwyg") === this.element) {
-                // 空单元格直接进入编辑，阻止浏览器先在单元格顶部绘制临时光标。
+                // 阻止浏览器在空单元格顶部绘制临时光标，保留鼠标移动后的跨单元格拖选。
                 event.preventDefault();
-                void import("../render/tableCellRichEditor").then(module => module.openTableCellRichEditor(protyle, emptyCell));
-                return;
             }
             const customElement = hasClosestByClassName(target, "protyle-custom");
             let nodeElement = hasClosestBlock(target) as HTMLElement;
@@ -4497,6 +4495,10 @@ export class WYSIWYG {
                 return;
             }
             const richCell = event.target.closest<HTMLTableCellElement>("th, td");
+            if (richCell && this.tableControl?.getSelectedCells().length > 1) {
+                event.preventDefault();
+                return;
+            }
             if (richCell && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && !protyle.disabled &&
                 richCell.closest(".protyle-wysiwyg") === this.element &&
                 !event.target.closest("a, [data-type~='block-ref'], [data-type~='a'], img")) {

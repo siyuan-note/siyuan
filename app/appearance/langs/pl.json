@@ -1,4 +1,6 @@
 {
+	"flashcardOpenMode": "Domyślny sposób otwierania",
+	"flashcardOpenDialog": "Otwórz w oknie dialogowym",
 	"statistics": "Statystyki",
 	"flashcardIncludeNewMarks": "Uwzględnij nowe wyróżnienia",
 	"flashcardFlag": "Flaga",

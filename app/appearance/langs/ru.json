@@ -1,4 +1,6 @@
 {
+	"flashcardOpenMode": "Способ открытия по умолчанию",
+	"flashcardOpenDialog": "Открыть в диалоговом окне",
 	"statistics": "Статистика",
 	"flashcardIncludeNewMarks": "Включить новые выделения",
 	"flashcardFlag": "Флаг",

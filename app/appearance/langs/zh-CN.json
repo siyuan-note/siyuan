@@ -1,4 +1,6 @@
 {
+	"flashcardOpenMode": "默认打开方式",
+	"flashcardOpenDialog": "在弹窗中打开",
 	"statistics": "统计",
 	"flashcardIncludeNewMarks": "纳入新增标记",
 	"flashcardFlag": "旗标",

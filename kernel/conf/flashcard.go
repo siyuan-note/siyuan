@@ -24,6 +24,7 @@ import (
 )
 
 type Flashcard struct {
+	OpenMode        int  `json:"openMode"`        // 默认打开方式，0：弹窗，1：页签，2：右侧分屏，3：新窗口
 	NewCardLimit    int  `json:"newCardLimit"`    // 新卡上限 https://github.com/siyuan-note/siyuan/issues/7695
 	ReviewCardLimit int  `json:"reviewCardLimit"` // 复习卡上限 https://github.com/siyuan-note/siyuan/issues/7703
 	Mark            bool `json:"mark"`            // 是否启用标记制卡 https://github.com/siyuan-note/siyuan/issues/7794

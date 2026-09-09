@@ -1,4 +1,6 @@
 {
+	"flashcardOpenMode": "기본 열기 방식",
+	"flashcardOpenDialog": "대화 상자에서 열기",
 	"statistics": "통계",
 	"flashcardIncludeNewMarks": "새 강조 표시 포함",
 	"flashcardFlag": "깃발",

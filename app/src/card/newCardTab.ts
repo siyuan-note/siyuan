@@ -23,6 +23,7 @@ export const newCardModel = (options: {
             cardType: options.data.cardType,
             id: options.data.id,
             title: options.data.title,
+            reviewSetID: options.data.reviewSetID,
             review: options.data.review,
         },
         init() {
@@ -33,7 +34,7 @@ export const newCardModel = (options: {
                         return;
                     }
                     this.data = normalizeFlashcardTabData(this.data, reviewSetID);
-                    openFlashcardV2ReviewSession(options.app, "", this.data.title || window.siyuan.languages.riffCard,
+                    openFlashcardV2ReviewSession(options.app, this.data.reviewSetID || "", this.data.title || window.siyuan.languages.riffCard,
                         this.data.review, {
                             element: this.element as HTMLElement,
                             signal: controller.signal,

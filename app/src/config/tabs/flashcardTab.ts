@@ -1,4 +1,6 @@
 import type {SettingTabBuilder} from "../setting/builder";
+import {isBrowser, isMobile} from "../../util/functions";
+import {resolveFlashcardOpenMode} from "../../card/flashcardOpenMode";
 
 /** 闪卡 Tab：各组注册实现（由 setting/tabs.ts 调用） */
 const registerFlashcardCreationGroup = (tab: SettingTabBuilder) => {
@@ -32,6 +34,19 @@ const registerFlashcardCreationGroup = (tab: SettingTabBuilder) => {
 
 const registerFlashcardReviewGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("review", window.siyuan.languages.configGroupReview);
+
+    if (!isMobile()) {
+        group.select("flashcard.openMode", {
+            title: window.siyuan.languages.flashcardOpenMode,
+            readConfig: () => resolveFlashcardOpenMode(window.siyuan.config.flashcard.openMode, false, isBrowser()),
+            options: [
+                {value: 0, label: window.siyuan.languages.flashcardOpenDialog},
+                {value: 1, label: window.siyuan.languages.openInNewTab},
+                {value: 2, label: window.siyuan.languages.insertRight},
+                ...(!isBrowser() ? [{value: 3, label: window.siyuan.languages.openByNewWindow}] : []),
+            ],
+        });
+    }
 
     group.select("flashcard.reviewMode", {
         title: window.siyuan.languages.reviewMode,

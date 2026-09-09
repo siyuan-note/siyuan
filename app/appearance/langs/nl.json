@@ -1,4 +1,6 @@
 {
+	"flashcardOpenMode": "Standaard openingswijze",
+	"flashcardOpenDialog": "Openen in dialoogvenster",
 	"statistics": "Statistieken",
 	"flashcardIncludeNewMarks": "Nieuwe markeringen opnemen",
 	"flashcardFlag": "Vlag",

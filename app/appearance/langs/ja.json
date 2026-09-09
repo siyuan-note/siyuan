@@ -1,4 +1,6 @@
 {
+	"flashcardOpenMode": "デフォルトの開き方",
+	"flashcardOpenDialog": "ダイアログで開く",
 	"statistics": "統計",
 	"flashcardIncludeNewMarks": "新しいマークを含める",
 	"flashcardFlag": "フラグ",

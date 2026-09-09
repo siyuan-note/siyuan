@@ -435,6 +435,10 @@ func setFlashcard(c *gin.Context) {
 		flashcard.NewCardLimit = 20
 	}
 
+	if flashcard.OpenMode < 0 || flashcard.OpenMode > 3 {
+		flashcard.OpenMode = 0
+	}
+
 	if 0 > flashcard.ReviewCardLimit {
 		flashcard.ReviewCardLimit = 200
 	}

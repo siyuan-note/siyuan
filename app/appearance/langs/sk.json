@@ -1,4 +1,6 @@
 {
+	"flashcardOpenMode": "Predvolený spôsob otvárania",
+	"flashcardOpenDialog": "Otvoriť v dialógovom okne",
 	"statistics": "Štatistiky",
 	"flashcardIncludeNewMarks": "Zahrnúť nové zvýraznenia",
 	"flashcardFlag": "Vlajka",

@@ -1,4 +1,6 @@
 {
+	"flashcardOpenMode": "Standardöffnungsart",
+	"flashcardOpenDialog": "Im Dialog öffnen",
 	"statistics": "Statistiken",
 	"flashcardIncludeNewMarks": "Neue Markierungen einbeziehen",
 	"flashcardFlag": "Farbmarkierung",

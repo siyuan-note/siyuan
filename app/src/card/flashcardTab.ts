@@ -6,6 +6,7 @@ export interface IFlashcardTabData {
     cardType: "doc" | "notebook" | "all";
     id: string;
     title?: string;
+    reviewSetID?: string;
     review?: IFlashcardV2ReviewSessionOptions;
 }
 
@@ -18,6 +19,7 @@ export const normalizeFlashcardTabData = (data: IFlashcardTabData, reviewSetID?:
         cardType: data.cardType,
         id: data.id,
         title: data.title,
+        ...(data.reviewSetID ? {reviewSetID: data.reviewSetID} : {}),
         review: data.review || {
             reviewMode: "normal",
             ...(reviewSetID ? {reviewSetIDs: [reviewSetID]} : {}),

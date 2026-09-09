@@ -48,6 +48,7 @@ import {
 import {setFlashcardLocateBlockID} from "./flashcardLocate";
 import {flashcardV2FlagMenuItems} from "./flashcardV2Flag";
 import {flashcardV2ReviewDay} from "./flashcardV2Calendar";
+import {openFlashcardReviewTab} from "./openFlashcardReviewTab";
 
 interface IFlashcardV2SessionQueueCard {
     sessionCard: {
@@ -749,6 +750,9 @@ const openFlashcardV2SourceEditor = (app: App, blockID: string, callback: () => 
 export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name: string,
     options: IFlashcardV2ReviewSessionOptions = {reviewMode: "normal"}, mount?: IFlashcardSessionMount) => {
     if (mount?.signal.aborted) {
+        return;
+    }
+    if (!mount && openFlashcardReviewTab(app, reviewSetID, name, options)) {
         return;
     }
     const existing = !mount && window.siyuan.dialogs.find((item) =>

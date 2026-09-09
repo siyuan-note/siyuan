@@ -1,4 +1,6 @@
 {
+	"flashcardOpenMode": "Mode d’ouverture par défaut",
+	"flashcardOpenDialog": "Ouvrir dans une boîte de dialogue",
 	"statistics": "Statistiques",
 	"flashcardIncludeNewMarks": "Inclure les nouveaux surlignages",
 	"flashcardFlag": "Drapeau",

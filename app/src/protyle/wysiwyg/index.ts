@@ -1,4 +1,5 @@
 import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
+import {repairHiddenTabSelection} from "../util/tabsSelection";
 import {isTabTextBoundary} from "./tabsBoundary";
 import {
     beforePaste,
@@ -1140,6 +1141,10 @@ export class WYSIWYG {
             const documentSelf = document;
             documentSelf.onmouseup = null;
             let target = event.target as HTMLElement;
+            if (event.button === 0 && !event.shiftKey && !event.ctrlKey && !event.metaKey &&
+                !event.altKey && !protyle.disabled) {
+                repairHiddenTabSelection(this.element, target);
+            }
             const emptyCell = target.closest<HTMLTableCellElement>("td:empty, th:empty");
             if (emptyCell && event.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey &&
                 !event.altKey && !protyle.disabled && emptyCell.closest(".protyle-wysiwyg") === this.element) {

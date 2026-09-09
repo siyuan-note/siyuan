@@ -19,6 +19,7 @@ const sources = () => {
     return {
         navigation: extract("editor/util.ts", ["switchEditor"]),
         visibility: extract("protyle/render/tabsVisibility.ts", ["isHiddenTabContent"]),
+        selection: extract("protyle/util/tabsSelection.ts", ["repairHiddenTabSelection"]),
     };
 };
 
@@ -86,6 +87,37 @@ const cases = (source) => {
     root.dispatchEvent(new PointerEvent("pointerdown", {bubbles: true}));
     check.equal(disconnected, true);
     root.remove();
+    // 引用跳转后切回页签，点击空列表项必须替换隐藏正文中的旧选区。
+    const repair = new Function(source.visibility + source.selection + "; return repairHiddenTabSelection;")();
+    const selectionRoot = document.createElement("div");
+    document.body.append(selectionRoot);
+    selectionRoot.innerHTML = '<div class="tab-item" data-tabs-hidden="false"><div class="tab-item-content">' +
+        '<div data-type="NodeList"><div data-type="NodeListItem"><div data-type="NodeParagraph">' +
+        '<div contenteditable="true"></div></div></div></div><div contenteditable="true">Visible</div></div></div>' +
+        '<div class="tab-item" data-tabs-hidden="true"><div class="tab-item-content">' +
+        '<div contenteditable="true">Previous target</div></div></div>';
+    const [empty, visible, hidden] = selectionRoot.querySelectorAll('[contenteditable="true"]');
+    const selection = window.getSelection();
+    const place = element => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    };
+    place(hidden);
+    repair(selectionRoot, empty);
+    check.equal(selection.anchorNode, empty);
+    check.equal(selection.anchorOffset, 0);
+    place(visible);
+    repair(selectionRoot, empty);
+    check.equal(selection.anchorNode, visible);
+    place(hidden);
+    repair(selectionRoot, hidden);
+    check.equal(selection.anchorNode, hidden);
+    repair(selectionRoot, visible);
+    check.equal(selection.anchorNode, hidden);
+    selectionRoot.remove();
     return "Tabs title and navigation cases passed";
 };
 

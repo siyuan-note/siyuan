@@ -1,4 +1,6 @@
 {
+	"uploadInsertTargetUnavailable": "La cible initiale du téléversement n’est plus disponible. Le résultat n’a pas été inséré ; les fichiers téléversés sont conservés.",
+	"mobileToolbarEntryTip": "Configurer la visibilité et l’ordre de la barre d’outils mobile avec les mêmes profils que sur ordinateur",
 	"keymapAssigned": "Attribués",
 	"keymapCustomized": "Personnalisés par moi",
 	"keymapUnassigned": "Non attribués",

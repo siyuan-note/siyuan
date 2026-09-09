@@ -9,6 +9,9 @@
     display: flex;
 
     &__item {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       color: var(--b3-theme-on-background);
       border: 0;
       background-color: transparent;
@@ -63,6 +66,44 @@
       margin: 6px 4px;
     }
 
+    &__font {
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+      gap: 6px;
+      font-size: 12px;
+      max-width: 96px;
+
+      &[data-type="font-family"] {
+        max-width: 120px;
+      }
+
+      &-label {
+        flex: 0 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: left;
+      }
+
+      svg {
+        flex-shrink: 0;
+        width: 8px;
+        height: 8px;
+      }
+    }
+
+  }
+
+  &-font-size {
+    padding: 8px;
+    width: 220px;
+
+    input[type="number"] {
+      min-width: 0;
+      width: 120px;
+    }
   }
 
   &-hint {

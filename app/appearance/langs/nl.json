@@ -1,4 +1,6 @@
 {
+	"uploadInsertTargetUnavailable": "Het oorspronkelijke uploaddoel is niet meer beschikbaar. Het resultaat is niet ingevoegd; geüploade bestanden blijven behouden.",
+	"mobileToolbarEntryTip": "Configureer de zichtbaarheid en volgorde van de mobiele werkbalk met dezelfde profielen als op de desktop",
 	"keymapAssigned": "Toegewezen",
 	"keymapCustomized": "Door mij aangepast",
 	"keymapUnassigned": "Niet toegewezen",

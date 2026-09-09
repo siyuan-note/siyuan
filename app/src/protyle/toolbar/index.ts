@@ -98,6 +98,7 @@ import {
     normalizeCalloutTitleRange
 } from "./inlineRangeBoundary";
 import {resolvePluginToolbar} from "../../plugin/toolbarItem";
+import {FontControl, updateFontControls} from "./fontControls";
 import {
     areProtylePluginExtensionsEnabled,
     getProtyleLockedToolbar,
@@ -108,7 +109,7 @@ const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) 
         return toolbar;
     }
     const filtered = toolbar.filter(item => typeof item === "string" ||
-        Constants.INLINE_TYPE.concat("|").includes(item.name) || item.showInLite);
+        Constants.INLINE_TYPE.concat("|", "font-family", "font-size").includes(item.name) || item.showInLite);
     return filtered.filter((item, index) => {
         const name = typeof item === "string" ? item : item.name;
         if (name !== "|") {
@@ -134,7 +135,7 @@ const applyPluginToolbar = (toolbar: Array<string | IMenuItem>, protyle: IProtyl
         });
         result = filterPluginToolbar(result, protyle.lite);
         result.forEach((toolbarItem) => {
-            if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name)) {
+            if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|", "font-family", "font-size").includes(toolbarItem.name)) {
                 return;
             }
             if (typeof toolbarItem.hotkey !== "string") {
@@ -181,7 +182,7 @@ export class Toolbar {
         /// #endif
         this.toolbarHeight = 29;
         options.toolbar = applyPluginToolbar(options.toolbar, protyle);
-        if (!isMobile() && !protyle.lite) {
+        if (!protyle.lite) {
             refreshToolbarCatalog(options.toolbar);
         }
         options.toolbar.forEach((menuItem: IMenuItem) => {
@@ -200,7 +201,7 @@ export class Toolbar {
         this.element.innerHTML = "";
         protyle.options.toolbar = toolbarKeyToMenu(getProtyleLockedToolbar(protyle) || getDefaultToolbar(isMobile()));
         protyle.options.toolbar = applyPluginToolbar(protyle.options.toolbar, protyle);
-        if (!isMobile() && !protyle.lite) {
+        if (!protyle.lite) {
             refreshToolbarCatalog(protyle.options.toolbar);
         }
         protyle.options.toolbar.forEach((menuItem: IMenuItem) => {
@@ -303,6 +304,7 @@ export class Toolbar {
             return;
         }
         this.rangePosition = getSelectionPosition(nodeElement, range, true, position);
+        updateFontControls(protyle);
         this.element.classList.remove("fn__none");
         this.toolbarHeight = this.element.clientHeight;
         const y = this.setSelectionElementPosition(protyle, this.element);
@@ -2516,6 +2518,10 @@ export class Toolbar {
                 break;
             case "text":
                 menuItemObj = new Font(protyle, menuItem);
+                break;
+            case "font-family":
+            case "font-size":
+                menuItemObj = new FontControl(protyle, menuItem);
                 break;
             case "format-painter":
                 menuItemObj = menuItem.click ? new ToolbarItem(protyle, menuItem) :

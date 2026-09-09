@@ -1,4 +1,6 @@
 {
+	"uploadInsertTargetUnavailable": "Özgün yükleme hedefi artık kullanılamıyor. Sonuç eklenmedi; yüklenen dosyalar korunuyor.",
+	"mobileToolbarEntryTip": "Masaüstü ile aynı profilleri kullanarak mobil araç çubuğunun görünürlüğünü ve sırasını yapılandırın",
 	"keymapAssigned": "Atanmış",
 	"keymapCustomized": "Benim özelleştirdiklerim",
 	"keymapUnassigned": "Atanmamış",

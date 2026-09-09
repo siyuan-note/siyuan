@@ -12,8 +12,8 @@ import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {scrollCenter} from "../../util/highlightById";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {filesize} from "filesize";
-import {createUploadInsertPosition, isUploadInsertPositionAvailable} from "./insertPosition";
-import type {IUploadInsertPosition} from "./insertPosition";
+import {captureUploadDocument, createUploadInsertPosition, getAvailableUploadInsertRange, isUploadDocumentAvailable} from "./insertPosition";
+import type {IUploadDocument, IUploadInsertPosition} from "./insertPosition";
 import {
     type IAssetUploadEventContext,
     type IAssetUploadTask,
@@ -29,6 +29,7 @@ interface FileWithPath extends File {
 }
 
 export interface IUploadInsertOptions {
+    document?: IUploadDocument;
     htmlAsIframe?: boolean;
     insertPosition?: IUploadInsertPosition;
     source?: TAssetUploadSource;
@@ -143,6 +144,10 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle, options
     }
     let insertBlock = true;
     const range = getUploadInsertRange(protyle, options?.insertPosition);
+    if (!range) {
+        showMessage(window.siyuan.languages.uploadInsertTargetUnavailable);
+        return;
+    }
     if (range.toString() === "" && range.startContainer.nodeType === 3 && protyle.toolbar.getCurrentType(range).length > 0) {
         // 防止链接插入其他元素中 https://ld246.com/article/1676003478664
         range.setEndAfter(range.startContainer.parentElement);
@@ -199,16 +204,15 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle, options
 };
 
 export const getUploadInsertRange = (protyle: IProtyle, position?: IUploadInsertPosition) => {
-    if (isUploadInsertPositionAvailable(protyle.wysiwyg.element, position)) {
-        return position.range.cloneRange();
-    }
-    if (position?.context && restoreFocusContext(protyle, position.context)) {
-        return getEditorRange(protyle.wysiwyg.element).cloneRange();
-    }
-    return getEditorRange(protyle.wysiwyg.element);
+    return getAvailableUploadInsertRange(protyle.wysiwyg.element, position, context => {
+        if (restoreFocusContext(protyle, context)) {
+            return getEditorRange(protyle.wysiwyg.element).cloneRange();
+        }
+    });
 };
 
 interface IAssetUploadCallbacks {
+    isTargetAvailable(): boolean;
     success(responseText: string, response: IWebSocketData | undefined,
             input: IAssetUploadInput,
             result: Omit<IAssetUploadResult, "requestId" | "input">): void | PromiseLike<void>;
@@ -229,7 +233,7 @@ const getAssetUploadContext = (options?: IUploadInsertOptions): IAssetUploadEven
 };
 
 const captureUploadInsertPosition = (protyle: IProtyle, options?: IUploadInsertOptions): IUploadInsertOptions => {
-    const result = {...options};
+    const result = {...options, document: options?.document || captureUploadDocument(protyle)};
     if ((result.target || "editor") !== "editor" || result.insertPosition) {
         return result;
     }
@@ -282,6 +286,11 @@ const finishSuccessfulUpload = (task: IAssetUploadTask | undefined, callbacks: I
         return;
     }
     try {
+        // 完成通知可能触发插件切换文档，消费结果前再次核验原目标。
+        if (!callbacks.isTargetAvailable()) {
+            showMessage(window.siyuan.languages.uploadInsertTargetUnavailable);
+            return;
+        }
         const callbackResult = callbacks.success(responseText, response, input, result);
         if (callbackResult && typeof callbackResult.then === "function") {
             void Promise.resolve(callbackResult).catch(error => {
@@ -325,7 +334,7 @@ const uploadPreparedLocalFiles = (input: Extract<IAssetUploadInput, { kind: "loc
         void (async () => {
             let msgId: string | undefined;
             try {
-                if (!document.body.contains(protyle.element)) {
+                if (!callbacks.isTargetAvailable()) {
                     finishUpload(task, callbacks, {status: "canceled"});
                     return;
                 }
@@ -333,7 +342,7 @@ const uploadPreparedLocalFiles = (input: Extract<IAssetUploadInput, { kind: "loc
                 const response = await fetchSyncPost("/api/asset/insertLocalAssets", {
                     assetPaths,
                     isUpload,
-                    id: protyle.block.rootID,
+                    id: options.document.rootID,
                     fromHTMLPaste: options?.fromHTMLPaste,
                 });
                 hideMessage(msgId);
@@ -384,7 +393,7 @@ const uploadPreparedLocalFiles = (input: Extract<IAssetUploadInput, { kind: "loc
 };
 
 const uploadPreparedFiles = (input: Extract<IAssetUploadInput, { kind: "files" }>, protyle: IProtyle,
-                             callbacks: IAssetUploadCallbacks, task: IAssetUploadTask) => {
+                             callbacks: IAssetUploadCallbacks, task: IAssetUploadTask, options: IUploadInsertOptions) => {
     const fileList = input.files;
     if (protyle.options.upload.handler) {
         const finishHandler = (result: string | null) => {
@@ -458,10 +467,15 @@ const uploadPreparedFiles = (input: Extract<IAssetUploadInput, { kind: "files" }
     if (protyle.lite) {
         formData.append("assetsDirPath", "/assets/");
     } else {
-        formData.append("id", protyle.block?.rootID);
+        formData.append("id", options.document.rootID);
     }
     confirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
         try {
+            if (!callbacks.isTargetAvailable()) {
+                hideMessage(validateResult.msgId);
+                finishUpload(task, callbacks, {status: "canceled"});
+                return;
+            }
             const xhr = new XMLHttpRequest();
             xhr.open("POST", protyle.options.upload.url);
             if (protyle.options.upload.token) {
@@ -568,12 +582,12 @@ const startPreparedAssetUpload = (prepared: Awaited<ReturnType<typeof prepareAss
             finishUpload(prepared.task, callbacks, {status: "canceled"});
             return;
         }
-        if (!document.body.contains(protyle.element)) {
+        if (!callbacks.isTargetAvailable()) {
             finishUpload(prepared.task, callbacks, {status: "canceled"});
             return;
         }
         if (prepared.task.input.kind === "files") {
-            uploadPreparedFiles(prepared.task.input, protyle, callbacks, prepared.task);
+            uploadPreparedFiles(prepared.task.input, protyle, callbacks, prepared.task, options);
         } else {
             uploadPreparedLocalFiles(prepared.task.input, protyle, true, callbacks, prepared.task, options);
         }
@@ -588,6 +602,10 @@ const startPreparedAssetUpload = (prepared: Awaited<ReturnType<typeof prepareAss
 const startAssetUpload = (input: IAssetUploadInput, protyle: IProtyle, options: IUploadInsertOptions,
                           callbacks: IAssetUploadCallbacks) => {
     try {
+        if (!callbacks.isTargetAvailable()) {
+            finishCallbacks(callbacks, false);
+            return;
+        }
         const prepared = prepareAssetUpload({
             plugins: [...(protyle.app?.plugins || [])],
             protyle,
@@ -667,6 +685,7 @@ export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUplo
     }
     const uploadOptions = captureUploadInsertPosition(protyle, options);
     const callbacks: IAssetUploadCallbacks = {
+        isTargetAvailable: () => isUploadDocumentAvailable(protyle, uploadOptions.document),
         success(responseText, response, _input, result) {
             if (successCB) {
                 return successCB(response, result);
@@ -688,6 +707,7 @@ export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUplo
     const assetFiles = input.files.filter(item => !linkedFiles.includes(item));
     if (linkedFiles.length > 0) {
         uploadPreparedLocalFiles({kind: "local-files", files: linkedFiles}, protyle, false, {
+            isTargetAvailable: callbacks.isTargetAvailable,
             success: callbacks.success,
             complete: assetFiles.length === 0 ? callbacks.complete : undefined,
             reset: assetFiles.length === 0 ? callbacks.reset : undefined,
@@ -755,6 +775,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
     }
 
     const callbacks: IAssetUploadCallbacks = {
+        isTargetAvailable: () => isUploadDocumentAvailable(protyle, uploadOptions.document),
         success(responseText, response, input, result) {
             if (protyle.options.upload.success) {
                 return protyle.options.upload.success(protyle.wysiwyg.element, responseText);

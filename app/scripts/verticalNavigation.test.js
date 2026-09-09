@@ -33,6 +33,7 @@ const rendererModules = () => {
     modules["render/tabsRender"] = "export const setTabTitleNavigationEditing = () => false;";
     modules["../util/highlightById"] = "export const scrollCenter = () => {};";
     modules["render/av/focus"] = 'import {focusEditableAtGoalX} from "../../wysiwyg/verticalCaret";\n' +
+        'import {ensureAVTableBoundaryRow, getAVData} from "./virtualScroll";\n' +
         "const clearSelect = () => {};\n" +
         extract("render/av/focus", ["getVisibleAVTitle", "focusAVTitleByVerticalArrow", "focusAVVerticalRegion",
             "getOwnVisibleElements", "getClosestCell"]);
@@ -103,7 +104,10 @@ const rendererModules = () => {
             '" style="height:30px"><div class="av__cell" data-col-id="c0" data-dtype="text">' + row.id + '</div></div>';`;
     modules["render/av/focus"] = 'import {setAVCellAnchor} from "./rangeSelect";\n' +
         'import {focusBlock} from "../../util/selection";\n' +
-        "const addDragFill = () => {}, cellScrollIntoView = () => {};\n" + modules["render/av/focus"];
+        'import {hasClosestByClassName} from "../../util/hasClosest";\n' +
+        "const addDragFill = () => {};\n" +
+        extract("render/av/cell", ["cellScrollIntoView"])
+            .replace(/\/\/\/ #if MOBILE[\s\S]*?\/\/\/ #else/g, "") + "\n" + modules["render/av/focus"];
     const avKeydown = ts.createSourceFile("avKeydown.ts", readFileSync(path.join(root, "render/av/keydown.ts"), "utf8"),
         ts.ScriptTarget.Latest, true);
     let cellMoves;

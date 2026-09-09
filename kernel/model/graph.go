@@ -630,7 +630,9 @@ func graphDailyNoteFilter(local bool) string {
 
 	buf := bytes.Buffer{}
 	for _, p := range dailyNotesPaths {
-		buf.WriteString(" AND ref.hpath NOT LIKE '" + p + "%'")
+		// 转义单引号，避免日记存储路径闭合 SQL 字符串字面量造成注入
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-xr4h-j7cg-q8pc
+		buf.WriteString(" AND ref.hpath NOT LIKE '" + strings.ReplaceAll(p, "'", "''") + "%'")
 	}
 	return buf.String()
 }

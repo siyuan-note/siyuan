@@ -4487,7 +4487,8 @@ export class WYSIWYG {
                 richCell.closest(".protyle-wysiwyg") === this.element &&
                 !event.target.closest("a, [data-type~='block-ref'], [data-type~='a'], img")) {
                 event.preventDefault();
-                void import("../render/tableCellRichEditor").then(module => module.openTableCellRichEditor(protyle, richCell));
+                void import("../render/tableCellRichEditor").then(module => module.openTableCellRichEditor(protyle, richCell,
+                    undefined, {x: event.clientX, y: event.clientY}));
                 return;
             }
             if (areProtylePluginExtensionsEnabled(protyle)) {

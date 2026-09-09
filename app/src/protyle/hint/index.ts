@@ -45,7 +45,8 @@ import {
 } from "../../emoji";
 import {blockRender} from "../render/blockRender";
 import {getUploadInsertRange, uploadFiles} from "../upload";
-import {createUploadInsertPosition} from "../upload/insertPosition";
+import {showMessage} from "../../dialog/message";
+import {captureUploadDocument, createUploadInsertPosition, isUploadDocumentAvailable} from "../upload/insertPosition";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
 /// #endif
@@ -449,17 +450,26 @@ export class Hint {
                     getUndoFocusContext(protyle.wysiwyg.element, range, true));
             };
             let insertPosition = captureInsertPosition();
+            let uploadDocument = captureUploadDocument(protyle);
             item.addEventListener("click", () => {
                 insertPosition = captureInsertPosition();
+                uploadDocument = captureUploadDocument(protyle);
             });
             item.addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
                 if (event.target.files.length === 0) {
                     return;
                 }
-                const range = getUploadInsertRange(protyle, insertPosition);
+                const range = isUploadDocumentAvailable(protyle, uploadDocument) ?
+                    getUploadInsertRange(protyle, insertPosition) : undefined;
+                if (!range) {
+                    event.target.value = "";
+                    showMessage(window.siyuan.languages.uploadInsertTargetUnavailable);
+                    return;
+                }
                 range.deleteContents();
                 range.collapse(true);
                 uploadFiles(protyle, event.target.files, event.target, undefined, undefined, {
+                    document: uploadDocument,
                     htmlAsIframe: event.target.dataset.uploadMode === "html-iframe",
                     insertPosition: createUploadInsertPosition(range,
                         getUndoFocusContext(protyle.wysiwyg.element, range, true)),
@@ -1196,6 +1206,19 @@ ${genHintItemHTML(item)}
                     focusByWbr(nodeElement, range);
                 }
             }
+        }
+        // 新建表格后直接接管当前单元格，后续输入与鼠标点击进入编辑使用相同的限制。
+        const selection = getSelection();
+        const focus = selection?.focusNode;
+        const focusElement = focus instanceof Element ? focus : focus?.parentElement;
+        const cell = focusElement?.closest<HTMLTableCellElement>("td, th");
+        if (cell && cell.closest(".protyle-wysiwyg") === protyle.wysiwyg.element &&
+            cell.contains(selection.anchorNode)) {
+            void import("../render/tableCellRichEditor").then(module => {
+                if (cell.contains(getSelection()?.focusNode)) {
+                    module.openTableCellRichEditor(protyle, cell);
+                }
+            });
         }
     }
 

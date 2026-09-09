@@ -337,6 +337,21 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         protyle.wysiwyg.preventKeyup = false;
+        if (!event.isComposing && event.target.closest(".protyle-wysiwyg") === editorElement) {
+            const undo = matchHotKey(window.siyuan.config.keymap.editor.general.undo, event);
+            const redo = matchHotKey(window.siyuan.config.keymap.editor.general.redo, event);
+            if (undo || redo) {
+                // 撤销使用所属文档的历史栈，不依赖重新聚焦后浏览器是否已恢复块内选区。
+                event.preventDefault();
+                event.stopPropagation();
+                if (undo) {
+                    protyle.undo.undo(protyle);
+                } else {
+                    protyle.undo.redo(protyle);
+                }
+                return;
+            }
+        }
         hideElements(["util"], protyle);
         if (event.shiftKey && event.key.indexOf("Arrow") > -1) {
             // 防止连续选中的时候抖动 https://github.com/siyuan-note/insider/issues/657#issuecomment-851391217
@@ -1688,20 +1703,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 showSelectAllIncompleteTip();
             }
             return true;
-        }
-
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.undo, event)) {
-            protyle.undo.undo(protyle);
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-        }
-
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.redo, event)) {
-            protyle.undo.redo(protyle);
-            event.preventDefault();
-            event.stopPropagation();
-            return;
         }
 
         /// #if !MOBILE

@@ -9,11 +9,36 @@ import {
     markPluginToolbarEntries,
 } from "./defaults";
 import {normalizeToolbarSeparators, resolveToolbarItems} from "./entryVisibility";
+import {mergeEntryOrderPreservingUnknown, moveEntryOrder} from "../../config/entryVisibility/order";
 
 interface IToolbarTestItem {
     key?: string;
     separator?: boolean;
 }
+
+test("mobile toolbar shares desktop identifiers and declaration order", () => {
+    const mobile = getDefaultToolbar(true).map(item => typeof item === "string" ? {name: item} : item);
+    assert.deepEqual(mobile.map(getToolbarEntryId),
+        DESKTOP_TOOLBAR_ENTRIES.filter(item => item.name !== "format-painter").map(item => item.key));
+});
+
+test("font entries merge into old profiles while preserving plugin slots and hidden entries", () => {
+    const defaults = DESKTOP_TOOLBAR_ENTRIES.map(item => item.key);
+    const separators = new Set(DESKTOP_TOOLBAR_ENTRIES.filter(item => item.separator).map(item => item.key));
+    const saved = defaults.filter(key => !["font-family", "font-size"].includes(key));
+    saved.splice(saved.indexOf("strong"), 0, "plugin:unloaded:action");
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved, undefined, separators);
+    assert.ok(merged.includes("plugin:unloaded:action"));
+    assert.deepEqual(merged.filter(key => !["font-family", "font-size"].includes(key)), saved);
+    const items = defaults.map(key => ({key, separator: separators.has(key)}));
+    const result = resolve(items, {order: merged, hidden: ["text", "font-family"]});
+    assert.equal(result.visible.some(item => item.key === "text" || item.key === "font-family"), false);
+    assert.equal(result.visible.some(item => item.key === "font-size"), true);
+    const moved = moveEntryOrder(defaults, "font-size", "font-family", false, separators);
+    const updated = mergeEntryOrderPreservingUnknown(defaults, merged, moved, separators);
+    assert.ok(updated.includes("plugin:unloaded:action"));
+    assert.ok(updated.indexOf("font-size") < updated.indexOf("font-family"));
+});
 
 const resolve = (items: IToolbarTestItem[], options: {
     hidden?: string[];

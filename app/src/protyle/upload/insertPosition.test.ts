@@ -1,6 +1,9 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {createUploadInsertPosition, isUploadInsertPositionAvailable} from "./insertPosition";
+import {
+    captureUploadDocument, createUploadInsertPosition, getAvailableUploadInsertRange,
+    isUploadDocumentAvailable, isUploadInsertPositionAvailable,
+} from "./insertPosition";
 
 class TestElement {
     public isConnected = true;
@@ -33,6 +36,54 @@ const createRange = (startContainer: TestElement, endContainer = startContainer)
 };
 
 describe("upload insert position", () => {
+    it("keeps the original range instead of consulting a later selection", () => {
+        const original = new TestElement();
+        const later = new TestElement();
+        const editor = new TestElement().append(original, later);
+        const position = createUploadInsertPosition(createRange(original));
+        const result = getAvailableUploadInsertRange(editor as unknown as Element, position, () => {
+            assert.fail("an available position must not be restored from the current selection");
+        });
+        assert.equal(result.startContainer, original);
+        editor.children = [later];
+        assert.equal(getAvailableUploadInsertRange(editor as unknown as Element, position), undefined);
+        position.context = {undoFocusId: "original"};
+        assert.equal(getAvailableUploadInsertRange(editor as unknown as Element, position, () => undefined), undefined);
+        assert.equal(getAvailableUploadInsertRange(editor as unknown as Element), undefined);
+    });
+
+    it("restores a rebuilt original target only when restoration succeeds", () => {
+        const old = new TestElement();
+        const rebuilt = new TestElement();
+        const editor = new TestElement().append(rebuilt);
+        const position = createUploadInsertPosition(createRange(old), {undoFocusId: "original"});
+        const result = getAvailableUploadInsertRange(editor as unknown as Element, position, context => {
+            assert.equal(context.undoFocusId, "original");
+            return createRange(rebuilt);
+        });
+        assert.equal(result.startContainer, rebuilt);
+        editor.isConnected = false;
+        assert.equal(getAvailableUploadInsertRange(editor as unknown as Element, position, () => {
+            assert.fail("a detached editor cannot restore the target");
+        }), undefined);
+    });
+
+    it("rejects a reused editor after its document or notebook changes", () => {
+        const protyle = {element: new TestElement(), block: {rootID: "doc-a"}, notebookId: "box-a"} as unknown as IProtyle;
+        const target = captureUploadDocument(protyle);
+        assert.equal(isUploadDocumentAvailable(protyle, target), true);
+        protyle.block.rootID = "doc-b";
+        assert.equal(isUploadDocumentAvailable(protyle, target), false);
+        assert.equal(target.rootID, "doc-a");
+        protyle.block.rootID = "doc-a";
+        protyle.notebookId = "box-b";
+        assert.equal(isUploadDocumentAvailable(protyle, target), false);
+        protyle.notebookId = "box-a";
+        assert.equal(isUploadDocumentAvailable(protyle, target), true);
+        (protyle.element as unknown as TestElement).isConnected = false;
+        assert.equal(isUploadDocumentAvailable(protyle, target), false);
+    });
+
     it("keeps an independent range snapshot", () => {
         const source = new TestElement();
         const range = createRange(source);

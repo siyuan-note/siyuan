@@ -619,6 +619,11 @@ body.mobile-topbar--merged {
     will-change: transform;
   }
 
+  > .protyle-content {
+    // 将正文高亮和吸顶元素限制在独立层叠上下文内，避免滚动时覆盖导航栏。
+    isolation: isolate;
+  }
+
   > .protyle-content::before {
     display: block;
     height: calc(var(--mobile-topbar-height) + var(--mobile-breadcrumb-height));
@@ -1284,6 +1289,20 @@ body.mobile-topbar--merged {
     border: 0;
     color: var(--b3-theme-on-surface);
 
+    &[data-type="font-family"],
+    &[data-type="font-size"] {
+      padding: 0 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      &.protyle-toolbar__item--current {
+        color: var(--b3-theme-primary);
+      }
+    }
+
     span {
       padding: 6px;
       white-space: nowrap;
@@ -1528,6 +1547,21 @@ body.mobile-topbar--merged {
 
 .b3-dialog {
   padding: var(--mobile-top-safe-area) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.mobile-command-panel {
+  flex: 1;
+  min-height: 0;
+
+  .search__header {
+    flex-shrink: 0;
+  }
+
+  .search__list {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+  }
 }
 
 .b3-snackbars {

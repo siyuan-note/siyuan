@@ -5,6 +5,7 @@ import {getFirstBlock, getLastBlock, getNextBlock, getPreviousBlock} from "../..
 import {scrollCenter} from "../../../util/highlightById";
 import {focusEditableAtGoalX, TVerticalDirection} from "../../wysiwyg/verticalCaret";
 import {selectAVItemRange, setAVItemAnchor, setAVCellAnchor} from "./rangeSelect";
+import {ensureAVTableBoundaryRow, getAVData} from "./virtualScroll";
 
 const isForwardArrow = (key: string) => key === "ArrowDown" || key === "ArrowRight";
 
@@ -65,7 +66,8 @@ export const focusAVVerticalRegion = (blockElement: HTMLElement, direction: TVer
 
     if (blockElement.dataset.avType === "table") {
         const rows = getOwnVisibleElements(blockElement, ".av__row[data-id]:not(.av__row--header)");
-        const rowElement = rows[direction === "down" ? 0 : rows.length - 1];
+        const rowElement = getAVData(blockElement) ? ensureAVTableBoundaryRow(blockElement, direction) :
+            rows[direction === "down" ? 0 : rows.length - 1];
         const cellElement = rowElement && getClosestCell(rowElement, goalX);
         if (cellElement) {
             if (!focusBlock(blockElement)) {

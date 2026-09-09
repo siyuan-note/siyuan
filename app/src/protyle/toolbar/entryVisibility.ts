@@ -18,7 +18,7 @@ export const normalizeToolbarSeparators = <T>(items: T[], isSeparator: (item: T)
         }
         result.push(item);
     });
-    if (isSeparator(result[result.length - 1])) {
+    if (result.length > 0 && isSeparator(result[result.length - 1])) {
         result.pop();
     }
     return result;

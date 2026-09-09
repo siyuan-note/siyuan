@@ -1,4 +1,6 @@
 {
+	"uploadInsertTargetUnavailable": "Pierwotny cel przesyłania nie jest już dostępny. Wynik nie został wstawiony; przesłane pliki zostały zachowane.",
+	"mobileToolbarEntryTip": "Skonfiguruj widoczność i kolejność mobilnego paska narzędzi przy użyciu tych samych profili co na komputerze",
 	"keymapAssigned": "Przypisane",
 	"keymapCustomized": "Dostosowane przeze mnie",
 	"keymapUnassigned": "Nieprzypisane",

@@ -54,6 +54,10 @@ export const showTooltip = (
     messageElement.innerHTML = window.DOMPurify.sanitize(message);
     // 避免原本的 top 和 left 影响计算
     messageElement.removeAttribute("style");
+    // 普通提示不拦截目标点击，包含链接或控件的提示仍可交互。
+    if (!messageElement.querySelector("a, button, input, select, textarea, [contenteditable='true'], [tabindex], [role='button']")) {
+        messageElement.style.pointerEvents = "none";
+    }
     const position = positionOverride || target.getAttribute("data-position");
     const parentRect = target.parentElement.getBoundingClientRect();
 

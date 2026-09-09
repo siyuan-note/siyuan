@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260905124213"
+		"updated": "20260909090723"
 	},
 	"Children": [
 		{
@@ -2704,12 +2704,99 @@
 			"Properties": {
 				"ID": "20240530101000-grqaq7u",
 				"id": "20240530101000-hen4g1y",
-				"updated": "20240530101000"
+				"updated": "20260909090723"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "テーブル"
+				}
+			]
+		},
+		{
+			"ID": "20260909090723-b3zszao",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260909090723-b3zszao",
+				"updated": "20260909090723"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "セルは手動で変換せずに段落、見出し、リスト、引用、コード、数式を編集できます。既存の文字列に含まれる Markdown 記号はそのまま保持されます。"
+				}
+			]
+		},
+		{
+			"ID": "20260909090723-or0hf4r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260909090723-or0hf4r",
+				"updated": "20260909090723"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "セルをクリックすると編集できます。テーブルの作成直後は、再度クリックせずに入力できます。セルにカーソルを移動して "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "F2"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押しても編集を開始できます。セルに通常の段落が一つだけ含まれる場合、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で次の行の同じ列に移動します。最終行ではテーブルの後に段落を挿入します。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でセルを切り替え、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でセル内を改行します。見出しや複数の段落などを含む場合、Enter は現在の内容の種類に応じてセル内を編集します。リストとコードブロックでは、それぞれの改行とインデント操作が適用されます。候補を閉じてから "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Escape"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すか、セルの外をクリックすると編集が終了し、内容が自動保存されます。"
+				}
+			]
+		},
+		{
+			"ID": "20260909090723-xl7wtk2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260909090723-xl7wtk2",
+				"updated": "20260909090723"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "内部の段落とリスト項目に独立したブロック ID はありません。既存のブロックへの参照、画像、既存のインライン書式に対応しています。入れ子のテーブル、データベース、スーパーブロック、タブ、コールアウト、クエリ埋め込み、区切り線、実行可能な図表、音声、動画、ウィジェット、HTML、カスタムブロックには対応していません。貼り付ける内容に未対応のブロックが含まれる場合は、貼り付け全体を拒否して未対応の種類を通知し、既存の内容を維持します。標準 Markdown では読みやすいインライン内容としてエクスポートされ、HTML、PDF、Word ではリッチテキストのレイアウトが保持されます。"
 				}
 			]
 		},

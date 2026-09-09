@@ -131,6 +131,17 @@ import {CALLOUT_PRESETS, updateCalloutType, updateCustomCalloutType} from "../wy
 import {setTabsPosition, toggleTabsTasks, unwrapTabs} from "../wysiwyg/tabs";
 import {getTabItems} from "../render/tabsRender";
 
+const restoreGutterRange = (range: Range) => {
+    const container = range?.startContainer;
+    const target = container?.nodeType === Node.ELEMENT_NODE ? container as Element : container?.parentElement;
+    const title = target?.closest(".tab-item-title, [tabs-title=\"true\"]");
+    // 块标菜单不恢复已结束编辑的页签标题选区，避免重新打开标题编辑。
+    if (title && title.closest<HTMLElement>(".tab-item")?.dataset.tabsEditing !== "true") {
+        return;
+    }
+    focusByRange(range);
+};
+
 // 块类型 data-type 到本地化名称键的映射，用于块标提示中的 ${x}
 const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
     NodeParagraph: "paragraph",
@@ -379,7 +390,7 @@ export class Gutter {
                         }
                         /// #if !MOBILE
                         window.siyuan.menus.menu.popup({x: br.left, y: br.bottom, isLeft: true});
-                        focusByRange(protyle.toolbar.range);
+                        restoreGutterRange(protyle.toolbar.range);
                         /// #endif
                     }
                 }
@@ -660,7 +671,7 @@ export class Gutter {
                 window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, isLeft: true});
                 const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
                 window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
-                focusByRange(protyle.toolbar.range);
+                restoreGutterRange(protyle.toolbar.range);
                 /// #endif
             }
         });
@@ -703,7 +714,7 @@ export class Gutter {
                     window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, isLeft: true});
                     const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
                     window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
-                    focusByRange(protyle.toolbar.range);
+                    restoreGutterRange(protyle.toolbar.range);
                     /// #endif
                 }
             }

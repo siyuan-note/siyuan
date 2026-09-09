@@ -69,6 +69,81 @@ const syncTableBottomSpacer = (bodyEl: HTMLElement, state: IBodyState, dataEnd: 
     spacerElement.style.height = height + "px";
 };
 
+const rebuildTableWindow = (bodyEl: HTMLElement, state: IBodyState,
+                            renderWindow: ReturnType<typeof getGroupTableViewportWindow>) => {
+    const endMarker = bodyEl.querySelector(".av__spacer--bottom") || bodyEl.querySelector(".av__row--util");
+    if (!renderWindow || !endMarker) {
+        return false;
+    }
+    const rows = (state.view as IAVTable).rows;
+    let rowsHTML = renderWindow.topSpacerHeight > 0 ?
+        `<div class="av__spacer" style="height:${renderWindow.topSpacerHeight}px"></div>` : "";
+    for (let i = renderWindow.renderedStart; i <= renderWindow.renderedEnd; i++) {
+        rowsHTML += getRowHTML({data: state.view, row: rows[i - state.dataOffset], rowIndex: i,
+            pinIndex: state.pinIndex, type: "table"});
+    }
+    bodyEl.querySelectorAll(".av__row[data-id], .av__spacer:not(.av__spacer--bottom)").forEach(row => row.remove());
+    endMarker.insertAdjacentHTML("beforebegin", rowsHTML);
+    state.renderedStart = renderWindow.renderedStart;
+    state.renderedEnd = renderWindow.renderedEnd;
+    state.topSpacerHeight = renderWindow.topSpacerHeight;
+    syncTableBottomSpacer(bodyEl, state, state.dataOffset + rows.length - 1);
+    bodyEl.querySelectorAll<HTMLElement>(".av__row[data-id]").forEach(row => {
+        if (state.selectedRowIds?.has(row.dataset.id)) {
+            row.classList.add("av__row--select");
+            row.querySelector(".av__firstcol use")?.setAttribute("xlink:href", "#iconCheck");
+        }
+    });
+    restoreAVCellSelection(bodyEl.closest(".av"));
+    renderAVRichTextElements(bodyEl);
+    return true;
+};
+
+// 跨块进入表格时按当前已加载数据定位边界，仅回填边界附近的虚拟窗口。
+export const ensureAVTableBoundaryRow = (blockElement: HTMLElement, direction: "up" | "down") => {
+    const bodies = Array.from(blockElement.querySelectorAll<HTMLElement>(".av__body")).filter(body =>
+        body.closest(".av") === blockElement && body.getClientRects().length > 0 && !body.classList.contains("fn__none"));
+    if (direction === "up") {
+        bodies.reverse();
+    }
+    for (const body of bodies) {
+        const view = getBodyData(body) as IAVTable;
+        if (!view) {
+            return;
+        }
+        if (!view.rows?.length) {
+            continue;
+        }
+        const state = bodyStates.get(body);
+        if (state && state.view !== view) {
+            return;
+        }
+        const row = view.rows[direction === "down" ? 0 : view.rows.length - 1];
+        const findRow = () => Array.from(body.querySelectorAll<HTMLElement>(".av__row[data-id]"))
+            .find(item => item.dataset.id === row.id);
+        const existing = findRow();
+        if (existing) {
+            return existing;
+        }
+        if (!state || !blockElement.isConnected) {
+            return;
+        }
+        const dataStart = state.dataOffset;
+        const dataEnd = dataStart + view.rows.length - 1;
+        const rowHeight = Math.max(state.rowHeight || 36, 1);
+        const viewportHeight = (getBacklinkScrollElement(blockElement) ||
+            dataStore.get(blockElement)?.protyle.contentElement)?.clientHeight || rowHeight;
+        const targetTop = (direction === "down" ? 0 : view.rows.length - 1) * rowHeight;
+        if (!rebuildTableWindow(body, state, getGroupTableViewportWindow({
+            dataStart, dataEnd, bodyTop: 0, headerHeight: 0, rowHeight,
+            viewportTop: targetTop, viewportBottom: targetTop + viewportHeight,
+        }))) {
+            return;
+        }
+        return findRow();
+    }
+};
+
 const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
     const localScroller = getBacklinkScrollElement(blockElement);
     if (localScroller) {
@@ -187,32 +262,6 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
         const bottomSpacerElement = bodyEl.querySelector(".av__spacer--bottom") as HTMLElement;
         const firstRowRect = currentRows[0].getBoundingClientRect();
         const lastRowRect = currentRows[currentRows.length - 1].getBoundingClientRect();
-        const rebuildTableWindow = (renderWindow: ReturnType<typeof getGroupTableViewportWindow>) => {
-            if (!renderWindow) {
-                return;
-            }
-            currentRows.forEach(row => row.remove());
-            spacerElement?.remove();
-            let rowsHTML = renderWindow.topSpacerHeight > 0 ?
-                `<div class="av__spacer" style="height:${renderWindow.topSpacerHeight}px"></div>` : "";
-            for (let i = renderWindow.renderedStart; i <= renderWindow.renderedEnd; i++) {
-                rowsHTML += getRowHTML({
-                    data: state.view,
-                    row: dataRows[i - dataStart],
-                    rowIndex: i,
-                    pinIndex: state.pinIndex,
-                    type: "table"
-                });
-            }
-            const endMarker = bottomSpacerElement?.isConnected ? bottomSpacerElement :
-                bodyEl.querySelector(".av__row--util");
-            endMarker?.insertAdjacentHTML("beforebegin", rowsHTML);
-            state.renderedStart = renderWindow.renderedStart;
-            state.renderedEnd = renderWindow.renderedEnd;
-            state.topSpacerHeight = renderWindow.topSpacerHeight;
-            syncTableBottomSpacer(bodyEl, state, dataEnd);
-            restoreSelect();
-        };
         const viewportTop = Math.max(elementRect.top, blockRect.top);
         const viewportBottom = Math.min(elementRect.bottom, blockRect.bottom);
         const windowOutsideBuffer = lastRowRect.bottom < topLimit || firstRowRect.top > bottomLimit;
@@ -220,7 +269,7 @@ const doTrim = (blockElement: HTMLElement, elementRect: DOMRect): void => {
         if (groupedTable && (spacerElement || bottomSpacerElement) && windowOutsideBuffer && bodyIntersectsViewport) {
             // 当前窗口完全离开缓冲区时，按视口在分组中的位置重建附近窗口。
             const headerHeight = (bodyEl.querySelector(".av__row--header") as HTMLElement)?.offsetHeight || rowHeight;
-            rebuildTableWindow(getGroupTableViewportWindow({
+            rebuildTableWindow(bodyEl, state, getGroupTableViewportWindow({
                 dataStart,
                 dataEnd,
                 bodyTop: bodyRect.top,

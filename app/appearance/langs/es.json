@@ -1,4 +1,6 @@
 {
+	"uploadInsertTargetUnavailable": "El destino original de la carga ya no está disponible. No se insertó el resultado; los archivos cargados se conservan.",
+	"mobileToolbarEntryTip": "Configura la visibilidad y el orden de la barra de herramientas móvil con los mismos perfiles que en escritorio",
 	"keymapAssigned": "Asignados",
 	"keymapCustomized": "Personalizados por mí",
 	"keymapUnassigned": "Sin asignar",

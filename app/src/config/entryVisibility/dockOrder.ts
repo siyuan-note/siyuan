@@ -136,17 +136,17 @@ export const getDockOrderContainer = (
 ) => {
     switch (getDockOrderScopePosition(scope)) {
         case "LeftTop":
-            return layout.leftDock?.elements[0];
+            return layout?.leftDock?.elements[0];
         case "LeftBottom":
-            return layout.leftDock?.elements[1];
+            return layout?.leftDock?.elements[1];
         case "RightTop":
-            return layout.rightDock?.elements[0];
+            return layout?.rightDock?.elements[0];
         case "RightBottom":
-            return layout.rightDock?.elements[1];
+            return layout?.rightDock?.elements[1];
         case "BottomLeft":
-            return layout.bottomDock?.elements[0];
+            return layout?.bottomDock?.elements[0];
         case "BottomRight":
-            return layout.bottomDock?.elements[1];
+            return layout?.bottomDock?.elements[1];
     }
 };
 

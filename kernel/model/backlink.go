@@ -686,6 +686,11 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int, containChild
 
 // GetBacklinkInBox 与 GetBacklink 一致，但按 boxID 路由到加密 db 或全局 db。
 func GetBacklinkInBox(id, keyword, mentionKeyword string, beforeLen int, containChildren bool, boxID string) (boxIDOut string, linkPaths, mentionPaths []*Path, linkRefsCount, mentionsCount int) {
+	return GetBacklinkInBoxWithOptions(id, keyword, mentionKeyword, beforeLen, containChildren, boxID, true)
+}
+
+// GetBacklinkInBoxWithOptions 按笔记本查询反链，并按需搜索提及。
+func GetBacklinkInBoxWithOptions(id, keyword, mentionKeyword string, beforeLen int, containChildren bool, boxID string, includeMentions bool) (boxIDOut string, linkPaths, mentionPaths []*Path, linkRefsCount, mentionsCount int) {
 	linkPaths = []*Path{}
 	mentionPaths = []*Path{}
 
@@ -794,6 +799,9 @@ func GetBacklinkInBox(id, keyword, mentionKeyword string, beforeLen int, contain
 	}
 	linkPaths = toSubTreeInBox(linkRefs, keyword, boxID, originalRefBlockIDs)
 
+	if !includeMentions {
+		return
+	}
 	mentions, _ := buildTreeBackmentionInBox(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, beforeLen, boxID)
 	mentionsCount = len(mentions)
 	mentionPaths = toFlatTree(mentions, 0, "backlink", nil)

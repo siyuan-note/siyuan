@@ -4458,6 +4458,12 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
+            /// #if MOBILE
+            if (hasClosestByClassName(event.target, "protyle-attr--refcount") && commonClick(event, protyle)) {
+                mobileBlur = true;
+                return;
+            }
+            /// #endif
             const openListItemAttrByShift = shouldOpenListItemAttr(event.shiftKey, protyle.disabled,
                 hasClosestByClassName(event.target, "protyle-action"));
             const shiftAssetElement = hasClosestByAttribute(event.target, "data-type", "file-annotation-ref") ||

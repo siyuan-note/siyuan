@@ -313,6 +313,11 @@ export class Title {
         this.element.querySelector(".protyle-attr").addEventListener("click", (event: MouseEvent & {
             target: HTMLElement
         }) => {
+            /// #if MOBILE
+            if (event.target.closest(".protyle-attr--refcount") && commonClick(event, protyle)) {
+                return;
+            }
+            /// #endif
             const docInfoParam: IObject = {
                 id: protyle.block.rootID
             };

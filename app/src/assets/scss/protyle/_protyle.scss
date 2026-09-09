@@ -14,6 +14,14 @@
   top: 30px;
   width: 16px;
   bottom: 9px; // 下图标 hover 时，需要留出一定的空间
+  // 空白区域透传点击，避免遮挡编辑器右侧的反链计数。
+  pointer-events: none;
+
+  &__down,
+  &__up,
+  &__bar {
+    pointer-events: auto;
+  }
 
   svg {
     height: 16px;

@@ -319,6 +319,10 @@ func getBacklink(c *gin.Context) {
 	id := arg["id"].(string)
 	keyword := arg["k"].(string)
 	mentionKeyword := arg["mk"].(string)
+	includeMentions := true
+	if val, ok := arg["includeMentions"].(bool); ok {
+		includeMentions = val
+	}
 	beforeLen := 12
 	if nil != arg["beforeLen"] {
 		beforeLen = int(arg["beforeLen"].(float64))
@@ -339,9 +343,9 @@ func getBacklink(c *gin.Context) {
 			return
 		}
 		if notebook != "" && model.IsEncryptedBox(notebook) {
-			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklinkInBox(id, keyword, mentionKeyword, beforeLen, containChildren, notebook)
+			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklinkInBoxWithOptions(id, keyword, mentionKeyword, beforeLen, containChildren, notebook, includeMentions)
 		} else {
-			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink(id, keyword, mentionKeyword, beforeLen, containChildren)
+			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklinkInBoxWithOptions(id, keyword, mentionKeyword, beforeLen, containChildren, "", includeMentions)
 		}
 	}
 	if model.IsReadOnlyRoleContext(c) {
@@ -360,5 +364,7 @@ func getBacklink(c *gin.Context) {
 		"mk":            mentionKeyword,
 		"box":           boxID,
 	}
-	util.RandomSleep(200, 500)
+	if includeMentions {
+		util.RandomSleep(200, 500)
+	}
 }

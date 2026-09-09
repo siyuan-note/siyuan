@@ -1,4 +1,5 @@
 import {Menu} from "../../plugin/Menu";
+import {observeFontPreview} from "../../util/fontPreview";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {
     getFontFamilyDisplayName,
@@ -155,7 +156,6 @@ const genFontPickerHTML = (fonts: IFontItem[], options: IFontFamilyPickerOptions
 const bindFontPicker = (element: HTMLElement, options: IFontFamilyPickerOptions) => {
     const listElement = element.querySelector<HTMLElement>('[data-type="font-family-list"]');
     const inputElement = element.querySelector<HTMLInputElement>('[data-type="font-family-search"]');
-    let previewObserver: IntersectionObserver;
     let removalObserver: MutationObserver;
     const syncActiveDescendant = () => {
         const activeElement = listElement.querySelector<HTMLElement>(".b3-list-item--focus");
@@ -188,7 +188,7 @@ const bindFontPicker = (element: HTMLElement, options: IFontFamilyPickerOptions)
         syncActiveDescendant();
     };
     const cleanup = () => {
-        previewObserver?.disconnect();
+        cleanupPreview?.();
         removalObserver?.disconnect();
     };
     const selectItem = (item: HTMLElement) => {
@@ -197,23 +197,9 @@ const bindFontPicker = (element: HTMLElement, options: IFontFamilyPickerOptions)
         options.onSelect(item.dataset.family || undefined);
     };
 
-    if ("IntersectionObserver" in window) {
-        previewObserver = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                const labelElement = (entry.target as HTMLElement).querySelector<HTMLElement>(".b3-menu__label");
-                if (!entry.isIntersecting || !labelElement?.dataset.family) {
-                    labelElement?.style.removeProperty("font-family");
-                    return;
-                }
-                labelElement.style.fontFamily = getInlineFontFamilyStyle(labelElement.dataset.family);
-            });
-        }, {root: listElement});
-        listElement.querySelectorAll<HTMLElement>(".b3-list-item").forEach(item => previewObserver.observe(item));
-    } else {
-        listElement.querySelectorAll<HTMLElement>('.b3-menu__label[data-family]:not([data-family=""])').forEach(item => {
-            item.style.fontFamily = getInlineFontFamilyStyle(item.dataset.family);
-        });
-    }
+    const cleanupPreview = observeFontPreview(listElement, label => {
+        label.style.fontFamily = getInlineFontFamilyStyle(label.dataset.family);
+    });
     inputElement.addEventListener("keydown", event => {
         options.onInteraction?.();
         event.stopPropagation();

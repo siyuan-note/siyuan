@@ -38,6 +38,7 @@ import {
 } from "../../util/customFont";
 import {showMessage} from "../../dialog/message";
 import {IFontItem, loadSystemFonts} from "../../util/systemFont";
+import {observeFontPreview} from "../../util/fontPreview";
 import {
     shouldShowBootAppearanceSetting,
     type IBootAppearanceListItem,
@@ -344,10 +345,10 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
         // 在异步加载前阻止冒泡，避免同一次点击关闭字体菜单。
         event.stopPropagation();
         let closed = false;
-        let fontPreviewObserver: IntersectionObserver;
+        let cleanupFontPreview: () => void;
         const fontMenu = new Menu(`appearanceFontFamily-${configKey}`, () => {
             closed = true;
-            fontPreviewObserver?.disconnect();
+            cleanupFontPreview?.();
             refreshOpenMenu = undefined;
         });
         if (fontMenu.isOpen) {
@@ -416,36 +417,14 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                     filterFontList();
                 };
                 refreshFontMenu();
-                if ("IntersectionObserver" in window) {
-                    fontPreviewObserver = new IntersectionObserver((entries) => {
-                        entries.forEach((entry) => {
-                            const itemElement = entry.target as HTMLElement;
-                            const labelElement = itemElement.querySelector<HTMLElement>(".b3-menu__label");
-                            if (!entry.isIntersecting || !labelElement?.dataset.family) {
-                                labelElement?.style.removeProperty("font-family");
-                                labelElement?.style.removeProperty("font-weight");
-                                return;
-                            }
-                            const customFont = itemElement.dataset.id ? customFontsByID.get(itemElement.dataset.id) : undefined;
-                            if (customFont) {
-                                registerCustomFont(customFont);
-                            }
-                            labelElement.style.fontFamily = labelElement.dataset.family;
-                            labelElement.style.fontWeight = labelElement.dataset.weight;
-                        });
-                    }, {
-                        root: listElement,
-                    });
-                    listElement.querySelectorAll<HTMLElement>(".b3-list-item").forEach((item) => {
-                        fontPreviewObserver.observe(item);
-                    });
-                } else {
-                    listElement.querySelectorAll<HTMLElement>(".b3-menu__label").forEach((item) => {
-                        item.style.fontFamily = item.dataset.family;
-                        item.style.fontWeight = item.dataset.weight;
-                    });
-                    customFonts.forEach(registerCustomFont);
-                }
+                cleanupFontPreview = observeFontPreview(listElement, (label, item) => {
+                    const customFont = item.dataset.id ? customFontsByID.get(item.dataset.id) : undefined;
+                    if (customFont) {
+                        registerCustomFont(customFont);
+                    }
+                    label.style.fontFamily = label.dataset.family;
+                    label.style.fontWeight = label.dataset.weight;
+                });
                 function filterFontList() {
                     const value = inputElement.value.toLowerCase().trim();
                     listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");

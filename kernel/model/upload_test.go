@@ -241,6 +241,32 @@ func TestMultipartUploadContinuesAfterFileOpenFailure(t *testing.T) {
 	}
 }
 
+func TestMultipartUploadPreservesDifferentContentWithDuplicateNames(t *testing.T) {
+	assetsDir := setupAssetUploadTest(t)
+	files := []assetUploadTestFile{
+		{name: "processed.jpg", data: []byte("first capture")},
+		{name: "processed.jpg", data: []byte("second capture")},
+		{name: "processed.jpg", data: []byte("second capture")},
+	}
+	cacheAssetUploadTestFile(t, assetsDir, "first-seed.jpg", files[0].data)
+	cacheAssetUploadTestFile(t, assetsDir, "second-seed.jpg", files[1].data)
+	response := executeAssetUploadTestRequest(t, newAssetUploadTestRequest(t, files,
+		map[string]string{"skipIfDuplicated": "true"}))
+	cleanupAssetUploadTestHashes(t, response.Data.SuccFiles)
+	if len(response.Data.SuccFiles) != len(files) || len(response.Data.FailedFiles) != 0 {
+		t.Fatalf("unexpected response: %+v", response)
+	}
+	for index, success := range response.Data.SuccFiles {
+		content, err := os.ReadFile(filepath.Join(assetsDir, filepath.Base(success.Path)))
+		if err != nil || !bytes.Equal(content, files[index].data) {
+			t.Fatalf("wrong uploaded content at %s: %q, %v", success.Path, content, err)
+		}
+	}
+	if response.Data.SuccFiles[0].Path == response.Data.SuccFiles[1].Path {
+		t.Fatal("different captures reused the same path")
+	}
+}
+
 func TestMultipartUploadContinuesAfterDuplicateMatch(t *testing.T) {
 	assetsDir := setupAssetUploadTest(t)
 	firstData := []byte("duplicate upload")

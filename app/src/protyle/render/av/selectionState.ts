@@ -147,15 +147,18 @@ const findAVSelectionView = (view: IAVView, groupID: string): IAVView | undefine
 };
 
 export const resolveAVSelectedCell = (data: IAV, point: IAVCellPoint): IAVSelectedCell | undefined => {
-    const view = findAVSelectionView(data.view, point.groupID) as IAVTable;
-    if (!view?.rows || !view.columns) {
+    const view = findAVSelectionView(data.view, point.groupID);
+    if (!view) {
         return;
     }
-    const columns = view.columns.filter(column => !column.hidden);
-    const rowIndex = view.rows.findIndex(row => row.id === point.rowID);
+    const sourceColumns = (view as IAVTable).columns || (view as IAVGallery).fields || [];
+    const rows: Array<IAVRow | IAVGalleryItem> = (view as IAVTable).rows || (view as IAVGallery).cards || [];
+    const columns = sourceColumns.filter(column => !column.hidden);
+    const rowIndex = rows.findIndex(row => row.id === point.rowID);
     const colIndex = columns.findIndex(column => column.id === point.colID);
-    const sourceColIndex = view.columns.findIndex(column => column.id === point.colID);
-    const cell = rowIndex >= 0 && sourceColIndex >= 0 ? view.rows[rowIndex]?.cells[sourceColIndex] : undefined;
+    const sourceColIndex = sourceColumns.findIndex(column => column.id === point.colID);
+    const row = rows[rowIndex];
+    const cell = row && ("cells" in row ? row.cells : row.values)[sourceColIndex];
     if (!cell || colIndex < 0) {
         return;
     }

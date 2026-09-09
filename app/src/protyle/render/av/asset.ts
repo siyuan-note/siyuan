@@ -30,7 +30,7 @@ import {base64ToURL, showBase64ImageSizeLimit} from "../../upload/base64";
 import {isBrowserRenderableImagePath} from "../../../util/imageURL";
 import {genNetworkImageAssetValue} from "./assetValue";
 import {getAssetUploadSuccesses} from "../../upload/uploadResult";
-import {getAVSelectedCells, resolveAVSelectedCell, type IAVSelectedCell} from "./selectionState";
+import {getAVSelectedCells, resolveAVSelectedCell, type IAVSelectedCell, type IAVCellPoint} from "./selectionState";
 import {getAVData, getAVSelectedTableCells} from "./virtualScroll";
 import {getAVAssetUploadTargets} from "./assetUploadTarget";
 
@@ -46,26 +46,10 @@ export const bindAssetEvent = (options: {
         if (event.target.files.length === 0) {
             return;
         }
-        uploadFiles(options.protyle, event.target.files, event.target, (res) => {
-            if (!document.body.contains(options.blockElement)) {
-                return;
-            }
-            const resData = JSON.parse(res);
-            const value: IAVCellAssetValue[] = [];
-            getAssetUploadSuccesses(resData.data).forEach((success) => {
-                value.push({
-                    name: success.name,
-                    content: success.path,
-                    type: Constants.SIYUAN_ASSETS_IMAGE.includes(getAssetExtension(success.path).toLowerCase()) ? "image" : "file"
-                });
-            });
-            updateAssetCell({
-                protyle: options.protyle,
-                cellElements: options.cellElements,
-                addValue: value,
-                blockElement: options.blockElement,
-                menuElement: options.menuElement,
-            });
+        const applyUpload = captureAssetCellUpload(options.protyle, options.blockElement,
+            options.cellElements, options.menuElement);
+        uploadFiles(options.protyle, event.target.files, event.target, (_res, result) => {
+            applyUpload(result);
         }, undefined, {source: "file-picker", target: "av-cell"});
     });
 };
@@ -137,6 +121,7 @@ export const updateAssetCell = (options: {
     protyle: IProtyle,
     cellElements: HTMLElement[],
     replaceValue?: IAVCellAssetValue[],
+    targets?: IAVCellPoint[],
     addValue?: IAVCellAssetValue[],
     updateValue?: { index: number, value: IAVCellAssetValue }
     removeIndex?: number,
@@ -152,17 +137,30 @@ export const updateAssetCell = (options: {
     const batchTarget = typeof options.removeIndex === "number" ?
         getVisibleAssetValues(options.cellElements)[options.removeIndex] : undefined;
     options.cellElements.forEach((item, elementIndex) => {
-        const rowID = getFieldIdByCellElement(item, viewType);
+        const target = options.targets?.[elementIndex];
+        const rowID = target?.rowID || getFieldIdByCellElement(item, viewType);
+        const data = target && getAVData(options.blockElement as HTMLElement);
+        const selectedCell = data && resolveAVSelectedCell(data, target);
+        if (target && data && selectedCell?.column.type !== "mAsset") {
+            return;
+        }
         if (!options.blockElement.contains(item)) {
             if (viewType === "table") {
-                item = options.cellElements[elementIndex] = (options.blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
+                item = (options.blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
                     options.blockElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
             } else {
-                item = options.cellElements[elementIndex] = (options.blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${item.dataset.fieldId}"]`)) as HTMLElement;
+                item = (options.blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${item.dataset.fieldId}"]`)) as HTMLElement;
             }
         }
-        const renderedValue = genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
-        const cellValue = batchMode === "replace" ? renderedValue : getAVBatchSourceValue(item, renderedValue);
+        if (!item && !selectedCell) {
+            return;
+        }
+        if (item) {
+            options.cellElements[elementIndex] = item;
+        }
+        const renderedValue: IAVCellValue = selectedCell ? JSON.parse(JSON.stringify(selectedCell.cell.value)) :
+            genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
+        const cellValue = selectedCell || batchMode === "replace" ? renderedValue : getAVBatchSourceValue(item, renderedValue);
         const oldValue = JSON.parse(JSON.stringify(cellValue));
         if (batchMode === "add" && options.addValue?.length > 0) {
             const existing = new Set((cellValue.mAsset || []).map(asset =>
@@ -173,6 +171,8 @@ export const updateAssetCell = (options: {
             cellValue.mAsset = (cellValue.mAsset || []).filter(asset =>
                 asset.type !== batchTarget.type || asset.content !== batchTarget.content ||
                 asset.name !== batchTarget.name);
+        } else if (options.targets && options.addValue?.length > 0) {
+            cellValue.mAsset = (cellValue.mAsset || []).concat(options.addValue);
         } else if (elementIndex === 0) {
             if (typeof options.removeIndex === "number") {
                 cellValue.mAsset.splice(options.removeIndex, 1);
@@ -211,11 +211,15 @@ export const updateAssetCell = (options: {
             avID,
             data: oldValue
         });
-        if (!item.classList.contains("custom-attr__avvalue")) {
+        if (item && !item.classList.contains("custom-attr__avvalue")) {
             updateAttrViewCellAnimation(item, cellValue);
         }
         updateAttrViewCellInOtherElements(options.protyle, avID, rowID, colId, cellValue, item);
     });
+    if (cellDoOperations.length === 0) {
+        showMessage(window.siyuan.languages.uploadInsertTargetUnavailable);
+        return;
+    }
     cellDoOperations.push({
         action: "doUpdateUpdated",
         id: options.blockElement.getAttribute("data-node-id"),
@@ -225,7 +229,7 @@ export const updateAssetCell = (options: {
     const menuElement = typeof options.menuElement === "undefined" ?
         document.querySelector<HTMLElement>(".av__panel > .b3-menu") :
         options.menuElement?.isConnected ? options.menuElement : null;
-    if (menuElement) {
+    if (menuElement && options.cellElements.every(item => options.blockElement.contains(item))) {
         menuElement.innerHTML = getAssetHTML(options.cellElements);
         bindAssetEvent({
             protyle: options.protyle,
@@ -540,32 +544,25 @@ const getAssetCellMenu = (cellElement: HTMLElement) => {
     return ids.includes(cellElement.dataset.id) ? menuElement : null;
 };
 
-const updateCellWithUploadedAssets = (result: Omit<IAssetUploadResult, "requestId" | "input">,
-                                      protyle: IProtyle, blockElement: Element, cellElement: HTMLElement,
-                                      menuElement: HTMLElement | null) => {
-    if (!document.body.contains(blockElement)) {
-        return;
-    }
-    if (!blockElement.contains(cellElement)) {
-        const viewType = blockElement.getAttribute("data-av-type") as TAVView;
-        const rowID = getFieldIdByCellElement(cellElement, viewType);
-        if (viewType === "table") {
-            cellElement = blockElement.querySelector<HTMLElement>(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
-                blockElement.querySelector<HTMLElement>(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`);
-        } else {
-            cellElement = blockElement.querySelector<HTMLElement>(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`);
-        }
-        if (!cellElement) {
+const captureAssetCellUpload = (protyle: IProtyle, blockElement: Element, cells: HTMLElement[],
+                                menuElement: HTMLElement | null) => {
+    const cellElements = Array.from(cells);
+    const viewType = blockElement.getAttribute("data-av-type") as TAVView;
+    const targets = cellElements.map(item => ({
+        rowID: getFieldIdByCellElement(item, viewType),
+        colID: getColId(item, viewType),
+        groupID: item.closest<HTMLElement>(".av__body")?.dataset.groupId || "",
+    }));
+    return (result: Omit<IAssetUploadResult, "requestId" | "input">) => {
+        if (!document.body.contains(blockElement)) {
             return;
         }
-    }
-    updateAssetCell({
-        protyle,
-        blockElement,
-        cellElements: [cellElement],
-        addValue: getUploadedAssetValues(result),
-        menuElement,
-    });
+        const addValue = getUploadedAssetValues(result);
+        if (addValue.length === 0) {
+            return;
+        }
+        updateAssetCell({protyle, blockElement, cellElements, targets, addValue, menuElement});
+    };
 };
 
 export const captureAVAssetUploadHandler = (protyle: IProtyle, blockElement: HTMLElement) => {
@@ -623,6 +620,8 @@ export const captureAVAssetUploadHandler = (protyle: IProtyle, blockElement: HTM
         }
     }
     const targets = getAVAssetUploadTargets(stableCells, targetCellElements);
+    const applyPanelUpload = usePanelTarget && cellElements.length > 0 ?
+        captureAssetCellUpload(protyle, blockElement, cellElements, panelElement?.querySelector(".b3-menu")) : undefined;
 
     return async (result: Omit<IAssetUploadResult, "requestId" | "input">) => {
         if (!document.body.contains(blockElement)) {
@@ -633,8 +632,8 @@ export const captureAVAssetUploadHandler = (protyle: IProtyle, blockElement: HTM
             return;
         }
         if (usePanelTarget) {
-            if (cellElements.length > 0) {
-                await updateCellsValue(protyle, blockElement, values, cellElements);
+            if (applyPanelUpload) {
+                applyPanelUpload(result);
                 if (panelElement.isConnected) {
                     panelElement.remove();
                 }
@@ -700,8 +699,9 @@ export const dragUpload = (files: ILocalFiles[], protyle: IProtyle, cellElement:
         return;
     }
     const menuElement = getAssetCellMenu(cellElement);
+    const applyUpload = captureAssetCellUpload(protyle, blockElement, [cellElement], menuElement);
     uploadLocalFiles(files, protyle, true, {source: "drop", target: "av-cell", position}, (_response, result) => {
-        updateCellWithUploadedAssets(result, protyle, blockElement, cellElement, menuElement);
+        applyUpload(result);
     });
 };
 
@@ -712,8 +712,9 @@ export const uploadFilesToAssetCell = (files: FileList | File[], protyle: IProty
         return;
     }
     const menuElement = getAssetCellMenu(cellElement);
+    const applyUpload = captureAssetCellUpload(protyle, blockElement, [cellElement], menuElement);
     uploadFiles(protyle, files, undefined, (_response, result) => {
-        updateCellWithUploadedAssets(result, protyle, blockElement, cellElement, menuElement);
+        applyUpload(result);
     }, undefined, {source: options.source, target: "av-cell", position: options.position});
 };
 

@@ -374,10 +374,6 @@ func Upload(c *gin.Context) {
 			ret.Msg = uploadErr.Error()
 		}
 	}
-	skipIfDuplicated := false // 默认不跳过重复文件，但是有的场景需要跳过，比如上传 PDF 标注图片 https://github.com/siyuan-note/siyuan/issues/10666
-	if nil != form.Value["skipIfDuplicated"] {
-		skipIfDuplicated = "true" == form.Value["skipIfDuplicated"][0]
-	}
 
 	for index, file := range files {
 		baseName := file.Filename
@@ -434,32 +430,6 @@ func Upload(c *gin.Context) {
 			recordAssetUploadSuccess(succMap, &succFiles, index, baseName, strings.TrimPrefix(existAssetPath, "/"))
 			f.Close()
 		} else {
-			// 加密资源的随机磁盘名无法区分截图的旋转和生成配置，不按文件名复用。
-			if skipIfDuplicated && !IsEncryptedBox(uploadBoxID) {
-				// 复制 PDF 矩形注解时不再重复插入图片 No longer upload image repeatedly when copying PDF rectangle annotation https://github.com/siyuan-note/siyuan/issues/10666
-				pattern := assetsDirPath + string(os.PathSeparator) + strings.TrimSuffix(fName, ext)
-				_, patternLastID := util.LastID(fName)
-				if lastID != "" && lastID != patternLastID {
-					// 文件名太长被截断了，通过之前的 lastID 来匹配 PDF files with too long file names cannot generate annotated images https://github.com/siyuan-note/siyuan/issues/15739
-					pattern = assetsDirPath + string(os.PathSeparator) + "*" + lastID + ext
-				} else {
-					pattern += "*" + ext
-				}
-
-				matches, globErr := filepath.Glob(pattern)
-				if nil != globErr {
-					logging.LogErrorf("glob failed: %s", globErr)
-				} else {
-					if 0 < len(matches) {
-						fName = filepath.Base(matches[0])
-						p := strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/")
-						recordAssetUploadSuccess(succMap, &succFiles, index, baseName, p)
-						f.Close()
-						continue
-					}
-				}
-			}
-
 			if IsEncryptedBox(uploadBoxID) {
 				if "" == lastID {
 					lastID = ast.NewNodeID()

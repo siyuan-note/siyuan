@@ -1,7 +1,6 @@
 import type {EventBus, IEventBusSafeEmitResult} from "../../plugin/EventBusCore";
 import {emitWithErrors, eventBusHas, hasPluginSubscriber} from "../../plugin/EventBusCore";
 import {genUUID} from "../../util/genID";
-import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 
 export interface IAssetUploadEventContext {
     source: TAssetUploadSource;
@@ -339,8 +338,7 @@ export const prepareAssetUpload = (options: {
     if (initialValidationError) {
         return fail(initialValidationError);
     }
-    if ((options.protyle && !areProtylePluginExtensionsEnabled(options.protyle)) ||
-        !hasPluginSubscriber("before-upload-assets")) {
+    if (!hasPluginSubscriber("before-upload-assets")) {
         return {state: "ready", task};
     }
     const plugins = Array.from(options.plugins).filter(plugin => !unloadingPlugins.has(plugin) &&

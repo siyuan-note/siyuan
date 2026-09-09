@@ -3,10 +3,14 @@ import {scrollSettingContent} from "./dragScroll";
 // 顶部渐变毛玻璃固定覆盖边距，内容从其后方滚动，同时支持拖拽。
 export const initSettingDrag = (dialog: HTMLElement) => {
     const wrap = dialog.querySelector<HTMLElement>(".config__tab-wrap");
+    // 仅为拖拽区域建立定位容器，让详情覆盖层仍相对整个设置面板定位。
+    const anchor = document.createElement("div");
+    anchor.className = "config__drag-anchor";
     const handle = document.createElement("div");
     handle.className = "config__drag resize__move";
     handle.setAttribute("aria-hidden", "true");
-    wrap.append(handle);
+    anchor.append(handle);
+    wrap.prepend(anchor);
     const onWheel = (event: WheelEvent) => {
         const panel = Array.from(wrap.querySelectorAll<HTMLElement>(":scope > .config__tab-container"))
             .find(element => element.getClientRects().length > 0);
@@ -59,5 +63,6 @@ export const initSettingDrag = (dialog: HTMLElement) => {
         handle.removeEventListener("wheel", onWheel);
         cancelAnimationFrame(frame);
         observer.disconnect();
+        anchor.remove();
     };
 };

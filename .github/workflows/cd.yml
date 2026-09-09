@@ -330,12 +330,15 @@ jobs:
             shard="${shard_config%:*}"
             port="${shard_config#*:}"
             (
+              # UI 测试共享同一内核及全局界面状态，必须串行运行
+              # 串行执行保留 25 分钟总时限，外层步骤仍由 30 分钟超时保护
               SIYUAN_BASE_URL="http://127.0.0.1:${port}" \
               SIYUAN_E2E_SHARD="${shard}" \
               SIYUAN_TEST_RESULTS_DIR="test-results-${shard}" \
               PLAYWRIGHT_HTML_OUTPUT_DIR="playwright-report-${shard}" \
               pnpm exec playwright test --config=playwright.focused.config.ts \
-                --global-timeout=900000 --reporter=line,html --output="test-results-${shard}"
+                --global-timeout=1500000 --workers=1 \
+                --reporter=line,html --output="test-results-${shard}"
             ) &
             TEST_PID=$!
             TEST_PIDS+=("${TEST_PID}")

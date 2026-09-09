@@ -629,6 +629,9 @@
 }
 
 .sy__backlink--bottom {
+  // 避免浏览器锚定下方提及内容，导致折叠时标题随滚动补偿移动。
+  overflow-anchor: none;
+
   .backlinkList__loading {
     height: 40px;
   }

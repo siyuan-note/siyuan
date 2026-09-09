@@ -716,14 +716,9 @@ export class BacklinkContent extends Model {
         } else {
             delete listElement.dataset.heightFolding;
             listElement.classList.remove("fn__none");
-            const viewFoldPromise = this.resumeViewFoldStates(listElement);
-            const expandPromise = new Promise<void>(resolve => {
-                expandHeight(listElement, resolve);
-            });
-            this.restorePersistedReadingAnchorAfter(
-                listElement === this.mTree.element,
-                Promise.all([viewFoldPromise, expandPromise]).then(() => undefined),
-            );
+            // 手动展开时保持当前位置，避免共享阅读锚点将页面滚动到提及区域。
+            void this.resumeViewFoldStates(listElement);
+            expandHeight(listElement);
         }
         if (folded) {
             listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");

@@ -652,8 +652,10 @@ export class MobileFiles extends Model {
                         this.updateItemArrow(data.data.box.id, data.data.path);
                     }
                     break;
-                case "createdailynote":
                 case "heading2doc":
+                    this.updateItemArrow(data.data.box.id, data.data.path);
+                    break;
+                case "createdailynote":
                 case "li2doc":
                     this.selectItem(data.data.box.id, data.data.path);
                     break;

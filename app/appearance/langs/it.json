@@ -1,4 +1,6 @@
 {
+	"backlinkHideReference": "Nascondi i blocchi di riferimento nei backlink propagati",
+	"backlinkHideReferenceTip": "Nascondi i blocchi contenenti solo riferimenti a blocchi nei backlink propagati quando rimangono altri contenuti visibili e mostrali di nuovo durante la modifica",
 	"uploadInsertTargetUnavailable": "La destinazione originale del caricamento non è più disponibile. Il risultato non è stato inserito; i file caricati vengono conservati.",
 	"mobileToolbarEntryTip": "Configura visibilità e ordine della barra degli strumenti mobile usando gli stessi profili del desktop",
 	"keymapAssigned": "Assegnate",

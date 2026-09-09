@@ -18,7 +18,6 @@ package model
 
 import (
 	"sort"
-	"strings"
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
@@ -189,18 +188,7 @@ func isPureBlockRefParagraph(block *Block, luteEngine *lute.Lute) bool {
 		return false
 	}
 
-	hasBlockRef := false
-	for node := inlineTree.Root.FirstChild.FirstChild; nil != node; node = node.Next {
-		if treenode.IsBlockRef(node) {
-			hasBlockRef = true
-			continue
-		}
-		if ast.NodeText == node.Type && "" == strings.TrimSpace(node.Text()) {
-			continue
-		}
-		return false
-	}
-	return hasBlockRef
+	return isPureBacklinkReferenceNode(inlineTree.Root.FirstChild)
 }
 
 func isFirstBacklinkParentParagraph(refBlock, parent *Block, boxID string, treeCache map[string]*parse.Tree) bool {

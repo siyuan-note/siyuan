@@ -1,4 +1,6 @@
 {
+	"backlinkHideReference": "Verwijzingsblokken in doorgegeven backlinks verbergen",
+	"backlinkHideReferenceTip": "Verberg blokken met uitsluitend blokverwijzingen in doorgegeven backlinks als andere inhoud zichtbaar blijft en toon ze weer tijdens het bewerken",
 	"uploadInsertTargetUnavailable": "Het oorspronkelijke uploaddoel is niet meer beschikbaar. Het resultaat is niet ingevoegd; geüploade bestanden blijven behouden.",
 	"mobileToolbarEntryTip": "Configureer de zichtbaarheid en volgorde van de mobiele werkbalk met dezelfde profielen als op de desktop",
 	"keymapAssigned": "Toegewezen",

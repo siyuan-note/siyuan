@@ -94,3 +94,17 @@ func TestNewBacklinkResponses(t *testing.T) {
 		t.Fatalf("expected context ID and revision, got %#v", contextResponses)
 	}
 }
+
+func TestBacklinkContextRevisionIncludesReferenceBlock(t *testing.T) {
+	context := &model.Backlink{ID: "parent", DOM: "unchanged"}
+	before := newBacklinkContextResponses([]*model.Backlink{context})[0].Revision
+	context.ReferenceBlockID = "reference"
+	response := newBacklinkContextResponses([]*model.Backlink{context})[0]
+	if response.ReferenceBlockID != context.ReferenceBlockID || response.Revision == before {
+		t.Fatal("reference metadata must be returned and invalidate the context revision")
+	}
+	context.ReferenceBlockID = ""
+	if newBacklinkContextResponses([]*model.Backlink{context})[0].Revision != before {
+		t.Fatal("removing the hidden reference must restore the original revision")
+	}
+}

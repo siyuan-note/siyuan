@@ -31,6 +31,7 @@ type backlinkPathResponse struct {
 }
 
 type backlinkContextResponse struct {
+	ReferenceBlockID     string                               `json:"referenceBlockID,omitempty"`
 	AttributeViewTargets []*model.BacklinkAttributeViewTarget `json:"attributeViewTargets,omitempty"`
 	ID                   string                               `json:"id"`
 	DOM                  string                               `json:"dom"`
@@ -117,6 +118,7 @@ func newBacklinkContextResponses(backlinks []*model.Backlink) (ret []*backlinkCo
 	ret = make([]*backlinkContextResponse, 0, len(backlinks))
 	for _, item := range backlinks {
 		response := &backlinkContextResponse{
+			ReferenceBlockID:     item.ReferenceBlockID,
 			AttributeViewTargets: item.AttributeViewTargets,
 			ID:                   item.ID,
 			DOM:                  item.DOM,
@@ -124,12 +126,13 @@ func newBacklinkContextResponses(backlinks []*model.Backlink) (ret []*backlinkCo
 			Expand:               item.Expand,
 		}
 		response.Revision = hashBacklinkRevision("bci1:", struct {
+			ReferenceBlockID     string
 			AttributeViewTargets []*model.BacklinkAttributeViewTarget
 			ID                   string
 			DOM                  string
 			BlockPaths           []*model.BlockPath
 			Expand               bool
-		}{response.AttributeViewTargets, response.ID, response.DOM, response.BlockPaths, response.Expand})
+		}{response.ReferenceBlockID, response.AttributeViewTargets, response.ID, response.DOM, response.BlockPaths, response.Expand})
 		ret = append(ret, response)
 	}
 	return

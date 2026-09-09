@@ -139,6 +139,7 @@ func refreshCrossTreeMoveRefs(refreshes []crossTreeMoveRefRefresh) {
 }
 
 type Backlink struct {
+	ReferenceBlockID     string                         `json:"referenceBlockID,omitempty"`
 	AttributeViewTargets []*BacklinkAttributeViewTarget `json:"attributeViewTargets,omitempty"`
 	ID                   string                         `json:"id"`
 	DOM                  string                         `json:"dom"`
@@ -461,6 +462,7 @@ func buildBacklink(refID string, refTree *parse.Tree, originalRefBlockIDs map[st
 	}
 
 	renderNodes, expand := getBacklinkRenderNodes(node, originalRefBlockIDs)
+	referenceBlockID := getBacklinkReferenceBlockID(node, renderNodes, originalRefBlockIDs[node.ID])
 	var blockPaths []*BlockPath
 	if (nil != node.Parent && ast.NodeDocument != node.Parent.Type) || (ast.NodeHeading != node.Type && 0 < treenode.HeadingLevel(node)) {
 		blockPaths = buildBlockBreadcrumb(node, nil, false)
@@ -496,7 +498,7 @@ func buildBacklink(refID string, refTree *parse.Tree, originalRefBlockIDs map[st
 	fillBlockRefCount(renderNodes, refTree.Box)
 
 	dom := renderVisibleBlockDOMByNodes(renderNodes, luteEngine)
-	ret = &Backlink{ID: refID, DOM: dom, BlockPaths: blockPaths, Expand: expand, node: node}
+	ret = &Backlink{ID: refID, DOM: dom, BlockPaths: blockPaths, Expand: expand, ReferenceBlockID: referenceBlockID, node: node}
 	if 0 < len(avTargets) {
 		appendBacklinkAttributeViewTargets(ret, renderNodes, avTargets)
 	}

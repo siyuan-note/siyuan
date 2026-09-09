@@ -1,4 +1,6 @@
 {
+	"backlinkHideReference": "Hide reference blocks in propagated backlinks",
+	"backlinkHideReferenceTip": "Hide blocks containing only block references in propagated backlinks when other content remains visible, and show them again while editing",
 	"uploadInsertTargetUnavailable": "The original upload target is no longer available. The result was not inserted; uploaded files are retained.",
 	"mobileToolbarEntryTip": "Configure mobile toolbar visibility and order using the same profiles as desktop",
 	"keymapAssigned": "Assigned",

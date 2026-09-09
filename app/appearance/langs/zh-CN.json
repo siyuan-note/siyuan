@@ -1,4 +1,6 @@
 {
+	"backlinkHideReference": "隐藏传递型反链的引用块",
+	"backlinkHideReferenceTip": "在反链面板中隐藏仅含块引用且仍有其他内容可展示的传递型引用块，编辑时恢复显示",
 	"uploadInsertTargetUnavailable": "原上传目标已失效，未回填结果；已上传的文件会保留。",
 	"mobileToolbarEntryTip": "配置移动端工具栏项的显隐与排序，与桌面端共用方案",
 	"keymapAssigned": "已分配",

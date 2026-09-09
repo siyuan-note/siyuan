@@ -1,6 +1,28 @@
 @use "../util/mixin";
 @use "tabs";
 
+// 编辑时恢复引用块，保留完整的选择范围和块结构；折叠的列表项和标题保留定位内容。
+.protyle-wysiwyg[data-backlink-hide-reference]:not(:focus-within) {
+  [data-backlink-reference]:not([fold="1"]):not(.li[fold="1"] *) {
+    display: none !important;
+  }
+
+  .li[data-backlink-reference-list]:not([fold="1"]):not(.li[fold="1"] *) {
+    min-height: 0;
+
+    &::before,
+    > .protyle-action,
+    > .protyle-attr {
+      display: none !important;
+    }
+
+    > [data-node-id] {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+  }
+}
+
 .protyle-cross-block-preview {
   pointer-events: none;
 

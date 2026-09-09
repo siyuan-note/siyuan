@@ -1641,6 +1641,20 @@ body.mobile-topbar--merged {
 .sy__backlink {
   min-height: 0;
 
+  > .block__icons > .block__logo--counter {
+    @extend .toolbar__text;
+    margin: 0;
+    font-weight: normal;
+
+    > .counter {
+      margin-left: 8px;
+      padding: 0;
+      background-color: transparent;
+      font-size: 12px;
+      color: var(--b3-theme-on-surface);
+    }
+  }
+
   > .block__icons {
     flex-wrap: wrap;
     height: auto;

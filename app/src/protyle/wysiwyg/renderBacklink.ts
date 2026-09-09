@@ -18,8 +18,10 @@ import {
 } from "../util/viewFold";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 import {IBacklinkAVTarget, prepareBacklinkAV} from "../render/av/backlink";
+import {markBacklinkReference, updateBacklinkReferenceVisibility} from "./backlinkReference";
 
 interface IBacklinkData {
+    referenceBlockID?: string,
     attributeViewTargets?: IBacklinkAVTarget[],
     id?: string,
     revision?: string,
@@ -29,6 +31,7 @@ interface IBacklinkData {
 }
 
 interface IBacklinkDOMRecord {
+    referenceBlockID: string,
     revision: string,
     anchor: HTMLElement,
     targets: IBacklinkAVTarget[],
@@ -57,10 +60,12 @@ const removeBacklinkDOMRecord = (record: IBacklinkDOMRecord) => {
 const createBacklinkDOMRecord = (item: IBacklinkData, index: number, id: string) => {
     const template = document.createElement("template");
     template.innerHTML = genBreadcrumb(item.blockPaths, false, index, id) + setBacklinkFold(item.dom, item.expand);
+    markBacklinkReference(template.content, item.referenceBlockID);
     const nodes = Array.from(template.content.childNodes);
     (nodes[0] as HTMLElement).setAttribute("data-backlink-revision", item.revision || "");
     return {
         record: {
+            referenceBlockID: item.referenceBlockID || "",
             revision: item.revision || "",
             anchor: nodes[0] as HTMLElement,
             targets: item.attributeViewTargets || [],
@@ -84,6 +89,7 @@ const renderBacklinkDOMNodes = (protyle: IProtyle, nodes: Node[], record: IBackl
 };
 
 export const renderBacklink = (protyle: IProtyle, backlinkData: IBacklinkData[]) => {
+    updateBacklinkReferenceVisibility(protyle);
     protyle.block.showAll = true;
     const element = protyle.wysiwyg.element;
     let records = backlinkDOMRecords.get(protyle);
@@ -223,6 +229,7 @@ export const loadBreadcrumb = (protyle: IProtyle, element: HTMLElement) => {
         const record = backlinkDOMRecords.get(protyle)?.get(element.parentElement.dataset.backlinkId);
         getBacklinkDOMNodes(element.parentElement).forEach(node => {
             if (node instanceof HTMLElement) {
+                markBacklinkReference(node, record?.referenceBlockID);
                 prepareBacklinkAV(node, record?.targets || []);
             }
         });

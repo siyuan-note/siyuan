@@ -1,4 +1,6 @@
 {
+	"backlinkHideReference": "Aktarılan geri bağlantılarda referans bloklarını gizle",
+	"backlinkHideReferenceTip": "Başka içerik görünür kaldığında aktarılan geri bağlantılarda yalnızca blok referansları içeren blokları gizle ve düzenleme sırasında yeniden göster",
 	"uploadInsertTargetUnavailable": "Özgün yükleme hedefi artık kullanılamıyor. Sonuç eklenmedi; yüklenen dosyalar korunuyor.",
 	"mobileToolbarEntryTip": "Masaüstü ile aynı profilleri kullanarak mobil araç çubuğunun görünürlüğünü ve sırasını yapılandırın",
 	"keymapAssigned": "Atanmış",

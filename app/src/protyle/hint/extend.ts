@@ -1,5 +1,6 @@
 import {fetchPost} from "../../util/fetch";
 import {insertHTML} from "../util/insertHTML";
+import {TABLE_CELL_SLASH_IDS} from "../util/tableCellRichMenu";
 import {getIconByType} from "../../editor/getIcon";
 import {isDisabledFeature, updateHotkeyTip} from "../util/compatibility";
 import {blockRender} from "../render/blockRender";
@@ -25,7 +26,6 @@ import {zoomOut} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {genAssetHTML} from "../../asset/renderAssets";
 import {unicode2Emoji} from "../../emoji";
-import {avRender} from "../render/av/render";
 import {addWidgetCacheVersion} from "../util/widgetCache";
 import {
     getEntryCatalogNode,
@@ -175,7 +175,7 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         value: "> " + Lute.Caret,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconQuote"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.quote}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.insert.quote.custom, ">")}</div>`,
     }, {
-        filter: [window.siyuan.languages.tabs, "tabs", "页签", "yeqian"],
+        filter: [window.siyuan.languages.tabs, "tabs", "页签", "yeqian", "yq"],
         id: "tabs",
         value: `::: tabs\n@tab\n\n${Lute.Caret}\n\n@tab\n\n:::\n`,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconTabs"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.tabs}</span></div>`,
@@ -455,9 +455,15 @@ export const hintSlash = (key: string, protyle: IProtyle, sourceOrHideConfigured
         allList.pop();
     }
     refreshSlashMenuCatalog(areProtylePluginExtensionsEnabled(protyle) ? protyle.app.plugins : []);
+    const selection = getSelection();
+    const focus = selection?.focusNode;
+    const focusElement = focus instanceof Element ? focus : focus?.parentElement;
+    const cell = focusElement?.closest("td, th");
+    const inTableCell = cell && cell.closest(".protyle-wysiwyg") === protyle.wysiwyg.element;
     return resolveSlashMenuItems(allList.filter((item) => {
         const builtinStyleID = slashBuiltinStyleIDs[item.entryKey];
-        return getEntryCatalogNode(getSlashMenuEntryPath(item.entryKey)) &&
+        return (!inTableCell || TABLE_CELL_SLASH_IDS.has(item.id)) &&
+            getEntryCatalogNode(getSlashMenuEntryPath(item.entryKey)) &&
             (!builtinStyleID || isBuiltinInlineStyleVisible("style1", builtinStyleID));
     }), {
         enabled,
@@ -675,7 +681,6 @@ export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement
             blockRender(protyle, protyle.wysiwyg.element);
             processRender(protyle.wysiwyg.element);
             highlightRender(protyle.wysiwyg.element);
-            avRender(protyle.wysiwyg.element, protyle);
             hideElements(["util"], protyle);
         };
         const docTreePlan = response.data.docTreePlan as ITemplateDocTreePlan | undefined;

@@ -65,6 +65,27 @@ describe("mobile input detection", () => {
         }
     });
 
+    it("accepts a plaintext database search field and its descendants", () => {
+        const databaseElement = createElement({
+            attributes: {contenteditable: "false"},
+            parentElement: createEditableRoot(),
+        });
+        const searchElement = createElement({
+            attributes: {contenteditable: "plaintext-only", "data-type": "av-search"},
+            parentElement: databaseElement,
+        });
+        const textElement = createElement({tagName: "SPAN", parentElement: searchElement});
+        const nonEditableElement = createElement({
+            attributes: {contenteditable: "false"},
+            parentElement: searchElement,
+        });
+
+        assert.equal(canInput(searchElement), searchElement);
+        assert.equal(canInput(textElement), searchElement);
+        assert.equal(canInput(nonEditableElement), false);
+        assert.equal(canInput(databaseElement), false);
+    });
+
     it("accepts the editable Protyle root as the active element", () => {
         const bodyElement = createElement({tagName: "BODY"});
         const wysiwygElement = createElement({

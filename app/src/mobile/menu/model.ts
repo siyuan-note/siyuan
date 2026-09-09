@@ -29,6 +29,7 @@ export const destroyModel = () => {
 export const openModel = (obj: {
     html: string,
     icon?: string,
+    hideCloseIcon?: boolean,
     title: string,
     bindEvent: (element: HTMLElement) => void,
     destroyCallback?: () => void,
@@ -48,6 +49,7 @@ export const openModel = (obj: {
         iconElement.classList.add("fn__none");
     }
     iconElement.onclick = obj.backCallback ? backModel : null;
+    modelElement.querySelector("#modelClose").classList.toggle("fn__none", !!obj.hideCloseIcon);
     const titleElement = modelElement.querySelector(".toolbar__text");
     titleElement.innerHTML = obj.title;
     titleElement.classList.toggle("toolbar__text--search", !!titleElement.querySelector(".toolbar__search"));

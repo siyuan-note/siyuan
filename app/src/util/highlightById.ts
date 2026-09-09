@@ -2,6 +2,7 @@ import {revealTabsForTarget} from "../protyle/render/tabsRender";
 import {hasClosestBlock, isInEmbedBlock} from "../protyle/util/hasClosest";
 import {focusByRange, getEditorRange} from "../protyle/util/selection";
 import {getStartScrollTop} from "./highlightPosition";
+import {isMobile} from "./functions";
 
 export const bgFade = (element: Element) => {
     element.classList.add("protyle-wysiwyg--hl");
@@ -86,11 +87,14 @@ export const scrollCenter = (
             range.insertNode(br2Element);
             const editorElement = protyle.contentElement;
             const cursorTop = br2Element.getBoundingClientRect().top - editorElement.getBoundingClientRect().top;
+            // 移动端额外预留一行，避免输入文字贴近键盘工具栏。
+            const extraLineHeight = isMobile() ? parseFloat(getComputedStyle(br2Element).lineHeight) ||
+                window.siyuan.config.editor.fontSize * 1.625 : 0;
             let scrollTop = 0;
             if (cursorTop < 0) {
                 scrollTop = editorElement.scrollTop + cursorTop;
             } else if (cursorTop > editorElement.clientHeight - 74) {   // 74 = 移动端底部 + 段落块高度
-                scrollTop = editorElement.scrollTop + (cursorTop + 74 - editorElement.clientHeight);
+                scrollTop = editorElement.scrollTop + (cursorTop + 74 + extraLineHeight - editorElement.clientHeight);
             }
             if (scrollTop !== 0) {
                 editorElement.scroll({top: scrollTop, behavior});

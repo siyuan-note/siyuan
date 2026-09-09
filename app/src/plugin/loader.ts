@@ -10,7 +10,7 @@ import {
     removeMobilePluginDock,
 } from "../mobile/dock/pluginDockState";
 /// #endif
-import {API} from "./API";
+import {getAPI} from "./API";
 import {getFrontend, isMobile, isWindow} from "../util/functions";
 import {Constants} from "../constants";
 import {beginPluginTeardown, destroyPlugin} from "./uninstall";
@@ -30,12 +30,10 @@ import {
 import {getHostCapabilities} from "../util/hostCapabilities";
 
 const requireFunc = (key: string) => {
-    const modules = {
-        siyuan: API
-    };
-    // @ts-ignore
-    return modules[key]
-        ?? window.require?.(key);
+    if (key === "siyuan") {
+        return getAPI();
+    }
+    return window.require?.(key);
 };
 if (window.require instanceof Function) {
     requireFunc.__proto__ = window.require;

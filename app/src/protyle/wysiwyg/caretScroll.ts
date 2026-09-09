@@ -1,4 +1,5 @@
-import {getSelectionPosition} from "../util/selection";
+import {getVerticalCaretRect} from "./verticalCaret";
+import {isAtomicVerticalNavigationTarget, isAtomicVerticalNavigationRange} from "./verticalNavigationState";
 import {
     getCaretOverflowDirection,
     getCaretScrollDelta,
@@ -19,12 +20,19 @@ const getLineHeight = (element: Element) => {
 };
 
 const getCaretScrollGeometry = (protyle: IProtyle): ICaretScrollGeometry | undefined => {
+    if (protyle.disabled || !protyle.element.isConnected) {
+        return;
+    }
     const selection = window.getSelection();
     if (!selection?.focusNode || !protyle.wysiwyg.element.contains(selection.focusNode)) {
         return;
     }
     const focusElement = selection.focusNode.nodeType === Node.ELEMENT_NODE ?
         selection.focusNode as Element : selection.focusNode.parentElement;
+    if (focusElement?.closest(".protyle-wysiwyg") !== protyle.wysiwyg.element ||
+        isAtomicVerticalNavigationTarget(focusElement)) {
+        return;
+    }
     const editableElement = focusElement?.closest("[contenteditable=\"true\"]");
     if (!editableElement || !protyle.wysiwyg.element.contains(editableElement)) {
         return;
@@ -36,15 +44,18 @@ const getCaretScrollGeometry = (protyle: IProtyle): ICaretScrollGeometry | undef
         return;
     }
     range.collapse(true);
-    const caretPosition = getSelectionPosition(editableElement, range);
-    if (!Number.isFinite(caretPosition.top) || caretPosition.left === 0 && caretPosition.top === 0) {
+    if (isAtomicVerticalNavigationRange(range)) {
+        return;
+    }
+    const caretPosition = getVerticalCaretRect(editableElement, range);
+    if (!caretPosition) {
         return;
     }
     const lineHeight = getLineHeight(editableElement);
     const viewportRect = protyle.contentElement.getBoundingClientRect();
     return {
         caretTop: caretPosition.top,
-        caretHeight: lineHeight,
+        caretHeight: caretPosition.height,
         viewportTop: viewportRect.top,
         viewportHeight: viewportRect.height,
         lineHeight,

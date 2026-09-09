@@ -14,6 +14,14 @@
   top: 30px;
   width: 16px;
   bottom: 9px; // 下图标 hover 时，需要留出一定的空间
+  // 空白区域透传点击，避免遮挡编辑器右侧的反链计数。
+  pointer-events: none;
+
+  &__down,
+  &__up,
+  &__bar {
+    pointer-events: auto;
+  }
 
   svg {
     height: 16px;
@@ -531,6 +539,56 @@
 }
 
 .sy__backlink {
+  .backlinkList__loading {
+    align-items: center;
+    box-sizing: border-box;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    min-height: 40px;
+    width: 100%;
+  }
+
+  [data-backlink-type-folded] {
+    display: none !important;
+  }
+
+  .backlinkTypeFold {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: auto;
+    margin: 4px 0;
+    padding: 0 4px;
+    padding-inline-end: 8px;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    background-color: transparent;
+    color: var(--b3-theme-on-surface);
+    font: inherit;
+    font-size: 14px;
+    line-height: 24px;
+    flex-shrink: 0;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--b3-list-hover);
+      color: var(--b3-theme-on-background);
+    }
+
+    &:focus-visible {
+      outline: 1px solid var(--b3-theme-primary);
+      outline-offset: -1px;
+    }
+
+    svg {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+    }
+  }
+
   > .backlinkList,
   > .backlinkMList {
     > .b3-list > .backlinkList__item {
@@ -554,11 +612,14 @@
         }
 
         > .counter {
-          background-color: transparent;
+          background-color: var(--b3-theme-background-light);
           color: var(--b3-theme-on-surface-light);
+          height: 18px;
+          line-height: 18px;
+          padding: 0 4px;
 
           &:hover {
-            background-color: transparent;
+            background-color: var(--b3-theme-background-light);
             color: var(--b3-theme-on-surface-light);
           }
         }
@@ -568,6 +629,10 @@
 }
 
 .sy__backlink--bottom {
+  .backlinkList__loading {
+    height: 40px;
+  }
+
   box-sizing: border-box;
   min-height: 32px;
   outline: none;
@@ -647,13 +712,6 @@
         margin-right: -4px;
       }
     }
-  }
-
-  .backlinkList__loading {
-    align-items: center;
-    display: flex;
-    height: 40px;
-    justify-content: center;
   }
 
   > .backlinkList--divider-spacing:not(.fn__none) + .block__icons {
@@ -834,6 +892,92 @@
 
   &__tip {
     font-size: 2rem;
+  }
+}
+
+.table__cell-rich {
+  min-width: 180px;
+  min-height: 1.6em;
+  white-space: normal;
+  cursor: text;
+  padding: 4px !important;
+
+  .protyle-action {
+    pointer-events: none;
+  }
+
+  .protyle-icons,
+  .protyle-icon,
+  .protyle-action__language {
+    display: none !important;
+  }
+}
+
+.table__cell-editor {
+  min-width: 180px;
+  min-height: 0;
+  white-space: normal;
+
+  [contenteditable="true"]:focus {
+    outline: none;
+  }
+
+  &.protyle {
+    background-color: transparent;
+  }
+
+  .protyle-content {
+    overflow: visible;
+  }
+
+  .protyle-wysiwyg {
+    padding: 4px !important;
+    min-height: 1.6em;
+  }
+}
+
+.table__cell-rich.table__cell--inline,
+.table__cell-editor.table__cell--inline {
+  min-width: 0;
+  min-height: 0;
+  padding: 0 !important;
+
+  &,
+  .protyle-wysiwyg {
+    padding: 0 !important;
+    min-height: 0;
+
+    > .p {
+      margin: 0;
+      padding: 0;
+      line-height: inherit;
+
+      > [contenteditable] {
+        min-height: 1lh;
+      }
+    }
+  }
+}
+
+.protyle-wysiwyg [data-type="NodeTable"] {
+  td[tabindex="-1"]:focus,
+  th[tabindex="-1"]:focus {
+    outline: none;
+  }
+
+  td:empty::after,
+  th:empty::after {
+    // 空单元格与输入文字共用行盒高度，避免输入第一个字符时改变整行高度。
+    content: "\200b";
+    display: block;
+    height: auto;
+  }
+}
+
+.table__cell-editor .protyle-wysiwyg > .p > [contenteditable]:empty {
+  &::before,
+  &::after {
+    content: none !important;
   }
 }
 

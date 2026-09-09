@@ -62,7 +62,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
     const searchType = assetsElement.classList.contains("fn__none") ? (unRefElement.classList.contains("fn__none") ? "doc" : "unRef") : "asset";
     const listElement = searchType === "asset" ? assetsElement.querySelector("#searchAssetList") : (searchType === "doc" ? element.querySelector("#searchList") : unRefElement.querySelector("#searchUnRefList"));
     const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
-    if (searchType === "doc" && matchHotKey(window.siyuan.config.keymap.general.newFile.custom, event)) {
+    if (searchType === "doc" && matchHotKey(window.siyuan.config.keymap.general.newFile, event)) {
         if (config.method === 0) {
             newFile(app, searchInputElement.value);
         }
@@ -98,7 +98,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
         return false;
     }
     if (searchType !== "asset") {
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.insertRight.custom, event)) {
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.insertRight, event)) {
             openSearchEditor({
                 protyle: edit.protyle,
                 rootId: currentList.getAttribute("data-root-id"),
@@ -124,27 +124,27 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
             });
             return true;
         }
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockRef.custom, event)) {
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockRef, event)) {
             fetchPost("/api/block/getRefText", {id}, (response) => {
                 writeText(`((${id} '${response.data}'))`);
             });
             return true;
         }
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockEmbed.custom, event)) {
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockEmbed, event)) {
             writeText(`{{select * from blocks where id='${id}'}}`);
             return true;
         }
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyProtocol.custom, event)) {
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyProtocol, event)) {
             writeText(`siyuan://blocks/${id}`);
             return true;
         }
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyProtocolInMd.custom, event)) {
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyProtocolInMd, event)) {
             fetchPost("/api/block/getRefText", {id}, (response) => {
                 writeText(`[${response.data}](siyuan://blocks/${id})`);
             });
             return true;
         }
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyHPath.custom, event)) {
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyHPath, event)) {
             fetchPost("/api/filetree/getHPathByID", {
                 id
             }, (response) => {
@@ -152,7 +152,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
             });
             return true;
         }
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyID.custom, event)) {
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.copyID, event)) {
             writeText(id);
             return true;
         }

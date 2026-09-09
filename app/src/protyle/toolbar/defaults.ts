@@ -34,6 +34,14 @@ export const DESKTOP_TOOLBAR_ENTRIES: IToolbarEntry[] = [{
     name: "|",
     separator: true,
 }, {
+    key: "font-family",
+    name: "font-family",
+    lang: "fontFamily",
+}, {
+    key: "font-size",
+    name: "font-size",
+    lang: "fontSize",
+}, {
     key: "text",
     name: "text",
     lang: "appearance",
@@ -104,6 +112,9 @@ const desktopToolbarEntryKeys = new Map(DESKTOP_TOOLBAR_ENTRIES
     .filter((item) => !item.separator)
     .map((item) => [item.name, item.key]));
 
+export const MOBILE_TOOLBAR_NAMES = DESKTOP_TOOLBAR_ENTRIES
+    .filter(item => !item.separator && item.name !== "format-painter").map(item => item.name);
+
 export const isBuiltinToolbarItemName = (name: string) => name === "|" || desktopToolbarEntryKeys.has(name);
 
 const setToolbarEntryMetadata = (item: IMenuItem, id: string, label?: string) => {
@@ -117,25 +128,7 @@ const toolbarSeparator = (entryId: string): IMenuItem => {
 };
 
 export const getDefaultToolbar = (mobile: boolean): Array<string | IMenuItem> => {
-    if (mobile) {
-        return [
-            "block-ref",
-            "a",
-            "ai",
-            "|",
-            "text",
-            "strong",
-            "em",
-            "u",
-            "clear",
-            "|",
-            "code",
-            "tag",
-            "inline-math",
-            "inline-memo",
-        ];
-    }
-    return DESKTOP_TOOLBAR_ENTRIES.map((item) => {
+    return DESKTOP_TOOLBAR_ENTRIES.filter(item => !mobile || item.name !== "format-painter").map((item) => {
         if (item.separator) {
             return toolbarSeparator(item.key);
         }

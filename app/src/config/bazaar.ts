@@ -4,6 +4,7 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {highlightRender} from "../protyle/render/highlightRender";
 import {Constants} from "../constants";
 import {getFrontend, isBrowser, isMobile} from "../util/functions";
+import {getHostCapabilities} from "../util/hostCapabilities";
 import {hasPluginSetting, Plugin} from "../plugin";
 import type {App} from "../index";
 import {escapeAttr, escapeHtml} from "../util/escape";
@@ -252,7 +253,7 @@ export const bazaar = {
         return `<div class="config-bazaar fn__flex-column" style="height: 100%">
 <div class="config-bazaar__main fn__flex-column fn__flex-1">
 <div class="config-bazaar__drop fn__none">
-    <svg><use xlink:href="#iconUpload"></use></svg>
+    <svg><use xlink:href="#iconDownload"></use></svg>
     <div>${window.siyuan.languages.dropLocalBazaarPackage}</div>
 </div>
 <div class="layout-tab-bar fn__flex">
@@ -290,7 +291,7 @@ export const bazaar = {
                 <input data-type="downloaded-filter" class="b3-text-field config-bazaar__filter" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
                 <div class="fn__flex config-bazaar__actions">
                     <label class="block__icon block__icon--show config-bazaar__local-package ariaLabel" data-type="install-local-package" data-position="north" aria-label="${window.siyuan.languages.installLocalBazaarPackage}">
-                        <svg class="b3-button__icon"><use xlink:href="#iconUpload"></use></svg>
+                        <svg class="b3-button__icon"><use xlink:href="#iconDownload"></use></svg>
                         <input class="b3-form__upload" data-type="local-package-file" type="file" accept=".zip,application/zip">
                     </label>
                     <button class="b3-button fn__none" data-type="install-all">${window.siyuan.languages.updateAll}</button>
@@ -400,7 +401,7 @@ export const bazaar = {
         <span data-position="north" class="ariaLabel block__icon block__icon--show" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
         </span>
-        <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
+        <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() || !getHostCapabilities().localFileSystem ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
         ${bazaar._genOpenStorageHTML(item, bazaarType)}
@@ -411,7 +412,7 @@ export const bazaar = {
         if (bazaarType !== "plugins" || !item.hasStorageData) {
             return "";
         }
-        return `<span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open-storage" aria-label="${window.siyuan.languages.openStorageLocation}">
+        return `<span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() || !getHostCapabilities().localFileSystem ? " fn__none" : ""}" data-type="open-storage" aria-label="${window.siyuan.languages.openStorageLocation}">
     <svg><use xlink:href="#iconDatabase"></use></svg>
 </span>`;
     },
@@ -603,7 +604,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         ${bazaar._genIncompatibleChipHTML(available, "bazaar", bazaarType)}
         ${bazaar._genDeprecatedChipHTML(available)}
         ${bazaar._genFundingHTML(installed.preferredFunding, false)}
-        <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
+        <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() || !getHostCapabilities().localFileSystem ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
         ${bazaar._genOpenStorageHTML(installed, bazaarType)}
@@ -848,7 +849,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         <span data-position="north" class="ariaLabel block__icon block__icon--show" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
         </span>
-        <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
+        <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() || !getHostCapabilities().localFileSystem ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
         ${bazaar._genOpenStorageHTML(bazaarItem, bazaarType)}

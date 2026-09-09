@@ -71,6 +71,7 @@ import {
     restoreBlockSelectionModeState
 } from "./blockSelection";
 import {isEmptyParagraph} from "./emptyTextBlock";
+import {cleanTableCellRichHTML, retainTableCellRichMetadata} from "../util/tableCellRich";
 import {completeTabsListSource, convertTabsList, isTabsListConversion} from "./tabsList";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {
@@ -83,7 +84,7 @@ const cleanBlockSelectionModeOperations = (operations?: IOperation[]) => {
     operations?.forEach(operation => {
         if (["appendInsert", "insert", "prependInsert", "update"].includes(operation.action) &&
             typeof operation.data === "string") {
-            operation.data = cleanBlockSelectionModeHTML(operation.data);
+            operation.data = cleanTableCellRichHTML(cleanBlockSelectionModeHTML(operation.data));
         }
         if (operation.action === "unfoldHeading" && typeof operation.retData === "string") {
             operation.retData = cleanBlockSelectionModeHTML(operation.retData);
@@ -191,6 +192,7 @@ const promiseTransaction = (options: {
     const protyle = options.protyle;
     // 受影响的嵌入块需推迟到事务提交后再渲染，否则其查询请求会早于写入到达内核而拿到旧数据
     const pendingEmbedElements = new Set<Element>();
+    const pendingAVElements = new Set<Element>();
     /// #if MOBILE
     if (((0 !== window.siyuan.config.sync.provider && isPaidUser()) ||
             (0 === window.siyuan.config.sync.provider && !needSubscribe(""))) &&
@@ -278,7 +280,7 @@ const promiseTransaction = (options: {
                 if (updatedEmbed) {
                     processRender(protyle.wysiwyg.element);
                     highlightRender(protyle.wysiwyg.element);
-                    avRender(protyle.wysiwyg.element, protyle);
+                    pendingAVElements.add(protyle.wysiwyg.element);
                 }
                 focusRestoredBlockSelectionMode(restoredSelectionModeElement);
                 return;
@@ -487,7 +489,7 @@ const promiseTransaction = (options: {
                 cursorElements.forEach(item => {
                     processRender(item);
                     highlightRender(item);
-                    avRender(item, protyle);
+                    pendingAVElements.add(item);
                     blockRender(protyle, item);
                     item.querySelectorAll("wbr").forEach(wbrItem => {
                         wbrItem.remove();
@@ -552,6 +554,29 @@ const promiseTransaction = (options: {
             templateDocTreePlanID: options.templateDocTreePlanID,
         },
         callback: (responseTransaction: {doOperations: IOperation[]}) => {
+            // 新增和更新的数据库载体必须在事务成功后渲染，确保内核已登记块及其笔记本归属。
+            responseTransaction.doOperations.forEach(operation => {
+                if (operation.action === "insert" || operation.action === "update") {
+                    protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
+                        pendingAVElements.add(item);
+                    });
+                }
+            });
+            const avElements = new Set<Element>();
+            pendingAVElements.forEach(item => {
+                if (item.getAttribute("data-type") === "NodeAttributeView") {
+                    avElements.add(item);
+                } else {
+                    item.querySelectorAll('[data-type="NodeAttributeView"]').forEach(avElement => {
+                        avElements.add(avElement);
+                    });
+                }
+            });
+            avElements.forEach(item => {
+                if (item.isConnected) {
+                    avRender(item, protyle);
+                }
+            });
             invalidateViewFoldRequests(protyle);
             const ids = getBlockSelectionStatusIDs(protyle.wysiwyg.element);
             countBlockWord(ids, protyle, true);
@@ -762,9 +787,6 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
     }
     invalidateViewFoldRequests(protyle);
     const undoFocusContext = isUndo ? operations.find(item => item.context?.undoFocusId)?.context : undefined;
-    const undoFocusEmbedElement = undoFocusContext?.undoFocusEmbedId ? protyle.wysiwyg.element.querySelector(
-        `[data-type="NodeBlockQueryEmbed"][data-node-id="${undoFocusContext.undoFocusEmbedId}"]`
-    ) : undefined;
     const deferUndoFocus = !!undoFocusContext?.undoFocusEmbedId;
     const pendingUndoEmbedElements = new Set<Element>();
     operations.forEach(operation => {
@@ -1197,7 +1219,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                 protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]'),
                 operation,
             ).forEach(item => {
-                if (item === undoFocusEmbedElement) {
+                if (undoFocusContext?.undoFocusEmbedId === item.getAttribute("data-node-id")) {
                     // 当前嵌入块需在撤销操作全部回放后渲染，否则中途移除选区会把光标带到源块
                     pendingUndoEmbedElements.add(item);
                 } else {
@@ -2264,6 +2286,12 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
     }
     cleanBlockSelectionModeOperations(doOperations);
     cleanBlockSelectionModeOperations(undoOperations);
+    doOperations.forEach(operation => {
+        if (operation.action === "update" && typeof operation.data === "string") {
+            undoOperations?.filter(undo => undo.action === "update" && undo.id === operation.id && typeof undo.data === "string")
+                .forEach(undo => undo.data = retainTableCellRichMetadata(undo.data, operation.data));
+        }
+    });
     cleanHeadingNumberOperations(doOperations);
     cleanHeadingNumberOperations(undoOperations);
     if (!protyle) {
@@ -2408,8 +2436,8 @@ export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: 
         refreshSbResize(element);
     }
     const id = element.getAttribute("data-node-id");
-    const newHTML = cleanHeadingNumberHTML(cleanBlockSelectionModeHTML(element.outerHTML));
-    const cleanOldHTML = cleanHeadingNumberHTML(cleanBlockSelectionModeHTML(oldHTML));
+    const newHTML = cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(element.outerHTML)));
+    const cleanOldHTML = cleanHeadingNumberHTML(cleanTableCellRichHTML(cleanBlockSelectionModeHTML(oldHTML)));
     if (newHTML === cleanOldHTML.replace("<wbr>", "") && !additionalOperations) {
         return;
     }

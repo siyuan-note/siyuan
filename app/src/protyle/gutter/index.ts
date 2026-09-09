@@ -132,6 +132,17 @@ import {CALLOUT_PRESETS, updateCalloutType, updateCustomCalloutType} from "../wy
 import {setTabsPosition, toggleTabsTasks, unwrapTabs} from "../wysiwyg/tabs";
 import {getTabItems} from "../render/tabsRender";
 
+const restoreGutterRange = (range: Range) => {
+    const container = range?.startContainer;
+    const target = container?.nodeType === Node.ELEMENT_NODE ? container as Element : container?.parentElement;
+    const title = target?.closest(".tab-item-title, [tabs-title=\"true\"]");
+    // 块标菜单不恢复已结束编辑的页签标题选区，避免重新打开标题编辑。
+    if (title && title.closest<HTMLElement>(".tab-item")?.dataset.tabsEditing !== "true") {
+        return;
+    }
+    focusByRange(range);
+};
+
 // 块类型 data-type 到本地化名称键的映射，用于块标提示中的 ${x}
 const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
     NodeParagraph: "paragraph",
@@ -380,7 +391,7 @@ export class Gutter {
                         }
                         /// #if !MOBILE
                         window.siyuan.menus.menu.popup({x: br.left, y: br.bottom, isLeft: true});
-                        focusByRange(protyle.toolbar.range);
+                        restoreGutterRange(protyle.toolbar.range);
                         /// #endif
                     }
                 }
@@ -391,12 +402,15 @@ export class Gutter {
                 if (buttonElement.getAttribute("disabled")) {
                     return;
                 }
-                buttonElement.setAttribute("disabled", "disabled");
                 const blockButtonElement = buttonElement.previousElementSibling || buttonElement.nextElementSibling;
                 const foldElement = this.getNodeElement(protyle, blockButtonElement);
                 if (!foldElement) {
                     hideElements(["gutter"], protyle);
                     return;
+                }
+                // 视图折叠直接更新局部状态，只有文档折叠需要禁用按钮并等待事务恢复。
+                if (!hasViewFoldContext(protyle)) {
+                    buttonElement.setAttribute("disabled", "disabled");
                 }
                 let foldStatus = -1;
                 if (event.altKey && foldElement.getAttribute("data-type") === "NodeHeading") {
@@ -661,7 +675,7 @@ export class Gutter {
                 window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, isLeft: true});
                 const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
                 window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
-                focusByRange(protyle.toolbar.range);
+                restoreGutterRange(protyle.toolbar.range);
                 /// #endif
             }
         });
@@ -704,7 +718,7 @@ export class Gutter {
                     window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, isLeft: true});
                     const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
                     window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
-                    focusByRange(protyle.toolbar.range);
+                    restoreGutterRange(protyle.toolbar.range);
                     /// #endif
                 }
             }
@@ -3611,6 +3625,20 @@ export class Gutter {
     }
 
     public render(protyle: IProtyle, element: Element, target?: Element) {
+        const cellFragment = element.closest(".table__cell-rich, .table__cell-editor") ||
+            target?.closest(".table__cell-rich, .table__cell-editor");
+        if (cellFragment) {
+            if (cellFragment.classList.contains("table__cell-editor")) {
+                hideElements(["gutter"], protyle);
+                return;
+            }
+            // 单元格预览中的片段不提供块级操作，块标始终定位到所属表格。
+            const table = cellFragment.closest('[data-type="NodeTable"][data-node-id]');
+            if (!table) {
+                return;
+            }
+            element = table;
+        }
         // https://github.com/siyuan-note/siyuan/issues/4659
         if (protyle.title && protyle.title.element.getAttribute("data-render") !== "true") {
             return;
@@ -3721,6 +3749,7 @@ export class Gutter {
                     listItem = tabsHeader ? undefined : topElement.querySelector(".li") || topElement.querySelector(".list");
                     // 嵌入块中有列表时块标显示位置错误 https://github.com/siyuan-note/siyuan/issues/6254
                     if ((!embedContext && isInEmbedBlock(listItem)) || isInAVBlock(listItem) ||
+                        listItem?.closest(".table__cell-rich, .table__cell-editor") ||
                         hasClosestByClassName(nodeElement, "callout")) {
                         listItem = undefined;
                     }

@@ -1,3 +1,18 @@
+export interface IUploadDocument {
+    rootID: string;
+    notebookID: string;
+}
+
+export const captureUploadDocument = (protyle: IProtyle): IUploadDocument => ({
+    rootID: protyle.block?.rootID,
+    notebookID: protyle.notebookId,
+});
+
+export const isUploadDocumentAvailable = (protyle: IProtyle, target: IUploadDocument) => {
+    return protyle.element.isConnected && target?.rootID === protyle.block?.rootID &&
+        target?.notebookID === protyle.notebookId;
+};
+
 export interface IUploadInsertPosition {
     range: Range;
     startContainer: Node;
@@ -23,8 +38,12 @@ export const isUploadInsertPositionAvailable = (editorElement: Element, position
         editorElement.contains(position.range.endContainer);
 };
 
-export const getAvailableUploadInsertRange = (editorElement: Element, position?: IUploadInsertPosition) => {
+export const getAvailableUploadInsertRange = (editorElement: Element, position?: IUploadInsertPosition,
+                                             restore?: (context: Record<string, string>) => Range | undefined) => {
     if (isUploadInsertPositionAvailable(editorElement, position)) {
         return position.range.cloneRange();
+    }
+    if (editorElement.isConnected && position?.context && restore) {
+        return restore(position.context);
     }
 };

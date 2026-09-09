@@ -1033,11 +1033,14 @@ func ExportPreview(id string, fillCSSVar bool, accessChecker ...EmbedBlockAccess
 		if numberErr := applyHeadingNumbersForExport(tree, bt, false); nil != numberErr {
 			return numberErr
 		}
-		tree = exportTree(tree, false, false, true,
+		tree, exportTreeErr := exportTree(tree, false, true, false, true,
 			blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			"#", "#", // 这里固定使用 # 包裹标签，否则无法正确解析标签 https://github.com/siyuan-note/siyuan/issues/13857
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
 			Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, true, accessChecker...)
+		if nil != exportTreeErr {
+			return exportTreeErr
+		}
 		luteEngine := NewLute()
 		enableLuteInlineSyntax(luteEngine)
 		luteEngine.SetFootnotes(true)
@@ -1072,8 +1075,7 @@ func ExportPreview(id string, fillCSSVar bool, accessChecker ...EmbedBlockAccess
 			return ast.WalkContinue
 		})
 
-		md := treenode.FormatNode(tree.Root, luteEngine)
-		tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
+		tree = normalizeExportPreviewTree(tree, luteEngine)
 		// 使用实际主题样式值替换样式变量 Use real theme style value replace var in preview mode https://github.com/siyuan-note/siyuan/issues/11458
 		if fillCSSVar {
 			fillThemeStyleVar(tree)
@@ -1220,11 +1222,14 @@ func exportMarkdownHTML(id, savePath string, docx, merge bool, mergeHeadingOptio
 		}
 
 		blockRefMode := Conf.Export.BlockRefMode
-		tree = exportTree(tree, true, false, true,
+		tree, exportTreeErr := exportTree(tree, true, true, false, true,
 			blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
 			Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, true)
+		if nil != exportTreeErr {
+			return exportTreeErr
+		}
 		name = path.Base(tree.HPath)
 		name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 		savePath = strings.TrimSpace(savePath)
@@ -1432,11 +1437,14 @@ func ExportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle boo
 			}
 		}
 
-		tree = exportTree(tree, true, keepFold, true,
+		tree, exportTreeErr := exportTree(tree, true, true, keepFold, true,
 			blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
 			addTitle, customTitle, Conf.Export.InlineMemo, true, true)
+		if nil != exportTreeErr {
+			return exportTreeErr
+		}
 		adjustHeadingLevel(bt, tree, addTitle)
 		name = path.Base(tree.HPath)
 		name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
@@ -2963,13 +2971,17 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string, i
 	return
 }
 
+func attributeViewExportError(avID string, err error) error {
+	return fmt.Errorf("%s: %w", fmt.Sprintf(Conf.Language(382), avID), err)
+}
+
 func exportAv(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap map[string]string) error {
 	// 用 box-aware 路径解析 + 自动解密读取 AV 定义明文（加密笔记本的 AV 在 <boxID>/storage/av/，
 	// GetAttributeViewDataPath 只查全局路径会漏；filelock.Copy 会拷密文）。
 	avData, readErr := av.ReadAttributeViewDataInBox(avID, boxID)
 	if readErr != nil {
 		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
-		return readErr
+		return attributeViewExportError(avID, readErr)
 	}
 	if boxID != "" && avData != nil {
 		avData, readErr = rewriteAttributeViewDataAssetReferences(avData, assetReferenceRewriteOptions{rewriteUnmapped: true})
@@ -2992,7 +3004,7 @@ func exportAv(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap
 	attrView, parseErr := av.ParseAttributeViewInBox(avID, boxID)
 	if parseErr != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, parseErr)
-		return parseErr
+		return attributeViewExportError(avID, parseErr)
 	}
 
 	if err := copyExportAttributeViewAssets(attrView, boxID, exportFolder, assetPathMap); err != nil {
@@ -3158,11 +3170,15 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 	tagOpenMarker, tagCloseMarker string, blockRefTextLeft, blockRefTextRight string,
 	addTitle, inlineMemo bool, defBlockIDs []string, singleFile, fillCSSVar bool, boxPaths map[string]string,
 	accessChecker ...EmbedBlockAccessChecker) (ret string) {
-	tree = exportTree(tree, false, false, false,
+	tree, exportTreeErr := exportTree(tree, false, false, false, false,
 		blockRefMode, blockEmbedMode, fileAnnotationRefMode,
 		tagOpenMarker, tagCloseMarker,
 		blockRefTextLeft, blockRefTextRight,
 		addTitle, "", inlineMemo, 0 < len(defBlockIDs), singleFile, accessChecker...)
+	if nil != exportTreeErr {
+		logging.LogErrorf("prepare Markdown export failed: %s", exportTreeErr)
+		return ""
+	}
 	finishTabTitles := treenode.MaterializeTabTitles(tree.Root)
 	defer finishTabTitles()
 	if adjustHeadingLv {
@@ -3310,12 +3326,12 @@ func exportMarkdownRelativePath(currentDocDir, href string) string {
 	return filepath.ToSlash(relative)
 }
 
-func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
+func exportTree(tree *parse.Tree, wysiwyg, richTableCells, keepFold, avHiddenCol bool,
 	blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
 	tagOpenMarker, tagCloseMarker string,
 	blockRefTextLeft, blockRefTextRight string,
 	addTitle bool, customTitle string, inlineMemo, addDocAnchorSpan, singleFile bool,
-	accessChecker ...EmbedBlockAccessChecker) (ret *parse.Tree) {
+	accessChecker ...EmbedBlockAccessChecker) (ret *parse.Tree, err error) {
 	luteEngine := NewLute()
 	ret = tree
 	id := tree.Root.ID
@@ -3323,6 +3339,11 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	// 解析查询嵌入节点
 	depth := 0
 	resolveEmbedR(ret.Root, blockEmbedMode, luteEngine, &[]string{}, &depth, accessChecker...)
+	if richTableCells {
+		if err = treenode.MaterializeTableCellRichExport(ret.Root); nil != err {
+			return nil, err
+		}
+	}
 	finishTabTitles := treenode.MaterializeTabTitles(ret.Root)
 	defer finishTabTitles()
 
@@ -3448,7 +3469,10 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 
 	if 4 == blockRefMode { // 脚注+锚点哈希
 		unlinks = nil
-		footnotesDefBlock := resolveFootnotesDefs(&refFootnoteOrder, refFootnotesByID, ret, currentTreeNodeIDs, blockRefTextLeft, blockRefTextRight)
+		footnotesDefBlock, footnotesErr := resolveFootnotesDefs(&refFootnoteOrder, refFootnotesByID, ret, currentTreeNodeIDs, blockRefTextLeft, blockRefTextRight, richTableCells)
+		if nil != footnotesErr {
+			return nil, footnotesErr
+		}
 		if nil != footnotesDefBlock {
 			// 如果是聚焦导出，可能存在没有使用的脚注定义块，在这里进行清理
 			// Improve focus export conversion of block refs to footnotes https://github.com/siyuan-note/siyuan/issues/10647
@@ -3631,6 +3655,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 
 	unlinks = nil
 	// Attribute View export https://github.com/siyuan-note/siyuan/issues/8710
+	var attrViewRichErr error
 	ast.Walk(ret.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -3755,6 +3780,12 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 						}
 					} else if av.KeyTypeText == cell.Value.Type {
 						if nil != cell.Value.Text {
+							if richTableCells && cell.Value.Text.IsRich() {
+								if attrViewRichErr = appendAttributeViewRichTextExport(mdTableCell, cell.Value.Text); attrViewRichErr != nil {
+									return ast.WalkStop
+								}
+								continue
+							}
 							val = cell.Value.Text.Content
 							if !wysiwyg {
 								val = string(lex.EscapeProtyleMarkers([]byte(val)))
@@ -3922,6 +3953,15 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 							if nil == v {
 								continue
 							}
+							if richTableCells && av.KeyTypeText == v.Type && v.Text.IsRich() {
+								if attrViewRichErr = appendAttributeViewRichTextExport(mdTableCell, v.Text); attrViewRichErr != nil {
+									return ast.WalkStop
+								}
+								if i < len(cell.Value.Rollup.Contents)-1 {
+									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(", ")})
+								}
+								continue
+							}
 
 							if av.KeyTypeBlock == v.Type {
 								if nil != v.Block {
@@ -3986,15 +4026,18 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		unlinks = append(unlinks, n)
 		return ast.WalkContinue
 	})
+	if attrViewRichErr != nil {
+		return nil, attrViewRichErr
+	}
 	for _, n := range unlinks {
 		n.Unlink()
 	}
-	return ret
+	return ret, nil
 }
 
-func resolveFootnotesDefs(refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, currentTree *parse.Tree, currentTreeNodeIDs map[string]bool, blockRefTextLeft, blockRefTextRight string) (footnotesDefBlock *ast.Node) {
+func resolveFootnotesDefs(refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, currentTree *parse.Tree, currentTreeNodeIDs map[string]bool, blockRefTextLeft, blockRefTextRight string, richTableCells bool) (footnotesDefBlock *ast.Node, err error) {
 	if 1 > len(*refFootnoteOrder) {
-		return nil
+		return nil, nil
 	}
 
 	footnotesDefBlock = &ast.Node{Type: ast.NodeFootnotesDefBlock}
@@ -4057,6 +4100,11 @@ func resolveFootnotesDefs(refFootnoteOrder *[]string, refFootnotesByID map[strin
 
 		var newNodes []*ast.Node
 		for _, node := range nodes {
+			if richTableCells {
+				if err = treenode.MaterializeTableCellRichExport(node); nil != err {
+					return nil, err
+				}
+			}
 			var unlinks []*ast.Node
 
 			ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -4095,6 +4143,11 @@ func resolveFootnotesDefs(refFootnoteOrder *[]string, refFootnotesByID map[strin
 					for _, b := range sqlBlocks {
 						subNodes := renderBlockMarkdownR(b.ID, &rendered, currentTree.Box)
 						for _, subNode := range subNodes {
+							if richTableCells {
+								if err = treenode.MaterializeTableCellRichExport(subNode); nil != err {
+									return ast.WalkStop
+								}
+							}
 							if ast.NodeListItem == subNode.Type {
 								parentList := &ast.Node{Type: ast.NodeList, ListData: &ast.ListData{Typ: subNode.ListData.Typ}}
 								parentList.AppendChild(subNode)
@@ -4109,6 +4162,9 @@ func resolveFootnotesDefs(refFootnoteOrder *[]string, refFootnotesByID map[strin
 				}
 				return ast.WalkContinue
 			})
+			if nil != err {
+				return nil, err
+			}
 			for _, n := range unlinks {
 				n.Unlink()
 			}

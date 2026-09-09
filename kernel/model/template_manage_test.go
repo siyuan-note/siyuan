@@ -61,14 +61,54 @@ func TestTemplateFileManagement(t *testing.T) {
 	}
 	call(TemplateFileRequest{Action: "write", Path: "weekly/child.md", Content: "child"})
 	dir := call(TemplateFileRequest{Action: "read", Path: "weekly"}).(map[string]string)
-	deleted := call(TemplateFileRequest{Action: "remove", Path: "weekly", Revision: dir["revision"]}).(map[string]string)
-	content, err := os.ReadFile(filepath.Join(util.DataDir, "templates", deleted["recoveryPath"], "child.md"))
-	if err != nil || string(content) != "child" {
-		t.Fatalf("deleted directory is not recoverable: %s %v", content, err)
+	call(TemplateFileRequest{Action: "remove", Path: "weekly", Revision: dir["revision"]})
+	if _, err := os.Stat(filepath.Join(util.DataDir, "templates", "weekly")); !os.IsNotExist(err) {
+		t.Fatalf("directory was not deleted: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(util.DataDir, "templates", ".trash")); !os.IsNotExist(err) {
+		t.Fatalf("deletion created a trash directory: %v", err)
 	}
 	entries := call(TemplateFileRequest{Action: "list"}).([]TemplateFileEntry)
 	if len(entries) != 1 || entries[0].Path != "renamed.md" {
 		t.Fatalf("unexpected entries: %+v", entries)
+	}
+}
+
+func TestTemplateDeletePreservesLegacyTrash(t *testing.T) {
+	previous := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = previous })
+	root, err := openTemplateRoot()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer root.Close()
+	if err = root.MkdirAll(".trash/legacy", 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err = root.WriteFile(".trash/legacy/old.md", []byte("retained"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = ManageTemplateFiles(TemplateFileRequest{Action: "write", Path: "new.md", Content: "delete"}); err != nil {
+		t.Fatal(err)
+	}
+	read, err := ManageTemplateFiles(TemplateFileRequest{Action: "read", Path: "new.md"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = ManageTemplateFiles(TemplateFileRequest{Action: "remove", Path: "new.md", Revision: read.(map[string]string)["revision"]}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = root.Stat("new.md"); !os.IsNotExist(err) {
+		t.Fatalf("file was not deleted: %v", err)
+	}
+	content, err := root.ReadFile(".trash/legacy/old.md")
+	if err != nil || string(content) != "retained" {
+		t.Fatalf("legacy recovery data changed: %v", err)
+	}
+	items, err := os.ReadDir(filepath.Join(root.Name(), ".trash"))
+	if err != nil || len(items) != 1 || items[0].Name() != "legacy" {
+		t.Fatalf("deletion retained a new copy: %v", err)
 	}
 }
 
@@ -87,6 +127,34 @@ func TestTemplateFilePaths(t *testing.T) {
 	}
 	if _, err := ManageTemplateFiles(TemplateFileRequest{Action: "write", Path: "linked/outside.md"}); err == nil {
 		t.Fatal("symlink escape accepted")
+	}
+}
+
+func TestTemplateRenameWithinChineseDirectory(t *testing.T) {
+	previous := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = previous })
+	call := func(request TemplateFileRequest) any {
+		t.Helper()
+		ret, err := ManageTemplateFiles(request)
+		if err != nil {
+			t.Fatalf("%s %q: %v", request.Action, request.Path, err)
+		}
+		return ret
+	}
+	call(TemplateFileRequest{Action: "mkdir", Path: "子文件夹"})
+	call(TemplateFileRequest{Action: "write", Path: "子文件夹/模板.md", Content: "内容"})
+	read := call(TemplateFileRequest{Action: "read", Path: "子文件夹/模板.md"}).(map[string]string)
+	call(TemplateFileRequest{Action: "move", Path: "子文件夹/模板.md", Target: "子文件夹/新模板.md", Revision: read["revision"]})
+	read = call(TemplateFileRequest{Action: "read", Path: "子文件夹/新模板.md"}).(map[string]string)
+	if read["content"] != "内容" {
+		t.Fatal("renaming changed template contents")
+	}
+	read = call(TemplateFileRequest{Action: "read", Path: "子文件夹"}).(map[string]string)
+	call(TemplateFileRequest{Action: "move", Path: "子文件夹", Target: "新文件夹", Revision: read["revision"]})
+	read = call(TemplateFileRequest{Action: "read", Path: "新文件夹/新模板.md"}).(map[string]string)
+	if read["content"] != "内容" {
+		t.Fatal("renaming a directory lost its template")
 	}
 }
 

@@ -8,6 +8,12 @@ Implement an "encrypted notebook" in SiYuan — a special notebook whose `.sy` d
 
 Existing encrypted data is the compatibility baseline. Format and key-management changes must preserve access to existing data and its recovery paths; development status must never justify requiring users to delete or recreate their data. This covers documents, assets and their original names, attribute-view definitions, key envelopes, backups, history, and sync snapshots.
 
+Database bindings follow the same isolation boundary. When importing a `.sy.zip` into an encrypted notebook, bindings to blocks included in that import are remapped to the imported blocks; bindings to blocks outside the import become detached rows, preserving row IDs, stored text, and other field values. Imported document backlinks retain only databases included in the archive. Import must not write database backlinks into documents outside the target boundary. Ordinary imports retain bindings to existing ordinary documents. Adding or replacing bound rows and editing a bound primary key must validate the boundary before changing either the row or the document.
+
+Existing invalid database backlinks are not silently deleted or resolved across encryption boundaries during export. Export reports the affected database ID and preserves the source data. To diagnose an affected document, compare its `custom-avs` entries with the databases in its permitted storage scope, retain a backup, and explicitly remove only confirmed invalid bindings. Missing files, corrupt data, and authentication failures remain errors; merely unlocking another encrypted notebook does not make its databases part of the document's export scope. This binding correction does not change ciphertext formats, AAD, keys, or legacy authenticated readers.
+
+Table-cell rich text uses document `Spec: "4"` and an optional `TableCellRich` source envelope inside the authenticated plaintext AST. Existing document versions remain readable without converting their cells. Document encryption envelopes, AAD, subkey derivation, and recovery keys are unchanged. Reads, exports, history, snapshots, and recovery authenticate ciphertext first, then validate the document and rich text versions; unknown or damaged source is rejected while preserving the original data. Inline projections may be rebuilt only after authentication and source validation succeed.
+
 ## 2. Core Constraints
 
 | Aspect | Design Decision |
@@ -21,7 +27,7 @@ Existing encrypted data is the compatibility baseline. Format and key-management
 | **Isolation principle** | **Each encrypted notebook is an independent island — isolated from normal notebooks, and encrypted notebooks are also isolated from each other. Data, block refs, database mirroring, and moves never cross the encrypted-notebook boundary. Unlocking one encrypted notebook does not affect the locked state of other encrypted notebooks.** |
 | Global features | Encrypted notebooks never participate (global search / graph / block refs cannot see them) |
 | Block refs | Normal refs within the notebook; cross-boundary refs forbidden (bidirectional: normal↔encrypted, encrypted A↔encrypted B) |
-| AI / LLM | No functional-layer isolation — when unlocked, AI/LLM can read/search just like a normal notebook; when locked, no usable DEK handle exists and dedicated entry points deny access (see §13) |
+| AI / LLM | No functional-layer isolation — when unlocked, AI/LLM can read content directly and use in-notebook search; when locked, no usable DEK handle exists and dedicated entry points deny access. Global search, semantic search, and embedding vectorization never participate (see §13) |
 | Publish | Unsupported — publish readers and anonymous visitors cannot enumerate or read an encrypted notebook regardless of unlock state, publish password, or visibility configuration |
 | Cross-boundary move | Forbidden — would break data consistency and leak |
 | Database | Notebook-level storage — encrypted notebook database files follow the notebook directory, DEK-encrypted; cross-boundary mirroring forbidden |
@@ -54,6 +60,7 @@ Existing encrypted data is the compatibility baseline. Format and key-management
 | **Doc to heading (Doc2Heading)** | Supported | Forbidden across encrypted boundary |
 | **database mirroring (cross-notebook)** | Supported | Forbidden across encrypted boundary |
 | **Asset file rename** | Supported | Not supported (desensitized filename rename breaks the mapping) |
+| **Asset text recognition (OCR)** | Supported | Not supported, regardless of lock state |
 | **Import** | Supported | Supported (.sy.zip and Markdown, auto DEK-encrypted before writing to disk) |
 | **In-notebook search** | Via global SQLite database | Via encrypted SQLite database |
 | **Backlinks panel** | Via global SQLite database | Via encrypted SQLite database (incl. mention subquery) |
@@ -75,7 +82,7 @@ Existing encrypted data is the compatibility baseline. Format and key-management
 | **Rebuild index** | Full | Skipped on startup (closed); opening performs a full rebuild into the encrypted SQLite database |
 | **/api/file/\*** | Can read, write, copy, rename, delete, or enumerate workspace files | Refuses access to any file in encrypted-notebook persistent directories (not just .sy) to prevent ciphertext disclosure or writes that bypass the encryption layer; `temp/` remains accessible to administrator file APIs and trusted plugins |
 
-**Core difference summary**: An encrypted notebook is an "island" — data is physically isolated, operations have dedicated entry points, it never participates in global features (global search/graph), it cannot be published, and documents/database files do not cross the boundary. In-notebook features (editing, block refs, backlinks, search, database, outline, history, etc.) work normally; AI/LLM is also usable when unlocked (same as a normal notebook). Encrypted notebooks are also isolated from each other. Normal notebooks are completely unaffected.
+**Core difference summary**: An encrypted notebook is an "island" — data is physically isolated, operations have dedicated entry points, it never participates in global features (global search/graph), it cannot be published, and documents/database files do not cross the boundary. In-notebook features (editing, block refs, backlinks, search, database, outline, history, etc.) work normally; when unlocked, AI/LLM can read content directly and use in-notebook search. Encrypted notebooks are also isolated from each other. Normal notebooks are completely unaffected.
 
 ## 4. Key Architecture
 
@@ -271,7 +278,7 @@ Encrypted notebooks forbid moving documents across the encrypted boundary (norma
 
 ## 12. Security Boundary
 
-**Security premise**: An encrypted notebook provides its strongest application-level protection while closed (locked). After locking completes, new operations are denied, managed DEK handles and database connections are removed, and kernel-managed plaintext caches, temporary files, and tokens are cleaned on a best-effort basis; this does not promise erasure of every transient copy in the Go runtime, OS swap, crash dumps, or storage media. **When open (unlocked), the application holds a usable DEK handle**, and callers authorized by the main application — APIs, third-party plugins, AI/LLM (including MCP, agents, semantic search) — can read plaintext content just like a normal notebook. The publish service is an explicit exception: publish readers and anonymous visitors cannot enumerate or read encrypted notebooks regardless of unlock state, and publish passwords, visibility configuration, and `publishAccess.json` cannot override this rule. The kernel CLI likewise rejects encrypted notebooks and their raw files regardless of lock state. Encryption protects data at rest and unreachability through supported entry points after locking; it **does not protect visibility to callers authorized by the main application while unlocked**. Treat an unlocked encrypted notebook as a normal notebook in active use within the main application and lock it immediately afterwards.
+**Security premise**: An encrypted notebook provides its strongest application-level protection while closed (locked). After locking completes, new operations are denied, managed DEK handles and database connections are removed, and kernel-managed plaintext caches, temporary files, and tokens are cleaned on a best-effort basis; this does not promise erasure of every transient copy in the Go runtime, OS swap, crash dumps, or storage media. **When open (unlocked), the application holds a usable DEK handle**, and callers authorized by the main application — APIs, third-party plugins, AI/LLM (including MCP and agents) — can read plaintext content and use in-notebook search through supported notebook-specific entry points; global search, semantic search, and embedding vectorization do not participate. The publish service is an explicit exception: publish readers and anonymous visitors cannot enumerate or read encrypted notebooks regardless of unlock state, and publish passwords, visibility configuration, and `publishAccess.json` cannot override this rule. The kernel CLI likewise rejects encrypted notebooks and their raw files regardless of lock state. Encryption protects data at rest and unreachability through supported entry points after locking; it **does not protect visibility to callers authorized by the main application while unlocked**. Treat an unlocked encrypted notebook as a normal notebook in active use within the main application and lock it immediately afterwards.
 
 **Protected (ciphertext on disk)**:
 - `.sy` document body (encrypted)
@@ -298,9 +305,9 @@ Encrypted notebooks forbid moving documents across the encrypted boundary (norma
 
 ## 13. AI / LLM Reachability
 
-The visibility of encrypted notebooks to AI/LLM is determined entirely by the **lock state**; there is no functional-layer isolation.
+The visibility of encrypted notebooks to AI/LLM through supported notebook-specific entry points is determined by the **lock state**; there is no separate functional-layer switch to hide content from AI. Global search, semantic search, and embedding vectorization never include encrypted content.
 
-**When locked**: AI/LLM (including MCP, agents, semantic search, embedding vectorization) cannot obtain a usable DEK handle, and every encrypted-notebook entry point denies access. Dedicated databases are closed and disk content is ciphertext, so these callers cannot read encrypted content.
+**When locked**: AI/LLM (including MCP and agents) cannot obtain a usable DEK handle, and every encrypted-notebook entry point denies access. Dedicated databases are closed and disk content is ciphertext, so these callers cannot read encrypted content.
 
 **When unlocked**: the DEK is in memory, so AI/LLM can read encrypted-notebook content and search within a notebook — MCP tools can list encrypted notebooks and their documents, read block content, run in-notebook FTS search, etc. However, global search, semantic search, and embedding vectorization still do not include encrypted content (encrypted data never enters the global `block_embeddings`/`blocks` tables; physically unreachable), see §3 comparison table.
 
@@ -308,12 +315,12 @@ Design stance: there is no "hide from AI" isolation at the functional layer, bec
 
 ## 14. Feature Limitations
 
-An encrypted notebook is an island; some features are unimplemented because of their cross-notebook nature or dependence on global aggregation. These are feature boundaries, not performance or security trade-offs.
+An encrypted notebook is an island; some features are unsupported because of their cross-notebook nature or dependence on global aggregation. These are explicit feature boundaries.
 
-- **Flashcards / spaced repetition**: Decks and scheduling are cross-notebook and depend on the global SQLite database; not implemented.
+- **Flashcards / spaced repetition**: Decks and scheduling are cross-notebook and depend on the global SQLite database; not supported.
 - **Publish**: The publish service targets read-only or anonymous visitors, so encrypted notebooks never participate whether locked or unlocked and cannot be enabled through publish passwords or visibility configuration.
-- **Bookmarks**: Global aggregation view (scans the global siyuan.db); encrypted notebooks not integrated.
-- **Tags**: Global aggregation view (scans the global spans table); encrypted notebooks not integrated.
+- **Bookmarks**: Global aggregation view (scans the global siyuan.db); encrypted notebooks are not supported.
+- **Tags**: Global aggregation view (scans the global spans table); encrypted notebooks are not supported.
 - **Asset file rename**: Encrypted-notebook asset filenames are already desensitized to `uuid-blockID.ext`; the disk filename participates in AAD, so renaming requires re-enveloping the whole asset.
 - **Unused asset cleanup**: Encrypted-notebook assets are excluded from global unused-asset cleanup (island, assets do not cross boundaries), preventing false deletion when locked and document references cannot be scanned.
 - **Unused database cleanup**: Encrypted-notebook database definitions are excluded from global unused-database cleanup, preventing false deletion when locked and reference relationships cannot be confirmed.
@@ -403,6 +410,8 @@ Sync endpoints and offline backups are storage that may be lost, copied, or roll
 
 ## 20. Feature Boundaries, Plaintext Temporaries, and Interface Rules
 
+Text recognition (OCR) is not supported for assets in encrypted notebooks, regardless of lock state. Manual recognition returns a localized "unsupported" message, and automatic recognition skips encrypted-notebook assets. No OCR text may be generated for these assets or written to the global OCR store or search index.
+
 Unsupported publishing, flashcards, bookmarks, tags, asset rename, unused-asset cleanup, and unused-database cleanup must be handled uniformly by the frontend, HTTP API, plugin API, MCP, and import paths: return an explicit "unsupported" error for encrypted-notebook targets and create no global index, global attribute, or deferred task. Existing legacy data must not be loaded, aggregated, or written back. Publish authorization is independent of lock state and takes precedence over `publishAccess.json`; existing publish configuration cannot make an encrypted notebook visible again. Error codes and localized messages remain stable for callers.
 
 Every raw entry point that might bypass dedicated read/write paths is registered, including file APIs, kernel CLI, MCP file tools, WebDAV, plugin file interfaces, export download URLs, preview URLs, and background tasks. Encrypted-notebook persistent directories always reject direct access through raw entry points to avoid ciphertext disclosure or writes that bypass the encryption layer. Workspace `temp/` is general temporary storage accessible to administrator file APIs, archive APIs, and trusted plugins, so it is not part of the encrypted access-control boundary. WebDAV continues to deny the entire `temp/` directory unconditionally to avoid exposing temporary data through a remote file service. Adding an entry point requires separate review of whether it touches encrypted-notebook persistent directories or temporary plaintext.
@@ -456,7 +465,7 @@ Native mobile save flows must call `AcquireExportFile` to obtain a lease contain
 ### Changing the master password
 Go to **Settings - Authentication - Encrypted Notebook - Change master password**. Changing the password only re-wraps each notebook's WrappedDEK — **document data is not re-encrypted**, so it completes instantly. The key backup is auto-refreshed and synced after a password change.
 
-> Important semantics: password change uses the KEK envelope model — the DEK itself does not change; only a new KEK (derived from the new password) re-wraps the WrappedDEK. This means **changing the password does not revoke the old password's decryption ability**: if the old password and an old WrappedDEK (retained in sync endpoints, backups, or historical snapshots) leak together, the same DEK can still be unwrapped, decrypting current data. If you suspect the old password has leaked, migrate content to a freshly created encrypted notebook (new DEK) rather than just changing the password.
+> Important semantics: password change uses the KEK envelope model — the DEK itself does not change; only a new KEK (derived from the new password) re-wraps the WrappedDEK. This means **changing the password does not revoke the old password's decryption ability**: if the old password and an old WrappedDEK (retained in sync endpoints, backups, or historical snapshots) leak together, the same DEK can still be unwrapped, decrypting current data. If you suspect the old password has leaked, export the content as plaintext, import it into a freshly created encrypted notebook (new DEK), and securely delete the plaintext files after confirming the migration rather than only changing the password.
 
 ### Multi-device sync
 Encrypted-notebook ciphertext `.sy`/assets/database files sync along with the data (ciphertext in, ciphertext out, self-consistent); the global key material (MasterSalt etc.) is also automatically backed up to the sync directory. **No manual "enable" is needed on a new device after sync**:

@@ -45,7 +45,8 @@ import {
 } from "../../emoji";
 import {blockRender} from "../render/blockRender";
 import {getUploadInsertRange, uploadFiles} from "../upload";
-import {createUploadInsertPosition} from "../upload/insertPosition";
+import {showMessage} from "../../dialog/message";
+import {captureUploadDocument, createUploadInsertPosition, isUploadDocumentAvailable} from "../upload/insertPosition";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
 /// #endif
@@ -295,7 +296,7 @@ export class Hint {
             if (protyle.lite) {
                 protyle.options.hint.extend.find((item) => {
                     if (item.key === "/" && item.hint) {
-                        item.hint(key, protyle, "hint");
+                        this.genHTML(item.hint(key, protyle, "hint"), protyle, true, "hint");
                         return true;
                     }
                 });
@@ -352,7 +353,7 @@ export class Hint {
             Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar], Constants.SIZE_TITLE);
     }
 
-    private getMobileSelectionTop(protyle: IProtyle) {
+    private getMobileSelectionBounds(protyle: IProtyle) {
         const range = getEditorRange(protyle.wysiwyg.element);
         const position = getSelectionPosition(protyle.wysiwyg.element, range);
         if (range.startContainer.nodeType === 3 && range.startContainer.textContent.length > 0) {
@@ -369,13 +370,19 @@ export class Hint {
             const rects = textRange.getClientRects();
             const rect = rects[rects.length - 1];
             if (rect?.height > 0) {
-                return rect.top;
+                return {
+                    top: rect.top,
+                    bottom: rect.bottom,
+                };
             }
         }
-        return position.top;
+        return {
+            top: position.top,
+            bottom: position.top + 26,
+        };
     }
 
-    private setMobilePosition(anchorTop: number) {
+    private setMobilePosition(anchorTop: number, anchorBottom: number) {
         const viewportBounds = getVisibleViewportBounds();
         const viewportTop = Math.max(viewportBounds.top, getTopBarHeight());
         let viewportBottom = viewportBounds.bottom;
@@ -386,14 +393,14 @@ export class Hint {
         viewportBottom = Math.max(viewportTop, viewportBottom);
         const heightLimit = (viewportBottom - viewportTop) / 3;
         const gap = 8;
-        let position = getMobileHintPosition(anchorTop, this.element.scrollHeight, viewportTop, viewportBottom,
-            heightLimit, gap);
+        let position = getMobileHintPosition(anchorTop, anchorBottom, this.element.scrollHeight, viewportTop,
+            viewportBottom, heightLimit, gap);
         const hintStyle = getComputedStyle(this.element);
         const verticalInset = parseFloat(hintStyle.paddingTop) + parseFloat(hintStyle.paddingBottom) +
             parseFloat(hintStyle.borderTopWidth) + parseFloat(hintStyle.borderBottomWidth);
         this.element.style.maxHeight = `${Math.max(0, position.maxHeight - verticalInset)}px`;
-        position = getMobileHintPosition(anchorTop, this.element.getBoundingClientRect().height, viewportTop,
-            viewportBottom, heightLimit, gap);
+        position = getMobileHintPosition(anchorTop, anchorBottom, this.element.getBoundingClientRect().height,
+            viewportTop, viewportBottom, heightLimit, gap);
         this.element.style.left = "0";
         this.element.style.top = `${position.top}px`;
     }
@@ -410,7 +417,7 @@ export class Hint {
                     /// #if !MOBILE
                     setPosition(this.element, cellRect.left, cellRect.bottom, cellRect.height);
                     /// #else
-                    this.setMobilePosition(cellRect.top);
+                    this.setMobilePosition(cellRect.top, cellRect.bottom);
                     /// #endif
                 }
             } else {
@@ -418,7 +425,8 @@ export class Hint {
                 /// #if !MOBILE
                 setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
                 /// #else
-                this.setMobilePosition(this.getMobileSelectionTop(protyle));
+                const selectionBounds = this.getMobileSelectionBounds(protyle);
+                this.setMobilePosition(selectionBounds.top, selectionBounds.bottom);
                 /// #endif
             }
         } else if (!this.element.querySelector(".fn__loading")) {
@@ -442,17 +450,26 @@ export class Hint {
                     getUndoFocusContext(protyle.wysiwyg.element, range, true));
             };
             let insertPosition = captureInsertPosition();
+            let uploadDocument = captureUploadDocument(protyle);
             item.addEventListener("click", () => {
                 insertPosition = captureInsertPosition();
+                uploadDocument = captureUploadDocument(protyle);
             });
             item.addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
                 if (event.target.files.length === 0) {
                     return;
                 }
-                const range = getUploadInsertRange(protyle, insertPosition);
+                const range = isUploadDocumentAvailable(protyle, uploadDocument) ?
+                    getUploadInsertRange(protyle, insertPosition) : undefined;
+                if (!range) {
+                    event.target.value = "";
+                    showMessage(window.siyuan.languages.uploadInsertTargetUnavailable);
+                    return;
+                }
                 range.deleteContents();
                 range.collapse(true);
                 uploadFiles(protyle, event.target.files, event.target, undefined, undefined, {
+                    document: uploadDocument,
                     htmlAsIframe: event.target.dataset.uploadMode === "html-iframe",
                     insertPosition: createUploadInsertPosition(range,
                         getUndoFocusContext(protyle.wysiwyg.element, range, true)),
@@ -507,7 +524,7 @@ export class Hint {
                 /// #if !MOBILE
                 setPosition(this.element, cellRect.left, cellRect.bottom, cellRect.height);
                 /// #else
-                this.setMobilePosition(cellRect.top);
+                this.setMobilePosition(cellRect.top, cellRect.bottom);
                 /// #endif
             }
         } else {
@@ -515,7 +532,8 @@ export class Hint {
             /// #if !MOBILE
             setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
             /// #else
-            this.setMobilePosition(this.getMobileSelectionTop(protyle));
+            const selectionBounds = this.getMobileSelectionBounds(protyle);
+            this.setMobilePosition(selectionBounds.top, selectionBounds.bottom);
             /// #endif
         }
         this.element.scrollTop = 0;
@@ -864,6 +882,10 @@ ${genHintItemHTML(item)}
         } else if (this.splitChar === "/" || this.splitChar === "、") {
             if (protyle.lite) {
                 insertHTML(value, protyle, false, false, false, undefined, undoContext);
+                if (Constants.BLOCK_HINT_KEYS.includes(value)) {
+                    this.enableExtend = true;
+                    this.render(protyle);
+                }
             } else if (value === "((" || value === "{{") {
                 this.enableExtend = true;
                 if (value === "((") {
@@ -1184,6 +1206,19 @@ ${genHintItemHTML(item)}
                     focusByWbr(nodeElement, range);
                 }
             }
+        }
+        // 新建表格后直接接管当前单元格，后续输入与鼠标点击进入编辑使用相同的限制。
+        const selection = getSelection();
+        const focus = selection?.focusNode;
+        const focusElement = focus instanceof Element ? focus : focus?.parentElement;
+        const cell = focusElement?.closest<HTMLTableCellElement>("td, th");
+        if (cell && cell.closest(".protyle-wysiwyg") === protyle.wysiwyg.element &&
+            cell.contains(selection.anchorNode)) {
+            void import("../render/tableCellRichEditor").then(module => {
+                if (cell.contains(getSelection()?.focusNode)) {
+                    module.openTableCellRichEditor(protyle, cell);
+                }
+            });
         }
     }
 

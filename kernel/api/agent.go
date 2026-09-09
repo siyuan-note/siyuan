@@ -93,7 +93,7 @@ func agentChat(c *gin.Context) {
 		c.JSON(http.StatusOK, ret)
 		return
 	}
-	client := util.NewOpenAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name)
+	client := util.NewOpenAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name, model.ResolveAIProviderHeaders(selectedProvider))
 
 	confirmTimeout := resolveAgentConfirmTimeout(model.Conf.AI.Agent.ConfirmTimeout)
 	maxRetries := model.Conf.AI.Agent.MaxRetries
@@ -188,7 +188,7 @@ func agentChat(c *gin.Context) {
 		case <-c.Request.Context().Done():
 			return
 		case <-deadline:
-			writeSSEInterrupted(c, model.Conf.Language(24))
+			writeSSEInterrupted(c, model.Conf.Language(379))
 			flusher.Flush()
 			return
 		}
@@ -396,7 +396,7 @@ func agentChatTitle(c *gin.Context) {
 		c.JSON(http.StatusOK, ret)
 		return
 	}
-	client := util.NewOpenAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name)
+	client := util.NewOpenAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name, model.ResolveAIProviderHeaders(selectedProvider))
 
 	title := agent.GenerateTitle(client, selectedProvider.BaseURL, selectedProvider.Protocol, selectedModel.Name,
 		req.Message, req.Language)

@@ -172,7 +172,7 @@ export const renderMobileBottomBar = () => {
     });
 };
 
-const bindBottomBarAction = (id: string, callback: () => void) => {
+const bindBottomBarAction = (id: string, callback: (event: MouseEvent) => void) => {
     const element = document.getElementById(id);
     if (!element) {
         return;
@@ -295,13 +295,13 @@ export const initMobileBottomBar = (app: App) => {
         newDailyNoteFromLastNotebook(app);
         closePanel();
     });
-    bindBottomBarAction("mobileBottomBarCommand", () => {
+    bindBottomBarAction("mobileBottomBarCommand", (event) => {
         if (isMobileBlockSelecting()) {
             return;
         }
-        activeBlur();
-        closePanel();
+        closePanel({preserveKeyboard: true});
         commandPanel(app);
+        event.stopPropagation();
     });
 };
 

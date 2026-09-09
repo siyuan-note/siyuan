@@ -143,7 +143,7 @@ func ContainOnlyDefaultIAL(tree *parse.Tree) bool {
 
 const BaseSpec = "2"
 
-var CurrentSpec = "3"
+var CurrentSpec = "4"
 
 var ErrSpecTooNew = fmt.Errorf("the document spec is too new")
 
@@ -155,10 +155,16 @@ func CheckSpecJSON(data []byte) error {
 	if err := json.Unmarshal(data, &root); nil != err {
 		return err
 	}
-	return CheckSpec(&parse.Tree{Root: &ast.Node{Spec: root.Spec}})
+	if err := CheckSpec(&parse.Tree{Root: &ast.Node{Spec: root.Spec}}); nil != err {
+		return err
+	}
+	return checkTableCellRichJSON(data, root.Spec)
 }
 
 func CheckSpec(tree *parse.Tree) (err error) {
+	if err = ValidateTableCellRich(tree.Root); nil != err {
+		return
+	}
 	if CurrentSpec == tree.Root.Spec || "" == tree.Root.Spec {
 		return
 	}
@@ -188,6 +194,15 @@ func UpgradeSpec(tree *parse.Tree) (upgraded bool) {
 		ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 			if entering && (ast.NodeTabs == node.Type || ast.NodeTabItem == node.Type) {
 				tree.Root.Spec = "3"
+				return ast.WalkStop
+			}
+			return ast.WalkContinue
+		})
+	}
+	if "2" == tree.Root.Spec || "3" == tree.Root.Spec {
+		ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+			if entering && nil != node.TableCellRich {
+				tree.Root.Spec = TableCellRichDocumentSpec
 				return ast.WalkStop
 			}
 			return ast.WalkContinue

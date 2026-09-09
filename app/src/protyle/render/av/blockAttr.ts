@@ -7,9 +7,8 @@ import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
 import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
-import {uploadFiles} from "../../upload";
 import {openLink} from "../../../editor/openLink";
-import {dragUpload, dragUploadFiles, editAssetItem} from "./asset";
+import {dragUpload, dragUploadFiles, editAssetItem, uploadFilesToAssetCell} from "./asset";
 import {previewImages} from "../../preview/image";
 /// #if !BROWSER
 import {webUtils} from "electron";
@@ -126,7 +125,7 @@ const handleRichTextInteraction = (protyle: IProtyle, event: MouseEvent) => {
 };
 
 export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IProtyle, cb?: (element: HTMLElement) => void,
-                                  row?: { avID: string, itemID: string, valueID: string }) => {
+                                  row?: { avID: string, itemID: string, valueID: string, databaseBlockID: string }) => {
     const renderID = (++attributeViewRenderID).toString();
     element.dataset.avAttributeRenderId = renderID;
     fetchPost("/api/av/getAttributeViewKeys", row ? {id, avID: row.avID, itemID: row.itemID, valueID: row.valueID} : {id}, (response) => {
@@ -162,6 +161,8 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             avID: string
             avName: string
         }) => {
+            // 条目 ID 仅用于读取行数据，编辑菜单和更新时间使用真实数据库载体块。
+            const blockID = row ? row.databaseBlockID : id;
             const primaryValue = table.keyValues.find(item => item.key.type === "block")?.values[0] || table.keyValues[0]?.values[0];
             let innerHTML = `<div class="custom-attr__avheader">
     <div class="block__logo block__logo--icon popover__block" style="max-width:calc(100% - 40px)" data-id='${JSON.stringify(table.blockIDs)}'>
@@ -195,15 +196,17 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             innerHTML += `<div class="fn__hr"></div>
 <button data-type="addColumn" class="b3-button b3-button--cancel"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.newCol}</button>
 <div class="fn__hr--b"></div><div class="fn__hr--b"></div>`;
-            html += `<div data-av-id="${table.avID}" data-av-type="table" data-node-id="${id}" data-type="NodeAttributeView">${innerHTML}</div>`;
+            const tableHTML = `<div data-av-id="${table.avID}" data-av-type="table" data-node-id="${blockID}" data-attribute-id="${id}" data-type="NodeAttributeView">${innerHTML}</div>`;
+            html += tableHTML;
 
             if (element.innerHTML) {
                 // 防止 blockElement 找不到
-                const blockElement = element.querySelector(`[data-node-id="${id}"][data-av-id="${table.avID}"]`);
+                const blockElement = element.querySelector<HTMLElement>(`[data-attribute-id="${id}"][data-av-id="${table.avID}"]`);
                 if (blockElement) {
+                    blockElement.dataset.nodeId = blockID;
                     blockElement.innerHTML = innerHTML;
                 } else {
-                    element.insertAdjacentHTML("beforeend", `<div data-av-id="${table.avID}" data-av-type="table" data-node-id="${id}" data-type="NodeAttributeView">${innerHTML}</div>`);
+                    element.insertAdjacentHTML("beforeend", tableHTML);
                 }
             }
         });
@@ -343,10 +346,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     event.preventDefault();
                     event.stopPropagation();
                     if (files && files.length > 0) {
-                        uploadFiles(protyle, files, undefined, undefined, undefined, {
-                            source: "paste",
-                            target: "av-cell",
-                        });
+                        uploadFilesToAssetCell(files, protyle, assetCellElement, {source: "paste"});
                     } else {
                         const textPlain = event.clipboardData.getData("text/plain");
                         const blockElement = hasClosestBlock(assetCellElement);
@@ -521,7 +521,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
         }
         renderAVRichTextElements(element);
         tables.forEach((table: IAVAttributeTableData) => {
-            const blockElement = element.querySelector<HTMLElement>(`[data-node-id="${id}"][data-av-id="${table.avID}"]`);
+            const blockElement = element.querySelector<HTMLElement>(`[data-attribute-id="${id}"][data-av-id="${table.avID}"]`);
             if (blockElement) {
                 attributeTableData.set(blockElement, table);
             }

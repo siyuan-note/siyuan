@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20260905124213"
+		"updated": "20260909090723"
 	},
 	"Children": [
 		{
@@ -2538,12 +2538,99 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-8glkpvq",
-				"updated": "20211226122008"
+				"updated": "20260909090723"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "表格"
+				}
+			]
+		},
+		{
+			"ID": "20260908091355-rch0001",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908091355-rch0001",
+				"updated": "20260908091355"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "儲存格預設支援編輯段落、標題、列表、引述、程式碼和公式，無需手動轉換。既有文字中的 Markdown 標記保持原樣，原有粗體、連結等格式也會保留。"
+				}
+			]
+		},
+		{
+			"ID": "20260908091355-rch0002",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908091355-rch0002",
+				"updated": "20260909090723"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "點擊儲存格即可編輯；新增表格後可直接輸入，無需再次點擊。也可以將游標移入儲存格後按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "F2"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 開始編輯。儲存格僅含一個普通段落時，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 移到下一列的同欄；表格末列則在表格後插入段落。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 切換儲存格，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 在儲存格內換行。包含標題、多個段落等內容時，Enter 依目前內容類型在儲存格內編輯；列表和程式碼區塊使用對應的換行與縮排操作。關閉提示後按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Escape"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或點擊儲存格外結束編輯，內容自動儲存。"
+				}
+			]
+		},
+		{
+			"ID": "20260908091355-rch0003",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908091355-rch0003",
+				"updated": "20260909090723"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "內部段落和列表項目沒有獨立區塊 ID，支援引用既有區塊。圖片及原有行級格式可以保留。不支援巢狀表格、資料庫、超級區塊、頁籤、提示區塊、查詢嵌入、分隔線、可執行圖表、音訊、影片、掛件、HTML 和自訂區塊。貼上內容包含不支援的區塊時，會拒絕整次貼上並提示不支援的類型，原有內容不變。標準 Markdown 匯出為可讀的行級內容，HTML、PDF 和 Word 匯出保留富文字排版。"
 				}
 			]
 		},

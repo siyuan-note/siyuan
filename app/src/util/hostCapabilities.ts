@@ -2,6 +2,8 @@ export type TKernelConnection = {
     kernelMode: "local" | "remote";
     ownsKernel: boolean;
     kernelOrigin: string;
+    trustRemoteExtensions?: boolean;
+    extensionScriptNonce?: string;
 };
 
 export type THostCapabilities = {
@@ -46,21 +48,29 @@ export const setHostConnection = (connection: TKernelConnection | undefined) => 
 
 export const isRemoteKernel = () => resolveRemoteKernel(hostConnection, window.location.search, getProcessArgs());
 
-export const getHostCapabilities = (): THostCapabilities => {
-    const remoteKernel = isRemoteKernel();
-    const ownsKernel = !remoteKernel && hostConnection?.ownsKernel !== false;
+export const resolveHostCapabilities = (remoteKernel: boolean, connection: TKernelConnection | undefined,
+                                        origin: string): THostCapabilities => {
+    const ownsKernel = !remoteKernel && connection?.ownsKernel !== false;
+    const trustedExtensions = remoteKernel && connection?.kernelMode === "remote" &&
+        connection.kernelOrigin === origin && connection.trustRemoteExtensions === true;
     return {
         remoteKernel,
         ownsKernel,
         localFileSystem: !remoteKernel,
         importExport: !remoteKernel,
-        plugins: !remoteKernel,
+        plugins: !remoteKernel || trustedExtensions,
         workspaces: !remoteKernel,
-        customAppearance: !remoteKernel,
+        customAppearance: !remoteKernel || trustedExtensions,
         widgets: !remoteKernel,
         oidcAuthentication: !remoteKernel,
     };
 };
+
+export const getHostCapabilities = (): THostCapabilities =>
+    resolveHostCapabilities(isRemoteKernel(), hostConnection, window.location.origin);
+
+export const getExtensionScriptNonce = () => isRemoteKernel() && getHostCapabilities().customAppearance
+    ? hostConnection?.extensionScriptNonce : undefined;
 
 export const appendRemoteQuery = (url: URL) => {
     if (isRemoteKernel()) {

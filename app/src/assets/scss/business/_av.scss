@@ -107,9 +107,13 @@
       background-color: transparent;
 
       .item__graphic {
-        height: calc(1.625em - 8px);
-        width: calc(1.625em - 8px);
-        line-height: calc(1.625em - 8px);
+        height: 1.25em;
+        width: 1.25em;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        object-fit: contain;
         padding: 8px 0 8px 8px;
         font-size: inherit;
         text-align: center;
@@ -753,7 +757,7 @@
 
     &-tip,
     &-name {
-      img:first-child, svg:first-child, svg.ariaLabel {
+      svg.ariaLabel {
         height: 1.625em;
         width: calc(1.625em - 10px);
         margin: 0 5px 0 0;
@@ -761,17 +765,18 @@
         vertical-align: bottom;
       }
 
-      img:first-child {
-        height: calc(1.625em - 10px);
-        float: left;
-        margin-top: 5px;
-      }
-
-      span:first-child {
-        width: calc(1.9em - 10px);
+      .av__gallery-fieldicon,
+      svg:first-child {
+        width: 1.25em;
+        height: 1.25em;
         margin: 0 5px 0 0;
-        height: 1.625em;
-        font-size: .85em;
+        font-size: inherit;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        object-fit: contain;
+        vertical-align: -0.25em;
       }
     }
 
@@ -1038,13 +1043,14 @@
         text-overflow: ellipsis;
       }
 
-      img.av__cellheadericon {
-        height: calc(1.625em - 8px);
-      }
-
       .av__cellheadericon {
-        height: 1.625em;
-        width: calc(1.625em - 8px);
+        height: 1.25em;
+        width: 1.25em;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        object-fit: contain;
+        line-height: 1;
         color: var(--b3-theme-on-surface);
         margin: 0 5px 0 0;
         flex-shrink: 0;
@@ -2119,16 +2125,18 @@ img.av__cellassetimg {
   .b3-menu__avemoji {
     font-size: 1em;
     line-height: 1.625;
-    height: auto;
+    height: 1.625em;
+    width: 1.25em;
     margin: 0 5px 0 -4px;
     vertical-align: top;
 
     svg,
     img {
-      height: calc(1.625em - 8px);
+      height: 1.25em;
       font-size: 1em;
-      width: calc(1.625em - 8px);
-      margin: 4px 0;
+      width: 1.25em;
+      margin: 0;
+      object-fit: contain;
     }
   }
 }

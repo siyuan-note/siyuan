@@ -4,7 +4,9 @@ const path = require("node:path");
 const test = require("node:test");
 const {
     createRemoteDocumentContentSecurityPolicy,
+    createRemoteKernelTarget,
     getArgFrom,
+    getKernelConnection,
     getInsecureCertificateSwitchName,
     getRemoteKernelRedirectDecision,
     getRemoteKernelRequestPolicy,
@@ -44,6 +46,107 @@ test("normalizeRemoteKernelOrigin rejects insecure or non-origin URLs", () => {
         "https://example.com/#fragment",
         "https://example.com#",
     ].forEach((value) => assert.throws(() => normalizeRemoteKernelOrigin(value)));
+});
+
+test("remote extension trust requires the exact startup flag and a valid remote origin", () => {
+    for (const args of [[], ["--trust-remote-extensions=false"], ["--trust-remote-extensions=true"],
+        ["--trust-remote-extensions-extra"]]) {
+        const target = createRemoteKernelTarget("https://example.com", args);
+        assert.equal(target.trustRemoteExtensions, false);
+        assert.equal(target.extensionScriptNonce, undefined);
+    }
+    const args = ["--trust-remote-extensions"];
+    const target = createRemoteKernelTarget("https://example.com:443/", args);
+    assert.equal(target.origin, "https://example.com");
+    assert.equal(target.trustRemoteExtensions, true);
+    assert.equal(Buffer.from(target.extensionScriptNonce, "base64").length, 32);
+    assert.notEqual(createRemoteKernelTarget(target.origin, args).extensionScriptNonce, target.extensionScriptNonce);
+    assert.throws(() => createRemoteKernelTarget("http://example.com", args));
+    assert.throws(() => createRemoteKernelTarget(undefined, args));
+    assert.deepEqual(getKernelConnection(target), {
+        kernelMode: "remote", ownsKernel: false, kernelOrigin: target.origin,
+        trustRemoteExtensions: true, extensionScriptNonce: target.extensionScriptNonce,
+    });
+    assert.equal(getKernelConnection({...target, mode: "local"}).trustRemoteExtensions, false);
+    assert.equal(getKernelConnection({...target, mode: "local"}).extensionScriptNonce, undefined);
+    assert.equal(getKernelConnection(undefined), undefined);
+});
+
+test("trusted extensions load from the selected origin without replacing the packaged frontend", () => {
+    const request = {
+        method: "GET", destination: "script", localResourceAvailable: false, trustRemoteExtensions: true,
+    };
+    for (const pathname of ["/plugins/example/index.js", "/appearance/themes/custom/theme.js",
+        "/appearance/icons/custom/icon.js"]) {
+        for (const destination of ["script", "style", "worker", ""]) {
+            assert.equal(getRemoteKernelRequestPolicy({...request, pathname, destination}), "remote");
+            assert.equal(getRemoteKernelRequestPolicy({...request, pathname, destination,
+                localResourceAvailable: true}), "remote");
+        }
+        assert.equal(getRemoteKernelRequestPolicy({...request, pathname, trustRemoteExtensions: false}),
+            "deny-active-content");
+        assert.equal(getRemoteKernelRequestPolicy({...request, pathname, isTargetOrigin: false}), "deny-active-content");
+        assert.equal(getRemoteKernelRequestPolicy({...request, pathname, method: "POST"}), "deny-active-content");
+        for (const destination of ["document", "frame", "iframe", "object", "serviceworker", "sharedworker"]) {
+            assert.equal(getRemoteKernelRequestPolicy({...request, pathname, destination}), "deny-active-content");
+        }
+    }
+    for (const pathname of ["/stage/build/app/index.js", "/appearance/icons/litheness/icon.js",
+        "/appearance/themes/daylight/theme.css", "/appearance/themes/midnight/theme.css",
+        "/appearance/langs/en.json", "/appearance/fonts/emoji.woff2"]) {
+        assert.equal(getRemoteKernelRequestPolicy({...request, pathname, localResourceAvailable: true}), "local");
+        assert.equal(getRemoteKernelRequestPolicy({...request, pathname}), "deny-active-content");
+    }
+    assert.equal(getRemoteKernelRequestPolicy({...request, pathname: "/custom-fonts/font-id", destination: "font"}),
+        "remote");
+    assert.equal(getRemoteKernelRequestPolicy({...request, pathname: "/plugins/example/icon.png", destination: "image"}),
+        "remote");
+    assert.equal(getRemoteKernelRequestPolicy({...request, pathname: "/api/petal/loadPetals", destination: "",
+        method: "POST"}), "remote");
+    for (const pathname of ["/assets/code.js", "/widgets/example/index.html", "/api/file/getFile",
+        "/appearance/themes/%64aylight/theme.js", "/appearance/icons/%256citheness/icon.js",
+        "/plugins/%252e%252e/stage/build/app/index.js", "/appearance/themes/custom/../../langs/en.json"]) {
+        assert.equal(getRemoteKernelRequestPolicy({...request, pathname}), "deny-active-content");
+    }
+    assert.equal(getRemoteKernelRequestPolicy({...request, pathname: "/api/system/exit", destination: "",
+        method: "POST"}), "deny-api");
+});
+
+test("trusted extension redirects retain origin and resource restrictions", () => {
+    const origin = "https://example.com";
+    for (const [location, expected] of [["/plugins/example/chunk.js", "remote"],
+        ["/assets/code.js", "deny-active-content"], ["/api/system/exit", "deny-api"],
+        ["/widgets/example/index.html", "deny-active-content"]]) {
+        const redirect = getRemoteKernelRedirectDecision({status: 302, location, origin, method: "GET"});
+        assert.equal(redirect.action, "follow");
+        assert.equal(getRemoteKernelRequestPolicy({method: redirect.method, pathname: redirect.url.pathname,
+            destination: "script", localResourceAvailable: false, trustRemoteExtensions: true}), expected);
+    }
+    assert.equal(getRemoteKernelRedirectDecision({status: 302, location: "https://other.example.com/plugins/code.js",
+        origin, method: "GET"}).action, "deny");
+});
+
+test("trusted extension CSP authorizes snippets explicitly while retaining document restrictions", () => {
+    const target = createRemoteKernelTarget("https://example.com", ["--trust-remote-extensions"]);
+    const policy = createRemoteDocumentContentSecurityPolicy("<script>packaged();</script>", target.origin,
+        target.extensionScriptNonce);
+    assert.ok(policy.includes("'nonce-" + target.extensionScriptNonce + "'"));
+    const directives = Object.fromEntries(policy.split("; ").map(value => {
+        const [name, ...sources] = value.split(" ");
+        return [name, sources];
+    }));
+    assert.ok(directives["script-src"].includes("'unsafe-eval'"));
+    assert.equal(directives["script-src"].includes("'unsafe-inline'"), false);
+    assert.equal(directives["script-src"].includes("'self'"), false);
+    for (const pathname of ["/plugins/", "/appearance/themes/", "/appearance/icons/"]) {
+        assert.ok(directives["script-src"].includes(target.origin + pathname));
+    }
+    for (const name of ["script-src-attr", "frame-src", "child-src", "object-src"]) {
+        assert.deepEqual(directives[name], ["'none'"]);
+    }
+    const untrusted = createRemoteDocumentContentSecurityPolicy("", target.origin);
+    assert.equal(untrusted.includes("'unsafe-eval'"), false);
+    assert.equal(untrusted.includes("'nonce-"), false);
 });
 
 test("remote kernel request policy rejects lifecycle and workspace APIs", () => {

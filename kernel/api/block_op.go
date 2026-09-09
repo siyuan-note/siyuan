@@ -571,16 +571,20 @@ func appendBlock(c *gin.Context) {
 		return
 	}
 
-	data := arg["data"].(string)
-	dataType := arg["dataType"].(string)
-	parentID := arg["parentID"].(string)
-	if util.InvalidIDPattern(parentID, ret) {
+	var data, dataType, parentID string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("data", &data, true, false),
+		util.BindJsonArg("dataType", &dataType, true, true),
+		util.BindJsonArg("parentID", &parentID, true, true),
+	) {
 		return
 	}
-	// append 只用 parentID 定位目标，目标必须是容器块，否则非法嵌套
-	if err := treenode.CheckContainerParent(parentID); err != nil {
+	if dataType != "markdown" && dataType != "dom" {
 		ret.Code = -1
-		ret.Msg = err.Error()
+		ret.Msg = "dataType must be markdown or dom"
+		return
+	}
+	if util.InvalidIDPattern(parentID, ret) {
 		return
 	}
 	if "markdown" == dataType {
@@ -594,20 +598,16 @@ func appendBlock(c *gin.Context) {
 		}
 	}
 
-	transactions := []*model.Transaction{
-		{
-			DoOperations: []*model.Operation{
-				{
-					Action:   "appendInsert",
-					Data:     data,
-					ParentID: parentID,
-				},
-			},
-		},
+	transactions, err := model.PerformBlockOperation(&model.Operation{
+		Action:   "appendInsert",
+		Data:     data,
+		ParentID: parentID,
+	})
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
 	}
-
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)
@@ -781,37 +781,31 @@ func insertBlock(c *gin.Context) {
 		return
 	}
 
-	data := arg["data"].(string)
-	dataType := arg["dataType"].(string)
-	var parentID, previousID, nextID string
-	if nil != arg["parentID"] {
-		parentID = arg["parentID"].(string)
-		if "" != parentID && util.InvalidIDPattern(parentID, ret) {
+	var data, dataType, parentID, previousID, nextID string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("data", &data, true, false),
+		util.BindJsonArg("dataType", &dataType, true, true),
+		util.BindJsonArg("parentID", &parentID, false, false),
+		util.BindJsonArg("previousID", &previousID, false, false),
+		util.BindJsonArg("nextID", &nextID, false, false),
+	) {
+		return
+	}
+	if dataType != "markdown" && dataType != "dom" {
+		ret.Code = -1
+		ret.Msg = "dataType must be markdown or dom"
+		return
+	}
+	if parentID == "" && previousID == "" && nextID == "" {
+		ret.Code = -1
+		ret.Msg = "at least one of parentID, previousID or nextID is required"
+		return
+	}
+	for _, id := range []string{parentID, previousID, nextID} {
+		if id != "" && util.InvalidIDPattern(id, ret) {
 			return
 		}
 	}
-	if nil != arg["previousID"] {
-		previousID = arg["previousID"].(string)
-		if "" != previousID && util.InvalidIDPattern(previousID, ret) {
-			return
-		}
-	}
-	if nil != arg["nextID"] {
-		nextID = arg["nextID"].(string)
-		if "" != nextID && util.InvalidIDPattern(nextID, ret) {
-			return
-		}
-	}
-
-	// 仅靠 parentID 定位目标时（无 previousID/nextID），目标必须是容器块，否则非法嵌套
-	if "" != parentID && "" == previousID && "" == nextID {
-		if err := treenode.CheckContainerParent(parentID); err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return
-		}
-	}
-
 	if "markdown" == dataType {
 		luteEngine := util.NewLute()
 		var err error
@@ -823,22 +817,18 @@ func insertBlock(c *gin.Context) {
 		}
 	}
 
-	transactions := []*model.Transaction{
-		{
-			DoOperations: []*model.Operation{
-				{
-					Action:     "insert",
-					Data:       data,
-					ParentID:   parentID,
-					PreviousID: previousID,
-					NextID:     nextID,
-				},
-			},
-		},
+	transactions, err := model.PerformBlockOperation(&model.Operation{
+		Action:     "insert",
+		Data:       data,
+		ParentID:   parentID,
+		PreviousID: previousID,
+		NextID:     nextID,
+	})
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
 	}
-
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)
@@ -994,23 +984,23 @@ func deleteBlock(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
 	if util.InvalidIDPattern(id, ret) {
 		return
 	}
 
-	transactions := []*model.Transaction{
-		{
-			DoOperations: []*model.Operation{
-				{
-					Action: "delete",
-					ID:     id,
-				},
-			},
-		},
+	transactions, err := model.PerformBlockOperation(&model.Operation{
+		Action: "delete",
+		ID:     id,
+	})
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
 	}
-
-	model.PerformTransactions(&transactions)
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)

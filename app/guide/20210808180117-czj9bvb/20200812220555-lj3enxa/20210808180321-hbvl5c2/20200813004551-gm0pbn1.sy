@@ -7,9 +7,69 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260906013806"
+		"updated": "20260909090822"
 	},
 	"Children": [
+		{
+			"ID": "20260908092714-514td5y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908092714-514td5y",
+				"updated": "20260908202901"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "快捷键"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中为同一个操作配置多个快捷键。点击该行的加号后按下组合键即可保存；点击快捷键的关闭按钮可删除；如需更换，请先删除再添加。点击恢复按钮可恢复该操作的全部默认快捷键。按 Esc 或点击外部可取消录入。第一项用于菜单提示，右击其他快捷键可将其设为主快捷键。同一操作内输入重复快捷键时，不会保存或退出录入，可以继续输入其他组合键。"
+				}
+			]
+		},
+		{
+			"ID": "20260908092714-88wn8r6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908092714-88wn8r6",
+				"updated": "20260908180419"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "不同操作可以设置相同的快捷键，重复绑定会以冲突配色提示。执行时，当前局部范围优先，通用范围其次；同一范围按固定顺序匹配，用户不能调整执行优先级。内置操作使用固定判断顺序，插件操作按插件名称和命令标识排序。每次按键只执行首个可用操作；开始执行后，即使取消或失败，也不会继续执行其他操作。"
+				}
+			]
+		},
+		{
+			"ID": "20260908172944-s7w2qn9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908172944-s7w2qn9",
+				"updated": "20260908180419"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "搜索栏下方可按「全部」「已分配」「由我分配」「未分配」筛选，并与名称搜索或按键搜索组合使用。「已分配」表示至少有一个快捷键；「由我分配」表示绑定与默认配置不同，包括新增、修改或删除绑定；「未分配」表示没有快捷键。仅在存在未解决的冲突时显示「冲突」筛选项，并突出显示具体冲突的快捷键。修改后筛选结果会自动更新；冲突全部消除后，若当前选中「冲突」，则自动切回「全部」。"
+				}
+			]
+		},
 		{
 			"ID": "20260813143407-p4v8n2c",
 			"Type": "NodeParagraph",
@@ -12288,7 +12348,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20201227133317-v7clw0j",
-				"updated": "20260811122156"
+				"updated": "20260909090822"
 			},
 			"Children": [
 				{
@@ -12954,6 +13014,102 @@
 								{
 									"Type": "NodeText",
 									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "编辑单元格"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "F2"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "结束单元格编辑（先关闭提示）"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Escape"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "单元格仅含一个普通段落：移到下一行同列，末行则在表格后插入段落；其他内容按当前类型编辑"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "单元格普通内容：切换单元格；列表或代码：缩进或取消缩进"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Tab / Shift+Tab"
 								}
 							]
 						}

@@ -9,6 +9,9 @@ import {getAllModels} from "../layout/getAll";
 import {setStorageVal} from "../protyle/util/compatibility";
 import type {Tab} from "../layout/Tab";
 import {setTitle} from "./processTitle";
+/// #if MOBILE
+import {getMobileBacklinkPanels, removeMobileBacklinkContent} from "../mobile/util/backlinkPanels";
+/// #endif
 /// #if !MOBILE
 import {removeBlockPanelEditors} from "../block/panelRemoval";
 /// #endif
@@ -26,6 +29,11 @@ export const reloadSync = (
         hideMessage();
     }
     /// #if MOBILE
+    removeMobileBacklinkContent({rootIDs: data.removeRootIDs});
+    getMobileBacklinkPanels().forEach(panel => {
+        panel.markIndexDirty({backlinkChanged: true, backlinkFull: true});
+        panel.refreshAfterIndex();
+    });
     if (window.siyuan.mobile.popEditor && window.siyuan.mobile.popEditor.protyle) {
         if (data.removeRootIDs.includes(window.siyuan.mobile.popEditor.protyle.block.rootID)) {
             hideElements(["dialog"]);

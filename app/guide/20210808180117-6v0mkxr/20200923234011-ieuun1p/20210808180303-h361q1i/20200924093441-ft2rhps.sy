@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260905124213"
+		"updated": "20260909090723"
 	},
 	"Children": [
 		{
@@ -2548,12 +2548,99 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-qr9enpx",
-				"updated": "20210415200941"
+				"updated": "20260909090723"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "Table"
+				}
+			]
+		},
+		{
+			"ID": "20260908091355-rch0007",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908091355-rch0007",
+				"updated": "20260908091355"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Table cells support paragraphs, headings, lists, blockquotes, code, and math without manual conversion. Existing Markdown-looking text stays literal, and existing bold text, links, and other inline formatting are preserved."
+				}
+			]
+		},
+		{
+			"ID": "20260908091355-rch0008",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908091355-rch0008",
+				"updated": "20260909090723"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Click a cell to edit it. After creating a table, type directly without clicking again. You can also place the caret in a cell and press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "F2"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to start editing. When the cell contains only one ordinary paragraph, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " moves to the same column in the next row, or inserts a paragraph after the table when on the last row. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tab"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " switches cells, and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " inserts a line break within the cell. With headings, multiple paragraphs, or other block content, Enter edits within the cell according to the current content type. Lists and code blocks use their own line-break and indentation behavior. Close suggestions, then press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Escape"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or click outside the cell to finish editing and save automatically."
+				}
+			]
+		},
+		{
+			"ID": "20260908091355-rch0009",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908091355-rch0009",
+				"updated": "20260909090723"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Internal paragraphs and list items have no independent block IDs. References to existing blocks, images, and existing inline formatting are supported. Nested tables, databases, super blocks, tabs, callouts, query embeds, thematic breaks, executable diagrams, audio, video, widgets, HTML, and custom blocks are not supported. If pasted content contains an unsupported block, the entire paste is rejected with a message listing the unsupported types; existing content stays unchanged. Standard Markdown exports readable inline content, while HTML, PDF, and Word preserve rich text layout."
 				}
 			]
 		},

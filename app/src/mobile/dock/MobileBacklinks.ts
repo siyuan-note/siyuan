@@ -1,173 +1,50 @@
-import {Tree} from "../../util/Tree";
-import {fetchPost} from "../../util/fetch";
-import {Constants} from "../../constants";
-import {openMobileFileById} from "../editor";
 import type {App} from "../../index";
-import {isEncryptedBox} from "../../util/pathName";
+import {BacklinkContent} from "../../layout/dock/BacklinkContent";
+import {registerMobileBacklinkPanel} from "../util/backlinkPanels";
+import {flushMobileSecondaryEditor} from "../util/secondaryEditors";
 
-export class MobileBacklinks {
-    public element: HTMLElement;
-    private tree: Tree;
-    private notebookId: string;
-    private mTree: Tree;
-    private updateId = 0;
-    public beforeLen = 10;
+export class MobileBacklinks extends BacklinkContent {
+    private unregisterPanel: () => void;
+    private updateVersion = 0;
 
     constructor(app: App, element: HTMLElement) {
-        this.element = element;
-        this.element.innerHTML = `<div class="toolbar toolbar--border toolbar--dark">
-    <div class="fn__space"></div>
-    <div class="toolbar__text">
-        ${window.siyuan.languages.backlinks}
-    </div>
-    <span class="counter listCount"></span>
-    <span class="fn__space"></span>
-    <svg data-type="expand" class="toolbar__icon"><use xlink:href="#iconExpand"></use></svg>
-    <span class="fn__space"></span>
-    <svg data-type="collapse" class="toolbar__icon"><use xlink:href="#iconContract"></use></svg>
-</div>
-<div class="backlinkList fn__flex-1"></div>
-<div class="toolbar">
-    <div class="fn__space"></div>
-    <div class="toolbar__text">
-        ${window.siyuan.languages.mentions}
-    </div>
-    <span class="counter listMCount"></span>
-    <span class="fn__space"></span>
-    <svg data-type="mExpand" class="toolbar__icon"><use xlink:href="#iconExpand"></use></svg>
-    <span class="fn__space"></span>
-    <svg data-type="mCollapse" class="toolbar__icon"><use xlink:href="#iconContract"></use></svg>
-    <span class="fn__space"></span>
-    <svg data-type="layout" class="toolbar__icon"><use xlink:href="#iconDown"></use></svg>
-</div>
-<div class="backlinkMList fn__flex-1"></div>`;
-
-        this.tree = new Tree({
-            element: this.element.querySelector(".backlinkList") as HTMLElement,
-            data: null,
-            click(element: HTMLElement) {
-                openMobileFileById(app, element.getAttribute("data-node-id"), [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
-            }
+        const protyle = window.siyuan.mobile.editor?.protyle;
+        super({
+            app,
+            element,
+            type: "local",
+            surface: "mobile-dock",
+            blockId: protyle?.block.id || "",
+            rootId: protyle?.block.rootID,
+            notebookId: protyle?.notebookId,
         });
-        this.mTree = new Tree({
-            element: this.element.querySelector(".backlinkMList") as HTMLElement,
-            data: null,
-            click: (element) => {
-                openMobileFileById(app, element.getAttribute("data-node-id"), [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
-            },
-        });
-        this.element.addEventListener("click", (event) => {
-            let target = event.target as HTMLElement;
-            while (target && !target.isEqualNode(this.element)) {
-                if (target.classList.contains("toolbar__icon")) {
-                    const type = target.getAttribute("data-type");
-                    switch (type) {
-                        case "collapse":
-                            this.tree.collapseAll();
-                            break;
-                        case "expand":
-                            this.tree.expandAll();
-                            break;
-                        case "mExpand":
-                            this.mTree.expandAll();
-                            break;
-                        case "mCollapse":
-                            this.mTree.collapseAll();
-                            break;
-                        case "layout":
-                            if (this.mTree.element.style.flex) {
-                                if (this.mTree.element.style.height === "0px") {
-                                    this.mTree.element.removeAttribute("style");
-                                    target.setAttribute("aria-label", window.siyuan.languages.up);
-                                    target.querySelector("use").setAttribute("xlink:href", "#iconUp");
-                                } else {
-                                    this.mTree.element.removeAttribute("style");
-                                    target.setAttribute("aria-label", window.siyuan.languages.down);
-                                    target.querySelector("use").setAttribute("xlink:href", "#iconDown");
-                                }
-                            } else {
-                                if (target.getAttribute("aria-label") === window.siyuan.languages.down) {
-                                    this.mTree.element.setAttribute("style", "flex:none;height:0px");
-                                    target.setAttribute("aria-label", window.siyuan.languages.up);
-                                    target.querySelector("use").setAttribute("xlink:href", "#iconUp");
-                                } else {
-                                    this.mTree.element.setAttribute("style", `flex:none;height:${this.element.clientHeight - this.tree.element.previousElementSibling.clientHeight * 2}px`);
-                                    target.setAttribute("aria-label", window.siyuan.languages.down);
-                                    target.querySelector("use").setAttribute("xlink:href", "#iconDown");
-                                }
-                            }
-                            target.setAttribute("data-clicked", "true");
-                            break;
-                    }
-                }
-                target = target.parentElement;
-            }
-        });
-
-        this.update();
+        this.unregisterPanel = registerMobileBacklinkPanel(this);
     }
 
     public update() {
-        const editor = window.siyuan.mobile.editor?.protyle;
-        const updateId = ++this.updateId;
-        if (!editor) {
-            this.tree.updateData([]);
-            this.mTree.updateData([]);
-            this.element.querySelectorAll(".listCount, .listMCount").forEach(item => item.classList.add("fn__none"));
-            return;
+        const version = ++this.updateVersion;
+        const protyle = window.siyuan.mobile.editor?.protyle;
+        const blockId = protyle?.block.id || "";
+        if (this.blockId !== blockId || this.notebookId !== (protyle?.notebookId || "")) {
+            void Promise.all(this.editors.map(flushMobileSecondaryEditor)).then(() => {
+                if (version === this.updateVersion) {
+                    this.switchBlock(blockId, protyle?.block.rootID || "", protyle?.notebookId || "");
+                }
+            }).catch(error => console.error(error));
+        } else {
+            this.markIndexDirty({backlinkChanged: true, backlinkFull: true});
+            this.refreshAfterIndex();
         }
-        const blockId = editor.block.id;
-        const param: IObject = {
-            id: blockId,
-            beforeLen: this.beforeLen,
-            k: "",
-            mk: "",
-        };
-        if (isEncryptedBox(editor.notebookId)) {
-            param.notebook = editor.notebookId;
-        }
-        fetchPost("/api/ref/getBacklink", param, response => {
-            if (updateId !== this.updateId || window.siyuan.mobile.editor?.protyle.block.id !== blockId) {
-                return;
-            }
-            this.notebookId = response.data.box;
-            this.tree.updateData(response.data.backlinks);
-            this.mTree.updateData(response.data.backmentions);
+    }
 
-            const countElement = this.element.querySelector(".listCount");
-            if (response.data.linkRefsCount === 0) {
-                countElement.classList.add("fn__none");
-            } else {
-                countElement.classList.remove("fn__none");
-                countElement.textContent = response.data.linkRefsCount.toString();
-            }
-            const mCountElement = this.element.querySelector(".listMCount");
-            if (response.data.mentionsCount === 0) {
-                mCountElement.classList.add("fn__none");
-            } else {
-                mCountElement.classList.remove("fn__none");
-                mCountElement.textContent = response.data.mentionsCount.toString();
-            }
+    public destroy() {
+        this.updateVersion++;
+        this.unregisterPanel?.();
+        super.destroy();
+    }
 
-            const layoutElement = this.element.querySelector("[data-type='layout']");
-            if (layoutElement.getAttribute("data-clicked")) {
-                return;
-            }
-            if (response.data.mentionsCount === 0) {
-                this.mTree.element.setAttribute("style", "flex:none;height:0px");
-                layoutElement.setAttribute("aria-label", window.siyuan.languages.up);
-                layoutElement.querySelector("use").setAttribute("xlink:href", "#iconUp");
-                return;
-            }
-            if (response.data.linkRefsCount === 0) {
-                this.mTree.element.setAttribute("style", `flex:none;height:${this.element.clientHeight - this.tree.element.previousElementSibling.clientHeight * 2}px`);
-                layoutElement.setAttribute("aria-label", window.siyuan.languages.down);
-                layoutElement.querySelector("use").setAttribute("xlink:href", "#iconDown");
-            } else {
-                this.mTree.element.removeAttribute("style");
-                layoutElement.setAttribute("aria-label", window.siyuan.languages.down);
-                layoutElement.querySelector("use").setAttribute("xlink:href", "#iconDown");
-            }
-        });
+    public switchBlock(blockId: string, rootId: string, notebookId: string) {
+        this.updateVersion++;
+        super.switchBlock(blockId, rootId, notebookId);
     }
 }

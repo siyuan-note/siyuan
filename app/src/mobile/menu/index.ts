@@ -165,6 +165,7 @@ const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettingTab>, 
     openModel({
         title: settingTabDef.title,
         icon: "iconLeft",
+        hideCloseIcon: true,
         html: `<div class="config${isMobile() ? " config--mobile" : ""}"></div>`,
         bindEvent(modelMainElement: HTMLElement) {
             root = modelMainElement.firstElementChild as HTMLElement;
@@ -249,8 +250,7 @@ const renderMobilePluginDockMenu = (app: App, menuElement: HTMLElement) => {
 export const initRightMenu = (app: App) => {
     const menuElement = document.getElementById("menu");
     menuElement.innerHTML = `<div class="b3-menu__title">
-    <svg class="b3-menu__icon"><use xlink:href="#iconLeft"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.back}</span>
+    <svg class="b3-menu__icon" role="img" aria-label="${escapeAttr(window.siyuan.languages.returnLabel)}"><use xlink:href="#iconLeft"></use></svg>
 </div>
 <div class="mobile-main-menu__search" data-prevent-swipe>
     <input placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__block" autocomplete="off" autocorrect="off" spellcheck="false">
@@ -408,8 +408,11 @@ export const initRightMenu = (app: App) => {
             }
         }
     };
-    const resetSearch = () => {
-        activeBlur();
+    const resetSearch = (preserveKeyboard = false) => {
+        // 转入输入型弹窗时保留键盘，避免 Android 异步隐藏键盘回调清除新输入框的焦点。
+        if (!preserveKeyboard) {
+            activeBlur();
+        }
         selectedTabId = undefined;
         searchMountQueue.invalidate();
         searchElement.value = "";
@@ -424,8 +427,8 @@ export const initRightMenu = (app: App) => {
             syncSearch();
         }
     });
-    menuElement.addEventListener(MOBILE_MENU_CLOSE_EVENT, () => {
-        resetSearch();
+    menuElement.addEventListener(MOBILE_MENU_CLOSE_EVENT, (event: CustomEvent<{preserveKeyboard?: boolean}>) => {
+        resetSearch(event.detail?.preserveKeyboard);
         const callback = takeMobileMenuReturnCallback();
         if (callback) {
             window.setTimeout(callback);
@@ -520,7 +523,7 @@ export const initRightMenu = (app: App) => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "menuCommand") {
-                closePanel();
+                closePanel({preserveKeyboard: true});
                 commandPanel(app);
                 event.preventDefault();
                 event.stopPropagation();

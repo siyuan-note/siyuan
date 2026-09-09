@@ -5,9 +5,6 @@ import {getAllModels} from "../layout/getAll";
 import {resizeTopBar} from "../layout/util";
 import {setTabPosition} from "../layout/tabUtil";
 /// #endif
-/// #if !BROWSER
-import {ipcRenderer} from "electron";
-/// #endif
 import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {getAllEditor} from "../layout/getAll";
@@ -151,18 +148,6 @@ export const destroyPlugin = (app: App, plugin: Plugin, isUninstall: boolean) =>
     runCleanup(plugin, "commands", () => unregisterPluginCommands(plugin));
     /// #if !BROWSER
     if (!isWindow()) {
-        runCleanup(plugin, "global shortcut", () => {
-            plugin.commands.forEach(command => {
-                if (command.globalCallback && command.customHotkey) {
-                    runCleanup(plugin, "global shortcut", () => {
-                        ipcRenderer.send(Constants.SIYUAN_CMD, {
-                            cmd: "unregisterGlobalShortcut",
-                            accelerator: command.customHotkey
-                        });
-                    });
-                }
-            });
-        });
         if (window.siyuan.languages?.["_trayMenu"]) {
             runCleanup(plugin, "global shortcut sync", () => sendGlobalShortcut(app));
         }

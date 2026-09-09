@@ -1,6 +1,7 @@
 import * as assert from "node:assert/strict";
 import test from "node:test";
 import {ensurePluginKeymap, setPluginKeymapCustom, updatePluginKeymap} from "./keymap";
+import {getDefaultKeymapBindings, getKeymapBindings, setKeymapBindings} from "../util/keymapBindings";
 
 const withKeymap = (plugin: Config.IKeymapPlugin, callback: () => void) => {
     const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
@@ -43,4 +44,34 @@ test("setting a custom plugin hotkey creates a missing editable item", () => {
     const plugin: Config.IKeymapPlugin = {};
     setPluginKeymapCustom(plugin, "plugin", "item", "⌘J", "⌘K");
     assert.deepEqual(plugin, {plugin: {item: {default: "⌘K", custom: "⌘J"}}});
+});
+
+test("plugin default lists are available on first registration and preserve custom lists on reload", () => {
+    withKeymap({}, () => {
+        const item = updatePluginKeymap("test", "command", "", ["⌘K", "⌘L", "⌘K", "A"]);
+        assert.deepEqual(item.bindings.keys, ["⌘K", "⌘L"]);
+        item.bindings.keys = ["⌘M", "⌘N"];
+        item.custom = "⌘M";
+        const reloaded = updatePluginKeymap("test", "command", "", ["⌘O"]);
+        assert.deepEqual(reloaded.bindings.keys, ["⌘M", "⌘N"]);
+        assert.deepEqual(reloaded.bindings.defaults, ["⌘O"]);
+        assert.equal(reloaded.custom, "⌘M");
+    });
+});
+
+test("switching from a default list to a single or empty default preserves custom bindings and updates reset", () => {
+    for (const hotkey of ["⌘M", ""]) {
+        for (const keys of [["⌘J", "⌘N"], []]) {
+            withKeymap({}, () => {
+                const item = updatePluginKeymap("test", "command", "", ["⌘K", "⌘L"]);
+                setKeymapBindings(item, keys);
+                const updated = updatePluginKeymap("test", "command", hotkey);
+                assert.deepEqual(getKeymapBindings(updated), keys);
+                assert.equal(updated.custom, keys[0] || "");
+                assert.deepEqual(getDefaultKeymapBindings(updated), hotkey ? [hotkey] : []);
+                setKeymapBindings(updated, getDefaultKeymapBindings(updated));
+                assert.deepEqual(getKeymapBindings(updated), hotkey ? [hotkey] : []);
+            });
+        }
+    }
 });

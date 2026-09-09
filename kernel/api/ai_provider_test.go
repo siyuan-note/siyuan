@@ -15,6 +15,7 @@ func TestResolveAIProviderDraft(t *testing.T) {
 		"providerConfig": map[string]any{
 			"baseURL":        " http://127.0.0.1:8080/v1 ",
 			"apiKey":         " key ",
+			"headers":        map[string]string{"X-Api-Key": "header-key"},
 			"requestTimeout": 700,
 		},
 	})
@@ -26,6 +27,9 @@ func TestResolveAIProviderDraft(t *testing.T) {
 	}
 	if provider.APIKey != "key" {
 		t.Fatalf("API key = %q", provider.APIKey)
+	}
+	if provider.Headers["X-Api-Key"] != "header-key" {
+		t.Fatal("provider headers were not retained")
 	}
 	if provider.RequestTimeout != 600 {
 		t.Fatalf("request timeout = %d, want 600", provider.RequestTimeout)

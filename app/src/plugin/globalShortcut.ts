@@ -1,25 +1,48 @@
+import {getKeymapBindings, IShortcutKeymap, normalizeShortcutKey} from "../util/keymapBindings";
+
 interface IPluginGlobalShortcutCommand {
+    langKey?: string;
     customHotkey?: string;
     execute?: (context: ICommandContext) => void | Promise<void>;
     globalCallback?: (context?: ICommandContext) => void;
+    when?: (context: ICommandContext) => boolean;
+    enabled?: (context: ICommandContext) => boolean;
 }
 
 interface IPluginGlobalShortcutOwner {
+    name?: string;
     commands: IPluginGlobalShortcutCommand[];
 }
 
-export const dispatchPluginGlobalShortcut = (plugins: IPluginGlobalShortcutOwner[], hotkey: string) => {
+export const dispatchPluginGlobalShortcut = (plugins: IPluginGlobalShortcutOwner[], hotkey: string,
+                                            keymap?: Record<string, Record<string, IShortcutKeymap>>, mac = true) => {
     const context: ICommandContext = {source: "globalShortcut", focus: "global"};
-    for (const plugin of plugins) {
-        const command = plugin.commands.find(item => item.globalCallback && item.customHotkey === hotkey);
-        if (command) {
-            if (command.execute) {
-                void command.execute(context);
-            } else {
-                command.globalCallback(context);
+    const candidates = plugins.flatMap((plugin, index) => plugin.commands.map((command, commandIndex) => {
+        const item = keymap?.[plugin.name]?.[command.langKey];
+        const key = getKeymapBindings(item || {custom: command.customHotkey})
+            .find(key => normalizeShortcutKey(key, mac) === normalizeShortcutKey(hotkey, mac));
+        return {command, key, id: `plugin/${encodeURIComponent(plugin.name ?? String(index))}/${encodeURIComponent(command.langKey ?? String(commandIndex))}`};
+    })).filter(({command, key}) => command.globalCallback && key)
+        .sort((first, second) => first.id < second.id ? -1 : first.id > second.id ? 1 : 0);
+    for (const {command} of candidates) {
+        try {
+            if ((command.when && !command.when(context)) || (command.enabled && !command.enabled(context))) {
+                continue;
             }
-            return true;
+        } catch (error) {
+            console.error("Global shortcut condition failed:", error);
+            continue;
         }
+        try {
+            if (command.execute) {
+                void Promise.resolve(command.execute(context)).catch(error => console.error("Global shortcut failed:", error));
+            } else {
+                void Promise.resolve(command.globalCallback(context)).catch(error => console.error("Global shortcut failed:", error));
+            }
+        } catch (error) {
+            console.error("Global shortcut failed:", error);
+        }
+        return true;
     }
     return false;
 };

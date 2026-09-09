@@ -19,26 +19,26 @@ import {remapTabsDOMIDs} from "../util/tabsCopy";
 import {isEncryptedBox} from "../../util/pathName";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 import {captureCommandContext} from "../../command/context";
-import {resolvePluginCommandCallback, supportsPluginCommandSource} from "../../plugin/commandAdapter";
+import {dispatchPluginShortcut} from "../../command/shortcutRuntime";
 import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement?: HTMLElement) => {
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.netImg2LocalAsset, event)) {
         net2LocalAssets(protyle, "Img");
         event.preventDefault();
         event.stopPropagation();
         return true;
     }
 
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.netAssets2LocalAssets.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.netAssets2LocalAssets, event)) {
         net2LocalAssets(protyle, "Assets");
         event.preventDefault();
         event.stopPropagation();
         return true;
     }
 
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.optimizeTypography.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.optimizeTypography, event)) {
         fetchPost("/api/format/autoSpace", {
             id: protyle.block.rootID
         });
@@ -46,7 +46,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
         event.stopPropagation();
         return true;
     }
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyHPath.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyHPath, event)) {
         fetchPost("/api/filetree/getHPathByID", {
             id: protyle.block.rootID
         }, (response) => {
@@ -57,7 +57,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
         return true;
     }
 
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyProtocolInMd.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyProtocolInMd, event)) {
         if (nodeElement) {
             const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0) {
@@ -72,7 +72,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
         return true;
     }
 
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyID.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyID, event)) {
         if (nodeElement) {
             const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0) {
@@ -86,7 +86,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
         event.stopPropagation();
         return true;
     }
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyProtocol.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyProtocol, event)) {
         if (nodeElement) {
             const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0) {
@@ -101,7 +101,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
         return true;
     }
 
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockEmbed.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockEmbed, event)) {
         if (nodeElement) {
             const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0) {
@@ -117,29 +117,10 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
     }
     /// #if !MOBILE
     if (areProtylePluginExtensionsEnabled(protyle)) {
-        let matchedCommand: ICommand | undefined;
-        protyle.app.plugins.find(item => {
-            item.commands.find(command => {
-                if (supportsPluginCommandSource(command, "editorShortcut") &&
-                    matchHotKey(command.customHotkey, event)) {
-                    matchedCommand = command;
-                    return true;
-                }
-            });
-            return Boolean(matchedCommand);
-        });
-        if (matchedCommand) {
-            const commandContext = captureCommandContext({
-                app: protyle.app,
-                source: "editorShortcut",
-                protyle,
-                range: protyle.toolbar.range,
-            });
-            const callback = resolvePluginCommandCallback(matchedCommand, commandContext);
-            if (callback) {
-                void callback();
-                return true;
-            }
+        if (dispatchPluginShortcut(protyle.app, event, "editorShortcut", () => captureCommandContext({
+            app: protyle.app, source: "editorShortcut", protyle, range: protyle.toolbar.range,
+        }))) {
+            return true;
         }
     }
     /// #endif
@@ -162,7 +143,7 @@ export const upSelect = (options: {
         const nodeEditableElement = (tdElement || getContenteditableElement(options.nodeElement) || options.nodeElement) as HTMLElement;
         const startIndex = getSelectionOffset(nodeEditableElement, options.editorElement, options.range).start;
         const innerText = nodeEditableElement.innerText;
-        const isExpandUp = matchHotKey(window.siyuan.config.keymap.editor.general.expandUp.custom, options.event);
+        const isExpandUp = matchHotKey(window.siyuan.config.keymap.editor.general.expandUp, options.event);
         if (!isMac() && isExpandUp) {
             // Windows 中 ⌥⇧↑ 默认无选中功能会导致 https://ld246.com/article/1716635371149
         } else if (startIndex > 0) {
@@ -209,7 +190,7 @@ export const downSelect = (options: {
         const nodeEditableElement = (tdElement || getContenteditableElement(options.nodeElement) || options.nodeElement) as HTMLElement;
         const endIndex = getSelectionOffset(nodeEditableElement, options.editorElement, options.range).end;
         const innerText = nodeEditableElement.innerText;
-        const isExpandDown = matchHotKey(window.siyuan.config.keymap.editor.general.expandDown.custom, options.event);
+        const isExpandDown = matchHotKey(window.siyuan.config.keymap.editor.general.expandDown, options.event);
         if (!isMac() && isExpandDown) {
             // Windows 中 ⌥⇧↓ 默认无选中功能会导致 https://ld246.com/article/1716635371149
         } else if (endIndex < innerText.length) {

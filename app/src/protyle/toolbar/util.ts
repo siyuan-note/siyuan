@@ -1,4 +1,5 @@
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {markToolbarHotkey} from "./hotkey";
 import {Constants} from "../../constants";
 import {focusByRange, focusByWbr} from "../util/selection";
 import {isDisabledFeature, writeText} from "../util/compatibility";
@@ -289,6 +290,16 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
         icon: "iconFont",
         tipPosition: "n",
     }, {
+        name: "font-family",
+        lang: "fontFamily",
+        icon: "iconFont",
+        tipPosition: "n",
+    }, {
+        name: "font-size",
+        lang: "fontSize",
+        icon: "iconFont",
+        tipPosition: "n",
+    }, {
         name: "clear",
         lang: "clearInline",
         hotkey: window.siyuan.config.keymap.editor.insert.clearInline.custom,
@@ -308,10 +319,12 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
         toolbarItem.find((defaultMenuItem: IMenuItem) => {
             if (typeof menuItem === "string" && defaultMenuItem.name === menuItem) {
                 currentMenuItem = defaultMenuItem;
+                markToolbarHotkey(currentMenuItem, menuItem);
                 return true;
             }
             if (typeof menuItem === "object" && defaultMenuItem.name === menuItem.name) {
                 currentMenuItem = Object.assign({}, defaultMenuItem, menuItem);
+                markToolbarHotkey(currentMenuItem, menuItem);
                 return true;
             }
         });

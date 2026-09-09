@@ -73,6 +73,7 @@ import {
 } from "./removeRange";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 import {input} from "./input";
+import {getFoldedNavigationOwner} from "./verticalVisibility";
 import {isWindows} from "../util/compatibility";
 import {
     BLOCK_SELECTION_MODE_CLASS,
@@ -1588,6 +1589,12 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
     const parentElement = hasClosestBlock(getParentBlock(blockElement));
     const editableElement = getContenteditableElement(blockElement);
     let previousLastElement = getLastBlock(previousElement) as HTMLElement;
+    const foldedListItem = getFoldedNavigationOwner(previousLastElement);
+    if (foldedListItem?.getAttribute("data-type") === "NodeListItem") {
+        // 删除合并定位到折叠列表项的可见文本，避免在隐藏子列表中插入光标。
+        previousLastElement = (hasClosestBlock(getContenteditableElement(foldedListItem)) ||
+            foldedListItem.querySelector("[data-node-id]")) as HTMLElement;
+    }
     if (range.toString() === "" && isMobile() && previousLastElement &&
         previousLastElement.classList.contains("hr") && editableElement && getSelectionOffset(editableElement).start === 0) {
         if (!await confirmRefRemoval(protyle,

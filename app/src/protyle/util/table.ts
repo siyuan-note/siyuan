@@ -5,12 +5,12 @@ import {
     focusByWbr,
     getEditorRange,
     getSelectionOffset,
-    getSelectionPosition,
     getUndoFocusContext,
 } from "./selection";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "./hasClosest";
 import {matchHotKey} from "./hotKey";
 import {isNotCtrl} from "./compatibility";
+import {focusEditableAtGoalX, getCaretGoalX, isCaretAtVerticalBoundary} from "../wysiwyg/verticalCaret";
 import {scrollCenter} from "../../util/highlightById";
 import {insertEmptyBlock} from "../../block/util";
 import {removeBlock} from "../wysiwyg/remove";
@@ -409,7 +409,7 @@ export const moveColumnToRight = (protyle: IProtyle, range: Range, cellElement: 
 export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) => {
     const cellElement = (hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH")) as HTMLTableCellElement;
     const nodeElement = hasClosestBlock(range.startContainer) as HTMLTableElement;
-    if (!cellElement || !nodeElement) {
+    if (!cellElement || !nodeElement || !protyle.wysiwyg.element.contains(cellElement)) {
         return false;
     }
     // 光标在表格中，选中其他块标后按删除按钮无效
@@ -513,103 +513,17 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
             return true;
         }
 
-        if (event.key === "ArrowUp" && isNotCtrl(event) && !event.shiftKey && !event.altKey) {
-            if (cellElement.firstChild) {
-                let firstChild = cellElement.firstChild;
-                while (firstChild) {
-                    if (firstChild.textContent === "" && firstChild.nodeType === 3) {
-                        if (!firstChild.nextSibling) {
-                            break;
-                        }
-                        firstChild = firstChild.nextSibling;
-                    } else {
-                        break;
-                    }
-                }
-                const rangeTemp = document.createRange();
-                rangeTemp.selectNodeContents(firstChild);
-                rangeTemp.collapse(true);
-                const rangeRects = range.getClientRects().length === 0 ? getSelectionPosition(cellElement, range) : range.getClientRects()[0];
-                const rangeTempRects = rangeTemp.getClientRects().length === 0 ? getSelectionPosition(cellElement, rangeTemp) : rangeTemp.getClientRects()[0];
-                if (rangeTempRects.top < rangeRects.top) {
-                    return false;
-                }
-            }
-            const trElement = cellElement.parentElement as HTMLTableRowElement;
-            let previousElement = trElement.previousElementSibling as HTMLTableRowElement;
-            if (!previousElement) {
-                previousElement = trElement.parentElement.previousElementSibling.lastElementChild as HTMLTableRowElement;
-            }
-            if (!previousElement || previousElement?.tagName === "COL") {
+        if (["ArrowUp", "ArrowDown"].includes(event.key) && isNotCtrl(event) &&
+            !event.shiftKey && !event.altKey && !event.isComposing && range.collapsed) {
+            const direction = event.key === "ArrowUp" ? "up" : "down";
+            if (!isCaretAtVerticalBoundary(cellElement, range, direction)) {
                 return false;
             }
-            const currentColIndex = getColIndex(cellElement);
-            let newCellElement = previousElement.cells[currentColIndex];
-            while (previousElement) {
-                let i = 0;
-                while (newCellElement && newCellElement.classList.contains("fn__none")) {
-                    i++;
-                    newCellElement = newCellElement.previousElementSibling as HTMLTableCellElement;
-                }
-                if (newCellElement.colSpan < 2 && i !== 0) {
-                    previousElement = previousElement.previousElementSibling as HTMLTableRowElement;
-                    newCellElement = previousElement.cells[currentColIndex];
-                } else if (newCellElement.colSpan > i) {
-                    break;
-                }
-            }
-
-            range.selectNodeContents(newCellElement);
-            range.collapse(false);
-            scrollCenter(protyle);
-            event.preventDefault();
-            return true;
-        }
-
-        if (event.key === "ArrowDown" && isNotCtrl(event) && !event.shiftKey && !event.altKey) {
-            if (cellElement.lastChild) {
-                let lastChild = cellElement.lastChild;
-                while (lastChild) {
-                    if (lastChild.textContent === "" && lastChild.nodeType === 3) {
-                        if (!lastChild.previousSibling) {
-                            break;
-                        }
-                        lastChild = lastChild.previousSibling;
-                    } else {
-                        break;
-                    }
-                }
-                const rangeTemp = document.createRange();
-                rangeTemp.selectNodeContents(lastChild);
-                rangeTemp.collapse(false);
-                if (getSelectionPosition(cellElement, rangeTemp).top > getSelectionPosition(cellElement, range).top) {
-                    return false;
-                }
-            }
-            const trElement = cellElement.parentElement as HTMLTableRowElement;
-            if ((!trElement.nextElementSibling && trElement.parentElement.tagName === "TBODY") ||
-                (trElement.parentElement.tagName === "THEAD" && !trElement.parentElement.nextElementSibling)) {
+            const target = getVerticalTableCell(cellElement, direction);
+            if (!target) {
                 return false;
             }
-            let nextElement = trElement.nextElementSibling as HTMLTableRowElement;
-            if (!nextElement) {
-                nextElement = trElement.parentElement.nextElementSibling.firstChild as HTMLTableRowElement;
-            }
-            if (!nextElement) {
-                return false;
-            }
-            let rowSpan = cellElement.rowSpan;
-            while (rowSpan > 1) {
-                rowSpan--;
-                nextElement = nextElement.nextElementSibling as HTMLTableRowElement;
-            }
-            let nextCellElement = nextElement.cells[getColIndex(cellElement)];
-            while (nextCellElement.classList.contains("fn__none") && nextCellElement.nextElementSibling) {
-                nextCellElement = nextCellElement.previousElementSibling as HTMLTableCellElement;
-            }
-            range.selectNodeContents(nextCellElement);
-            range.collapse(true);
-            scrollCenter(protyle);
+            focusEditableAtGoalX(target, direction, getCaretGoalX(range), protyle.contentElement);
             event.preventDefault();
             return true;
         }
@@ -629,19 +543,19 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         }
 
         // 居左
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.alignLeft.custom, event)) {
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.alignLeft, event)) {
             setTableAlign(protyle, [cellElement], nodeElement, "left", range);
             event.preventDefault();
             return true;
         }
         // 居中
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.alignCenter.custom, event)) {
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.alignCenter, event)) {
             setTableAlign(protyle, [cellElement], nodeElement, "center", range);
             event.preventDefault();
             return true;
         }
         // 居右
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.alignRight.custom, event)) {
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.alignRight, event)) {
             setTableAlign(protyle, [cellElement], nodeElement, "right", range);
             event.preventDefault();
             return true;
@@ -721,7 +635,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
             return true;
         }
     });
-    if (matchHotKey(window.siyuan.config.keymap.editor.table.moveToUp.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.table.moveToUp, event)) {
         if ((!hasNone || (hasNone && !hasRowSpan && hasColSpan)) &&
             (!previousHasNone || (previousHasNone && !previousHasRowSpan && previousHasColSpan))) {
             moveRowToUp(protyle, range, cellElement, nodeElement);
@@ -730,7 +644,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         return true;
     }
 
-    if (matchHotKey(window.siyuan.config.keymap.editor.table.moveToDown.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.table.moveToDown, event)) {
         if ((!hasNone || (hasNone && !hasRowSpan && hasColSpan)) &&
             (!nextHasNone || (nextHasNone && !nextHasRowSpan && nextHasColSpan))) {
             moveRowToDown(protyle, range, cellElement, nodeElement);
@@ -739,7 +653,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         return true;
     }
 
-    if (matchHotKey(window.siyuan.config.keymap.editor.table.moveToLeft.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.table.moveToLeft, event)) {
         if (colIsPure && previousColIsPure) {
             moveColumnToLeft(protyle, range, cellElement, nodeElement);
         }
@@ -747,7 +661,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         return true;
     }
 
-    if (matchHotKey(window.siyuan.config.keymap.editor.table.moveToRight.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.table.moveToRight, event)) {
         if (colIsPure && nextColIsPure) {
             moveColumnToRight(protyle, range, cellElement, nodeElement);
         }
@@ -756,7 +670,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
     }
 
     // 上方新添加一行
-    if (matchHotKey(window.siyuan.config.keymap.editor.table.insertRowAbove.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.table.insertRowAbove, event)) {
         insertRowAbove(protyle, range, cellElement, nodeElement);
         event.preventDefault();
         event.stopPropagation();
@@ -764,7 +678,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
     }
 
     // 下方新添加一行 https://github.com/Vanessa219/vditor/issues/46
-    if (matchHotKey(window.siyuan.config.keymap.editor.table.insertRowBelow.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.table.insertRowBelow, event)) {
         if (!nextHasNone || (nextHasNone && !nextHasRowSpan && nextHasColSpan)) {
             insertRow(protyle, range, cellElement, nodeElement);
         }
@@ -773,7 +687,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
     }
 
     // 左方新添加一列
-    if (matchHotKey(window.siyuan.config.keymap.editor.table.insertColumnLeft.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.table.insertColumnLeft, event)) {
         if (colIsPure || previousColIsPure) {
             insertColumn(protyle, nodeElement, cellElement, "beforebegin", range);
         }
@@ -782,7 +696,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
     }
 
     // 后方新添加一列
-    if (matchHotKey(window.siyuan.config.keymap.editor.table.insertColumnRight.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.table.insertColumnRight, event)) {
         if (colIsPure || nextColIsPure) {
             insertColumn(protyle, nodeElement, cellElement, "afterend", range);
         }
@@ -791,7 +705,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
     }
 
     // 删除当前行
-    if (matchHotKey(window.siyuan.config.keymap.editor.table["delete-row"].custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.table["delete-row"], event)) {
         deleteRow(protyle, range, cellElement, nodeElement);
         event.preventDefault();
         event.stopPropagation();
@@ -799,7 +713,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
     }
 
     // 删除当前列
-    if (matchHotKey(window.siyuan.config.keymap.editor.table["delete-column"].custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.table["delete-column"], event)) {
         deleteColumn(protyle, range, nodeElement, cellElement);
         event.preventDefault();
         return true;
@@ -990,6 +904,21 @@ export const buildTableGrid = (tableElement: HTMLElement): ITableGrid => {
         columnCount: grid.reduce((count, row) => Math.max(count, row.length), 0),
         grid,
     };
+};
+
+// 合并占位由逻辑网格确定，跨行单元格从其占据区域的外侧查找相邻行。
+export const getVerticalTableCell = (cell: HTMLTableCellElement, direction: "up" | "down") => {
+    const table = cell.closest("table");
+    if (!table) {
+        return;
+    }
+    const {grid, cellInfos} = buildTableGrid(table);
+    const info = cellInfos.find(item => item.cell === cell);
+    if (!info) {
+        return;
+    }
+    const row = direction === "up" ? info.row - 1 : info.row + info.rowspan;
+    return grid[row]?.[info.col] || undefined;
 };
 
 export const getTableCellSelectionIndexes = (

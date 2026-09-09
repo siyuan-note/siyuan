@@ -32,8 +32,8 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         event.preventDefault();
         return true;
     }
-    const isNewNameFile = matchHotKey(window.siyuan.config.keymap.editor.general.newNameFile.custom, event);
-    const isNewNameSettingFile = matchHotKey(window.siyuan.config.keymap.editor.general.newNameSettingFile.custom, event);
+    const isNewNameFile = matchHotKey(window.siyuan.config.keymap.editor.general.newNameFile, event);
+    const isNewNameSettingFile = matchHotKey(window.siyuan.config.keymap.editor.general.newNameSettingFile, event);
     if (isNewNameFile || isNewNameSettingFile) {
         if (event.repeat) {
             event.preventDefault();
@@ -163,8 +163,10 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
                 newCellElement = previousCellElements[previousCellElements.length - 1];
             }
             if (newCellElement) {
-                clearSelect(["cell"], nodeElement);
-                newCellElement.classList.add("av__cell--select");
+                if (!setAVCellAnchor(nodeElement, newCellElement as HTMLElement)) {
+                    event.preventDefault();
+                    return true;
+                }
                 addDragFill(newCellElement);
                 cellScrollIntoView(nodeElement, newCellElement, false);
             }
@@ -182,8 +184,10 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
                 newCellElement = nextRowElement.querySelector(".av__cell");
             }
             if (newCellElement) {
-                clearSelect(["cell"], nodeElement);
-                newCellElement.classList.add("av__cell--select");
+                if (!setAVCellAnchor(nodeElement, newCellElement as HTMLElement)) {
+                    event.preventDefault();
+                    return true;
+                }
                 addDragFill(newCellElement);
                 cellScrollIntoView(nodeElement, newCellElement, false);
             } else if (event.key !== "ArrowRight") {
@@ -206,8 +210,10 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
                 newCellElement = previousRowElement.querySelector(`.av__cell[data-col-id="${selectCellElement.dataset.colId}"]`);
             }
             if (getAVVerticalNavigationAction(!!newCellElement) === "move") {
-                clearSelect(["cell"], nodeElement);
-                newCellElement.classList.add("av__cell--select");
+                if (!setAVCellAnchor(nodeElement, newCellElement as HTMLElement)) {
+                    event.preventDefault();
+                    return true;
+                }
                 addDragFill(newCellElement);
                 cellScrollIntoView(nodeElement, newCellElement);
             } else if (leaveVerticalRegion("up")) {
@@ -222,8 +228,10 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
                 newCellElement = nextRowElement.querySelector(`.av__cell[data-col-id="${selectCellElement.dataset.colId}"]`);
             }
             if (getAVVerticalNavigationAction(!!newCellElement) === "move") {
-                clearSelect(["cell"], nodeElement);
-                newCellElement.classList.add("av__cell--select");
+                if (!setAVCellAnchor(nodeElement, newCellElement as HTMLElement)) {
+                    event.preventDefault();
+                    return true;
+                }
                 addDragFill(newCellElement);
                 cellScrollIntoView(nodeElement, newCellElement);
             } else if (leaveVerticalRegion("down")) {

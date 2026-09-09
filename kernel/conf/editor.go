@@ -94,6 +94,7 @@ type Editor struct {
 	BackmentionExpandCount          int            `json:"backmentionExpandCount"`          // 反链提及默认展开数量
 	BacklinkMentionExclude          string         `json:"backlinkMentionExclude"`          // 反链提及关键字排除列表
 	BacklinkContainChildren         bool           `json:"backlinkContainChildren"`         // 反向链接是否包含子块进行计算
+	BacklinkHideReference           bool           `json:"backlinkHideReference"`           // 反链面板是否隐藏传递型纯引用块
 	BacklinkShowBottom              bool           `json:"backlinkShowBottom"`              // 是否在文档底部显示反向链接
 	BacklinkSort                    *int           `json:"backlinkSort"`                    // 反向链接排序方式
 	BackmentionSort                 *int           `json:"backmentionSort"`                 // 反链提及排序方式

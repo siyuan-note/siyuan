@@ -1,8 +1,11 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    getCodeTrailingZeroWidthLineLimit,
+    getHorizontalDistanceToRect,
     getNavigableVerticalRects,
     getRectsIntersectingVerticalLine,
+    getRevealDelta,
     isCaretRectAtVerticalBoundary,
 } from "./verticalGeometry";
 
@@ -53,6 +56,17 @@ describe("vertical caret boundary", () => {
         assert.deepEqual(navigableRects, rects.slice(0, 2));
     });
 
+    it("keeps the only caret line of an empty code block", () => {
+        const emptyLine = {...rect(10), right: 10, width: 0};
+
+        assert.equal(getCodeTrailingZeroWidthLineLimit("\n"), 1);
+        assert.deepEqual(getNavigableVerticalRects([emptyLine], getCodeTrailingZeroWidthLineLimit("\n")),
+            [emptyLine]);
+        assert.equal(getCodeTrailingZeroWidthLineLimit("x\n"), 0);
+        assert.equal(getCodeTrailingZeroWidthLineLimit("x\n\n"), 1);
+        assert.equal(getCodeTrailingZeroWidthLineLimit("\n\n\n"), 3);
+    });
+
     it("accepts only range context rectangles that reach the target line", () => {
         const lines = [rect(30)];
 
@@ -60,5 +74,14 @@ describe("vertical caret boundary", () => {
         assert.deepEqual(getRectsIntersectingVerticalLine([rect(10, 40)], lines), [rect(10, 40)]);
         assert.deepEqual(getRectsIntersectingVerticalLine([{...rect(30), right: 10, width: 0}], lines),
             [{...rect(30), right: 10, width: 0}]);
+    });
+
+    it("calculates the nearest horizontal region and the required reveal distance", () => {
+        assert.equal(getHorizontalDistanceToRect(30, rect(10)), 0);
+        assert.equal(getHorizontalDistanceToRect(5, rect(10)), 5);
+        assert.equal(getHorizontalDistanceToRect(120, rect(10)), 20);
+        assert.equal(getRevealDelta(80, 100, 20, 120), 0);
+        assert.equal(getRevealDelta(10, 30, 20, 120), -10);
+        assert.equal(getRevealDelta(130, 150, 20, 120), 30);
     });
 });

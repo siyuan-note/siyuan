@@ -1,4 +1,5 @@
 import {Menu} from "../../plugin/Menu";
+import {observeFontPreview} from "../../util/fontPreview";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {
     getFontFamilyDisplayName,
@@ -49,6 +50,25 @@ const getNodeFontFamily = (node: Node, root: HTMLElement) => {
         element = element.parentElement;
     }
     return {excluded: false, fontFamily};
+};
+
+export const getFontFamilyState = (protyle: IProtyle, nodeElements?: Element[]) => {
+    if (!nodeElements?.length) {
+        return getInlineFontFamilyState(protyle);
+    }
+    // 块级菜单读取块及祖先的字体，不受正文内联样式和角标影响。
+    const fontFamilies: (string | undefined)[] = [];
+    nodeElements.forEach((element: HTMLElement) => {
+        if (FONT_FAMILY_EXCLUDED_BLOCK_TYPES.includes(element.getAttribute("data-type")) ||
+            element.classList.contains("li")) {
+            return;
+        }
+        const info = getNodeFontFamily(element, protyle.wysiwyg.element);
+        if (!info.excluded) {
+            fontFamilies.push(info.fontFamily);
+        }
+    });
+    return getInlineFontFamilySelection(fontFamilies, fontFamilies.length > 0) as IInlineFontFamilyState;
 };
 
 export const getInlineFontFamilyState = (protyle: IProtyle, nodeElements?: Element[]) => {
@@ -155,7 +175,6 @@ const genFontPickerHTML = (fonts: IFontItem[], options: IFontFamilyPickerOptions
 const bindFontPicker = (element: HTMLElement, options: IFontFamilyPickerOptions) => {
     const listElement = element.querySelector<HTMLElement>('[data-type="font-family-list"]');
     const inputElement = element.querySelector<HTMLInputElement>('[data-type="font-family-search"]');
-    let previewObserver: IntersectionObserver;
     let removalObserver: MutationObserver;
     const syncActiveDescendant = () => {
         const activeElement = listElement.querySelector<HTMLElement>(".b3-list-item--focus");
@@ -188,7 +207,7 @@ const bindFontPicker = (element: HTMLElement, options: IFontFamilyPickerOptions)
         syncActiveDescendant();
     };
     const cleanup = () => {
-        previewObserver?.disconnect();
+        cleanupPreview?.();
         removalObserver?.disconnect();
     };
     const selectItem = (item: HTMLElement) => {
@@ -197,23 +216,9 @@ const bindFontPicker = (element: HTMLElement, options: IFontFamilyPickerOptions)
         options.onSelect(item.dataset.family || undefined);
     };
 
-    if ("IntersectionObserver" in window) {
-        previewObserver = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                const labelElement = (entry.target as HTMLElement).querySelector<HTMLElement>(".b3-menu__label");
-                if (!entry.isIntersecting || !labelElement?.dataset.family) {
-                    labelElement?.style.removeProperty("font-family");
-                    return;
-                }
-                labelElement.style.fontFamily = getInlineFontFamilyStyle(labelElement.dataset.family);
-            });
-        }, {root: listElement});
-        listElement.querySelectorAll<HTMLElement>(".b3-list-item").forEach(item => previewObserver.observe(item));
-    } else {
-        listElement.querySelectorAll<HTMLElement>('.b3-menu__label[data-family]:not([data-family=""])').forEach(item => {
-            item.style.fontFamily = getInlineFontFamilyStyle(item.dataset.family);
-        });
-    }
+    const cleanupPreview = observeFontPreview(listElement, label => {
+        label.style.fontFamily = getInlineFontFamilyStyle(label.dataset.family);
+    });
     inputElement.addEventListener("keydown", event => {
         options.onInteraction?.();
         event.stopPropagation();
@@ -287,24 +292,37 @@ const loadFontFamilies = async (currentFamily?: string) => {
 };
 
 let desktopRequestID = 0;
+const desktopMenuIDs = new WeakMap<HTMLElement, string>();
 
 export const openFontFamilyMenu = async (target: HTMLElement, options: IFontFamilyPickerOptions) => {
     if (options.disabled) {
         return;
     }
     const requestID = ++desktopRequestID;
+    if (!desktopMenuIDs.has(target)) {
+        desktopMenuIDs.set(target, `inlineFontFamily${requestID}`);
+    }
+    let closed = false;
+    let cleanup: () => void;
+    const menu = new Menu(desktopMenuIDs.get(target), () => {
+        closed = true;
+        cleanup?.();
+        target.setAttribute("aria-expanded", "false");
+    });
+    if (menu.isOpen) {
+        return;
+    }
     const fonts = await loadFontFamilies(options.family);
+    if (closed) {
+        return;
+    }
     if (requestID !== desktopRequestID || !target.isConnected || options.isOpenValid?.() === false) {
+        menu.close();
         return;
     }
     if (target.tagName === "INPUT") {
         (target as HTMLInputElement).value = getInlineFontFamilyLabel(options);
     }
-    let cleanup: () => void;
-    const menu = new Menu(undefined, () => {
-        cleanup?.();
-        target.setAttribute("aria-expanded", "false");
-    });
     menu.addItem({
         iconHTML: "",
         type: "empty",

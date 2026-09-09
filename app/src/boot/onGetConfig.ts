@@ -1,6 +1,6 @@
 import {adjustLayout, exportLayout, JSONToLayout, resetLayout, resizeTopBar} from "../layout/util";
 import {resizeTabs, setTabPosition} from "../layout/tabUtil";
-import {initWindowOpenOverride, isWindows, setStorageVal} from "../protyle/util/compatibility";
+import {initWindowOpenOverride, isMac, isWindows, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {initNativeDialogOverride} from "../protyle/util/compatibility";
 /// #endif
@@ -39,6 +39,18 @@ import {ensureUILayout} from "../util/ensureUILayout";
 import {dispatchPluginGlobalShortcut} from "../plugin/globalShortcut";
 import {requestResponsiveDockLayout} from "../layout/dock/responsive";
 import {getHostCapabilities, setHostConnection, type TKernelConnection} from "../util/hostCapabilities";
+import {setLastExportPath} from "../protyle/export/path";
+
+export const loadDesktopHostConnection = async () => {
+    /// #if !BROWSER
+    try {
+        // 加载扩展前先读取主进程的连接能力，信任状态不从远程配置或页面参数获取。
+        setHostConnection(await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "kernelConnection"}));
+    } catch (error) {
+        console.error("load desktop host connection failed:", error);
+    }
+    /// #endif
+};
 
 export const initDesktopHost = async () => {
     /// #if !BROWSER
@@ -223,14 +235,21 @@ export const initWindow = async (app: App) => {
         onWindowsMsg(ipcData);
     });
     ipcRenderer.on(Constants.SIYUAN_HOTKEY, (e, data) => {
-        if (!isWindow()) {
-            dispatchPluginGlobalShortcut(app.plugins, data.hotkey);
+        if (Array.isArray(data.failed)) {
+            if (data.failed.length) {
+                showMessage(window.siyuan.languages.keymapSystemScope + " " + window.siyuan.languages.conflict +
+                    " [" + data.failed.map(updateHotkeyTip).join("] [") + "]");
+            }
+        } else if (!isWindow()) {
+            dispatchPluginGlobalShortcut(app.plugins, data.hotkey, window.siyuan.config.keymap.plugin, isMac());
         }
     });
     ipcRenderer.on(Constants.SIYUAN_EXPORT_PDF, async (e, ipcData) => {
         if (!getHostCapabilities().importExport) {
             return;
         }
+        const savePath = ipcData.filePaths[0];
+        setLastExportPath(savePath);
         const msgId = showMessage(window.siyuan.languages.exporting, -1);
         window.siyuan.storage[Constants.LOCAL_EXPORTPDF] = {
             removeAssets: ipcData.removeAssets,
@@ -264,7 +283,6 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                 pdfOptions: ipcData.pdfOptions,
                 webContentsId: ipcData.webContentsId
             });
-            const savePath = ipcData.filePaths[0];
             let pdfFilePath = path.join(savePath, replaceLocalPath(ipcData.rootTitle) + ".pdf");
             const responseUnique = await fetchSyncPost("/api/file/getUniqueFilename", {path: pdfFilePath});
             pdfFilePath = responseUnique.data.path;

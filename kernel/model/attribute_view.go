@@ -2410,7 +2410,7 @@ func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error)
 		return
 	}
 
-	updateBoundBlockAvsAttribute([]string{newAvID})
+	updateBoundBlockAvsAttribute([]string{newAvID}, avBoxID)
 	return
 }
 
@@ -6026,6 +6026,31 @@ func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBloc
 		return
 	}
 
+	// 整批校验完成后再写入，避免后续条目越界时已修改前面的绑定。
+	boundTrees := map[string]*parse.Tree{}
+	for _, src := range srcs {
+		if src["isDetached"].(bool) {
+			continue
+		}
+		id := src["id"].(string)
+		if !ast.IsNodeIDPattern(id) {
+			continue
+		}
+		var tree *parse.Tree
+		if tx != nil {
+			tree, err = tx.loadTree(id)
+		} else {
+			tree, err = LoadTreeByBlockID(id)
+		}
+		if err != nil {
+			return
+		}
+		if err = validateAttributeViewBinding(avID, tree); err != nil {
+			return
+		}
+		boundTrees[id] = tree
+	}
+
 	now := time.Now().UnixMilli()
 	for _, src := range srcs {
 		boundBlockID := ""
@@ -6042,17 +6067,7 @@ func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBloc
 				continue
 			}
 
-			var loadErr error
-			if nil != tx {
-				tree, loadErr = tx.loadTree(boundBlockID)
-			} else {
-				tree, loadErr = LoadTreeByBlockID(boundBlockID)
-			}
-			if nil != loadErr {
-				logging.LogErrorf("load tree [%s] failed: %s", boundBlockID, loadErr)
-				err = loadErr
-				return
-			}
+			tree = boundTrees[boundBlockID]
 		}
 
 		var srcContent string
@@ -6085,6 +6100,9 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 func addAttributeViewBlock0(attrView *av.AttributeView, now int64, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, src map[string]any, isDetached, ignoreDefaultFill bool, tree *parse.Tree, tx *Transaction, result *insertAttrViewBlockResult) (err error) {
 	var node *ast.Node
 	if !isDetached {
+		if err = validateAttributeViewBinding(avID, tree); err != nil {
+			return
+		}
 		node = treenode.GetNodeInTree(tree, addingBoundBlockID)
 		if nil == node {
 			err = ErrBlockNotFound
@@ -7511,6 +7529,24 @@ func updateAttributeViewColTemplate(operation *Operation) (err error) {
 	return
 }
 
+// SetAttributeViewKeyTemplate 设置模板字段公式，复用字段模板保存和分组更新逻辑。
+func SetAttributeViewKeyTemplate(avID, keyID, templateContent string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return err
+	}
+	key, err := attrView.GetKey(keyID)
+	if nil != err {
+		return err
+	}
+	if av.KeyTypeTemplate != key.Type {
+		return errors.New("key must be a template field")
+	}
+	return updateAttributeViewColTemplate(&Operation{
+		AvID: avID, ID: keyID, Typ: string(av.KeyTypeTemplate), Data: templateContent,
+	})
+}
+
 func (tx *Transaction) doUpdateAttrViewColNumberFormat(operation *Operation) (ret *TxErr) {
 	err := updateAttributeViewColNumberFormat(operation)
 	if err != nil {
@@ -7888,6 +7924,9 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newNodeI
 	var node *ast.Node
 	if !isDetached {
 		node, tree, _ = getNodeByBlockID(tx, newNodeID)
+		if err = validateAttributeViewBinding(avID, tree); err != nil {
+			return
+		}
 	}
 
 	now := util.CurrentTimeMillis()
@@ -7944,6 +7983,19 @@ func BatchReplaceAttributeViewBlocks(avID string, isDetached bool, oldNew []map[
 	if err != nil {
 		return
 	}
+	if !isDetached {
+		for _, replacements := range oldNew {
+			for _, nodeID := range replacements {
+				_, tree, loadErr := getNodeByBlockID(nil, nodeID)
+				if loadErr != nil {
+					return loadErr
+				}
+				if err = validateAttributeViewBinding(avID, tree); err != nil {
+					return
+				}
+			}
+		}
+	}
 
 	for _, oldNewMap := range oldNew {
 		for oldBlockID, newNodeID := range oldNewMap {
@@ -7974,6 +8026,13 @@ func (tx *Transaction) doBatchUpdateAttrViewCells(operations []*Operation) (ret 
 		return &TxErr{code: TxErrHandleAttributeView, id: operations[0].AvID, msg: err.Error()}
 	}
 
+	var cells []*AttrViewCellUpdate
+	for _, operation := range operations {
+		cells = append(cells, &AttrViewCellUpdate{KeyID: operation.KeyID, RowID: operation.RowID, Data: operation.Data})
+	}
+	if err = preflightAttributeViewCellBindings(tx, attrView, cells); err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: attrView.ID, msg: err.Error()}
+	}
 	for _, operation := range operations {
 		if _, err = updateAttributeViewValue(tx, attrView, operation.KeyID, operation.RowID, operation.Data, false,
 			operations[0].BlockID); err != nil {
@@ -7995,6 +8054,9 @@ func (tx *Transaction) doUpdateAttrViewCells(operation *Operation) (ret *TxErr) 
 	attrView, err := avParseView(operation.AvID, operation.BlockID)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	if err = preflightAttributeViewCellBindings(tx, attrView, operation.CellUpdates); err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: attrView.ID, msg: err.Error()}
 	}
 	context := newAttrViewValueUpdateContext(attrView)
 	for _, cell := range operation.CellUpdates {
@@ -8020,6 +8082,7 @@ func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []any) (
 		return
 	}
 
+	var cells []*AttrViewCellUpdate
 	for _, value := range values {
 		v := value.(map[string]any)
 		keyID := v["keyID"].(string)
@@ -8035,8 +8098,13 @@ func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []any) (
 			err = errors.New(msg)
 			return
 		}
-		valueData := v["value"]
-		_, err = updateAttributeViewValue(tx, attrView, keyID, itemID, valueData, false)
+		cells = append(cells, &AttrViewCellUpdate{KeyID: keyID, RowID: itemID, Data: v["value"]})
+	}
+	if err = preflightAttributeViewCellBindings(tx, attrView, cells); err != nil {
+		return
+	}
+	for _, cell := range cells {
+		_, err = updateAttributeViewValue(tx, attrView, cell.KeyID, cell.RowID, cell.Data, false)
 		if err != nil {
 			return
 		}
@@ -8185,8 +8253,8 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 		return
 	}
 	updatedVal := val
-	// 文本值先在副本上合并和校验，避免富文本校验失败污染原值，并保留旧客户端的部分更新语义。
-	if av.KeyTypeText == valueType {
+	// 文本和主键值先在副本上合并和校验，避免校验失败污染原值，并保留部分更新语义。
+	if av.KeyTypeText == valueType || av.KeyTypeBlock == valueType {
 		updatedVal = val.Clone()
 		if nil == updatedVal {
 			err = fmt.Errorf("clone attribute view text value [%s] failed", valueID)
@@ -8202,6 +8270,18 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 	updatedVal.BlockID = itemID
 	updatedVal.Type = valueType
 	updatedVal.CreatedAt = valueCreatedAt
+	if av.KeyTypeBlock == valueType && !updatedVal.IsDetached {
+		if updatedVal.Block == nil {
+			return nil, ErrBlockNotFound
+		}
+		_, tree, loadErr := getNodeByBlockID(tx, updatedVal.Block.ID)
+		if loadErr != nil {
+			return nil, loadErr
+		}
+		if err = validateAttributeViewBinding(avID, tree); err != nil {
+			return
+		}
+	}
 	if av.KeyTypeText == updatedVal.Type && nil != updatedVal.Text {
 		if nil != oldText && nil != oldText.Rich && !attributeViewTextRichFieldPresent(data) &&
 			updatedVal.Text.Content != oldText.Content {
@@ -8648,6 +8728,9 @@ func bindBlockAv(tx *Transaction, avID, blockID string) {
 }
 
 func bindBlockAv0(tx *Transaction, avID string, node *ast.Node, tree *parse.Tree) {
+	if err := validateAttributeViewBinding(avID, tree); err != nil {
+		return
+	}
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	if "" == attrs[av.NodeAttrNameAvs] {
 		attrs[av.NodeAttrNameAvs] = avID
@@ -9232,13 +9315,13 @@ func getAttrViewName(attrView *av.AttributeView) string {
 	return ret
 }
 
-func updateBoundBlockAvsAttribute(avIDs []string) {
+func updateBoundBlockAvsAttribute(avIDs []string, boxID string) {
 	// 更新指定 avIDs 中绑定块的 avs 属性
 
 	cachedTrees, saveTrees := map[string]*parse.Tree{}, map[string]*parse.Tree{}
 	luteEngine := util.NewLute()
 	for _, avID := range avIDs {
-		attrView, _ := av.ParseAttributeView(avID)
+		attrView, _ := av.ParseAttributeViewInBox(avID, boxID)
 		if nil == attrView {
 			continue
 		}
@@ -9249,7 +9332,7 @@ func updateBoundBlockAvsAttribute(avIDs []string) {
 		}
 
 		for _, blockValue := range blockKeyValues.Values {
-			if blockValue.IsDetached || nil == blockValue.Block {
+			if nil == blockValue || blockValue.IsDetached || nil == blockValue.Block {
 				continue
 			}
 
@@ -9258,15 +9341,7 @@ func updateBoundBlockAvsAttribute(avIDs []string) {
 				continue
 			}
 
-			bt := treenode.GetBlockTree(boundBlockID)
-			if nil == bt {
-				for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
-					if encBT := treenode.GetBlockTreeInBox(boundBlockID, encBoxID); nil != encBT {
-						bt = encBT
-						break
-					}
-				}
-			}
+			bt := attributeViewBindingBlockTree(boundBlockID, boxID)
 			if nil == bt {
 				continue
 			}

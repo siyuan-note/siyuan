@@ -1,3 +1,19 @@
+import {getAtomicVerticalNavigationOwner} from "../wysiwyg/verticalNavigationState";
+
+// 动态回收按响应到达时的选区判断；连续区间在遇到用户位置时停止裁剪。
+export const containsCurrentSelection = (element: Element) => {
+    const selection = element.ownerDocument.getSelection();
+    for (let index = 0; selection && index < selection.rangeCount; index++) {
+        const range = selection.getRangeAt(index);
+        const atomicOwner = getAtomicVerticalNavigationOwner(range);
+        if (range.intersectsNode(element) || atomicOwner && element.contains(atomicOwner)) {
+            return true;
+        }
+    }
+    const activeElement = element.ownerDocument.activeElement;
+    return activeElement && element.contains(activeElement);
+};
+
 export const updateDocumentBottomEof = (wysiwygElement: HTMLElement, preserveCurrent = false) => {
     if (preserveCurrent && wysiwygElement.hasAttribute("data-bottom-eof")) {
         return;

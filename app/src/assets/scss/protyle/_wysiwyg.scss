@@ -1,6 +1,28 @@
 @use "../util/mixin";
 @use "tabs";
 
+// 编辑时恢复引用块，保留完整的选择范围和块结构；折叠的列表项和标题保留定位内容。
+.protyle-wysiwyg[data-backlink-hide-reference]:not(:focus-within) {
+  [data-backlink-reference]:not([fold="1"]):not(.li[fold="1"] *) {
+    display: none !important;
+  }
+
+  .li[data-backlink-reference-list]:not([fold="1"]):not(.li[fold="1"] *) {
+    min-height: 0;
+
+    &::before,
+    > .protyle-action,
+    > .protyle-attr {
+      display: none !important;
+    }
+
+    > [data-node-id] {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+  }
+}
+
 .protyle-cross-block-preview {
   pointer-events: none;
 
@@ -15,7 +37,8 @@
   pointer-events: none;
 }
 
-.protyle-wysiwyg {
+.protyle-wysiwyg,
+.table__cell-rich {
   padding: 16px 16px 16px 24px;
   box-sizing: border-box;
   // 移除三击无法选中整个 https://github.com/siyuan-note/siyuan/issues/8511
@@ -44,7 +67,12 @@
     cursor: text;
   }
 
-  [data-node-id] {
+  [data-node-id],
+  [data-table-cell-node],
+  td.dragover__top,
+  td.dragover__bottom,
+  th.dragover__top,
+  th.dragover__bottom {
     position: relative;
 
     &.protyle-wysiwyg--navigation {
@@ -181,11 +209,11 @@
         border-left-color: var(--b3-scroll-color);
       }
 
-      & > [data-node-id] {
+      & > :is([data-node-id], [data-table-cell-node]) {
         margin-left: 34px;
       }
 
-      & > [data-node-id]:not(.p):not(.code-block) {
+      & > :is([data-node-id], [data-table-cell-node]):not(.p):not(.code-block) {
         padding-right: 0;
       }
 
@@ -303,8 +331,8 @@
         direction: rtl;
       }
 
-      .li > [data-node-id],
-      & > [data-node-id] {
+      .li > :is([data-node-id], [data-table-cell-node]),
+      & > :is([data-node-id], [data-table-cell-node]) {
         margin-right: 34px;
         margin-left: 0;
       }

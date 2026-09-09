@@ -1,3 +1,4 @@
+import {sendGlobalShortcut} from "../boot/globalEvent/globalShortcut";
 import type {App} from "../index";
 import {EventBus} from "./EventBus";
 import {fetchPost} from "../util/fetch";
@@ -12,9 +13,6 @@ import {clearOBG} from "../layout/dock/util";
 ///#else
 import {MobileCustom} from "../mobile/dock/MobileCustom";
 /// #endif
-/// #if !BROWSER
-import {ipcRenderer} from "electron";
-/// #endif
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {BlockPanel} from "../block/Panel";
 import {Setting} from "./Setting";
@@ -27,7 +25,6 @@ import {
     type IFlashcardV2PluginRegistration,
     registerFlashcardV2PluginType
 } from "../card/flashcardV2Plugin";
-import {isDisallowedTextInputHotkey} from "../util/hotKeyPolicy";
 import {
     addBreadcrumbButton as addPluginBreadcrumbButton,
     removeBreadcrumbButton as removePluginBreadcrumbButton,
@@ -203,7 +200,7 @@ export class Plugin {
         if (typeof command.hotkey !== "string") {
             command.hotkey = "";
         }
-        const keymapItem = updatePluginKeymap(this.name, command.langKey, command.hotkey);
+        const keymapItem = updatePluginKeymap(this.name, command.langKey, command.hotkey, command.hotkeys);
         command.hotkey = keymapItem.default;
         command.customHotkey = keymapItem.custom;
         if (typeof command.customHotkey !== "string") {
@@ -212,12 +209,8 @@ export class Plugin {
             this.commands.push(command);
             registerPluginCommand(this.app, this, command);
             /// #if !BROWSER
-            if (!isWindow() && command.globalCallback && command.customHotkey &&
-                !isDisallowedTextInputHotkey(command.customHotkey)) {
-                ipcRenderer.send(Constants.SIYUAN_CMD, {
-                    cmd: "registerGlobalShortcut",
-                    accelerator: command.customHotkey
-                });
+            if (command.globalCallback) {
+                sendGlobalShortcut(this.app);
             }
             /// #endif
         }

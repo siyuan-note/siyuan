@@ -7,11 +7,26 @@ import {isMobile} from "../../util/functions";
 import {isOnlyMeta} from "../util/compatibility";
 import {hasClosestBlock} from "../util/hasClosest";
 import {zoomOut} from "../../menus/protyle";
+/// #if MOBILE
+import {openMobileBacklinks} from "../../mobile/util/openBacklinks";
+/// #endif
 
 export const commonClick = (event: MouseEvent & {
     target: HTMLElement
 }, protyle: IProtyle, data?: Record<string, string>) => {
     const isM = isMobile();
+    /// #if MOBILE
+    const attrRefCountElement = hasClosestByClassName(event.target, "protyle-attr--refcount");
+    if (isM && attrRefCountElement) {
+        const blockId = attrRefCountElement.parentElement.parentElement.getAttribute("data-node-id");
+        if (blockId) {
+            openMobileBacklinks(protyle, blockId);
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+    /// #endif
     const attrBookmarkElement = hasClosestByClassName(event.target, "protyle-attr--bookmark");
     if (attrBookmarkElement) {
         if (!isM && isOnlyMeta(event)) {

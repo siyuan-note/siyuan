@@ -161,7 +161,7 @@ export const getEditHTML = (options: {
     } else if (colData.type === "template") {
         html += `<button class="b3-menu__separator" data-id="separator_2"></button>
 <button class="b3-menu__item" data-type="nobg">
-    <textarea spellcheck="false" rows="${Math.min(colData.template.split("\n").length, 8)}" placeholder="${window.siyuan.languages.template}" data-type="updateTemplate" style="margin: 4px 0" rows="1" class="fn__block b3-text-field">${colData.template}</textarea>
+    <textarea spellcheck="false" rows="${Math.min(colData.template.split("\n").length, 8)}" placeholder="${window.siyuan.languages.template}" data-type="updateTemplate" style="margin: 4px 0" rows="1" class="fn__block b3-text-field">${escapeHtml(colData.template)}</textarea>
 </button>`;
     } else if (colData.type === "relation") {
         const isSelf = colData.relation?.avID === options.data.id;
@@ -172,7 +172,6 @@ export const getEditHTML = (options: {
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 <button class="b3-menu__item${colData.relation?.avID ? "" : " b3-menu__item--disabled"}" data-type="goAttrViewColFilters" data-filter-type="relation">
-    <svg class="b3-menu__icon"><use xlink:href="#iconFilter"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.filter}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
@@ -1008,7 +1007,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     <div class="fn__hr"></div>
     <div class="fn__flex">
         <span class="fn__space"></span>
-        <textarea placeholder="${window.siyuan.languages.addDesc}" rows="1" class="b3-text-field fn__block" type="text" data-value="${escapeAttr(oldDesc)}">${oldDesc}</textarea>
+        <textarea placeholder="${window.siyuan.languages.addDesc}" rows="1" class="b3-text-field fn__block" type="text" data-value="${escapeAttr(oldDesc)}">${escapeHtml(oldDesc)}</textarea>
         <span class="fn__space"></span>    
     </div>
 </div>

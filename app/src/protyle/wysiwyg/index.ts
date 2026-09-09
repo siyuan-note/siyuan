@@ -1,4 +1,5 @@
 import {visibleTabsSelectionHTML} from "../render/tabsVisibility";
+import {repairHiddenTabSelection} from "../util/tabsSelection";
 import {isTabTextBoundary} from "./tabsBoundary";
 import {
     beforePaste,
@@ -34,6 +35,7 @@ import {
     setLastNodeRange,
 } from "../util/selection";
 import {Constants} from "../../constants";
+import {mergeTableCellContents} from "../util/tableCellRich";
 import {isMobile} from "../../util/functions";
 import {previewDocImage} from "../preview/image";
 import {getDiagramBlock, previewDiagram} from "../preview/diagram";
@@ -159,7 +161,7 @@ import {escapeAttr, escapeHtml} from "../../util/escape";
 import {openLink} from "../../editor/openLink";
 import {mathRender} from "../render/mathRender";
 import {editAssetItem} from "../render/av/asset";
-import {hasViewFoldContext, sanitizeViewFoldHTML, setViewFold} from "../util/viewFold";
+import {hasViewFoldContext, sanitizeViewFoldHTML} from "../util/viewFold";
 import {img3115} from "../../boot/compatibleVersion";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
 import {globalClickHideMenu} from "../../boot/globalEvent/click";
@@ -169,7 +171,7 @@ import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
 import {reloadProtyle} from "../util/reload";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
-import {setFold} from "../util/blockFold";
+import {setFold, toggleListFold} from "../util/blockFold";
 import {BlockPanel} from "../../block/Panel";
 import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
@@ -1139,6 +1141,18 @@ export class WYSIWYG {
             const documentSelf = document;
             documentSelf.onmouseup = null;
             let target = event.target as HTMLElement;
+            if (event.button === 0 && !event.shiftKey && !event.ctrlKey && !event.metaKey &&
+                !event.altKey && !protyle.disabled) {
+                repairHiddenTabSelection(this.element, target);
+            }
+            const emptyCell = target.closest<HTMLTableCellElement>("td:empty, th:empty");
+            if (emptyCell && event.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey &&
+                !event.altKey && !protyle.disabled && emptyCell.closest(".protyle-wysiwyg") === this.element) {
+                // 空单元格直接进入编辑，阻止浏览器先在单元格顶部绘制临时光标。
+                event.preventDefault();
+                void import("../render/tableCellRichEditor").then(module => module.openTableCellRichEditor(protyle, emptyCell));
+                return;
+            }
             const customElement = hasClosestByClassName(target, "protyle-custom");
             let nodeElement = hasClosestBlock(target) as HTMLElement;
             let clickedTableNode = !customElement && nodeElement && nodeElement.dataset.type === "NodeTable" ?
@@ -1165,6 +1179,7 @@ export class WYSIWYG {
                 const nodeRect = clickedTableNode.getBoundingClientRect();
                 if (event.clientX > tableRect.right &&
                     event.clientY >= nodeRect.top && event.clientY <= nodeRect.bottom) {
+                    this.preventClick = true;
                     event.preventDefault();
                     event.stopPropagation();
                     return;
@@ -2657,15 +2672,10 @@ export class WYSIWYG {
                                             }
                                             index++;
                                         }
-                                        let html = "";
+                                        mergeTableCellContents(selectCellElements);
                                         let rowElement: Element = selectCellElements[0].parentElement;
                                         let rowSpan = selectCellElements[0].rowSpan;
                                         selectCellElements.forEach((item, index) => {
-                                            let cellHTML = item.innerHTML.trim();
-                                            if (cellHTML.endsWith("<br>")) {
-                                                cellHTML = cellHTML.substr(0, cellHTML.length - 4);
-                                            }
-                                            html += cellHTML + ((!cellHTML || index === selectCellElements.length - 1) ? "" : "<br>");
                                             if (index !== 0) {
                                                 if (rowElement !== item.parentElement) {
                                                     if (!item.classList.contains("fn__none")) { // https://github.com/siyuan-note/insider/issues/1011
@@ -2705,7 +2715,10 @@ export class WYSIWYG {
                                         // 合并背景色不会修改，需要等计算完毕
                                         setTimeout(() => {
                                             if (tableBlockElement) {
-                                                selectCellElements[0].innerHTML = (html.replace(/<br>$/, "") || "<br>") + "<wbr>";
+                                                if (!selectCellElements[0].innerHTML) {
+                                                    selectCellElements[0].innerHTML = "<br>";
+                                                }
+                                                selectCellElements[0].insertAdjacentHTML("beforeend", "<wbr>");
                                                 selectCellElements[0].colSpan = colSpan;
                                                 selectCellElements[0].rowSpan = rowSpan;
                                                 focusByWbr(selectCellElements[0], document.createRange());
@@ -3815,12 +3828,15 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
-            if (!hasClosestByAttribute(event.target, "contenteditable", "true")) {
+            if (event.target !== this.element && !hasClosestByAttribute(event.target, "contenteditable", "true")) {
                 event.stopPropagation();
                 event.preventDefault();
                 return;
             }
-            const blockElement = hasClosestBlock(event.target);
+            let blockElement = hasClosestBlock(event.target);
+            if (!blockElement) {
+                blockElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
+            }
             const calloutTitleElement = hasClosestByClassName(event.target, "callout-title");
             if (blockElement && calloutTitleElement) {
                 const range = getEditorRange(protyle.wysiwyg.element);
@@ -3877,7 +3893,34 @@ export class WYSIWYG {
             }
             return keyState;
         };
+        this.element.addEventListener("keyup", (event: KeyboardEvent) => {
+            if (event.isComposing || protyle.disabled || event.ctrlKey || event.metaKey || event.altKey ||
+                !["Tab", "Enter", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key) ||
+                (event.shiftKey && event.key !== "Tab")) {
+                return;
+            }
+            const selection = getSelection();
+            const target = selection?.focusNode;
+            const element = target instanceof Element ? target : target?.parentElement;
+            const cell = element?.closest<HTMLTableCellElement>("th, td");
+            if (cell && cell.closest(".protyle-wysiwyg") === this.element && cell.contains(selection.anchorNode)) {
+                void import("../render/tableCellRichEditor").then(module => module.openTableCellRichEditor(protyle, cell));
+            }
+        });
         this.element.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (event.key === "F2" && !event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey &&
+                !event.isComposing && !protyle.disabled) {
+                const selection = getSelection();
+                const target = selection?.focusNode;
+                const element = target instanceof Element ? target : target?.parentElement;
+                const cell = element?.closest<HTMLTableCellElement>("th, td");
+                if (cell && cell.closest(".protyle-wysiwyg") === this.element) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    void import("../render/tableCellRichEditor").then(module => module.openTableCellRichEditor(protyle, cell));
+                    return;
+                }
+            }
             if (isInAndroid()) {
                 if (event.key === "Unidentified") {
                     mobileUnidentifiedInputRange = undefined;
@@ -4423,6 +4466,12 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
+            /// #if MOBILE
+            if (hasClosestByClassName(event.target, "protyle-attr--refcount") && commonClick(event, protyle)) {
+                mobileBlur = true;
+                return;
+            }
+            /// #endif
             const openListItemAttrByShift = shouldOpenListItemAttr(event.shiftKey, protyle.disabled,
                 hasClosestByClassName(event.target, "protyle-action"));
             const shiftAssetElement = hasClosestByAttribute(event.target, "data-type", "file-annotation-ref") ||
@@ -4445,6 +4494,15 @@ export class WYSIWYG {
             }
             if (this.preventClick) {
                 this.preventClick = false;
+                return;
+            }
+            const richCell = event.target.closest<HTMLTableCellElement>("th, td");
+            if (richCell && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && !protyle.disabled &&
+                richCell.closest(".protyle-wysiwyg") === this.element &&
+                !event.target.closest("a, [data-type~='block-ref'], [data-type~='a'], img")) {
+                event.preventDefault();
+                void import("../render/tableCellRichEditor").then(module => module.openTableCellRichEditor(protyle, richCell,
+                    undefined, {x: event.clientX, y: event.clientY}));
                 return;
             }
             if (areProtylePluginExtensionsEnabled(protyle)) {
@@ -4900,38 +4958,7 @@ export class WYSIWYG {
                             // 缩放列表项 https://ld246.com/article/1653123034794
                             setFold(protyle, actionElement.parentElement);
                         } else {
-                            let hasFold = true;
-                            const listElement = actionElement.parentElement.parentElement;
-                            Array.from(actionElement.parentElement.parentElement.children).find((listItemElement) => {
-                                if (listItemElement.classList.contains("li")) {
-                                    if (listItemElement.getAttribute("fold") !== "1" && listItemElement.childElementCount > 3) {
-                                        hasFold = false;
-                                        return true;
-                                    }
-                                }
-                            });
-                            if (hasViewFoldContext(protyle)) {
-                                Array.from(listElement.children).forEach(listItemElement => {
-                                    if (listItemElement.classList.contains("li") &&
-                                        (hasFold || listItemElement.childElementCount > 3)) {
-                                        setViewFold(protyle, listItemElement, !hasFold);
-                                    }
-                                });
-                                hideElements(["gutter"], protyle);
-                                event.stopPropagation();
-                                return;
-                            }
-                            const oldHTML = listElement.outerHTML;
-                            Array.from(actionElement.parentElement.parentElement.children).find((listItemElement) => {
-                                if (listItemElement.classList.contains("li")) {
-                                    if (hasFold) {
-                                        listItemElement.removeAttribute("fold");
-                                    } else if (listItemElement.childElementCount > 3) {
-                                        listItemElement.setAttribute("fold", "1");
-                                    }
-                                }
-                            });
-                            updateTransaction(protyle, listElement, oldHTML);
+                            toggleListFold(protyle, actionElement.parentElement.parentElement);
                         }
                         hideElements(["gutter"], protyle);
                     } else if (shouldOpenListItemAttr(event.shiftKey, protyle.disabled, actionElement)) {

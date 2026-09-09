@@ -1,5 +1,6 @@
 .config {
   &__tab-wrap {
+    position: relative;
     overflow: hidden;
     box-sizing: border-box;
     background-color: var(--b3-theme-background);
@@ -13,6 +14,7 @@
   &__drag {
     position: absolute;
     top: 0;
+    left: 0;
     right: 0;
     z-index: 1;
     height: 24px;
@@ -30,13 +32,12 @@
     }
 
     &--tabs {
-      height: 16px;
+      height: 6px;
     }
   }
 
   &__tab-wrap > .config__tab-container:not([data-name="bazaar"]):not([data-name="assets"]) {
-    margin: 0 24px;
-    padding: 24px 0;
+    padding: 24px;
     scroll-padding-block: 24px;
     height: 100%;
     flex-shrink: 0;
@@ -263,8 +264,8 @@
   }
 
   &__panel .config__tab-container .layout-tab-bar {
-    padding-top: 16px;
-    padding-bottom: 15px;
+    padding-top: 6px;
+    padding-bottom: 6px;
 
     .item {
       margin-top: 0;
@@ -400,6 +401,93 @@
   }
 
   &-keymap {
+    &__filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+
+      button {
+        border: 0;
+      }
+    }
+
+    &__row {
+      flex-wrap: wrap;
+
+      &:hover .b3-list-item__action,
+      &:focus-within .b3-list-item__action {
+        display: flex;
+      }
+    }
+
+    &__controls,
+    &__bindings {
+      display: flex;
+      align-items: center;
+    }
+
+    &__controls {
+      max-width: 70%;
+      margin-left: auto;
+
+      > .b3-list-item__action {
+        display: flex;
+      }
+    }
+
+    &__bindings {
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      min-width: 0;
+    }
+
+    &__chip {
+      display: inline-flex;
+      align-items: center;
+      white-space: nowrap;
+
+    }
+
+    &__text {
+      border: 0;
+      padding: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      cursor: default;
+    }
+
+    &__remove {
+      border: 0;
+      background: transparent;
+      color: inherit;
+      box-sizing: content-box;
+      margin-left: 3px;
+      margin-right: -2px;
+
+      svg {
+        display: block;
+        width: 12px;
+        height: 12px;
+      }
+    }
+
+    &__action {
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+
+      &--active {
+        color: var(--b3-theme-primary);
+      }
+
+      &:disabled {
+        opacity: .35;
+        cursor: default;
+      }
+    }
+
     &__key {
       padding: 2px 4px;
       font-family: var(--b3-font-family-kbd);
@@ -410,11 +498,31 @@
       background-color: var(--b3-theme-background);
       border: solid 1px var(--b3-theme-surface-lighter);
       border-radius: var(--b3-border-radius);
-      box-shadow: inset 0 -1px 0 var(--b3-theme-surface-lighter);
+      box-shadow: inset 0 -1px 0 var(--b3-theme-on-surface-lighter);
       margin-left: 4px;
       cursor: pointer;
       height: 14px;
       min-width: 17px;
+      font-size: inherit;
+      box-sizing: content-box;
+
+      &:focus-visible {
+        outline: 2px solid var(--b3-theme-primary);
+      }
+    }
+
+    &__record {
+      display: inline-flex;
+      align-items: center;
+      max-width: 100%;
+      background-color: var(--b3-font-background3);
+      color: var(--b3-font-color3);
+      white-space: nowrap;
+    }
+
+    &__chip--conflict {
+      background-color: var(--b3-font-background1);
+      color: var(--b3-font-color1);
     }
 
     .b3-list__panel .b3-text-field {
@@ -424,6 +532,10 @@
     div.b3-list-item > .b3-list-item__text {
       padding-left: 4px;
       user-select: none;
+    }
+
+    div.config-keymap__row > .b3-list-item__text {
+      padding-left: 0;
     }
   }
 
@@ -1035,6 +1147,25 @@
   }
 
   &-entry-visibility {
+    &__view--mobile {
+      .config-entry-visibility__column {
+        flex: 1 0 100%;
+      }
+
+      .config-entry-visibility__browser {
+        margin: 0 8px 8px;
+      }
+
+      .config-entry-visibility__drag,
+      .config-entry-visibility__arrow-space {
+        display: none;
+      }
+
+      .config-entry-visibility__row {
+        min-height: 44px;
+      }
+    }
+
     &__content {
       box-sizing: border-box;
       display: flex;

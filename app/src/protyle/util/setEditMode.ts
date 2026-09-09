@@ -7,6 +7,9 @@ import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 
 /// #if MOBILE
 export const updateMobileTitleReadonly = (protyle: IProtyle) => {
+    if (window.siyuan.mobile.editor?.protyle !== protyle) {
+        return;
+    }
     const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
     const readonlyElement = document.getElementById("toolbarNameReadonly");
     if (!inputElement || !readonlyElement) {

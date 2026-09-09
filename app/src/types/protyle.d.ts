@@ -489,6 +489,7 @@ interface IProtyleOptions {
         snapshot?: string
     },
     backlinkData?: {
+        referenceBlockID?: string,
         id?: string,
         revision?: string,
         blockPaths: IBreadcrumb[],

@@ -21,16 +21,24 @@ import {isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../protyle/util/
 import {emitToPlugins} from "../plugin/EventBusCore";
 import {createHostQuitGuard} from "./hostQuit";
 import {getHostCapabilities, sanitizeKernelHTML} from "../util/hostCapabilities";
+/// #if MOBILE
+import {getMobileBacklinkPanels} from "../mobile/util/backlinkPanels";
+/// #endif
 
 export const processBacklinkIndexCommit = (data: {
     rootIDs?: string[],
     backlinkChanged?: boolean,
     backlinkFull?: boolean,
 }) => {
-    /// #if !MOBILE
     if (!data?.backlinkChanged) {
         return;
     }
+    /// #if MOBILE
+    getMobileBacklinkPanels().forEach(item => {
+        item.markIndexDirty(data);
+        item.refreshAfterIndex();
+    });
+    /// #else
     getAllModels().backlink.forEach(item => {
         item.markIndexDirty(data);
         item.refreshAfterIndex();

@@ -27,6 +27,20 @@ const createCommand = (
 });
 
 describe("command registry", () => {
+    it("isolates a throwing availability condition while listing commands", () => {
+        const registry = new CommandRegistry();
+        registry.register(createCommand("broken", {when: () => { throw new Error("condition"); }}), "broken");
+        registry.register(createCommand("available"), "available");
+        const original = console.error;
+        const errors: unknown[] = [];
+        console.error = (...args) => errors.push(args);
+        try {
+            assert.deepEqual(registry.list(createContext()).map(item => item.id), ["available"]);
+            assert.equal(errors.length, 1);
+        } finally {
+            console.error = original;
+        }
+    });
     it("rejects duplicate IDs and unregisters commands by owner", () => {
         const registry = new CommandRegistry();
         const firstOwner = {};

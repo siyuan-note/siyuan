@@ -2,6 +2,7 @@ import {afterEach, describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {destroyEventBus, EventBus} from "../../plugin/EventBusCore";
 import {cancelAssetUploads, cancelAssetUploadsByPlugin, prepareAssetUpload} from "./pluginEvent";
+import {registerProtyleRuntimeCapabilities, areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 
 type TListener = (event: CustomEvent<IBeforeUploadAssetsDetail>) => void;
 
@@ -22,6 +23,33 @@ const protyle = {} as IProtyle;
 const context = {source: "paste", target: "editor"} as const;
 
 describe("asset upload plugin event", () => {
+    it("runs upload decisions in restricted editors without enabling other plugin extensions", async () => {
+        for (const action of ["cancel", "replace", "error"] as const) {
+            const editor = {} as IProtyle;
+            registerProtyleRuntimeCapabilities(editor, {upload: true, pluginExtensions: false});
+            const replacement = createFile("processed.jpg");
+            let calls = 0;
+            const plugin = createPlugin(event => {
+                calls++;
+                if (action === "error") {
+                    throw new Error("conversion failed");
+                }
+                event.detail.respondWith(action === "cancel" ? {action: "cancel"} :
+                    {action: "replace", input: {kind: "files", files: [replacement]}});
+            });
+            const prepared = await prepareAssetUpload({plugins: [plugin], protyle: editor,
+                input: {kind: "files", files: [createFile("input.png")]}, context});
+            assert.equal(calls, 1);
+            assert.equal(prepared.state, action === "cancel" ? "canceled" : action === "error" ? "failed" : "ready");
+            assert.equal(areProtylePluginExtensionsEnabled(editor), false);
+            if (prepared.state === "ready") {
+                assert.equal(prepared.task.input.files[0], replacement);
+                prepared.task.complete({status: "success"});
+            }
+            destroyEventBus(plugin.eventBus);
+            eventBuses.pop();
+        }
+    });
     afterEach(() => {
         eventBuses.splice(0).forEach(destroyEventBus);
     });
@@ -384,6 +412,28 @@ describe("asset upload plugin event", () => {
         assert.equal(laterPluginCalled, false);
         if (prepared.state === "failed") {
             assert.match(prepared.error, /test-plugin.*compression crashed/);
+        }
+    });
+
+    it("fails closed when a listener throws a falsy value", async () => {
+        for (const thrownValue of [null, undefined, false, 0, ""]) {
+            let laterPluginCalled = false;
+            const prepared = await prepareAssetUpload({
+                plugins: [
+                    createPlugin(() => {
+                        throw thrownValue;
+                    }),
+                    createPlugin(() => {
+                        laterPluginCalled = true;
+                    }),
+                ],
+                protyle,
+                input: {kind: "files", files: [createFile("a.png")]},
+                context,
+            });
+
+            assert.equal(prepared.state, "failed");
+            assert.equal(laterPluginCalled, false);
         }
     });
 

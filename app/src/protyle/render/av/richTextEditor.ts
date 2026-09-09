@@ -7,11 +7,14 @@ import {getDefaultToolbar} from "../../toolbar/defaults";
 import {highlightRender} from "../highlightRender";
 import {mathRender} from "../mathRender";
 import {positionAVRichTextEditor} from "./richTextEditorPosition";
+import {getAVData} from "./virtualScroll";
+import {resolveAVSelectedCell} from "./selectionState";
 import {
     configureAVRichTextLute,
     createAVRichTextValue,
     getAVRichTextLute,
     getAVRichTextBlockDOM,
+    getAVRichTextUnsupportedPasteBlocks,
     getAVTextSource,
     sanitizeAVRichTextBlockDOM,
     serializeAVRichTextBlockDOM,
@@ -136,6 +139,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             pluginExtensions: false,
             customBlockRender: false,
             sanitizeBlockDOM: sanitizeAVRichTextBlockDOM,
+            getUnsupportedPasteBlocks: getAVRichTextUnsupportedPasteBlocks,
             restoreLuteMarkdownSyntax: configureAVRichTextLute,
         },
         afterSetContent: (protyle, element) => {
@@ -149,15 +153,42 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
 
     let finished = false;
     let cancelled = false;
-    const isOwnerConnected = () => options.protyle.element.isConnected && options.nodeElement.isConnected &&
-        options.anchorElement.isConnected;
-    const resize = () => setPanelPosition(panelElement, options.anchorElement);
+    const isOwnerConnected = () => {
+        if (!options.protyle.element.isConnected || !options.nodeElement.isConnected) {
+            return false;
+        }
+        if (options.anchorElement.isConnected) {
+            return true;
+        }
+        // 行重渲染后按稳定标识确认编辑目标，避免其他单元格的事务丢弃尚未保存的输入。
+        const data = getAVData(options.nodeElement);
+        return data && options.stableCells.length > 0 && options.stableCells.every(cell =>
+            resolveAVSelectedCell(data, cell)?.column.type === "text");
+    };
+    const resize = () => {
+        if (!options.anchorElement.isConnected) {
+            const cell = options.stableCells[0];
+            if (cell) {
+                const group = cell.groupID ? `.av__body[data-group-id="${cell.groupID}"] ` : "";
+                const anchor = options.nodeElement.querySelector<HTMLElement>(
+                    `${group}.av__row[data-id="${cell.rowID}"] [data-col-id="${cell.colID}"]`);
+                if (anchor) {
+                    options.anchorElement = anchor;
+                }
+            }
+        }
+        if (options.anchorElement.isConnected) {
+            setPanelPosition(panelElement, options.anchorElement);
+        }
+    };
     window.addEventListener("resize", resize);
     const panelResizeObserver = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(resize);
     panelResizeObserver?.observe(panelElement);
     const ownerObserver = new MutationObserver(() => {
         if (!isOwnerConnected()) {
             void finish(false);
+        } else if (!options.anchorElement.isConnected) {
+            resize();
         }
     });
     ownerObserver.observe(document.body, {childList: true, subtree: true});

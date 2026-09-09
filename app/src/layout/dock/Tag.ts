@@ -38,8 +38,8 @@ export class Tag extends Model {
 
         this.element.innerHTML = `<div class="block__icons">
     <div class="block__logo fn__flex-1">${window.siyuan.languages.tag}</div>
-    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
-    <span data-type="search" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.filter}"><svg><use xlink:href='#iconFilter'></use></svg></span>
+    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.searchPlaceholder}" />
+    <span data-type="search" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.search}"><svg><use xlink:href='#iconSearch'></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="refresh" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
     <span class="fn__space"></span>
@@ -65,10 +65,10 @@ export class Tag extends Model {
             const value = inputElement.value;
             if (value.trim()) {
                 filterIconElement.classList.add("block__icon--active");
-                filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter + " " + value);
+                filterIconElement.setAttribute("aria-label", window.siyuan.languages.search + " " + value);
             } else {
                 filterIconElement.classList.remove("block__icon--active");
-                filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter);
+                filterIconElement.setAttribute("aria-label", window.siyuan.languages.search);
             }
         });
         inputElement.addEventListener("input", (event: InputEvent) => {

@@ -42,6 +42,10 @@ import {
 } from "../editor/assetOpen";
 import {resolvePdfAssetLink} from "../editor/pdfAssetLink";
 import {getHostCapabilities} from "../util/hostCapabilities";
+/// #if MOBILE
+import {bindBottomSheetDialog} from "../mobile/util/bindBottomSheetDialog";
+import {activeBlur} from "../mobile/util/keyboardToolbar";
+/// #endif
 
 const bindAttrInput = (inputElement: HTMLInputElement, id: string) => {
     inputElement.addEventListener("change", () => {
@@ -221,10 +225,11 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
     });
     const dialog = new Dialog({
         width: isMobile() ? "100vw" : "50vw",
-        containerClassName: "b3-dialog__container--theme",
-        height: isMobile() ? "100vh" : "80vh",
+        containerClassName: "b3-dialog__container--theme" + (isMobile() ? " mobile-attributes-sheet" : ""),
+        hideCloseIcon: isMobile(),
+        height: isMobile() ? "60vh" : "80vh",
         content: `<div class="fn__flex-column">
-    <div class="layout-tab-bar fn__flex" style="${isMobile() ? "padding-right: 38px;" : ""}flex-shrink:0;border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0">
+    <div class="layout-tab-bar fn__flex" style="flex-shrink:0;border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0">
         <div class="item item--full item--focus" data-type="attr">
             <span class="fn__flex-1"></span>
             <span class="item__text">${window.siyuan.languages.builtIn}</span>
@@ -280,7 +285,11 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
     </div>
 </div>`,
         destroyCallback() {
+            /// #if MOBILE
+            disposeSheet();
+            /// #else
             focusByRange(range);
+            /// #endif
             if (protyle) {
                 hideElements(["select"], protyle);
             } else {
@@ -288,6 +297,16 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
             }
         }
     });
+    /// #if MOBILE
+    const destroyDialog = dialog.destroy.bind(dialog);
+    dialog.destroy = (options?: IObject) => {
+        if (dialog.element.contains(document.activeElement)) {
+            activeBlur(true);
+        }
+        destroyDialog(options);
+    };
+    const disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy());
+    /// #endif
     dialog.element.setAttribute("data-key", Constants.DIALOG_ATTR);
     (dialog.element.querySelector('.b3-text-field[data-name="bookmark"]') as HTMLInputElement).value = attrs.bookmark || "";
     (dialog.element.querySelector('.b3-text-field[data-name="name"]') as HTMLInputElement).value = attrs.name || "";
@@ -582,7 +601,7 @@ export const exportMd = (id: string) => {
                     title: window.siyuan.languages.fileName,
                     content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value="">
 <div class="fn__hr"></div>
-<label>${window.siyuan.languages.savePath}<select class="b3-select fn__block" data-template-directory><option value="">/</option></select></label>
+<label>${window.siyuan.languages.savePath}<div class="fn__hr"></div><select class="b3-select fn__block" data-template-directory><option value="">/</option></select></label>
 <div class="fn__hr"></div>
 <button type="button" class="b3-button b3-button--outline" data-template-manager>${window.siyuan.languages.templateManager}</button>
 ${databaseOptions}</div>

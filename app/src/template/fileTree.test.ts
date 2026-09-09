@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getTemplateTree, TemplateEntry} from "./fileTree";
+import {getTemplateRenameTarget, getTemplateTree, TemplateEntry} from "./fileTree";
 
 const entries: TemplateEntry[] = [
     {path: "note10.md", isDir: false},
@@ -13,6 +13,22 @@ const entries: TemplateEntry[] = [
 ];
 
 describe("template file tree", () => {
+    it("keeps normalized slashes in the basename without changing the parent directory", () => {
+        assert.equal(getTemplateRenameTarget("模板.md", "22／1111.md"), "22／1111.md");
+        assert.equal(getTemplateRenameTarget("子文件夹/模板.md", "22／1111.md"), "子文件夹/22／1111.md");
+        assert.equal(getTemplateRenameTarget("Work/Weekly", "Daily／Review"), "Work/Daily／Review");
+        assert.equal(getTemplateRenameTarget("folder/note.md", "..／outside.md"), "folder/..／outside.md");
+        assert.equal(getTemplateRenameTarget("folder/note.md", "／／note.md"), "folder/／／note.md");
+    });
+    it("renames only the basename while preserving nested and non-ASCII paths", () => {
+        assert.equal(getTemplateRenameTarget("子文件夹/模板.md", "新模板.md"), "子文件夹/新模板.md");
+        assert.equal(getTemplateRenameTarget("Work/Weekly", "Daily"), "Work/Daily");
+        assert.equal(getTemplateRenameTarget("模板.md", "O'Reilly.md"), "O'Reilly.md");
+        assert.equal(getTemplateRenameTarget("folder /template.md", "new.md"), "folder /new.md");
+        for (const name of ["", ".", "..", "../outside.md", "new/note.md", "new\\note.md", "C:note.md"]) {
+            assert.equal(getTemplateRenameTarget("folder/note.md", name), undefined, name);
+        }
+    });
     it("groups folders first and naturally sorts files without changing the input", () => {
         const original = entries.slice();
         const rows = getTemplateTree(entries, "", new Set());

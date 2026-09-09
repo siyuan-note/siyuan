@@ -74,11 +74,14 @@ func TestAssetDownloadFootnoteExport(t *testing.T) {
 	if err := prepareExportBlockAssets(source.ID, false); err != nil {
 		t.Fatal(err)
 	}
-	exported := exportTree(prepareExportTree(getExportBlockTree(source.ID)), true, false, true,
+	exported, prepareErr := exportTree(prepareExportTree(getExportBlockTree(source.ID)), true, true, false, true,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
 		Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, true)
+	if prepareErr != nil {
+		t.Fatal(prepareErr)
+	}
 	containsAsset := false
 	for _, dest := range getAssetsLinkDests(exported.Root, false) {
 		if dest == "assets/file.bin" {

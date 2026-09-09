@@ -158,9 +158,9 @@ func getBacklinkDoc(c *gin.Context) {
 	if encryptedNotebookDenied || !isBacklinkDocAccessible(c, refTreeID) {
 		backlinks, keywords = []*model.Backlink{}, []string{}
 	} else if notebook != "" && model.IsEncryptedBox(notebook) {
-		backlinks, keywords = model.GetBacklinkDocInBox(defID, refTreeID, keyword, containChildren, highlight, notebook)
+		backlinks, keywords = model.GetBacklinkDocInBox(defID, refTreeID, keyword, containChildren, highlight, notebook, parseBacklinkSourceFilter(arg))
 	} else {
-		backlinks, keywords = model.GetBacklinkDoc(defID, refTreeID, keyword, containChildren, highlight)
+		backlinks, keywords = model.GetBacklinkDoc(defID, refTreeID, keyword, containChildren, highlight, parseBacklinkSourceFilter(arg))
 	}
 	keywords = canonicalBacklinkKeywords(keywords)
 	items := newBacklinkContextResponses(backlinks)
@@ -198,6 +198,10 @@ func getBacklink2(c *gin.Context) {
 	knownRevision, _ := arg["knownRevision"].(string)
 	keyword := arg["k"].(string)
 	mentionKeyword := arg["mk"].(string)
+	includeMentions := true
+	if val, ok := arg["includeMentions"].(bool); ok {
+		includeMentions = val
+	}
 	sortArg := arg["sort"]
 	sort := util.SortModeUpdatedDESC
 	if nil != sortArg {
@@ -213,6 +217,28 @@ func getBacklink2(c *gin.Context) {
 		containChildren = val.(bool)
 	}
 	sourceFilter := parseBacklinkSourceFilter(arg)
+	if candidates, _ := arg["refDefCandidates"].(bool); candidates {
+		defs := []*model.BacklinkRefDef{}
+		ret.Data = map[string]any{"refDefs": defs}
+		notebook, _ := arg["notebook"].(string)
+		if model.IsReadOnlyRoleContext(c) || isEncryptedNotebookDeniedForPublish(c, notebook) {
+			return
+		}
+		if err := holdEncryptedBoxRequest(c, notebook); nil != err {
+			ret.Code, ret.Msg = 1, err.Error()
+			return
+		}
+		if !model.IsEncryptedBox(notebook) {
+			notebook = ""
+		}
+		defs, err := model.GetBacklinkRefDefs(id, keyword, containChildren, notebook, sourceFilter)
+		if nil != err {
+			ret.Code, ret.Msg = 1, err.Error()
+			return
+		}
+		ret.Data = map[string]any{"refDefs": defs}
+		return
+	}
 	var boxID string
 	var backlinks, backmentions []*model.Path
 	var linkRefsCount, mentionsCount int
@@ -225,9 +251,9 @@ func getBacklink2(c *gin.Context) {
 			return
 		}
 		if notebook != "" && model.IsEncryptedBox(notebook) {
-			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2InBoxWithFilter(id, keyword, mentionKeyword, sort, mentionSort, containChildren, notebook, sourceFilter)
+			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword, sort, mentionSort, containChildren, notebook, sourceFilter, includeMentions)
 		} else {
-			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2WithFilter(id, keyword, mentionKeyword, sort, mentionSort, containChildren, sourceFilter)
+			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword, sort, mentionSort, containChildren, "", sourceFilter, includeMentions)
 		}
 	}
 	if model.IsReadOnlyRoleContext(c) {
@@ -293,6 +319,13 @@ func parseBacklinkSourceFilter(arg map[string]any) *model.BacklinkSourceFilter {
 	filter := &model.BacklinkSourceFilter{}
 	filter.DailyNote, _ = filterArg["dailyNote"].(string)
 	filter.ExcludeSelf, _ = filterArg["excludeSelf"].(bool)
+	if ids, ok := filterArg["excludedRefDefIDs"].([]any); ok {
+		for _, value := range ids {
+			if id, ok := value.(string); ok {
+				filter.ExcludedRefDefIDs = append(filter.ExcludedRefDefIDs, id)
+			}
+		}
+	}
 	if notebookIDs, ok := filterArg["excludedNotebookIDs"].([]any); ok {
 		for _, notebookID := range notebookIDs {
 			if id, ok := notebookID.(string); ok {
@@ -301,64 +334,4 @@ func parseBacklinkSourceFilter(arg map[string]any) *model.BacklinkSourceFilter {
 		}
 	}
 	return model.NormalizeBacklinkSourceFilter(filter)
-}
-
-func getBacklink(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	if nil == arg["id"] {
-		return
-	}
-
-	id := arg["id"].(string)
-	keyword := arg["k"].(string)
-	mentionKeyword := arg["mk"].(string)
-	beforeLen := 12
-	if nil != arg["beforeLen"] {
-		beforeLen = int(arg["beforeLen"].(float64))
-	}
-	containChildren := model.Conf.Editor.BacklinkContainChildren
-	if val, ok := arg["containChildren"]; ok {
-		containChildren = val.(bool)
-	}
-	var boxID string
-	var backlinks, backmentions []*model.Path
-	var linkRefsCount, mentionsCount int
-	// 加密笔记本的反链面板走 InBox 版（查加密 content db）
-	notebook, _ := arg["notebook"].(string)
-	if !isEncryptedNotebookDeniedForPublish(c, notebook) {
-		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
-			ret.Code = 1
-			ret.Msg = err.Error()
-			return
-		}
-		if notebook != "" && model.IsEncryptedBox(notebook) {
-			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklinkInBox(id, keyword, mentionKeyword, beforeLen, containChildren, notebook)
-		} else {
-			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink(id, keyword, mentionKeyword, beforeLen, containChildren)
-		}
-	}
-	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
-		backlinks = model.FilterPathsByPublishAccess(c, publishAccess, backlinks)
-		backmentions = model.FilterPathsByPublishAccess(c, publishAccess, backmentions)
-		linkRefsCount = countBacklinkPaths(backlinks)
-		mentionsCount = countBacklinkPaths(backmentions)
-	}
-	ret.Data = map[string]any{
-		"backlinks":     backlinks,
-		"linkRefsCount": linkRefsCount,
-		"backmentions":  backmentions,
-		"mentionsCount": mentionsCount,
-		"k":             keyword,
-		"mk":            mentionKeyword,
-		"box":           boxID,
-	}
-	util.RandomSleep(200, 500)
 }

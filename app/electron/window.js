@@ -854,16 +854,24 @@ const chooseWorkspacePath = async (langData) => {
 };
 
 // 窗口通用初始化：macOS body class、关闭/最小化按钮 IPC
-const initWindowChrome = () => {
+const initWindowChrome = (options = {}) => {
     const {ipcRenderer} = require("electron");
     if ("darwin" === process.platform) {
         document.body.classList.add("darwin");
     }
     document.getElementById("close").addEventListener("click", () => {
-        ipcRenderer.send("siyuan-first-quit");
+        if (options.close) {
+            options.close();
+        } else {
+            ipcRenderer.send("siyuan-first-quit");
+        }
     });
     document.getElementById("min").addEventListener("click", () => {
-        ipcRenderer.send("siyuan-cmd", "minimize");
+        if (options.minimize) {
+            options.minimize();
+        } else {
+            ipcRenderer.send("siyuan-cmd", "minimize");
+        }
     });
 };
 

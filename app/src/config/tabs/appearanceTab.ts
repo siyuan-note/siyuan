@@ -38,6 +38,7 @@ import {
 } from "../../util/customFont";
 import {showMessage} from "../../dialog/message";
 import {IFontItem, loadSystemFonts} from "../../util/systemFont";
+import {observeFontPreview} from "../../util/fontPreview";
 import {
     shouldShowBootAppearanceSetting,
     type IBootAppearanceListItem,
@@ -47,9 +48,7 @@ import {
 import {genMobileBottomBarSettingHTML, mountMobileBottomBarSetting} from "../../mobile/util/mobileBottomBar";
 import {genMobileSidePanelSettingHTML, mountMobileSidePanelSetting} from "../../mobile/util/mobileSidePanelSetting";
 /// #endif
-/// #if !MOBILE
 import {genEntryVisibilityHtml, mountEntryVisibility} from "../entryVisibility/ui";
-/// #endif
 
 interface IBootAppearanceListData {
     appearances: IBootAppearanceListItem[];
@@ -104,6 +103,7 @@ const genFontConfigHtml = (configKey: FontFamiliesConfigKey, title: string, desc
     <input
         class="b3-select fn__flex-center fn__size200"
         id="${getFontConfigPath(configKey)}"
+        data-menu="true"
         value="${escapeAttr(getEditorFontDisplay(fonts) || window.siyuan.languages.default)}"
         readonly
     >
@@ -167,7 +167,7 @@ const genFontListItemHtml = (item: IFontItem, checked: boolean) => {
     return `<div class="b3-list-item b3-list-item--narrow" data-id="${escapeAttr(item.id || "")}">
     <span class="b3-menu__label" data-family="${escapeAttr(item.family)}" data-name="${escapeAttr(item.displayName)}" data-search="${escapeAttr(searchText)}" data-spacing="${escapeAttr(item.spacing || "")}" data-weight="${item.weight || 400}">${escapeHtml(item.displayName)}</span>
     ${checked ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
-    ${item.id && !window.siyuan.config.readonly ? `<span class="b3-menu__action ariaLabel" data-type="delete-font" aria-label="${escapeAttr(window.siyuan.languages.delete)}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>` : ""}
+    ${item.id && !window.siyuan.config.readonly ? `<svg class="b3-menu__action b3-menu__action--show fn__flex-shrink ariaLabel" data-type="delete-font" aria-label="${escapeAttr(window.siyuan.languages.delete)}"><use xlink:href="#iconTrashcan"></use></svg>` : ""}
 </div>`;
 };
 
@@ -341,12 +341,34 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
     });
     mountedFontConfigUpdaters.set(fontConfigElement, updateFontInput);
     updateFontInput(getFontConfig());
-    fontFamiliesElement.addEventListener("click", async () => {
+    fontFamiliesElement.addEventListener("click", async (event) => {
+        // 在异步加载前阻止冒泡，避免同一次点击关闭字体菜单。
+        event.stopPropagation();
+        let closed = false;
+        let cleanupFontPreview: () => void;
+        const fontMenu = new Menu(`appearanceFontFamily-${configKey}`, () => {
+            closed = true;
+            cleanupFontPreview?.();
+            refreshOpenMenu = undefined;
+        });
+        if (fontMenu.isOpen) {
+            return;
+        }
         let availableFonts: Awaited<ReturnType<typeof loadAvailableFonts>>;
         try {
             availableFonts = await loadAvailableFonts();
         } catch (error) {
             console.warn("load font list failed", error);
+            if (!closed) {
+                fontMenu.close();
+            }
+            return;
+        }
+        if (closed) {
+            return;
+        }
+        if (!fontFamiliesElement.isConnected) {
+            fontMenu.close();
             return;
         }
         const {nativeMobile, customFonts, fontItems} = availableFonts;
@@ -361,11 +383,6 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
         const canManageCustomFonts = nativeMobile && !window.siyuan.config.readonly;
         const canShowAllFonts = configKey === "codeFontFamilies" && fontItems.some((font) => !isCodeFont(font));
         const customFontsByID = new Map(customFonts.map((font) => [font.id, font]));
-        let fontPreviewObserver: IntersectionObserver;
-        const fontMenu = new Menu(undefined, () => {
-            fontPreviewObserver?.disconnect();
-            refreshOpenMenu = undefined;
-        });
         fontMenu.addItem({
             iconHTML: "",
             type: "empty",
@@ -373,7 +390,7 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
     <div class="fn__flex">
         <input class="b3-text-field fn__flex-1" data-type="font-search" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}">
         ${canShowAllFonts ? `<span class="fn__space"></span><button class="b3-button b3-button--outline fn__flex-center" data-type="show-all-fonts">${escapeHtml(window.siyuan.languages.showAll)}</button>` : ""}
-        ${canManageCustomFonts ? `<span class="fn__space"></span><button class="b3-button b3-button--outline fn__flex-center" data-type="import-font"><svg><use xlink:href="#iconUpload"></use></svg>${escapeHtml(window.siyuan.languages.importFont)}</button>` : ""}
+        ${canManageCustomFonts ? `<span class="fn__space"></span><button class="b3-button b3-button--outline fn__flex-center" data-type="import-font"><svg><use xlink:href="#iconDownload"></use></svg>${escapeHtml(window.siyuan.languages.importFont)}</button>` : ""}
     </div>
     ${nativeMobile ? `<div class="b3-label__text ft__on-surface" style="margin-top: 8px">${escapeHtml(window.siyuan.languages.fontFileTip)}</div>` : ""}
     ${canManageCustomFonts ? '<input class="fn__none" data-type="font-file" type="file" accept=".ttf,.otf,font/ttf,font/otf">' : ""}
@@ -400,36 +417,14 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                     filterFontList();
                 };
                 refreshFontMenu();
-                if ("IntersectionObserver" in window) {
-                    fontPreviewObserver = new IntersectionObserver((entries) => {
-                        entries.forEach((entry) => {
-                            const itemElement = entry.target as HTMLElement;
-                            const labelElement = itemElement.querySelector<HTMLElement>(".b3-menu__label");
-                            if (!entry.isIntersecting || !labelElement?.dataset.family) {
-                                labelElement?.style.removeProperty("font-family");
-                                labelElement?.style.removeProperty("font-weight");
-                                return;
-                            }
-                            const customFont = itemElement.dataset.id ? customFontsByID.get(itemElement.dataset.id) : undefined;
-                            if (customFont) {
-                                registerCustomFont(customFont);
-                            }
-                            labelElement.style.fontFamily = labelElement.dataset.family;
-                            labelElement.style.fontWeight = labelElement.dataset.weight;
-                        });
-                    }, {
-                        root: listElement,
-                    });
-                    listElement.querySelectorAll<HTMLElement>(".b3-list-item").forEach((item) => {
-                        fontPreviewObserver.observe(item);
-                    });
-                } else {
-                    listElement.querySelectorAll<HTMLElement>(".b3-menu__label").forEach((item) => {
-                        item.style.fontFamily = item.dataset.family;
-                        item.style.fontWeight = item.dataset.weight;
-                    });
-                    customFonts.forEach(registerCustomFont);
-                }
+                cleanupFontPreview = observeFontPreview(listElement, (label, item) => {
+                    const customFont = item.dataset.id ? customFontsByID.get(item.dataset.id) : undefined;
+                    if (customFont) {
+                        registerCustomFont(customFont);
+                    }
+                    label.style.fontFamily = label.dataset.family;
+                    label.style.fontWeight = label.dataset.weight;
+                });
                 function filterFontList() {
                     const value = inputElement.value.toLowerCase().trim();
                     listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
@@ -459,7 +454,9 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                     showAllFonts = true;
                     (event.currentTarget as HTMLElement).remove();
                     filterFontList();
-                    inputElement.focus();
+                    if (!isMobile()) {
+                        inputElement.focus();
+                    }
                 });
                 inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                     event.stopPropagation();
@@ -555,7 +552,9 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
         fontMenu.open({x: rect.left, y: rect.bottom, h: rect.height});
         // 内部列表自行滚动，搜索框保持固定
         fontMenu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
-        fontMenu.element.querySelector<HTMLInputElement>('[data-type="font-search"]').focus();
+        if (!isMobile()) {
+            fontMenu.element.querySelector<HTMLInputElement>('[data-type="font-search"]').focus();
+        }
     });
 
     async function openFontWeightMenu(chipElement: HTMLElement, index: number, event: MouseEvent) {
@@ -800,11 +799,13 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
         }, (stack) => {
             stack.title(window.siyuan.languages.theme);
             /// #if !BROWSER
-            stack.button({
-                id: "appearanceOpenTheme",
-                label: window.siyuan.languages.appearance9,
-                icon: "iconFolder",
-            });
+            if (getHostCapabilities().localFileSystem) {
+                stack.button({
+                    id: "appearanceOpenTheme",
+                    label: window.siyuan.languages.appearance9,
+                    icon: "iconFolder",
+                });
+            }
             /// #endif
             stack.select("appearance.themeLight", {
                 desc: window.siyuan.languages.theme11,
@@ -840,11 +841,13 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
         }, (stack) => {
             stack.title(window.siyuan.languages.icon);
             /// #if !BROWSER
-            stack.button({
-                id: "appearanceOpenIcon",
-                label: window.siyuan.languages.appearance8,
-                icon: "iconFolder",
-            });
+            if (getHostCapabilities().localFileSystem) {
+                stack.button({
+                    id: "appearanceOpenIcon",
+                    label: window.siyuan.languages.appearance8,
+                    icon: "iconFolder",
+                });
+            }
             /// #endif
             stack.select("appearance.icon", {
                 desc: window.siyuan.languages.theme2,
@@ -902,13 +905,13 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
         afterMount: mountMobileSidePanelSetting,
     });
     /// #endif
-    /// #if !MOBILE
     group.slot({
         key: "entryVisibility",
         keywords: [window.siyuan.languages.entryVisibility, window.siyuan.languages.entryVisibilityTip],
         html: genEntryVisibilityHtml,
         afterMount: mountEntryVisibility,
     });
+    /// #if !MOBILE
     group.select("editor.floatWindowMode", {
         title: window.siyuan.languages.floatWindowMode,
         desc: window.siyuan.languages.floatWindowModeTip,
@@ -1197,18 +1200,20 @@ const registerAppearancePersonalizationGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("personalization", window.siyuan.languages.configGroupPersonalization);
 
     /// #if !BROWSER
-    group.button({
-        id: "appearanceOpenEmoji",
-        title: window.siyuan.languages.customEmoji,
-        desc: window.siyuan.languages.customEmojiTip,
-        label: window.siyuan.languages.showInFolder,
-        icon: "iconFolder",
-        afterMount: (root) => {
-            root.querySelector("#appearanceOpenEmoji")?.addEventListener("click", () => {
-                useShell("openPath", path.join(window.siyuan.config.system.dataDir, "emojis"));
-            });
-        },
-    });
+    if (getHostCapabilities().localFileSystem) {
+        group.button({
+            id: "appearanceOpenEmoji",
+            title: window.siyuan.languages.customEmoji,
+            desc: window.siyuan.languages.customEmojiTip,
+            label: window.siyuan.languages.showInFolder,
+            icon: "iconFolder",
+            afterMount: (root) => {
+                root.querySelector("#appearanceOpenEmoji")?.addEventListener("click", () => {
+                    useShell("openPath", path.join(window.siyuan.config.system.dataDir, "emojis"));
+                });
+            },
+        });
+    }
     /// #endif
     group.stack({
         key: "codeSnippet",

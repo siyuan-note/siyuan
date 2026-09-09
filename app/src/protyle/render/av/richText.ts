@@ -107,42 +107,68 @@ const removeUnsupportedBlockAttributes = (element: HTMLElement) => {
     });
 };
 
-export const sanitizeAVRichTextBlockDOM = (blockDOM: string) => {
+const isSupportedAVRichTextBlock = (element: HTMLElement) => {
+    const type = element.dataset.type;
+    return ALLOWED_BLOCK_TYPES.has(type) &&
+        (type !== "NodeHeading" || /^h[1-6]$/.test(element.dataset.subtype || "")) &&
+        (type !== "NodeCodeBlock" || !element.classList.contains("render-node") &&
+            !isAVRichTextExecutableCodeLanguage(element.dataset.subtype || ""));
+};
+
+export const getAVRichTextUnsupportedPasteBlocks = (blockDOM: string, images = false) => {
+    const template = document.createElement("template");
+    template.innerHTML = blockDOM;
+    const names = new Set<string>();
+    const keys: Record<string, string> = {
+        NodeTable: "table", NodeBlockQueryEmbed: "blockEmbed", NodeThematicBreak: "line",
+        NodeVideo: "video", NodeAudio: "audio", NodeWidget: "widget", NodeAttributeView: "database",
+        NodeCustomBlock: "custom", NodeSuperBlock: "superBlock", NodeCallout: "callout",
+        NodeTabs: "tabs", NodeTabItem: "tabItem", NodeCodeBlock: "code", NodeHeading: "headings",
+    };
+    template.content.querySelectorAll<HTMLElement>('[data-type^="Node"]').forEach(element => {
+        const type = element.dataset.type;
+        if (!isSupportedAVRichTextBlock(element)) {
+            names.add(type === "NodeHTMLBlock" ? "HTML" : type === "NodeIFrame" ? "IFrame" :
+                type === "NodeCodeBlock" && element.dataset.subtype ? element.dataset.subtype :
+                    window.siyuan.languages[keys[type]] || window.siyuan.languages.agentCatBlock);
+        }
+    });
+    if (!images && template.content.querySelector(".img, img")) {
+        names.add(window.siyuan.languages.image);
+    }
+    return Array.from(names);
+};
+
+export const sanitizeAVRichTextBlockDOM = (blockDOM: string, images = false) => {
     const template = document.createElement("template");
     template.innerHTML = blockDOM;
     template.content.querySelectorAll<HTMLElement>('[data-type^="Node"]').forEach((element) => {
         const type = element.dataset.type;
-        if (type === "NodeCodeBlock" && (element.classList.contains("render-node") ||
-            isAVRichTextExecutableCodeLanguage(element.dataset.subtype || ""))) {
+        if (!isSupportedAVRichTextBlock(element)) {
             element.remove();
             return;
         }
         if (type === "NodeHeading") {
-            const subtype = element.dataset.subtype || "";
-            if (!/^h[1-6]$/.test(subtype)) {
-                element.remove();
-                return;
-            }
-            element.className = subtype;
+            element.className = element.dataset.subtype;
         }
-        if (ALLOWED_BLOCK_TYPES.has(type)) {
-            removeUnsupportedBlockAttributes(element);
-            return;
-        }
-        element.remove();
+        removeUnsupportedBlockAttributes(element);
     });
     template.content.querySelectorAll(
-        ".img, img, iframe, audio, video, object, embed, script, style, link, meta, form, input, button, textarea, select"
+        (images ? "" : ".img, img, ") +
+        "iframe, audio, video, object, embed, script, style, link, meta, form, input, button, textarea, select"
     ).forEach((element) => {
         element.remove();
     });
     template.content.querySelectorAll<HTMLElement>("*").forEach((element) => {
-        if (!isAVRichTextEditorAllowedTag(element.tagName)) {
+        if (!isAVRichTextEditorAllowedTag(element.tagName) && !(images && element.tagName === "IMG")) {
             replaceWithText(element);
         }
     });
     template.content.querySelectorAll<HTMLElement>("span[data-type]").forEach((element) => {
         const types = (element.dataset.type || "").split(" ").filter(Boolean);
+        if (images && types.length === 1 && types[0] === "img") {
+            return;
+        }
         if (types.some((type) => !ALLOWED_INLINE_TYPES.has(type))) {
             replaceWithText(element);
             return;
@@ -161,7 +187,9 @@ export const sanitizeAVRichTextBlockDOM = (blockDOM: string) => {
     template.content.querySelectorAll<HTMLElement>("*").forEach((element) => {
         Array.from(element.attributes).forEach((attribute) => {
             const name = attribute.name.toLowerCase();
-            if (!AV_RICH_TEXT_EDITOR_ALLOWED_ATTRIBUTES.includes(name) ||
+            const imageAttribute = images && ["src", "data-src", "alt", "title", "loading"].includes(name) &&
+                (element.tagName === "IMG" || element.classList.contains("img"));
+            if ((!AV_RICH_TEXT_EDITOR_ALLOWED_ATTRIBUTES.includes(name) && !imageAttribute) ||
                 name === "xlink:href" && !attribute.value.startsWith("#icon")) {
                 element.removeAttribute(attribute.name);
             }
@@ -187,7 +215,27 @@ export const sanitizeAVRichTextBlockDOM = (blockDOM: string) => {
         }
     });
     template.content.querySelectorAll<HTMLElement>("[style]:not(span[data-type])")
-        .forEach((element) => element.removeAttribute("style"));
+        .forEach((element) => {
+            if (!images || !element.closest(".img")) {
+                element.removeAttribute("style");
+            }
+        });
+    if (images) {
+        template.content.querySelectorAll<HTMLElement>(".img[style], .img [style]").forEach(element => {
+            if (/[\\<>@]|url\s*\(|expression\s*\(/i.test(element.getAttribute("style"))) {
+                element.removeAttribute("style");
+            }
+        });
+        template.content.querySelectorAll<HTMLImageElement>("img").forEach(element => {
+            const source = getAVRichTextSafeURL(element.getAttribute("data-src") || element.getAttribute("src"));
+            if (!source) {
+                (element.closest(".img") || element).remove();
+                return;
+            }
+            element.setAttribute("src", source);
+            element.setAttribute("data-src", source);
+        });
+    }
     return (template.innerHTML || "").trim();
 };
 
@@ -271,14 +319,14 @@ const getAVRichTextPlainContent = (blockDOM: string, lute: Lute) => {
     return projectAVRichTextPlainBlocks(blocks, lute.BlockDOM2Content(blockDOM));
 };
 
-export const serializeAVRichTextBlockDOM = (blockDOM: string, lute = getAVRichTextLute()) => {
-    const sanitizedBlockDOM = sanitizeAVRichTextBlockDOM(blockDOM);
+export const serializeAVRichTextBlockDOM = (blockDOM: string, lute = getAVRichTextLute(), images = false) => {
+    const sanitizedBlockDOM = sanitizeAVRichTextBlockDOM(blockDOM, images);
     const cleanBlockDOM = cleanAVRichTextBlockDOMStructure(sanitizedBlockDOM);
     const styleBackslashEncoding = createAVRichTextStyleBackslashEncoding(cleanBlockDOM);
     const protectedBlockDOM = protectAVRichTextStyleBackslashes(cleanBlockDOM, styleBackslashEncoding);
     const markdown = protectedBlockDOM ?
         styleBackslashEncoding.encodeMarkdown(lute.BlockDOM2Md(protectedBlockDOM).trim()) : "";
-    const normalizedBlockDOM = markdown ? sanitizeAVRichTextBlockDOM(parseAVRichTextKramdown(markdown, lute)) : "";
+    const normalizedBlockDOM = markdown ? sanitizeAVRichTextBlockDOM(parseAVRichTextKramdown(markdown, lute), images) : "";
     return {
         blockDOM: normalizedBlockDOM,
         markdown,
@@ -286,8 +334,8 @@ export const serializeAVRichTextBlockDOM = (blockDOM: string, lute = getAVRichTe
     };
 };
 
-export const getAVRichTextBlockDOM = (markdown: string) => markdown ?
-    sanitizeAVRichTextBlockDOM(parseAVRichTextKramdown(markdown)) : "";
+export const getAVRichTextBlockDOM = (markdown: string, images = false) => markdown ?
+    sanitizeAVRichTextBlockDOM(parseAVRichTextKramdown(markdown), images) : "";
 
 const getAVRichTextPreviewBlockDOM = (blockDOM: string) => {
     const template = document.createElement("template");

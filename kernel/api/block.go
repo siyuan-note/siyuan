@@ -1198,6 +1198,12 @@ func getBlockInfo(c *gin.Context) {
 		return
 	}
 	boxID := encryptedNotebookFromArg(arg)
+	// 普通文档的索引可能尚未就绪，先恢复索引，再按实际归属取得响应租约。
+	if boxID == "" && !model.IsReadOnlyRoleContext(c) && treenode.GetBlockTree(id) == nil {
+		if err := model.ReindexMissingNormalBlock(id); setGetBlockInfoError(ret, id, err) {
+			return
+		}
+	}
 	if !holdBlockRequest(c, ret, boxID, arg) {
 		return
 	}
@@ -1226,29 +1232,7 @@ func getBlockInfo(c *gin.Context) {
 	} else {
 		tree, err = model.LoadTreeByBlockIDWithReindex(id)
 	}
-	if err != nil {
-		if errors.Is(err, model.ErrIndexing) {
-			ret.Code = 3
-			ret.Msg = model.Conf.Language(56)
-			return
-		}
-		if errors.Is(err, treenode.ErrSpecTooNew) {
-			ret.Code = -1
-			ret.Msg = model.Conf.Language(275)
-			return
-		}
-		if errors.Is(err, model.ErrBoxUnindexed) {
-			ret.Code = -1
-			ret.Msg = "" // 加载的时候已经推送过提示了，这里不需要再提示
-			return
-		}
-		if errors.Is(err, model.ErrTreeNotFound) {
-			ret.Code = -1
-			ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
-			return
-		}
-		ret.Code = -1
-		ret.Msg = err.Error()
+	if setGetBlockInfoError(ret, id, err) {
 		return
 	}
 
@@ -1302,6 +1286,27 @@ func getBlockInfo(c *gin.Context) {
 		"rootChildID":    rootChildID,
 		"rootIcon":       icon,
 	}
+}
+
+func setGetBlockInfoError(ret *gulu.Result, id string, err error) bool {
+	if err == nil {
+		return false
+	}
+	ret.Code = -1
+	switch {
+	case errors.Is(err, model.ErrIndexing):
+		ret.Code = 3
+		ret.Msg = model.Conf.Language(56)
+	case errors.Is(err, treenode.ErrSpecTooNew):
+		ret.Msg = model.Conf.Language(275)
+	case errors.Is(err, model.ErrBoxUnindexed):
+		ret.Msg = "" // 加载时已经推送提示。
+	case errors.Is(err, model.ErrTreeNotFound):
+		ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
+	default:
+		ret.Msg = err.Error()
+	}
+	return true
 }
 
 func getBlockInfoPublishAccess(c *gin.Context, id, boxID string) (blockTree *treenode.BlockTree, passwordRequired, metadataVisible, accessible bool) {

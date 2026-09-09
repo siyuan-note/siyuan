@@ -25,6 +25,7 @@ export interface IEntryCatalogNode {
     sortable?: boolean;
     fixed?: boolean;
     defaultVisible?: () => boolean;
+    customDefaultVisible?: boolean;
     children?: IEntryCatalogNode[];
 }
 
@@ -39,7 +40,7 @@ const lang = (key: string) => () => window.siyuan.languages[key] || key;
 const literal = (value: string) => () => value;
 const location = (...labels: Array<() => string>) => () => labels.map((label) => label()).join(" - ");
 const node = (key: string, label: () => string, simple = true, children?: IEntryCatalogNode[],
-              sortable?: boolean, options?: Pick<IEntryCatalogNode, "defaultVisible" | "fixed">): IEntryCatalogNode => ({
+              sortable?: boolean, options?: Pick<IEntryCatalogNode, "defaultVisible" | "customDefaultVisible" | "fixed">): IEntryCatalogNode => ({
     key,
     label,
     simple,
@@ -468,9 +469,15 @@ const gutterSingle = () => [
 
 export const SLASH_MENU_ROOT_PATH = "editor.slash.menu";
 
-const toolbarBuiltinChildren = DESKTOP_TOOLBAR_ENTRIES.map((item) => item.separator
-    ? separator(item.key)
-    : node(item.key, lang(item.lang)));
+// 共享工具栏声明决定目录默认顺序，字体和字号位于外观之前。
+const toolbarBuiltinChildren = DESKTOP_TOOLBAR_ENTRIES.map((item) => {
+    if (item.separator) {
+        return separator(item.key);
+    }
+    const fontControl = ["font-family", "font-size"].includes(item.key);
+    return node(item.key, lang(item.lang), !fontControl, undefined, undefined,
+        fontControl ? {customDefaultVisible: false} : undefined);
+});
 const toolbarBuiltinNodeMap = new Map(toolbarBuiltinChildren.map((item) => [item.key, item]));
 
 const slashMenuBuiltinChildren = [
@@ -1031,6 +1038,8 @@ export const getEntryParentPath = (path: string) => parentMap.get(path);
 export const isEntryCatalogNodeConfigurable = (item: IEntryCatalogNode) => item.fixed !== true;
 export const getEntryCatalogDefaultVisibility = (path: string) =>
     getEntryCatalogNode(path)?.defaultVisible?.() ?? true;
+export const getEntryCatalogCustomDefaultVisibility = (path: string) =>
+    getEntryCatalogNode(path)?.customDefaultVisible ?? getEntryCatalogDefaultVisibility(path);
 export const getEntryPaths = () => Array.from(entryMap.entries())
     .filter(([, item]) => isEntryCatalogNodeConfigurable(item))
     .map(([path]) => path);

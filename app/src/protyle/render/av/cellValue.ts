@@ -1,5 +1,23 @@
 import type {IAVSelectedCell} from "./selectionState";
 
+// 按行和字段同步已加载的数据，供后续编辑读取，不依赖选区或单元格是否已渲染。
+export const updateAVCachedCellValue = (view: IAVView, rowID: string, colID: string, value: IAVCellValue) => {
+    const columns = (view as IAVTable).columns || (view as IAVGallery).fields || [];
+    const colIndex = columns.findIndex(column => column.id === colID);
+    const items: Array<IAVRow | IAVGalleryItem> = (view as IAVTable).rows || (view as IAVGallery).cards || [];
+    if (colIndex >= 0) {
+        items.filter(item => item.id === rowID).forEach(item => {
+            const cell = ("cells" in item ? item.cells : item.values)[colIndex];
+            if (cell) {
+                cell.id = value.id || "";
+                cell.value = cloneAVCellValueSnapshot(value);
+                cell.valueType = value.type;
+            }
+        });
+    }
+    view.groups?.forEach(group => updateAVCachedCellValue(group, rowID, colID, value));
+};
+
 export const getAVBlockRefSubtype = (value?: IAVCellValue): "s" | "d" => value?.block?.refSubtype === "d" ? "d" : "s";
 
 export const createEmptyAVValue = (keyID: string, type: TAVCol, blockID?: string) => ({
@@ -158,6 +176,7 @@ export const createAVStableTextCell = (options: {
 export const createAVCellUpdateOperation = (options: {
     valueID?: string;
     avID?: string;
+    blockID?: string;
     keyID: string;
     rowID: string;
     data: IAVCellValue;
@@ -165,6 +184,7 @@ export const createAVCellUpdateOperation = (options: {
     action: "updateAttrViewCell",
     id: options.valueID || "",
     avID: options.avID,
+    ...(options.blockID ? {blockID: options.blockID} : {}),
     keyID: options.keyID,
     rowID: options.rowID,
     data: options.data,

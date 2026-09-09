@@ -65,6 +65,10 @@ func TestBatchNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, false, true)
 }
 
+func TestGetBlockInfoNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, false, false)
+}
+
 func runNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	t.Helper()
 	if os.Getenv("SIYUAN_TEST_NOTEBOOK_RESPONSE_LEASE") == t.Name() {
@@ -128,6 +132,9 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 		paragraph := &ast.Node{Type: ast.NodeParagraph, ID: ast.NewNodeID()}
 		paragraph.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("REVIEW-SECRET-CONTENT")})
 		tree.Root.AppendChild(paragraph)
+		if t.Name() == "TestGetBlockInfoNotebookResponseLease" {
+			tree.Root.SetIALAttr("title", "REVIEW-SECRET-CONTENT")
+		}
 		if _, err = filesys.WriteTree(tree); err != nil {
 			t.Fatal(err)
 		}
@@ -139,6 +146,7 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	engine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, model.RoleAdministrator); c.Next() })
 	engine.POST("/api/block/getBlockKramdown", getBlockKramdown)
 	engine.POST("/api/block/getBlockKramdowns", getBlockKramdowns)
+	engine.POST("/api/block/getBlockInfo", getBlockInfo)
 	writer := &blockedBlockResponseWriter{ResponseRecorder: httptest.NewRecorder(), ready: make(chan []byte, 1), proceed: make(chan struct{})}
 	var releaseWriter sync.Once
 	defer releaseWriter.Do(func() { close(writer.proceed) })
@@ -147,6 +155,9 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 		args["notebook"] = boxIDs[0]
 	}
 	endpoint := "/api/block/getBlockKramdown"
+	if t.Name() == "TestGetBlockInfoNotebookResponseLease" {
+		endpoint = "/api/block/getBlockInfo"
+	}
 	if batch {
 		delete(args, "id")
 		args["ids"] = boxIDs
@@ -196,5 +207,30 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	}
 	if lockedBeforeResponse {
 		t.Fatalf("lock completed before plaintext response was sent: %s", writer.Body.String())
+	}
+	if t.Name() == "TestGetBlockInfoNotebookResponseLease" {
+		for _, explicit := range []bool{false, true} {
+			args := map[string]any{"id": boxIDs[0]}
+			if explicit {
+				args["notebook"] = boxIDs[0]
+			}
+			body, err := json.Marshal(args)
+			if err != nil {
+				t.Fatal(err)
+			}
+			recorder := httptest.NewRecorder()
+			request := httptest.NewRequest(http.MethodPost, endpoint, strings.NewReader(string(body)))
+			request.Header.Set("Content-Type", "application/json")
+			engine.ServeHTTP(recorder, request)
+			var response struct {
+				Code int `json:"code"`
+			}
+			if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+				t.Fatal(err)
+			}
+			if response.Code == 0 || strings.Contains(recorder.Body.String(), "REVIEW-SECRET-CONTENT") {
+				t.Fatalf("locked notebook metadata escaped: %s", recorder.Body.String())
+			}
+		}
 	}
 }

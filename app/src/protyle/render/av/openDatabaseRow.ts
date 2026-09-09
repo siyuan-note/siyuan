@@ -95,6 +95,7 @@ const openMobileDatabaseRow = (protyle: IProtyle, data: IDatabaseRowOpenData, ti
             avID: data.avID,
             itemID: data.itemID,
             valueID: data.valueID,
+            databaseBlockID: data.databaseBlockID,
         });
     };
     context.ghostProtyle = new Protyle(protyle.app, document.createElement("div"), {

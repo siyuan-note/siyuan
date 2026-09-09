@@ -908,6 +908,9 @@ interface ICommand {
     langText?: string, // 显示的文本, 指定后不再使用 langKey 对应的 i18n 文本
     hotkey?: string, // 快捷键，默认为空字符串
     customHotkey?: string,
+    hotkeys?: string[], // 默认快捷键列表，优先于 hotkey
+    when?: (context: ICommandContext) => boolean,
+    enabled?: (context: ICommandContext) => boolean,
     execute?: (context: ICommandContext) => void | Promise<void>
     callback?: (context?: ICommandContext) => void   // 其余回调存在时将不会触发
     globalCallback?: (context?: ICommandContext) => void // 焦点不在应用内时执行的回调
@@ -1039,6 +1042,7 @@ interface IGraphCommon {
 }
 
 interface IKeymapItem {
+    bindings?: Config.IKey["bindings"],
     default: string,
     custom: string
 }

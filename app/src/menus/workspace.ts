@@ -1,6 +1,7 @@
 import {MenuItem} from "./Menu";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
+import {openRemoteConnection} from "../dialog/remoteConnection";
 /// #endif
 import {openHistory} from "../history/history";
 import {getOpenNotebookCount, originalPath, pathPosix, useShell} from "../util/pathName";
@@ -244,12 +245,17 @@ const getZoomSubMenu = () => {
     return submenu;
 };
 
-export const workspaceMenu = (app: App, rect: DOMRect) => {
+export const workspaceMenu = async (app: App, rect: DOMRect) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
         window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_BAR_WORKSPACE) {
         window.siyuan.menus.menu.remove();
         return;
     }
+    let remoteConnections: string[] = [];
+    /// #if !BROWSER
+    remoteConnections = await ipcRenderer.invoke(Constants.SIYUAN_GET, {cmd: "remoteConnections"});
+    const manageConnections = (origin?: string) => openRemoteConnection(origin);
+    /// #endif
     const renderMenu = (workspaces: IWorkspace[]) => {
         window.siyuan.menus.menu.remove();
         window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BAR_WORKSPACE);
@@ -289,12 +295,13 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             type: "submenu",
             submenu: dockMenu
         }).element);
-        if (!window.siyuan.config.readonly && getHostCapabilities().workspaces) {
+        if ((!window.siyuan.config.readonly && getHostCapabilities().workspaces) || !isBrowser()) {
             let workspaceSubMenu: IMenu[];
             /// #if !BROWSER
-            workspaceSubMenu = [{
+            workspaceSubMenu = getHostCapabilities().workspaces ? [{
                 id: "newOrOpenBy",
-                label: `${window.siyuan.languages.new} / ${window.siyuan.languages.openBy}`,
+                label: getHostCapabilities().workspaces
+                    ? `${window.siyuan.languages.new} / ${window.siyuan.languages.openBy}` : window.siyuan.languages.openBy,
                 iconHTML: "",
                 click: async () => {
                     const localPath = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
@@ -315,11 +322,24 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                         }
                     });
                 }
-            }];
-            workspaceSubMenu.push({id: "separator_1", type: "separator"});
+            }] : [];
+            workspaceSubMenu.push({
+                id: "connectRemoteKernel",
+                label: window.siyuan.languages.connectRemoteKernel,
+                icon: "iconCloud",
+                click: () => manageConnections(),
+            });
+            if (workspaces.length + remoteConnections.length > 0) {
+                workspaceSubMenu.push({id: "separator_1", type: "separator"});
+            }
             workspaces.forEach((item: IWorkspace) => {
                 workspaceSubMenu.push(workspaceItem(item) as IMenu);
             });
+            remoteConnections.forEach(origin => workspaceSubMenu.push({
+                label: escapeHtml(window.siyuan.languages.remoteConnection + " · " + origin),
+                icon: "iconCloud",
+                click: () => manageConnections(origin),
+            }));
             /// #else
             workspaceSubMenu = [{
                 id: "new",
@@ -635,15 +655,6 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
-                id: "lockScreen",
-                label: window.siyuan.languages.lockScreen,
-                icon: "iconLock",
-                accelerator: window.siyuan.config.keymap.general.lockScreen.custom,
-                click: () => {
-                    lockScreen();
-                }
-            }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
                 id: "dataHistory",
                 label: window.siyuan.languages.dataHistory,
                 icon: "iconHistory",
@@ -652,6 +663,16 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     openHistory(app);
                 }
             }).element);
+            if (!window.siyuan.config.readonly && getHostCapabilities().importExport) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "dataMigration",
+                    label: window.siyuan.languages.dataMigration,
+                    icon: "iconDatabaseBackup",
+                    click: () => {
+                        openDataMigration();
+                    }
+                }).element);
+            }
             if (getHostCapabilities().importExport) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "templateManager",
@@ -664,16 +685,15 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     }
                 }).element);
             }
-            if (!window.siyuan.config.readonly && getHostCapabilities().importExport) {
-                window.siyuan.menus.menu.append(new MenuItem({
-                    id: "dataMigration",
-                    label: window.siyuan.languages.dataMigration,
-                    icon: "iconDatabaseBackup",
-                    click: () => {
-                        openDataMigration();
-                    }
-                }).element);
-            }
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "lockScreen",
+                label: window.siyuan.languages.lockScreen,
+                icon: "iconLock",
+                accelerator: window.siyuan.config.keymap.general.lockScreen.custom,
+                click: () => {
+                    lockScreen();
+                }
+            }).element);
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
         }
         window.siyuan.menus.menu.append(new MenuItem({

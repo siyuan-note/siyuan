@@ -1,0 +1,21 @@
+body { font-size: 14px; line-height: 1.6; text-align: start; }
+main { max-width: 680px; margin: auto; padding: 48px 24px 24px; }
+h1 { font-size: 22px; margin: 0 0 12px; }
+h2 { font-size: 16px; }
+p { margin: 8px 0; }
+input:not([type="checkbox"]) { box-sizing: border-box; width: 100%; padding: 8px; border: 1px solid #888; border-radius: 4px; background: transparent; color: inherit; }
+button { padding: 6px 12px; border: 1px solid #888; border-radius: 4px; background: transparent; color: inherit; cursor: pointer; }
+button:hover { background: #8882; }
+button:disabled { opacity: .5; cursor: default; }
+#connect { background: #3573f0; color: white; border-color: #3573f0; }
+#addressTip, #restartTip, #trustTip { opacity: .75; }
+#message { overflow-wrap: anywhere; min-height: 24px; }
+fieldset { border: 0; padding: 8px 0; margin: 0; }
+.actions, .entry { display: flex; gap: 8px; margin-top: 12px; }
+.entry { align-items: center; }
+.entry > button:first-child { flex: 1; text-align: start; overflow-wrap: anywhere; min-width: 0; }
+#captchaRow { margin: 8px 0; }
+#captchaImage { vertical-align: middle; max-width: 160px; }
+@media (prefers-color-scheme: dark) {
+    body { color: #dadada; background: #1e1e1e; }
+}

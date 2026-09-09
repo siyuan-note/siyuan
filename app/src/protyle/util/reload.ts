@@ -10,8 +10,10 @@ import {hideKeyboardToolbar} from "../../mobile/util/keyboardToolbar";
 /// #endif
 import {restoreLuteMarkdownSyntax} from "./paste";
 import {invalidateTrackedRanges} from "./trackedRange";
+import {updateBacklinkReferenceVisibility} from "../wysiwyg/backlinkReference";
 
 export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?: boolean) => {
+    updateBacklinkReferenceVisibility(protyle);
     invalidateTrackedRanges(protyle);
     /// #if MOBILE
     hideKeyboardToolbar();

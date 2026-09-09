@@ -597,6 +597,15 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 	}
 
 	var replacements []string
+	importedBlockIDs := map[string]bool{}
+	for _, tree := range trees {
+		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if entering && n.ID != "" {
+				importedBlockIDs[n.ID] = true
+			}
+			return ast.WalkContinue
+		})
+	}
 	for oldID, newID := range blockIDs {
 		replacements = append(replacements, oldID, newID)
 	}
@@ -666,6 +675,10 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 				newData = bytes.ReplaceAll(newData, []byte(oldAvID), []byte(newAvID))
 			}
 			newData = []byte(blockIDReplacer.Replace(string(newData)))
+			newData, err = isolateImportedAttributeViewBindings(newData, importedBlockIDs, encryptedTarget)
+			if err != nil {
+				return
+			}
 			newData, err = rewriteAttributeViewDataAssetReferences(newData, assetRewriteOptions)
 			if err != nil {
 				logging.LogErrorf("rewrite imported attribute view assets [%s] failed: %s", oldPath, err)
@@ -723,6 +736,9 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 				if ast.NodeAttributeView == n.Type {
 					n.AttributeViewID = avIDs[n.AttributeViewID]
 				}
+				if encryptedTarget {
+					retainImportedAttributeViewBindings(n, avIDs)
+				}
 				return ast.WalkContinue
 			})
 
@@ -733,7 +749,11 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		for _, avID := range avIDs {
 			attrViewIDs = append(attrViewIDs, avID)
 		}
-		updateBoundBlockAvsAttribute(attrViewIDs)
+		avBoxID := ""
+		if encryptedTarget {
+			avBoxID = boxID
+		}
+		updateBoundBlockAvsAttribute(attrViewIDs, avBoxID)
 
 		// 插入关联关系 https://github.com/siyuan-note/siyuan/issues/11628
 		relationAvs := map[string]string{}

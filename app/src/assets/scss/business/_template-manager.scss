@@ -145,6 +145,7 @@
   }
 
   &__preview {
+    background-color: var(--b3-theme-background);
     overflow: auto;
     flex: 1 0 auto;
     max-height: 45vh;

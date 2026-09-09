@@ -775,6 +775,7 @@ func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isLargeDoc bool, t
 	if err != nil {
 		return
 	}
+	err = treenode.RefreshTableCellRichProjection(tree.Root)
 	return
 }
 

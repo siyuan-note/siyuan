@@ -7,6 +7,7 @@ import {
 } from "./hasClosest";
 import * as dayjs from "dayjs";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
+import {copyTableCellContent} from "./tableCellRich";
 import {
     fixAdjacentTags,
     getContenteditableElement,
@@ -887,7 +888,7 @@ const processTable = (range: Range, html: string, protyle: IProtyle, blockElemen
     const oldHTML = blockElement.outerHTML;
     blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
     matchedCells.forEach((item, index) => {
-        item.target.innerHTML = item.source.innerHTML;
+        copyTableCellContent(item.target, item.source);
         if (index === matchedCells.length - 1) {
             setLastNodeRange(item.target, range, false);
         }
@@ -933,10 +934,14 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             return;
         }
     }
-    const tablePasteTarget = getTablePasteTarget(range);
-    fixTableRange(range);
+    const tableElement = hasClosestByAttribute(range.startContainer, "data-type", "NodeTable");
+    const isEditorTable = tableElement && protyle.wysiwyg.element.contains(tableElement);
+    const tablePasteTarget = isEditorTable ? getTablePasteTarget(range) : undefined;
+    if (isEditorTable) {
+        fixTableRange(range);
+    }
     let unSpinHTML;
-    if (hasClosestByAttribute(range.startContainer, "data-type", "NodeTable") && !isBlock) {
+    if (isEditorTable && !isBlock) {
         if (hasClosestByTag(range.startContainer, "TABLE")) {
             unSpinHTML = protyle.lute.BlockDOM2InlineBlockDOM(html);
         } else {

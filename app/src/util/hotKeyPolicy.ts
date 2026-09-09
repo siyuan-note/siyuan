@@ -1,3 +1,5 @@
+import {getKeymapBindings, IShortcutKeymap, setKeymapBindings} from "./keymapBindings";
+
 const MODIFIER_KEYS = "⌃⌥⇧⌘";
 const NON_CHARACTER_KEYS = new Set(["←", "↑", "→", "↓", "⇥", "⌫", "⌦", "↩"]);
 const RESERVED_KEYMAPS = new Set(["⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥",
@@ -45,6 +47,15 @@ export const clearDisallowedKeymapItems = (
 ) => {
     let changed = false;
     Object.values(keymap || {}).forEach((item) => {
+        const multi = item as IShortcutKeymap;
+        if (multi.bindings?.version === 1) {
+            const keys = getKeymapBindings(multi);
+            const allowed = keys.filter(key => !isDisallowedTextInputHotkey(key));
+            if (allowed.length !== keys.length || multi.custom !== (allowed[0] || "")) {
+                setKeymapBindings(multi, allowed);
+                changed = true;
+            }
+        }
         if (typeof item.custom === "string") {
             const custom = clearDisallowedTextInputHotkey(item.custom);
             if (custom !== item.custom) {

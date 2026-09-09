@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="color-scheme" content="light dark">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src data:">
+    <title>SiYuan</title>
+    <link rel="stylesheet" href="window.css">
+    <link rel="stylesheet" href="connections.css">
+</head>
+<body>
+    <main>
+        <h1 id="title"></h1>
+        <p id="restartTip"></p>
+        <form id="connectionForm">
+            <label id="addressLabel" for="origin"></label>
+            <input id="origin" type="url" placeholder="https://siyuan.example.com" required autofocus>
+            <p id="addressTip"></p>
+            <label><input id="trust" type="checkbox"><span id="trustLabel"></span></label>
+            <p id="trustTip"></p>
+            <fieldset id="auth" hidden>
+                <input id="authCode" type="password" autocomplete="current-password">
+                <div id="captchaRow" hidden><input id="captcha" autocomplete="off"><button id="refreshCaptcha" type="button"><img id="captchaImage"></button></div>
+                <label><input id="rememberMe" type="checkbox"><span id="rememberLabel"></span></label>
+            </fieldset>
+            <div class="actions"><button id="connect" type="submit"></button><button id="cancel" type="button"></button></div>
+        </form>
+        <p id="message" role="status" aria-live="polite"></p>
+        <h2 id="historyTitle"></h2>
+        <div id="history"></div>
+    </main>
+<svg class="svg" id="min" viewBox="0 0 32 32">
+    <path d="M1.333 14.667h29.333q1.333 0 1.333 1.333v0q0 1.333-1.333 1.333h-29.333q-1.333 0-1.333-1.333v0q0-1.333 1.333-1.333z"></path>
+</svg>
+<svg class="svg" id="close" viewBox="0 0 32 32">
+    <path d="M32 3.221l-12.779 12.779 12.779 12.779-3.221 3.221-12.779-12.779-12.779 12.779-3.221-3.221 12.779-12.779-12.779-12.779 3.221-3.221 12.779 12.779 12.779-12.779z"></path>
+</svg>
+<div class="drag"></div>
+    <script src="window.js"></script>
+    <script src="connections.js"></script>
+</body>
+</html>

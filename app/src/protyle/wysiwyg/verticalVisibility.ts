@@ -1,9 +1,11 @@
-// 滚动区域外的内容仍可通过滚动到达；隐藏裁剪与折叠区域则限制合法落点。
-export const getReachableVerticalRects = (element: Element, rects: DOMRect[]) => {
-    let result = rects.filter(rect => rect.height > 0.5);
+import {getRevealDelta} from "./verticalGeometry";
+
+// 逻辑解析保留原始矩形，并用可滚动到达的投影检查外层裁剪；展示后只接受当前可见的矩形。
+export const getReachableVerticalRects = (element: Element, rects: DOMRect[], requireVisible = false) => {
+    let result = rects.filter(rect => rect.height > 0.5).map(rect => ({original: rect, rect}));
     const view = element.ownerDocument?.defaultView;
     if (!view) {
-        return result;
+        return result.map(item => item.rect);
     }
     let ancestor: Element | null = element;
     while (ancestor && result.length > 0) {
@@ -11,22 +13,40 @@ export const getReachableVerticalRects = (element: Element, rects: DOMRect[]) =>
         if (style.visibility === "hidden" || style.visibility === "collapse" || style.display === "none") {
             return [];
         }
-        const clipX = ["hidden", "clip"].includes(style.overflowX);
-        const clipY = ["hidden", "clip"].includes(style.overflowY);
+        const scrollX = ["auto", "scroll", "overlay"].includes(style.overflowX);
+        const scrollY = ["auto", "scroll", "overlay"].includes(style.overflowY);
+        const clipX = scrollX || ["hidden", "clip"].includes(style.overflowX);
+        const clipY = scrollY || ["hidden", "clip"].includes(style.overflowY);
         if (clipX || clipY) {
             const bounds = ancestor.getBoundingClientRect();
-            result = result.flatMap(rect => {
-                const left = clipX ? Math.max(rect.left, bounds.left) : rect.left;
-                const right = clipX ? Math.min(rect.right, bounds.right) : rect.right;
-                const top = clipY ? Math.max(rect.top, bounds.top) : rect.top;
-                const bottom = clipY ? Math.min(rect.bottom, bounds.bottom) : rect.bottom;
+            const viewportLeft = bounds.left + ancestor.clientLeft;
+            const viewportTop = bounds.top + ancestor.clientTop;
+            const viewportRight = viewportLeft + ancestor.clientWidth;
+            const viewportBottom = viewportTop + ancestor.clientHeight;
+            result = result.flatMap(({original, rect}) => {
+                let deltaX = 0;
+                let deltaY = 0;
+                if (!requireVisible && scrollX) {
+                    const maxScroll = ancestor.scrollWidth - ancestor.clientWidth;
+                    const minScroll = style.direction === "rtl" ? -maxScroll : 0;
+                    deltaX = Math.max(minScroll, Math.min(minScroll + maxScroll, ancestor.scrollLeft +
+                        getRevealDelta(rect.left, rect.right, viewportLeft, viewportRight))) - ancestor.scrollLeft;
+                }
+                if (!requireVisible && scrollY) {
+                    deltaY = Math.max(0, Math.min(ancestor.scrollHeight - ancestor.clientHeight, ancestor.scrollTop +
+                        getRevealDelta(rect.top, rect.bottom, viewportTop, viewportBottom))) - ancestor.scrollTop;
+                }
+                const left = clipX ? Math.max(rect.left - deltaX, viewportLeft) : rect.left;
+                const right = clipX ? Math.min(rect.right - deltaX, viewportRight) : rect.right;
+                const top = clipY ? Math.max(rect.top - deltaY, viewportTop) : rect.top;
+                const bottom = clipY ? Math.min(rect.bottom - deltaY, viewportBottom) : rect.bottom;
                 return right >= left && bottom - top > 0.5 ?
-                    [new DOMRect(left, top, right - left, bottom - top)] : [];
+                    [{original, rect: new DOMRect(left, top, right - left, bottom - top)}] : [];
             });
         }
         ancestor = ancestor.parentElement;
     }
-    return result;
+    return result.map(item => requireVisible ? item.rect : item.original);
 };
 
 export const getFoldedNavigationOwner = (element: Element) => {

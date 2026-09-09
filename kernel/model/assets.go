@@ -533,7 +533,7 @@ func GenerateImage(ctx context.Context, request GenerateImageRequest) (GenerateI
 		return GenerateImageResult{}, errors.New("unsupported image output format")
 	}
 	generated, err := util.NewOpenAIImageAdapter(
-		provider.APIKey, provider.BaseURL, generationModel.Name, Conf.AI.ImageGeneration.RequestTimeout,
+		provider.APIKey, provider.BaseURL, generationModel.Name, Conf.AI.ImageGeneration.RequestTimeout, ResolveAIProviderHeaders(provider),
 	).Generate(ctx, util.GenerateImageRequest{
 		Prompt: prompt, Size: size, Quality: quality, OutputFormat: outputFormat,
 	})

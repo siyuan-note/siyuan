@@ -1,8 +1,21 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getTemplateActionState} from "./actionState";
+import {getTemplateActionEntry, getTemplateActionState} from "./actionState";
 
 describe("template manager action state", () => {
+    it("keeps editing actions on the open file when a directory is selected", () => {
+        const selected = {path: "folder", isDir: true};
+        const editing = {path: "folder/note.md", isDir: false};
+        for (const action of ["save", "preview"]) {
+            const entry = getTemplateActionEntry(action, selected, editing);
+            assert.equal(entry, editing);
+            assert.equal(getTemplateActionState(action, entry, true, false).disabled, false);
+        }
+        for (const action of ["rename", "move", "remove", "open", "new"]) {
+            assert.equal(getTemplateActionEntry(action, selected, editing), selected);
+        }
+        assert.equal(getTemplateActionEntry("save", selected, undefined), undefined);
+    });
     it("keeps native button appearance stable while blocking repeated operations", () => {
         const entry = {path: "note.md", isDir: false};
         for (const action of ["new", "mkdir", "rename", "move", "remove", "refresh", "save", "preview"]) {

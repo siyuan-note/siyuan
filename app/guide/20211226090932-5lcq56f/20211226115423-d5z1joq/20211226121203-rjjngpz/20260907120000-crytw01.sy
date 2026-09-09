@@ -1,0 +1,1580 @@
+{
+	"ID": "20260907120000-crytw01",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260907120000-crytw01",
+		"title": "加密筆記本",
+		"type": "doc",
+		"updated": "20260908162209"
+	},
+	"Children": [
+		{
+			"ID": "20260907120000-tw00001",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-tw00001",
+				"updated": "20260908100000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00002",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260907120000-tw00002",
+				"updated": "20260907120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "加密筆記本用於儲存敏感內容。其文檔、資料文件及原始檔名、資料庫定義和專用索引會加密儲存在磁碟上；一般筆記本維持原有儲存方式。鎖定後，必須使用主密碼才能開啟。"
+				}
+			]
+		},
+		{
+			"ID": "20260908120000-twuse01",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260908120000-twuse01",
+				"updated": "20260908150000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用情境"
+				}
+			]
+		},
+		{
+			"ID": "20260908120000-twuse02",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260908120000-twuse02",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"ID": "20260908120000-twuse03",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908120000-twuse03",
+						"updated": "20260908120000"
+					},
+					"Children": [
+						{
+							"ID": "20260908120000-twuse04",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908120000-twuse04",
+								"updated": "20260908120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "個人隱私資料：儲存日記、醫療記錄、財務資訊、證件資料等不希望以明文留在磁碟上的內容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908120000-twuse05",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908120000-twuse05",
+						"updated": "20260908120000"
+					},
+					"Children": [
+						{
+							"ID": "20260908120000-twuse06",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908120000-twuse06",
+								"updated": "20260908120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "工作機密資料：儲存專案規劃、會議記錄、客戶資料、研究材料和其他需要限制本機存取的內容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908120000-twuse07",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908120000-twuse07",
+						"updated": "20260908120000"
+					},
+					"Children": [
+						{
+							"ID": "20260908120000-twuse08",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908120000-twuse08",
+								"updated": "20260908120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "敏感知識庫與 AI 輔助：解鎖後使用 AI 進行摘要、問答、潤飾和整理；使用雲端 AI 服務時，相關內容可能傳送給所設定的服務供應商，請依隱私需求選擇模型和部署方式"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-twrev01",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-twrev01",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-twrev02",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-twrev02",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "裝置與備份防護：在裝置遺失、遭竊或備份媒體外洩時，降低他人直接讀取鎖定筆記本內容的風險"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908120000-twuse09",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908120000-twuse09",
+						"updated": "20260908120000"
+					},
+					"Children": [
+						{
+							"ID": "20260908120000-twuse10",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908120000-twuse10",
+								"updated": "20260908120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "多裝置與長期保存：透過資料同步使用加密後的持久化資料，並配合主密碼和金鑰備份在其他裝置上復原存取"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00003",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-tw00003",
+				"updated": "20260908150000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用前須知"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00004",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-tw00004",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-tw00005",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00005",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00006",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00006",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "主密碼無法找回。忘記主密碼後，任何人都無法復原內容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-tw00007",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00007",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00008",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00008",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "金鑰備份不能取代主密碼。復原資料時通常需要相符的金鑰備份和主密碼，請分別妥善保管"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-tw00009",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00009",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00010",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00010",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密筆記本在鎖定狀態下提供最強的保護。解鎖期間，獲得主應用程式授權的插件、API、MCP 工具和 AI 智能體可以讀取其中內容"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-twrev03",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-twrev03",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-twrev04",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-twrev04",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密主要保護磁碟上的持久化內容，並在鎖定後阻止透過受支援入口存取內容；筆記本名稱、目錄結構、檔案數量和大小、修改時間、資料文件副檔名等中繼資料仍可能可見"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-twrev05",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-twrev05",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-twrev06",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-twrev06",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "鎖定只會盡力清理應用程式可控制的明文快取和暫存檔案，不保證抹除作業系統交換區、休眠檔案、當機傾印或儲存快照中的瞬時副本；主動導出的檔案、剪貼簿、螢幕截圖和列印內容需要自行保護"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-twrev07",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-twrev07",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-twrev08",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-twrev08",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "主密碼派生通常需要約 1 秒，解鎖時還會重建專用索引，大型筆記本可能需要更久；上傳大型資料文件會占用更多記憶體，瀏覽資料文件時每次請求都需要重新解密"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00011",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-tw00011",
+				"updated": "20260908150000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "啟用並建立"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00012",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260907120000-tw00012",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "前往 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "鑑權"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "加密筆記本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，開啟「啟用加密筆記本」，設定並確認主密碼，然後確認風險提示。建議使用密碼管理器產生並儲存至少 12 位且混合大小寫字母、數字和符號的高強度密碼。"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00013",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-tw00013",
+				"updated": "20260908100000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-tw00014",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00014",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00015",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00015",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "啟用後立即導出金鑰備份，並在工作空間之外儲存一份獨立副本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-tw00016",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00016",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00017",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00017",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "桌面端前往 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "文件"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "更多"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "新建加密筆記本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-tw00018",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00018",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00019",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00019",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "行動端前往 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "右側欄"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "建立"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "新建加密筆記本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-tw00020",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00020",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00021",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00021",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "輸入筆記本名稱和主密碼。建立完成後，筆記本會直接開啟"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00022",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-tw00022",
+				"updated": "20260908150000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "解鎖和鎖定"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00023",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-tw00023",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-tw00024",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00024",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00025",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00025",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在文件面板中點擊已關閉的加密筆記本，輸入主密碼即可解鎖並開啟。每個加密筆記本分別解鎖"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-tw00026",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00026",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00027",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00027",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "關閉加密筆記本即鎖定。關閉前會先儲存尚未寫入的編輯和檔案歷史；鎖定會停止新的內容存取，等待或取消進行中的任務，撤銷應用程式管理的金鑰存取並關閉資料庫連線，並盡力清理應用程式管理的明文快取、暫存檔案和存取權杖"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-tw00028",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00028",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00029",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00029",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "應用程式重新啟動後，所有加密筆記本均保持鎖定，需要重新輸入主密碼"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00030",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260907120000-tw00030",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可以在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "鑑權"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "加密筆記本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中設定自動鎖定的閒置分鐘數。目前工作空間中的介面操作會重新整理所有已解鎖加密筆記本的計時，背景同步、索引等任務不會自動重新整理；設定為 0 表示停用自動鎖定。"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00031",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-tw00031",
+				"updated": "20260908150000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "主密碼和金鑰備份"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00032",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-tw00032",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-tw00033",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00033",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00034",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00034",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "所有加密筆記本共用一個主密碼，但每個筆記本使用獨立的資料金鑰。解鎖一個筆記本不會解鎖其他筆記本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-tw00035",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00035",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00036",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00036",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "修改主密碼前必須關閉所有加密筆記本。修改操作只會重新保護各筆記本的資料金鑰，不會重新加密文檔內容；完成後系統會自動更新工作空間中的金鑰備份，還應立即導出新的金鑰備份"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-twrev09",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-twrev09",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-twrev10",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-twrev10",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "如果舊主密碼和保留舊版金鑰資訊的同步副本、備份或歷史快照同時外洩，舊主密碼仍可能解密使用同一資料金鑰的現有內容。懷疑舊主密碼外洩時，應將內容導出為明文後導入使用新資料金鑰的新加密筆記本，並在確認遷移成功後安全刪除明文檔案"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-tw00037",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00037",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00038",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00038",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "本機設定遺失、新裝置需要復原或介面提示設定需要復原時，導入金鑰備份並輸入與其相符的主密碼。金鑰備份本身不包含主密碼"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-twrev11",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-twrev11",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-twrev12",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-twrev12",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "系統可以驗證金鑰備份是否完整，但不能判斷哪個備份最新。應在工作空間之外保留帶有版本記錄的獨立金鑰備份"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-tw00039",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00039",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00040",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00040",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "存在加密筆記本或仍依賴目前金鑰的可復原歷史時，系統會拒絕停用加密筆記本功能，以免資料永久失去存取能力"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00041",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260907120000-tw00041",
+				"updated": "20260907120000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "修改、導出或導入金鑰均在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "鑑權"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "加密筆記本"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中進行。"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00042",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-tw00042",
+				"updated": "20260908150000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "同步、歷史、導入和導出"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00043",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-tw00043",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-tw00044",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00044",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00045",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00045",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "資料同步儲存和傳輸加密後的持久化資料，並同步金鑰備份；新裝置會自動復原啟用狀態，但解鎖狀態不會同步，仍需輸入主密碼"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-tw00046",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00046",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00047",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00047",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文檔歷史支援加密資料，檢視或回復時需要先解鎖對應筆記本；復原已刪除筆記本還需要相符的金鑰備份和主密碼"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-twrev13",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-twrev13",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-twrev14",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-twrev14",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "支援向已解鎖的加密筆記本導入 .sy.zip 和 Markdown，內容會在寫入磁碟前加密"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-tw00048",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00048",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00049",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00049",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "僅在解鎖狀態下支援導出，導出的 .sy.zip、HTML、Word、PDF 和 Markdown 等檔案均為明文；導出後應按一般敏感檔案保護、移動或刪除"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00050",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-tw00050",
+				"updated": "20260908162209"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "功能範圍"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00051",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-tw00051",
+				"updated": "20260908150000"
+			},
+			"HeadingLevel": 3,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "支援的功能"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00052",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-tw00052",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-tw00053",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00053",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00054",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00054",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "解鎖後可在筆記本內正常編輯文檔、使用內容區塊引用、反向連結、搜尋、資料庫、導入、歷史和導出"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-tw00055",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00055",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00056",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00056",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "解鎖期間，插件、API、MCP 工具和 AI 智能體可以讀取內容區塊、列出文檔並使用筆記本內全文搜尋"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00057",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-tw00057",
+				"updated": "20260908162209"
+			},
+			"HeadingLevel": 3,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "不支援的功能"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00058",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-tw00058",
+				"updated": "20260908162209"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-tw00059",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00059",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00060",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00060",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密內容不進入全局搜尋、全局關係圖、語意搜尋和嵌入向量化"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-tw00061",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00061",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00062",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00062",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不支援跨一般筆記本與加密筆記本邊界，或跨兩個加密筆記本進行內容區塊引用、移動、文檔轉標題和資料庫鏡像"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-tw00063",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00063",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00064",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00064",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "發布服務無論筆記本是否解鎖都無法列出或讀取其內容，發布密碼和可見性設定也無法為其啟用發布；此外不支援閃卡、書籤、標籤、資料文件重新命名、原始檔案 API、WebDAV 和內核命令列操作"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908162209-0500uig",
+					"Type": "NodeListItem",
+					"Properties": {
+						"id": "20260908162209-0500uig",
+						"updated": "20260908162209"
+					},
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Children": [
+						{
+							"ID": "20260908162209-zqfy1am",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908162209-zqfy1am",
+								"updated": "20260908162209"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密筆記本中的資源檔案不支援文字辨識"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-twrev15",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-twrev15",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-twrev16",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-twrev16",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密筆記本不參與全局未引用資料文件和未引用資料庫清理"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00065",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260907120000-tw00065",
+				"updated": "20260908150000"
+			},
+			"HeadingLevel": 2,
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用建議"
+				}
+			]
+		},
+		{
+			"ID": "20260907120000-tw00066",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260907120000-tw00066",
+				"updated": "20260908150000"
+			},
+			"Children": [
+				{
+					"ID": "20260907120000-tw00067",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00067",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00068",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00068",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "設定合適的自動鎖定時間，不使用時及時關閉加密筆記本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-tw00069",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00069",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00070",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00070",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不要直接編輯工作空間中的加密檔案，也不要在檔案系統中重新命名加密資料文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-tw00071",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00071",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00072",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00072",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "修改主密碼、遷移裝置或調整同步設定後，確認工作空間之外儲存有帶版本記錄的最新金鑰備份"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260907120000-tw00073",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260907120000-tw00073",
+						"updated": "20260908100000"
+					},
+					"Children": [
+						{
+							"ID": "20260907120000-tw00074",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260907120000-tw00074",
+								"updated": "20260908100000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不要把主密碼和唯一一份金鑰備份儲存在同一個位置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260908150000-twrev17",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260908150000-twrev17",
+						"updated": "20260908150000"
+					},
+					"Children": [
+						{
+							"ID": "20260908150000-twrev18",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260908150000-twrev18",
+								"updated": "20260908150000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "非敏感內容建議儲存在一般筆記本中，避免不必要的加解密、索引重建和資料文件處理開銷"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

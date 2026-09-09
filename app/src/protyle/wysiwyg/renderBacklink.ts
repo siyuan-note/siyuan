@@ -18,8 +18,12 @@ import {
 } from "../util/viewFold";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 import {IBacklinkAVTarget, prepareBacklinkAV} from "../render/av/backlink";
+import {markBacklinkReference, updateBacklinkReferenceVisibility} from "./backlinkReference";
+import {setBacklinkTypeFoldExpandHandler, updateBacklinkTypeFolds} from "./backlinkTypeFold";
 
 interface IBacklinkData {
+    type?: string,
+    referenceBlockID?: string,
     attributeViewTargets?: IBacklinkAVTarget[],
     id?: string,
     revision?: string,
@@ -29,6 +33,7 @@ interface IBacklinkData {
 }
 
 interface IBacklinkDOMRecord {
+    referenceBlockID: string,
     revision: string,
     anchor: HTMLElement,
     targets: IBacklinkAVTarget[],
@@ -57,10 +62,13 @@ const removeBacklinkDOMRecord = (record: IBacklinkDOMRecord) => {
 const createBacklinkDOMRecord = (item: IBacklinkData, index: number, id: string) => {
     const template = document.createElement("template");
     template.innerHTML = genBreadcrumb(item.blockPaths, false, index, id) + setBacklinkFold(item.dom, item.expand);
+    markBacklinkReference(template.content, item.referenceBlockID);
     const nodes = Array.from(template.content.childNodes);
     (nodes[0] as HTMLElement).setAttribute("data-backlink-revision", item.revision || "");
+    (nodes[0] as HTMLElement).setAttribute("data-backlink-type", item.type || "");
     return {
         record: {
+            referenceBlockID: item.referenceBlockID || "",
             revision: item.revision || "",
             anchor: nodes[0] as HTMLElement,
             targets: item.attributeViewTargets || [],
@@ -84,6 +92,7 @@ const renderBacklinkDOMNodes = (protyle: IProtyle, nodes: Node[], record: IBackl
 };
 
 export const renderBacklink = (protyle: IProtyle, backlinkData: IBacklinkData[]) => {
+    updateBacklinkReferenceVisibility(protyle);
     protyle.block.showAll = true;
     const element = protyle.wysiwyg.element;
     let records = backlinkDOMRecords.get(protyle);
@@ -92,6 +101,13 @@ export const renderBacklink = (protyle: IProtyle, backlinkData: IBacklinkData[])
         backlinkDOMRecords.set(protyle, records);
         element.replaceChildren();
     }
+    setBacklinkTypeFoldExpandHandler(protyle, id => {
+        const record = records.get(id);
+        if (record) {
+            // 展开后重新计算数据库等内容的布局，避免沿用隐藏时的尺寸。
+            void renderBacklinkDOMNodes(protyle, getBacklinkDOMNodes(record.anchor), record);
+        }
+    });
 
     const ids = new Set(backlinkData.map((item, index) => item.id || `legacy-${index}`));
     records.forEach((record, id) => {
@@ -157,7 +173,10 @@ export const renderBacklink = (protyle: IProtyle, backlinkData: IBacklinkData[])
     if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
         disabledProtyle(protyle);
     }
-    return Promise.all(applyPromises).then(() => undefined);
+    updateBacklinkTypeFolds(protyle);
+    return Promise.all(applyPromises).then(() => {
+        updateBacklinkTypeFolds(protyle);
+    });
 };
 
 // 传递型折叠处理
@@ -223,12 +242,14 @@ export const loadBreadcrumb = (protyle: IProtyle, element: HTMLElement) => {
         const record = backlinkDOMRecords.get(protyle)?.get(element.parentElement.dataset.backlinkId);
         getBacklinkDOMNodes(element.parentElement).forEach(node => {
             if (node instanceof HTMLElement) {
+                markBacklinkReference(node, record?.referenceBlockID);
                 prepareBacklinkAV(node, record?.targets || []);
             }
         });
         avRender(element.parentElement.parentElement, protyle);
         blockRender(protyle, element.parentElement.parentElement);
         void applyViewFoldStates(protyle);
+        updateBacklinkTypeFolds(protyle);
         if (getResponse.data.isSyncing) {
             disabledForeverProtyle(protyle);
         } else if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {

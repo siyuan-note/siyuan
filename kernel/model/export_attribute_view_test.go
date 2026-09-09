@@ -126,7 +126,10 @@ func TestAttributeViewExportDoesNotCrossEncryptedBoundary(t *testing.T) {
 		t.Fatal("CSV export crossed from a normal document to an encrypted attribute view")
 	}
 
-	exported := exportTree(tree, false, false, true, 0, 0, 0, "", "", "", "", false, "", false, false, false)
+	exported, exportErr := exportTree(tree, false, false, false, true, 0, 0, 0, "", "", "", "", false, "", false, false, false)
+	if exportErr != nil {
+		t.Fatal(exportErr)
+	}
 	if nodes := exported.Root.ChildrenByType(ast.NodeAttributeView); 1 != len(nodes) {
 		t.Fatal("document export resolved an encrypted attribute view from a normal document")
 	}

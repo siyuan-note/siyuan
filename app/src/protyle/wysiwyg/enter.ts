@@ -760,6 +760,20 @@ const removeEmptyNode = (newElement: Element) => {
 
 export const softEnter = (range: Range, nodeElement: HTMLElement, protyle: IProtyle,
                           trackedRangeInsertion?: ITrackedRangeInsertion) => {
+    if (range.collapsed && nodeElement.getAttribute("data-type") === "NodeParagraph") {
+        const editableElement = getContenteditableElement(nodeElement);
+        if (editableElement?.contains(range.startContainer)) {
+            const prefixRange = range.cloneRange();
+            prefixRange.setStart(editableElement, 0);
+            const prefix = prefixRange.cloneContents();
+            // 段落开头和空段落不插入软换行，列表项内的段落遵循相同规则。
+            // https://github.com/siyuan-note/siyuan/issues/12200
+            if (getTextWithoutSemanticMarkers(prefix).split(Constants.ZWSP).join("") === "" &&
+                !prefix.querySelector("br, img, .img, .emoji, [data-type='inline-math']")) {
+                return true;
+            }
+        }
+    }
     let startElement = range.startContainer as HTMLElement;
     const nextSibling = hasNextSibling(startElement) as Element;
     if (nodeElement.getAttribute("data-type") === "NodeAttributeView") {

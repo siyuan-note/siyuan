@@ -1,6 +1,7 @@
 import {normalizePluginHotkey} from "../util/hotKeyPolicy";
+import {getKeymapBindings, setKeymapBindings} from "../util/keymapBindings";
 
-export const updatePluginKeymap = (pluginName: string, key: string, hotkey: unknown) => {
+export const updatePluginKeymap = (pluginName: string, key: string, hotkey: unknown, hotkeys?: string[]) => {
     if (!window.siyuan.config.keymap.plugin) {
         window.siyuan.config.keymap.plugin = {};
     }
@@ -18,10 +19,24 @@ export const updatePluginKeymap = (pluginName: string, key: string, hotkey: unkn
         keymapItem.default = normalized.defaultHotkey;
         keymapItem.custom = normalized.customHotkey;
     }
+    if (keymapItem?.bindings?.version === 1) {
+        const keys = getKeymapBindings(keymapItem).map(key => normalizePluginHotkey(key).defaultHotkey).filter(Boolean);
+        setKeymapBindings(keymapItem, keys);
+    }
     normalized.ignoredHotkeys.forEach((ignoredHotkey) => {
         console.warn(`Plugin ${pluginName} ignored disallowed hotkey "${ignoredHotkey}" for "${key}".`);
     });
-    return window.siyuan.config.keymap.plugin[pluginName][key];
+    const item = window.siyuan.config.keymap.plugin[pluginName][key];
+    if (Array.isArray(hotkeys) && (!item.bindings || item.bindings.version === 1)) {
+        const defaults = [...new Set(hotkeys.map(key => normalizePluginHotkey(key).defaultHotkey).filter(Boolean))];
+        setKeymapBindings(item, keymapItem ? getKeymapBindings(item) : defaults);
+        item.bindings.defaults = defaults;
+        item.default = defaults[0] || "";
+    } else if (!Array.isArray(hotkeys) && item.bindings?.version === 1) {
+        // 未声明默认列表时，重置使用本次注册的单个默认快捷键。
+        delete item.bindings.defaults;
+    }
+    return item;
 };
 
 export const ensurePluginKeymap = (pluginName: string, key: string, hotkey: unknown) => {
@@ -40,4 +55,7 @@ export const setPluginKeymapCustom = (keymap: Config.IKeymapPlugin, pluginName: 
         custom: "",
     };
     keymap[pluginName][key].custom = custom;
+    if (keymap[pluginName][key].bindings) {
+        setKeymapBindings(keymap[pluginName][key], custom ? [custom] : []);
+    }
 };

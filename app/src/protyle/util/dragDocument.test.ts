@@ -10,6 +10,7 @@ import {
     getSuperBlockResizeDropTarget,
     getTopListDragTarget,
     isAttributeViewTitleTarget,
+    isCopyBlockDrag,
     isDragTargetInSource,
     isSameDragEditor,
     isSameSiblingMove,
@@ -19,6 +20,38 @@ import {
     stringifyBlockDragData,
     uniqueDragIds
 } from "./dragDocument";
+
+describe("lightweight editor block dragging", () => {
+    const editor = {closest: (): Element => null} as unknown as Element;
+    const otherEditor = {closest: (): Element => null} as unknown as Element;
+    const fragment = {closest: (selector: string) =>
+        selector === ".protyle-lite-fragment" ? {} : null} as unknown as Element;
+
+    it("copies temporary cell blocks into the outer document", () => {
+        assert.equal(isCopyBlockDrag(false, false, editor, fragment), true);
+        assert.equal(isCopyBlockDrag(false, true, editor, fragment), true);
+    });
+
+    it("moves within a cell and copies between fragments", () => {
+        assert.equal(isCopyBlockDrag(true, false, fragment, fragment), false);
+        assert.equal(isCopyBlockDrag(true, false, editor, fragment), true);
+    });
+
+    it("moves local blocks and preserves explicit copies", () => {
+        assert.equal(isCopyBlockDrag(true, false, editor, editor), false);
+        assert.equal(isCopyBlockDrag(true, true, editor, editor), true);
+    });
+
+    it("copies external and unavailable sources into lightweight editors", () => {
+        assert.equal(isCopyBlockDrag(true, false, editor, otherEditor), true);
+        assert.equal(isCopyBlockDrag(true, false, editor), true);
+    });
+
+    it("preserves normal editor move semantics", () => {
+        assert.equal(isCopyBlockDrag(false, false, editor, otherEditor), false);
+        assert.equal(isCopyBlockDrag(false, true, editor, otherEditor), true);
+    });
+});
 
 const createClassElement = (classNames: string[], parentElement: Element = null, dataID = "") => ({
     nodeType: 1,

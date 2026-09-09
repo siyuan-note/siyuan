@@ -1,3 +1,4 @@
+import {createListDragTarget} from "./listDragTarget";
 import {focusBlock, focusByRange, getRangeByPoint} from "./selection";
 import {
     getContenteditableElement,
@@ -37,7 +38,7 @@ import {updatePanelByEditor} from "../../editor/util";
 /// #endif
 import {blockRender} from "../render/blockRender";
 /// #else
-import {uploadFiles, uploadLocalFiles} from "../upload";
+import {uploadLocalFiles} from "../upload";
 import {getLocalDropFiles, hasDataTransferFiles} from "../upload/localDropFiles";
 import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
@@ -50,6 +51,7 @@ import {isFoldedHeading, shouldUnfoldMovedHeading} from "./foldHeadingMove";
 import {webUtils} from "electron";
 import {dragUpload} from "../render/av/asset";
 /// #endif
+import {dragUploadFiles} from "../render/av/asset";
 import {addDragFill, getTypeByCellElement} from "../render/av/cell";
 import {insertGalleryItemAnimation} from "../render/av/gallery/item";
 import {clearSelect} from "./clear";
@@ -66,6 +68,8 @@ import {
     getSuperBlockResizeDropTarget,
     getTopListDragTarget,
     isAttributeViewTitleTarget,
+    isCopyBlockDrag,
+    isFragmentBlockDrag,
     isDragTargetInSource,
     isSameDragEditor,
     isSameSiblingMove,
@@ -1055,6 +1059,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     let kanbanGroupDragHeight = "";
     const isLiteTabDrag = (event: DragEvent) => protyle.lite &&
         event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB);
+    const shouldCopyBlockDrag = (event: DragEvent) => isCopyBlockDrag(protyle.lite, event.ctrlKey,
+        protyle.wysiwyg.element, window.siyuan.dragElement);
     const clearKanbanGroupDragover = () => {
         if (kanbanGroupDragoverElement) {
             kanbanGroupDragoverElement.classList.remove("dragover__left", "dragover__right");
@@ -1382,8 +1388,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         event.preventDefault();
     };
     editorElement.addEventListener("drop", async (event: DragEvent & { target: HTMLElement }) => {
-        // lite 模式不落盘，拖拽块时强制复制语义（避免移动操作删除源块）。
-        const isCopyDrag = protyle.lite || event.ctrlKey;
+        const isCopyDrag = shouldCopyBlockDrag(event);
         counter = 0;
         hideDragTip();
         window.siyuan.dragTitle = "";
@@ -1505,6 +1510,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             targetElement.removeAttribute("select-end");
         }
         if (gutterType) {
+            // 片段中的临时块不能作为正文的引用或嵌入查询目标。
+            if ((event.altKey || event.shiftKey) && isFragmentBlockDrag(window.siyuan.dragElement)) {
+                event.preventDefault();
+                event.stopPropagation();
+                clearBlockDragoverTarget();
+                return;
+            }
             // gutter 或反链面板拖拽
             const sourceElements: Element[] = [];
             const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
@@ -2201,32 +2213,23 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         /// #if !BROWSER
                         if (!getHostCapabilities().localFileSystem) {
                             focusBlock(hasClosestBlock(cellElement) as HTMLElement);
-                            uploadFiles(protyle, event.dataTransfer.files, undefined, undefined, undefined, {
-                                source: "drop",
-                                target: "av-cell",
-                                position: {x: event.clientX, y: event.clientY},
-                            });
+                            dragUploadFiles(event.dataTransfer.files, protyle, cellElement,
+                                {x: event.clientX, y: event.clientY});
                         } else {
                             const files = getLocalDropFiles(event.dataTransfer.files,
                                 file => webUtils.getPathForFile(file));
                             if (!files) {
                                 focusBlock(hasClosestBlock(cellElement) as HTMLElement);
-                                uploadFiles(protyle, event.dataTransfer.files, undefined, undefined, undefined, {
-                                    source: "drop",
-                                    target: "av-cell",
-                                    position: {x: event.clientX, y: event.clientY},
-                                });
+                                dragUploadFiles(event.dataTransfer.files, protyle, cellElement,
+                                    {x: event.clientX, y: event.clientY});
                             } else {
                                 dragUpload(files, protyle, cellElement, {x: event.clientX, y: event.clientY});
                             }
                         }
                         /// #else
                         focusBlock(hasClosestBlock(cellElement) as HTMLElement);
-                        uploadFiles(protyle, event.dataTransfer.files, undefined, undefined, undefined, {
-                            source: "drop",
-                            target: "av-cell",
-                            position: {x: event.clientX, y: event.clientY},
-                        });
+                        dragUploadFiles(event.dataTransfer.files, protyle, cellElement,
+                            {x: event.clientX, y: event.clientY});
                         /// #endif
                     }
                 }
@@ -2241,48 +2244,17 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         kanbanGroupDragHeight = "";
         clearBlockDragoverTarget(document);
     });
-    let dragCache: { nodeId: string, indent: number, rgb: { r: number, g: number, b: number }, guides: string };
+    const getListDragTarget = createListDragTarget();
     let disabledPosition: string;
+    const getDragTargetText = (element: HTMLElement) => {
+        const text = getContenteditableElement(element)?.textContent?.trim() || "";
+        const characters = Array.from(text);
+        return characters.length > 20 ? characters.slice(0, 20).join("") + "..." : text;
+    };
     // 列表项目标的插入点与提示处理：设置 class、CSS 变量、showDragTip
     const applyLiTarget = (htmlTarget: HTMLElement, event: DragEvent, canDropAsSibling = true): void => {
         clearBlockDragoverTarget();
-        const nodeId = htmlTarget.getAttribute("data-node-id");
-        // Cache expensive computations per target element (never changes while hovering same element)
-        if (!dragCache || dragCache.nodeId !== nodeId) {
-            const contentBlock = Array.from(htmlTarget.children).find(c => c.hasAttribute("data-node-id")) as HTMLElement;
-            const indent = contentBlock ? parseFloat(getComputedStyle(contentBlock).marginLeft) || 34 : 34;
-            const depth = getListDepth(htmlTarget);
-            const computedColor = getComputedStyle(htmlTarget).getPropertyValue("--b3-theme-primary-lighter").trim();
-            const rgb = parseHexColor(computedColor) || {r: 53, g: 115, b: 217};
-            let siblingGuides = "";
-            for (let n = 1; n <= depth; n++) {
-                if (siblingGuides) siblingGuides += ", ";
-                // guide 竖线透明度从 0.5（最近）渐变到 0.1（最远），均低于插入线（0.6）以突出目标位置
-                const opacity = depth <= 1 ? 0.3 : 0.5 - (n - 1) / (depth - 1) * 0.4;
-                siblingGuides += `${-n * indent}px 0 0 0 rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity.toFixed(2)})`;
-            }
-            dragCache = {nodeId, indent, rgb, guides: siblingGuides || "none"};
-        }
-        const {indent, rgb, guides} = dragCache;
-
-        const liRect = htmlTarget.getBoundingClientRect();
-        const isRTL = getComputedStyle(htmlTarget).direction === "rtl";
-        const offsetX = isRTL ? (liRect.right - event.clientX) : (event.clientX - liRect.left);
-        // 用内容块（不含子列表）的 rect 判断上下半，避免有子列表时下半区域过小难以命中
-        const contentBlockForRect = Array.from(htmlTarget.children).find(c =>
-            c.hasAttribute("data-node-id") && !c.classList.contains("list")) as HTMLElement;
-        const contentRect = contentBlockForRect ? contentBlockForRect.getBoundingClientRect() : liRect;
-        const isBottom = event.clientY > contentRect.top + contentRect.height / 2;
-        // 列表首项的上半保留顶部插入点；其余列表项整个区域统一使用底部插入点，避免下半区域过小难以命中
-        const isFirstLi = !htmlTarget.previousElementSibling || !htmlTarget.previousElementSibling.classList.contains("li");
-        let position = "bottom";
-        if (isFirstLi && !isBottom) {
-            position = "top";
-        }
-        // 有子列表时鼠标无法到达子列表区域（elementFromPoint 会命中子项的 .li），
-        // 因此有子列表的列表项内容区域全部作为 sibling（在目标后插入同级），无子列表时用 offsetX 判断 child/sibling
-        const hasChildList = !!Array.from(htmlTarget.children).find(c => c.classList.contains("list"));
-        const isChild = position === "bottom" && !hasChildList && offsetX >= indent;
+        const {position, isChild, apply} = getListDragTarget(htmlTarget, event);
         if (!canDropAsSibling && !isChild) {
             hideDragTip();
             return;
@@ -2299,31 +2271,19 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             hideDragTip();
             return;
         }
-        const className = `dragover__${position}--${isChild ? "child" : "sibling"}`;
 
-        htmlTarget.classList.add(className);
+        apply();
         dragoverElement = htmlTarget;
-        htmlTarget.style.setProperty("--drag-indent", `${indent}px`);
-        htmlTarget.style.setProperty("--drag-line-left", isChild ? `${indent}px` : "0");
-        // guide 竖线在 sibling 和 child 时都显示（sibling 时 ::before 为 transparent 不会与 guide 线重叠）
-        htmlTarget.style.setProperty("--drag-guides", guides);
-        // ::before 目标标记仅在成为子项时显示，sibling 时由横线独占该区域避免半透明叠加变深
-        htmlTarget.style.setProperty("--drag-base-bg",
-            isChild ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)` : "transparent");
-        // 横向插入线使用独立颜色，始终显示
-        htmlTarget.style.setProperty("--drag-line-bg",
-            `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.6)`);
         highlightByLevel(editorElement, htmlTarget);
         // 提示文案：修饰键显示对应操作，无修饰键显示插入位置
-        const targetText = (getContenteditableElement(htmlTarget)?.textContent?.trim() || "").slice(0, 20);
+        const targetText = getDragTargetText(htmlTarget);
         let action: string;
         if (event.altKey || (event.shiftKey && protyle.lite)) {
             // Alt=引用；lite 模式 Shift 也为引用
             action = window.siyuan.languages.dragTipRef;
         } else if (event.shiftKey) {
             action = window.siyuan.languages.dragTipEmbed;
-        } else if (event.ctrlKey || protyle.lite) {
-            // Ctrl=创建副本；lite 模式无修饰键也为复制
+        } else if (shouldCopyBlockDrag(event)) {
             action = window.siyuan.languages.duplicateCopy;
         } else if (isChild) {
             action = window.siyuan.languages.dragTipListItemChild.replace("${x}", targetText);
@@ -2338,11 +2298,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     let cachedIsCol = false;
     editorElement.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
         if (protyle.disabled || isLiteTabDrag(event) ||
+            ((event.altKey || event.shiftKey) && isFragmentBlockDrag(window.siyuan.dragElement)) ||
             event.dataTransfer.types.includes(Constants.SIYUAN_DROP_EDITOR)) {
             event.preventDefault();
             event.stopPropagation();
             event.dataTransfer.dropEffect = "none";
             hideDragTip();
+            clearBlockDragoverTarget();
             return;
         }
         if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_BLOCK_REF)) {
@@ -2475,8 +2437,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 action = window.siyuan.languages.dragTipRef;
             } else if (event.shiftKey) {
                 action = window.siyuan.languages.dragTipEmbed;
-            } else if (event.ctrlKey || protyle.lite) {
-                // Ctrl=创建副本；lite 模式无修饰键也为复制（不移动源块）
+            } else if (shouldCopyBlockDrag(event)) {
                 action = window.siyuan.languages.duplicateCopy;
             } else {
                 action = window.siyuan.languages.move;
@@ -2887,7 +2848,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     let displayText = cachedTargetText;
                     if (!displayText && targetElement.classList.contains("list")) {
                         const firstLi = targetElement.querySelector(":scope > .li");
-                        displayText = getContenteditableElement(firstLi as HTMLElement)?.textContent?.trim() || "";
+                        displayText = getDragTargetText(firstLi as HTMLElement);
                     }
                     // 默认移动（无修饰键、非 AV 目标、普通块源、非超级块本身）时，更新下半为带目标名的位置文案
                     if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && !targetElement.classList.contains("sb")) {
@@ -2960,7 +2921,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     targetElement.classList.add(edgeClass);
                     addDragover(targetElement);
                     const sbFirstBlock = targetElement.querySelector("[data-node-id]") as HTMLElement;
-                    const sbText = getContenteditableElement(sbFirstBlock)?.textContent?.trim() || "";
+                    const sbText = getDragTargetText(sbFirstBlock);
                     if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && !isAvTarget && sbText) {
                         const key = isSbLeftEdge
                             ? window.siyuan.languages.dragTipMoveTargetFront
@@ -3101,13 +3062,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             dragoverElement = targetElement;
             // 目标变化时更新缓存
-            cachedTargetText = getContenteditableElement(targetElement as HTMLElement)?.textContent?.trim() || "";
+            cachedTargetText = getDragTargetText(targetElement as HTMLElement);
             cachedIsCol = !!hasClosestByAttribute(targetElement as HTMLElement, "data-sb-layout", "col");
             highlightColColumn(targetElement as HTMLElement);
         }
         // 默认移动（无修饰键、非 AV 目标、普通块源）时，更新下半为带目标名的位置文案
         if (!event.altKey && !event.shiftKey && !event.ctrlKey && gutterType && !isAvSubType && targetElement && !isAvTarget && point.className) {
-            const targetText = getContenteditableElement(targetElement as HTMLElement)?.textContent?.trim() || "";
+            const targetText = getDragTargetText(targetElement as HTMLElement);
             const isFront = point.className === "dragover__top" || point.className === "dragover__left";
             const isBack = point.className === "dragover__bottom" || point.className === "dragover__right";
             if (targetText && (isFront || isBack)) {
@@ -3175,48 +3136,6 @@ const cleanupDragIndicators = (scope: ParentNode) => {
         item.style.removeProperty("--drag-line-bg");
         item.style.removeProperty("--b3-av-kanban-drag-height");
     });
-};
-
-const getListDepth = (liElement: Element): number => {
-    let depth = 0;
-    let list = liElement.parentElement;
-    while (list && list.classList.contains("list")) {
-        const parentLi = list.parentElement;
-        if (parentLi && parentLi.classList.contains("li")) {
-            depth++;
-            list = parentLi.parentElement;
-        } else {
-            break;
-        }
-    }
-    return depth;
-};
-
-const parseHexColor = (color: string): { r: number, g: number, b: number } | null => {
-    if (!color) return null;
-    const hexMatch = color.match(/^#([0-9a-f]{3,8})$/i);
-    if (hexMatch) {
-        let hex = hexMatch[1];
-        if (hex.length === 3) {
-            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-        }
-        if (hex.length >= 6) {
-            return {
-                r: parseInt(hex.slice(0, 2), 16),
-                g: parseInt(hex.slice(2, 4), 16),
-                b: parseInt(hex.slice(4, 6), 16),
-            };
-        }
-    }
-    const rgbMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-    if (rgbMatch) {
-        return {
-            r: parseInt(rgbMatch[1]),
-            g: parseInt(rgbMatch[2]),
-            b: parseInt(rgbMatch[3]),
-        };
-    }
-    return null;
 };
 
 const highlightByLevel = (editorElement: HTMLElement, liElement: HTMLElement) => {

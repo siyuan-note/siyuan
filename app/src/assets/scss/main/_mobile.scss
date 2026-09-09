@@ -619,6 +619,11 @@ body.mobile-topbar--merged {
     will-change: transform;
   }
 
+  > .protyle-content {
+    // 将正文高亮和吸顶元素限制在独立层叠上下文内，避免滚动时覆盖导航栏。
+    isolation: isolate;
+  }
+
   > .protyle-content::before {
     display: block;
     height: calc(var(--mobile-topbar-height) + var(--mobile-breadcrumb-height));
@@ -628,7 +633,8 @@ body.mobile-topbar--merged {
   // 滚动视口延伸到屏幕底边，仅在文档末尾留出空间，确保末行可滚到导航栏上方。
   > .protyle-content::after {
     display: block;
-    height: var(--mobile-bottom-bar-offset);
+    // 键盘切换时保留末尾占位，避免滚动到底部后因内容高度缩减而回弹。
+    height: calc(var(--mobile-bottom-bar-height) + var(--mobile-bottom-bar-bottom));
     content: "";
   }
 
@@ -1284,6 +1290,20 @@ body.mobile-topbar--merged {
     border: 0;
     color: var(--b3-theme-on-surface);
 
+    &[data-type="font-family"],
+    &[data-type="font-size"] {
+      padding: 0 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      &.protyle-toolbar__item--current {
+        color: var(--b3-theme-primary);
+      }
+    }
+
     span {
       padding: 6px;
       white-space: nowrap;
@@ -1403,6 +1423,17 @@ body.mobile-topbar--merged {
 }
 
 .b3-menu {
+  &--sheet {
+    // 菜单入口可能指定宽度，移动端底部菜单始终铺满视口
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
   &__accelerator--hotkey {
     display: none;
   }
@@ -1412,6 +1443,38 @@ body.mobile-topbar--merged {
 
     & > .b3-menu__icon {
       color: var(--b3-theme-error);
+    }
+  }
+}
+
+.av__panel {
+  > .b3-dialog__scrim {
+    background-color: rgba(0, 0, 0, .2);
+  }
+
+  > .b3-menu {
+    // 数据库面板切换内容时会重新写入锚点坐标，底部布局不随锚点变化
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: 56vh;
+    max-height: 90vh !important;
+    max-height: 90dvh !important;
+    box-sizing: border-box;
+    border: 0;
+    border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;
+    padding: 16px 8px max(16px, env(safe-area-inset-bottom));
+    overflow: auto;
+    overscroll-behavior: contain;
+    animation: bottom2Top .15s cubic-bezier(0, 0, .2, 1);
+
+    > .b3-menu__items {
+      max-height: none;
+      min-height: 0;
     }
   }
 }
@@ -1485,6 +1548,169 @@ body.mobile-topbar--merged {
 
 .b3-dialog {
   padding: var(--mobile-top-safe-area) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.mobile-bottom-sheet-dialog {
+  .b3-dialog {
+    align-items: flex-end;
+    box-sizing: border-box;
+    bottom: auto;
+    height: 100%;
+  }
+
+  .mobile-bottom-sheet {
+    max-height: min(60vh, 100%);
+    border: 0;
+    border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;
+    background-color: var(--b3-theme-surface);
+    padding-top: 0;
+    box-sizing: border-box;
+    transform: translateY(100%);
+    transition: transform .15s cubic-bezier(0, 0, .2, 1);
+  }
+
+  .mobile-bottom-sheet__handle {
+    height: 16px;
+    flex-shrink: 0;
+    position: relative;
+    touch-action: none;
+
+    &::before {
+      position: absolute;
+      top: 5px;
+      left: calc(50% - 16px);
+      width: 32px;
+      height: 4px;
+      border-radius: 2px;
+      background-color: var(--b3-theme-on-surface-light);
+      content: "";
+      opacity: .45;
+    }
+  }
+
+  &.b3-dialog--open .mobile-bottom-sheet {
+    transform: translateY(0);
+  }
+
+  .b3-dialog__body {
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
+.mobile-backlinks-dialog {
+  .mobile-backlinks-content {
+    flex: 0 1 auto;
+    min-height: 0;
+
+    > .backlinkList__header {
+      padding: 4px 12px 8px;
+      gap: 4px;
+
+      > .block__logo {
+        flex: 0 0 100%;
+        box-sizing: border-box;
+        min-height: 28px;
+        margin: 0;
+      }
+
+      > .fn__space {
+        display: none;
+      }
+    }
+
+    > .backlinkList {
+      flex: 0 1 auto;
+      padding-bottom: 8px;
+    }
+  }
+
+}
+
+.mobile-attributes-sheet .b3-dialog__body > .fn__flex-column {
+  flex: 1;
+  min-height: 0;
+
+  > .fn__flex-1 {
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+.sy__backlink {
+  min-height: 0;
+
+  > .block__icons > .block__logo--counter {
+    @extend .toolbar__text;
+    margin: 0;
+    font-weight: normal;
+
+    > .counter {
+      margin-left: 8px;
+      padding: 0;
+      background-color: transparent;
+      font-size: 12px;
+      color: var(--b3-theme-on-surface);
+    }
+  }
+
+  > .block__icons {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 40px;
+  }
+
+  > .backlinkList,
+  > .backlinkMList {
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+
+    > .b3-list > .backlinkList__item > .b3-list-item {
+      margin-left: 0;
+      margin-right: 0;
+      border-radius: 0;
+    }
+  }
+
+  .protyle-breadcrumb__bar {
+    min-height: 32px;
+  }
+
+  .block__icon {
+    opacity: 1;
+    box-sizing: border-box;
+    min-width: 32px;
+    min-height: 32px;
+    justify-content: center;
+
+    &[disabled] {
+      opacity: .38;
+    }
+  }
+
+  &--only-backlinks {
+    > .backlinkMList__header,
+    > .backlinkMList {
+      display: none !important;
+    }
+  }
+}
+
+.mobile-command-panel {
+  flex: 1;
+  min-height: 0;
+
+  .search__header {
+    flex-shrink: 0;
+  }
+
+  .search__list {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+  }
 }
 
 .b3-snackbars {

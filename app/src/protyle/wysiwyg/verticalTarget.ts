@@ -15,6 +15,9 @@ const getEmbedNavigationScope = (element: Element) =>
         (element.parentElement ? isInEmbedBlock(element.parentElement, false) : false) :
         isInEmbedBlock(element, false);
 
+export const getVerticalNavigationScope = (element: Element, editorElement: HTMLElement) =>
+    getEmbedNavigationScope(element) || editorElement;
+
 export const getAdjacentVisibleBlock = (element: Element, direction: TVerticalDirection) => {
     if (!isVerticalNavigationElementVisible(element)) {
         return false;
@@ -75,4 +78,15 @@ export const getVisibleBoundaryBlock = (element: Element, direction: TVerticalDi
         return isVerticalNavigationElementVisible(foldedOwner) ? foldedOwner : undefined;
     }
     return findVisibleBoundaryBlock(element, direction, getEmbedNavigationScope(element), element);
+};
+
+export const getAdjacentVerticalBlock = (element: Element, direction: TVerticalDirection) => {
+    let adjacent = getAdjacentVisibleBlock(element, direction);
+    while (adjacent) {
+        const target = getVisibleBoundaryBlock(adjacent, direction);
+        if (target) {
+            return target as HTMLElement;
+        }
+        adjacent = getAdjacentVisibleBlock(adjacent, direction);
+    }
 };

@@ -36,6 +36,7 @@ import {
     getAVBlockRefSubtype,
     getConvertedEmptyAVCellValue,
     hasAVRenderTemplateResult,
+    updateAVCachedCellValue,
 } from "./cellValue";
 import {setPosition} from "../../../util/setPosition";
 import {getAVSelectedCells, IAVSelectedCell, updateAVSelectedCellValue} from "./selectionState";
@@ -55,6 +56,7 @@ import {
     renderAVRichTextElements,
 } from "./richText";
 import {openAVRichTextEditor} from "./richTextEditor";
+import {getAVData} from "./virtualScroll";
 
 export {cellValueIsEmpty} from "./cellValue";
 
@@ -1068,6 +1070,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             doOperations.push(createAVCellUpdateOperation({
                 valueID: cellId,
                 avID,
+                blockID: id,
                 keyID: colId,
                 rowID,
                 data: cellValue
@@ -1076,6 +1079,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             undoOperations.push(createAVCellUpdateOperation({
                 valueID: cellId,
                 avID,
+                blockID: id,
                 keyID: colId,
                 rowID,
                 data: oldValue
@@ -1149,6 +1153,11 @@ export const updateAttrViewCellInOtherElements = (protyle: IProtyle, avID: strin
         updateCustomAttr(sourceElement);
     }
     protyle.wysiwyg.element.querySelectorAll<HTMLElement>(`.av[data-av-id="${avID}"]`).forEach(item => {
+        const data = getAVData(item);
+        if (data) {
+            updateAVCachedCellValue(data.view, rowID, colID, value);
+        }
+        updateAVSelectedCellValue(item, rowID, colID, value);
         item.querySelectorAll<HTMLElement>(
             `.av__row[data-id="${rowID}"] .av__cell[data-col-id="${colID}"], ` +
             `.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${colID}"]`

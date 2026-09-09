@@ -239,6 +239,7 @@ declare namespace Config {
      * AI provider configuration
      */
     export interface IProvider {
+        headers?: Record<string, string>;
         id: string;
         enabled: boolean;
         displayName?: string;
@@ -562,6 +563,8 @@ declare namespace Config {
          * Whether the backlink contains children
          */
         backlinkContainChildren: boolean;
+        /** 反链面板是否隐藏传递型纯引用块 */
+        backlinkHideReference: boolean;
         /**
          * Whether to show backlinks at the bottom of the document
          */
@@ -1282,6 +1285,13 @@ declare namespace Config {
      * SiYuan shortcut key
      */
     export interface IKey {
+        /** 多快捷键配置，custom 保留第一项以兼容单快捷键调用方。 */
+        bindings?: {
+            version: 1;
+            keys: string[];
+            defaults?: string[];
+            priority?: Record<string, number>;
+        };
         /**
          * Custom shortcut key
          */

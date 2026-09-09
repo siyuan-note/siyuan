@@ -311,6 +311,10 @@ const registerEditorBidirectionalGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.backlinkContainChildren,
         desc: window.siyuan.languages.backlinkContainChildrenTip,
     });
+    group.switch("editor.backlinkHideReference", {
+        title: window.siyuan.languages.backlinkHideReference,
+        desc: window.siyuan.languages.backlinkHideReferenceTip,
+    });
     if (!isMobile()) {
         group.switch("editor.backlinkShowBottom", {
             title: window.siyuan.languages.backlinkShowBottom,

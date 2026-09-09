@@ -221,7 +221,6 @@ export const getRollupHTML = (options: { data?: IAV, cellElements?: HTMLElement[
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 <button class="b3-menu__item${canFilter ? "" : " b3-menu__item--disabled"}" data-type="goAttrViewColFilters" data-filter-type="rollup">
-    <svg class="b3-menu__icon"><use xlink:href="#iconFilter"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.filter}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>`;

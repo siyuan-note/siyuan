@@ -77,7 +77,7 @@
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: pre;
     pointer-events: none;
   }
 
@@ -181,7 +181,7 @@
       font-size: inherit;
       font-weight: normal;
       opacity: 1;
-      white-space: nowrap;
+      white-space: pre;
       word-break: normal;
       overflow-x: auto;
       scrollbar-width: none;

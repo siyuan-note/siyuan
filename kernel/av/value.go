@@ -554,6 +554,10 @@ func ParseValueTextRich(rich *ValueTextRich) (tree *parse.Tree, err error) {
 }
 
 func parseValueTextRich(rich *ValueTextRich) (blockDOM string, tree *parse.Tree, err error) {
+	return parseValueTextRichWithImages(rich, false)
+}
+
+func parseValueTextRichWithImages(rich *ValueTextRich, images bool) (blockDOM string, tree *parse.Tree, err error) {
 	if nil == rich {
 		return
 	}
@@ -583,11 +587,15 @@ func parseValueTextRich(rich *ValueTextRich) (blockDOM string, tree *parse.Tree,
 		}
 		blockDOM = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	}
-	err = validateValueTextRichTree(tree)
+	err = validateValueTextRichTreeWithImages(tree, images)
 	return
 }
 
 func validateValueTextRichTree(tree *parse.Tree) (err error) {
+	return validateValueTextRichTreeWithImages(tree, false)
+}
+
+func validateValueTextRichTreeWithImages(tree *parse.Tree, images bool) (err error) {
 	if nil == tree || nil == tree.Root {
 		return fmt.Errorf("attribute view rich text tree is missing")
 	}
@@ -595,7 +603,7 @@ func validateValueTextRichTree(tree *parse.Tree) (err error) {
 		if !entering {
 			return ast.WalkContinue
 		}
-		if !isAllowedValueTextRichNode(node) {
+		if !isAllowedValueTextRichNode(node) && !(images && isAllowedTableCellRichImageNode(node)) {
 			err = fmt.Errorf("unsupported attribute view rich text node [%s]", node.Type.String())
 			return ast.WalkStop
 		}
@@ -2104,6 +2112,10 @@ func NormalizeValueTextRich(rich *ValueTextRich) (tree *parse.Tree, err error) {
 }
 
 func normalizeValueTextRichTreeSource(tree *parse.Tree) (content string, normalizedTree *parse.Tree, err error) {
+	return normalizeValueTextRichTreeSourceWithImages(tree, false)
+}
+
+func normalizeValueTextRichTreeSourceWithImages(tree *parse.Tree, images bool) (content string, normalizedTree *parse.Tree, err error) {
 	normalizedTree = tree
 	previous := ""
 	for iteration := 0; iteration < 4; iteration++ {
@@ -2120,7 +2132,7 @@ func normalizeValueTextRichTreeSource(tree *parse.Tree) (content string, normali
 		candidate := &ValueTextRich{
 			Spec: ValueTextRichSpec, Format: ValueTextRichFormatKramdown, Content: content,
 		}
-		if _, normalizedTree, err = parseValueTextRich(candidate); nil != err {
+		if _, normalizedTree, err = parseValueTextRichWithImages(candidate, images); nil != err {
 			return "", nil, err
 		}
 	}

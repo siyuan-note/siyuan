@@ -7,9 +7,69 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260906013806"
+		"updated": "20260909090822"
 	},
 	"Children": [
+		{
+			"ID": "20260908092714-e1q4nu2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908092714-e1q4nu2",
+				"updated": "20260908202901"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "快捷鍵"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中為同一個操作設定多個快捷鍵。點擊該列的加號後按下組合鍵即可儲存；點擊快捷鍵的關閉按鈕可刪除；如需更換，請先刪除再新增。點擊還原按鈕可還原該操作的全部預設快捷鍵。按 Esc 或點擊外部可取消輸入。第一項用於選單提示，右擊其他快捷鍵可將其設為主要快捷鍵。同一操作內輸入重複快捷鍵時，不會儲存或結束輸入，可以繼續輸入其他組合鍵。"
+				}
+			]
+		},
+		{
+			"ID": "20260908092714-g928py1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908092714-g928py1",
+				"updated": "20260908180419"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "不同操作可以設定相同的快捷鍵，重複綁定會以衝突配色提示。執行時，目前局部範圍優先，通用範圍其次；同一範圍依固定順序比對，使用者不能調整執行優先順序。內建操作使用固定判斷順序，外掛操作依外掛名稱和命令識別碼排序。每次按鍵只執行首個可用操作；開始執行後，即使取消或失敗，也不會繼續執行其他操作。"
+				}
+			]
+		},
+		{
+			"ID": "20260908172944-8gbcie5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260908172944-8gbcie5",
+				"updated": "20260908180419"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "搜尋列下方可依「全部」「已指派」「由我指派」「未指派」篩選，並與名稱搜尋或按鍵搜尋組合使用。「已指派」表示至少有一個快捷鍵；「由我指派」表示綁定與預設設定不同，包括新增、修改或刪除綁定；「未指派」表示沒有快捷鍵。僅在存在未解決的衝突時顯示「衝突」篩選項，並醒目顯示具體衝突的快捷鍵。修改後篩選結果會自動更新；衝突全部消除後，若目前選取「衝突」，則自動切回「全部」。"
+				}
+			]
+		},
 		{
 			"ID": "20260813143408-r6w3j9h",
 			"Type": "NodeParagraph",
@@ -12294,7 +12354,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20211226122652-n2r88dm",
-				"updated": "20260811122156"
+				"updated": "20260909090822"
 			},
 			"Children": [
 				{
@@ -12960,6 +13020,102 @@
 								{
 									"Type": "NodeText",
 									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "編輯儲存格"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "F2"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "結束儲存格編輯（先關閉提示）"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Escape"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "儲存格僅含一個普通段落：移到下一列的同欄，末列則在表格後插入段落；其他內容依目前類型編輯"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "儲存格一般內容：切換儲存格；列表或程式碼：縮排或取消縮排"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Tab / Shift+Tab"
 								}
 							]
 						}

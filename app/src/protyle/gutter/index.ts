@@ -401,12 +401,15 @@ export class Gutter {
                 if (buttonElement.getAttribute("disabled")) {
                     return;
                 }
-                buttonElement.setAttribute("disabled", "disabled");
                 const blockButtonElement = buttonElement.previousElementSibling || buttonElement.nextElementSibling;
                 const foldElement = this.getNodeElement(protyle, blockButtonElement);
                 if (!foldElement) {
                     hideElements(["gutter"], protyle);
                     return;
+                }
+                // 视图折叠直接更新局部状态，只有文档折叠需要禁用按钮并等待事务恢复。
+                if (!hasViewFoldContext(protyle)) {
+                    buttonElement.setAttribute("disabled", "disabled");
                 }
                 let foldStatus = -1;
                 if (event.altKey && foldElement.getAttribute("data-type") === "NodeHeading") {

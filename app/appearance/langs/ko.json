@@ -1,4 +1,6 @@
 {
+	"backlinkExcludeRefDefs": "선택한 블록 참조를 포함하는 항목 제외",
+	"backlinkExcludeRefDefsTip": "항목이나 하위 내용이 선택한 블록 중 하나를 참조하면 항목 전체를 숨깁니다. 선택 사항은 현재 대상 블록별로 저장됩니다",
 	"backlinkFoldByType": "블록 유형별로 접기",
 	"backlinkHideReference": "전파된 백링크의 참조 블록 숨기기",
 	"backlinkHideReferenceTip": "전파된 백링크에서 다른 표시할 내용이 있으면 블록 참조만 포함된 블록을 숨기고 편집 중에는 다시 표시",

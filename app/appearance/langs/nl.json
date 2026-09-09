@@ -1,4 +1,6 @@
 {
+	"backlinkExcludeRefDefs": "Items met verwijzingen naar geselecteerde blokken uitsluiten",
+	"backlinkExcludeRefDefsTip": "Verberg het volledige item inclusief onderliggende inhoud als het naar een geselecteerd blok verwijst; de selectie wordt voor het huidige doel opgeslagen",
 	"backlinkFoldByType": "Inklappen per bloktype",
 	"backlinkHideReference": "Verwijzingsblokken in doorgegeven backlinks verbergen",
 	"backlinkHideReferenceTip": "Verberg blokken met uitsluitend blokverwijzingen in doorgegeven backlinks als andere inhoud zichtbaar blijft en toon ze weer tijdens het bewerken",

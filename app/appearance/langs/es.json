@@ -1,4 +1,6 @@
 {
+	"backlinkExcludeRefDefs": "Excluir entradas con referencias a los bloques seleccionados",
+	"backlinkExcludeRefDefsTip": "Ocultar toda la entrada, incluidos sus elementos secundarios, si referencia algún bloque seleccionado; la selección se guarda para el destino actual",
 	"backlinkFoldByType": "Contraer por tipo de bloque",
 	"backlinkHideReference": "Ocultar bloques de referencia en enlaces inversos propagados",
 	"backlinkHideReferenceTip": "Ocultar los bloques que solo contienen referencias a bloques en los enlaces inversos propagados cuando queda otro contenido visible y mostrarlos de nuevo al editar",

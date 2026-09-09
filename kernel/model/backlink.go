@@ -160,6 +160,7 @@ type BacklinkSourceFilter struct {
 	DailyNote           string   `json:"dailyNote"`
 	ExcludedNotebookIDs []string `json:"excludedNotebookIDs"`
 	ExcludeSelf         bool     `json:"excludeSelf"`
+	ExcludedRefDefIDs   []string `json:"excludedRefDefIDs"`
 }
 
 func NormalizeBacklinkSourceFilter(filter *BacklinkSourceFilter) *BacklinkSourceFilter {
@@ -181,13 +182,15 @@ func NormalizeBacklinkSourceFilter(filter *BacklinkSourceFilter) *BacklinkSource
 		excludedNotebookIDs = append(excludedNotebookIDs, notebookID)
 	}
 	sort.Strings(excludedNotebookIDs)
-	if BacklinkDailyNoteAll == dailyNote && 0 == len(excludedNotebookIDs) && !filter.ExcludeSelf {
+	excludedRefDefIDs := normalizeBacklinkRefDefIDs(filter.ExcludedRefDefIDs)
+	if BacklinkDailyNoteAll == dailyNote && 0 == len(excludedNotebookIDs) && !filter.ExcludeSelf && 0 == len(excludedRefDefIDs) {
 		return nil
 	}
 	return &BacklinkSourceFilter{
 		DailyNote:           dailyNote,
 		ExcludedNotebookIDs: excludedNotebookIDs,
 		ExcludeSelf:         filter.ExcludeSelf,
+		ExcludedRefDefIDs:   excludedRefDefIDs,
 	}
 }
 
@@ -870,7 +873,11 @@ func filterBacklinkSourcesInBox(linkRefs []*Block, defRootID, boxID string, filt
 		return linkRefs
 	}
 	dailyNoteRootIDs := backlinkDailyNoteRootIDsInBox(linkRefs, boxID, BacklinkDailyNoteAll != filter.DailyNote)
-	return filterBacklinkSources(linkRefs, defRootID, filter, dailyNoteRootIDs)
+	ret = filterBacklinkSources(linkRefs, defRootID, filter, dailyNoteRootIDs)
+	if 0 < len(filter.ExcludedRefDefIDs) {
+		ret = filterBacklinkRefDefs(ret, boxID, filter.ExcludedRefDefIDs)
+	}
+	return
 }
 
 func filterBacklinkSources(linkRefs []*Block, defRootID string, filter *BacklinkSourceFilter, dailyNoteRootIDs map[string]bool) (ret []*Block) {

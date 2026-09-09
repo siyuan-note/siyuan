@@ -1,4 +1,6 @@
 {
+	"backlinkExcludeRefDefs": "Seçili blok başvurularını içeren öğeleri hariç tut",
+	"backlinkExcludeRefDefsTip": "Seçili bloklardan herhangi birine başvuran öğeyi alt öğeleriyle birlikte gizle; seçimler mevcut hedef için kaydedilir",
 	"backlinkFoldByType": "Blok türüne göre daralt",
 	"backlinkHideReference": "Aktarılan geri bağlantılarda referans bloklarını gizle",
 	"backlinkHideReferenceTip": "Başka içerik görünür kaldığında aktarılan geri bağlantılarda yalnızca blok referansları içeren blokları gizle ve düzenleme sırasında yeniden göster",

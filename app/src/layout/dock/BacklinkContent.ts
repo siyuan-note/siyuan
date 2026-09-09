@@ -45,6 +45,8 @@ import {
 } from "./backlinkSourceFilter";
 import {escapeHtml} from "../../util/escape";
 import {ViewStateService} from "../../util/viewState";
+import {acquireBacklinkRefFilter} from "./backlinkRefFilterState";
+import {showBacklinkRefFilter} from "./backlinkRefFilterMenu";
 import {
     applyViewFoldStates,
     invalidateViewFoldRequests,
@@ -158,6 +160,7 @@ export class BacklinkContent extends Model {
     private empty = false;
     private emptyChange?: (empty: boolean) => void;
     private sourceFilter = createBacklinkSourceFilter();
+    private refFilterState?: ReturnType<typeof acquireBacklinkRefFilter>;
     private viewState?: ViewStateService;
     private viewStateReady: Promise<void> = Promise.resolve();
     private viewStateLoaded = false;
@@ -534,11 +537,15 @@ export class BacklinkContent extends Model {
         this.clearReadingAnchorTimers();
         const previousReady = this.viewStateReady;
         const previous = this.viewState;
+        const previousRefFilter = this.refFilterState;
+        this.refFilterState = undefined;
+        this.sourceFilter.excludedRefDefIDs = [];
         const generation = ++this.viewStateGeneration;
         this.viewState = undefined;
         this.viewStateLoaded = !blockID;
         const createService = async () => {
             await previousReady;
+            await previousRefFilter?.release().catch(error => console.error(error));
             if (previous) {
                 try {
                     await previous.destroy();
@@ -555,7 +562,19 @@ export class BacklinkContent extends Model {
                 hostID: blockID,
             });
             this.viewState = service;
-            await service.ready;
+            const refFilter = acquireBacklinkRefFilter(blockID, ids => {
+                if (generation !== this.viewStateGeneration ||
+                    JSON.stringify(ids) === JSON.stringify(this.sourceFilter.excludedRefDefIDs)) {
+                    return;
+                }
+                this.sourceFilter.excludedRefDefIDs = ids;
+                this.updateSourceFilterButton();
+                if (this.viewStateLoaded) {
+                    this.searchBacklinks();
+                }
+            });
+            this.refFilterState = refFilter;
+            await Promise.all([service.ready, refFilter.ready]);
         };
         this.viewStateReady = createService().catch(error => {
             console.error(error);
@@ -846,7 +865,11 @@ export class BacklinkContent extends Model {
     }
 
     private applySourceFilter(filter: IBacklinkSourceFilter) {
+        const previousIDs = JSON.stringify(this.sourceFilter.excludedRefDefIDs);
         this.sourceFilter = normalizeBacklinkSourceFilter(filter);
+        if (previousIDs !== JSON.stringify(this.sourceFilter.excludedRefDefIDs)) {
+            this.refFilterState?.set(this.sourceFilter.excludedRefDefIDs);
+        }
         this.updateSourceFilterButton();
         this.searchBacklinks();
     }
@@ -972,6 +995,23 @@ export class BacklinkContent extends Model {
             click: () => {
                 this.applySourceFilter({...this.sourceFilter, excludeSelf: !this.sourceFilter.excludeSelf});
             }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconFilter",
+            label: `${window.siyuan.languages.backlinkExcludeRefDefs} (${this.sourceFilter.excludedRefDefIDs.length})`,
+            disabled: !this.viewStateLoaded || !this.refFilterState,
+            click: () => {
+                const generation = this.viewStateGeneration;
+                showBacklinkRefFilter({
+                    id: this.blockId,
+                    notebook: isEncryptedBox(this.notebookId) ? this.notebookId : "",
+                    keyword: this.inputsElement[0].value,
+                    filter: this.sourceFilter,
+                    getSelected: () => this.sourceFilter.excludedRefDefIDs,
+                    isCurrent: () => !this.destroyed && generation === this.viewStateGeneration,
+                    apply: ids => this.applySourceFilter({...this.sourceFilter, excludedRefDefIDs: ids}),
+                });
+            },
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
@@ -2276,6 +2316,7 @@ export class BacklinkContent extends Model {
         });
         this.editors = [];
         void this.viewState?.destroy().catch(error => console.error(error));
+        void this.refFilterState?.release().catch(error => console.error(error));
         if (this.ws) {
             this.ws.onclose = null;
             this.ws.close();

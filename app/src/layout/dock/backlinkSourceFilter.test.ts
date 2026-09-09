@@ -20,6 +20,15 @@ describe("backlink source filter", () => {
             dailyNote: "only",
             excludedNotebookIDs: ["box-a", "box-b"],
             excludeSelf: true,
+            excludedRefDefIDs: [],
         });
+    });
+
+    it("keeps reference-only filters and normalizes persisted IDs", () => {
+        const id = "20260909120000-abcdefg";
+        const filter = getBacklinkSourceFilterParam({
+            ...createBacklinkSourceFilter(), excludedRefDefIDs: [id, "", "invalid", id],
+        });
+        assert.deepEqual(filter.excludedRefDefIDs, [id]);
     });
 });

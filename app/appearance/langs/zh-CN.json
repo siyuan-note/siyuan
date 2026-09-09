@@ -1,4 +1,6 @@
 {
+	"backlinkExcludeRefDefs": "排除包含指定块引用的条目",
+	"backlinkExcludeRefDefsTip": "条目及其子内容引用任一选中块时，隐藏整个条目；选择按当前查看的目标块保存",
 	"backlinkFoldByType": "按块类型折叠",
 	"backlinkHideReference": "隐藏传递型反链的引用块",
 	"backlinkHideReferenceTip": "在反链面板中隐藏仅含块引用且仍有其他内容可展示的传递型引用块，编辑时恢复显示",

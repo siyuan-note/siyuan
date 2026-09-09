@@ -1,4 +1,6 @@
 {
+	"backlinkExcludeRefDefs": "Einträge mit ausgewählten Blockreferenzen ausschließen",
+	"backlinkExcludeRefDefsTip": "Den gesamten Eintrag einschließlich Unterelementen ausblenden, wenn er auf einen ausgewählten Block verweist; die Auswahl wird für das aktuelle Ziel gespeichert",
 	"backlinkFoldByType": "Nach Blocktyp einklappen",
 	"backlinkHideReference": "Referenzblöcke in vererbten Rückverweisen ausblenden",
 	"backlinkHideReferenceTip": "Blöcke mit ausschließlich Blockreferenzen in vererbten Rückverweisen ausblenden, wenn andere Inhalte sichtbar bleiben, und beim Bearbeiten wieder anzeigen",

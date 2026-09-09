@@ -250,8 +250,7 @@ const renderMobilePluginDockMenu = (app: App, menuElement: HTMLElement) => {
 export const initRightMenu = (app: App) => {
     const menuElement = document.getElementById("menu");
     menuElement.innerHTML = `<div class="b3-menu__title">
-    <svg class="b3-menu__icon"><use xlink:href="#iconLeft"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.back}</span>
+    <svg class="b3-menu__icon" role="img" aria-label="${escapeAttr(window.siyuan.languages.returnLabel)}"><use xlink:href="#iconLeft"></use></svg>
 </div>
 <div class="mobile-main-menu__search" data-prevent-swipe>
     <input placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__block" autocomplete="off" autocorrect="off" spellcheck="false">

@@ -541,9 +541,12 @@
 .sy__backlink {
   .backlinkList__loading {
     align-items: center;
+    box-sizing: border-box;
     display: flex;
-    height: 40px;
+    height: 100%;
     justify-content: center;
+    min-height: 40px;
+    width: 100%;
   }
 
   [data-backlink-type-folded] {
@@ -626,6 +629,10 @@
 }
 
 .sy__backlink--bottom {
+  .backlinkList__loading {
+    height: 40px;
+  }
+
   box-sizing: border-box;
   min-height: 32px;
   outline: none;

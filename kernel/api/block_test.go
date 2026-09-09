@@ -17,22 +17,146 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"os/exec"
 	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestGetBlockInfoRecovery(t *testing.T) {
+	for _, name := range []string{"document", "child", "explicit", "missing", "indexing", "reader", "encrypted"} {
+		t.Run(name, func(t *testing.T) {
+			if os.Getenv("SIYUAN_TEST_BLOCK_INFO_RECOVERY") == t.Name() {
+				testGetBlockInfoRecovery(t, name)
+				return
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+			defer cancel()
+			command := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestGetBlockInfoRecovery$/^"+name+"$", "-test.v")
+			command.Env = append(os.Environ(), "SIYUAN_TEST_BLOCK_INFO_RECOVERY="+t.Name())
+			if output, err := command.CombinedOutput(); err != nil {
+				t.Fatalf("recovery subprocess failed: %v\n%s", err, output)
+			}
+		})
+	}
+}
+
+func testGetBlockInfoRecovery(t *testing.T, name string) {
+	root := t.TempDir()
+	util.DataDir = filepath.Join(root, "data")
+	util.TempDir = root
+	util.ConfDir = root
+	util.QueueDir = filepath.Join(root, "queue")
+	util.DBPath = filepath.Join(root, "siyuan.db")
+	util.HistoryDBPath = filepath.Join(root, "history.db")
+	util.AssetContentDBPath = filepath.Join(root, "asset_content.db")
+	util.BlockTreeDBPath = filepath.Join(root, "blocktree.db")
+	model.Conf = model.NewAppConf()
+	model.Conf.FileTree, model.Conf.Sync = conf.NewFileTree(), conf.NewSync()
+	model.Conf.NotebookCrypto = conf.NewNotebookCrypto()
+	model.Conf.Search, model.Conf.Editor, model.Conf.Export = conf.NewSearch(), conf.NewEditor(), conf.NewExport()
+	box := &model.Box{ID: ast.NewNodeID()}
+	boxConf := conf.NewBoxConf()
+	boxConf.Name, boxConf.Closed = "Recovery", false
+	if err := box.SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+	sql.InitDatabase(true)
+	sql.InitHistoryDatabase(true)
+	sql.InitAssetContentDatabase(true)
+	defer sql.CloseDatabase()
+	docID := ast.NewNodeID()
+	tree := treenode.NewTree(box.ID, "/"+docID+".sy", "/Recovered", "Recovered")
+	if _, err := filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	if name == "encrypted" {
+		// 加密候选即使带有可解析的明文，也不能由普通笔记本恢复路径读取或索引。
+		boxConf.Encrypted = true
+		if err := box.SaveConf(boxConf); err != nil {
+			t.Fatal(err)
+		}
+	}
+	id := docID
+	if name == "child" {
+		id = tree.Root.FirstChild.ID
+	} else if name == "missing" {
+		id = ast.NewNodeID()
+	}
+	if name == "indexing" {
+		task.AppendTask(task.DatabaseIndexFull, func() {})
+	}
+	gin.SetMode(gin.TestMode)
+	engine := gin.New()
+	engine.Use(boxLeaseMiddleware)
+	engine.Use(func(c *gin.Context) {
+		role := model.RoleAdministrator
+		if name == "reader" {
+			role = model.RoleReader
+		}
+		c.Set(model.RoleContextKey, role)
+		c.Next()
+	})
+	engine.POST("/api/block/getBlockInfo", getBlockInfo)
+	args := map[string]any{"id": id}
+	if name == "explicit" {
+		args["notebook"] = box.ID
+	}
+	body, err := json.Marshal(args)
+	if err != nil {
+		t.Fatal(err)
+	}
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "/api/block/getBlockInfo", strings.NewReader(string(body)))
+	request.Header.Set("Content-Type", "application/json")
+	engine.ServeHTTP(recorder, request)
+	var response struct {
+		Code int `json:"code"`
+		Data struct {
+			RootID    string `json:"rootID"`
+			RootTitle string `json:"rootTitle"`
+		} `json:"data"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+		t.Fatal(err)
+	}
+	switch name {
+	case "document", "child", "explicit":
+		if response.Code != 0 || response.Data.RootID != docID || response.Data.RootTitle != "Recovered" {
+			t.Fatalf("document did not recover: %s", recorder.Body.String())
+		}
+		if treenode.GetBlockTree(id) == nil {
+			t.Fatal("requested block was not indexed")
+		}
+	default:
+		wantCode := -1
+		if name == "indexing" {
+			wantCode = 3
+		}
+		if response.Code != wantCode || response.Data.RootID != "" || treenode.GetBlockTree(docID) != nil {
+			t.Fatalf("unexpected recovery or response: %s", recorder.Body.String())
+		}
+	}
+}
 
 func TestParseBlockRefStringArrayEmptyHandling(t *testing.T) {
 	arg := map[string]any{"ids": []any{}}

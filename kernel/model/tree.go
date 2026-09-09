@@ -336,6 +336,21 @@ func loadTreeByBlockIDInBox0(id, boxID string, logNotFound bool) (ret *parse.Tre
 var searchTreeLimiter = rate.NewLimiter(rate.Every(3*time.Second), 1)
 
 func indexTreeInFilesystem(blockID string) error {
+	return indexTreeInFilesystem0(blockID, false)
+}
+
+// ReindexMissingNormalBlock 在请求取得加密笔记本租约前，仅恢复普通笔记本中缺失的块索引。
+func ReindexMissingNormalBlock(blockID string) error {
+	if !ast.IsNodeIDPattern(blockID) {
+		return ErrInvalidID
+	}
+	if task.ContainIndexTask() {
+		return ErrIndexing
+	}
+	return indexTreeInFilesystem0(blockID, true)
+}
+
+func indexTreeInFilesystem0(blockID string, normalOnly bool) error {
 	if !searchTreeLimiter.Allow() {
 		return ErrIndexing
 	}
@@ -345,7 +360,7 @@ func indexTreeInFilesystem(blockID string) error {
 
 	logging.LogWarnf("searching tree on filesystem [id=%s]", blockID)
 
-	unindexedTreePath := findUnindexedTreePathInAllBoxes(blockID)
+	unindexedTreePath := findUnindexedTreePath(blockID, normalOnly)
 	if "" == unindexedTreePath {
 		logging.LogInfof("tree not found on filesystem [id=%s]", blockID)
 		return ErrTreeNotFound
@@ -402,9 +417,16 @@ func loadParentTree(tree *parse.Tree) (ret *parse.Tree) {
 }
 
 func findUnindexedTreePathInAllBoxes(id string) (ret string) {
+	return findUnindexedTreePath(id, false)
+}
+
+func findUnindexedTreePath(id string, normalOnly bool) (ret string) {
 	boxes := Conf.GetBoxes()
 	luteEngine := util.NewLute()
 	for _, box := range boxes {
+		if normalOnly && IsEncryptedBox(box.ID) {
+			continue
+		}
 		root := filepath.Join(util.DataDir, box.ID)
 		paths := search.FindAllMatchedPaths(root, []string{id})
 		var rootIDs []string

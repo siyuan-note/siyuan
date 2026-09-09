@@ -1071,7 +1071,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         if (attrElement) {
             // 更新属性面板
             attrElement.removeAttribute("data-rendering");
-            renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);
+            renderAVAttribute(attrElement.parentElement, attrElement.dataset.attributeId, protyle);
         }
         getAVElements(protyle, avID).forEach((item) => {
             item.removeAttribute("data-render");

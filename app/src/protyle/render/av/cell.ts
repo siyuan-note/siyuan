@@ -1070,6 +1070,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             doOperations.push(createAVCellUpdateOperation({
                 valueID: cellId,
                 avID,
+                blockID: id,
                 keyID: colId,
                 rowID,
                 data: cellValue
@@ -1078,6 +1079,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             undoOperations.push(createAVCellUpdateOperation({
                 valueID: cellId,
                 avID,
+                blockID: id,
                 keyID: colId,
                 rowID,
                 data: oldValue

@@ -176,6 +176,7 @@ export const createAVStableTextCell = (options: {
 export const createAVCellUpdateOperation = (options: {
     valueID?: string;
     avID?: string;
+    blockID?: string;
     keyID: string;
     rowID: string;
     data: IAVCellValue;
@@ -183,6 +184,7 @@ export const createAVCellUpdateOperation = (options: {
     action: "updateAttrViewCell",
     id: options.valueID || "",
     avID: options.avID,
+    ...(options.blockID ? {blockID: options.blockID} : {}),
     keyID: options.keyID,
     rowID: options.rowID,
     data: options.data,

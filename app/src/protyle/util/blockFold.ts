@@ -165,6 +165,35 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
     return {fold: !hasFold ? 1 : 0, undoOperations, doOperations, ready: Promise.resolve()};
 };
 
+export const toggleListFold = (protyle: IProtyle, listElement: Element) => {
+    const items = Array.from(listElement.children).filter(item => item.classList.contains("li"));
+    const folded = items.some(item => item.getAttribute("fold") !== "1" && item.childElementCount > 3);
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    items.forEach(item => {
+        if (folded && item.childElementCount <= 3) {
+            return;
+        }
+        if (hasViewFoldContext(protyle)) {
+            setViewFold(protyle, item, folded);
+            return;
+        }
+        const wasFolded = item.getAttribute("fold") === "1";
+        if (folded === wasFolded) {
+            return;
+        }
+        // 折叠只更新属性，避免用不完整的界面内容覆盖列表子块。
+        const id = item.getAttribute("data-node-id");
+        doOperations.push({action: "setAttrs", id, data: JSON.stringify({fold: folded ? "1" : ""})});
+        undoOperations.push({action: "setAttrs", id, data: JSON.stringify({fold: wasFolded ? "1" : ""})});
+        applyFoldState(protyle, item, folded);
+    });
+    if (doOperations.length > 0) {
+        transaction(protyle, doOperations, undoOperations);
+    }
+    preventScroll(protyle);
+};
+
 const headingFoldingProtyles = new WeakSet<IProtyle>();
 
 const getViewHeadingGroup = (protyle: IProtyle, nodeElement: Element, scope: "children" | "siblings") => {

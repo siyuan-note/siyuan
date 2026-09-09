@@ -160,7 +160,7 @@ import {escapeAttr, escapeHtml} from "../../util/escape";
 import {openLink} from "../../editor/openLink";
 import {mathRender} from "../render/mathRender";
 import {editAssetItem} from "../render/av/asset";
-import {hasViewFoldContext, sanitizeViewFoldHTML, setViewFold} from "../util/viewFold";
+import {hasViewFoldContext, sanitizeViewFoldHTML} from "../util/viewFold";
 import {img3115} from "../../boot/compatibleVersion";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
 import {globalClickHideMenu} from "../../boot/globalEvent/click";
@@ -170,7 +170,7 @@ import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
 import {reloadProtyle} from "../util/reload";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
-import {setFold} from "../util/blockFold";
+import {setFold, toggleListFold} from "../util/blockFold";
 import {BlockPanel} from "../../block/Panel";
 import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
@@ -4944,38 +4944,7 @@ export class WYSIWYG {
                             // 缩放列表项 https://ld246.com/article/1653123034794
                             setFold(protyle, actionElement.parentElement);
                         } else {
-                            let hasFold = true;
-                            const listElement = actionElement.parentElement.parentElement;
-                            Array.from(actionElement.parentElement.parentElement.children).find((listItemElement) => {
-                                if (listItemElement.classList.contains("li")) {
-                                    if (listItemElement.getAttribute("fold") !== "1" && listItemElement.childElementCount > 3) {
-                                        hasFold = false;
-                                        return true;
-                                    }
-                                }
-                            });
-                            if (hasViewFoldContext(protyle)) {
-                                Array.from(listElement.children).forEach(listItemElement => {
-                                    if (listItemElement.classList.contains("li") &&
-                                        (hasFold || listItemElement.childElementCount > 3)) {
-                                        setViewFold(protyle, listItemElement, !hasFold);
-                                    }
-                                });
-                                hideElements(["gutter"], protyle);
-                                event.stopPropagation();
-                                return;
-                            }
-                            const oldHTML = listElement.outerHTML;
-                            Array.from(actionElement.parentElement.parentElement.children).find((listItemElement) => {
-                                if (listItemElement.classList.contains("li")) {
-                                    if (hasFold) {
-                                        listItemElement.removeAttribute("fold");
-                                    } else if (listItemElement.childElementCount > 3) {
-                                        listItemElement.setAttribute("fold", "1");
-                                    }
-                                }
-                            });
-                            updateTransaction(protyle, listElement, oldHTML);
+                            toggleListFold(protyle, actionElement.parentElement.parentElement);
                         }
                         hideElements(["gutter"], protyle);
                     } else if (shouldOpenListItemAttr(event.shiftKey, protyle.disabled, actionElement)) {

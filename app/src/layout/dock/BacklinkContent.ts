@@ -903,8 +903,16 @@ export class BacklinkContent extends Model {
                     element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>');
                 }
             });
-            foldResetElement?.toggleAttribute("disabled", foldedTypes.length === 0);
-            resetElement?.toggleAttribute("disabled", !getBacklinkSourceFilterParam(this.sourceFilter) && foldedTypes.length === 0);
+            if (foldedTypes.length === 0) {
+                foldResetElement?.setAttribute("disabled", "disabled");
+            } else {
+                foldResetElement?.removeAttribute("disabled");
+            }
+            if (!getBacklinkSourceFilterParam(this.sourceFilter) && foldedTypes.length === 0) {
+                resetElement?.setAttribute("disabled", "disabled");
+            } else {
+                resetElement?.removeAttribute("disabled");
+            }
             this.itemRecords[0].forEach(record => {
                 if (record.editor && this.viewState) {
                     configureBacklinkTypeFold(record.editor.protyle, types, this.viewState);

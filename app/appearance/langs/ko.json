@@ -1,5 +1,5 @@
 {
-	"backlinkFoldByType": "블록 유형별로 기본 접기",
+	"backlinkFoldByType": "블록 유형별로 접기",
 	"backlinkHideReference": "전파된 백링크의 참조 블록 숨기기",
 	"backlinkHideReferenceTip": "전파된 백링크에서 다른 표시할 내용이 있으면 블록 참조만 포함된 블록을 숨기고 편집 중에는 다시 표시",
 	"uploadInsertTargetUnavailable": "원래 업로드 대상이 더 이상 유효하지 않습니다. 결과를 삽입하지 않았으며 업로드된 파일은 유지됩니다.",

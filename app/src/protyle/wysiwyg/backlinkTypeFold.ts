@@ -46,7 +46,7 @@ export const updateBacklinkTypeFolds = (protyle: IProtyle) => {
         } else {
             if (!button) {
                 button = document.createElement("button");
-                button.className = "backlinkTypeFold block__icon block__icon--show";
+                button.className = "backlinkTypeFold";
                 button.type = "button";
                 button.addEventListener("mousedown", event => {
                     event.preventDefault();

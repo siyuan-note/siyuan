@@ -562,6 +562,7 @@ export class BacklinkContent extends Model {
         }).then(() => {
             if (generation === this.viewStateGeneration) {
                 this.viewStateLoaded = true;
+                this.updateSourceFilterButton();
             }
         });
     }
@@ -846,17 +847,23 @@ export class BacklinkContent extends Model {
 
     private applySourceFilter(filter: IBacklinkSourceFilter) {
         this.sourceFilter = normalizeBacklinkSourceFilter(filter);
+        this.updateSourceFilterButton();
+        this.searchBacklinks();
+    }
+
+    private updateSourceFilterButton() {
         this.element.querySelector('[data-type="sourceFilter"]')?.classList.toggle(
             "block__icon--active",
-            Boolean(getBacklinkSourceFilterParam(this.sourceFilter)),
+            Boolean(getBacklinkSourceFilterParam(this.sourceFilter)) ||
+            normalizeBacklinkFoldTypes(this.viewState?.get("foldedBlockTypes")).length > 0,
         );
-        this.searchBacklinks();
     }
 
     private showSourceFilterMenu(event: MouseEvent) {
         const foldedTypes = normalizeBacklinkFoldTypes(this.viewState?.get("foldedBlockTypes"));
         const applyFoldTypes = (types: string[]) => {
             this.viewState?.set("foldedBlockTypes", types);
+            this.updateSourceFilterButton();
             BACKLINK_BLOCK_TYPES.forEach(([type]) => {
                 if (foldedTypes.includes(type) !== types.includes(type)) {
                     const field = `type-fold-generation:${type}`;

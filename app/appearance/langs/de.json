@@ -1,5 +1,5 @@
 {
-	"backlinkFoldByType": "Standardmäßig nach Blocktyp einklappen",
+	"backlinkFoldByType": "Nach Blocktyp einklappen",
 	"backlinkHideReference": "Referenzblöcke in vererbten Rückverweisen ausblenden",
 	"backlinkHideReferenceTip": "Blöcke mit ausschließlich Blockreferenzen in vererbten Rückverweisen ausblenden, wenn andere Inhalte sichtbar bleiben, und beim Bearbeiten wieder anzeigen",
 	"uploadInsertTargetUnavailable": "Das ursprüngliche Upload-Ziel ist nicht mehr verfügbar. Das Ergebnis wurde nicht eingefügt; hochgeladene Dateien bleiben erhalten.",

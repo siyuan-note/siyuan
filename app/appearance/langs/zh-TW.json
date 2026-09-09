@@ -1,5 +1,5 @@
 {
-	"backlinkFoldByType": "依區塊類型預設摺疊",
+	"backlinkFoldByType": "依區塊類型摺疊",
 	"backlinkHideReference": "隱藏傳遞型反向連結的引用區塊",
 	"backlinkHideReferenceTip": "在反向連結面板中隱藏僅含區塊引用且仍有其他內容可顯示的傳遞型引用區塊，編輯時恢復顯示",
 	"uploadInsertTargetUnavailable": "原上傳目標已失效，未填入結果；已上傳的檔案會保留。",

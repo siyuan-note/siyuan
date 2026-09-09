@@ -1,5 +1,5 @@
 {
-	"backlinkFoldByType": "Comprimi per tipo di blocco per impostazione predefinita",
+	"backlinkFoldByType": "Comprimi per tipo di blocco",
 	"backlinkHideReference": "Nascondi i blocchi di riferimento nei backlink propagati",
 	"backlinkHideReferenceTip": "Nascondi i blocchi contenenti solo riferimenti a blocchi nei backlink propagati quando rimangono altri contenuti visibili e mostrali di nuovo durante la modifica",
 	"uploadInsertTargetUnavailable": "La destinazione originale del caricamento non è più disponibile. Il risultato non è stato inserito; i file caricati vengono conservati.",

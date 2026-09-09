@@ -1,5 +1,5 @@
 {
-	"backlinkFoldByType": "Domyślnie zwijaj według typu bloku",
+	"backlinkFoldByType": "Zwijaj według typu bloku",
 	"backlinkHideReference": "Ukryj bloki odwołań w propagowanych linkach zwrotnych",
 	"backlinkHideReferenceTip": "Ukrywaj bloki zawierające wyłącznie odwołania do bloków w propagowanych linkach zwrotnych, gdy pozostaje inna widoczna treść, i pokazuj je ponownie podczas edycji",
 	"uploadInsertTargetUnavailable": "Pierwotny cel przesyłania nie jest już dostępny. Wynik nie został wstawiony; przesłane pliki zostały zachowane.",

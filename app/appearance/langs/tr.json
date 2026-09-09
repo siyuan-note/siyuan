@@ -1,5 +1,5 @@
 {
-	"backlinkFoldByType": "Blok türüne göre varsayılan olarak daralt",
+	"backlinkFoldByType": "Blok türüne göre daralt",
 	"backlinkHideReference": "Aktarılan geri bağlantılarda referans bloklarını gizle",
 	"backlinkHideReferenceTip": "Başka içerik görünür kaldığında aktarılan geri bağlantılarda yalnızca blok referansları içeren blokları gizle ve düzenleme sırasında yeniden göster",
 	"uploadInsertTargetUnavailable": "Özgün yükleme hedefi artık kullanılamıyor. Sonuç eklenmedi; yüklenen dosyalar korunuyor.",

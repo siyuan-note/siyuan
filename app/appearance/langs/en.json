@@ -1,6 +1,6 @@
 {
 	"backlinkExcludeRefDefs": "Exclude entries containing selected block references",
-	"backlinkExcludeRefDefsTip": "Hide an entire entry, including its children, when it references any selected block; selections are saved for the current target",
+	"backlinkExcludeRefDefsTip": "Hide an entire entry, including its children, when it references any selected block",
 	"backlinkFoldByType": "Collapse by block type",
 	"backlinkHideReference": "Hide reference blocks in propagated backlinks",
 	"backlinkHideReferenceTip": "Hide blocks containing only block references in propagated backlinks when other content remains visible, and show them again while editing",

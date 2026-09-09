@@ -1,6 +1,6 @@
 {
 	"backlinkExcludeRefDefs": "Excluir entradas com referências aos blocos selecionados",
-	"backlinkExcludeRefDefsTip": "Ocultar toda a entrada, incluindo seus filhos, quando houver referência a qualquer bloco selecionado; a seleção é salva para o destino atual",
+	"backlinkExcludeRefDefsTip": "Ocultar toda a entrada, incluindo seus filhos, quando houver referência a qualquer bloco selecionado",
 	"backlinkFoldByType": "Recolher por tipo de bloco",
 	"backlinkHideReference": "Ocultar blocos de referência em backlinks propagados",
 	"backlinkHideReferenceTip": "Ocultar blocos que contêm apenas referências a blocos em backlinks propagados quando houver outro conteúdo visível e exibi-los novamente durante a edição",

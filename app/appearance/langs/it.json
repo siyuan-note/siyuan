@@ -1,6 +1,6 @@
 {
 	"backlinkExcludeRefDefs": "Escludi le voci con riferimenti ai blocchi selezionati",
-	"backlinkExcludeRefDefsTip": "Nascondi l’intera voce, inclusi gli elementi figli, se fa riferimento a un blocco selezionato; la selezione viene salvata per la destinazione corrente",
+	"backlinkExcludeRefDefsTip": "Nascondi l’intera voce, inclusi gli elementi figli, se fa riferimento a un blocco selezionato",
 	"backlinkFoldByType": "Comprimi per tipo di blocco",
 	"backlinkHideReference": "Nascondi i blocchi di riferimento nei backlink propagati",
 	"backlinkHideReferenceTip": "Nascondi i blocchi contenenti solo riferimenti a blocchi nei backlink propagati quando rimangono altri contenuti visibili e mostrali di nuovo durante la modifica",

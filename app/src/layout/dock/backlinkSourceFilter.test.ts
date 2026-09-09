@@ -24,7 +24,7 @@ describe("backlink source filter", () => {
         });
     });
 
-    it("keeps reference-only filters and normalizes persisted IDs", () => {
+    it("keeps reference-only filters and normalizes IDs", () => {
         const id = "20260909120000-abcdefg";
         const filter = getBacklinkSourceFilterParam({
             ...createBacklinkSourceFilter(), excludedRefDefIDs: [id, "", "invalid", id],

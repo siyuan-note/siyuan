@@ -1,6 +1,6 @@
 {
 	"backlinkExcludeRefDefs": "Exclure les entrées contenant les références de blocs sélectionnées",
-	"backlinkExcludeRefDefsTip": "Masquer toute l’entrée, y compris ses enfants, si elle référence un bloc sélectionné ; la sélection est enregistrée pour la cible actuelle",
+	"backlinkExcludeRefDefsTip": "Masquer toute l’entrée, y compris ses enfants, si elle référence un bloc sélectionné",
 	"backlinkFoldByType": "Replier selon le type de bloc",
 	"backlinkHideReference": "Masquer les blocs de référence dans les liens retour propagés",
 	"backlinkHideReferenceTip": "Masquer les blocs contenant uniquement des références de bloc dans les liens retour propagés si un autre contenu reste visible, et les réafficher pendant la modification",

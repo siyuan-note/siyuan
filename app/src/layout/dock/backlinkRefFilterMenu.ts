@@ -1,6 +1,6 @@
-import {Dialog} from "../../dialog";
-import {fetchPost} from "../../util/fetch";
+import {fetchSyncPost} from "../../util/fetch";
 import {escapeAttr, escapeHtml} from "../../util/escape";
+import {Constants} from "../../constants";
 import type {IBacklinkSourceFilter} from "./backlinkSourceFilter";
 
 interface IRefDef {
@@ -9,7 +9,7 @@ interface IRefDef {
     path: string;
 }
 
-export const showBacklinkRefFilter = (options: {
+export const loadBacklinkRefFilterMenu = async (options: {
     id: string;
     notebook: string;
     keyword: string;
@@ -17,102 +17,102 @@ export const showBacklinkRefFilter = (options: {
     getSelected: () => string[];
     isCurrent: () => boolean;
     apply: (ids: string[]) => void;
-}) => {
+}): Promise<IMenu[]> => {
     const languages = window.siyuan.languages;
-    const dialog = new Dialog({
-        title: languages.backlinkExcludeRefDefs,
-        width: "520px",
-        content: `<div class="b3-dialog__content">
-<div class="ft__secondary">${languages.backlinkExcludeRefDefsTip}</div>
-<div class="fn__hr"></div>
-<input class="b3-text-field fn__block" aria-label="${escapeAttr(escapeHtml(languages.search))}" placeholder="${escapeAttr(escapeHtml(languages.search))}">
-<div class="fn__hr"></div>
-<div data-type="candidates" style="max-height: 50vh; overflow: auto"></div>
-</div><div class="b3-dialog__action"><span class="ft__secondary fn__flex-1" data-type="count"></span>
-<button class="b3-button b3-button--cancel" data-type="reset">${languages.reset}</button>
-<div class="fn__space"></div><button class="b3-button b3-button--text" data-type="close">${languages.close}</button></div>`,
-    });
-    const input = dialog.element.querySelector("input") as HTMLInputElement;
-    const list = dialog.element.querySelector('[data-type="candidates"]');
-    const count = dialog.element.querySelector('[data-type="count"]');
-    const reset = dialog.element.querySelector('[data-type="reset"]') as HTMLButtonElement;
-    let candidates: IRefDef[] = [];
-    const active = () => {
-        if (!options.isCurrent()) {
-            dialog.destroy();
-            return false;
-        }
-        return dialog.element.isConnected;
-    };
-    const render = () => {
-        if (!active()) {
-            return;
-        }
-        const selected = options.getSelected();
-        count.textContent = `${languages.backlinkExcludeRefDefs} (${selected.length})`;
-        reset.disabled = selected.length === 0;
-        const byID = new Map(candidates.map(item => [item.id, item]));
-        selected.forEach(id => {
-            if (!byID.has(id)) {
-                byID.set(id, {id, text: id, path: ""});
-            }
-        });
-        const keyword = input.value.toLocaleLowerCase();
-        list.replaceChildren();
-        Array.from(byID.values()).filter(item => selected.includes(item.id) ||
-            `${item.text} ${item.path} ${item.id}`.toLocaleLowerCase().includes(keyword)).forEach(item => {
-            const row = document.createElement("label");
-            row.className = "b3-list-item";
-            const checkbox = document.createElement("input");
-            checkbox.type = "checkbox";
-            checkbox.className = "b3-switch fn__flex-shrink";
-            checkbox.checked = selected.includes(item.id);
-            const text = document.createElement("span");
-            text.className = "b3-list-item__text";
-            text.textContent = item.text || item.id;
-            row.title = `${item.path}\n${item.id}`;
-            const path = document.createElement("span");
-            path.className = "ft__secondary fn__ellipsis";
-            path.style.maxWidth = "40%";
-            path.textContent = item.path;
-            checkbox.addEventListener("change", () => {
-                if (!active()) {
-                    return;
-                }
-                const ids = new Set(options.getSelected());
-                if (checkbox.checked) {
-                    ids.add(item.id);
-                } else {
-                    ids.delete(item.id);
-                }
-                options.apply(Array.from(ids));
-                render();
-            });
-            row.append(checkbox, text, path);
-            list.appendChild(row);
-        });
-        if (!list.childElementCount) {
-            list.textContent = languages.emptyContent;
-        }
-    };
-    input.addEventListener("input", render);
-    reset.addEventListener("click", () => {
-        if (active()) {
-            options.apply([]);
-            render();
-        }
-    });
-    dialog.element.querySelector('[data-type="close"]').addEventListener("click", () => dialog.destroy());
-    render();
-    list.textContent = languages.loading;
-    void fetchPost("/api/ref/getBacklink2", {
+    const response = await fetchSyncPost("/api/ref/getBacklink2", {
         id: options.id, k: options.keyword, mk: "", notebook: options.notebook,
         sourceFilter: options.filter, refDefCandidates: true,
-    }, response => {
-        if (response.code === 0 && active()) {
-            candidates = response.data.refDefs || [];
-            render();
+    });
+    if (!options.isCurrent() || response.code !== 0) {
+        return [];
+    }
+    const candidates: IRefDef[] = response.data.refDefs || [];
+    const byID = new Map(candidates.map(item => [item.id, item]));
+    options.getSelected().forEach(id => {
+        if (!byID.has(id)) {
+            byID.set(id, {id, text: id, path: ""});
         }
-    }).then(render);
-    input.focus();
+    });
+    const rows = new Map<string, HTMLElement>();
+    let input: HTMLInputElement;
+    let reset: HTMLElement;
+    let empty: HTMLElement;
+    const refresh = () => {
+        const selected = options.getSelected();
+        const keyword = input.value.toLocaleLowerCase();
+        let visible = 0;
+        rows.forEach((element, id) => {
+            const item = byID.get(id);
+            const checked = selected.includes(id);
+            const hidden = !checked && !`${item.text} ${item.path} ${id}`.toLocaleLowerCase().includes(keyword);
+            element.classList.toggle("fn__none", hidden);
+            if (hidden) {
+                element.classList.remove("b3-menu__item--current");
+            }
+            element.querySelector(".b3-menu__checked")?.remove();
+            element.setAttribute("aria-checked", String(checked));
+            if (checked) {
+                element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>');
+            }
+            if (!hidden) {
+                visible++;
+            }
+        });
+        empty?.classList.toggle("fn__none", visible > 0);
+        reset?.toggleAttribute("disabled", selected.length === 0);
+    };
+    return [{
+        type: "empty",
+        label: `<input ${Constants.ATTRIBUTE_MENU_KEYMAP}="true" class="b3-text-field fn__block" style="margin: 4px 0" placeholder="${escapeAttr(escapeHtml(languages.search))}">`,
+        bind: element => {
+            input = element.querySelector("input");
+            input.setAttribute("aria-label", languages.search);
+            input.title = languages.backlinkExcludeRefDefsTip;
+            input.addEventListener("input", refresh);
+            input.addEventListener("click", event => event.stopPropagation());
+        },
+    }, {
+        label: languages.reset,
+        iconHTML: "",
+        disabled: options.getSelected().length === 0,
+        bind: element => { reset = element; },
+        click: () => {
+            if (options.isCurrent()) {
+                options.apply([]);
+                refresh();
+            }
+            return true;
+        },
+    }, ...Array.from(byID.values()).map((item): IMenu => ({
+        label: `${escapeHtml(item.text || item.id)}<span class="ft__on-surface fn__block fn__ellipsis">${escapeHtml(item.path)}</span>`,
+        iconHTML: "",
+        checked: options.getSelected().includes(item.id),
+        bind: element => {
+            element.title = `${item.path}\n${item.id}`;
+            element.setAttribute("role", "menuitemcheckbox");
+            element.setAttribute("aria-checked", String(options.getSelected().includes(item.id)));
+            rows.set(item.id, element);
+        },
+        click: () => {
+            if (options.isCurrent()) {
+                const ids = new Set(options.getSelected());
+                if (ids.has(item.id)) {
+                    ids.delete(item.id);
+                } else {
+                    ids.add(item.id);
+                }
+                options.apply(Array.from(ids));
+                refresh();
+            }
+            return true;
+        },
+    })), {
+        type: "readonly",
+        label: languages.emptyContent,
+        iconHTML: "",
+        bind: element => {
+            empty = element;
+            refresh();
+        },
+    }];
 };

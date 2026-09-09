@@ -1,6 +1,6 @@
 {
 	"backlinkExcludeRefDefs": "選択したブロック参照を含む項目を除外",
-	"backlinkExcludeRefDefsTip": "項目またはその子要素が選択したいずれかのブロックを参照している場合、項目全体を非表示にします。選択は現在の対象ブロックごとに保存されます",
+	"backlinkExcludeRefDefsTip": "項目またはその子要素が選択したいずれかのブロックを参照している場合、項目全体を非表示にします",
 	"backlinkFoldByType": "ブロックの種類ごとに折りたたむ",
 	"backlinkHideReference": "伝播型バックリンクの参照ブロックを非表示",
 	"backlinkHideReferenceTip": "伝播型バックリンクで、ほかに表示できる内容がある場合はブロック参照のみのブロックを非表示にし、編集中は再表示します",

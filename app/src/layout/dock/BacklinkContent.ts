@@ -45,8 +45,8 @@ import {
 } from "./backlinkSourceFilter";
 import {escapeHtml} from "../../util/escape";
 import {ViewStateService} from "../../util/viewState";
-import {acquireBacklinkRefFilter} from "./backlinkRefFilterState";
-import {showBacklinkRefFilter} from "./backlinkRefFilterMenu";
+import {loadBacklinkRefFilterMenu} from "./backlinkRefFilterMenu";
+import {BacklinkMentionCache, getBacklinkMentionQueryKey} from "./backlinkMentionCache";
 import {
     applyViewFoldStates,
     invalidateViewFoldRequests,
@@ -149,6 +149,7 @@ export class BacklinkContent extends Model {
     private contextRequestVersions = [0, 0];
     private itemRecords = [new Map<string, IBacklinkItemRecord>(), new Map<string, IBacklinkItemRecord>()];
     private listRevision = "";
+    private mentionCache = new BacklinkMentionCache<Pick<IBacklinkListResponse, "backmentions" | "mentionsCount">>();
     private listQueryKey = "";
     private renderedQueryKey = "";
     private indexChangeVersion = 0;
@@ -160,7 +161,6 @@ export class BacklinkContent extends Model {
     private empty = false;
     private emptyChange?: (empty: boolean) => void;
     private sourceFilter = createBacklinkSourceFilter();
-    private refFilterState?: ReturnType<typeof acquireBacklinkRefFilter>;
     private viewState?: ViewStateService;
     private viewStateReady: Promise<void> = Promise.resolve();
     private viewStateLoaded = false;
@@ -534,18 +534,15 @@ export class BacklinkContent extends Model {
     }
 
     private setViewStateHost(blockID: string) {
+        this.mentionCache.clear();
         this.clearReadingAnchorTimers();
         const previousReady = this.viewStateReady;
         const previous = this.viewState;
-        const previousRefFilter = this.refFilterState;
-        this.refFilterState = undefined;
-        this.sourceFilter.excludedRefDefIDs = [];
         const generation = ++this.viewStateGeneration;
         this.viewState = undefined;
         this.viewStateLoaded = !blockID;
         const createService = async () => {
             await previousReady;
-            await previousRefFilter?.release().catch(error => console.error(error));
             if (previous) {
                 try {
                     await previous.destroy();
@@ -562,19 +559,7 @@ export class BacklinkContent extends Model {
                 hostID: blockID,
             });
             this.viewState = service;
-            const refFilter = acquireBacklinkRefFilter(blockID, ids => {
-                if (generation !== this.viewStateGeneration ||
-                    JSON.stringify(ids) === JSON.stringify(this.sourceFilter.excludedRefDefIDs)) {
-                    return;
-                }
-                this.sourceFilter.excludedRefDefIDs = ids;
-                this.updateSourceFilterButton();
-                if (this.viewStateLoaded) {
-                    this.searchBacklinks();
-                }
-            });
-            this.refFilterState = refFilter;
-            await Promise.all([service.ready, refFilter.ready]);
+            await service.ready;
         };
         this.viewStateReady = createService().catch(error => {
             console.error(error);
@@ -865,11 +850,7 @@ export class BacklinkContent extends Model {
     }
 
     private applySourceFilter(filter: IBacklinkSourceFilter) {
-        const previousIDs = JSON.stringify(this.sourceFilter.excludedRefDefIDs);
         this.sourceFilter = normalizeBacklinkSourceFilter(filter);
-        if (previousIDs !== JSON.stringify(this.sourceFilter.excludedRefDefIDs)) {
-            this.refFilterState?.set(this.sourceFilter.excludedRefDefIDs);
-        }
         this.updateSourceFilterButton();
         this.searchBacklinks();
     }
@@ -1004,20 +985,27 @@ export class BacklinkContent extends Model {
                 this.applySourceFilter({...this.sourceFilter, excludeSelf: !this.sourceFilter.excludeSelf});
             }
         }).element);
+        const refFilterGeneration = this.viewStateGeneration;
+        let refFilterMenuElement: HTMLElement;
         window.siyuan.menus.menu.append(new MenuItem({
-            icon: "iconFilter",
+            iconHTML: "",
             label: `${window.siyuan.languages.backlinkExcludeRefDefs} (${this.sourceFilter.excludedRefDefIDs.length})`,
-            disabled: !this.viewStateLoaded || !this.refFilterState,
-            click: () => {
-                const generation = this.viewStateGeneration;
-                showBacklinkRefFilter({
+            disabled: !this.blockId,
+            bind: element => { refFilterMenuElement = element; },
+            loadSubmenu: () => {
+                return loadBacklinkRefFilterMenu({
                     id: this.blockId,
                     notebook: isEncryptedBox(this.notebookId) ? this.notebookId : "",
                     keyword: this.inputsElement[0].value,
                     filter: this.sourceFilter,
                     getSelected: () => this.sourceFilter.excludedRefDefIDs,
-                    isCurrent: () => !this.destroyed && generation === this.viewStateGeneration,
-                    apply: ids => this.applySourceFilter({...this.sourceFilter, excludedRefDefIDs: ids}),
+                    isCurrent: () => !this.destroyed && refFilterGeneration === this.viewStateGeneration,
+                    apply: ids => {
+                        this.applySourceFilter({...this.sourceFilter, excludedRefDefIDs: ids});
+                        refFilterMenuElement.querySelector(":scope > .b3-menu__label").textContent =
+                            `${window.siyuan.languages.backlinkExcludeRefDefs} (${this.sourceFilter.excludedRefDefIDs.length})`;
+                        resetElement?.toggleAttribute("disabled", !getBacklinkSourceFilterParam(this.sourceFilter) && foldedTypes.length === 0);
+                    },
                 });
             },
         }).element);
@@ -1642,8 +1630,11 @@ export class BacklinkContent extends Model {
         service.set(this.getReadingAnchorField(isMention), anchor);
     }
 
-    private refreshExpandedContexts(rootIDs: Set<string>, full: boolean) {
+    private refreshExpandedContexts(rootIDs: Set<string>, full: boolean, reuseMentions = false) {
         this.itemRecords.forEach((records, index) => {
+            if (index === 1 && reuseMentions) {
+                return;
+            }
             records.forEach((record, rootID) => {
                 const arrowElement = record.headerElement.querySelector(".b3-list-item__arrow");
                 if (!arrowElement?.classList.contains("b3-list-item__arrow--open")) {
@@ -1899,6 +1890,17 @@ export class BacklinkContent extends Model {
         if (isEncryptedBox(notebookId)) {
             param.notebook = notebookId;
         }
+        const mentionQueryKey = JSON.stringify([
+            getBacklinkMentionQueryKey(param),
+            window.siyuan.config.search,
+            window.siyuan.config.editor.backlinkMentionExclude,
+            window.siyuan.config.editor.backlinkContainChildren,
+        ]);
+        const cachedMentions = !this.onlyBacklinks && !init && !refreshAllContexts && !this.dirty ?
+            this.mentionCache.get(mentionQueryKey, this.indexChangeVersion) : undefined;
+        if (cachedMentions) {
+            param.includeMentions = false;
+        }
         const queryKey = JSON.stringify(param);
         const queryChanged = queryKey !== this.listQueryKey;
         if (!queryChanged && this.listRevision) {
@@ -1941,9 +1943,17 @@ export class BacklinkContent extends Model {
             this.listQueryKey = queryKey;
             this.listRevision = response.data.revision;
             if (!response.data.unchanged) {
+                if (cachedMentions) {
+                    Object.assign(response.data, cachedMentions);
+                } else if (!this.onlyBacklinks) {
+                    this.mentionCache.set(mentionQueryKey, indexChangeVersion, {
+                        backmentions: response.data.backmentions,
+                        mentionsCount: response.data.mentionsCount,
+                    });
+                }
                 this.render(response.data, init);
             }
-            this.refreshExpandedContexts(changedRootIDs, fullContextRefresh);
+            this.refreshExpandedContexts(changedRootIDs, fullContextRefresh, Boolean(cachedMentions));
             if (indexChangeVersion === this.indexChangeVersion) {
                 this.pendingRootIDs.clear();
                 this.pendingFull = false;
@@ -2007,6 +2017,7 @@ export class BacklinkContent extends Model {
 
     public render(data?: IBacklinkListResponse, init = false) {
         if (!data) {
+            this.mentionCache.clear();
             this.listRevision = "";
             this.listQueryKey = "";
             data = {
@@ -2324,7 +2335,6 @@ export class BacklinkContent extends Model {
         });
         this.editors = [];
         void this.viewState?.destroy().catch(error => console.error(error));
-        void this.refFilterState?.release().catch(error => console.error(error));
         if (this.ws) {
             this.ws.onclose = null;
             this.ws.close();

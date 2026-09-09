@@ -159,6 +159,7 @@ type BacklinkSourceFilter struct {
 	DailyNote           string   `json:"dailyNote"`
 	ExcludedNotebookIDs []string `json:"excludedNotebookIDs"`
 	ExcludeSelf         bool     `json:"excludeSelf"`
+	ExcludedBlockTypes  []string `json:"excludedBlockTypes"`
 }
 
 func NormalizeBacklinkSourceFilter(filter *BacklinkSourceFilter) *BacklinkSourceFilter {
@@ -180,13 +181,21 @@ func NormalizeBacklinkSourceFilter(filter *BacklinkSourceFilter) *BacklinkSource
 		excludedNotebookIDs = append(excludedNotebookIDs, notebookID)
 	}
 	sort.Strings(excludedNotebookIDs)
-	if BacklinkDailyNoteAll == dailyNote && 0 == len(excludedNotebookIDs) && !filter.ExcludeSelf {
+	excludedBlockTypes := []string{}
+	for _, blockType := range filter.ExcludedBlockTypes {
+		if "" != treenode.TypeAbbr(blockType) && !gulu.Str.Contains(blockType, excludedBlockTypes) {
+			excludedBlockTypes = append(excludedBlockTypes, blockType)
+		}
+	}
+	sort.Strings(excludedBlockTypes)
+	if BacklinkDailyNoteAll == dailyNote && 0 == len(excludedNotebookIDs) && !filter.ExcludeSelf && 0 == len(excludedBlockTypes) {
 		return nil
 	}
 	return &BacklinkSourceFilter{
 		DailyNote:           dailyNote,
 		ExcludedNotebookIDs: excludedNotebookIDs,
 		ExcludeSelf:         filter.ExcludeSelf,
+		ExcludedBlockTypes:  excludedBlockTypes,
 	}
 }
 
@@ -250,7 +259,7 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren, highli
 	return
 }
 
-func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight bool) (ret []*Backlink, keywords []string) {
+func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight bool, filters ...*BacklinkSourceFilter) (ret []*Backlink, keywords []string) {
 	keyword = strings.TrimSpace(keyword)
 	if "" != keyword {
 		keywords = strings.Split(keyword, " ")
@@ -295,6 +304,9 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight
 	refs = removeDuplicatedRefs(refs)
 
 	linkRefs, _, _, originalRefBlockIDs := buildLinkRefsInBox(rootID, refs, keywords, encBoxIDUsed)
+	if len(filters) > 0 {
+		linkRefs = filterBacklinkSourcesInBox(linkRefs, rootID, encBoxIDUsed, filters[0])
+	}
 	refTree, err := LoadTreeByBlockID(refTreeID)
 	if err != nil {
 		logging.LogWarnf("load ref tree [%s] failed: %s", refTreeID, err)
@@ -315,7 +327,7 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight
 	return
 }
 
-func GetBacklinkDocInBox(defID, refTreeID, keyword string, containChildren, highlight bool, boxID string) (ret []*Backlink, keywords []string) {
+func GetBacklinkDocInBox(defID, refTreeID, keyword string, containChildren, highlight bool, boxID string, filters ...*BacklinkSourceFilter) (ret []*Backlink, keywords []string) {
 	keyword = strings.TrimSpace(keyword)
 	if "" != keyword {
 		keywords = strings.Split(keyword, " ")
@@ -342,6 +354,9 @@ func GetBacklinkDocInBox(defID, refTreeID, keyword string, containChildren, high
 	refs = removeDuplicatedRefs(refs)
 
 	linkRefs, _, _, originalRefBlockIDs := buildLinkRefsInBox(rootID, refs, keywords, boxID)
+	if len(filters) > 0 {
+		linkRefs = filterBacklinkSourcesInBox(linkRefs, rootID, boxID, filters[0])
+	}
 	refTree, err := loadTreeByBlockIDInBox(refTreeID, boxID)
 	if err != nil {
 		logging.LogWarnf("load ref tree [%s] failed: %s", refTreeID, err)
@@ -872,6 +887,9 @@ func filterBacklinkSources(linkRefs []*Block, defRootID string, filter *Backlink
 	}
 	for _, linkRef := range linkRefs {
 		if nil == linkRef || excludedNotebookIDs[linkRef.Box] || filter.ExcludeSelf && defRootID == linkRef.RootID {
+			continue
+		}
+		if gulu.Str.Contains(linkRef.Type, filter.ExcludedBlockTypes) {
 			continue
 		}
 		isDailyNote := dailyNoteRootIDs[linkRef.RootID]

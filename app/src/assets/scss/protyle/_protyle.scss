@@ -562,11 +562,14 @@
         }
 
         > .counter {
-          background-color: transparent;
+          background-color: var(--b3-theme-background-light);
           color: var(--b3-theme-on-surface-light);
+          height: 18px;
+          line-height: 18px;
+          padding: 0 4px;
 
           &:hover {
-            background-color: transparent;
+            background-color: var(--b3-theme-background-light);
             color: var(--b3-theme-on-surface-light);
           }
         }

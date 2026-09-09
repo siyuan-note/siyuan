@@ -81,6 +81,26 @@ func TestIsDailyNoteBlock(t *testing.T) {
 	}
 }
 
+func TestBacklinkBlockTypeFilter(t *testing.T) {
+	filter := NormalizeBacklinkSourceFilter(&BacklinkSourceFilter{
+		ExcludedBlockTypes: []string{"NodeAttributeView", "", "unknown", "NodeAttributeView"},
+	})
+	if nil == filter || !reflect.DeepEqual(filter.ExcludedBlockTypes, []string{"NodeAttributeView"}) {
+		t.Fatalf("unexpected block types: %+v", filter)
+	}
+	database := &Block{ID: "database", Type: "NodeAttributeView"}
+	parent := &Block{ID: "parent", Type: "NodeHeading", Children: []*Block{database}}
+	paragraph := &Block{ID: "paragraph", Type: "NodeParagraph", RootID: "same-document"}
+	refs := []*Block{database, parent, paragraph}
+	filtered := filterBacklinkSources(refs, "target", filter, nil)
+	assertBacklinkSourceIDs(t, filtered, []string{"parent", "paragraph"})
+	if len(parent.Children) != 1 || parent.Children[0] != database || len(refs) != 3 {
+		t.Fatal("filter must preserve nested content and original references")
+	}
+	filter.ExcludedBlockTypes = append(filter.ExcludedBlockTypes, "NodeHeading", "NodeParagraph")
+	assertBacklinkSourceIDs(t, filterBacklinkSources(refs, "target", filter, nil), []string{})
+}
+
 func assertBacklinkSourceIDs(t *testing.T, blocks []*Block, expected []string) {
 	t.Helper()
 	actual := make([]string, 0, len(blocks))

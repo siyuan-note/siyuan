@@ -158,9 +158,9 @@ func getBacklinkDoc(c *gin.Context) {
 	if encryptedNotebookDenied || !isBacklinkDocAccessible(c, refTreeID) {
 		backlinks, keywords = []*model.Backlink{}, []string{}
 	} else if notebook != "" && model.IsEncryptedBox(notebook) {
-		backlinks, keywords = model.GetBacklinkDocInBox(defID, refTreeID, keyword, containChildren, highlight, notebook)
+		backlinks, keywords = model.GetBacklinkDocInBox(defID, refTreeID, keyword, containChildren, highlight, notebook, parseBacklinkSourceFilter(arg))
 	} else {
-		backlinks, keywords = model.GetBacklinkDoc(defID, refTreeID, keyword, containChildren, highlight)
+		backlinks, keywords = model.GetBacklinkDoc(defID, refTreeID, keyword, containChildren, highlight, parseBacklinkSourceFilter(arg))
 	}
 	keywords = canonicalBacklinkKeywords(keywords)
 	items := newBacklinkContextResponses(backlinks)
@@ -295,6 +295,13 @@ func parseBacklinkSourceFilter(arg map[string]any) *model.BacklinkSourceFilter {
 	}
 
 	filter := &model.BacklinkSourceFilter{}
+	if blockTypes, ok := filterArg["excludedBlockTypes"].([]any); ok {
+		for _, blockType := range blockTypes {
+			if value, ok := blockType.(string); ok {
+				filter.ExcludedBlockTypes = append(filter.ExcludedBlockTypes, value)
+			}
+		}
+	}
 	filter.DailyNote, _ = filterArg["dailyNote"].(string)
 	filter.ExcludeSelf, _ = filterArg["excludeSelf"].(bool)
 	if notebookIDs, ok := filterArg["excludedNotebookIDs"].([]any); ok {

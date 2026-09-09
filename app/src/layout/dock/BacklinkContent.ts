@@ -853,6 +853,37 @@ export class BacklinkContent extends Model {
     }
 
     private showSourceFilterMenu(event: MouseEvent) {
+        const blockTypeSubmenu: IMenu[] = [{
+            label: window.siyuan.languages.all,
+            checked: !this.sourceFilter.excludedBlockTypes.length,
+            iconHTML: "",
+            click: () => this.applySourceFilter({...this.sourceFilter, excludedBlockTypes: []}),
+        }, {type: "separator"}];
+        [
+            ["NodeDocument", "doc"], ["NodeParagraph", "paragraph"], ["NodeHeading", "headings"],
+            ["NodeList", "list1"], ["NodeListItem", "listItem"], ["NodeBlockquote", "quote"],
+            ["NodeSuperBlock", "superBlock"], ["NodeCallout", "callout"],
+            ["NodeTabs", "tabs"], ["NodeTabItem", "tabItem"], ["NodeAttributeView", "database"],
+            ["NodeTable", "table"], ["NodeCodeBlock", "code"], ["NodeMathBlock", "math"],
+            ["NodeBlockQueryEmbed", "embedBlock"], ["NodeVideo", "video"], ["NodeAudio", "audio"],
+            ["NodeWidget", "widget"], ["NodeHTMLBlock", "HTML"], ["NodeIFrame", "IFrame"],
+            ["NodeThematicBreak", "line"], ["NodeCustomBlock", "custom"],
+        ].forEach(([type, label]) => {
+            blockTypeSubmenu.push({
+                label: window.siyuan.languages[label] || label,
+                checked: !this.sourceFilter.excludedBlockTypes.includes(type),
+                iconHTML: "",
+                click: () => {
+                    const excluded = new Set(this.sourceFilter.excludedBlockTypes);
+                    if (excluded.has(type)) {
+                        excluded.delete(type);
+                    } else {
+                        excluded.add(type);
+                    }
+                    this.applySourceFilter({...this.sourceFilter, excludedBlockTypes: Array.from(excluded)});
+                },
+            });
+        });
         const dailyNoteSubmenu = ([
             ["all", window.siyuan.languages.all],
             ["only", window.siyuan.languages.dailyNote],
@@ -891,6 +922,12 @@ export class BacklinkContent extends Model {
         });
 
         window.siyuan.menus.menu.remove();
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconListFilterPlus",
+            label: window.siyuan.languages.type,
+            type: "submenu",
+            submenu: blockTypeSubmenu,
+        }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconCalendar",
             label: window.siyuan.languages.dailyNote,
@@ -1007,13 +1044,16 @@ export class BacklinkContent extends Model {
         const viewStateGeneration = this.viewStateGeneration;
         const contextRequestVersion = this.contextRequestVersions[index];
         const requestGeneration = ++record.requestGeneration;
-        const param: IObject = {
+        const param: {[key: string]: string | number | boolean | IBacklinkSourceFilter} = {
             defID: blockId,
             refTreeID: docId,
             highlight: !isSupportCSSHL(),
             keyword,
         };
         const notebookId = liElement.getAttribute("data-notebook-id");
+        if (!isMention) {
+            param.sourceFilter = getBacklinkSourceFilterParam(this.sourceFilter);
+        }
         if (isEncryptedBox(notebookId)) {
             param.notebook = notebookId;
         }

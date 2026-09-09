@@ -36,6 +36,7 @@ func TestParseBacklinkSourceFilter(t *testing.T) {
 			"dailyNote":           model.BacklinkDailyNoteExclude,
 			"excludedNotebookIDs": []any{"box-b", "box-a", "box-b"},
 			"excludeSelf":         true,
+			"excludedBlockTypes":  []any{"NodeAttributeView", 42, "NodeParagraph", "NodeAttributeView", "unknown"},
 		},
 	})
 	if nil == filter || model.BacklinkDailyNoteExclude != filter.DailyNote || !filter.ExcludeSelf {
@@ -43,5 +44,8 @@ func TestParseBacklinkSourceFilter(t *testing.T) {
 	}
 	if !reflect.DeepEqual([]string{"box-a", "box-b"}, filter.ExcludedNotebookIDs) {
 		t.Fatalf("unexpected notebook IDs: %v", filter.ExcludedNotebookIDs)
+	}
+	if !reflect.DeepEqual([]string{"NodeAttributeView", "NodeParagraph"}, filter.ExcludedBlockTypes) {
+		t.Fatalf("unexpected block types: %v", filter.ExcludedBlockTypes)
 	}
 }

@@ -283,7 +283,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
 </div>
 <div class="fn__none">
     <div class="fn__hr"></div>
-    <textarea rows="1" placeholder="${window.siyuan.languages.addDesc}" class="b3-text-field fn__block" type="text" data-value="${escapeAttr(desc)}">${desc}</textarea>
+    <textarea rows="1" placeholder="${window.siyuan.languages.addDesc}" class="b3-text-field fn__block" type="text" data-value="${escapeAttr(desc)}">${escapeHtml(desc)}</textarea>
 </div>
 <div class="fn__hr--small"></div>`,
         bind(element) {

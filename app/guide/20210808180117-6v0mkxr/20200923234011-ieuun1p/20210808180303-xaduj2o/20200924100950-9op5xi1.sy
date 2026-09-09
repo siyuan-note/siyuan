@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260908202901"
+		"updated": "20260909090822"
 	},
 	"Children": [
 		{
@@ -12362,7 +12362,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20210106154319-otreidg",
-				"updated": "20260908091355"
+				"updated": "20260909090822"
 			},
 			"Children": [
 				{
@@ -13089,7 +13089,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Ordinary cell content: next row; lists or code: new item or line"
+									"Data": "A single ordinary paragraph: next row in the same column, or a paragraph after the last row; other content follows its block type"
 								}
 							]
 						},

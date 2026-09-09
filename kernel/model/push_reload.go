@@ -241,45 +241,49 @@ func refreshDocInfo0(tree *parse.Tree, size uint64) {
 		}
 	}
 
-	subFileCount := 0
-	if IsBoxDoc(tree.Box, tree.ID) {
-		subFileCount = BoxDocSubFileCount(tree.Box)
-	} else if "true" != tree.Root.IALAttr(DocHiddenAttr) {
-		subDir := filepath.Join(util.DataDir, tree.Box, strings.TrimSuffix(tree.Path, ".sy"))
-		subFiles, err := os.ReadDir(subDir)
-		if err == nil {
-			for _, subFile := range subFiles {
-				if !strings.HasSuffix(subFile.Name(), ".sy") {
-					continue
-				}
+	docInfo := map[string]any{
+		"box":      tree.Box,
+		"rootID":   tree.ID,
+		"name":     tree.Root.IALAttr("title"),
+		"alias":    tree.Root.IALAttr("alias"),
+		"name1":    tree.Root.IALAttr("name"),
+		"memo":     tree.Root.IALAttr("memo"),
+		"bookmark": tree.Root.IALAttr("bookmark"),
+		"size":     size,
+		"hSize":    humanize.BytesCustomCeil(size, 2),
+		"mtime":    mTime.Unix(),
+		"ctime":    cTime.Unix(),
+		"hMtime":   mTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(mTime, Conf.Lang),
+		"hCtime":   cTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(cTime, Conf.Lang),
+	}
 
-				subDocIAL := filesys.DocIAL(filepath.Join(subDir, subFile.Name()))
-				if "true" == subDocIAL[DocHiddenAttr] {
-					continue
+	boxID, rootID, treePath := tree.Box, tree.ID, tree.Path
+	hidden := "true" == tree.Root.IALAttr(DocHiddenAttr)
+	task.AppendAsyncTaskWithDelay(task.ReloadProtyle, 500*time.Millisecond, func(docInfo map[string]any) {
+		// 发送时统计子文档，避免转换标题等操作期间的中间状态导致文档树图标闪烁。
+		subFileCount := 0
+		if IsBoxDoc(boxID, rootID) {
+			subFileCount = BoxDocSubFileCount(boxID)
+		} else if !hidden {
+			subDir := filepath.Join(util.DataDir, boxID, strings.TrimSuffix(treePath, ".sy"))
+			subFiles, err := os.ReadDir(subDir)
+			if err == nil {
+				for _, subFile := range subFiles {
+					if !strings.HasSuffix(subFile.Name(), ".sy") {
+						continue
+					}
+
+					subDocIAL := filesys.DocIAL(filepath.Join(subDir, subFile.Name()))
+					if "true" == subDocIAL[DocHiddenAttr] {
+						continue
+					}
+					subFileCount++
 				}
-				subFileCount++
 			}
 		}
-	}
-
-	docInfo := map[string]any{
-		"box":          tree.Box,
-		"rootID":       tree.ID,
-		"name":         tree.Root.IALAttr("title"),
-		"alias":        tree.Root.IALAttr("alias"),
-		"name1":        tree.Root.IALAttr("name"),
-		"memo":         tree.Root.IALAttr("memo"),
-		"bookmark":     tree.Root.IALAttr("bookmark"),
-		"size":         size,
-		"hSize":        humanize.BytesCustomCeil(size, 2),
-		"mtime":        mTime.Unix(),
-		"ctime":        cTime.Unix(),
-		"hMtime":       mTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(mTime, Conf.Lang),
-		"hCtime":       cTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(cTime, Conf.Lang),
-		"subFileCount": subFileCount,
-	}
-
-	task.AppendAsyncTaskWithDelay(task.ReloadProtyle, 500*time.Millisecond, util.PushReloadDocInfo, docInfo)
+		docInfo["subFileCount"] = subFileCount
+		util.PushReloadDocInfo(docInfo)
+	}, docInfo)
 }
 
 func ReloadFiletree() {

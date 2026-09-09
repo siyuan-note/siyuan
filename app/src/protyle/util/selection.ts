@@ -694,6 +694,39 @@ export const restoreFocusContext = (protyle: IProtyle, context: Record<string, s
         (!startEmbed || startEmbed.getAttribute("data-node-id") !== context.undoFocusEmbedId))) {
         return false;
     }
+    if (context.undoFocusTableCell !== undefined && startBlockElement.getAttribute("data-type") === "NodeTable") {
+        const index = Number(context.undoFocusTableCell);
+        const cell = Number.isInteger(index) && index >= 0 ?
+            startBlockElement.querySelectorAll<HTMLTableCellElement>("th, td")[index] : undefined;
+        if (!cell || cell.classList.contains("fn__none")) {
+            return false;
+        }
+        try {
+            const saved = JSON.parse(context.undoFocusTableSelection);
+            if (![saved.startIndex, saved.endIndex, saved.start, saved.end].every(value =>
+                Number.isInteger(value) && value >= 0) || typeof saved.backward !== "boolean") {
+                return false;
+            }
+            // 单元格内部块没有持久 ID，使用单元格序号和片段内选区恢复编辑位置。
+            const range = document.createRange();
+            range.selectNodeContents(cell);
+            range.collapse(true);
+            cell.tabIndex = -1;
+            cell.focus({preventScroll: true});
+            focusByRange(range);
+            void import("../render/tableCellRichEditor").then(module => {
+                if (cell.isConnected && cell.contains(getSelection().focusNode)) {
+                    module.openTableCellRichEditor(protyle, cell, undefined, undefined, saved);
+                    if (getSelection().rangeCount) {
+                        protyle.toolbar.range = getSelection().getRangeAt(0);
+                    }
+                }
+            });
+            return true;
+        } catch (_error) {
+            return false;
+        }
+    }
     const startFocusElement = context.undoFocusCalloutTitle === "true" ?
         startBlockElement.querySelector(".callout-title") : startBlockElement;
     const endFocusElement = context.undoFocusCalloutTitle === "true" ?

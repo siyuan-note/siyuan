@@ -11,7 +11,7 @@ import {mathRender} from "./mathRender";
 import {renderTableCellRichElements} from "./tableCellRich";
 import {cleanTableCellRichHTML, getTableCellInlineHTML, getTableCellRichBlockDOM, renderTableCellRich, serializeTableCellRich, setTableCellRich, TABLE_CELL_INLINE_ATTRIBUTE, updateTableCellEditingValue} from "../util/tableCellRich";
 import {TABLE_CELL_RICH_ATTRIBUTE} from "../util/tableCellRichValue";
-import {focusByOffset, focusByRange, getSelectionOffset} from "../util/selection";
+import {focusByOffset, focusByRange, getSelectionOffset, getUndoFocusContext} from "../util/selection";
 import {getAdjacentRichTableCell, isTableCellCaretAtBoundary} from "../util/tableCellRichNavigation";
 import {focusEditableAtGoalX, getCaretGoalX} from "../wysiwyg/verticalCaret";
 import {fixTable} from "../util/table";
@@ -73,7 +73,8 @@ export const applyTableCellRichInlineMark = (owner: IProtyle, cells: HTMLTableCe
 };
 
 export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElement,
-                                       navigation?: {key: string, goalX: number}, point?: {x: number, y: number}) => {
+                                       navigation?: {key: string, goalX: number}, point?: {x: number, y: number},
+                                       restoredSelection?: ReturnType<typeof captureRichCellSelection>) => {
     if (owner.disabled || !cell.isConnected || activeEditor?.cell === cell) {
         return;
     }
@@ -132,6 +133,8 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     let finished = false;
     let composing = false;
     let finishAfterComposition = false;
+    let undoSelection: ReturnType<typeof captureRichCellSelection>;
+    let contentChanged = false;
     const fragment = mountProtyleLiteFragment(host, {
         app: owner.app,
         initialBlockHTML,
@@ -154,6 +157,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             protyle.undo.clear();
         },
         onChange: () => {
+            contentChanged = true;
             updateTableCellContentLayout(host, fragment.getBlockHTML());
             window.clearTimeout(timer);
             if (!finished && !composing) {
@@ -170,12 +174,28 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         try {
             const serialized = serializeTableCellRich(fragment.getBlockHTML());
             if (serialized.markdown === source) {
+                contentChanged = false;
                 return;
             }
             const oldHTML = cleanTableCellRichHTML(table.outerHTML);
+            const redoSelection = captureRichCellSelection(fragment.wysiwyg, getSelection()) || undoSelection;
+            const tableRange = document.createRange();
+            tableRange.selectNodeContents(cell);
+            tableRange.collapse(true);
+            const context = getUndoFocusContext(owner.wysiwyg.element, tableRange, true);
+            const cellIndex = Array.from(table.querySelectorAll("th, td")).indexOf(cell).toString();
+            const focusContext = (saved: typeof undoSelection) => saved ? {
+                ...context,
+                undoFocusTableCell: cellIndex,
+                undoFocusTableSelection: JSON.stringify(saved),
+            } : context;
             source = serialized.markdown;
             updateTableCellEditingValue(cell, serialized);
-            updateTransaction(owner, table, oldHTML);
+            updateTransaction(owner, table, oldHTML, focusContext(undoSelection), {
+                doOperations: [], undoOperations: [], context: focusContext(redoSelection),
+            });
+            undoSelection = redoSelection;
+            contentChanged = false;
         } catch (error) {
             console.error(error);
             showMessage(window.siyuan.languages.tableCellRichInvalid);
@@ -210,7 +230,14 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     };
     activeEditor = {cell, finish};
     const signal = controller.signal;
+    const captureBeforeChange = () => {
+        if (!contentChanged || serializeTableCellRich(fragment.getBlockHTML()).markdown === source) {
+            undoSelection = captureRichCellSelection(fragment.wysiwyg, getSelection());
+        }
+    };
+    host.addEventListener("beforeinput", captureBeforeChange, {capture: true, signal});
     host.addEventListener("pointerdown", event => {
+        captureBeforeChange();
         if (fragment.wysiwyg.contains(event.target as Node)) {
             hideElements(["toolbar"], fragment.protyle);
         }
@@ -250,6 +277,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         }
     }, {signal});
     host.addEventListener("keydown", event => {
+        captureBeforeChange();
         const keymap = window.siyuan.config.keymap.editor.general;
         const undo = matchHotKey(keymap.undo, event);
         const redo = matchHotKey(keymap.redo, event);
@@ -326,6 +354,10 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     }, {capture: true, signal});
     observer.observe(owner.element, {childList: true, subtree: true});
     fragment.focus(true);
+    if (restoredSelection && restoreRichCellSelection(fragment.wysiwyg, restoredSelection)) {
+        undoSelection = restoredSelection;
+        return;
+    }
     if (navigation) {
         const editables = fragment.wysiwyg.querySelectorAll<HTMLElement>('[contenteditable="true"]');
         const backward = navigation.key === "ArrowLeft" || navigation.key === "ArrowUp";
@@ -343,6 +375,9 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         return;
     }
     if (richSelection && (preserveSelection || !point) && restoreRichCellSelection(fragment.wysiwyg, richSelection)) {
+        if (preserveSelection) {
+            fragment.protyle.toolbar.render(fragment.protyle, getSelection().getRangeAt(0));
+        }
         return;
     }
     if (point && !preserveSelection) {
@@ -356,6 +391,9 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         const edit = fragment.wysiwyg.querySelector('[contenteditable="true"]');
         if (edit) {
             focusByOffset(edit, initialOffset.start, initialOffset.end);
+            if (preserveSelection) {
+                fragment.protyle.toolbar.render(fragment.protyle, getSelection().getRangeAt(0));
+            }
         }
     }
 };

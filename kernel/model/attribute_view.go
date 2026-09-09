@@ -7529,6 +7529,24 @@ func updateAttributeViewColTemplate(operation *Operation) (err error) {
 	return
 }
 
+// SetAttributeViewKeyTemplate 设置模板字段公式，复用字段模板保存和分组更新逻辑。
+func SetAttributeViewKeyTemplate(avID, keyID, templateContent string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		return err
+	}
+	key, err := attrView.GetKey(keyID)
+	if nil != err {
+		return err
+	}
+	if av.KeyTypeTemplate != key.Type {
+		return errors.New("key must be a template field")
+	}
+	return updateAttributeViewColTemplate(&Operation{
+		AvID: avID, ID: keyID, Typ: string(av.KeyTypeTemplate), Data: templateContent,
+	})
+}
+
 func (tx *Transaction) doUpdateAttrViewColNumberFormat(operation *Operation) (ret *TxErr) {
 	err := updateAttributeViewColNumberFormat(operation)
 	if err != nil {

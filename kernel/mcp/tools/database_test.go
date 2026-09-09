@@ -12,8 +12,10 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestDatabaseStructuredRenderOutput(t *testing.T) {
@@ -188,7 +190,7 @@ func TestDatabaseViewFieldIDsSupportsLayouts(t *testing.T) {
 }
 
 func TestDatabaseActionEffects(t *testing.T) {
-	for _, action := range []string{"create", "key_add", "key_remove", "item_add", "item_remove", "item_update", "clean"} {
+	for _, action := range []string{"create", "key_add", "key_update", "key_set_template", "key_remove", "item_add", "item_remove", "item_update", "clean"} {
 		effects, ok := DatabaseTool.EffectsFor(action)
 		if !ok || !effects.LocalWrite {
 			t.Fatalf("database action [%s] should declare a local write", action)
@@ -206,5 +208,76 @@ func TestDatabaseStringArray(t *testing.T) {
 	values := databaseStringArray([]any{" first ", 1, "", "second"})
 	if len(values) != 2 || values[0] != "first" || values[1] != "second" {
 		t.Fatalf("unexpected database string array: %+v", values)
+	}
+}
+
+func TestDatabaseKeySetTemplateArguments(t *testing.T) {
+	validator, err := CompileToolValidator(DatabaseTool)
+	if nil != err {
+		t.Fatal(err)
+	}
+	for _, templateContent := range []string{".action{add .数字 1}", ""} {
+		args := map[string]any{"action": "key_set_template", "id": "database", "keyID": "field", "template": templateContent}
+		if err = validator.ValidateInput(args); nil != err {
+			t.Fatal(err)
+		}
+		result, resultErr := databaseSuccess("key_set_template", map[string]any{"id": "database", "keyID": "field", "template": templateContent})
+		if nil != resultErr {
+			t.Fatal(resultErr)
+		}
+		if err = validator.ValidateOutput(result); nil != err {
+			t.Fatal(err)
+		}
+	}
+	for _, args := range []map[string]any{
+		{"action": "key_set_template", "id": "database", "keyID": "field"},
+		{"action": "key_set_template", "id": "database", "keyID": "field", "template": 1},
+		{"action": "key_set_template", "keyID": "field", "template": ""},
+		{"action": "key_set_template", "id": "database", "template": ""},
+	} {
+		result, callErr := databaseHandler(args)
+		if nil != callErr || !result.IsError {
+			t.Fatalf("invalid arguments should fail before accessing a database: %+v, %v", result, callErr)
+		}
+	}
+}
+
+func TestDatabaseKeyTemplatePersistence(t *testing.T) {
+	originalDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = originalDataDir })
+	attrView := &av.AttributeView{ID: ast.NewNodeID(), KeyValues: []*av.KeyValues{
+		{Key: &av.Key{ID: "number", Name: "数字", Type: av.KeyTypeNumber}},
+		{Key: &av.Key{ID: "template", Name: "模板", Type: av.KeyTypeTemplate}},
+	}}
+	if err := av.SaveAttributeView(attrView); nil != err {
+		t.Fatal(err)
+	}
+	for _, formula := range []string{".action{add .数字 1}", ""} {
+		if err := model.SetAttributeViewKeyTemplate(attrView.ID, "template", formula); nil != err {
+			t.Fatal(err)
+		}
+		stored, err := av.ParseAttributeView(attrView.ID)
+		if nil != err {
+			t.Fatal(err)
+		}
+		key, err := stored.GetKey("template")
+		if nil != err || formula != key.Template {
+			t.Fatalf("template was not persisted: %+v, %v", key, err)
+		}
+		for _, keyID := range []string{"number", "missing"} {
+			if err = model.SetAttributeViewKeyTemplate(attrView.ID, keyID, "invalid"); nil == err {
+				t.Fatalf("expected invalid target %q to be rejected", keyID)
+			}
+		}
+		stored, err = av.ParseAttributeView(attrView.ID)
+		if nil != err {
+			t.Fatal(err)
+		}
+		key, _ = stored.GetKey("template")
+		numberKey, _ := stored.GetKey("number")
+		if formula != key.Template || "" != numberKey.RenderTemplate || "" != numberKey.Template {
+			t.Fatal("rejected updates changed field configuration")
+		}
 	}
 }

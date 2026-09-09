@@ -5,6 +5,10 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void>
     dialog.element.classList.add("mobile-bottom-sheet-dialog");
     const sheet = dialog.element.querySelector<HTMLElement>(".b3-dialog__container");
     sheet.classList.add("mobile-bottom-sheet");
+    const handle = document.createElement("div");
+    handle.className = "mobile-bottom-sheet__handle";
+    handle.setAttribute("aria-hidden", "true");
+    sheet.prepend(handle);
     const resize = () => {
         const viewport = window.visualViewport;
         const container = dialog.element.querySelector<HTMLElement>(".b3-dialog");
@@ -19,6 +23,7 @@ export const bindBottomSheetDialog = (dialog: Dialog, close: () => Promise<void>
     const disposeDrag = bindBottomSheetDrag(sheet, dialog.element.querySelector(".b3-dialog__scrim"), close);
     return () => {
         disposeDrag();
+        handle.remove();
         window.visualViewport?.removeEventListener("resize", resize);
         window.visualViewport?.removeEventListener("scroll", resize);
     };

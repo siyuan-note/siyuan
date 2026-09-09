@@ -1559,11 +1559,32 @@ body.mobile-topbar--merged {
 
   .mobile-bottom-sheet {
     max-height: min(60vh, 100%);
-    border-radius: 16px 16px 0 0;
-    padding-top: 4px;
+    border: 0;
+    border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;
+    background-color: var(--b3-theme-surface);
+    padding-top: 0;
     box-sizing: border-box;
     transform: translateY(100%);
-    transition: transform 150ms ease;
+    transition: transform .15s cubic-bezier(0, 0, .2, 1);
+  }
+
+  .mobile-bottom-sheet__handle {
+    height: 16px;
+    flex-shrink: 0;
+    position: relative;
+    touch-action: none;
+
+    &::before {
+      position: absolute;
+      top: 5px;
+      left: calc(50% - 16px);
+      width: 32px;
+      height: 4px;
+      border-radius: 2px;
+      background-color: var(--b3-theme-on-surface-light);
+      content: "";
+      opacity: .45;
+    }
   }
 
   &.b3-dialog--open .mobile-bottom-sheet {

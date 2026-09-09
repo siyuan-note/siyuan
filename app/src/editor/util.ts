@@ -38,6 +38,7 @@ import {isBrowserRenderableImagePath} from "../util/imageURL";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 import {getHostCapabilities} from "../util/hostCapabilities";
 import {revealTabsForTarget} from "../protyle/render/tabsRender";
+import {isHiddenTabContent} from "../protyle/render/tabsVisibility";
 import {shouldCheckOtherWindows} from "./openFileWindow";
 
 const isSameCustomTab = (type: string, data: any, options: IOpenFileOptions) => {
@@ -481,6 +482,11 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
                 }
                 const userScrollAbort = new AbortController();
                 const observerLoad = new ResizeObserver(() => {
+                    // 用户已离开目标页签时停止补偿滚动，避免再次展开跳转目标。
+                    if (isHiddenTabContent(nodeElement)) {
+                        stopObserve();
+                        return;
+                    }
                     if (document.contains(nodeElement)) {
                         if (typeof scrollTop === "number") {
                             editor.editor.protyle.contentElement.scrollTop = scrollTop;
@@ -494,6 +500,10 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
                     observerLoad.disconnect();
                 };
                 const onUserScroll = () => stopObserve();
+                editor.editor.protyle.contentElement.addEventListener("pointerdown", onUserScroll, {
+                    capture: true,
+                    signal: userScrollAbort.signal
+                });
                 editor.editor.protyle.contentElement.addEventListener("wheel", onUserScroll, {
                     capture: true,
                     passive: true,

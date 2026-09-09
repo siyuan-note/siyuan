@@ -50,6 +50,7 @@ export const openMobileBacklinks = async (protyle: IProtyle, blockId: string) =>
         width: "100vw",
         height: "auto",
         containerClassName: "mobile-backlinks-sheet",
+        hideCloseIcon: true,
         destroyCallback: () => {
             disposeSheet();
             unregisterPanel?.();

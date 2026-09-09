@@ -145,7 +145,8 @@
       box-shadow: 2px 0 0 0 var(--b3-protyle-inline-mark-background) inset;
     }
 
-    [spellcheck] {
+    [spellcheck],
+    [data-table-cell-content] {
       min-height: 1.625em;
       word-break: break-word;
       // https://github.com/siyuan-note/siyuan/issues/10483

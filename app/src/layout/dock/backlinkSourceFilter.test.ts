@@ -20,16 +20,15 @@ describe("backlink source filter", () => {
             dailyNote: "only",
             excludedNotebookIDs: ["box-a", "box-b"],
             excludeSelf: true,
-            excludedBlockTypes: [],
+            excludedRefDefIDs: [],
         });
     });
 
-    it("keeps a block type filter active and resets it to all types", () => {
+    it("keeps reference-only filters and normalizes IDs", () => {
+        const id = "20260909120000-abcdefg";
         const filter = getBacklinkSourceFilterParam({
-            ...createBacklinkSourceFilter(),
-            excludedBlockTypes: ["NodeParagraph", "NodeAttributeView", "NodeParagraph", ""],
+            ...createBacklinkSourceFilter(), excludedRefDefIDs: [id, "", "invalid", id],
         });
-        assert.deepEqual(filter.excludedBlockTypes, ["NodeAttributeView", "NodeParagraph"]);
-        assert.equal(getBacklinkSourceFilterParam({...filter, excludedBlockTypes: []}), undefined);
+        assert.deepEqual(filter.excludedRefDefIDs, [id]);
     });
 });

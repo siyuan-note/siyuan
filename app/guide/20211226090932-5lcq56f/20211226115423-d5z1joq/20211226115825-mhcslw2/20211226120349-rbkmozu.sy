@@ -6,7 +6,7 @@
 		"id": "20211226120349-rbkmozu",
 		"title": "在内容區塊中遨遊",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20260909204559"
 	},
 	"Children": [
 		{
@@ -258,7 +258,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120415-p3ajlx2",
-				"updated": "20260810212846"
+				"updated": "20260909204559"
 			},
 			"Children": [
 				{
@@ -387,6 +387,77 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260909204559-o4vhrdw",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260909204559-o4vhrdw",
+				"updated": "20260909204559"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "篩選與摺疊"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20260909204559-p2ldpwr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260909204559-p2ldpwr",
+				"updated": "20260909204559"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在底部反向連結或側欄反向連結中，打開 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "篩選反向連結來源"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，可以篩選來源或依區塊類型摺疊項目。這兩類設定的儲存方式不同。"
+				}
+			]
+		},
+		{
+			"ID": "20260909204559-ci181fb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260909204559-ci181fb",
+				"updated": "20260909204559"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "日記、筆記本、排除目前文件的反向連結和排除區塊引用屬於暫時篩選，只在目前面板中生效，不會永久儲存，也不會在底部反向連結與側欄反向連結之間同步。"
+				}
+			]
+		},
+		{
+			"ID": "20260909204559-g3t1k59",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260909204559-g3t1k59",
+				"updated": "20260909204559"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "依區塊類型摺疊"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 的設定會被記住。例如，在文件 A 的底部反向連結中設定摺疊列表區塊，重新打開後仍會保留，文件 B 不受影響。同一份文件的底部反向連結和側欄反向連結分別記憶。檢視某個內容區塊的反向連結時，也會單獨記憶其摺疊設定。"
 				}
 			]
 		},

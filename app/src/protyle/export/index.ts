@@ -509,7 +509,7 @@ ${getIconScript(servePath)}
 <script src="${servePath}stage/protyle/js/lute/lute.min.js?${Constants.SIYUAN_VERSION}"></script>    
 <script>
     const previewElement = document.getElementById('preview');
-    const fixBlockWidth = async () => {
+    const fixBlockWidth = async (printableWidth = false) => {
         const isLandscape = document.querySelector("#landscape").checked;
         let width = 800
         let height = 1131
@@ -540,6 +540,10 @@ ${getIconScript(servePath)}
               break;
         }
         const scale = parseFloat(document.querySelector("#scale").value);
+        if (printableWidth) {
+            width -= ((parseFloat(document.querySelector("#marginsLeft").value) || 0) +
+                (parseFloat(document.querySelector("#marginsRight").value) || 0)) * 96;
+        }
         width = width / scale;
         height = (height -
             (parseFloat(document.querySelector("#marginsTop").value) +
@@ -899,6 +903,17 @@ ${getIconScript(servePath)}
             reserveEmbeddedAssetSpace(removeAssetsElement.checked);
             await waitForImages();
             const isPaged = actionElement.querySelector("#paged").checked;
+            document.body.classList.add("exporting");
+            previewElement.style.zoom = "";
+            previewElement.style.padding = "6px 0 0 0";
+            if (!isPaged) {
+                // 按打印可用宽度完成排版后测量，避免预览边距、缩放和列表布局影响长页高度。
+                previewElement.style.margin = "0";
+                previewElement.style.minHeight = "0";
+            }
+            await fixBlockWidth(!isPaged);
+            await document.fonts.ready;
+            await waitForImages();
             let exportConfig;
             if (!isPaged) {
                 const getPageSizeDimensions = () => {
@@ -913,22 +928,25 @@ ${getIconScript(servePath)}
                     };
                     return pageSizes[actionElement.querySelector("#pageSize").value];
                 };
-                const previewHeight = Math.max(previewElement.scrollHeight / 96 - (parseFloat(document.querySelector("#marginsTop").value) || 0) - (parseFloat(document.querySelector("#marginsBottom").value) || 0), getPageSizeDimensions().height);
-                exportConfig = buildExportConfig(actionElement.querySelector("#landscape").checked ? {
-                    height: getPageSizeDimensions().height,
+                const dimensions = getPageSizeDimensions();
+                const landscape = actionElement.querySelector("#landscape").checked;
+                const scale = parseFloat(actionElement.querySelector("#scale").value);
+                const margins = (parseFloat(document.querySelector("#marginsTop").value) || 0) +
+                    (parseFloat(document.querySelector("#marginsBottom").value) || 0);
+                // 纸张高度包含缩放后的正文和打印边距，并预留一个像素以容纳单位换算误差。
+                const previewHeight = Math.max((previewElement.scrollHeight * scale + 1) / 96 + margins,
+                    landscape ? dimensions.width : dimensions.height);
+                exportConfig = buildExportConfig(landscape ? {
+                    height: dimensions.height,
                     width: previewHeight,
                 } : {
-                    width: getPageSizeDimensions().width,
+                    width: dimensions.width,
                     height: previewHeight,
                 });
             } else {
                 exportConfig = buildExportConfig();
             }
             exportConfig.filePaths = result.filePaths;
-            document.body.classList.add("exporting");
-            previewElement.style.zoom = "";
-            previewElement.style.padding = "6px 0 0 0";
-            await fixBlockWidth();
             actionElement.remove();
             ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", exportConfig);
         });

@@ -42,6 +42,7 @@ import {setInlineMemoContentIfMissing} from "./inlineMemoSelection";
 import {
     getInlineFontFamilyLabel,
     getInlineFontFamilyState,
+    getFontFamilyState,
     getInlineFontFamilyValue,
     openFontFamilyMenu,
 } from "./fontFamilyMenu";
@@ -266,7 +267,8 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
         lastColorHTML += "</div>";
     }
     const {fontSize, baseFontSize} = getFontSizeInfo(protyle, nodeElements);
-    const fontFamilyState = getInlineFontFamilyState(protyle, fontFamilyElements || nodeElements);
+    const fontFamilyState = fontFamilyElements ? getInlineFontFamilyState(protyle, fontFamilyElements) :
+        getFontFamilyState(protyle, nodeElements);
     const disableFontFamily = disableFont || fontFamilyState.disabled;
     const showInlineDirection = !nodeElements || nodeElements.length === 0 || !!onChange;
     const applyFontStyle = (type: string, color?: string) => {
@@ -496,20 +498,6 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
         return;
     }
     if (nodeElements && nodeElements.length > 0) {
-        if (type === "clear" &&
-            protyle.toolbar.setBlockElementsInlineMark(protyle, nodeElements, type, {type: "text"}, true)) {
-            if (focusRange) {
-                focusByRange(protyle.toolbar.range);
-            }
-            return;
-        }
-        if (type === "fontFamily" &&
-            protyle.toolbar.setBlockElementsInlineMark(protyle, nodeElements, "text", {type, color})) {
-            if (focusRange) {
-                focusByRange(protyle.toolbar.range);
-            }
-            return;
-        }
         updateBatchTransaction(nodeElements, protyle, (e: HTMLElement) => {
             if (type === "clear") {
                 e.style.color = "";

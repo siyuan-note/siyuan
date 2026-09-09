@@ -1,4 +1,7 @@
 {
+	"backlinkExcludeRefDefs": "Verwijzingen uitsluiten",
+	"backlinkExcludeRefDefsTip": "Verberg het volledige item inclusief onderliggende inhoud als het naar een geselecteerd blok verwijst",
+	"backlinkFoldByType": "Inklappen per bloktype",
 	"backlinkHideReference": "Verwijzingsblokken in doorgegeven backlinks verbergen",
 	"backlinkHideReferenceTip": "Verberg blokken met uitsluitend blokverwijzingen in doorgegeven backlinks als andere inhoud zichtbaar blijft en toon ze weer tijdens het bewerken",
 	"uploadInsertTargetUnavailable": "Het oorspronkelijke uploaddoel is niet meer beschikbaar. Het resultaat is niet ingevoegd; geüploade bestanden blijven behouden.",

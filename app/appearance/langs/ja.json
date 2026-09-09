@@ -1,4 +1,7 @@
 {
+	"backlinkExcludeRefDefs": "参照を除外",
+	"backlinkExcludeRefDefsTip": "項目またはその子要素が選択したいずれかのブロックを参照している場合、項目全体を非表示にします",
+	"backlinkFoldByType": "ブロックの種類ごとに折りたたむ",
 	"backlinkHideReference": "伝播型バックリンクの参照ブロックを非表示",
 	"backlinkHideReferenceTip": "伝播型バックリンクで、ほかに表示できる内容がある場合はブロック参照のみのブロックを非表示にし、編集中は再表示します",
 	"uploadInsertTargetUnavailable": "アップロード元の挿入先が無効になったため、結果を挿入しませんでした。アップロード済みのファイルは保持されます。",

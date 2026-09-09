@@ -52,6 +52,25 @@ const getNodeFontFamily = (node: Node, root: HTMLElement) => {
     return {excluded: false, fontFamily};
 };
 
+export const getFontFamilyState = (protyle: IProtyle, nodeElements?: Element[]) => {
+    if (!nodeElements?.length) {
+        return getInlineFontFamilyState(protyle);
+    }
+    // 块级菜单读取块及祖先的字体，不受正文内联样式和角标影响。
+    const fontFamilies: (string | undefined)[] = [];
+    nodeElements.forEach((element: HTMLElement) => {
+        if (FONT_FAMILY_EXCLUDED_BLOCK_TYPES.includes(element.getAttribute("data-type")) ||
+            element.classList.contains("li")) {
+            return;
+        }
+        const info = getNodeFontFamily(element, protyle.wysiwyg.element);
+        if (!info.excluded) {
+            fontFamilies.push(info.fontFamily);
+        }
+    });
+    return getInlineFontFamilySelection(fontFamilies, fontFamilies.length > 0) as IInlineFontFamilyState;
+};
+
 export const getInlineFontFamilyState = (protyle: IProtyle, nodeElements?: Element[]) => {
     const fontFamilies: (string | undefined)[] = [];
     let eligible = false;

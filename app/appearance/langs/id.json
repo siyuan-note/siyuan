@@ -1,4 +1,7 @@
 {
+	"backlinkExcludeRefDefs": "Kecualikan referensi",
+	"backlinkExcludeRefDefsTip": "Sembunyikan seluruh entri beserta turunannya jika merujuk ke salah satu blok terpilih",
+	"backlinkFoldByType": "Ciutkan menurut jenis blok",
 	"backlinkHideReference": "Sembunyikan blok referensi pada tautan balik yang diteruskan",
 	"backlinkHideReferenceTip": "Sembunyikan blok yang hanya berisi referensi blok pada tautan balik yang diteruskan jika konten lain tetap terlihat, dan tampilkan kembali saat mengedit",
 	"uploadInsertTargetUnavailable": "Tujuan unggahan awal tidak lagi tersedia. Hasil tidak disisipkan; berkas yang diunggah tetap disimpan.",

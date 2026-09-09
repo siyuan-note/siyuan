@@ -217,6 +217,28 @@ func getBacklink2(c *gin.Context) {
 		containChildren = val.(bool)
 	}
 	sourceFilter := parseBacklinkSourceFilter(arg)
+	if candidates, _ := arg["refDefCandidates"].(bool); candidates {
+		defs := []*model.BacklinkRefDef{}
+		ret.Data = map[string]any{"refDefs": defs}
+		notebook, _ := arg["notebook"].(string)
+		if model.IsReadOnlyRoleContext(c) || isEncryptedNotebookDeniedForPublish(c, notebook) {
+			return
+		}
+		if err := holdEncryptedBoxRequest(c, notebook); nil != err {
+			ret.Code, ret.Msg = 1, err.Error()
+			return
+		}
+		if !model.IsEncryptedBox(notebook) {
+			notebook = ""
+		}
+		defs, err := model.GetBacklinkRefDefs(id, keyword, containChildren, notebook, sourceFilter)
+		if nil != err {
+			ret.Code, ret.Msg = 1, err.Error()
+			return
+		}
+		ret.Data = map[string]any{"refDefs": defs}
+		return
+	}
 	var boxID string
 	var backlinks, backmentions []*model.Path
 	var linkRefsCount, mentionsCount int
@@ -295,15 +317,15 @@ func parseBacklinkSourceFilter(arg map[string]any) *model.BacklinkSourceFilter {
 	}
 
 	filter := &model.BacklinkSourceFilter{}
-	if blockTypes, ok := filterArg["excludedBlockTypes"].([]any); ok {
-		for _, blockType := range blockTypes {
-			if value, ok := blockType.(string); ok {
-				filter.ExcludedBlockTypes = append(filter.ExcludedBlockTypes, value)
+	filter.DailyNote, _ = filterArg["dailyNote"].(string)
+	filter.ExcludeSelf, _ = filterArg["excludeSelf"].(bool)
+	if ids, ok := filterArg["excludedRefDefIDs"].([]any); ok {
+		for _, value := range ids {
+			if id, ok := value.(string); ok {
+				filter.ExcludedRefDefIDs = append(filter.ExcludedRefDefIDs, id)
 			}
 		}
 	}
-	filter.DailyNote, _ = filterArg["dailyNote"].(string)
-	filter.ExcludeSelf, _ = filterArg["excludeSelf"].(bool)
 	if notebookIDs, ok := filterArg["excludedNotebookIDs"].([]any); ok {
 		for _, notebookID := range notebookIDs {
 			if id, ok := notebookID.(string); ok {

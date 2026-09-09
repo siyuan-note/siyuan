@@ -68,8 +68,8 @@ export class MobileOutline extends Model {
         ${window.siyuan.languages.outline}
     </div>
     <div class="fn__space"></div>
-    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
-    <svg data-type="search" class="toolbar__icon"><use xlink:href='#iconFilter'></use></svg>
+    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.searchPlaceholder}" />
+    <svg data-type="search" class="toolbar__icon"><use xlink:href='#iconSearch'></use></svg>
     <svg data-type="keepCurrentExpand" class="toolbar__icon${window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand ? " toolbar__icon--active" : ""}"><use xlink:href="#iconFocus"></use></svg>
     <svg data-type="expandLevel" class="toolbar__icon"><use xlink:href="#iconList"></use></svg>
     <svg data-type="expand" class="toolbar__icon"><use xlink:href="#iconExpand"></use></svg>

@@ -1,4 +1,7 @@
 {
+	"backlinkExcludeRefDefs": "Excluir referências",
+	"backlinkExcludeRefDefsTip": "Ocultar toda a entrada, incluindo seus filhos, quando houver referência a qualquer bloco selecionado",
+	"backlinkFoldByType": "Recolher por tipo de bloco",
 	"backlinkHideReference": "Ocultar blocos de referência em backlinks propagados",
 	"backlinkHideReferenceTip": "Ocultar blocos que contêm apenas referências a blocos em backlinks propagados quando houver outro conteúdo visível e exibi-los novamente durante a edição",
 	"uploadInsertTargetUnavailable": "O destino original do envio não está mais disponível. O resultado não foi inserido; os arquivos enviados foram mantidos.",

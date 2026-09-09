@@ -21,6 +21,7 @@ import {getAllEditor} from "../getAll";
 import {isMobile} from "../../util/functions";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {renderBacklink} from "../../protyle/wysiwyg/renderBacklink";
+import {BACKLINK_BLOCK_TYPES, configureBacklinkTypeFold, normalizeBacklinkFoldTypes} from "../../protyle/wysiwyg/backlinkTypeFold";
 import {
     getBottomBacklinkVisibility,
     getInitialBacklinkSectionState,
@@ -44,6 +45,8 @@ import {
 } from "./backlinkSourceFilter";
 import {escapeHtml} from "../../util/escape";
 import {ViewStateService} from "../../util/viewState";
+import {loadBacklinkRefFilterMenu} from "./backlinkRefFilterMenu";
+import {BacklinkMentionCache, getBacklinkMentionQueryKey} from "./backlinkMentionCache";
 import {
     applyViewFoldStates,
     invalidateViewFoldRequests,
@@ -146,6 +149,7 @@ export class BacklinkContent extends Model {
     private contextRequestVersions = [0, 0];
     private itemRecords = [new Map<string, IBacklinkItemRecord>(), new Map<string, IBacklinkItemRecord>()];
     private listRevision = "";
+    private mentionCache = new BacklinkMentionCache<Pick<IBacklinkListResponse, "backmentions" | "mentionsCount">>();
     private listQueryKey = "";
     private renderedQueryKey = "";
     private indexChangeVersion = 0;
@@ -238,10 +242,10 @@ export class BacklinkContent extends Model {
         this.element.innerHTML = `<div class="block__icons backlinkList__header">
     ${this.type === "bottom" ? `<span data-type="bLayout" class="block__icon block__icon--show fn__flex-center backlinkList__toggle ariaLabel" data-position="north" aria-label="${window.siyuan.languages.collapse}"><svg><use xlink:href="#iconDown"></use></svg></span>` : ""}
     <div class="block__logo block__logo--counter fn__flex-1 fn__pointer" data-type="backlink">${window.siyuan.languages.backlinks}<span class="counter listCount"></span></div>
-    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
+    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.searchPlaceholder}" />
     ${this.type === "bottom" ? "" : `<span data-type="refresh" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
     <span class="fn__space"></span>`}
-    <span data-type="search" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.filter}"><svg><use xlink:href='#iconFilter'></use></svg></span>
+    <span data-type="search" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.search}"><svg><use xlink:href='#iconSearch'></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="sourceFilter" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.backlinkSourceFilter}"><svg><use xlink:href='#iconListFilterPlus'></use></svg></span>
     <span class="fn__space"></span>
@@ -261,8 +265,8 @@ export class BacklinkContent extends Model {
 <div class="block__icons backlinkMList__header">
     ${this.type === "bottom" ? `<span data-type="layout" class="block__icon block__icon--show fn__flex-center backlinkList__toggle ariaLabel" data-position="north" aria-label="${window.siyuan.languages.collapse}"><svg><use xlink:href="#iconDown"></use></svg></span>` : ""}
     <div class="block__logo block__logo--counter fn__flex-1 fn__pointer" data-type="mention">${window.siyuan.languages.mentions}<span class="counter listMCount"></span></div>
-    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
-    <span data-type="search" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.filter}"><svg><use xlink:href='#iconFilter'></use></svg></span>
+    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.searchPlaceholder}" />
+    <span data-type="search" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.search}"><svg><use xlink:href='#iconSearch'></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="mSort" data-sort="${backmentionSort}" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.sort}"><svg><use xlink:href='#iconSort'></use></svg></span>
     <span class="fn__space"></span>
@@ -288,10 +292,10 @@ export class BacklinkContent extends Model {
                 const filterIconElement = inputElement.parentElement.querySelector('[data-type="search"]');
                 if (inputElement.value) {
                     filterIconElement.classList.add("block__icon--active");
-                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter + " " + inputElement.value);
+                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.search + " " + inputElement.value);
                 } else {
                     filterIconElement.classList.remove("block__icon--active");
-                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter);
+                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.search);
                 }
             });
             item.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -530,6 +534,7 @@ export class BacklinkContent extends Model {
     }
 
     private setViewStateHost(blockID: string) {
+        this.mentionCache.clear();
         this.clearReadingAnchorTimers();
         const previousReady = this.viewStateReady;
         const previous = this.viewState;
@@ -561,6 +566,7 @@ export class BacklinkContent extends Model {
         }).then(() => {
             if (generation === this.viewStateGeneration) {
                 this.viewStateLoaded = true;
+                this.updateSourceFilterButton();
             }
         });
     }
@@ -845,45 +851,75 @@ export class BacklinkContent extends Model {
 
     private applySourceFilter(filter: IBacklinkSourceFilter) {
         this.sourceFilter = normalizeBacklinkSourceFilter(filter);
-        this.element.querySelector('[data-type="sourceFilter"]')?.classList.toggle(
-            "block__icon--active",
-            Boolean(getBacklinkSourceFilterParam(this.sourceFilter)),
-        );
+        this.updateSourceFilterButton();
         this.searchBacklinks();
     }
 
+    private updateSourceFilterButton() {
+        this.element.querySelector('[data-type="sourceFilter"]')?.classList.toggle(
+            "block__icon--active",
+            Boolean(getBacklinkSourceFilterParam(this.sourceFilter)) ||
+            normalizeBacklinkFoldTypes(this.viewState?.get("foldedBlockTypes")).length > 0,
+        );
+    }
+
     private showSourceFilterMenu(event: MouseEvent) {
-        const blockTypeSubmenu: IMenu[] = [{
-            label: window.siyuan.languages.all,
-            checked: !this.sourceFilter.excludedBlockTypes.length,
-            iconHTML: "",
-            click: () => this.applySourceFilter({...this.sourceFilter, excludedBlockTypes: []}),
-        }, {type: "separator"}];
-        [
-            ["NodeDocument", "doc"], ["NodeParagraph", "paragraph"], ["NodeHeading", "headings"],
-            ["NodeList", "list1"], ["NodeListItem", "listItem"], ["NodeBlockquote", "quote"],
-            ["NodeSuperBlock", "superBlock"], ["NodeCallout", "callout"],
-            ["NodeTabs", "tabs"], ["NodeTabItem", "tabItem"], ["NodeAttributeView", "database"],
-            ["NodeTable", "table"], ["NodeCodeBlock", "code"], ["NodeMathBlock", "math"],
-            ["NodeBlockQueryEmbed", "embedBlock"], ["NodeVideo", "video"], ["NodeAudio", "audio"],
-            ["NodeWidget", "widget"], ["NodeHTMLBlock", "HTML"], ["NodeIFrame", "IFrame"],
-            ["NodeThematicBreak", "line"], ["NodeCustomBlock", "custom"],
-        ].forEach(([type, label]) => {
-            blockTypeSubmenu.push({
-                label: window.siyuan.languages[label] || label,
-                checked: !this.sourceFilter.excludedBlockTypes.includes(type),
-                iconHTML: "",
-                click: () => {
-                    const excluded = new Set(this.sourceFilter.excludedBlockTypes);
-                    if (excluded.has(type)) {
-                        excluded.delete(type);
-                    } else {
-                        excluded.add(type);
-                    }
-                    this.applySourceFilter({...this.sourceFilter, excludedBlockTypes: Array.from(excluded)});
-                },
+        let foldedTypes = normalizeBacklinkFoldTypes(this.viewState?.get("foldedBlockTypes"));
+        const foldItems = new Map<string, HTMLElement>();
+        let foldResetElement: HTMLElement;
+        let resetElement: HTMLElement;
+        const applyFoldTypes = (types: string[]) => {
+            this.viewState?.set("foldedBlockTypes", types);
+            this.updateSourceFilterButton();
+            BACKLINK_BLOCK_TYPES.forEach(([type]) => {
+                if (foldedTypes.includes(type) !== types.includes(type)) {
+                    const field = `type-fold-generation:${type}`;
+                    this.viewState?.set(field, (this.viewState.get<number>(field) || 0) + 1);
+                }
             });
-        });
+            foldedTypes = types;
+            foldItems.forEach((element, type) => {
+                element.querySelector(".b3-menu__checked")?.remove();
+                if (foldedTypes.includes(type)) {
+                    element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>');
+                }
+            });
+            if (foldedTypes.length === 0) {
+                foldResetElement?.setAttribute("disabled", "disabled");
+            } else {
+                foldResetElement?.removeAttribute("disabled");
+            }
+            if (!getBacklinkSourceFilterParam(this.sourceFilter) && foldedTypes.length === 0) {
+                resetElement?.setAttribute("disabled", "disabled");
+            } else {
+                resetElement?.removeAttribute("disabled");
+            }
+            this.itemRecords[0].forEach(record => {
+                if (record.editor && this.viewState) {
+                    configureBacklinkTypeFold(record.editor.protyle, types, this.viewState);
+                }
+            });
+        };
+        const blockTypeFoldSubmenu: IMenu[] = [{
+            label: window.siyuan.languages.reset,
+            icon: "iconUndo",
+            disabled: foldedTypes.length === 0,
+            bind: element => { foldResetElement = element; },
+            click: () => {
+                applyFoldTypes([]);
+                return true;
+            },
+        }, {type: "separator"}, ...BACKLINK_BLOCK_TYPES.map(([type, label]) => ({
+            label: window.siyuan.languages[label] || label,
+            checked: foldedTypes.includes(type),
+            iconHTML: "",
+            bind: (element: HTMLElement) => { foldItems.set(type, element); },
+            click: () => {
+                applyFoldTypes(foldedTypes.includes(type) ?
+                    foldedTypes.filter(item => item !== type) : [...foldedTypes, type]);
+                return true;
+            },
+        }))];
         const dailyNoteSubmenu = ([
             ["all", window.siyuan.languages.all],
             ["only", window.siyuan.languages.dailyNote],
@@ -923,10 +959,11 @@ export class BacklinkContent extends Model {
 
         window.siyuan.menus.menu.remove();
         window.siyuan.menus.menu.append(new MenuItem({
-            icon: "iconListFilterPlus",
-            label: window.siyuan.languages.type,
+            icon: "iconContract",
+            label: window.siyuan.languages.backlinkFoldByType,
             type: "submenu",
-            submenu: blockTypeSubmenu,
+            disabled: !this.viewStateLoaded || !this.viewState,
+            submenu: blockTypeFoldSubmenu,
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconCalendar",
@@ -948,13 +985,39 @@ export class BacklinkContent extends Model {
                 this.applySourceFilter({...this.sourceFilter, excludeSelf: !this.sourceFilter.excludeSelf});
             }
         }).element);
+        const refFilterGeneration = this.viewStateGeneration;
+        let refFilterMenuElement: HTMLElement;
+        window.siyuan.menus.menu.append(new MenuItem({
+            iconHTML: "",
+            label: `${window.siyuan.languages.backlinkExcludeRefDefs} (${this.sourceFilter.excludedRefDefIDs.length})`,
+            disabled: !this.blockId,
+            bind: element => { refFilterMenuElement = element; },
+            loadSubmenu: () => {
+                return loadBacklinkRefFilterMenu({
+                    id: this.blockId,
+                    notebook: isEncryptedBox(this.notebookId) ? this.notebookId : "",
+                    keyword: this.inputsElement[0].value,
+                    filter: this.sourceFilter,
+                    getSelected: () => this.sourceFilter.excludedRefDefIDs,
+                    isCurrent: () => !this.destroyed && refFilterGeneration === this.viewStateGeneration,
+                    apply: ids => {
+                        this.applySourceFilter({...this.sourceFilter, excludedRefDefIDs: ids});
+                        refFilterMenuElement.querySelector(":scope > .b3-menu__label").textContent =
+                            `${window.siyuan.languages.backlinkExcludeRefDefs} (${this.sourceFilter.excludedRefDefIDs.length})`;
+                        resetElement?.toggleAttribute("disabled", !getBacklinkSourceFilterParam(this.sourceFilter) && foldedTypes.length === 0);
+                    },
+                });
+            },
+        }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            disabled: !getBacklinkSourceFilterParam(this.sourceFilter),
+            disabled: !getBacklinkSourceFilterParam(this.sourceFilter) && foldedTypes.length === 0,
+            bind: element => { resetElement = element; },
             icon: "iconUndo",
             label: window.siyuan.languages.reset,
             click: () => {
                 this.applySourceFilter(createBacklinkSourceFilter());
+                applyFoldTypes([]);
             }
         }).element);
         window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
@@ -1148,6 +1211,9 @@ export class BacklinkContent extends Model {
                     this.editors.push(editor);
                     record.editor = editor;
                     const service = this.viewState;
+                    if (!isMention && service) {
+                        configureBacklinkTypeFold(editor.protyle, normalizeBacklinkFoldTypes(service.get("foldedBlockTypes")), service);
+                    }
                     const scrollEpoch = this.getReadingAnchorScrollEpoch(isMention);
                     const anchorQueryKey = this.renderedQueryKey;
                     if (service) {
@@ -1564,8 +1630,11 @@ export class BacklinkContent extends Model {
         service.set(this.getReadingAnchorField(isMention), anchor);
     }
 
-    private refreshExpandedContexts(rootIDs: Set<string>, full: boolean) {
+    private refreshExpandedContexts(rootIDs: Set<string>, full: boolean, reuseMentions = false) {
         this.itemRecords.forEach((records, index) => {
+            if (index === 1 && reuseMentions) {
+                return;
+            }
             records.forEach((record, rootID) => {
                 const arrowElement = record.headerElement.querySelector(".b3-list-item__arrow");
                 if (!arrowElement?.classList.contains("b3-list-item__arrow--open")) {
@@ -1821,6 +1890,17 @@ export class BacklinkContent extends Model {
         if (isEncryptedBox(notebookId)) {
             param.notebook = notebookId;
         }
+        const mentionQueryKey = JSON.stringify([
+            getBacklinkMentionQueryKey(param),
+            window.siyuan.config.search,
+            window.siyuan.config.editor.backlinkMentionExclude,
+            window.siyuan.config.editor.backlinkContainChildren,
+        ]);
+        const cachedMentions = !this.onlyBacklinks && !init && !refreshAllContexts && !this.dirty ?
+            this.mentionCache.get(mentionQueryKey, this.indexChangeVersion) : undefined;
+        if (cachedMentions) {
+            param.includeMentions = false;
+        }
         const queryKey = JSON.stringify(param);
         const queryChanged = queryKey !== this.listQueryKey;
         if (!queryChanged && this.listRevision) {
@@ -1863,9 +1943,17 @@ export class BacklinkContent extends Model {
             this.listQueryKey = queryKey;
             this.listRevision = response.data.revision;
             if (!response.data.unchanged) {
+                if (cachedMentions) {
+                    Object.assign(response.data, cachedMentions);
+                } else if (!this.onlyBacklinks) {
+                    this.mentionCache.set(mentionQueryKey, indexChangeVersion, {
+                        backmentions: response.data.backmentions,
+                        mentionsCount: response.data.mentionsCount,
+                    });
+                }
                 this.render(response.data, init);
             }
-            this.refreshExpandedContexts(changedRootIDs, fullContextRefresh);
+            this.refreshExpandedContexts(changedRootIDs, fullContextRefresh, Boolean(cachedMentions));
             if (indexChangeVersion === this.indexChangeVersion) {
                 this.pendingRootIDs.clear();
                 this.pendingFull = false;
@@ -1929,6 +2017,7 @@ export class BacklinkContent extends Model {
 
     public render(data?: IBacklinkListResponse, init = false) {
         if (!data) {
+            this.mentionCache.clear();
             this.listRevision = "";
             this.listQueryKey = "";
             data = {

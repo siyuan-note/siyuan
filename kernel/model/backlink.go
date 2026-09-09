@@ -139,6 +139,7 @@ func refreshCrossTreeMoveRefs(refreshes []crossTreeMoveRefRefresh) {
 }
 
 type Backlink struct {
+	Type                 string                         `json:"type,omitempty"`
 	ReferenceBlockID     string                         `json:"referenceBlockID,omitempty"`
 	AttributeViewTargets []*BacklinkAttributeViewTarget `json:"attributeViewTargets,omitempty"`
 	ID                   string                         `json:"id"`
@@ -159,7 +160,7 @@ type BacklinkSourceFilter struct {
 	DailyNote           string   `json:"dailyNote"`
 	ExcludedNotebookIDs []string `json:"excludedNotebookIDs"`
 	ExcludeSelf         bool     `json:"excludeSelf"`
-	ExcludedBlockTypes  []string `json:"excludedBlockTypes"`
+	ExcludedRefDefIDs   []string `json:"excludedRefDefIDs"`
 }
 
 func NormalizeBacklinkSourceFilter(filter *BacklinkSourceFilter) *BacklinkSourceFilter {
@@ -181,21 +182,15 @@ func NormalizeBacklinkSourceFilter(filter *BacklinkSourceFilter) *BacklinkSource
 		excludedNotebookIDs = append(excludedNotebookIDs, notebookID)
 	}
 	sort.Strings(excludedNotebookIDs)
-	excludedBlockTypes := []string{}
-	for _, blockType := range filter.ExcludedBlockTypes {
-		if "" != treenode.TypeAbbr(blockType) && !gulu.Str.Contains(blockType, excludedBlockTypes) {
-			excludedBlockTypes = append(excludedBlockTypes, blockType)
-		}
-	}
-	sort.Strings(excludedBlockTypes)
-	if BacklinkDailyNoteAll == dailyNote && 0 == len(excludedNotebookIDs) && !filter.ExcludeSelf && 0 == len(excludedBlockTypes) {
+	excludedRefDefIDs := normalizeBacklinkRefDefIDs(filter.ExcludedRefDefIDs)
+	if BacklinkDailyNoteAll == dailyNote && 0 == len(excludedNotebookIDs) && !filter.ExcludeSelf && 0 == len(excludedRefDefIDs) {
 		return nil
 	}
 	return &BacklinkSourceFilter{
 		DailyNote:           dailyNote,
 		ExcludedNotebookIDs: excludedNotebookIDs,
 		ExcludeSelf:         filter.ExcludeSelf,
-		ExcludedBlockTypes:  excludedBlockTypes,
+		ExcludedRefDefIDs:   excludedRefDefIDs,
 	}
 }
 
@@ -514,6 +509,7 @@ func buildBacklink(refID string, refTree *parse.Tree, originalRefBlockIDs map[st
 
 	dom := renderVisibleBlockDOMByNodes(renderNodes, luteEngine)
 	ret = &Backlink{ID: refID, DOM: dom, BlockPaths: blockPaths, Expand: expand, ReferenceBlockID: referenceBlockID, node: node}
+	ret.Type = node.Type.String()
 	if 0 < len(avTargets) {
 		appendBacklinkAttributeViewTargets(ret, renderNodes, avTargets)
 	}
@@ -877,7 +873,11 @@ func filterBacklinkSourcesInBox(linkRefs []*Block, defRootID, boxID string, filt
 		return linkRefs
 	}
 	dailyNoteRootIDs := backlinkDailyNoteRootIDsInBox(linkRefs, boxID, BacklinkDailyNoteAll != filter.DailyNote)
-	return filterBacklinkSources(linkRefs, defRootID, filter, dailyNoteRootIDs)
+	ret = filterBacklinkSources(linkRefs, defRootID, filter, dailyNoteRootIDs)
+	if 0 < len(filter.ExcludedRefDefIDs) {
+		ret = filterBacklinkRefDefs(ret, boxID, filter.ExcludedRefDefIDs)
+	}
+	return
 }
 
 func filterBacklinkSources(linkRefs []*Block, defRootID string, filter *BacklinkSourceFilter, dailyNoteRootIDs map[string]bool) (ret []*Block) {
@@ -887,9 +887,6 @@ func filterBacklinkSources(linkRefs []*Block, defRootID string, filter *Backlink
 	}
 	for _, linkRef := range linkRefs {
 		if nil == linkRef || excludedNotebookIDs[linkRef.Box] || filter.ExcludeSelf && defRootID == linkRef.RootID {
-			continue
-		}
-		if gulu.Str.Contains(linkRef.Type, filter.ExcludedBlockTypes) {
 			continue
 		}
 		isDailyNote := dailyNoteRootIDs[linkRef.RootID]

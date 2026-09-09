@@ -79,7 +79,11 @@ export const setEditorFontSize = (fontSize: number, options: IEditorFontSizeOpti
     return nextFontSize;
 };
 
-export const adjustEditorFontSize = (action: TEditorFontSizeAction, options: IEditorFontSizeOptions = {}) =>
-    setEditorFontSize(resolveEditorFontSize(window.siyuan.config.editor.fontSize, action), {
-        notify: options.notify ?? true,
+export const adjustEditorFontSize = (action: TEditorFontSizeAction, options: IEditorFontSizeOptions = {}) => {
+    if (action === "reset") {
+        hideMessage(MESSAGE_ID);
+    }
+    return setEditorFontSize(resolveEditorFontSize(window.siyuan.config.editor.fontSize, action), {
+        notify: action !== "reset" && (options.notify ?? true),
     });
+};

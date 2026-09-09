@@ -633,7 +633,8 @@ body.mobile-topbar--merged {
   // 滚动视口延伸到屏幕底边，仅在文档末尾留出空间，确保末行可滚到导航栏上方。
   > .protyle-content::after {
     display: block;
-    height: var(--mobile-bottom-bar-offset);
+    // 键盘切换时保留末尾占位，避免滚动到底部后因内容高度缩减而回弹。
+    height: calc(var(--mobile-bottom-bar-height) + var(--mobile-bottom-bar-bottom));
     content: "";
   }
 

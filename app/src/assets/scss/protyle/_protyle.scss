@@ -539,6 +539,13 @@
 }
 
 .sy__backlink {
+  .backlinkList__loading {
+    align-items: center;
+    display: flex;
+    height: 40px;
+    justify-content: center;
+  }
+
   [data-backlink-type-folded] {
     display: none !important;
   }
@@ -698,13 +705,6 @@
         margin-right: -4px;
       }
     }
-  }
-
-  .backlinkList__loading {
-    align-items: center;
-    display: flex;
-    height: 40px;
-    justify-content: center;
   }
 
   > .backlinkList--divider-spacing:not(.fn__none) + .block__icons {

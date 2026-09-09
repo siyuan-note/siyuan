@@ -860,7 +860,10 @@ export class BacklinkContent extends Model {
     }
 
     private showSourceFilterMenu(event: MouseEvent) {
-        const foldedTypes = normalizeBacklinkFoldTypes(this.viewState?.get("foldedBlockTypes"));
+        let foldedTypes = normalizeBacklinkFoldTypes(this.viewState?.get("foldedBlockTypes"));
+        const foldItems = new Map<string, HTMLElement>();
+        let foldResetElement: HTMLElement;
+        let resetElement: HTMLElement;
         const applyFoldTypes = (types: string[]) => {
             this.viewState?.set("foldedBlockTypes", types);
             this.updateSourceFilterButton();
@@ -870,6 +873,15 @@ export class BacklinkContent extends Model {
                     this.viewState?.set(field, (this.viewState.get<number>(field) || 0) + 1);
                 }
             });
+            foldedTypes = types;
+            foldItems.forEach((element, type) => {
+                element.querySelector(".b3-menu__checked")?.remove();
+                if (foldedTypes.includes(type)) {
+                    element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>');
+                }
+            });
+            foldResetElement?.toggleAttribute("disabled", foldedTypes.length === 0);
+            resetElement?.toggleAttribute("disabled", !getBacklinkSourceFilterParam(this.sourceFilter) && foldedTypes.length === 0);
             this.itemRecords[0].forEach(record => {
                 if (record.editor && this.viewState) {
                     configureBacklinkTypeFold(record.editor.protyle, types, this.viewState);
@@ -880,13 +892,21 @@ export class BacklinkContent extends Model {
             label: window.siyuan.languages.reset,
             icon: "iconUndo",
             disabled: foldedTypes.length === 0,
-            click: () => applyFoldTypes([]),
+            bind: element => { foldResetElement = element; },
+            click: () => {
+                applyFoldTypes([]);
+                return true;
+            },
         }, {type: "separator"}, ...BACKLINK_BLOCK_TYPES.map(([type, label]) => ({
             label: window.siyuan.languages[label] || label,
             checked: foldedTypes.includes(type),
             iconHTML: "",
-            click: () => applyFoldTypes(foldedTypes.includes(type) ?
-                foldedTypes.filter(item => item !== type) : [...foldedTypes, type]),
+            bind: (element: HTMLElement) => { foldItems.set(type, element); },
+            click: () => {
+                applyFoldTypes(foldedTypes.includes(type) ?
+                    foldedTypes.filter(item => item !== type) : [...foldedTypes, type]);
+                return true;
+            },
         }))];
         const dailyNoteSubmenu = ([
             ["all", window.siyuan.languages.all],
@@ -956,6 +976,7 @@ export class BacklinkContent extends Model {
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
             disabled: !getBacklinkSourceFilterParam(this.sourceFilter) && foldedTypes.length === 0,
+            bind: element => { resetElement = element; },
             icon: "iconUndo",
             label: window.siyuan.languages.reset,
             click: () => {

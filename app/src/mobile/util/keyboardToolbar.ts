@@ -1049,6 +1049,11 @@ export const showKeyboardToolbar = () => {
                 }
             }
             const viewportBounds = getVisibleViewportBounds();
+            const cursorElement = range.startContainer.nodeType === Node.ELEMENT_NODE ?
+                range.startContainer as Element : range.startContainer.parentElement;
+            // 自动滚动时额外预留一行，避免输入文字被键盘工具栏遮挡。
+            const extraLineHeight = parseFloat(getComputedStyle(cursorElement).lineHeight) ||
+                window.siyuan.config.editor.fontSize * 1.625;
             if (cursorTop < viewportBounds.bottom - 42 &&
                 cursorTop > Math.max(contentElement.getBoundingClientRect().top, viewportBounds.top)) {
                 renderGutter();
@@ -1070,8 +1075,8 @@ export const showKeyboardToolbar = () => {
             contentElement.addEventListener("touchstart", clearRenderGutter, {once: true, passive: true});
             contentElement.scroll({
                 top: cursorTop < 0 ?
-                    contentElement.scrollTop + viewportBounds.bottom - viewportBounds.top - 42 :
-                    contentElement.scrollTop + cursorTop - viewportBounds.bottom + 42 + 26,
+                    contentElement.scrollTop + viewportBounds.bottom - viewportBounds.top - 42 + extraLineHeight :
+                    contentElement.scrollTop + cursorTop - viewportBounds.bottom + 42 + 26 + extraLineHeight,
                 left: contentElement.scrollLeft,
                 behavior: "smooth"
             });

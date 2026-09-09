@@ -101,6 +101,7 @@ describe("database resource upload consumers", () => {
             harness.start(kind);
             harness.complete("new.png");
             assert.deepEqual(harness.cell.value.mAsset.map(value => value.content), ["original.png", "new.png"]);
+            assert.deepEqual(harness.cell.value.mAsset.map(value => value.name), ["original", "new.png"]);
         });
         it(`${kind}: appends both uploads while the row is not rendered`, () => {
             const harness = createHarness();

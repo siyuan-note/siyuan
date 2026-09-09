@@ -531,7 +531,7 @@ const getUploadedAssetValues = (result: Omit<IAssetUploadResult, "requestId" | "
         const filename = formatName(success.name);
         values.push({
             type: Constants.SIYUAN_ASSETS_IMAGE.includes(type) ? "image" : "file",
-            name: filename.substring(0, filename.length - type.length),
+            name: filename,
             content: success.path,
         });
     });

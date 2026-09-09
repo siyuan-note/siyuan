@@ -117,6 +117,7 @@ let keyboardPanelTop: number | undefined;
 let keyboardPanelClosing = false;
 let keyboardPanelCloseTimeout: number | undefined;
 let keyboardPanelLandscape: boolean;
+let pendingKeyboardFocus: {protyle: IProtyle, range: Range} | undefined;
 let showUtilTimeout: number | undefined;
 let preventRender = false;
 let preventRenderTimeout: number;
@@ -761,6 +762,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
 };
 
 export const showKeyboardToolbarUtil = (oldScrollTop: number) => {
+    pendingKeyboardFocus = undefined;
     window.siyuan.menus.menu.remove();
     showUtil = true;
     clearTimeout(keyboardPanelCloseTimeout);
@@ -848,6 +850,11 @@ export const hideKeyboardToolbarUtilOnEditorClick = () => {
 const restoreKeyboardToolbarRange = (protyle: IProtyle | undefined, range?: Range) => {
     if (protyle) {
         const editorRange = getEditorFocusRange(protyle.wysiwyg.element, range, protyle.toolbar.range);
+        if (editorRange && (isInAndroid() || isInHarmony())) {
+            // 原生端恢复 WebView 焦点后，通过键盘显示回调再次恢复编辑器选区。
+            pendingKeyboardFocus = {protyle, range: editorRange};
+            callMobileAppShowKeyboard();
+        }
         if (restoreEditorFocusRange(protyle.wysiwyg.element, editorRange)) {
             return;
         }
@@ -969,6 +976,11 @@ const renderKeyboardToolbar = () => {
 };
 
 export const showKeyboardToolbar = () => {
+    const pendingFocus = pendingKeyboardFocus;
+    pendingKeyboardFocus = undefined;
+    if (pendingFocus && getCurrentEditor()?.protyle === pendingFocus.protyle && !pendingFocus.protyle.disabled) {
+        restoreEditorFocusRange(pendingFocus.protyle.wysiwyg.element, pendingFocus.range);
+    }
     if (!showUtil) {
         hideKeyboardToolbarUtil();
     }
@@ -1074,6 +1086,7 @@ export const hideKeyboardToolbar = () => {
     if (showUtil) {
         return;
     }
+    pendingKeyboardFocus = undefined;
     const toolbarElement = document.getElementById("keyboardToolbar");
     const toolbarHidden = toolbarElement.classList.contains("fn__none");
     toolbarElement.classList.add("fn__none");
@@ -1454,16 +1467,17 @@ export const initKeyboardToolbar = () => {
                     currentRange, protyle.toolbar.range) : currentRange?.cloneRange();
                 hideKeyboardToolbarUtil(true);
                 restoreKeyboardToolbarRange(protyle, range);
-                callMobileAppShowKeyboard();
             } else {
                 activeBlur();
             }
             return;
         }
-        if (!currentRange) {
+        // 块菜单允许在编辑器失焦后使用当前文档中保存的选区。
+        const range = type === "block" && protyle ?
+            getEditorFocusRange(protyle.wysiwyg.element, currentRange, protyle.toolbar.range) : currentRange;
+        if (!range) {
             return;
         }
-        const range = currentRange;
         if (window.siyuan.config.readonly || !protyle || protyle.disabled) {
             return;
         }
@@ -1474,7 +1488,7 @@ export const initKeyboardToolbar = () => {
             protyle.undo.redo(protyle);
             return;
         }
-        if (getSelection().rangeCount === 0) {
+        if (type !== "block" && getSelection().rangeCount === 0) {
             return;
         }
         const nodeElement = hasClosestBlock(range.startContainer);
@@ -1514,7 +1528,7 @@ export const initKeyboardToolbar = () => {
         } else if (type === "font-family" || type === "font-size") {
             if (buttonElement.classList.contains("protyle-toolbar__item--current")) {
                 hideKeyboardToolbarUtil(true);
-                focusByRange(range);
+                restoreKeyboardToolbarRange(protyle, range);
                 return;
             }
             resetKeyboardToolbarUtilButtons();
@@ -1529,7 +1543,7 @@ export const initKeyboardToolbar = () => {
                 buttonElement.classList.contains("protyle-toolbar__item--current");
             const finish = () => {
                 hideKeyboardToolbarUtil(true);
-                focusByRange(protyle.toolbar.range);
+                restoreKeyboardToolbarRange(protyle, protyle.toolbar.range);
             };
             const apply = (style: string, value: string) => {
                 if (!valid()) {
@@ -1572,7 +1586,7 @@ export const initKeyboardToolbar = () => {
         } else if (type === "text") {
             if (buttonElement.classList.contains("protyle-toolbar__item--current")) {
                 hideKeyboardToolbarUtil(true);
-                focusByRange(range);
+                restoreKeyboardToolbarRange(protyle, range);
             } else {
                 resetKeyboardToolbarUtilButtons();
                 buttonElement.classList.add("protyle-toolbar__item--current");
@@ -1618,6 +1632,9 @@ export const initKeyboardToolbar = () => {
             window.JSAndroid?.hideKeyboard();
             return;
         } else if (type === "block") {
+            protyle.toolbar.range = range;
+            keyboardPanelClosing = false;
+            hideKeyboardToolbarUtil();
             protyle.gutter.renderMenu(protyle, nodeElement);
             window.siyuan.menus.menu.fullscreen();
             activeBlur();

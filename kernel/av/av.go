@@ -689,7 +689,7 @@ func GetAttributeViewContent(avID string) (content string) {
 		return
 	}
 
-	attrView, err := ParseAttributeView(avID)
+	attrView, err := parseAttributeView(avID, false)
 	if err != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
@@ -701,7 +701,7 @@ func GetAttributeViewContent(avID string) (content string) {
 }
 
 func GetAttributeViewContentByPath(avJSONPath string) (content string) {
-	attrView, err := ParseAttributeViewByPath(avJSONPath)
+	attrView, err := parseAttributeViewByPathInBoxWithOptions(avJSONPath, avBoxIDFromPath(avJSONPath), false)
 	if err != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avJSONPath, err)
 		return
@@ -746,6 +746,10 @@ func IsAttributeViewExist(avID string) bool {
 }
 
 func ParseAttributeView(avID string) (ret *AttributeView, err error) {
+	return parseAttributeView(avID, true)
+}
+
+func parseAttributeView(avID string, resolveColors bool) (ret *AttributeView, err error) {
 	if !ast.IsNodeIDPattern(avID) {
 		err = ErrInvalidAttributeViewID
 		return
@@ -756,15 +760,24 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 	if avJSONPath == "" {
 		// 文件不存在，可能是首次创建，按全局路径返回（由调用方处理）
 		avJSONPath = GetAttributeViewDataPath(avID)
-		return parseAttributeViewByPathInBox(avJSONPath, "")
+		return parseAttributeViewByPathInBoxWithOptions(avJSONPath, "", resolveColors)
 	}
 	if boxID != "" {
 		SetAVBoxID(avID, boxID)
 	}
-	return parseAttributeViewByPathInBox(avJSONPath, boxID)
+	return parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID, resolveColors)
 }
 
 func ParseAttributeViewInBox(avID, boxID string) (ret *AttributeView, err error) {
+	return parseAttributeViewInBox(avID, boxID, true)
+}
+
+// ParseAttributeViewForIndexInBox 读取索引所需的数据并保留解密认证，不解析显示配色，避免等待同步自身结束。
+func ParseAttributeViewForIndexInBox(avID, boxID string) (ret *AttributeView, err error) {
+	return parseAttributeViewInBox(avID, boxID, false)
+}
+
+func parseAttributeViewInBox(avID, boxID string, resolveColors bool) (ret *AttributeView, err error) {
 	if !ast.IsNodeIDPattern(avID) {
 		err = ErrInvalidAttributeViewID
 		return
@@ -784,7 +797,7 @@ func ParseAttributeViewInBox(avID, boxID string) (ret *AttributeView, err error)
 			SetAVBoxID(avID, boxID)
 		}
 	}
-	return parseAttributeViewByPathInBox(avJSONPath, avBoxID)
+	return parseAttributeViewByPathInBoxWithOptions(avJSONPath, avBoxID, resolveColors)
 }
 
 func ParseAttributeViewByPath(avJSONPath string) (ret *AttributeView, err error) {

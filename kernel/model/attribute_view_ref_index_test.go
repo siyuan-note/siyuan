@@ -78,6 +78,14 @@ func TestAttributeViewRefCarrierTreesRequirePhysicalCarrier(t *testing.T) {
 	if trees := attributeViewRefCarrierTrees(attributeView, ""); 0 != len(trees) {
 		t.Fatalf("attribute view without a carrier produced index trees: %+v", trees)
 	}
+	originalPalette := av.LoadWorkspacePalette
+	av.LoadWorkspacePalette = func() ([]*av.AttributeViewCustomColor, []string) {
+		t.Fatal("reference index scheduling must not load the workspace palette")
+		return nil, nil
+	}
+	t.Cleanup(func() { av.LoadWorkspacePalette = originalPalette })
+	queueAttributeViewRefIndex(attributeView, "")
+	queueExternalAttributeViewRefIndexByRepoPath("/storage/av/" + attributeView + ".json")
 }
 
 func TestAttributeViewRichTextRefDefIDs(t *testing.T) {

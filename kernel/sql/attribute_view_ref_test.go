@@ -117,6 +117,12 @@ func TestRefsFromTreeIncludesAttributeViewRichTextReferences(t *testing.T) {
 	}
 
 	root := &ast.Node{Type: ast.NodeDocument, ID: rootID}
+	originalPalette := av.LoadWorkspacePalette
+	av.LoadWorkspacePalette = func() ([]*av.AttributeViewCustomColor, []string) {
+		t.Fatal("reference indexing must not load the workspace palette")
+		return nil, nil
+	}
+	t.Cleanup(func() { av.LoadWorkspacePalette = originalPalette })
 	databaseNode := &ast.Node{Type: ast.NodeAttributeView, ID: databaseID, AttributeViewID: attributeView}
 	root.AppendChild(databaseNode)
 	tree := &parse.Tree{Root: root, ID: rootID, Box: "20260904009004-box0001", Path: "/" + rootID + ".sy"}

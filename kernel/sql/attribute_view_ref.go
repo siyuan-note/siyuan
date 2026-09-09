@@ -32,7 +32,7 @@ func attributeViewRefsFromNode(tree *parse.Tree, databaseNode *ast.Node) (ret []
 	}
 
 	avBoxID := attributeViewRefStorageBoxID(tree.Box)
-	attrView, err := av.ParseAttributeViewInBox(databaseNode.AttributeViewID, avBoxID)
+	attrView, err := av.ParseAttributeViewForIndexInBox(databaseNode.AttributeViewID, avBoxID)
 	if nil != err || nil == attrView {
 		return
 	}

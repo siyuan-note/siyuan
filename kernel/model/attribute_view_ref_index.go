@@ -34,7 +34,7 @@ func queueAttributeViewRefIndex(avID, avBoxID string) {
 	if "" == avID {
 		return
 	}
-	attrView, err := av.ParseAttributeViewInBox(avID, avBoxID)
+	attrView, err := av.ParseAttributeViewForIndexInBox(avID, avBoxID)
 	if nil != err || nil == attrView || av.RichTextSpec > attrView.Spec {
 		return
 	}
@@ -48,7 +48,7 @@ func queueExternalAttributeViewRefIndex(avID, avBoxID string) {
 		return
 	}
 	var newDefIDs []string
-	if attrView, err := av.ParseAttributeViewInBox(avID, avBoxID); nil == err && nil != attrView &&
+	if attrView, err := av.ParseAttributeViewForIndexInBox(avID, avBoxID); nil == err && nil != attrView &&
 		av.RichTextSpec <= attrView.Spec {
 		newDefIDs = attributeViewRichTextRefDefIDs(attrView)
 	}

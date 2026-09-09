@@ -34,10 +34,6 @@ export const DESKTOP_TOOLBAR_ENTRIES: IToolbarEntry[] = [{
     name: "|",
     separator: true,
 }, {
-    key: "text",
-    name: "text",
-    lang: "appearance",
-}, {
     key: "font-family",
     name: "font-family",
     lang: "fontFamily",
@@ -45,6 +41,10 @@ export const DESKTOP_TOOLBAR_ENTRIES: IToolbarEntry[] = [{
     key: "font-size",
     name: "font-size",
     lang: "fontSize",
+}, {
+    key: "text",
+    name: "text",
+    lang: "appearance",
 }, {
     key: "strong",
     name: "strong",

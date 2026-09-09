@@ -1302,9 +1302,9 @@ export const initKeyboardToolbar = () => {
             <button class="keyboard__action" data-type="block-ref"><svg><use xlink:href="#iconRef"></use></svg></button>
             <button class="keyboard__action" data-type="a"><svg><use xlink:href="#iconLink"></use></svg></button>
             <span class="keyboard__split" data-id="separator_1"></span>
-            <button class="keyboard__action" data-type="text"><svg><use xlink:href="#iconFont"></use></svg></button>
             <button class="keyboard__action" data-type="font-family" aria-label="${window.siyuan.languages.fontFamily}">${window.siyuan.languages.fontFamily}</button>
             <button class="keyboard__action" data-type="font-size" aria-label="${window.siyuan.languages.fontSize}">${window.siyuan.languages.fontSize}</button>
+            <button class="keyboard__action" data-type="text"><svg><use xlink:href="#iconFont"></use></svg></button>
             <button class="keyboard__action" data-type="strong"><svg><use xlink:href="#iconBold"></use></svg></button>
             <button class="keyboard__action" data-type="em"><svg><use xlink:href="#iconItalic"></use></svg></button>
             <button class="keyboard__action" data-type="u"><svg><use xlink:href="#iconUnderline"></use></svg></button>

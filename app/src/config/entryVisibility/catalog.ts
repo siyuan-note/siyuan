@@ -469,6 +469,7 @@ const gutterSingle = () => [
 
 export const SLASH_MENU_ROOT_PATH = "editor.slash.menu";
 
+// 共享工具栏声明决定目录默认顺序，字体和字号位于外观之前。
 const toolbarBuiltinChildren = DESKTOP_TOOLBAR_ENTRIES.map((item) => {
     if (item.separator) {
         return separator(item.key);

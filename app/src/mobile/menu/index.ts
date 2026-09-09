@@ -165,6 +165,7 @@ const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettingTab>, 
     openModel({
         title: settingTabDef.title,
         icon: "iconLeft",
+        hideCloseIcon: true,
         html: `<div class="config${isMobile() ? " config--mobile" : ""}"></div>`,
         bindEvent(modelMainElement: HTMLElement) {
             root = modelMainElement.firstElementChild as HTMLElement;

@@ -253,7 +253,7 @@ export const bazaar = {
         return `<div class="config-bazaar fn__flex-column" style="height: 100%">
 <div class="config-bazaar__main fn__flex-column fn__flex-1">
 <div class="config-bazaar__drop fn__none">
-    <svg><use xlink:href="#iconUpload"></use></svg>
+    <svg><use xlink:href="#iconDownload"></use></svg>
     <div>${window.siyuan.languages.dropLocalBazaarPackage}</div>
 </div>
 <div class="layout-tab-bar fn__flex">
@@ -291,7 +291,7 @@ export const bazaar = {
                 <input data-type="downloaded-filter" class="b3-text-field config-bazaar__filter" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
                 <div class="fn__flex config-bazaar__actions">
                     <label class="block__icon block__icon--show config-bazaar__local-package ariaLabel" data-type="install-local-package" data-position="north" aria-label="${window.siyuan.languages.installLocalBazaarPackage}">
-                        <svg class="b3-button__icon"><use xlink:href="#iconUpload"></use></svg>
+                        <svg class="b3-button__icon"><use xlink:href="#iconDownload"></use></svg>
                         <input class="b3-form__upload" data-type="local-package-file" type="file" accept=".zip,application/zip">
                     </label>
                     <button class="b3-button fn__none" data-type="install-all">${window.siyuan.languages.updateAll}</button>

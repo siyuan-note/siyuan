@@ -731,13 +731,13 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
             </button>
             <span class="fn__space"></span>
             <button class="b3-button b3-button--outline fn__flex-center fn__size200${disableImportExport ? " fn__none" : ""}" id="exportCryptoBackupBtn">
-                <svg class="svg"><use xlink:href="#iconDownload"></use></svg>
+                <svg class="svg"><use xlink:href="#iconUpload"></use></svg>
                 ${window.siyuan.languages.exportNotebookCryptoBackup}
             </button>
             <span class="fn__space"></span>
         </div>
         <button class="b3-button b3-button--outline fn__flex-center fn__size200${disableImportExport ? " fn__none" : ""}" id="importCryptoBackupBtn">
-            <svg class="svg"><use xlink:href="#iconUpload"></use></svg>
+            <svg class="svg"><use xlink:href="#iconDownload"></use></svg>
             ${window.siyuan.languages.importNotebookCryptoBackup}
         </button>
     </div>

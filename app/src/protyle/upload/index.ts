@@ -464,7 +464,7 @@ const uploadPreparedFiles = (input: Extract<IAssetUploadInput, { kind: "files" }
             msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", escapeHtml(validateResult.files[i].name)).replace("${y}", filesize(validateResult.files[i].size, {standard: "iec"})) + "<br>";
         }
     }
-    if (protyle.lite) {
+    if (protyle.lite && !options.document.rootID) {
         formData.append("assetsDirPath", "/assets/");
     } else {
         formData.append("id", options.document.rootID);

@@ -2,6 +2,14 @@ export const isSameDragEditor = (targetEditor: Pick<Element, "contains">, source
     return targetEditor.contains(sourceElement);
 };
 
+export const isCopyBlockDrag = (lite: boolean, ctrlKey: boolean, targetEditor: Element, sourceEditor?: Element) => {
+    // 片段块没有独立的持久化 ID，跨编辑器时创建新块，仅在片段内部移动。
+    return ctrlKey || (sourceEditor !== targetEditor && (lite || isFragmentBlockDrag(sourceEditor)));
+};
+
+export const isFragmentBlockDrag = (sourceEditor?: Element) =>
+    !!sourceEditor?.closest(".protyle-lite-fragment");
+
 export type TBlockDragData = {
     html: string,
     notebookID: string,

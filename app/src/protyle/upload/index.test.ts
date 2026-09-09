@@ -16,6 +16,7 @@ const createHarness = () => {
     let confirm: (() => void) | undefined;
     let delayConfirmation = false;
     const protyle = {
+        lite: false,
         element: {isConnected: true},
         block: {rootID: "doc-a"}, notebookId: "box-a", app: {plugins: [] as unknown[]},
         wysiwyg: {element: {}},
@@ -104,6 +105,27 @@ const createHarness = () => {
 const settle = () => new Promise(resolve => setImmediate(resolve));
 
 describe("upload document binding", () => {
+    it("uploads lightweight document fragments to their owning document", async () => {
+        const harness = createHarness();
+        harness.protyle.lite = true;
+        harness.start("files");
+        harness.resume();
+        await settle();
+        assert.equal(harness.requests.length, 1);
+        assert.equal(harness.requests[0].id, "doc-a");
+    });
+
+    it("keeps standalone lightweight uploads independent of documents", async () => {
+        const harness = createHarness();
+        harness.protyle.lite = true;
+        harness.protyle.block.rootID = "";
+        harness.start("files");
+        harness.resume();
+        await settle();
+        assert.equal(harness.requests.length, 1);
+        assert.equal(harness.requests[0].id, undefined);
+    });
+
     for (const kind of ["files", "local-files"] as const) {
         it(`${kind}: preserves the document captured by a parent paste operation`, () => {
             const harness = createHarness();

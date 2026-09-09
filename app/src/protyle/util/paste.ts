@@ -69,6 +69,7 @@ import {
     getProtyleBlockDOMSanitizer,
     getProtyleUnsupportedPasteBlocks,
     getProtyleRestrictedPlainTextHTML,
+    isProtyleUploadDisabled,
     restoreProtyleLuteMarkdownSyntax,
 } from "../runtimeCapabilities";
 /// #if !BROWSER
@@ -713,6 +714,28 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         textPlain = event.textPlain;
         siyuanHTML = event.siyuanHTML;
         files = event.files;
+    }
+    if (blockDOMSanitizer && !siyuanHTML && !isProtyleUploadDisabled(protyle)) {
+        // 受限片段中的图片走附件上传，避免被后续纯文本降级丢弃。
+        const isImage = (name: string) => Constants.SIYUAN_ASSETS_IMAGE.includes(
+            name.substring(name.lastIndexOf(".")).toLowerCase());
+        if (files?.length > 0 && Array.from(files as FileList).every(file => isImage(file.name))) {
+            uploadFiles(protyle, files, undefined, avAssetUploadSuccess, undefined, directAssetUploadOptions);
+            return;
+        }
+        let localImages = "localFiles" in event ? event.localFiles : undefined;
+        /// #if !BROWSER
+        if (!localImages?.length && !files?.length && !textHTML && !textPlain && "clipboardData" in event) {
+            localImages = await getLocalFiles();
+            if (!isPasteInsertPositionAvailable()) {
+                return;
+            }
+        }
+        /// #endif
+        if (localImages?.length > 0 && localImages.every(file => !file.isDir && isImage(file.path))) {
+            await readLocalFile(protyle, localImages, directAssetUploadOptions, avAssetUploadSuccess);
+            return;
+        }
     }
     if (blockDOMSanitizer) {
         // 在清洗和修改选区前检查完整载荷，避免不支持的块被静默删除后只粘贴部分内容。

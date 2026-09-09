@@ -67,6 +67,8 @@ import {
     getSuperBlockResizeDropTarget,
     getTopListDragTarget,
     isAttributeViewTitleTarget,
+    isCopyBlockDrag,
+    isFragmentBlockDrag,
     isDragTargetInSource,
     isSameDragEditor,
     isSameSiblingMove,
@@ -1056,6 +1058,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     let kanbanGroupDragHeight = "";
     const isLiteTabDrag = (event: DragEvent) => protyle.lite &&
         event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB);
+    const shouldCopyBlockDrag = (event: DragEvent) => isCopyBlockDrag(protyle.lite, event.ctrlKey,
+        protyle.wysiwyg.element, window.siyuan.dragElement);
     const clearKanbanGroupDragover = () => {
         if (kanbanGroupDragoverElement) {
             kanbanGroupDragoverElement.classList.remove("dragover__left", "dragover__right");
@@ -1383,8 +1387,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         event.preventDefault();
     };
     editorElement.addEventListener("drop", async (event: DragEvent & { target: HTMLElement }) => {
-        // lite 模式不落盘，拖拽块时强制复制语义（避免移动操作删除源块）。
-        const isCopyDrag = protyle.lite || event.ctrlKey;
+        const isCopyDrag = shouldCopyBlockDrag(event);
         counter = 0;
         hideDragTip();
         window.siyuan.dragTitle = "";
@@ -1506,6 +1509,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             targetElement.removeAttribute("select-end");
         }
         if (gutterType) {
+            // 片段中的临时块不能作为正文的引用或嵌入查询目标。
+            if ((event.altKey || event.shiftKey) && isFragmentBlockDrag(window.siyuan.dragElement)) {
+                event.preventDefault();
+                event.stopPropagation();
+                clearBlockDragoverTarget();
+                return;
+            }
             // gutter 或反链面板拖拽
             const sourceElements: Element[] = [];
             const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
@@ -2319,8 +2329,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             action = window.siyuan.languages.dragTipRef;
         } else if (event.shiftKey) {
             action = window.siyuan.languages.dragTipEmbed;
-        } else if (event.ctrlKey || protyle.lite) {
-            // Ctrl=创建副本；lite 模式无修饰键也为复制
+        } else if (shouldCopyBlockDrag(event)) {
             action = window.siyuan.languages.duplicateCopy;
         } else if (isChild) {
             action = window.siyuan.languages.dragTipListItemChild.replace("${x}", targetText);
@@ -2335,11 +2344,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     let cachedIsCol = false;
     editorElement.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
         if (protyle.disabled || isLiteTabDrag(event) ||
+            ((event.altKey || event.shiftKey) && isFragmentBlockDrag(window.siyuan.dragElement)) ||
             event.dataTransfer.types.includes(Constants.SIYUAN_DROP_EDITOR)) {
             event.preventDefault();
             event.stopPropagation();
             event.dataTransfer.dropEffect = "none";
             hideDragTip();
+            clearBlockDragoverTarget();
             return;
         }
         if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_BLOCK_REF)) {
@@ -2472,8 +2483,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 action = window.siyuan.languages.dragTipRef;
             } else if (event.shiftKey) {
                 action = window.siyuan.languages.dragTipEmbed;
-            } else if (event.ctrlKey || protyle.lite) {
-                // Ctrl=创建副本；lite 模式无修饰键也为复制（不移动源块）
+            } else if (shouldCopyBlockDrag(event)) {
                 action = window.siyuan.languages.duplicateCopy;
             } else {
                 action = window.siyuan.languages.move;

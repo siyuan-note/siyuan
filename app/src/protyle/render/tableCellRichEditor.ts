@@ -137,7 +137,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         initialBlockHTML,
         protyleOptions: {notebookId: owner.notebookId, toolbar, hint},
         runtimeCapabilities: {
-            upload: false,
+            upload: true,
             websocket: false,
             pluginExtensions: false,
             customBlockRender: false,
@@ -161,6 +161,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             }
         },
     });
+    fragment.protyle.block.rootID = owner.block.rootID;
     const commit = () => {
         window.clearTimeout(timer);
         if (!cell.isConnected || !table.isConnected || !host.isConnected || owner.disabled || composing) {

@@ -95,6 +95,7 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 4. **Markdown:** Do not hand-wrap; keep each line (paragraphs, table rows, list items, etc.) on a single line
 5. **TypeScript/JavaScript:** Semicolons required, use double quotes, indent with spaces
 6. **CSS:** Do not use the `:has()` selector because of its performance impact
+7. **CSS positioning and scrolling:** When changing `position`, `transform`, `contain`, or `overflow` on a shared container, check the effects on descendant positioning reference frames, overlay coverage, and clipping. Prefer a dedicated container when a local control needs a positioning reference. For settings dialog changes, verify detail overlays, the top drag area, and scrollbar placement at different window widths
 
 ---
 

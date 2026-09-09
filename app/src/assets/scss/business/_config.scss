@@ -1,6 +1,5 @@
 .config {
   &__tab-wrap {
-    position: relative;
     overflow: hidden;
     box-sizing: border-box;
     background-color: var(--b3-theme-background);
@@ -9,6 +8,12 @@
     height: 100%;
     display: flex;
     flex-direction: column;
+  }
+
+  &__drag-anchor {
+    position: relative;
+    height: 0;
+    flex-shrink: 0;
   }
 
   &__drag {
@@ -825,7 +830,7 @@
     }
 
     &__readme {
-      padding: 16px 16px 16px 0;
+      padding: 16px 0;
 
       .config-bazaar__deprecated {
         background-color: var(--b3-card-warning-background);
@@ -934,6 +939,7 @@
         &__main {
           flex: 1;
           margin-left: 16px;
+          padding-right: 16px;
           overflow: auto;
         }
 

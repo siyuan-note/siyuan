@@ -575,6 +575,11 @@ func GetBacklink2InBox(id, keyword, mentionKeyword string, sortMode, mentionSort
 }
 
 func GetBacklink2InBoxWithFilter(id, keyword, mentionKeyword string, sortMode, mentionSortMode int, containChildren bool, boxID string, sourceFilter *BacklinkSourceFilter) (boxIDOut string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
+	return GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword, sortMode, mentionSortMode, containChildren, boxID, sourceFilter, true)
+}
+
+// GetBacklink2InBoxWithOptions 查询反链文档列表，并按需搜索提及。
+func GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword string, sortMode, mentionSortMode int, containChildren bool, boxID string, sourceFilter *BacklinkSourceFilter, includeMentions bool) (boxIDOut string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
 	keyword = strings.TrimSpace(keyword)
 	var keywords []string
 	if "" != keyword {
@@ -626,11 +631,13 @@ func GetBacklink2InBoxWithFilter(id, keyword, mentionKeyword string, sortMode, m
 		return backlinks[i].ID > backlinks[j].ID
 	})
 
-	mentionRefs, _ := buildTreeBackmentionInBox(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, 12, boxID)
-	tmpBackmentions := toFlatTree(mentionRefs, 0, "backlink", nil)
-	for _, l := range tmpBackmentions {
-		l.Blocks = nil
-		backmentions = append(backmentions, l)
+	if includeMentions {
+		mentionRefs, _ := buildTreeBackmentionInBox(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, 12, boxID)
+		tmpBackmentions := toFlatTree(mentionRefs, 0, "backlink", nil)
+		for _, l := range tmpBackmentions {
+			l.Blocks = nil
+			backmentions = append(backmentions, l)
+		}
 	}
 
 	sort.Slice(backmentions, func(i, j int) bool {
@@ -677,134 +684,6 @@ func GetBacklink2InBoxWithFilter(id, keyword, mentionKeyword string, sortMode, m
 		name := boxNames[l.Box]
 		l.HPath = name + l.HPath
 	}
-	return
-}
-
-func GetBacklink(id, keyword, mentionKeyword string, beforeLen int, containChildren bool) (boxID string, linkPaths, mentionPaths []*Path, linkRefsCount, mentionsCount int) {
-	return GetBacklinkInBox(id, keyword, mentionKeyword, beforeLen, containChildren, "")
-}
-
-// GetBacklinkInBox 与 GetBacklink 一致，但按 boxID 路由到加密 db 或全局 db。
-func GetBacklinkInBox(id, keyword, mentionKeyword string, beforeLen int, containChildren bool, boxID string) (boxIDOut string, linkPaths, mentionPaths []*Path, linkRefsCount, mentionsCount int) {
-	return GetBacklinkInBoxWithOptions(id, keyword, mentionKeyword, beforeLen, containChildren, boxID, true)
-}
-
-// GetBacklinkInBoxWithOptions 按笔记本查询反链，并按需搜索提及。
-func GetBacklinkInBoxWithOptions(id, keyword, mentionKeyword string, beforeLen int, containChildren bool, boxID string, includeMentions bool) (boxIDOut string, linkPaths, mentionPaths []*Path, linkRefsCount, mentionsCount int) {
-	linkPaths = []*Path{}
-	mentionPaths = []*Path{}
-
-	sqlBlock := sql.GetBlockInBox(id, boxID)
-	if nil == sqlBlock {
-		return
-	}
-	rootID := sqlBlock.RootID
-	boxIDOut = sqlBlock.Box
-
-	var links []*Block
-	refs := sql.QueryRefsByDefIDInBox(id, containChildren, boxID)
-	refs = removeDuplicatedRefs(refs)
-
-	// 为了减少查询，组装好 IDs 后一次查出
-	defSQLBlockIDs, refSQLBlockIDs := map[string]bool{}, map[string]bool{}
-	var queryBlockIDs []string
-	for _, ref := range refs {
-		defSQLBlockIDs[ref.DefBlockID] = true
-		refSQLBlockIDs[ref.BlockID] = true
-		queryBlockIDs = append(queryBlockIDs, ref.DefBlockID)
-		queryBlockIDs = append(queryBlockIDs, ref.BlockID)
-	}
-	querySQLBlocks := sql.GetBlocksInBox(queryBlockIDs, boxID)
-	defSQLBlocksCache := map[string]*sql.Block{}
-	for _, defSQLBlock := range querySQLBlocks {
-		if nil != defSQLBlock && defSQLBlockIDs[defSQLBlock.ID] {
-			defSQLBlocksCache[defSQLBlock.ID] = defSQLBlock
-		}
-	}
-	refSQLBlocksCache := map[string]*sql.Block{}
-	for _, refSQLBlock := range querySQLBlocks {
-		if nil != refSQLBlock && refSQLBlockIDs[refSQLBlock.ID] {
-			refSQLBlocksCache[refSQLBlock.ID] = refSQLBlock
-		}
-	}
-
-	excludeBacklinkIDs := hashset.New()
-	for _, ref := range refs {
-		defSQLBlock := defSQLBlocksCache[(ref.DefBlockID)]
-		if nil == defSQLBlock {
-			continue
-		}
-
-		refSQLBlock := refSQLBlocksCache[ref.BlockID]
-		if nil == refSQLBlock {
-			continue
-		}
-		refBlock := fromSQLBlock(refSQLBlock, "", beforeLen)
-		if rootID == refBlock.RootID { // 排除当前文档内引用提及
-			excludeBacklinkIDs.Add(refBlock.RootID, refBlock.ID)
-		}
-		defBlock := fromSQLBlock(defSQLBlock, "", beforeLen)
-		if defBlock.RootID == rootID { // 当前文档的定义块
-			links = append(links, defBlock)
-			if ref.DefBlockID == defBlock.ID {
-				defBlock.Refs = append(defBlock.Refs, refBlock)
-			}
-		}
-	}
-
-	for _, link := range links {
-		for _, ref := range link.Refs {
-			excludeBacklinkIDs.Add(ref.RootID, ref.ID)
-		}
-		linkRefsCount += len(link.Refs)
-	}
-
-	var linkRefs []*Block
-	var backlinkRefBlocks []*Block
-	for _, link := range links {
-		for _, ref := range link.Refs {
-			backlinkRefBlocks = append(backlinkRefBlocks, ref)
-		}
-	}
-	coveredRefIDs := map[string]bool{}
-	originalRefBlockIDs := map[string]string{}
-	for _, mapping := range buildBacklinkParentMappings(backlinkRefBlocks, boxID) {
-		parent := sql.GetBlockInBox(mapping.parent.ID, boxID)
-		if nil == parent {
-			continue
-		}
-		originalRefBlockIDs[mapping.parent.ID] = mapping.refBlock.ID
-		for refID := range mapping.coveredRefIDs {
-			coveredRefIDs[refID] = true
-		}
-		linkRefsCount -= len(mapping.coveredRefIDs) - 1
-		linkRefs = append(linkRefs, fromSQLBlock(parent, keyword, beforeLen))
-	}
-	for _, link := range links {
-		for _, ref := range link.Refs {
-			if coveredRefIDs[ref.ID] {
-				continue
-			}
-
-			ref.DefID = link.ID
-			ref.DefPath = link.Path
-
-			content := ref.Content
-			if "" != keyword {
-				_, content = search.MarkText(content, keyword, beforeLen, Conf.Search.CaseSensitive)
-				ref.Content = content
-			}
-			linkRefs = append(linkRefs, ref)
-		}
-	}
-	linkPaths = toSubTreeInBox(linkRefs, keyword, boxID, originalRefBlockIDs)
-
-	if !includeMentions {
-		return
-	}
-	mentions, _ := buildTreeBackmentionInBox(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, beforeLen, boxID)
-	mentionsCount = len(mentions)
-	mentionPaths = toFlatTree(mentions, 0, "backlink", nil)
 	return
 }
 

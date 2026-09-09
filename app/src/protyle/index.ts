@@ -36,6 +36,9 @@ import {disabledProtyle, enableProtyle, onGet, setReadonlyByConfig} from "./util
 import {reloadProtyle} from "./util/reload";
 import {renderBacklink} from "./wysiwyg/renderBacklink";
 import {setEmpty} from "../mobile/util/setEmpty";
+/// #if MOBILE
+import {removeMobileSecondaryEditor, unregisterMobileSecondaryEditor} from "../mobile/util/secondaryEditors";
+/// #endif
 import {resize} from "./util/resize";
 import {getDocByScroll} from "./scroll/saveScroll";
 import type {App} from "../index";
@@ -388,7 +391,9 @@ export class Protyle {
                         case "removeBox":
                             if (this.protyle.notebookId === data.data.box) {
                                 /// #if MOBILE
-                                setEmpty(app);
+                                if (!removeMobileSecondaryEditor(this)) {
+                                    setEmpty(app);
+                                }
                                 /// #else
                                 if (this.protyle.model) {
                                     this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id);
@@ -399,7 +404,9 @@ export class Protyle {
                         case "removeDoc":
                             if (data.data.ids.includes(this.protyle.block.rootID)) {
                                 /// #if MOBILE
-                                setEmpty(app);
+                                if (!removeMobileSecondaryEditor(this)) {
+                                    setEmpty(app);
+                                }
                                 /// #else
                                 if (this.protyle.model) {
                                     this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id);
@@ -641,6 +648,9 @@ export class Protyle {
 
     /** 销毁编辑器 */
     public destroy() {
+        /// #if MOBILE
+        unregisterMobileSecondaryEditor(this);
+        /// #endif
         destroy(this.protyle);
     }
 

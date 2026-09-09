@@ -198,6 +198,10 @@ func getBacklink2(c *gin.Context) {
 	knownRevision, _ := arg["knownRevision"].(string)
 	keyword := arg["k"].(string)
 	mentionKeyword := arg["mk"].(string)
+	includeMentions := true
+	if val, ok := arg["includeMentions"].(bool); ok {
+		includeMentions = val
+	}
 	sortArg := arg["sort"]
 	sort := util.SortModeUpdatedDESC
 	if nil != sortArg {
@@ -225,9 +229,9 @@ func getBacklink2(c *gin.Context) {
 			return
 		}
 		if notebook != "" && model.IsEncryptedBox(notebook) {
-			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2InBoxWithFilter(id, keyword, mentionKeyword, sort, mentionSort, containChildren, notebook, sourceFilter)
+			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword, sort, mentionSort, containChildren, notebook, sourceFilter, includeMentions)
 		} else {
-			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2WithFilter(id, keyword, mentionKeyword, sort, mentionSort, containChildren, sourceFilter)
+			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword, sort, mentionSort, containChildren, "", sourceFilter, includeMentions)
 		}
 	}
 	if model.IsReadOnlyRoleContext(c) {
@@ -301,70 +305,4 @@ func parseBacklinkSourceFilter(arg map[string]any) *model.BacklinkSourceFilter {
 		}
 	}
 	return model.NormalizeBacklinkSourceFilter(filter)
-}
-
-func getBacklink(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	if nil == arg["id"] {
-		return
-	}
-
-	id := arg["id"].(string)
-	keyword := arg["k"].(string)
-	mentionKeyword := arg["mk"].(string)
-	includeMentions := true
-	if val, ok := arg["includeMentions"].(bool); ok {
-		includeMentions = val
-	}
-	beforeLen := 12
-	if nil != arg["beforeLen"] {
-		beforeLen = int(arg["beforeLen"].(float64))
-	}
-	containChildren := model.Conf.Editor.BacklinkContainChildren
-	if val, ok := arg["containChildren"]; ok {
-		containChildren = val.(bool)
-	}
-	var boxID string
-	var backlinks, backmentions []*model.Path
-	var linkRefsCount, mentionsCount int
-	// 加密笔记本的反链面板走 InBox 版（查加密 content db）
-	notebook, _ := arg["notebook"].(string)
-	if !isEncryptedNotebookDeniedForPublish(c, notebook) {
-		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
-			ret.Code = 1
-			ret.Msg = err.Error()
-			return
-		}
-		if notebook != "" && model.IsEncryptedBox(notebook) {
-			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklinkInBoxWithOptions(id, keyword, mentionKeyword, beforeLen, containChildren, notebook, includeMentions)
-		} else {
-			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklinkInBoxWithOptions(id, keyword, mentionKeyword, beforeLen, containChildren, "", includeMentions)
-		}
-	}
-	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
-		backlinks = model.FilterPathsByPublishAccess(c, publishAccess, backlinks)
-		backmentions = model.FilterPathsByPublishAccess(c, publishAccess, backmentions)
-		linkRefsCount = countBacklinkPaths(backlinks)
-		mentionsCount = countBacklinkPaths(backmentions)
-	}
-	ret.Data = map[string]any{
-		"backlinks":     backlinks,
-		"linkRefsCount": linkRefsCount,
-		"backmentions":  backmentions,
-		"mentionsCount": mentionsCount,
-		"k":             keyword,
-		"mk":            mentionKeyword,
-		"box":           boxID,
-	}
-	if includeMentions {
-		util.RandomSleep(200, 500)
-	}
 }

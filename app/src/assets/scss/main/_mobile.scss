@@ -1549,6 +1549,66 @@ body.mobile-topbar--merged {
   padding: var(--mobile-top-safe-area) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
+.mobile-backlinks-dialog {
+  .b3-dialog {
+    align-items: flex-end;
+    box-sizing: border-box;
+    bottom: auto;
+    height: 100%;
+  }
+
+  .mobile-backlinks-sheet {
+    max-height: 100%;
+    border-radius: 16px 16px 0 0;
+    padding-top: 32px;
+    box-sizing: border-box;
+    transform: translateY(100%);
+    transition: transform 150ms ease;
+  }
+
+  &.b3-dialog--open .mobile-backlinks-sheet {
+    transform: translateY(0);
+  }
+
+  .mobile-backlinks-content {
+    height: 100%;
+    min-height: 0;
+  }
+}
+
+.sy__backlink {
+  min-height: 0;
+
+  > .block__icons {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 40px;
+  }
+
+  > .backlinkList,
+  > .backlinkMList {
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  .protyle-breadcrumb__bar {
+    min-height: 32px;
+  }
+
+  .block__icon {
+    min-width: 28px;
+    min-height: 28px;
+  }
+
+  &--only-backlinks {
+    > .backlinkMList__header,
+    > .backlinkMList {
+      display: none !important;
+    }
+  }
+}
+
 .mobile-command-panel {
   flex: 1;
   min-height: 0;

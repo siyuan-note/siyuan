@@ -1,6 +1,7 @@
 import {activeBlur} from "./keyboardToolbar";
 import {Constants} from "../../constants";
 import {destroyModel} from "../menu/model";
+import {clearActiveMobileSecondaryEditor, getActiveMobileSecondaryEditor} from "./secondaryEditors";
 
 let hidePanelMaskTimer = 0;
 
@@ -15,6 +16,11 @@ export const showPanelMask = () => {
 };
 
 export const closePanel = (options: {preserveKeyboard?: boolean} = {}) => {
+    const secondaryEditor = getActiveMobileSecondaryEditor();
+    if (secondaryEditor?.protyle.element.closest("#sidebar, #sidebarRight")) {
+        activeBlur(true);
+    }
+    clearActiveMobileSecondaryEditor();
     destroyModel();
     const menuElement = document.getElementById("menu");
     if (menuElement) {

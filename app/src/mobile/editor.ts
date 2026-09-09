@@ -20,9 +20,11 @@ import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 import {restoreMobileTopBarLayout, updateMobileTopBarLayout} from "./util/mobileTopBar";
 import {stickyRow} from "../protyle/render/av/row";
 import {invalidateTrackedRanges} from "../protyle/util/trackedRange";
+import {getActiveMobileSecondaryEditor} from "./util/secondaryEditors";
+import {closeMobileBacklinkSheets} from "./util/backlinkPanels";
 
 export const getCurrentEditor = () => {
-    return window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
+    return getActiveMobileSecondaryEditor() || window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
 };
 
 // 串行更新时间，避免快速切换文档时较早的关闭请求覆盖较新的打开状态。
@@ -305,6 +307,12 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
 export const openMobileFileById = (app: App, id: string, action: TProtyleAction[] = [Constants.CB_GET_HL],
                                    scrollPosition?: ScrollLogicalPosition, notebookId?: string,
                                    afterOpen?: (protyle: IProtyle) => void, forceReload = false) => {
+    const closing = closeMobileBacklinkSheets();
+    if (closing) {
+        void closing.then(() => openMobileFileById(app, id, action, scrollPosition, notebookId, afterOpen, forceReload))
+            .catch(error => console.error(error));
+        return;
+    }
     if (window.siyuan.mobile.tabs) {
         const options = {action, scrollPosition, notebookId, afterOpen, forceReload};
         if (action.includes(Constants.CB_GET_OPENNEW)) {
@@ -331,6 +339,12 @@ export const openMobileFileByIdInNewTab = (app: App, id: string,
                                            action: TProtyleAction[] = [Constants.CB_GET_HL],
                                            scrollPosition?: ScrollLogicalPosition, notebookId?: string,
                                            afterOpen?: (protyle: IProtyle) => void) => {
+    const closing = closeMobileBacklinkSheets();
+    if (closing) {
+        void closing.then(() => openMobileFileByIdInNewTab(app, id, action, scrollPosition, notebookId, afterOpen))
+            .catch(error => console.error(error));
+        return;
+    }
     if (window.siyuan.mobile.tabs) {
         void window.siyuan.mobile.tabs.openInNewTab(id, {
             action,

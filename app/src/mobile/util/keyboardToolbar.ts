@@ -75,6 +75,7 @@ import {createFontSizePicker} from "../../protyle/toolbar/fontControls";
 import {applyMobileToolbarEntries} from "./toolbarEntries";
 import {getEntryOrder, isEntryVisible} from "../../config/entryVisibility/runtime";
 import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
+import {getKeyboardPanelHeight} from "./keyboardPanelHeight";
 
 const applyKeyboardToolbarEntries = (element: HTMLElement, toolbar: Array<string | IMenuItem>) => {
     applyMobileToolbarEntries(element, toolbar, {
@@ -112,7 +113,10 @@ let renderKeyboardToolbarTimeout: number;
 let scrollSelectionIntoViewTimeout: number;
 let clearRenderGutterAfterScroll: () => void;
 let showUtil = false;
-let showUtilHeightTimeout: number | undefined;
+let keyboardPanelTop: number | undefined;
+let keyboardPanelClosing = false;
+let keyboardPanelCloseTimeout: number | undefined;
+let keyboardPanelLandscape: boolean;
 let showUtilTimeout: number | undefined;
 let preventRender = false;
 let preventRenderTimeout: number;
@@ -369,6 +373,7 @@ const preventKeyboardToolbarRender = () => {
 };
 
 const updateKeyboardToolbarPosition = () => {
+    updateKeyboardPanelHeight();
     if (isInMobileApp() || !window.visualViewport) {
         return;
     }
@@ -378,6 +383,33 @@ const updateKeyboardToolbarPosition = () => {
     toolbarElement.style.transform = "";
     toolbarElement.style.bottom = "auto";
     toolbarElement.style.top = `${viewportBottom - toolbarHeight}px`;
+};
+
+const getKeyboardViewportBottom = () => !isInMobileApp() && window.visualViewport ?
+    window.visualViewport.offsetTop + window.visualViewport.height : window.innerHeight;
+
+const updateKeyboardPanelHeight = () => {
+    if (keyboardPanelTop === undefined) {
+        return;
+    }
+    if (keyboardPanelLandscape !== window.matchMedia("(orientation: landscape)").matches) {
+        keyboardPanelClosing = false;
+        hideKeyboardToolbarUtil();
+        return;
+    }
+    const toolbarElement = document.getElementById("keyboardToolbar");
+    const barHeight = toolbarElement.querySelector<HTMLElement>(".keyboard__bar").offsetHeight;
+    const height = getKeyboardPanelHeight(getKeyboardViewportBottom(), keyboardPanelTop, barHeight);
+    if (keyboardPanelClosing && height <= barHeight) {
+        keyboardPanelClosing = false;
+        hideKeyboardToolbarUtil();
+        return;
+    }
+    toolbarElement.style.height = `${height}px`;
+    const editor = getCurrentEditor();
+    if (editor) {
+        editor.protyle.element.parentElement.style.paddingBottom = `${height}px`;
+    }
 };
 
 const getSlashItem = (value: string, icon: string, text: string, focus = "false") => {
@@ -731,10 +763,10 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
 export const showKeyboardToolbarUtil = (oldScrollTop: number) => {
     window.siyuan.menus.menu.remove();
     showUtil = true;
-    clearTimeout(showUtilHeightTimeout);
+    clearTimeout(keyboardPanelCloseTimeout);
+    keyboardPanelClosing = false;
     clearTimeout(showUtilTimeout);
     const toolHeight = document.querySelector(".keyboard__bar").clientHeight;
-    const toolbarElement = document.getElementById("keyboardToolbar");
     let keyboardHeight = window.innerHeight / 2 - toolHeight;
     if (window.siyuan.mobile.size.isLandscape) {
         if (window.siyuan.mobile.size.landscape.height1 !== window.siyuan.mobile.size.landscape.height2) {
@@ -746,25 +778,50 @@ export const showKeyboardToolbarUtil = (oldScrollTop: number) => {
         }
     }
     const editor = getCurrentEditor();
+    const size = window.siyuan.mobile.size;
+    const orientationSize = size.isLandscape ? size.landscape : size.portrait;
+    const fullHeight = Math.max(window.innerHeight, orientationSize.height1);
+    const viewportBottom = getKeyboardViewportBottom();
+    keyboardPanelTop = keyboardPanelTop ?? (viewportBottom < fullHeight - 100 ?
+        viewportBottom - toolHeight : fullHeight - keyboardHeight);
+    keyboardPanelLandscape = size.isLandscape;
+    updateKeyboardToolbarPosition();
     if (editor) {
-        editor.protyle.element.parentElement.style.paddingBottom = keyboardHeight + "px";
         editor.protyle.contentElement.scrollTop = oldScrollTop;
     }
-    showUtilHeightTimeout = window.setTimeout(() => {
-        showUtilHeightTimeout = undefined;
-        toolbarElement.style.height = keyboardHeight + "px";
-        updateKeyboardToolbarPosition();
-    }, Constants.TIMEOUT_TRANSITION); // 防止抖动
     showUtilTimeout = window.setTimeout(() => {
         showUtil = false;
         showUtilTimeout = undefined;
     }, 1000);   // 防止光标改变后斜杆菜单消失
 };
 
-const hideKeyboardToolbarUtil = () => {
-    clearTimeout(showUtilHeightTimeout);
+const resetKeyboardToolbarUtilButtons = () => {
+    const toolbarElement = document.getElementById("keyboardToolbar");
+    toolbarElement.querySelectorAll('[data-type="add"], [data-type="text"], [data-type="font-family"], [data-type="font-size"]')
+        .forEach(item => item.classList.remove("protyle-toolbar__item--current"));
+    toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconKeyboardHide");
+};
+
+const hideKeyboardToolbarUtil = (restoreKeyboard = false) => {
+    if (keyboardPanelClosing) {
+        return;
+    }
+    if (restoreKeyboard && keyboardPanelTop !== undefined) {
+        keyboardPanelClosing = true;
+        showUtil = true;
+        resetKeyboardToolbarUtilButtons();
+        clearTimeout(showUtilTimeout);
+        // 键盘未能弹出时也要释放菜单，避免保留失效的占位。
+        keyboardPanelCloseTimeout = window.setTimeout(() => {
+            keyboardPanelClosing = false;
+            hideKeyboardToolbarUtil();
+        }, 1000);
+        updateKeyboardToolbarPosition();
+        return;
+    }
+    clearTimeout(keyboardPanelCloseTimeout);
+    keyboardPanelTop = undefined;
     clearTimeout(showUtilTimeout);
-    showUtilHeightTimeout = undefined;
     showUtilTimeout = undefined;
     showUtil = false;
     const toolbarElement = document.getElementById("keyboardToolbar");
@@ -777,11 +834,7 @@ const hideKeyboardToolbarUtil = () => {
     if (editor) {
         editor.protyle.element.parentElement.style.paddingBottom = "48px";
     }
-    toolbarElement.querySelector('.keyboard__action[data-type="add"]').classList.remove("protyle-toolbar__item--current");
-    toolbarElement.querySelector('.keyboard__action[data-type="text"]').classList.remove("protyle-toolbar__item--current");
-    toolbarElement.querySelectorAll('[data-type="font-family"], [data-type="font-size"]').forEach(item =>
-        item.classList.remove("protyle-toolbar__item--current"));
-    toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconKeyboardHide");
+    resetKeyboardToolbarUtilButtons();
 };
 
 export const hideKeyboardToolbarUtilOnEditorClick = () => {
@@ -789,7 +842,7 @@ export const hideKeyboardToolbarUtilOnEditorClick = () => {
     if (!showUtil && (!toolbarElement || toolbarElement.clientHeight <= 100)) {
         return;
     }
-    hideKeyboardToolbarUtil();
+    hideKeyboardToolbarUtil(true);
 };
 
 const restoreKeyboardToolbarRange = (protyle: IProtyle | undefined, range?: Range) => {
@@ -1024,6 +1077,7 @@ export const hideKeyboardToolbar = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     const toolbarHidden = toolbarElement.classList.contains("fn__none");
     toolbarElement.classList.add("fn__none");
+    keyboardPanelTop = undefined;
     toolbarElement.style.height = "";
     const editor = getCurrentEditor();
     if (editor) {
@@ -1161,6 +1215,7 @@ export const initKeyboardToolbar = () => {
     }
     if (!isInEdge()) {
         window.addEventListener("resize", () => {
+            updateKeyboardToolbarPosition();
             // 获取键盘高度
             window.siyuan.mobile.size.isLandscape = window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
             if (window.siyuan.mobile.size.isLandscape) {
@@ -1397,12 +1452,8 @@ export const initKeyboardToolbar = () => {
                 toolbarElement.querySelector('.keyboard__action.protyle-toolbar__item--current[data-type="add"]')) {
                 const range = protyle ? getEditorFocusRange(protyle.wysiwyg.element,
                     currentRange, protyle.toolbar.range) : currentRange?.cloneRange();
-                hideKeyboardToolbarUtil();
-                if (isInHarmony() || isInAndroid()) {
-                    setTimeout(() => restoreKeyboardToolbarRange(protyle, range), Constants.TIMEOUT_TRANSITION);
-                } else {
-                    restoreKeyboardToolbarRange(protyle, range);
-                }
+                hideKeyboardToolbarUtil(true);
+                restoreKeyboardToolbarRange(protyle, range);
                 callMobileAppShowKeyboard();
             } else {
                 activeBlur();
@@ -1462,11 +1513,11 @@ export const initKeyboardToolbar = () => {
             return;
         } else if (type === "font-family" || type === "font-size") {
             if (buttonElement.classList.contains("protyle-toolbar__item--current")) {
-                hideKeyboardToolbarUtil();
+                hideKeyboardToolbarUtil(true);
                 focusByRange(range);
                 return;
             }
-            hideKeyboardToolbarUtil();
+            resetKeyboardToolbarUtilButtons();
             buttonElement.classList.add("protyle-toolbar__item--current");
             toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconCloseRound");
             const savedRange = range.cloneRange();
@@ -1477,7 +1528,7 @@ export const initKeyboardToolbar = () => {
                 savedRange.startContainer.isConnected && savedRange.endContainer.isConnected &&
                 buttonElement.classList.contains("protyle-toolbar__item--current");
             const finish = () => {
-                hideKeyboardToolbarUtil();
+                hideKeyboardToolbarUtil(true);
                 focusByRange(protyle.toolbar.range);
             };
             const apply = (style: string, value: string) => {
@@ -1520,10 +1571,10 @@ export const initKeyboardToolbar = () => {
             return;
         } else if (type === "text") {
             if (buttonElement.classList.contains("protyle-toolbar__item--current")) {
-                hideKeyboardToolbarUtil();
+                hideKeyboardToolbarUtil(true);
                 focusByRange(range);
             } else {
-                hideKeyboardToolbarUtil();
+                resetKeyboardToolbarUtilButtons();
                 buttonElement.classList.add("protyle-toolbar__item--current");
                 toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconCloseRound");
                 const oldScrollTop = protyle.contentElement.scrollTop;
@@ -1557,12 +1608,13 @@ export const initKeyboardToolbar = () => {
             return;
         } else if (type === "add") {
             protyle.toolbar.range = range.cloneRange();
-            (document.activeElement as HTMLElement)?.blur();
+            resetKeyboardToolbarUtilButtons();
             buttonElement.classList.add("protyle-toolbar__item--current");
             toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconCloseRound");
             const oldScrollTop = protyle.contentElement.scrollTop;
             renderSlashMenu(protyle, toolbarElement);
             showKeyboardToolbarUtil(oldScrollTop);
+            (document.activeElement as HTMLElement)?.blur();
             window.JSAndroid?.hideKeyboard();
             return;
         } else if (type === "block") {

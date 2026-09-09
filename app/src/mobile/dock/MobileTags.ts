@@ -28,8 +28,8 @@ export class MobileTags {
         ${window.siyuan.languages.tag}
     </div>
     <span class="fn__space"></span>
-    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
-    <svg data-type="search" class="toolbar__icon"><use xlink:href='#iconFilter'></use></svg>
+    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.searchPlaceholder}" />
+    <svg data-type="search" class="toolbar__icon"><use xlink:href='#iconSearch'></use></svg>
     <span class="fn__space"></span>
     <svg data-type="expand" class="toolbar__icon"><use xlink:href="#iconExpand"></use></svg>
     <span class="fn__space"></span>

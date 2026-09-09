@@ -242,10 +242,10 @@ export class BacklinkContent extends Model {
         this.element.innerHTML = `<div class="block__icons backlinkList__header">
     ${this.type === "bottom" ? `<span data-type="bLayout" class="block__icon block__icon--show fn__flex-center backlinkList__toggle ariaLabel" data-position="north" aria-label="${window.siyuan.languages.collapse}"><svg><use xlink:href="#iconDown"></use></svg></span>` : ""}
     <div class="block__logo block__logo--counter fn__flex-1 fn__pointer" data-type="backlink">${window.siyuan.languages.backlinks}<span class="counter listCount"></span></div>
-    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
+    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.searchPlaceholder}" />
     ${this.type === "bottom" ? "" : `<span data-type="refresh" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
     <span class="fn__space"></span>`}
-    <span data-type="search" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.filter}"><svg><use xlink:href='#iconFilter'></use></svg></span>
+    <span data-type="search" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.search}"><svg><use xlink:href='#iconSearch'></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="sourceFilter" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.backlinkSourceFilter}"><svg><use xlink:href='#iconListFilterPlus'></use></svg></span>
     <span class="fn__space"></span>
@@ -265,8 +265,8 @@ export class BacklinkContent extends Model {
 <div class="block__icons backlinkMList__header">
     ${this.type === "bottom" ? `<span data-type="layout" class="block__icon block__icon--show fn__flex-center backlinkList__toggle ariaLabel" data-position="north" aria-label="${window.siyuan.languages.collapse}"><svg><use xlink:href="#iconDown"></use></svg></span>` : ""}
     <div class="block__logo block__logo--counter fn__flex-1 fn__pointer" data-type="mention">${window.siyuan.languages.mentions}<span class="counter listMCount"></span></div>
-    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
-    <span data-type="search" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.filter}"><svg><use xlink:href='#iconFilter'></use></svg></span>
+    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.searchPlaceholder}" />
+    <span data-type="search" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.search}"><svg><use xlink:href='#iconSearch'></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="mSort" data-sort="${backmentionSort}" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.sort}"><svg><use xlink:href='#iconSort'></use></svg></span>
     <span class="fn__space"></span>
@@ -292,10 +292,10 @@ export class BacklinkContent extends Model {
                 const filterIconElement = inputElement.parentElement.querySelector('[data-type="search"]');
                 if (inputElement.value) {
                     filterIconElement.classList.add("block__icon--active");
-                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter + " " + inputElement.value);
+                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.search + " " + inputElement.value);
                 } else {
                     filterIconElement.classList.remove("block__icon--active");
-                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter);
+                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.search);
                 }
             });
             item.addEventListener("keydown", (event: KeyboardEvent) => {

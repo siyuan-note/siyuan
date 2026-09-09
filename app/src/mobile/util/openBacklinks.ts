@@ -5,6 +5,7 @@ import {registerMobileBacklinkPanel} from "./backlinkPanels";
 import {clearActiveMobileSecondaryEditor, flushMobileSecondaryEditor} from "./secondaryEditors";
 import {showMessage} from "../../dialog/message";
 import {escapeHtml} from "../../util/escape";
+import {bindBottomSheetDialog} from "./bindBottomSheetDialog";
 
 class MobileBacklinkDialog extends Dialog {
     public beforeClose: () => Promise<void>;
@@ -47,32 +48,20 @@ export const openMobileBacklinks = async (protyle: IProtyle, blockId: string) =>
     const dialog = new MobileBacklinkDialog({
         content: '<div class="mobile-backlinks-content fn__flex-column"></div>',
         width: "100vw",
-        height: "60vh",
+        height: "auto",
         containerClassName: "mobile-backlinks-sheet",
         destroyCallback: () => {
+            disposeSheet();
             unregisterPanel?.();
             panel?.destroy();
             if (currentDialog === dialog) {
                 currentDialog = undefined;
                 clearActiveMobileSecondaryEditor();
             }
-            window.visualViewport?.removeEventListener("resize", resize);
-            window.visualViewport?.removeEventListener("scroll", resize);
         }
     });
     currentDialog = dialog;
     dialog.element.classList.add("mobile-backlinks-dialog");
-    const resize = () => {
-        const viewport = window.visualViewport;
-        const container = dialog.element.querySelector<HTMLElement>(".b3-dialog");
-        if (viewport) {
-            container.style.top = `${viewport.offsetTop}px`;
-            container.style.height = `${viewport.height}px`;
-        }
-    };
-    window.visualViewport?.addEventListener("resize", resize);
-    window.visualViewport?.addEventListener("scroll", resize);
-    resize();
     const panel = new BacklinkContent({
         app: protyle.app,
         element: dialog.element.querySelector(".mobile-backlinks-content"),
@@ -102,4 +91,5 @@ export const openMobileBacklinks = async (protyle: IProtyle, blockId: string) =>
         }
     };
     const unregisterPanel = registerMobileBacklinkPanel(panel, () => dialog.close());
+    const disposeSheet = bindBottomSheetDialog(dialog, () => dialog.close());
 };

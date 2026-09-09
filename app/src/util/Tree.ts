@@ -115,7 +115,7 @@ export class Tree {
             } else {
                 style = `padding-left: ${(item.depth * 18) || 4}px;margin-right: 2px`;
             }
-            const showArrow = hasChild || (item.type === "backlink" && !isM);
+            const showArrow = hasChild || item.type === "backlink";
             // data-id 需要添加 item.id，否则大纲更新时 name 不一致导致 https://github.com/siyuan-note/siyuan/issues/11843
             html += `<li class="b3-list-item${isM ? "" : " b3-list-item--hide-action"}" 
 ${item.id ? 'data-node-id="' + item.id + '"' : ""} 

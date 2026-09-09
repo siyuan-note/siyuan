@@ -1549,7 +1549,7 @@ body.mobile-topbar--merged {
   padding: var(--mobile-top-safe-area) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
-.mobile-backlinks-dialog {
+.mobile-bottom-sheet-dialog {
   .b3-dialog {
     align-items: flex-end;
     box-sizing: border-box;
@@ -1557,22 +1557,63 @@ body.mobile-topbar--merged {
     height: 100%;
   }
 
-  .mobile-backlinks-sheet {
-    max-height: 100%;
+  .mobile-bottom-sheet {
+    max-height: min(60vh, 100%);
     border-radius: 16px 16px 0 0;
-    padding-top: 32px;
+    padding-top: 4px;
     box-sizing: border-box;
     transform: translateY(100%);
     transition: transform 150ms ease;
   }
 
-  &.b3-dialog--open .mobile-backlinks-sheet {
+  &.b3-dialog--open .mobile-bottom-sheet {
     transform: translateY(0);
   }
 
-  .mobile-backlinks-content {
-    height: 100%;
+  .b3-dialog__body {
     min-height: 0;
+    overflow: hidden;
+  }
+}
+
+.mobile-backlinks-dialog {
+  .mobile-backlinks-content {
+    flex: 0 1 auto;
+    min-height: 0;
+
+    > .backlinkList__header {
+      padding: 4px 12px 8px;
+      gap: 4px;
+
+      > .block__logo {
+        flex: 0 0 100%;
+        box-sizing: border-box;
+        min-height: 28px;
+        margin: 0;
+        padding-right: 32px;
+      }
+
+      > .fn__space {
+        display: none;
+      }
+    }
+
+    > .backlinkList {
+      flex: 0 1 auto;
+      padding-bottom: 8px;
+    }
+  }
+
+}
+
+.mobile-attributes-sheet .b3-dialog__body > .fn__flex-column {
+  flex: 1;
+  min-height: 0;
+
+  > .fn__flex-1 {
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
   }
 }
 
@@ -1590,6 +1631,12 @@ body.mobile-topbar--merged {
     min-height: 0;
     overflow: auto;
     overscroll-behavior: contain;
+
+    > .b3-list > .backlinkList__item > .b3-list-item {
+      margin-left: 0;
+      margin-right: 0;
+      border-radius: 0;
+    }
   }
 
   .protyle-breadcrumb__bar {
@@ -1597,8 +1644,15 @@ body.mobile-topbar--merged {
   }
 
   .block__icon {
-    min-width: 28px;
-    min-height: 28px;
+    opacity: 1;
+    box-sizing: border-box;
+    min-width: 32px;
+    min-height: 32px;
+    justify-content: center;
+
+    &[disabled] {
+      opacity: .38;
+    }
   }
 
   &--only-backlinks {

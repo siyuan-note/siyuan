@@ -9,7 +9,7 @@ const sources = () => {
     const modules = {};
     for (const name of ["layout/dock/BacklinkContent", "layout/dock/backlinkRefresh",
         "layout/dock/backlinkReadingAnchor", "layout/dock/backlinkSourceFilter", "mobile/util/secondaryEditors",
-        "mobile/util/backlinkPanels", "mobile/util/openBacklinks", "protyle/util/transactionQueue",
+        "mobile/util/backlinkPanels", "mobile/util/openBacklinks", "mobile/util/bindBottomSheetDrag", "mobile/util/bindBottomSheetDialog", "protyle/util/transactionQueue",
         "util/escape", "dialog/index"]) {
         modules[name] = ts.transpileModule(preprocess(
             readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"),
@@ -199,6 +199,48 @@ const runCases = async (sources) => {
     for (const request of requests.splice(0)) {request.reply(list);}
     await tick();
     assert.equal(window.siyuan.dialogs.length, 0);
+    const dragElement = document.createElement("div");
+    dragElement.style.height = "400px";
+    dragElement.innerHTML = '<div class="heading">Backlinks</div><div contenteditable="true">editable</div><div class="scroll" style="height:40px;overflow:auto"><div style="height:200px">content</div></div>';
+    document.body.appendChild(dragElement);
+    let closeCount = 0;
+    const disposeDrag = load("mobile/util/bindBottomSheetDrag").bindBottomSheetDrag(dragElement,
+        document.createElement("div"), async () => {closeCount++;});
+    const touch = (target, type, y, x = 10) => {
+        const event = new Event(type, {bubbles: true, cancelable: true});
+        Object.defineProperties(event, {
+            touches: {value: type === "touchend" ? [] : [{clientX: x, clientY: y}]},
+            changedTouches: {value: [{clientX: x, clientY: y}]},
+        });
+        target.dispatchEvent(event);
+        return event;
+    };
+    const heading = dragElement.firstElementChild;
+    touch(heading, "touchstart", 0);
+    assert.equal(touch(heading, "touchmove", 150).defaultPrevented, true);
+    assert.equal(dragElement.style.transform, "translateY(150px)");
+    touch(heading, "touchend", 150);
+    await tick();
+    assert.equal(closeCount, 1);
+    assert.equal(heading.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true})), false);
+    touch(heading, "touchstart", 0);
+    touch(heading, "touchmove", 10);
+    touch(heading, "touchend", 10);
+    assert.equal(dragElement.style.transform, "");
+    assert.equal(closeCount, 1, "short drag must rebound");
+    for (const target of [dragElement.querySelector('[contenteditable="true"]'), dragElement.querySelector(".scroll > div")]) {
+        dragElement.querySelector(".scroll").scrollTop = 30;
+        touch(target, "touchstart", 0);
+        assert.equal(touch(target, "touchmove", 150).defaultPrevented, false);
+        touch(target, "touchend", 150);
+        assert.equal(closeCount, 1, "editing and scrolled content must retain native gestures");
+    }
+    touch(heading, "touchstart", 0);
+    touch(heading, "touchmove", 80);
+    touch(heading, "touchcancel", 80);
+    assert.equal(dragElement.style.transform, "");
+    assert.equal(closeCount, 1);
+    disposeDrag();
     return "Mobile backlink lifecycle cases passed";
 };
 

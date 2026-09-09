@@ -229,6 +229,13 @@ export class AgentSessionPanel {
         }
         container.dataset.eventsBound = "1";
 
+        container.addEventListener("mousedown", (e: MouseEvent) => {
+            if (hasClosestByClassName(e.target as HTMLElement, "agent-session-more")) {
+                // 阻止双击更多按钮时选中相邻会话标题。
+                e.preventDefault();
+            }
+        });
+
         container.addEventListener("click", (e: MouseEvent) => {
             const target = e.target as HTMLElement;
 

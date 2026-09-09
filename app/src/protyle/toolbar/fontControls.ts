@@ -1,7 +1,7 @@
 import {Menu} from "../../plugin/Menu";
 import {ToolbarItem} from "./ToolbarItem";
 import {convertFontSize, fontEvent, getFontNodeElements, getFontSizeInfo} from "./Font";
-import {getInlineFontFamilyLabel, getInlineFontFamilyState, getInlineFontFamilyValue, openFontFamilyMenu} from "./fontFamilyMenu";
+import {getInlineFontFamilyLabel, getFontFamilyState, getInlineFontFamilyValue, openFontFamilyMenu} from "./fontFamilyMenu";
 import {focusByRange, getBlockRanges} from "../util/selection";
 import {escapeAttr} from "../../util/escape";
 import {isMixedFontSize, normalizeFontSizeInput} from "./fontSizeCore";
@@ -94,7 +94,7 @@ export const updateFontControls = (protyle: IProtyle) => {
     const familyButton = protyle.toolbar.element.querySelector<HTMLButtonElement>('[data-type="font-family"]');
     const sizeButton = protyle.toolbar.element.querySelector<HTMLButtonElement>('[data-type="font-size"]');
     if (familyButton) {
-        const state = getInlineFontFamilyState(protyle, getFontNodeElements(protyle));
+        const state = getFontFamilyState(protyle, getFontNodeElements(protyle));
         setLabel(familyButton, getInlineFontFamilyLabel(state), "fontFamily");
         familyButton.disabled = state.disabled;
     }
@@ -131,7 +131,7 @@ export class FontControl extends ToolbarItem {
             };
             if (item.name === "font-family") {
                 void openFontFamilyMenu(this.element, {
-                    ...getInlineFontFamilyState(protyle, nodes),
+                    ...getFontFamilyState(protyle, nodes),
                     isOpenValid: valid,
                     onSelect: family => apply("fontFamily", getInlineFontFamilyValue(family)),
                 });

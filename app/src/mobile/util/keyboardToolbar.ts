@@ -65,7 +65,7 @@ import {
 } from "../../protyle/util/inlineElementMarker";
 import {
     getInlineFontFamilyLabel,
-    getInlineFontFamilyState,
+    getFontFamilyState,
     getInlineFontFamilyValue,
     renderMobileFontFamilyMenu,
 } from "../../protyle/toolbar/fontFamilyMenu";
@@ -569,7 +569,7 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
         lastColorHTML += "</div>";
     }
     const {fontSize, baseFontSize} = getFontSizeInfo(protyle, nodeElements);
-    const fontFamilyState = getInlineFontFamilyState(protyle, nodeElements);
+    const fontFamilyState = getFontFamilyState(protyle, nodeElements);
     const disableFontFamily = disableFont || fontFamilyState.disabled;
     const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
     utilElement.innerHTML = `${lastColorHTML}
@@ -1369,7 +1369,7 @@ export const initKeyboardToolbar = () => {
         if (slashBtnElement && slashBtnElement.dataset.action === "fontFamilyMenu") {
             const range = protyle.toolbar.range.cloneRange();
             const nodeElements = getFontNodeElements(protyle);
-            const fontFamilyState = getInlineFontFamilyState(protyle, nodeElements);
+            const fontFamilyState = getFontFamilyState(protyle, nodeElements);
             const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
             const isFontFamilyMenuValid = () => getCurrentEditor()?.protyle === protyle &&
                 toolbarElement.clientHeight > 100 && range.startContainer.isConnected &&
@@ -1560,7 +1560,7 @@ export const initKeyboardToolbar = () => {
             };
             preventKeyboardToolbarRender();
             if (type === "font-family") {
-                const state = getInlineFontFamilyState(protyle, nodes);
+                const state = getFontFamilyState(protyle, nodes);
                 if (state.disabled) {
                     finish();
                     return;

@@ -2753,6 +2753,8 @@
 		"377": "Mude para Baixar todos antes de alterar ou redefinir o repositório de dados",
 		"378": "Solicitações entre sites não são permitidas",
 		"379": "O agente parou porque o limite de tempo da sessão foi atingido. Envie uma mensagem para continuar ou ajuste o tempo limite em Configurações - IA",
-		"380": "OCR não é compatível com recursos em cadernos criptografados"
+		"380": "OCR não é compatível com recursos em cadernos criptografados",
+		"381": "Os vínculos de bancos de dados não podem ultrapassar os limites dos cadernos criptografados",
+		"382": "Não foi possível exportar o banco de dados [%s]. Verifique os vínculos de bancos de dados do documento e o caderno que contém o banco de dados"
 	}
 }

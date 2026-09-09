@@ -2753,6 +2753,8 @@
 		"377": "Bitte wechseln Sie zu Alle herunterladen, bevor Sie das Datenrepository ändern oder zurücksetzen",
 		"378": "Websiteübergreifende Anfragen sind nicht zulässig",
 		"379": "Der Agent wurde gestoppt, weil das Zeitlimit der Sitzung erreicht wurde. Senden Sie eine Nachricht, um fortzufahren, oder passen Sie das Zeitlimit unter Einstellungen - KI an",
-		"380": "OCR wird für Ressourcen in verschlüsselten Notizbüchern nicht unterstützt"
+		"380": "OCR wird für Ressourcen in verschlüsselten Notizbüchern nicht unterstützt",
+		"381": "Datenbankverknüpfungen dürfen die Grenzen verschlüsselter Notizbücher nicht überschreiten",
+		"382": "Datenbank [%s] kann nicht exportiert werden. Prüfen Sie die Datenbankverknüpfungen des Dokuments und das Notizbuch, das die Datenbank enthält"
 	}
 }

@@ -2753,6 +2753,8 @@
 		"377": "Passa a Scarica tutto prima di cambiare o reimpostare il repository dei dati",
 		"378": "Le richieste tra siti non sono consentite",
 		"379": "L’agente si è fermato perché è stato raggiunto il limite di tempo della sessione. Invia un messaggio per continuare o modifica il timeout in Impostazioni - IA",
-		"380": "Il riconoscimento ottico dei caratteri non è supportato per le risorse nei quaderni crittografati"
+		"380": "Il riconoscimento ottico dei caratteri non è supportato per le risorse nei quaderni crittografati",
+		"381": "I collegamenti ai database non possono oltrepassare i confini dei quaderni crittografati",
+		"382": "Impossibile esportare il database [%s]. Controlla i collegamenti ai database del documento e il quaderno che contiene il database"
 	}
 }

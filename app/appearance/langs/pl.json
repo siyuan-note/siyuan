@@ -2753,6 +2753,8 @@
 		"377": "Przełącz na Pobierz wszystkie przed zmianą lub zresetowaniem repozytorium danych",
 		"378": "Żądania między witrynami są niedozwolone",
 		"379": "Agent został zatrzymany z powodu przekroczenia limitu czasu sesji. Wyślij wiadomość, aby kontynuować, lub zmień limit czasu w Ustawienia - AI",
-		"380": "OCR nie jest obsługiwane dla zasobów w zaszyfrowanych notatnikach"
+		"380": "OCR nie jest obsługiwane dla zasobów w zaszyfrowanych notatnikach",
+		"381": "Powiązania baz danych nie mogą przekraczać granic zaszyfrowanych notatników",
+		"382": "Nie można wyeksportować bazy danych [%s]. Sprawdź powiązania baz danych dokumentu oraz notatnik zawierający bazę danych"
 	}
 }

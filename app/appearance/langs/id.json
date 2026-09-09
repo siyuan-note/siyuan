@@ -2753,6 +2753,8 @@
 		"377": "Beralihlah ke Unduh semua sebelum mengubah atau mengatur ulang repositori data",
 		"378": "Permintaan lintas situs tidak diizinkan",
 		"379": "Agen berhenti karena batas waktu sesi tercapai. Kirim pesan untuk melanjutkan, atau sesuaikan batas waktu di Pengaturan - AI",
-		"380": "OCR tidak didukung untuk sumber daya dalam buku catatan terenkripsi"
+		"380": "OCR tidak didukung untuk sumber daya dalam buku catatan terenkripsi",
+		"381": "Pengikatan basis data tidak dapat melintasi batas buku catatan terenkripsi",
+		"382": "Tidak dapat mengekspor basis data [%s]. Periksa pengikatan basis data dokumen dan buku catatan yang berisi basis data tersebut"
 	}
 }

@@ -2753,6 +2753,8 @@
 		"377": "Veuillez passer à Tout télécharger avant de modifier ou de réinitialiser le dépôt de données",
 		"378": "Les requêtes intersites ne sont pas autorisées",
 		"379": "L’agent s’est arrêté car la limite de durée de la session a été atteinte. Envoyez un message pour continuer ou ajustez le délai dans Paramètres - IA",
-		"380": "La reconnaissance optique de caractères n’est pas prise en charge pour les ressources des carnets chiffrés"
+		"380": "La reconnaissance optique de caractères n’est pas prise en charge pour les ressources des carnets chiffrés",
+		"381": "Les liaisons de bases de données ne peuvent pas franchir les limites des carnets chiffrés",
+		"382": "Impossible d’exporter la base de données [%s]. Vérifiez les liaisons de bases de données du document et le carnet contenant la base de données"
 	}
 }

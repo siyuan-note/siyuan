@@ -2971,13 +2971,17 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string, i
 	return
 }
 
+func attributeViewExportError(avID string, err error) error {
+	return fmt.Errorf("%s: %w", fmt.Sprintf(Conf.Language(382), avID), err)
+}
+
 func exportAv(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap map[string]string) error {
 	// 用 box-aware 路径解析 + 自动解密读取 AV 定义明文（加密笔记本的 AV 在 <boxID>/storage/av/，
 	// GetAttributeViewDataPath 只查全局路径会漏；filelock.Copy 会拷密文）。
 	avData, readErr := av.ReadAttributeViewDataInBox(avID, boxID)
 	if readErr != nil {
 		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
-		return readErr
+		return attributeViewExportError(avID, readErr)
 	}
 	if boxID != "" && avData != nil {
 		avData, readErr = rewriteAttributeViewDataAssetReferences(avData, assetReferenceRewriteOptions{rewriteUnmapped: true})
@@ -3000,7 +3004,7 @@ func exportAv(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap
 	attrView, parseErr := av.ParseAttributeViewInBox(avID, boxID)
 	if parseErr != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, parseErr)
-		return parseErr
+		return attributeViewExportError(avID, parseErr)
 	}
 
 	if err := copyExportAttributeViewAssets(attrView, boxID, exportFolder, assetPathMap); err != nil {

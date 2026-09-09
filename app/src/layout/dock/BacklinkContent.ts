@@ -21,6 +21,7 @@ import {getAllEditor} from "../getAll";
 import {isMobile} from "../../util/functions";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {renderBacklink} from "../../protyle/wysiwyg/renderBacklink";
+import {BACKLINK_BLOCK_TYPES, configureBacklinkTypeFold, normalizeBacklinkFoldTypes} from "../../protyle/wysiwyg/backlinkTypeFold";
 import {
     getBottomBacklinkVisibility,
     getInitialBacklinkSectionState,
@@ -853,37 +854,33 @@ export class BacklinkContent extends Model {
     }
 
     private showSourceFilterMenu(event: MouseEvent) {
-        const blockTypeSubmenu: IMenu[] = [{
-            label: window.siyuan.languages.all,
-            checked: !this.sourceFilter.excludedBlockTypes.length,
-            iconHTML: "",
-            click: () => this.applySourceFilter({...this.sourceFilter, excludedBlockTypes: []}),
-        }, {type: "separator"}];
-        [
-            ["NodeDocument", "doc"], ["NodeParagraph", "paragraph"], ["NodeHeading", "headings"],
-            ["NodeList", "list1"], ["NodeListItem", "listItem"], ["NodeBlockquote", "quote"],
-            ["NodeSuperBlock", "superBlock"], ["NodeCallout", "callout"],
-            ["NodeTabs", "tabs"], ["NodeTabItem", "tabItem"], ["NodeAttributeView", "database"],
-            ["NodeTable", "table"], ["NodeCodeBlock", "code"], ["NodeMathBlock", "math"],
-            ["NodeBlockQueryEmbed", "embedBlock"], ["NodeVideo", "video"], ["NodeAudio", "audio"],
-            ["NodeWidget", "widget"], ["NodeHTMLBlock", "HTML"], ["NodeIFrame", "IFrame"],
-            ["NodeThematicBreak", "line"], ["NodeCustomBlock", "custom"],
-        ].forEach(([type, label]) => {
-            blockTypeSubmenu.push({
-                label: window.siyuan.languages[label] || label,
-                checked: !this.sourceFilter.excludedBlockTypes.includes(type),
-                iconHTML: "",
-                click: () => {
-                    const excluded = new Set(this.sourceFilter.excludedBlockTypes);
-                    if (excluded.has(type)) {
-                        excluded.delete(type);
-                    } else {
-                        excluded.add(type);
-                    }
-                    this.applySourceFilter({...this.sourceFilter, excludedBlockTypes: Array.from(excluded)});
-                },
+        const foldedTypes = normalizeBacklinkFoldTypes(this.viewState?.get("foldedBlockTypes"));
+        const applyFoldTypes = (types: string[]) => {
+            this.viewState?.set("foldedBlockTypes", types);
+            BACKLINK_BLOCK_TYPES.forEach(([type]) => {
+                if (foldedTypes.includes(type) !== types.includes(type)) {
+                    const field = `type-fold-generation:${type}`;
+                    this.viewState?.set(field, (this.viewState.get<number>(field) || 0) + 1);
+                }
             });
-        });
+            this.itemRecords[0].forEach(record => {
+                if (record.editor && this.viewState) {
+                    configureBacklinkTypeFold(record.editor.protyle, types, this.viewState);
+                }
+            });
+        };
+        const blockTypeFoldSubmenu: IMenu[] = [{
+            label: window.siyuan.languages.reset,
+            icon: "iconUndo",
+            disabled: foldedTypes.length === 0,
+            click: () => applyFoldTypes([]),
+        }, {type: "separator"}, ...BACKLINK_BLOCK_TYPES.map(([type, label]) => ({
+            label: window.siyuan.languages[label] || label,
+            checked: foldedTypes.includes(type),
+            iconHTML: "",
+            click: () => applyFoldTypes(foldedTypes.includes(type) ?
+                foldedTypes.filter(item => item !== type) : [...foldedTypes, type]),
+        }))];
         const dailyNoteSubmenu = ([
             ["all", window.siyuan.languages.all],
             ["only", window.siyuan.languages.dailyNote],
@@ -923,10 +920,11 @@ export class BacklinkContent extends Model {
 
         window.siyuan.menus.menu.remove();
         window.siyuan.menus.menu.append(new MenuItem({
-            icon: "iconListFilterPlus",
-            label: window.siyuan.languages.type,
+            icon: "iconContract",
+            label: window.siyuan.languages.backlinkFoldByType,
             type: "submenu",
-            submenu: blockTypeSubmenu,
+            disabled: !this.viewStateLoaded || !this.viewState,
+            submenu: blockTypeFoldSubmenu,
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconCalendar",
@@ -950,11 +948,12 @@ export class BacklinkContent extends Model {
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
-            disabled: !getBacklinkSourceFilterParam(this.sourceFilter),
+            disabled: !getBacklinkSourceFilterParam(this.sourceFilter) && foldedTypes.length === 0,
             icon: "iconUndo",
             label: window.siyuan.languages.reset,
             click: () => {
                 this.applySourceFilter(createBacklinkSourceFilter());
+                applyFoldTypes([]);
             }
         }).element);
         window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
@@ -1148,6 +1147,9 @@ export class BacklinkContent extends Model {
                     this.editors.push(editor);
                     record.editor = editor;
                     const service = this.viewState;
+                    if (!isMention && service) {
+                        configureBacklinkTypeFold(editor.protyle, normalizeBacklinkFoldTypes(service.get("foldedBlockTypes")), service);
+                    }
                     const scrollEpoch = this.getReadingAnchorScrollEpoch(isMention);
                     const anchorQueryKey = this.renderedQueryKey;
                     if (service) {

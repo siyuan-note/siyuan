@@ -539,6 +539,20 @@
 }
 
 .sy__backlink {
+  [data-backlink-type-folded] {
+    display: none !important;
+  }
+
+  .backlinkTypeFold {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    width: auto;
+    font-size: 12px;
+    line-height: 20px;
+    flex-shrink: 0;
+  }
+
   > .backlinkList,
   > .backlinkMList {
     > .b3-list > .backlinkList__item {

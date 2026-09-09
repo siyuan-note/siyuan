@@ -20,16 +20,6 @@ describe("backlink source filter", () => {
             dailyNote: "only",
             excludedNotebookIDs: ["box-a", "box-b"],
             excludeSelf: true,
-            excludedBlockTypes: [],
         });
-    });
-
-    it("keeps a block type filter active and resets it to all types", () => {
-        const filter = getBacklinkSourceFilterParam({
-            ...createBacklinkSourceFilter(),
-            excludedBlockTypes: ["NodeParagraph", "NodeAttributeView", "NodeParagraph", ""],
-        });
-        assert.deepEqual(filter.excludedBlockTypes, ["NodeAttributeView", "NodeParagraph"]);
-        assert.equal(getBacklinkSourceFilterParam({...filter, excludedBlockTypes: []}), undefined);
     });
 });

@@ -108,3 +108,13 @@ func TestBacklinkContextRevisionIncludesReferenceBlock(t *testing.T) {
 		t.Fatal("removing the hidden reference must restore the original revision")
 	}
 }
+
+func TestBacklinkContextRevisionIncludesBlockType(t *testing.T) {
+	context := &model.Backlink{ID: "source", DOM: "unchanged", Type: "NodeParagraph"}
+	before := newBacklinkContextResponses([]*model.Backlink{context})[0].Revision
+	context.Type = "NodeAttributeView"
+	response := newBacklinkContextResponses([]*model.Backlink{context})[0]
+	if response.Type != context.Type || response.Revision == before {
+		t.Fatal("block type must be returned and invalidate the context revision")
+	}
+}

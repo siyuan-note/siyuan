@@ -1,5 +1,5 @@
 {
-	"backlinkExcludeRefDefs": "Seçili blok başvurularını içeren öğeleri hariç tut",
+	"backlinkExcludeRefDefs": "Başvuruları hariç tut",
 	"backlinkExcludeRefDefsTip": "Seçili bloklardan herhangi birine başvuran öğeyi alt öğeleriyle birlikte gizle",
 	"backlinkFoldByType": "Blok türüne göre daralt",
 	"backlinkHideReference": "Aktarılan geri bağlantılarda referans bloklarını gizle",

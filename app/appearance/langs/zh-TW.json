@@ -1,5 +1,5 @@
 {
-	"backlinkExcludeRefDefs": "排除包含指定區塊引用的項目",
+	"backlinkExcludeRefDefs": "排除區塊引用",
 	"backlinkExcludeRefDefsTip": "項目及其子內容引用任一選取區塊時，隱藏整個項目",
 	"backlinkFoldByType": "依區塊類型摺疊",
 	"backlinkHideReference": "隱藏傳遞型反向連結的引用區塊",

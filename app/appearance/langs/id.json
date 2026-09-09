@@ -1,5 +1,5 @@
 {
-	"backlinkExcludeRefDefs": "Kecualikan entri yang berisi referensi blok terpilih",
+	"backlinkExcludeRefDefs": "Kecualikan referensi",
 	"backlinkExcludeRefDefsTip": "Sembunyikan seluruh entri beserta turunannya jika merujuk ke salah satu blok terpilih",
 	"backlinkFoldByType": "Ciutkan menurut jenis blok",
 	"backlinkHideReference": "Sembunyikan blok referensi pada tautan balik yang diteruskan",

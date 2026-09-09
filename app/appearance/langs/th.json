@@ -1,5 +1,5 @@
 {
-	"backlinkExcludeRefDefs": "ยกเว้นรายการที่มีการอ้างอิงบล็อกที่เลือก",
+	"backlinkExcludeRefDefs": "ยกเว้นการอ้างอิง",
 	"backlinkExcludeRefDefsTip": "ซ่อนทั้งรายการรวมถึงเนื้อหาย่อยเมื่ออ้างอิงบล็อกใดก็ตามที่เลือก",
 	"backlinkFoldByType": "ยุบตามประเภทบล็อก",
 	"backlinkHideReference": "ซ่อนบล็อกอ้างอิงในลิงก์ย้อนกลับที่ส่งต่อ",

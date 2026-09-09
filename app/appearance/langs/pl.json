@@ -1,5 +1,5 @@
 {
-	"backlinkExcludeRefDefs": "Wyklucz wpisy zawierające odwołania do wybranych bloków",
+	"backlinkExcludeRefDefs": "Wyklucz odwołania",
 	"backlinkExcludeRefDefsTip": "Ukryj cały wpis wraz z elementami podrzędnymi, jeśli odwołuje się do dowolnego wybranego bloku",
 	"backlinkFoldByType": "Zwijaj według typu bloku",
 	"backlinkHideReference": "Ukryj bloki odwołań w propagowanych linkach zwrotnych",

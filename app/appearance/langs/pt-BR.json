@@ -1,5 +1,5 @@
 {
-	"backlinkExcludeRefDefs": "Excluir entradas com referências aos blocos selecionados",
+	"backlinkExcludeRefDefs": "Excluir referências",
 	"backlinkExcludeRefDefsTip": "Ocultar toda a entrada, incluindo seus filhos, quando houver referência a qualquer bloco selecionado",
 	"backlinkFoldByType": "Recolher por tipo de bloco",
 	"backlinkHideReference": "Ocultar blocos de referência em backlinks propagados",

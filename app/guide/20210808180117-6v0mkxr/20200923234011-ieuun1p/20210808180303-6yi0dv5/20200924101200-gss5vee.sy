@@ -6,7 +6,7 @@
 		"id": "20200924101200-gss5vee",
 		"title": "Navigate in the Content Block",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20260909204559"
 	},
 	"Children": [
 		{
@@ -303,7 +303,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200924101210-3qfiiat",
-				"updated": "20260809232000"
+				"updated": "20260909204559"
 			},
 			"Children": [
 				{
@@ -436,6 +436,77 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260909204559-73o59yg",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260909204559-73o59yg",
+				"updated": "20260909204559"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Filtering and folding"
+				}
+			],
+			"HeadingLevel": 3
+		},
+		{
+			"ID": "20260909204559-f1dn9z9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260909204559-f1dn9z9",
+				"updated": "20260909204559"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the backlinks below a document or in the sidebar, open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Filter backlink sources"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to filter sources or collapse entries by block type. These settings are saved differently."
+				}
+			]
+		},
+		{
+			"ID": "20260909204559-0r03n3w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260909204559-0r03n3w",
+				"updated": "20260909204559"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The daily note, notebook, current-document exclusion, and reference exclusion filters are temporary. They apply only to the current panel, are not saved permanently, and are not shared between the bottom and sidebar backlink panels."
+				}
+			]
+		},
+		{
+			"ID": "20260909204559-dj9ha8m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260909204559-dj9ha8m",
+				"updated": "20260909204559"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Collapse by block type"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " is remembered. For example, if you collapse list blocks in the backlinks below document A, that choice is restored when you reopen it and does not affect document B. The bottom and sidebar backlink panels remember separate choices for the same document. When viewing backlinks for an individual content block, its folding choices are also remembered separately."
 				}
 			]
 		},

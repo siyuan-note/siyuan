@@ -1,5 +1,5 @@
 {
-	"backlinkExcludeRefDefs": "Exclure les entrées contenant les références de blocs sélectionnées",
+	"backlinkExcludeRefDefs": "Exclure des références",
 	"backlinkExcludeRefDefsTip": "Masquer toute l’entrée, y compris ses enfants, si elle référence un bloc sélectionné",
 	"backlinkFoldByType": "Replier selon le type de bloc",
 	"backlinkHideReference": "Masquer les blocs de référence dans les liens retour propagés",

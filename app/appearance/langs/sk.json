@@ -1,5 +1,5 @@
 {
-	"backlinkExcludeRefDefs": "Vylúčiť položky s odkazmi na vybrané bloky",
+	"backlinkExcludeRefDefs": "Vylúčiť odkazy",
 	"backlinkExcludeRefDefsTip": "Skryť celú položku vrátane podradeného obsahu, ak odkazuje na ktorýkoľvek vybraný blok",
 	"backlinkFoldByType": "Zbaliť podľa typu bloku",
 	"backlinkHideReference": "Skryť bloky odkazov v prenesených spätných odkazoch",

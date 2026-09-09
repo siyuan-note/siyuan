@@ -1,5 +1,5 @@
 {
-	"backlinkExcludeRefDefs": "चुने गए ब्लॉक संदर्भों वाली प्रविष्टियाँ हटाएँ",
+	"backlinkExcludeRefDefs": "संदर्भ बाहर रखें",
 	"backlinkExcludeRefDefsTip": "किसी चुने गए ब्लॉक का संदर्भ होने पर पूरी प्रविष्टि और उसकी उप-प्रविष्टियाँ छिपाएँ",
 	"backlinkFoldByType": "ब्लॉक प्रकार के अनुसार संक्षिप्त करें",
 	"backlinkHideReference": "प्रसारित बैकलिंक में संदर्भ ब्लॉक छिपाएँ",

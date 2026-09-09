@@ -1,5 +1,5 @@
 {
-	"backlinkExcludeRefDefs": "החרגת רשומות המכילות הפניות לבלוקים שנבחרו",
+	"backlinkExcludeRefDefs": "החרגת הפניות",
 	"backlinkExcludeRefDefsTip": "הסתרת הרשומה כולה, כולל ילדיה, אם היא מפנה לבלוק שנבחר",
 	"backlinkFoldByType": "כיווץ לפי סוג בלוק",
 	"backlinkHideReference": "הסתרת בלוקי הפניה בקישורים נכנסים מועברים",

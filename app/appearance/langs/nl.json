@@ -1,5 +1,5 @@
 {
-	"backlinkExcludeRefDefs": "Items met verwijzingen naar geselecteerde blokken uitsluiten",
+	"backlinkExcludeRefDefs": "Verwijzingen uitsluiten",
 	"backlinkExcludeRefDefsTip": "Verberg het volledige item inclusief onderliggende inhoud als het naar een geselecteerd blok verwijst",
 	"backlinkFoldByType": "Inklappen per bloktype",
 	"backlinkHideReference": "Verwijzingsblokken in doorgegeven backlinks verbergen",

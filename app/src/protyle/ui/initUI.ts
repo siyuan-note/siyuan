@@ -383,7 +383,8 @@ export const setPadding = (protyle: IProtyle) => {
         paddingLeft = parseFloat(wysiwygStyle.paddingLeft);
         paddingRight = parseFloat(wysiwygStyle.paddingRight);
     } else if (protyle.options.backlinkData) {
-        protyle.wysiwyg.element.style.padding = `4px ${paddingRight}px 4px ${paddingLeft}px`;
+        // 首个块的备注等属性位于块上方，为其保留完整的显示空间。
+        protyle.wysiwyg.element.style.padding = `16px ${paddingRight}px 4px ${paddingLeft}px`;
     } else {
         const paddingBottom = backlinkBottomVisible && protyle.options.typewriterMode ? backlinkBottomGap : padding.bottom;
         protyle.wysiwyg.element.style.padding = `${padding.top}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`;

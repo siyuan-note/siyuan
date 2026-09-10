@@ -431,6 +431,7 @@ export class BacklinkContent extends Model {
         }
         // 为了快捷键的 dispatch
         this.element.querySelector('[data-type="collapse"]').addEventListener("click", () => {
+            const finishScroll = this.beginBottomScroll();
             this.cancelContextRequests(this.tree.element, false);
             this.hideEditorGutters(this.tree.element);
             this.invalidateHeadingRequests(this.tree.element);
@@ -444,6 +445,7 @@ export class BacklinkContent extends Model {
                 item.classList.remove("b3-list-item__arrow--open");
             });
             this.updateBottomBacklinkSpacing();
+            finishScroll?.();
         });
         this.element.querySelector('[data-type="expand"]').addEventListener("click", () => {
             this.expandDocumentItems(this.tree, false);
@@ -467,7 +469,8 @@ export class BacklinkContent extends Model {
                             this.expandDocumentItems(this.mTree, true);
                             event.stopPropagation();
                             break;
-                        case "mCollapse":
+                        case "mCollapse": {
+                            const finishScroll = this.beginBottomScroll();
                             this.cancelContextRequests(this.mTree.element, true);
                             this.hideEditorGutters(this.mTree.element);
                             this.invalidateHeadingRequests(this.mTree.element);
@@ -481,7 +484,9 @@ export class BacklinkContent extends Model {
                                 item.classList.remove("b3-list-item__arrow--open");
                             });
                             event.stopPropagation();
+                            finishScroll?.();
                             break;
+                        }
                         case "min":
                             /// #if !MOBILE
                             getDockByType("backlink").toggleModel("backlink", false, true);
@@ -702,12 +707,19 @@ export class BacklinkContent extends Model {
         }
     }
 
+    private beginBottomScroll() {
+        if (this.type !== "bottom") {
+            return;
+        }
+        this.bottomLayoutScroll ??= new BottomBacklinkScroll(this.element, this.ownerProtyle.contentElement);
+        return this.bottomLayoutScroll.begin();
+    }
+
     private setBottomLayout(element: HTMLElement, listElement: HTMLElement) {
         if (isHeightAnimating(listElement)) {
             return;
         }
-        this.bottomLayoutScroll ??= new BottomBacklinkScroll(this.element, this.ownerProtyle.contentElement);
-        const finishScroll = this.bottomLayoutScroll.begin();
+        const finishScroll = this.beginBottomScroll();
         const folded = !listElement.classList.contains("fn__none");
         if (folded) {
             this.savePendingReadingAnchor(listElement === this.mTree.element);
@@ -1037,6 +1049,7 @@ export class BacklinkContent extends Model {
         const record = this.itemRecords[isMention ? 1 : 0].get(docId);
         const editor = record?.editor;
         if (svgElement.classList.contains("b3-list-item__arrow--open")) {
+            const finishScroll = persist ? this.beginBottomScroll() : undefined;
             svgElement.classList.remove("b3-list-item__arrow--open");
             if (record) {
                 record.requestGeneration++;
@@ -1059,10 +1072,12 @@ export class BacklinkContent extends Model {
                 this.setDocumentExpanded(isMention, docId, false);
             }
             this.updateBottomBacklinkSpacing();
+            finishScroll?.();
         } else if (editor && !record?.contextDirty) {
+            const finishScroll = persist ? this.beginBottomScroll() : undefined;
             editor.protyle.element.classList.remove("fn__none");
             svgElement.classList.add("b3-list-item__arrow--open");
-            void applyViewFoldStates(editor.protyle);
+            void applyViewFoldStates(editor.protyle).finally(() => finishScroll?.());
             if (persist) {
                 this.setDocumentExpanded(isMention, docId, true);
             }
@@ -1128,6 +1143,9 @@ export class BacklinkContent extends Model {
         if (record.contextRevision) {
             param.knownRevision = record.contextRevision;
         }
+        let finishScroll: (() => void) | undefined;
+        const viewPromises: Promise<unknown>[] = [];
+        const manualBottomExpand = this.type === "bottom" && expand && persist;
         fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", param, (response) => {
             if (this.destroyed || blockId !== this.blockId || viewStateGeneration !== this.viewStateGeneration ||
                 !liElement.isConnected ||
@@ -1146,6 +1164,8 @@ export class BacklinkContent extends Model {
                 this.pendingRootIDs.add(docId);
                 return;
             }
+            // 收到有效内容后再保护当前视口，等待请求期间仍允许用户正常滚动。
+            finishScroll = manualBottomExpand ? this.beginBottomScroll() : undefined;
             record.contextDirty = false;
             record.contextRevision = response.data.revision;
             record.editor?.protyle.element.setAttribute("data-backlink-revision", response.data.revision);
@@ -1157,7 +1177,10 @@ export class BacklinkContent extends Model {
                     const scrollEpoch = this.getReadingAnchorScrollEpoch(isMention);
                     const anchorQueryKey = this.renderedQueryKey;
                     editor.protyle.options.backlinkData = backlinkData;
-                    void renderBacklink(editor.protyle, backlinkData).then(() => {
+                    viewPromises.push(renderBacklink(editor.protyle, backlinkData).then(() => {
+                        if (manualBottomExpand) {
+                            return;
+                        }
                         window.requestAnimationFrame(() => {
                             if (this.destroyed || blockId !== this.blockId ||
                                 viewStateGeneration !== this.viewStateGeneration ||
@@ -1174,7 +1197,7 @@ export class BacklinkContent extends Model {
                                 this.restorePersistedReadingAnchor(isMention, docId);
                             }
                         });
-                    });
+                    }));
                     searchMarkRender(editor.protyle, response.data.keywords, undefined, undefined, {
                         excludeSelector: ".protyle-breadcrumb__bar[data-backlink-id]"
                     });
@@ -1223,13 +1246,16 @@ export class BacklinkContent extends Model {
                     const scrollEpoch = this.getReadingAnchorScrollEpoch(isMention);
                     const anchorQueryKey = this.renderedQueryKey;
                     if (service) {
-                        void registerViewFoldContext(editor.protyle, {
+                        viewPromises.push(registerViewFoldContext(editor.protyle, {
                             store: service,
                             pane: isMention ? "backmention" : "backlink",
                             rootID: docId,
                             getOccurrenceID: getBacklinkOccurrenceID,
                             getOccurrenceRevision: getBacklinkOccurrenceRevision,
                         }).then(() => {
+                            if (manualBottomExpand) {
+                                return;
+                            }
                             window.requestAnimationFrame(() => {
                                 if (this.destroyed || blockId !== this.blockId ||
                                     viewStateGeneration !== this.viewStateGeneration || service !== this.viewState ||
@@ -1242,7 +1268,7 @@ export class BacklinkContent extends Model {
                                 }
                                 this.restorePersistedReadingAnchor(isMention, docId);
                             });
-                        });
+                        }));
                     }
                 }
             }
@@ -1255,6 +1281,7 @@ export class BacklinkContent extends Model {
             }
             this.updateBottomBacklinkSpacing();
         }).finally(() => {
+            void Promise.allSettled(viewPromises).then(() => finishScroll?.());
             if (requestGeneration === record.requestGeneration) {
                 svgElement.removeAttribute("disabled");
             }

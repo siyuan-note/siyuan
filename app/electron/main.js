@@ -2990,6 +2990,11 @@ app.whenReady().then(() => {
             writeLog("ignored local file clipboard processing in remote kernel mode");
             return false;
         }
+        // 原生剪贴板格式（公式、Office、WPS）同样属于本地机密，远程内核窗口禁止读取。
+        if (remoteSender && ["clipboardReadMathML", "clipboardReadOffice", "clipboardReadWPS"].includes(data.cmd)) {
+            writeLog("ignored local native clipboard processing in remote kernel mode");
+            return "";
+        }
         if (remoteSender && data.cmd === "showOpenDialog") {
             writeLog("ignored local open dialog in remote kernel mode");
             return {canceled: true, filePaths: []};

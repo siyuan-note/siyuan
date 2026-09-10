@@ -1,3 +1,4 @@
+import {copyBlockSelection} from "../util/blockClipboard";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -1373,7 +1374,7 @@ export class Gutter {
                 } else {
                     focusByRange(getEditorRange(selectsElement[0]));
                 }
-                protyle.wysiwyg.copyRichText();
+                copyBlockSelection(selectsElement[0], () => protyle.wysiwyg.copyRichText());
             }
         });
         /// #endif
@@ -1401,7 +1402,7 @@ export class Gutter {
                 } else {
                     focusByRange(getEditorRange(selectsElement[0]));
                 }
-                document.execCommand("copy");
+                copyBlockSelection(selectsElement[0]);
             }
         });
         const copyTextRefMenu = this.genCopyTextRef(selectsElement);
@@ -3518,7 +3519,7 @@ export class Gutter {
                 } else {
                     focusByRange(getEditorRange(nodeElement));
                 }
-                protyle.wysiwyg.copyRichText();
+                copyBlockSelection(nodeElement, () => protyle.wysiwyg.copyRichText());
             }
         });
         /// #endif
@@ -3550,7 +3551,7 @@ export class Gutter {
                 } else {
                     focusByRange(getEditorRange(nodeElement));
                 }
-                document.execCommand("copy");
+                copyBlockSelection(nodeElement);
             }
         });
         const copyTextRefMenu = this.genCopyTextRef([nodeElement]);
@@ -3619,7 +3620,7 @@ export class Gutter {
                 // 用于标识复制文本 *
                 selectsElement[0].setAttribute("data-reftext", "true");
                 focusByRange(getEditorRange(selectsElement[0]));
-                document.execCommand("copy");
+                copyBlockSelection(selectsElement[0]);
             }
         };
     }

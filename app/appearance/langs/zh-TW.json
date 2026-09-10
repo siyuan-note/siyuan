@@ -1395,7 +1395,7 @@
 	"apiVersion": "API 版本",
 	"apiVersionTip": "僅在使用 Azure OpenAI 服務時需要設定",
 	"apiProvider": "API 提供商",
-	"apiProviderTip": "相容 Chat Completions API 介面的提供商（如 DeepSeek、Kimi、MiniMax）均可使用",
+	"apiProviderTip": "相容 Chat Completions API 或 Responses API 介面的提供商（如 DeepSeek、Kimi、MiniMax）均可使用",
 	"skip": "跳過",
 	"nextRound": "下一輪",
 	"save": "保存",

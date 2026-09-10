@@ -1395,7 +1395,7 @@
 	"apiVersion": "Версия API",
 	"apiVersionTip": "Требуется только при использовании службы Azure OpenAI",
 	"apiProvider": "Поставщик API",
-	"apiProviderTip": "Поставщики, совместимые с Chat Completions API (например, DeepSeek, Kimi, MiniMax), могут использоваться",
+	"apiProviderTip": "Поставщики, совместимые с Chat Completions API или Responses API (например, DeepSeek, Kimi, MiniMax), могут использоваться",
 	"skip": "Пропустить",
 	"nextRound": "Следующий круг",
 	"save": "Сохранить",

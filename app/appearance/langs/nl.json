@@ -1395,7 +1395,7 @@
 	"apiVersion": "API-versie",
 	"apiVersionTip": "Alleen nodig voor Azure OpenAI",
 	"apiProvider": "API-provider",
-	"apiProviderTip": "Providers die compatibel zijn met de Chat Completions API (bijv. DeepSeek, Kimi, MiniMax) kunnen worden gebruikt",
+	"apiProviderTip": "Providers die compatibel zijn met de Chat Completions API of de Responses API (bijv. DeepSeek, Kimi, MiniMax) kunnen worden gebruikt",
 	"skip": "Overslaan",
 	"nextRound": "Volgende ronde",
 	"save": "Opslaan",

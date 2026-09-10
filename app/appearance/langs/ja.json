@@ -1395,7 +1395,7 @@
 	"apiVersion": "API バージョン",
 	"apiVersionTip": "Azure OpenAI サービスを使用する場合にのみ必要です",
 	"apiProvider": "API プロバイダー",
-	"apiProviderTip": "Chat Completions API と互換性のあるプロバイダー（DeepSeek、Kimi、MiniMax など）を利用できます",
+	"apiProviderTip": "Chat Completions API または Responses API と互換性のあるプロバイダー（DeepSeek、Kimi、MiniMax など）を利用できます",
 	"skip": "スキップ",
 	"nextRound": "次のラウンド",
 	"save": "保存",

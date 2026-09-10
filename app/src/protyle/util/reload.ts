@@ -11,8 +11,12 @@ import {hideKeyboardToolbar} from "../../mobile/util/keyboardToolbar";
 import {restoreLuteMarkdownSyntax} from "./paste";
 import {invalidateTrackedRanges} from "./trackedRange";
 import {updateBacklinkReferenceVisibility} from "../wysiwyg/backlinkReference";
+import {shouldReloadProtyle} from "./reloadState";
 
 export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?: boolean) => {
+    if (!shouldReloadProtyle(protyle)) {
+        return;
+    }
     updateBacklinkReferenceVisibility(protyle);
     invalidateTrackedRanges(protyle);
     /// #if MOBILE

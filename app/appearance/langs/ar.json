@@ -1,4 +1,6 @@
 {
+	"hashTagSearch": "<code class='fn__code'>#</code> البحث عن الوسوم",
+	"hashTagSearchTip": "ابحث عن الوسوم عند كتابة #؛ عند التعطيل لن تظهر قائمة الاقتراحات، لكن لا يزال بإمكانك إنشاء الوسوم من قائمة الشرطة المائلة أو الاختصارات",
 	"entryStatusBar": "الشريط السفلي",
 	"entryStatusMessage": "رسائل الحالة",
 	"entryStatusTask": "مهام الخلفية",

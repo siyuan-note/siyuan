@@ -1,4 +1,6 @@
 {
+	"hashTagSearch": "<code class='fn__code'>#</code> tagzoeken",
+	"hashTagSearchTip": "Zoek tags bij het typen van #; indien uitgeschakeld verschijnt de suggestielijst niet meer, maar tags kunnen nog steeds worden gemaakt via het slashmenu of sneltoetsen",
 	"entryStatusBar": "Onderbalk",
 	"entryStatusMessage": "Statusberichten",
 	"entryStatusTask": "Achtergrondtaken",

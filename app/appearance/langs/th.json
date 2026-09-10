@@ -1,4 +1,6 @@
 {
+	"hashTagSearch": "<code class='fn__code'>#</code> ค้นหาแท็ก",
+	"hashTagSearchTip": "ค้นหาแท็กเมื่อพิมพ์ #; เมื่อปิด รายการแนะนำจะไม่แสดงอีก แต่ยังสร้างแท็กได้จากเมนูสแลชหรือคีย์ลัด",
 	"entryStatusBar": "แถบด้านล่าง",
 	"entryStatusMessage": "ข้อความสถานะ",
 	"entryStatusTask": "งานเบื้องหลัง",

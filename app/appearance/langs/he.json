@@ -1,4 +1,6 @@
 {
+	"hashTagSearch": "<code class='fn__code'>#</code> חיפוש תגיות",
+	"hashTagSearchTip": "חפש תגיות בעת הקלדת #; כאשר מושבת, רשימת ההצעות לא תופיע, אך עדיין ניתן ליצור תגיות מתפריט הלוכסן או מקיצורי דרך",
 	"entryStatusBar": "סרגל תחתון",
 	"entryStatusMessage": "הודעות מצב",
 	"entryStatusTask": "משימות רקע",

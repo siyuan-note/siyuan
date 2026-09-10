@@ -467,6 +467,9 @@ func InitConf() {
 	if nil == Conf.Editor.CheckBlockRef {
 		Conf.Editor.CheckBlockRef = defaultEditor.CheckBlockRef
 	}
+	if nil == Conf.Editor.HashTagSearch {
+		Conf.Editor.HashTagSearch = defaultEditor.HashTagSearch
+	}
 	Conf.Editor.AssetOpen = conf.NormalizeAssetOpen(Conf.Editor.AssetOpen)
 	Conf.Editor.NormalizeFontFamilies()
 	Conf.Appearance.NormalizeGlobalFontFamilies()

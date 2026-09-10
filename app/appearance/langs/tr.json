@@ -1,4 +1,6 @@
 {
+	"hashTagSearch": "<code class='fn__code'>#</code> etiket arama",
+	"hashTagSearchTip": "# yazarken etiketleri ara; kapalıyken öneri listesi görünmez, ancak etiketler eğik çizgi menüsünden veya kısayollardan oluşturulmaya devam edilebilir",
 	"entryStatusBar": "Alt çubuk",
 	"entryStatusMessage": "Durum mesajları",
 	"entryStatusTask": "Arka plan görevleri",

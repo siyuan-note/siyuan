@@ -763,6 +763,10 @@ declare namespace Config {
          */
         spellcheckLanguages: string[];
         /**
+         * Whether to search tags when typing `#`
+         */
+        hashTagSearch: boolean;
+        /**
          * Whether to enable virtual references
          */
         virtualBlockRef: boolean;

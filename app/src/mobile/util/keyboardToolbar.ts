@@ -388,7 +388,7 @@ const updateKeyboardToolbarPosition = () => {
 };
 
 const getKeyboardViewportBottom = () => !isInMobileApp() && window.visualViewport ?
-    window.visualViewport.offsetTop + window.visualViewport.height : window.innerHeight;
+    window.visualViewport.offsetTop + window.visualViewport.height : document.documentElement.getBoundingClientRect().height;
 
 const updateKeyboardPanelHeight = () => {
     if (keyboardPanelTop === undefined) {
@@ -400,7 +400,8 @@ const updateKeyboardPanelHeight = () => {
         return;
     }
     const toolbarElement = document.getElementById("keyboardToolbar");
-    const barHeight = toolbarElement.querySelector<HTMLElement>(".keyboard__bar").offsetHeight;
+    // 与展开入口保持相同高度口径，避免边框和整数取整导致交接时上下跳动。
+    const barHeight = toolbarElement.querySelector<HTMLElement>(".keyboard__bar").clientHeight;
     const height = getKeyboardPanelHeight(getKeyboardViewportBottom(), keyboardPanelTop, barHeight);
     if (keyboardPanelClosing && height <= barHeight) {
         keyboardPanelClosing = false;

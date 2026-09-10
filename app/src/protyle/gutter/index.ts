@@ -389,7 +389,7 @@ export class Gutter {
                                 this.getNodeElement(protyle, activeBlockButton) || protyle.wysiwyg.element.firstElementChild);
                         }
                         /// #if !MOBILE
-                        window.siyuan.menus.menu.popup({x: br.left, y: br.bottom, isLeft: true});
+                        window.siyuan.menus.menu.popup({x: br.left, y: br.bottom, h: br.height, isLeft: true});
                         restoreGutterRange(protyle.toolbar.range);
                         /// #endif
                     }
@@ -671,7 +671,7 @@ export class Gutter {
                 /// #if MOBILE
                 window.siyuan.menus.menu.fullscreen();
                 /// #else
-                window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, isLeft: true});
+                window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, h: gutterRect.height, isLeft: true});
                 const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
                 window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
                 restoreGutterRange(protyle.toolbar.range);
@@ -714,7 +714,7 @@ export class Gutter {
                     /// #if MOBILE
                     window.siyuan.menus.menu.fullscreen();
                     /// #else
-                    window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, isLeft: true});
+                    window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, h: gutterRect.height, isLeft: true});
                     const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
                     window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
                     restoreGutterRange(protyle.toolbar.range);

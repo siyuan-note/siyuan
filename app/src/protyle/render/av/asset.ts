@@ -443,7 +443,7 @@ export const editAssetItem = (options: {
     /// #else
     menu.open({
         x: rect.right,
-        y: rect.top,
+        y: rect.bottom,
         w: rect.width,
         h: rect.height,
     });

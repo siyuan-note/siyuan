@@ -914,7 +914,7 @@ export class Background {
         itemsElement.firstElementChild.setAttribute("style", "padding: 0 8px;height: 100%;");
         /// #else
         const rect = target.getBoundingClientRect();
-        menu.open({x: rect.left, y: rect.top + rect.height});
+        menu.open({x: rect.left, y: rect.top + rect.height, h: rect.height});
         menu.element.querySelector("input").focus();
         /// #endif
     }

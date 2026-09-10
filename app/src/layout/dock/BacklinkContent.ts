@@ -489,13 +489,15 @@ export class BacklinkContent extends Model {
                             event.stopPropagation();
                             break;
                         case "sort":
-                        case "mSort":
+                        case "mSort": {
                             this.showSortMenu(type, target.getAttribute("data-sort"));
-                            window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+                            const rect = target.getBoundingClientRect();
+                            window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height});
                             event.stopPropagation();
                             break;
+                        }
                         case "sourceFilter":
-                            this.showSourceFilterMenu(event);
+                            this.showSourceFilterMenu(target);
                             event.stopPropagation();
                             break;
                         case "layout":
@@ -865,7 +867,7 @@ export class BacklinkContent extends Model {
         );
     }
 
-    private showSourceFilterMenu(event: MouseEvent) {
+    private showSourceFilterMenu(target: HTMLElement) {
         let foldedTypes = normalizeBacklinkFoldTypes(this.viewState?.get("foldedBlockTypes"));
         const foldItems = new Map<string, HTMLElement>();
         let foldResetElement: HTMLElement;
@@ -1022,7 +1024,8 @@ export class BacklinkContent extends Model {
                 applyFoldTypes([]);
             }
         }).element);
-        window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+        const rect = target.getBoundingClientRect();
+        window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height});
     }
 
     private toggleItem(liElement: HTMLElement, isMention: boolean, persist = true) {

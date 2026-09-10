@@ -437,7 +437,8 @@ export const movePathTo = (options: {
         const rect = inputElement.getBoundingClientRect();
         menu.open({
             x: rect.left,
-            y: rect.bottom
+            y: rect.bottom,
+            h: rect.height
         });
     };
     inputEvent();

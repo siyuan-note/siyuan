@@ -176,7 +176,8 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
     const rect = options.element.getBoundingClientRect();
     menu.open({
         x: rect.left,
-        y: rect.bottom
+        y: rect.bottom,
+        h: rect.height
     });
 };
 
@@ -526,7 +527,8 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
     const addRect = viewElement.querySelector('.block__icon[data-type="av-add"]')?.getBoundingClientRect();
     addMenu.open({
         x: addRect.left,
-        y: addRect.bottom + 8
+        y: addRect.bottom + 8,
+        h: addRect.height + 8
     });
 };
 

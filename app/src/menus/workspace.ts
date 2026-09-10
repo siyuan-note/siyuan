@@ -742,7 +742,7 @@ export const workspaceMenu = async (app: App, rect: DOMRect) => {
                 }
             }).element);
         }
-        window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom});
+        window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height});
     };
     if (getHostCapabilities().workspaces) {
         fetchPost("/api/system/getWorkspaces", {}, (response) => renderMenu(response.data));

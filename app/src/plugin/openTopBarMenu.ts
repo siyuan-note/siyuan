@@ -137,7 +137,7 @@ export const openTopBarMenu = (app: App, target?: Element) => {
         if (rect.width === 0) {
             rect = document.querySelector("#barMore").getBoundingClientRect();
         }
-        menu.open({x: rect.right, y: rect.bottom, isLeft: true});
+        menu.open({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true});
     } else {
         menu.fullscreen();
     }

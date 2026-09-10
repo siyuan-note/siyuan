@@ -214,7 +214,7 @@ export const openTabsMenu = (protyle: IProtyle, tabs: HTMLElement, item: HTMLEle
         }});
     }
     const rect = anchor.getBoundingClientRect();
-    menu.open({x: rect.left, y: rect.bottom});
+    menu.open({x: rect.left, y: rect.bottom, h: rect.height});
 };
 
 export const initEditorTabs = (protyle: IProtyle) => {

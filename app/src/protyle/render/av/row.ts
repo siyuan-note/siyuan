@@ -858,7 +858,8 @@ export const setPageSize = (options: {
     const rect = options.target.getBoundingClientRect();
     menu.open({
         x: rect.left,
-        y: rect.bottom
+        y: rect.bottom,
+        h: rect.height
     });
 };
 

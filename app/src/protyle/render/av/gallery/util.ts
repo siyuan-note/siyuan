@@ -143,7 +143,7 @@ export const setGalleryCover = (options: {
         }
     });
     const rect = options.target.getBoundingClientRect();
-    menu.open({x: rect.left, y: rect.bottom});
+    menu.open({x: rect.left, y: rect.bottom, h: rect.height});
 };
 
 export const setGallerySize = (options: {
@@ -220,7 +220,7 @@ export const setGallerySize = (options: {
         }
     });
     const rect = options.target.getBoundingClientRect();
-    menu.open({x: rect.left, y: rect.bottom});
+    menu.open({x: rect.left, y: rect.bottom, h: rect.height});
 };
 
 export const setGalleryRatio = (options: {
@@ -298,7 +298,7 @@ export const setGalleryRatio = (options: {
         }
     });
     const rect = options.target.getBoundingClientRect();
-    menu.open({x: rect.left, y: rect.bottom});
+    menu.open({x: rect.left, y: rect.bottom, h: rect.height});
 };
 
 export const openGalleryItemMenu = (options: {

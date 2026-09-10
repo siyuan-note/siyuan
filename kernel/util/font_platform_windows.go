@@ -370,11 +370,12 @@ func loadPlatformFonts() (ret []*Font) {
 			weight = inferFontWeight(400, style)
 		}
 		ret = addFont(ret, &Font{
-			Family:      family,
-			Weight:      weight,
-			DisplayName: displayName,
-			Aliases:     aliases,
-			Spacing:     directWriteFontSpacing(int(font.spacing)),
+			nonNormalStyle: isNonNormalFontStyle(style),
+			Family:         family,
+			Weight:         weight,
+			DisplayName:    displayName,
+			Aliases:        aliases,
+			Spacing:        directWriteFontSpacing(int(font.spacing)),
 		})
 	}
 	return

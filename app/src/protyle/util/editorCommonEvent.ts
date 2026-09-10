@@ -1,4 +1,4 @@
-import {createListDragTarget} from "./listDragTarget";
+import {cleanupDragIndicators, createListDragTarget} from "./listDragTarget";
 import {focusBlock, focusByRange, getRangeByPoint} from "./selection";
 import {
     getContenteditableElement,
@@ -3123,19 +3123,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         kanbanGroupDragHeight = "";
         clearBlockDragoverTarget(document);
     }, {once: true});
-};
-
-const cleanupDragIndicators = (scope: ParentNode) => {
-    scope.querySelectorAll(".dragover__top, .dragover__bottom, .dragover__left, .dragover__right, .dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, .dragover, [style*=\"--drag-indent\"]").forEach((item: HTMLElement) => {
-        item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover",
-            "dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child");
-        item.style.removeProperty("--drag-indent");
-        item.style.removeProperty("--drag-guides");
-        item.style.removeProperty("--drag-line-left");
-        item.style.removeProperty("--drag-base-bg");
-        item.style.removeProperty("--drag-line-bg");
-        item.style.removeProperty("--b3-av-kanban-drag-height");
-    });
 };
 
 const highlightByLevel = (editorElement: HTMLElement, liElement: HTMLElement) => {

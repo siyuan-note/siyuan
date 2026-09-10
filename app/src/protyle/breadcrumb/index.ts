@@ -259,9 +259,11 @@ ${padHTML}
             }
             event.preventDefault();
             event.stopPropagation();
+            const itemRect = itemElement.getBoundingClientRect();
             this.openChildrenMenu(protyle, itemElement.getAttribute("data-node-id"), {
-                x: event.clientX,
-                y: event.clientY,
+                x: itemRect.left,
+                y: itemRect.bottom,
+                h: itemRect.height,
                 isLeft: false,
             });
         });

@@ -539,6 +539,17 @@
 }
 
 .sy__backlink {
+  // 仅为上下文首块已有的属性栏留出空间，普通块保持紧凑。
+  .protyle-wysiwyg > .protyle-breadcrumb__bar + [data-node-id]:is(
+    [name]:not([name=""]),
+    [alias]:not([alias=""]),
+    [memo]:not([memo=""]),
+    [bookmark]:not([bookmark=""]),
+    [custom-avs]:not([custom-avs=""])
+  ) {
+    margin-top: 12px;
+  }
+
   .backlinkList__loading {
     align-items: center;
     box-sizing: border-box;
@@ -910,7 +921,7 @@
   min-height: 1.6em;
   white-space: normal;
   cursor: text;
-  padding: 4px !important;
+  padding: 0 !important;
 
   .protyle-action {
     pointer-events: none;
@@ -941,7 +952,7 @@
   }
 
   .protyle-wysiwyg {
-    padding: 4px !important;
+    padding: 0 !important;
     min-height: 1.6em;
   }
 }

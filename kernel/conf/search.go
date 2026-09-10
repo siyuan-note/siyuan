@@ -90,7 +90,7 @@ func NewSearch() *Search {
 		WidgetBlock:   false,
 		Callout:       false,
 		Tabs:          false,
-		TabItem:       true,
+		TabItem:       false,
 
 		Limit:         64,
 		CaseSensitive: false,

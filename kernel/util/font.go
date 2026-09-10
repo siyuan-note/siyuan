@@ -60,11 +60,12 @@ func LoadSysFonts() []*Font {
 }
 
 type Font struct {
-	Family      string   `json:"family"`            // 对应 CSS font-family
-	Weight      int      `json:"weight"`            // 对应 CSS font-weight
-	DisplayName string   `json:"displayName"`       // 给人看的名称 (Family + Subfamily)
-	Aliases     []string `json:"aliases,omitempty"` // 用于字体搜索的本地化名称和内部名称
-	Spacing     string   `json:"spacing,omitempty"` // 字体间距分类
+	nonNormalStyle bool
+	Family         string   `json:"family"`            // 对应 CSS font-family
+	Weight         int      `json:"weight"`            // 对应 CSS font-weight
+	DisplayName    string   `json:"displayName"`       // 给人看的名称 (Family + Subfamily)
+	Aliases        []string `json:"aliases,omitempty"` // 用于字体搜索的本地化名称和内部名称
+	Spacing        string   `json:"spacing,omitempty"` // 字体间距分类
 }
 
 const (
@@ -139,6 +140,12 @@ func addFont(fonts []*Font, f *Font) []*Font {
 		if strings.EqualFold(f.Family, font.Family) && f.Weight == font.Weight {
 			font.Aliases = mergeFontAliases(font.Aliases, f.Aliases, font.Family, font.DisplayName)
 			font.Spacing = mergeFontSpacing(font.Spacing, f.Spacing)
+			// 字体选择仅保存字体族和字重，同字重优先使用直立样式的名称。
+			if font.nonNormalStyle && !f.nonNormalStyle {
+				font.Aliases = appendFontAlias(font.Aliases, font.DisplayName)
+				font.DisplayName = f.DisplayName
+				font.nonNormalStyle = false
+			}
 			return fonts
 		}
 	}
@@ -264,11 +271,12 @@ func parseFontVariations(font *sfnt.Font, defaultFont *Font) (ret []*Font) {
 		aliases := collectFontAliases(entries, sfnt.NameID(subfamilyNameID))
 		aliases = append(aliases, defaultFont.Aliases...)
 		ret = append(ret, &Font{
-			Family:      defaultFont.Family,
-			Weight:      weight,
-			DisplayName: displayName,
-			Aliases:     aliases,
-			Spacing:     defaultFont.Spacing,
+			nonNormalStyle: defaultFont.nonNormalStyle || isNonNormalFontStyle(subfamily),
+			Family:         defaultFont.Family,
+			Weight:         weight,
+			DisplayName:    displayName,
+			Aliases:        aliases,
+			Spacing:        defaultFont.Spacing,
 		})
 	}
 	return
@@ -314,12 +322,18 @@ func parseFontInfo(font *sfnt.Font) (*Font, error) {
 		sfnt.NameFull, sfnt.NameCompatibleFull, sfnt.NamePostscript)
 
 	return &Font{
-		Family:      family,
-		Weight:      weight,
-		DisplayName: displayName,
-		Aliases:     aliases,
-		Spacing:     detectFontSpacing(font),
+		nonNormalStyle: isNonNormalFontStyle(subfamily),
+		Family:         family,
+		Weight:         weight,
+		DisplayName:    displayName,
+		Aliases:        aliases,
+		Spacing:        detectFontSpacing(font),
 	}, nil
+}
+
+func isNonNormalFontStyle(style string) bool {
+	style = strings.ToLower(style)
+	return strings.Contains(style, "italic") || strings.Contains(style, "oblique")
 }
 
 func detectFontSpacing(font *sfnt.Font) string {

@@ -117,10 +117,26 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     host.dataset.protyleLiteRender = "safe";
     host.contentEditable = "false";
     cell.replaceChildren(host);
-    const events = ["beforeinput", "input", "keydown", "keyup", "compositionstart", "compositionupdate", "compositionend",
+    const events = ["beforeinput", "input", "compositionstart", "compositionupdate", "compositionend",
         "copy", "cut", "paste", "pointerdown", "pointerup", "pointermove", "mousedown", "mouseup", "mousemove",
         "click", "dblclick", "contextmenu", "dragstart", "dragover", "drop", "focusin", "focusout"];
     events.forEach(type => host.addEventListener(type, event => event.stopPropagation()));
+    ["keydown", "keyup"].forEach(type => host.addEventListener(type, (event: KeyboardEvent) => {
+        event.stopPropagation();
+        if (event.defaultPrevented || event.isComposing || composing) {
+            return;
+        }
+        // 跳过外层正文的编辑处理，让未消费的快捷键继续到达全局监听器。
+        const forwarded = new KeyboardEvent(event.type, {
+            key: event.key, code: event.code, location: event.location, repeat: event.repeat,
+            keyCode: event.keyCode, charCode: event.charCode,
+            ctrlKey: event.ctrlKey, metaKey: event.metaKey, altKey: event.altKey, shiftKey: event.shiftKey,
+            bubbles: true, cancelable: true,
+        });
+        if (!owner.element.dispatchEvent(forwarded)) {
+            event.preventDefault();
+        }
+    }));
     ["mouseover", "pointerover"].forEach(type => host.addEventListener(type, event => {
         hideElements(["gutter"], owner);
         event.stopPropagation();

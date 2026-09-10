@@ -482,6 +482,9 @@ func BatchGetEmbeddings(texts []string, apiKey, baseURL, model string, dimension
 	if 1 > len(texts) {
 		return
 	}
+	if timeout < 1 {
+		timeout = 30
+	}
 
 	config := openai.DefaultConfig(apiKey)
 	config.BaseURL = baseURL
@@ -491,11 +494,23 @@ func BatchGetEmbeddings(texts []string, apiKey, baseURL, model string, dimension
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
 	defer cancel()
 
-	resp, err := client.CreateEmbeddings(ctx, openai.EmbeddingRequestStrings{
+	request := openai.EmbeddingRequestStrings{
 		Input:      texts,
 		Model:      openai.EmbeddingModel(model),
 		Dimensions: dimensions, // 0 时因 omitempty 不发送，等同于用模型默认维度
-	})
+	}
+	resp, err := client.CreateEmbeddings(ctx, request)
+	if ctx.Err() == nil && retryableEmbeddingError(err) {
+		// 嵌入计算遇到瞬时连接中断时最多补试一次，等待及补试共享原请求的超时预算。
+		timer := time.NewTimer(200 * time.Millisecond)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			err = ctx.Err()
+		case <-timer.C:
+			resp, err = client.CreateEmbeddings(ctx, request)
+		}
+	}
 	if err != nil {
 		logging.LogErrorf("create embeddings failed: %s", err)
 		return
@@ -505,6 +520,17 @@ func BatchGetEmbeddings(texts []string, apiKey, baseURL, model string, dimension
 		ret = append(ret, data.Embedding)
 	}
 	return
+}
+
+// retryableEmbeddingError 仅重试传输层连接中断，不重试接口状态错误、响应解析错误或超时。
+func retryableEmbeddingError(err error) bool {
+	var requestErr *url.Error
+	if !errors.As(err, &requestErr) || requestErr.Timeout() {
+		return false
+	}
+	return errors.Is(requestErr.Err, io.EOF) || errors.Is(requestErr.Err, io.ErrUnexpectedEOF) ||
+		errors.Is(requestErr.Err, syscall.ECONNRESET) || errors.Is(requestErr.Err, syscall.EPIPE) ||
+		requestErr.Err.Error() == "http: server closed idle connection"
 }
 
 // rerankDocTextMaxRunes 限制单篇文档送入重排服务的最大 Unicode 字符数，兼顾常见模型的输入上限。

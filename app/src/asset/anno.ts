@@ -208,8 +208,9 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
         }
         const eventTarget = event.target as HTMLElement;
         const handleElement = eventTarget.closest(".pdf__rect-resize") as HTMLElement;
+        const edgeElement = eventTarget.closest(".pdf__rect-edge");
         const target = eventTarget.closest(".pdf__rect") as HTMLElement;
-        if (!target || (!handleElement && !isRectAnnotationElement(target))) {
+        if (!target || !isRectAnnotationElement(target) || (!handleElement && !edgeElement)) {
             return;
         }
         const direction = handleElement?.dataset.direction as RectResizeDirection;
@@ -985,7 +986,15 @@ const showHighlight = (selected: IPdfAnno, pdf: any, hl?: boolean) => {
     });
     rectDiv.setAttribute("data-content", selected.content);
     if (isRectAnnotationElement(rectDiv)) {
+        rectDiv.dataset.mode = "rect";
         rectDiv.style.touchAction = "none";
+        Array.from(rectDiv.children).forEach((rectChild: HTMLElement) => {
+            ["n", "e", "s", "w"].forEach(direction => {
+                const edge = document.createElement("span");
+                edge.className = `pdf__rect-edge pdf__rect-edge--${direction}`;
+                rectChild.append(edge);
+            });
+        });
     }
     rectsElement.append(rectDiv);
     if (hl) {

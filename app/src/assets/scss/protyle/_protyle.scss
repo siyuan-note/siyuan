@@ -969,6 +969,18 @@
   }
 }
 
+.table__cell-rich.table__cell--empty,
+.table__cell-editor.table__cell--empty {
+  // 空内容填满单元格，避免零宽编辑容器裁掉光标。
+  width: 100%;
+}
+
+.table__cell-rich [data-table-cell-content],
+.table__cell-editor .protyle-wysiwyg [contenteditable="true"] {
+  // 为空列表项等块的文字区域保留光标宽度，预览和编辑时保持一致。
+  min-width: 1px;
+}
+
 .protyle-wysiwyg [data-type="NodeTable"] {
   td[tabindex="-1"]:focus,
   th[tabindex="-1"]:focus {

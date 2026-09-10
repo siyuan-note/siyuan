@@ -3,7 +3,7 @@ import {showMessage} from "../../dialog/message";
 import {renderTableCellRichElements} from "../render/tableCellRich";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {hideCaretLine, hideDragTip, showDragTip} from "./dragTip";
-import {createListDragTarget} from "./listDragTarget";
+import {cleanupDragIndicators, createListDragTarget} from "./listDragTarget";
 import {cleanTableCellRichHTML, getTableCellRichBlockDOM, serializeTableCellRich, setTableCellRich} from "./tableCellRich";
 
 export const bindTableCellRichDrag = (owner: IProtyle, cell: HTMLTableCellElement,
@@ -13,7 +13,7 @@ export const bindTableCellRichDrag = (owner: IProtyle, cell: HTMLTableCellElemen
     const getListDragTarget = createListDragTarget();
     const clear = () => {
         indicator?.classList.remove("dragover", "dragover__top", "dragover__bottom",
-            "dragover__top--sibling", "dragover__bottom--sibling", "dragover__bottom--child");
+            "dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child");
         ["--drag-indent", "--drag-line-left", "--drag-guides", "--drag-base-bg", "--drag-line-bg"].forEach(name =>
             indicator?.style.removeProperty(name));
         indicator = undefined;
@@ -61,6 +61,8 @@ export const bindTableCellRichDrag = (owner: IProtyle, cell: HTMLTableCellElemen
         }
         event.preventDefault();
         event.stopImmediatePropagation();
+        // 跨入单元格时接管普通块拖拽留下的指示，避免多个落点同时高亮。
+        cleanupDragIndicators(owner.wysiwyg.element);
         hideCaretLine();
         hideDragTip();
         event.dataTransfer.dropEffect = event.altKey || event.shiftKey ? "none" : event.ctrlKey ? "copy" : "move";

@@ -910,7 +910,7 @@
   min-height: 1.6em;
   white-space: normal;
   cursor: text;
-  padding: 4px !important;
+  padding: 0 !important;
 
   .protyle-action {
     pointer-events: none;
@@ -941,7 +941,7 @@
   }
 
   .protyle-wysiwyg {
-    padding: 4px !important;
+    padding: 0 !important;
     min-height: 1.6em;
   }
 }

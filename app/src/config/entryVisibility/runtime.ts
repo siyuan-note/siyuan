@@ -49,12 +49,15 @@ export const getActiveEntryProfile = () => {
     return config.profiles.find((item) => item.id === config.active);
 };
 
-const getTemplateVisibility = (path: string, template: TEntryVisibilityTemplate) =>
-    getBuiltinProfileEntryVisibility(
+const getTemplateVisibility = (path: string, template: TEntryVisibilityTemplate) => {
+    const entry = getEntryCatalogNode(path);
+    return getBuiltinProfileEntryVisibility(
         template,
-        getEntryCatalogNode(path)?.simple !== false,
+        entry?.simple !== false,
         getEntryCatalogDefaultVisibility(path),
+        entry?.simpleDefaultVisible,
     );
+};
 
 export const isEntryVisible = (path: string): boolean => {
     /// #if MOBILE

@@ -6,7 +6,10 @@ export const getBuiltinProfileEntryVisibility = (
     profile: "simple" | "full",
     simple: boolean,
     defaultVisible = true,
-) => defaultVisible && (profile === "full" || simple);
+    simpleDefaultVisible?: boolean,
+) => profile === "full"
+    ? defaultVisible
+    : (simpleDefaultVisible ?? defaultVisible) && simple;
 
 export type TEntryVisibilityImportProfile = {
     name?: unknown;

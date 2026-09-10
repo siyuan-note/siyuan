@@ -24,6 +24,8 @@ import {exportLayout, resizeTopBar} from "./util";
 import {setTabPosition} from "./tabUtil";
 import {commandPanel} from "../boot/globalEvent/command/panel";
 import {openTopBarMenu} from "../plugin/openTopBarMenu";
+import {newDailyNote} from "../util/mount";
+import {openCard} from "../card/openCard";
 import {getWorkspaceName, setTitle} from "../util/processTitle";
 import {bindTopBarDrag} from "./topBarDrag";
 import {
@@ -86,6 +88,12 @@ export const initBar = (app: App) => {
 </button>
 <button id="barForward" data-topbar-entry="barForward" class="ariaLabel toolbar__item toolbar__item--disabled" aria-label="${window.siyuan.languages.goForward} ${updateHotkeyTip(window.siyuan.config.keymap.general.goForward.custom)}">
     <svg><use xlink:href="#iconForward"></use></svg>
+</button>
+<button id="barDailyNote" data-topbar-entry="barDailyNote" class="ariaLabel toolbar__item${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.dailyNote} ${updateHotkeyTip(window.siyuan.config.keymap.general.dailyNote.custom)}">
+    <svg><use xlink:href="#iconCalendar"></use></svg>
+</button>
+<button id="barRiffCard" data-topbar-entry="barRiffCard" class="ariaLabel toolbar__item${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.riffCard} ${updateHotkeyTip(window.siyuan.config.keymap.general.riffCard.custom)}">
+    <svg><use xlink:href="#iconRiffCard"></use></svg>
 </button>
 <div class="fn__flex-1 fn__ellipsis" id="drag"><span class="fn__none">开发版，使用前请进行备份 Development version, please backup before use</span></div>
 <div id="toolbarVIP" data-topbar-entry="toolbarVIP" class="fn__flex${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.accountDisplayVIP}"></div>
@@ -173,6 +181,14 @@ export const initBar = (app: App) => {
                 break;
             } else if (targetId === "barForward") {
                 goForward(app);
+                event.stopPropagation();
+                break;
+            } else if (targetId === "barDailyNote") {
+                newDailyNote(app);
+                event.stopPropagation();
+                break;
+            } else if (targetId === "barRiffCard") {
+                openCard(app);
                 event.stopPropagation();
                 break;
             } else if (targetId === "barSync") {

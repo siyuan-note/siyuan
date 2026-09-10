@@ -25,6 +25,7 @@ export interface IEntryCatalogNode {
     sortable?: boolean;
     fixed?: boolean;
     defaultVisible?: () => boolean;
+    simpleDefaultVisible?: boolean;
     customDefaultVisible?: boolean;
     children?: IEntryCatalogNode[];
 }
@@ -40,7 +41,8 @@ const lang = (key: string) => () => window.siyuan.languages[key] || key;
 const literal = (value: string) => () => value;
 const location = (...labels: Array<() => string>) => () => labels.map((label) => label()).join(" - ");
 const node = (key: string, label: () => string, simple = true, children?: IEntryCatalogNode[],
-              sortable?: boolean, options?: Pick<IEntryCatalogNode, "defaultVisible" | "customDefaultVisible" | "fixed">): IEntryCatalogNode => ({
+              sortable?: boolean, options?: Pick<IEntryCatalogNode,
+                  "defaultVisible" | "simpleDefaultVisible" | "customDefaultVisible" | "fixed">): IEntryCatalogNode => ({
     key,
     label,
     simple,
@@ -586,6 +588,16 @@ const topBarBuiltinChildren = [
     node("barSync", lang("syncNow")),
     node("barBack", lang("goBack")),
     node("barForward", lang("goForward")),
+    node("barDailyNote", lang("dailyNote"), true, undefined, undefined, {
+        defaultVisible: () => false,
+        simpleDefaultVisible: true,
+        customDefaultVisible: false,
+    }),
+    node("barRiffCard", lang("riffCard"), true, undefined, undefined, {
+        defaultVisible: () => false,
+        simpleDefaultVisible: true,
+        customDefaultVisible: false,
+    }),
     fixed("drag", lang("entryTopBarDrag")),
     node("toolbarVIP", lang("accountDisplayVIP"), true, undefined, undefined, {
         defaultVisible: () => window.siyuan.config.account.displayVIP,

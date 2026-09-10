@@ -12,6 +12,7 @@ import {
 import {
     entryCatalog,
     getEntryCatalogChildren,
+    getEntryCatalogCustomDefaultVisibility,
     getEntryCatalogDefaultVisibility,
     getEntryCatalogNode,
     getEntryCatalogPathChain,
@@ -35,6 +36,7 @@ import {
     SLASH_MENU_ROOT_PATH,
     TOP_BAR_ROOT_PATH,
 } from "./catalog";
+import {getBuiltinProfileEntryVisibility} from "./profile";
 
 const slashMenuBuiltinOrder = [
     "template",
@@ -133,6 +135,8 @@ test("top bar catalog includes a fixed drag boundary in built-in DOM order", () 
         "barSync",
         "barBack",
         "barForward",
+        "barDailyNote",
+        "barRiffCard",
         "drag",
         "toolbarVIP",
         "toolbarTitle",
@@ -193,6 +197,21 @@ test("top bar account entries use legacy account switches only as defaults", () 
     }
 });
 
+test("daily note and flashcard top bar entries default to visible only in the Simple profile", () => {
+    for (const key of ["barDailyNote", "barRiffCard"]) {
+        const path = `${TOP_BAR_ROOT_PATH}.${key}`;
+        const entry = getEntryCatalogNode(path)!;
+        const defaultVisible = getEntryCatalogDefaultVisibility(path);
+        assert.equal(defaultVisible, false);
+        assert.equal(entry.simpleDefaultVisible, true);
+        assert.equal(getEntryCatalogCustomDefaultVisibility(path), false);
+        assert.equal(getBuiltinProfileEntryVisibility("full", entry.simple, defaultVisible,
+            entry.simpleDefaultVisible), false);
+        assert.equal(getBuiltinProfileEntryVisibility("simple", entry.simple, defaultVisible,
+            entry.simpleDefaultVisible), true);
+    }
+});
+
 const topBarElement = (attributes: Record<string, string>) => ({
     getAttribute: (name: string) => attributes[name] ?? null,
 }) as unknown as Element;
@@ -229,7 +248,7 @@ test("top bar catalog inserts plugin entries on their declared side of the fixed
         }]);
         const children = getEntryCatalogChildren(TOP_BAR_ROOT_PATH);
         const keys = children.map((item) => item.key);
-        assert.deepEqual(keys.slice(0, 5), ["barSync", "barBack", "barForward", leftKey, "drag"]);
+        assert.deepEqual(keys.slice(0, 7), ["barSync", "barBack", "barForward", "barDailyNote", "barRiffCard", leftKey, "drag"]);
         assert.deepEqual(keys.slice(keys.indexOf("toolbarTitle"), keys.indexOf("barCommand")), [
             "toolbarTitle",
             rightKey,

@@ -11,7 +11,7 @@ import {registerMobileSecondaryEditor} from "../../mobile/util/secondaryEditors"
 /// #endif
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
-import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
+import {isPhablet, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {Protyle} from "../../protyle";
 import {MenuItem} from "../../menus/Menu";
 import type {App} from "../../index";
@@ -338,7 +338,7 @@ export class BacklinkContent extends Model {
                     app: options.app,
                     id: element.getAttribute("data-node-id"),
                     position: "right",
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
+                    action: [isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
                 this.mTree.element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             },
@@ -347,7 +347,7 @@ export class BacklinkContent extends Model {
                     app: options.app,
                     id: element.getAttribute("data-node-id"),
                     position: "bottom",
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
+                    action: [isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
                 this.mTree.element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             },
@@ -379,7 +379,7 @@ export class BacklinkContent extends Model {
                     app: options.app,
                     id: element.getAttribute("data-node-id"),
                     position: "right",
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
+                    action: [isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
                 this.tree.element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             },
@@ -388,7 +388,7 @@ export class BacklinkContent extends Model {
                     app: options.app,
                     id: element.getAttribute("data-node-id"),
                     position: "bottom",
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
+                    action: [isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT]
                 });
                 this.tree.element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             },

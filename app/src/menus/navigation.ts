@@ -32,7 +32,7 @@ import {openEditorTab} from "./util";
 import {makeCard} from "../card/makeCard";
 import {transaction} from "../protyle/wysiwyg/transaction";
 import {emitOpenMenu} from "../plugin/EventBus";
-import {saveExportFile} from "../protyle/util/compatibility";
+import {isPhablet, saveExportFile} from "../protyle/util/compatibility";
 import {exportMarkdownZip} from "../protyle/export/exportMd";
 import {addFilesToDatabase} from "../protyle/render/av/addToDatabase";
 import {getDocTreeMenuItems, getDocTreeMenuType} from "./navigationSelection";
@@ -419,7 +419,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 openFileById({
                     app,
                     id: boxDocID,
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                    action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                 });
             }
         }).element);
@@ -710,7 +710,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 openFileById({
                     app,
                     id,
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                    action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                 });
             }
         }).element);

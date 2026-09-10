@@ -9,7 +9,7 @@ import {Tag} from "../layout/dock/Tag";
 import {upDownHint} from "./upDownHint";
 import {escapeHtml} from "./escape";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
-import {isNotCtrl} from "../protyle/util/compatibility";
+import {isNotCtrl, isPhablet} from "../protyle/util/compatibility";
 import {electronUndo} from "../protyle/undo";
 
 export const genTagList = (listElement: Element, k: string) => {
@@ -122,8 +122,9 @@ export const checkFold = (id: string, cb: (zoomIn: boolean, action: TProtyleActi
         return;
     }
     fetchPost("/api/block/checkBlockFold", {id}, (foldResponse) => {
+        const action = isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS;
         cb(foldResponse.data.isFolded,
-            foldResponse.data.isFolded ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+            foldResponse.data.isFolded ? [action, Constants.CB_GET_ALL] : [action, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
             foldResponse.data.isRoot);
     });
 };

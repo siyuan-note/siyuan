@@ -134,6 +134,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
                 protyle: stack.protyle,
                 id: stack.zoomId || stack.protyle.block.rootID,
                 isPushBack: false,
+                suppressFocus: false,
                 callback: focusTitle,
             });
         } else {
@@ -215,6 +216,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
             protyle: stack.protyle,
             id: stack.zoomId || stack.protyle.block.rootID,
             isPushBack: false,
+            suppressFocus: false,
             callback: () => {
                 Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find((item: HTMLElement) => {
                     if (!isInEmbedBlock(item)) {

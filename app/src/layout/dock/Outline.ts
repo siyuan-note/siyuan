@@ -8,6 +8,7 @@ import {confirmBlockRef} from "../../util/checkBlockRef";
 import {getAllModels} from "../getAll";
 import {hasClosestBlock, hasClosestByClassName, hasTopClosestByClassName} from "../../protyle/util/hasClosest";
 import {
+    isPhablet,
     setStorageVal,
     updateHotkeyAfterTip,
     writeBlockDOMClipboard
@@ -152,11 +153,12 @@ export class Outline extends Model {
                     }
                 } else {
                     checkFold(id, (zoomIn) => {
+                        const action = isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS;
                         openFileById({
                             app: options.app,
                             id,
                             scrollPosition: "start",
-                            action: zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML, Constants.CB_GET_OUTLINE] : [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
+                            action: zoomIn ? [action, Constants.CB_GET_ALL, Constants.CB_GET_HTML, Constants.CB_GET_OUTLINE] : [action, Constants.CB_GET_OUTLINE, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
                         });
                     });
                 }
@@ -171,7 +173,7 @@ export class Outline extends Model {
                 openFileById({
                     app: options.app,
                     id,
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML],
+                    action: [isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML],
                     zoomIn: true,
                 });
             },
@@ -1041,11 +1043,12 @@ export class Outline extends Model {
 
             // 带子标题转换
             checkFold(id, (zoomIn) => {
+                const action = isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS;
                 openFileById({
                     app: this.app,
                     id,
                     scrollPosition: "start",
-                    action: zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML, Constants.CB_GET_OUTLINE] : [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
+                    action: zoomIn ? [action, Constants.CB_GET_ALL, Constants.CB_GET_HTML, Constants.CB_GET_OUTLINE] : [action, Constants.CB_GET_OUTLINE, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
                 });
             });
             this.setCurrentById(id, false);

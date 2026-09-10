@@ -33,7 +33,7 @@ import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {openMenu} from "./commonMenuItem";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {copyPlainText, readClipboard, setStorageVal, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
+import {copyPlainText, isPhablet, readClipboard, setStorageVal, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
 import {paste, pasteAndKeepSourceFormat, pasteAsPlainText, pasteEscaped} from "../protyle/util/paste";
@@ -78,6 +78,7 @@ import {
 } from "../protyle/util/tableColumnWidth";
 import {getParentDocumentID} from "../protyle/util/parentDocument";
 import {getZoomFocusScrollAttr, shouldFocusAfterZoom} from "../protyle/util/focusRestore";
+import {scrollCenter} from "../util/highlightById";
 import {
     getSemanticInlineVisibleText,
     normalizeSemanticInlineElement
@@ -969,17 +970,17 @@ export const enterBack = (protyle: IProtyle, id: string, focusPosition?: { start
         });
         if (parentDocumentID) {
             /// #if MOBILE
-            openMobileFileById(protyle.app, parentDocumentID, [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]);
+            openMobileFileById(protyle.app, parentDocumentID, [Constants.CB_GET_SCROLL]);
             /// #else
             openFileById({
                 app: protyle.app,
                 id: parentDocumentID,
-                action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
             });
             /// #endif
         }
     } else {
-        zoomOut({protyle, id: protyle.block.parent2ID, focusId: id, focusPosition});
+        zoomOut({protyle, id: protyle.block.parent2ID, focusId: id, focusPosition, suppressFocus: isPhablet()});
     }
 };
 
@@ -991,11 +992,14 @@ export const zoomOut = (options: {
     isPushBack?: boolean,
     callback?: () => void,
     reload?: boolean,
+    suppressFocus?: boolean,
     dataDocType?: string
 }) => {
     if (options.protyle.lite || options.protyle.options.backlinkData) {
         return;
     }
+    // 浏览跳转不唤起输入法；带定位目标的编辑恢复和主动重载仍可恢复光标。
+    const suppressFocus = options.suppressFocus ?? (isPhablet() && !options.focusId && !options.reload);
     if (options.id !== options.protyle.block.rootID) {
         options.protyle.breadcrumb?.element.parentElement.querySelector('[data-type="context"]')
             ?.classList.remove("block__icon--active");
@@ -1022,7 +1026,9 @@ export const zoomOut = (options: {
         }
         const focusElement = options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.focusId || options.id}"]`);
         if (focusElement) {
-            focusBlock(focusElement, undefined, true, true);
+            if (!suppressFocus) {
+                focusBlock(focusElement, undefined, true, true);
+            }
             focusElement.scrollIntoView();
             return;
         }
@@ -1069,6 +1075,7 @@ export const zoomOut = (options: {
             afterCB: options.callback,
             dataDocType: options.dataDocType,
             focusAfterZoom,
+            suppressFocus,
         });
         // https://github.com/siyuan-note/siyuan/issues/4874
         if (options.focusId) {
@@ -1090,7 +1097,9 @@ export const zoomOut = (options: {
                 } else {
                     showElement = getFirstBlock(showElement);
                 }
-                if (showElement === focusElement && options.focusPosition) {
+                if (suppressFocus) {
+                    scrollCenter(options.protyle, showElement, "start");
+                } else if (showElement === focusElement && options.focusPosition) {
                     focusByOffset(showElement, options.focusPosition.start, options.focusPosition.end);
                 } else {
                     focusBlock(showElement, undefined, true, true);
@@ -1110,6 +1119,7 @@ export const zoomOut = (options: {
                         action: options.isPushBack ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO],
                         dataDocType: options.dataDocType,
                         focusAfterZoom: true,
+                        suppressFocus,
                     });
                 });
                 return;
@@ -1133,6 +1143,7 @@ export const zoomOut = (options: {
                         },
                         dataDocType: options.dataDocType,
                         focusAfterZoom: true,
+                        suppressFocus,
                     });
                 });
                 return;

@@ -24,7 +24,7 @@ import {
     updateFileTreeItemIcon,
 } from "../../emoji/fileTreeIcon";
 import {importNotebook, newEncryptedNotebook, newNotebook, openEncryptedNotebook} from "../../util/mount";
-import {isNotCtrl, isOnlyMeta, setStorageVal, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
+import {isNotCtrl, isOnlyMeta, isPhablet, setStorageVal, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {
     hasClosestByClassName,
@@ -232,7 +232,7 @@ export class Files extends Model {
                         app: options.app,
                         removeCurrentTab: false,
                         id: target.getAttribute("data-node-id"),
-                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                        action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                         afterOpen() {
                             target.removeAttribute("data-opening");
                         }
@@ -271,7 +271,7 @@ export class Files extends Model {
                                     openFileById({
                                         app: options.app,
                                         id: liElement.getAttribute("data-node-id"),
-                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                                        action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                                         afterOpen() {
                                             liElement.removeAttribute("data-opening");
                                         }
@@ -414,7 +414,7 @@ export class Files extends Model {
                                         app: options.app,
                                         id: target.getAttribute("data-node-id"),
                                         position: "right",
-                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                                        action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                                         afterOpen() {
                                             target.removeAttribute("data-opening");
                                         }
@@ -424,7 +424,7 @@ export class Files extends Model {
                                         app: options.app,
                                         id: target.getAttribute("data-node-id"),
                                         position: "bottom",
-                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                                        action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                                         afterOpen() {
                                             target.removeAttribute("data-opening");
                                         }
@@ -435,7 +435,7 @@ export class Files extends Model {
                                         app: options.app,
                                         removeCurrentTab: false,
                                         id: target.getAttribute("data-node-id"),
-                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                                        action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                                         afterOpen() {
                                             target.removeAttribute("data-opening");
                                         }
@@ -444,7 +444,7 @@ export class Files extends Model {
                                     openFileById({
                                         app: options.app,
                                         id: target.getAttribute("data-node-id"),
-                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                                        action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                                         afterOpen() {
                                             target.removeAttribute("data-opening");
                                         }

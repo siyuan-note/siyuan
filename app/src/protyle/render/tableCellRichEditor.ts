@@ -315,6 +315,26 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     }, {capture: true, signal});
     host.addEventListener("keydown", event => {
         captureBeforeChange();
+        if (!event.isComposing && !composing &&
+            Object.values(window.siyuan.config.keymap.editor.table).some(hotkey => matchHotKey(hotkey, event))) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            // 先提交内嵌编辑内容，再以所属单元格执行表格快捷键。
+            finish();
+            const range = document.createRange();
+            range.selectNodeContents(cell);
+            range.collapse(true);
+            owner.wysiwyg.element.focus({preventScroll: true});
+            focusByRange(range);
+            fixTable(owner, event, range);
+            const next = getSelection().focusNode;
+            const nextElement = next instanceof Element ? next : next?.parentElement;
+            const nextCell = nextElement?.closest<HTMLTableCellElement>("td, th");
+            if (nextCell && nextCell.closest(".protyle-wysiwyg") === owner.wysiwyg.element) {
+                openTableCellRichEditor(owner, nextCell);
+            }
+            return;
+        }
         const keymap = window.siyuan.config.keymap.editor.general;
         const undo = matchHotKey(keymap.undo, event);
         const redo = matchHotKey(keymap.redo, event);

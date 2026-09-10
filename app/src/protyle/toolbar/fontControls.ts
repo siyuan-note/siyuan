@@ -113,6 +113,7 @@ export class FontControl extends ToolbarItem {
         this.element.innerHTML = '<span class="protyle-toolbar__font-label"></span><svg aria-hidden="true"><use xlink:href="#iconDown"></use></svg>';
         this.element.querySelector(".protyle-toolbar__font-label").textContent = window.siyuan.languages[item.lang];
         this.element.setAttribute("aria-haspopup", "true");
+        this.element.setAttribute("data-menu", "true");
         this.element.addEventListener("mousedown", event => event.preventDefault());
         this.element.addEventListener("click", () => {
             closeSubElement(protyle.toolbar);

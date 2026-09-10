@@ -388,7 +388,9 @@ export class Gutter {
                             protyle.toolbar.range = getEditorRange(
                                 this.getNodeElement(protyle, activeBlockButton) || protyle.wysiwyg.element.firstElementChild);
                         }
-                        /// #if !MOBILE
+                        /// #if MOBILE
+                        window.siyuan.menus.menu.fullscreen();
+                        /// #else
                         window.siyuan.menus.menu.popup({x: br.left, y: br.bottom, h: br.height, isLeft: true});
                         restoreGutterRange(protyle.toolbar.range);
                         /// #endif
@@ -750,7 +752,12 @@ export class Gutter {
             event.stopPropagation();
         });
         // 双元素交互：悬浮块标显示框线（贴边不动），悬浮框线显示+号（独立元素外偏定位）
-        this.element.addEventListener("mousemove", (event: MouseEvent & { target: HTMLElement }) => {
+        this.element.addEventListener("pointermove", (event: PointerEvent & { target: HTMLElement }) => {
+            // 仅鼠标悬浮显示插入控件，避免触摸合成的鼠标事件让透明框线覆盖块标。
+            if (event.pointerType !== "mouse") {
+                hideInsert();
+                return;
+            }
             const lineBefore = this.element.querySelector('.protyle-gutters__line[data-type="gutterLineBefore"]') as HTMLElement;
             const lineAfter = this.element.querySelector('.protyle-gutters__line[data-type="gutterLineAfter"]') as HTMLElement;
             const plusBefore = this.element.querySelector('.protyle-gutters__plus[data-type="gutterPlusBefore"]') as HTMLElement;

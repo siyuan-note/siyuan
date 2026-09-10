@@ -375,6 +375,7 @@ const preventKeyboardToolbarRender = () => {
 
 const updateKeyboardToolbarPosition = () => {
     updateKeyboardPanelHeight();
+    scrollKeyboardSelectionIntoView();
     if (isInMobileApp() || !window.visualViewport) {
         return;
     }
@@ -406,10 +407,13 @@ const updateKeyboardPanelHeight = () => {
         hideKeyboardToolbarUtil();
         return;
     }
-    toolbarElement.style.height = `${height}px`;
+    // 原生端占位随视口同步变化，避免等待 resize 时编辑器短暂增高，导致滚动位置被截断。
+    const panelHeight = isInMobileApp() ?
+        `max(${barHeight}px, calc(100vh - ${keyboardPanelTop}px))` : `${height}px`;
+    toolbarElement.style.height = panelHeight;
     const editor = getCurrentEditor();
     if (editor) {
-        editor.protyle.element.parentElement.style.paddingBottom = `${height}px`;
+        editor.protyle.element.parentElement.style.paddingBottom = panelHeight;
     }
 };
 
@@ -1018,10 +1022,27 @@ export const showKeyboardToolbar = () => {
             eventBus.emit("mobile-keyboard-show");
         });
     }
+    scrollKeyboardSelectionIntoView();
+};
+
+const scrollKeyboardSelectionIntoView = () => {
+    const toolbarElement = document.getElementById("keyboardToolbar");
+    if (!toolbarElement || toolbarElement.classList.contains("fn__none") || showUtil) {
+        return;
+    }
     clearTimeout(scrollSelectionIntoViewTimeout);
     clearRenderGutterAfterScroll?.();
     scrollSelectionIntoViewTimeout = window.setTimeout(() => {
-        if (editor?.protyle.toolbar.isMultiSelectMode()) {
+        const editor = getCurrentEditor();
+        const selection = getSelection();
+        if (!editor || editor.protyle.toolbar.isMultiSelectMode() || selection.rangeCount === 0 ||
+            !editor.protyle.wysiwyg.element.contains(document.activeElement) ||
+            toolbarElement.classList.contains("fn__none") || showUtil) {
+            return;
+        }
+        // 视口稳定后读取当前选区，避免键盘动画期间使用已经移动的光标位置。
+        const range = selection.getRangeAt(0);
+        if (!editor.protyle.wysiwyg.element.contains(range.startContainer)) {
             return;
         }
         const contentElement = hasClosestByClassName(range.startContainer, "protyle-content", true);
@@ -1036,7 +1057,7 @@ export const showKeyboardToolbar = () => {
                     range.startContainer as Element : range.startContainer.parentElement;
                 editor.protyle.gutter.render(editor.protyle, blockElement, targetElement);
             };
-            let cursorTop = getSelectionPosition(contentElement).top;
+            let cursorTop = getSelectionPosition(contentElement, range.cloneRange()).top;
             if (cursorTop < 0 && window.siyuan.mobile.touchRange) {
                 const rangeBlockElement = hasClosestBlock(window.siyuan.mobile.touchRange.startContainer);
                 if (rangeBlockElement) {
@@ -1054,7 +1075,9 @@ export const showKeyboardToolbar = () => {
             // 自动滚动时额外预留一行，避免输入文字被键盘工具栏遮挡。
             const extraLineHeight = parseFloat(getComputedStyle(cursorElement).lineHeight) ||
                 window.siyuan.config.editor.fontSize * 1.625;
-            if (cursorTop < viewportBounds.bottom - 42 &&
+            const visibleBottom = Math.min(viewportBounds.bottom, contentElement.getBoundingClientRect().bottom,
+                toolbarElement.getBoundingClientRect().top);
+            if (cursorTop + extraLineHeight < visibleBottom &&
                 cursorTop > Math.max(contentElement.getBoundingClientRect().top, viewportBounds.top)) {
                 renderGutter();
                 return;
@@ -1075,8 +1098,8 @@ export const showKeyboardToolbar = () => {
             contentElement.addEventListener("touchstart", clearRenderGutter, {once: true, passive: true});
             contentElement.scroll({
                 top: cursorTop < 0 ?
-                    contentElement.scrollTop + viewportBounds.bottom - viewportBounds.top - 42 + extraLineHeight :
-                    contentElement.scrollTop + cursorTop - viewportBounds.bottom + 42 + 26 + extraLineHeight,
+                    contentElement.scrollTop + visibleBottom - viewportBounds.top + extraLineHeight :
+                    contentElement.scrollTop + cursorTop - visibleBottom + extraLineHeight * 2,
                 left: contentElement.scrollLeft,
                 behavior: "smooth"
             });

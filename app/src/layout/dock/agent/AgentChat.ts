@@ -2099,19 +2099,14 @@ export class AgentChat extends Model {
         });
         // 恢复已提交的选中状态（answers 中存的是选项 value）。
         if (entry.answers && entry.answers.length > 0) {
-            el.querySelectorAll(".agent-chat__question-option input").forEach((inp) => {
+            el.querySelectorAll("input[type=radio], input[type=checkbox]").forEach((inp) => {
                 (inp as HTMLInputElement).checked = entry.answers!.includes((inp as HTMLInputElement).value);
             });
             const customInput = el.querySelector(".agent-chat__question-custom") as HTMLInputElement | null;
             if (customInput) {
-                const optionInputs = Array.from(el.querySelectorAll(".agent-chat__question-option input")) as HTMLInputElement[];
-                const customAnswer = entry.answers.find(a => !optionInputs.some(input => input.value === a));
+                const customAnswer = entry.answers.find(a => el.querySelector('input[value="' + a + '"]') === null);
                 if (customAnswer) {
                     customInput.value = customAnswer;
-                    const customRadio = customInput.parentElement.querySelector(".agent-chat__question-custom-radio") as HTMLInputElement;
-                    if (customRadio) {
-                        customRadio.checked = true;
-                    }
                 }
             }
         }
@@ -4173,18 +4168,21 @@ export class AgentChat extends Model {
             status: "pending",
         });
 
-        el.querySelectorAll(".agent-chat__question-custom-option").forEach((option) => {
-            const radio = option.querySelector(".agent-chat__question-custom-radio") as HTMLInputElement;
-            const input = option.querySelector(".agent-chat__question-custom") as HTMLInputElement;
-            const selectCustom = () => {
-                if (!input.disabled) {
-                    radio.checked = true;
+        el.querySelectorAll(".agent-chat__question-option").forEach((option) => {
+            const input = option.querySelector("input") as HTMLInputElement;
+            if (!input) return;
+            let wasChecked = false;
+            option.addEventListener("mousedown", () => {
+                wasChecked = input.checked;
+            });
+            option.addEventListener("click", (e) => {
+                if (el.classList.contains("agent-chat__msg--confirmed")) {
+                    return;
                 }
-            };
-            input.addEventListener("focus", selectCustom);
-            input.addEventListener("input", selectCustom);
-            radio.addEventListener("click", () => {
-                input.focus();
+                if (input.type === "radio" && wasChecked) {
+                    e.preventDefault();
+                    input.checked = false;
+                }
             });
         });
 
@@ -4195,14 +4193,13 @@ export class AgentChat extends Model {
                 for (let qi = 0; qi < rawQuestions.length; qi++) {
                     const optEl = el.querySelector('.agent-chat__question-options[data-qi="' + qi + '"]');
                     if (optEl) {
-                        const selected = optEl.querySelectorAll(".agent-chat__question-option input:checked") as NodeListOf<HTMLInputElement>;
+                        const selected = optEl.querySelectorAll("input:checked") as NodeListOf<HTMLInputElement>;
                         for (let si = 0; si < selected.length; si++) {
                             answers.push(selected[si].value);
                         }
                     }
                     const customInput = el.querySelector('.agent-chat__question-custom[data-qi="' + qi + '"]') as HTMLInputElement;
-                    const customRadio = optEl?.querySelector(".agent-chat__question-custom-radio") as HTMLInputElement;
-                    if (customInput && customInput.value.trim() && (!customRadio || customRadio.checked)) {
+                    if (customInput && customInput.value.trim()) {
                         answers.push(customInput.value.trim());
                     }
                 }

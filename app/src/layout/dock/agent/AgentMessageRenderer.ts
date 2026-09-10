@@ -109,15 +109,7 @@ export const renderQuestionCardHTML = (rawQuestions: Array<Record<string, unknow
             html += "</label>";
         }
         if (custom) {
-            const customLabel = escapeHtml(L.agentQuestionCustom || "Type your own answer...");
-            if (!multiple) {
-                html += '<div class="agent-chat__question-custom-option">' +
-                    '<input type="radio" name="' + inputName + '" class="agent-chat__question-custom-radio" aria-label="' + customLabel + '">';
-            }
-            html += '<input class="agent-chat__question-custom" aria-label="' + customLabel + '" placeholder="' + customLabel + '" data-qi="' + qi + '">';
-            if (!multiple) {
-                html += "</div>";
-            }
+            html += '<input class="agent-chat__question-custom" placeholder="' + (L.agentQuestionCustom || "Type your own answer...") + '" data-qi="' + qi + '">';
         }
         html += "</div></div>";
     }

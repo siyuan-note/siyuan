@@ -565,6 +565,33 @@ describe("attribute view rich text DOM policy", () => {
         assert.match(html, /data-href="https:\/\/b3log\.org\/siyuan"/);
     });
 
+    it("preserves disabled task checkboxes and nested mixed lists in previews", {
+        skip: hasDOM && typeof Lute !== "undefined" ? false :
+            "The Node test environment does not provide DOM and Lute globals",
+    }, async () => {
+        Object.assign(globalThis, {NODE_ENV: "test", SIYUAN_VERSION: "test"});
+        const richText = await import("./richText");
+        const template = document.createElement("template");
+        template.innerHTML = richText.getAVRichTextPreviewHTML([
+            "- [ ] pending",
+            "- [x] completed",
+            "  - [ ] nested pending",
+            "  - ordinary bullet",
+            "",
+            "1. numbered item",
+        ].join("\n"));
+
+        const checkboxes = Array.from(template.content.querySelectorAll<HTMLInputElement>("input"));
+        assert.equal(checkboxes.length, 3);
+        assert.deepEqual(checkboxes.map((element) => element.checked), [false, true, false]);
+        assert.ok(checkboxes.every((element) => element.type === "checkbox" && element.disabled));
+        assert.ok(template.content.querySelector("li li input"));
+        assert.ok(Array.from(template.content.querySelectorAll("li")).some((element) =>
+            element.textContent.trim() === "ordinary bullet" && !element.querySelector("input")));
+        assert.equal(template.content.querySelector("ol > li")?.textContent.trim(), "numbered item");
+        assert.equal(template.content.querySelector(".protyle-action, svg, use"), null);
+    });
+
     it("flattens inline memo HTML and removes dangerous preview links", {
         skip: hasDOM && typeof Lute !== "undefined" ? false :
             "The Node test environment does not provide DOM and Lute globals",

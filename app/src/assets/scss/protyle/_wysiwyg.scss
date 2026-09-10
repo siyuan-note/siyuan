@@ -520,11 +520,11 @@
     }
 
     span[data-type="virtual-block-ref"] {
-      --protyle-ref-line-color: var(--b3-theme-on-surface);
+      border-bottom: 1px dashed var(--b3-theme-on-surface);
       transition: var(--b3-transition);
 
       &:hover {
-        --protyle-ref-line-color: var(--b3-theme-on-background);
+        border-color: var(--b3-theme-on-background);
       }
     }
 
@@ -542,7 +542,6 @@
       --protyle-ref-line-color: var(--b3-protyle-inline-fileref-color);
     }
 
-    span[data-type="virtual-block-ref"],
     span[data-type~="block-ref"]:not(.av__celltext),
     span[data-type~="file-annotation-ref"] {
       // 按固定长度绘制虚线，并在换行后的每段文字下方重复显示。

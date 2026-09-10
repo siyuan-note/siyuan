@@ -4571,6 +4571,10 @@ export class WYSIWYG {
                     return;
                 }
             }
+            // 数据库表头工具栏不涉及编辑器选区，提前处理，避免 getEditorRange 兜底聚焦编辑器时在移动端唤起软键盘
+            if (hasClosestByClassName(event.target, "av__views") && avClick(protyle, event)) {
+                return;
+            }
             const range = getEditorRange(this.element);
             const resumeBlockHint = !protyle.hint.element.classList.contains("fn__none") &&
                 Constants.BLOCK_HINT_KEYS.includes(protyle.hint.splitChar);

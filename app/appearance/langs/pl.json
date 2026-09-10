@@ -1395,7 +1395,7 @@
 	"apiVersion": "Wersja API",
 	"apiVersionTip": "Wymagane tylko podczas korzystania z usługi Azure OpenAI",
 	"apiProvider": "Dostawca API",
-	"apiProviderTip": "Dostawcy zgodni z API Chat Completions (np. DeepSeek, Kimi, MiniMax) mogą być używani",
+	"apiProviderTip": "Dostawcy zgodni z API Chat Completions lub API Responses (np. DeepSeek, Kimi, MiniMax) mogą być używani",
 	"skip": "Pomiń",
 	"nextRound": "Następna runda",
 	"save": "Zapisz",
@@ -2765,6 +2765,8 @@
 		"379": "Agent został zatrzymany z powodu przekroczenia limitu czasu sesji. Wyślij wiadomość, aby kontynuować, lub zmień limit czasu w Ustawienia - AI",
 		"380": "OCR nie jest obsługiwane dla zasobów w zaszyfrowanych notatnikach",
 		"381": "Powiązania baz danych nie mogą przekraczać granic zaszyfrowanych notatników",
-		"382": "Nie można wyeksportować bazy danych [%s]. Sprawdź powiązania baz danych dokumentu oraz notatnik zawierający bazę danych"
+		"382": "Nie można wyeksportować bazy danych [%s]. Sprawdź powiązania baz danych dokumentu oraz notatnik zawierający bazę danych",
+		"383": "Nieprawidłowy folder eksportu",
+		"384": "Synchronizacja przerwana: pliki obszaru roboczego zostały zmodyfikowane podczas synchronizacji. Spróbuj ponownie później i unikaj edytowania podczas synchronizacji"
 	}
 }

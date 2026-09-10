@@ -1395,7 +1395,7 @@
 	"apiVersion": "API version",
 	"apiVersionTip": "Only required when using the Azure OpenAI service",
 	"apiProvider": "API Provider",
-	"apiProviderTip": "Providers compatible with the Chat Completions API (e.g., DeepSeek, Kimi, MiniMax) are supported",
+	"apiProviderTip": "Providers compatible with the Chat Completions API or the Responses API (e.g., DeepSeek, Kimi, MiniMax) are supported",
 	"skip": "Skip",
 	"nextRound": "Next round",
 	"save": "Save",
@@ -2765,6 +2765,8 @@
 		"379": "The agent stopped because the session time limit was reached. Send a message to continue, or adjust the timeout in Settings - AI",
 		"380": "OCR is not supported for assets in encrypted notebooks",
 		"381": "Database bindings cannot cross encrypted notebook boundaries",
-		"382": "Cannot export database [%s]. Check the document's database bindings and the notebook containing the database"
+		"382": "Cannot export database [%s]. Check the document's database bindings and the notebook containing the database",
+		"383": "Invalid export folder",
+		"384": "Sync aborted: workspace files were modified during sync. Please try again later and avoid editing while syncing"
 	}
 }

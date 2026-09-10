@@ -1395,7 +1395,7 @@
 	"apiVersion": "API sürümü",
 	"apiVersionTip": "Yalnızca Azure OpenAI hizmeti kullanıldığında gereklidir",
 	"apiProvider": "API Sağlayıcısı",
-	"apiProviderTip": "Chat Completions API ile uyumlu sağlayıcılar (örn. DeepSeek, Kimi, MiniMax) kullanılabilir",
+	"apiProviderTip": "Chat Completions API veya Responses API ile uyumlu sağlayıcılar (örn. DeepSeek, Kimi, MiniMax) kullanılabilir",
 	"skip": "Geç",
 	"nextRound": "Sonraki tur",
 	"save": "Kaydet",
@@ -2765,6 +2765,8 @@
 		"379": "Oturum süresi sınırına ulaşıldığı için ajan durduruldu. Devam etmek için bir mesaj gönderin veya Ayarlar - Yapay Zeka bölümünden zaman aşımını ayarlayın",
 		"380": "Şifrelenmiş not defterlerindeki kaynaklar için OCR desteklenmiyor",
 		"381": "Veritabanı bağlamaları şifreli not defterlerinin sınırlarını aşamaz",
-		"382": "[%s] veritabanı dışa aktarılamıyor. Belgenin veritabanı bağlamalarını ve veritabanının bulunduğu not defterini kontrol edin"
+		"382": "[%s] veritabanı dışa aktarılamıyor. Belgenin veritabanı bağlamalarını ve veritabanının bulunduğu not defterini kontrol edin",
+		"383": "Geçersiz dışa aktarma klasörü",
+		"384": "Senkronizasyon durduruldu: senkronizasyon sırasında çalışma alanı dosyaları değiştirildi. Lütfen daha sonra tekrar deneyin ve senkronizasyon sırasında düzenleme yapmaktan kaçının"
 	}
 }

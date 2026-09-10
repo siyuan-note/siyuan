@@ -1395,7 +1395,7 @@
 	"apiVersion": "API 版本",
 	"apiVersionTip": "仅在使用 Azure OpenAI 服务时需要设置",
 	"apiProvider": "API 提供商",
-	"apiProviderTip": "兼容 Chat Completions API 接口的提供商（如 DeepSeek、Kimi、MiniMax）均可使用",
+	"apiProviderTip": "兼容 Chat Completions API 或 Responses API 接口的提供商（如 DeepSeek、Kimi、MiniMax）均可使用",
 	"skip": "跳过",
 	"nextRound": "下一轮",
 	"save": "保存",
@@ -2765,6 +2765,8 @@
 		"379": "智能体已达到会话时限并停止。请发送消息继续，或在 设置 - AI 中调整超时时间",
 		"380": "加密笔记本中的资源文件不支持文字识别",
 		"381": "数据库绑定不能跨越加密笔记本边界",
-		"382": "无法导出数据库 [%s]。请检查文档的数据库绑定及数据库所属笔记本"
+		"382": "无法导出数据库 [%s]。请检查文档的数据库绑定及数据库所属笔记本",
+		"383": "导出目录不合法",
+		"384": "同步中止：同步过程中检测到工作空间文件被修改，请稍后重试，并避免同步时编辑"
 	}
 }

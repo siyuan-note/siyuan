@@ -2861,6 +2861,11 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 	}
 
 	afterIndex, err = repo.Index("[Sync] Cloud sync", checkChunks, newSyncContext())
+	if errors.Is(err, dejavu.ErrIndexFileChanged) {
+		// 索引期间工作空间文件被修改属于瞬时竞态，重试一次以避免同步无谓中止
+		logging.LogWarnf("index data repo before cloud sync aborted because files changed, retry once: %s", err)
+		afterIndex, err = repo.Index("[Sync] Cloud sync", checkChunks, newSyncContext())
+	}
 	if err != nil {
 		logging.LogErrorf("index data repo before cloud sync failed: %s", err)
 		return

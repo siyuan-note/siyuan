@@ -1395,7 +1395,7 @@
 	"apiVersion": "Verzia API",
 	"apiVersionTip": "Vyžadované len pre Azure OpenAI",
 	"apiProvider": "Poskytovateľ API",
-	"apiProviderTip": "Poskytovatelia kompatibilní s Chat Completions API (napr. DeepSeek, Kimi, MiniMax) môžu byť použité",
+	"apiProviderTip": "Poskytovatelia kompatibilní s Chat Completions API alebo Responses API (napr. DeepSeek, Kimi, MiniMax) môžu byť použité",
 	"skip": "Preskočiť",
 	"nextRound": "Ďalšie kolo",
 	"save": "Uložiť",
@@ -2765,6 +2765,8 @@
 		"379": "Agent sa zastavil, pretože bol dosiahnutý časový limit relácie. Ak chcete pokračovať, odošlite správu alebo upravte časový limit v Nastavenia - AI",
 		"380": "OCR nie je podporované pre zdroje v šifrovaných zápisníkoch",
 		"381": "Väzby databáz nemôžu prekračovať hranice šifrovaných zápisníkov",
-		"382": "Databázu [%s] sa nedá exportovať. Skontrolujte databázové väzby dokumentu a zápisník obsahujúci databázu"
+		"382": "Databázu [%s] sa nedá exportovať. Skontrolujte databázové väzby dokumentu a zápisník obsahujúci databázu",
+		"383": "Neplatný priečinok exportu",
+		"384": "Synchronizácia bola prerušená: súbory pracovného priestoru boli počas synchronizácie zmenené. Skúste to znova neskôr a počas synchronizácie needitujte"
 	}
 }

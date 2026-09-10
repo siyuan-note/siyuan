@@ -1395,7 +1395,7 @@
 	"apiVersion": "Versión API",
 	"apiVersionTip": "Sólo es necesario cuando se utiliza el servicio Azure OpenAI",
 	"apiProvider": "API proveedor",
-	"apiProviderTip": "Los proveedores compatibles con la API de Chat Completions (p. ej., DeepSeek, Kimi, MiniMax) pueden utilizarse",
+	"apiProviderTip": "Los proveedores compatibles con la API de Chat Completions o la API de Responses (p. ej., DeepSeek, Kimi, MiniMax) pueden utilizarse",
 	"skip": "Omitir",
 	"nextRound": "Siguiente ronda",
 	"save": "Guardar",
@@ -2765,6 +2765,8 @@
 		"379": "El agente se detuvo porque se alcanzó el límite de tiempo de la sesión. Envía un mensaje para continuar o ajusta el tiempo de espera en Ajustes - IA",
 		"380": "No se admite OCR para los recursos de los cuadernos cifrados",
 		"381": "Los vínculos de bases de datos no pueden cruzar los límites de los cuadernos cifrados",
-		"382": "No se puede exportar la base de datos [%s]. Compruebe los vínculos de bases de datos del documento y el cuaderno que contiene la base de datos"
+		"382": "No se puede exportar la base de datos [%s]. Compruebe los vínculos de bases de datos del documento y el cuaderno que contiene la base de datos",
+		"383": "Carpeta de exportación no válida",
+		"384": "Sincronización cancelada: se modificaron archivos del espacio de trabajo durante la sincronización. Inténtalo de nuevo más tarde y evita editar durante la sincronización"
 	}
 }

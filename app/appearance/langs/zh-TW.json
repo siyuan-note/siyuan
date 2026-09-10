@@ -1395,7 +1395,7 @@
 	"apiVersion": "API 版本",
 	"apiVersionTip": "僅在使用 Azure OpenAI 服務時需要設定",
 	"apiProvider": "API 提供商",
-	"apiProviderTip": "相容 Chat Completions API 介面的提供商（如 DeepSeek、Kimi、MiniMax）均可使用",
+	"apiProviderTip": "相容 Chat Completions API 或 Responses API 介面的提供商（如 DeepSeek、Kimi、MiniMax）均可使用",
 	"skip": "跳過",
 	"nextRound": "下一輪",
 	"save": "保存",
@@ -2765,6 +2765,8 @@
 		"379": "智能體已達到工作階段時限並停止。請傳送訊息繼續，或在 設定 - AI 中調整逾時時間",
 		"380": "加密筆記本中的資源檔案不支援文字辨識",
 		"381": "資料庫綁定不能跨越加密筆記本邊界",
-		"382": "無法匯出資料庫 [%s]。請檢查文件的資料庫綁定及資料庫所屬筆記本"
+		"382": "無法匯出資料庫 [%s]。請檢查文件的資料庫綁定及資料庫所屬筆記本",
+		"383": "匯出目錄不合法",
+		"384": "同步中止：同步過程中偵測到工作空間檔案被修改，請稍後重試，並避免同步時編輯"
 	}
 }

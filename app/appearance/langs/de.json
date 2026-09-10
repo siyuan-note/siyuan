@@ -1395,7 +1395,7 @@
 	"apiVersion": "API-Version",
 	"apiVersionTip": "Nur erforderlich, wenn der Azure OpenAI-Dienst verwendet wird.",
 	"apiProvider": "API-Anbieter",
-	"apiProviderTip": "Anbieter, die mit der Chat Completions API kompatibel sind (z. B. DeepSeek, Kimi, MiniMax), können verwendet werden",
+	"apiProviderTip": "Anbieter, die mit der Chat Completions API oder der Responses API kompatibel sind (z. B. DeepSeek, Kimi, MiniMax), können verwendet werden",
 	"skip": "Überspringen",
 	"nextRound": "Nächste Runde",
 	"save": "Speichern",
@@ -2765,6 +2765,8 @@
 		"379": "Der Agent wurde gestoppt, weil das Zeitlimit der Sitzung erreicht wurde. Senden Sie eine Nachricht, um fortzufahren, oder passen Sie das Zeitlimit unter Einstellungen - KI an",
 		"380": "OCR wird für Ressourcen in verschlüsselten Notizbüchern nicht unterstützt",
 		"381": "Datenbankverknüpfungen dürfen die Grenzen verschlüsselter Notizbücher nicht überschreiten",
-		"382": "Datenbank [%s] kann nicht exportiert werden. Prüfen Sie die Datenbankverknüpfungen des Dokuments und das Notizbuch, das die Datenbank enthält"
+		"382": "Datenbank [%s] kann nicht exportiert werden. Prüfen Sie die Datenbankverknüpfungen des Dokuments und das Notizbuch, das die Datenbank enthält",
+		"383": "Ungültiger Exportordner",
+		"384": "Synchronisierung abgebrochen: Arbeitsbereichsdateien wurden während der Synchronisierung geändert. Bitte versuche es später erneut und vermeide Bearbeitungen während der Synchronisierung"
 	}
 }

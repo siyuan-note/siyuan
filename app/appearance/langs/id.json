@@ -1395,7 +1395,7 @@
 	"apiVersion": "Versi API",
 	"apiVersionTip": "Hanya diperlukan saat menggunakan layanan Azure OpenAI",
 	"apiProvider": "Penyedia API",
-	"apiProviderTip": "Penyedia yang kompatibel dengan API Chat Completions (mis., DeepSeek, Kimi, MiniMax) dapat digunakan",
+	"apiProviderTip": "Penyedia yang kompatibel dengan API Chat Completions atau API Responses (mis., DeepSeek, Kimi, MiniMax) dapat digunakan",
 	"skip": "Lewati",
 	"nextRound": "Putaran berikutnya",
 	"save": "Simpan",
@@ -2765,6 +2765,8 @@
 		"379": "Agen berhenti karena batas waktu sesi tercapai. Kirim pesan untuk melanjutkan, atau sesuaikan batas waktu di Pengaturan - AI",
 		"380": "OCR tidak didukung untuk sumber daya dalam buku catatan terenkripsi",
 		"381": "Pengikatan basis data tidak dapat melintasi batas buku catatan terenkripsi",
-		"382": "Tidak dapat mengekspor basis data [%s]. Periksa pengikatan basis data dokumen dan buku catatan yang berisi basis data tersebut"
+		"382": "Tidak dapat mengekspor basis data [%s]. Periksa pengikatan basis data dokumen dan buku catatan yang berisi basis data tersebut",
+		"383": "Folder ekspor tidak valid",
+		"384": "Sinkronisasi dibatalkan: berkas ruang kerja diubah selama sinkronisasi. Coba lagi nanti dan hindari mengedit saat menyinkronkan"
 	}
 }

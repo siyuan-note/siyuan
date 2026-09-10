@@ -1395,7 +1395,7 @@
 	"apiVersion": "Versione API",
 	"apiVersionTip": "Necessario solo quando si utilizza il servizio Azure OpenAI",
 	"apiProvider": "Provider API",
-	"apiProviderTip": "I provider compatibili con l'API Chat Completions (es. DeepSeek, Kimi, MiniMax) possono essere utilizzati",
+	"apiProviderTip": "I provider compatibili con l'API Chat Completions o l'API Responses (es. DeepSeek, Kimi, MiniMax) possono essere utilizzati",
 	"skip": "Salta",
 	"nextRound": "Prossimo turno",
 	"save": "Salva",
@@ -2765,6 +2765,8 @@
 		"379": "L’agente si è fermato perché è stato raggiunto il limite di tempo della sessione. Invia un messaggio per continuare o modifica il timeout in Impostazioni - IA",
 		"380": "Il riconoscimento ottico dei caratteri non è supportato per le risorse nei quaderni crittografati",
 		"381": "I collegamenti ai database non possono oltrepassare i confini dei quaderni crittografati",
-		"382": "Impossibile esportare il database [%s]. Controlla i collegamenti ai database del documento e il quaderno che contiene il database"
+		"382": "Impossibile esportare il database [%s]. Controlla i collegamenti ai database del documento e il quaderno che contiene il database",
+		"383": "Cartella di esportazione non valida",
+		"384": "Sincronizzazione interrotta: i file dell'area di lavoro sono stati modificati durante la sincronizzazione. Riprova più tardi ed evita di modificare durante la sincronizzazione"
 	}
 }

@@ -1,6 +1,22 @@
 import * as assert from "node:assert/strict";
 import {describe, it} from "node:test";
-import {genStackHtml} from "./render";
+import {genNumberInputHtml, genStackHtml} from "./render";
+
+describe("genNumberInputHtml", () => {
+    it("keeps the unit next to the input inside the number wrapper", () => {
+        const html = genNumberInputHtml("timeout", 30, 0, 100, undefined, "s");
+
+        assert.match(html, /class="fn__size200 fn__flex-center fn__flex config-item__number"/);
+        assert.match(html, /<span class="ft__on-surface fn__flex-center">s<\/span>/);
+    });
+
+    it("renders a standalone input when there is no unit", () => {
+        const html = genNumberInputHtml("timeout", 30);
+
+        assert.match(html, /class="b3-text-field fn__flex-center fn__size200"/);
+        assert.doesNotMatch(html, /config-item__number/);
+    });
+});
 
 describe("genStackHtml", () => {
     it("renders descriptions with controls using the primary text color", () => {

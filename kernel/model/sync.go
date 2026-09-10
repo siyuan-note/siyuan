@@ -833,6 +833,9 @@ func formatRepoErrorMsg(err error) string {
 		msg = Conf.Language(189)
 	} else if errors.Is(err, dejavu.ErrRepoFatal) {
 		msg = Conf.Language(23)
+	} else if errors.Is(err, dejavu.ErrIndexFileChanged) {
+		// 同步索引期间工作空间文件被修改，明确提示用户稍后重试 https://ld246.com/article/1789052153692
+		msg = Conf.Language(384)
 	} else if errors.Is(err, cloud.ErrSystemTimeIncorrect) {
 		msg = Conf.Language(195)
 	} else if errors.Is(err, cloud.ErrDeprecatedVersion) {

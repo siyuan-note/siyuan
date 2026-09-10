@@ -2765,6 +2765,7 @@
 		"379": "Oturum süresi sınırına ulaşıldığı için ajan durduruldu. Devam etmek için bir mesaj gönderin veya Ayarlar - Yapay Zeka bölümünden zaman aşımını ayarlayın",
 		"380": "Şifrelenmiş not defterlerindeki kaynaklar için OCR desteklenmiyor",
 		"381": "Veritabanı bağlamaları şifreli not defterlerinin sınırlarını aşamaz",
-		"382": "[%s] veritabanı dışa aktarılamıyor. Belgenin veritabanı bağlamalarını ve veritabanının bulunduğu not defterini kontrol edin"
+		"382": "[%s] veritabanı dışa aktarılamıyor. Belgenin veritabanı bağlamalarını ve veritabanının bulunduğu not defterini kontrol edin",
+		"383": "Geçersiz dışa aktarma klasörü"
 	}
 }

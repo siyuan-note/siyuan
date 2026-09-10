@@ -2765,6 +2765,7 @@
 		"379": "Agent został zatrzymany z powodu przekroczenia limitu czasu sesji. Wyślij wiadomość, aby kontynuować, lub zmień limit czasu w Ustawienia - AI",
 		"380": "OCR nie jest obsługiwane dla zasobów w zaszyfrowanych notatnikach",
 		"381": "Powiązania baz danych nie mogą przekraczać granic zaszyfrowanych notatników",
-		"382": "Nie można wyeksportować bazy danych [%s]. Sprawdź powiązania baz danych dokumentu oraz notatnik zawierający bazę danych"
+		"382": "Nie można wyeksportować bazy danych [%s]. Sprawdź powiązania baz danych dokumentu oraz notatnik zawierający bazę danych",
+		"383": "Nieprawidłowy folder eksportu"
 	}
 }

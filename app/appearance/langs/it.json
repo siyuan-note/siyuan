@@ -2765,6 +2765,7 @@
 		"379": "L’agente si è fermato perché è stato raggiunto il limite di tempo della sessione. Invia un messaggio per continuare o modifica il timeout in Impostazioni - IA",
 		"380": "Il riconoscimento ottico dei caratteri non è supportato per le risorse nei quaderni crittografati",
 		"381": "I collegamenti ai database non possono oltrepassare i confini dei quaderni crittografati",
-		"382": "Impossibile esportare il database [%s]. Controlla i collegamenti ai database del documento e il quaderno che contiene il database"
+		"382": "Impossibile esportare il database [%s]. Controlla i collegamenti ai database del documento e il quaderno che contiene il database",
+		"383": "Cartella di esportazione non valida"
 	}
 }

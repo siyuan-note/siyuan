@@ -2765,6 +2765,7 @@
 		"379": "The agent stopped because the session time limit was reached. Send a message to continue, or adjust the timeout in Settings - AI",
 		"380": "OCR is not supported for assets in encrypted notebooks",
 		"381": "Database bindings cannot cross encrypted notebook boundaries",
-		"382": "Cannot export database [%s]. Check the document's database bindings and the notebook containing the database"
+		"382": "Cannot export database [%s]. Check the document's database bindings and the notebook containing the database",
+		"383": "Invalid export folder"
 	}
 }

@@ -857,6 +857,15 @@ func exportBrowserHTML(c *gin.Context) {
 		return
 	}
 
+	// folder 由客户端指定，禁止包含 ..、绝对路径等穿越组件，防止在导出目录之外写入 index.html
+	exportDir := filepath.Join(util.TempDir, "export")
+	tmpDir := filepath.Join(exportDir, folder)
+	if !gulu.File.IsSubPath(exportDir, tmpDir) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(383)
+		return
+	}
+
 	// 检测是否来自加密笔记本：folder 形如 <boxID>/<folderName>
 	boxID := ""
 	if parts := strings.SplitN(folder, "/", 2); len(parts) >= 1 && ast.IsNodeIDPattern(parts[0]) && model.IsEncryptedBox(parts[0]) {
@@ -870,7 +879,6 @@ func exportBrowserHTML(c *gin.Context) {
 		}
 	}
 
-	tmpDir := filepath.Join(util.TempDir, "export", folder)
 	htmlPath := filepath.Join(tmpDir, "index.html")
 	if err := filelock.WriteFile(htmlPath, []byte(htmlContent)); err != nil {
 		ret.Code = -1

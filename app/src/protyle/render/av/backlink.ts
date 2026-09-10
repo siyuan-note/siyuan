@@ -25,6 +25,22 @@ export const prepareBacklinkAV = (element: HTMLElement, targets: IBacklinkAVTarg
         if (!target?.matches.length) {
             return;
         }
+        if (initialized.has(database) && database.getAttribute("data-render") === "true") {
+            target.matches.forEach(match => {
+                const cells = database.querySelectorAll<HTMLElement>(
+                    `.av__row[data-id="${match.itemID}"] [data-col-id="${match.keyID}"], ` +
+                    `.av__gallery-item[data-id="${match.itemID}"] [data-field-id="${match.keyID}"]`
+                );
+                cells.forEach(cell => {
+                    cell.querySelectorAll<HTMLElement>('[data-type~="block-ref"][data-id]').forEach(ref => {
+                        if (match.defIDs.includes(ref.dataset.id)) {
+                            ref.classList.add("def--mark");
+                        }
+                    });
+                });
+            });
+            return;
+        }
         const match = target.matches[0];
         database.classList.add("av--backlink");
         if (!initialized.has(database)) {

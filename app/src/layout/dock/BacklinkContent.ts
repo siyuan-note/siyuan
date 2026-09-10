@@ -21,6 +21,7 @@ import {getAllEditor} from "../getAll";
 import {isMobile} from "../../util/functions";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {renderBacklink} from "../../protyle/wysiwyg/renderBacklink";
+import {hasAVEditorSession} from "../../protyle/render/av/editorSession";
 import {BACKLINK_BLOCK_TYPES, configureBacklinkTypeFold, normalizeBacklinkFoldTypes} from "../../protyle/wysiwyg/backlinkTypeFold";
 import {
     getBottomBacklinkVisibility,
@@ -221,6 +222,7 @@ export class BacklinkContent extends Model {
             });
         };
         this.element.addEventListener("focusout", this.panelFocusoutListener);
+        this.element.addEventListener("av-editor-close", this.panelFocusoutListener);
         if (this.type !== "bottom") {
             this.visibilityObserver = new IntersectionObserver((entries) => {
                 if (entries[0].isIntersecting) {
@@ -1134,7 +1136,8 @@ export class BacklinkContent extends Model {
                 return;
             }
             svgElement.removeAttribute("disabled");
-            if (record.editor?.protyle.element.contains(document.activeElement)) {
+            if (record.editor && (record.editor.protyle.element.contains(document.activeElement) ||
+                hasAVEditorSession(record.editor.protyle.element))) {
                 record.contextDirty = true;
                 this.dirty = true;
                 this.pendingRootIDs.add(docId);
@@ -2261,7 +2264,8 @@ export class BacklinkContent extends Model {
     }
 
     public refreshAfterIndex() {
-        if (this.destroyed || !this.blockId || !this.dirty || this.element.contains(document.activeElement)) {
+        if (this.destroyed || !this.blockId || !this.dirty || this.element.contains(document.activeElement) ||
+            hasAVEditorSession(this.element)) {
             return;
         }
         if (this.type === "bottom") {
@@ -2279,7 +2283,7 @@ export class BacklinkContent extends Model {
             return;
         }
         if (shouldDeferBottomBacklinkRefresh(
-            this.element.contains(document.activeElement),
+            this.element.contains(document.activeElement) || hasAVEditorSession(this.element),
             ignoreFocus
         )) {
             return;
@@ -2329,6 +2333,7 @@ export class BacklinkContent extends Model {
         }
         if (this.panelFocusoutListener) {
             this.element.removeEventListener("focusout", this.panelFocusoutListener);
+            this.element.removeEventListener("av-editor-close", this.panelFocusoutListener);
         }
         this.visibilityObserver?.disconnect();
         this.editors.forEach(item => {

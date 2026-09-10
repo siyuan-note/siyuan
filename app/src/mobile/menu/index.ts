@@ -193,6 +193,13 @@ const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettingTab>, 
                     return false;
                 }
             }
+            // 返回时优先关闭设置页内已展开的子视图，与子视图返回按钮的行为保持一致
+            const views = root ? Array.from(root.querySelectorAll<HTMLElement>(".config__view--show")) : [];
+            const backElement = views[views.length - 1]?.querySelector<HTMLElement>('[data-action="back"]');
+            if (backElement) {
+                backElement.click();
+                return false;
+            }
             if (returnCallback) {
                 returnCallback();
             } else {

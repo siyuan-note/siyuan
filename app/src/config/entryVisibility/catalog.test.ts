@@ -133,10 +133,10 @@ test("top bar catalog includes a fixed drag boundary in built-in DOM order", () 
     assert.equal(TOP_BAR_ROOT_PATH, "topBar");
     assert.deepEqual(getEntryCatalogChildren(TOP_BAR_ROOT_PATH).map((item) => item.key), [
         "barSync",
-        "barBack",
-        "barForward",
         "barDailyNote",
         "barRiffCard",
+        "barBack",
+        "barForward",
         "drag",
         "toolbarVIP",
         "toolbarTitle",
@@ -248,7 +248,7 @@ test("top bar catalog inserts plugin entries on their declared side of the fixed
         }]);
         const children = getEntryCatalogChildren(TOP_BAR_ROOT_PATH);
         const keys = children.map((item) => item.key);
-        assert.deepEqual(keys.slice(0, 7), ["barSync", "barBack", "barForward", "barDailyNote", "barRiffCard", leftKey, "drag"]);
+        assert.deepEqual(keys.slice(0, 7), ["barSync", "barDailyNote", "barRiffCard", "barBack", "barForward", leftKey, "drag"]);
         assert.deepEqual(keys.slice(keys.indexOf("toolbarTitle"), keys.indexOf("barCommand")), [
             "toolbarTitle",
             rightKey,

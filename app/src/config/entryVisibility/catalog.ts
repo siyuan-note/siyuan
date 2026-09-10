@@ -586,8 +586,6 @@ const statusBarCatalogSection: IEntryCatalogSection = {
 
 const topBarBuiltinChildren = [
     node("barSync", lang("syncNow")),
-    node("barBack", lang("goBack")),
-    node("barForward", lang("goForward")),
     node("barDailyNote", lang("dailyNote"), true, undefined, undefined, {
         defaultVisible: () => false,
         simpleDefaultVisible: true,
@@ -598,6 +596,8 @@ const topBarBuiltinChildren = [
         simpleDefaultVisible: true,
         customDefaultVisible: false,
     }),
+    node("barBack", lang("goBack")),
+    node("barForward", lang("goForward")),
     fixed("drag", lang("entryTopBarDrag")),
     node("toolbarVIP", lang("accountDisplayVIP"), true, undefined, undefined, {
         defaultVisible: () => window.siyuan.config.account.displayVIP,

@@ -1,5 +1,6 @@
 import {getEventName, updateHotkeyTip} from "../protyle/util/compatibility";
 import {setPosition} from "../util/setPosition";
+import {getAnchoredMenuPosition} from "./menuPosition";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
@@ -549,9 +550,27 @@ export class Menu {
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.classList.remove("fn__none");
         this.position = options;
-        setPosition(this.element, options.x - (options.isLeft ? this.element.clientWidth : 0), options.y, options.h, options.w);
-        this.updateMaxHeight(this.element, this.element.lastElementChild as HTMLElement);
+        this.setPopupPosition();
         this.startTrackingTargetPosition();
+    }
+
+    private setPopupPosition() {
+        const options = this.position;
+        const itemsElement = this.element.lastElementChild as HTMLElement;
+        if (options.h > 0) {
+            // 先按锚点一侧的可用空间限制内容高度，避免长菜单跨过按钮。
+            itemsElement.style.maxHeight = "";
+            const menuHeight = this.element.getBoundingClientRect().height;
+            const position = getAnchoredMenuPosition(options.y, options.h, menuHeight,
+                window.innerHeight, getTopBarHeight());
+            const chromeHeight = menuHeight - itemsElement.getBoundingClientRect().height;
+            itemsElement.style.maxHeight = Math.max(0, position.height - chromeHeight) + "px";
+            setPosition(this.element, options.x - (options.isLeft ? this.element.clientWidth : 0),
+                position.top, 0, options.w);
+            return;
+        }
+        setPosition(this.element, options.x - (options.isLeft ? this.element.clientWidth : 0), options.y, options.h, options.w);
+        this.updateMaxHeight(this.element, itemsElement);
     }
 
     public resetPosition() {
@@ -572,8 +591,7 @@ export class Menu {
             this.position.h = rect.height;
             this.position.w = rect.width;
         }
-        setPosition(this.element, this.position.x - (this.position.isLeft ? this.element.clientWidth : 0), this.position.y, this.position.h, this.position.w);
-        this.updateMaxHeight(this.element, this.element.lastElementChild as HTMLElement);
+        this.setPopupPosition();
         this.element.querySelectorAll(".b3-menu__item--show .b3-menu__submenu").forEach((item: HTMLElement) => {
             // 可能有多层子菜单，都要重新定位
             this.showSubMenu(item);

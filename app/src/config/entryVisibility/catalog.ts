@@ -476,7 +476,10 @@ const toolbarBuiltinChildren = DESKTOP_TOOLBAR_ENTRIES.map((item) => {
     }
     const fontControl = ["font-family", "font-size"].includes(item.key);
     return node(item.key, lang(item.lang), !fontControl, undefined, undefined,
-        fontControl ? {customDefaultVisible: false} : undefined);
+        fontControl ? {
+            defaultVisible: () => typeof window === "undefined" || !window.siyuan.mobile,
+            customDefaultVisible: false,
+        } : undefined);
 });
 const toolbarBuiltinNodeMap = new Map(toolbarBuiltinChildren.map((item) => [item.key, item]));
 

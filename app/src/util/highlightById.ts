@@ -48,6 +48,25 @@ export const scrollCenter = (
     position: ScrollLogicalPosition = "nearest",
     behavior: ScrollBehavior = "auto"
 ) => {
+    const cellEditor = protyle.wysiwyg.element.closest(".table__cell-editor");
+    const cellScroll = cellEditor?.parentElement.closest<HTMLElement>(".protyle-content");
+    if (cellScroll && position === "nearest") {
+        // 单元格片段没有独立视口，只在光标离开所属文档的可视区域时滚动。
+        const selection = getSelection();
+        const range = selection.rangeCount ? selection.getRangeAt(0) : undefined;
+        const target = nodeElement || (range && hasClosestBlock(range.startContainer));
+        const caretRect = !nodeElement && range?.getBoundingClientRect();
+        const rect = caretRect && caretRect.height > 0 ? caretRect : target && target.getBoundingClientRect();
+        if (rect) {
+            const viewport = cellScroll.getBoundingClientRect();
+            const offset = rect.top < viewport.top ? rect.top - viewport.top :
+                rect.bottom > viewport.bottom - 16 ? rect.bottom - viewport.bottom + 16 : 0;
+            if (offset) {
+                cellScroll.scroll({top: cellScroll.scrollTop + offset, behavior});
+            }
+        }
+        return;
+    }
     if (nodeElement) {
         revealTabsForTarget(nodeElement);
     }

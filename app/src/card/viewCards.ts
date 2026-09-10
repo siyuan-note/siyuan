@@ -309,7 +309,7 @@ const renderViewItem = (blocks: IBlock[], title: string, deckType: string) => {
             listHTML += `<div data-type="card-item" class="b3-list-item${isFirst ? " b3-list-item--focus" : ""}${isMobile() ? "" : " b3-list-item--hide-action"}" data-id="${item.id}">
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
 ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
-<span class="b3-list-item__text">${item.content || Constants.ZWSP}</span>
+<span class="b3-list-item__text">${escapeHtml(item.content || Constants.ZWSP)}</span>
 <span class="${(isMobile() || !hPath) ? "fn__none " : ""}b3-list-item__meta b3-list-item__meta--ellipsis" title="${escapeAttr(hPath)}">${escapeHtml(hPath)}</span>
 <span data-position="parentE" aria-label="${window.siyuan.languages.revisionCount}" class="ariaLabel counter${item.riffCard?.reps === 0 ? " fn__none" : ""}">${item.riffCard?.reps}</span>
 <span data-position="parentE" aria-label="${window.siyuan.languages.nextDue}" class="ariaLabel b3-list-item__meta${!item.riffCard?.due ? " fn__none" : ""}">${dayjs(item.riffCard?.due).format("YYYY-MM-DD")}</span>
@@ -324,7 +324,7 @@ ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
         } else {
             // 块被删除的情况
             listHTML += `<div data-type="card-item" class="b3-list-item${isMobile() ? "" : " b3-list-item--hide-action"}">
-<span class="b3-list-item__text">${item.content}</span>
+<span class="b3-list-item__text">${escapeHtml(item.content)}</span>
 <span data-position="parentE" data-type="remove" data-id="${item.id}" class="b3-list-item__action b3-list-item__action--warning ariaLabel" aria-label="${window.siyuan.languages.removeDeck}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span>

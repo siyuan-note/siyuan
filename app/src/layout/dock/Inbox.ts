@@ -300,7 +300,13 @@ ${data.shorthandContent}
             },
             separatorPosition: "top",
         });
-        window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16});
+        const button = (event.target as Element).closest("[data-type='more']");
+        const rect = !itemElement ? button?.getBoundingClientRect() : undefined;
+        window.siyuan.menus.menu.popup({
+            x: rect ? rect.left : event.clientX,
+            y: rect ? rect.bottom : event.clientY + 16,
+            h: rect ? rect.height : 0,
+        });
     }
 
     private remove(removeIds?: string[]) {

@@ -299,3 +299,87 @@ func TestCheckAuthRemoteSessionOrigin(t *testing.T) {
 		t.Fatalf("cross-origin status = %d, want %d", recorder.Code, http.StatusUnauthorized)
 	}
 }
+
+// TestCheckAuthLockScreenLocalHostPassThrough 验证设置锁屏密码时本机放行分支拒绝
+// 浏览器标记的跨站请求与非本机 Origin/Host 请求，无浏览器头的本机客户端及同源请求放行
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-9gpj-3rm3-x42m
+func TestCheckAuthLockScreenLocalHostPassThrough(t *testing.T) {
+	originalConf := Conf
+	originalWorkspaceDir := util.WorkspaceDir
+	Conf = NewAppConf()
+	Conf.AccessAuthCode = "test-access-auth-code"
+	util.WorkspaceDir = "test-workspace"
+	t.Cleanup(func() {
+		Conf = originalConf
+		util.WorkspaceDir = originalWorkspaceDir
+	})
+
+	engine := gin.New()
+	engine.GET("/assets/icon.png", CheckAuth, func(c *gin.Context) {
+		c.Status(http.StatusNoContent)
+	})
+	engine.POST("/api/system/exit", CheckAuth, func(c *gin.Context) {
+		c.Status(http.StatusNoContent)
+	})
+
+	newRequest := func(method, target, host string, headers map[string]string) *httptest.ResponseRecorder {
+		request := httptest.NewRequest(method, target, nil)
+		request.RemoteAddr = "127.0.0.1:1234"
+		request.Host = "127.0.0.1:6806"
+		if "" != host {
+			request.Host = host
+		}
+		for key, value := range headers {
+			request.Header.Set(key, value)
+		}
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, request)
+		return recorder
+	}
+
+	t.Run("headless local client allowed", func(t *testing.T) {
+		if recorder := newRequest(http.MethodGet, "/assets/icon.png", "", nil); recorder.Code != http.StatusNoContent {
+			t.Fatalf("assets status = %d, want %d", recorder.Code, http.StatusNoContent)
+		}
+		if recorder := newRequest(http.MethodPost, "/api/system/exit", "", nil); recorder.Code != http.StatusNoContent {
+			t.Fatalf("exit status = %d, want %d", recorder.Code, http.StatusNoContent)
+		}
+	})
+
+	t.Run("same-origin browser request allowed", func(t *testing.T) {
+		headers := map[string]string{
+			"Sec-Fetch-Site": "same-origin",
+			"Origin":         "http://127.0.0.1:6806",
+		}
+		if recorder := newRequest(http.MethodPost, "/api/system/exit", "", headers); recorder.Code != http.StatusNoContent {
+			t.Fatalf("exit status = %d, want %d", recorder.Code, http.StatusNoContent)
+		}
+	})
+
+	t.Run("cross-site browser request denied", func(t *testing.T) {
+		headers := map[string]string{
+			"Sec-Fetch-Site": "cross-site",
+		}
+		if recorder := newRequest(http.MethodGet, "/assets/icon.png", "", headers); recorder.Code != http.StatusUnauthorized {
+			t.Fatalf("assets status = %d, want %d", recorder.Code, http.StatusUnauthorized)
+		}
+		if recorder := newRequest(http.MethodPost, "/api/system/exit", "", headers); recorder.Code != http.StatusUnauthorized {
+			t.Fatalf("exit status = %d, want %d", recorder.Code, http.StatusUnauthorized)
+		}
+	})
+
+	t.Run("non-local origin denied", func(t *testing.T) {
+		headers := map[string]string{
+			"Origin": "https://evil.example",
+		}
+		if recorder := newRequest(http.MethodPost, "/api/system/exit", "", headers); recorder.Code != http.StatusUnauthorized {
+			t.Fatalf("exit status = %d, want %d", recorder.Code, http.StatusUnauthorized)
+		}
+	})
+
+	t.Run("non-local host denied", func(t *testing.T) {
+		if recorder := newRequest(http.MethodGet, "/assets/icon.png", "evil.example", nil); recorder.Code != http.StatusUnauthorized {
+			t.Fatalf("assets status = %d, want %d", recorder.Code, http.StatusUnauthorized)
+		}
+	})
+}

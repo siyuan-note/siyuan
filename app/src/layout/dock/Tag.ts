@@ -118,7 +118,7 @@ export class Tag extends Model {
                         case "min":
                             getDockByType("tag").toggleModel("tag", false, true);
                             break;
-                        case "sort":
+                        case "sort": {
                             window.siyuan.menus.menu.remove();
                             window.siyuan.menus.menu.append(new MenuItem({
                                 icon: window.siyuan.config.tag.sort === 0 ? "iconSelect" : undefined,
@@ -168,10 +168,12 @@ export class Tag extends Model {
                                     this.update();
                                 },
                             }).element);
-                            window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+                            const rect = target.getBoundingClientRect();
+                            window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height});
                             event.preventDefault();
                             event.stopPropagation();
                             break;
+                        }
                         case "refresh":
                             this.update();
                             break;

@@ -24,7 +24,7 @@ import {
     updateFileTreeItemIcon,
 } from "../../emoji/fileTreeIcon";
 import {importNotebook, newEncryptedNotebook, newNotebook, openEncryptedNotebook} from "../../util/mount";
-import {isNotCtrl, isOnlyMeta, setStorageVal, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
+import {isNotCtrl, isOnlyMeta, isPhablet, setStorageVal, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {
     hasClosestByClassName,
@@ -207,7 +207,8 @@ export class Files extends Model {
                     event.preventDefault();
                     break;
                 } else if (type === "more") {
-                    this.initMoreMenu().popup({x: event.clientX, y: event.clientY});
+                    const rect = target.getBoundingClientRect();
+                    this.initMoreMenu().popup({x: rect.left, y: rect.bottom, h: rect.height});
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -231,7 +232,7 @@ export class Files extends Model {
                         app: options.app,
                         removeCurrentTab: false,
                         id: target.getAttribute("data-node-id"),
-                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                        action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                         afterOpen() {
                             target.removeAttribute("data-opening");
                         }
@@ -270,7 +271,7 @@ export class Files extends Model {
                                     openFileById({
                                         app: options.app,
                                         id: liElement.getAttribute("data-node-id"),
-                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                                        action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                                         afterOpen() {
                                             liElement.removeAttribute("data-opening");
                                         }
@@ -333,16 +334,20 @@ export class Files extends Model {
                             if (type === "new") {
                                 newFileInTree(options.app, notebookId, pathString);
                             } else if (type === "more-root") {
+                                const rect = target.getBoundingClientRect();
                                 initNavigationMenu(options.app, target.parentElement).popup({
-                                    x: event.clientX,
-                                    y: event.clientY
+                                    x: rect.left,
+                                    y: rect.bottom,
+                                    h: rect.height,
                                 });
                             }
                         }
                         if (type === "more-file") {
+                            const rect = target.getBoundingClientRect();
                             initFileMenu(options.app, notebookId, pathString, target.parentElement).popup({
-                                x: event.clientX,
-                                y: event.clientY
+                                x: rect.left,
+                                y: rect.bottom,
+                                h: rect.height,
                             });
                         }
                         event.preventDefault();
@@ -409,7 +414,7 @@ export class Files extends Model {
                                         app: options.app,
                                         id: target.getAttribute("data-node-id"),
                                         position: "right",
-                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                                        action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                                         afterOpen() {
                                             target.removeAttribute("data-opening");
                                         }
@@ -419,7 +424,7 @@ export class Files extends Model {
                                         app: options.app,
                                         id: target.getAttribute("data-node-id"),
                                         position: "bottom",
-                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                                        action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                                         afterOpen() {
                                             target.removeAttribute("data-opening");
                                         }
@@ -430,7 +435,7 @@ export class Files extends Model {
                                         app: options.app,
                                         removeCurrentTab: false,
                                         id: target.getAttribute("data-node-id"),
-                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                                        action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                                         afterOpen() {
                                             target.removeAttribute("data-opening");
                                         }
@@ -439,7 +444,7 @@ export class Files extends Model {
                                     openFileById({
                                         app: options.app,
                                         id: target.getAttribute("data-node-id"),
-                                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                                        action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                                         afterOpen() {
                                             target.removeAttribute("data-opening");
                                         }

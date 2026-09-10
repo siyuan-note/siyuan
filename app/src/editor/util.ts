@@ -1,3 +1,4 @@
+import {isPhablet} from "../protyle/util/compatibility";
 import {Tab} from "../layout/Tab";
 import {Editor} from "./index";
 import {Wnd} from "../layout/Wnd";
@@ -396,7 +397,7 @@ const getUnInitTab = (options: IOpenFileOptions) => {
                 initObj.notebookId = options.notebookId;
                 initObj.mode = options.mode;
                 if (options.zoomIn) {
-                    initObj.action = [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS];
+                    initObj.action = [Constants.CB_GET_ALL, isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS];
                 } else {
                     initObj.action = options.action;
                 }
@@ -626,7 +627,7 @@ const newTab = (options: IOpenFileOptions) => {
                         blockId: options.id,
                         rootId: options.rootID,
                         notebookId: options.notebookId,
-                        action: [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS],
+                        action: [Constants.CB_GET_ALL, isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS],
                         scrollPosition: options.scrollPosition,
                     });
                 } else {

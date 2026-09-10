@@ -70,6 +70,30 @@ html[data-frontend="browser-desktop"] {
   }
 }
 
+// 仅顶部工具栏避让原生窗口控件，正文与侧栏不增加横向留白。
+:root[data-ios-window-controls] #toolbar {
+  padding-left: calc(var(--ios-window-controls-left, 0px) + 5px);
+  padding-right: calc(var(--ios-window-controls-right, 0px) + 5px);
+  padding-top: var(--ios-window-safe-top, 0px);
+  height: max(calc(32px + var(--ios-window-safe-top, 0px)), var(--ios-window-controls-height, 0px));
+  align-items: flex-start;
+
+  #toolbarVIP {
+    align-self: center;
+  }
+}
+
+:root[data-ios-window-controls] #status {
+  height: calc(32px + var(--ios-window-safe-bottom, 0px));
+  padding-bottom: var(--ios-window-safe-bottom, 0px);
+}
+
+// 融合页签沿用原有的 42px 顶栏，仅增加横向占位，避免按钮与页签使用不同的纵向基准。
+:root[data-ios-window-controls] .body--toolbar-hide #toolbar {
+  height: 42px;
+  padding-top: 0;
+}
+
 .toolbar {
   box-sizing: border-box;
   height: 32px;
@@ -260,8 +284,8 @@ html[data-frontend="browser-desktop"] {
 }
 
 .file-tree {
-  .block__icons .block__icon,
-  &:not(.fullscreen) .block__icons .fn__space {
+  .block__icons:not(.protyle-wysiwyg *) .block__icon:not(.backlinkList__toggle),
+  &:not(.fullscreen) .block__icons:not(.protyle-wysiwyg *) .fn__space {
     display: none;
     transition: opacity .3s cubic-bezier(0, 0, .2, 1) 0ms, display .3s cubic-bezier(0, 0, .2, 1) 0ms allow-discrete;
   }
@@ -270,13 +294,13 @@ html[data-frontend="browser-desktop"] {
     display: none;
   }
 
-  &:hover .block__icons .fn__space {
+  &:hover .block__icons:not(.protyle-wysiwyg *) .fn__space {
     display: block;
   }
 
-  &:hover .block__icons .block__icon:not([disabled]),
-  &:not(.fullscreen):hover .block__icons .fn__space,
-  &.fullscreen .block__icons .block__icon:not([disabled]) {
+  &:hover .block__icons:not(.protyle-wysiwyg *) .block__icon:not([disabled], .backlinkList__toggle),
+  &:not(.fullscreen):hover .block__icons:not(.protyle-wysiwyg *) .fn__space,
+  &.fullscreen .block__icons:not(.protyle-wysiwyg *) .block__icon:not([disabled], .backlinkList__toggle) {
     opacity: 1;
     display: flex;
     @starting-style {
@@ -284,7 +308,7 @@ html[data-frontend="browser-desktop"] {
     }
   }
 
-  &:hover .block__icons .block__icon[disabled] {
+  &:hover .block__icons:not(.protyle-wysiwyg *) .block__icon[disabled]:not(.backlinkList__toggle) {
     opacity: .38;
     display: block;
     cursor: not-allowed;

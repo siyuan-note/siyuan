@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260909090723"
+		"updated": "20260910080119"
 	},
 	"Children": [
 		{
@@ -2704,7 +2704,7 @@
 			"Properties": {
 				"ID": "20240530101000-grqaq7u",
 				"id": "20240530101000-hen4g1y",
-				"updated": "20260909090723"
+				"updated": "20260910080119"
 			},
 			"Children": [
 				{
@@ -2732,21 +2732,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260909090723-or0hf4r",
-				"updated": "20260909090723"
+				"updated": "20260910080119"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "セルをクリックすると編集できます。テーブルの作成直後は、再度クリックせずに入力できます。セルにカーソルを移動して "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "F2"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " を押しても編集を開始できます。セルに通常の段落が一つだけ含まれる場合、"
+					"Data": "セルをクリックすると編集できます。テーブルの作成直後は、再度クリックせずに入力できます。セルに通常の段落が一つだけ含まれる場合、"
 				},
 				{
 					"Type": "NodeTextMark",

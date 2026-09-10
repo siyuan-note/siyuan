@@ -55,6 +55,9 @@ var importMdCmd = &cobra.Command{
 		}
 
 		if dryRun {
+			if err := model.ValidateImportFromLocalPath(notebook, absPath, targetPath); err != nil {
+				return formatNotebookWriteError(notebook, err)
+			}
 			fmt.Printf("[dry-run] Would import Markdown from \"%s\" to notebook %s\n", filePath, notebook)
 			return nil
 		}
@@ -136,7 +139,7 @@ var importDataCmd = &cobra.Command{
 func init() {
 	importMdCmd.Flags().String("file", "", "file or directory path")
 	importMdCmd.Flags().StringP("notebook", "n", "", "notebook ID")
-	importMdCmd.Flags().String("path", "", "target internal path (default /)")
+	importMdCmd.Flags().String("path", "", "target parent document internal path, with or without .sy suffix (default /)")
 	importMdCmd.Flags().String("hpath", "", "target human-readable path")
 
 	importSYCmd.Flags().String("file", "", ".sy.zip file path")

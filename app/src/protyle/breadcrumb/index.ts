@@ -29,7 +29,7 @@ import {Menu} from "../../plugin/Menu";
 import {getNoContainerElement} from "../wysiwyg/getBlock";
 import {openTitleMenu} from "../header/openTitleMenu";
 import {emitOpenMenu} from "../../plugin/EventBus";
-import {isInAndroid, isInHarmony, isIPad, isMac, updateHotkeyTip} from "../util/compatibility";
+import {isInAndroid, isInHarmony, isIPad, isMac, isPhablet, updateHotkeyTip} from "../util/compatibility";
 import {isEncryptedBox} from "../../util/pathName";
 import {listIndent, listOutdent} from "../wysiwyg/list";
 import {improveBreadcrumbAppearance} from "../wysiwyg/renderBacklink";
@@ -102,6 +102,7 @@ ${padHTML}
                     this.openChildrenMenu(protyle, itemElement.getAttribute("data-node-id"), {
                         x: targetRect.left,
                         y: targetRect.bottom,
+                        h: targetRect.height,
                         isLeft: false,
                     });
                     event.preventDefault();
@@ -118,7 +119,7 @@ ${padHTML}
                         openFileById({
                             app: protyle.app,
                             id,
-                            action: id === protyle.block.rootID ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL]
+                            action: id === protyle.block.rootID ? [isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS] : [isPhablet() ? Constants.CB_GET_HL : Constants.CB_GET_FOCUS, Constants.CB_GET_ALL]
                         });
                     } else {
                         zoomOut({protyle, id});
@@ -145,7 +146,7 @@ ${padHTML}
                         });
                     } else {
                         const targetRect = target.getBoundingClientRect();
-                        openTitleMenu(protyle, {x: targetRect.right, y: targetRect.bottom, isLeft: true}, Constants.MENU_FROM_TITLE_BREADCRUMB);
+                        openTitleMenu(protyle, {x: targetRect.right, y: targetRect.bottom, h: targetRect.height, isLeft: true}, Constants.MENU_FROM_TITLE_BREADCRUMB);
                     }
                     event.stopPropagation();
                     event.preventDefault();
@@ -155,6 +156,7 @@ ${padHTML}
                     this.showMenu(protyle, {
                         x: targetRect.right,
                         y: targetRect.bottom,
+                        h: targetRect.height,
                         isLeft: true,
                     });
                     event.stopPropagation();
@@ -170,6 +172,7 @@ ${padHTML}
                         protyle,
                         id: protyle.block.rootID,
                         focusId: protyle.block.id,
+                        suppressFocus: isPhablet(),
                         dataDocType: "NodeDocument",
                         callback: () => {
                             element.querySelector('[data-type="context"]').classList.add("block__icon--active");
@@ -240,6 +243,15 @@ ${padHTML}
             }
         });
         /// #if !MOBILE
+        element.querySelector("[data-type='doc']").addEventListener("contextmenu", (event: MouseEvent) => {
+            if (event.shiftKey) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+            openTitleMenu(protyle, {x: rect.right, y: rect.bottom, h: rect.height, isLeft: true}, Constants.MENU_FROM_TITLE_BREADCRUMB);
+        });
         this.element.addEventListener("contextmenu", (event) => {
             const itemElement = (event.target as HTMLElement).closest(".protyle-breadcrumb__item");
             if (!itemElement || !this.element.contains(itemElement)) {
@@ -276,6 +288,7 @@ ${padHTML}
                 this.openChildrenMenu(protyle, itemElement.getAttribute("data-node-id"), {
                     x: itemRect.left,
                     y: itemRect.bottom,
+                    h: itemRect.height,
                     isLeft: false,
                 }, true);
                 event.preventDefault();

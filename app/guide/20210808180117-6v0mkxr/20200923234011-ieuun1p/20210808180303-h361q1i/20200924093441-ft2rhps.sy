@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260909090723"
+		"updated": "20260910080119"
 	},
 	"Children": [
 		{
@@ -2548,7 +2548,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-qr9enpx",
-				"updated": "20260909090723"
+				"updated": "20260910080119"
 			},
 			"Children": [
 				{
@@ -2576,21 +2576,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260908091355-rch0008",
-				"updated": "20260909090723"
+				"updated": "20260910080119"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Click a cell to edit it. After creating a table, type directly without clicking again. You can also place the caret in a cell and press "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "F2"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to start editing. When the cell contains only one ordinary paragraph, "
+					"Data": "Click a cell to edit it. After creating a table, type directly without clicking again. When the cell contains only one ordinary paragraph, "
 				},
 				{
 					"Type": "NodeTextMark",

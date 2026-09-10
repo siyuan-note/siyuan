@@ -2363,7 +2363,8 @@ func createDoc0(boxID, p, title, dom string, titleEmpty, syncWrite bool) (tree *
 	tree.HPath = validation.hPath
 	tree.ID = validation.id
 	tree.Root.ID = validation.id
-	tree.Root.Spec = treenode.CurrentSpec
+	tree.Root.Spec = treenode.BaseSpec
+	treenode.UpgradeSpec(tree)
 	updated := util.TimeFromID(validation.id)
 	tree.Root.KramdownIAL = [][]string{{"id", validation.id}, {"title", html.EscapeAttrVal(validation.title)}, {"updated", updated}}
 	if validation.isEmpty {

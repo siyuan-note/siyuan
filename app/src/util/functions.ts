@@ -122,8 +122,8 @@ export const duplicateNameAddOne = (name: string) => {
 /// #if !BROWSER
 // 红绿灯为原生控件不随缩放变化，缩小时按 zoom 补偿 --b3-toolbar-left-mac 避免与工具栏内容重叠
 export const setToolbarLeftMac = (zoom: number) => {
-    // 非桌面端、非 macOS 不补偿（让 body--win32 的 class 规则生效）
-    if (!window.siyuan.config || getBackend() !== "darwin") {
+    // 窗口控件属于本机客户端，连接远程内核时仍按本机平台计算占位。
+    if (!window.siyuan.config || !navigator.platform.toUpperCase().includes("MAC")) {
         return;
     }
     // 全屏下红绿灯隐藏，清除内联补偿让 body--fullscreen 的 5px 生效

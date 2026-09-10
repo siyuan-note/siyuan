@@ -31,6 +31,7 @@ import {afterLayoutReady} from "../plugin/loader";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
 import {
     isDisabledFeature,
+    isPhablet,
     isSensitiveLayoutData,
     isSensitiveSearchConfig,
     setStorageVal,
@@ -909,6 +910,11 @@ export const newModelByInitData = (app: App, tab: Tab, json: any) => {
                 json.action = json.action.filter((item: string) => item !== Constants.CB_GET_ALL);
             }
         }
+        const action = Array.isArray(json.action) ? [...json.action] : (json.action ? [json.action] : []);
+        // 手机和平板恢复页签时只恢复浏览位置，避免自动聚焦弹出输入法。
+        if (!isPhablet()) {
+            action.push(Constants.CB_GET_FOCUS);
+        }
         const editorModel = new Editor({
             app,
             tab,
@@ -917,8 +923,7 @@ export const newModelByInitData = (app: App, tab: Tab, json: any) => {
             notebookId: json.notebookId,
             mode: json.mode,
             scrollPosition: json.scrollPosition,
-            action: Array.isArray(json.action) ? json.action.concat(Constants.CB_GET_FOCUS) :
-                (json.action ? [json.action, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS]),
+            action,
             afterInitProtyle(editor) {
                 if (json.databaseRowId) {
                     editor.protyle.databaseAttributePanel?.expand();

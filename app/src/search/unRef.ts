@@ -196,6 +196,6 @@ export const unRefMoreMenu = (target: Element, element: Element, edit: Protyle) 
     menu.fullscreen();
     /// #else
     const rect = target.getBoundingClientRect();
-    menu.open({x: rect.right, y: rect.bottom, isLeft: true});
+    menu.open({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true});
     /// #endif
 };

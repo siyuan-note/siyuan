@@ -1049,7 +1049,8 @@ export const openMenuPanel = (options: {
                             }
                         });
                     }
-                    menu.open({x: event.clientX, y: event.clientY, h: 28});
+                    const rect = target.getBoundingClientRect();
+                    menu.open({x: rect.left, y: rect.bottom, h: rect.height});
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -1106,7 +1107,8 @@ export const openMenuPanel = (options: {
                             setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height, 0, true);
                         }
                     });
-                    menu.open({x: event.clientX, y: event.clientY, h: 28});
+                    const rect = target.getBoundingClientRect();
+                    menu.open({x: rect.left, y: rect.bottom, h: rect.height});
                     event.preventDefault();
                     event.stopPropagation();
                     break;

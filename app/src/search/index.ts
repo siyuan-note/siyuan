@@ -6,6 +6,7 @@ import {setPanelFocus} from "../layout/util";
 import type {App} from "../index";
 import {clearOBG} from "../layout/dock/util";
 import {cancelSearchRequest} from "./request";
+import {isPhablet} from "../protyle/util/compatibility";
 
 export class Search extends Model {
     public element: HTMLElement;
@@ -46,7 +47,9 @@ export class Search extends Model {
             }
         }
         inputElement.value = text;
-        inputElement.select();
+        if (!isPhablet()) {
+            inputElement.select();
+        }
         inputElement.dispatchEvent(new CustomEvent("input"));
     }
 

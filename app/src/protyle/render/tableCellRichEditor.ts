@@ -20,6 +20,7 @@ import {TABLE_CELL_SLASH_IDS} from "../util/tableCellRichMenu";
 import {captureRichCellSelection, restoreRichCellSelection} from "../util/tableCellRichSelection";
 import {matchHotKey} from "../util/hotKey";
 import {bindTableCellRichDrag} from "../util/tableCellRichDrag";
+import {getTableCellEditorLute} from "../util/tableCellRichLute";
 
 let activeEditor: {cell: Element, finish: () => void} | undefined;
 
@@ -39,7 +40,8 @@ export const applyTableCellRichInlineMark = (owner: IProtyle, cells: HTMLTableCe
         app: owner.app,
         runtimeCapabilities: {
             upload: false, websocket: false, pluginExtensions: false, customBlockRender: false,
-            lute: getAVRichTextLute(),
+            lute: getTableCellEditorLute(getAVRichTextLute(),
+                window.siyuan.config.editor.markdown.blockFullWidthTaskList !== false),
             sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true),
             getUnsupportedPasteBlocks: html => getAVRichTextUnsupportedPasteBlocks(html, true),
             restoreLuteMarkdownSyntax: configureAVRichTextLute,
@@ -144,7 +146,8 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             websocket: false,
             pluginExtensions: false,
             customBlockRender: false,
-            lute: getAVRichTextLute(),
+            lute: getTableCellEditorLute(getAVRichTextLute(),
+                window.siyuan.config.editor.markdown.blockFullWidthTaskList !== false),
             lockedOptions: {toolbar, hint},
             sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true),
             getUnsupportedPasteBlocks: html => getAVRichTextUnsupportedPasteBlocks(html, true),
@@ -242,6 +245,36 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             hideElements(["toolbar"], fragment.protyle);
         }
     }, {capture: true, signal});
+    host.addEventListener("mousedown", event => {
+        if (event.button !== 0 || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey ||
+            !(event.target instanceof Element) || event.target.closest(".protyle-action, .protyle-toolbar, .protyle-table-control")) {
+            return;
+        }
+        const drag = new AbortController();
+        let selectingCells = false;
+        document.addEventListener("mousemove", move => {
+            const target = document.elementFromPoint(move.clientX, move.clientY)?.closest<HTMLTableCellElement>("td, th");
+            if (!target || target.closest('[data-type="NodeTable"]') !== table || (!selectingCells && target === cell)) {
+                return;
+            }
+            if (!selectingCells) {
+                selectingCells = true;
+                finish();
+                hideElements(["toolbar"], owner);
+            }
+            move.preventDefault();
+            move.stopImmediatePropagation();
+            owner.wysiwyg.tableControl?.selectCellRange(cell, target);
+        }, {capture: true, signal: drag.signal});
+        document.addEventListener("mouseup", up => {
+            drag.abort();
+            if (selectingCells) {
+                up.preventDefault();
+            }
+        }, {capture: true, once: true, signal: drag.signal});
+        document.addEventListener("dragstart", () => drag.abort(), {capture: true, once: true, signal: drag.signal});
+        window.addEventListener("blur", () => drag.abort(), {once: true, signal: drag.signal});
+    }, {capture: true, signal});
     const belongsToEditor = (target: Node) => host.contains(target) || fragment.hintElement.contains(target) ||
         fragment.protyle.toolbar.element.contains(target) || fragment.protyle.toolbar.subElement.contains(target) ||
         !!(target instanceof Element && target.closest("#commonMenu, .b3-dialog"));
@@ -284,6 +317,26 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     }, {capture: true, signal});
     host.addEventListener("keydown", event => {
         captureBeforeChange();
+        if (!event.isComposing && !composing &&
+            Object.values(window.siyuan.config.keymap.editor.table).some(hotkey => matchHotKey(hotkey, event))) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            // 先提交内嵌编辑内容，再以所属单元格执行表格快捷键。
+            finish();
+            const range = document.createRange();
+            range.selectNodeContents(cell);
+            range.collapse(true);
+            owner.wysiwyg.element.focus({preventScroll: true});
+            focusByRange(range);
+            fixTable(owner, event, range);
+            const next = getSelection().focusNode;
+            const nextElement = next instanceof Element ? next : next?.parentElement;
+            const nextCell = nextElement?.closest<HTMLTableCellElement>("td, th");
+            if (nextCell && nextCell.closest(".protyle-wysiwyg") === owner.wysiwyg.element) {
+                openTableCellRichEditor(owner, nextCell);
+            }
+            return;
+        }
         const keymap = window.siyuan.config.keymap.editor.general;
         const undo = matchHotKey(keymap.undo, event);
         const redo = matchHotKey(keymap.redo, event);

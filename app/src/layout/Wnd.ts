@@ -48,7 +48,7 @@ import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
 import {setPosition} from "../util/setPosition";
 import {clearOBG} from "./dock/util";
 import {recordBeforeResizeTop} from "../protyle/util/resize";
-import {sanitizeClosedTabs, setStorageVal} from "../protyle/util/compatibility";
+import {isPhablet, sanitizeClosedTabs, setStorageVal} from "../protyle/util/compatibility";
 import {setTitle} from "../util/processTitle";
 import {dragOverScroll} from "../boot/globalEvent/dragover";
 import {
@@ -420,7 +420,7 @@ export class Wnd {
                         openFileById({
                             app,
                             id: item,
-                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                            action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                             forceCurrentWindow: true,
                         });
                     }
@@ -735,7 +735,7 @@ export class Wnd {
                     openFileById({
                         app: this.app,
                         id: keepCursorId,
-                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                        action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                     });
                 }
                 currentTab.headElement.removeAttribute("keep-cursor");
@@ -744,7 +744,7 @@ export class Wnd {
             if (update) {
                 updatePanelByEditor({
                     protyle: currentTab.model.editor.protyle,
-                    focus: true,
+                    focus: !isPhablet(),
                     pushBackStack: pushBack,
                     reload: false,
                     resize,
@@ -895,6 +895,7 @@ export class Wnd {
         window.siyuan.menus.menu.popup({
             x: rect.left + rect.width,
             y: rect.top + rect.height,
+            h: rect.height,
             isLeft: true
         });
     }

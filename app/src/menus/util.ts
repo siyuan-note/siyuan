@@ -9,7 +9,7 @@ import {Constants} from "../constants";
 import {openNewWindowById} from "../window/openNewWindow";
 import {MenuItem} from "./Menu";
 import type {App} from "../index";
-import {isInAndroid, saveExportFile, updateHotkeyTip} from "../protyle/util/compatibility";
+import {isInAndroid, isPhablet, saveExportFile, updateHotkeyTip} from "../protyle/util/compatibility";
 import {checkFold} from "../util/noRelyPCFunction";
 import {showMessage} from "../dialog/message";
 import type {Editor} from "../editor";
@@ -86,7 +86,7 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
                     app,
                     id: ids[0],
                     position: "right",
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                    action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                 });
             } else {
                 ids.forEach((id) => {
@@ -113,7 +113,7 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
                     app,
                     id: ids[0],
                     position: "bottom",
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                    action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
                 });
             } else {
                 ids.forEach((id) => {
@@ -140,7 +140,7 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
                     openFileById({
                         app,
                         id: ids[0],
-                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
+                        action: isPhablet() ? [Constants.CB_GET_SCROLL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL],
                         removeCurrentTab: false
                     });
                 } else {

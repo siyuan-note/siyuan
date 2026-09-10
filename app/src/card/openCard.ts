@@ -523,7 +523,8 @@ export const bindCardEvent = async (options: {
                 const rect = moreElement.getBoundingClientRect();
                 menu.open({
                     x: rect.left,
-                    y: rect.bottom
+                    y: rect.bottom,
+                    h: rect.height
                 });
                 /// #endif
                 return;
@@ -599,7 +600,8 @@ export const bindCardEvent = async (options: {
                 const rect = sticktabElement.getBoundingClientRect();
                 stickMenu.open({
                     x: rect.left,
-                    y: rect.bottom
+                    y: rect.bottom,
+                    h: rect.height
                 });
                 event.stopPropagation();
                 event.preventDefault();
@@ -674,7 +676,7 @@ export const bindCardEvent = async (options: {
                         }).element);
                     });
                     const filterRect = filterTempElement.getBoundingClientRect();
-                    window.siyuan.menus.menu.popup({x: filterRect.left, y: filterRect.bottom});
+                    window.siyuan.menus.menu.popup({x: filterRect.left, y: filterRect.bottom, h: filterRect.height});
                 });
                 event.stopPropagation();
                 event.preventDefault();

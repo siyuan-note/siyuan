@@ -605,6 +605,8 @@ body.mobile-topbar--merged {
   position: absolute;
   inset: var(--mobile-top-safe-area) 0 0;
   box-sizing: border-box;
+  // 绝对定位的主编辑器需继承键盘占位，保持软键盘与工具栏菜单切换时的滚动视口高度。
+  padding-bottom: inherit;
 
   > .protyle-breadcrumb {
     position: absolute;

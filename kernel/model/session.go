@@ -262,15 +262,7 @@ func CheckAuth(c *gin.Context) {
 		}
 
 		// Authenticate requests with the Origin header other than 127.0.0.1 https://github.com/siyuan-note/siyuan/issues/9180
-		clientIP := c.ClientIP()
-		host := c.Request.Host
-		origin := c.GetHeader("Origin")
-		forwardedHost := c.GetHeader("X-Forwarded-Host")
-		if !localhost ||
-			("" != clientIP && !util.IsLocalHostname(clientIP)) ||
-			("" != host && !util.IsLocalHost(host)) ||
-			("" != origin && !util.IsLocalOrigin(origin)) ||
-			("" != forwardedHost && !util.IsLocalHost(forwardedHost)) {
+		if !localhost || !isLocalHostRequestAllowed(c) {
 			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed: for security reasons, please set [Lock screen password] when using non-127.0.0.1 access\n\n为安全起见，使用非 127.0.0.1 访问时请设置 [锁屏密码]"})
 			c.Abort()
 			return
@@ -291,6 +283,15 @@ func CheckAuth(c *gin.Context) {
 
 	// 放过来自本机的某些请求
 	if localhost {
+		// 校验浏览器来源，防止恶意网页借助受害者浏览器作为环回客户端绕过锁屏鉴权
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-9gpj-3rm3-x42m
+		if util.IsCrossSiteFetchSite(c.GetHeader("Sec-Fetch-Site")) || !isLocalHostRequestAllowed(c) {
+			logging.LogWarnf("invalid local host pass-through request [ip=%s, origin=%s, host=%s, uri=%s]",
+				c.ClientIP(), c.GetHeader("Origin"), c.Request.Host, c.Request.RequestURI)
+			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed: invalid request origin"})
+			c.Abort()
+			return
+		}
 		if strings.HasPrefix(c.Request.RequestURI, "/assets/") || strings.HasPrefix(c.Request.RequestURI, "/export/") {
 			c.Set(RoleContextKey, RoleAdministrator)
 			c.Next()
@@ -435,6 +436,21 @@ func authByAPIToken(c *gin.Context, source, token string) (handled bool) {
 func IsLocalRequest(c *gin.Context) bool {
 	// 仅当直接连接和可信代理解析出的原始客户端均为环回地址时，才视为本机请求。
 	return util.IsLocalHost(c.Request.RemoteAddr) && util.IsLocalHostname(c.ClientIP())
+}
+
+// isLocalHostRequestAllowed 判断本机放行请求是否可信任：
+// 要求 clientIP/host/origin/forwardedHost 均为本机地址，防止恶意网页借助受害者浏览器
+// 作为环回客户端绕过鉴权（DNS 重绑定场景通过 Host 校验兜底）
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-9gpj-3rm3-x42m
+func isLocalHostRequestAllowed(c *gin.Context) bool {
+	clientIP := c.ClientIP()
+	host := c.Request.Host
+	origin := c.GetHeader("Origin")
+	forwardedHost := c.GetHeader("X-Forwarded-Host")
+	return ("" == clientIP || util.IsLocalHostname(clientIP)) &&
+		("" == host || util.IsLocalHost(host)) &&
+		("" == origin || util.IsLocalOrigin(origin)) &&
+		("" == forwardedHost || util.IsLocalHost(forwardedHost))
 }
 
 func CheckAdminRole(c *gin.Context) {

@@ -367,7 +367,8 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
                         });
                     }
                     window.siyuan.menus.menu.element.classList.add("b3-menu--list");
-                    window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16, w: 16});
+                    const rect = target.getBoundingClientRect();
+                    window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width});
                 });
                 event.stopPropagation();
                 event.preventDefault();

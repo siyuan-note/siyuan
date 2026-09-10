@@ -17,7 +17,7 @@ import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {getFileTreeIconHTML} from "../emoji/fileTreeIcon";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "../protyle/util/hasClosest";
-import {isIPad, isNotCtrl, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
+import {isIPad, isNotCtrl, isPhablet, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {newFile} from "../util/newFile";
 import {
     filterMenu,
@@ -329,7 +329,9 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
 
     searchInputElement.value = config.k || "";
     replaceInputElement.value = config.r || "";
-    searchInputElement.select();
+    if (!isPhablet() || !config.k) {
+        searchInputElement.select();
+    }
 
     const dragElement = element.querySelector(".search__drag");
     dragElement.addEventListener("mousedown", (event: MouseEvent) => {
@@ -732,7 +734,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                     }).element);
                 });
                 const rect = target.getBoundingClientRect();
-                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, isLeft: true});
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true});
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -803,7 +805,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                     persistSearchConfig(config);
                 });
                 const rect = target.getBoundingClientRect();
-                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, isLeft: true});
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true});
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -1067,7 +1069,8 @@ const openSearchBlockEditor = (options: {
         openFileById({
             app: options.protyle.app,
             id: options.id,
-            action: currentRange ?
+            action: isPhablet() ?
+                (zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_CONTEXT, Constants.CB_GET_HL]) : currentRange ?
                 (zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_SCROLL, Constants.CB_GET_SEARCH] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_SCROLL, Constants.CB_GET_SEARCH]) :
                 (zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_HL]),
             zoomIn,

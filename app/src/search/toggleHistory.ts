@@ -74,7 +74,8 @@ export const toggleReplaceHistory = (replaceInputElement: HTMLInputElement) => {
     const rect = replaceInputElement.previousElementSibling.getBoundingClientRect();
     menu.open({
         x: rect.left,
-        y: rect.bottom
+        y: rect.bottom,
+        h: rect.height
     });
 };
 
@@ -149,7 +150,8 @@ export const toggleSearchHistory = (searchElement: Element, config: Config.IUILa
     const rect = searchInputElement.previousElementSibling.getBoundingClientRect();
     menu.open({
         x: rect.left,
-        y: rect.bottom
+        y: rect.bottom,
+        h: rect.height
     });
 };
 
@@ -218,7 +220,8 @@ export const toggleAssetHistory = (assetElement: Element) => {
     const rect = assetInputElement.previousElementSibling.getBoundingClientRect();
     menu.open({
         x: rect.left,
-        y: rect.bottom
+        y: rect.bottom,
+        h: rect.height
     });
 };
 

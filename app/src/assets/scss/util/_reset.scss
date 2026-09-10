@@ -251,12 +251,8 @@ audio:not([controls]) {
 
 a {
   outline: 0;
-  text-decoration: none;
-  color: var(--b3-theme-primary);
-}
-
-a:hover {
   text-decoration: underline;
+  color: var(--b3-theme-primary);
 }
 
 sub,

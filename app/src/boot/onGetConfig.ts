@@ -387,7 +387,7 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
         document.body.classList.add("body--maximize");
     }
 
-    if ("darwin" !== window.siyuan.config.system.os) {
+    if (!isMac()) {
         document.body.classList.add("body--win32");
 
         // 添加窗口控件

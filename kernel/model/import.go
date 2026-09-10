@@ -1369,12 +1369,39 @@ func ImportFromLocalPathSkipRoot(boxID, localPath string, toPath string) (err er
 	return importFromLocalPath(boxID, localPath, toPath, true)
 }
 
+// ValidateImportFromLocalPath 校验 Markdown 导入来源和目标，不写入导入数据。
+func ValidateImportFromLocalPath(boxID, localPath, toPath string) error {
+	if _, err := getOpenedBox(boxID); err != nil {
+		return err
+	}
+	if _, err := os.Stat(localPath); err != nil {
+		return err
+	}
+	_, _, err := resolveMarkdownImportTarget(boxID, toPath)
+	return err
+}
+
+func resolveMarkdownImportTarget(boxID, toPath string) (baseHPath, baseTargetPath string, err error) {
+	toPath = path.Clean("/" + strings.TrimPrefix(toPath, "/"))
+	if toPath != "/" && !strings.HasSuffix(toPath, ".sy") {
+		toPath += ".sy"
+	}
+	toPath = normalizeBoxDocTarget(boxID, toPath)
+	if toPath == "/" {
+		return "/", "/", nil
+	}
+	block := treenode.GetBlockTreeRootByPath(boxID, toPath)
+	if block == nil || block.ID == "" {
+		return "", "", fmt.Errorf("target document not found in notebook %s: %s", boxID, toPath)
+	}
+	return block.HPath, strings.TrimSuffix(block.Path, ".sy"), nil
+}
+
 func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) (err error) {
 	box, err := getOpenedBox(boxID)
 	if nil != err {
 		return err
 	}
-	toPath = normalizeBoxDocTarget(boxID, toPath)
 	util.PushEndlessProgress(Conf.Language(73))
 	defer func() {
 		util.PushClearProgress()
@@ -1392,18 +1419,9 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 
 	FlushTxQueue()
 
-	var baseHPath, baseTargetPath string
-	if "/" == toPath {
-		baseHPath = "/"
-		baseTargetPath = "/"
-	} else {
-		block := treenode.GetBlockTreeRootByPath(boxID, toPath)
-		if nil == block {
-			logging.LogErrorf("not found block by path [%s]", toPath)
-			return nil
-		}
-		baseHPath = block.HPath
-		baseTargetPath = strings.TrimSuffix(block.Path, ".sy")
+	baseHPath, baseTargetPath, err := resolveMarkdownImportTarget(boxID, toPath)
+	if err != nil {
+		return err
 	}
 	targetDocDirLocalPath := filepath.Join(util.DataDir, boxID,
 		filepath.FromSlash(strings.TrimPrefix(baseTargetPath, "/")))
@@ -1480,7 +1498,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 			hPath = strings.TrimSuffix(hPath, ext)
 			if "" == curRelPath {
 				curRelPath = "/"
-				hPath = "/" + title
+				hPath = path.Join(baseHPath, title)
 			} else {
 				dirPath := targetPaths[path.Dir(curRelPath)]
 				targetPath = path.Join(dirPath, id)

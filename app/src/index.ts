@@ -1,4 +1,7 @@
 import {Constants} from "./constants";
+/// #if BROWSER
+import "./util/iosWindowControls";
+/// #endif
 import {Menus} from "./menus";
 import {Model} from "./layout/Model";
 import {loadDesktopHostConnection, onGetConfig} from "./boot/onGetConfig";
@@ -380,6 +383,9 @@ window.openFileByURL = (openURL) => {
 /// #if BROWSER
 window.showKeyboardToolbar = () => {
     // 防止 Pad 端报错
+};
+window.hideKeyboardToolbar = () => {
+    // 桌面界面没有手机键盘工具栏，兼容原生容器的键盘隐藏回调。
 };
 window.processIOSPurchaseResponse = processIOSPurchaseResponse;
 // 移动端容器（Android/鸿蒙）启用桌面模式时，原生壳默认禁用 WebView 自身键盘行为、等待 JS 调用

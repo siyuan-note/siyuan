@@ -899,7 +899,7 @@
 }
 
 .table__cell-rich {
-  min-width: 180px;
+  min-width: 0;
   min-height: 1.6em;
   white-space: normal;
   cursor: text;
@@ -917,7 +917,7 @@
 }
 
 .table__cell-editor {
-  min-width: 180px;
+  min-width: 0;
   min-height: 0;
   white-space: normal;
 

@@ -72,7 +72,7 @@
       & > .b3-button,
       & > .b3-tooltips,
       & > .b3-form__icona,
-      & > .fn__size200,
+      & > .fn__size200:not(.b3-switch),
       .searchByKeyLabel {
         flex: 1 1 100%;
         width: 100%;

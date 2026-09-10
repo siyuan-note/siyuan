@@ -208,6 +208,7 @@ import {
     resolveBlockDragSelectStart
 } from "./blockDragSelect";
 import {isCrossBlockTextRange} from "../gutter/multiSelect";
+import {bindTouchBlockDragSelect} from "./touchBlockDragSelect";
 import {formatPainter} from "../toolbar/FormatPainter";
 import {shouldOpenListItemAttr} from "./listContext";
 import {getBlockEdgeCaretRange, isCaretRangeInsideElement} from "./blockEdgeCaret";
@@ -495,6 +496,9 @@ export class WYSIWYG {
         }
         this.bindCommonEvent(protyle);
         this.bindEvent(protyle);
+        if (!isMobile()) {
+            bindTouchBlockDragSelect(this.element, () => !protyle.toolbar.isMultiSelectMode());
+        }
         if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
             return;
         }

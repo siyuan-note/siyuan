@@ -294,12 +294,6 @@ export class Hint {
 
         // https://github.com/siyuan-note/siyuan/issues/7933
         if (this.splitChar === "#") {
-            // 关闭标签搜索后输入 # 不再弹出候选标签
-            if (window.siyuan.config.editor.hashTagSearch === false) {
-                this.element.classList.add("fn__none");
-                clearTimeout(this.timeId);
-                return;
-            }
             const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
             if (blockElement && blockElement.getAttribute("data-type") === "NodeHeading") {
                 const blockIndex = getSelectionOffset(protyle.toolbar.range.startContainer, blockElement).start;
@@ -1349,7 +1343,12 @@ ${genHintItemHTML(item)}
         const prevLastIndex = this.lastIndex;
         this.lastIndex = -1;
         this.splitChar = "";
+        const disableHashTagSearch = window.siyuan.config.editor.hashTagSearch === false;
         extend.forEach((item) => {
+            // 关闭标签搜索后 # 不再作为触发符，避免影响 / 等后续提示
+            if (disableHashTagSearch && item.key === "#") {
+                return;
+            }
             let currentLastIndex = currentLineValue.lastIndexOf(item.key);
             // https://ld246.com/article/1701670704754
             if (Constants.BLOCK_HINT_KEYS.includes(item.key) && currentLastIndex > -1) {
@@ -1369,6 +1368,7 @@ ${genHintItemHTML(item)}
         // 上一次提示没有结束时不能被其余提示干扰 https://github.com/siyuan-note/siyuan/issues/14324
         if (!this.element.classList.contains("fn__none") && prevSplit && prevSplit !== this.splitChar &&
             prevLastIndex > -1 && currentLineValue.startsWith(prevSplit, prevLastIndex) &&
+            !(disableHashTagSearch && prevSplit === "#") &&
             !(["/", "、"].includes(prevSplit) && this.splitChar === ":")) {
             this.splitChar = prevSplit;
             this.lastIndex = prevLastIndex;

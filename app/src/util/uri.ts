@@ -45,7 +45,7 @@ const processSiYuanUriBlocks = (app: App, uriObj: URL): boolean => {
                     });
                     /// #else
                     openMobileFileById(app, id, (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] :
-                        [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                        [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL], "start");
                     /// #endif
                 });
                 /// #if !BROWSER

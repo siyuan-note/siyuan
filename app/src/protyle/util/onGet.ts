@@ -33,7 +33,7 @@ import {getEmbeddedDocInfoResponse} from "./docInfo";
 import {updateWidgetCacheVersion} from "./widgetCache";
 import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
 import {getSavedTabFocusTarget, hasFocusOffsets} from "./focusRestore";
-import {isIPhone} from "./compatibility";
+import {isIPhone, isPhablet} from "./compatibility";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {disposeCustomBlocksInElement, setCustomBlockRootReady} from "../../plugin/customBlockRender";
 import {invalidateTrackedRanges, invalidateTrackedRangesInElement} from "./trackedRange";
@@ -631,6 +631,22 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
             /// #endif
         }, focusElement.getAttribute("data-type") === "NodeCodeBlock" ? Constants.TIMEOUT_TRANSITION : 0);
     }
+    /// #if !MOBILE
+    else if (isPhablet() && !action.includes(Constants.CB_GET_UNUNDO) &&
+        !action.includes(Constants.CB_GET_UNCHANGEID) &&
+        (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_FOCUSFIRST) ||
+            action.includes(Constants.CB_GET_SCROLL) || action.includes(Constants.CB_GET_HL))) {
+        // 平板浏览时不聚焦编辑器，仍需记录导航位置，并避免读取其他文档的选区。
+        const editElement = focusElement.classList.contains("protyle-title__input") ?
+            focusElement : getContenteditableElement(focusElement);
+        if (editElement) {
+            const range = document.createRange();
+            range.selectNodeContents(editElement);
+            range.collapse(true);
+            pushBack(protyle, range, focusElement);
+        }
+    }
+    /// #endif
     if (hasScrollTop) {
         protyle.contentElement.scrollTop = scrollAttr.scrollTop;
     }

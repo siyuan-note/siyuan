@@ -90,7 +90,8 @@ import {openAttr} from "../../menus/commonMenuItem";
 import {blockRender} from "../render/blockRender";
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
-import {pushBack} from "../../util/backForward";
+import {pushBack, pushBackByClick} from "../../util/backForward";
+import {bindTouchNavigation} from "./touchNavigation";
 import {openFileById} from "../../editor/util";
 import {openGlobalSearch} from "../../search/util";
 /// #else
@@ -105,6 +106,7 @@ import {
     isIPhone,
     isMac,
     isOnlyMeta,
+    isPhablet,
     readClipboard,
     writeClipboardData
 } from "../util/compatibility";
@@ -499,6 +501,13 @@ export class WYSIWYG {
         if (!isMobile()) {
             bindTouchBlockDragSelect(this.element, () => !protyle.toolbar.isMultiSelectMode());
         }
+        /// #if !MOBILE
+        bindTouchNavigation(this.element, (target, point) => {
+            if (!protyle.toolbar.isMultiSelectMode() && !window.siyuan.touchDragActive) {
+                pushBackByClick(protyle, target, point);
+            }
+        });
+        /// #endif
         if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
             return;
         }
@@ -5090,6 +5099,12 @@ export class WYSIWYG {
             const pointerElement = document.elementFromPoint(event.clientX, event.clientY);
             const isDirectCalloutClick = isDirectCalloutStructureClick(this.mouseDownTarget, event.target,
                 pointerElement);
+            /// #if !MOBILE
+            const recordClickHistory = isPhablet();
+            if (recordClickHistory) {
+                pushBackByClick(protyle, event.target, {x: event.clientX, y: event.clientY});
+            }
+            /// #endif
             setTimeout(() => {
                 // 选中后，在选中的文字上点击需等待 range 更新
                 let newRange = getEditorRange(this.element);
@@ -5181,7 +5196,9 @@ export class WYSIWYG {
                     focusByRange(newRange);
                 }
                 /// #if !MOBILE
-                pushBack(protyle, newRange);
+                if (!recordClickHistory) {
+                    pushBack(protyle, newRange);
+                }
                 /// #endif
                 mobileBlur = false;
             }, (isMobile() || isInIOS()) ? 520 : 0); // Android/iPad 双击慢了出不来

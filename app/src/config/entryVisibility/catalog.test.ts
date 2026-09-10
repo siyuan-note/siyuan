@@ -168,35 +168,6 @@ test("top bar markup stays aligned with its configurable built-in catalog", () =
     assert.doesNotMatch(source, /id="drag"[^>]*data-topbar-entry/);
 });
 
-test("top bar account entries use legacy account switches only as defaults", () => {
-    const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
-    Object.defineProperty(globalThis, "window", {
-        configurable: true,
-        value: {
-            siyuan: {
-                config: {
-                    account: {
-                        displayVIP: false,
-                        displayTitle: true,
-                    },
-                },
-            },
-        },
-    });
-    try {
-        assert.equal(getEntryCatalogDefaultVisibility("topBar.toolbarVIP"), false);
-        assert.equal(getEntryCatalogDefaultVisibility("topBar.toolbarTitle"), true);
-        assert.equal(getEntryCatalogDefaultVisibility("topBar.barSearch"), true);
-        assert.equal(getEntryCatalogDefaultVisibility("topBar.drag"), true);
-    } finally {
-        if (windowDescriptor) {
-            Object.defineProperty(globalThis, "window", windowDescriptor);
-        } else {
-            Reflect.deleteProperty(globalThis, "window");
-        }
-    }
-});
-
 test("daily note and flashcard top bar entries default to visible only in the Simple profile", () => {
     for (const key of ["barDailyNote", "barRiffCard"]) {
         const path = `${TOP_BAR_ROOT_PATH}.${key}`;

@@ -599,12 +599,8 @@ const topBarBuiltinChildren = [
     node("barBack", lang("goBack")),
     node("barForward", lang("goForward")),
     fixed("drag", lang("entryTopBarDrag")),
-    node("toolbarVIP", lang("accountDisplayVIP"), true, undefined, undefined, {
-        defaultVisible: () => window.siyuan.config.account.displayVIP,
-    }),
-    node("toolbarTitle", lang("accountDisplayTitle"), true, undefined, undefined, {
-        defaultVisible: () => window.siyuan.config.account.displayTitle,
-    }),
+    node("toolbarVIP", lang("accountDisplayVIP")),
+    node("toolbarTitle", lang("accountDisplayTitle")),
     node("barPlugins", lang("plugin")),
     node("barCommand", lang("commandPanel")),
     node("barSearch", lang("globalSearch")),

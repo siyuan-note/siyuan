@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260909090822"
+		"updated": "20260910080119"
 	},
 	"Children": [
 		{
@@ -4045,7 +4045,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20260906013806"
+				"updated": "20260910080119"
 			},
 			"Children": [
 				{
@@ -12302,7 +12302,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-xpgtzbg",
-				"updated": "20260811122156"
+				"updated": "20260910080119"
 			},
 			"Children": [
 				{
@@ -12348,7 +12348,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20201227133317-v7clw0j",
-				"updated": "20260909090822"
+				"updated": "20260910080119"
 			},
 			"Children": [
 				{
@@ -13014,30 +13014,6 @@
 								{
 									"Type": "NodeText",
 									"Data": "​"
-								}
-							]
-						}
-					]
-				},
-				{
-					"Type": "NodeTableRow",
-					"Children": [
-						{
-							"Type": "NodeTableCell",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "编辑单元格"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "F2"
 								}
 							]
 						}

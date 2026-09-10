@@ -2766,6 +2766,7 @@
 		"380": "La reconnaissance optique de caractères n’est pas prise en charge pour les ressources des carnets chiffrés",
 		"381": "Les liaisons de bases de données ne peuvent pas franchir les limites des carnets chiffrés",
 		"382": "Impossible d’exporter la base de données [%s]. Vérifiez les liaisons de bases de données du document et le carnet contenant la base de données",
-		"383": "Dossier d'exportation invalide"
+		"383": "Dossier d'exportation invalide",
+		"384": "Synchronisation interrompue : des fichiers de l'espace de travail ont été modifiés pendant la synchronisation. Réessayez plus tard et évitez de modifier pendant la synchronisation"
 	}
 }

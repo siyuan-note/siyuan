@@ -2766,6 +2766,7 @@
 		"380": "OCR tidak didukung untuk sumber daya dalam buku catatan terenkripsi",
 		"381": "Pengikatan basis data tidak dapat melintasi batas buku catatan terenkripsi",
 		"382": "Tidak dapat mengekspor basis data [%s]. Periksa pengikatan basis data dokumen dan buku catatan yang berisi basis data tersebut",
-		"383": "Folder ekspor tidak valid"
+		"383": "Folder ekspor tidak valid",
+		"384": "Sinkronisasi dibatalkan: berkas ruang kerja diubah selama sinkronisasi. Coba lagi nanti dan hindari mengedit saat menyinkronkan"
 	}
 }

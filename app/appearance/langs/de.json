@@ -2766,6 +2766,7 @@
 		"380": "OCR wird für Ressourcen in verschlüsselten Notizbüchern nicht unterstützt",
 		"381": "Datenbankverknüpfungen dürfen die Grenzen verschlüsselter Notizbücher nicht überschreiten",
 		"382": "Datenbank [%s] kann nicht exportiert werden. Prüfen Sie die Datenbankverknüpfungen des Dokuments und das Notizbuch, das die Datenbank enthält",
-		"383": "Ungültiger Exportordner"
+		"383": "Ungültiger Exportordner",
+		"384": "Synchronisierung abgebrochen: Arbeitsbereichsdateien wurden während der Synchronisierung geändert. Bitte versuche es später erneut und vermeide Bearbeitungen während der Synchronisierung"
 	}
 }

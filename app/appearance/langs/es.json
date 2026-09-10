@@ -2766,6 +2766,7 @@
 		"380": "No se admite OCR para los recursos de los cuadernos cifrados",
 		"381": "Los vínculos de bases de datos no pueden cruzar los límites de los cuadernos cifrados",
 		"382": "No se puede exportar la base de datos [%s]. Compruebe los vínculos de bases de datos del documento y el cuaderno que contiene la base de datos",
-		"383": "Carpeta de exportación no válida"
+		"383": "Carpeta de exportación no válida",
+		"384": "Sincronización cancelada: se modificaron archivos del espacio de trabajo durante la sincronización. Inténtalo de nuevo más tarde y evita editar durante la sincronización"
 	}
 }

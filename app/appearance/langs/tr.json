@@ -2766,6 +2766,7 @@
 		"380": "Şifrelenmiş not defterlerindeki kaynaklar için OCR desteklenmiyor",
 		"381": "Veritabanı bağlamaları şifreli not defterlerinin sınırlarını aşamaz",
 		"382": "[%s] veritabanı dışa aktarılamıyor. Belgenin veritabanı bağlamalarını ve veritabanının bulunduğu not defterini kontrol edin",
-		"383": "Geçersiz dışa aktarma klasörü"
+		"383": "Geçersiz dışa aktarma klasörü",
+		"384": "Senkronizasyon durduruldu: senkronizasyon sırasında çalışma alanı dosyaları değiştirildi. Lütfen daha sonra tekrar deneyin ve senkronizasyon sırasında düzenleme yapmaktan kaçının"
 	}
 }

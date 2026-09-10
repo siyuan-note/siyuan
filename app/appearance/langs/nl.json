@@ -2766,6 +2766,7 @@
 		"380": "OCR wordt niet ondersteund voor bronnen in versleutelde notitieboeken",
 		"381": "Databasekoppelingen mogen de grenzen van versleutelde notitieboeken niet overschrijden",
 		"382": "Database [%s] kan niet worden geëxporteerd. Controleer de databasekoppelingen van het document en het notitieboek waarin de database staat",
-		"383": "Ongeldige exportmap"
+		"383": "Ongeldige exportmap",
+		"384": "Synchronisatie afgebroken: werkruimtebestanden zijn gewijzigd tijdens het synchroniseren. Probeer het later opnieuw en vermijd bewerken tijdens het synchroniseren"
 	}
 }

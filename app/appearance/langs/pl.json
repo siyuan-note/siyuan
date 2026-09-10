@@ -2766,6 +2766,7 @@
 		"380": "OCR nie jest obsługiwane dla zasobów w zaszyfrowanych notatnikach",
 		"381": "Powiązania baz danych nie mogą przekraczać granic zaszyfrowanych notatników",
 		"382": "Nie można wyeksportować bazy danych [%s]. Sprawdź powiązania baz danych dokumentu oraz notatnik zawierający bazę danych",
-		"383": "Nieprawidłowy folder eksportu"
+		"383": "Nieprawidłowy folder eksportu",
+		"384": "Synchronizacja przerwana: pliki obszaru roboczego zostały zmodyfikowane podczas synchronizacji. Spróbuj ponownie później i unikaj edytowania podczas synchronizacji"
 	}
 }

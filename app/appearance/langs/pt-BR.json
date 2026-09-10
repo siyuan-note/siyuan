@@ -1,4 +1,5 @@
 {
+	"bazaarPackagePending": "As informações do pacote ainda não foram sincronizadas. Tente novamente mais tarde.",
 	"backlinkExcludeRefDefs": "Excluir referências",
 	"backlinkExcludeRefDefsTip": "Ocultar toda a entrada, incluindo seus filhos, quando houver referência a qualquer bloco selecionado",
 	"backlinkFoldByType": "Recolher por tipo de bloco",

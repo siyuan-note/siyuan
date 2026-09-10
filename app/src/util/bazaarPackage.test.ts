@@ -677,9 +677,10 @@ describe("bazaar rating request ordering", () => {
 });
 
 describe("getBazaarRatingErrorLanguageKey", () => {
-    it("recognizes only the stable rating rate-limit error code", () => {
+    it("recognizes only supported rating error codes", () => {
         assert.equal(getBazaarRatingErrorLanguageKey({errorCode: "bazaarRatingRateLimited"}),
             "bazaarRatingRateLimited");
+        assert.equal(getBazaarRatingErrorLanguageKey({errorCode: "bazaarPackagePending"}), "bazaarPackagePending");
         assert.equal(getBazaarRatingErrorLanguageKey({errorCode: "other"}), undefined);
         assert.equal(getBazaarRatingErrorLanguageKey("bazaarRatingRateLimited"), undefined);
         assert.equal(getBazaarRatingErrorLanguageKey(null), undefined);

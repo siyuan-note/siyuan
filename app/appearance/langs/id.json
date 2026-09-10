@@ -1,4 +1,5 @@
 {
+	"bazaarPackagePending": "Informasi paket belum disinkronkan. Silakan coba lagi nanti.",
 	"backlinkExcludeRefDefs": "Kecualikan referensi",
 	"backlinkExcludeRefDefsTip": "Sembunyikan seluruh entri beserta turunannya jika merujuk ke salah satu blok terpilih",
 	"backlinkFoldByType": "Ciutkan menurut jenis blok",

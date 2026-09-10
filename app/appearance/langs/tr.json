@@ -1,4 +1,5 @@
 {
+	"bazaarPackagePending": "Paket bilgileri henüz eşitlenmedi. Lütfen daha sonra tekrar deneyin.",
 	"backlinkExcludeRefDefs": "Başvuruları hariç tut",
 	"backlinkExcludeRefDefsTip": "Seçili bloklardan herhangi birine başvuran öğeyi alt öğeleriyle birlikte gizle",
 	"backlinkFoldByType": "Blok türüne göre daralt",

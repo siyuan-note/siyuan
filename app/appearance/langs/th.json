@@ -1,4 +1,5 @@
 {
+	"bazaarPackagePending": "ข้อมูลแพ็กเกจยังไม่ได้ซิงค์ โปรดลองอีกครั้งในภายหลัง",
 	"backlinkExcludeRefDefs": "ยกเว้นการอ้างอิง",
 	"backlinkExcludeRefDefsTip": "ซ่อนทั้งรายการรวมถึงเนื้อหาย่อยเมื่ออ้างอิงบล็อกใดก็ตามที่เลือก",
 	"backlinkFoldByType": "ยุบตามประเภทบล็อก",

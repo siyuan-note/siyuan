@@ -1,4 +1,5 @@
 {
+	"bazaarPackagePending": "包信息尚未同步，请稍后重试。",
 	"backlinkExcludeRefDefs": "排除引用",
 	"backlinkExcludeRefDefsTip": "条目及其子内容引用任一选中块时，隐藏整个条目",
 	"backlinkFoldByType": "按块类型折叠",

@@ -1,4 +1,5 @@
 {
+	"bazaarPackagePending": "Informacje o pakiecie nie zostały jeszcze zsynchronizowane. Spróbuj ponownie później.",
 	"backlinkExcludeRefDefs": "Wyklucz odwołania",
 	"backlinkExcludeRefDefsTip": "Ukryj cały wpis wraz z elementami podrzędnymi, jeśli odwołuje się do dowolnego wybranego bloku",
 	"backlinkFoldByType": "Zwijaj według typu bloku",

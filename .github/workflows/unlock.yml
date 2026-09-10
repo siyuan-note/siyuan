@@ -1,8 +1,10 @@
-name: Unlock reopened issues
+name: Unlock issues with new activity
 
 on:
   issues:
     types: [reopened]
+  issue_comment:
+    types: [created]
 
 jobs:
   unlock:

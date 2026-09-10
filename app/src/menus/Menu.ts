@@ -2,6 +2,7 @@ import {getEventName, updateHotkeyTip} from "../protyle/util/compatibility";
 import {setPosition} from "../util/setPosition";
 import {getAnchoredMenuPosition} from "./menuPosition";
 import {updateMenuItemGroupClasses} from "./menuGroup";
+import {waitForSheetViewport} from "./sheetOpen";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
@@ -38,6 +39,7 @@ export class Menu {
     private sheetDragging = false;
     private suppressSheetClick = false;
     private targetPositionFrame: number | undefined;
+    private cancelSheetOpen: (() => void) | undefined;
 
     private updateTargetPosition = () => {
         if (typeof this.targetPositionFrame === "number") {
@@ -287,6 +289,8 @@ export class Menu {
     };
 
     private closeSheet() {
+        this.cancelSheetOpen?.();
+        this.cancelSheetOpen = undefined;
         if (!this.element.classList.contains("b3-menu--sheet")) {
             this.element.style.transform = "";
             window.setTimeout(() => this.remove(), Constants.TIMEOUT_DBLCLICK);
@@ -453,6 +457,8 @@ export class Menu {
     }
 
     private removeImmediately() {
+        this.cancelSheetOpen?.();
+        this.cancelSheetOpen = undefined;
         const menuName = this.element.getAttribute("data-name");
         const menuFrom = this.element.getAttribute("data-from");
         const wasOpen = !this.element.classList.contains("fn__none");
@@ -501,6 +507,8 @@ export class Menu {
     }
 
     public popup(options: IPosition) {
+        this.cancelSheetOpen?.();
+        this.cancelSheetOpen = undefined;
         if (isMobile()) {
             this.fullscreen("bottom");
             return;
@@ -587,6 +595,8 @@ export class Menu {
     }
 
     public fullscreen(position: "bottom" | "all" = "all") {
+        this.cancelSheetOpen?.();
+        this.cancelSheetOpen = undefined;
         applyMenuConfig(this.element);
         if (this.element.lastElementChild.innerHTML === "") {
             return;
@@ -627,10 +637,22 @@ export class Menu {
         window.addEventListener("touchmove", this.preventDefault, {passive: false});
         this.setSheetHeight();
         void this.element.offsetHeight;
-        requestAnimationFrame(() => {
-            if (this.element.classList.contains("b3-menu--sheet")) {
-                this.element.style.transform = "translateY(0px)";
-            }
+        const mobileSize = window.siyuan.mobile.size;
+        const orientationSize = mobileSize.isLandscape ? mobileSize.landscape : mobileSize.portrait;
+        this.cancelSheetOpen = waitForSheetViewport({
+            height: () => Math.min(window.innerHeight, window.visualViewport?.height ?? window.innerHeight),
+            fullHeight: Math.max(window.innerHeight, orientationSize?.height1 || 0),
+            now: () => performance.now(),
+            requestFrame: callback => requestAnimationFrame(callback),
+            cancelFrame: id => cancelAnimationFrame(id),
+            open: () => {
+                this.cancelSheetOpen = undefined;
+                if (this.element.classList.contains("b3-menu--sheet")) {
+                    this.setSheetHeight();
+                    void this.element.offsetHeight;
+                    this.element.style.transform = "translateY(0px)";
+                }
+            },
         });
         this.element.lastElementChild.scrollTop = 0;
     }

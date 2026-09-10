@@ -1,5 +1,6 @@
 /// #if !MOBILE
 import {getDockByType} from "./tabUtil";
+import {applyStatusBarEntryVisibility} from "../config/entryVisibility/runtime";
 import {toggleDockBar} from "./dock/util";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {fetchPost} from "../util/fetch";
@@ -19,20 +20,21 @@ export const initStatus = (isWindow = false) => {
     /// #if !MOBILE
     let barDockHTML = "";
     if (!isWindow) {
-        barDockHTML = `<div id="barDock" class="toolbar__item ariaLabel${window.siyuan.config.readonly || isWindow ? " fn__none" : ""}" aria-label="${window.siyuan.languages.toggleDock} ${updateHotkeyTip(window.siyuan.config.keymap.general.toggleDock.custom)}">
+        barDockHTML = `<div id="barDock" data-statusbar-entry="barDock" class="toolbar__item ariaLabel${window.siyuan.config.readonly || isWindow ? " fn__none" : ""}" aria-label="${window.siyuan.languages.toggleDock} ${updateHotkeyTip(window.siyuan.config.keymap.general.toggleDock.custom)}">
     <svg>
         <use xlink:href="#${window.siyuan.config.uiLayout.hideDock ? "iconDock" : "iconHideDock"}"></use>
     </svg>
 </div>`;
     }
     document.getElementById("status").innerHTML = `${barDockHTML}
-<div class="status__msg"></div>
-<div class="fn__flex-1"></div>
-<div class="status__backgroundtask fn__none"></div>
-<div class="status__counter"></div>
-<div id="statusHelp" class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.help}">
+<div data-statusbar-entry="message" class="status__msg"></div>
+<div data-statusbar-entry="spacer" class="fn__flex-1"></div>
+<div data-statusbar-entry="backgroundTask" class="status__backgroundtask fn__none"></div>
+<div data-statusbar-entry="counter" class="status__counter"></div>
+<div id="statusHelp" data-statusbar-entry="statusHelp" class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.help}">
     <svg><use xlink:href="#iconHelp"></use></svg>
 </div>`;
+    applyStatusBarEntryVisibility();
     document.querySelector("#status").addEventListener("click", (event) => {
         let target = event.target as HTMLElement | null;
         while (target && target.id !== "status") {

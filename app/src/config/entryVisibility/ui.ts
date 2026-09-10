@@ -16,6 +16,7 @@ import {
     refreshSlashMenuCatalog,
     refreshTopBarCatalog,
     TOP_BAR_ROOT_PATH,
+    STATUS_BAR_ROOT_PATH,
 } from "./catalog";
 import {
     createEntryProfileSnapshot,
@@ -222,6 +223,9 @@ const resolveProfileEntryOrder = (profile: Config.IEntryVisibilityProfile, paren
                                   defaultOrder: string[], separatorKeys: Set<string>) => {
     if (parentPath === TOP_BAR_ROOT_PATH) {
         return resolveEntryOrderWithBoundaryDefaults(defaultOrder, profile.orders?.[parentPath], "drag", separatorKeys);
+    }
+    if (parentPath === STATUS_BAR_ROOT_PATH) {
+        return resolveEntryOrderWithBoundaryDefaults(defaultOrder, profile.orders?.[parentPath], "spacer", separatorKeys);
     }
     return resolveEntryOrder(defaultOrder, profile.orders?.[parentPath], separatorKeys);
 };

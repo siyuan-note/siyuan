@@ -47,6 +47,7 @@ import {escapeHtml} from "../../util/escape";
 import {ViewStateService} from "../../util/viewState";
 import {loadBacklinkRefFilterMenu} from "./backlinkRefFilterMenu";
 import {BacklinkMentionCache, getBacklinkMentionQueryKey} from "./backlinkMentionCache";
+import {BottomBacklinkScroll} from "./bottomBacklinkScroll";
 import {
     applyViewFoldStates,
     invalidateViewFoldRequests,
@@ -172,6 +173,7 @@ export class BacklinkContent extends Model {
     private restoringReadingAnchors: [boolean, boolean] = [false, false];
     private readingAnchorScrollEpochs: [number, number] = [0, 0];
     private readingAnchorRenderGeneration = 0;
+    private bottomLayoutScroll?: BottomBacklinkScroll;
     private ownerScrollListener?: () => void;
     private onlyBacklinks: boolean;
     private surface: string;
@@ -700,6 +702,8 @@ export class BacklinkContent extends Model {
         if (isHeightAnimating(listElement)) {
             return;
         }
+        this.bottomLayoutScroll ??= new BottomBacklinkScroll(this.element, this.ownerProtyle.contentElement);
+        const finishScroll = this.bottomLayoutScroll.begin();
         const folded = !listElement.classList.contains("fn__none");
         if (folded) {
             this.savePendingReadingAnchor(listElement === this.mTree.element);
@@ -712,13 +716,14 @@ export class BacklinkContent extends Model {
             collapseHeight(listElement, () => {
                 delete listElement.dataset.heightFolding;
                 listElement.classList.add("fn__none");
+                finishScroll();
             });
         } else {
             delete listElement.dataset.heightFolding;
             listElement.classList.remove("fn__none");
             // 手动展开时保持当前位置，避免共享阅读锚点将页面滚动到提及区域。
             void this.resumeViewFoldStates(listElement);
-            expandHeight(listElement);
+            expandHeight(listElement, finishScroll);
         }
         if (folded) {
             listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
@@ -1679,6 +1684,7 @@ export class BacklinkContent extends Model {
     private resetRenderedData(resetLists: boolean) {
         cancelHeightAnimation(this.tree.element);
         cancelHeightAnimation(this.mTree.element);
+        this.bottomLayoutScroll?.reset();
         delete this.tree.element.dataset.heightFolding;
         delete this.mTree.element.dataset.heightFolding;
         this.cancelContextRequests(this.tree.element, false);
@@ -2312,6 +2318,7 @@ export class BacklinkContent extends Model {
         this.clearReadingAnchorTimers();
         cancelHeightAnimation(this.tree.element);
         cancelHeightAnimation(this.mTree.element);
+        this.bottomLayoutScroll?.reset();
         delete this.tree.element.dataset.heightFolding;
         delete this.mTree.element.dataset.heightFolding;
         if (this.ownerFocusoutListener) {

@@ -4172,17 +4172,26 @@ export class AgentChat extends Model {
             const input = option.querySelector("input") as HTMLInputElement;
             if (!input) return;
             let wasChecked = false;
-            option.addEventListener("mousedown", () => {
+            option.addEventListener("pointerdown", () => {
                 wasChecked = input.checked;
             });
+            input.addEventListener("keydown", (e) => {
+                if (e.key === " " && !e.repeat) {
+                    wasChecked = input.checked;
+                }
+            });
             option.addEventListener("click", (e) => {
-                if (el.classList.contains("agent-chat__msg--confirmed")) {
+                if (input.disabled || el.classList.contains("agent-chat__msg--confirmed")) {
                     return;
                 }
                 if (input.type === "radio" && wasChecked) {
-                    e.preventDefault();
+                    // 标签点击需阻止转发，直接点击单选框时保留默认行为，避免浏览器恢复选中状态。
+                    if (e.target !== input) {
+                        e.preventDefault();
+                    }
                     input.checked = false;
                 }
+                wasChecked = false;
             });
         });
 

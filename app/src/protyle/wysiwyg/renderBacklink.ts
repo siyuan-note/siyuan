@@ -18,6 +18,7 @@ import {
 } from "../util/viewFold";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 import {IBacklinkAVTarget, prepareBacklinkAV} from "../render/av/backlink";
+import {captureBacklinkAVSources, reuseBacklinkAVSources} from "../render/av/backlinkReuse";
 import {markBacklinkReference, updateBacklinkReferenceVisibility} from "./backlinkReference";
 import {setBacklinkTypeFoldExpandHandler, updateBacklinkTypeFolds} from "./backlinkTypeFold";
 
@@ -37,6 +38,7 @@ interface IBacklinkDOMRecord {
     revision: string,
     anchor: HTMLElement,
     targets: IBacklinkAVTarget[],
+    databases: ReturnType<typeof captureBacklinkAVSources>,
 }
 
 const backlinkDOMRecords = new WeakMap<IProtyle, Map<string, IBacklinkDOMRecord>>();
@@ -72,6 +74,7 @@ const createBacklinkDOMRecord = (item: IBacklinkData, index: number, id: string)
             revision: item.revision || "",
             anchor: nodes[0] as HTMLElement,
             targets: item.attributeViewTargets || [],
+            databases: captureBacklinkAVSources(nodes, item.attributeViewTargets || []),
         },
         nodes,
     };
@@ -131,8 +134,10 @@ export const renderBacklink = (protyle: IProtyle, backlinkData: IBacklinkData[])
             clearViewFoldDefaults(protyle, id);
             const created = createBacklinkDOMRecord(item, index, id);
             if (record) {
+                const restoreAVScroll = reuseBacklinkAVSources(created.nodes, created.record.databases, record.databases);
                 created.nodes.forEach(node => element.insertBefore(node, record.anchor));
                 removeBacklinkDOMRecord(record);
+                restoreAVScroll();
             } else {
                 created.nodes.forEach(node => element.appendChild(node));
             }

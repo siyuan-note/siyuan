@@ -21,6 +21,7 @@ import {getAllEditor} from "../getAll";
 import {isMobile} from "../../util/functions";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {renderBacklink} from "../../protyle/wysiwyg/renderBacklink";
+import {hasAVEditorSession} from "../../protyle/render/av/editorSession";
 import {BACKLINK_BLOCK_TYPES, configureBacklinkTypeFold, normalizeBacklinkFoldTypes} from "../../protyle/wysiwyg/backlinkTypeFold";
 import {
     getBottomBacklinkVisibility,
@@ -47,6 +48,7 @@ import {escapeHtml} from "../../util/escape";
 import {ViewStateService} from "../../util/viewState";
 import {loadBacklinkRefFilterMenu} from "./backlinkRefFilterMenu";
 import {BacklinkMentionCache, getBacklinkMentionQueryKey} from "./backlinkMentionCache";
+import {BottomBacklinkScroll} from "./bottomBacklinkScroll";
 import {
     applyViewFoldStates,
     invalidateViewFoldRequests,
@@ -172,6 +174,7 @@ export class BacklinkContent extends Model {
     private restoringReadingAnchors: [boolean, boolean] = [false, false];
     private readingAnchorScrollEpochs: [number, number] = [0, 0];
     private readingAnchorRenderGeneration = 0;
+    private bottomLayoutScroll?: BottomBacklinkScroll;
     private ownerScrollListener?: () => void;
     private onlyBacklinks: boolean;
     private surface: string;
@@ -219,6 +222,7 @@ export class BacklinkContent extends Model {
             });
         };
         this.element.addEventListener("focusout", this.panelFocusoutListener);
+        this.element.addEventListener("av-editor-close", this.panelFocusoutListener);
         if (this.type !== "bottom") {
             this.visibilityObserver = new IntersectionObserver((entries) => {
                 if (entries[0].isIntersecting) {
@@ -485,13 +489,15 @@ export class BacklinkContent extends Model {
                             event.stopPropagation();
                             break;
                         case "sort":
-                        case "mSort":
+                        case "mSort": {
                             this.showSortMenu(type, target.getAttribute("data-sort"));
-                            window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+                            const rect = target.getBoundingClientRect();
+                            window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height});
                             event.stopPropagation();
                             break;
+                        }
                         case "sourceFilter":
-                            this.showSourceFilterMenu(event);
+                            this.showSourceFilterMenu(target);
                             event.stopPropagation();
                             break;
                         case "layout":
@@ -700,6 +706,8 @@ export class BacklinkContent extends Model {
         if (isHeightAnimating(listElement)) {
             return;
         }
+        this.bottomLayoutScroll ??= new BottomBacklinkScroll(this.element, this.ownerProtyle.contentElement);
+        const finishScroll = this.bottomLayoutScroll.begin();
         const folded = !listElement.classList.contains("fn__none");
         if (folded) {
             this.savePendingReadingAnchor(listElement === this.mTree.element);
@@ -712,18 +720,14 @@ export class BacklinkContent extends Model {
             collapseHeight(listElement, () => {
                 delete listElement.dataset.heightFolding;
                 listElement.classList.add("fn__none");
+                finishScroll();
             });
         } else {
             delete listElement.dataset.heightFolding;
             listElement.classList.remove("fn__none");
-            const viewFoldPromise = this.resumeViewFoldStates(listElement);
-            const expandPromise = new Promise<void>(resolve => {
-                expandHeight(listElement, resolve);
-            });
-            this.restorePersistedReadingAnchorAfter(
-                listElement === this.mTree.element,
-                Promise.all([viewFoldPromise, expandPromise]).then(() => undefined),
-            );
+            // 手动展开时保持当前位置，避免共享阅读锚点将页面滚动到提及区域。
+            void this.resumeViewFoldStates(listElement);
+            expandHeight(listElement, finishScroll);
         }
         if (folded) {
             listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
@@ -863,7 +867,7 @@ export class BacklinkContent extends Model {
         );
     }
 
-    private showSourceFilterMenu(event: MouseEvent) {
+    private showSourceFilterMenu(target: HTMLElement) {
         let foldedTypes = normalizeBacklinkFoldTypes(this.viewState?.get("foldedBlockTypes"));
         const foldItems = new Map<string, HTMLElement>();
         let foldResetElement: HTMLElement;
@@ -1020,7 +1024,8 @@ export class BacklinkContent extends Model {
                 applyFoldTypes([]);
             }
         }).element);
-        window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+        const rect = target.getBoundingClientRect();
+        window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height});
     }
 
     private toggleItem(liElement: HTMLElement, isMention: boolean, persist = true) {
@@ -1134,7 +1139,8 @@ export class BacklinkContent extends Model {
                 return;
             }
             svgElement.removeAttribute("disabled");
-            if (record.editor?.protyle.element.contains(document.activeElement)) {
+            if (record.editor && (record.editor.protyle.element.contains(document.activeElement) ||
+                hasAVEditorSession(record.editor.protyle.element))) {
                 record.contextDirty = true;
                 this.dirty = true;
                 this.pendingRootIDs.add(docId);
@@ -1684,6 +1690,7 @@ export class BacklinkContent extends Model {
     private resetRenderedData(resetLists: boolean) {
         cancelHeightAnimation(this.tree.element);
         cancelHeightAnimation(this.mTree.element);
+        this.bottomLayoutScroll?.reset();
         delete this.tree.element.dataset.heightFolding;
         delete this.mTree.element.dataset.heightFolding;
         this.cancelContextRequests(this.tree.element, false);
@@ -2260,7 +2267,8 @@ export class BacklinkContent extends Model {
     }
 
     public refreshAfterIndex() {
-        if (this.destroyed || !this.blockId || !this.dirty || this.element.contains(document.activeElement)) {
+        if (this.destroyed || !this.blockId || !this.dirty || this.element.contains(document.activeElement) ||
+            hasAVEditorSession(this.element)) {
             return;
         }
         if (this.type === "bottom") {
@@ -2278,7 +2286,7 @@ export class BacklinkContent extends Model {
             return;
         }
         if (shouldDeferBottomBacklinkRefresh(
-            this.element.contains(document.activeElement),
+            this.element.contains(document.activeElement) || hasAVEditorSession(this.element),
             ignoreFocus
         )) {
             return;
@@ -2317,6 +2325,7 @@ export class BacklinkContent extends Model {
         this.clearReadingAnchorTimers();
         cancelHeightAnimation(this.tree.element);
         cancelHeightAnimation(this.mTree.element);
+        this.bottomLayoutScroll?.reset();
         delete this.tree.element.dataset.heightFolding;
         delete this.mTree.element.dataset.heightFolding;
         if (this.ownerFocusoutListener) {
@@ -2327,6 +2336,7 @@ export class BacklinkContent extends Model {
         }
         if (this.panelFocusoutListener) {
             this.element.removeEventListener("focusout", this.panelFocusoutListener);
+            this.element.removeEventListener("av-editor-close", this.panelFocusoutListener);
         }
         this.visibilityObserver?.disconnect();
         this.editors.forEach(item => {

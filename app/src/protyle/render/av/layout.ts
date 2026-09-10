@@ -307,7 +307,7 @@ export const bindLayoutEvent = (options: {
             });
         });
         const rect = cardLayoutElement.getBoundingClientRect();
-        menu.open({x: rect.left, y: rect.bottom});
+        menu.open({x: rect.left, y: rect.bottom, h: rect.height});
         event.preventDefault();
         event.stopPropagation();
     });

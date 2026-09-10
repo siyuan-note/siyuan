@@ -89,6 +89,15 @@ export const serializeTableCellRich = (blockDOM: string) => {
         whitespace.push(value.replace(/ /g, "&#32;").replace(/\t/g, "&#9;").replace(/\n/g, "<br />"));
         return token;
     };
+    // 多块内容中的空段落需要显式占位，避免 Markdown 格式化移除用户插入的空行。
+    const paragraphs = template.content.querySelectorAll('[data-type="NodeParagraph"] > [contenteditable="true"]');
+    if (template.content.childElementCount > 1 || template.content.querySelector('[data-type="NodeList"]')) {
+        paragraphs.forEach(paragraph => {
+            if (!paragraph.innerHTML.replace(/\u200b/g, "").trim()) {
+                paragraph.textContent = protectWhitespace(" ");
+            }
+        });
+    }
     template.content.querySelectorAll("br").forEach(br => {
         if (!br.closest('[data-type="NodeCodeBlock"], [data-type="NodeMathBlock"], .img')) {
             br.replaceWith(protectWhitespace("\n"));

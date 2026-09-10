@@ -197,14 +197,21 @@ export class Title {
                     });
                 } else {
                     const iconRect = iconElement.getBoundingClientRect();
-                    openTitleMenu(protyle, {x: iconRect.left, y: iconRect.bottom}, Constants.MENU_FROM_TITLE_PROTYLE);
+                    openTitleMenu(protyle, {x: iconRect.left, y: iconRect.bottom, h: iconRect.height}, Constants.MENU_FROM_TITLE_PROTYLE);
                 }
             });
             this.element.addEventListener("contextmenu", async (event) => {
                 if (event.shiftKey) {
                     return;
                 }
-                if (getSelection().rangeCount === 0 || iconElement.contains((event.target as HTMLElement))) {
+                if (iconElement.contains(event.target as Node)) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const iconRect = iconElement.getBoundingClientRect();
+                    openTitleMenu(protyle, {x: iconRect.left, y: iconRect.bottom, h: iconRect.height}, Constants.MENU_FROM_TITLE_PROTYLE);
+                    return;
+                }
+                if (getSelection().rangeCount === 0) {
                     openTitleMenu(protyle, {x: event.clientX, y: event.clientY}, Constants.MENU_FROM_TITLE_PROTYLE);
                     return;
                 }

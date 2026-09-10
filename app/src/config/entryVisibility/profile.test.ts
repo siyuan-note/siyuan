@@ -27,6 +27,32 @@ test("font toolbar entries are visible in Full, hidden in Simple and preserve ex
     assert.equal(getEntryCatalogCustomDefaultVisibility(`${TOOLBAR_ENTRY_ROOT_PATH}.text`), true);
 });
 
+test("mobile font entries default to hidden and preserve explicit profile choices", () => {
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
+    Object.defineProperty(globalThis, "window", {configurable: true, value: {siyuan: {mobile: {}}}});
+    try {
+        for (const key of ["font-family", "font-size"]) {
+            const path = `${TOOLBAR_ENTRY_ROOT_PATH}.${key}`;
+            const defaultVisible = getEntryCatalogDefaultVisibility(path);
+            const entry = getEntryCatalogNode(path);
+            assert.equal(defaultVisible, false);
+            assert.equal(getBuiltinProfileEntryVisibility("full", entry.simple, defaultVisible), false);
+            assert.equal(getBuiltinProfileEntryVisibility("simple", entry.simple, defaultVisible), false);
+            const customDefaultVisible = getEntryCatalogCustomDefaultVisibility(path);
+            assert.equal(getProfileEntryVisibility({entries: {}}, path, customDefaultVisible), false);
+            assert.equal(getProfileEntryVisibility({entries: {[path]: true}}, path, customDefaultVisible), true);
+            assert.equal(getProfileEntryVisibility({entries: {[path]: false}}, path, customDefaultVisible), false);
+        }
+        assert.equal(getEntryCatalogDefaultVisibility(`${TOOLBAR_ENTRY_ROOT_PATH}.text`), true);
+    } finally {
+        if (descriptor) {
+            Object.defineProperty(globalThis, "window", descriptor);
+        } else {
+            Reflect.deleteProperty(globalThis, "window");
+        }
+    }
+});
+
 test("built-in profiles honor entry defaults", () => {
     assert.equal(getBuiltinProfileEntryVisibility("full", false, true), true);
     assert.equal(getBuiltinProfileEntryVisibility("full", true, false), false);

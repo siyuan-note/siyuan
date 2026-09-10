@@ -56,7 +56,7 @@ export const initStatus = (isWindow = false) => {
                     }).element);
                 });
                 const rect = target.getBoundingClientRect();
-                window.siyuan.menus.menu.popup({x: rect.right, y: rect.top, isLeft: true});
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true});
                 event.stopPropagation();
                 break;
             } else if (target.id === "statusHelp") {
@@ -110,7 +110,7 @@ export const initStatus = (isWindow = false) => {
                     }
                 }).element);
                 const rect = target.getBoundingClientRect();
-                window.siyuan.menus.menu.popup({x: rect.right, y: rect.top, isLeft: true});
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true});
                 event.stopPropagation();
                 break;
             } else if (target.classList.contains("b3-menu__item")) {

@@ -766,7 +766,7 @@ export const openNewItemTemplateDialog = (options: {
             },
         });
         const rect = target.getBoundingClientRect();
-        menu.open({x: rect.right, y: rect.top, h: rect.height});
+        menu.open({x: rect.right, y: rect.bottom, h: rect.height});
     };
 
     let draggingIndex = -1;

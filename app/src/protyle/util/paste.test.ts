@@ -47,7 +47,7 @@ const createHarness = (disabled = false) => {
         target: {}, stopPropagation() {}, preventDefault() {},
         clipboardData: {files, types: [], getData: (type: string) => type === "text/siyuan" ? siyuanHTML : ""},
     } as unknown as ClipboardEvent & {target: HTMLElement});
-    return {paste, uploads, position, restrictedFallback,
+    return {paste, uploads, position, restrictedFallback, api: module.exports as typeof import("./paste"),
         setLocalFiles: (files: unknown[]) => { localFiles = files; },
         invalidate: () => { available = false; }};
 };
@@ -91,4 +91,25 @@ describe("restricted cell image paste", () => {
             assert.equal(harness.uploads.length, 0);
         });
     }
+});
+
+describe("strip pasted IAL data attributes", () => {
+    const harness = createHarness();
+
+    it("removes data-* and on* keys from pasted block IAL", () => {
+        assert.equal(harness.api.stripPastedIALDataAttributes(
+            'x\n{: id="20240101000000-abc123" data-subtype="x&quot; autofocus" onmouseover="alert(1)" custom-foo="bar"}'),
+            'x\n{: id="20240101000000-abc123" custom-foo="bar"}');
+    });
+
+    it("keeps data-assets for legacy asset references", () => {
+        assert.equal(harness.api.stripPastedIALDataAttributes(
+            'x\n{: data-assets="assets/a.png"}'),
+            'x\n{: data-assets="assets/a.png"}');
+    });
+
+    it("leaves ordinary markdown and non-IAL lines untouched", () => {
+        const markdown = "paragraph\n\n{: not an ial line\n\n# heading\n{: id=\"20240101000000-abc123\"}";
+        assert.equal(harness.api.stripPastedIALDataAttributes(markdown), markdown);
+    });
 });

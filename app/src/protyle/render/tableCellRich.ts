@@ -21,6 +21,9 @@ export const renderTableCellRichElements = (root: Element) => {
             if (node.hasAttribute("data-node-id")) {
                 node.setAttribute("data-table-cell-node", "");
             }
+            if (node.hasAttribute("spellcheck")) {
+                node.setAttribute("data-table-cell-content", "");
+            }
             ["id", "data-node-id", "data-node-index", "updated", "spellcheck", "draggable"].forEach(attribute =>
                 node.removeAttribute(attribute));
             if (node.hasAttribute("contenteditable")) {

@@ -9,6 +9,7 @@ import {mathRender} from "../mathRender";
 import {positionAVRichTextEditor} from "./richTextEditorPosition";
 import {getAVData} from "./virtualScroll";
 import {resolveAVSelectedCell} from "./selectionState";
+import {beginAVEditorSession} from "./editorSession";
 import {
     configureAVRichTextLute,
     createAVRichTextValue,
@@ -109,6 +110,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
     </div>` : ""}
 </div>`;
     document.body.appendChild(maskElement);
+    const endEditorSession = beginAVEditorSession(options.protyle.element);
     const panelElement = maskElement.firstElementChild as HTMLElement;
     const hostElement = panelElement.querySelector<HTMLElement>(".av__richtext-host");
     hostElement.dataset.protyleLiteRender = "safe";
@@ -222,6 +224,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
             if (activeEditor?.finish === finish) {
                 activeEditor = undefined;
             }
+            endEditorSession();
             options.onDestroy?.();
         }
     };

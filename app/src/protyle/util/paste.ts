@@ -263,6 +263,17 @@ export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element, prep
     }
 };
 
+// 清理外部纯文本粘贴内容块级 IAL 中的 data-* 与 on* 属性，
+// 避免数据属性被注入后参与块标等后续 HTML 序列化
+export const stripPastedIALDataAttributes = (textPlain: string) => {
+    return textPlain.split("\n").map((line) => {
+        if (!/^\s*\{:.*\}\s*$/.test(line)) {
+            return line;
+        }
+        return line.replace(/\s(?:(?:data-(?!assets)[\w-]+)|on[\w-]+)\s*=\s*(?:"[^"]*"|'[^']*')/g, "");
+    }).join("\n");
+};
+
 export const pasteAsPlainText = async (protyle: IProtyle, prepareInsertion?: () => boolean) => {
     let localFiles: ILocalFiles[] = [];
     /// #if !BROWSER
@@ -317,7 +328,8 @@ export const pasteAsPlainText = async (protyle: IProtyle, prepareInsertion?: () 
         enableLuteMarkdownSyntax(protyle);
         let content: string;
         try {
-            content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
+            content = protyle.lute.BlockDOM2EscapeMarkerContent(
+                protyle.lute.Md2BlockDOM(stripPastedIALDataAttributes(textPlain)));
         } finally {
             restoreLuteMarkdownSyntax(protyle);
         }
@@ -1470,6 +1482,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 }
             }
             let textPlainDom: string;
+            textPlain = stripPastedIALDataAttributes(textPlain);
 
             // Auto-convert pasted URL to link format https://github.com/siyuan-note/siyuan/issues/17337
             if (window.siyuan.config.editor.pasteURLAutoConvert) {

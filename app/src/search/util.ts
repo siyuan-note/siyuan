@@ -732,7 +732,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                     }).element);
                 });
                 const rect = target.getBoundingClientRect();
-                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, isLeft: true});
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true});
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -803,7 +803,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                     persistSearchConfig(config);
                 });
                 const rect = target.getBoundingClientRect();
-                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, isLeft: true});
+                window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, h: rect.height, isLeft: true});
                 event.stopPropagation();
                 event.preventDefault();
                 break;

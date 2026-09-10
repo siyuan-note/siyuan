@@ -145,7 +145,8 @@
       box-shadow: 2px 0 0 0 var(--b3-protyle-inline-mark-background) inset;
     }
 
-    [spellcheck] {
+    [spellcheck],
+    [data-table-cell-content] {
       min-height: 1.625em;
       word-break: break-word;
       // https://github.com/siyuan-note/siyuan/issues/10483
@@ -505,10 +506,7 @@
       color: var(--b3-protyle-inline-link-color);
       cursor: pointer;
       transition: var(--b3-transition);
-
-      &:hover {
-        border-bottom: 1px solid;
-      }
+      border-bottom: 1px solid;
     }
 
     span[data-type~="search-mark"] {
@@ -536,22 +534,24 @@
 
     span[data-type~="block-ref"]:not(.av__celltext),
     span[data-type~="file-annotation-ref"] {
-      color: var(--b3-protyle-inline-blockref-color);
-      opacity: .86;
+      border-bottom: 1px dashed var(--b3-protyle-inline-blockref-color);
       transition: var(--b3-transition);
     }
 
     span[data-type~="file-annotation-ref"] {
-      color: var(--b3-protyle-inline-fileref-color);
+      border-bottom-color: var(--b3-protyle-inline-fileref-color);
+    }
+
+    span[data-type="virtual-block-ref"]:hover,
+    span[data-type~="block-ref"]:not(.av__celltext):hover,
+    span[data-type~="file-annotation-ref"]:hover {
+      background-color: var(--b3-list-hover);
+      border-radius: 2px;
     }
 
     span[data-type~="block-ref"],
     span[data-type~="file-annotation-ref"] {
       cursor: pointer;
-
-      &:hover {
-        opacity: 1;
-      }
     }
 
     &.render-node {

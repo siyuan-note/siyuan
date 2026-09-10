@@ -46,6 +46,28 @@ test("mobile toolbar keeps navigation reachable and removes empty separators", (
     assert.deepEqual(root.children.filter(item => !item.classList.contains("fn__none")), [back, size, first, family]);
 });
 
+test("mobile toolbar follows font visibility changes while preserving formatting entries", () => {
+    const root = new ToolbarElement();
+    const back = new ToolbarElement("goback");
+    const family = new ToolbarElement("font-family");
+    const size = new ToolbarElement("font-size");
+    const appearance = new ToolbarElement("text");
+    const bold = new ToolbarElement("strong");
+    const separator = new ToolbarElement(undefined, "separator_1");
+    root.children = [back, family, size, separator, appearance, bold];
+    applyMobileToolbarEntries(root as unknown as HTMLElement, getDefaultToolbar(true), {
+        order: ["font-family", "font-size", "separator_1", "text", "strong"],
+        isVisible: key => !["font-family", "font-size"].includes(key),
+    });
+    assert.deepEqual(root.children.filter(item => !item.classList.contains("fn__none")), [back, appearance, bold]);
+    applyMobileToolbarEntries(root as unknown as HTMLElement, getDefaultToolbar(true), {
+        order: ["font-family", "font-size", "separator_1", "text", "strong"],
+        isVisible: () => true,
+    });
+    assert.deepEqual(root.children.filter(item => !item.classList.contains("fn__none")),
+        [back, family, size, separator, appearance, bold]);
+});
+
 test("mobile toolbar applies plugin visibility and restores its configured order", () => {
     const defaults = getDefaultToolbar(true);
     const plugin = {name: "plugin-action"};

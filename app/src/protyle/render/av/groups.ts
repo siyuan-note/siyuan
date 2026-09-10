@@ -387,7 +387,8 @@ export const goGroupsDate = (options: {
     menu.open({
         isLeft: true,
         x: rect.right,
-        y: rect.bottom
+        y: rect.bottom,
+        h: rect.height
     });
 };
 
@@ -438,6 +439,7 @@ export const goGroupsSort = (options: {
     menu.open({
         isLeft: true,
         x: rect.right,
-        y: rect.bottom
+        y: rect.bottom,
+        h: rect.height
     });
 };

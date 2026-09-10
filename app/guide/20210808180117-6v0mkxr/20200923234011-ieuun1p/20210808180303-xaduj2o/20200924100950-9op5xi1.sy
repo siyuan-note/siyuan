@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260909090822"
+		"updated": "20260910080119"
 	},
 	"Children": [
 		{
@@ -4047,7 +4047,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20260906013806"
+				"updated": "20260910080119"
 			},
 			"Children": [
 				{
@@ -12316,7 +12316,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-jeh8w1g",
-				"updated": "20260811122156"
+				"updated": "20260910080119"
 			},
 			"Children": [
 				{
@@ -12362,7 +12362,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20210106154319-otreidg",
-				"updated": "20260909090822"
+				"updated": "20260910080119"
 			},
 			"Children": [
 				{
@@ -13028,30 +13028,6 @@
 								{
 									"Type": "NodeText",
 									"Data": "​"
-								}
-							]
-						}
-					]
-				},
-				{
-					"Type": "NodeTableRow",
-					"Children": [
-						{
-							"Type": "NodeTableCell",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Edit a table cell"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "F2"
 								}
 							]
 						}

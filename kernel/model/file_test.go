@@ -575,6 +575,29 @@ func TestCreateDocByMdConvertsHTMLTagsToTextMarks(t *testing.T) {
 	}
 }
 
+func TestCreateDocByMdKeepsOrdinaryTableSpec(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	tree, err := CreateDocByMd(fixture.box.ID, "/20260718000004-abcdefg.sy", "Ordinary table",
+		"| Header |\n| --- |\n| **bold** |", nil, nil)
+	if nil != err {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		cache.RemoveTreeData(tree.ID)
+		cache.RemoveDocIAL(tree.Path)
+	})
+	if tree.Root.Spec != treenode.BaseSpec {
+		t.Fatalf("ordinary table must use base spec, got %s", tree.Root.Spec)
+	}
+	loaded, err := filesys.LoadTree(tree.Box, tree.Path, util.NewLute())
+	if nil != err {
+		t.Fatal(err)
+	}
+	if loaded.Root.Spec != treenode.BaseSpec {
+		t.Fatalf("persisted ordinary table must use base spec, got %s", loaded.Root.Spec)
+	}
+}
+
 func TestValidateCreateDocReportsClosedNotebook(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	boxConf := fixture.box.GetConf()

@@ -629,6 +629,9 @@
 }
 
 .sy__backlink--bottom {
+  // 避免浏览器锚定下方提及内容，导致折叠时标题随滚动补偿移动。
+  overflow-anchor: none;
+
   .backlinkList__loading {
     height: 40px;
   }
@@ -895,8 +898,15 @@
   }
 }
 
+.table__cell-rich,
+.table__cell-editor {
+  // 按内容计算宽度，使窄列在输入时自动撑开，同时保留单元格的宽度约束。
+  width: max-content;
+  max-width: 100%;
+}
+
 .table__cell-rich {
-  min-width: 180px;
+  min-width: 0;
   min-height: 1.6em;
   white-space: normal;
   cursor: text;
@@ -914,7 +924,7 @@
 }
 
 .table__cell-editor {
-  min-width: 180px;
+  min-width: 0;
   min-height: 0;
   white-space: normal;
 
@@ -957,6 +967,18 @@
       }
     }
   }
+}
+
+.table__cell-rich.table__cell--empty,
+.table__cell-editor.table__cell--empty {
+  // 空内容填满单元格，避免零宽编辑容器裁掉光标。
+  width: 100%;
+}
+
+.table__cell-rich [data-table-cell-content],
+.table__cell-editor .protyle-wysiwyg [contenteditable="true"] {
+  // 为空列表项等块的文字区域保留光标宽度，预览和编辑时保持一致。
+  min-width: 1px;
 }
 
 .protyle-wysiwyg [data-type="NodeTable"] {

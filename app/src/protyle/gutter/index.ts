@@ -51,6 +51,7 @@ import {
 } from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {escapeAttr} from "../../util/escape";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 import {
     cancelSB,
@@ -388,8 +389,10 @@ export class Gutter {
                             protyle.toolbar.range = getEditorRange(
                                 this.getNodeElement(protyle, activeBlockButton) || protyle.wysiwyg.element.firstElementChild);
                         }
-                        /// #if !MOBILE
-                        window.siyuan.menus.menu.popup({x: br.left, y: br.bottom, isLeft: true});
+                        /// #if MOBILE
+                        window.siyuan.menus.menu.fullscreen();
+                        /// #else
+                        window.siyuan.menus.menu.popup({x: br.left, y: br.bottom, h: br.height, isLeft: true});
                         restoreGutterRange(protyle.toolbar.range);
                         /// #endif
                     }
@@ -671,7 +674,7 @@ export class Gutter {
                 /// #if MOBILE
                 window.siyuan.menus.menu.fullscreen();
                 /// #else
-                window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, isLeft: true});
+                window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, h: gutterRect.height, isLeft: true});
                 const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
                 window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
                 restoreGutterRange(protyle.toolbar.range);
@@ -714,7 +717,7 @@ export class Gutter {
                     /// #if MOBILE
                     window.siyuan.menus.menu.fullscreen();
                     /// #else
-                    window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, isLeft: true});
+                    window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, h: gutterRect.height, isLeft: true});
                     const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
                     window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
                     restoreGutterRange(protyle.toolbar.range);
@@ -750,7 +753,12 @@ export class Gutter {
             event.stopPropagation();
         });
         // 双元素交互：悬浮块标显示框线（贴边不动），悬浮框线显示+号（独立元素外偏定位）
-        this.element.addEventListener("mousemove", (event: MouseEvent & { target: HTMLElement }) => {
+        this.element.addEventListener("pointermove", (event: PointerEvent & { target: HTMLElement }) => {
+            // 仅鼠标悬浮显示插入控件，避免触摸合成的鼠标事件让透明框线覆盖块标。
+            if (event.pointerType !== "mouse") {
+                hideInsert();
+                return;
+            }
             const lineBefore = this.element.querySelector('.protyle-gutters__line[data-type="gutterLineBefore"]') as HTMLElement;
             const lineAfter = this.element.querySelector('.protyle-gutters__line[data-type="gutterLineAfter"]') as HTMLElement;
             const plusBefore = this.element.querySelector('.protyle-gutters__plus[data-type="gutterPlusBefore"]') as HTMLElement;
@@ -3777,7 +3785,7 @@ export class Gutter {
 
                 let popoverHTML = "";
                 if (protyle.options.backlinkData) {
-                    popoverHTML = `class="popover__block" data-id="${dataNodeId}"`;
+                    popoverHTML = `class="popover__block" data-id="${escapeAttr(dataNodeId)}"`;
                 }
                 const viewOccurrenceID = hasViewFoldContext(protyle) ?
                     getViewFoldOccurrenceID(protyle, nodeElement) : "";
@@ -3864,7 +3872,7 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
                 viewOccurrenceID: hasViewFoldContext(protyle) ?
                     getViewFoldOccurrenceID(protyle, embedElement) : "",
                 popoverHTML: protyle.options.backlinkData ?
-                    `class="popover__block" data-id="${embedElement.getAttribute("data-node-id")}"` : "",
+                    `class="popover__block" data-id="${escapeAttr(embedElement.getAttribute("data-node-id"))}"` : "",
                 draggable: !protyle.disabled,
             }) + html;
         }

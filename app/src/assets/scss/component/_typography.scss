@@ -378,6 +378,7 @@
       box-sizing: border-box;
       max-width: 620px;
       word-wrap: break-word;
+      vertical-align: top;
 
       &:empty::after {
         content: "";

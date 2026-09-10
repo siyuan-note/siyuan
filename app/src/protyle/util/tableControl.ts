@@ -529,6 +529,9 @@ export class TableControl {
             if (!this.selection || this.protyle.disabled) {
                 return;
             }
+            if (this.handleTableHotkey(event)) {
+                return;
+            }
             const keymap = window.siyuan.config.keymap.editor.general;
             const undo = matchHotKey(keymap.undo, event);
             const redo = matchHotKey(keymap.redo, event);
@@ -654,6 +657,70 @@ export class TableControl {
             this.hoverType = undefined;
             this.scheduleRender();
         }, {signal});
+    }
+
+    private handleTableHotkey(event: KeyboardEvent) {
+        if (event.isComposing) {
+            return false;
+        }
+        const keymap = window.siyuan.config.keymap.editor.table;
+        const action = ["insertRowAbove", "insertRowBelow", "insertColumnLeft", "insertColumnRight",
+            "moveToUp", "moveToDown", "moveToLeft", "moveToRight", "delete-row", "delete-column"]
+            .find(key => matchHotKey(keymap[key], event));
+        if (!action) {
+            return false;
+        }
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const selection = this.selection;
+        const grid = buildTableGrid(selection.table);
+        const mode = ["insertRowAbove", "insertRowBelow", "moveToUp", "moveToDown", "delete-row"].includes(action) ?
+            "row" : "column";
+        // 将单元格选区投影到目标行列，沿用表格操作的合并单元格边界检查。
+        const cells = new Set(this.getSelectedCells());
+        const indexes = new Set<number>();
+        grid.cellInfos.filter(info => cells.has(info.cell)).forEach(info => {
+            const start = mode === "row" ? info.row : info.col;
+            const span = mode === "row" ? info.rowspan : info.colspan;
+            for (let index = start; index < start + span; index++) {
+                indexes.add(index);
+            }
+        });
+        const sorted = Array.from(indexes).sort((a, b) => a - b);
+        if (sorted.length === 0) {
+            return true;
+        }
+        const first = sorted[0];
+        const last = sorted[sorted.length - 1];
+        if (action.startsWith("insert")) {
+            const index = action === "insertRowAbove" || action === "insertColumnLeft" ? first : last + 1;
+            if (this.canInsertAtBoundary(grid, mode, index)) {
+                if (mode === "row") {
+                    this.insertRowAt(selection.node, selection.table, index);
+                } else {
+                    this.insertColumnAt(selection.node, selection.table, index);
+                }
+            }
+        } else if (action === "delete-row" || action === "delete-column") {
+            if (mode === "row") {
+                deleteTableRows(this.protyle, selection.node, sorted);
+            } else {
+                deleteTableColumns(this.protyle, selection.node, sorted);
+            }
+            this.clear();
+        } else {
+            const target = action === "moveToUp" || action === "moveToLeft" ? first - 1 : last + 2;
+            const count = mode === "row" ? grid.rowCount : grid.columnCount;
+            if (target >= 0 && target <= count && !grid.cellInfos.some(info => info.rowspan > 1 || info.colspan > 1)) {
+                selection.mode = mode;
+                selection.indexes = indexes;
+                selection.anchor = first;
+                this.moveSelection(target);
+                this.updateSelectedCells();
+                this.scheduleRender();
+            }
+        }
+        return true;
     }
 
     private handleTablePointerMove(event: PointerEvent, fromControl: boolean) {
@@ -933,7 +1000,7 @@ export class TableControl {
         return getRangeIndexes(start, start + span - 1).some(index => this.selection.indexes.has(index));
     }
 
-    private getSelectedCells() {
+    public getSelectedCells() {
         return this.selectedCells.filter(cell => cell.isConnected);
     }
 

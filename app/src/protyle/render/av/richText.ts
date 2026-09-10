@@ -340,7 +340,9 @@ export const getAVRichTextBlockDOM = (markdown: string, images = false) => markd
 const getAVRichTextPreviewBlockDOM = (blockDOM: string) => {
     const template = document.createElement("template");
     template.innerHTML = cleanAVRichTextBlockDOMStructure(blockDOM);
-    template.content.querySelectorAll(".protyle-action").forEach((element) => element.remove());
+    // 待办操作节点携带勾选状态，需要保留到 HTML 转换完成。
+    template.content.querySelectorAll(".protyle-action:not(.protyle-action--task)")
+        .forEach((element) => element.remove());
     return (template.innerHTML || "").trim();
 };
 

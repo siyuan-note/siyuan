@@ -207,7 +207,8 @@ export class Files extends Model {
                     event.preventDefault();
                     break;
                 } else if (type === "more") {
-                    this.initMoreMenu().popup({x: event.clientX, y: event.clientY});
+                    const rect = target.getBoundingClientRect();
+                    this.initMoreMenu().popup({x: rect.left, y: rect.bottom, h: rect.height});
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -333,16 +334,20 @@ export class Files extends Model {
                             if (type === "new") {
                                 newFileInTree(options.app, notebookId, pathString);
                             } else if (type === "more-root") {
+                                const rect = target.getBoundingClientRect();
                                 initNavigationMenu(options.app, target.parentElement).popup({
-                                    x: event.clientX,
-                                    y: event.clientY
+                                    x: rect.left,
+                                    y: rect.bottom,
+                                    h: rect.height,
                                 });
                             }
                         }
                         if (type === "more-file") {
+                            const rect = target.getBoundingClientRect();
                             initFileMenu(options.app, notebookId, pathString, target.parentElement).popup({
-                                x: event.clientX,
-                                y: event.clientY
+                                x: rect.left,
+                                y: rect.bottom,
+                                h: rect.height,
                             });
                         }
                         event.preventDefault();

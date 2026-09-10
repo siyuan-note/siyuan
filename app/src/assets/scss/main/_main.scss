@@ -284,8 +284,8 @@ html[data-frontend="browser-desktop"] {
 }
 
 .file-tree {
-  .block__icons .block__icon,
-  &:not(.fullscreen) .block__icons .fn__space {
+  .block__icons:not(.protyle-wysiwyg *) .block__icon:not(.backlinkList__toggle),
+  &:not(.fullscreen) .block__icons:not(.protyle-wysiwyg *) .fn__space {
     display: none;
     transition: opacity .3s cubic-bezier(0, 0, .2, 1) 0ms, display .3s cubic-bezier(0, 0, .2, 1) 0ms allow-discrete;
   }
@@ -294,13 +294,13 @@ html[data-frontend="browser-desktop"] {
     display: none;
   }
 
-  &:hover .block__icons .fn__space {
+  &:hover .block__icons:not(.protyle-wysiwyg *) .fn__space {
     display: block;
   }
 
-  &:hover .block__icons .block__icon:not([disabled]),
-  &:not(.fullscreen):hover .block__icons .fn__space,
-  &.fullscreen .block__icons .block__icon:not([disabled]) {
+  &:hover .block__icons:not(.protyle-wysiwyg *) .block__icon:not([disabled], .backlinkList__toggle),
+  &:not(.fullscreen):hover .block__icons:not(.protyle-wysiwyg *) .fn__space,
+  &.fullscreen .block__icons:not(.protyle-wysiwyg *) .block__icon:not([disabled], .backlinkList__toggle) {
     opacity: 1;
     display: flex;
     @starting-style {
@@ -308,7 +308,7 @@ html[data-frontend="browser-desktop"] {
     }
   }
 
-  &:hover .block__icons .block__icon[disabled] {
+  &:hover .block__icons:not(.protyle-wysiwyg *) .block__icon[disabled]:not(.backlinkList__toggle) {
     opacity: .38;
     display: block;
     cursor: not-allowed;

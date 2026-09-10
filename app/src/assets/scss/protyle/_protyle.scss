@@ -898,6 +898,13 @@
   }
 }
 
+.table__cell-rich,
+.table__cell-editor {
+  // 按内容计算宽度，使窄列在输入时自动撑开，同时保留单元格的宽度约束。
+  width: max-content;
+  max-width: 100%;
+}
+
 .table__cell-rich {
   min-width: 0;
   min-height: 1.6em;

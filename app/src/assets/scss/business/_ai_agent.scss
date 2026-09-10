@@ -1043,6 +1043,19 @@
   line-height: 1.5;
 }
 
+.agent-chat__question-custom-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  margin-top: 8px;
+
+  .agent-chat__question-custom {
+    min-width: 0;
+    margin-top: 0;
+  }
+}
+
 .agent-chat__question-custom {
   width: 100%;
   box-sizing: border-box;

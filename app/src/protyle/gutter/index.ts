@@ -51,6 +51,7 @@ import {
 } from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {escapeAttr} from "../../util/escape";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 import {
     cancelSB,
@@ -3784,7 +3785,7 @@ export class Gutter {
 
                 let popoverHTML = "";
                 if (protyle.options.backlinkData) {
-                    popoverHTML = `class="popover__block" data-id="${dataNodeId}"`;
+                    popoverHTML = `class="popover__block" data-id="${escapeAttr(dataNodeId)}"`;
                 }
                 const viewOccurrenceID = hasViewFoldContext(protyle) ?
                     getViewFoldOccurrenceID(protyle, nodeElement) : "";
@@ -3871,7 +3872,7 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
                 viewOccurrenceID: hasViewFoldContext(protyle) ?
                     getViewFoldOccurrenceID(protyle, embedElement) : "",
                 popoverHTML: protyle.options.backlinkData ?
-                    `class="popover__block" data-id="${embedElement.getAttribute("data-node-id")}"` : "",
+                    `class="popover__block" data-id="${escapeAttr(embedElement.getAttribute("data-node-id"))}"` : "",
                 draggable: !protyle.disabled,
             }) + html;
         }

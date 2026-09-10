@@ -2,7 +2,6 @@ import type {App} from "../../index";
 import {
     AgentChat,
     type AgentChatNotification,
-    type AgentChatStatus,
 } from "../../layout/dock/agent/AgentChat";
 import {closePanel} from "../util/closePanel";
 import {showMessage} from "../../dialog/message";
@@ -14,14 +13,11 @@ let app: App | undefined;
 let agentChat: AgentChat | undefined;
 let rootElement: HTMLElement | undefined;
 let detachedRoot: DocumentFragment | undefined;
-let running = false;
 let unread: AgentChatNotification | undefined;
 
 const updateMenuStatus = () => {
     const item = document.getElementById("menuAgentChat");
     if (item) {
-        const icon = item.querySelector(".b3-menu__icon");
-        icon?.classList.toggle("fn__rotate", running);
         const status = item.querySelector('[data-type="agent-status"]');
         status?.classList.toggle("fn__none", !unread);
         status?.classList.toggle("agent-menu-status--warning", unread === "confirm");
@@ -30,7 +26,6 @@ const updateMenuStatus = () => {
         }
     }
     const tabElement = document.querySelector('[data-type="sidebar-agent-tab"]');
-    tabElement?.classList.toggle("fn__rotate", running);
     tabElement?.classList.toggle("agent-menu-status--warning", unread === "confirm");
     if (tabElement) {
         const label = unread === "confirm" ? window.siyuan.languages.agentNotifyConfirm :
@@ -60,11 +55,6 @@ const notify = (type: AgentChatNotification) => {
     }
 };
 
-const setStatus = (status: AgentChatStatus) => {
-    running = status === "running";
-    updateMenuStatus();
-};
-
 const ensureAgentChat = (currentApp: App) => {
     app = currentApp;
     if (agentChat && rootElement) {
@@ -85,7 +75,6 @@ const ensureAgentChat = (currentApp: App) => {
         },
         onNavigate: hideMobileAgent,
         notify,
-        onStatusChange: setStatus,
     });
     window.siyuan.mobile.agentChat = agentChat;
     window.siyuan.mobile.docks.agent = agentChat;

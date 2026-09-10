@@ -1,5 +1,5 @@
 {
-	"bazaarPackagePending": "パッケージ情報はまだ同期されていません。しばらくしてから再試行してください。",
+	"bazaarPackagePending": "パッケージ情報はまだ同期されていません。しばらくしてから再試行してください",
 	"backlinkExcludeRefDefs": "参照を除外",
 	"backlinkExcludeRefDefsTip": "項目またはその子要素が選択したいずれかのブロックを参照している場合、項目全体を非表示にします",
 	"backlinkFoldByType": "ブロックの種類ごとに折りたたむ",

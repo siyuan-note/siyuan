@@ -1,5 +1,5 @@
 {
-	"bazaarPackagePending": "Die Paketinformationen wurden noch nicht synchronisiert. Bitte versuche es später erneut.",
+	"bazaarPackagePending": "Die Paketinformationen wurden noch nicht synchronisiert. Bitte versuche es später erneut",
 	"backlinkExcludeRefDefs": "Referenzen ausschließen",
 	"backlinkExcludeRefDefsTip": "Den gesamten Eintrag einschließlich Unterelementen ausblenden, wenn er auf einen ausgewählten Block verweist",
 	"backlinkFoldByType": "Nach Blocktyp einklappen",

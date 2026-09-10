@@ -1,5 +1,5 @@
 {
-	"bazaarPackagePending": "Package information has not synced yet. Please try again later.",
+	"bazaarPackagePending": "Package information has not synced yet. Please try again later",
 	"backlinkExcludeRefDefs": "Exclude references",
 	"backlinkExcludeRefDefsTip": "Hide an entire entry, including its children, when it references any selected block",
 	"backlinkFoldByType": "Collapse by block type",

@@ -1134,6 +1134,25 @@
       overflow: hidden;
       font: inherit;
 
+      li.vditor-task {
+        list-style: none;
+        position: relative;
+
+        > input[type="checkbox"] {
+          position: absolute;
+          left: -1.5em;
+          top: .3125em;
+          width: 1em;
+          height: 1em;
+          margin: 0;
+        }
+
+        > input + p {
+          margin: 0;
+          padding: 0;
+        }
+      }
+
       .av__cell[data-wrap="true"] & {
         white-space: normal;
 
@@ -1202,6 +1221,16 @@
         li > :not(:first-child),
         blockquote > :not(:first-child) {
           margin-left: .5em;
+        }
+
+        li.vditor-task > input[type="checkbox"] {
+          position: static;
+          margin: 0 .4em 0 0;
+          vertical-align: -.125em;
+        }
+
+        li.vditor-task > input + p {
+          margin-left: 0;
         }
       }
     }

@@ -1,4 +1,6 @@
 {
+	"entryHide": "Ocultar",
+	"entryShow": "Mostrar",
 	"hashTagSearch": "<code class='fn__code'>#</code> pesquisa de tags",
 	"hashTagSearchTip": "Pesquisar tags ao digitar #; quando desativado, a lista de sugestões não aparece mais, mas as tags ainda podem ser criadas pelo menu de barra ou atalhos",
 	"entryStatusBar": "Barra inferior",

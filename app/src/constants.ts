@@ -266,6 +266,7 @@ export abstract class Constants {
     public static readonly MENU_BAR_ZOOM = "barZoom"; // 顶栏缩放菜单
     public static readonly MENU_BAR_MODE = "barmode"; // 顶栏外观菜单
     public static readonly MENU_BAR_MORE = "barmore"; // 顶栏更多菜单
+    public static readonly MENU_BAR_ENTRY = "barEntry"; // 顶栏入口显隐菜单
     public static readonly MENU_STATUS_HELP = "statusHelp"; // 状态栏帮助菜单
     public static readonly MENU_STATUS_BACKGROUND_TASK = "statusBackgroundTask"; // 状态栏后台任务菜单
     public static readonly MENU_DOCK = "menu-dock"; // 桌面端 dock 图标菜单

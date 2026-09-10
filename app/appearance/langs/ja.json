@@ -1,4 +1,6 @@
 {
+	"entryHide": "非表示",
+	"entryShow": "表示",
 	"hashTagSearch": "<code class='fn__code'>#</code> タグ検索",
 	"hashTagSearchTip": "# の入力時にタグ検索を行います。無効にすると候補が表示されなくなりますが、スラッシュメニューやショートカットからタグを作成できます",
 	"entryStatusBar": "ボトムバー",

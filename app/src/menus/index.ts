@@ -3,6 +3,7 @@ import {getInstanceById, setPanelFocus} from "../layout/util";
 import {Tab} from "../layout/Tab";
 import {initSearchMenu} from "./search";
 import {initDockMenu} from "./dock";
+import {initTopBarMenu} from "./topBar";
 import {initFileMenu, initNavigationMenu} from "./navigation";
 import {initTabMenu} from "./tab";
 /// #endif
@@ -57,6 +58,12 @@ export class Menus {
             } else {
                 event.preventDefault();
             }
+            if (target.id === "toolbar" || target.closest("#drag")) {
+                hideTooltip();
+                initTopBarMenu().popup({x: event.clientX, y: event.clientY});
+                event.stopPropagation();
+                return;
+            }
             while (target && target.parentElement   // ⌃⇥ 后点击会为空
             && !target.parentElement.isEqualNode(document.querySelector("body"))) {
                 const dataType = target.getAttribute("data-type");
@@ -107,6 +114,17 @@ export class Menus {
                 } else if (dataType && target.classList.contains("dock__item")) {
                     hideTooltip();
                     initDockMenu(target).popup({x: event.clientX, y: event.clientY});
+                    event.stopPropagation();
+                    break;
+                } else if (target.hasAttribute("data-topbar-entry")) {
+                    hideTooltip();
+                    initTopBarMenu(target).popup({x: event.clientX, y: event.clientY});
+                    event.stopPropagation();
+                    break;
+                } else if (target.classList.contains("dock") || target.classList.contains("dock__items") ||
+                    target.classList.contains("dock__item--space")) {
+                    hideTooltip();
+                    initDockMenu().popup({x: event.clientX, y: event.clientY});
                     event.stopPropagation();
                     break;
                 } else if (dataType === "textMenu") {

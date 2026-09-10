@@ -1,4 +1,6 @@
 {
+	"entryHide": "छुपाएं",
+	"entryShow": "दिखाएँ",
 	"hashTagSearch": "<code class='fn__code'>#</code> टैग खोज",
 	"hashTagSearchTip": "# टाइप करते समय टैग खोजें; बंद होने पर सुझाव सूची नहीं दिखती, लेकिन टैग स्लैश मेनू या शॉर्टकट से अभी भी बनाए जा सकते हैं",
 	"entryStatusBar": "निचली पट्टी",

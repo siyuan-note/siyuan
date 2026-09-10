@@ -1,5 +1,7 @@
 import {MenuItem} from "./Menu";
 import {Constants} from "../constants";
+import {buildEntryVisibilityMenuItems, buildEntryVisibilityToggleItem} from "../config/entryVisibility/menu";
+import {getDockEntryKey, refreshDockCatalog} from "../config/entryVisibility/catalog";
 
 const moveMenuItem = (label: string, target: Element) => {
     return new MenuItem({
@@ -18,14 +20,27 @@ const moveMenuItem = (label: string, target: Element) => {
     });
 };
 
-export const initDockMenu = (target: Element) => {
+export const initDockMenu = (target?: Element) => {
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_DOCK);
-    window.siyuan.menus.menu.append(moveMenuItem("moveToLeftTop", target).element);
-    window.siyuan.menus.menu.append(moveMenuItem("moveToLeftBottom", target).element);
-    window.siyuan.menus.menu.append(moveMenuItem("moveToRightTop", target).element);
-    window.siyuan.menus.menu.append(moveMenuItem("moveToRightBottom", target).element);
-    window.siyuan.menus.menu.append(moveMenuItem("moveToBottomLeft", target).element);
-    window.siyuan.menus.menu.append(moveMenuItem("moveToBottomRight", target).element);
+    refreshDockCatalog(window.siyuan.ws?.app?.plugins || []);
+    if (target) {
+        window.siyuan.menus.menu.append(moveMenuItem("moveToLeftTop", target).element);
+        window.siyuan.menus.menu.append(moveMenuItem("moveToLeftBottom", target).element);
+        window.siyuan.menus.menu.append(moveMenuItem("moveToRightTop", target).element);
+        window.siyuan.menus.menu.append(moveMenuItem("moveToRightBottom", target).element);
+        window.siyuan.menus.menu.append(moveMenuItem("moveToBottomLeft", target).element);
+        window.siyuan.menus.menu.append(moveMenuItem("moveToBottomRight", target).element);
+        const key = getDockEntryKey(target);
+        const item = key ? buildEntryVisibilityToggleItem(`dock.${key}`) : undefined;
+        if (item) {
+            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem(item).element);
+        }
+    } else {
+        buildEntryVisibilityMenuItems("dock").forEach((item) => {
+            window.siyuan.menus.menu.append(new MenuItem(item).element);
+        });
+    }
     return window.siyuan.menus.menu;
 };

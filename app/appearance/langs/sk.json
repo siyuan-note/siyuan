@@ -1,4 +1,6 @@
 {
+	"entryHide": "Skryť",
+	"entryShow": "Zobraziť",
 	"hashTagSearch": "<code class='fn__code'>#</code> vyhľadávanie značiek",
 	"hashTagSearchTip": "Vyhľadávať značky pri zadaní #; ak je vypnuté, zoznam návrhov sa už nezobrazuje, ale značky možno stále vytvárať cez lomítkové menu alebo skratky",
 	"entryStatusBar": "Dolný panel",

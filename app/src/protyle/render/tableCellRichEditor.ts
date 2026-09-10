@@ -20,6 +20,7 @@ import {TABLE_CELL_SLASH_IDS} from "../util/tableCellRichMenu";
 import {captureRichCellSelection, restoreRichCellSelection} from "../util/tableCellRichSelection";
 import {matchHotKey} from "../util/hotKey";
 import {bindTableCellRichDrag} from "../util/tableCellRichDrag";
+import {getTableCellEditorLute} from "../util/tableCellRichLute";
 
 let activeEditor: {cell: Element, finish: () => void} | undefined;
 
@@ -39,7 +40,7 @@ export const applyTableCellRichInlineMark = (owner: IProtyle, cells: HTMLTableCe
         app: owner.app,
         runtimeCapabilities: {
             upload: false, websocket: false, pluginExtensions: false, customBlockRender: false,
-            lute: getAVRichTextLute(),
+            lute: getTableCellEditorLute(getAVRichTextLute()),
             sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true),
             getUnsupportedPasteBlocks: html => getAVRichTextUnsupportedPasteBlocks(html, true),
             restoreLuteMarkdownSyntax: configureAVRichTextLute,
@@ -144,7 +145,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             websocket: false,
             pluginExtensions: false,
             customBlockRender: false,
-            lute: getAVRichTextLute(),
+            lute: getTableCellEditorLute(getAVRichTextLute()),
             lockedOptions: {toolbar, hint},
             sanitizeBlockDOM: html => sanitizeAVRichTextBlockDOM(html, true),
             getUnsupportedPasteBlocks: html => getAVRichTextUnsupportedPasteBlocks(html, true),

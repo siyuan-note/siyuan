@@ -1,5 +1,8 @@
 import {Constants} from "../../constants";
 
+// 统一反链编辑器的内边距，左右边距用于显示块标和引用计数。
+export const BACKLINK_EDITOR_PADDING = "4px 16px 4px 24px";
+
 /** 计算编辑器内容区域的水平边距。 */
 export const getEditorHorizontalPadding = (width: number, fullWidth: boolean) => {
     let left = 24;

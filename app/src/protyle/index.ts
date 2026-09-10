@@ -3,6 +3,7 @@ import {Hint} from "./hint";
 import {getLute} from "./render/setLute";
 import {Preview} from "./preview";
 import {addLoading, initUI, removeLoading} from "./ui/initUI";
+import {BACKLINK_EDITOR_PADDING} from "./ui/padding";
 import {LocalUndo, Undo} from "./undo";
 import {Upload} from "./upload";
 import {Options} from "./util/Options";
@@ -423,7 +424,7 @@ export class Protyle {
                 this.protyle.block.rootID = options.blockId;
                 renderBacklink(this.protyle, options.backlinkData);
                 // 为了满足 eventPath0.style.paddingLeft 从而显示块标 https://github.com/siyuan-note/siyuan/issues/11578
-                this.protyle.wysiwyg.element.style.padding = "4px 16px 4px 24px";
+                this.protyle.wysiwyg.element.style.padding = BACKLINK_EDITOR_PADDING;
                 return;
             }
             if (!options.blockId) {

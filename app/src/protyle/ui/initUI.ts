@@ -20,7 +20,7 @@ import {
 } from "../util/hasClosest";
 import {hideElements} from "./hideElements";
 import {AVAttributePanel} from "../render/av/attributePanel";
-import {getEditorHorizontalPadding} from "./padding";
+import {BACKLINK_EDITOR_PADDING, getEditorHorizontalPadding} from "./padding";
 import {callMobileAppShowKeyboard} from "../../mobile/util/mobileAppUtil";
 import {sanitizeKernelHTML} from "../../util/hostCapabilities";
 
@@ -383,8 +383,7 @@ export const setPadding = (protyle: IProtyle) => {
         paddingLeft = parseFloat(wysiwygStyle.paddingLeft);
         paddingRight = parseFloat(wysiwygStyle.paddingRight);
     } else if (protyle.options.backlinkData) {
-        // 首个块的备注等属性位于块上方，为其保留完整的显示空间。
-        protyle.wysiwyg.element.style.padding = `16px ${paddingRight}px 4px ${paddingLeft}px`;
+        protyle.wysiwyg.element.style.padding = BACKLINK_EDITOR_PADDING;
     } else {
         const paddingBottom = backlinkBottomVisible && protyle.options.typewriterMode ? backlinkBottomGap : padding.bottom;
         protyle.wysiwyg.element.style.padding = `${padding.top}px ${paddingRight}px ${paddingBottom}px ${paddingLeft}px`;

@@ -520,11 +520,11 @@
     }
 
     span[data-type="virtual-block-ref"] {
-      border-bottom: 1px dashed var(--b3-theme-on-surface);
+      --protyle-ref-line-color: var(--b3-theme-on-surface);
       transition: var(--b3-transition);
 
       &:hover {
-        border-color: var(--b3-theme-on-background);
+        --protyle-ref-line-color: var(--b3-theme-on-background);
       }
     }
 
@@ -534,12 +534,24 @@
 
     span[data-type~="block-ref"]:not(.av__celltext),
     span[data-type~="file-annotation-ref"] {
-      border-bottom: 1px dashed var(--b3-protyle-inline-blockref-color);
+      --protyle-ref-line-color: var(--b3-protyle-inline-blockref-color);
       transition: var(--b3-transition);
     }
 
     span[data-type~="file-annotation-ref"] {
-      border-bottom-color: var(--b3-protyle-inline-fileref-color);
+      --protyle-ref-line-color: var(--b3-protyle-inline-fileref-color);
+    }
+
+    span[data-type="virtual-block-ref"],
+    span[data-type~="block-ref"]:not(.av__celltext),
+    span[data-type~="file-annotation-ref"] {
+      // 按固定长度绘制虚线，并在换行后的每段文字下方重复显示。
+      background-image: repeating-linear-gradient(to right, var(--protyle-ref-line-color) 0 6px, transparent 6px 9px);
+      background-position: left bottom;
+      background-size: 9px 1px;
+      background-repeat: repeat-x;
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
     }
 
     span[data-type="virtual-block-ref"]:hover,

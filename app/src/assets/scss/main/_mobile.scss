@@ -1463,20 +1463,59 @@ body.mobile-topbar--merged {
     width: auto !important;
     min-width: 0 !important;
     max-width: none !important;
-    height: 56vh;
     max-height: 90vh !important;
     max-height: 90dvh !important;
     box-sizing: border-box;
     border: 0;
     border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;
-    padding: 16px 8px max(16px, env(safe-area-inset-bottom));
-    overflow: auto;
-    overscroll-behavior: contain;
-    animation: bottom2Top .15s cubic-bezier(0, 0, .2, 1);
+    padding: 0;
+    background-color: var(--b3-theme-surface);
+    // 固定定位的下拉列表仍以视口为参照，滚动和裁剪仅作用于内容区域
+    overflow: visible;
+    transform: none;
+    will-change: auto;
+
+    &::before {
+      content: "";
+      display: block;
+      flex-shrink: 0;
+      width: 32px;
+      height: 4px;
+      margin: 5px auto 7px;
+      border-radius: 2px;
+      background-color: var(--b3-theme-on-surface-light);
+      opacity: .45;
+    }
 
     > .b3-menu__items {
       max-height: none;
       min-height: 0;
+    }
+
+    .b3-menu__title {
+      flex-shrink: 0;
+      height: auto;
+      min-height: 40px;
+      padding: 0 8px;
+      background-color: var(--b3-theme-surface);
+      border: 0 !important;
+
+      &::before {
+        content: none;
+      }
+
+      > .b3-menu__label {
+        text-align: left;
+        color: var(--b3-theme-on-surface-light);
+      }
+
+      > .block__icon {
+        color: var(--b3-theme-on-surface-light);
+      }
+
+      + .b3-menu__separator {
+        height: 8px;
+      }
     }
   }
 }

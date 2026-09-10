@@ -94,6 +94,19 @@
       }
     }
 
+    // 输入框和单位保持同行，单位前的间距不被隐藏
+    &-item > .config-item__number {
+      flex-wrap: nowrap;
+
+      & > .b3-text-field.fn__flex-1 {
+        margin-top: 0;
+      }
+
+      & > .fn__space {
+        display: inline-block;
+      }
+    }
+
     &-range {
       .config-range__desktop {
         display: none;

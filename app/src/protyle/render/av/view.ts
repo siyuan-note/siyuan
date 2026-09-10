@@ -263,7 +263,7 @@ export const getViewHTML = (data: IAV) => {
     <span class="b3-menu__label ft__center">${window.siyuan.languages.config}</span>
 </button>
 <button class="b3-menu__separator"></button>
-<button class="b3-menu__item" data-type="nobg">
+<button class="b3-menu__item av__panel-name" data-type="nobg">
     <div class="fn__block">
         <div class="fn__flex">
             <span class="b3-menu__avemoji" data-type="update-view-icon">${view.icon ? unicode2Emoji(view.icon) : `<svg style="height: 14px;width: 14px"><use xlink:href="#${getViewIcon(data.viewType)}"></use></svg>`}</span>

@@ -232,6 +232,10 @@ html[data-frontend="browser-desktop"] {
 }
 
 .status {
+  & > [data-entry-hidden="true"] {
+    display: none !important;
+  }
+
   box-sizing: border-box;
   z-index: 2;
   height: 32px;

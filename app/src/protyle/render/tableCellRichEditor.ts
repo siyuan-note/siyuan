@@ -21,6 +21,7 @@ import {captureRichCellSelection, restoreRichCellSelection} from "../util/tableC
 import {matchHotKey} from "../util/hotKey";
 import {bindTableCellRichDrag} from "../util/tableCellRichDrag";
 import {getTableCellEditorLute} from "../util/tableCellRichLute";
+import {setTableCellRichContext} from "../util/tableCellRichContext";
 
 let activeEditor: {cell: Element, finish: () => void} | undefined;
 
@@ -246,6 +247,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         }
     };
     activeEditor = {cell, finish};
+    setTableCellRichContext(fragment.protyle, {owner, cell, finish});
     const signal = controller.signal;
     bindTableCellRichDrag(owner, cell, fragment.wysiwyg, finish, signal,
         target => openTableCellRichEditor(owner, target));

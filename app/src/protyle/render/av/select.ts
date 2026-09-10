@@ -763,7 +763,7 @@ export const getSelectHTML = (fields: IAVColumn[], cellElements: HTMLElement[], 
     ${selectedHTML}
     <input>
 </div>
-<div style="flex: 1;overflow: auto;">${filterSelectHTML("", colData.options, selected)}</div>
+<div class="av__select-list" style="flex: 1;overflow: auto;">${filterSelectHTML("", colData.options, selected)}</div>
 </div>`;
 };
 

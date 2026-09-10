@@ -107,7 +107,7 @@ export const getEditHTML = (options: {
     <span class="b3-menu__label ft__center">${window.siyuan.languages.edit}</span>
 </button>
 <button class="b3-menu__separator" data-id="separator_1"></button>
-<button class="b3-menu__item" data-type="nobg">
+<button class="b3-menu__item av__panel-name" data-type="nobg">
     <div class="fn__block">
         <div class="fn__flex">
             <span class="b3-menu__avemoji" data-col-type="${colData.type}" data-icon="${escapeAttr(colData.icon)}" data-type="update-icon">${colData.icon ? unicode2Emoji(colData.icon) : `<svg style="width: 14px;height: 14px"><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>`}</span>

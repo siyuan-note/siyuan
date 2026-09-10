@@ -443,6 +443,9 @@ func setBazaarPackageRatingError(ret *gulu.Result, err error) {
 	if errors.Is(err, model.ErrBazaarRatingRateLimited) {
 		ret.Data = map[string]any{"errorCode": "bazaarRatingRateLimited"}
 	}
+	if errors.Is(err, model.ErrBazaarPackagePending) {
+		ret.Data = map[string]any{"errorCode": "bazaarPackagePending"}
+	}
 }
 
 func bazaarPackageRatingResponseData(rating *bazaar.PackageRating, ratingAvailable bool, userRating int) map[string]any {

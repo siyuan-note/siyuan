@@ -911,8 +911,8 @@
 
 .table__cell-rich,
 .table__cell-editor {
-  // 按内容计算宽度，使窄列在输入时自动撑开，同时保留单元格的宽度约束。
-  width: max-content;
+  // 跟随单元格的可用宽度，保证预览与编辑使用相同的折行边界。
+  width: auto;
   max-width: 100%;
 }
 

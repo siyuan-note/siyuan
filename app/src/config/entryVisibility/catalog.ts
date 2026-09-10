@@ -567,6 +567,20 @@ const toolbarCatalogSection: IEntryCatalogSection = {
 };
 
 export const TOP_BAR_ROOT_PATH = "topBar";
+export const STATUS_BAR_ROOT_PATH = "statusBar";
+
+const statusBarCatalogSection: IEntryCatalogSection = {
+    key: STATUS_BAR_ROOT_PATH,
+    label: lang("entryStatusBar"),
+    children: [
+        node("barDock", lang("toggleDock")),
+        node("message", lang("entryStatusMessage")),
+        fixed("spacer", lang("entryStatusSpacer")),
+        node("backgroundTask", lang("entryStatusTask")),
+        node("counter", lang("entryDocumentStatistics")),
+        node("statusHelp", lang("help")),
+    ],
+};
 
 const topBarBuiltinChildren = [
     node("barSync", lang("syncNow")),
@@ -640,6 +654,7 @@ const dockCatalogSection: IEntryCatalogSection = {
 
 export const entryCatalog: IEntryCatalogSection[] = [
     topBarCatalogSection,
+    statusBarCatalogSection,
     dockCatalogSection,
     {
         key: "docTree.panel",

@@ -397,11 +397,12 @@ export const isLatestBazaarRatingRequest = (requestIDs: Map<string, number>, key
     return requestIDs.get(key) === requestID;
 };
 
-export const getBazaarRatingErrorLanguageKey = (data: unknown): "bazaarRatingRateLimited" | undefined => {
+export const getBazaarRatingErrorLanguageKey = (data: unknown): "bazaarRatingRateLimited" | "bazaarPackagePending" | undefined => {
     if (!data || typeof data !== "object" || Array.isArray(data)) {
         return;
     }
-    return (data as {errorCode?: unknown}).errorCode === "bazaarRatingRateLimited" ? "bazaarRatingRateLimited" : undefined;
+    const errorCode = (data as {errorCode?: unknown}).errorCode;
+    return errorCode === "bazaarRatingRateLimited" || errorCode === "bazaarPackagePending" ? errorCode : undefined;
 };
 
 export const isValidBazaarPackageName = (name: string) => {

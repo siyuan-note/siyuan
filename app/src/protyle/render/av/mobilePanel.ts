@@ -10,7 +10,7 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
     };
     const updateContent = () => {
         // 保留原有节点和事件绑定，标题的返回操作仍由数据库面板处理
-        menuElement.querySelectorAll(".b3-menu__items").forEach((itemsElement) => {
+        menuElement.querySelectorAll(".b3-menu__items, .av__select-list").forEach((itemsElement) => {
             const titleElement = itemsElement.firstElementChild;
             if (titleElement?.matches('[data-type="nobg"]') &&
                 titleElement.querySelector(":scope > .b3-menu__label.ft__center")) {

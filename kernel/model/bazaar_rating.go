@@ -18,6 +18,7 @@ package model
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -66,6 +67,9 @@ type bazaarPackageSetRatingData struct {
 // ErrBazaarRatingRateLimited 表示评分请求受到云端频率限制。
 var ErrBazaarRatingRateLimited = errors.New("bazaar rating rate limited")
 
+// ErrBazaarPackagePending 表示云端尚未同步包信息。
+var ErrBazaarPackagePending = errors.New("bazaar package information has not synced yet")
+
 // GetInstalledBazaarPackageRatings 获取指定已安装包的公开评分。
 func GetInstalledBazaarPackageRatings(ctx context.Context, pkgType string,
 	packageNames []string) (ratings map[string]*bazaar.PackageRating, eligiblePackageNames []string, err error) {
@@ -108,6 +112,14 @@ func GetInstalledBazaarPackageUserRatings(ctx context.Context, pkgType string,
 	if nil != err {
 		return nil, nil, err
 	}
+	// 仅返回查询成功的包，失败项保持未加载状态，允许后续重新查询。
+	loadedPackageNames := make([]string, 0, len(userRatings))
+	for _, packageName := range eligiblePackageNames {
+		if _, loaded := userRatings[packageName]; loaded {
+			loadedPackageNames = append(loadedPackageNames, packageName)
+		}
+	}
+	eligiblePackageNames = loadedPackageNames
 	return userRatings, eligiblePackageNames, nil
 }
 
@@ -299,32 +311,34 @@ func requestBazaarPackageUserRatings(ctx context.Context, token string, packageN
 	}
 	close(jobs)
 
-	group, groupCtx := errgroup.WithContext(ctx)
+	var group errgroup.Group
+	var firstErr error
 	workerCount := min(bazaarPackageUserRatingConcurrency, len(packageNames))
 	var resultMu sync.Mutex
 	for range workerCount {
 		group.Go(func() error {
 			for {
 				select {
-				case <-groupCtx.Done():
-					return groupCtx.Err()
+				case <-ctx.Done():
+					return ctx.Err()
 				case packageName, ok := <-jobs:
 					if !ok {
 						return nil
 					}
 					data := bazaarPackageUserRatingData{}
-					err := requestBazaarPackageRating(groupCtx, "/apis/siyuan/bazaar/getBazaarPackageRating", map[string]any{
+					err := requestBazaarPackageRating(ctx, "/apis/siyuan/bazaar/getBazaarPackageRating", map[string]any{
 						"token":       token,
 						"packageName": packageName,
 					}, &data)
-					if nil != err {
-						return err
-					}
-					if 0 > data.Rating || 5 < data.Rating {
-						return errors.New("invalid user rating returned by cloud server")
+					if nil == err && (0 > data.Rating || 5 < data.Rating) {
+						err = errors.New("invalid user rating returned by cloud server")
 					}
 					resultMu.Lock()
-					userRatings[packageName] = data.Rating
+					if nil == err {
+						userRatings[packageName] = data.Rating
+					} else if nil == firstErr {
+						firstErr = err
+					}
 					resultMu.Unlock()
 				}
 			}
@@ -333,6 +347,12 @@ func requestBazaarPackageUserRatings(ctx context.Context, token string, packageN
 	if err := group.Wait(); nil != err {
 		return nil, err
 	}
+	if err := ctx.Err(); nil != err {
+		return nil, err
+	}
+	if 0 == len(userRatings) && nil != firstErr {
+		return nil, firstErr
+	}
 	return userRatings, nil
 }
 
@@ -340,9 +360,15 @@ func requestBazaarPackageRating[T any](ctx context.Context, endpoint string, bod
 	token, _ := body["token"].(string)
 	invalidUser := cloudAccountAuthFailureHandler(token)
 	result := bazaarRatingCloudResult[T]{}
+	errorResult := bazaarRatingCloudResult[struct {
+		ErrorCode string `json:"errorCode"`
+	}]{}
 	resp, err := httpclient.NewCloudRequest30s().SetContext(ctx).SetSuccessResult(&result).SetBody(body).
 		Post(bazaarRatingCloudServer() + endpoint)
 	if nil != err {
+		if nil != ctx.Err() {
+			return ctx.Err()
+		}
 		logging.LogWarnf("request bazaar package rating failed: %s", err)
 		return ErrFailedToConnectCloudServer
 	}
@@ -354,8 +380,14 @@ func requestBazaarPackageRating[T any](ctx context.Context, endpoint string, bod
 		return ErrBazaarRatingRateLimited
 	}
 	if http.StatusOK != resp.StatusCode {
-		logging.LogWarnf("request bazaar package rating failed: %d", resp.StatusCode)
-		return ErrFailedToConnectCloudServer
+		if body, readErr := resp.ToBytes(); nil == readErr {
+			_ = json.Unmarshal(body, &errorResult)
+		}
+		if http.StatusServiceUnavailable == resp.StatusCode && "bazaarPackagePending" == errorResult.Data.ErrorCode {
+			return ErrBazaarPackagePending
+		}
+		logging.LogWarnf("request bazaar package rating [%s] failed: HTTP %d", body["packageName"], resp.StatusCode)
+		return fmt.Errorf("request bazaar package rating failed: HTTP %d (%s)", resp.StatusCode, http.StatusText(resp.StatusCode))
 	}
 	if 0 != result.Code {
 		if "" != result.Msg {

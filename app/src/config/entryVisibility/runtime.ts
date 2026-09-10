@@ -13,6 +13,7 @@ import {
     refreshDockCatalog,
     refreshTopBarCatalog,
     TOP_BAR_ROOT_PATH,
+    STATUS_BAR_ROOT_PATH,
 } from "./catalog";
 import {
     mergeEntryOrderPreservingUnknown,
@@ -101,6 +102,9 @@ export const getEntryOrder = (parentPath: string, profile = getActiveEntryProfil
     const separatorKeys = new Set(nodes.filter((item) => item.type === "separator").map((item) => item.key));
     if (parentPath === TOP_BAR_ROOT_PATH) {
         return resolveEntryOrderWithBoundaryDefaults(defaultOrder, profile?.orders?.[parentPath], "drag", separatorKeys);
+    }
+    if (parentPath === STATUS_BAR_ROOT_PATH) {
+        return resolveEntryOrderWithBoundaryDefaults(defaultOrder, profile?.orders?.[parentPath], "spacer", separatorKeys);
     }
     return resolveEntryOrder(defaultOrder, profile?.orders?.[parentPath], separatorKeys);
 };
@@ -441,11 +445,37 @@ export const applyTopBarEntryVisibility = () => {
     /// #endif
 };
 
+export const applyStatusBarEntryVisibility = () => {
+    /// #if !MOBILE
+    const status = document.getElementById("status");
+    if (!status) {
+        return;
+    }
+    const children = Array.from(status.children) as HTMLElement[];
+    reorderEntrySlots(children, getEntryOrder(STATUS_BAR_ROOT_PATH), item => item.dataset.statusbarEntry)
+        .forEach(item => status.append(item));
+    children.forEach((item) => {
+        const key = item.dataset.statusbarEntry;
+        if (!key) {
+            return;
+        }
+        const path = `${STATUS_BAR_ROOT_PATH}.${key}`;
+        const node = getEntryCatalogNode(path);
+        if (node && isEntryCatalogNodeConfigurable(node) && !isEntryVisible(path)) {
+            item.setAttribute("data-entry-hidden", "true");
+        } else {
+            item.removeAttribute("data-entry-hidden");
+        }
+    });
+    /// #endif
+};
+
 const applyEntryVisibilityLocal = (config: Config.IEntryVisibility) => {
     window.siyuan.config.appearance.entryVisibility = config;
     /// #if !MOBILE
     window.siyuan.menus?.menu?.remove();
     applyTopBarEntryVisibility();
+    applyStatusBarEntryVisibility();
     applyDockEntryVisibility();
     document.querySelectorAll<HTMLElement>(".protyle-toolbar").forEach(applyToolbarEntryVisibility);
     /// #endif

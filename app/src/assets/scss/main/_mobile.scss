@@ -1490,6 +1490,60 @@ body.mobile-topbar--merged {
     > .b3-menu__items {
       max-height: none;
       min-height: 0;
+      box-sizing: border-box;
+      padding: 8px 16px max(16px, env(safe-area-inset-bottom));
+    }
+
+    .b3-chips {
+      max-width: none !important;
+      flex-shrink: 0;
+      padding: 6px 8px;
+      margin-bottom: 8px;
+      border-radius: var(--b3-border-radius-b);
+      background-color: var(--b3-theme-background);
+
+      input {
+        min-width: 0;
+        width: 100%;
+        background-color: transparent;
+      }
+    }
+
+    .av__select-list {
+      min-height: 0;
+
+      > .b3-menu__item {
+        margin: 0;
+        border-top: 0;
+      }
+
+      > .b3-menu__item--group-first {
+        border-top-left-radius: var(--b3-border-radius-b);
+        border-top-right-radius: var(--b3-border-radius-b);
+      }
+
+      > .b3-menu__item--group-last {
+        border-bottom: 0;
+        border-bottom-left-radius: var(--b3-border-radius-b);
+        border-bottom-right-radius: var(--b3-border-radius-b);
+      }
+    }
+
+    .av__panel-name {
+      padding: 6px 8px;
+
+      .b3-form__icona-input {
+        display: block;
+      }
+
+      > .fn__block > .fn__hr:last-child,
+      > .fn__block > .fn__hr--small:last-child {
+        display: none;
+      }
+    }
+
+    .b3-menu__label {
+      min-height: 0;
     }
 
     .b3-menu__title {

@@ -58,6 +58,10 @@ func TestSystemPromptDocumentsBlockReferenceSyntax(t *testing.T) {
 		!strings.Contains(systemPrompt, `for text that follows the target block's content`) {
 		t.Fatal("system prompt does not explain static and dynamic block-reference behavior")
 	}
+	if !strings.Contains(systemPrompt, `required whenever the anchor text differs from the referenced block's content`) ||
+		!strings.Contains(systemPrompt, `only when the anchor text is the target block's own content`) {
+		t.Fatal("system prompt does not tie static anchor text to mismatched content and dynamic anchor text to the target's own content")
+	}
 	if !strings.Contains(systemPrompt, `Never use ((<blockID>)) or [[<blockID>]]`) {
 		t.Fatal("system prompt does not reject block references without anchor text or bracketed block IDs")
 	}

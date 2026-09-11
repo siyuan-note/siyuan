@@ -12,6 +12,7 @@ import {
 import {
     entryCatalog,
     getEntryCatalogChildren,
+    getEntryCatalogCustomDefaultVisibility,
     getEntryCatalogDefaultVisibility,
     getEntryCatalogNode,
     getEntryCatalogPathChain,
@@ -35,6 +36,7 @@ import {
     SLASH_MENU_ROOT_PATH,
     TOP_BAR_ROOT_PATH,
 } from "./catalog";
+import {getBuiltinProfileEntryVisibility} from "./profile";
 
 const slashMenuBuiltinOrder = [
     "template",
@@ -131,6 +133,8 @@ test("top bar catalog includes a fixed drag boundary in built-in DOM order", () 
     assert.equal(TOP_BAR_ROOT_PATH, "topBar");
     assert.deepEqual(getEntryCatalogChildren(TOP_BAR_ROOT_PATH).map((item) => item.key), [
         "barSync",
+        "barDailyNote",
+        "barRiffCard",
         "barBack",
         "barForward",
         "drag",
@@ -164,32 +168,18 @@ test("top bar markup stays aligned with its configurable built-in catalog", () =
     assert.doesNotMatch(source, /id="drag"[^>]*data-topbar-entry/);
 });
 
-test("top bar account entries use legacy account switches only as defaults", () => {
-    const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
-    Object.defineProperty(globalThis, "window", {
-        configurable: true,
-        value: {
-            siyuan: {
-                config: {
-                    account: {
-                        displayVIP: false,
-                        displayTitle: true,
-                    },
-                },
-            },
-        },
-    });
-    try {
-        assert.equal(getEntryCatalogDefaultVisibility("topBar.toolbarVIP"), false);
-        assert.equal(getEntryCatalogDefaultVisibility("topBar.toolbarTitle"), true);
-        assert.equal(getEntryCatalogDefaultVisibility("topBar.barSearch"), true);
-        assert.equal(getEntryCatalogDefaultVisibility("topBar.drag"), true);
-    } finally {
-        if (windowDescriptor) {
-            Object.defineProperty(globalThis, "window", windowDescriptor);
-        } else {
-            Reflect.deleteProperty(globalThis, "window");
-        }
+test("daily note and flashcard top bar entries default to visible only in the Simple profile", () => {
+    for (const key of ["barDailyNote", "barRiffCard"]) {
+        const path = `${TOP_BAR_ROOT_PATH}.${key}`;
+        const entry = getEntryCatalogNode(path)!;
+        const defaultVisible = getEntryCatalogDefaultVisibility(path);
+        assert.equal(defaultVisible, false);
+        assert.equal(entry.simpleDefaultVisible, true);
+        assert.equal(getEntryCatalogCustomDefaultVisibility(path), false);
+        assert.equal(getBuiltinProfileEntryVisibility("full", entry.simple, defaultVisible,
+            entry.simpleDefaultVisible), false);
+        assert.equal(getBuiltinProfileEntryVisibility("simple", entry.simple, defaultVisible,
+            entry.simpleDefaultVisible), true);
     }
 });
 
@@ -229,7 +219,7 @@ test("top bar catalog inserts plugin entries on their declared side of the fixed
         }]);
         const children = getEntryCatalogChildren(TOP_BAR_ROOT_PATH);
         const keys = children.map((item) => item.key);
-        assert.deepEqual(keys.slice(0, 5), ["barSync", "barBack", "barForward", leftKey, "drag"]);
+        assert.deepEqual(keys.slice(0, 7), ["barSync", "barDailyNote", "barRiffCard", "barBack", "barForward", leftKey, "drag"]);
         assert.deepEqual(keys.slice(keys.indexOf("toolbarTitle"), keys.indexOf("barCommand")), [
             "toolbarTitle",
             rightKey,

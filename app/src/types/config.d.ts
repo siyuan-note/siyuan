@@ -26,7 +26,6 @@ declare namespace Config {
          */
         accessAuthCode: TAccessAuthCode;
         oidc: IOIDC;
-        account: IAccount;
         ai: IAI;
         api: IAPI;
         appearance: IAppearance;
@@ -131,20 +130,6 @@ declare namespace Config {
         redirectURL: string;
         allowAll: boolean;
         claimRules: IOIDCClaimRule[];
-    }
-
-    /**
-     * Account configuration
-     */
-    export interface IAccount {
-        /**
-         * Display the title icon
-         */
-        displayTitle: boolean;
-        /**
-         * Display the VIP icon
-         */
-        displayVIP: boolean;
     }
 
     /**
@@ -762,6 +747,10 @@ declare namespace Config {
          * Support spell check languages
          */
         spellcheckLanguages: string[];
+        /**
+         * Whether to search tags when typing `#`
+         */
+        hashTagSearch: boolean;
         /**
          * Whether to enable virtual references
          */

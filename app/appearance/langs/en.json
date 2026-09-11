@@ -1,4 +1,8 @@
 {
+	"entryHide": "Hide",
+	"entryShow": "Show",
+	"hashTagSearch": "<code class='fn__code'>#</code> tag search",
+	"hashTagSearchTip": "Search tags when typing #; when disabled, the candidate list no longer appears, but tags can still be created via the slash menu or shortcuts",
 	"entryStatusBar": "Bottom bar",
 	"entryStatusMessage": "Status messages",
 	"entryStatusTask": "Background tasks",

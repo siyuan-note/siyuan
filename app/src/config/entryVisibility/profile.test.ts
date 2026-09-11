@@ -59,6 +59,9 @@ test("built-in profiles honor entry defaults", () => {
     assert.equal(getBuiltinProfileEntryVisibility("simple", true, true), true);
     assert.equal(getBuiltinProfileEntryVisibility("simple", false, true), false);
     assert.equal(getBuiltinProfileEntryVisibility("simple", true, false), false);
+    assert.equal(getBuiltinProfileEntryVisibility("simple", true, false, true), true);
+    assert.equal(getBuiltinProfileEntryVisibility("full", true, false, true), false);
+    assert.equal(getBuiltinProfileEntryVisibility("simple", true, true, false), false);
 });
 
 test("custom entry visibility preserves saved values", () => {

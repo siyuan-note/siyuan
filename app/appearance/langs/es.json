@@ -1,4 +1,8 @@
 {
+	"entryHide": "Ocultar",
+	"entryShow": "Mostrar",
+	"hashTagSearch": "<code class='fn__code'>#</code> búsqueda de etiquetas",
+	"hashTagSearchTip": "Buscar etiquetas al escribir #; cuando está desactivado, la lista de sugerencias ya no aparece, pero las etiquetas aún pueden crearse desde el menú de barra o los atajos",
 	"entryStatusBar": "Barra inferior",
 	"entryStatusMessage": "Mensajes de estado",
 	"entryStatusTask": "Tareas en segundo plano",

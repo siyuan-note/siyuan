@@ -60,6 +60,10 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.listItemDotNumberClickFocus,
         desc: window.siyuan.languages.listItemDotNumberClickFocusTip,
     });
+    group.switch("editor.hashTagSearch", {
+        title: window.siyuan.languages.hashTagSearch,
+        desc: window.siyuan.languages.hashTagSearchTip,
+    });
     group.switch("editor.pasteURLAutoConvert", {
         title: window.siyuan.languages.pasteURLAutoConvert,
         desc: window.siyuan.languages.pasteURLAutoConvertTip,

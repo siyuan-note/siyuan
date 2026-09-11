@@ -69,6 +69,7 @@ export abstract class Constants {
     public static readonly SIYUAN_SAVE_CLOSE: string = "siyuan-save-close";
     public static readonly SIYUAN_OPEN_SETTING: string = "siyuan-open-setting";
     public static readonly SIYUAN_OPEN_HELP: string = "siyuan-open-help";
+    public static readonly SIYUAN_TOPBAR_CONTEXT_MENU: string = "siyuan-topbar-context-menu"; // 顶栏拖拽区域右键转交渲染进程
 
     // custom
     public static readonly CUSTOM_REMINDER_WECHAT: string = "custom-reminder-wechat";
@@ -266,6 +267,7 @@ export abstract class Constants {
     public static readonly MENU_BAR_ZOOM = "barZoom"; // 顶栏缩放菜单
     public static readonly MENU_BAR_MODE = "barmode"; // 顶栏外观菜单
     public static readonly MENU_BAR_MORE = "barmore"; // 顶栏更多菜单
+    public static readonly MENU_BAR_ENTRY = "barEntry"; // 顶栏入口显隐菜单
     public static readonly MENU_STATUS_HELP = "statusHelp"; // 状态栏帮助菜单
     public static readonly MENU_STATUS_BACKGROUND_TASK = "statusBackgroundTask"; // 状态栏后台任务菜单
     public static readonly MENU_DOCK = "menu-dock"; // 桌面端 dock 图标菜单
@@ -322,6 +324,8 @@ export abstract class Constants {
     public static readonly MENU_AI = "ai"; // 块 AI 菜单
     public static readonly MENU_TAB = "tab"; // 页签右键菜单
     public static readonly MENU_TAB_LIST = "tabList"; // 页签切换菜单
+    public static readonly MENU_MOBILE_TABS = "mobileTabs"; // 移动端页签长按菜单
+    public static readonly MENU_MOBILE_TABS_OVERVIEW = "mobileTabsOverview"; // 移动端页签概览面板
 
     public static readonly MENU_INLINE_CONTEXT = "inline-context"; // 文本右键菜单
     public static readonly MENU_INLINE_IMG = "inline-img"; // 图片元素菜单

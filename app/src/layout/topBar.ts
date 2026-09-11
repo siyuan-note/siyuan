@@ -7,7 +7,9 @@ import {exitSiYuan, processSync} from "../dialog/processSystem";
 import {goBack, goForward} from "../util/backForward";
 import {syncGuide} from "../sync/syncGuide";
 import {workspaceMenu} from "../menus/workspace";
+import {initTopBarMenu} from "../menus/topBar";
 import {MenuItem} from "../menus/Menu";
+import {hideTooltip} from "../dialog/tooltip";
 import {setMode} from "../util/assets";
 import {openSetting} from "../config";
 import {openSearch} from "../search/spread";
@@ -24,6 +26,8 @@ import {exportLayout, resizeTopBar} from "./util";
 import {setTabPosition} from "./tabUtil";
 import {commandPanel} from "../boot/globalEvent/command/panel";
 import {openTopBarMenu} from "../plugin/openTopBarMenu";
+import {newDailyNote} from "../util/mount";
+import {openCard} from "../card/openCard";
 import {getWorkspaceName, setTitle} from "../util/processTitle";
 import {bindTopBarDrag} from "./topBarDrag";
 import {
@@ -81,6 +85,12 @@ export const initBar = (app: App) => {
 <div id="barSync" data-topbar-entry="barSync" class="ariaLabel toolbar__item${window.siyuan.config.readonly ? " fn__none" : ""}">
     <svg><use xlink:href="#iconCloudSucc"></use></svg>
 </div>
+<button id="barDailyNote" data-topbar-entry="barDailyNote" class="ariaLabel toolbar__item${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.dailyNote} ${updateHotkeyTip(window.siyuan.config.keymap.general.dailyNote.custom)}">
+    <svg><use xlink:href="#iconCalendar"></use></svg>
+</button>
+<button id="barRiffCard" data-topbar-entry="barRiffCard" class="ariaLabel toolbar__item${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.riffCard} ${updateHotkeyTip(window.siyuan.config.keymap.general.riffCard.custom)}">
+    <svg><use xlink:href="#iconRiffCard"></use></svg>
+</button>
 <button id="barBack" data-topbar-entry="barBack" class="ariaLabel toolbar__item toolbar__item--disabled" aria-label="${window.siyuan.languages.goBack} ${updateHotkeyTip(window.siyuan.config.keymap.general.goBack.custom)}">
     <svg><use xlink:href="#iconBack"></use></svg>
 </button>
@@ -122,6 +132,12 @@ export const initBar = (app: App) => {
     window.addEventListener("siyuan-entry-visibility", updateTopBarLayout);
     window.addEventListener("siyuan-topbar-change", updateTopBarLayout);
     processSync();
+    /// #if !BROWSER
+    ipcRenderer.on(Constants.SIYUAN_TOPBAR_CONTEXT_MENU, (event, position: IPosition) => {
+        hideTooltip();
+        initTopBarMenu().popup(position);
+    });
+    /// #endif
     toolbarElement.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
         if (typeof event.detail === "string") {
@@ -173,6 +189,14 @@ export const initBar = (app: App) => {
                 break;
             } else if (targetId === "barForward") {
                 goForward(app);
+                event.stopPropagation();
+                break;
+            } else if (targetId === "barDailyNote") {
+                newDailyNote(app);
+                event.stopPropagation();
+                break;
+            } else if (targetId === "barRiffCard") {
+                openCard(app);
                 event.stopPropagation();
                 break;
             } else if (targetId === "barSync") {

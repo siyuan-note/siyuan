@@ -1,4 +1,8 @@
 {
+	"entryHide": "Masquer",
+	"entryShow": "Afficher",
+	"hashTagSearch": "<code class='fn__code'>#</code> recherche d’étiquettes",
+	"hashTagSearchTip": "Rechercher des étiquettes en tapant # ; lorsque cette option est désactivée, la liste de suggestions n’apparaît plus, mais les étiquettes restent accessibles via le menu oblique ou les raccourcis",
 	"entryStatusBar": "Barre inférieure",
 	"entryStatusMessage": "Messages d’état",
 	"entryStatusTask": "Tâches en arrière-plan",

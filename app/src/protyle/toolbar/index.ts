@@ -1450,6 +1450,15 @@ export class Toolbar {
                 }
             }
         }
+        // 新建空标签后进入标签搜索状态，便于选择已有标签
+        if (type === "tag" && !isBatch) {
+            const tagElement = newNodes.find((item): item is HTMLElement =>
+                item.nodeType === Node.ELEMENT_NODE &&
+                ((item as HTMLElement).getAttribute("data-type") || "").split(" ").includes("tag"));
+            if (tagElement && getSemanticInlineVisibleText(tagElement) === "") {
+                protyle.hint.startHashTagSearch(protyle, tagElement);
+            }
+        }
         return newNodes;
     }
 

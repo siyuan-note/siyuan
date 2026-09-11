@@ -550,7 +550,6 @@ func exportConf(c *gin.Context) {
 		clonedConf.Export.PandocBin = ""
 	}
 	clonedConf.UserData = ""
-	clonedConf.Account = nil
 	clonedConf.AccessAuthCode = ""
 	if nil != clonedConf.System {
 		clonedConf.System.NetworkProxy = &conf.NetworkProxy{}

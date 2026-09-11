@@ -1,4 +1,8 @@
 {
+	"entryHide": "숨기기",
+	"entryShow": "표시",
+	"hashTagSearch": "<code class='fn__code'>#</code> 태그 검색",
+	"hashTagSearchTip": "#을 입력할 때 태그를 검색합니다. 끄면 후보가 표시되지 않지만 슬래시 메뉴나 단축키로 태그를 만들 수 있습니다",
 	"entryStatusBar": "하단 표시줄",
 	"entryStatusMessage": "상태 메시지",
 	"entryStatusTask": "백그라운드 작업",

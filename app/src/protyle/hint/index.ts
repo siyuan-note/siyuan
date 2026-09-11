@@ -15,7 +15,7 @@ import {
     getSelectionPosition,
     getUndoFocusContext,
 } from "../util/selection";
-import {genHintItemHTML, hintEmbed, hintRef, hintSlash} from "./extend";
+import {genHintItemHTML, hintEmbed, hintRef, hintSlash, hintTag} from "./extend";
 import {
     getBlockRefAnchorText,
     getDocCreateTemplatePath,
@@ -72,7 +72,7 @@ import {
 import {getMobileHintPosition} from "./mobileHintPosition";
 import {getVisibleViewportBounds} from "../../mobile/util/visibleViewport";
 import {getTopBarHeight} from "../../layout/getTopBarHeight";
-import {stripSemanticMarkersFromRangeText} from "../util/inlineElementMarker";
+import {getSemanticInlineVisibleText, stripSemanticMarkersFromRangeText} from "../util/inlineElementMarker";
 import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
 
 const genEmojiInsertHTML = (value: string) => {
@@ -115,6 +115,7 @@ export class Hint {
     public enableExtend = false;
     public splitChar = "";
     public lastIndex = -1;
+    public hashTagSearchElement?: HTMLElement;
     private source: THintSource;
     private createTargetSessionID = 0;
     private createTargetRenderID = 0;
@@ -176,6 +177,17 @@ export class Hint {
         this.destroyEmojiPanel();
     }
 
+    // 新建空标签后进入标签搜索状态，输入过程中弹出候选标签列表
+    public startHashTagSearch(protyle: IProtyle, tagElement: HTMLElement) {
+        if (!protyle.options.hint.extend.some((item) => item.hint === hintTag)) {
+            return;
+        }
+        this.hashTagSearchElement = tagElement;
+        this.splitChar = "";
+        this.lastIndex = -1;
+        hintTag("", protyle);
+    }
+
     public prepareCreateTarget(protyle: IProtyle, type: TCreateTargetType) {
         const {notebookId, path} = getCreateTargetContext(protyle);
         if (this.element.classList.contains("fn__none") || !this.createTargetSession ||
@@ -218,6 +230,22 @@ export class Hint {
             this.element.classList.add("fn__none");
             clearTimeout(this.timeId);
             return;
+        }
+        // 新建的空标签处于搜索状态，输入时按标签内容过滤候选
+        if (this.hashTagSearchElement) {
+            const selection = getSelection();
+            if (!this.hashTagSearchElement.isConnected ||
+                !protyle.wysiwyg.element.contains(this.hashTagSearchElement) ||
+                !selection.focusNode || !this.hashTagSearchElement.contains(selection.focusNode)) {
+                this.hashTagSearchElement = undefined;
+            } else {
+                clearTimeout(this.timeId);
+                const tagKey = getSemanticInlineVisibleText(this.hashTagSearchElement);
+                this.timeId = window.setTimeout(() => {
+                    hintTag(tagKey, protyle);
+                }, protyle.options.hint.delay);
+                return;
+            }
         }
         if (!this.enableExtend) {
             clearTimeout(this.timeId);
@@ -708,6 +736,24 @@ ${genHintItemHTML(item)}
         const range = protyle.toolbar.range;
         let nodeElement = hasClosestBlock(protyle.toolbar.range.startContainer) as HTMLElement;
         if (!nodeElement) {
+            return;
+        }
+        // 新建标签的搜索状态：用选中的标签替换原空标签
+        if (this.hashTagSearchElement && this.source === "hint") {
+            const tagElement = this.hashTagSearchElement;
+            this.hashTagSearchElement = undefined;
+            this.splitChar = "";
+            this.lastIndex = -1;
+            if (tagElement.isConnected && protyle.wysiwyg.element.contains(tagElement) && value) {
+                const tagRange = document.createRange();
+                tagRange.setStartBefore(tagElement);
+                tagRange.setEndAfter(tagElement);
+                tagRange.deleteContents();
+                tagRange.collapse(true);
+                focusByRange(tagRange);
+                protyle.toolbar.range = tagRange;
+                insertHTML(protyle.lute.SpinBlockDOM(value), protyle, false, isMobile());
+            }
             return;
         }
         if (this.source === "av") {
@@ -1297,7 +1343,12 @@ ${genHintItemHTML(item)}
         const prevLastIndex = this.lastIndex;
         this.lastIndex = -1;
         this.splitChar = "";
+        const disableHashTagSearch = window.siyuan.config.editor.hashTagSearch === false;
         extend.forEach((item) => {
+            // 关闭标签搜索后 # 不再作为触发符，避免影响 / 等后续提示
+            if (disableHashTagSearch && item.key === "#") {
+                return;
+            }
             let currentLastIndex = currentLineValue.lastIndexOf(item.key);
             // https://ld246.com/article/1701670704754
             if (Constants.BLOCK_HINT_KEYS.includes(item.key) && currentLastIndex > -1) {
@@ -1317,6 +1368,7 @@ ${genHintItemHTML(item)}
         // 上一次提示没有结束时不能被其余提示干扰 https://github.com/siyuan-note/siyuan/issues/14324
         if (!this.element.classList.contains("fn__none") && prevSplit && prevSplit !== this.splitChar &&
             prevLastIndex > -1 && currentLineValue.startsWith(prevSplit, prevLastIndex) &&
+            !(disableHashTagSearch && prevSplit === "#") &&
             !(["/", "、"].includes(prevSplit) && this.splitChar === ":")) {
             this.splitChar = prevSplit;
             this.lastIndex = prevLastIndex;

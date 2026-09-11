@@ -25,6 +25,8 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -137,6 +139,92 @@ func TestPublishReverseProxyWebSocketOrigin(t *testing.T) {
 			defer response.Body.Close()
 			if response.StatusCode != test.wantStatus {
 				t.Fatalf("websocket handshake returned %d, want %d", response.StatusCode, test.wantStatus)
+			}
+		})
+	}
+}
+
+// TestPublishSessionCookieAttributes 覆盖发布服务认证成功后下发的会话 Cookie 属性。
+// 客户端到发布代理这一跳分别走 TLS 与明文，验证只有直连 TLS 时才标记 Secure。
+func TestPublishSessionCookieAttributes(t *testing.T) {
+	const (
+		username = "publish-user"
+		password = "publish-password"
+	)
+
+	previousConf := model.Conf
+	defer func() { model.Conf = previousConf }()
+
+	model.Conf = model.NewAppConf()
+	model.Conf.Publish = &conf.Publish{
+		Enable: true,
+		Port:   6808,
+		Auth: &conf.BasicAuth{
+			Enable:   true,
+			Accounts: []*conf.BasicAuthAccount{{Username: username, Password: password}},
+		},
+	}
+	// 构建账户及其 token，Basic Auth 成功后由会话认证路径转发
+	model.InitPublishAccounts()
+
+	tests := []struct {
+		name       string
+		plaintext  bool
+		wantSecure bool
+	}{
+		{name: "direct TLS connection", plaintext: false, wantSecure: true},
+		{name: "plaintext connection", plaintext: true, wantSecure: false},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			backend := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+				writer.WriteHeader(http.StatusOK)
+			}))
+			defer backend.Close()
+
+			handler := newPublishReverseProxy(mustParseURL(t, backend.URL), transport)
+			var publishServer *httptest.Server
+			if test.plaintext {
+				publishServer = httptest.NewServer(handler)
+			} else {
+				publishServer = httptest.NewTLSServer(handler)
+			}
+			defer publishServer.Close()
+
+			request, err := http.NewRequest(http.MethodGet, publishServer.URL+"/published", nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			request.SetBasicAuth(username, password)
+
+			response, err := publishServer.Client().Do(request)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer response.Body.Close()
+
+			if response.StatusCode != http.StatusOK {
+				t.Fatalf("publish proxy returned %d, want %d", response.StatusCode, http.StatusOK)
+			}
+
+			var sessionCookie *http.Cookie
+			for _, cookie := range response.Cookies() {
+				if model.SessionIdCookieName == cookie.Name {
+					sessionCookie = cookie
+				}
+			}
+			// 认证失败不会下发 Cookie，必须先确认存在，否则下面的属性断言会空过
+			if nil == sessionCookie {
+				t.Fatalf("response has no %s cookie, Set-Cookie = %v", model.SessionIdCookieName, response.Header.Values("Set-Cookie"))
+			}
+			if sessionCookie.Secure != test.wantSecure {
+				t.Fatalf("cookie Secure = %v, want %v", sessionCookie.Secure, test.wantSecure)
+			}
+			if http.SameSiteLaxMode != sessionCookie.SameSite {
+				t.Fatalf("cookie SameSite = %v, want %v", sessionCookie.SameSite, http.SameSiteLaxMode)
+			}
+			if !sessionCookie.HttpOnly {
+				t.Fatal("cookie is not HttpOnly")
 			}
 		})
 	}

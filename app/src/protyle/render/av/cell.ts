@@ -18,7 +18,8 @@ import {mergeAddOption} from "./select";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {electronUndo} from "../../undo";
 import {formatDateDisplay, formatDateValue, parseDateValue} from "./dateFormat";
-import {getFieldIdByCellElement} from "./row";
+import {cancelAddedRow, getFieldIdByCellElement} from "./row";
+import {matchHotKey} from "../../util/hotKey";
 import {getFieldsByData} from "./view";
 import {getCompressURL, removeCompressURL} from "../../../util/image";
 import {isBrowserRenderableImagePath} from "../../../util/imageURL";
@@ -492,6 +493,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     keepMenuOpen?: boolean;
     positionByMenu?: boolean;
     requireExplicitChange?: boolean;
+    addedItem?: {itemID: string, previousID?: string, groupID?: string};
 }) => {
     if (cellElements.length === 0 || (cellElements.length === 1 && !cellElements[0])) {
         options?.destroyCallback?.();
@@ -724,6 +726,19 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         }
         inputElement.addEventListener("keydown", (event) => {
             if (event.isComposing) {
+                return;
+            }
+            if (options?.addedItem && !inputElement.value.trim() &&
+                (event.key === "Escape" ||
+                    matchHotKey(window.siyuan.config.keymap.editor.general.undo, event))) {
+                // 新建条目尚未填写数据时，Esc 或 Ctrl+Z 取消该条目
+                cancelAddedRow(protyle, blockElement, options.addedItem);
+                avMaskElement?.remove();
+                if (!document.querySelector(".b3-dialog")) {
+                    focusBlock(blockElement);
+                }
+                event.preventDefault();
+                event.stopPropagation();
                 return;
             }
             if (electronUndo(event)) {

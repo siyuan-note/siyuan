@@ -445,35 +445,6 @@ func setFlashcard(c *gin.Context) {
 	ret.Data = flashcard
 }
 
-func setAccount(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	param, err := gulu.JSON.MarshalJSON(arg)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
-	account := &conf.Account{}
-	if err = gulu.JSON.UnmarshalJSON(param, account); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
-	model.Conf.Account = account
-	model.Conf.Save()
-
-	ret.Data = model.Conf.Account
-}
-
 func setEditor(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

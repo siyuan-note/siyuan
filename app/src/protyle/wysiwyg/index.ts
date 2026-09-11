@@ -36,6 +36,7 @@ import {
 } from "../util/selection";
 import {Constants} from "../../constants";
 import {mergeTableCellContents} from "../util/tableCellRich";
+import {resolveDocumentBlockElement} from "../util/outlineBlock";
 import {isMobile} from "../../util/functions";
 import {previewDocImage} from "../preview/image";
 import {getDiagramBlock, previewDiagram} from "../preview/diagram";
@@ -626,7 +627,7 @@ export class WYSIWYG {
     private setEmptyOutline(protyle: IProtyle, element: HTMLElement) {
         let nodeElement = element;
         if (!element.getAttribute("data-node-id")) {
-            const tempElement = hasClosestBlock(element);
+            const tempElement = resolveDocumentBlockElement(element);
             if (!tempElement) {
                 return;
             }

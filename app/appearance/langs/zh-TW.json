@@ -1,4 +1,8 @@
 {
+	"entryHide": "隱藏",
+	"entryShow": "顯示",
+	"hashTagSearch": "<code class='fn__code'>#</code> 標籤搜尋",
+	"hashTagSearchTip": "輸入 # 時進行標籤搜尋，關閉後不再彈出候選標籤，仍可透過斜線選單或快速鍵建立標籤",
 	"entryStatusBar": "底欄",
 	"entryStatusMessage": "狀態訊息",
 	"entryStatusTask": "背景工作",

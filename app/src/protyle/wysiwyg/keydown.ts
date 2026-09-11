@@ -1919,6 +1919,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     !protyle.toolbar.subElement.classList.contains("fn__none")) {
                     hideElements(["toolbar", "hint", "util"], protyle);
                     protyle.hint.enableExtend = false;
+                    protyle.hint.hashTagSearchElement = undefined;
                 } else if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
                     // 防止 ESC 时选中当前块
                     window.siyuan.menus.menu.remove(true);

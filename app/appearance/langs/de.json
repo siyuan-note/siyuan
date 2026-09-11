@@ -1,4 +1,8 @@
 {
+	"entryHide": "Ausblenden",
+	"entryShow": "Anzeigen",
+	"hashTagSearch": "<code class='fn__code'>#</code> Tag-Suche",
+	"hashTagSearchTip": "Beim Eingeben von # nach Tags suchen; wenn deaktiviert, erscheint die Vorschlagsliste nicht mehr, Tags können aber weiterhin über das Slash-Menü oder Tastenkürzel erstellt werden",
 	"entryStatusBar": "Untere Leiste",
 	"entryStatusMessage": "Statusmeldungen",
 	"entryStatusTask": "Hintergrundaufgaben",

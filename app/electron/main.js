@@ -72,6 +72,7 @@ const {
     shouldTrustLocalKernelCertificate,
     unsafeRemoteChromiumSwitchNames,
 } = require("./remoteKernel");
+const {dispatchWindowMessage} = require("./windowMessaging");
 
 process.noAsar = true;
 const appDir = path.dirname(app.getAppPath());
@@ -652,6 +653,24 @@ const bindSpellcheckContextMenu = (contents) => {
         spellcheckContexts.delete(contents.id);
         pendingSpellcheckRequests.delete(contents.id);
         pendingNativeContextMenuRequests.delete(contents.id);
+    });
+};
+
+// 顶栏空白处是窗口拖拽区域，右键会被系统当作非客户区并弹出系统菜单，这里转交渲染进程显示自定义菜单
+// https://www.electronjs.org/docs/latest/api/base-window#event-system-context-menu-windows-linux
+const bindTopBarContextMenu = (win) => {
+    win.on("system-context-menu", (event, point) => {
+        const bounds = win.getContentBounds();
+        const dipPoint = screen.screenToDipPoint(point);
+        const zoom = win.webContents.getZoomFactor();
+        const x = (dipPoint.x - bounds.x) / zoom;
+        const y = (dipPoint.y - bounds.y) / zoom;
+        // 顶栏高度 32px，融合顶栏 42px，超出范围保留系统菜单
+        if (y < 0 || y > 42) {
+            return;
+        }
+        event.preventDefault();
+        win.webContents.send("siyuan-topbar-context-menu", {x, y});
     });
 };
 
@@ -2051,6 +2070,7 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
     });
     remote.enable(currentWindow.webContents);
     bindSpellcheckContextMenu(currentWindow.webContents);
+    bindTopBarContextMenu(currentWindow);
     rememberWindowKernelTarget(currentWindow, kernelTarget);
 
     if (resetToCenter) {
@@ -3727,8 +3747,10 @@ app.whenReady().then(() => {
         event.sender.send("siyuan-hotkey", {failed});
     });
     ipcMain.on("siyuan-send-windows", (event, data) => {
-        BrowserWindow.getAllWindows().forEach(item => {
-            item.webContents.send("siyuan-send-windows", data);
+        dispatchWindowMessage(data, {
+            senderWebContentsId: event.sender.id,
+            getKernelTarget: getWindowKernelTarget,
+            getAllWindows: () => BrowserWindow.getAllWindows(),
         });
     });
     ipcMain.on("siyuan-block-drag", (event, data) => {

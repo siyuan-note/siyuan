@@ -6,8 +6,9 @@ import type {ProtyleRuntimeCapabilities} from "../runtimeCapabilities";
 import {removeLoading} from "../ui/initUI";
 import {focusBlock} from "../util/selection";
 import {invalidateTrackedRanges} from "../util/trackedRange";
+import {PROTYLE_LITE_FRAGMENT_CLASS} from "../util/liteFragment";
 
-export const PROTYLE_LITE_FRAGMENT_CLASS = "protyle-lite-fragment";
+export {PROTYLE_LITE_FRAGMENT_CLASS};
 export const PROTYLE_LITE_HINT_OVERLAY_CLASS = "protyle-hint--lite-overlay";
 
 export interface ProtyleLiteFragmentOptions {

@@ -10,7 +10,11 @@
 
 Electron 44 requires macOS 13 or later and supports only 64-bit Windows and Linux builds.
 
-Install pnpm: `npm install -g pnpm@11.25.0`
+Install Node.js 24 to match CI, then install pnpm using npm: `npm install -g pnpm@12.3.4`.
+
+Use the version specified by the `packageManager` field in [`app/package.json`](../app/package.json); update the version in the command above if that field changes. This uses the same installation method as [CI](workflows/cd.yml).
+
+Do not mix this method with pnpm's standalone installation scripts (`@pnpm/exe`). Different pnpm distributions can change the `packageManagerDependencies` metadata in `app/pnpm-lock.yaml`, causing unrelated lockfile changes. If you previously installed standalone pnpm, remove it from `PATH` or uninstall it so that the npm-installed pnpm takes precedence. Before installing dependencies, check `pnpm --version` against `packageManager` and locate the executable with `where.exe pnpm` on Windows or `command -v pnpm` on macOS/Linux. Review lockfile changes before committing and exclude metadata-only changes caused by switching installation methods.
 
 <details>
 <summary>For China mainland</summary>

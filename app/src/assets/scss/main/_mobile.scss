@@ -526,13 +526,10 @@ body.mobile-keyboard--open {
 }
 
 .mobile-chrome--hidden {
-  .mobile-topbar {
-    visibility: hidden;
-  }
-
+  // 滚动显隐使用位移和透明度，保持栏位渲染层，避免切换可见性时卡顿。
+  .mobile-topbar,
   .mobile-bottom-bar {
     pointer-events: none;
-    visibility: hidden;
   }
 }
 

@@ -17,6 +17,10 @@ const findEntryElement = (path: string) => {
         return Array.from(document.querySelectorAll<HTMLElement>(".dock__item[data-type]"))
             .find((item) => getDockEntryKey(item) === key);
     }
+    if (scope === "statusBar") {
+        return Array.from(document.querySelectorAll<HTMLElement>("#status [data-statusbar-entry]"))
+            .find((item) => item.getAttribute("data-statusbar-entry") === key);
+    }
     return undefined;
 };
 
@@ -26,7 +30,7 @@ const getEntryIcon = (path: string): Pick<IMenu, "icon" | "iconHTML"> => {
     }
     const element = findEntryElement(path);
     if (!element) {
-        return {iconHTML: ""};
+        return {};
     }
     const customElement = element.querySelector(":scope > .b3-menu__icon--custom");
     if (customElement) {
@@ -50,7 +54,7 @@ const getEntryIcon = (path: string): Pick<IMenu, "icon" | "iconHTML"> => {
         iconElement.classList.add("b3-menu__icon");
         return {iconHTML: iconElement.outerHTML};
     }
-    return {iconHTML: ""};
+    return {};
 };
 
 const getRuntime = (): IEntryVisibilityMenuRuntime => ({

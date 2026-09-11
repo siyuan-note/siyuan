@@ -1,6 +1,6 @@
 {
-	"entryHide": "Ukryj",
-	"entryShow": "Pokaż",
+	"entryHide": "Ukryj ${name}",
+	"entryShow": "Pokaż ${name}",
 	"hashTagSearch": "<code class='fn__code'>#</code> wyszukiwanie tagów",
 	"hashTagSearchTip": "Wyszukuj tagi po wpisaniu #; po wyłączeniu lista podpowiedzi nie pojawia się, ale tagi nadal można tworzyć z menu ukośnika lub skrótów",
 	"entryStatusBar": "Dolny pasek",

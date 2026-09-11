@@ -14,11 +14,11 @@ export const initTopBarMenu = (target?: Element) => {
         const item = key ? buildEntryVisibilityToggleItem(`${TOP_BAR_ROOT_PATH}.${key}`) : undefined;
         if (item) {
             menu.append(new MenuItem(item).element);
+            menu.append(new MenuItem({type: "separator"}).element);
         }
-    } else {
-        buildEntryVisibilityMenuItems(TOP_BAR_ROOT_PATH).forEach((item) => {
-            menu.append(new MenuItem(item).element);
-        });
     }
+    buildEntryVisibilityMenuItems(TOP_BAR_ROOT_PATH).forEach((item) => {
+        menu.append(new MenuItem(item).element);
+    });
     return menu;
 };

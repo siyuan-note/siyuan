@@ -50,8 +50,8 @@ export const buildEntryVisibilityToggleItem = (path: string, runtime: IEntryVisi
     }
     const visible = runtime.isEntryVisible(path);
     return {
-        id: path,
-        label: visible ? runtime.languages.entryHide : runtime.languages.entryShow,
+        id: `${path}.toggle`,
+        label: (visible ? runtime.languages.entryHide : runtime.languages.entryShow).replace("${name}", () => node.label()),
         icon: visible ? "iconEyeoff" : "iconEye",
         disabled: runtime.readonly,
         click: () => {

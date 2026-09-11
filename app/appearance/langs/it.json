@@ -1,6 +1,6 @@
 {
-	"entryHide": "Nascondi",
-	"entryShow": "Mostra",
+	"entryHide": "Nascondi ${name}",
+	"entryShow": "Mostra ${name}",
 	"hashTagSearch": "<code class='fn__code'>#</code> ricerca dei tag",
 	"hashTagSearchTip": "Cerca i tag digitando #; se disattivato, l’elenco dei suggerimenti non appare più, ma i tag possono comunque essere creati dal menu barra o dalle scorciatoie",
 	"entryStatusBar": "Barra inferiore",

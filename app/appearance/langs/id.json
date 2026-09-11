@@ -1,6 +1,6 @@
 {
-	"entryHide": "Sembunyikan",
-	"entryShow": "Tampilkan",
+	"entryHide": "Sembunyikan ${name}",
+	"entryShow": "Tampilkan ${name}",
 	"hashTagSearch": "<code class='fn__code'>#</code> pencarian tag",
 	"hashTagSearchTip": "Cari tag saat mengetik #; saat dinonaktifkan, daftar saran tidak muncul lagi, tetapi tag tetap dapat dibuat dari menu garis miring atau pintasan",
 	"entryStatusBar": "Bilah bawah",

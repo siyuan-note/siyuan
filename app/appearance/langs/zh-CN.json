@@ -1,6 +1,6 @@
 {
-	"entryHide": "隐藏",
-	"entryShow": "显示",
+	"entryHide": "隐藏 ${name}",
+	"entryShow": "显示 ${name}",
 	"hashTagSearch": "<code class='fn__code'>#</code> 标签搜索",
 	"hashTagSearchTip": "输入 # 时进行标签搜索，关闭后不再弹出候选标签，仍可通过斜杠菜单或快捷键创建标签",
 	"entryStatusBar": "底栏",

@@ -253,7 +253,7 @@ export const readClipboard = async () => {
     if (isInHarmony()) {
         text.textPlain = window.JSHarmony.readClipboard();
         text.textHTML = window.JSHarmony.readHTMLClipboard();
-        const textObj = getTextSiyuanFromTextHTML(text.textHTML);
+        const textObj = getTextSiyuanFromTextHTML(text.textHTML, true);
         text.textHTML = textObj.textHtml;
         text.siyuanHTML = textObj.textSiyuan;
         if (!text.siyuanHTML) {
@@ -350,8 +350,7 @@ const writePlainTextFallback = async (text: string) => {
             return true;
         }
         if (isInHarmony()) {
-            window.JSHarmony.writeClipboard(text);
-            return true;
+            return window.JSHarmony.writeClipboard(text) !== false;
         }
         if (isInIOS()) {
             window.webkit.messageHandlers.setClipboard.postMessage(text);
@@ -424,15 +423,16 @@ export const writeClipboardData = async (data: IClipboardWriteData, options: ICl
             return {status: "plain"};
         }
         if (isInHarmony()) {
-            if (textSiyuan) {
-                window.JSHarmony.writeSiYuanHTMLClipboard(textPlain, textHTML, textSiyuan);
+            if (textHTML || textSiyuan) {
+                // 使用通用 HTML 注释封装，使旧版鸿蒙壳也不会写入可见的内部格式分隔符。
+                if (window.JSHarmony.writeHTMLClipboard(textPlain, buildWebClipboardHTML(textHTML, textSiyuan)) === false) {
+                    throw new Error(window.siyuan.languages.clipboardPermissionDenied);
+                }
                 return {status: "rich"};
             }
-            if (textHTML) {
-                window.JSHarmony.writeHTMLClipboard(textPlain, textHTML);
-                return {status: "rich"};
+            if (window.JSHarmony.writeClipboard(textPlain) === false) {
+                throw new Error(window.siyuan.languages.clipboardPermissionDenied);
             }
-            window.JSHarmony.writeClipboard(textPlain);
             return {status: "plain"};
         }
         if (isInIOS()) {

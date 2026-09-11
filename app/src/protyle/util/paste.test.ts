@@ -32,7 +32,7 @@ const createHarness = (disabled = false) => {
         "./selection": {getEditorRange: () => position.range},
         "./hasClosest": {hasClosestBlock: (): undefined => undefined},
         "./wpsPresentation": {extractWPSPresentationClipboard: (): undefined => undefined},
-        "./compatibility": {getLocalFiles: async () => localFiles},
+        "./compatibility": {getLocalFiles: async () => localFiles, isInHarmony: () => false},
         "../upload": {
             uploadFiles: (_protyle: unknown, files: unknown, _element: unknown, _success: unknown,
                           _complete: unknown, options: typeof uploads[number]["options"]) => uploads.push({files, options}),

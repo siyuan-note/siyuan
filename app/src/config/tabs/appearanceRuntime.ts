@@ -6,11 +6,12 @@ import {exportLayout} from "../../layout/util";
 import {syncHideToolbarLayout, updateBarModeIcon} from "../../layout/topBar";
 /// #endif
 import {fetchPost} from "../../util/fetch";
-import {loadAssets, refreshHeadingNumberMeasurements, setInlineStyle, unloadThemeScript} from "../../util/assets";
+import {loadAssets, refreshHeadingNumberMeasurements, setBodyHighlight, setInlineStyle, unloadThemeScript} from "../../util/assets";
 import {getFrontend} from "../../util/functions";
 import {shouldUnloadThemeScript} from "../../util/themeCompatibility";
 import {remountOpenSettingTab} from "../setting/mount";
 import {createConfigNamespaceApi} from "../util/namespaceApi";
+import {syncBodyGradient} from "./bodyGradient";
 
 /** 主题模式下拉框初值：合并 mode / modeOS */
 export const appearanceThemeModeValue = (): number =>
@@ -51,6 +52,17 @@ const applyAppearanceConfig = async (data: Config.IAppearance) => {
     }
 
     const prevAppearance = window.siyuan.config.appearance;
+    // 仅更新背景渐变时原位同步控件，避免整页重建期间的布局变化引起滚动抖动。
+    // 启动初始化传入当前配置本身，需要完整加载外观资源；重复推送仍使用原位同步。
+    const appearanceKeys = Object.keys({...prevAppearance, ...data}) as Array<keyof Config.IAppearance>;
+    if (prevAppearance !== data &&
+        appearanceKeys.every(key => key === "bodyGradient" ||
+            JSON.stringify(prevAppearance[key]) === JSON.stringify(data[key]))) {
+        window.siyuan.config.appearance = data;
+        setBodyHighlight(data.bodyGradient);
+        syncBodyGradient();
+        return;
+    }
     if (shouldUnloadThemeScript(prevAppearance, data, getFrontend()) && !await unloadThemeScript()) {
         /// #if MOBILE
         void reloadUI();

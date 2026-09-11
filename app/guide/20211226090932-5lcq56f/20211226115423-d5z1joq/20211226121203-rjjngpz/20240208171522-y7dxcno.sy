@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20260904121106"
+		"updated": "20260911164949"
 	},
 	"Children": [
 		{
@@ -3117,6 +3117,62 @@
 				{
 					"Type": "NodeText",
 					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20260911164949-25ia9x8",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260911164949-25ia9x8",
+				"updated": "20260911164949"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "復原新增條目"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260911164949-u1ojzfi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260911164949-u1ojzfi",
+				"updated": "20260911164949"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "誤新增條目且尚未編輯時，先按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 關閉主鍵輸入框，再按復原快捷鍵 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Z"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（macOS 為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘Z"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）復原新增。輸入框內的復原快捷鍵僅復原文字編輯，Esc 關閉輸入框並保留條目。離開輸入框後，復原作用於最近的資料庫操作；重做可恢復被復原的新增條目。"
 				}
 			]
 		}

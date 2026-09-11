@@ -922,46 +922,6 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
     blockElement.setAttribute("updated", newUpdated);
 };
 
-export const cancelAddedRow = (protyle: IProtyle, blockElement: HTMLElement, options: {
-    itemID: string,
-    previousID?: string,
-    groupID?: string
-}) => {
-    const avID = blockElement.getAttribute("data-av-id");
-    const newUpdated = dayjs().format("YYYYMMDDHHmmss");
-    // 取消新建条目，同时提供逆操作，误触取消后仍可撤销恢复
-    transaction(protyle, [{
-        action: "removeAttrViewBlock",
-        srcIDs: [options.itemID],
-        avID,
-    }, {
-        action: "doUpdateUpdated",
-        id: blockElement.dataset.nodeId,
-        data: newUpdated,
-    }], [{
-        action: "insertAttrViewBlock",
-        avID,
-        previousID: options.previousID,
-        srcs: [{
-            itemID: Lute.NewNodeID(),
-            id: options.itemID,
-            isDetached: true,
-            content: "",
-        }],
-        blockID: blockElement.dataset.nodeId,
-        groupID: options.groupID,
-    }, {
-        action: "doUpdateUpdated",
-        id: blockElement.dataset.nodeId,
-        data: blockElement.getAttribute("updated"),
-    }]);
-    blockElement.setAttribute("updated", newUpdated);
-    blockElement.querySelector(`.av__row[data-id="${options.itemID}"], .av__gallery-item[data-id="${options.itemID}"]`)?.remove();
-    clearSelect(["cell"], blockElement);
-    stickyRow(blockElement, protyle.contentElement, "all");
-    updateHeader(blockElement.querySelector(".av__row"));
-};
-
 export const insertRows = (options: {
     blockElement: HTMLElement,
     protyle: IProtyle,
@@ -974,9 +934,10 @@ export const insertRows = (options: {
     const srcs: IOperationSrcs[] = [];
     new Array(options.count).fill(0).forEach(() => {
         const newNodeID = Lute.NewNodeID();
-        srcIDs.push(newNodeID);
+        const itemID = Lute.NewNodeID();
+        srcIDs.push(itemID);
         srcs.push({
-            itemID: Lute.NewNodeID(),
+            itemID,
             id: newNodeID,
             isDetached: true,
             content: "",

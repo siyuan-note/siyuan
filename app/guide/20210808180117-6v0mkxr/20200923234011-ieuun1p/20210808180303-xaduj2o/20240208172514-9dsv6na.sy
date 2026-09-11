@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20260904121106"
+		"updated": "20260911164949"
 	},
 	"Children": [
 		{
@@ -3127,6 +3127,62 @@
 				"id": "20260613194213-n2rytff",
 				"updated": "20260613194213"
 			}
+		},
+		{
+			"ID": "20260911164949-hmuujgx",
+			"Type": "NodeHeading",
+			"Properties": {
+				"id": "20260911164949-hmuujgx",
+				"updated": "20260911164949"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Undo adding an entry"
+				}
+			],
+			"HeadingLevel": 2
+		},
+		{
+			"ID": "20260911164949-3rfp2zf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260911164949-3rfp2zf",
+				"updated": "20260911164949"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you accidentally add an entry and have not edited it, press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to close the primary cell editor, then press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+Z"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ( "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘Z"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on macOS) to undo the addition. Inside the editor, undo only affects text editing, and Esc closes the editor while keeping the entry. After leaving the editor, undo affects the most recent database operation; redo restores an entry whose addition was undone."
+				}
+			]
 		}
 	]
 }

@@ -823,7 +823,7 @@
 	"agentTimeout": "Timeout",
 	"agentTimeoutTip": "Gesamt-Timeout der Agent-Sitzung, 0 = kein Limit",
 	"agentConfirmTimeout": "Bestätigungs-Timeout",
-	"agentConfirmTimeoutTip": "Nach Timeout automatisch ablehnen, 0 = unbegrenzt warten",
+	"agentConfirmTimeoutTip": "Nach Timeout automatisch ablehnen; gilt auch für die Wartezeit auf die Antwort des Agenten; 0 = unbegrenzt warten",
 	"agentMaxRetries": "Maximale Wiederholungen",
 	"agentMaxRetriesTip": "Maximale API-Wiederholungsversuche bei Fehler",
 	"agentMaxToolCallRounds": "Max. Werkzeugaufruf-Runden",

@@ -823,7 +823,7 @@
 	"agentTimeout": "Timeout",
 	"agentTimeoutTip": "0 = no limit",
 	"agentConfirmTimeout": "Confirm Timeout",
-	"agentConfirmTimeoutTip": "Auto reject after timeout, 0 = wait indefinitely",
+	"agentConfirmTimeoutTip": "Auto reject after timeout; also applies to how long the agent waits for an answer; 0 = wait indefinitely",
 	"agentMaxRetries": "Max Retries",
 	"agentMaxRetriesTip": "Max API retry attempts on failure",
 	"agentMaxToolCallRounds": "Max Tool Call Rounds",

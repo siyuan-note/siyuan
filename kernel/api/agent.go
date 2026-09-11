@@ -208,7 +208,7 @@ func newAgentSessionDeadline(timeoutSeconds int) (*time.Timer, <-chan time.Time)
 
 func resolveAgentConfirmTimeout(timeoutSeconds int) time.Duration {
 	if timeoutSeconds < 0 {
-		return 120 * time.Second
+		return conf.DefaultAgentConfirmTimeout * time.Second
 	}
 	return time.Duration(timeoutSeconds) * time.Second
 }

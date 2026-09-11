@@ -11,6 +11,8 @@ package api
 import (
 	"testing"
 	"time"
+
+	"github.com/siyuan-note/siyuan/kernel/conf"
 )
 
 func TestNewAgentSessionDeadlineZeroHasNoLimit(t *testing.T) {
@@ -24,13 +26,16 @@ func TestNewAgentSessionDeadlineZeroHasNoLimit(t *testing.T) {
 }
 
 func TestResolveAgentConfirmTimeout(t *testing.T) {
+	if conf.DefaultAgentConfirmTimeout != 600 {
+		t.Fatalf("default confirmation timeout changed: %d", conf.DefaultAgentConfirmTimeout)
+	}
 	if timeout := resolveAgentConfirmTimeout(0); timeout != 0 {
 		t.Fatalf("zero confirmation timeout was changed: %v", timeout)
 	}
 	if timeout := resolveAgentConfirmTimeout(30); timeout != 30*time.Second {
 		t.Fatalf("positive confirmation timeout was not preserved: %v", timeout)
 	}
-	if timeout := resolveAgentConfirmTimeout(-1); timeout != 120*time.Second {
+	if timeout := resolveAgentConfirmTimeout(-1); timeout != time.Duration(conf.DefaultAgentConfirmTimeout)*time.Second {
 		t.Fatalf("negative confirmation timeout did not use the default: %v", timeout)
 	}
 }

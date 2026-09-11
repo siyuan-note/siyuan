@@ -39,6 +39,9 @@ type AI struct {
 	Providers       []*Provider      `json:"providers"`
 }
 
+// DefaultAgentConfirmTimeout 是智能体确认超时时间的默认值（秒），也用于智能体提问的等待时长。
+const DefaultAgentConfirmTimeout = 600
+
 type Agent struct {
 	ModelID             string            `json:"modelId"`
 	SessionTimeout      int               `json:"sessionTimeout"`
@@ -181,7 +184,7 @@ func defaultAgent() *Agent {
 	return &Agent{
 		SessionTimeout:      600,
 		StreamIdleTimeout:   120,
-		ConfirmTimeout:      120,
+		ConfirmTimeout:      DefaultAgentConfirmTimeout,
 		MaxRetries:          3,
 		Temperature:         1.0,
 		MaxCompletionTokens: 0,

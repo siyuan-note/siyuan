@@ -823,7 +823,7 @@
 	"agentTimeout": "Limit czasu",
 	"agentTimeoutTip": "Całkowity limit czasu sesji agenta, 0 = bez limitu",
 	"agentConfirmTimeout": "Limit czasu potwierdzenia",
-	"agentConfirmTimeoutTip": "Automatyczne odrzucenie po przekroczeniu czasu, 0 = oczekiwanie bez limitu",
+	"agentConfirmTimeoutTip": "Automatyczne odrzucenie po przekroczeniu czasu; dotyczy też czasu oczekiwania agenta na odpowiedź; 0 = oczekiwanie bez limitu",
 	"agentMaxRetries": "Maks. liczba ponowień",
 	"agentMaxRetriesTip": "Maks. liczba ponownych prób API przy błędzie",
 	"agentMaxToolCallRounds": "Maks. liczba rund wywołań narzędzi",

@@ -109,7 +109,7 @@ const inlineMathSelection = createInlineMathSelection((editor, math) => {
     protyle.toolbar.showRender(protyle, math);
 });
 
-let renderKeyboardToolbarTimeout: number;
+let renderKeyboardToolbarFrame: number | undefined;
 let scrollSelectionIntoViewTimeout: number;
 let clearRenderGutterAfterScroll: () => void;
 let showUtil = false;
@@ -870,10 +870,18 @@ const restoreKeyboardToolbarRange = (protyle: IProtyle | undefined, range?: Rang
 };
 
 const renderKeyboardToolbar = () => {
-    clearTimeout(renderKeyboardToolbarTimeout);
-    renderKeyboardToolbarTimeout = window.setTimeout(() => {
+    if (renderKeyboardToolbarFrame !== undefined) {
+        return;
+    }
+    // 合并同一帧内的选区变化，在浏览器更新选区后及时显示工具栏。
+    renderKeyboardToolbarFrame = window.requestAnimationFrame(() => {
+        renderKeyboardToolbarFrame = undefined;
         if (!canInput(document.activeElement)) {
             hideKeyboardToolbar();
+            return;
+        }
+        const selection = getSelection();
+        if (!selection || selection.rangeCount === 0) {
             return;
         }
         if (!showUtil) {
@@ -881,7 +889,7 @@ const renderKeyboardToolbar = () => {
         }
         showKeyboardToolbar();
         const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
-        const range = getSelection().getRangeAt(0);
+        const range = selection.getRangeAt(0);
         const isProtyle = hasClosestByClassName(range.startContainer, "protyle-wysiwyg", true);
         const nodeElement = hasClosestBlock(range.startContainer);
         const endNodeElement = hasClosestBlock(range.endContainer);
@@ -977,7 +985,7 @@ const renderKeyboardToolbar = () => {
                 }
             });
         }
-    }, 620); // 需等待 range 更新
+    });
 };
 
 export const showKeyboardToolbar = () => {
@@ -1109,7 +1117,10 @@ const scrollKeyboardSelectionIntoView = () => {
 };
 
 export const hideKeyboardToolbar = () => {
-    clearTimeout(renderKeyboardToolbarTimeout);
+    if (renderKeyboardToolbarFrame !== undefined) {
+        window.cancelAnimationFrame(renderKeyboardToolbarFrame);
+        renderKeyboardToolbarFrame = undefined;
+    }
     clearTimeout(scrollSelectionIntoViewTimeout);
     clearRenderGutterAfterScroll?.();
     if (showUtil) {

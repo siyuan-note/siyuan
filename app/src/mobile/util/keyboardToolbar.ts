@@ -989,6 +989,16 @@ const renderKeyboardToolbar = () => {
 };
 
 export const showKeyboardToolbar = () => {
+    const toolbarElement = document.getElementById("keyboardToolbar");
+    if (["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName) &&
+        !toolbarElement.contains(document.activeElement)) {
+        // 普通输入框可能保留文档选区，不能据此恢复编辑焦点或显示文档工具栏。
+        keyboardPanelClosing = false;
+        hideKeyboardToolbarUtil();
+        hideKeyboardToolbar();
+        notifyMobileKeyboardChange(true);
+        return;
+    }
     const pendingFocus = pendingKeyboardFocus;
     pendingKeyboardFocus = undefined;
     if (pendingFocus && getCurrentEditor()?.protyle === pendingFocus.protyle && !pendingFocus.protyle.disabled) {
@@ -997,7 +1007,6 @@ export const showKeyboardToolbar = () => {
     if (!showUtil) {
         hideKeyboardToolbarUtil();
     }
-    const toolbarElement = document.getElementById("keyboardToolbar");
     const selection = getSelection();
     // 空块恢复焦点时 Selection 可能暂时为空，但原生键盘已经显示，仍需隐藏普通底栏。
     notifyMobileKeyboardChange(true);
@@ -1194,6 +1203,12 @@ export const activeBlur = (force = false) => {
 
 export const initKeyboardToolbar = () => {
     let composing = false;
+    document.addEventListener("focusin", () => {
+        if (["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName) &&
+            !document.getElementById("keyboardToolbar").contains(document.activeElement)) {
+            showKeyboardToolbar();
+        }
+    });
     const getMathEditor = () => {
         const protyle = getCurrentEditor()?.protyle;
         return isInAndroid() && protyle && !protyle.disabled && !protyle.toolbar.isMultiSelectMode() &&

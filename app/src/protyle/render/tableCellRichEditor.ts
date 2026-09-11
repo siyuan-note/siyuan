@@ -22,6 +22,7 @@ import {matchHotKey} from "../util/hotKey";
 import {bindTableCellRichDrag} from "../util/tableCellRichDrag";
 import {getTableCellEditorLute} from "../util/tableCellRichLute";
 import {setTableCellRichContext} from "../util/tableCellRichContext";
+import {updateOutlineCurrentBlock} from "../util/outlineBlock";
 
 let activeEditor: {cell: Element, finish: () => void} | undefined;
 
@@ -179,6 +180,8 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         onChange: () => {
             contentChanged = true;
             updateTableCellContentLayout(host, fragment.getBlockHTML());
+            // 单元格内容变化可能改变其所属块，需同步大纲高亮
+            updateOutlineCurrentBlock(owner, cell);
             if (!finished && !composing) {
                 commit();
             }
@@ -262,6 +265,8 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         if (fragment.wysiwyg.contains(event.target as Node)) {
             hideElements(["toolbar"], fragment.protyle);
         }
+        // 单元格编辑器自行接管焦点，编辑区收不到块级点击，需在此同步大纲高亮
+        updateOutlineCurrentBlock(owner, cell);
     }, {capture: true, signal});
     host.addEventListener("mousedown", event => {
         if (event.button !== 0 || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey ||
@@ -431,6 +436,8 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     }, {capture: true, signal});
     observer.observe(owner.element, {childList: true, subtree: true});
     fragment.focus(true);
+    // 进入单元格编辑即按所属表格块同步大纲高亮
+    updateOutlineCurrentBlock(owner, cell);
     if (restoredSelection && restoreRichCellSelection(fragment.wysiwyg, restoredSelection)) {
         undoSelection = restoredSelection;
         return;

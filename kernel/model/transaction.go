@@ -2044,7 +2044,14 @@ func (tx *Transaction) degradeCrossBoundaryBlockRefs(root *ast.Node, srcBox stri
 }
 
 func degradeCrossBoundaryBlockRefs0(root *ast.Node, srcBox string, restoredCreatedDocBoxes map[string]string) int {
-	degraded := 0
+	return degradeCrossBoundaryBlockRefsWithAllowed(root, srcBox, restoredCreatedDocBoxes, nil)
+}
+
+// degradeCrossBoundaryBlockRefsWithAllowed 与 degradeCrossBoundaryBlockRefs 语义相同，
+// 额外把 allowedBlockIDs 视为本地块。导入 .sy.zip 时包内文档尚未入库，块树查不到，
+// 只有把本次导入的全部块 ID 一并放行，才能既拦住包外引用又不误伤包内跨文档引用。
+func degradeCrossBoundaryBlockRefsWithAllowed(root *ast.Node, srcBox string, restoredCreatedDocBoxes map[string]string,
+	allowedBlockIDs map[string]bool) (degraded int) {
 	localBlockIDs := map[string]struct{}{}
 	ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering && n.IsBlock() && n.ID != "" {
@@ -2059,6 +2066,9 @@ func degradeCrossBoundaryBlockRefs0(root *ast.Node, srcBox string, restoredCreat
 
 		if ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref") {
 			if _, local := localBlockIDs[n.TextMarkBlockRefID]; local {
+				return ast.WalkContinue
+			}
+			if allowedBlockIDs[n.TextMarkBlockRefID] {
 				return ast.WalkContinue
 			}
 			if targetBox, restored := restoredCreatedDocBoxes[n.TextMarkBlockRefID]; restored && "" != targetBox && targetBox == srcBox {

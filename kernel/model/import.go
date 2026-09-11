@@ -645,6 +645,15 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		if err = checkEncryptedImportDeck(unzipRootPath, trees, blockIDs); nil != err {
 			return
 		}
+		// 兜底校验：禁止跨加密边界块引。包内文档尚未入库，块树查不到，因此把本次导入的全部块 ID
+		// 一并放行，既拦住包外引用（普通笔记本或其它加密笔记本的块），又不误伤包内跨文档引用。
+		importedBlockIDs := make(map[string]bool, len(blockIDs))
+		for _, newID := range blockIDs {
+			importedBlockIDs[newID] = true
+		}
+		for _, tree := range trees {
+			degradeCrossBoundaryBlockRefsWithAllowed(tree.Root, tree.Box, nil, importedBlockIDs)
+		}
 	}
 	if importedBoxDoc {
 		if err = writeBoxDocID(boxID); err != nil {
@@ -936,9 +945,10 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		newSyPath := filepath.Join(filepath.Dir(syPath), finalSyName)
 		if err = writeImportedTree(boxID, syPath, newSyPath, finalRelPath, data); err != nil {
 			logging.LogErrorf("write imported .sy [%s] failed: %s", syPath, err)
-			// 只有"目标笔记本未解锁导致拒绝写盘"才替换为提示解锁的文案，其余写盘错误原样上抛，避免归因错误
+			// 只有"目标笔记本未解锁导致拒绝写盘"才替换为提示解锁的文案，其余写盘错误原样上抛，避免归因错误。
+			// 相对路径的父目录名来自导入包，需与文档标题一样转义后再进入错误消息。
 			if errors.Is(err, errImportedTreeBoxLocked) {
-				err = errors.New(fmt.Sprintf(Conf.Language(388), finalRelPath))
+				err = errors.New(fmt.Sprintf(Conf.Language(388), htmlstd.EscapeString(finalRelPath)))
 			}
 			return
 		}

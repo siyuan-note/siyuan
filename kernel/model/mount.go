@@ -191,8 +191,9 @@ func removeBoxDir(p string) (err error) {
 			return
 		}
 
-		// 目录已不存在或已被删除视为成功
-		if !gulu.File.IsExist(p) {
+		// 目录确实已不存在才算删除成功；无法访问（权限、IO 错误）时不能误判为已删除，
+		// 否则调用方会继续清理数据库与运行态，留下"索引清空但目录还在"的笔记本。
+		if _, statErr := os.Stat(p); nil != statErr && os.IsNotExist(statErr) {
 			return nil
 		}
 

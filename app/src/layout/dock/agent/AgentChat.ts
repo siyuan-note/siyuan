@@ -993,6 +993,10 @@ export class AgentChat extends Model {
             if (t.closest(".b3-select")) {
                 return;
             }
+            // 编辑浮层内的点击保留原有焦点，避免输入操作作用于正文。
+            if (t.closest(".protyle-util")) {
+                return;
+            }
             if (this.composer) {
                 this.composer.focus();
             }

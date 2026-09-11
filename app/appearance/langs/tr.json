@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "Arka plan renk geçişi",
+	"bodyGradientTip": "Arka plan renk geçişini özelleştirin veya kapatın; otomatik renkler çalışma alanının adına göre belirlenir",
+	"bodyGradientAuto": "Otomatik (çalışma alanı adı)",
+	"bodyGradientStrength": "Yoğunluk",
 	"entryHide": "${name} gizle",
 	"entryShow": "${name} göster",
 	"hashTagSearch": "<code class='fn__code'>#</code> etiket arama",

@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "Градієнт тла",
+	"bodyGradientTip": "Налаштуйте або вимкніть градієнт тла; автоматичний колір визначається назвою робочого простору",
+	"bodyGradientAuto": "Автоматично (за назвою робочого простору)",
+	"bodyGradientStrength": "Інтенсивність",
 	"entryHide": "Приховати ${name}",
 	"entryShow": "Показати ${name}",
 	"hashTagSearch": "<code class='fn__code'>#</code> пошук тегів",

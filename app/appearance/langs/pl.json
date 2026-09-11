@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "Gradient tła",
+	"bodyGradientTip": "Dostosuj lub wyłącz gradient tła; automatyczne kolory są oparte na nazwie przestrzeni roboczej",
+	"bodyGradientAuto": "Automatycznie (nazwa przestrzeni roboczej)",
+	"bodyGradientStrength": "Intensywność",
 	"entryHide": "Ukryj ${name}",
 	"entryShow": "Pokaż ${name}",
 	"hashTagSearch": "<code class='fn__code'>#</code> wyszukiwanie tagów",

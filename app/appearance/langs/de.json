@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "Hintergrundverlauf",
+	"bodyGradientTip": "Hintergrundverlauf anpassen oder deaktivieren; automatische Farben basieren auf dem Namen des Arbeitsbereichs",
+	"bodyGradientAuto": "Automatisch (Arbeitsbereichsname)",
+	"bodyGradientStrength": "Intensität",
 	"entryHide": "${name} ausblenden",
 	"entryShow": "${name} anzeigen",
 	"hashTagSearch": "<code class='fn__code'>#</code> Tag-Suche",

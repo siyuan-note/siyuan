@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "การไล่สีพื้นหลัง",
+	"bodyGradientTip": "ปรับแต่งหรือปิดการไล่สีพื้นหลัง โดยสีอัตโนมัติจะอิงตามชื่อพื้นที่ทำงาน",
+	"bodyGradientAuto": "อัตโนมัติ (ตามชื่อพื้นที่ทำงาน)",
+	"bodyGradientStrength": "ความเข้ม",
 	"entryHide": "ซ่อน ${name}",
 	"entryShow": "แสดง ${name}",
 	"hashTagSearch": "<code class='fn__code'>#</code> ค้นหาแท็ก",

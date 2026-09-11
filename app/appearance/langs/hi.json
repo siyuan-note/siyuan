@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "पृष्ठभूमि ग्रेडिएंट",
+	"bodyGradientTip": "पृष्ठभूमि ग्रेडिएंट को अनुकूलित या बंद करें; स्वचालित रंग कार्यक्षेत्र के नाम पर आधारित होते हैं",
+	"bodyGradientAuto": "स्वचालित (कार्यक्षेत्र के नाम से)",
+	"bodyGradientStrength": "तीव्रता",
 	"entryHide": "${name} छिपाएँ",
 	"entryShow": "${name} दिखाएँ",
 	"hashTagSearch": "<code class='fn__code'>#</code> टैग खोज",

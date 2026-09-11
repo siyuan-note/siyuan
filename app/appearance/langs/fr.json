@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "Dégradé de fond",
+	"bodyGradientTip": "Personnaliser ou désactiver le dégradé de fond ; les couleurs automatiques dépendent du nom de l’espace de travail",
+	"bodyGradientAuto": "Automatique (nom de l’espace de travail)",
+	"bodyGradientStrength": "Intensité",
 	"entryHide": "Masquer ${name}",
 	"entryShow": "Afficher ${name}",
 	"hashTagSearch": "<code class='fn__code'>#</code> recherche d’étiquettes",

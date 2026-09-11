@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "Prechod pozadia",
+	"bodyGradientTip": "Prispôsobte alebo vypnite prechod pozadia; automatické farby vychádzajú z názvu pracovného priestoru",
+	"bodyGradientAuto": "Automaticky (názov pracovného priestoru)",
+	"bodyGradientStrength": "Intenzita",
 	"entryHide": "Skryť ${name}",
 	"entryShow": "Zobraziť ${name}",
 	"hashTagSearch": "<code class='fn__code'>#</code> vyhľadávanie značiek",

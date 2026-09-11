@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "تدرج الخلفية",
+	"bodyGradientTip": "تخصيص تدرج الخلفية أو تعطيله؛ تعتمد الألوان التلقائية على اسم مساحة العمل",
+	"bodyGradientAuto": "تلقائي (حسب اسم مساحة العمل)",
+	"bodyGradientStrength": "الشدة",
 	"entryHide": "إخفاء ${name}",
 	"entryShow": "إظهار ${name}",
 	"hashTagSearch": "<code class='fn__code'>#</code> البحث عن الوسوم",

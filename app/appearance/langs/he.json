@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "מעבר צבע ברקע",
+	"bodyGradientTip": "התאמה אישית או השבתה של מעבר הצבע ברקע; הצבעים האוטומטיים מבוססים על שם סביבת העבודה",
+	"bodyGradientAuto": "אוטומטי (לפי שם סביבת העבודה)",
+	"bodyGradientStrength": "עוצמה",
 	"entryHide": "הסתר ${name}",
 	"entryShow": "הצג ${name}",
 	"hashTagSearch": "<code class='fn__code'>#</code> חיפוש תגיות",

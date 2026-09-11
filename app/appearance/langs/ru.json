@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "Градиент фона",
+	"bodyGradientTip": "Настройте или отключите градиент фона; автоматический цвет определяется названием рабочего пространства",
+	"bodyGradientAuto": "Автоматически (по названию рабочего пространства)",
+	"bodyGradientStrength": "Интенсивность",
 	"entryHide": "Скрыть ${name}",
 	"entryShow": "Показать ${name}",
 	"hashTagSearch": "<code class='fn__code'>#</code> поиск тегов",

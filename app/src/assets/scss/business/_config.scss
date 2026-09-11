@@ -1,3 +1,36 @@
+.config-body-gradient {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 8px;
+
+  &__color,
+  &__strength {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__color {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  &__strength {
+    flex-wrap: wrap;
+  }
+
+  .b3-slider {
+    width: 100px;
+  }
+
+  output {
+    min-width: 4ch;
+    text-align: end;
+  }
+}
+
 .config {
   &__tab-wrap {
     overflow: hidden;

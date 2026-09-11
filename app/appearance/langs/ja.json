@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "背景グラデーション",
+	"bodyGradientTip": "背景グラデーションをカスタマイズまたは無効化します。自動モードではワークスペース名に基づいて色を生成します",
+	"bodyGradientAuto": "自動（ワークスペース名に基づく）",
+	"bodyGradientStrength": "強度",
 	"entryHide": "${name}を非表示",
 	"entryShow": "${name}を表示",
 	"hashTagSearch": "<code class='fn__code'>#</code> タグ検索",

@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "Gradiente de fundo",
+	"bodyGradientTip": "Personalize ou desative o gradiente de fundo; as cores automáticas são baseadas no nome do espaço de trabalho",
+	"bodyGradientAuto": "Automático (nome do espaço de trabalho)",
+	"bodyGradientStrength": "Intensidade",
 	"entryHide": "Ocultar ${name}",
 	"entryShow": "Mostrar ${name}",
 	"hashTagSearch": "<code class='fn__code'>#</code> pesquisa de tags",

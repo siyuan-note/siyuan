@@ -19,6 +19,7 @@ package conf
 import "github.com/siyuan-note/siyuan/kernel/util"
 
 type Appearance struct {
+	BodyGradient        *BodyGradient       `json:"bodyGradient"`        // 背景渐变，空值表示自动配色
 	GlobalFontFamilies  []*EditorFont       `json:"globalFontFamilies"`  // 按优先级排列的全局默认字体
 	Mode                int                 `json:"mode"`                // 模式：0：明亮，1：暗黑
 	ModeOS              bool                `json:"modeOS"`              // 模式是否跟随系统
@@ -40,6 +41,17 @@ type Appearance struct {
 	StatusBar           *util.StatusBar     `json:"statusBar"`           // 底部状态栏配置
 	Notifications       *util.Notifications `json:"notifications"`       // 外观通知开关配置
 	EntryVisibility     *EntryVisibility    `json:"entryVisibility"`     // 桌面端入口可见性配置
+}
+
+type BodyGradient struct {
+	Mode  string            `json:"mode"` // auto：自动，custom：自定义，off：关闭
+	Light BodyGradientColor `json:"light"`
+	Dark  BodyGradientColor `json:"dark"`
+}
+
+type BodyGradientColor struct {
+	Color   string  `json:"color"`   // 十六进制 RGB 颜色
+	Opacity float64 `json:"opacity"` // 渐变起点的不透明度，范围为 0 至 100
 }
 
 func NewAppearance() *Appearance {

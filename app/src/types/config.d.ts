@@ -285,6 +285,12 @@ declare namespace Config {
      * SiYuan appearance related configuration
      */
     export interface IAppearance {
+        /** 背景渐变，未配置时根据工作空间名称自动配色 */
+        bodyGradient?: {
+            mode: "auto" | "custom" | "off";
+            light: {color: string; opacity: number};
+            dark: {color: string; opacity: number};
+        };
         /** 全局默认字体，按优先级从高到低排列 */
         globalFontFamilies: IEditor["fontFamilies"];
         /**

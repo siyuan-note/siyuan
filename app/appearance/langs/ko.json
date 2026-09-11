@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "배경 그라데이션",
+	"bodyGradientTip": "배경 그라데이션을 사용자 지정하거나 끕니다. 자동 색상은 작업 공간 이름을 기반으로 생성됩니다",
+	"bodyGradientAuto": "자동 (작업 공간 이름 기준)",
+	"bodyGradientStrength": "강도",
 	"entryHide": "${name} 숨기기",
 	"entryShow": "${name} 표시",
 	"hashTagSearch": "<code class='fn__code'>#</code> 태그 검색",

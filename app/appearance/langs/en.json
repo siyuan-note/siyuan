@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "Background gradient",
+	"bodyGradientTip": "Customize or disable the background gradient; automatic colors are based on the workspace name",
+	"bodyGradientAuto": "Automatic (workspace name)",
+	"bodyGradientStrength": "Strength",
 	"entryHide": "Hide ${name}",
 	"entryShow": "Show ${name}",
 	"hashTagSearch": "<code class='fn__code'>#</code> tag search",

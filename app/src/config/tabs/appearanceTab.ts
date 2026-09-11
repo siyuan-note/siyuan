@@ -49,6 +49,7 @@ import {genMobileBottomBarSettingHTML, mountMobileBottomBarSetting} from "../../
 import {genMobileSidePanelSettingHTML, mountMobileSidePanelSetting} from "../../mobile/util/mobileSidePanelSetting";
 /// #endif
 import {genEntryVisibilityHtml, mountEntryVisibility} from "../entryVisibility/ui";
+import {genBodyGradientHtml, mountBodyGradient} from "./bodyGradient";
 
 interface IBootAppearanceListData {
     appearances: IBootAppearanceListItem[];
@@ -749,6 +750,13 @@ const mountBootAppearance = async (root: HTMLElement) => {
 
 const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("interface", window.siyuan.languages.configGroupInterface);
+
+    group.slot({
+        key: "bodyGradient",
+        keywords: [window.siyuan.languages.bodyGradient, window.siyuan.languages.bodyGradientTip],
+        html: genBodyGradientHtml,
+        afterMount: mountBodyGradient,
+    });
 
     group.select("appearance.lang", {
         title: window.siyuan.languages.language,

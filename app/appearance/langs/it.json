@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "Sfumatura dello sfondo",
+	"bodyGradientTip": "Personalizza o disattiva la sfumatura dello sfondo; i colori automatici si basano sul nome dello spazio di lavoro",
+	"bodyGradientAuto": "Automatico (nome dello spazio di lavoro)",
+	"bodyGradientStrength": "Intensità",
 	"entryHide": "Nascondi ${name}",
 	"entryShow": "Mostra ${name}",
 	"hashTagSearch": "<code class='fn__code'>#</code> ricerca dei tag",

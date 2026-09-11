@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "背景渐变",
+	"bodyGradientTip": "自定义或关闭背景渐变，自动模式根据工作空间名称生成颜色",
+	"bodyGradientAuto": "自动（根据工作空间名称）",
+	"bodyGradientStrength": "强度",
 	"entryHide": "隐藏 ${name}",
 	"entryShow": "显示 ${name}",
 	"hashTagSearch": "<code class='fn__code'>#</code> 标签搜索",

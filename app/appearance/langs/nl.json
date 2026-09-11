@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "Achtergrondverloop",
+	"bodyGradientTip": "Pas het achtergrondverloop aan of schakel het uit; automatische kleuren zijn gebaseerd op de naam van de werkruimte",
+	"bodyGradientAuto": "Automatisch (werkruimtenaam)",
+	"bodyGradientStrength": "Intensiteit",
 	"entryHide": "${name} verbergen",
 	"entryShow": "${name} weergeven",
 	"hashTagSearch": "<code class='fn__code'>#</code> tagzoeken",

@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "Degradado de fondo",
+	"bodyGradientTip": "Personalizar o desactivar el degradado de fondo; los colores automáticos se basan en el nombre del espacio de trabajo",
+	"bodyGradientAuto": "Automático (nombre del espacio de trabajo)",
+	"bodyGradientStrength": "Intensidad",
 	"entryHide": "Ocultar ${name}",
 	"entryShow": "Mostrar ${name}",
 	"hashTagSearch": "<code class='fn__code'>#</code> búsqueda de etiquetas",

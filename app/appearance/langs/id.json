@@ -1,4 +1,8 @@
 {
+	"bodyGradient": "Gradien latar belakang",
+	"bodyGradientTip": "Sesuaikan atau nonaktifkan gradien latar belakang; warna otomatis didasarkan pada nama ruang kerja",
+	"bodyGradientAuto": "Otomatis (nama ruang kerja)",
+	"bodyGradientStrength": "Intensitas",
 	"entryHide": "Sembunyikan ${name}",
 	"entryShow": "Tampilkan ${name}",
 	"hashTagSearch": "<code class='fn__code'>#</code> pencarian tag",

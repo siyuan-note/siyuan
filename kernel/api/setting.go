@@ -797,6 +797,9 @@ func setAppearance(c *gin.Context) {
 	if nil == appearance.EntryVisibility {
 		appearance.EntryVisibility = model.Conf.Appearance.EntryVisibility
 	}
+	if _, exists := arg["bodyGradient"]; !exists {
+		appearance.BodyGradient = model.Conf.Appearance.BodyGradient
+	}
 	if _, exists := arg["globalFontFamilies"]; !exists {
 		appearance.GlobalFontFamilies = model.Conf.Appearance.GlobalFontFamilies
 	}

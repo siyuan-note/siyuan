@@ -2774,6 +2774,7 @@
 		"384": "Sinkronisasi dibatalkan: berkas ruang kerja diubah selama sinkronisasi. Coba lagi nanti dan hindari mengedit saat menyinkronkan",
 		"385": "Buku catatan terenkripsi tidak mendukung kartu ingatan, sehingga .sy.zip yang berisi data dek kartu tidak dapat diimpor (dokumen: %s). Hapus kartu ingatan di buku catatan sumber lalu ekspor ulang, atau impor ke buku catatan biasa",
 		"386": "Dokumen [%s] berisi konten kartu ingatan, yang tidak didukung buku catatan terenkripsi, sehingga tidak dapat diimpor. Hapus kartu ingatan di buku catatan sumber lalu ekspor ulang, atau impor ke buku catatan biasa",
+		"387": "Gagal menghapus direktori buku catatan [%s]: direktori masih tidak kosong (%v). Beberapa berkas mungkin sedang digunakan atau masih ditulis, mulai ulang lalu coba lagi",
 		"388": "Gagal menulis dokumen impor [%s] ke buku catatan terenkripsi, buka kunci buku catatan terlebih dahulu",
 		"390": "Buku catatan terenkripsi tidak mendukung penanda dan tag, hapus dulu atribut %s pada blok ini",
 		"391": "Buku catatan terenkripsi adalah ruang terisolasi, isinya tidak dapat dipindahkan ke dalam atau ke luar, maupun dirujuk antar buku catatan",

@@ -2774,6 +2774,7 @@
 		"384": "Sincronizzazione interrotta: i file dell'area di lavoro sono stati modificati durante la sincronizzazione. Riprova più tardi ed evita di modificare durante la sincronizzazione",
 		"385": "I quaderni crittografati non supportano le carte di ripasso, quindi un .sy.zip contenente dati di mazzi di carte non può essere importato (documenti: %s). Rimuovi le carte di ripasso nel quaderno di origine ed esporta di nuovo, oppure importa in un quaderno normale",
 		"386": "Il documento [%s] contiene carte di ripasso, che i quaderni crittografati non supportano, quindi non può essere importato. Rimuovi le carte di ripasso nel quaderno di origine ed esporta di nuovo, oppure importa in un quaderno normale",
+		"387": "Impossibile rimuovere la cartella del quaderno [%s]: la cartella non è ancora vuota (%v). Alcuni file potrebbero essere in uso o in scrittura, riavvia e riprova",
 		"388": "Impossibile scrivere il documento importato [%s] nel quaderno crittografato, sblocca prima il quaderno",
 		"390": "I quaderni crittografati non supportano segnalibri e tag, rimuovi prima l’attributo %s di questo blocco",
 		"391": "Un quaderno crittografato è uno spazio isolato, il suo contenuto non può essere spostato verso l’interno o verso l’esterno, né referenziato tra quaderni",

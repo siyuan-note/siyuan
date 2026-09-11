@@ -2774,6 +2774,7 @@
 		"384": "Synchronizacja przerwana: pliki obszaru roboczego zostały zmodyfikowane podczas synchronizacji. Spróbuj ponownie później i unikaj edytowania podczas synchronizacji",
 		"385": "Zaszyfrowane notatniki nie obsługują fiszek, więc pliku .sy.zip zawierającego dane talii fiszek nie można zaimportować (dokumenty: %s). Usuń fiszki w notatniku źródłowym i wyeksportuj ponownie albo zaimportuj do zwykłego notatnika",
 		"386": "Dokument [%s] zawiera treść fiszek, której zaszyfrowane notatniki nie obsługują, więc nie można go zaimportować. Usuń fiszki w notatniku źródłowym i wyeksportuj ponownie albo zaimportuj do zwykłego notatnika",
+		"387": "Nie udało się usunąć katalogu notatnika [%s]: katalog nadal nie jest pusty (%v). Niektóre pliki mogą być używane lub wciąż zapisywane, uruchom ponownie i spróbuj jeszcze raz",
 		"388": "Nie udało się zapisać importowanego dokumentu [%s] w zaszyfrowanym notatniku, najpierw odblokuj notatnik",
 		"390": "Zaszyfrowane notatniki nie obsługują zakładek ani tagów, najpierw usuń atrybut %s tego bloku",
 		"391": "Zaszyfrowany notatnik to odizolowana przestrzeń, jej treści nie można przenieść do środka ani na zewnątrz, ani odwoływać się do niej między notatnikami",

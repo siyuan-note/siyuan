@@ -2774,6 +2774,7 @@
 		"384": "Synchronisation interrompue : des fichiers de l'espace de travail ont été modifiés pendant la synchronisation. Réessayez plus tard et évitez de modifier pendant la synchronisation",
 		"385": "Les carnets chiffrés ne prennent pas en charge les cartes de révision, un .sy.zip contenant des données de paquets de cartes ne peut donc pas être importé (documents : %s). Supprimez les cartes de révision dans le carnet source puis exportez à nouveau, ou importez dans un carnet ordinaire",
 		"386": "Le document [%s] contient des cartes de révision, que les carnets chiffrés ne prennent pas en charge, il ne peut donc pas être importé. Supprimez les cartes de révision dans le carnet source puis exportez à nouveau, ou importez dans un carnet ordinaire",
+		"387": "Échec de la suppression du dossier du carnet [%s] : le dossier n’est toujours pas vide (%v). Des fichiers sont peut-être utilisés ou en cours d’écriture, redémarrez puis réessayez",
 		"388": "Échec de l’écriture du document importé [%s] dans le carnet chiffré, veuillez d’abord déverrouiller le carnet",
 		"390": "Les carnets chiffrés ne prennent pas en charge les signets et les étiquettes, supprimez d’abord l’attribut %s de ce bloc",
 		"391": "Un carnet chiffré est un espace isolé, son contenu ne peut être déplacé vers l’intérieur ou vers l’extérieur, ni référencé entre carnets",

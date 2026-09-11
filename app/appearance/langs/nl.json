@@ -2774,6 +2774,7 @@
 		"384": "Synchronisatie afgebroken: werkruimtebestanden zijn gewijzigd tijdens het synchroniseren. Probeer het later opnieuw en vermijd bewerken tijdens het synchroniseren",
 		"385": "Versleutelde notitieboeken ondersteunen geen flashcards, dus een .sy.zip met flashcard-deckgegevens kan niet worden geïmporteerd (documenten: %s). Verwijder de flashcards in het bronnotitieboek en exporteer opnieuw, of importeer naar een gewoon notitieboek",
 		"386": "Document [%s] bevat flashcard-inhoud, wat versleutelde notitieboeken niet ondersteunen, dus het kan niet worden geïmporteerd. Verwijder de flashcards in het bronnotitieboek en exporteer opnieuw, of importeer naar een gewoon notitieboek",
+		"387": "Map van notitieboek [%s] kon niet worden verwijderd: de map is nog steeds niet leeg (%v). Mogelijk zijn bestanden in gebruik of worden ze nog geschreven, herstart en probeer het opnieuw",
 		"388": "Het geïmporteerde document [%s] kon niet naar het versleutelde notitieboek worden geschreven, ontgrendel het notitieboek eerst",
 		"390": "Versleutelde notitieboeken ondersteunen geen bladwijzers en tags, verwijder eerst het kenmerk %s van dit blok",
 		"391": "Een versleuteld notitieboek is een geïsoleerde ruimte, de inhoud kan niet naar binnen of naar buiten worden verplaatst en niet tussen notitieboeken worden gerefereerd",

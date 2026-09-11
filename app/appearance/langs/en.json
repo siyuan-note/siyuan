@@ -2774,6 +2774,7 @@
 		"384": "Sync aborted: workspace files were modified during sync. Please try again later and avoid editing while syncing",
 		"385": "Encrypted notebooks do not support flashcards, so a .sy.zip containing flashcard deck data cannot be imported (documents: %s). Remove the flashcards in the source notebook and export again, or import into a regular notebook",
 		"386": "Document [%s] contains flashcard content, which encrypted notebooks do not support, so it cannot be imported. Remove the flashcards in the source notebook and export again, or import into a regular notebook",
+		"387": "Failed to remove notebook directory [%s]: the directory is still not empty (%v). Some files may be in use or still being written, please restart and try again",
 		"388": "Failed to write imported document [%s] into the encrypted notebook, please unlock the notebook first",
 		"390": "Encrypted notebooks do not support bookmarks and tags, please remove the %s attribute of this block first",
 		"391": "An encrypted notebook is an isolated space, its content cannot be moved in or out, nor referenced across notebooks",

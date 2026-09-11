@@ -2774,6 +2774,7 @@
 		"384": "Sincronización cancelada: se modificaron archivos del espacio de trabajo durante la sincronización. Inténtalo de nuevo más tarde y evita editar durante la sincronización",
 		"385": "Los cuadernos cifrados no admiten tarjetas de repaso, por lo que no se puede importar un .sy.zip que contenga datos de mazos de tarjetas (documentos: %s). Elimina las tarjetas de repaso en el cuaderno de origen y vuelve a exportar, o importa en un cuaderno normal",
 		"386": "El documento [%s] contiene tarjetas de repaso, que los cuadernos cifrados no admiten, por lo que no se puede importar. Elimina las tarjetas de repaso en el cuaderno de origen y vuelve a exportar, o importa en un cuaderno normal",
+		"387": "No se pudo eliminar el directorio del cuaderno [%s]: el directorio sigue sin estar vacío (%v). Puede que algunos archivos estén en uso o aún se estén escribiendo; reinicia e inténtalo de nuevo",
 		"388": "No se pudo escribir el documento importado [%s] en el cuaderno cifrado; desbloquea primero el cuaderno",
 		"390": "Los cuadernos cifrados no admiten marcadores ni etiquetas; elimina primero el atributo %s de este bloque",
 		"391": "Un cuaderno cifrado es un espacio aislado, su contenido no puede moverse hacia dentro o hacia fuera, ni referenciarse entre cuadernos",

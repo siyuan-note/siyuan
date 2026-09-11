@@ -2774,6 +2774,7 @@
 		"384": "Synchronizácia bola prerušená: súbory pracovného priestoru boli počas synchronizácie zmenené. Skúste to znova neskôr a počas synchronizácie needitujte",
 		"385": "Šifrované zápisníky nepodporujú kartičky, preto .sy.zip s údajmi balíkov kartičiek nie je možné importovať (dokumenty: %s). Odstráňte kartičky v zdrojovom zápisníku a exportujte znova alebo importujte do bežného zápisníka",
 		"386": "Dokument [%s] obsahuje obsah kartičiek, ktorý šifrované zápisníky nepodporujú, preto ho nie je možné importovať. Odstráňte kartičky v zdrojovom zápisníku a exportujte znova alebo importujte do bežného zápisníka",
+		"387": "Nepodarilo sa odstrániť priečinok zápisníka [%s]: priečinok stále nie je prázdny (%v). Niektoré súbory môžu byť používané alebo sa ešte zapisujú, reštartujte a skúste znova",
 		"388": "Importovaný dokument [%s] sa nepodarilo zapísať do šifrovaného zápisníka, najprv zápisník odomknite",
 		"390": "Šifrované zápisníky nepodporujú záložky a značky, najprv odstráňte atribút %s tohto bloku",
 		"391": "Šifrovaný zápisník je izolovaný priestor, jeho obsah nie je možné presunúť dovnútra ani von, ani odkazovať medzi zápisníkmi",

@@ -2774,6 +2774,7 @@
 		"384": "Synchronisierung abgebrochen: Arbeitsbereichsdateien wurden während der Synchronisierung geändert. Bitte versuche es später erneut und vermeide Bearbeitungen während der Synchronisierung",
 		"385": "Verschlüsselte Notizbücher unterstützen keine Lernkarten, daher kann eine .sy.zip mit Lernkarten-Daten nicht importiert werden (Dokumente: %s). Entfernen Sie die Lernkarten im Quellnotizbuch und exportieren Sie erneut, oder importieren Sie in ein normales Notizbuch",
 		"386": "Das Dokument [%s] enthält Lernkarten-Inhalte, die verschlüsselte Notizbücher nicht unterstützen, daher kann es nicht importiert werden. Entfernen Sie die Lernkarten im Quellnotizbuch und exportieren Sie erneut, oder importieren Sie in ein normales Notizbuch",
+		"387": "Notizbuchverzeichnis [%s] konnte nicht entfernt werden: Das Verzeichnis ist weiterhin nicht leer (%v). Möglicherweise werden Dateien verwendet oder noch geschrieben, bitte starten Sie neu und versuchen Sie es erneut",
 		"388": "Das importierte Dokument [%s] konnte nicht in das verschlüsselte Notizbuch geschrieben werden, bitte entsperren Sie das Notizbuch zuerst",
 		"390": "Verschlüsselte Notizbücher unterstützen keine Lesezeichen und Tags, bitte entfernen Sie zuerst das Attribut %s dieses Blocks",
 		"391": "Ein verschlüsseltes Notizbuch ist ein isolierter Bereich, seine Inhalte können weder hinein- noch herausverschoben und nicht notizbuchübergreifend referenziert werden",

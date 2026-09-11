@@ -80,6 +80,8 @@ const hintSkill = (key: string, protyle: IProtyle): IHintData[] => {
         return [];
     }
     prepareAgentHint(protyle);
+    // 每次查询都切换到加载状态，避免已有候选项让异步占位结果关闭菜单。
+    protyle.hint.genHTML([], protyle, true, "hint");
     protyle.hint.genLoading(protyle);
     fetchPost("/api/ai/agent/lsSkills", {}, (response) => {
         // 异步响应返回时输入状态可能已变化，避免 Esc 或其他提示触发后重新打开旧菜单。

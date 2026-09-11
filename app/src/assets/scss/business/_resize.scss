@@ -81,3 +81,145 @@
     cursor: move;
   }
 }
+
+// 高亮只附着在当前命中的把手上，不覆盖窗口内容或改变定位参照。
+.touch-resize-active {
+  background-color: var(--b3-theme-primary-lighter);
+}
+
+// 边缘使用居中的圆角线段，角落使用相邻的局部线段，装饰不参与命中测试。
+.resize__r, .resize__l, .resize__t, .resize__d,
+.resize__rd, .resize__ld, .resize__rt, .resize__lt {
+  &.touch-resize-active {
+    background-color: transparent;
+  }
+}
+
+.resize__r, .resize__l, .resize__t, .resize__d {
+  &.touch-resize-active::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    background-color: var(--b3-theme-primary-lighter);
+    border-radius: 2px;
+  }
+}
+
+.resize__r.touch-resize-active::after,
+.resize__l.touch-resize-active::after {
+  width: 3px;
+  height: min(96px, 100%);
+  top: max(0px, calc(50% - 48px));
+}
+
+.resize__r.touch-resize-active::after { left: 4px; }
+.resize__l.touch-resize-active::after { right: 4px; }
+
+.resize__t.touch-resize-active::after,
+.resize__d.touch-resize-active::after {
+  height: 3px;
+  width: min(96px, 100%);
+  left: max(0px, calc(50% - 48px));
+}
+
+.resize__t.touch-resize-active::after { bottom: 4px; }
+.resize__d.touch-resize-active::after { top: 4px; }
+
+[data-touch-resize-corner].touch-resize-active::after {
+  display: none;
+}
+
+// 角把手向窗口内部延伸两段线，在点击位置连接圆角，外侧留出 4px 间距。
+.resize__rd, .resize__ld, .resize__rt, .resize__lt {
+  &.touch-resize-active::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    box-sizing: border-box;
+    width: 104px;
+    height: 104px;
+    border: 0 solid var(--b3-theme-primary-lighter);
+  }
+}
+
+.resize__rd.touch-resize-active::after {
+  right: calc(100% - 15px);
+  bottom: calc(100% - 15px);
+  border-right-width: 3px;
+  border-bottom-width: 3px;
+  border-bottom-right-radius: 12px;
+}
+
+.resize__ld.touch-resize-active::after {
+  left: calc(100% - 15px);
+  bottom: calc(100% - 15px);
+  border-left-width: 3px;
+  border-bottom-width: 3px;
+  border-bottom-left-radius: 12px;
+}
+
+.resize__rt.touch-resize-active::after {
+  right: calc(100% - 15px);
+  top: calc(100% - 15px);
+  border-right-width: 3px;
+  border-top-width: 3px;
+  border-top-right-radius: 12px;
+}
+
+.resize__lt.touch-resize-active::after {
+  left: calc(100% - 15px);
+  top: calc(100% - 15px);
+  border-left-width: 3px;
+  border-top-width: 3px;
+  border-top-left-radius: 12px;
+}
+
+@media (any-pointer: coarse) {
+  // 扩大弹窗外侧的触摸把手，避免侵占内部按钮和滚动条。
+  .b3-dialog {
+    .resize__r {
+      width: 14px;
+      right: -14px;
+    }
+
+    .resize__l {
+      width: 14px;
+      left: -14px;
+    }
+
+    .resize__t {
+      height: 14px;
+      top: -14px;
+    }
+
+    .resize__d {
+      height: 14px;
+      bottom: -14px;
+    }
+
+    .resize__rd, .resize__ld, .resize__rt, .resize__lt {
+      width: 24px;
+      height: 24px;
+    }
+
+    .resize__rd {
+      right: -16px;
+      bottom: -16px;
+    }
+
+    .resize__ld {
+      left: -16px;
+      bottom: -16px;
+    }
+
+    .resize__rt {
+      right: -16px;
+      top: -16px;
+    }
+
+    .resize__lt {
+      left: -16px;
+      top: -16px;
+    }
+  }
+}

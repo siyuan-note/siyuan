@@ -828,7 +828,7 @@ export class Files extends Model {
                     const sourceNotebookId = window.siyuan.dragElement?.closest("[data-notebook-id]")?.getAttribute("data-notebook-id") ||
                         parseBlockDragData(event.dataTransfer.getData(gutterType)).notebookID;
                     if (!isMoveTargetAllowed([sourceNotebookId], toURL)) {
-                        showMessage(window.siyuan.languages._kernel[313]);
+                        showMessage(window.siyuan.languages._kernel[391]);
                         newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
                         window.siyuan.dragElement = undefined;
                         return;
@@ -903,7 +903,7 @@ export class Files extends Model {
                 const sourceNotebookIds = selectFileElements.map((item) =>
                     item.getAttribute("data-notebook-id") || item.closest("ul[data-url]")?.getAttribute("data-url") || "");
                 if (!isMoveTargetAllowed(sourceNotebookIds, toURL)) {
-                    showMessage(window.siyuan.languages._kernel[313]);
+                    showMessage(window.siyuan.languages._kernel[391]);
                     newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
                     return;
                 }
@@ -944,7 +944,7 @@ export class Files extends Model {
                     const sourceNotebookIds = selectFileElements.map(item =>
                         item.getAttribute("data-notebook-id") || item.closest("ul[data-url]")?.getAttribute("data-url") || "");
                     if (!isMoveTargetAllowed(sourceNotebookIds, toURL)) {
-                        showMessage(window.siyuan.languages._kernel[313]);
+                        showMessage(window.siyuan.languages._kernel[391]);
                         return;
                     }
                     await this.reorderSortedDocuments(selectFileElements.map(item => item.getAttribute("data-node-id")),
@@ -955,7 +955,7 @@ export class Files extends Model {
                     const sourceNotebookIds = selectFileElements.map((item) =>
                         item.getAttribute("data-notebook-id") || item.closest("ul[data-url]")?.getAttribute("data-url") || "");
                     if (!isMoveTargetAllowed(sourceNotebookIds, toURL)) {
-                        showMessage(window.siyuan.languages._kernel[313]);
+                        showMessage(window.siyuan.languages._kernel[391]);
                         newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
                         return;
                     }
@@ -1086,7 +1086,7 @@ export class Files extends Model {
         const sourcePath = pathResponse.data.path as string;
         const sourceNotebook = pathResponse.data.notebook as string;
         if (!isMoveTargetAllowed([sourceNotebook], targetNotebook)) {
-            showMessage(window.siyuan.languages._kernel[313]);
+            showMessage(window.siyuan.languages._kernel[391]);
             return;
         }
         if (sourceNotebook === targetNotebook) {

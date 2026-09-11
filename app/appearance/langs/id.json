@@ -2700,7 +2700,7 @@
 		"310": "Fitur buku catatan terenkripsi tidak diaktifkan",
 		"311": "Kata sandi utama salah",
 		"312": "Fitur buku catatan terenkripsi sudah diaktifkan",
-		"313": "Encrypted notebooks do not support this operation",
+		"313": "",
 		"314": "Silakan buka kunci buku catatan terenkripsi terlebih dahulu",
 		"315": "Buku catatan terenkripsi sudah ada tetapi cadangan kunci utama hilang. Pulihkan conf.json asli atau file cadangan untuk mengaktifkan kembali",
 		"316": "Dekripsi gagal: kunci salah atau data rusak",
@@ -2774,6 +2774,12 @@
 		"384": "Sinkronisasi dibatalkan: berkas ruang kerja diubah selama sinkronisasi. Coba lagi nanti dan hindari mengedit saat menyinkronkan",
 		"385": "Buku catatan terenkripsi tidak mendukung kartu ingatan, sehingga .sy.zip yang berisi data dek kartu tidak dapat diimpor (dokumen: %s). Hapus kartu ingatan di buku catatan sumber lalu ekspor ulang, atau impor ke buku catatan biasa",
 		"386": "Dokumen [%s] berisi konten kartu ingatan, yang tidak didukung buku catatan terenkripsi, sehingga tidak dapat diimpor. Hapus kartu ingatan di buku catatan sumber lalu ekspor ulang, atau impor ke buku catatan biasa",
-		"391": "Buku catatan terenkripsi adalah ruang terisolasi, isinya tidak dapat dipindahkan ke dalam atau ke luar, maupun dirujuk antar buku catatan"
+		"388": "Gagal menulis dokumen impor [%s] ke buku catatan terenkripsi, buka kunci buku catatan terlebih dahulu",
+		"390": "Buku catatan terenkripsi tidak mendukung penanda dan tag, hapus dulu atribut %s pada blok ini",
+		"391": "Buku catatan terenkripsi adalah ruang terisolasi, isinya tidak dapat dipindahkan ke dalam atau ke luar, maupun dirujuk antar buku catatan",
+		"392": "Konten buku catatan terenkripsi tidak termasuk indeks global, sehingga graf hubungan tidak tersedia",
+		"393": "Buku catatan terenkripsi tidak mendukung operasi ini",
+		"394": "Buku catatan terenkripsi tidak mendukung publikasi, izin publikasi tidak dapat dikonfigurasi",
+		"395": "Ekspor massal tidak mendukung buku catatan terenkripsi, buka kuncinya lalu ekspor satu per satu, atau ekspor buku catatan biasa"
 	}
 }

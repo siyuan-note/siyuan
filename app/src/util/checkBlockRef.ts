@@ -24,6 +24,10 @@ export const checkBlockRef = async (options: IBlockRefCheckOptions, protyle?: IP
         }
         const response = await fetchSyncPost("/api/block/checkBlockRef", options);
         if (response.code !== 0) {
+            // 检查失败时给出内核原因（例如加密笔记本已锁定）；字段校验类报错属于调用方参数问题，不打扰用户
+            if (response.msg && !response.msg.startsWith("Field [")) {
+                showMessage(response.msg, 6000, "error");
+            }
             return;
         }
         return response.data === true;

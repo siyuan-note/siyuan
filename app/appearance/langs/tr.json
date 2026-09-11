@@ -2700,7 +2700,7 @@
 		"310": "Şifreli not defteri özelliği etkin değil",
 		"311": "Yanlış ana şifre",
 		"312": "Şifreli not defteri özelliği zaten etkin",
-		"313": "Encrypted notebooks do not support this operation",
+		"313": "",
 		"314": "Lütfen önce şifreli not defterinin kilidini açın",
 		"315": "Şifreli not defterleri zaten mevcut ancak anahtar yedeği eksik. Yeniden etkinleştirmek için orijinal conf.json veya yedek dosyasını geri yükleyin",
 		"316": "Şifre çözme başarısız: yanlış anahtar veya bozuk veriler",
@@ -2774,6 +2774,12 @@
 		"384": "Senkronizasyon durduruldu: senkronizasyon sırasında çalışma alanı dosyaları değiştirildi. Lütfen daha sonra tekrar deneyin ve senkronizasyon sırasında düzenleme yapmaktan kaçının",
 		"385": "Şifrelenmiş not defterleri bilgi kartlarını desteklemez, bu nedenle bilgi kartı destesi verisi içeren bir .sy.zip içe aktarılamaz (belgeler: %s). Kaynak not defterindeki bilgi kartlarını kaldırıp yeniden dışa aktarın veya normal bir not defterine aktarın",
 		"386": "[%s] belgesi şifrelenmiş not defterlerinin desteklemediği bilgi kartı içeriği barındırıyor, bu nedenle içe aktarılamaz. Kaynak not defterindeki bilgi kartlarını kaldırıp yeniden dışa aktarın veya normal bir not defterine aktarın",
-		"391": "Şifrelenmiş not defteri yalıtılmış bir alandır, içeriği içeri veya dışarı taşınamaz ve not defterleri arasında referans verilemez"
+		"388": "İçe aktarılan [%s] belgesi şifrelenmiş not defterine yazılamadı, lütfen önce not defterinin kilidini açın",
+		"390": "Şifrelenmiş not defterleri yer imlerini ve etiketleri desteklemez, lütfen önce bu bloğun %s özniteliğini kaldırın",
+		"391": "Şifrelenmiş not defteri yalıtılmış bir alandır, içeriği içeri veya dışarı taşınamaz ve not defterleri arasında referans verilemez",
+		"392": "Şifrelenmiş not defterlerinin içeriği genel dizinin parçası değildir, bu nedenle ilişki grafiği kullanılamaz",
+		"393": "Şifrelenmiş not defterleri bu işlemi desteklemez",
+		"394": "Şifrelenmiş not defterleri yayımlamayı desteklemez, yayımlama izinleri yapılandırılamaz",
+		"395": "Toplu dışa aktarma şifrelenmiş not defterlerini desteklemez; kilitlerini açıp tek tek dışa aktarın veya normal not defterlerini dışa aktarın"
 	}
 }

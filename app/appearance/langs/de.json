@@ -2700,7 +2700,7 @@
 		"310": "Funktion für verschlüsseltes Notizbuch ist nicht aktiviert",
 		"311": "Falsches Master-Passwort",
 		"312": "Funktion für verschlüsseltes Notizbuch ist bereits aktiviert",
-		"313": "Verschlüsselte Notizbücher unterstützen diesen Vorgang nicht",
+		"313": "",
 		"314": "Bitte entsperren Sie zuerst das verschlüsselte Notizbuch",
 		"315": "Es existieren bereits verschlüsselte Notizbücher, aber das Schlüsselmaterial-Backup fehlt. Um wieder zu aktivieren, muss die ursprüngliche conf.json oder die Backupdatei wiederhergestellt werden",
 		"316": "Entschlüsselung fehlgeschlagen: falscher Schlüssel oder beschädigte Daten",
@@ -2774,6 +2774,12 @@
 		"384": "Synchronisierung abgebrochen: Arbeitsbereichsdateien wurden während der Synchronisierung geändert. Bitte versuche es später erneut und vermeide Bearbeitungen während der Synchronisierung",
 		"385": "Verschlüsselte Notizbücher unterstützen keine Lernkarten, daher kann eine .sy.zip mit Lernkarten-Daten nicht importiert werden (Dokumente: %s). Entfernen Sie die Lernkarten im Quellnotizbuch und exportieren Sie erneut, oder importieren Sie in ein normales Notizbuch",
 		"386": "Das Dokument [%s] enthält Lernkarten-Inhalte, die verschlüsselte Notizbücher nicht unterstützen, daher kann es nicht importiert werden. Entfernen Sie die Lernkarten im Quellnotizbuch und exportieren Sie erneut, oder importieren Sie in ein normales Notizbuch",
-		"391": "Ein verschlüsseltes Notizbuch ist ein isolierter Bereich, seine Inhalte können weder hinein- noch herausverschoben und nicht notizbuchübergreifend referenziert werden"
+		"388": "Das importierte Dokument [%s] konnte nicht in das verschlüsselte Notizbuch geschrieben werden, bitte entsperren Sie das Notizbuch zuerst",
+		"390": "Verschlüsselte Notizbücher unterstützen keine Lesezeichen und Tags, bitte entfernen Sie zuerst das Attribut %s dieses Blocks",
+		"391": "Ein verschlüsseltes Notizbuch ist ein isolierter Bereich, seine Inhalte können weder hinein- noch herausverschoben und nicht notizbuchübergreifend referenziert werden",
+		"392": "Inhalte verschlüsselter Notizbücher sind nicht Teil des globalen Index, daher ist die Beziehungsgrafik nicht verfügbar",
+		"393": "Verschlüsselte Notizbücher unterstützen diesen Vorgang nicht",
+		"394": "Verschlüsselte Notizbücher unterstützen keine Veröffentlichung, Veröffentlichungsrechte können nicht konfiguriert werden",
+		"395": "Der Stapelentexport unterstützt keine verschlüsselten Notizbücher, bitte entsperren Sie sie und exportieren Sie sie einzeln oder exportieren Sie normale Notizbücher"
 	}
 }

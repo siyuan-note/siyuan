@@ -195,6 +195,7 @@ func TestAttributeViewRichTextExport(t *testing.T) {
 		"word":    string(render.NewProtyleExportDocxRenderer(preview, luteEngine.RenderOptions, luteEngine.ParseOptions).Render()),
 	} {
 		t.Run(name, func(t *testing.T) {
+			// 各输出对嵌套列表与加粗使用的标记不同：预览为原生 ul/span，HTML 导出为带 data-type 的块级结构，Word 导出沿用 ul/strong
 			listMarker, boldMarker := "<ul", "<strong"
 			if name == "preview" {
 				boldMarker = `data-type="strong"`
@@ -204,7 +205,7 @@ func TestAttributeViewRichTextExport(t *testing.T) {
 			}
 			if strings.Count(output, listMarker) != 2 || !strings.Contains(output, boldMarker) ||
 				!strings.Contains(output, "foo") || strings.Count(output, "123") != 2 {
-				t.Fatalf("database rich text lost nested lists or formatting: %s", output)
+				t.Fatalf("database rich text lost nested lists or formatting (markers %q/%q): %s", listMarker, boldMarker, output)
 			}
 		})
 	}

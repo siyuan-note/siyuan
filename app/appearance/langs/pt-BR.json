@@ -2700,7 +2700,7 @@
 		"310": "O recurso de caderno criptografado não está habilitado",
 		"311": "Senha mestra incorreta",
 		"312": "O recurso de caderno criptografado já está habilitado",
-		"313": "Notebooks criptografados não suportam esta operação",
+		"313": "",
 		"314": "Por favor, desbloqueie primeiro o caderno criptografado",
 		"315": "Já existem cadernos criptografados mas o backup da chave mestre está ausente. Restaure o conf.json original ou o arquivo de backup para reativar",
 		"316": "Falha na descriptografia: chave incorreta ou dados corrompidos",
@@ -2774,6 +2774,12 @@
 		"384": "Sincronização interrompida: arquivos do espaço de trabalho foram modificados durante a sincronização. Tente novamente mais tarde e evite editar durante a sincronização",
 		"385": "Cadernos criptografados não são compatíveis com flashcards, portanto um .sy.zip que contenha dados de baralhos de flashcards não pode ser importado (documentos: %s). Remova os flashcards no caderno de origem e exporte novamente, ou importe para um caderno comum",
 		"386": "O documento [%s] contém conteúdo de flashcards, que os cadernos criptografados não suportam, portanto não pode ser importado. Remova os flashcards no caderno de origem e exporte novamente, ou importe para um caderno comum",
-		"391": "Um caderno criptografado é um espaço isolado, seu conteúdo não pode ser movido para dentro ou para fora, nem referenciado entre cadernos"
+		"388": "Falha ao gravar o documento importado [%s] no caderno criptografado, desbloqueie o caderno primeiro",
+		"390": "Cadernos criptografados não são compatíveis com favoritos e tags, remova primeiro o atributo %s deste bloco",
+		"391": "Um caderno criptografado é um espaço isolado, seu conteúdo não pode ser movido para dentro ou para fora, nem referenciado entre cadernos",
+		"392": "O conteúdo dos cadernos criptografados não faz parte do índice global, portanto o grafo de relações não está disponível",
+		"393": "Notebooks criptografados não suportam esta operação",
+		"394": "Cadernos criptografados não são compatíveis com publicação, não é possível configurar permissões de publicação",
+		"395": "A exportação em lote não é compatível com cadernos criptografados; desbloqueie-os e exporte um por um, ou exporte cadernos comuns"
 	}
 }

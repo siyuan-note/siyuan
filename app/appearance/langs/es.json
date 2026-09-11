@@ -2700,7 +2700,7 @@
 		"310": "La función de cuaderno cifrado no está habilitada",
 		"311": "Contraseña maestra incorrecta",
 		"312": "La función de cuaderno cifrado ya está habilitada",
-		"313": "Los cuadernos cifrados no admiten esta operación",
+		"313": "",
 		"314": "Por favor, desbloquee primero el cuaderno cifrado",
 		"315": "Ya existen cuadernos cifrados pero falta la copia de seguridad de la clave maestra. Restaure el conf.json original o el archivo de copia de seguridad para volver a habilitarlo",
 		"316": "Error al descifrar: clave incorrecta o datos dañados",
@@ -2774,6 +2774,12 @@
 		"384": "Sincronización cancelada: se modificaron archivos del espacio de trabajo durante la sincronización. Inténtalo de nuevo más tarde y evita editar durante la sincronización",
 		"385": "Los cuadernos cifrados no admiten tarjetas de repaso, por lo que no se puede importar un .sy.zip que contenga datos de mazos de tarjetas (documentos: %s). Elimina las tarjetas de repaso en el cuaderno de origen y vuelve a exportar, o importa en un cuaderno normal",
 		"386": "El documento [%s] contiene tarjetas de repaso, que los cuadernos cifrados no admiten, por lo que no se puede importar. Elimina las tarjetas de repaso en el cuaderno de origen y vuelve a exportar, o importa en un cuaderno normal",
-		"391": "Un cuaderno cifrado es un espacio aislado, su contenido no puede moverse hacia dentro o hacia fuera, ni referenciarse entre cuadernos"
+		"388": "No se pudo escribir el documento importado [%s] en el cuaderno cifrado; desbloquea primero el cuaderno",
+		"390": "Los cuadernos cifrados no admiten marcadores ni etiquetas; elimina primero el atributo %s de este bloque",
+		"391": "Un cuaderno cifrado es un espacio aislado, su contenido no puede moverse hacia dentro o hacia fuera, ni referenciarse entre cuadernos",
+		"392": "El contenido de los cuadernos cifrados no forma parte del índice global, por lo que el gráfico de relaciones no está disponible",
+		"393": "Los cuadernos cifrados no admiten esta operación",
+		"394": "Los cuadernos cifrados no admiten publicación, no se pueden configurar permisos de publicación",
+		"395": "La exportación por lotes no admite cuadernos cifrados; desbloquéalos y expórtalos uno por uno, o exporta cuadernos normales"
 	}
 }

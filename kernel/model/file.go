@@ -458,7 +458,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 
 	ret = []*File{}
 	if flashcard && IsEncryptedBox(boxID) {
-		return nil, 0, errors.New(Conf.Language(313))
+		return nil, 0, errors.New(Conf.Language(393))
 	}
 
 	var deck *riff.Deck
@@ -1735,7 +1735,7 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 	for _, fromPath := range fromPaths {
 		fromBox := pathsBoxes[fromPath]
 		if fromBox.ID != toBox.ID && !IsSameCryptoBoundary(fromBox.ID, toBox.ID) {
-			err = errors.New(Conf.Language(313))
+			err = errors.New(Conf.Language(391))
 			return
 		}
 	}

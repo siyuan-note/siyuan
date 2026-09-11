@@ -92,7 +92,7 @@ export const openGraph = async (options: {
     useBlockId?: boolean,
 }) => {
     if (isEncryptedBox(options.notebookId)) {
-        showMessage(window.siyuan.languages._kernel[313]);
+        showMessage(window.siyuan.languages._kernel[392]);
         return;
     }
     const graph = getAllModels().graph.find(item => {

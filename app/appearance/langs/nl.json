@@ -2700,7 +2700,7 @@
 		"310": "Functie voor versleuteld notitieboek is niet ingeschakeld",
 		"311": "Onjuist hoofdwachtwoord",
 		"312": "Functie voor versleuteld notitieboek is al ingeschakeld",
-		"313": "Encrypted notebooks do not support this operation",
+		"313": "",
 		"314": "Ontgrendel eerst het versleutelde notitieboek",
 		"315": "Er bestaan al versleutelde notitieboeken maar de back-up van de hoofdsleutel ontbreekt. Herstel de originele conf.json of het back-upbestand om opnieuw in te schakelen",
 		"316": "Ontsleuteling mislukt: onjuiste sleutel of beschadigde gegevens",
@@ -2774,6 +2774,12 @@
 		"384": "Synchronisatie afgebroken: werkruimtebestanden zijn gewijzigd tijdens het synchroniseren. Probeer het later opnieuw en vermijd bewerken tijdens het synchroniseren",
 		"385": "Versleutelde notitieboeken ondersteunen geen flashcards, dus een .sy.zip met flashcard-deckgegevens kan niet worden geïmporteerd (documenten: %s). Verwijder de flashcards in het bronnotitieboek en exporteer opnieuw, of importeer naar een gewoon notitieboek",
 		"386": "Document [%s] bevat flashcard-inhoud, wat versleutelde notitieboeken niet ondersteunen, dus het kan niet worden geïmporteerd. Verwijder de flashcards in het bronnotitieboek en exporteer opnieuw, of importeer naar een gewoon notitieboek",
-		"391": "Een versleuteld notitieboek is een geïsoleerde ruimte, de inhoud kan niet naar binnen of naar buiten worden verplaatst en niet tussen notitieboeken worden gerefereerd"
+		"388": "Het geïmporteerde document [%s] kon niet naar het versleutelde notitieboek worden geschreven, ontgrendel het notitieboek eerst",
+		"390": "Versleutelde notitieboeken ondersteunen geen bladwijzers en tags, verwijder eerst het kenmerk %s van dit blok",
+		"391": "Een versleuteld notitieboek is een geïsoleerde ruimte, de inhoud kan niet naar binnen of naar buiten worden verplaatst en niet tussen notitieboeken worden gerefereerd",
+		"392": "Inhoud van versleutelde notitieboeken maakt geen deel uit van de globale index, daarom is de relatietekening niet beschikbaar",
+		"393": "Versleutelde notitieboeken ondersteunen deze bewerking niet",
+		"394": "Versleutelde notitieboeken ondersteunen geen publicatie, publicatierechten kunnen niet worden ingesteld",
+		"395": "Batch-export ondersteunt geen versleutelde notitieboeken, ontgrendel ze en exporteer ze een voor een, of exporteer gewone notitieboeken"
 	}
 }

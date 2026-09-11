@@ -639,7 +639,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		}
 		// 禁止跨加密边界移动块：加密笔记本是孤岛，跨 box 移动会破坏隔离（内容从 A 泄漏到 B）
 		if !isSameTree && !IsSameCryptoBoundary(srcTree.Box, targetTree.Box) {
-			util.PushMsg(Conf.Language(313), 5000)
+			util.PushMsg(Conf.Language(391), 5000)
 			return &TxErr{code: TxErrCodeSkipTx}
 		}
 
@@ -723,7 +723,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	}
 	// 禁止跨加密边界移动块（同 doMove targetPreviousID 分支）
 	if !isSameTree && !IsSameCryptoBoundary(srcTree.Box, targetTree.Box) {
-		util.PushMsg(Conf.Language(313), 5000)
+		util.PushMsg(Conf.Language(391), 5000)
 		return &TxErr{code: TxErrCodeSkipTx}
 	}
 
@@ -1199,7 +1199,7 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 	}
 	// 禁止跨加密边界插入块（同 doMove 守卫）
 	if !isSameTree && !IsSameCryptoBoundary(srcTree.Box, targetTree.Box) {
-		util.PushMsg(Conf.Language(313), 5000)
+		util.PushMsg(Conf.Language(391), 5000)
 		return &TxErr{code: TxErrCodeSkipTx}
 	}
 	if captureHeadingMoveGroup {

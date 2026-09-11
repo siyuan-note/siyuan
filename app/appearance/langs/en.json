@@ -2700,7 +2700,7 @@
 		"310": "Encrypted notebook feature is not enabled",
 		"311": "Incorrect master password",
 		"312": "Encrypted notebook feature is already enabled",
-		"313": "Encrypted notebooks do not support this operation",
+		"313": "",
 		"314": "Please unlock the encrypted notebook first",
 		"315": "Encrypted notebooks already exist but the master key backup is missing. Restore the original conf.json or backup file to re-enable",
 		"316": "Decryption failed: incorrect key or corrupted data",
@@ -2774,6 +2774,12 @@
 		"384": "Sync aborted: workspace files were modified during sync. Please try again later and avoid editing while syncing",
 		"385": "Encrypted notebooks do not support flashcards, so a .sy.zip containing flashcard deck data cannot be imported (documents: %s). Remove the flashcards in the source notebook and export again, or import into a regular notebook",
 		"386": "Document [%s] contains flashcard content, which encrypted notebooks do not support, so it cannot be imported. Remove the flashcards in the source notebook and export again, or import into a regular notebook",
-		"391": "An encrypted notebook is an isolated space, its content cannot be moved in or out, nor referenced across notebooks"
+		"388": "Failed to write imported document [%s] into the encrypted notebook, please unlock the notebook first",
+		"390": "Encrypted notebooks do not support bookmarks and tags, please remove the %s attribute of this block first",
+		"391": "An encrypted notebook is an isolated space, its content cannot be moved in or out, nor referenced across notebooks",
+		"392": "Content of encrypted notebooks is not part of the global index, so the graph view is unavailable",
+		"393": "Encrypted notebooks do not support this operation",
+		"394": "Encrypted notebooks do not support publishing, publish access cannot be configured",
+		"395": "Batch export does not support encrypted notebooks, please unlock and export them one by one, or export regular notebooks instead"
 	}
 }

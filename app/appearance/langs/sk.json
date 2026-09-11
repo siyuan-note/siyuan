@@ -2700,7 +2700,7 @@
 		"310": "Funkcia šifrovaného zápisníka nie je povolená",
 		"311": "Nesprávne hlavné heslo",
 		"312": "Funkcia šifrovaného zápisníka je už povolená",
-		"313": "Encrypted notebooks do not support this operation",
+		"313": "",
 		"314": "Najprv odomknite šifrovaný zápisník",
 		"315": "Šifrované zápisníky už existujú, ale chýba záloha hlavného kľúča. Na opätovné povolenie obnovte pôvodný conf.json alebo súbor zálohy",
 		"316": "Dešifrovanie zlyhalo: nesprávny kľúč alebo poškodené údaje",
@@ -2774,6 +2774,12 @@
 		"384": "Synchronizácia bola prerušená: súbory pracovného priestoru boli počas synchronizácie zmenené. Skúste to znova neskôr a počas synchronizácie needitujte",
 		"385": "Šifrované zápisníky nepodporujú kartičky, preto .sy.zip s údajmi balíkov kartičiek nie je možné importovať (dokumenty: %s). Odstráňte kartičky v zdrojovom zápisníku a exportujte znova alebo importujte do bežného zápisníka",
 		"386": "Dokument [%s] obsahuje obsah kartičiek, ktorý šifrované zápisníky nepodporujú, preto ho nie je možné importovať. Odstráňte kartičky v zdrojovom zápisníku a exportujte znova alebo importujte do bežného zápisníka",
-		"391": "Šifrovaný zápisník je izolovaný priestor, jeho obsah nie je možné presunúť dovnútra ani von, ani odkazovať medzi zápisníkmi"
+		"388": "Importovaný dokument [%s] sa nepodarilo zapísať do šifrovaného zápisníka, najprv zápisník odomknite",
+		"390": "Šifrované zápisníky nepodporujú záložky a značky, najprv odstráňte atribút %s tohto bloku",
+		"391": "Šifrovaný zápisník je izolovaný priestor, jeho obsah nie je možné presunúť dovnútra ani von, ani odkazovať medzi zápisníkmi",
+		"392": "Obsah šifrovaných zápisníkov nie je súčasťou globálneho indexu, preto nie je dostupný graf vzťahov",
+		"393": "Šifrované zápisníky túto operáciu nepodporujú",
+		"394": "Šifrované zápisníky nepodporujú publikovanie, práva na publikovanie nie je možné nastaviť",
+		"395": "Hromadný export nepodporuje šifrované zápisníky, odomknite ich a exportujte po jednom alebo exportujte bežné zápisníky"
 	}
 }

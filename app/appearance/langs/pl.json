@@ -2700,7 +2700,7 @@
 		"310": "Funkcja zaszyfrowanego notatnika nie jest włączona",
 		"311": "Nieprawidłowe główne hasło",
 		"312": "Funkcja zaszyfrowanego notatnika jest już włączona",
-		"313": "Encrypted notebooks do not support this operation",
+		"313": "",
 		"314": "Najpierw odblokuj zaszyfrowany notatnik",
 		"315": "Istnieją już zaszyfrowane notatniki, ale brakuje kopii zapasowej klucza głównego. Przywróć oryginalny conf.json lub plik kopii zapasowej, aby ponownie włączyć",
 		"316": "Odszyfrowanie nie powiodło się: nieprawidłowy klucz lub uszkodzone dane",
@@ -2774,6 +2774,12 @@
 		"384": "Synchronizacja przerwana: pliki obszaru roboczego zostały zmodyfikowane podczas synchronizacji. Spróbuj ponownie później i unikaj edytowania podczas synchronizacji",
 		"385": "Zaszyfrowane notatniki nie obsługują fiszek, więc pliku .sy.zip zawierającego dane talii fiszek nie można zaimportować (dokumenty: %s). Usuń fiszki w notatniku źródłowym i wyeksportuj ponownie albo zaimportuj do zwykłego notatnika",
 		"386": "Dokument [%s] zawiera treść fiszek, której zaszyfrowane notatniki nie obsługują, więc nie można go zaimportować. Usuń fiszki w notatniku źródłowym i wyeksportuj ponownie albo zaimportuj do zwykłego notatnika",
-		"391": "Zaszyfrowany notatnik to odizolowana przestrzeń, jej treści nie można przenieść do środka ani na zewnątrz, ani odwoływać się do niej między notatnikami"
+		"388": "Nie udało się zapisać importowanego dokumentu [%s] w zaszyfrowanym notatniku, najpierw odblokuj notatnik",
+		"390": "Zaszyfrowane notatniki nie obsługują zakładek ani tagów, najpierw usuń atrybut %s tego bloku",
+		"391": "Zaszyfrowany notatnik to odizolowana przestrzeń, jej treści nie można przenieść do środka ani na zewnątrz, ani odwoływać się do niej między notatnikami",
+		"392": "Treść zaszyfrowanych notatników nie jest częścią indeksu globalnego, dlatego graf relacji jest niedostępny",
+		"393": "Zaszyfrowane notatniki nie obsługują tej operacji",
+		"394": "Zaszyfrowane notatniki nie obsługują publikowania, nie można skonfigurować uprawnień publikowania",
+		"395": "Eksport zbiorczy nie obsługuje zaszyfrowanych notatników, odblokuj je i wyeksportuj pojedynczo albo wyeksportuj zwykłe notatniki"
 	}
 }

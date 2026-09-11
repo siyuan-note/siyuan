@@ -2700,7 +2700,7 @@
 		"310": "La fonctionnalité de carnet chiffré n'est pas activée",
 		"311": "Mot de passe maître incorrect",
 		"312": "La fonctionnalité de carnet chiffré est déjà activée",
-		"313": "Les cahiers chiffrés ne prennent pas en charge cette opération",
+		"313": "",
 		"314": "Veuillez d'abord déverrouiller le carnet chiffré",
 		"315": "Des carnets chiffrés existent déjà mais la sauvegarde de la clé maître est manquante. Restaurez le conf.json original ou le fichier de sauvegarde pour réactiver",
 		"316": "Échec du déchiffrement : clé incorrecte ou données corrompues",
@@ -2774,6 +2774,12 @@
 		"384": "Synchronisation interrompue : des fichiers de l'espace de travail ont été modifiés pendant la synchronisation. Réessayez plus tard et évitez de modifier pendant la synchronisation",
 		"385": "Les carnets chiffrés ne prennent pas en charge les cartes de révision, un .sy.zip contenant des données de paquets de cartes ne peut donc pas être importé (documents : %s). Supprimez les cartes de révision dans le carnet source puis exportez à nouveau, ou importez dans un carnet ordinaire",
 		"386": "Le document [%s] contient des cartes de révision, que les carnets chiffrés ne prennent pas en charge, il ne peut donc pas être importé. Supprimez les cartes de révision dans le carnet source puis exportez à nouveau, ou importez dans un carnet ordinaire",
-		"391": "Un carnet chiffré est un espace isolé, son contenu ne peut être déplacé vers l’intérieur ou vers l’extérieur, ni référencé entre carnets"
+		"388": "Échec de l’écriture du document importé [%s] dans le carnet chiffré, veuillez d’abord déverrouiller le carnet",
+		"390": "Les carnets chiffrés ne prennent pas en charge les signets et les étiquettes, supprimez d’abord l’attribut %s de ce bloc",
+		"391": "Un carnet chiffré est un espace isolé, son contenu ne peut être déplacé vers l’intérieur ou vers l’extérieur, ni référencé entre carnets",
+		"392": "Le contenu des carnets chiffrés ne fait pas partie de l’index global, le graphique des relations n’est donc pas disponible",
+		"393": "Les cahiers chiffrés ne prennent pas en charge cette opération",
+		"394": "Les carnets chiffrés ne prennent pas en charge la publication, les droits de publication ne peuvent pas être configurés",
+		"395": "L’exportation par lots ne prend pas en charge les carnets chiffrés ; déverrouillez-les et exportez-les un par un, ou exportez des carnets ordinaires"
 	}
 }

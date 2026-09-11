@@ -324,6 +324,8 @@ export abstract class Constants {
     public static readonly MENU_AI = "ai"; // 块 AI 菜单
     public static readonly MENU_TAB = "tab"; // 页签右键菜单
     public static readonly MENU_TAB_LIST = "tabList"; // 页签切换菜单
+    public static readonly MENU_MOBILE_TABS = "mobileTabs"; // 移动端页签长按菜单
+    public static readonly MENU_MOBILE_TABS_OVERVIEW = "mobileTabsOverview"; // 移动端页签概览面板
 
     public static readonly MENU_INLINE_CONTEXT = "inline-context"; // 文本右键菜单
     public static readonly MENU_INLINE_IMG = "inline-img"; // 图片元素菜单

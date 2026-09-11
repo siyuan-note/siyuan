@@ -669,12 +669,16 @@ body.mobile-topbar--merged {
   &__item {
     display: flex;
     align-items: center;
-    min-height: 48px;
-    margin-bottom: 8px;
-    padding: 4px 6px 4px 12px;
+    min-height: 40px;
+    margin-bottom: 5px;
+    padding: 2px 4px 2px 8px;
     border: 1px solid var(--b3-border-color);
     border-radius: var(--b3-border-radius-b);
     background-color: var(--b3-theme-background);
+    // 长按弹出菜单时避免触发文本选择
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 
     &--active {
       border-color: var(--b3-theme-primary);
@@ -682,17 +686,40 @@ body.mobile-topbar--merged {
     }
   }
 
+  &__item-pin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    margin-right: 4px;
+    color: var(--b3-theme-primary);
+
+    svg {
+      display: block;
+      width: 13px;
+      height: 13px;
+    }
+  }
+
   &__item-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     flex-shrink: 0;
-    margin-right: 10px;
+    margin-right: 8px;
     color: var(--b3-theme-on-surface-light);
-    font-size: 18px;
-    line-height: 18px;
+    font-size: 16px;
+    // 行高与条目等高，emoji 图标才不会顶出自身盒子而与文字错位
+    line-height: 40px;
+
+    & > img,
+    & > svg {
+      display: block;
+    }
   }
 
   &__item-title {
@@ -701,16 +728,18 @@ body.mobile-topbar--merged {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    // 行高不小于图标，保证文字基线与图标中心对齐
+    line-height: 40px;
   }
 
   &__close {
-    width: 36px;
-    height: 36px;
-    padding: 8px;
+    width: 34px;
+    height: 30px;
+    padding: 7px;
 
     svg {
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
     }
   }
 

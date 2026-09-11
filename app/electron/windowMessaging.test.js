@@ -99,7 +99,7 @@ test("主进程 handler 按发送方与内核目标接线到 dispatchWindowMessa
     const closing = source.indexOf("\n    });\n", opening);
     assert.notEqual(closing, -1);
     // 去掉 handler 自身的外层花括号，保留 (event, data) => {...} 的函数体
-    const body = source.slice(opening + 1, closing + 5).replace(/\n    \}$/, "\n");
+    const body = source.slice(opening + 1, closing + 5).replace(/\n {4}\}$/, "\n");
     const entries = ["senderWebContentsId: event.sender.id", "getKernelTarget: getWindowKernelTarget",
         "getAllWindows: () => BrowserWindow.getAllWindows()"];
     entries.forEach(entry => assert.equal(body.includes(entry), true, entry));

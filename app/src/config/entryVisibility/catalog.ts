@@ -393,8 +393,10 @@ const gutterSingle = () => [
     separator("separator_table"),
     gutterTable(),
     separator("separator_exportCSV"),
-    node("exportCSV", () => `${window.siyuan.languages.export} CSV`),
-    node("showDatabaseInFolder", lang("showInFolder")),
+    node("database", lang("database"), true, [
+        node("exportCSV", () => `${window.siyuan.languages.export} CSV`),
+        node("showDatabaseInFolder", lang("showInFolder")),
+    ]),
     separator("separator_VideoOrAudio"),
     node("assetVideo", location(lang("video"), lang("assets")), true, [
         node("asset", lang("assets")),

@@ -68,7 +68,7 @@ func (appearance *Appearance) NormalizeGlobalFontFamilies() {
 }
 
 const (
-	EntryVisibilityVersion       = 4
+	EntryVisibilityVersion       = 5
 	EntryVisibilityProfileSimple = "simple"
 	EntryVisibilityProfileFull   = "full"
 )
@@ -128,6 +128,30 @@ func NormalizeEntryVisibility(entryVisibility *EntryVisibility, fallback string)
 			delete(profile.Entries, "document.more.editMode.wysiwyg")
 			delete(profile.Entries, "document.more.editMode.preview")
 			delete(profile.Orders, "document.more.editMode")
+		}
+		if version < 5 {
+			const parent = "gutter.single"
+			for _, key := range []string{"exportCSV", "showDatabaseInFolder"} {
+				if visible, ok := profile.Entries[parent+"."+key]; ok {
+					profile.Entries[parent+".database."+key] = visible
+					delete(profile.Entries, parent+"."+key)
+				}
+			}
+			var children, order []string
+			for _, key := range profile.Orders[parent] {
+				if key == "exportCSV" || key == "showDatabaseInFolder" {
+					if len(children) == 0 {
+						order = append(order, "database")
+					}
+					children = append(children, key)
+				} else if key != "database" {
+					order = append(order, key)
+				}
+			}
+			if len(children) > 0 {
+				profile.Orders[parent] = order
+				profile.Orders[parent+".database"] = children
+			}
 		}
 		profileIDs[profile.ID] = true
 		profiles = append(profiles, profile)

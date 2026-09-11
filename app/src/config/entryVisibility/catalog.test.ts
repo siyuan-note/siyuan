@@ -1154,3 +1154,17 @@ test("entry catalog resolves navigation columns for deeply nested entries", () =
         "gutter.single.turnInto.includeSublists.recursiveParagraph"), []);
     assert.deepEqual(getEntryCatalogPathChain("gutter.single", "gutter.single.missing"), []);
 });
+test("database block menu groups actions after its stable separator", () => {
+    const children = getEntryCatalogChildren("gutter.single");
+    const index = children.findIndex(item => item.key === "database");
+    assert.equal(children[index - 1].key, "separator_exportCSV");
+    assert.equal(children[index - 1].type, "separator");
+    assert.equal(children[index].simple, true);
+    assert.deepEqual(getEntryCatalogChildren("gutter.single.database").map(item => item.key),
+        ["exportCSV", "showDatabaseInFolder"]);
+    assert.equal(getEntryCatalogNode("gutter.single.exportCSV"), undefined);
+    assert.equal(getEntryCatalogNode("gutter.single.showDatabaseInFolder"), undefined);
+    const source = readFileSync(resolve(process.cwd(), "src/protyle/gutter/index.ts"), "utf8");
+    const section = source.slice(source.indexOf("const submenu: IMenu[] = [];", source.indexOf('type === "NodeAttributeView"')));
+    assert.ok(section.indexOf('id: "exportCSV"') < section.indexOf('id: "showDatabaseInFolder"'));
+});

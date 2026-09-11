@@ -195,14 +195,23 @@ func agentChat(c *gin.Context) {
 	}
 }
 
-func newAgentSessionDeadline(timeoutSeconds int) (*time.Timer, <-chan time.Time) {
+// sessionDeadlineTimeoutSeconds 解析会话总超时秒数：小于等于 0 表示不限制，超过上限时按上限截断。
+func sessionDeadlineTimeoutSeconds(timeoutSeconds int) (seconds int, unlimited bool) {
 	if timeoutSeconds <= 0 {
+		return 0, true
+	}
+	if timeoutSeconds > conf.MaxAgentSessionTimeout {
+		timeoutSeconds = conf.MaxAgentSessionTimeout
+	}
+	return timeoutSeconds, false
+}
+
+func newAgentSessionDeadline(timeoutSeconds int) (*time.Timer, <-chan time.Time) {
+	seconds, unlimited := sessionDeadlineTimeoutSeconds(timeoutSeconds)
+	if unlimited {
 		return nil, nil
 	}
-	if timeoutSeconds > 3600 {
-		timeoutSeconds = 3600
-	}
-	timer := time.NewTimer(time.Duration(timeoutSeconds) * time.Second)
+	timer := time.NewTimer(time.Duration(seconds) * time.Second)
 	return timer, timer.C
 }
 

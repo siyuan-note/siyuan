@@ -25,6 +25,22 @@ func TestNewAgentSessionDeadlineZeroHasNoLimit(t *testing.T) {
 	}
 }
 
+func TestSessionDeadlineTimeoutSecondsSkippedWhenUnlimited(t *testing.T) {
+	if _, skipped := sessionDeadlineTimeoutSeconds(0); !skipped {
+		t.Fatal("zero session timeout was not treated as unlimited")
+	}
+}
+
+func TestSessionDeadlineTimeoutSecondsCapsAtMax(t *testing.T) {
+	seconds, skipped := sessionDeadlineTimeoutSeconds(conf.MaxAgentSessionTimeout + 1)
+	if skipped || seconds != conf.MaxAgentSessionTimeout {
+		t.Fatalf("session timeout above the max = %d, skipped=%v", seconds, skipped)
+	}
+	if seconds, skipped = sessionDeadlineTimeoutSeconds(30); skipped || seconds != 30 {
+		t.Fatalf("session timeout below the max = %d, skipped=%v", seconds, skipped)
+	}
+}
+
 func TestResolveAgentConfirmTimeout(t *testing.T) {
 	if conf.DefaultAgentConfirmTimeout != 600 {
 		t.Fatalf("default confirmation timeout changed: %d", conf.DefaultAgentConfirmTimeout)

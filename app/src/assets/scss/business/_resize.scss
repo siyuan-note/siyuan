@@ -147,7 +147,7 @@
   bottom: calc(100% - 15px);
   border-right-width: 3px;
   border-bottom-width: 3px;
-  border-bottom-right-radius: 12px;
+  border-bottom-right-radius: calc(var(--b3-border-radius-b) + 6px);
 }
 
 .resize__ld.touch-resize-active::after {
@@ -155,7 +155,7 @@
   bottom: calc(100% - 15px);
   border-left-width: 3px;
   border-bottom-width: 3px;
-  border-bottom-left-radius: 12px;
+  border-bottom-left-radius: calc(var(--b3-border-radius-b) + 6px);
 }
 
 .resize__rt.touch-resize-active::after {
@@ -163,7 +163,7 @@
   top: calc(100% - 15px);
   border-right-width: 3px;
   border-top-width: 3px;
-  border-top-right-radius: 12px;
+  border-top-right-radius: calc(var(--b3-border-radius-b) + 6px);
 }
 
 .resize__lt.touch-resize-active::after {
@@ -171,7 +171,7 @@
   top: calc(100% - 15px);
   border-left-width: 3px;
   border-top-width: 3px;
-  border-top-left-radius: 12px;
+  border-top-left-radius: calc(var(--b3-border-radius-b) + 6px);
 }
 
 @media (any-pointer: coarse) {

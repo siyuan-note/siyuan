@@ -8,7 +8,7 @@
 		"id": "20240530101000-3eaevtp",
 		"title": "データベース",
 		"type": "doc",
-		"updated": "20260911164949"
+		"updated": "20260904121106"
 	},
 	"Children": [
 		{
@@ -3127,62 +3127,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ を使用してください。"
-				}
-			]
-		},
-		{
-			"ID": "20260911164949-bl0hpyi",
-			"Type": "NodeHeading",
-			"Properties": {
-				"id": "20260911164949-bl0hpyi",
-				"updated": "20260911164949"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "エントリの追加を取り消す"
-				}
-			],
-			"HeadingLevel": 2
-		},
-		{
-			"ID": "20260911164949-zxvbk8s",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260911164949-zxvbk8s",
-				"updated": "20260911164949"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "誤ってエントリを追加し、まだ編集していない場合は、"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Esc"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " を押して主キーの入力欄を閉じ、"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+Z"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "（macOS では "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⌘Z"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "）で追加を取り消します。入力欄内の取り消し操作はテキスト編集のみが対象で、Esc はエントリを残して入力欄を閉じます。入力欄を閉じた後は、直前のデータベース操作が取り消されます。やり直し操作で、追加を取り消したエントリを復元できます。"
 				}
 			]
 		}

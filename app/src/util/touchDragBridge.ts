@@ -1133,13 +1133,6 @@ export const initTouchDragBridge = () => {
         document.addEventListener("lostpointercapture", handleLostPointerCapture, {capture: true, passive: true});
         document.addEventListener("click", handleMouseClick, {capture: true, passive: false});
         document.addEventListener("mouseup", handleForeignMouseUp, {capture: true, passive: true});
-        window.addEventListener("blur", () => {
-            if (dragState?.inputType === "pointer" &&
-                shouldCancelPointerDragAfterWindowExit(!!isInAndroid(), dragState.isDragging,
-                    !!dragState.relayId)) {
-                completeBridgeDrag(undefined, true);
-            }
-        });
     }
 
     document.addEventListener("wheel", handleDragWheel, {capture: true, passive: true});
@@ -1148,6 +1141,11 @@ export const initTouchDragBridge = () => {
     document.addEventListener("keyup", handleDragKey, {capture: true});
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("blur", () => {
+        if (enablePointerBridge && dragState?.inputType === "pointer" &&
+            shouldCancelPointerDragAfterWindowExit(!!isInAndroid(), dragState.isDragging,
+                !!dragState.relayId)) {
+            completeBridgeDrag(undefined, true);
+        }
         if (touchResizeHandle) {
             cancelManualTouch();
         }

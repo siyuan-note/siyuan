@@ -72,6 +72,7 @@ const {
     shouldTrustLocalKernelCertificate,
     unsafeRemoteChromiumSwitchNames,
 } = require("./remoteKernel");
+const {dispatchWindowMessage} = require("./windowMessaging");
 
 process.noAsar = true;
 const appDir = path.dirname(app.getAppPath());
@@ -3746,8 +3747,10 @@ app.whenReady().then(() => {
         event.sender.send("siyuan-hotkey", {failed});
     });
     ipcMain.on("siyuan-send-windows", (event, data) => {
-        BrowserWindow.getAllWindows().forEach(item => {
-            item.webContents.send("siyuan-send-windows", data);
+        dispatchWindowMessage(data, {
+            senderWebContentsId: event.sender.id,
+            getKernelTarget: getWindowKernelTarget,
+            getAllWindows: () => BrowserWindow.getAllWindows(),
         });
     });
     ipcMain.on("siyuan-block-drag", (event, data) => {

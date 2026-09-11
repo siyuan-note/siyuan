@@ -22,7 +22,8 @@ export const checkBlockRef = async (options: IBlockRefCheckOptions, protyle?: IP
         if (protyle) {
             await waitForPendingTransactions(protyle);
         }
-        const response = await fetchSyncPost("/api/block/checkBlockRef", options);
+        // process=false：该请求由本函数统一处理错误提示，避免 fetchSyncPost 内部再弹一次
+        const response = await fetchSyncPost("/api/block/checkBlockRef", options, undefined, false);
         if (response.code !== 0) {
             // 检查失败时给出内核原因（例如加密笔记本已锁定）；字段校验类报错属于调用方参数问题，不打扰用户
             if (response.msg && !response.msg.startsWith("Field [")) {

@@ -655,6 +655,24 @@ const bindSpellcheckContextMenu = (contents) => {
     });
 };
 
+// 顶栏空白处是窗口拖拽区域，右键会被系统当作非客户区并弹出系统菜单，这里转交渲染进程显示自定义菜单
+// https://www.electronjs.org/docs/latest/api/base-window#event-system-context-menu-windows-linux
+const bindTopBarContextMenu = (win) => {
+    win.on("system-context-menu", (event, point) => {
+        const bounds = win.getContentBounds();
+        const dipPoint = screen.screenToDipPoint(point);
+        const zoom = win.webContents.getZoomFactor();
+        const x = (dipPoint.x - bounds.x) / zoom;
+        const y = (dipPoint.y - bounds.y) / zoom;
+        // 顶栏高度 32px，融合顶栏 42px，超出范围保留系统菜单
+        if (y < 0 || y > 42) {
+            return;
+        }
+        event.preventDefault();
+        win.webContents.send("siyuan-topbar-context-menu", {x, y});
+    });
+};
+
 remote.initialize();
 
 // Electron 相关文件夹名称改为 `SiYuan-Electron` https://github.com/siyuan-note/siyuan/issues/3349
@@ -2051,6 +2069,7 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
     });
     remote.enable(currentWindow.webContents);
     bindSpellcheckContextMenu(currentWindow.webContents);
+    bindTopBarContextMenu(currentWindow);
     rememberWindowKernelTarget(currentWindow, kernelTarget);
 
     if (resetToCenter) {

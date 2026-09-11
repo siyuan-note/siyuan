@@ -7,7 +7,9 @@ import {exitSiYuan, processSync} from "../dialog/processSystem";
 import {goBack, goForward} from "../util/backForward";
 import {syncGuide} from "../sync/syncGuide";
 import {workspaceMenu} from "../menus/workspace";
+import {initTopBarMenu} from "../menus/topBar";
 import {MenuItem} from "../menus/Menu";
+import {hideTooltip} from "../dialog/tooltip";
 import {setMode} from "../util/assets";
 import {openSetting} from "../config";
 import {openSearch} from "../search/spread";
@@ -130,6 +132,12 @@ export const initBar = (app: App) => {
     window.addEventListener("siyuan-entry-visibility", updateTopBarLayout);
     window.addEventListener("siyuan-topbar-change", updateTopBarLayout);
     processSync();
+    /// #if !BROWSER
+    ipcRenderer.on(Constants.SIYUAN_TOPBAR_CONTEXT_MENU, (event, position: IPosition) => {
+        hideTooltip();
+        initTopBarMenu().popup(position);
+    });
+    /// #endif
     toolbarElement.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
         if (typeof event.detail === "string") {

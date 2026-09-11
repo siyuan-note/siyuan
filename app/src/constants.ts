@@ -69,6 +69,7 @@ export abstract class Constants {
     public static readonly SIYUAN_SAVE_CLOSE: string = "siyuan-save-close";
     public static readonly SIYUAN_OPEN_SETTING: string = "siyuan-open-setting";
     public static readonly SIYUAN_OPEN_HELP: string = "siyuan-open-help";
+    public static readonly SIYUAN_TOPBAR_CONTEXT_MENU: string = "siyuan-topbar-context-menu"; // 顶栏拖拽区域右键转交渲染进程
 
     // custom
     public static readonly CUSTOM_REMINDER_WECHAT: string = "custom-reminder-wechat";

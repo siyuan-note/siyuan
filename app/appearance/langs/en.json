@@ -2771,6 +2771,9 @@
 		"381": "Database bindings cannot cross encrypted notebook boundaries",
 		"382": "Cannot export database [%s]. Check the document's database bindings and the notebook containing the database",
 		"383": "Invalid export folder",
-		"384": "Sync aborted: workspace files were modified during sync. Please try again later and avoid editing while syncing"
+		"384": "Sync aborted: workspace files were modified during sync. Please try again later and avoid editing while syncing",
+		"385": "Encrypted notebooks do not support flashcards, so a .sy.zip containing flashcard deck data cannot be imported (documents: %s). Remove the flashcards in the source notebook and export again, or import into a regular notebook",
+		"386": "Document [%s] contains flashcard content, which encrypted notebooks do not support, so it cannot be imported. Remove the flashcards in the source notebook and export again, or import into a regular notebook",
+		"391": "An encrypted notebook is an isolated space, its content cannot be moved in or out, nor referenced across notebooks"
 	}
 }

@@ -2771,6 +2771,9 @@
 		"381": "Los vínculos de bases de datos no pueden cruzar los límites de los cuadernos cifrados",
 		"382": "No se puede exportar la base de datos [%s]. Compruebe los vínculos de bases de datos del documento y el cuaderno que contiene la base de datos",
 		"383": "Carpeta de exportación no válida",
-		"384": "Sincronización cancelada: se modificaron archivos del espacio de trabajo durante la sincronización. Inténtalo de nuevo más tarde y evita editar durante la sincronización"
+		"384": "Sincronización cancelada: se modificaron archivos del espacio de trabajo durante la sincronización. Inténtalo de nuevo más tarde y evita editar durante la sincronización",
+		"385": "Los cuadernos cifrados no admiten tarjetas de repaso, por lo que no se puede importar un .sy.zip que contenga datos de mazos de tarjetas (documentos: %s). Elimina las tarjetas de repaso en el cuaderno de origen y vuelve a exportar, o importa en un cuaderno normal",
+		"386": "El documento [%s] contiene tarjetas de repaso, que los cuadernos cifrados no admiten, por lo que no se puede importar. Elimina las tarjetas de repaso en el cuaderno de origen y vuelve a exportar, o importa en un cuaderno normal",
+		"391": "Un cuaderno cifrado es un espacio aislado, su contenido no puede moverse hacia dentro o hacia fuera, ni referenciarse entre cuadernos"
 	}
 }

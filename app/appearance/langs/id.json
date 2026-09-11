@@ -2771,6 +2771,9 @@
 		"381": "Pengikatan basis data tidak dapat melintasi batas buku catatan terenkripsi",
 		"382": "Tidak dapat mengekspor basis data [%s]. Periksa pengikatan basis data dokumen dan buku catatan yang berisi basis data tersebut",
 		"383": "Folder ekspor tidak valid",
-		"384": "Sinkronisasi dibatalkan: berkas ruang kerja diubah selama sinkronisasi. Coba lagi nanti dan hindari mengedit saat menyinkronkan"
+		"384": "Sinkronisasi dibatalkan: berkas ruang kerja diubah selama sinkronisasi. Coba lagi nanti dan hindari mengedit saat menyinkronkan",
+		"385": "Buku catatan terenkripsi tidak mendukung kartu ingatan, sehingga .sy.zip yang berisi data dek kartu tidak dapat diimpor (dokumen: %s). Hapus kartu ingatan di buku catatan sumber lalu ekspor ulang, atau impor ke buku catatan biasa",
+		"386": "Dokumen [%s] berisi konten kartu ingatan, yang tidak didukung buku catatan terenkripsi, sehingga tidak dapat diimpor. Hapus kartu ingatan di buku catatan sumber lalu ekspor ulang, atau impor ke buku catatan biasa",
+		"391": "Buku catatan terenkripsi adalah ruang terisolasi, isinya tidak dapat dipindahkan ke dalam atau ke luar, maupun dirujuk antar buku catatan"
 	}
 }

@@ -2771,6 +2771,9 @@
 		"381": "Väzby databáz nemôžu prekračovať hranice šifrovaných zápisníkov",
 		"382": "Databázu [%s] sa nedá exportovať. Skontrolujte databázové väzby dokumentu a zápisník obsahujúci databázu",
 		"383": "Neplatný priečinok exportu",
-		"384": "Synchronizácia bola prerušená: súbory pracovného priestoru boli počas synchronizácie zmenené. Skúste to znova neskôr a počas synchronizácie needitujte"
+		"384": "Synchronizácia bola prerušená: súbory pracovného priestoru boli počas synchronizácie zmenené. Skúste to znova neskôr a počas synchronizácie needitujte",
+		"385": "Šifrované zápisníky nepodporujú kartičky, preto .sy.zip s údajmi balíkov kartičiek nie je možné importovať (dokumenty: %s). Odstráňte kartičky v zdrojovom zápisníku a exportujte znova alebo importujte do bežného zápisníka",
+		"386": "Dokument [%s] obsahuje obsah kartičiek, ktorý šifrované zápisníky nepodporujú, preto ho nie je možné importovať. Odstráňte kartičky v zdrojovom zápisníku a exportujte znova alebo importujte do bežného zápisníka",
+		"391": "Šifrovaný zápisník je izolovaný priestor, jeho obsah nie je možné presunúť dovnútra ani von, ani odkazovať medzi zápisníkmi"
 	}
 }

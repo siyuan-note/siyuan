@@ -2771,6 +2771,9 @@
 		"381": "Les liaisons de bases de données ne peuvent pas franchir les limites des carnets chiffrés",
 		"382": "Impossible d’exporter la base de données [%s]. Vérifiez les liaisons de bases de données du document et le carnet contenant la base de données",
 		"383": "Dossier d'exportation invalide",
-		"384": "Synchronisation interrompue : des fichiers de l'espace de travail ont été modifiés pendant la synchronisation. Réessayez plus tard et évitez de modifier pendant la synchronisation"
+		"384": "Synchronisation interrompue : des fichiers de l'espace de travail ont été modifiés pendant la synchronisation. Réessayez plus tard et évitez de modifier pendant la synchronisation",
+		"385": "Les carnets chiffrés ne prennent pas en charge les cartes de révision, un .sy.zip contenant des données de paquets de cartes ne peut donc pas être importé (documents : %s). Supprimez les cartes de révision dans le carnet source puis exportez à nouveau, ou importez dans un carnet ordinaire",
+		"386": "Le document [%s] contient des cartes de révision, que les carnets chiffrés ne prennent pas en charge, il ne peut donc pas être importé. Supprimez les cartes de révision dans le carnet source puis exportez à nouveau, ou importez dans un carnet ordinaire",
+		"391": "Un carnet chiffré est un espace isolé, son contenu ne peut être déplacé vers l’intérieur ou vers l’extérieur, ni référencé entre carnets"
 	}
 }

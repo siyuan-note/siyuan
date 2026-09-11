@@ -2771,6 +2771,9 @@
 		"381": "Datenbankverknüpfungen dürfen die Grenzen verschlüsselter Notizbücher nicht überschreiten",
 		"382": "Datenbank [%s] kann nicht exportiert werden. Prüfen Sie die Datenbankverknüpfungen des Dokuments und das Notizbuch, das die Datenbank enthält",
 		"383": "Ungültiger Exportordner",
-		"384": "Synchronisierung abgebrochen: Arbeitsbereichsdateien wurden während der Synchronisierung geändert. Bitte versuche es später erneut und vermeide Bearbeitungen während der Synchronisierung"
+		"384": "Synchronisierung abgebrochen: Arbeitsbereichsdateien wurden während der Synchronisierung geändert. Bitte versuche es später erneut und vermeide Bearbeitungen während der Synchronisierung",
+		"385": "Verschlüsselte Notizbücher unterstützen keine Lernkarten, daher kann eine .sy.zip mit Lernkarten-Daten nicht importiert werden (Dokumente: %s). Entfernen Sie die Lernkarten im Quellnotizbuch und exportieren Sie erneut, oder importieren Sie in ein normales Notizbuch",
+		"386": "Das Dokument [%s] enthält Lernkarten-Inhalte, die verschlüsselte Notizbücher nicht unterstützen, daher kann es nicht importiert werden. Entfernen Sie die Lernkarten im Quellnotizbuch und exportieren Sie erneut, oder importieren Sie in ein normales Notizbuch",
+		"391": "Ein verschlüsseltes Notizbuch ist ein isolierter Bereich, seine Inhalte können weder hinein- noch herausverschoben und nicht notizbuchübergreifend referenziert werden"
 	}
 }

@@ -2771,6 +2771,9 @@
 		"381": "Veritabanı bağlamaları şifreli not defterlerinin sınırlarını aşamaz",
 		"382": "[%s] veritabanı dışa aktarılamıyor. Belgenin veritabanı bağlamalarını ve veritabanının bulunduğu not defterini kontrol edin",
 		"383": "Geçersiz dışa aktarma klasörü",
-		"384": "Senkronizasyon durduruldu: senkronizasyon sırasında çalışma alanı dosyaları değiştirildi. Lütfen daha sonra tekrar deneyin ve senkronizasyon sırasında düzenleme yapmaktan kaçının"
+		"384": "Senkronizasyon durduruldu: senkronizasyon sırasında çalışma alanı dosyaları değiştirildi. Lütfen daha sonra tekrar deneyin ve senkronizasyon sırasında düzenleme yapmaktan kaçının",
+		"385": "Şifrelenmiş not defterleri bilgi kartlarını desteklemez, bu nedenle bilgi kartı destesi verisi içeren bir .sy.zip içe aktarılamaz (belgeler: %s). Kaynak not defterindeki bilgi kartlarını kaldırıp yeniden dışa aktarın veya normal bir not defterine aktarın",
+		"386": "[%s] belgesi şifrelenmiş not defterlerinin desteklemediği bilgi kartı içeriği barındırıyor, bu nedenle içe aktarılamaz. Kaynak not defterindeki bilgi kartlarını kaldırıp yeniden dışa aktarın veya normal bir not defterine aktarın",
+		"391": "Şifrelenmiş not defteri yalıtılmış bir alandır, içeriği içeri veya dışarı taşınamaz ve not defterleri arasında referans verilemez"
 	}
 }

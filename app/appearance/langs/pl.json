@@ -2771,6 +2771,9 @@
 		"381": "Powiązania baz danych nie mogą przekraczać granic zaszyfrowanych notatników",
 		"382": "Nie można wyeksportować bazy danych [%s]. Sprawdź powiązania baz danych dokumentu oraz notatnik zawierający bazę danych",
 		"383": "Nieprawidłowy folder eksportu",
-		"384": "Synchronizacja przerwana: pliki obszaru roboczego zostały zmodyfikowane podczas synchronizacji. Spróbuj ponownie później i unikaj edytowania podczas synchronizacji"
+		"384": "Synchronizacja przerwana: pliki obszaru roboczego zostały zmodyfikowane podczas synchronizacji. Spróbuj ponownie później i unikaj edytowania podczas synchronizacji",
+		"385": "Zaszyfrowane notatniki nie obsługują fiszek, więc pliku .sy.zip zawierającego dane talii fiszek nie można zaimportować (dokumenty: %s). Usuń fiszki w notatniku źródłowym i wyeksportuj ponownie albo zaimportuj do zwykłego notatnika",
+		"386": "Dokument [%s] zawiera treść fiszek, której zaszyfrowane notatniki nie obsługują, więc nie można go zaimportować. Usuń fiszki w notatniku źródłowym i wyeksportuj ponownie albo zaimportuj do zwykłego notatnika",
+		"391": "Zaszyfrowany notatnik to odizolowana przestrzeń, jej treści nie można przenieść do środka ani na zewnątrz, ani odwoływać się do niej między notatnikami"
 	}
 }

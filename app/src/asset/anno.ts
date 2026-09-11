@@ -33,6 +33,7 @@ import {
     registerPdfInstance,
 } from "./annoRuntime";
 import {appendPdfAnnotationId} from "../editor/pdfAssetLink";
+import {isPdfRectAnnotation, mergePdfTextAnnotationRects} from "./pdfTextAnnotation";
 
 export {destroyAnno, registerPdfInstance, unregisterPdfInstance} from "./annoRuntime";
 
@@ -619,9 +620,8 @@ const hideToolbarMenu = (element: HTMLElement) => {
     element.querySelector(".pdf__util").classList.add("fn__none");
 };
 
-const isRectAnnotationElement = (element: HTMLElement) => element.dataset.mode === "rect" ||
-    (element.dataset.mode === "" && element.childElementCount === 1 &&
-        /-P\d+-\d{14}-\w{7}$/.test(element.dataset.content));
+const isRectAnnotationElement = (element: HTMLElement) =>
+    isPdfRectAnnotation(element.dataset.mode, element.childElementCount, element.dataset.content);
 
 let rectElement: HTMLElement;
 const showToolbar = (element: HTMLElement, range: Range, target?: HTMLElement) => {
@@ -731,30 +731,16 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
         range.setEndAfter(getTextNode(startPage.textLayer.div, false));
     }
 
-    // push 入的是 convertToPdfPoint 拼接后的 4 元素数组，因此 startSelected 实际为 number[][]
-    const startSelected: number[][] = [];
-    mergeRects(range).forEach(function (r) {
-        startSelected.push(
-            startViewport.convertToPdfPoint(r.left - startPageRect.x,
-                r.top - startPageRect.y).concat(startViewport.convertToPdfPoint(r.right - startPageRect.x,
-                r.bottom - startPageRect.y)),
-        );
-    });
+    const startSelected = getTextAnnotationCoords(range, startViewport, startPageRect);
 
-    const endSelected: number[][] = [];
+    let endSelected: number[][] = [];
     if (startIndex !== endIndex) {
         focusByRange(cloneRange);
         const endPage = pdf.pdfViewer.getPageView(endIndex);
         const endPageRect = endPage.canvas.getClientRects()[0];
         const endViewport = endPage.viewport;
         cloneRange.setStart(getTextNode(endPage.textLayer.div, true), 0);
-        mergeRects(cloneRange).forEach(function (r) {
-            endSelected.push(
-                endViewport.convertToPdfPoint(r.left - endPageRect.x,
-                    r.top - endPageRect.y).concat(endViewport.convertToPdfPoint(r.right - endPageRect.x,
-                    r.bottom - endPageRect.y)),
-            );
-        });
+        endSelected = getTextAnnotationCoords(cloneRange, endViewport, endPageRect);
     }
 
     const id = Lute.NewNodeID();
@@ -878,23 +864,11 @@ const getHightlightCoordsByRect = (pdf: any, color: string, rectResizeElement: H
     return result;
 };
 
-const mergeRects = (range: Range) => {
-    const rects = range.getClientRects();
-    const mergedRects: { left: number, top: number, right: number, bottom: number }[] = [];
-    let lastTop: number = undefined;
-    Array.from(rects).forEach(item => {
-        if (item.height === 0 || item.width === 0) {
-            return;
-        }
-        if (typeof lastTop === "undefined" || Math.abs(lastTop - item.top) > 4) {
-            mergedRects.push({left: item.left, top: item.top, right: item.right, bottom: item.bottom});
-            lastTop = item.top;
-        } else {
-            mergedRects[mergedRects.length - 1].right = item.right;
-        }
-    });
-    return mergedRects;
-};
+const getTextAnnotationCoords = (range: Range, viewport: any, pageRect: DOMRect) =>
+    mergePdfTextAnnotationRects(Array.from(range.getClientRects())
+        .filter(rect => rect.width > 0 && rect.height > 0)
+        .map(rect => viewport.convertToPdfPoint(rect.left - pageRect.x, rect.top - pageRect.y)
+            .concat(viewport.convertToPdfPoint(rect.right - pageRect.x, rect.bottom - pageRect.y))));
 
 export const getPdfInstance = (element: HTMLElement) => {
     const registeredInstance = getRegisteredPdfInstance(element);
@@ -971,13 +945,16 @@ const showHighlight = (selected: IPdfAnno, pdf: any, hl?: boolean) => {
     }
     // 使用 setAttribute 构建元素，避免将 .sya 中的数据拼接到 HTML 中 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-fqpw-c3pj-w8g9
     const rectDiv = document.createElement("div");
+    const isRectAnnotation = isPdfRectAnnotation(selected.mode, selected.coords.length, selected.content);
     rectDiv.className = "pdf__rect popover__block";
     rectDiv.setAttribute("data-node-id", selected.id);
     rectDiv.setAttribute("data-relations", selected.ids ? selected.ids.join(",") : "");
-    rectDiv.setAttribute("data-mode", selected.mode);
+    rectDiv.setAttribute("data-mode", isRectAnnotation ? "rect" : (selected.mode || "text"));
     rectDiv.setAttribute("data-type", selected.type);
     rectDiv.style.setProperty("--pdf-annotation-color", selected.color);
-    selected.coords.forEach((rect) => {
+    // 旧标注只在显示时合并矩形，保留文件中的原始坐标和矩形框选标注。
+    const coords = isRectAnnotation ? selected.coords : mergePdfTextAnnotationRects(selected.coords);
+    coords.forEach((rect) => {
         const rectChild = document.createElement("div");
         if (!setRectPosition(rectChild, page, rect, viewport)) {
             return;
@@ -985,8 +962,7 @@ const showHighlight = (selected: IPdfAnno, pdf: any, hl?: boolean) => {
         rectDiv.append(rectChild);
     });
     rectDiv.setAttribute("data-content", selected.content);
-    if (isRectAnnotationElement(rectDiv)) {
-        rectDiv.dataset.mode = "rect";
+    if (isRectAnnotation) {
         rectDiv.style.touchAction = "none";
         Array.from(rectDiv.children).forEach((rectChild: HTMLElement) => {
             ["n", "e", "s", "w"].forEach(direction => {

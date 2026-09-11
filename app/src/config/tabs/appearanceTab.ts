@@ -751,13 +751,6 @@ const mountBootAppearance = async (root: HTMLElement) => {
 const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("interface", window.siyuan.languages.configGroupInterface);
 
-    group.slot({
-        key: "bodyGradient",
-        keywords: [window.siyuan.languages.bodyGradient, window.siyuan.languages.bodyGradientTip],
-        html: genBodyGradientHtml,
-        afterMount: mountBodyGradient,
-    });
-
     group.select("appearance.lang", {
         title: window.siyuan.languages.language,
         desc: window.siyuan.languages.language1,
@@ -883,6 +876,12 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
             desc: window.siyuan.languages.appearance3,
             options: Constants.SIYUAN_CONFIG_APPEARANCE_DARK_CODE.map(value => ({value})),
         });
+    });
+    group.slot({
+        key: "bodyGradient",
+        keywords: [window.siyuan.languages.bodyGradient, window.siyuan.languages.bodyGradientTip],
+        html: genBodyGradientHtml,
+        afterMount: mountBodyGradient,
     });
 };
 

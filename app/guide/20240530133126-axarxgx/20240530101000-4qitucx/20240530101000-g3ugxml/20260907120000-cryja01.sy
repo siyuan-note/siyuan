@@ -1118,6 +1118,62 @@
 					]
 				},
 				{
+					"ID": "20260911103000-jarev15",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260911103000-jarev15",
+						"updated": "20260911103000"
+					},
+					"Children": [
+						{
+							"ID": "20260911103000-jarev16",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260911103000-jarev16",
+								"updated": "20260911103000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "アーカイブ内の文書に学習カードの内容が含まれている場合はインポートを拒否し、該当する文書をエラーで示します。元のノートブックで学習カードを削除して再エクスポートするか、通常のノートブックへインポートしてください"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260911103000-jarev17",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260911103000-jarev17",
+						"updated": "20260911103000"
+					},
+					"Children": [
+						{
+							"ID": "20260911103000-jarev18",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260911103000-jarev18",
+								"updated": "20260911103000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "アーカイブ外を指すブロック参照はプレーンテキストへ降格し、アーカイブ外のデータベースのバインドは非バインド項目になります"
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20260907120000-ja00048",
 					"Type": "NodeListItem",
 					"ListData": {

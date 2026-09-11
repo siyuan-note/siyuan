@@ -1118,6 +1118,62 @@
 					]
 				},
 				{
+					"ID": "20260911103000-enrev15",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260911103000-enrev15",
+						"updated": "20260911103000"
+					},
+					"Children": [
+						{
+							"ID": "20260911103000-enrev16",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260911103000-enrev16",
+								"updated": "20260911103000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Importing is rejected when a document in the archive contains flashcards, and the error names the affected documents; remove the flashcards in the source notebook and export again, or import into a regular notebook"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260911103000-enrev17",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260911103000-enrev17",
+						"updated": "20260911103000"
+					},
+					"Children": [
+						{
+							"ID": "20260911103000-enrev18",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260911103000-enrev18",
+								"updated": "20260911103000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Block references pointing outside the archive are downgraded to plain text, and database bindings outside the archive become unbound entries"
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20260907120000-en00048",
 					"Type": "NodeListItem",
 					"ListData": {

@@ -91,7 +91,8 @@ func QueryRootBlockByCondition(condition, exactKeyword string, limit int, args .
 	exactCondition, exactArg := rootBlockExactMatchCondition(exactKeyword, caseSensitive)
 	sqlStmt := "SELECT *, length(hpath) - length(replace(hpath, '/', '')) AS lv FROM blocks WHERE type = 'd' AND " + condition +
 		" ORDER BY CASE WHEN " + exactCondition + " THEN 0 ELSE 1 END ASC, box DESC, lv ASC LIMIT ?"
-	args = append(args, exactArg, limit)
+	args = append(args, exactArg...)
+	args = append(args, limit)
 	rows, err := query(sqlStmt, args...)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
@@ -114,7 +115,8 @@ func QueryRootBlockByConditionInBox(condition, exactKeyword string, limit int, b
 	exactCondition, exactArg := rootBlockExactMatchCondition(exactKeyword, caseSensitive)
 	sqlStmt := "SELECT *, length(hpath) - length(replace(hpath, '/', '')) AS lv FROM blocks WHERE type = 'd' AND " + condition +
 		" ORDER BY CASE WHEN " + exactCondition + " THEN 0 ELSE 1 END ASC, box DESC, lv ASC LIMIT ?"
-	args = append(args, exactArg, limit)
+	args = append(args, exactArg...)
+	args = append(args, limit)
 	rows, err := queryForBox(boxID, sqlStmt, args...)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
@@ -133,11 +135,24 @@ func QueryRootBlockByConditionInBox(condition, exactKeyword string, limit int, b
 	return
 }
 
-func rootBlockExactMatchCondition(keyword string, sensitive bool) (condition, arg string) {
+func rootBlockExactMatchCondition(keyword string, sensitive bool) (condition string, args []any) {
 	if sensitive {
-		return "content = ?", keyword
+		condition = "content = ? OR name = ?"
+		args = []any{keyword, keyword}
+	} else {
+		condition = "content LIKE ? ESCAPE '\\' OR name LIKE ? ESCAPE '\\'"
+		args = []any{escapeLikePattern(keyword), escapeLikePattern(keyword)}
 	}
-	return "content LIKE ? ESCAPE '\\'", escapeLikePattern(keyword)
+	if "" != keyword && !strings.Contains(keyword, ",") {
+		if sensitive {
+			condition += " OR instr(',' || alias || ',', ?) > 0"
+			args = append(args, ","+keyword+",")
+		} else {
+			condition += " OR (',' || alias || ',') LIKE ? ESCAPE '\\'"
+			args = append(args, "%,"+escapeLikePattern(keyword)+",%")
+		}
+	}
+	return
 }
 
 func (block *Block) IsContainerBlock() bool {

@@ -29,6 +29,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -1144,6 +1145,32 @@ func TestSortSearchDocResults(t *testing.T) {
 		if hPath != results[i].data["hPath"] {
 			t.Fatalf("unexpected search result order at %d: got %q, want %q", i, results[i].data["hPath"], hPath)
 		}
+	}
+}
+
+func TestSearchDocBlockExactMatching(t *testing.T) {
+	for _, test := range []struct {
+		name      string
+		block     sql.Block
+		keyword   string
+		sensitive bool
+		want      bool
+	}{
+		{"title", sql.Block{Content: "Math"}, "Math", true, true},
+		{"name", sql.Block{Name: "Math"}, "Math", true, true},
+		{"alias", sql.Block{Alias: "Algebra,Math,Geometry"}, "Math", true, true},
+		{"partial alias", sql.Block{Alias: "Higher Math"}, "Math", true, false},
+		{"multiple aliases", sql.Block{Alias: "Math,Algebra"}, "Math,Algebra", true, false},
+		{"sensitive", sql.Block{Name: "Math", Alias: "Math"}, "math", true, false},
+		{"insensitive name", sql.Block{Name: "Math"}, "math", false, true},
+		{"insensitive alias", sql.Block{Alias: "Algebra,Math"}, "math", false, true},
+		{"literal", sql.Block{Alias: "Other,Math%_\\"}, "Math%_\\", true, true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if got := isExactSearchDocBlockMatch(&test.block, test.keyword, test.sensitive); got != test.want {
+				t.Fatalf("got %t, want %t", got, test.want)
+			}
+		})
 	}
 }
 

@@ -240,6 +240,11 @@ func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.
 			Value:    sessionID,
 			Path:     "/",
 			HttpOnly: true,
+			// 只有直连 TLS 的连接才标记 Secure，不信任调用方可伪造的 X-Forwarded-Proto，
+			// 避免明文连接上的会话标识被浏览器带到其他连接上 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-7j37-4gq6-wm7m
+			Secure: nil != request.TLS,
+			// 阻止跨站请求携带会话 Cookie，与内核其他会话 Cookie 保持一致
+			SameSite: http.SameSiteLaxMode,
 		}
 
 		// set JWT

@@ -1,6 +1,6 @@
 import {MenuItem} from "./Menu";
 import {Constants} from "../constants";
-import {buildEntryVisibilityMenuItems, buildEntryVisibilityToggleItem} from "../config/entryVisibility/menu";
+import {buildDockEntryVisibilityMenuItems, buildEntryVisibilityToggleItem} from "../config/entryVisibility/menu";
 import {getDockEntryKey, refreshDockCatalog} from "../config/entryVisibility/catalog";
 
 const moveMenuItem = (label: string, target: Element) => {
@@ -20,7 +20,7 @@ const moveMenuItem = (label: string, target: Element) => {
     });
 };
 
-export const initDockMenu = (target?: Element) => {
+export const initDockMenu = (target?: Element, container?: Element) => {
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_DOCK);
     refreshDockCatalog(window.siyuan.ws?.app?.plugins || []);
@@ -38,7 +38,7 @@ export const initDockMenu = (target?: Element) => {
             window.siyuan.menus.menu.append(new MenuItem(item).element);
         }
     } else {
-        buildEntryVisibilityMenuItems("dock").forEach((item) => {
+        buildDockEntryVisibilityMenuItems(container).forEach((item) => {
             window.siyuan.menus.menu.append(new MenuItem(item).element);
         });
     }

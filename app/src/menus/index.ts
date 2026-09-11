@@ -124,7 +124,10 @@ export class Menus {
                 } else if (target.classList.contains("dock") || target.classList.contains("dock__items") ||
                     target.classList.contains("dock__item--space")) {
                     hideTooltip();
-                    initDockMenu().popup({x: event.clientX, y: event.clientY});
+                    initDockMenu(undefined, target.closest(".dock") || undefined).popup({
+                        x: event.clientX,
+                        y: event.clientY
+                    });
                     event.stopPropagation();
                     break;
                 } else if (dataType === "textMenu") {

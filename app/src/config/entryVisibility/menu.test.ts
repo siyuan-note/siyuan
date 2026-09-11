@@ -28,6 +28,7 @@ const createRuntime = (options: {
     readonly?: boolean;
     hidden?: string[];
     reverseOrder?: boolean;
+    icons?: Record<string, Pick<IMenu, "icon" | "iconHTML">>;
 } = {}) => {
     const hidden = new Set(options.hidden || []);
     const calls: Array<{path: string; visible: boolean}> = [];
@@ -40,6 +41,7 @@ const createRuntime = (options: {
         setEntryVisibilityValue: (path, visible) => {
             calls.push({path, visible});
         },
+        getEntryIcon: (path) => options.icons?.[path] || {iconHTML: ""},
         readonly: options.readonly || false,
         languages: {entryHide: "Hide", entryShow: "Show"},
     };
@@ -77,6 +79,23 @@ test("dock blank menu lists configurable dock entries only", () => {
         assert.ok(ids.includes("dock.file"));
         assert.ok(ids.includes("dock.inbox"));
         assert.ok(!ids.some((id) => id.includes("separator")));
+    });
+});
+
+test("blank menu keeps only entries accepted by the filter", () => {
+    withWindow(() => {
+        const {runtime} = createRuntime();
+        const items = buildEntryVisibilityMenuItems("dock", runtime, (key) => key === "file" || key === "outline");
+        assert.deepEqual(items.map((item) => item.id), ["dock.file", "dock.outline"]);
+    });
+});
+
+test("blank menu applies entry icons", () => {
+    withWindow(() => {
+        const {runtime} = createRuntime({icons: {"dock.file": {icon: "iconFile"}}});
+        const items = buildEntryVisibilityMenuItems("dock", runtime);
+        assert.equal(items.find((item) => item.id === "dock.file")!.icon, "iconFile");
+        assert.equal(items.find((item) => item.id === "dock.outline")!.iconHTML, "");
     });
 });
 

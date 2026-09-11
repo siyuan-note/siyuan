@@ -2,7 +2,7 @@ import {buildEntryVisibilityMenuItems as buildMenuItems,
     buildEntryVisibilityToggleItem as buildToggleItem,
     IEntryVisibilityMenuRuntime,
 } from "./menuItems";
-import {getDockEntryKey, TOP_BAR_ROOT_PATH} from "./catalog";
+import {getDockEntryKey, STATUS_BAR_ROOT_PATH, TOP_BAR_ROOT_PATH} from "./catalog";
 import {getEntryOrder, isEntryVisible, setEntryVisibilityValue} from "./runtime";
 
 const findEntryElement = (path: string) => {
@@ -25,6 +25,11 @@ const findEntryElement = (path: string) => {
 };
 
 const getEntryIcon = (path: string): Pick<IMenu, "icon" | "iconHTML"> => {
+    if (path === `${STATUS_BAR_ROOT_PATH}.message` || path === `${STATUS_BAR_ROOT_PATH}.backgroundTask` ||
+        path === `${STATUS_BAR_ROOT_PATH}.counter`) {
+        // 动态状态内容不作为菜单图标，保留默认图标占位。
+        return {};
+    }
     if (path === `${TOP_BAR_ROOT_PATH}.toolbarVIP` || path === `${TOP_BAR_ROOT_PATH}.toolbarTitle`) {
         return {icon: "iconAccount"};
     }

@@ -321,8 +321,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (event.key === "Escape" && !event.isComposing && !event.repeat) {
                 return;
             }
-            // 放行锁定编辑快捷键，由全局快捷键处理器切换只读状态。
-            if (matchHotKey(window.siyuan.config.keymap.general.editReadonly, event)) {
+            // 放行锁定编辑和命令面板快捷键，由全局快捷键处理器执行。
+            if (matchHotKey(window.siyuan.config.keymap.general.editReadonly, event) ||
+                matchHotKey(window.siyuan.config.keymap.general.commandPanel, event)) {
                 return;
             }
             event.stopPropagation();

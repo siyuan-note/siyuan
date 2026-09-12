@@ -18,6 +18,16 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
             }
             updateMenuItemGroupClasses(itemsElement);
         });
+        // 视图分区标题与列表项分属不同层级，按可见分区补齐列表圆角
+        menuElement.querySelectorAll("[data-av-view-section]").forEach((sectionElement) => {
+            sectionElement.querySelector(".b3-menu__item")?.classList.add("b3-menu__title");
+            const items = Array.from(menuElement.querySelectorAll<HTMLElement>(
+                `[data-av-view-visibility="${sectionElement.getAttribute("data-av-view-section")}"]`));
+            items.forEach((item) => item.classList.remove("b3-menu__item--group-first", "b3-menu__item--group-last"));
+            const visibleItems = items.filter((item) => !item.classList.contains("fn__none"));
+            visibleItems[0]?.classList.add("b3-menu__item--group-first");
+            visibleItems[visibleItems.length - 1]?.classList.add("b3-menu__item--group-last");
+        });
     };
     const contentObserver = new MutationObserver(() => {
         // 分组类更新不再次触发自身，页面替换和显隐切换都需要重新分组

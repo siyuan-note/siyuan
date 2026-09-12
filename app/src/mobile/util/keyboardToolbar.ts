@@ -1212,6 +1212,9 @@ export const activeBlur = (force = false) => {
 
     if (window.JSAndroid && window.JSAndroid.hideKeyboard) {
         window.JSAndroid.hideKeyboard();
+        // Android 在键盘退场完成后统一清理焦点，避免中断输入法绘制。
+        hideKeyboardToolbar();
+        return;
     } else if (window.JSHarmony && window.JSHarmony.hideKeyboard) {
         window.JSHarmony.hideKeyboard();
     }

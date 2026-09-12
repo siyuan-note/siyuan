@@ -1489,6 +1489,7 @@ export class TableControl {
         }
         const menu = window.siyuan.menus.menu;
         menu.remove();
+        menu.element.setAttribute("data-name", `table-${this.selection.mode}`);
         const merged = buildTableGrid(this.selection.table).cellInfos.some(info => info.rowspan > 1 || info.colspan > 1);
         const mergedSelection = this.selection.mode !== "cell" && merged;
         const rectangle = this.selection.mode !== "cell" || this.isRectangle();
@@ -1533,8 +1534,9 @@ export class TableControl {
                 click: () => this.paste(),
             }).element);
             menu.append(new MenuItem({
-                icon: "iconTrashcan",
+                icon: "iconClear",
                 label: window.siyuan.languages.clear,
+                warning: true,
                 click: () => this.clearCells(),
             }).element);
         }
@@ -1603,6 +1605,7 @@ export class TableControl {
                 menu.append(new MenuItem({
                     icon: "iconClear",
                     label: window.siyuan.languages.clear,
+                    warning: true,
                     click: () => this.clearCells(),
                 }).element);
                 menu.append(new MenuItem({

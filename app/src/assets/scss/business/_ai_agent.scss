@@ -1191,7 +1191,7 @@
   font-size: var(--b3-font-size);
   line-height: 1.6;
   color: var(--b3-theme-on-background);
-  padding: 0;
+  padding: 0 !important;
 }
 
 .agent-chat__composer-host .protyle-wysiwyg {

@@ -11,6 +11,7 @@ import {openGlobalSearch} from "../../search/util";
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
 import {Dialog} from "../../dialog";
+import {openInputDialog} from "../../dialog/inputDialog";
 import {Constants} from "../../constants";
 import {assetMenu} from "../../menus/protyle";
 import {previewImages} from "../preview/image";
@@ -467,34 +468,22 @@ export class Background {
                     event.stopPropagation();
                     break;
                 } else if (type === "link" && !protyle.disabled) {
-                    const dialog = new Dialog({
+                    const dialog = openInputDialog({
                         title: window.siyuan.languages.link,
-                        width: isMobile() ? "92vw" : "520px",
-                        content: `<div class="b3-dialog__content">
-        <input class="b3-text-field fn__block" value="${this.imgElement.src.startsWith("data:") ? "" : this.imgElement.getAttribute("src")}">
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
+                        value: this.imgElement.src.startsWith("data:") ? "" : this.imgElement.getAttribute("src"),
+                        onConfirm: (value, dialog) => {
+                            const style = `background-image:url("${value}");`;
+                            this.ial["title-img"] = style;
+                            this.render(this.ial, protyle.block.rootID);
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id: protyle.block.rootID,
+                                attrs: {"title-img": this.ial["title-img"]}
+                            });
+                            dialog.destroy();
+                        },
                     });
                     dialog.element.setAttribute("data-key", Constants.DIALOG_BACKGROUNDLINK);
                     bindPopoverDialog(dialog, protyle.element);
-                    const btnsElement = dialog.element.querySelectorAll(".b3-button");
-                    btnsElement[0].addEventListener("click", () => {
-                        dialog.destroy();
-                    });
-                    btnsElement[1].addEventListener("click", () => {
-                        const style = `background-image:url("${dialog.element.querySelector("input").value}");`;
-                        this.ial["title-img"] = style;
-                        this.render(this.ial, protyle.block.rootID);
-                        fetchPost("/api/attr/setBlockAttrs", {
-                            id: protyle.block.rootID,
-                            attrs: {"title-img": this.ial["title-img"]}
-                        });
-                        dialog.destroy();
-                    });
-                    dialog.element.querySelector("input").focus();
                     event.preventDefault();
                     event.stopPropagation();
                     break;

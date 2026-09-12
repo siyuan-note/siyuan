@@ -1,4 +1,5 @@
 import {Dialog} from "../dialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {Protyle} from "../protyle";
@@ -386,48 +387,33 @@ export const bindCardEvent = async (options: {
                     icon: "iconClock",
                     label: window.siyuan.languages.setDueTime,
                     click() {
-                        const timedialog = new Dialog({
+                        openInputDialog({
                             title: window.siyuan.languages.setDueTime,
-                            content: `<div class="b3-dialog__content">
-    <div class="b3-label__text">${window.siyuan.languages.showCardDay}</div>
-    <div class="fn__hr"></div>
-    <input class="b3-text-field fn__block" value="1" type="number" step="1" min="1">
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-                            width: isMobile() ? "92vw" : "520px",
-                        });
-                        const inputElement = timedialog.element.querySelector("input") as HTMLInputElement;
-                        const btnsElement = timedialog.element.querySelectorAll(".b3-button");
-                        timedialog.bindInput(inputElement, () => {
-                            (btnsElement[1] as HTMLButtonElement).click();
-                        });
-                        inputElement.focus();
-                        inputElement.select();
-                        btnsElement[0].addEventListener("click", () => {
-                            timedialog.destroy();
-                        });
-                        btnsElement[1].addEventListener("click", () => {
-                            fetchPost("/api/riff/batchSetRiffCardsDueTime", {
-                                cardDues: [{
-                                    id: currentCard.cardID,
-                                    due: dayjs().add(parseInt(inputElement.value), "day").format("YYYYMMDDHHmmss")
-                                }]
-                            }, () => {
-                                actionElements[0].classList.add("fn__none");
-                                actionElements[1].classList.remove("fn__none");
-                                if (currentCard.state === 0) {
-                                    options.cardsData.unreviewedNewCardCount--;
-                                } else {
-                                    options.cardsData.unreviewedOldCardCount--;
-                                }
-                                options.element.firstElementChild.dispatchEvent(new CustomEvent("click", {detail: "0"}));
-                                options.cardsData.cards.splice(index, 1);
-                                index--;
-                                timedialog.destroy();
-                            });
+                            label: window.siyuan.languages.showCardDay,
+                            value: "1",
+                            type: "number",
+                            min: "1",
+                            step: "1",
+                            onConfirm: (value, timedialog) => {
+                                fetchPost("/api/riff/batchSetRiffCardsDueTime", {
+                                    cardDues: [{
+                                        id: currentCard.cardID,
+                                        due: dayjs().add(parseInt(value), "day").format("YYYYMMDDHHmmss")
+                                    }]
+                                }, () => {
+                                    actionElements[0].classList.add("fn__none");
+                                    actionElements[1].classList.remove("fn__none");
+                                    if (currentCard.state === 0) {
+                                        options.cardsData.unreviewedNewCardCount--;
+                                    } else {
+                                        options.cardsData.unreviewedOldCardCount--;
+                                    }
+                                    options.element.firstElementChild.dispatchEvent(new CustomEvent("click", {detail: "0"}));
+                                    options.cardsData.cards.splice(index, 1);
+                                    index--;
+                                    timedialog.destroy();
+                                });
+                            },
                         });
                     }
                 });

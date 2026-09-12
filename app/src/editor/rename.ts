@@ -1,9 +1,8 @@
 import {showMessage} from "../dialog/message";
-import {Dialog} from "../dialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {focusByRange} from "../protyle/util/selection";
 import {hasClosestBlock} from "../protyle/util/hasClosest";
 import {removeEmbed} from "../protyle/wysiwyg/removeEmbed";
-import {isMobile} from "../util/functions";
 import {getAssetName, getDisplayName, pathPosix, setNotebookName} from "../util/pathName";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
@@ -57,106 +56,74 @@ export const rename = (options: {
         return;
     }
     const initialName = options.empty ? "" : options.name;
-    const dialog = new Dialog({
+    const dialog = openInputDialog({
         title: window.siyuan.languages.rename,
-        content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value=""></div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-        width: isMobile() ? "92vw" : "520px",
+        value: initialName,
         destroyCallback() {
             if (options.range) {
                 focusByRange(options.range);
             }
-        }
+        },
+        onConfirm: (value, dialog) => {
+            if (!validateName(value)) {
+                return;
+            }
+            let name = value.trim();
+            if (name === initialName) {
+                dialog.destroy();
+                return;
+            }
+            name = replaceFileName(name);
+            if (options.type === "notebook") {
+                if (!name) {
+                    name = window.siyuan.languages.untitled;
+                }
+                fetchPost("/api/notebook/renameNotebook", {
+                    notebook: options.notebookId,
+                    name,
+                }, () => {
+                    setNotebookName(options.notebookId, name);
+                });
+            } else {
+                fetchPost("/api/filetree/renameDoc", {
+                    notebook: options.notebookId,
+                    path: options.path,
+                    title: name,
+                });
+            }
+            dialog.destroy();
+        },
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_RENAME);
-    const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
-    const btnsElement = dialog.element.querySelectorAll(".b3-button");
-    dialog.bindInput(inputElement, () => {
-        (btnsElement[1] as HTMLButtonElement).click();
-    });
-    inputElement.value = initialName;
-    inputElement.focus();
-    inputElement.select();
-    btnsElement[0].addEventListener("click", () => {
-        dialog.destroy();
-    });
-    btnsElement[1].addEventListener("click", () => {
-        if (!validateName(inputElement.value)) {
-            return false;
-        }
-        let name = inputElement.value.trim();
-        if (name === initialName) {
-            dialog.destroy();
-            return false;
-        }
-        name = replaceFileName(name);
-        if (options.type === "notebook") {
-            if (!name) {
-                name = window.siyuan.languages.untitled;
-            }
-            fetchPost("/api/notebook/renameNotebook", {
-                notebook: options.notebookId,
-                name,
-            }, () => {
-                setNotebookName(options.notebookId, name);
-            });
-        } else {
-            fetchPost("/api/filetree/renameDoc", {
-                notebook: options.notebookId,
-                path: options.path,
-                title: name,
-            });
-        }
-        dialog.destroy();
-    });
 };
 
 export const renameAsset = (assetPath: string) => {
-    const dialog = new Dialog({
+    const oldName = getAssetName(assetPath);
+    const dialog = openInputDialog({
         title: window.siyuan.languages.rename,
-        content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value=""></div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-        width: isMobile() ? "92vw" : "520px",
+        value: oldName,
+        onConfirm: (value, dialog) => {
+            if (value === oldName || !value) {
+                dialog.destroy();
+                return;
+            }
+
+            fetchPost("/api/asset/renameAsset", {oldPath: assetPath, newName: value}, (response) => {
+                /// #if !MOBILE
+                getAllModels().asset.forEach(item => {
+                    if (item.path === assetPath) {
+                        item.update(response.data.newPath);
+                    }
+                });
+                /// #endif
+                getAllEditor().forEach(item => {
+                    item.reload(false);
+                });
+                dialog.destroy();
+            });
+        },
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_RENAMEASSETS);
-    const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
-    const btnsElement = dialog.element.querySelectorAll(".b3-button");
-    dialog.bindInput(inputElement, () => {
-        (btnsElement[1] as HTMLButtonElement).click();
-    });
-    const oldName = getAssetName(assetPath);
-    inputElement.value = oldName;
-    inputElement.focus();
-    inputElement.select();
-    btnsElement[0].addEventListener("click", () => {
-        dialog.destroy();
-    });
-    btnsElement[1].addEventListener("click", () => {
-        if (inputElement.value === oldName || !inputElement.value) {
-            dialog.destroy();
-            return false;
-        }
-
-        fetchPost("/api/asset/renameAsset", {oldPath: assetPath, newName: inputElement.value}, (response) => {
-            /// #if !MOBILE
-            getAllModels().asset.forEach(item => {
-                if (item.path === assetPath) {
-                    item.update(response.data.newPath);
-                }
-            });
-            /// #endif
-            getAllEditor().forEach(item => {
-                item.reload(false);
-            });
-            dialog.destroy();
-        });
-    });
 };
 
 export const newFileContentBySelect = (protyle: IProtyle) => {

@@ -1,5 +1,6 @@
 import {fetchPost} from "../util/fetch";
 import {Dialog} from "../dialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {isMobile} from "../util/functions";
 import {hideMessage, showMessage} from "../dialog/message";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -135,35 +136,19 @@ export const makeCard = (app: App, ids: string[]) => {
                     event.preventDefault();
                     break;
                 } else if (type === "rename") {
-                    const renameDialog = new Dialog({
+                    openInputDialog({
                         title: window.siyuan.languages.rename,
-                        content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value=""></div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-                        width: isMobile() ? "92vw" : "520px",
-                    });
-                    const inputElement = renameDialog.element.querySelector("input") as HTMLInputElement;
-                    const btnsElement = renameDialog.element.querySelectorAll(".b3-button");
-                    renameDialog.bindInput(inputElement, () => {
-                        (btnsElement[1] as HTMLButtonElement).click();
-                    });
-                    inputElement.value = target.parentElement.getAttribute("data-name");
-                    inputElement.focus();
-                    inputElement.select();
-                    btnsElement[0].addEventListener("click", () => {
-                        renameDialog.destroy();
-                    });
-                    btnsElement[1].addEventListener("click", () => {
-                        fetchPost("/api/riff/renameRiffDeck", {
-                            name: inputElement.value,
-                            deckID: target.parentElement.getAttribute("data-id"),
-                        }, () => {
-                            target.parentElement.querySelector(".b3-list-item__text span").textContent = inputElement.value;
-                            target.parentElement.setAttribute("data-name", inputElement.value);
-                        });
-                        renameDialog.destroy();
+                        value: target.parentElement.getAttribute("data-name"),
+                        onConfirm: (value, renameDialog) => {
+                            fetchPost("/api/riff/renameRiffDeck", {
+                                name: value,
+                                deckID: target.parentElement.getAttribute("data-id"),
+                            }, () => {
+                                target.parentElement.querySelector(".b3-list-item__text span").textContent = value;
+                                target.parentElement.setAttribute("data-name", value);
+                            });
+                            renameDialog.destroy();
+                        },
                     });
                     event.stopPropagation();
                     event.preventDefault();

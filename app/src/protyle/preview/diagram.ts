@@ -27,7 +27,13 @@ const createDiagramSVG = (element: SVGSVGElement) => {
             target.style.setProperty(property, style.getPropertyValue(property));
         }
     });
-    const {width, height} = element.getBoundingClientRect();
+    const bounds = element.getBoundingClientRect();
+    const viewBox = element.viewBox.baseVal;
+    // 使用图表坐标尺寸，避免将编辑器内缩小后的显示尺寸作为复制图片的分辨率。
+    const scale = viewBox.width > 0 && viewBox.height > 0 ?
+        Math.max(1, bounds.width / viewBox.width, bounds.height / viewBox.height) : 1;
+    const width = viewBox.width > 0 && viewBox.height > 0 ? viewBox.width * scale : bounds.width;
+    const height = viewBox.width > 0 && viewBox.height > 0 ? viewBox.height * scale : bounds.height;
     clone.setAttribute("width", `${width}`);
     clone.setAttribute("height", `${height}`);
     clone.style.width = `${width}px`;
@@ -39,7 +45,7 @@ const createDiagramSVG = (element: SVGSVGElement) => {
 
 // SVG 图表保留矢量内容，画布图表使用 PNG，共用图片预览的缩放和拖动控件。
 export const previewDiagram = (diagramElement: HTMLElement) => {
-    addScript(`${Constants.PROTYLE_CDN}/js/html-to-image.min.js?v=1.11.13`, "protyleHtml2image").then(async () => {
+    return addScript(`${Constants.PROTYLE_CDN}/js/html-to-image.min.js?v=1.11.13`, "protyleHtml2image").then(async () => {
         const type = diagramElement.getAttribute("data-subtype");
         const renderElement = type === "echarts" ?
             diagramElement.querySelector("canvas") :

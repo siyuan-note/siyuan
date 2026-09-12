@@ -319,6 +319,9 @@ const foldBlocksRecursively0 = async (protyle: IProtyle, nodeElements: Element[]
                 id: element.getAttribute("data-node-id"),
                 removeFoldAttr: false,
             });
+            if (response.code !== 0) {
+                throw new Error(response.msg);
+            }
             fullHTML = response.data;
         } else if (element.querySelector('[data-type="NodeHeading"][fold="1"]')) {
             const response = await fetchSyncPost("/api/block/getBlockDOM", {

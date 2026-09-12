@@ -74,12 +74,10 @@ func getHistoryItems(c *gin.Context) {
 	}
 }
 
-func reindexHistory(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
+var reindexHistory = contractHandler(apicontract.ReindexHistory, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 	model.ReindexHistory()
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 func getNotebookHistory(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -97,20 +95,15 @@ func getNotebookHistory(c *gin.Context) {
 	}
 }
 
-func clearWorkspaceHistory(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	msgId := util.PushMsg(model.Conf.Language(100), 1000*60*15)
+var clearWorkspaceHistory = contractHandler(apicontract.ClearWorkspaceHistory, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
+	msgID := util.PushMsg(model.Conf.Language(100), 1000*60*15)
 	time.Sleep(3 * time.Second)
-	err := model.ClearWorkspaceHistory()
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+	if err := model.ClearWorkspaceHistory(); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-	util.PushUpdateMsg(msgId, model.Conf.Language(99), 1000*5)
-}
+	util.PushUpdateMsg(msgID, model.Conf.Language(99), 1000*5)
+	return apicontract.Success(apicontract.Null{})
+})
 
 func getDocHistoryContent(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

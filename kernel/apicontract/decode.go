@@ -80,11 +80,17 @@ func decodeRequestFields(value reflect.Value, fields map[string]json.RawMessage)
 			}
 			continue
 		}
-		if err := json.Unmarshal(raw, value.Field(i).Addr().Interface()); err != nil {
+		var decodeErr error
+		if isNull && has("nullable") {
+			value.Field(i).SetZero()
+		} else {
+			decodeErr = decodeRequestValue(raw, value.Field(i))
+		}
+		if decodeErr != nil {
 			if has("ignoretype") {
 				continue
 			}
-			return fmt.Errorf("Field [%s] has an invalid type: %w", name, err)
+			return fmt.Errorf("Field [%s] has an invalid type: %w", name, decodeErr)
 		}
 		if has("trim") {
 			trimmed := strings.TrimSpace(value.Field(i).String())
@@ -128,4 +134,56 @@ func decodeRequestFields(value reflect.Value, fields map[string]json.RawMessage)
 		}
 	}
 	return nil
+}
+
+// decodeRequestValue 递归绑定复合参数，避免数组元素和嵌套字段绕过空值及必填检查。
+func decodeRequestValue(raw json.RawMessage, value reflect.Value) error {
+	if bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		switch value.Kind() {
+		case reflect.Pointer, reflect.Map, reflect.Slice:
+			value.SetZero()
+			return nil
+		default:
+			return fmt.Errorf("value must not be null")
+		}
+	}
+	switch value.Kind() {
+	case reflect.Pointer:
+		value.Set(reflect.New(value.Type().Elem()))
+		return decodeRequestValue(raw, value.Elem())
+	case reflect.Struct:
+		var fields map[string]json.RawMessage
+		if err := json.Unmarshal(raw, &fields); err != nil {
+			return err
+		}
+		return decodeRequestFields(value, fields)
+	case reflect.Slice:
+		var entries []json.RawMessage
+		if err := json.Unmarshal(raw, &entries); err != nil {
+			return err
+		}
+		value.Set(reflect.MakeSlice(value.Type(), len(entries), len(entries)))
+		for i, entry := range entries {
+			if err := decodeRequestValue(entry, value.Index(i)); err != nil {
+				return fmt.Errorf("element [%d]: %w", i, err)
+			}
+		}
+		return nil
+	case reflect.Map:
+		var entries map[string]json.RawMessage
+		if err := json.Unmarshal(raw, &entries); err != nil {
+			return err
+		}
+		value.Set(reflect.MakeMapWithSize(value.Type(), len(entries)))
+		for key, entry := range entries {
+			child := reflect.New(value.Type().Elem()).Elem()
+			if err := decodeRequestValue(entry, child); err != nil {
+				return fmt.Errorf("entry [%s]: %w", key, err)
+			}
+			value.SetMapIndex(reflect.ValueOf(key).Convert(value.Type().Key()), child)
+		}
+		return nil
+	default:
+		return json.Unmarshal(raw, value.Addr().Interface())
+	}
 }

@@ -46,3 +46,13 @@ func notebookContract(box *model.Box) *apicontract.Notebook {
 		Encrypted: box.Encrypted, Unlocked: box.Unlocked, State: string(box.State),
 	}
 }
+
+// holdContractBlockRequest 保留显式笔记本选择及全部附带 ID 的租约检查。
+func holdContractBlockRequest(c *gin.Context, notebook, id string, ids []string, allowMissing bool) (boxID string, err error) {
+	if notebook != "" && model.IsEncryptedBox(notebook) {
+		boxID = notebook
+	}
+	leaseIDs := append([]string{id}, ids...)
+	err = holdEncryptedBlockRequests(c, boxID, leaseIDs, allowMissing)
+	return
+}

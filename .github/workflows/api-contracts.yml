@@ -43,7 +43,7 @@ jobs:
         run: go test ./apicontract/...
         working-directory: kernel
       - name: Test actual API responses and compatibility
-        run: go test -tags "fts5 sqlcipher" ./api -run "TestAPIContract|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount" -count=1
+        run: go test -tags "fts5 sqlcipher" ./api -run "TestAPIContract|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestContract.*NotebookResponseLease" -count=1
         working-directory: kernel
       - name: Test frontend transport behavior
         run: pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts

@@ -121,7 +121,7 @@
 
 ### TypeScript contracts
 
-The plugin `fetchPost`, `fetchSyncPost`, and `fetchGet` declarations infer request and response types for migrated API paths from generated kernel contracts. The initial coverage includes version, block attributes, tag search, notebook listing, history search, and block information. Existing untyped endpoints and dynamic URLs remain supported. Check the response code before reading successful data from asynchronous calls, and handle nullable fields explicitly.
+The plugin `fetchPost`, `fetchSyncPost`, and `fetchGet` declarations infer request and response types for migrated API paths from generated kernel contracts. Coverage is expanding and includes system utilities, batch block attributes, tag and bookmark operations, selected block queries, notebook listing, history search, and snapshot operations. Existing untyped endpoints and dynamic URLs remain supported. Check the response code before reading successful data from asynchronous calls, and handle nullable fields explicitly.
 
 ```typescript
 import {fetchSyncPost} from "siyuan";

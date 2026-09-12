@@ -25,7 +25,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
     let blockElement: HTMLElement;
     if (!document.contains(stack.protyle.element)) {
         const response = await fetchSyncPost("/api/block/checkBlockExist", {id: stack.protyle.block.rootID});
-        if (!response.data) {
+        if (response.code !== 0 || !response.data) {
             // 页签删除
             return false;
         }
@@ -170,7 +170,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
     }
     if (stack.protyle.element.parentElement) {
         const response = await fetchSyncPost("/api/block/checkBlockExist", {id: stack.id});
-        if (!response.data) {
+        if (response.code !== 0 || !response.data) {
             // 块被删除
             if (getSelection().rangeCount > 0) {
                 focusByRange(getSelection().getRangeAt(0));

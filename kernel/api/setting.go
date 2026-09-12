@@ -26,6 +26,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	mcpserver "github.com/siyuan-note/siyuan/kernel/mcp"
 	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
@@ -41,25 +42,16 @@ var (
 	bazaarPetalStateRevision uint64
 )
 
-func setEditorReadOnly(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-	readOnly := arg["readonly"].(bool)
-
+var setEditorReadOnly = contractHandler(apicontract.SetEditorReadOnly, func(c *gin.Context, request apicontract.EditorReadOnlyRequest) apicontract.Response[apicontract.Null] {
 	oldReadOnly := model.Conf.Editor.ReadOnly
-	model.Conf.Editor.ReadOnly = readOnly
+	model.Conf.Editor.ReadOnly = request.ReadOnly
 	model.Conf.Save()
-
 	if oldReadOnly != model.Conf.Editor.ReadOnly {
 		util.BroadcastByType("protyle", "readonly", 0, "", model.Conf.Editor.ReadOnly)
 		util.BroadcastByType("main", "readonly", 0, "", model.Conf.Editor.ReadOnly)
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 func setConfSnippet(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -91,57 +83,23 @@ func setConfSnippet(c *gin.Context) {
 	model.PushReloadSnippet(snippet)
 }
 
-func addVirtualBlockRefExclude(c *gin.Context) {
-	// Add internal kernel API `/api/setting/addVirtualBlockRefExclude` https://github.com/siyuan-note/siyuan/issues/9909
-
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	keywordsArg := arg["keywords"]
-	var keywords []string
-	for _, k := range keywordsArg.([]any) {
-		keywords = append(keywords, k.(string))
-	}
-
-	model.AddVirtualBlockRefExclude(keywords)
+var addVirtualBlockRefExclude = contractHandler(apicontract.AddVirtualBlockRefExclude, func(c *gin.Context, request apicontract.VirtualBlockRefRequest) apicontract.Response[apicontract.Null] {
+	model.AddVirtualBlockRefExclude(request.Keywords)
 	util.BroadcastByType("main", "setConf", 0, "", model.Conf)
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func addVirtualBlockRefInclude(c *gin.Context) {
-	// Add internal kernel API `/api/setting/addVirtualBlockRefInclude` https://github.com/siyuan-note/siyuan/issues/9909
-
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	keywordsArg := arg["keywords"]
-	var keywords []string
-	for _, k := range keywordsArg.([]any) {
-		keywords = append(keywords, k.(string))
-	}
-
-	model.AddVirtualBlockRefInclude(keywords)
+var addVirtualBlockRefInclude = contractHandler(apicontract.AddVirtualBlockRefInclude, func(c *gin.Context, request apicontract.VirtualBlockRefRequest) apicontract.Response[apicontract.Null] {
+	model.AddVirtualBlockRefInclude(request.Keywords)
 	util.BroadcastByType("main", "setConf", 0, "", model.Conf)
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func refreshVirtualBlockRef(c *gin.Context) {
-	// Add internal kernel API `/api/setting/refreshVirtualBlockRef` https://github.com/siyuan-note/siyuan/issues/9829
-
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
+var refreshVirtualBlockRef = contractHandler(apicontract.RefreshVirtualBlockRef, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 	model.ResetVirtualBlockRefCache()
 	util.BroadcastByType("main", "setConf", 0, "", model.Conf)
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 func setBazaar(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -571,22 +529,17 @@ func setExport(c *gin.Context) {
 	ret.Data = model.Conf.Export
 }
 
-func getPandocBin(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
+var getPandocBin = contractHandler(apicontract.GetPandocBin, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[string] {
 	pandocRuntime := util.GetPandocRuntime()
 	if !util.IsValidPandocBin(pandocRuntime.BinPath) {
 		util.InitPandoc(model.Conf.Export.PandocBin)
 		pandocRuntime = util.GetPandocRuntime()
 	}
 	if !util.IsValidPandocBin(pandocRuntime.BinPath) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(115)
-		return
+		return apicontract.Failure[string](-1, model.Conf.Language(115))
 	}
-	ret.Data = pandocRuntime.BinPath
-}
+	return apicontract.Success(pandocRuntime.BinPath)
+})
 
 func setFiletree(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

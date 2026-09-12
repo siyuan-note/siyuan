@@ -2,6 +2,8 @@
 
 首批覆盖 `/api/system/version`、`/api/attr/getBlockAttrs`、`/api/attr/setBlockAttrs`、`/api/search/searchTag`、`/api/notebook/lsNotebooks`、`/api/history/searchHistory` 和 `/api/block/getBlockInfo`。版本接口同时支持 GET 和 POST，因此共登记 8 个方法与路径组合。
 
+截至本次迁移，契约覆盖 53 个接口、55 个方法与路径组合，存量清单仍有 572 条路由记录。后续已覆盖的范围包括快照创建与备注、系统基础查询和部分设置、属性批量读写、标签查询与标签/书签改名删除、部分编辑器设置，以及块位置、折叠状态和标题子节点查询。完整名单以 `kernel/apicontract/contracts.go` 为准；剩余工作以 `legacy_routes.json` 为准，全量迁移尚未完成。
+
 ## 契约与实现
 
 `kernel/apicontract/contracts.go` 定义请求、响应和端点。契约包独立于内核启动、数据库和持久化模型，生成器可以单独运行。API 入口通过 `contractHandler` 绑定端点，请求参数和成功返回值受到 Go 泛型签名约束；响应载荷通过构造函数设置，不能直接给通用 `ret.Data` 赋值。业务校验继续使用现有辅助函数，`contractFailure` 保留其错误码、消息和已支持的错误载荷。
@@ -9,6 +11,8 @@
 生成器从同一组 Go 类型生成 `app/src/types/api/index.d.ts` 和 `kernel/apicontract/schema.json`。后者包含共享的 `$defs` 和每个端点的请求、响应 schema，测试使用同一套 schema 检查实际 HTTP 响应。类型声明不会在运行时验证 JSON，CI 中的处理函数测试负责验证序列化结果。
 
 输入和输出分别处理。`json` tag 控制线协议字段名；请求字段默认必填，`api:"optional"` 表示可缺省，`nullable` 表示接受 `null`，指针保留可空语义。输出字段的 `omitempty` 只控制输出省略，不推导请求必填性。嵌入结构体展平，递归类型通过引用表示；接口联合、常量字段和自定义编解码需要显式建模。未支持的类型、字段冲突和未知 JSON tag 会使生成失败，不会降级为 `any`。
+
+数组、字典和嵌套结构体递归检查请求约束，字符串数组中的 `null` 不会被转换为空字符串，批量属性中的 `null` 值仍表示删除属性。标签树单独定义递归传输结构；前端共享树节点中的笔记本和文档路径字段为可选，反映标签节点不返回这些字段的实际行为。
 
 `Notebook` 是接口载荷，业务模型通过显式转换映射到该载荷，回归测试比较完整 JSON，包括各个加密状态。修改契约不会改变 `.sy`、数据库、历史、同步或加密格式。
 
@@ -27,6 +31,8 @@
 `ignoretype` 和 `filterstrings` 仅用于声明过的旧参数兼容行为。生成的请求类型描述规范调用形式；兼容解码可能接受并忽略更宽的旧输入，兼容测试明确覆盖这些例外。不存在全局“绑定失败后回退旧解析”的开关。
 
 只读中间件仍可返回带 `closeTimeout` 的提示对象。`fetchPost` 的普通回调只接收消息处理后保留的非负错误码，块信息接口的 `3` 仍须处理；`fetchSyncPost` 和 `fetchGet` 保留完整响应。动态 URL 保留存量签名；静态 POST 路径必须来自契约或存量路由，错误参数不能通过重载回退。拼接出开放范围的模板 URL 时使用显式 `string` 变量。
+
+业务错误需要保留提示显示时长时使用 `FailureWithTimeout`。块查询迁移后通过 `holdContractBlockRequest` 保留显式笔记本及附带 ID 的租约检查；状态查询允许已删除 ID 的行为仍由对应入口明确指定。
 
 ## 新增与迁移
 
@@ -56,7 +62,7 @@ pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts
 
 ```text
 go test ./apicontract/...
-go test -tags "fts5 sqlcipher" ./api -run "TestAPIContract|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount" -count=1
+go test -tags "fts5 sqlcipher" ./api -run "TestAPIContract|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestContract.*NotebookResponseLease" -count=1
 ```
 
 `tsconfig.api.json` 单独启用严格检查并检查声明文件，覆盖参数错误、字段拼写、必填请求体、成功与失败分支、可空值和方法不匹配。主应用继续沿用现有配置，因此存量调用的严格空值检查并未全量开启。处理函数测试使用临时工作区和独立测试进程，不启动或重启运行中的内核。

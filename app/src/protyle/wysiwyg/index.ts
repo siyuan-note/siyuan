@@ -834,6 +834,9 @@ export class WYSIWYG {
                                 id: item.getAttribute("data-node-id"),
                                 removeFoldAttr: false
                             });
+                            if (response.code !== 0) {
+                                return;
+                            }
                             itemHTML = response.data;
                         } else if (item.getAttribute("data-type") !== "NodeBlockQueryEmbed" && item.querySelector('[data-type="NodeHeading"][fold="1"]')) {
                             needClipboardWrite = true;
@@ -3173,6 +3176,10 @@ export class WYSIWYG {
                             id: item.getAttribute("data-node-id"),
                             removeFoldAttr: false
                         });
+                        if (response.code !== 0) {
+                            clearAutoSelectedBlock();
+                            return;
+                        }
                         itemHTML = response.data;
                         const deleteResponse = await fetchSyncPost("/api/block/getHeadingDeleteTransaction", {
                             id: item.getAttribute("data-node-id"),

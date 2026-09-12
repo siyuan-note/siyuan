@@ -24,6 +24,13 @@ func FailureWithText[Data any](code int, msg, data string) Response[Data] {
 	return Response[Data]{code: code, msg: msg, data: data}
 }
 
+// FailureWithTimeout 保留业务错误提示的显示时长。
+func FailureWithTimeout[Data any](code int, msg string, milliseconds int) Response[Data] {
+	return Response[Data]{code: code, msg: msg, data: struct {
+		CloseTimeout int `json:"closeTimeout"`
+	}{milliseconds}}
+}
+
 func (r Response[Data]) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
 		Code int    `json:"code"`

@@ -162,6 +162,24 @@ func TestAPIContractHandlers(t *testing.T) {
 		return response
 	}
 	admin := model.RoleAdministrator
+	blockQueries := []struct {
+		path    string
+		handler gin.HandlerFunc
+	}{
+		{"/api/block/getBlockSiblingID", getBlockSiblingID},
+		{"/api/block/getBlockRelevantIDs", getBlockRelevantIDs},
+		{"/api/block/getUnfoldedParentID", getUnfoldedParentID},
+		{"/api/block/checkBlockFold", checkBlockFold},
+		{"/api/block/checkBlockExist", checkBlockExist},
+		{"/api/block/getBlockIndex", getBlockIndex},
+		{"/api/block/getDocBlocksOrders", getDocBlocksOrders},
+		{"/api/block/getHeadingChildrenIDs", getHeadingChildrenIDs},
+		{"/api/block/getHeadingChildrenDOM", getHeadingChildrenDOM},
+	}
+	domText := request("POST", "/api/block/getDOMText", `{"dom":"<div>text</div>"}`, admin, getDOMText)
+	if domText["code"] != float64(0) || domText["data"] != model.GetDOMText("<div>text</div>") {
+		t.Fatalf("DOM text response changed: %+v", domText)
+	}
 	for _, method := range []string{"GET", "POST"} {
 		response := request(method, "/api/system/version", "", admin, version)
 		if response["data"] != util.Ver {
@@ -171,6 +189,16 @@ func TestAPIContractHandlers(t *testing.T) {
 	info := request("POST", "/api/block/getBlockInfo", `{"id":"`+docID+`"}`, admin, getBlockInfo)
 	if info["code"] != float64(0) || info["data"].(map[string]any)["rootID"] != docID {
 		t.Fatalf("block info failed: %+v", info)
+	}
+	for _, entry := range blockQueries {
+		response := request("POST", entry.path, `{"id":"`+docID+`"}`, admin, entry.handler)
+		if response["code"] != float64(0) {
+			t.Fatalf("block query failed for %s: %+v", entry.path, response)
+		}
+	}
+	indexes := request("POST", "/api/block/getBlocksIndexes", `{"ids":["`+docID+`"]}`, admin, getBlocksIndexes)
+	if indexes["code"] != float64(0) {
+		t.Fatalf("batch indexes failed: %+v", indexes)
 	}
 	attrs := request("POST", "/api/attr/getBlockAttrs", `{"id":"`+docID+`"}`, admin, getBlockAttrs)
 	if attrs["data"].(map[string]any)["custom-value"] != "before" {
@@ -187,6 +215,19 @@ func TestAPIContractHandlers(t *testing.T) {
 	}
 	if values["custom-other"] != "after" {
 		t.Fatal("attribute update was not preserved")
+	}
+	batch := request("POST", "/api/attr/batchGetBlockAttrs", `{"ids":["`+docID+`"]}`, admin, batchGetBlockAttrs)
+	if batch["data"].(map[string]any)[docID].(map[string]any)["custom-other"] != "after" {
+		t.Fatalf("batch attribute lookup changed: %+v", batch)
+	}
+	batch = request("POST", "/api/attr/batchSetBlockAttrs", `{"blockAttrs":[{"id":"`+docID+`","attrs":{"custom-other":null,"custom-batch":"value"}}]}`, admin, batchSetBlockAttrs)
+	if batch["code"] != float64(0) || batch["data"] != nil {
+		t.Fatalf("batch update failed: %+v", batch)
+	}
+	batch = request("POST", "/api/attr/batchGetBlockAttrs", `{"ids":["`+docID+`"]}`, admin, batchGetBlockAttrs)
+	batchAttrs := batch["data"].(map[string]any)[docID].(map[string]any)
+	if _, exists := batchAttrs["custom-other"]; exists || batchAttrs["custom-batch"] != "value" {
+		t.Fatalf("batch attribute deletion changed: %+v", batchAttrs)
 	}
 	tags := request("POST", "/api/search/searchTag", `{"k":""}`, admin, searchTag)
 	if !reflect.DeepEqual(tags["data"].(map[string]any)["tags"], []any{}) {
@@ -238,6 +279,16 @@ func TestAPIContractHandlers(t *testing.T) {
 		}
 		if !visible && data["rootTitle"] != "" {
 			t.Fatal("private document title was exposed")
+		}
+		for _, entry := range blockQueries {
+			response := request("POST", entry.path, `{"id":"`+docID+`"}`, model.RoleReader, entry.handler)
+			if fields, ok := response["data"].(map[string]any); ok {
+				for key, value := range fields {
+					if value != "" && value != false {
+						t.Fatalf("protected block metadata exposed by %s: %s=%v", entry.path, key, value)
+					}
+				}
+			}
 		}
 	}
 }

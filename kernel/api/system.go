@@ -45,79 +45,53 @@ import (
 	"golang.org/x/mod/semver"
 )
 
-func clearTempFiles(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
+var clearTempFiles = contractHandler(apicontract.ClearTempFiles, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 	model.ClearTempFiles()
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func vacuumDataIndex(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
+var vacuumDataIndex = contractHandler(apicontract.VacuumDataIndex, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 	model.VacuumDataIndex()
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func rebuildDataIndex(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
+var rebuildDataIndex = contractHandler(apicontract.RebuildDataIndex, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 	model.FullReindex(false)
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func addMicrosoftDefenderExclusion(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	if !gulu.OS.IsWindows() {
-		return
+var addMicrosoftDefenderExclusion = contractHandler(apicontract.AddMicrosoftDefenderExclusion, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
+	if gulu.OS.IsWindows() {
+		if err := model.AddMicrosoftDefenderExclusion(); err != nil {
+			return apicontract.Failure[apicontract.Null](-1, err.Error())
+		}
 	}
+	return apicontract.Success(apicontract.Null{})
+})
 
-	err := model.AddMicrosoftDefenderExclusion()
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
+var ignoreAddMicrosoftDefenderExclusion = contractHandler(apicontract.IgnoreAddMicrosoftDefenderExclusion, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
+	if gulu.OS.IsWindows() {
+		model.Conf.System.MicrosoftDefenderExcluded = true
+		model.Conf.Save()
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func ignoreAddMicrosoftDefenderExclusion(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var getWorkspaceInfo = contractHandler(apicontract.GetWorkspaceInfo, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.WorkspaceInfoData] {
+	return apicontract.Success(apicontract.WorkspaceInfoData{WorkspaceDir: util.WorkspaceDir, SiyuanVer: util.Ver})
+})
 
-	if !gulu.OS.IsWindows() {
-		return
-	}
-
-	model.Conf.System.MicrosoftDefenderExcluded = true
-	model.Conf.Save()
-}
-
-func getWorkspaceInfo(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	ret.Data = map[string]any{
-		"workspaceDir": util.WorkspaceDir,
-		"siyuanVer":    util.Ver,
-	}
-}
-
-func getNetwork(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
+var getNetwork = contractHandler(apicontract.GetNetwork, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.NetworkData] {
 	maskedConf, err := model.GetMaskedConf()
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = "get conf failed: " + err.Error()
-		return
+		return apicontract.Failure[apicontract.NetworkData](-1, "get conf failed: "+err.Error())
 	}
-
-	ret.Data = map[string]any{
-		"proxy": maskedConf.System.NetworkProxy,
+	var proxy *apicontract.NetworkProxy
+	if value := maskedConf.System.NetworkProxy; value != nil {
+		proxy = &apicontract.NetworkProxy{Scheme: value.Scheme, Host: value.Host, Port: value.Port}
 	}
-}
+	return apicontract.Success(apicontract.NetworkData{Proxy: proxy})
+})
 
 func getChangelog(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -1063,21 +1037,11 @@ func setOIDC(c *gin.Context) {
 	}
 }
 
-func setFollowSystemLockScreen(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	lockScreenMode := int(arg["lockScreenMode"].(float64))
-
-	model.Conf.System.LockScreenMode = lockScreenMode
+var setFollowSystemLockScreen = contractHandler(apicontract.SetFollowSystemLockScreen, func(c *gin.Context, request apicontract.LockScreenRequest) apicontract.Response[apicontract.Null] {
+	model.Conf.System.LockScreenMode = int(request.LockScreenMode)
 	model.Conf.Save()
-	return
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 func getSysFonts(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -1232,20 +1196,14 @@ var version = contractHandler(apicontract.Version, func(c *gin.Context, request 
 	return apicontract.Success(util.Ver)
 })
 
-func currentTime(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var currentTime = contractHandler(apicontract.CurrentTime, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[int64] {
+	return apicontract.Success(util.CurrentTimeMillis())
+})
 
-	ret.Data = util.CurrentTimeMillis()
-}
-
-func bootProgress(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
+var bootProgress = contractHandler(apicontract.BootProgress, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.BootProgressData] {
 	progress, details := util.GetBootProgressDetails()
-	ret.Data = map[string]any{"progress": progress, "details": details}
-}
+	return apicontract.Success(apicontract.BootProgressData{Progress: progress, Details: details})
+})
 
 func getBootAppearance(c *gin.Context) {
 	if !model.IsLocalRequest(c) {
@@ -1336,39 +1294,21 @@ func setAppearanceMode(c *gin.Context) {
 	}
 }
 
-func setNetworkServe(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	networkServe := arg["networkServe"].(bool)
-	model.Conf.System.NetworkServe = networkServe
+var setNetworkServe = contractHandler(apicontract.SetNetworkServe, func(c *gin.Context, request apicontract.NetworkServeRequest) apicontract.Response[apicontract.Null] {
+	model.Conf.System.NetworkServe = request.NetworkServe
 	model.Conf.Save()
-
 	util.PushMsg(model.Conf.Language(42), 1000*15)
 	time.Sleep(time.Second * 3)
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func setNetworkServeTLS(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	networkServeTLS := arg["networkServeTLS"].(bool)
-	model.Conf.System.NetworkServeTLS = networkServeTLS
+var setNetworkServeTLS = contractHandler(apicontract.SetNetworkServeTLS, func(c *gin.Context, request apicontract.NetworkServeTLSRequest) apicontract.Response[apicontract.Null] {
+	model.Conf.System.NetworkServeTLS = request.NetworkServeTLS
 	model.Conf.Save()
-
 	util.PushMsg(model.Conf.Language(42), 1000*15)
 	time.Sleep(time.Second * 3)
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 func exportTLSCACert(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -1520,78 +1460,33 @@ func importTLSCABundle(c *gin.Context) {
 	}
 }
 
-func setAutoLaunch(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	autoLaunch := int(arg["autoLaunch"].(float64))
-	model.Conf.System.AutoLaunch2 = autoLaunch
+var setAutoLaunch = contractHandler(apicontract.SetAutoLaunch, func(c *gin.Context, request apicontract.AutoLaunchRequest) apicontract.Response[apicontract.Null] {
+	model.Conf.System.AutoLaunch2 = int(request.AutoLaunch)
 	model.Conf.Save()
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func setDownloadInstallPkg(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	downloadInstallPkg := arg["downloadInstallPkg"].(bool)
-	model.Conf.System.DownloadInstallPkg = downloadInstallPkg
+var setDownloadInstallPkg = contractHandler(apicontract.SetDownloadInstallPkg, func(c *gin.Context, request apicontract.DownloadInstallPkgRequest) apicontract.Response[apicontract.Null] {
+	model.Conf.System.DownloadInstallPkg = request.DownloadInstallPkg
 	model.Conf.Save()
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func setUpdateChannel(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var setUpdateChannel = contractHandler(apicontract.SetUpdateChannel, func(c *gin.Context, request apicontract.UpdateChannelRequest) apicontract.Response[apicontract.Null] {
+	if err := model.SetUpdateChannel(request.UpdateChannel); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
+	return apicontract.Success(apicontract.Null{})
+})
 
-	updateChannel, ok := arg["updateChannel"].(string)
-	if !ok {
-		ret.Code = -1
-		ret.Msg = "update channel is invalid"
-		return
-	}
-	if err := model.SetUpdateChannel(updateChannel); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-	}
-}
-
-func setNetworkProxy(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	scheme := arg["scheme"].(string)
-	host := arg["host"].(string)
-	port := arg["port"].(string)
-	model.Conf.System.NetworkProxy = &conf.NetworkProxy{
-		Scheme: scheme,
-		Host:   host,
-		Port:   port,
-	}
+var setNetworkProxy = contractHandler(apicontract.SetNetworkProxy, func(c *gin.Context, request apicontract.NetworkProxy) apicontract.Response[apicontract.Null] {
+	model.Conf.System.NetworkProxy = &conf.NetworkProxy{Scheme: request.Scheme, Host: request.Host, Port: request.Port}
 	model.Conf.Save()
-
 	proxyURL := model.Conf.System.NetworkProxy.String()
 	util.SetNetworkProxy(proxyURL, model.Conf.System.NetworkProxy.IsSystem())
 	util.PushMsg(model.Conf.Language(102), 3000)
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 func addUIProcess(c *gin.Context) {
 	pid := c.Query("pid")

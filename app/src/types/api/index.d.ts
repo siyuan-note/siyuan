@@ -1,10 +1,30 @@
 // 此文件由内核契约生成，请运行 pnpm run api:generate 更新。
 
+export type AppendHeadingChildrenRequestInput = { "childrenDOM": string; "id": string; };
+
+export type AutoLaunchRequestInput = { "autoLaunch": number; };
+
+export type BatchSetBlockAttrsRequestInput = { "blockAttrs": Array<SetBlockAttrsRequestInput>; };
+
+export type BlockFoldData = { "isFolded": boolean; "isRoot": boolean; };
+
 export type BlockIDRequestInput = { "id": string; };
+
+export type BlockIDsRequestInput = { "ids": Array<string>; };
 
 export type BlockInfoData = (FullBlockInfo & { "publishAccessRequired"?: never; }) | (PublishedBlockInfo & { "box"?: never; "path"?: never; "rootChildID"?: never; });
 
 export type BlockInfoRequestInput = { "id": string; "ids"?: Array<string> | null; "notebook"?: string | null; };
+
+export type BlockQueryRequestInput = { "id": string; "ids"?: Array<string> | null; "notebook"?: string | null; };
+
+export type BlockRelevantData = { "nextID": string; "parentID": string; "previousID": string; };
+
+export type BlockSiblingData = { "next": string; "parent": string; "previous": string; };
+
+export type BlocksQueryRequestInput = { "id"?: string | null; "ids": Array<string>; "notebook"?: string | null; };
+
+export type BootProgressData = { "details": string; "progress": number; };
 
 export type CheckSnapshotData = { "changed": boolean; };
 
@@ -12,17 +32,49 @@ export type CreateSnapshotData = { "created": boolean; "id": string; };
 
 export type CreateSnapshotRequestInput = { "memo"?: string; };
 
+export type DOMTextRequestInput = { "dom": string; };
+
+export type DocOrdersRequestInput = { "id": string; };
+
+export type DownloadInstallPkgRequestInput = { "downloadInstallPkg": boolean; };
+
+export type EditorReadOnlyRequestInput = { "readonly": boolean; };
+
 export type EmptyRequestInput = Record<string, never>;
 
 export type FullBlockInfo = { "box": string; "path": string; "rootChildID": string; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
+
+export type GetTagRequestInput = { "app"?: string | null; "ignoreMaxListHint"?: boolean | null; "sort"?: number | null; };
+
+export type HeadingChildrenRequestInput = { "id": string; "removeFoldAttr"?: boolean | null; };
 
 export type ListNotebooksData = { "boxDocEnabled": boolean; "notebooks": Array<Notebook | null> | null; };
 
 export type ListNotebooksRequestInput = { "flashcard"?: boolean | null; };
 
+export type LockScreenRequestInput = { "lockScreenMode": number; };
+
+export type NetworkData = { "proxy": NetworkProxy | null; };
+
+export type NetworkProxy = { "host": string; "port": string; "scheme": string; };
+
+export type NetworkProxyInput = { "host": string; "port": string; "scheme": string; };
+
+export type NetworkServeRequestInput = { "networkServe": boolean; };
+
+export type NetworkServeTLSRequestInput = { "networkServeTLS": boolean; };
+
 export type Notebook = { "closed": boolean; "dueFlashcardCount": number; "encrypted": boolean; "flashcardCount": number; "icon": string; "id": string; "name": string; "newFlashcardCount": number; "sort": number; "sortMode": number; "state"?: "Locked" | "Unlocking" | "Unlocked" | "Locking" | "Error"; "subFileCount": number; "unlocked": boolean; };
 
 export type PublishedBlockInfo = { "publishAccessRequired": true; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
+
+export type RemoveBookmarkRequestInput = { "bookmark": string; };
+
+export type RemoveTagRequestInput = { "label": string; };
+
+export type RenameBookmarkRequestInput = { "newBookmark": string; "oldBookmark": string; };
+
+export type RenameTagRequestInput = { "newLabel": string; "oldLabel": string; };
 
 export type SearchHistoryData = { "histories": Array<string> | null; "pageCount": number; "totalCount": number; };
 
@@ -36,6 +88,16 @@ export type SetBlockAttrsRequestInput = { "attrs": Record<string, string | null>
 
 export type SetSnapshotMemoRequestInput = { "id": string; "memo": string; };
 
+export type TagData = { "children": Array<TagData | null> | null; "count": number; "depth": number; "label": string; "name": string; "type": string; };
+
+export type UnfoldedParentData = { "parentID": string; };
+
+export type UpdateChannelRequestInput = { "updateChannel": string; };
+
+export type VirtualBlockRefRequestInput = { "keywords": Array<string>; };
+
+export type WorkspaceInfoData = { "siyuanVer": string; "workspaceDir": string; };
+
 export type APILegacyGETPath =
     "/api/ai/mcp/oauth/callback/:flowID" |
     "/api/icon/getDynamicIcon" |
@@ -45,7 +107,6 @@ export type APILegacyGETPath =
     "/api/plugin" |
     "/api/plugin/rpc" |
     "/api/plugin/rpc/:name" |
-    "/api/system/bootProgress" |
     "/api/system/bootProgressSSE" |
     "/api/system/getBootAppearance" |
     "/api/system/getCaptcha" |
@@ -59,6 +120,11 @@ export type APILegacyGETPath =
     "/ws/plugin/rpc/:name";
 
 export interface APIGETRoutes {
+    "/api/system/bootProgress": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": BootProgressData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
     "/api/system/version": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -128,9 +194,6 @@ export type APILegacyPOSTPath =
     "/api/asset/upload" |
     "/api/asset/uploadCloud" |
     "/api/asset/uploadCloudByAssetsPaths" |
-    "/api/attr/batchGetBlockAttrs" |
-    "/api/attr/batchSetBlockAttrs" |
-    "/api/attr/getBookmarkLabels" |
     "/api/attr/resetBlockAttrs" |
     "/api/av/addAttributeViewBlocks" |
     "/api/av/addAttributeViewKey" |
@@ -213,14 +276,11 @@ export type APILegacyPOSTPath =
     "/api/bazaar/updateBazaarPackage" |
     "/api/block/appendBlock" |
     "/api/block/appendDailyNoteBlock" |
-    "/api/block/appendHeadingChildren" |
     "/api/block/batchAppendBlock" |
     "/api/block/batchInsertBlock" |
     "/api/block/batchPrependBlock" |
     "/api/block/batchUpdateBlock" |
     "/api/block/batchUpdateTaskListItemMarker" |
-    "/api/block/checkBlockExist" |
-    "/api/block/checkBlockFold" |
     "/api/block/checkBlockRef" |
     "/api/block/checkBlocksExist" |
     "/api/block/deleteBlock" |
@@ -232,23 +292,15 @@ export type APILegacyPOSTPath =
     "/api/block/getBlockDOMs" |
     "/api/block/getBlockDOMsWithEmbed" |
     "/api/block/getBlockDefIDsByRefText" |
-    "/api/block/getBlockIndex" |
     "/api/block/getBlockKramdown" |
     "/api/block/getBlockKramdowns" |
-    "/api/block/getBlockRelevantIDs" |
-    "/api/block/getBlockSiblingID" |
     "/api/block/getBlockTreeInfos" |
-    "/api/block/getBlocksIndexes" |
     "/api/block/getBlocksWordCount" |
     "/api/block/getChildBlocks" |
     "/api/block/getContentWordCount" |
-    "/api/block/getDOMText" |
-    "/api/block/getDocBlocksOrders" |
     "/api/block/getDocHeadingLevelTransaction" |
     "/api/block/getDocInfo" |
     "/api/block/getDocsInfo" |
-    "/api/block/getHeadingChildrenDOM" |
-    "/api/block/getHeadingChildrenIDs" |
     "/api/block/getHeadingDeleteTransaction" |
     "/api/block/getHeadingFoldTransaction" |
     "/api/block/getHeadingInsertTransaction" |
@@ -260,7 +312,6 @@ export type APILegacyPOSTPath =
     "/api/block/getRefText" |
     "/api/block/getTailChildBlocks" |
     "/api/block/getTreeStat" |
-    "/api/block/getUnfoldedParentID" |
     "/api/block/insertBlock" |
     "/api/block/moveBlock" |
     "/api/block/moveOutlineHeading" |
@@ -273,8 +324,6 @@ export type APILegacyPOSTPath =
     "/api/block/updateBlock" |
     "/api/block/updateTaskListItemMarker" |
     "/api/bookmark/getBookmark" |
-    "/api/bookmark/removeBookmark" |
-    "/api/bookmark/renameBookmark" |
     "/api/broadcast/getChannelInfo" |
     "/api/broadcast/getChannels" |
     "/api/broadcast/postMessage" |
@@ -375,14 +424,12 @@ export type APILegacyPOSTPath =
     "/api/graph/resetGraph" |
     "/api/graph/resetLocalGraph" |
     "/api/graph/setGraphConf" |
-    "/api/history/clearWorkspaceHistory" |
     "/api/history/createAssetHistory" |
     "/api/history/createDocHistory" |
     "/api/history/diffDocVersions" |
     "/api/history/getDocHistoryContent" |
     "/api/history/getHistoryItems" |
     "/api/history/getNotebookHistory" |
-    "/api/history/reindexHistory" |
     "/api/history/rollbackAssetsHistory" |
     "/api/history/rollbackAttributeViewHistory" |
     "/api/history/rollbackDocHistory" |
@@ -507,22 +554,17 @@ export type APILegacyPOSTPath =
     "/api/search/searchWidget" |
     "/api/search/semanticSearchBlock" |
     "/api/search/updateEmbedBlock" |
-    "/api/setting/addVirtualBlockRefExclude" |
-    "/api/setting/addVirtualBlockRefInclude" |
     "/api/setting/getBootAppearances" |
     "/api/setting/getCloudUser" |
-    "/api/setting/getPandocBin" |
     "/api/setting/getPublish" |
     "/api/setting/login2faCloudUser" |
     "/api/setting/logoutCloudUser" |
-    "/api/setting/refreshVirtualBlockRef" |
     "/api/setting/setAI" |
     "/api/setting/setAppearance" |
     "/api/setting/setBazaar" |
     "/api/setting/setBazaarPetalDisabled" |
     "/api/setting/setBootAppearance" |
     "/api/setting/setEditor" |
-    "/api/setting/setEditorReadOnly" |
     "/api/setting/setEmoji" |
     "/api/setting/setEntryVisibility" |
     "/api/setting/setExport" |
@@ -590,13 +632,9 @@ export type APILegacyPOSTPath =
     "/api/sync/setSyncProviderS3" |
     "/api/sync/setSyncProviderWebDAV" |
     "/api/system/addCustomEmoji" |
-    "/api/system/addMicrosoftDefenderExclusion" |
-    "/api/system/bootProgress" |
     "/api/system/checkUpdate" |
     "/api/system/checkWorkspaceDir" |
-    "/api/system/clearTempFiles" |
     "/api/system/createWorkspaceDir" |
-    "/api/system/currentTime" |
     "/api/system/dismissOnboarding" |
     "/api/system/ensureOnboarding" |
     "/api/system/exit" |
@@ -609,11 +647,8 @@ export type APILegacyPOSTPath =
     "/api/system/getCustomFonts" |
     "/api/system/getEmojiConf" |
     "/api/system/getMobileWorkspaces" |
-    "/api/system/getNetwork" |
     "/api/system/getSysFonts" |
-    "/api/system/getWorkspaceInfo" |
     "/api/system/getWorkspaces" |
-    "/api/system/ignoreAddMicrosoftDefenderExclusion" |
     "/api/system/importConf" |
     "/api/system/importCustomFont" |
     "/api/system/importTLSCABundle" |
@@ -626,7 +661,6 @@ export type APILegacyPOSTPath =
     "/api/system/oidc/validateActivate" |
     "/api/system/oidc/validateCancel" |
     "/api/system/oidc/validatePoll" |
-    "/api/system/rebuildDataIndex" |
     "/api/system/reloadUI" |
     "/api/system/removeCustomFont" |
     "/api/system/removeWorkspaceDir" |
@@ -634,21 +668,10 @@ export type APILegacyPOSTPath =
     "/api/system/setAPIToken" |
     "/api/system/setAccessAuthCode" |
     "/api/system/setAppearanceMode" |
-    "/api/system/setAutoLaunch" |
-    "/api/system/setDownloadInstallPkg" |
-    "/api/system/setFollowSystemLockScreen" |
-    "/api/system/setNetworkProxy" |
-    "/api/system/setNetworkServe" |
-    "/api/system/setNetworkServeTLS" |
     "/api/system/setOIDC" |
     "/api/system/setUILayout" |
-    "/api/system/setUpdateChannel" |
     "/api/system/setWorkspaceDir" |
     "/api/system/uiproc" |
-    "/api/system/vacuumDataIndex" |
-    "/api/tag/getTag" |
-    "/api/tag/removeTag" |
-    "/api/tag/renameTag" |
     "/api/template/docSaveAsTemplate" |
     "/api/template/getDocSaveAsTemplateInfo" |
     "/api/template/manage" |
@@ -669,20 +692,115 @@ export type APILegacyPOSTPath =
     "/plugin/private/:name/*path";
 
 export interface APIPOSTRoutes {
+    "/api/attr/batchGetBlockAttrs": {
+        request: BlockIDsRequestInput;
+        response: { "code": 0; "data": Record<string, Record<string, string> | null>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/attr/batchSetBlockAttrs": {
+        request: BatchSetBlockAttrsRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/attr/getBlockAttrs": {
         request: BlockIDRequestInput;
         response: { "code": 0; "data": Record<string, string>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+    };
+    "/api/attr/getBookmarkLabels": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
     };
     "/api/attr/setBlockAttrs": {
         request: SetBlockAttrsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/block/appendHeadingChildren": {
+        request: AppendHeadingChildrenRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/checkBlockExist": {
+        request: BlockQueryRequestInput;
+        response: { "code": 0; "data": boolean; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/checkBlockFold": {
+        request: BlockQueryRequestInput;
+        response: { "code": 0; "data": BlockFoldData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getBlockIndex": {
+        request: BlockQueryRequestInput;
+        response: { "code": 0; "data": number; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/block/getBlockInfo": {
         request: BlockInfoRequestInput;
         response: { "code": 0; "data": BlockInfoData; "msg": string; } | { "code": -1 | 3; "data": { "closeTimeout": number; } | null | string; "msg": string; };
         body: "json";
+    };
+    "/api/block/getBlockRelevantIDs": {
+        request: BlockQueryRequestInput;
+        response: { "code": 0; "data": BlockRelevantData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getBlockSiblingID": {
+        request: BlockQueryRequestInput;
+        response: { "code": 0; "data": BlockSiblingData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getBlocksIndexes": {
+        request: BlocksQueryRequestInput;
+        response: { "code": 0; "data": Record<string, number> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getDOMText": {
+        request: DOMTextRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getDocBlocksOrders": {
+        request: DocOrdersRequestInput;
+        response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getHeadingChildrenDOM": {
+        request: HeadingChildrenRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getHeadingChildrenIDs": {
+        request: BlockIDRequestInput;
+        response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getUnfoldedParentID": {
+        request: BlockQueryRequestInput;
+        response: { "code": 0; "data": UnfoldedParentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bookmark/removeBookmark": {
+        request: RemoveBookmarkRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bookmark/renameBookmark": {
+        request: RenameBookmarkRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/history/clearWorkspaceHistory": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/history/reindexHistory": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
     };
     "/api/history/searchHistory": {
         request: SearchHistoryRequestInput;
@@ -714,10 +832,130 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": SearchTagData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/setting/addVirtualBlockRefExclude": {
+        request: VirtualBlockRefRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/setting/addVirtualBlockRefInclude": {
+        request: VirtualBlockRefRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/setting/getPandocBin": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/setting/refreshVirtualBlockRef": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/setting/setEditorReadOnly": {
+        request: EditorReadOnlyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/system/addMicrosoftDefenderExclusion": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/bootProgress": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": BootProgressData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/clearTempFiles": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/currentTime": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": number; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/getNetwork": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": NetworkData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/getWorkspaceInfo": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": WorkspaceInfoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/ignoreAddMicrosoftDefenderExclusion": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/rebuildDataIndex": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/setAutoLaunch": {
+        request: AutoLaunchRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/system/setDownloadInstallPkg": {
+        request: DownloadInstallPkgRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/system/setFollowSystemLockScreen": {
+        request: LockScreenRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/system/setNetworkProxy": {
+        request: NetworkProxyInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/system/setNetworkServe": {
+        request: NetworkServeRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/system/setNetworkServeTLS": {
+        request: NetworkServeTLSRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/system/setUpdateChannel": {
+        request: UpdateChannelRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/system/vacuumDataIndex": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
     "/api/system/version": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+    };
+    "/api/tag/getTag": {
+        request: GetTagRequestInput;
+        response: { "code": 0; "data": Array<TagData | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/tag/removeTag": {
+        request: RemoveTagRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/tag/renameTag": {
+        request: RenameTagRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
     };
 }
 

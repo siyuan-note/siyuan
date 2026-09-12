@@ -1,6 +1,65 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$defs": {
+    "AppendHeadingChildrenRequestInput": {
+      "type": "object",
+      "properties": {
+        "childrenDOM": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "childrenDOM",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "AutoLaunchRequestInput": {
+      "type": "object",
+      "properties": {
+        "autoLaunch": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "autoLaunch"
+      ],
+      "additionalProperties": false
+    },
+    "BatchSetBlockAttrsRequestInput": {
+      "type": "object",
+      "properties": {
+        "blockAttrs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SetBlockAttrsRequestInput"
+          }
+        }
+      },
+      "required": [
+        "blockAttrs"
+      ],
+      "additionalProperties": false
+    },
+    "BlockFoldData": {
+      "type": "object",
+      "properties": {
+        "isFolded": {
+          "type": "boolean"
+        },
+        "isRoot": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "isFolded",
+        "isRoot"
+      ],
+      "additionalProperties": false
+    },
     "BlockIDRequestInput": {
       "type": "object",
       "properties": {
@@ -10,6 +69,21 @@
       },
       "required": [
         "id"
+      ],
+      "additionalProperties": false
+    },
+    "BlockIDsRequestInput": {
+      "type": "object",
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "ids"
       ],
       "additionalProperties": false
     },
@@ -58,6 +132,132 @@
       ],
       "additionalProperties": false
     },
+    "BlockQueryRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "ids": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notebook": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "BlockRelevantData": {
+      "type": "object",
+      "properties": {
+        "nextID": {
+          "type": "string"
+        },
+        "parentID": {
+          "type": "string"
+        },
+        "previousID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "nextID",
+        "parentID",
+        "previousID"
+      ],
+      "additionalProperties": false
+    },
+    "BlockSiblingData": {
+      "type": "object",
+      "properties": {
+        "next": {
+          "type": "string"
+        },
+        "parent": {
+          "type": "string"
+        },
+        "previous": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "next",
+        "parent",
+        "previous"
+      ],
+      "additionalProperties": false
+    },
+    "BlocksQueryRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notebook": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "ids"
+      ],
+      "additionalProperties": false
+    },
+    "BootProgressData": {
+      "type": "object",
+      "properties": {
+        "details": {
+          "type": "string"
+        },
+        "progress": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "details",
+        "progress"
+      ],
+      "additionalProperties": false
+    },
     "CheckSnapshotData": {
       "type": "object",
       "properties": {
@@ -93,6 +293,54 @@
           "type": "string"
         }
       },
+      "additionalProperties": false
+    },
+    "DOMTextRequestInput": {
+      "type": "object",
+      "properties": {
+        "dom": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "dom"
+      ],
+      "additionalProperties": false
+    },
+    "DocOrdersRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "DownloadInstallPkgRequestInput": {
+      "type": "object",
+      "properties": {
+        "downloadInstallPkg": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "downloadInstallPkg"
+      ],
+      "additionalProperties": false
+    },
+    "EditorReadOnlyRequestInput": {
+      "type": "object",
+      "properties": {
+        "readonly": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "readonly"
+      ],
       "additionalProperties": false
     },
     "EmptyRequestInput": {
@@ -132,6 +380,64 @@
         "rootIcon",
         "rootTitle",
         "rootTitleEmpty"
+      ],
+      "additionalProperties": false
+    },
+    "GetTagRequestInput": {
+      "type": "object",
+      "properties": {
+        "app": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ignoreMaxListHint": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sort": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "HeadingChildrenRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "removeFoldAttr": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id"
       ],
       "additionalProperties": false
     },
@@ -182,6 +488,101 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "LockScreenRequestInput": {
+      "type": "object",
+      "properties": {
+        "lockScreenMode": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "lockScreenMode"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkData": {
+      "type": "object",
+      "properties": {
+        "proxy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NetworkProxy"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "proxy"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkProxy": {
+      "type": "object",
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "string"
+        },
+        "scheme": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "host",
+        "port",
+        "scheme"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkProxyInput": {
+      "type": "object",
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "string"
+        },
+        "scheme": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "host",
+        "port",
+        "scheme"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkServeRequestInput": {
+      "type": "object",
+      "properties": {
+        "networkServe": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "networkServe"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkServeTLSRequestInput": {
+      "type": "object",
+      "properties": {
+        "networkServeTLS": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "networkServeTLS"
+      ],
       "additionalProperties": false
     },
     "Notebook": {
@@ -278,6 +679,62 @@
         "rootIcon",
         "rootTitle",
         "rootTitleEmpty"
+      ],
+      "additionalProperties": false
+    },
+    "RemoveBookmarkRequestInput": {
+      "type": "object",
+      "properties": {
+        "bookmark": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "bookmark"
+      ],
+      "additionalProperties": false
+    },
+    "RemoveTagRequestInput": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label"
+      ],
+      "additionalProperties": false
+    },
+    "RenameBookmarkRequestInput": {
+      "type": "object",
+      "properties": {
+        "newBookmark": {
+          "type": "string"
+        },
+        "oldBookmark": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "newBookmark",
+        "oldBookmark"
+      ],
+      "additionalProperties": false
+    },
+    "RenameTagRequestInput": {
+      "type": "object",
+      "properties": {
+        "newLabel": {
+          "type": "string"
+        },
+        "oldLabel": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "newLabel",
+        "oldLabel"
       ],
       "additionalProperties": false
     },
@@ -439,9 +896,188 @@
         "memo"
       ],
       "additionalProperties": false
+    },
+    "TagData": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/TagData"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "count": {
+          "type": "integer"
+        },
+        "depth": {
+          "type": "integer"
+        },
+        "label": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "children",
+        "count",
+        "depth",
+        "label",
+        "name",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "UnfoldedParentData": {
+      "type": "object",
+      "properties": {
+        "parentID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "parentID"
+      ],
+      "additionalProperties": false
+    },
+    "UpdateChannelRequestInput": {
+      "type": "object",
+      "properties": {
+        "updateChannel": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "updateChannel"
+      ],
+      "additionalProperties": false
+    },
+    "VirtualBlockRefRequestInput": {
+      "type": "object",
+      "properties": {
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "keywords"
+      ],
+      "additionalProperties": false
+    },
+    "WorkspaceInfoData": {
+      "type": "object",
+      "properties": {
+        "siyuanVer": {
+          "type": "string"
+        },
+        "workspaceDir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "siyuanVer",
+        "workspaceDir"
+      ],
+      "additionalProperties": false
     }
   },
   "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/system/bootProgress",
+      "handler": "bootProgress",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BootProgressData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
     {
       "method": "GET",
       "path": "/api/system/version",
@@ -463,6 +1099,169 @@
               },
               "data": {
                 "type": "string"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/attr/batchGetBlockAttrs",
+      "handler": "batchGetBlockAttrs",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/BlockIDsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/attr/batchSetBlockAttrs",
+      "handler": "batchSetBlockAttrs",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/BatchSetBlockAttrsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
               },
               "msg": {
                 "type": "string"
@@ -597,6 +1396,91 @@
     },
     {
       "method": "POST",
+      "path": "/api/attr/getBookmarkLabels",
+      "handler": "getBookmarkLabels",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/attr/setBlockAttrs",
       "handler": "setBlockAttrs",
       "body": "json",
@@ -616,6 +1500,306 @@
               },
               "data": {
                 "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/block/appendHeadingChildren",
+      "handler": "appendHeadingChildren",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AppendHeadingChildrenRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/block/checkBlockExist",
+      "handler": "checkBlockExist",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/BlockQueryRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "boolean"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/block/checkBlockFold",
+      "handler": "checkBlockFold",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/BlockQueryRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BlockFoldData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/block/getBlockIndex",
+      "handler": "getBlockIndex",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/BlockQueryRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "integer"
               },
               "msg": {
                 "type": "string"
@@ -732,6 +1916,936 @@
                   },
                   {
                     "type": "string"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/block/getBlockRelevantIDs",
+      "handler": "getBlockRelevantIDs",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/BlockQueryRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BlockRelevantData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/block/getBlockSiblingID",
+      "handler": "getBlockSiblingID",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/BlockQueryRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BlockSiblingData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/block/getBlocksIndexes",
+      "handler": "getBlocksIndexes",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/BlocksQueryRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "integer"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/block/getDOMText",
+      "handler": "getDOMText",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/DOMTextRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "string"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/block/getDocBlocksOrders",
+      "handler": "getDocBlocksOrders",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/DocOrdersRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/block/getHeadingChildrenDOM",
+      "handler": "getHeadingChildrenDOM",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/HeadingChildrenRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "string"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/block/getHeadingChildrenIDs",
+      "handler": "getHeadingChildrenIDs",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/BlockIDRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/block/getUnfoldedParentID",
+      "handler": "getUnfoldedParentID",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/BlockQueryRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/UnfoldedParentData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bookmark/removeBookmark",
+      "handler": "removeBookmark",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/RemoveBookmarkRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bookmark/renameBookmark",
+      "handler": "renameBookmark",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/RenameBookmarkRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/history/clearWorkspaceHistory",
+      "handler": "clearWorkspaceHistory",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/history/reindexHistory",
+      "handler": "reindexHistory",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
                   }
                 ]
               },
@@ -1208,6 +3322,1581 @@
     },
     {
       "method": "POST",
+      "path": "/api/setting/addVirtualBlockRefExclude",
+      "handler": "addVirtualBlockRefExclude",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/VirtualBlockRefRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/addVirtualBlockRefInclude",
+      "handler": "addVirtualBlockRefInclude",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/VirtualBlockRefRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/getPandocBin",
+      "handler": "getPandocBin",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "string"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/refreshVirtualBlockRef",
+      "handler": "refreshVirtualBlockRef",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setEditorReadOnly",
+      "handler": "setEditorReadOnly",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/EditorReadOnlyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/addMicrosoftDefenderExclusion",
+      "handler": "addMicrosoftDefenderExclusion",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/bootProgress",
+      "handler": "bootProgress",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BootProgressData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/clearTempFiles",
+      "handler": "clearTempFiles",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/currentTime",
+      "handler": "currentTime",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "integer"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/getNetwork",
+      "handler": "getNetwork",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/getWorkspaceInfo",
+      "handler": "getWorkspaceInfo",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/WorkspaceInfoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/ignoreAddMicrosoftDefenderExclusion",
+      "handler": "ignoreAddMicrosoftDefenderExclusion",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/rebuildDataIndex",
+      "handler": "rebuildDataIndex",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/setAutoLaunch",
+      "handler": "setAutoLaunch",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/AutoLaunchRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/setDownloadInstallPkg",
+      "handler": "setDownloadInstallPkg",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/DownloadInstallPkgRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/setFollowSystemLockScreen",
+      "handler": "setFollowSystemLockScreen",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/LockScreenRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/setNetworkProxy",
+      "handler": "setNetworkProxy",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/NetworkProxyInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/setNetworkServe",
+      "handler": "setNetworkServe",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/NetworkServeRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/setNetworkServeTLS",
+      "handler": "setNetworkServeTLS",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/NetworkServeTLSRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/setUpdateChannel",
+      "handler": "setUpdateChannel",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/UpdateChannelRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/vacuumDataIndex",
+      "handler": "vacuumDataIndex",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/system/version",
       "handler": "version",
       "body": "none",
@@ -1227,6 +4916,248 @@
               },
               "data": {
                 "type": "string"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/tag/getTag",
+      "handler": "getTag",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetTagRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/TagData"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/tag/removeTag",
+      "handler": "removeTag",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/RemoveTagRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/tag/renameTag",
+      "handler": "renameTag",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/RenameTagRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
               },
               "msg": {
                 "type": "string"

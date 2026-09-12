@@ -357,6 +357,9 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
                 id: item.getAttribute("data-node-id"),
                 removeFoldAttr: false,
             });
+            if (responseHTML.code !== 0) {
+                throw new Error(responseHTML.msg);
+            }
             const foldElement = document.createElement("template");
             foldElement.innerHTML = normalizeHTMLAssetIFrameBlockDOM(responseHTML.data);
             let previousID = newId;

@@ -12,6 +12,21 @@ fetchPost("/api/attr/setBlockAttrs", {id: "id", attrs: {"custom-value": null}});
 fetchPost("/api/history/searchHistory", {page: 1.5, type: null});
 fetchPost(dynamicURL, {legacy: true});
 fetchPost("/api/system/currentTime", {});
+fetchPost("/api/attr/batchSetBlockAttrs", {blockAttrs: [{id: "id", attrs: {remove: null}}]});
+fetchPost("/api/tag/getTag", {sort: 1.5, app: null});
+fetchPost("/api/block/getHeadingChildrenDOM", {id: "id", removeFoldAttr: null});
+fetchPost("/api/system/setAutoLaunch", {autoLaunch: 1.5});
+
+// @ts-expect-error 批量请求中的嵌套属性对象不可缺省。
+fetchPost("/api/attr/batchSetBlockAttrs", {blockAttrs: [{id: "id"}]});
+// @ts-expect-error 字符串数组不接受 null 元素。
+fetchPost("/api/attr/batchGetBlockAttrs", {ids: [null]});
+// @ts-expect-error 标签响应没有文档路径。
+fetchPost("/api/tag/getTag", {}, response => { void response.data?.[0]?.hPath; });
+// @ts-expect-error 自动启动参数必须是数字。
+fetchPost("/api/system/setAutoLaunch", {autoLaunch: "1"});
+// @ts-expect-error POST 查询不能通过 GET 调用。
+fetchGet("/api/block/getBlockSiblingID", () => {});
 
 // @ts-expect-error 路径拼写错误不能被误认为存量接口。
 fetchPost("/api/attr/getBlockAtrrs", {id: "id"});

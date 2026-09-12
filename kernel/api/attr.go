@@ -17,9 +17,6 @@
 package api
 
 import (
-	"fmt"
-	"net/http"
-
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
@@ -29,35 +26,17 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func getBookmarkLabels(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
+var getBookmarkLabels = contractHandler(apicontract.GetBookmarkLabels, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]string] {
 	if model.IsReadOnlyRoleContext(c) {
-		ret.Data = model.BookmarkLabelsByPublishAccess(c, model.GetPublishAccess())
-	} else {
-		ret.Data = model.BookmarkLabels()
+		return apicontract.Success(model.BookmarkLabelsByPublishAccess(c, model.GetPublishAccess()))
 	}
-}
+	return apicontract.Success(model.BookmarkLabels())
+})
 
-func batchGetBlockAttrs(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	ids := arg["ids"].([]any)
-	var idList []string
-	for _, id := range ids {
-		idList = append(idList, id.(string))
-	}
-
-	idList = filterBlockIDsByPublishAccess(c, idList, "")
-	ret.Data = sql.BatchGetBlockAttrs(idList)
-}
+var batchGetBlockAttrs = contractHandler(apicontract.BatchGetBlockAttrs, func(c *gin.Context, request apicontract.BlockIDsRequest) apicontract.Response[map[string]map[string]string] {
+	ids := filterBlockIDsByPublishAccess(c, request.IDs, "")
+	return apicontract.Success(sql.BatchGetBlockAttrs(ids))
+})
 
 var getBlockAttrs = contractHandler(apicontract.GetBlockAttrs, func(c *gin.Context, request apicontract.BlockIDRequest) apicontract.Response[map[string]string] {
 	ret := gulu.Ret.NewResult()
@@ -108,50 +87,24 @@ var setBlockAttrs = contractHandler(apicontract.SetBlockAttrs, func(c *gin.Conte
 	return apicontract.Success(apicontract.Null{})
 })
 
-func batchSetBlockAttrs(c *gin.Context) {
+var batchSetBlockAttrs = contractHandler(apicontract.BatchSetBlockAttrs, func(c *gin.Context, request apicontract.BatchSetBlockAttrsRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	blockAttrsArg := arg["blockAttrs"].([]any)
 	var blockAttrs []map[string]any
-	for _, blockAttrArg := range blockAttrsArg {
-		blockAttr := blockAttrArg.(map[string]any)
-		id := blockAttr["id"].(string)
-		if util.InvalidIDPattern(id, ret) {
-			return
+	for _, block := range request.BlockAttrs {
+		if util.InvalidIDPattern(block.ID, ret) {
+			return contractFailure[apicontract.Null](ret)
 		}
-
-		attrs := blockAttr["attrs"].(map[string]any)
-		nameValues := map[string]string{}
-		for name, value := range attrs {
-			if nil == value {
-				nameValues[name] = ""
-			} else {
-				strValue, ok := value.(string)
-				if !ok {
-					ret.Code = -1
-					ret.Msg = fmt.Sprintf("the value of attr [%s] must be a string", name)
-					return
-				}
-				nameValues[name] = strValue
+		attrs := map[string]string{}
+		for name, value := range block.Attrs {
+			attrs[name] = ""
+			if value != nil {
+				attrs[name] = *value
 			}
 		}
-
-		blockAttrs = append(blockAttrs, map[string]any{
-			"id":    id,
-			"attrs": nameValues,
-		})
+		blockAttrs = append(blockAttrs, map[string]any{"id": block.ID, "attrs": attrs})
 	}
-
-	err := model.BatchSetBlockAttrs(blockAttrs)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+	if err := model.BatchSetBlockAttrs(blockAttrs); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})

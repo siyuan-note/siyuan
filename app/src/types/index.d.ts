@@ -1072,12 +1072,12 @@ interface IFileTreeList {
 }
 
 interface IBlockTree {
-    box: string,
+    box?: string,
     revision?: string,
     number?: string,
-    nodeType: string,
-    hPath: string,
-    subType: string,
+    nodeType?: string,
+    hPath?: string,
+    subType?: string,
     name: string,
     type: string,
     depth: number,

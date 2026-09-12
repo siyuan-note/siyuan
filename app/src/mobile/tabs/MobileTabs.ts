@@ -324,9 +324,9 @@ export class MobileTabs {
     }
 
     private resolveRoot(id: string, notebookId?: string, signal?: AbortSignal) {
-        return new Promise<{rootID: string; box: string}>((resolve, reject) => {
+        return new Promise<{rootID: string; box?: string}>((resolve, reject) => {
             signal?.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), {once: true});
-            const data: IObject = {id};
+            const data: {id: string; notebook?: string} = {id};
             if (notebookId) {
                 data.notebook = notebookId;
             }
@@ -353,7 +353,7 @@ export class MobileTabs {
         const abortController = new AbortController();
         this.abortController = abortController;
         const epoch = ++this.navigationEpoch;
-        let info: {rootID: string; box: string};
+        let info: {rootID: string; box?: string};
         try {
             info = await this.resolveRoot(id, options.notebookId, abortController.signal);
         } catch (error) {

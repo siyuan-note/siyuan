@@ -197,6 +197,9 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
                 } else {
                     ids.forEach((id) => {
                         fetchPost("/api/block/getBlockInfo", {id}, (response) => {
+                            if (response.code !== 0 || response.data.publishAccessRequired) {
+                                return;
+                            }
                             useShell("showItemInFolder", path.join(window.siyuan.config.system.dataDir, response.data.box, response.data.path));
                         });
                     });

@@ -28,6 +28,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -1181,47 +1182,39 @@ func getDocBlocksOrders(c *gin.Context) {
 	ret.Data = orders
 }
 
-func getBlockInfo(c *gin.Context) {
+var getBlockInfo = contractHandler(apicontract.GetBlockInfo, func(c *gin.Context, request apicontract.BlockInfoRequest) apicontract.Response[apicontract.BlockInfoData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
-		return
-	}
+	id := request.ID
 	if util.InvalidIDPattern(id, ret) {
-		return
+		return contractFailure[apicontract.BlockInfoData](ret)
 	}
-	boxID := encryptedNotebookFromArg(arg)
+	boxID := ""
+	if request.Notebook != "" && model.IsEncryptedBox(request.Notebook) {
+		boxID = request.Notebook
+	}
 	// 普通文档的索引可能尚未就绪，先恢复索引，再按实际归属取得响应租约。
 	if boxID == "" && !model.IsReadOnlyRoleContext(c) && treenode.GetBlockTree(id) == nil {
 		if err := model.ReindexMissingNormalBlock(id); setGetBlockInfoError(ret, id, err) {
-			return
+			return contractFailure[apicontract.BlockInfoData](ret)
 		}
 	}
-	if !holdBlockRequest(c, ret, boxID, arg) {
-		return
+	ids := append([]string{id}, request.IDs...)
+	if err := holdEncryptedBlockRequests(c, boxID, ids, false); err != nil {
+		ret.Code, ret.Msg = -1, err.Error()
+		return contractFailure[apicontract.BlockInfoData](ret)
 	}
 	blockTree, publishAccessRequired, publishMetadataVisible, publishAccessible := getBlockInfoPublishAccess(c, id, boxID)
 	if !publishAccessible {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
-		return
+		return contractFailure[apicontract.BlockInfoData](ret)
 	}
 	if publishAccessRequired && !publishMetadataVisible {
-		ret.Data = map[string]any{
-			"rootID":                blockTree.RootID,
-			"rootTitle":             "",
-			"rootTitleEmpty":        true,
-			"rootIcon":              "",
-			"publishAccessRequired": true,
-		}
-		return
+		return apicontract.Success[apicontract.BlockInfoData](apicontract.PublishedBlockInfo{
+			BlockInfoCommon:       apicontract.BlockInfoCommon{RootID: blockTree.RootID, RootTitleEmpty: true},
+			PublishAccessRequired: true,
+		})
 	}
 
 	// 仅在此处使用带重建索引的加载函数，其他地方不要使用
@@ -1233,34 +1226,30 @@ func getBlockInfo(c *gin.Context) {
 		tree, err = model.LoadTreeByBlockIDWithReindex(id)
 	}
 	if setGetBlockInfoError(ret, id, err) {
-		return
+		return contractFailure[apicontract.BlockInfoData](ret)
 	}
 
 	block, _ := model.GetBlock(id, tree)
 	if nil == block {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
-		return
+		return contractFailure[apicontract.BlockInfoData](ret)
 	}
 
 	root, err := model.GetBlock(block.RootID, tree)
 	if errors.Is(err, model.ErrIndexing) {
-		ret.Code = 3
-		ret.Data = model.Conf.Language(56)
-		return
+		return apicontract.FailureWithText[apicontract.BlockInfoData](3, ret.Msg, model.Conf.Language(56))
 	}
 	rootTitle := root.IAL["title"]
 	rootTitle = html.UnescapeString(rootTitle)
 	icon := html.UnescapeString(root.IAL["icon"])
 	if publishAccessRequired {
-		ret.Data = map[string]any{
-			"rootID":                block.RootID,
-			"rootTitle":             rootTitle,
-			"rootTitleEmpty":        root.IAL[model.NodeAttrTitleEmpty] == "true",
-			"rootIcon":              icon,
-			"publishAccessRequired": true,
-		}
-		return
+		return apicontract.Success[apicontract.BlockInfoData](apicontract.PublishedBlockInfo{
+			BlockInfoCommon: apicontract.BlockInfoCommon{
+				RootID: block.RootID, RootTitle: rootTitle, RootTitleEmpty: root.IAL[model.NodeAttrTitleEmpty] == "true", RootIcon: icon,
+			},
+			PublishAccessRequired: true,
+		})
 	}
 
 	var rootChildID string
@@ -1277,16 +1266,13 @@ func getBlockInfo(c *gin.Context) {
 		}
 	}
 
-	ret.Data = map[string]any{
-		"box":            block.Box,
-		"path":           block.Path,
-		"rootID":         block.RootID,
-		"rootTitle":      rootTitle,
-		"rootTitleEmpty": root.IAL[model.NodeAttrTitleEmpty] == "true",
-		"rootChildID":    rootChildID,
-		"rootIcon":       icon,
-	}
-}
+	return apicontract.Success[apicontract.BlockInfoData](apicontract.FullBlockInfo{
+		BlockInfoCommon: apicontract.BlockInfoCommon{
+			RootID: block.RootID, RootTitle: rootTitle, RootTitleEmpty: root.IAL[model.NodeAttrTitleEmpty] == "true", RootIcon: icon,
+		},
+		Box: block.Box, Path: block.Path, RootChildID: rootChildID,
+	})
+})
 
 func setGetBlockInfoError(ret *gulu.Result, id string, err error) bool {
 	if err == nil {

@@ -59,13 +59,14 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
         const pageInfoElement = nextElement.nextElementSibling.nextElementSibling;
         pageInfoElement.classList.remove("fn__none");
         pageInfoElement.textContent = window.siyuan.languages.pageCountAndHistoryCount.replace("${x}", response.data.pageCount).replace("${y}", response.data.totalCount);
-        if (response.data.histories.length === 0) {
+        const histories = response.data.histories || [];
+        if (histories.length === 0) {
             listElement.innerHTML = `${genCurrentVersionItem()}<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
             element.dispatchEvent(new CustomEvent("versionListRendered"));
             return;
         }
         let logsHTML = genCurrentVersionItem();
-        response.data.histories.forEach((item: string) => {
+        histories.forEach((item: string) => {
             logsHTML += `<li class="b3-list-item b3-list-item--hide-action" data-created="${item}">
     <span class="b3-list-item__text">${dayjs(parseInt(item) * 1000).format("YYYY-MM-DD HH:mm:ss")}</span>
     <span class="fn__space"></span>

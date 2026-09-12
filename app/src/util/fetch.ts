@@ -5,8 +5,9 @@ import {ipcRenderer} from "electron";
 import {processMessage} from "./processMessage";
 import {kernelError} from "./kernelFault";
 import {withFetchTimeout} from "./fetchTimeout";
+import type {FetchGet, FetchPost, FetchSyncPost} from "../types/api";
 
-export const fetchPost = (
+export const fetchPost = ((
     url: string,
     data?: any,
     cb?: (response: IWebSocketData) => void,
@@ -122,9 +123,9 @@ export const fetchPost = (
         }
         /// #endif
     });
-};
+}) as FetchPost<IWebSocketData>;
 
-export const fetchSyncPost = async (url: string, data?: any, headers?: Record<string, string>, process = true,
+export const fetchSyncPost = (async (url: string, data?: any, headers?: Record<string, string>, process = true,
                                     signal?: AbortSignal) => {
     const init: RequestInit = {
         method: "POST",
@@ -146,9 +147,9 @@ export const fetchSyncPost = async (url: string, data?: any, headers?: Record<st
         processMessage(res2);
     }
     return res2;
-};
+}) as FetchSyncPost<IWebSocketData>;
 
-export const fetchGet = (url: string, cb: (response: IWebSocketData | IObject | string) => void) => {
+export const fetchGet = ((url: string, cb: (response: IWebSocketData | IObject | string) => void) => {
     fetch(url, {cache: "no-store"}).then((response) => {
         if (response.headers.get("content-type")?.indexOf("application/json") > -1) {
             return response.json();
@@ -158,4 +159,4 @@ export const fetchGet = (url: string, cb: (response: IWebSocketData | IObject | 
     }).then((response) => {
         cb(response);
     });
-};
+}) as FetchGet<IWebSocketData | IObject | string>;

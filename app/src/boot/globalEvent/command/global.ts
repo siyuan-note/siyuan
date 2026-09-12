@@ -216,6 +216,9 @@ export const globalCommand = (command: string, app: App, range?: Range) => {
                     return true;
                 }
                 fetchPost("/api/block/getBlockInfo", {id: childData.rootId || childData.blockId}, (infoResponse) => {
+                    if (infoResponse.code !== 0) {
+                        return;
+                    }
                     if (infoResponse.data.rootID === (childData.rootId || childData.blockId)) {
                         if (childData.instance === "Editor") {
                             openFile({

@@ -38,6 +38,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -1227,12 +1228,9 @@ func removeCustomFont(c *gin.Context) {
 	}
 }
 
-func version(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	ret.Data = util.Ver
-}
+var version = contractHandler(apicontract.Version, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[string] {
+	return apicontract.Success(util.Ver)
+})
 
 func currentTime(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

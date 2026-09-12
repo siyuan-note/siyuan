@@ -27,7 +27,7 @@ const openSnapshotMemo = (repoElement: Element, id?: string, memo = "") => {
     const dialog = new Dialog({
         title: id ? window.siyuan.languages.editSnapshotMemo : window.siyuan.languages.snapshotMemo,
         content: `<div class="b3-dialog__content">
-    ${id ? `<div class="ft__secondary fn__hr">${window.siyuan.languages.snapshotMemoLocalTip}</div>` : ""}
+    ${id ? `<div class="ft__secondary">${window.siyuan.languages.snapshotMemoLocalTip}</div><div class="fn__hr"></div>` : ""}
     <textarea class="b3-text-field fn__block" placeholder="${escapeAttr(window.siyuan.languages.snapshotMemoTip)}"></textarea>
 </div>
 <div class="b3-dialog__action">

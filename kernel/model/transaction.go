@@ -2177,7 +2177,15 @@ func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {
 }
 
 func (tx *Transaction) doCreate(operation *Operation) (ret *TxErr) {
-	tree := operation.Data.(*parse.Tree)
+	tree := operation.Tree
+	if nil == tree && nil != operation.Data {
+		if t, ok := operation.Data.(*parse.Tree); ok {
+			tree = t
+		}
+	}
+	if nil == tree {
+		return &TxErr{code: TxErrCodePushMsg, msg: "invalid create operation: tree is nil", id: operation.ID}
+	}
 	// 兜底校验：禁止跨加密边界块引（创建文档可能携带跨边界引用）
 	// 必须在 getRefDefIDs 之前，避免跨边界引用被收集进引用缓存
 	tx.degradeCrossBoundaryBlockRefs(tree.Root, tree.Box)
@@ -2218,7 +2226,7 @@ func (tx *Transaction) doRestoreCreatedDoc(operation *Operation) (ret *TxErr) {
 	if box.Exist(tree.Path) {
 		return &TxErr{code: TxErrCodePushMsg, msg: "created doc path already exists", id: operation.ID}
 	}
-	if ret = tx.doCreate(&Operation{Action: "create", Data: tree}); nil == ret {
+	if ret = tx.doCreate(&Operation{Action: "create", Tree: tree}); nil == ret {
 		if "" != operation.templateDocTreeRootID {
 			tx.restoredTemplateCreatedDocs = append(tx.restoredTemplateCreatedDocs, tree)
 		} else {
@@ -2697,6 +2705,22 @@ func (tx *Transaction) commit() (err error) {
 	for id, tree := range tx.trees {
 		if _, restored := restoredIDs[id]; !restored {
 			orderedTrees = append(orderedTrees, tree)
+		}
+	}
+	for _, op := range tx.DoOperations {
+		if _, ok := op.Data.(*parse.Tree); ok {
+			if nil == op.Tree {
+				op.Tree = op.Data.(*parse.Tree)
+			}
+			op.Data = nil
+		}
+	}
+	for _, op := range tx.UndoOperations {
+		if _, ok := op.Data.(*parse.Tree); ok {
+			if nil == op.Tree {
+				op.Tree = op.Data.(*parse.Tree)
+			}
+			op.Data = nil
 		}
 	}
 	for _, tree := range orderedTrees {

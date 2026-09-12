@@ -1270,7 +1270,7 @@ func DuplicateDoc(tree *parse.Tree) {
 }
 
 func createTreeTx(tree *parse.Tree) {
-	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: tree}}}
+	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Tree: tree}}}
 	PerformTransactions(&[]*Transaction{transaction})
 }
 
@@ -2410,7 +2410,7 @@ func createDoc0(boxID, p, title, dom string, titleEmpty, syncWrite bool) (tree *
 }
 
 func performCreateDocTransaction(tree *parse.Tree, syncWrite bool) (err error) {
-	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: tree}}}
+	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Tree: tree}}}
 	if syncWrite {
 		if err = PerformTxSync(transaction); nil != err {
 			// 事务在写文件前会更新块树，失败时清理未落盘文档的索引。

@@ -17,6 +17,8 @@
 package model
 
 import (
+	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/88250/lute/ast"
@@ -92,5 +94,50 @@ func TestRecordCrossTreeMoveRefRefreshIncludesHeadingChildren(t *testing.T) {
 		if !actual[id] {
 			t.Fatalf("moved block ID [%s] was not recorded: %v", id, refresh.MovedBlockIDs)
 		}
+	}
+}
+
+func TestCreateOperationTreeNotExposedInJSON(t *testing.T) {
+	tree := &parse.Tree{
+		ID:  "20260912000000-doc0001",
+		Box: "20260912000000-box0001",
+		Root: &ast.Node{
+			ID:   "20260912000000-doc0001",
+			Type: ast.NodeDocument,
+		},
+	}
+	op := &Operation{
+		Action: "create",
+		Tree:   tree,
+	}
+	bytes, err := json.Marshal(op)
+	if nil != err {
+		t.Fatalf("marshal operation failed: %v", err)
+	}
+	if strings.Contains(string(bytes), "doc0001") {
+		t.Fatalf("tree internal AST leaked into operation JSON: %s", string(bytes))
+	}
+
+	// Test fallback and sanitization
+	tx := &Transaction{
+		trees: map[string]*parse.Tree{},
+		nodes: map[string]*ast.Node{},
+		DoOperations: []*Operation{
+			{Action: "create", Data: tree},
+		},
+	}
+	for _, doOp := range tx.DoOperations {
+		if _, ok := doOp.Data.(*parse.Tree); ok {
+			if nil == doOp.Tree {
+				doOp.Tree = doOp.Data.(*parse.Tree)
+			}
+			doOp.Data = nil
+		}
+	}
+	if nil != tx.DoOperations[0].Data {
+		t.Fatalf("expected Data to be nil after sanitization")
+	}
+	if tx.DoOperations[0].Tree != tree {
+		t.Fatalf("expected Tree to be preserved after sanitization")
 	}
 }

@@ -475,7 +475,7 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
                     saveDialog.destroy();
                 } else {
                     const removeName = hasSameName === value ? hasSameConfig : hasSameName;
-                    confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchRemoveName.replace("${x}", removeName).replace("${y}", value), () => {
+                    confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchRemoveName.replace("${x}", () => escapeHtml(removeName)).replace("${y}", () => escapeHtml(value)), () => {
                         Array.from(criteriaElement.children).forEach(item => {
                             if (item.textContent === hasSameConfig || item.textContent === hasSameName) {
                                 item.remove();
@@ -492,7 +492,7 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
                     });
                 }
             } else if (!hasSameName && hasSameConfig) {
-                confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchUpdateName.replace("${x}", hasSameConfig).replace("${y}", value), () => {
+                confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchUpdateName.replace("${x}", () => escapeHtml(hasSameConfig)).replace("${y}", () => escapeHtml(value)), () => {
                     Array.from(criteriaElement.children).forEach(item => {
                         if (item.textContent === hasSameConfig) {
                             item.remove();

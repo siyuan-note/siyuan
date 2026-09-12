@@ -60,7 +60,7 @@ const snapshotFileKinds: SnapshotFileKind[] = [
 ];
 
 const getSnapshotFileKind = (filePath: string): SnapshotFileKind => {
-    const normalizedPath = filePath.replaceAll("\\", "/").replace(/^\/+/, "");
+    const normalizedPath = filePath.replace(/\\/g, "/").replace(/^\/+/, "");
     if (normalizedPath.endsWith(".sy")) {
         return "document";
     }
@@ -217,7 +217,7 @@ const genItem = (items: SnapshotDiffItem[], hasUndo = true) => {
     let html = "";
     items.forEach((item) => {
         const compareID = item.compareFile ? ` data-id2="${item.compareFile.fileID}"` : "";
-        html += `<li class="b3-list-item b3-list-item--hide-action history__diff-item"${compareID} data-created="${item.file.updated}" data-id="${item.file.fileID}" data-kind="${item.kind}" data-title="${escapeAttr(item.file.title)}">
+        html += `<li class="b3-list-item b3-list-item--hide-action history__diff-item"${compareID} data-created="${item.file.updated}" data-id="${item.file.fileID}" data-kind="${item.kind}" data-title="${escapeAttr(escapeHtml(item.file.title))}">
     <span class="history__diff-file">
         <span class="history__diff-title">${escapeHtml(item.file.title)}</span>
         <span class="history__diff-path" title="${escapeAttr(item.file.path)} ${item.file.hSize}">${escapeHtml(item.file.path)}</span>
@@ -495,7 +495,7 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
                 break;
             } else if (target.getAttribute("data-type") == "rollback") {
                 confirmDialog("⚠️ " + window.siyuan.languages.rollback,
-                    window.siyuan.languages.rollbackConfirm.replace("${name}", target.parentElement.dataset.title).replace("${time}", dayjs(parseInt(target.parentElement.dataset.created)).format("YYYY-MM-DD HH:mm:ss")),
+                    window.siyuan.languages.rollbackConfirm.replace("${name}", () => escapeHtml(target.parentElement.dataset.title)).replace("${time}", dayjs(parseInt(target.parentElement.dataset.created)).format("YYYY-MM-DD HH:mm:ss")),
                     () => {
                         fetchPost("/api/repo/rollbackRepoSnapshotFile", {id: target.parentElement.dataset.id});
                     });

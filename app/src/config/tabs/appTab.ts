@@ -55,7 +55,7 @@ const renderWorkspaceList = (workspaceDirElement: Element) => {
     fetchPost("/api/system/getWorkspaces", {}, (response) => {
         let html = "";
         response.data.forEach((item: IWorkspace) => {
-            html += `<li data-path="${escapeAttr(item.path)}" class="b3-list-item b3-list-item--narrow${window.siyuan.config.system.workspaceDir === item.path ? " b3-list-item--focus" : ""}">
+            html += `<li data-path="${escapeAttr(escapeHtml(item.path))}" class="b3-list-item b3-list-item--narrow${window.siyuan.config.system.workspaceDir === item.path ? " b3-list-item--focus" : ""}">
     <span class="b3-list-item__text">${escapeHtml(pathPosix().basename(item.path))}</span>
     <span data-type="remove" class="b3-list-item__action">
         <svg><use xlink:href="#iconMin"></use></svg>
@@ -82,7 +82,7 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
                 fetchPost("/api/system/getMobileWorkspaces", {}, (response) => {
                     let selectHTML = "";
                     response.data.forEach((item: string, index: number) => {
-                        selectHTML += `<option value="${escapeAttr(item)}"${index === 0 ? " selected" : ""}>${escapeHtml(pathPosix().basename(item))}</option>`;
+                        selectHTML += `<option value="${escapeAttr(escapeHtml(item))}"${index === 0 ? " selected" : ""}>${escapeHtml(pathPosix().basename(item))}</option>`;
                     });
                     const openWorkspaceDialog = new Dialog({
                         title: window.siyuan.languages.openBy,
@@ -106,7 +106,7 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
                             openWorkspaceDialog.destroy();
                             return;
                         }
-                        confirmDialog(window.siyuan.languages.confirm, `${pathPosix().basename(window.siyuan.config.system.workspaceDir)} -> ${pathPosix().basename(openPath)}?`, () => {
+                        confirmDialog(window.siyuan.languages.confirm, `${escapeHtml(pathPosix().basename(window.siyuan.config.system.workspaceDir))} -> ${escapeHtml(pathPosix().basename(openPath))}?`, () => {
                             fetchPost("/api/system/setWorkspaceDir", {path: openPath}, () => {
                                 void exitSiYuan(false);
                             });
@@ -144,7 +144,7 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
                     fetchPost("/api/system/removeWorkspaceDir", {path: removePath});
                     break;
                 }
-                confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.removeWorkspacePhysically.replace("${x}", removePath), () => {
+                confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.removeWorkspacePhysically.replace("${x}", () => escapeHtml(removePath)), () => {
                     fetchPost("/api/system/removeWorkspaceDirPhysically", {path: removePath}, () => {
                         renderWorkspaceList(workspaceDirElement);
                     });
@@ -159,7 +159,7 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
                 if (!workspacePath) {
                     break;
                 }
-                confirmDialog(window.siyuan.languages.confirm, `${pathPosix().basename(window.siyuan.config.system.workspaceDir)} -> ${pathPosix().basename(workspacePath)}?`, () => {
+                confirmDialog(window.siyuan.languages.confirm, `${escapeHtml(pathPosix().basename(window.siyuan.config.system.workspaceDir))} -> ${escapeHtml(pathPosix().basename(workspacePath))}?`, () => {
                     fetchPost("/api/system/setWorkspaceDir", {path: workspacePath}, () => {
                         void exitSiYuan(false);
                     });

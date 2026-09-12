@@ -237,7 +237,7 @@ ${window.siyuan.languages.fileCount} ${item.count}<span class="fn__space"></span
     <span class="fn__space"></span>
     ${item.systemOS}${(item.systemName && item.systemOS) ? "/" : ""}${item.systemName}
     <span class="fn__space"></span>
-    <span class="b3-chip b3-chip--secondary b3-chip--small${item.tag ? "" : " fn__none"}">${item.tag}</span>
+    <span class="b3-chip b3-chip--secondary b3-chip--small${item.tag ? "" : " fn__none"}">${escapeHtml(item.tag)}</span>
 </div>
 ${item.requiresDownload && ["getRepoTagSnapshots", "getRepoSnapshots"].includes(type) ?
     `<div class="ft__smaller ft__error" style="white-space:normal">${escapeHtml(window.siyuan.languages.syncAssetSnapshotIncomplete)}</div>` : ""}
@@ -249,10 +249,10 @@ ${item.requiresDownload && ["getRepoTagSnapshots", "getRepoSnapshots"].includes(
 ${statHTML}`;
         const hasSelected = selectId.find(subItem => subItem.id === item.id);
         /// #if MOBILE
-        repoHTML += `<li class="b3-list-item${hasSelected ? " b3-list-item--focus" : ""}" data-type="repoitem" data-id="${item.id}" data-tag="${item.tag}">
+        repoHTML += `<li class="b3-list-item${hasSelected ? " b3-list-item--focus" : ""}" data-type="repoitem" data-id="${item.id}" data-tag="${escapeAttr(escapeHtml(item.tag))}">
 <div class="fn__flex-1">
     ${infoHTML}
-    <div class="fn__flex" style="height: 26px" data-type="repoitem"" data-id="${item.id}" data-tag="${item.tag}">
+    <div class="fn__flex" style="height: 26px" data-type="repoitem"" data-id="${item.id}" data-tag="${escapeAttr(escapeHtml(item.tag))}">
         ${actionHTML}
         <span class="b3-list-item__action" data-type="more">
             <svg><use xlink:href="#iconMore"></use></svg>
@@ -264,7 +264,7 @@ ${statHTML}`;
 </div>
 </li>`;
         /// #else
-        repoHTML += `<li class="b3-list-item b3-list-item--hide-action${hasSelected ? " b3-list-item--focus" : ""}" data-type="repoitem" data-id="${item.id}" data-tag="${item.tag}">
+        repoHTML += `<li class="b3-list-item b3-list-item--hide-action${hasSelected ? " b3-list-item--focus" : ""}" data-type="repoitem" data-id="${item.id}" data-tag="${escapeAttr(escapeHtml(item.tag))}">
 <div class="fn__flex-1">${infoHTML}</div>
 ${actionHTML}
 </li>`;
@@ -710,7 +710,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     event.preventDefault();
                     break;
                 }
-                let name;
+                let name: string;
                 let time;
                 if (dataType === "notebook") {
                     name = target.previousElementSibling.previousElementSibling.textContent.trim();
@@ -723,7 +723,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     time = dayjs(parseInt(liElement.getAttribute("data-created")) * 1000).format("YYYY-MM-DD HH:mm:ss");
                 }
                 confirmDialog("⚠️ " + window.siyuan.languages.rollback,
-                    window.siyuan.languages.rollbackConfirm.replace("${name}", name).replace("${time}", time),
+                    window.siyuan.languages.rollbackConfirm.replace("${name}", () => escapeHtml(name)).replace("${time}", time),
                     () => {
                         if (dataType === "assets") {
                             fetchPost("/api/history/rollbackAssetsHistory", {
@@ -976,7 +976,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 break;
             } else if (type === "removeRepoTagSnapshot" || type === "removeCloudRepoTagSnapshot") {
                 const tag = target.parentElement.getAttribute("data-tag");
-                confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <i>${tag}</i>?`, () => {
+                confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <i>${escapeHtml(tag)}</i>?`, () => {
                     fetchPost("/api/repo/" + type, {tag}, () => {
                         renderRepo(repoElement, 1);
                     });

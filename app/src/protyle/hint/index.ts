@@ -926,7 +926,9 @@ ${genHintItemHTML(item)}
             blockRender(protyle, protyle.wysiwyg.element);
             return;
         } else if (this.splitChar === "/" || this.splitChar === "、") {
-            if (protyle.lite) {
+            // 精简模式的自定义候选按文本插入，内置候选执行命令；块引用保留本地事务和后续提示。
+            if (protyle.lite && (Constants.BLOCK_HINT_KEYS.includes(value) ||
+                protyle.options.hint.extend.find((item) => item.key === "/" && item.hint)?.hint !== hintSlash)) {
                 insertHTML(value, protyle, false, false, false, undefined, undoContext);
                 if (Constants.BLOCK_HINT_KEYS.includes(value)) {
                     this.enableExtend = true;

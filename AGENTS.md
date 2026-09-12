@@ -85,6 +85,12 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
    - Keep parent and child paths aligned with the actual menu hierarchy. Dock entries support visibility only and must not be included in sorting
    - Cover catalog consistency, separator placement, order migration, and plugin-slot preservation in the related tests. Configured menus must not produce leading, trailing, or consecutive separators
    - The menu `ignore` option controls conditional rendering and must not be used to opt an entry out of visibility or order configuration
+10. **API contracts:**
+    - Follow [docs/API-CONTRACTS.md](docs/API-CONTRACTS.md) when adding or changing kernel HTTP APIs. Define new endpoints in `kernel/apicontract/` and bind their handlers through `contractHandler`; keep contracts synchronized when changing migrated endpoints
+    - Preserve existing input compatibility, response variants, authorization, and encrypted notebook lease behavior; cover affected behavior with regression tests
+    - Remove migrated or deleted routes from `kernel/apicontract/legacy_routes.json`; never add new routes to this legacy list or bypass contract checks with `any` or type assertions
+    - After contract changes, run `pnpm run api:generate --petal ../../petal` and `pnpm run api:check --petal ../../petal` from `app/`; synchronize related public declarations in `petal` and do not hand-edit generated declarations or schemas
+    - Run `pnpm run lint` from `app/`, `go test ./apicontract/...` from `kernel/`, and the applicable API compatibility and route coverage tests described in the maintenance document
 
 ---
 

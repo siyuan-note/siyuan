@@ -18,11 +18,15 @@ package model
 
 import (
 	"encoding/json"
+	"errors"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestDoUpdateRejectsInvalidData(t *testing.T) {
@@ -117,27 +121,79 @@ func TestCreateOperationTreeNotExposedInJSON(t *testing.T) {
 	if strings.Contains(string(bytes), "doc0001") {
 		t.Fatalf("tree internal AST leaked into operation JSON: %s", string(bytes))
 	}
+}
 
-	// Test fallback and sanitization
-	tx := &Transaction{
-		trees: map[string]*parse.Tree{},
-		nodes: map[string]*ast.Node{},
-		DoOperations: []*Operation{
+func TestCommitSanitizesOperationTreesBeforeWrite(t *testing.T) {
+	tree := &parse.Tree{ID: "20260912000000-doc0001", Root: &ast.Node{Type: ast.NodeDocument}}
+	preservedTree := &parse.Tree{ID: "20260912000001-doc0002"}
+	newOperations := func() []*Operation {
+		return []*Operation{
 			{Action: "create", Data: tree},
-		},
-	}
-	for _, doOp := range tx.DoOperations {
-		if _, ok := doOp.Data.(*parse.Tree); ok {
-			if nil == doOp.Tree {
-				doOp.Tree = doOp.Data.(*parse.Tree)
-			}
-			doOp.Data = nil
+			{Action: "create", Data: tree, Tree: preservedTree},
+			{Action: "create", Tree: tree},
+			{Action: "update", Data: "block content"},
 		}
 	}
-	if nil != tx.DoOperations[0].Data {
-		t.Fatalf("expected Data to be nil after sanitization")
+	tx := &Transaction{
+		trees:          map[string]*parse.Tree{tree.ID: tree},
+		DoOperations:   newOperations(),
+		UndoOperations: newOperations(),
 	}
-	if tx.DoOperations[0].Tree != tree {
-		t.Fatalf("expected Tree to be preserved after sanitization")
+	stop := errors.New("stop before persistence and broadcast")
+	called := false
+	// 在真实提交路径的写入边界检查，随后停止，避免落盘和广播。
+	tx.writeTransactionTree = func(actual *parse.Tree) error {
+		called = true
+		if actual != tree {
+			t.Fatal("unexpected transaction tree")
+		}
+		for _, operations := range [][]*Operation{tx.DoOperations, tx.UndoOperations} {
+			for i, want := range []*parse.Tree{tree, preservedTree, tree} {
+				if operations[i].Tree != want || nil != operations[i].Data {
+					t.Fatalf("operation %d did not preserve Tree and clear Data", i)
+				}
+			}
+			if operations[3].Data != "block content" {
+				t.Fatal("non-tree data was changed")
+			}
+		}
+		data, err := json.Marshal(tx)
+		if nil != err {
+			t.Fatal(err)
+		}
+		if strings.Contains(string(data), "doc000") {
+			t.Fatalf("AST leaked into transaction JSON: %s", data)
+		}
+		return stop
+	}
+	if err := tx.commit(); !errors.Is(err, stop) || !called {
+		t.Fatalf("expected commit to reach write boundary, got %v", err)
+	}
+}
+
+func TestDoCreateAcceptsTreeAndLegacyData(t *testing.T) {
+	previousPath := util.BlockTreeDBPath
+	util.BlockTreeDBPath = filepath.Join(t.TempDir(), "blocktree.db")
+	treenode.InitBlockTree(true)
+	t.Cleanup(func() {
+		treenode.CloseDatabase()
+		util.BlockTreeDBPath = previousPath
+		if "" != previousPath {
+			treenode.InitBlockTree(false)
+		}
+	})
+	tree := treenode.NewTree("20260912000000-box0001", "/20260912000000-doc0001.sy", "/Document", "Document")
+	for _, legacy := range []bool{false, true} {
+		op := &Operation{Action: "create", Tree: tree}
+		if legacy {
+			op.Tree, op.Data = nil, tree
+		}
+		tx := &Transaction{trees: map[string]*parse.Tree{}}
+		if err := tx.doCreate(op); nil != err {
+			t.Fatalf("create failed (legacy=%v): %v", legacy, err)
+		}
+		if tx.trees[tree.ID] != tree {
+			t.Fatalf("create did not register tree (legacy=%v)", legacy)
+		}
 	}
 }

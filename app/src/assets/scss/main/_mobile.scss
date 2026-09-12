@@ -25,6 +25,10 @@ body.body--android {
 
 body.mobile-keyboard--open {
   --mobile-bottom-bar-offset: 0px;
+
+  .status {
+    display: none;
+  }
 }
 
 .block__popover {

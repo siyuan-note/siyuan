@@ -836,7 +836,7 @@ body.mobile-topbar--merged {
   right: 0;
   bottom: 0;
   z-index: 6;
-  background-color: #000;
+  background-color: transparent;
   opacity: 0;
   transition: opacity 150ms linear;
 
@@ -1451,6 +1451,10 @@ body.mobile-topbar--merged {
 }
 
 .b3-menu {
+  &__scrim {
+    background-color: transparent;
+  }
+
   &--sheet {
     // 菜单入口可能指定宽度，移动端底部菜单始终铺满视口
     top: auto !important;
@@ -1477,7 +1481,7 @@ body.mobile-topbar--merged {
 
 .av__panel {
   > .b3-dialog__scrim {
-    background-color: rgba(0, 0, 0, .2);
+    background-color: transparent;
   }
 
   > .b3-menu {
@@ -1686,6 +1690,10 @@ body.mobile-topbar--merged {
 }
 
 .mobile-bottom-sheet-dialog {
+  .b3-dialog__scrim {
+    background-color: transparent;
+  }
+
   .b3-dialog {
     align-items: flex-end;
     box-sizing: border-box;

@@ -44,6 +44,9 @@ import (
 // var Mode = "dev"
 var Mode = "prod"
 
+// SystemTempDir 保存工作空间初始化重定向之前的系统临时目录。
+var SystemTempDir = os.TempDir()
+
 const Ver = "3.8.4-alpha.6"
 
 // IsReleaseVer 判断是否为正式版（不含 alpha、beta、rc 等预发布标识）。

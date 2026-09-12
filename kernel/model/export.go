@@ -570,6 +570,9 @@ func ExportSystemLog() (zipPath string) {
 		}
 	}
 
+	collectOptionalSystemLogs(filepath.Join(util.HomeDir, ".config", "siyuan"),
+		util.SystemTempDir, exportFolder, gulu.OS.IsWindows())
+
 	zipPath = exportFolder + ".zip"
 	zip, err := gulu.Zip.Create(zipPath)
 	if err != nil {

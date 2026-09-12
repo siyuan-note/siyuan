@@ -1,4 +1,11 @@
 {
+	"flashcardCleanup": "اكتشاف البطاقات التعليمية غير الصالحة",
+	"flashcardCleanupTip": "فحص جميع دفاتر الملاحظات. يمكن تحديد المصادر التي تأكد فقدانها فقط. يتم تخطي المصادر المغلقة أو التي يتعذر التحقق منها. يؤثر الحذف على جميع بطاقات المصدر ويحافظ على الجدولة وسجل المراجعة.",
+	"flashcardCleanupMissing": "كتلة مطلوبة مفقودة",
+	"flashcardCleanupClosed": "دفتر الملاحظات مغلق",
+	"flashcardCleanupUnknown": "يتعذر التحقق",
+	"flashcardCleanupSummary": "تم تحديد ${sources} مصادر (${cards} بطاقات)",
+	"flashcardCleanupResult": "تم حذف ${deleted} مصادر وتخطي ${skipped}",
 	"bodyGradient": "تدرج الخلفية",
 	"bodyGradientTip": "تخصيص تدرج الخلفية أو تعطيله؛ تعتمد الألوان التلقائية على اسم مساحة العمل",
 	"bodyGradientAuto": "تلقائي (حسب اسم مساحة العمل)",

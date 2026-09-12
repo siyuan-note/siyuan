@@ -1,4 +1,11 @@
 {
+	"flashcardCleanup": "Detectar tarjetas no válidas",
+	"flashcardCleanupTip": "Revisa todos los cuadernos. Solo se pueden seleccionar fuentes cuya ausencia esté confirmada. Se omiten las fuentes cerradas o no verificables. La eliminación afecta a todas las tarjetas de una fuente y conserva la programación y el historial de repasos.",
+	"flashcardCleanupMissing": "Falta un bloque necesario",
+	"flashcardCleanupClosed": "Cuaderno cerrado",
+	"flashcardCleanupUnknown": "No se puede verificar",
+	"flashcardCleanupSummary": "${sources} fuentes seleccionadas (${cards} tarjetas)",
+	"flashcardCleanupResult": "${deleted} fuentes eliminadas; ${skipped} omitidas",
 	"bodyGradient": "Degradado de fondo",
 	"bodyGradientTip": "Personalizar o desactivar el degradado de fondo; los colores automáticos se basan en el nombre del espacio de trabajo",
 	"bodyGradientAuto": "Automático (nombre del espacio de trabajo)",

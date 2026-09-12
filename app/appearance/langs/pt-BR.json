@@ -1,4 +1,11 @@
 {
+	"flashcardCleanup": "Detectar cartões inválidos",
+	"flashcardCleanupTip": "Verifica todos os cadernos. Somente fontes cuja ausência foi confirmada podem ser selecionadas. Fontes fechadas ou não verificáveis são ignoradas. A exclusão afeta todos os cartões de uma fonte e preserva o agendamento e o histórico de revisões.",
+	"flashcardCleanupMissing": "Bloco necessário ausente",
+	"flashcardCleanupClosed": "Caderno fechado",
+	"flashcardCleanupUnknown": "Não foi possível verificar",
+	"flashcardCleanupSummary": "${sources} fontes selecionadas (${cards} cartões)",
+	"flashcardCleanupResult": "${deleted} fontes excluídas; ${skipped} ignoradas",
 	"bodyGradient": "Gradiente de fundo",
 	"bodyGradientTip": "Personalize ou desative o gradiente de fundo; as cores automáticas são baseadas no nome do espaço de trabalho",
 	"bodyGradientAuto": "Automático (nome do espaço de trabalho)",

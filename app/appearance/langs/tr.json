@@ -1,4 +1,11 @@
 {
+	"flashcardCleanup": "Geçersiz bilgi kartlarını algıla",
+	"flashcardCleanupTip": "Tüm not defterlerini tarar. Yalnızca eksik olduğu doğrulanan kaynaklar seçilebilir. Kapalı veya doğrulanamayan kaynaklar atlanır. Silme işlemi bir kaynağın tüm kartlarını etkiler; zamanlama ve tekrar geçmişi korunur.",
+	"flashcardCleanupMissing": "Gerekli blok eksik",
+	"flashcardCleanupClosed": "Not defteri kapalı",
+	"flashcardCleanupUnknown": "Doğrulanamıyor",
+	"flashcardCleanupSummary": "${sources} kaynak seçildi (${cards} kart)",
+	"flashcardCleanupResult": "${deleted} kaynak silindi; ${skipped} kaynak atlandı",
 	"bodyGradient": "Arka plan renk geçişi",
 	"bodyGradientTip": "Arka plan renk geçişini özelleştirin veya kapatın; otomatik renkler çalışma alanının adına göre belirlenir",
 	"bodyGradientAuto": "Otomatik (çalışma alanı adı)",

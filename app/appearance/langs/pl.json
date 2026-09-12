@@ -1,4 +1,11 @@
 {
+	"flashcardCleanup": "Wykryj nieprawidłowe fiszki",
+	"flashcardCleanupTip": "Sprawdź wszystkie notatniki. Można wybrać tylko źródła, których brak potwierdzono. Źródła zamknięte lub niemożliwe do sprawdzenia są pomijane. Usunięcie obejmuje wszystkie fiszki danego źródła i zachowuje harmonogram oraz historię powtórek.",
+	"flashcardCleanupMissing": "Brak wymaganego bloku",
+	"flashcardCleanupClosed": "Notatnik zamknięty",
+	"flashcardCleanupUnknown": "Nie można zweryfikować",
+	"flashcardCleanupSummary": "Wybrane źródła: ${sources} (fiszki: ${cards})",
+	"flashcardCleanupResult": "Usunięte źródła: ${deleted}; pominięte: ${skipped}",
 	"bodyGradient": "Gradient tła",
 	"bodyGradientTip": "Dostosuj lub wyłącz gradient tła; automatyczne kolory są oparte na nazwie przestrzeni roboczej",
 	"bodyGradientAuto": "Automatycznie (nazwa przestrzeni roboczej)",

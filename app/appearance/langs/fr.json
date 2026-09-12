@@ -1,4 +1,11 @@
 {
+	"flashcardCleanup": "Détecter les cartes invalides",
+	"flashcardCleanupTip": "Analyser tous les carnets. Seules les sources dont l’absence est confirmée peuvent être sélectionnées. Les sources fermées ou invérifiables sont ignorées. La suppression concerne toutes les cartes d’une source et conserve la planification et l’historique des révisions.",
+	"flashcardCleanupMissing": "Bloc requis manquant",
+	"flashcardCleanupClosed": "Carnet fermé",
+	"flashcardCleanupUnknown": "Vérification impossible",
+	"flashcardCleanupSummary": "${sources} sources sélectionnées (${cards} cartes)",
+	"flashcardCleanupResult": "${deleted} sources supprimées ; ${skipped} ignorées",
 	"bodyGradient": "Dégradé de fond",
 	"bodyGradientTip": "Personnaliser ou désactiver le dégradé de fond ; les couleurs automatiques dépendent du nom de l’espace de travail",
 	"bodyGradientAuto": "Automatique (nom de l’espace de travail)",

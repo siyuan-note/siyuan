@@ -1,4 +1,11 @@
 {
+	"flashcardCleanup": "Detect invalid flashcards",
+	"flashcardCleanupTip": "Scan all notebooks. Only confirmed missing sources can be selected. Closed or unverifiable sources are skipped. Deletion affects all cards from a source and preserves scheduling and review history.",
+	"flashcardCleanupMissing": "Required block missing",
+	"flashcardCleanupClosed": "Notebook closed",
+	"flashcardCleanupUnknown": "Unable to verify",
+	"flashcardCleanupSummary": "Selected ${sources} sources (${cards} cards)",
+	"flashcardCleanupResult": "Deleted ${deleted} sources; skipped ${skipped}",
 	"bodyGradient": "Background gradient",
 	"bodyGradientTip": "Customize or disable the background gradient; automatic colors are based on the workspace name",
 	"bodyGradientAuto": "Automatic (workspace name)",

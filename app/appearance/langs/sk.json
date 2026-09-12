@@ -1,4 +1,11 @@
 {
+	"flashcardCleanup": "Zistiť neplatné kartičky",
+	"flashcardCleanupTip": "Skontrolovať všetky zápisníky. Vybrať možno iba zdroje, ktorých chýbanie je potvrdené. Zatvorené alebo neoveriteľné zdroje sa preskočia. Odstránenie sa týka všetkých kartičiek zdroja a zachová plánovanie aj históriu opakovania.",
+	"flashcardCleanupMissing": "Chýba požadovaný blok",
+	"flashcardCleanupClosed": "Zápisník je zatvorený",
+	"flashcardCleanupUnknown": "Nedá sa overiť",
+	"flashcardCleanupSummary": "Vybrané zdroje: ${sources} (kartičky: ${cards})",
+	"flashcardCleanupResult": "Odstránené zdroje: ${deleted}; preskočené: ${skipped}",
 	"bodyGradient": "Prechod pozadia",
 	"bodyGradientTip": "Prispôsobte alebo vypnite prechod pozadia; automatické farby vychádzajú z názvu pracovného priestoru",
 	"bodyGradientAuto": "Automaticky (názov pracovného priestoru)",

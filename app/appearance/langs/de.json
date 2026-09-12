@@ -1,4 +1,11 @@
 {
+	"flashcardCleanup": "Ungültige Lernkarten erkennen",
+	"flashcardCleanupTip": "Alle Notizbücher prüfen. Nur nachweislich fehlende Quellen sind auswählbar. Geschlossene oder nicht überprüfbare Quellen werden übersprungen. Das Löschen betrifft alle Karten einer Quelle und erhält Lernplanung und Wiederholungsverlauf.",
+	"flashcardCleanupMissing": "Erforderlicher Block fehlt",
+	"flashcardCleanupClosed": "Notizbuch geschlossen",
+	"flashcardCleanupUnknown": "Nicht überprüfbar",
+	"flashcardCleanupSummary": "${sources} Quellen ausgewählt (${cards} Karten)",
+	"flashcardCleanupResult": "${deleted} Quellen gelöscht; ${skipped} übersprungen",
 	"bodyGradient": "Hintergrundverlauf",
 	"bodyGradientTip": "Hintergrundverlauf anpassen oder deaktivieren; automatische Farben basieren auf dem Namen des Arbeitsbereichs",
 	"bodyGradientAuto": "Automatisch (Arbeitsbereichsname)",

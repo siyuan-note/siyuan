@@ -6,6 +6,7 @@ import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {genUUID} from "../util/genID";
+import {openFlashcardV2Cleanup} from "./flashcardV2Cleanup";
 import {openFlashcardV2ReviewSession} from "./flashcardV2Session";
 import type {App} from "../index";
 import {listFlashcardV2PluginTypes} from "./flashcardV2Plugin";
@@ -1711,6 +1712,7 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
 <div class="card__v2-management-tools">
 <button data-type="filter" class="b3-button b3-button--outline">${window.siyuan.languages.filter}${filterCount === 0 ? "" : ` (${filterCount})`}</button>
 <button data-type="conflicts" class="b3-button b3-button--outline">${window.siyuan.languages.conflict}</button>
+<button data-type="cleanup" class="b3-button b3-button--outline">${window.siyuan.languages.flashcardCleanup}</button>
 <button data-type="statistics" class="b3-button b3-button--outline">${window.siyuan.languages.statistics}</button>
 ${policyScope ? `<button data-type="scopePolicy" class="b3-button b3-button--outline">${window.siyuan.languages.config}</button>` : ""}
 ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-button--outline">${window.siyuan.languages.flashcardReviewSet}</button>` : ""}
@@ -1755,6 +1757,10 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
                 const target = (event.target as HTMLElement).closest("[data-type]") as HTMLElement;
                 const item = (event.target as HTMLElement).closest(".b3-list-item") as HTMLElement;
                 if (!target) {
+                    return;
+                }
+                if (target.dataset.type === "cleanup") {
+                    openFlashcardV2Cleanup(reloadPage);
                     return;
                 }
                 const type = target.dataset.type;

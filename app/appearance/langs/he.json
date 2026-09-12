@@ -1,4 +1,11 @@
 {
+	"flashcardCleanup": "איתור כרטיסיות לא תקינות",
+	"flashcardCleanupTip": "סריקת כל המחברות. ניתן לבחור רק מקורות שהיעדרם אושר. מקורות סגורים או שלא ניתן לאמת ידולגו. המחיקה משפיעה על כל הכרטיסיות של המקור ושומרת על לוח הזמנים והיסטוריית החזרות.",
+	"flashcardCleanupMissing": "חסר בלוק נדרש",
+	"flashcardCleanupClosed": "המחברת סגורה",
+	"flashcardCleanupUnknown": "לא ניתן לאמת",
+	"flashcardCleanupSummary": "נבחרו ${sources} מקורות (${cards} כרטיסיות)",
+	"flashcardCleanupResult": "נמחקו ${deleted} מקורות; דולגו ${skipped}",
 	"bodyGradient": "מעבר צבע ברקע",
 	"bodyGradientTip": "התאמה אישית או השבתה של מעבר הצבע ברקע; הצבעים האוטומטיים מבוססים על שם סביבת העבודה",
 	"bodyGradientAuto": "אוטומטי (לפי שם סביבת העבודה)",

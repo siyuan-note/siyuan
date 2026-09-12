@@ -566,6 +566,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/flashcard/createBasicSource", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createBasicFlashcardSource)
 	ginServer.Handle("POST", "/api/flashcard/createQuickSources", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createQuickFlashcardSources)
 	ginServer.Handle("POST", "/api/flashcard/manageSourceLifecycle", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, manageFlashcardSourceLifecycle)
+	ginServer.Handle("POST", "/api/flashcard/inspectInvalidSources", model.CheckAuth, model.CheckAdminRole, inspectInvalidFlashcardSources)
+	ginServer.Handle("POST", "/api/flashcard/deleteInvalidSources", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, deleteInvalidFlashcardSources)
 	ginServer.Handle("POST", "/api/flashcard/listConflicts", model.CheckAuth, model.CheckAdminRole, listFlashcardConflicts)
 	ginServer.Handle("POST", "/api/flashcard/resolveConflict", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, resolveFlashcardConflict)
 	ginServer.Handle("POST", "/api/flashcard/createAdvancedSource", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createAdvancedFlashcardSource)

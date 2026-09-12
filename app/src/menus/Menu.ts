@@ -1,7 +1,7 @@
 import {getEventName, updateHotkeyTip} from "../protyle/util/compatibility";
 import {setPosition} from "../util/setPosition";
 import {getAnchoredMenuPosition} from "./menuPosition";
-import {updateMenuItemGroupClasses} from "./menuGroup";
+import {updateMenuGroupsOnMutation, updateMenuItemGroupClasses} from "./menuGroup";
 import {waitForSheetViewport} from "./sheetOpen";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {isMobile} from "../util/functions";
@@ -56,6 +56,8 @@ export class Menu {
         this.preventDefault = this.preventDefault.bind(this);
 
         this.element = element || document.getElementById("commonMenu");
+        // 菜单项增删后重新分组，使圆角跟随各组的首尾项；仅监听节点变化，避免分组类更新触发循环。
+        new MutationObserver(updateMenuGroupsOnMutation).observe(this.element, {childList: true, subtree: true});
         this.element.querySelector(".b3-menu__title .b3-menu__label").innerHTML = window.siyuan.languages.back;
         const activateKeymapInput = (event: Event) => {
             const target = event.target as HTMLElement;

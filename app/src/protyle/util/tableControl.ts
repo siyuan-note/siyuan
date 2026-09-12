@@ -1489,6 +1489,7 @@ export class TableControl {
         }
         const menu = window.siyuan.menus.menu;
         menu.remove();
+        menu.element.setAttribute("data-name", `table-${this.selection.mode}`);
         const merged = buildTableGrid(this.selection.table).cellInfos.some(info => info.rowspan > 1 || info.colspan > 1);
         const mergedSelection = this.selection.mode !== "cell" && merged;
         const rectangle = this.selection.mode !== "cell" || this.isRectangle();

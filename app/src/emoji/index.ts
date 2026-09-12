@@ -181,6 +181,9 @@ export class EmojiPanelController {
     private virtualTimer = 0;
     private virtualKey = 0;
     private columnCount = 10;
+    private rowHeight = 34;
+    private rowGap = 0;
+    private measuredItem?: HTMLElement;
     private selectedUnicode = "";
     private categoryOffsets: {id: string, top: number}[] = [];
     private builtInChunkOffsets: {element: HTMLElement, categoryID: string, top: number, bottom: number}[] = [];
@@ -194,9 +197,11 @@ export class EmojiPanelController {
             if (!this.active || this.pageMode === "search" || this.panelElement.clientWidth === 0) {
                 return;
             }
+            const rowHeight = this.rowHeight;
+            const rowGap = this.rowGap;
             const columnCount = this.getColumnCount();
             const resizeAction = getEmojiPanelResizeAction(this.pageMode, this.columnCount, columnCount);
-            if (resizeAction === "render") {
+            if (resizeAction === "render" || rowHeight !== this.rowHeight || rowGap !== this.rowGap) {
                 if (this.pageMode === "custom") {
                     this.renderCustomPage();
                 } else {
@@ -307,6 +312,9 @@ export class EmojiPanelController {
     public activate() {
         this.active = true;
         this.resizeObserver.observe(this.panelElement);
+        if (this.measuredItem?.isConnected) {
+            this.resizeObserver.observe(this.measuredItem);
+        }
         if (!this.categoryID || this.panelElement.childElementCount === 0) {
             this.renderInitial();
             return;
@@ -403,7 +411,8 @@ export class EmojiPanelController {
         const chunksHTML = getEmojiVirtualChunks(items, this.columnCount).map((chunk) => {
             const key = (++this.virtualKey).toString();
             this.virtualItems.set(key, chunk);
-            const height = Math.ceil(chunk.length / this.columnCount) * 34;
+            const rows = Math.ceil(chunk.length / this.columnCount);
+            const height = rows * this.rowHeight + Math.max(0, rows - 1) * this.rowGap;
             return `<div class="emojis__content emojis__chunk" data-virtual-key="${key}" style="height:${height}px"></div>`;
         }).join("");
         return `<div class="emojis__section"${groupAttribute}${categoryAttribute}>${titleHTML}<div class="emojis__chunks">${chunksHTML}</div></div>`;
@@ -420,6 +429,7 @@ export class EmojiPanelController {
             this.renderVirtualChunk(firstChunk);
         }
         this.selectElement(targetElement.querySelector(".emojis__item"));
+        this.updateCategoryOffsets();
         const categoryOffset = this.categoryOffsets.find((item) => item.id === targetElement.dataset.category);
         if (categoryOffset) {
             this.panelElement.scrollTop = categoryOffset.top;
@@ -451,7 +461,24 @@ export class EmojiPanelController {
         if (this.panelElement.clientWidth === 0) {
             return this.columnCount;
         }
-        return Math.max(1, Math.floor(Math.max(34, this.panelElement.clientWidth - 12) / 34));
+        // 在面板内测量实际样式，使虚拟占位尺寸与主题设置的按钮尺寸保持一致。
+        const section = document.createElement("div");
+        section.className = "emojis__section";
+        section.style.visibility = "hidden";
+        section.innerHTML = `<div class="emojis__chunks"><div class="emojis__content emojis__chunk">${genEmojiButton("1f600", "", true)}</div></div>`;
+        this.panelElement.append(section);
+        const content = section.querySelector<HTMLElement>(".emojis__content");
+        const item = content.firstElementChild as HTMLElement;
+        const itemStyle = getComputedStyle(item);
+        const contentStyle = getComputedStyle(content);
+        const number = (value: string) => parseFloat(value) || 0;
+        const width = item.getBoundingClientRect().width + number(itemStyle.marginLeft) + number(itemStyle.marginRight);
+        const gap = number(contentStyle.columnGap);
+        const availableWidth = content.clientWidth - number(contentStyle.paddingLeft) - number(contentStyle.paddingRight);
+        this.rowHeight = item.getBoundingClientRect().height + number(itemStyle.marginTop) + number(itemStyle.marginBottom);
+        this.rowGap = number(contentStyle.rowGap);
+        section.remove();
+        return width > 0 ? Math.max(1, Math.floor((availableWidth + gap) / (width + gap))) : this.columnCount;
     }
 
     private observeVirtualChunks() {
@@ -524,6 +551,15 @@ export class EmojiPanelController {
             return;
         }
         element.innerHTML = items.map((item) => this.getItemHTML(item)).join("");
+        if (!this.measuredItem?.isConnected) {
+            if (this.measuredItem) {
+                this.resizeObserver.unobserve(this.measuredItem);
+            }
+            this.measuredItem = element.firstElementChild as HTMLElement;
+            if (this.measuredItem && this.active) {
+                this.resizeObserver.observe(this.measuredItem);
+            }
+        }
         this.observeImages(element);
         this.restoreVirtualSelection(element);
     }

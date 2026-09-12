@@ -367,7 +367,7 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string, boxID string) (
 		for name := range nameValues {
 			switch strings.ToLower(name) {
 			case "bookmark", "tags":
-				err = errors.New(Conf.Language(313))
+				err = errors.New(fmt.Sprintf(Conf.Language(390), name))
 				return
 			}
 		}

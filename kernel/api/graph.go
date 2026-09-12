@@ -185,12 +185,12 @@ func getLocalGraph(c *gin.Context) {
 	notebook, _ := arg["notebook"].(string)
 	if model.IsEncryptedBox(notebook) {
 		ret.Code = -1
-		ret.Msg = model.Conf.Language(313)
+		ret.Msg = model.Conf.Language(392)
 		return
 	}
 	if bt := treenode.GetBlockTree(id); bt != nil && model.IsEncryptedBox(bt.BoxID) {
 		ret.Code = -1
-		ret.Msg = model.Conf.Language(313)
+		ret.Msg = model.Conf.Language(392)
 		return
 	}
 

@@ -1,6 +1,7 @@
 import {Constants} from "../../constants";
 import {getDocumentIconHTML} from "../../emoji/fileTreeIcon";
 import type {App} from "../../index";
+import {MenuItem} from "../../menus/Menu";
 import {saveScroll} from "../../protyle/scroll/saveScroll";
 import {setStorageVal} from "../../protyle/util/compatibility";
 import {escapeAttr, escapeHtml} from "../../util/escape";
@@ -12,6 +13,7 @@ import {loadMobileFileById, updateRecentDocSwitchTime} from "../editor";
 import {openModel} from "../menu/model";
 import {closeModel} from "../util/closePanel";
 import {setEmpty} from "../util/setEmpty";
+import {canCloseTab, orderTabsForOverview, trimTabsToLimit} from "./mobileTabsState";
 
 const MAX_HISTORY = 32;
 
@@ -32,6 +34,10 @@ type MobileTab = {
     backStack: MobileTabEntry[];
     forwardStack: MobileTabEntry[];
     activeAt: number;
+    /**
+     * 钉住的页签不参与超限淘汰，在概览列表中置顶
+     */
+    pin?: boolean;
 };
 
 type MobileTabsState = {
@@ -87,6 +93,7 @@ const normalizeTab = (value: unknown): MobileTab | undefined => {
         forwardStack: Array.isArray(tab.forwardStack) ?
             tab.forwardStack.map(normalizeEntry).filter((item): item is MobileTabEntry => !!item).slice(-MAX_HISTORY) : [],
         activeAt: typeof tab.activeAt === "number" ? tab.activeAt : 0,
+        pin: tab.pin === true,
     };
 };
 
@@ -101,12 +108,30 @@ const sanitizeTab = (tab: MobileTab): MobileTab => {
     };
 };
 
+const getTabTitle = (tab: MobileTab) => tab.current?.title || window.siyuan.languages.newTab;
+
+const getTabIconHTML = (tab: MobileTab) => getDocumentIconHTML(
+    tab.current?.icon || "",
+    "mobile-tabs__item-icon",
+    // 没有图标时始终使用默认 SVG 图标做占位，不跟随 useSVGDefaultIcon 设置
+    true,
+);
+
+const getPinIcon = (pinned: boolean) => pinned ? "iconPin" : "iconUnpin";
+
 export class MobileTabs {
     private state: MobileTabsState;
     private navigationEpoch = 0;
     private abortController?: AbortController;
     private activationBackStack: string[] = [];
     private activationForwardStack: string[] = [];
+    private overviewElement?: HTMLElement;
+    private overviewLongPressTimer?: number;
+    private overviewLongPressTabID?: string;
+    private overviewLongPressTriggered = false;
+    private suppressOverviewClickUntil = 0;
+    private overviewPointerX?: number;
+    private overviewPointerY?: number;
 
     constructor(private readonly app: App) {
         const stored = window.siyuan.storage[Constants.LOCAL_MOBILE_TABS] as MobileTabsState | undefined;
@@ -254,19 +279,12 @@ export class MobileTabs {
     }
 
     private trimTabs() {
-        while (this.state.tabs.length > this.maxTabs) {
-            const inactive = this.state.tabs
-                .filter((item) => item.id !== this.state.activeTabID)
-                .sort((a, b) => a.activeAt - b.activeAt)[0];
-            if (!inactive) {
-                break;
+        this.state.tabs = trimTabsToLimit(this.state.tabs, this.state.activeTabID, this.maxTabs, (tab) => {
+            this.removeActivation(tab.id);
+            if (tab.current?.rootID) {
+                fetchPost("/api/storage/updateRecentDocCloseTime", {rootID: tab.current.rootID});
             }
-            this.state.tabs.splice(this.state.tabs.indexOf(inactive), 1);
-            this.removeActivation(inactive.id);
-            if (inactive.current?.rootID) {
-                fetchPost("/api/storage/updateRecentDocCloseTime", {rootID: inactive.current.rootID});
-            }
-        }
+        });
     }
 
     async removeMissingTabs() {
@@ -685,6 +703,21 @@ export class MobileTabs {
     }
 
     closeAll() {
+        // 钉住的页签不参与关闭全部
+        const pinnedTabs = this.state.tabs.filter((tab) => !!tab.pin);
+        if (pinnedTabs.length > 0) {
+            const keptIDs = new Set(pinnedTabs.map((tab) => tab.id));
+            this.filterEntries((_entry, entryTabID) => keptIDs.has(entryTabID));
+            if (!pinnedTabs.some((tab) => tab.id === this.state.activeTabID)) {
+                const nextTab = [...pinnedTabs].sort((a, b) => b.activeAt - a.activeAt)[0];
+                if (nextTab) {
+                    void this.switchTo(nextTab.id, false);
+                }
+            }
+            window.siyuan.menus.menu.remove();
+            this.renderOverview();
+            return;
+        }
         this.cancelNavigation();
         this.state.tabs.forEach((tab) => {
             if (tab.current?.rootID) {
@@ -722,13 +755,13 @@ export class MobileTabs {
         this.filterEntries((entry) => !roots.has(entry.rootID));
     }
 
-    private filterEntries(predicate: (entry: MobileTabEntry) => boolean) {
+    private filterEntries(predicate: (entry: MobileTabEntry, tabID: string) => boolean) {
         const activeTabID = this.state.activeTabID;
         this.state.tabs.forEach((tab) => {
-            tab.backStack = tab.backStack.filter(predicate);
-            tab.forwardStack = tab.forwardStack.filter(predicate);
+            tab.backStack = tab.backStack.filter((entry) => predicate(entry, tab.id));
+            tab.forwardStack = tab.forwardStack.filter((entry) => predicate(entry, tab.id));
         });
-        this.state.tabs = this.state.tabs.filter((tab) => !tab.current || predicate(tab.current));
+        this.state.tabs = this.state.tabs.filter((tab) => !tab.current || predicate(tab.current, tab.id));
         this.activationBackStack = this.activationBackStack.filter((tabID) =>
             this.state.tabs.some((tab) => tab.id === tabID));
         this.activationForwardStack = this.activationForwardStack.filter((tabID) =>
@@ -762,26 +795,83 @@ export class MobileTabs {
         this.persist();
     }
 
-    openOverview() {
-        this.snapshot();
+    private openTabMenu(tabID: string) {
+        const tab = this.state.tabs.find((item) => item.id === tabID);
+        if (!tab) {
+            return;
+        }
+        const pinned = !!tab.pin;
+        window.siyuan.menus.menu.remove();
+        window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_MOBILE_TABS);
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "close",
+            icon: "iconClose",
+            label: window.siyuan.languages.close,
+            click: () => {
+                void this.close(tabID);
+            },
+        }).element);
+        if (this.state.tabs.length > 1) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "closeOthers",
+                label: window.siyuan.languages.closeOthers,
+                click: () => {
+                    this.closeOthers(tabID);
+                },
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "closeAll",
+                label: window.siyuan.languages.closeAll,
+                click: () => {
+                    this.closeAll();
+                },
+            }).element);
+        }
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: pinned ? "unpin" : "pin",
+            icon: getPinIcon(pinned),
+            label: pinned ? window.siyuan.languages.unpin : window.siyuan.languages.pin,
+            click: () => {
+                this.togglePin(tabID);
+            },
+        }).element);
+        window.siyuan.menus.menu.fullscreen("bottom");
+    }
+
+    private togglePin(tabID: string) {
+        const tab = this.state.tabs.find((item) => item.id === tabID);
+        if (!tab) {
+            return;
+        }
+        tab.pin = !tab.pin;
+        tab.activeAt = Date.now();
+        // 钉住状态随页签列表持久化
         this.persist();
-        const active = this.state.activeTabID;
-        const rows = this.state.tabs.map((tab) => {
-            const iconHTML = tab.current ? getDocumentIconHTML(
-                tab.current.icon || "",
-                "mobile-tabs__item-icon",
-            ) : '<svg class="mobile-tabs__item-icon"><use xlink:href="#iconFile"></use></svg>';
-            return `<div class="mobile-tabs__item${tab.id === active ? " mobile-tabs__item--active" : ""}" data-tab-id="${escapeAttr(tab.id)}">
-    ${iconHTML}
-    <span class="mobile-tabs__item-title">${escapeHtml(tab.current?.title || window.siyuan.languages.newTab)}</span>
-    <button class="b3-button b3-button--text mobile-tabs__close" data-action="close" aria-label="${escapeAttr(window.siyuan.languages.close)}">
-        <svg><use xlink:href="#iconClose"></use></svg>
-    </button>
-</div>`;
-        }).join("");
+        this.renderOverview();
+        window.siyuan.menus.menu.remove();
+    }
+
+    private closeOthers(tabID: string) {
+        if (!this.state.tabs.some((item) => item.id === tabID)) {
+            return;
+        }
+        // 钉住的页签不参与关闭其他
+        const keptIDs = new Set(this.state.tabs
+            .filter((item) => item.id === tabID || !!item.pin)
+            .map((item) => item.id));
+        this.filterEntries((_entry, entryTabID) => keptIDs.has(entryTabID));
+        window.siyuan.menus.menu.remove();
+        this.renderOverview();
+    }
+
+    private renderOverview() {
+        // 钉住的页签置顶显示，靠图钉图标区分，不额外加分组标题或分隔线
+        const rows = orderTabsForOverview(this.state.tabs)
+            .map((tab) => this.renderOverviewItem(tab)).join("");
         openModel({
             title: `${window.siyuan.languages.mobileTabs} ${this.state.tabs.length}`,
-            html: `<div class="mobile-tabs">
+            html: `<div class="mobile-tabs" data-name="${escapeAttr(Constants.MENU_MOBILE_TABS_OVERVIEW)}">
     <div class="mobile-tabs__list">${rows || `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`}</div>
     <div class="mobile-tabs__actions">
         <button class="b3-button b3-button--outline" data-action="back"${this.canGoBack() ? "" : " disabled"}><svg><use xlink:href="#iconLeft"></use></svg>${window.siyuan.languages.goBack}</button>
@@ -791,44 +881,119 @@ export class MobileTabs {
     </div>
 </div>`,
             bindEvent: (element) => {
-                element.querySelectorAll<HTMLElement>("[data-action]").forEach((target) => {
-                    target.addEventListener("click", (event) => {
-                        event.stopPropagation();
-                        const action = target.dataset.action;
-                        const tabID = target.closest<HTMLElement>("[data-tab-id]")?.dataset.tabId;
-                        if (action === "close" && tabID) {
-                            void this.close(tabID);
-                        } else if (action === "back") {
-                            void this.goBack().then(() => closeModel());
-                        } else if (action === "forward") {
-                            void this.goForward().then(() => closeModel());
-                        } else if (action === "new-doc") {
-                            closeModel();
-                            newFile(this.app);
-                        } else if (action === "close-all") {
-                            this.closeAll();
-                        }
-                    });
-                });
-                element.querySelectorAll<HTMLElement>("[data-tab-id]").forEach((target) => {
-                    target.addEventListener("click", () => {
-                        const tabID = target.dataset.tabId;
-                        if (tabID) {
-                            void this.switchTo(tabID);
-                        }
-                    });
-                });
-                requestAnimationFrame(() => {
-                    const listElement = element.querySelector<HTMLElement>(".mobile-tabs__list");
-                    const activeElement = listElement?.querySelector<HTMLElement>(".mobile-tabs__item--active");
-                    if (!listElement || !activeElement) {
-                        return;
-                    }
-                    const listRect = listElement.getBoundingClientRect();
-                    const activeRect = activeElement.getBoundingClientRect();
-                    listElement.scrollTop += activeRect.top - listRect.top - (listRect.height - activeRect.height) / 2;
-                });
+                if (element !== this.overviewElement) {
+                    // 每次渲染都会替换内容，事件绑定在固定的容器上
+                    this.overviewElement = element;
+                    this.bindOverviewEvents(element);
+                }
+            },
+            destroyCallback: () => {
+                this.cancelOverviewLongPress();
             },
         });
+    }
+
+    private renderOverviewItem(tab: MobileTab) {
+        const pinned = !!tab.pin;
+        const closeHidden = !canCloseTab(pinned, window.siyuan.config.fileTree.openFilesUseCurrentTab);
+        return `<div class="mobile-tabs__item${tab.id === this.state.activeTabID ? " mobile-tabs__item--active" : ""}" data-tab-id="${escapeAttr(tab.id)}">
+    ${getTabIconHTML(tab)}
+    <span class="mobile-tabs__item-title">${escapeHtml(getTabTitle(tab))}</span>
+    <span class="mobile-tabs__item-pin${pinned ? "" : " fn__none"}" aria-hidden="${pinned ? "false" : "true"}" aria-label="${escapeAttr(window.siyuan.languages.pin)}"><svg><use xlink:href="#iconPin"></use></svg></span>
+    <button class="b3-button b3-button--text mobile-tabs__close${closeHidden ? " fn__none" : ""}" data-action="close" aria-label="${escapeAttr(window.siyuan.languages.close)}">
+        <svg><use xlink:href="#iconClose"></use></svg>
+    </button>
+</div>`;
+    }
+
+    private bindOverviewEvents(element: HTMLElement) {
+        element.addEventListener("click", (event) => {
+            const target = event.target as HTMLElement;
+            if (this.overviewLongPressTriggered) {
+                // 长按抬手时会补发 click，只忽略紧随长按的那一次
+                this.overviewLongPressTriggered = false;
+                if (Date.now() < this.suppressOverviewClickUntil) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
+            }
+            const actionElement = target.closest<HTMLElement>("[data-action]");
+            if (actionElement) {
+                const tabID = actionElement.closest<HTMLElement>("[data-tab-id]")?.dataset.tabId;
+                if (actionElement.dataset.action === "close" && tabID) {
+                    void this.close(tabID);
+                } else if (actionElement.dataset.action === "back") {
+                    void this.goBack().then(() => closeModel());
+                } else if (actionElement.dataset.action === "forward") {
+                    void this.goForward().then(() => closeModel());
+                } else if (actionElement.dataset.action === "new-doc") {
+                    closeModel();
+                    newFile(this.app);
+                } else if (actionElement.dataset.action === "close-all") {
+                    this.closeAll();
+                }
+                event.stopPropagation();
+                return;
+            }
+            const itemElement = target.closest<HTMLElement>("[data-tab-id]");
+            if (itemElement) {
+                void this.switchTo(itemElement.dataset.tabId);
+            }
+        });
+
+        const processPointerMove = (event: PointerEvent) => {
+            if (typeof this.overviewPointerX !== "number" || typeof this.overviewPointerY !== "number") {
+                return;
+            }
+            if (Math.abs(event.clientX - this.overviewPointerX) > Constants.SIZE_DRAG_THRESHOLD ||
+                Math.abs(event.clientY - this.overviewPointerY) > Constants.SIZE_DRAG_THRESHOLD) {
+                // 滑动视为滚动列表，取消长按
+                this.cancelOverviewLongPress();
+            }
+        };
+        element.addEventListener("pointerdown", (event) => {
+            if (event.button !== 0) {
+                return;
+            }
+            const itemElement = (event.target as HTMLElement).closest<HTMLElement>("[data-tab-id]");
+            if (!itemElement) {
+                return;
+            }
+            this.cancelOverviewLongPress();
+            this.overviewPointerX = event.clientX;
+            this.overviewPointerY = event.clientY;
+            this.overviewLongPressTabID = itemElement.dataset.tabId;
+            this.overviewLongPressTimer = window.setTimeout(() => {
+                const tabID = this.overviewLongPressTabID;
+                this.overviewLongPressTimer = undefined;
+                this.overviewLongPressTabID = undefined;
+                if (!tabID) {
+                    return;
+                }
+                this.overviewLongPressTriggered = true;
+                this.suppressOverviewClickUntil = Date.now() + Constants.TIMEOUT_LONGPRESS;
+                this.openTabMenu(tabID);
+            }, Constants.TIMEOUT_LONGPRESS);
+        });
+        element.addEventListener("pointermove", processPointerMove);
+        element.addEventListener("pointerup", () => this.cancelOverviewLongPress());
+        element.addEventListener("pointercancel", () => this.cancelOverviewLongPress());
+    }
+
+    private cancelOverviewLongPress() {
+        if (this.overviewLongPressTimer) {
+            clearTimeout(this.overviewLongPressTimer);
+            this.overviewLongPressTimer = undefined;
+        }
+        this.overviewLongPressTabID = undefined;
+        this.overviewPointerX = undefined;
+        this.overviewPointerY = undefined;
+    }
+
+    openOverview() {
+        this.snapshot();
+        this.persist();
+        this.renderOverview();
     }
 }

@@ -452,7 +452,7 @@ func exportNotebooksMd(c *gin.Context) {
 	for _, notebook := range notebooks {
 		if model.IsEncryptedBox(notebook) {
 			ret.Code = -1
-			ret.Msg = model.Conf.Language(313)
+			ret.Msg = model.Conf.Language(395)
 			return
 		}
 	}
@@ -551,7 +551,7 @@ func exportNotebooksSY(c *gin.Context) {
 	for _, notebook := range notebooks {
 		if model.IsEncryptedBox(notebook) {
 			ret.Code = -1
-			ret.Msg = model.Conf.Language(313)
+			ret.Msg = model.Conf.Language(395)
 			return
 		}
 	}
@@ -708,7 +708,7 @@ func exportDocx(c *gin.Context) {
 	// savePath 由客户端指定，禁止写入加密笔记本目录（明文导出物会绕过加密、锁定后残留）
 	if rejectEncryptedBoxPath(savePath) {
 		ret.Code = -1
-		ret.Msg = model.Conf.Language(313)
+		ret.Msg = model.Conf.Language(383)
 		return
 	}
 
@@ -766,7 +766,7 @@ func exportMdHTML(c *gin.Context) {
 	// savePath 由客户端指定，禁止写入加密笔记本目录（明文导出物会绕过加密、锁定后残留）
 	if rejectEncryptedBoxPath(savePath) {
 		ret.Code = -1
-		ret.Msg = model.Conf.Language(313)
+		ret.Msg = model.Conf.Language(383)
 		return
 	}
 
@@ -857,6 +857,15 @@ func exportBrowserHTML(c *gin.Context) {
 		return
 	}
 
+	// folder 由客户端指定，禁止包含 ..、绝对路径等穿越组件，防止在导出目录之外写入 index.html
+	exportDir := filepath.Join(util.TempDir, "export")
+	tmpDir := filepath.Join(exportDir, folder)
+	if !gulu.File.IsSubPath(exportDir, tmpDir) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(383)
+		return
+	}
+
 	// 检测是否来自加密笔记本：folder 形如 <boxID>/<folderName>
 	boxID := ""
 	if parts := strings.SplitN(folder, "/", 2); len(parts) >= 1 && ast.IsNodeIDPattern(parts[0]) && model.IsEncryptedBox(parts[0]) {
@@ -870,7 +879,6 @@ func exportBrowserHTML(c *gin.Context) {
 		}
 	}
 
-	tmpDir := filepath.Join(util.TempDir, "export", folder)
 	htmlPath := filepath.Join(tmpDir, "index.html")
 	if err := filelock.WriteFile(htmlPath, []byte(htmlContent)); err != nil {
 		ret.Code = -1
@@ -1028,7 +1036,7 @@ func exportHTML(c *gin.Context) {
 	// savePath 由客户端指定，禁止写入加密笔记本目录（明文导出物会绕过加密、锁定后残留）
 	if rejectEncryptedBoxPath(savePath) {
 		ret.Code = -1
-		ret.Msg = model.Conf.Language(313)
+		ret.Msg = model.Conf.Language(383)
 		return
 	}
 
@@ -1269,7 +1277,7 @@ func copyExportFile(c *gin.Context) {
 		if _, dekErr := model.GetDEKIfUnlocked(boxID); dekErr != nil {
 			model.ReleaseBoxReadLock(boxID)
 			ret.Code = -1
-			ret.Msg = "encrypted notebook locked"
+			ret.Msg = model.Conf.Language(314)
 			return
 		}
 		defer model.ReleaseBoxReadLock(boxID)

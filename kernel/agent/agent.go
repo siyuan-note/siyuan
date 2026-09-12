@@ -91,7 +91,7 @@ second paragraph
 
 ## Formatting
 - Inline formatting uses standard markdown: **bold**, *italic*, ~~strikethrough~~, ==mark==, and "code" (backticks).
-- In markdown written to SiYuan blocks, block references must include anchor text. Use ((<blockID> "<static anchor text>")) for fixed text, or ((<blockID> '<dynamic anchor text>')) for text that follows the target block's content. Never use ((<blockID>)) or [[<blockID>]]. These forms are for note content; in chat responses use [title](siyuan://blocks/<blockID>).
+- In markdown written to SiYuan blocks, block references must include anchor text. Use ((<blockID> "<static anchor text>")) for fixed text, which is required whenever the anchor text differs from the referenced block's content. Use ((<blockID> '<dynamic anchor text>')) for text that follows the target block's content, so only when the anchor text is the target block's own content. Never use ((<blockID>)) or [[<blockID>]]. These forms are for note content; in chat responses use [title](siyuan://blocks/<blockID>).
 - For text styling that markdown cannot express (color, background, font size), use SiYuan text marks.
   The syntax requires a leading data-type="text" attribute — WITHOUT it the HTML is escaped and shown as literal text:
   - Text color:      <span data-type="text" style="color: #ff0000;">red text</span>
@@ -163,6 +163,8 @@ const (
 	doomLoopWarnThreshold = 3
 	// doomLoopStopThreshold 是相同签名连续命中时终止 agent 的阈值。
 	doomLoopStopThreshold = 5
+	// fallbackQuestionTimeout 是确认超时时间非法（负数）时 question 工具的兜底等待时长。
+	fallbackQuestionTimeout = 5 * time.Minute
 )
 
 // toolSignatureKeys 列出各工具里真正"区分一次调用"的关键参数。
@@ -1417,7 +1419,7 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 						resultStr = toolInputErr.Error()
 						isErr = true
 					} else if tc.Function.Name == "question" {
-						resultStr = handleQuestion(ctx, args, roundID, ch, 5*time.Minute)
+						resultStr = handleQuestion(ctx, args, roundID, ch, resolveQuestionTimeout(confirmTimeout))
 					} else if registration.isBrowser() {
 						executed := handleBrowserCapability(ctx, tc, registration, args, ch,
 							resolveBrowserCapabilityTimeout(confirmTimeout))
@@ -1764,7 +1766,7 @@ func handleQuestion(ctx context.Context, args map[string]any, roundID string, ch
 		} else {
 			return "Question cancelled."
 		}
-	case <-time.After(timeout):
+	case <-optionalAgentDeadline(timeout):
 		if acceptedAnswer, accepted := finishQuestionWait(questionID, ch2); accepted {
 			answer = acceptedAnswer
 		} else {
@@ -1830,7 +1832,16 @@ func optionalAgentDeadline(timeout time.Duration) <-chan time.Time {
 
 func resolveBrowserCapabilityTimeout(confirmTimeout time.Duration) time.Duration {
 	if confirmTimeout <= 0 {
-		return 120 * time.Second
+		return time.Duration(conf.DefaultAgentConfirmTimeout) * time.Second
+	}
+	return confirmTimeout
+}
+
+// resolveQuestionTimeout 解析 question 工具等待用户作答的时长：确认超时时间为 0 时一直等待，
+// 其余情况沿用确认超时时间（调用方已把负数兜底为默认值），因此默认配置下为 600 秒。
+func resolveQuestionTimeout(confirmTimeout time.Duration) time.Duration {
+	if confirmTimeout <= 0 {
+		return fallbackQuestionTimeout
 	}
 	return confirmTimeout
 }

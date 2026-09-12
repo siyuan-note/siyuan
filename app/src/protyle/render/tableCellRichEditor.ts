@@ -21,6 +21,8 @@ import {captureRichCellSelection, restoreRichCellSelection} from "../util/tableC
 import {matchHotKey} from "../util/hotKey";
 import {bindTableCellRichDrag} from "../util/tableCellRichDrag";
 import {getTableCellEditorLute} from "../util/tableCellRichLute";
+import {setTableCellRichContext} from "../util/tableCellRichContext";
+import {updateOutlineCurrentBlock} from "../util/outlineBlock";
 
 let activeEditor: {cell: Element, finish: () => void} | undefined;
 
@@ -117,10 +119,26 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     host.dataset.protyleLiteRender = "safe";
     host.contentEditable = "false";
     cell.replaceChildren(host);
-    const events = ["beforeinput", "input", "keydown", "keyup", "compositionstart", "compositionupdate", "compositionend",
+    const events = ["beforeinput", "input", "compositionstart", "compositionupdate", "compositionend",
         "copy", "cut", "paste", "pointerdown", "pointerup", "pointermove", "mousedown", "mouseup", "mousemove",
         "click", "dblclick", "contextmenu", "dragstart", "dragover", "drop", "focusin", "focusout"];
     events.forEach(type => host.addEventListener(type, event => event.stopPropagation()));
+    ["keydown", "keyup"].forEach(type => host.addEventListener(type, (event: KeyboardEvent) => {
+        event.stopPropagation();
+        if (event.defaultPrevented || event.isComposing || composing) {
+            return;
+        }
+        // 跳过外层正文的编辑处理，让未消费的快捷键继续到达全局监听器。
+        const forwarded = new KeyboardEvent(event.type, {
+            key: event.key, code: event.code, location: event.location, repeat: event.repeat,
+            keyCode: event.keyCode, charCode: event.charCode,
+            ctrlKey: event.ctrlKey, metaKey: event.metaKey, altKey: event.altKey, shiftKey: event.shiftKey,
+            bubbles: true, cancelable: true,
+        });
+        if (!owner.element.dispatchEvent(forwarded)) {
+            event.preventDefault();
+        }
+    }));
     ["mouseover", "pointerover"].forEach(type => host.addEventListener(type, event => {
         hideElements(["gutter"], owner);
         event.stopPropagation();
@@ -162,6 +180,8 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         onChange: () => {
             contentChanged = true;
             updateTableCellContentLayout(host, fragment.getBlockHTML());
+            // 单元格内容变化可能改变其所属块，需同步大纲高亮
+            updateOutlineCurrentBlock(owner, cell);
             if (!finished && !composing) {
                 commit();
             }
@@ -230,6 +250,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         }
     };
     activeEditor = {cell, finish};
+    setTableCellRichContext(fragment.protyle, {owner, cell, finish});
     const signal = controller.signal;
     bindTableCellRichDrag(owner, cell, fragment.wysiwyg, finish, signal,
         target => openTableCellRichEditor(owner, target));
@@ -244,6 +265,8 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         if (fragment.wysiwyg.contains(event.target as Node)) {
             hideElements(["toolbar"], fragment.protyle);
         }
+        // 单元格编辑器自行接管焦点，编辑区收不到块级点击，需在此同步大纲高亮
+        updateOutlineCurrentBlock(owner, cell);
     }, {capture: true, signal});
     host.addEventListener("mousedown", event => {
         if (event.button !== 0 || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey ||
@@ -413,6 +436,8 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     }, {capture: true, signal});
     observer.observe(owner.element, {childList: true, subtree: true});
     fragment.focus(true);
+    // 进入单元格编辑即按所属表格块同步大纲高亮
+    updateOutlineCurrentBlock(owner, cell);
     if (restoredSelection && restoreRichCellSelection(fragment.wysiwyg, restoredSelection)) {
         undoSelection = restoredSelection;
         return;

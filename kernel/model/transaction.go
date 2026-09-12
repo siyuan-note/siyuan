@@ -639,7 +639,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		}
 		// 禁止跨加密边界移动块：加密笔记本是孤岛，跨 box 移动会破坏隔离（内容从 A 泄漏到 B）
 		if !isSameTree && !IsSameCryptoBoundary(srcTree.Box, targetTree.Box) {
-			util.PushMsg(Conf.Language(313), 5000)
+			util.PushMsg(Conf.Language(391), 5000)
 			return &TxErr{code: TxErrCodeSkipTx}
 		}
 
@@ -723,7 +723,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	}
 	// 禁止跨加密边界移动块（同 doMove targetPreviousID 分支）
 	if !isSameTree && !IsSameCryptoBoundary(srcTree.Box, targetTree.Box) {
-		util.PushMsg(Conf.Language(313), 5000)
+		util.PushMsg(Conf.Language(391), 5000)
 		return &TxErr{code: TxErrCodeSkipTx}
 	}
 
@@ -1199,7 +1199,7 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 	}
 	// 禁止跨加密边界插入块（同 doMove 守卫）
 	if !isSameTree && !IsSameCryptoBoundary(srcTree.Box, targetTree.Box) {
-		util.PushMsg(Conf.Language(313), 5000)
+		util.PushMsg(Conf.Language(391), 5000)
 		return &TxErr{code: TxErrCodeSkipTx}
 	}
 	if captureHeadingMoveGroup {
@@ -2044,7 +2044,14 @@ func (tx *Transaction) degradeCrossBoundaryBlockRefs(root *ast.Node, srcBox stri
 }
 
 func degradeCrossBoundaryBlockRefs0(root *ast.Node, srcBox string, restoredCreatedDocBoxes map[string]string) int {
-	degraded := 0
+	return degradeCrossBoundaryBlockRefsWithAllowed(root, srcBox, restoredCreatedDocBoxes, nil)
+}
+
+// degradeCrossBoundaryBlockRefsWithAllowed 与 degradeCrossBoundaryBlockRefs 语义相同，
+// 额外把 allowedBlockIDs 视为本地块。导入 .sy.zip 时包内文档尚未入库，块树查不到，
+// 只有把本次导入的全部块 ID 一并放行，才能既拦住包外引用又不误伤包内跨文档引用。
+func degradeCrossBoundaryBlockRefsWithAllowed(root *ast.Node, srcBox string, restoredCreatedDocBoxes map[string]string,
+	allowedBlockIDs map[string]bool) (degraded int) {
 	localBlockIDs := map[string]struct{}{}
 	ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering && n.IsBlock() && n.ID != "" {
@@ -2059,6 +2066,9 @@ func degradeCrossBoundaryBlockRefs0(root *ast.Node, srcBox string, restoredCreat
 
 		if ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref") {
 			if _, local := localBlockIDs[n.TextMarkBlockRefID]; local {
+				return ast.WalkContinue
+			}
+			if allowedBlockIDs[n.TextMarkBlockRefID] {
 				return ast.WalkContinue
 			}
 			if targetBox, restored := restoredCreatedDocBoxes[n.TextMarkBlockRefID]; restored && "" != targetBox && targetBox == srcBox {
@@ -2185,7 +2195,15 @@ func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {
 }
 
 func (tx *Transaction) doCreate(operation *Operation) (ret *TxErr) {
-	tree := operation.Data.(*parse.Tree)
+	tree := operation.Tree
+	if nil == tree && nil != operation.Data {
+		if t, ok := operation.Data.(*parse.Tree); ok {
+			tree = t
+		}
+	}
+	if nil == tree {
+		return &TxErr{code: TxErrCodePushMsg, msg: "invalid create operation: tree is nil", id: operation.ID}
+	}
 	// 兜底校验：禁止跨加密边界块引（创建文档可能携带跨边界引用）
 	// 必须在 getRefDefIDs 之前，避免跨边界引用被收集进引用缓存
 	tx.degradeCrossBoundaryBlockRefs(tree.Root, tree.Box)
@@ -2226,7 +2244,7 @@ func (tx *Transaction) doRestoreCreatedDoc(operation *Operation) (ret *TxErr) {
 	if box.Exist(tree.Path) {
 		return &TxErr{code: TxErrCodePushMsg, msg: "created doc path already exists", id: operation.ID}
 	}
-	if ret = tx.doCreate(&Operation{Action: "create", Data: tree}); nil == ret {
+	if ret = tx.doCreate(&Operation{Action: "create", Tree: tree}); nil == ret {
 		if "" != operation.templateDocTreeRootID {
 			tx.restoredTemplateCreatedDocs = append(tx.restoredTemplateCreatedDocs, tree)
 		} else {
@@ -2705,6 +2723,22 @@ func (tx *Transaction) commit() (err error) {
 	for id, tree := range tx.trees {
 		if _, restored := restoredIDs[id]; !restored {
 			orderedTrees = append(orderedTrees, tree)
+		}
+	}
+	for _, op := range tx.DoOperations {
+		if _, ok := op.Data.(*parse.Tree); ok {
+			if nil == op.Tree {
+				op.Tree = op.Data.(*parse.Tree)
+			}
+			op.Data = nil
+		}
+	}
+	for _, op := range tx.UndoOperations {
+		if _, ok := op.Data.(*parse.Tree); ok {
+			if nil == op.Tree {
+				op.Tree = op.Data.(*parse.Tree)
+			}
+			op.Data = nil
 		}
 	}
 	for _, tree := range orderedTrees {

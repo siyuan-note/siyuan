@@ -840,6 +840,9 @@ export class Background {
                 fetchPost("/api/search/searchTag", {
                     k: "",
                 }, (response) => {
+                    if (!listElement.isConnected) {
+                        return;
+                    }
                     let html = "";
                     const currentTags = this.getTags();
                     response.data.tags.forEach((item: string, index: number) => {
@@ -849,6 +852,7 @@ export class Background {
 </div>`;
                     });
                     listElement.innerHTML = html;
+                    window.siyuan.menus.menu.resetPosition();
                 });
                 const inputElement = element.querySelector("input");
                 inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -874,6 +878,9 @@ export class Background {
                     fetchPost("/api/search/searchTag", {
                         k: inputElement.value.trim(),
                     }, (response) => {
+                        if (!listElement.isConnected) {
+                            return;
+                        }
                         let searchHTML = "";
                         let hasKey = false;
                         const currentTags = this.getTags();
@@ -890,6 +897,7 @@ export class Background {
                             searchHTML = `<div data-type="new" class="b3-list-item b3-list-item--narrow${searchHTML ? "" : " b3-list-item--focus"}"><div class="fn__flex-1">${window.siyuan.languages.new} <mark>${escapeHtml(response.data.k)}</mark></div></div>` + searchHTML;
                         }
                         listElement.innerHTML = searchHTML;
+                        window.siyuan.menus.menu.resetPosition();
                     });
                 });
                 listElement.addEventListener("click", (event) => {

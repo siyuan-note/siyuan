@@ -10,6 +10,7 @@ import {positionAVRichTextEditor} from "./richTextEditorPosition";
 import {getAVData} from "./virtualScroll";
 import {resolveAVSelectedCell} from "./selectionState";
 import {beginAVEditorSession} from "./editorSession";
+import {updateOutlineCurrentBlock} from "../../util/outlineBlock";
 import {
     configureAVRichTextLute,
     createAVRichTextValue,
@@ -247,5 +248,7 @@ export const openAVRichTextEditor = (options: AVRichTextEditorOptions) => {
         }
     }, true);
     fragment.focus(true);
+    // 浮层编辑器自行接管焦点，编辑区收不到块级点击，需在此按所属数据库块同步大纲高亮
+    updateOutlineCurrentBlock(options.protyle, options.nodeElement);
     callMobileAppShowKeyboard();
 };

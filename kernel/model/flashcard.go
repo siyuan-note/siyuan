@@ -69,7 +69,7 @@ func validateFlashcardBlockIDs(blockIDs []string, getBlockTree func(string) *tre
 			return errors.New(Conf.Language(180))
 		}
 		if isEncryptedBox(bt.BoxID) {
-			return errors.New(Conf.Language(313))
+			return errors.New(Conf.Language(393))
 		}
 	}
 	return nil
@@ -273,7 +273,7 @@ func ResetFlashcards(typ, id, deckID string, blockIDs []string) error {
 	switch typ {
 	case "notebook":
 		if IsEncryptedBox(id) {
-			return errors.New(Conf.Language(313))
+			return errors.New(Conf.Language(393))
 		}
 	case "tree":
 		if err := validateFlashcardTree(id); err != nil {
@@ -757,7 +757,7 @@ func newFlashcard(card riff.Card, deckID string, now time.Time) *Flashcard {
 
 func GetNotebookDueFlashcards(boxID string, reviewedCardIDs []string) (ret []*Flashcard, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount int, err error) {
 	if IsEncryptedBox(boxID) {
-		err = errors.New(Conf.Language(313))
+		err = errors.New(Conf.Language(393))
 		return
 	}
 	deckLock.Lock()

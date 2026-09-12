@@ -26,11 +26,11 @@ html {
 }
 
 body {
-  background-image: radial-gradient(
+  background-image: var(--b3-body-background-gradient, radial-gradient(
                   ellipse 45% 20% at 0% 0%,
                   hsla(var(--b3-body-background-hl), calc(var(--b3-body-background-hl-opacity) * 0.5)) 0%,
                   transparent 100%
-  );
+  ));
 }
 
 .fullscreen {
@@ -232,6 +232,10 @@ html[data-frontend="browser-desktop"] {
 }
 
 .status {
+  & > [data-entry-hidden="true"] {
+    display: none !important;
+  }
+
   box-sizing: border-box;
   z-index: 2;
   height: 32px;

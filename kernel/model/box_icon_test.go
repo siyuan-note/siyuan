@@ -16,7 +16,15 @@
 
 package model
 
-import "testing"
+import (
+	"errors"
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/util"
+)
 
 func TestFilterBoxIconPreservesNetworkURL(t *testing.T) {
 	for _, icon := range []string{
@@ -63,5 +71,32 @@ func TestFilterBoxIconSanitizesCustomIconFilename(t *testing.T) {
 	icon := `" onerror="alert(1).png`
 	if got := filterBoxIcon(icon); got == icon {
 		t.Fatalf("unsafe custom icon filename was preserved [%q]", icon)
+	}
+}
+
+func TestSetBoxIconRejectsInvalidBoxID(t *testing.T) {
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = oldDataDir })
+
+	escapedDir := filepath.Join(filepath.Dir(util.DataDir), "escaped")
+	SetBoxIcon("../"+filepath.Base(escapedDir), "1f600")
+	if _, err := os.Stat(filepath.Join(escapedDir, ".siyuan", "conf.json")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("conf.json was written outside the workspace: %v", err)
+	}
+}
+
+func TestSaveConfRejectsInvalidBoxID(t *testing.T) {
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = oldDataDir })
+
+	escapedDir := filepath.Join(filepath.Dir(util.DataDir), "escaped")
+	box := &Box{ID: "../" + filepath.Base(escapedDir)}
+	if err := box.SaveConf(conf.NewBoxConf()); err == nil {
+		t.Fatal("SaveConf accepted a traversal box ID")
+	}
+	if _, err := os.Stat(filepath.Join(escapedDir, ".siyuan", "conf.json")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("conf.json was written outside the workspace: %v", err)
 	}
 }

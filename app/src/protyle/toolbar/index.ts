@@ -221,7 +221,9 @@ export class Toolbar {
         if (!this.rangePosition || !this.range) {
             return;
         }
-        const protyleRect = protyle.element.getBoundingClientRect();
+        // 单元格内的浮动工具栏使用外层编辑器边界，避免被短单元格挤到选区上。
+        const cellEditor = protyle.element.closest(".table__cell-editor");
+        const protyleRect = (cellEditor?.parentElement.closest(".protyle") || protyle.element).getBoundingClientRect();
         const viewportBoundary = element.dataset.positionBoundary === "viewport";
         const topBoundary = viewportBoundary ? 8 : protyleRect.top + 30;
         const bottomBoundary = viewportBoundary ? window.innerHeight - 8 :
@@ -1446,6 +1448,15 @@ export class Toolbar {
                         !showMenuElement.getAttribute("data-href"))) {
                     linkMenu(protyle, showMenuElement, showMenuElement.getAttribute("data-href") ? true : false);
                 }
+            }
+        }
+        // 新建空标签后进入标签搜索状态，便于选择已有标签
+        if (type === "tag" && !isBatch) {
+            const tagElement = newNodes.find((item): item is HTMLElement =>
+                item.nodeType === Node.ELEMENT_NODE &&
+                ((item as HTMLElement).getAttribute("data-type") || "").split(" ").includes("tag"));
+            if (tagElement && getSemanticInlineVisibleText(tagElement) === "") {
+                protyle.hint.startHashTagSearch(protyle, tagElement);
             }
         }
         return newNodes;

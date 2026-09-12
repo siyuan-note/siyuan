@@ -79,6 +79,7 @@ export class Plugin {
         }
     } = {};
     public topBarIcons: Element[] = [];
+    private customTopBarElements = new WeakSet<HTMLElement>();
     public setting: Setting;
     public statusBarIcons: Element[] = [];
     public commands: ICommand[] = [];
@@ -237,24 +238,51 @@ export class Plugin {
 
     public addTopBar(options: {
         id?: string,
-        icon: string,
+        icon?: string,
         title: string,
         position?: "right" | "left",
-        callback: (evt: MouseEvent) => void
+        element?: HTMLElement,
+        callback?: (evt: MouseEvent) => void
     }) {
         if (isPluginDisposed(this)) {
             return;
         }
-        options.icon = options.icon.trim();
-        if (!options.icon.startsWith("icon") && !options.icon.startsWith("<svg")) {
+        if (options.element && (isMobile() || isWindow())) {
+            return;
+        }
+        if (!options.element) {
+            options.icon = options.icon?.trim() || "";
+        }
+        if (!options.element && !options.icon.startsWith("icon") && !options.icon.startsWith("<svg")) {
             console.error(`plugin ${this.name} addTopBar error: icon must be svg id or svg tag`);
             return;
         }
         let iconElement = typeof options.id === "string" ? this.topBarIcons.find(item =>
             item.getAttribute("data-id") === options.id) as HTMLElement : undefined;
+        if (options.element && this.topBarIcons.includes(options.element)) {
+            if (typeof options.id !== "string") {
+                iconElement = options.element;
+            } else if (iconElement !== options.element) {
+                console.error(`plugin ${this.name} addTopBar error: element is already registered with another id`);
+                return;
+            }
+        }
         const isNew = !iconElement;
+        if (iconElement && (options.element && options.element !== iconElement ||
+            !options.element && this.customTopBarElements.has(iconElement))) {
+            const replacement = options.element || document.createElement("div");
+            ["id", "data-id", "data-topbar-entry", "data-location"].forEach(name => {
+                const value = iconElement.getAttribute(name);
+                if (value !== null) {
+                    replacement.setAttribute(name, value);
+                }
+            });
+            iconElement.replaceWith(replacement);
+            this.topBarIcons[this.topBarIcons.indexOf(iconElement)] = replacement;
+            iconElement = replacement;
+        }
         if (!iconElement) {
-            iconElement = document.createElement("div");
+            iconElement = options.element || document.createElement("div");
             if (typeof options.id === "string") {
                 iconElement.id = `plugin_${encodeURIComponent(this.name)}:${encodeURIComponent(options.id)}`;
                 iconElement.setAttribute("data-id", options.id);
@@ -269,16 +297,22 @@ export class Plugin {
             }
         }
         const previousLocation = iconElement.getAttribute("data-location");
-        iconElement.setAttribute("data-menu", "true");
-        iconElement.onclick = options.callback;
-        if (isMobile()) {
+        if (options.element) {
+            this.customTopBarElements.add(iconElement);
+            iconElement.setAttribute("aria-label", options.title);
+            iconElement.setAttribute("data-location", options.position || "right");
+        } else {
+            iconElement.setAttribute("data-menu", "true");
+            iconElement.onclick = options.callback;
+        }
+        if (!options.element && isMobile()) {
             iconElement.className = "b3-menu__item";
             const iconHTML = options.icon.startsWith("icon") ?
                 `<svg class="b3-menu__icon"><use xlink:href="#${options.icon}"></use></svg>` :
                 `<span class="b3-menu__icon b3-menu__icon--custom">${options.icon}</span>`;
             iconElement.innerHTML = iconHTML +
                 `<span class="b3-menu__label">${options.title}</span>`;
-        } else if (!isWindow()) {
+        } else if (!options.element && !isWindow()) {
             iconElement.className = "toolbar__item ariaLabel";
             iconElement.setAttribute("aria-label", options.title);
             iconElement.innerHTML = options.icon.startsWith("icon") ? `<svg><use xlink:href="#${options.icon}"></use></svg>` : options.icon;
@@ -290,7 +324,9 @@ export class Plugin {
                 document.getElementById("menuPluginTopBar")?.after(iconElement);
             }
         } else if (!isWindow() && window.siyuan.storage) {
-            if (!document.contains(iconElement) || previousLocation !== iconElement.getAttribute("data-location")) {
+            if (!document.contains(iconElement) ||
+                options.element && iconElement.parentElement !== document.getElementById("toolbar") ||
+                previousLocation !== iconElement.getAttribute("data-location")) {
                 document.querySelector("#" + (iconElement.getAttribute("data-location") === "right" ? "barPlugins" : "drag"))?.before(iconElement);
             }
         }

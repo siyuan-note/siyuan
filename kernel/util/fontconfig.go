@@ -88,11 +88,12 @@ func parseFontconfigFonts(data []byte, lang string) (ret []*Font) {
 		}
 		weight := parseFontconfigWeight(string(fields[4]), style)
 		ret = addFont(ret, &Font{
-			Family:      family,
-			Weight:      weight,
-			DisplayName: displayName,
-			Aliases:     aliases,
-			Spacing:     parseFontconfigSpacing(string(fields[5])),
+			nonNormalStyle: isNonNormalFontStyle(style),
+			Family:         family,
+			Weight:         weight,
+			DisplayName:    displayName,
+			Aliases:        aliases,
+			Spacing:        parseFontconfigSpacing(string(fields[5])),
 		})
 	}
 	return

@@ -25,6 +25,7 @@ export interface IEntryCatalogNode {
     sortable?: boolean;
     fixed?: boolean;
     defaultVisible?: () => boolean;
+    simpleDefaultVisible?: boolean;
     customDefaultVisible?: boolean;
     children?: IEntryCatalogNode[];
 }
@@ -40,7 +41,8 @@ const lang = (key: string) => () => window.siyuan.languages[key] || key;
 const literal = (value: string) => () => value;
 const location = (...labels: Array<() => string>) => () => labels.map((label) => label()).join(" - ");
 const node = (key: string, label: () => string, simple = true, children?: IEntryCatalogNode[],
-              sortable?: boolean, options?: Pick<IEntryCatalogNode, "defaultVisible" | "customDefaultVisible" | "fixed">): IEntryCatalogNode => ({
+              sortable?: boolean, options?: Pick<IEntryCatalogNode,
+                  "defaultVisible" | "simpleDefaultVisible" | "customDefaultVisible" | "fixed">): IEntryCatalogNode => ({
     key,
     label,
     simple,
@@ -391,8 +393,10 @@ const gutterSingle = () => [
     separator("separator_table"),
     gutterTable(),
     separator("separator_exportCSV"),
-    node("exportCSV", () => `${window.siyuan.languages.export} CSV`),
-    node("showDatabaseInFolder", lang("showInFolder")),
+    node("database", lang("database"), true, [
+        node("exportCSV", () => `${window.siyuan.languages.export} CSV`),
+        node("showDatabaseInFolder", lang("showInFolder")),
+    ]),
     separator("separator_VideoOrAudio"),
     node("assetVideo", location(lang("video"), lang("assets")), true, [
         node("asset", lang("assets")),
@@ -567,18 +571,38 @@ const toolbarCatalogSection: IEntryCatalogSection = {
 };
 
 export const TOP_BAR_ROOT_PATH = "topBar";
+export const STATUS_BAR_ROOT_PATH = "statusBar";
+
+const statusBarCatalogSection: IEntryCatalogSection = {
+    key: STATUS_BAR_ROOT_PATH,
+    label: lang("entryStatusBar"),
+    children: [
+        node("barDock", lang("toggleDock")),
+        node("message", lang("entryStatusMessage")),
+        fixed("spacer", lang("entryStatusSpacer")),
+        node("backgroundTask", lang("entryStatusTask")),
+        node("counter", lang("entryDocumentStatistics")),
+        node("statusHelp", lang("help")),
+    ],
+};
 
 const topBarBuiltinChildren = [
     node("barSync", lang("syncNow")),
+    node("barDailyNote", lang("dailyNote"), true, undefined, undefined, {
+        defaultVisible: () => false,
+        simpleDefaultVisible: true,
+        customDefaultVisible: false,
+    }),
+    node("barRiffCard", lang("riffCard"), true, undefined, undefined, {
+        defaultVisible: () => false,
+        simpleDefaultVisible: true,
+        customDefaultVisible: false,
+    }),
     node("barBack", lang("goBack")),
     node("barForward", lang("goForward")),
     fixed("drag", lang("entryTopBarDrag")),
-    node("toolbarVIP", lang("accountDisplayVIP"), true, undefined, undefined, {
-        defaultVisible: () => window.siyuan.config.account.displayVIP,
-    }),
-    node("toolbarTitle", lang("accountDisplayTitle"), true, undefined, undefined, {
-        defaultVisible: () => window.siyuan.config.account.displayTitle,
-    }),
+    node("toolbarVIP", lang("accountDisplayVIP")),
+    node("toolbarTitle", lang("accountDisplayTitle")),
     node("barPlugins", lang("plugin")),
     node("barCommand", lang("commandPanel")),
     node("barSearch", lang("globalSearch")),
@@ -640,6 +664,7 @@ const dockCatalogSection: IEntryCatalogSection = {
 
 export const entryCatalog: IEntryCatalogSection[] = [
     topBarCatalogSection,
+    statusBarCatalogSection,
     dockCatalogSection,
     {
         key: "docTree.panel",

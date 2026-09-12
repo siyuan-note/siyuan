@@ -246,6 +246,9 @@ func checkoutRepo(c *gin.Context) {
 		return
 	}
 	if sessionID != "" {
+		if util.InvalidIDPattern(sessionID, ret) {
+			return
+		}
 		markerDir := filepath.Join(util.TempDir, "ai", "agent")
 		os.MkdirAll(markerDir, 0755)
 		markerPath := filepath.Join(markerDir, "agentRollback_"+sessionID+".json")

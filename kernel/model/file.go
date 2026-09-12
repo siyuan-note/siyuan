@@ -312,7 +312,7 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 			data["dueFlashcardCount"] = strconv.Itoa(dueFlashcardCount)
 			data["flashcardCount"] = strconv.Itoa(flashcardCount)
 		}
-		results = append(results, searchDocResult{data: data, exact: isExactSearchDocMatch(rootBlock.Content, keyword, Conf.Search.CaseSensitive)})
+		results = append(results, searchDocResult{data: data, exact: isExactSearchDocBlockMatch(rootBlock, keyword, Conf.Search.CaseSensitive)})
 	}
 
 	sortSearchDocResults(results)
@@ -356,6 +356,20 @@ func isExactSearchDocMatch(value, keyword string, caseSensitive bool) bool {
 		return value == keyword
 	}
 	return strings.EqualFold(value, keyword)
+}
+
+func isExactSearchDocBlockMatch(block *sql.Block, keyword string, caseSensitive bool) bool {
+	if isExactSearchDocMatch(block.Content, keyword, caseSensitive) || isExactSearchDocMatch(block.Name, keyword, caseSensitive) {
+		return true
+	}
+	if "" != keyword && !strings.Contains(keyword, ",") {
+		for alias := range strings.SplitSeq(block.Alias, ",") {
+			if isExactSearchDocMatch(alias, keyword, caseSensitive) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func buildSearchDocsCondition(keywords, excludeIDs []string, searchName, searchAlias, searchMemo bool) (condition string, args []any) {
@@ -458,7 +472,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 
 	ret = []*File{}
 	if flashcard && IsEncryptedBox(boxID) {
-		return nil, 0, errors.New(Conf.Language(313))
+		return nil, 0, errors.New(Conf.Language(393))
 	}
 
 	var deck *riff.Deck
@@ -1270,7 +1284,7 @@ func DuplicateDoc(tree *parse.Tree) {
 }
 
 func createTreeTx(tree *parse.Tree) {
-	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: tree}}}
+	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Tree: tree}}}
 	PerformTransactions(&[]*Transaction{transaction})
 }
 
@@ -1735,7 +1749,7 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 	for _, fromPath := range fromPaths {
 		fromBox := pathsBoxes[fromPath]
 		if fromBox.ID != toBox.ID && !IsSameCryptoBoundary(fromBox.ID, toBox.ID) {
-			err = errors.New(Conf.Language(313))
+			err = errors.New(Conf.Language(391))
 			return
 		}
 	}
@@ -2411,7 +2425,7 @@ func createDoc0(boxID, p, title, dom string, titleEmpty, syncWrite bool) (tree *
 }
 
 func performCreateDocTransaction(tree *parse.Tree, syncWrite bool) (err error) {
-	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: tree}}}
+	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Tree: tree}}}
 	if syncWrite {
 		if err = PerformTxSync(transaction); nil != err {
 			// 事务在写文件前会更新块树，失败时清理未落盘文档的索引。

@@ -42,6 +42,7 @@ import {getAssetExtension} from "../../../util/pathName";
 import {isBrowserRenderableImagePath} from "../../../util/imageURL";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {isMobile} from "../../../util/functions";
+import {bindMobileAVPanel} from "./mobilePanel";
 import {openLink} from "../../../editor/openLink";
 import {previewAttrViewImages} from "../../preview/image";
 import {assetMenu} from "../../../menus/protyle";
@@ -242,6 +243,9 @@ export const openMenuPanel = (options: {
         }
         let closeCB: () => void;
         const menuElement = avPanelElement.lastElementChild as HTMLElement;
+        if (isMobile()) {
+            bindMobileAVPanel(avPanelElement as HTMLElement, menuElement);
+        }
         const rerenderSwitcher = () => {
             const keyword = (menuElement.querySelector(".b3-text-field") as HTMLInputElement)?.value || "";
             menuElement.innerHTML = getSwitcherHTML(data.views, data.viewID, options.blockElement);

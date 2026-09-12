@@ -10,7 +10,7 @@ import {
     isUploadInsertPositionAvailable,
 } from "../upload/insertPosition";
 import {processPasteCode, processRender} from "./processCode";
-import {getLocalFiles, getTextSiyuanFromTextHTML, readClipboard, readText} from "./compatibility";
+import {getLocalFiles, getTextSiyuanFromTextHTML, isInHarmony, readClipboard, readText} from "./compatibility";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import {focusByOffset, getEditorRange, getSelectionOffset, getUndoFocusContext} from "./selection";
 import {blockRender} from "../render/blockRender";
@@ -728,9 +728,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         files = event.files;
     }
     // 先提取网页剪贴板中的内部块数据，再执行受限片段校验和清洗。
-    if (blockDOMSanitizer && !siyuanHTML && textHTML) {
-        const clipboard = getTextSiyuanFromTextHTML(textHTML);
-        siyuanHTML = clipboard.textSiyuan;
+    if (textHTML && (blockDOMSanitizer || isInHarmony())) {
+        const clipboard = getTextSiyuanFromTextHTML(textHTML, !!isInHarmony());
+        siyuanHTML = siyuanHTML || clipboard.textSiyuan;
         textHTML = clipboard.textHtml;
     }
     if (blockDOMSanitizer && !siyuanHTML && !isProtyleUploadDisabled(protyle)) {

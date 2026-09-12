@@ -25,7 +25,7 @@ export const observeFontPreview = (listElement: HTMLElement,
         }
     };
     const items = listElement.querySelectorAll<HTMLElement>(".b3-list-item");
-    // 名称在预览字体就绪后显示，离开可见区域时保留字体，避免滚动时反复切换。
+    // 字体就绪后再显示名称，避免菜单选项从界面字体切换到预览字体。
     items.forEach(item => {
         const label = item.querySelector<HTMLElement>(".b3-menu__label");
         if (label?.dataset.family) {
@@ -39,7 +39,7 @@ export const observeFontPreview = (listElement: HTMLElement,
                     void prepare(entry.target as HTMLElement);
                 }
             });
-        }, {root: listElement, rootMargin: "200px 0px"});
+        }, {root: listElement, rootMargin: "100px 0px"});
         items.forEach(item => observer.observe(item));
     } else {
         items.forEach(item => void prepare(item));

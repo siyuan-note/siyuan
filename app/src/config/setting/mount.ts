@@ -34,7 +34,11 @@ export const remountOpenSettingTab = async (tabId: TSettingTab) => {
         search.visibleGroupIds = result.visibleGroupIds;
         search.unavailableItems = result.unavailableItems;
     }
+    // 重建和异步初始化配置项会改变内容高度，完成后恢复面板的滚动位置。
+    const {scrollTop, scrollLeft} = root;
     await tab.mount(root, search, undefined, true);
+    root.scrollTop = scrollTop;
+    root.scrollLeft = scrollLeft;
 };
 
 export const applySettingTabSearchVisibility = (

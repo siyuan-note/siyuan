@@ -36,6 +36,7 @@ import {
 } from "../util/selection";
 import {Constants} from "../../constants";
 import {mergeTableCellContents} from "../util/tableCellRich";
+import {resolveDocumentBlockElement} from "../util/outlineBlock";
 import {isMobile} from "../../util/functions";
 import {previewDocImage} from "../preview/image";
 import {getDiagramBlock, previewDiagram} from "../preview/diagram";
@@ -90,7 +91,8 @@ import {openAttr} from "../../menus/commonMenuItem";
 import {blockRender} from "../render/blockRender";
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
-import {pushBack} from "../../util/backForward";
+import {pushBack, pushBackByClick} from "../../util/backForward";
+import {bindTouchNavigation} from "./touchNavigation";
 import {openFileById} from "../../editor/util";
 import {openGlobalSearch} from "../../search/util";
 /// #else
@@ -105,6 +107,7 @@ import {
     isIPhone,
     isMac,
     isOnlyMeta,
+    isPhablet,
     readClipboard,
     writeClipboardData
 } from "../util/compatibility";
@@ -208,6 +211,7 @@ import {
     resolveBlockDragSelectStart
 } from "./blockDragSelect";
 import {isCrossBlockTextRange} from "../gutter/multiSelect";
+import {bindTouchBlockDragSelect} from "./touchBlockDragSelect";
 import {formatPainter} from "../toolbar/FormatPainter";
 import {shouldOpenListItemAttr} from "./listContext";
 import {getBlockEdgeCaretRange, isCaretRangeInsideElement} from "./blockEdgeCaret";
@@ -495,6 +499,16 @@ export class WYSIWYG {
         }
         this.bindCommonEvent(protyle);
         this.bindEvent(protyle);
+        if (!isMobile()) {
+            bindTouchBlockDragSelect(this.element, () => !protyle.toolbar.isMultiSelectMode());
+        }
+        /// #if !MOBILE
+        bindTouchNavigation(this.element, (target, point) => {
+            if (!protyle.toolbar.isMultiSelectMode() && !window.siyuan.touchDragActive) {
+                pushBackByClick(protyle, target, point);
+            }
+        });
+        /// #endif
         if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
             return;
         }
@@ -613,7 +627,7 @@ export class WYSIWYG {
     private setEmptyOutline(protyle: IProtyle, element: HTMLElement) {
         let nodeElement = element;
         if (!element.getAttribute("data-node-id")) {
-            const tempElement = hasClosestBlock(element);
+            const tempElement = resolveDocumentBlockElement(element);
             if (!tempElement) {
                 return;
             }
@@ -4558,6 +4572,10 @@ export class WYSIWYG {
                     return;
                 }
             }
+            // 数据库表头工具栏不涉及编辑器选区，提前处理，避免 getEditorRange 兜底聚焦编辑器时在移动端唤起软键盘
+            if (hasClosestByClassName(event.target, "av__views") && avClick(protyle, event)) {
+                return;
+            }
             const range = getEditorRange(this.element);
             const resumeBlockHint = !protyle.hint.element.classList.contains("fn__none") &&
                 Constants.BLOCK_HINT_KEYS.includes(protyle.hint.splitChar);
@@ -5086,6 +5104,12 @@ export class WYSIWYG {
             const pointerElement = document.elementFromPoint(event.clientX, event.clientY);
             const isDirectCalloutClick = isDirectCalloutStructureClick(this.mouseDownTarget, event.target,
                 pointerElement);
+            /// #if !MOBILE
+            const recordClickHistory = isPhablet();
+            if (recordClickHistory) {
+                pushBackByClick(protyle, event.target, {x: event.clientX, y: event.clientY});
+            }
+            /// #endif
             setTimeout(() => {
                 // 选中后，在选中的文字上点击需等待 range 更新
                 let newRange = getEditorRange(this.element);
@@ -5177,7 +5201,9 @@ export class WYSIWYG {
                     focusByRange(newRange);
                 }
                 /// #if !MOBILE
-                pushBack(protyle, newRange);
+                if (!recordClickHistory) {
+                    pushBack(protyle, newRange);
+                }
                 /// #endif
                 mobileBlur = false;
             }, (isMobile() || isInIOS()) ? 520 : 0); // Android/iPad 双击慢了出不来

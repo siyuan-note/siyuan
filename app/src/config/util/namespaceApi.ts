@@ -13,7 +13,7 @@ export function createConfigNamespaceApi<TData>(options: {
      * @param onApplied POST 成功后的回调，参数为接口返回的命名空间配置（与 `getConfig()` 同结构）。
      * `applyFromResponse` 为 true 时，调用前已执行 `setConfig`；为 false 时本地 `getConfig()` 可能尚未同步。
      */
-    patch: (relOrFullId: string, value: unknown, onApplied?: (data: TData) => void) => void;
+    patch: (relOrFullId: string, value: unknown, onApplied?: (data: TData) => void) => Promise<void>;
     apply: (data: TData) => void;
 } {
     const {namespace, getConfig, setConfig, apiPath, applyFromResponse = true} = options;

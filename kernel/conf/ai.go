@@ -39,6 +39,15 @@ type AI struct {
 	Providers       []*Provider      `json:"providers"`
 }
 
+// DefaultAgentConfirmTimeout 是智能体确认超时时间的默认值（秒），也用于智能体提问的等待时长。
+const DefaultAgentConfirmTimeout = 600
+
+// DefaultAgentSessionTimeout 是智能体会话总超时时间的默认值（秒）。
+const DefaultAgentSessionTimeout = 1800
+
+// MaxAgentSessionTimeout 是智能体会话总超时时间的上限（秒）。
+const MaxAgentSessionTimeout = 3600
+
 type Agent struct {
 	ModelID             string            `json:"modelId"`
 	SessionTimeout      int               `json:"sessionTimeout"`
@@ -179,9 +188,9 @@ func defaultRerank() *Rerank {
 
 func defaultAgent() *Agent {
 	return &Agent{
-		SessionTimeout:      600,
+		SessionTimeout:      DefaultAgentSessionTimeout,
 		StreamIdleTimeout:   120,
-		ConfirmTimeout:      120,
+		ConfirmTimeout:      DefaultAgentConfirmTimeout,
 		MaxRetries:          3,
 		Temperature:         1.0,
 		MaxCompletionTokens: 0,
@@ -535,8 +544,8 @@ func (ai *AI) Normalize() {
 		}
 		if ai.Agent.SessionTimeout < 0 {
 			ai.Agent.SessionTimeout = 0
-		} else if ai.Agent.SessionTimeout > 3600 {
-			ai.Agent.SessionTimeout = 3600
+		} else if ai.Agent.SessionTimeout > MaxAgentSessionTimeout {
+			ai.Agent.SessionTimeout = MaxAgentSessionTimeout
 		}
 		if ai.Agent.StreamIdleTimeout < 1 {
 			ai.Agent.StreamIdleTimeout = 120

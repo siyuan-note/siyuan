@@ -297,6 +297,32 @@ export const goForward = async (app: App) => {
     }
 };
 
+export const pushBackByClick = (protyle: IProtyle, target: HTMLElement, point?: {x: number, y: number}) => {
+    const blockElement = hasClosestBlock(target);
+    if (!blockElement || !protyle.wysiwyg.element.contains(blockElement) || isInEmbedBlock(blockElement)) {
+        return;
+    }
+    const editElement = getContenteditableElement(blockElement);
+    if (!editElement) {
+        return;
+    }
+    const selection = editElement.ownerDocument.getSelection();
+    let range = selection?.rangeCount ? selection.getRangeAt(0) : undefined;
+    // 触摸结束时选区可能仍在旧位置，按触摸坐标记录文字偏移，且不改变浏览器选区。
+    if (point) {
+        const pointRange = editElement.ownerDocument.caretRangeFromPoint?.(point.x, point.y);
+        if (pointRange && editElement.contains(pointRange.startContainer) && editElement.contains(pointRange.endContainer)) {
+            range = pointRange;
+        }
+    }
+    if (!range || !editElement.contains(range.startContainer) || !editElement.contains(range.endContainer)) {
+        range = editElement.ownerDocument.createRange();
+        range.selectNodeContents(editElement);
+        range.collapse(true);
+    }
+    pushBack(protyle, range, blockElement);
+};
+
 export const pushBack = (protyle: IProtyle, range?: Range, blockElement?: Element) => {
     if (!protyle.model) {
         return;

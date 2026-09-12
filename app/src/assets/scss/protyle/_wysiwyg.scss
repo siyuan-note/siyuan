@@ -68,11 +68,7 @@
   }
 
   [data-node-id],
-  [data-table-cell-node],
-  td.dragover__top,
-  td.dragover__bottom,
-  th.dragover__top,
-  th.dragover__bottom {
+  [data-table-cell-node] {
     position: relative;
 
     &.protyle-wysiwyg--navigation {
@@ -534,12 +530,23 @@
 
     span[data-type~="block-ref"]:not(.av__celltext),
     span[data-type~="file-annotation-ref"] {
-      border-bottom: 1px dashed var(--b3-protyle-inline-blockref-color);
+      --protyle-ref-line-color: var(--b3-protyle-inline-blockref-color);
       transition: var(--b3-transition);
     }
 
     span[data-type~="file-annotation-ref"] {
-      border-bottom-color: var(--b3-protyle-inline-fileref-color);
+      --protyle-ref-line-color: var(--b3-protyle-inline-fileref-color);
+    }
+
+    span[data-type~="block-ref"]:not(.av__celltext),
+    span[data-type~="file-annotation-ref"] {
+      // 按固定长度绘制虚线，并在换行后的每段文字下方重复显示。
+      background-image: repeating-linear-gradient(to right, var(--protyle-ref-line-color) 0 6px, transparent 6px 9px);
+      background-position: left bottom;
+      background-size: 9px 1px;
+      background-repeat: repeat-x;
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
     }
 
     span[data-type="virtual-block-ref"]:hover,
@@ -865,7 +872,8 @@
     background-color: var(--b3-theme-surface-lighter);
     display: block;
     position: absolute;
-    left: -16px;
+    // 与块标到内容的 4 像素间距保持一致，使折叠三角形位于圆圈中央。
+    left: -20px;
     top: 50%;
     border-radius: var(--b3-border-radius-b);
     margin-top: -8px;
@@ -874,7 +882,7 @@
 
   .bq > div[fold="1"][data-type="NodeHeading"]::before,
   .callout-content > div[fold="1"][data-type="NodeHeading"]::before {
-    left: -26px;
+    left: -30px;
   }
 
   [data-node-id][fold="1"]:not(.li):not([data-type="NodeHeading"]) {

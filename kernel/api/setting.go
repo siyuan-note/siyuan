@@ -449,35 +449,6 @@ func setFlashcard(c *gin.Context) {
 	ret.Data = flashcard
 }
 
-func setAccount(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	param, err := gulu.JSON.MarshalJSON(arg)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
-	account := &conf.Account{}
-	if err = gulu.JSON.UnmarshalJSON(param, account); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
-	model.Conf.Account = account
-	model.Conf.Save()
-
-	ret.Data = model.Conf.Account
-}
-
 func setEditor(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -829,6 +800,9 @@ func setAppearance(c *gin.Context) {
 
 	if nil == appearance.EntryVisibility {
 		appearance.EntryVisibility = model.Conf.Appearance.EntryVisibility
+	}
+	if _, exists := arg["bodyGradient"]; !exists {
+		appearance.BodyGradient = model.Conf.Appearance.BodyGradient
 	}
 	if _, exists := arg["globalFontFamilies"]; !exists {
 		appearance.GlobalFontFamilies = model.Conf.Appearance.GlobalFontFamilies

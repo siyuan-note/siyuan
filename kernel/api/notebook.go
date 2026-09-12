@@ -87,6 +87,9 @@ func setNotebookIcon(c *gin.Context) {
 	) {
 		return
 	}
+	if util.InvalidIDPattern(boxID, ret) {
+		return
+	}
 	if err := holdEncryptedBoxRequest(c, boxID); err != nil {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(314)

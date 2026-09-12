@@ -3,6 +3,7 @@ import {Hint} from "./hint";
 import {getLute} from "./render/setLute";
 import {Preview} from "./preview";
 import {addLoading, initUI, removeLoading} from "./ui/initUI";
+import {BACKLINK_EDITOR_PADDING} from "./ui/padding";
 import {LocalUndo, Undo} from "./undo";
 import {Upload} from "./upload";
 import {Options} from "./util/Options";
@@ -391,7 +392,8 @@ export class Protyle {
                         case "removeBox":
                             if (this.protyle.notebookId === data.data.box) {
                                 /// #if MOBILE
-                                if (!removeMobileSecondaryEditor(this)) {
+                                // 主编辑器由页签管理切换文档，避免切换前显示空白主页
+                                if (!removeMobileSecondaryEditor(this) && !window.siyuan.mobile.tabs) {
                                     setEmpty(app);
                                 }
                                 /// #else
@@ -404,7 +406,8 @@ export class Protyle {
                         case "removeDoc":
                             if (data.data.ids.includes(this.protyle.block.rootID)) {
                                 /// #if MOBILE
-                                if (!removeMobileSecondaryEditor(this)) {
+                                // 主编辑器由页签管理切换文档，避免切换前显示空白主页
+                                if (!removeMobileSecondaryEditor(this) && !window.siyuan.mobile.tabs) {
                                     setEmpty(app);
                                 }
                                 /// #else
@@ -423,7 +426,7 @@ export class Protyle {
                 this.protyle.block.rootID = options.blockId;
                 renderBacklink(this.protyle, options.backlinkData);
                 // 为了满足 eventPath0.style.paddingLeft 从而显示块标 https://github.com/siyuan-note/siyuan/issues/11578
-                this.protyle.wysiwyg.element.style.padding = "4px 16px 4px 24px";
+                this.protyle.wysiwyg.element.style.padding = BACKLINK_EDITOR_PADDING;
                 return;
             }
             if (!options.blockId) {

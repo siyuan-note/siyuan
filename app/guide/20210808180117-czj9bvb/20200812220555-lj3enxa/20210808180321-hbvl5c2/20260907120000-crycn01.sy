@@ -1118,6 +1118,62 @@
 					]
 				},
 				{
+					"ID": "20260911103000-cnrev15",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260911103000-cnrev15",
+						"updated": "20260911103000"
+					},
+					"Children": [
+						{
+							"ID": "20260911103000-cnrev16",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260911103000-cnrev16",
+								"updated": "20260911103000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "导入包内文档带闪卡内容时会被拒绝，报错会指出包含闪卡的文档；请在源笔记本中移除闪卡后重新导出，或改为导入到普通笔记本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260911103000-cnrev17",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260911103000-cnrev17",
+						"updated": "20260911103000"
+					},
+					"Children": [
+						{
+							"ID": "20260911103000-cnrev18",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260911103000-cnrev18",
+								"updated": "20260911103000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "导入文档中指向包外的块引会被降级为纯文本，包外的数据库绑定会转为非绑定条目"
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20260907120000-cn00048",
 					"Type": "NodeListItem",
 					"ListData": {

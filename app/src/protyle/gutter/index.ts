@@ -1,3 +1,4 @@
+import {copyBlockSelection} from "../util/blockClipboard";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -1374,7 +1375,7 @@ export class Gutter {
                 } else {
                     focusByRange(getEditorRange(selectsElement[0]));
                 }
-                protyle.wysiwyg.copyRichText();
+                copyBlockSelection(selectsElement[0], () => protyle.wysiwyg.copyRichText());
             }
         });
         /// #endif
@@ -1402,7 +1403,7 @@ export class Gutter {
                 } else {
                     focusByRange(getEditorRange(selectsElement[0]));
                 }
-                document.execCommand("copy");
+                copyBlockSelection(selectsElement[0]);
             }
         });
         const copyTextRefMenu = this.genCopyTextRef(selectsElement);
@@ -2446,9 +2447,9 @@ export class Gutter {
                 }).element);
             }
         } else if (type === "NodeAttributeView") {
+            const submenu: IMenu[] = [];
             if (getHostCapabilities().importExport) {
-                window.siyuan.menus.menu.append(new MenuItem({id: "separator_exportCSV", type: "separator"}).element);
-                window.siyuan.menus.menu.append(new MenuItem({
+                submenu.push({
                     id: "exportCSV",
                     icon: "iconDatabase",
                     label: window.siyuan.languages.export + " CSV",
@@ -2460,11 +2461,11 @@ export class Gutter {
                             saveExportFile(response.data.zip);
                         });
                     }
-                }).element);
+                });
             }
             /// #if !BROWSER
             if (getHostCapabilities().localFileSystem) {
-                window.siyuan.menus.menu.append(new MenuItem({
+                submenu.push({
                     id: "showDatabaseInFolder",
                     icon: "iconFolder",
                     label: window.siyuan.languages.showInFolder,
@@ -2477,9 +2478,19 @@ export class Gutter {
                             : path.join(window.siyuan.config.system.dataDir, "storage", "av");
                         useShell("showItemInFolder", path.join(avDir, avId) + ".json");
                     }
-                }).element);
+                });
             }
             /// #endif
+            if (submenu.length > 0) {
+                window.siyuan.menus.menu.append(new MenuItem({id: "separator_exportCSV", type: "separator"}).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "database",
+                    type: "submenu",
+                    icon: "iconDatabase",
+                    label: window.siyuan.languages.database,
+                    submenu,
+                }).element);
+            }
         } else if ((type === "NodeVideo" || type === "NodeAudio") && !protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_VideoOrAudio", type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -3526,7 +3537,7 @@ export class Gutter {
                 } else {
                     focusByRange(getEditorRange(nodeElement));
                 }
-                protyle.wysiwyg.copyRichText();
+                copyBlockSelection(nodeElement, () => protyle.wysiwyg.copyRichText());
             }
         });
         /// #endif
@@ -3558,7 +3569,7 @@ export class Gutter {
                 } else {
                     focusByRange(getEditorRange(nodeElement));
                 }
-                document.execCommand("copy");
+                copyBlockSelection(nodeElement);
             }
         });
         const copyTextRefMenu = this.genCopyTextRef([nodeElement]);
@@ -3627,7 +3638,7 @@ export class Gutter {
                 // 用于标识复制文本 *
                 selectsElement[0].setAttribute("data-reftext", "true");
                 focusByRange(getEditorRange(selectsElement[0]));
-                document.execCommand("copy");
+                copyBlockSelection(selectsElement[0]);
             }
         };
     }

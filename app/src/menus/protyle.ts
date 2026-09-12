@@ -903,10 +903,26 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             }
         }).element);
     }
-    if (nodeElement.classList.contains("table") && !protyle.disabled) {
-        const cellElement = hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
+    const cellContext = getTableCellRichContext(protyle);
+    if ((nodeElement.classList.contains("table") || cellContext) && !protyle.disabled && !cellContext?.owner.disabled) {
+        const cellElement = cellContext?.cell || hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
         if (cellElement) {
-            const tableMenus = tableMenu(protyle, nodeElement, cellElement as HTMLTableCellElement, range);
+            const tableRange = cellContext ? document.createRange() : range;
+            if (cellContext) {
+                tableRange.selectNodeContents(cellElement);
+                tableRange.collapse(true);
+            }
+            const tableMenus = tableMenu(cellContext?.owner || protyle,
+                cellContext ? cellElement.closest('[data-type="NodeTable"]') : nodeElement,
+                cellElement as HTMLTableCellElement, tableRange);
+            if (cellContext) {
+                prepareTableCellMenuItems([...tableMenus.insertMenus, ...tableMenus.removeMenus,
+                    ...tableMenus.otherMenus, ...tableMenus.other2Menus], () => {
+                    cellContext.finish();
+                    tableRange.selectNodeContents(cellElement);
+                    tableRange.collapse(true);
+                });
+            }
             if (tableMenus.insertMenus.length > 0) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "separator_1",
@@ -2764,3 +2780,4 @@ export const setFoldById = (data: {
         }
     });
 };
+import {getTableCellRichContext, prepareTableCellMenuItems} from "../protyle/util/tableCellRichContext";

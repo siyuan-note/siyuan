@@ -109,7 +109,7 @@ const inlineMathSelection = createInlineMathSelection((editor, math) => {
     protyle.toolbar.showRender(protyle, math);
 });
 
-let renderKeyboardToolbarTimeout: number;
+let renderKeyboardToolbarFrame: number | undefined;
 let scrollSelectionIntoViewTimeout: number;
 let clearRenderGutterAfterScroll: () => void;
 let showUtil = false;
@@ -870,10 +870,18 @@ const restoreKeyboardToolbarRange = (protyle: IProtyle | undefined, range?: Rang
 };
 
 const renderKeyboardToolbar = () => {
-    clearTimeout(renderKeyboardToolbarTimeout);
-    renderKeyboardToolbarTimeout = window.setTimeout(() => {
+    if (renderKeyboardToolbarFrame !== undefined) {
+        return;
+    }
+    // 合并同一帧内的选区变化，在浏览器更新选区后及时显示工具栏。
+    renderKeyboardToolbarFrame = window.requestAnimationFrame(() => {
+        renderKeyboardToolbarFrame = undefined;
         if (!canInput(document.activeElement)) {
             hideKeyboardToolbar();
+            return;
+        }
+        const selection = getSelection();
+        if (!selection || selection.rangeCount === 0) {
             return;
         }
         if (!showUtil) {
@@ -881,7 +889,7 @@ const renderKeyboardToolbar = () => {
         }
         showKeyboardToolbar();
         const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
-        const range = getSelection().getRangeAt(0);
+        const range = selection.getRangeAt(0);
         const isProtyle = hasClosestByClassName(range.startContainer, "protyle-wysiwyg", true);
         const nodeElement = hasClosestBlock(range.startContainer);
         const endNodeElement = hasClosestBlock(range.endContainer);
@@ -977,10 +985,20 @@ const renderKeyboardToolbar = () => {
                 }
             });
         }
-    }, 620); // 需等待 range 更新
+    });
 };
 
 export const showKeyboardToolbar = () => {
+    const toolbarElement = document.getElementById("keyboardToolbar");
+    if (["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName) &&
+        !toolbarElement.contains(document.activeElement)) {
+        // 普通输入框可能保留文档选区，不能据此恢复编辑焦点或显示文档工具栏。
+        keyboardPanelClosing = false;
+        hideKeyboardToolbarUtil();
+        hideKeyboardToolbar();
+        notifyMobileKeyboardChange(true);
+        return;
+    }
     const pendingFocus = pendingKeyboardFocus;
     pendingKeyboardFocus = undefined;
     if (pendingFocus && getCurrentEditor()?.protyle === pendingFocus.protyle && !pendingFocus.protyle.disabled) {
@@ -989,7 +1007,6 @@ export const showKeyboardToolbar = () => {
     if (!showUtil) {
         hideKeyboardToolbarUtil();
     }
-    const toolbarElement = document.getElementById("keyboardToolbar");
     const selection = getSelection();
     // 空块恢复焦点时 Selection 可能暂时为空，但原生键盘已经显示，仍需隐藏普通底栏。
     notifyMobileKeyboardChange(true);
@@ -1109,7 +1126,10 @@ const scrollKeyboardSelectionIntoView = () => {
 };
 
 export const hideKeyboardToolbar = () => {
-    clearTimeout(renderKeyboardToolbarTimeout);
+    if (renderKeyboardToolbarFrame !== undefined) {
+        window.cancelAnimationFrame(renderKeyboardToolbarFrame);
+        renderKeyboardToolbarFrame = undefined;
+    }
     clearTimeout(scrollSelectionIntoViewTimeout);
     clearRenderGutterAfterScroll?.();
     if (showUtil) {
@@ -1183,6 +1203,12 @@ export const activeBlur = (force = false) => {
 
 export const initKeyboardToolbar = () => {
     let composing = false;
+    document.addEventListener("focusin", () => {
+        if (["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName) &&
+            !document.getElementById("keyboardToolbar").contains(document.activeElement)) {
+            showKeyboardToolbar();
+        }
+    });
     const getMathEditor = () => {
         const protyle = getCurrentEditor()?.protyle;
         return isInAndroid() && protyle && !protyle.disabled && !protyle.toolbar.isMultiSelectMode() &&

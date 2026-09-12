@@ -58,6 +58,21 @@ func TestLocalizedFontNamesAndAliases(t *testing.T) {
 	}
 }
 
+func TestAddFontPrefersUprightStyle(t *testing.T) {
+	for _, italicFirst := range []bool{true, false} {
+		upright := &Font{Family: "Cascadia Code", Weight: 400, DisplayName: "Cascadia Code"}
+		italic := &Font{Family: "Cascadia Code", Weight: 400, DisplayName: "Cascadia Code Italic", nonNormalStyle: true}
+		first, second := upright, italic
+		if italicFirst {
+			first, second = italic, upright
+		}
+		fonts := addFont(addFont(nil, first), second)
+		if len(fonts) != 1 || fonts[0].DisplayName != "Cascadia Code" || fonts[0].nonNormalStyle {
+			t.Fatalf("unexpected merged font: %+v", fonts)
+		}
+	}
+}
+
 func TestAddFontMergesAliases(t *testing.T) {
 	fonts := addFont(nil, &Font{
 		Family:      "LXGW WenKai",

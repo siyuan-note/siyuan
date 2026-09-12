@@ -303,7 +303,7 @@ export const openFontFamilyMenu = async (target: HTMLElement, options: IFontFami
         desktopMenuIDs.set(target, `inlineFontFamily${requestID}`);
     }
     let closed = false;
-    let cleanup: () => void;
+    let cleanup: () => void = undefined;
     const menu = new Menu(desktopMenuIDs.get(target), () => {
         closed = true;
         cleanup?.();
@@ -312,6 +312,17 @@ export const openFontFamilyMenu = async (target: HTMLElement, options: IFontFami
     if (menu.isOpen) {
         return;
     }
+    const pickerElement = menu.addItem({
+        iconHTML: "",
+        type: "empty",
+        label: `<div class="b3-menu__filter">${escapeHtml(window.siyuan.languages.loading)}</div>`,
+    });
+    const openMenu = () => {
+        const rect = target.getBoundingClientRect();
+        menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target});
+    };
+    target.setAttribute("aria-expanded", "true");
+    openMenu();
     const fonts = await loadFontFamilies(options.family);
     if (closed) {
         return;
@@ -323,25 +334,16 @@ export const openFontFamilyMenu = async (target: HTMLElement, options: IFontFami
     if (target.tagName === "INPUT") {
         (target as HTMLInputElement).value = getInlineFontFamilyLabel(options);
     }
-    menu.addItem({
-        iconHTML: "",
-        type: "empty",
-        label: genFontPickerHTML(fonts, options, false),
-        bind(element) {
-            cleanup = bindFontPicker(element, {
-                ...options,
-                onClose: () => target.focus(),
-                onSelect(family) {
-                    menu.close();
-                    options.onSelect(family);
-                }
-            });
+    pickerElement.innerHTML = genFontPickerHTML(fonts, options, false);
+    cleanup = bindFontPicker(pickerElement, {
+        ...options,
+        onClose: () => target.focus(),
+        onSelect(family) {
+            menu.close();
+            options.onSelect(family);
         }
     });
-    const rect = target.getBoundingClientRect();
-    target.setAttribute("aria-expanded", "true");
-    menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target});
-    menu.element.querySelector(".b3-menu__items")?.setAttribute("style", "overflow: initial");
+    openMenu();
     menu.element.querySelector<HTMLInputElement>('[data-type="font-family-search"]')?.focus();
 };
 

@@ -16,6 +16,7 @@ import {
     refreshSlashMenuCatalog,
     refreshTopBarCatalog,
     TOP_BAR_ROOT_PATH,
+    STATUS_BAR_ROOT_PATH,
 } from "./catalog";
 import {
     createEntryProfileSnapshot,
@@ -197,7 +198,7 @@ const profileCard = (
         ${active ? "" : `<button class="b3-button b3-button--outline" data-action="activate">${window.siyuan.languages.use}</button>`}
         <button class="block__icon block__icon--show ariaLabel" data-action="duplicate" data-position="north" aria-label="${window.siyuan.languages.duplicateCopy}"><svg><use xlink:href="#iconCopy"></use></svg></button>
         ${builtin || !getHostCapabilities().importExport ? "" : `<button class="block__icon block__icon--show ariaLabel" data-action="export" data-position="north" aria-label="${window.siyuan.languages.export}"><svg><use xlink:href="#iconUpload"></use></svg></button>`}
-        <button class="block__icon block__icon--show${active || builtin ? " fn__none" : " block__icon--warning"} ariaLabel" data-action="delete" data-position="north" aria-label="${window.siyuan.languages.delete}"><svg><use xlink:href="#iconTrashcan"></use></svg></button>
+        <button class="block__icon block__icon--show${builtin ? " fn__none" : " block__icon--warning"} ariaLabel" data-action="delete" data-position="north" aria-label="${window.siyuan.languages.delete}"><svg><use xlink:href="#iconTrashcan"></use></svg></button>
     </div>
 </div>`;
 
@@ -222,6 +223,9 @@ const resolveProfileEntryOrder = (profile: Config.IEntryVisibilityProfile, paren
                                   defaultOrder: string[], separatorKeys: Set<string>) => {
     if (parentPath === TOP_BAR_ROOT_PATH) {
         return resolveEntryOrderWithBoundaryDefaults(defaultOrder, profile.orders?.[parentPath], "drag", separatorKeys);
+    }
+    if (parentPath === STATUS_BAR_ROOT_PATH) {
+        return resolveEntryOrderWithBoundaryDefaults(defaultOrder, profile.orders?.[parentPath], "spacer", separatorKeys);
     }
     return resolveEntryOrder(defaultOrder, profile.orders?.[parentPath], separatorKeys);
 };
@@ -986,11 +990,14 @@ export const mountEntryVisibility = (root: HTMLElement) => {
             renderProfileCards(root);
         } else if (action === "export" && profile) {
             exportProfile(profile);
-        } else if (action === "delete" && profile && config.active !== profile.id) {
+        } else if (action === "delete" && profile) {
             confirmDialog(window.siyuan.languages.deleteOpConfirm,
                 window.siyuan.languages.confirmDeleteTip.replace("${x}", escapeHtml(profile.name)), () => {
                     const latest = cloneConfig();
                     latest.profiles = latest.profiles.filter((item) => item.id !== profile.id);
+                    if (latest.active === profile.id) {
+                        latest.active = ENTRY_PROFILE_FULL;
+                    }
                     saveEntryVisibility(latest);
                     renderProfileCards(root);
                 }, undefined, true);

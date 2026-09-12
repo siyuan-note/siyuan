@@ -934,9 +934,10 @@ export const insertRows = (options: {
     const srcs: IOperationSrcs[] = [];
     new Array(options.count).fill(0).forEach(() => {
         const newNodeID = Lute.NewNodeID();
-        srcIDs.push(newNodeID);
+        const itemID = Lute.NewNodeID();
+        srcIDs.push(itemID);
         srcs.push({
-            itemID: Lute.NewNodeID(),
+            itemID,
             id: newNodeID,
             isDetached: true,
             content: "",

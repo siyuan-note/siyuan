@@ -30,7 +30,7 @@ func TestValidateFlashcardBlockIDsReportsSpecificFailure(t *testing.T) {
 	util.Langs = map[string]map[int]string{
 		"en": {
 			180: "block does not exist",
-			313: "encrypted notebook is unsupported",
+			393: "encrypted notebook is unsupported",
 		},
 	}
 	t.Cleanup(func() {

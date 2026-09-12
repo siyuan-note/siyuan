@@ -539,6 +539,17 @@
 }
 
 .sy__backlink {
+  // 仅为上下文首块已有的属性栏留出空间，普通块保持紧凑。
+  .protyle-wysiwyg > .protyle-breadcrumb__bar + [data-node-id]:is(
+    [name]:not([name=""]),
+    [alias]:not([alias=""]),
+    [memo]:not([memo=""]),
+    [bookmark]:not([bookmark=""]),
+    [custom-avs]:not([custom-avs=""])
+  ) {
+    margin-top: 12px;
+  }
+
   .backlinkList__loading {
     align-items: center;
     box-sizing: border-box;
@@ -900,8 +911,8 @@
 
 .table__cell-rich,
 .table__cell-editor {
-  // 按内容计算宽度，使窄列在输入时自动撑开，同时保留单元格的宽度约束。
-  width: max-content;
+  // 跟随单元格的可用宽度，保证预览与编辑使用相同的折行边界。
+  width: auto;
   max-width: 100%;
 }
 
@@ -910,7 +921,7 @@
   min-height: 1.6em;
   white-space: normal;
   cursor: text;
-  padding: 4px !important;
+  padding: 0 !important;
 
   .protyle-action {
     pointer-events: none;
@@ -941,7 +952,7 @@
   }
 
   .protyle-wysiwyg {
-    padding: 4px !important;
+    padding: 0 !important;
     min-height: 1.6em;
   }
 }
@@ -981,7 +992,41 @@
   min-width: 1px;
 }
 
+.table__cell-rich > .list[data-type="NodeList"],
+.table__cell-editor .protyle-wysiwyg > .list {
+  // 首层列表抵消单元格的侧边留白，列表标记和正文使用相同的起始间距。
+  margin-inline-start: -8px;
+}
+
 .protyle-wysiwyg [data-type="NodeTable"] {
+  td.dragover__top,
+  td.dragover__bottom,
+  th.dragover__top,
+  th.dragover__bottom {
+    position: relative;
+
+    // 与空单元格的占位行分离，避免占位行高度覆盖插入线高度。
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background-color: var(--b3-theme-primary-lighter);
+      pointer-events: none;
+    }
+  }
+
+  td.dragover__top::before,
+  th.dragover__top::before {
+    top: -4px;
+  }
+
+  td.dragover__bottom::before,
+  th.dragover__bottom::before {
+    bottom: -4px;
+  }
+
   td[tabindex="-1"]:focus,
   th[tabindex="-1"]:focus {
     outline: none;

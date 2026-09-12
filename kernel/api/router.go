@@ -459,7 +459,6 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/transactions/redo", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, performRedo)
 	ginServer.Handle("POST", "/api/transactions/clearHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, clearHistory)
 
-	ginServer.Handle("POST", "/api/setting/setAccount", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAccount)
 	ginServer.Handle("POST", "/api/setting/setEditor", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setEditor)
 	ginServer.Handle("POST", "/api/setting/setExport", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setExport)
 	ginServer.Handle("POST", "/api/setting/getPandocBin", model.CheckAuth, model.CheckAdminRole, getPandocBin)

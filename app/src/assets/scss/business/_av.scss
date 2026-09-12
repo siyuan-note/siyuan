@@ -776,6 +776,13 @@
         align-items: center;
         justify-content: center;
         object-fit: contain;
+      }
+
+      .av__gallery-fieldicon {
+        vertical-align: middle;
+      }
+
+      svg:first-child {
         vertical-align: -0.25em;
       }
     }

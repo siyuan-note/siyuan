@@ -371,6 +371,10 @@ func syncBoxConfCryptoBackup(boxID string, boxConf *conf.BoxConf) error {
 }
 
 func (box *Box) saveConf0(data []byte) error {
+	if !ast.IsNodeIDPattern(box.ID) {
+		return fmt.Errorf("invalid box ID [%s]", box.ID)
+	}
+
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan/conf.json")
 	if err := os.MkdirAll(filepath.Join(util.DataDir, box.ID, ".siyuan"), 0755); err != nil {
 		return fmt.Errorf("mkdir box conf dir failed: %w", err)
@@ -1144,6 +1148,11 @@ func pushNotebookSortChanged() {
 }
 
 func SetBoxIcon(boxID, icon string) {
+	if !ast.IsNodeIDPattern(boxID) {
+		logging.LogErrorf("invalid box ID [%s]", boxID)
+		return
+	}
+
 	icon = filterBoxIcon(icon)
 
 	box := &Box{ID: boxID}

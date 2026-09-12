@@ -49,6 +49,7 @@ import {genMobileBottomBarSettingHTML, mountMobileBottomBarSetting} from "../../
 import {genMobileSidePanelSettingHTML, mountMobileSidePanelSetting} from "../../mobile/util/mobileSidePanelSetting";
 /// #endif
 import {genEntryVisibilityHtml, mountEntryVisibility} from "../entryVisibility/ui";
+import {genBodyGradientHtml, mountBodyGradient} from "./bodyGradient";
 
 interface IBootAppearanceListData {
     appearances: IBootAppearanceListItem[];
@@ -875,6 +876,12 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
             desc: window.siyuan.languages.appearance3,
             options: Constants.SIYUAN_CONFIG_APPEARANCE_DARK_CODE.map(value => ({value})),
         });
+    });
+    group.slot({
+        key: "bodyGradient",
+        keywords: [window.siyuan.languages.bodyGradient, window.siyuan.languages.bodyGradientTip],
+        html: genBodyGradientHtml,
+        afterMount: mountBodyGradient,
     });
 };
 

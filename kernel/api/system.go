@@ -550,9 +550,9 @@ func exportConf(c *gin.Context) {
 		clonedConf.Export.PandocBin = ""
 	}
 	clonedConf.UserData = ""
-	clonedConf.Account = nil
 	clonedConf.AccessAuthCode = ""
 	if nil != clonedConf.System {
+		clonedConf.System.NetworkProxy = &conf.NetworkProxy{}
 		clonedConf.System.ID = ""
 		clonedConf.System.Name = ""
 		clonedConf.System.OSPlatform = ""
@@ -759,6 +759,8 @@ func importConf(c *gin.Context) {
 	if nil != importedConf.System && nil != model.Conf.System {
 		// 更新通道是应用级全局设置，导入工作空间配置时保持不变。
 		importedConf.System.UpdateChannel = model.Conf.System.UpdateChannel
+		// 网络代理依赖本机环境，导入设置时保持不变。
+		importedConf.System.NetworkProxy = model.Conf.System.NetworkProxy
 	}
 
 	model.Conf.FileTree = importedConf.FileTree

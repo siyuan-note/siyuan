@@ -1,3 +1,12 @@
+export const cleanupDragIndicators = (scope: ParentNode) => {
+    scope.querySelectorAll(".dragover__top, .dragover__bottom, .dragover__left, .dragover__right, .dragover__top--sibling, .dragover__bottom--sibling, .dragover__top--child, .dragover__bottom--child, .dragover, [style*=\"--drag-indent\"]").forEach((item: HTMLElement) => {
+        item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover",
+            "dragover__top--sibling", "dragover__bottom--sibling", "dragover__top--child", "dragover__bottom--child");
+        ["--drag-indent", "--drag-guides", "--drag-line-left", "--drag-base-bg", "--drag-line-bg",
+            "--b3-av-kanban-drag-height"].forEach(name => item.style.removeProperty(name));
+    });
+};
+
 export const createListDragTarget = () => {
     let dragCache: {node: HTMLElement, indent: number, rgb: {r: number, g: number, b: number}, guides: string};
     return (htmlTarget: HTMLElement, event: Pick<DragEvent, "clientX" | "clientY">) => {

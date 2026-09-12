@@ -90,6 +90,42 @@
 
     &[data-mode="rect"] > div {
       cursor: move;
+      pointer-events: none;
+    }
+
+    &-edge {
+      position: absolute;
+      pointer-events: auto;
+
+      &--n,
+      &--s {
+        left: -2px;
+        right: -2px;
+        height: 8px;
+      }
+
+      &--n {
+        top: -5px;
+      }
+
+      &--s {
+        bottom: -5px;
+      }
+
+      &--e,
+      &--w {
+        top: -2px;
+        bottom: -2px;
+        width: 8px;
+      }
+
+      &--e {
+        right: -5px;
+      }
+
+      &--w {
+        left: -5px;
+      }
     }
 
     &--selected > div {

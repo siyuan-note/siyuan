@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/sashabaranov/go-openai"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
 )
 
@@ -423,8 +424,60 @@ func TestAgentConfirmationDeadlineZeroHasNoLimit(t *testing.T) {
 	if deadline := optionalAgentDeadline(time.Second); deadline == nil {
 		t.Fatal("positive confirmation timeout did not create a deadline")
 	}
-	if timeout := resolveBrowserCapabilityTimeout(0); timeout != 120*time.Second {
+	if timeout := resolveBrowserCapabilityTimeout(0); timeout != time.Duration(conf.DefaultAgentConfirmTimeout)*time.Second {
 		t.Fatalf("zero confirmation timeout disabled the browser capability timeout: %v", timeout)
+	}
+}
+
+func TestQuestionTimeoutReusesConfirmTimeout(t *testing.T) {
+	if timeout := resolveQuestionTimeout(0); timeout != fallbackQuestionTimeout {
+		t.Fatalf("zero confirmation timeout did not use the fallback question timeout: %v", timeout)
+	}
+	if timeout := resolveQuestionTimeout(90 * time.Second); timeout != 90*time.Second {
+		t.Fatalf("positive confirmation timeout was not reused by question: %v", timeout)
+	}
+}
+
+func TestQuestionWithoutDeadlineWaitsForAnswer(t *testing.T) {
+	events := make(chan AgentEvent, 1)
+	resultCh := make(chan string, 1)
+	go func() {
+		resultCh <- handleQuestion(context.Background(), map[string]any{"questions": []any{}}, "test-round", events, 0)
+	}()
+
+	event := <-events
+	if event.Type != "question" || event.QuestionID == "" {
+		t.Fatalf("unexpected question event: %#v", event)
+	}
+	if !AnswerQuestion(event.QuestionID, []string{"no deadline answer"}) {
+		t.Fatal("question answer was rejected")
+	}
+	select {
+	case result := <-resultCh:
+		if result != "no deadline answer" {
+			t.Fatalf("unexpected question result: %q", result)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("question without a deadline did not wait for the answer")
+	}
+}
+
+func TestQuestionTimeoutReportsTimeout(t *testing.T) {
+	events := make(chan AgentEvent, 1)
+	resultCh := make(chan string, 1)
+	go func() {
+		resultCh <- handleQuestion(context.Background(), map[string]any{"questions": []any{}}, "test-round", events, 50*time.Millisecond)
+	}()
+
+	event := <-events
+	if event.Type != "question" || event.QuestionID == "" {
+		t.Fatalf("unexpected question event: %#v", event)
+	}
+	if result := <-resultCh; result != "No answer received (timed out)." {
+		t.Fatalf("unexpected question result: %q", result)
+	}
+	if AnswerQuestion(event.QuestionID, []string{"late answer"}) {
+		t.Fatal("answer was accepted after the question timed out")
 	}
 }
 

@@ -9,6 +9,23 @@ import {
     normalizeEntryVisibilityImportProfile,
 } from "./profile";
 
+test("database submenu migration preserves visibility, order and plugin slots", () => {
+    const profile = normalizeEntryVisibilityImportProfile({
+        name: "Custom",
+        entries: {"gutter.single.exportCSV": false, "gutter.single.showDatabaseInFolder": true},
+        orders: {"gutter.single": ["pluginBefore", "separator_exportCSV", "showDatabaseInFolder", "pluginMiddle", "exportCSV", "pluginAfter"]},
+    }, 4, {});
+    assert.deepEqual(profile.entries, {
+        "gutter.single.database.exportCSV": false,
+        "gutter.single.database.showDatabaseInFolder": true,
+    });
+    assert.deepEqual(profile.orders, {
+        "gutter.single": ["pluginBefore", "separator_exportCSV", "database", "pluginMiddle", "pluginAfter"],
+        "gutter.single.database": ["showDatabaseInFolder", "exportCSV"],
+    });
+    assert.deepEqual(normalizeEntryVisibilityImportProfile(profile, 5, {}), profile);
+});
+
 test("font toolbar entries are visible in Full, hidden in Simple and preserve explicit profile choices", () => {
     for (const key of ["font-family", "font-size"]) {
         const path = `${TOOLBAR_ENTRY_ROOT_PATH}.${key}`;
@@ -59,6 +76,9 @@ test("built-in profiles honor entry defaults", () => {
     assert.equal(getBuiltinProfileEntryVisibility("simple", true, true), true);
     assert.equal(getBuiltinProfileEntryVisibility("simple", false, true), false);
     assert.equal(getBuiltinProfileEntryVisibility("simple", true, false), false);
+    assert.equal(getBuiltinProfileEntryVisibility("simple", true, false, true), true);
+    assert.equal(getBuiltinProfileEntryVisibility("full", true, false, true), false);
+    assert.equal(getBuiltinProfileEntryVisibility("simple", true, true, false), false);
 });
 
 test("custom entry visibility preserves saved values", () => {

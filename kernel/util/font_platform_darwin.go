@@ -170,11 +170,12 @@ func loadPlatformFonts() (ret []*Font) {
 			font.DisplayName = font.Family
 		}
 		ret = addFont(ret, &Font{
-			Family:      font.Family,
-			Weight:      fontWeightFromNormalizedTrait(font.Weight, font.Style),
-			DisplayName: font.DisplayName,
-			Aliases:     font.Aliases,
-			Spacing:     font.Spacing,
+			nonNormalStyle: isNonNormalFontStyle(font.Style),
+			Family:         font.Family,
+			Weight:         fontWeightFromNormalizedTrait(font.Weight, font.Style),
+			DisplayName:    font.DisplayName,
+			Aliases:        font.Aliases,
+			Spacing:        font.Spacing,
 		})
 	}
 	return

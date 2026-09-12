@@ -10,7 +10,11 @@
 
 Electron 44 要求 macOS 13 或更高版本，Windows 和 Linux 仅支持 64 位构建。
 
-安装 pnpm：`npm install -g pnpm@12.3.4`
+安装与 CI 一致的 Node.js 24，然后通过 npm 安装 pnpm：`npm install -g pnpm@12.3.4`。
+
+版本以 [`app/package.json`](../app/package.json) 的 `packageManager` 字段为准；该字段变更后，请相应调整上述命令中的版本号。此安装方式与 [CI](workflows/cd.yml) 保持一致。
+
+不要与 pnpm 独立安装脚本（`@pnpm/exe`）混用。不同的 pnpm 发行包可能改变 `app/pnpm-lock.yaml` 中的 `packageManagerDependencies` 元数据，产生与依赖无关的锁文件变更。如果此前安装过独立版 pnpm，请将其移出 `PATH` 或卸载，确保优先使用通过 npm 安装的 pnpm。安装依赖前，请用 `pnpm --version` 核对版本是否与 `packageManager` 一致，并在 Windows 上用 `where.exe pnpm`、在 macOS/Linux 上用 `command -v pnpm` 检查可执行文件的位置。提交前请检查锁文件差异，排除因切换安装方式产生的纯元数据变更。
 
 <details>
 <summary>适用于中国大陆</summary>

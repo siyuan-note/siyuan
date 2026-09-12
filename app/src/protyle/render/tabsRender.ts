@@ -185,7 +185,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                 header.setAttribute("contenteditable", "false");
                 if (!boundHeaders.has(header)) {
                     boundHeaders.add(header);
-                    ["pointerdown", "mousedown", "mouseup", "click", "keydown"].forEach(type => {
+                    ["pointerdown", "mousedown", "mouseup", "click"].forEach(type => {
                         header.addEventListener(type, event => event.stopPropagation());
                     });
                     header.addEventListener("selectstart", event => event.preventDefault());
@@ -264,10 +264,14 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                                 task.classList.add("tabs-task--custom");
                             }
                             ["click", "dblclick", "contextmenu", "keydown"].forEach(type => task.addEventListener(type, event => {
-                                event.stopPropagation();
-                                if (type === "keydown" && !["Enter", " "].includes((event as KeyboardEvent).key)) {
-                                    return;
+                                if (type === "keydown") {
+                                    const keyEvent = event as KeyboardEvent;
+                                    if (keyEvent.isComposing || keyEvent.ctrlKey || keyEvent.metaKey || keyEvent.altKey ||
+                                        keyEvent.shiftKey || !["Enter", " "].includes(keyEvent.key)) {
+                                        return;
+                                    }
                                 }
+                                event.stopPropagation();
                                 event.preventDefault();
                                 if (!readonly) {
                                     if (type === "contextmenu") {
@@ -298,6 +302,9 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                             controller.options.menu?.(tabs, item, button);
                         });
                         button.addEventListener("keydown", event => {
+                            if (event.isComposing || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) {
+                                return;
+                            }
                             if (event.key === "Enter" || event.key === " ") {
                                 event.preventDefault();
                                 event.stopPropagation();

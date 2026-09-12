@@ -23,6 +23,11 @@ const getHotkey = (item: INativeCommandCatalogItem) => {
 };
 
 const matchesContext = (item: INativeCommandCatalogItem, context: ICommandContextSnapshot) => {
+    // 命令面板和快捷键共用只读限制，文档树操作仍按文档树上下文处理。
+    if (context.focus !== "fileTree" && context.protyle?.disabled &&
+        ["move", "addToDatabase"].includes(item.legacyId)) {
+        return false;
+    }
     if (item.requirement === "editor") {
         return Boolean(context.protyle);
     }

@@ -317,21 +317,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             return;
         }
-        if (protyle.disabled) {
-            if (event.key === "Escape" && !event.isComposing && !event.repeat) {
-                return;
-            }
-            // 放行锁定编辑和命令面板快捷键，由全局快捷键处理器执行。
-            if (matchHotKey(window.siyuan.config.keymap.general.editReadonly, event) ||
-                matchHotKey(window.siyuan.config.keymap.general.commandPanel, event)) {
-                return;
-            }
-            event.stopPropagation();
-            // 只读页签正文获得焦点后，保留复制快捷键的默认行为。
-            if (matchHotKey("⌘C", event)) {
-                return;
-            }
-            event.preventDefault();
+        // 只读正文和页签标题不执行正文编辑逻辑，保留默认行为并交给全局快捷键处理器。
+        if (protyle.disabled || event.target.closest(".tabs-header")) {
             return;
         }
         if (!protyle.selectElement.classList.contains("fn__none") &&

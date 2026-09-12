@@ -350,7 +350,6 @@ export const workspaceMenu = async (app: App, rect: DOMRect) => {
                     const createWorkspaceDialog = openInputDialog({
                         title: window.siyuan.languages.new,
                         value: "",
-                        width: "520px",
                         onConfirm: (value, dialog) => {
                             fetchPost("/api/system/createWorkspaceDir", {
                                 path: pathPosix().join(pathPosix().dirname(window.siyuan.config.system.workspaceDir), value)

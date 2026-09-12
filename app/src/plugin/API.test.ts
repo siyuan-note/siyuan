@@ -12,16 +12,21 @@ it("defers plugin API dependency reads and shares the initialized API", () => {
     }).outputText;
     let dependenciesReady = false;
     const adaptHotkey = (value: string) => value;
+    const openInputDialog = (): void => undefined;
     const dependency = new Proxy({}, {
         get(_target, key) {
             assert.ok(dependenciesReady, `Dependency ${String(key)} was read during module initialization`);
+            if (key === "openInputDialog") {
+                return openInputDialog;
+            }
             return key === "updateHotkeyTip" ? adaptHotkey : (): void => undefined;
         },
     });
-    const exports: {getAPI?: () => {adaptHotkey: typeof adaptHotkey}} = {};
+    const exports: {getAPI?: () => {adaptHotkey: typeof adaptHotkey, openInputDialog: typeof openInputDialog}} = {};
     runInNewContext(compiled, {exports, require: () => dependency});
     dependenciesReady = true;
     const api = exports.getAPI();
     assert.equal(api.adaptHotkey, adaptHotkey);
+    assert.equal(api.openInputDialog, openInputDialog);
     assert.equal(exports.getAPI(), api);
 });

@@ -44,7 +44,6 @@ const editTabTask = (protyle: IProtyle, item: HTMLElement) => {
     openInputDialog({
         title: lang.customTaskStatus,
         value: item.getAttribute("tabs-task") || " ",
-        width: "320px",
         maxLength: 1,
         onConfirm: (value, dialog) => {
             const marker = value || " ";

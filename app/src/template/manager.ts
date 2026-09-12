@@ -286,7 +286,6 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
             title,
             value,
             label: nameOnly ? lang.name : lang.savePath,
-            width: "min(520px, 92vw)",
             onConfirm: (value, prompt) => {
                 const input = prompt.element.querySelector<HTMLInputElement>("input");
                 if (nameOnly) {

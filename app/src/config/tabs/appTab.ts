@@ -120,7 +120,6 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
                 const createWorkspaceDialog = openInputDialog({
                     title: window.siyuan.languages.new,
                     value: "",
-                    width: "92vw",
                     onConfirm: (value, dialog) => {
                         fetchPost("/api/system/createWorkspaceDir", {
                             path: pathPosix().join(pathPosix().dirname(window.siyuan.config.system.workspaceDir), value),

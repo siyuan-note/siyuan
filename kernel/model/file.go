@@ -302,7 +302,8 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 			continue
 		}
 		hPath := b.Name + rootBlock.HPath
-		data := map[string]string{"path": rootBlock.Path, "hPath": hPath, "box": rootBlock.Box, "boxIcon": b.Icon}
+		data := map[string]string{"path": rootBlock.Path, "hPath": hPath, "box": rootBlock.Box, "boxIcon": b.Icon,
+			"name": rootBlock.Name, "alias": rootBlock.Alias}
 		if flashcard {
 			newFlashcardCount, dueFlashcardCount, flashcardCount := countTreeFlashcard(rootBlock.ID, deck, deckBlockIDs)
 			if 1 > flashcardCount {

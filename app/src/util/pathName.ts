@@ -352,6 +352,8 @@ export const movePathTo = (options: {
                 box: string,
                 hPath: string,
                 path: string,
+                name?: string,
+                alias?: string,
                 newFlashcardCount: string,
                 dueFlashcardCount: string,
                 flashcardCount: string
@@ -363,9 +365,16 @@ export const movePathTo = (options: {
 <span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardDueCard}">${item.dueFlashcardCount}</span>
 <span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardCard}">${item.flashcardCount}</span>`;
                 }
+                let attributesHTML = "";
+                if (item.name) {
+                    attributesHTML += `<span class="ft__smaller ft__on-surface" style="display: block; line-height: 1.5">${window.siyuan.languages.name} ${escapeHtml(item.name)}</span>`;
+                }
+                if (item.alias) {
+                    attributesHTML += `<span class="ft__smaller ft__on-surface" style="display: block; line-height: 1.5">${window.siyuan.languages.alias} ${escapeHtml(item.alias)}</span>`;
+                }
                 fileHTML += `<li class="b3-list-item${fileHTML === "" ? " b3-list-item--focus" : ""}" data-path="${item.path}" data-box="${item.box}"${getFileTreeDefaultIconAttr(item.boxIcon, "notebook")}>
     ${getFileTreeIconHTML(item.boxIcon, "notebook", "b3-list-item__graphic", true)}
-    <span class="b3-list-item__showall" style="padding: 4px 0">${escapeHtml(item.hPath)}</span>
+    <span class="b3-list-item__showall" style="padding: 4px 0">${escapeHtml(item.hPath)}${attributesHTML}</span>
     ${countHTML}
 </li>`;
             });

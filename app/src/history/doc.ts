@@ -226,7 +226,7 @@ export const openDocHistory = (options: {
     </div>
 </div>`;
     const dialog = new Dialog({
-        title: options.pathString,
+        title: escapeHtml(options.pathString),
         content: contentHTML,
         width: isMobile() ? "100vw" : "90vw",
         height: isMobile() ? "100dvh" : "80vh",

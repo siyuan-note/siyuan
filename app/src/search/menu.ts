@@ -415,7 +415,7 @@ const saveCriterionData = (config: Config.IUILayoutTabSearchConfig,
         const criteriaElement = element.querySelector("#criteria").firstElementChild;
         criteriaElement.classList.remove("fn__none");
         criteriaElement.querySelector(".b3-chip--current")?.classList.remove("b3-chip--current");
-        criteriaElement.insertAdjacentHTML("beforeend", `<div data-type="set-criteria" class="b3-chip b3-chip--current b3-chip--middle b3-chip--pointer">${criterion.name}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconClose"></use></svg></div>`);
+        criteriaElement.insertAdjacentHTML("beforeend", `<div data-type="set-criteria" class="b3-chip b3-chip--current b3-chip--middle b3-chip--pointer">${escapeHtml(criterion.name)}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconClose"></use></svg></div>`);
     });
 };
 
@@ -427,7 +427,7 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
     }
     const saveDialog = openInputDialog({
         title: window.siyuan.languages.saveCriterion,
-        value: "",
+        value: element.querySelector("#criteria .b3-chip--current")?.textContent || "",
         placeholder: window.siyuan.languages.memo,
         onConfirm: (inputValue, saveDialog) => {
             const inputElement = saveDialog.element.querySelector("input");
@@ -475,7 +475,7 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
                     saveDialog.destroy();
                 } else {
                     const removeName = hasSameName === value ? hasSameConfig : hasSameName;
-                    confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchRemoveName.replace("${x}", removeName).replace("${y}", value), () => {
+                    confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchRemoveName.replace("${x}", () => escapeHtml(removeName)).replace("${y}", () => escapeHtml(value)), () => {
                         Array.from(criteriaElement.children).forEach(item => {
                             if (item.textContent === hasSameConfig || item.textContent === hasSameName) {
                                 item.remove();
@@ -492,7 +492,7 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
                     });
                 }
             } else if (!hasSameName && hasSameConfig) {
-                confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchUpdateName.replace("${x}", hasSameConfig).replace("${y}", value), () => {
+                confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchUpdateName.replace("${x}", () => escapeHtml(hasSameConfig)).replace("${y}", () => escapeHtml(value)), () => {
                     Array.from(criteriaElement.children).forEach(item => {
                         if (item.textContent === hasSameConfig) {
                             item.remove();

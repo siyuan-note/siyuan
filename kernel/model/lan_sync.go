@@ -121,7 +121,15 @@ func refreshLANSyncManagerWithForce(force bool) {
 }
 
 func lanSyncScope() string {
-	base := fmt.Sprintf("v1:%d:%s", Conf.Sync.Provider, Conf.Sync.CloudName)
+	cloudName := Conf.Sync.CloudName
+	if conf.ProviderS3 == Conf.Sync.Provider {
+		// S3 只使用存储桶定位仓库，v1 作用域中的目录槽位固定为存储桶名。
+		cloudName = ""
+		if nil != Conf.Sync.S3 {
+			cloudName = Conf.Sync.S3.Bucket
+		}
+	}
+	base := fmt.Sprintf("v1:%d:%s", Conf.Sync.Provider, cloudName)
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan:
 		userID := ""

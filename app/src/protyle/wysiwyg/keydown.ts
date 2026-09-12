@@ -321,6 +321,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (event.key === "Escape" && !event.isComposing && !event.repeat) {
                 return;
             }
+            // 放行锁定编辑快捷键，由全局快捷键处理器切换只读状态。
+            if (matchHotKey(window.siyuan.config.keymap.general.editReadonly, event)) {
+                return;
+            }
             event.stopPropagation();
             // 只读页签正文获得焦点后，保留复制快捷键的默认行为。
             if (matchHotKey("⌘C", event)) {

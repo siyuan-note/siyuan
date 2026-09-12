@@ -133,7 +133,12 @@ import {CALLOUT_PRESETS, updateCalloutType, updateCustomCalloutType} from "../wy
 import {setTabsPosition, toggleTabsTasks, unwrapTabs} from "../wysiwyg/tabs";
 import {getTabItems} from "../render/tabsRender";
 
-const restoreGutterRange = (range: Range) => {
+const restoreGutterRange = (protyle: IProtyle) => {
+    // 多选块菜单只操作选中的块，不恢复旧文本光标，避免编辑器滚动到光标位置。
+    if (window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_BLOCK_MULTI) {
+        return;
+    }
+    const range = protyle.toolbar.range;
     const container = range?.startContainer;
     const target = container?.nodeType === Node.ELEMENT_NODE ? container as Element : container?.parentElement;
     const title = target?.closest(".tab-item-title, [tabs-title=\"true\"]");
@@ -386,7 +391,8 @@ export class Gutter {
                     if (event.clientX >= br.left && event.clientX <= br.right &&
                         event.clientY >= br.top && event.clientY <= br.bottom) {
                         this.renderMenu(protyle, activeBlockButton as HTMLElement);
-                        if (!protyle.toolbar.range) {
+                        if (!protyle.toolbar.range &&
+                            window.siyuan.menus.menu.element.getAttribute("data-name") !== Constants.MENU_BLOCK_MULTI) {
                             protyle.toolbar.range = getEditorRange(
                                 this.getNodeElement(protyle, activeBlockButton) || protyle.wysiwyg.element.firstElementChild);
                         }
@@ -394,7 +400,7 @@ export class Gutter {
                         window.siyuan.menus.menu.fullscreen();
                         /// #else
                         window.siyuan.menus.menu.popup({x: br.left, y: br.bottom, h: br.height, isLeft: true});
-                        restoreGutterRange(protyle.toolbar.range);
+                        restoreGutterRange(protyle);
                         /// #endif
                     }
                 }
@@ -668,7 +674,8 @@ export class Gutter {
             } else if (!window.siyuan.ctrlIsPressed && !window.siyuan.altIsPressed && !window.siyuan.shiftIsPressed) {
                 this.renderMenu(protyle, buttonElement);
                 // https://ld246.com/article/1648433751993
-                if (!protyle.toolbar.range) {
+                if (!protyle.toolbar.range &&
+                    window.siyuan.menus.menu.element.getAttribute("data-name") !== Constants.MENU_BLOCK_MULTI) {
                     protyle.toolbar.range = getEditorRange(
                         this.getNodeElement(protyle, buttonElement) || protyle.wysiwyg.element.firstElementChild);
                 }
@@ -678,7 +685,7 @@ export class Gutter {
                 window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, h: gutterRect.height, isLeft: true});
                 const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
                 window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
-                restoreGutterRange(protyle.toolbar.range);
+                restoreGutterRange(protyle);
                 /// #endif
             }
         });
@@ -710,7 +717,8 @@ export class Gutter {
                     }
                 } else if (buttonElement.dataset.type !== "NodeAttributeViewRow") {
                     this.renderMenu(protyle, buttonElement);
-                    if (!protyle.toolbar.range) {
+                    if (!protyle.toolbar.range &&
+                        window.siyuan.menus.menu.element.getAttribute("data-name") !== Constants.MENU_BLOCK_MULTI) {
                         protyle.toolbar.range = getEditorRange(
                             this.getNodeElement(protyle, buttonElement) ||
                             protyle.wysiwyg.element.firstElementChild);
@@ -721,7 +729,7 @@ export class Gutter {
                     window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, h: gutterRect.height, isLeft: true});
                     const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
                     window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
-                    restoreGutterRange(protyle.toolbar.range);
+                    restoreGutterRange(protyle);
                     /// #endif
                 }
             }

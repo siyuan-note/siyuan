@@ -69,7 +69,7 @@ export const getTableCellTextStyleMenus = (protyle: IProtyle, cellElements: HTML
         click: () => openTableCellAppearance(protyle, cellElements, onApply),
     });
     menus.push({
-        icon: "iconClear",
+        icon: "iconEraser",
         label: window.siyuan.languages.clearInline,
         accelerator: window.siyuan.config.keymap.editor.insert.clearInline.custom,
         click: () => {

@@ -303,7 +303,7 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
         name: "clear",
         lang: "clearInline",
         hotkey: window.siyuan.config.keymap.editor.insert.clearInline.custom,
-        icon: "iconClear",
+        icon: "iconEraser",
         tipPosition: "n",
     }, {
         name: "format-painter",

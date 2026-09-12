@@ -1385,7 +1385,7 @@ export const initKeyboardToolbar = () => {
             <button class="keyboard__action" data-type="inline-math"><svg><use xlink:href="#iconMath"></use></svg></button>
             <button class="keyboard__action" data-type="inline-memo"><svg><use xlink:href="#iconM"></use></svg></button>
             <span class="keyboard__split" data-id="separator_2"></span>
-            <button class="keyboard__action" data-type="clear"><svg><use xlink:href="#iconClear"></use></svg></button>
+            <button class="keyboard__action" data-type="clear"><svg><use xlink:href="#iconEraser"></use></svg></button>
         </div>
     </div>
     <span class="keyboard__split"></span>

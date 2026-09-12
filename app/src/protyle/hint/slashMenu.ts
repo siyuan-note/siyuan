@@ -2,6 +2,7 @@ import {reorderEntrySlots} from "../../config/entryVisibility/order";
 
 export type TSlashMenuItem = IHintData & {
     entryKey: string;
+    showInLite?: boolean;
 };
 
 interface IResolveSlashMenuOptions {
@@ -10,9 +11,22 @@ interface IResolveSlashMenuOptions {
     key: string;
     order: string[];
     visible: (entryKey: string) => boolean;
+    lite?: boolean;
+    canUpload?: boolean;
 }
 
 const isSeparator = (item?: TSlashMenuItem) => item?.html === "separator";
+
+// 精简模式仅保留不依赖持久化文档上下文的内置项。
+const LITE_SLASH_IDS = new Set([
+    "assets", "ref", "heading1", "heading2", "heading3", "heading4", "heading5", "heading6",
+    "list", "orderedList", "check", "quote", "tabs", "calloutNote", "calloutTip", "calloutImportant",
+    "calloutWarning", "calloutCaution", "code", "table", "line", "math", "html",
+    "emoji", "link", "bold", "italic", "underline", "strike", "mark", "sup", "sub", "inlineCode",
+    "kbd", "tag", "inlineMath", "insertIframeURL", "insertImgURL", "insertVideoURL", "insertAudioURL",
+    "staff", "chart", "flowChart", "graph", "mermaid", "mindmap", "UML",
+    "infoStyle", "successStyle", "warningStyle", "errorStyle", "clearFontStyle",
+]);
 
 export const normalizeSlashMenuSeparators = (items: TSlashMenuItem[]) => {
     const result: TSlashMenuItem[] = [];
@@ -44,7 +58,10 @@ export const resolveSlashMenuItems = (items: TSlashMenuItem[], options: IResolve
         return true;
     });
     const orderedItems = reorderEntrySlots(uniqueItems, options.order, (item) => item.entryKey);
-    const visibleItems = orderedItems.filter((item) => options.visible(item.entryKey) &&
+    const visibleItems = orderedItems.filter((item) => (!options.lite || isSeparator(item) ||
+        (item.entryKey === item.id ? LITE_SLASH_IDS.has(item.id) ||
+            (options.canUpload && ["insertAsset", "insertHTMLFile"].includes(item.id)) : item.showInLite === true)) &&
+        options.visible(item.entryKey) &&
         !(options.hideConfiguredCreate && item.entryKey === "newFileRef"));
     const filteredItems = options.key === "" ? visibleItems : visibleItems.filter((item) => item.filter?.some((filter) =>
         filter.toLowerCase().includes(options.key.toLowerCase())));

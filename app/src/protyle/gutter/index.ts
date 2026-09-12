@@ -75,7 +75,7 @@ import {makeCard, quickMakeCard} from "../../card/makeCard";
 import {transferBlockRef} from "../../menus/block";
 import {isMobile} from "../../util/functions";
 import {AIActions} from "../../ai/actions";
-import {activeBlur, renderTextMenu, showKeyboardToolbarUtil} from "../../mobile/util/keyboardToolbar";
+import {renderTextMenu, showKeyboardToolbarUtil} from "../../mobile/util/keyboardToolbar";
 import {getMobileBlockSelectionElement} from "../../mobile/util/blockSelection";
 import {hideTooltip} from "../../dialog/tooltip";
 import {appearanceMenu, limitRecentFontStyleRows} from "../toolbar/Font";
@@ -1599,9 +1599,6 @@ export class Gutter {
         }
         hideElements(["util", "toolbar", "hint"], protyle);
         window.siyuan.menus.menu.remove();
-        if (isMobile()) {
-            activeBlur();
-        }
         const id = buttonElement.getAttribute("data-node-id");
         const nodeElement = this.getNodeElement(protyle, buttonElement);
         if (!nodeElement) {

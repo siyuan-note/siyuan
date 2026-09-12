@@ -1407,8 +1407,8 @@ export const initKeyboardToolbar = () => {
     toolbarElement.addEventListener("mousedown", event => {
         const buttonElement = hasClosestByTag(event.target as HTMLElement, "BUTTON");
         const type = buttonElement && buttonElement.getAttribute("data-type");
-        if (type === "undo" || type === "redo") {
-            // 保持编辑器焦点，避免异步撤销或重做期间软键盘收起。
+        if (type === "undo" || type === "redo" || type === "block") {
+            // 保持编辑器焦点，避免工具栏操作期间软键盘收起。
             event.preventDefault();
         }
     });
@@ -1690,12 +1690,12 @@ export const initKeyboardToolbar = () => {
             window.JSAndroid?.hideKeyboard();
             return;
         } else if (type === "block") {
+            event.preventDefault();
             protyle.toolbar.range = range;
             keyboardPanelClosing = false;
             hideKeyboardToolbarUtil();
             protyle.gutter.renderMenu(protyle, nodeElement);
             window.siyuan.menus.menu.fullscreen();
-            activeBlur();
             return;
         } else if (type === "outdent") {
             if (nodeElement.classList.contains("code-block")) {

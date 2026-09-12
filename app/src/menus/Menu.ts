@@ -69,11 +69,21 @@ export class Menu {
         this.element.addEventListener("focusin", activateKeymapInput);
         this.element.addEventListener("pointerdown", activateKeymapInput);
         if (isMobile()) {
+            const preserveBlockMenuFocus = (event: MouseEvent) => {
+                const name = this.element.getAttribute("data-name");
+                if ((name === Constants.MENU_BLOCK_SINGLE || name === Constants.MENU_BLOCK_MULTI) &&
+                    !(event.target as Element).closest("input, textarea, select, [contenteditable=\"true\"]")) {
+                    // 保留编辑器选区和键盘，同时允许菜单输入框正常获取焦点。
+                    event.preventDefault();
+                }
+            };
+            this.element.addEventListener("mousedown", preserveBlockMenuFocus);
             this.element.addEventListener("touchstart", this.handleSheetTouchStart, {passive: true});
             this.element.addEventListener("touchmove", this.handleSheetTouchMove, {passive: false});
             this.element.addEventListener("touchend", this.handleSheetTouchEnd);
             this.element.addEventListener("touchcancel", this.handleSheetTouchCancel);
             if (this.element.id === "commonMenu") {
+                document.getElementById("commonMenuScrim")?.addEventListener("mousedown", preserveBlockMenuFocus);
                 document.getElementById("commonMenuScrim")?.addEventListener("click", (event) => {
                     event.stopPropagation();
                     this.closeSheet();

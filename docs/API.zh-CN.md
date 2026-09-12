@@ -4,6 +4,7 @@
 
 * [规范](#规范)
     * [参数和返回值](#参数和返回值)
+    * [TypeScript 类型契约](#typescript-类型契约)
     * [行为语义](#行为语义)
     * [鉴权](#鉴权)
 * [笔记本](#笔记本)
@@ -117,6 +118,21 @@
     * `code`：非 0 为异常情况
     * `msg`：正常情况下是空字符串，异常情况下会返回错误文案
     * `data`：可能为 `{}`、`[]` 或者 `NULL`，根据不同接口而不同
+
+### TypeScript 类型契约
+
+插件的 `fetchPost`、`fetchSyncPost` 和 `fetchGet` 声明会根据已迁移的接口路径，从内核生成的契约推导请求与响应类型。首批覆盖版本、块属性、标签搜索、笔记本列表、历史搜索和块信息。存量未迁移接口及动态 URL 继续支持。读取异步返回值中的成功数据前须检查响应码，并显式处理可空字段。
+
+```typescript
+import {fetchSyncPost} from "siyuan";
+
+const response = await fetchSyncPost("/api/attr/getBlockAttrs", {id: blockID});
+if (response.code === 0 && response.data) {
+    const value = response.data["custom-value"];
+}
+```
+
+准确覆盖范围见[生成的路由声明](../app/src/types/api/index.d.ts)，生成与兼容规则见[契约维护说明](API-CONTRACTS.md)。类型声明本身不执行运行时 JSON 校验。
 
 ### 行为语义
 

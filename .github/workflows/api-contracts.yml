@@ -1,0 +1,50 @@
+name: API contracts
+
+on:
+  pull_request:
+  push:
+    branches: [dev, master]
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: kernel/go.mod
+          cache-dependency-path: kernel/go.sum
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Install repository pnpm version
+        run: node -e "require('node:child_process').execFileSync('npm', ['install', '--global', require('./app/package.json').packageManager], {stdio:'inherit'});"
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: app
+      - name: Check generated contracts and route coverage
+        run: pnpm run api:check
+        working-directory: app
+      - name: Check legacy coverage does not grow
+        if: github.event_name == 'pull_request' || github.event.before != '0000000000000000000000000000000000000000'
+        run: pnpm run api:check --base "$API_CONTRACT_BASE"
+        working-directory: app
+        env:
+          API_CONTRACT_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+      - name: Check application and strict contract types
+        run: pnpm run typecheck
+        working-directory: app
+      - name: Test request and response contracts
+        run: go test ./apicontract/...
+        working-directory: kernel
+      - name: Test actual API responses and compatibility
+        run: go test -tags "fts5 sqlcipher" ./api -run "TestAPIContract|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount" -count=1
+        working-directory: kernel
+      - name: Test frontend transport behavior
+        run: pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts
+        working-directory: app

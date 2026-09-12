@@ -4,6 +4,7 @@
 
 * [Specification](#Specification)
     * [Parameters and return values](#Parameters-and-return-values)
+    * [TypeScript contracts](#TypeScript-contracts)
     * [Behavior semantics](#Behavior-semantics)
     * [Authentication](#Authentication)
 * [Notebooks](#Notebooks)
@@ -117,6 +118,21 @@
     * `code`: non-zero for exceptions
     * `msg`: an empty string under normal circumstances, an error text will be returned under abnormal conditions
     * `data`: may be `{}`, `[]` or `NULL`, depending on the interface
+
+### TypeScript contracts
+
+The plugin `fetchPost`, `fetchSyncPost`, and `fetchGet` declarations infer request and response types for migrated API paths from generated kernel contracts. The initial coverage includes version, block attributes, tag search, notebook listing, history search, and block information. Existing untyped endpoints and dynamic URLs remain supported. Check the response code before reading successful data from asynchronous calls, and handle nullable fields explicitly.
+
+```typescript
+import {fetchSyncPost} from "siyuan";
+
+const response = await fetchSyncPost("/api/attr/getBlockAttrs", {id: blockID});
+if (response.code === 0 && response.data) {
+    const value = response.data["custom-value"];
+}
+```
+
+See the [generated route declarations](../app/src/types/api/index.d.ts) for exact coverage and the [contract maintenance guide](API-CONTRACTS.md) for generation and compatibility rules. Type declarations do not perform runtime JSON validation.
 
 ### Behavior semantics
 

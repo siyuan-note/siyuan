@@ -656,9 +656,9 @@ interface INotebook {
     icon: string;
     sort: number;
     subFileCount: number;
-    dueFlashcardCount?: string;
-    newFlashcardCount?: string;
-    flashcardCount?: string;
+    dueFlashcardCount?: number;
+    newFlashcardCount?: number;
+    flashcardCount?: number;
     sortMode: number;
     encrypted?: boolean;
     unlocked?: boolean;

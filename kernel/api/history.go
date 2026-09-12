@@ -24,50 +24,23 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func searchHistory(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var notebook, query, op string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("notebook", &notebook, false, false),
-		util.BindJsonArg("query", &query, false, false),
-		util.BindJsonArg("op", &op, false, false),
-	) {
-		return
-	}
+var searchHistory = contractHandler(apicontract.SearchHistory, func(c *gin.Context, request apicontract.SearchHistoryRequest) apicontract.Response[apicontract.SearchHistoryData] {
 	typ := model.HistoryTypeDoc
-	if nil != arg["type"] {
-		typeVal, ok := util.ParseJsonArg[float64]("type", arg, ret, true, false)
-		if !ok {
-			return
-		}
-		typ = int(typeVal)
+	if request.Type != nil {
+		typ = int(*request.Type)
 	}
 	page := 1
-	if nil != arg["page"] {
-		pageVal, ok := util.ParseJsonArg[float64]("page", arg, ret, true, false)
-		if !ok {
-			return
-		}
-		page = int(pageVal)
+	if request.Page != nil {
+		page = int(*request.Page)
 	}
-	histories, pageCount, totalCount := model.FullTextSearchHistory(query, notebook, op, typ, page)
-	ret.Data = map[string]any{
-		"histories":  histories,
-		"pageCount":  pageCount,
-		"totalCount": totalCount,
-	}
-}
+	histories, pageCount, totalCount := model.FullTextSearchHistory(request.Query, request.Notebook, request.Op, typ, page)
+	return apicontract.Success(apicontract.SearchHistoryData{Histories: histories, PageCount: pageCount, TotalCount: totalCount})
+})
 
 func getHistoryItems(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

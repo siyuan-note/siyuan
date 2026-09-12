@@ -96,12 +96,13 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         const pageElement = nextElement.nextElementSibling.nextElementSibling;
         pageElement.textContent = `${window.siyuan.languages.pageCountAndHistoryCount.replace("${x}", response.data.pageCount).replace("${y}", response.data.totalCount || 1)}`;
         pageElement.classList.remove("fn__none");
-        if (response.data.histories.length === 0) {
+        const histories = response.data.histories || [];
+        if (histories.length === 0) {
             listElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
             return;
         }
         let logsHTML = "";
-        response.data.histories.forEach((item: string) => {
+        histories.forEach((item: string) => {
             logsHTML += `<li class="b3-list-item" data-type="toggle" data-created="${item}">
     <span class="b3-list-item__toggle b3-list-item__toggle--hl"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span>
     <span style="padding-left: 4px" class="b3-list-item__text">${dayjs(parseInt(item) * 1000).format("YYYY-MM-DD HH:mm:ss")}</span>
@@ -377,7 +378,8 @@ const renderRepo = (element: Element, currentPage: number) => {
             previousElement.setAttribute("disabled", "disabled");
         }
         nextElement.setAttribute("disabled", "disabled");
-        fetchPost(`/api/repo/${selectValue}`, {page: currentPage}, (response) => {
+        const snapshotURL: string = `/api/repo/${selectValue}`;
+        fetchPost(snapshotURL, {page: currentPage}, (response) => {
             selectElement.disabled = false;
             if (currentPage < response.data.pageCount) {
                 nextElement.removeAttribute("disabled");

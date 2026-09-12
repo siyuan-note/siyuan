@@ -16,6 +16,7 @@ import {
     openPublishAccessDialog
 } from "../../protyle/util/publishAccess";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {restoreFileTreePaths} from "../../util/fileTreeRestore";
 import {openEmojiPanel} from "../../emoji";
 import {
     getFileTreeDefaultIconAttr,
@@ -1484,11 +1485,30 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         } else {
             this.closeElement.classList.add("fn__none");
         }
-        window.siyuan.storage[Constants.LOCAL_FILESPATHS].forEach(async (item: IFilesPath) => {
-            for (const openPath of item.openPaths) {
-                await this.selectItem(item.notebookId, openPath, undefined, false, false);
+        const firstNotebook = this.element.firstElementChild;
+        void restoreFileTreePaths(window.siyuan.storage[Constants.LOCAL_FILESPATHS], async (notebookId, path) => {
+            if (this.element.firstElementChild !== firstNotebook) {
+                return;
             }
-            this.element.scrollTop = scrollTop;
+            const liElement = this.element.querySelector(`ul[data-url="${notebookId}"] li[data-path="${path}"]`);
+            if (!liElement || liElement.querySelector(".b3-list-item__arrow--open")) {
+                return;
+            }
+            const response = await fetchSyncPost("/api/filetree/listDocsByPath", {
+                notebook: notebookId,
+                path,
+                app: Constants.SIYUAN_APPID,
+            });
+            if (response.code !== 0 || !response.data || !this.element.contains(liElement) ||
+                liElement.querySelector(".b3-list-item__arrow--open")) {
+                return;
+            }
+            await this.onLsSelect(response.data, path, false, false);
+        }).then(() => {
+            if (this.element.firstElementChild === firstNotebook) {
+                this.refreshPublishAccessSwitch();
+                this.element.scrollTop = scrollTop;
+            }
         });
         this.refreshPublishAccessSwitch();
         if (!init) {

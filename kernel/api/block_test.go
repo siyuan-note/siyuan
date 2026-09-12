@@ -129,6 +129,7 @@ func testGetBlockInfoRecovery(t *testing.T, name string) {
 	request := httptest.NewRequest(http.MethodPost, "/api/block/getBlockInfo", strings.NewReader(string(body)))
 	request.Header.Set("Content-Type", "application/json")
 	engine.ServeHTTP(recorder, request)
+	requireAPIContract(t, http.MethodPost, "/api/block/getBlockInfo", recorder)
 	var response struct {
 		Code int `json:"code"`
 		Data struct {

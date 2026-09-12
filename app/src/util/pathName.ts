@@ -816,6 +816,9 @@ export const setNoteBook = (cb?: (notebook: INotebook[]) => void, flashcard = fa
     return fetchPost("/api/notebook/lsNotebooks", {
         flashcard
     }, (response) => {
+        if (!response.data?.notebooks) {
+            return;
+        }
         if (!flashcard) {
             window.siyuan.notebooks = response.data.notebooks;
             if (window.siyuan.config?.fileTree) {

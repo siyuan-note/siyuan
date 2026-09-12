@@ -23,6 +23,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -249,25 +250,15 @@ func searchAsset(c *gin.Context) {
 	return
 }
 
-func searchTag(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var searchTag = contractHandler(apicontract.SearchTag, func(c *gin.Context, request apicontract.SearchTagRequest) apicontract.Response[apicontract.SearchTagData] {
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	k := arg["k"].(string)
+	k := request.K
 	tags := model.SearchTags(k)
 	if 1 > len(tags) {
 		tags = []string{}
 	}
-	ret.Data = map[string]any{
-		"tags": tags,
-		"k":    k,
-	}
-}
+	return apicontract.Success(apicontract.SearchTagData{Tags: tags, K: k})
+})
 
 func searchWidget(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

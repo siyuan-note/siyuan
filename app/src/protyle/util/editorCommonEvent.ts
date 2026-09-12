@@ -177,7 +177,7 @@ const getDragSourceParentID = async (protyle: IProtyle, element: Element) => {
         id: element.getAttribute("data-node-id"),
         notebook: dragSourceElement?.getAttribute(DRAG_SOURCE_NOTEBOOK_ID) || "",
     });
-    return response?.data?.rootID || "";
+    return response.code === 0 ? response.data.rootID : "";
 };
 
 const cancelDetachedSourceSB = async (nodeElement: Element, excludedChildIDs: Set<string>) => {

@@ -71,6 +71,7 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
      4. Inspect the returned resource and read it back with `gh api` to verify the published text exactly, including line breaks and non-ASCII characters
      5. Delete the temporary JSON file and confirm that it no longer exists
    - For shell-independent read-back verification, query one field per `gh api --jq` call, for example `--jq .title` and `--jq .body`
+   - `gh api` applies `--jq` locally after sending the request, so an invalid or failing expression can cause a non-zero exit even when the write succeeded. Omit `--jq` on write commands and use separate read-back calls to verify individual fields. When a write command exits non-zero, confirm the remote state before deciding whether to retry; the write may already have succeeded, and retrying can create duplicate issues or comments or repeat other side effects
 7. **Issue titles:** Whenever the user asks to generate an issue title, provide it in English regardless of the wording of the request, and do not start it with `Fix`. These rules choose title wording from the issue's nature; they are not an instruction to apply GitHub labels
    - For a bug, objectively describe the problem or symptom instead of writing from a bug-fix perspective
    - For an improvement to existing functionality, write the title from an improvement perspective and prefer `Improve ...`

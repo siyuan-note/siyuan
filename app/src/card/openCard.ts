@@ -395,10 +395,25 @@ export const bindCardEvent = async (options: {
                             min: "1",
                             step: "1",
                             onConfirm: (value, timedialog) => {
+                                const inputElement = timedialog.element.querySelector("input") as HTMLInputElement;
+                                const days = Number(value);
+                                if (!Number.isInteger(days) || days < 1) {
+                                    showMessage(window.siyuan.languages.invalid, 3000, "error");
+                                    inputElement.focus();
+                                    inputElement.select();
+                                    return;
+                                }
+                                const due = dayjs().add(days, "day");
+                                if (!due.isValid() || due.year() > 9999) {
+                                    showMessage(window.siyuan.languages.invalid, 3000, "error");
+                                    inputElement.focus();
+                                    inputElement.select();
+                                    return;
+                                }
                                 fetchPost("/api/riff/batchSetRiffCardsDueTime", {
                                     cardDues: [{
                                         id: currentCard.cardID,
-                                        due: dayjs().add(parseInt(value), "day").format("YYYYMMDDHHmmss")
+                                        due: due.format("YYYYMMDDHHmmss")
                                     }]
                                 }, () => {
                                     actionElements[0].classList.add("fn__none");

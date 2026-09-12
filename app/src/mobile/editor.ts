@@ -202,15 +202,15 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             window.siyuan.mobile.editor.protyle.notebookId = data.data.box;
             window.siyuan.mobile.editor.protyle.title.element.removeAttribute("data-render");
             addLoading(window.siyuan.mobile.editor.protyle);
-            if (previousRootID !== data.data.rootID) {
-                window.siyuan.mobile.editor.protyle.wysiwyg.element.innerHTML = "";
-            }
+            // 保留正文直到新文档返回，跨文档切换时显式更新只读状态
+            const updateReadonly = previousRootID !== data.data.rootID ? true : undefined;
             const targetScrollAttr = scrollAttr || window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID];
             if (actionList.includes(Constants.CB_GET_SCROLL) && targetScrollAttr) {
                 getDocByScroll({
                     protyle: window.siyuan.mobile.editor.protyle,
                     scrollAttr: targetScrollAttr,
                     mergedOptions: protyleOptions,
+                    updateReadonly,
                     signal,
                     fail,
                     isValid,
@@ -254,6 +254,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                             data: getResponse,
                             protyle: window.siyuan.mobile.editor.protyle,
                             action: actionList,
+                            updateReadonly,
                             scrollPosition,
                             isValid,
                             afterCB() {

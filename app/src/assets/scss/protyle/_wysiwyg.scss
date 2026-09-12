@@ -541,6 +541,7 @@
     span[data-type~="block-ref"]:not(.av__celltext),
     span[data-type~="file-annotation-ref"] {
       // 按固定长度绘制虚线，并在换行后的每段文字下方重复显示。
+      padding-bottom: 2px;
       background-image: repeating-linear-gradient(to right, var(--protyle-ref-line-color) 0 6px, transparent 6px 9px);
       background-position: left bottom;
       background-size: 9px 1px;

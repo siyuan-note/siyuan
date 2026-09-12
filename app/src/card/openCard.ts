@@ -38,6 +38,7 @@ import {
 } from "./flashcardMode";
 import {setFold} from "../protyle/util/blockFold";
 import {openFlashcardV2ReviewSession} from "./flashcardV2Session";
+import {openFlashcardV2ReviewPicker} from "./flashcardV2";
 import {flashcardV2LocationQuery} from "./flashcardV2Query";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 import {appendRemoteQuery} from "../util/hostCapabilities";
@@ -816,7 +817,7 @@ const emitEvent = (card: ICard, type: string) => {
     });
 };
 
-export const openCard = (app: App) => {
+export const openCard = (app: App, selectReviewSet = false) => {
     if (window.siyuan.config.readonly) {
         return;
     }
@@ -827,7 +828,11 @@ export const openCard = (app: App) => {
             });
             return;
         }
-        openFlashcardV2ReviewSession(app, "", window.siyuan.languages.riffCard, {reviewMode: "normal"});
+        if (selectReviewSet) {
+            openFlashcardV2ReviewPicker(app);
+        } else {
+            openFlashcardV2ReviewSession(app, "", window.siyuan.languages.riffCard, {reviewMode: "normal"});
+        }
     });
 };
 

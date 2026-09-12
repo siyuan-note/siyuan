@@ -2227,6 +2227,48 @@ export const openFlashcardV2ManagementByRoots = (rootIDs: string[], name: string
     ensureFlashcardV2(() => openFlashcardV2ReviewSetCards("", name, 0, {rootIDs: uniqueRootIDs}));
 };
 
+export const openFlashcardV2ReviewPicker = (app: App) => {
+    ensureFlashcardV2(() => {
+        fetchPost("/api/flashcard/listEntities", {
+            entityType: "reviewSet",
+            options: {limit: 1000, offset: 0},
+        }, (response) => {
+            const revisions = response.data.entities as Array<IFlashcardEntityRevision<IReviewSet>>;
+            const dialog = new Dialog({
+                title: window.siyuan.languages.spaceRepetition,
+                width: isMobile() ? "92vw" : "480px",
+                height: `min(70vh, ${160 + revisions.length * 36}px)`,
+                content: `<div class="b3-dialog__content card__v2-panel card__v2-review-picker">
+<div class="b3-list b3-list--background card__v2-panel-list">
+<button data-type="all" class="b3-list-item"><svg class="b3-list-item__graphic"><use xlink:href="#iconRiffCard"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.all}</span></button>
+${revisions.map((revision, index) => `<button data-type="review" data-index="${index}" class="b3-list-item"><svg class="b3-list-item__graphic"><use xlink:href="#iconPlay"></use></svg><span class="b3-list-item__text">${escapeHtml(revision.payload.name)}</span><span class="b3-list-item__meta">${revision.payload.defaultReviewMode === "reinforcement" ? window.siyuan.languages.flashcardReviewReinforcement : window.siyuan.languages.flashcardReviewNormal}</span></button>`).join("")}
+</div>
+</div>
+<div class="b3-dialog__action"><button data-type="manage" class="b3-button b3-button--text">${window.siyuan.languages.manage}</button></div>`,
+            });
+            dialog.element.addEventListener("click", (event) => {
+                const target = (event.target as HTMLElement).closest<HTMLElement>("button[data-type]");
+                if (!target) {
+                    return;
+                }
+                if (target.dataset.type === "manage") {
+                    dialog.destroy();
+                    openFlashcardV2ReviewSets(app);
+                } else if (target.dataset.type === "all") {
+                    dialog.destroy();
+                    openFlashcardV2ReviewSession(app, "", window.siyuan.languages.riffCard, {reviewMode: "normal"});
+                } else if (target.dataset.type === "review") {
+                    const revision = revisions[Number(target.dataset.index)];
+                    dialog.destroy();
+                    openFlashcardV2ReviewSession(app, revision.entityID, revision.payload.name, {
+                        reviewMode: revision.payload.defaultReviewMode || "normal",
+                    });
+                }
+            });
+        });
+    });
+};
+
 export const openFlashcardV2ReviewSets = (app: App) => {
     ensureFlashcardV2(() => {
         fetchPost("/api/flashcard/listEntities", {

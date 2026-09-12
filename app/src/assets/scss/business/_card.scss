@@ -516,6 +516,18 @@
     }
   }
 
+  &__v2-review-picker button.b3-list-item {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+
+    &:focus-visible {
+      box-shadow: inset 0 0 0 1px var(--b3-theme-primary);
+    }
+  }
+
   &__v2-panel {
     box-sizing: border-box;
     display: flex;

@@ -196,7 +196,7 @@ export const initBar = (app: App) => {
                 event.stopPropagation();
                 break;
             } else if (targetId === "barRiffCard") {
-                openCard(app);
+                openCard(app, true);
                 event.stopPropagation();
                 break;
             } else if (targetId === "barSync") {

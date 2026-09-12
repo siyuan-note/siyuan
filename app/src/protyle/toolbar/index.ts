@@ -1545,17 +1545,17 @@ export class Toolbar {
         ${title}
     </span>
     <span class="fn__space"></span>
-    <button data-type="refresh" class="block__icon block__icon--show b3-tooltips b3-tooltips__nw block__icon--active${types.includes("NodeBlockQueryEmbed") ? " fn__none" : ""}" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href="#iconRefresh"></use></svg></button>
+    <button data-type="refresh" class="block__icon block__icon--show b3-tooltips b3-tooltips__n block__icon--active${types.includes("NodeBlockQueryEmbed") ? " fn__none" : ""}" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href="#iconRefresh"></use></svg></button>
     <span class="fn__space"></span>
-    <button data-type="before" class="block__icon block__icon--show b3-tooltips b3-tooltips__nw${protyle.disabled ? " fn__none" : ""}" aria-label="${window.siyuan.languages.insertBefore}"><svg><use xlink:href="#iconBefore"></use></svg></button>
+    <button data-type="before" class="block__icon block__icon--show b3-tooltips b3-tooltips__n${protyle.disabled ? " fn__none" : ""}" aria-label="${window.siyuan.languages.insertBefore}"><svg><use xlink:href="#iconBefore"></use></svg></button>
     <span class="fn__space${protyle.disabled ? " fn__none" : ""}"></span>
-    <button data-type="after" class="block__icon block__icon--show b3-tooltips b3-tooltips__nw${protyle.disabled ? " fn__none" : ""}" aria-label="${window.siyuan.languages.insertAfter}"><svg><use xlink:href="#iconAfter"></use></svg></button>
+    <button data-type="after" class="block__icon block__icon--show b3-tooltips b3-tooltips__n${protyle.disabled ? " fn__none" : ""}" aria-label="${window.siyuan.languages.insertAfter}"><svg><use xlink:href="#iconAfter"></use></svg></button>
     <span class="fn__space${protyle.disabled ? " fn__none" : ""}"></span>
-    <button data-type="export" class="block__icon block__icon--show b3-tooltips b3-tooltips__nw${getHostCapabilities().importExport ? "" : " fn__none"}" aria-label="${window.siyuan.languages.export} ${window.siyuan.languages.image}"><svg><use xlink:href="#iconImage"></use></svg></button>
+    <button data-type="export" class="block__icon block__icon--show b3-tooltips b3-tooltips__n${getHostCapabilities().importExport ? "" : " fn__none"}" aria-label="${window.siyuan.languages.export} ${window.siyuan.languages.image}"><svg><use xlink:href="#iconImage"></use></svg></button>
     <span class="fn__space${getHostCapabilities().importExport ? "" : " fn__none"}"></span>
-    <button data-type="pin" class="block__icon block__icon--show b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.pin}"><svg><use xlink:href="#iconPin"></use></svg></button>
+    <button data-type="pin" class="block__icon block__icon--show b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.pin}"><svg><use xlink:href="#iconPin"></use></svg></button>
     <span class="fn__space"></span>
-    <button data-type="close" class="block__icon block__icon--show b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.close}"><svg><use xlink:href="#iconClose"></use></svg></button>
+    <button data-type="close" class="block__icon block__icon--show b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.close}"><svg><use xlink:href="#iconClose"></use></svg></button>
 </div>
 <div class="protyle-util__scroll"><div class="fn__flex"><div class="protyle-linenumber__rows"></div><textarea ${protyle.disabled ? " readonly" : ""} spellcheck="false" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${placeholder}" style="overflow:hidden;resize:none;font-family: var(--b3-font-family-editor-code, var(--b3-font-family-code));font-weight: var(--b3-font-weight-editor-code, 400);"></textarea></div></div></div>
 <div class="resize__rd"></div><div class="resize__ld"></div><div class="resize__lt"></div><div class="resize__rt"></div><div class="resize__r"></div><div class="resize__d"></div><div class="resize__t"></div><div class="resize__l"></div>`;

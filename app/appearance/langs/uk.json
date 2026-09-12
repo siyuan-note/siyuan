@@ -1,4 +1,6 @@
 {
+	"editSnapshotMemo": "Змінити примітку знімка",
+	"snapshotMemoLocalTip": "Змінює лише примітку локального знімка",
 	"mobileBarsAutoHide": "Автоматично приховувати верхню й нижню панелі під час прокручування",
 	"mobileBarsAutoHideTip": "Прокручування вниз приховує верхню панель заголовка, навігаційний ланцюжок і нижню панель навігації, а прокручування вгору показує їх",
 	"bodyGradient": "Градієнт тла",
@@ -1565,7 +1567,7 @@
 	"cloudTagSnapshot": "Хмарний тегований знімок",
 	"cloudBackupTip": "Перейдіть у [Data History - Data Snapshot], щоб виконати дію",
 	"snapshotMemo": "Примітка до знімка",
-	"snapshotMemoTip": "Введіть примітку до знімка",
+	"snapshotMemoTip": "Необов’язково; типове значення: Create manually",
 	"tagSnapshot": "Позначити знімок",
 	"tagSnapshotUpload": "Позначити знімок і завантажити",
 	"tagSnapshotTip": "Не використовуйте символи \\ / : * ? &quot; &#039; &lt; &gt; |",

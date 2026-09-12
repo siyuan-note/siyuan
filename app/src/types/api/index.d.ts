@@ -6,6 +6,12 @@ export type BlockInfoData = (FullBlockInfo & { "publishAccessRequired"?: never; 
 
 export type BlockInfoRequestInput = { "id": string; "ids"?: Array<string> | null; "notebook"?: string | null; };
 
+export type CheckSnapshotData = { "changed": boolean; };
+
+export type CreateSnapshotData = { "created": boolean; "id": string; };
+
+export type CreateSnapshotRequestInput = { "memo"?: string; };
+
 export type EmptyRequestInput = Record<string, never>;
 
 export type FullBlockInfo = { "box": string; "path": string; "rootChildID": string; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
@@ -27,6 +33,8 @@ export type SearchTagData = { "k": string; "tags": Array<string>; };
 export type SearchTagRequestInput = { "k": string; };
 
 export type SetBlockAttrsRequestInput = { "attrs": Record<string, string | null>; "id": string; };
+
+export type SetSnapshotMemoRequestInput = { "id": string; "memo": string; };
 
 export type APILegacyGETPath =
     "/api/ai/mcp/oauth/callback/:flowID" |
@@ -443,7 +451,6 @@ export type APILegacyPOSTPath =
     "/api/ref/getBackmentionDoc" |
     "/api/ref/refreshBacklink" |
     "/api/repo/checkoutRepo" |
-    "/api/repo/createSnapshot" |
     "/api/repo/diffRepoSnapshots" |
     "/api/repo/downloadCloudSnapshot" |
     "/api/repo/exportRepoFile" |
@@ -686,6 +693,21 @@ export interface APIPOSTRoutes {
         request: ListNotebooksRequestInput;
         response: { "code": 0; "data": ListNotebooksData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "legacyOptional";
+    };
+    "/api/repo/checkSnapshot": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": CheckSnapshotData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/repo/createSnapshot": {
+        request: CreateSnapshotRequestInput;
+        response: { "code": 0; "data": CreateSnapshotData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/setSnapshotMemo": {
+        request: SetSnapshotMemoRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
     };
     "/api/search/searchTag": {
         request: SearchTagRequestInput;

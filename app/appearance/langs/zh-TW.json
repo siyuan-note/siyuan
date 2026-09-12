@@ -1,4 +1,6 @@
 {
+	"editSnapshotMemo": "修改快照備註",
+	"snapshotMemoLocalTip": "僅修改本機快照的備註",
 	"mobileBarsAutoHide": "捲動時自動隱藏頂部和底部列",
 	"mobileBarsAutoHideTip": "向下捲動時隱藏頂部標題列、麵包屑和底部導覽列，向上捲動時恢復顯示",
 	"bodyGradient": "背景漸層",
@@ -1565,7 +1567,7 @@
 	"cloudTagSnapshot": "雲端標記的快照",
 	"cloudBackupTip": "請到 [資料歷史 - 資料快照] 中進行操作",
 	"snapshotMemo": "快照備註",
-	"snapshotMemoTip": "請輸入快照備註",
+	"snapshotMemoTip": "可不填寫，預設備註為 Create manually",
 	"tagSnapshot": "標記快照",
 	"tagSnapshotUpload": "標記快照並上傳",
 	"tagSnapshotTip": "請勿包含符號 \\ / : * ? &quot; &#039; &lt; &gt; |",

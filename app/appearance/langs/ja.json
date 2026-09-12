@@ -1,4 +1,6 @@
 {
+	"editSnapshotMemo": "スナップショットのメモを編集",
+	"snapshotMemoLocalTip": "ローカルのスナップショットのメモのみを変更します",
 	"mobileBarsAutoHide": "スクロール時に上部と下部のバーを自動的に隠す",
 	"mobileBarsAutoHideTip": "下にスクロールすると上部のタイトルバー、パンくずリスト、下部のナビゲーションバーを隠し、上にスクロールすると再表示します",
 	"bodyGradient": "背景グラデーション",
@@ -1565,7 +1567,7 @@
 	"cloudTagSnapshot": "クラウドのタグ付きスナップショット",
 	"cloudBackupTip": "[データ履歴] - [データスナップショット] から操作してください",
 	"snapshotMemo": "スナップショットのメモ",
-	"snapshotMemoTip": "スナップショットのメモを入力してください",
+	"snapshotMemoTip": "任意。デフォルト：Create manually",
 	"tagSnapshot": "スナップショットにタグを付ける",
 	"tagSnapshotUpload": "スナップショットにタグを付けてアップロードする",
 	"tagSnapshotTip": "次の記号を含めないでください \\ / : * ? &quot; &#039; &lt; &gt; |",

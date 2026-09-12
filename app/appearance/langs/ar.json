@@ -1,4 +1,6 @@
 {
+	"editSnapshotMemo": "تعديل ملاحظة اللقطة",
+	"snapshotMemoLocalTip": "يغيّر ملاحظة اللقطة المحلية فقط",
 	"mobileBarsAutoHide": "إخفاء الشريطين العلوي والسفلي تلقائيًا أثناء التمرير",
 	"mobileBarsAutoHideTip": "مرر لأسفل لإخفاء شريط العنوان العلوي ومسار التنقل وشريط التنقل السفلي، ولأعلى لإظهارها",
 	"bodyGradient": "تدرج الخلفية",
@@ -1565,7 +1567,7 @@
 	"cloudTagSnapshot": "لقطة العلامة السحابية",
 	"cloudBackupTip": "الرجاء الذهاب إلى [تاريخ البيانات - لقطة البيانات] للعمل",
 	"snapshotMemo": "مذكرة اللقطة",
-	"snapshotMemoTip": "الرجاء إدخال مذكرة اللقطة",
+	"snapshotMemoTip": "اختياري؛ القيمة الافتراضية: Create manually",
 	"tagSnapshot": "وضع علامة على اللقطة",
 	"tagSnapshotUpload": "وضع علامة على اللقطة ورفعها",
 	"tagSnapshotTip": "‫لا تشمل الرموز \\ / : * ? &quot; &#039; &lt; &gt; |‬",

@@ -21,6 +21,54 @@ import {openDocHistory} from "./doc";
 
 let historyEditor: Protyle;
 const repoHistoryEditors = new WeakMap<Element, Protyle>();
+const snapshotMemos = new WeakMap<Element, Map<string, string>>();
+
+const openSnapshotMemo = (repoElement: Element, id?: string, memo = "") => {
+    const dialog = new Dialog({
+        title: id ? window.siyuan.languages.editSnapshotMemo : window.siyuan.languages.snapshotMemo,
+        content: `<div class="b3-dialog__content">
+    ${id ? `<div class="ft__secondary fn__hr">${window.siyuan.languages.snapshotMemoLocalTip}</div>` : ""}
+    <textarea class="b3-text-field fn__block" placeholder="${escapeAttr(window.siyuan.languages.snapshotMemoTip)}"></textarea>
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+        width: isMobile() ? "92vw" : "520px",
+    });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_SNAPSHOTMEMO);
+    const textarea = dialog.element.querySelector("textarea");
+    textarea.value = memo;
+    textarea.focus();
+    const buttons = dialog.element.querySelectorAll("button");
+    dialog.bindInput(textarea, () => buttons[1].click());
+    buttons[0].addEventListener("click", () => dialog.destroy());
+    buttons[1].addEventListener("click", async () => {
+        if (buttons[1].disabled) {
+            return;
+        }
+        buttons[1].disabled = true;
+        textarea.readOnly = true;
+        try {
+            if (id) {
+                await fetchPost("/api/repo/setSnapshotMemo", {id, memo: textarea.value}, () => {
+                    dialog.destroy();
+                    renderRepo(repoElement, parseInt(repoElement.getAttribute("data-page")) || 1);
+                });
+            } else {
+                await fetchPost("/api/repo/createSnapshot", {memo: textarea.value}, (response) => {
+                    if (response.data.created) {
+                        dialog.destroy();
+                        renderRepo(repoElement, 1);
+                    }
+                });
+            }
+        } finally {
+            buttons[1].disabled = false;
+            textarea.readOnly = false;
+        }
+    });
+};
 
 const renderDoc = (element: HTMLElement, currentPage: number) => {
     const previousElement = element.querySelector('[data-type="docprevious"]');
@@ -205,6 +253,11 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
 <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>`;
     }
     /// #endif
+    if (["getRepoTagSnapshots", "getRepoSnapshots"].includes(type) && !window.siyuan.config.readonly) {
+        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="editSnapshotMemo" aria-label="${window.siyuan.languages.editSnapshotMemo}"><svg><use xlink:href="#iconEdit"></use></svg></span>` + actionHTML;
+    }
+    const memos = new Map<string, string>();
+    snapshotMemos.set(element, memos);
     let repoHTML = "";
     const isPhone = isMobile();
     const selectId: { id: string, time: string }[] = ["getRepoTagSnapshots", "getRepoSnapshots"].includes(type) ?
@@ -222,6 +275,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         requiresDownload?: boolean,
         typesCount: { type: string, count: number }[]
     }) => {
+        memos.set(item.id, item.memo);
         let statHTML = "";
         if (item.typesCount) {
             statHTML = `<div class="b3-list-item__meta${isPhone ? " fn__none" : ""}">
@@ -945,34 +999,21 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.stopPropagation();
                 event.preventDefault();
                 break;
+            } else if (type === "editSnapshotMemo" && !window.siyuan.config.readonly) {
+                const id = target.closest("[data-id]").getAttribute("data-id");
+                openSnapshotMemo(repoElement, id, snapshotMemos.get(repoElement)?.get(id) || "");
+                event.stopPropagation();
+                event.preventDefault();
+                break;
             } else if (type === "genRepo") {
-                const genRepoDialog = new Dialog({
-                    title: window.siyuan.languages.snapshotMemo,
-                    content: `<div class="b3-dialog__content">
-    <textarea class="b3-text-field fn__block" placeholder="${window.siyuan.languages.snapshotMemoTip}"></textarea>
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-                    width: isMobile() ? "92vw" : "520px",
-                });
-                genRepoDialog.element.setAttribute("data-key", Constants.DIALOG_SNAPSHOTMEMO);
-                const textareaElement = genRepoDialog.element.querySelector("textarea");
-                textareaElement.focus();
-                const btnsElement = genRepoDialog.element.querySelectorAll(".b3-button");
-                genRepoDialog.bindInput(textareaElement, () => {
-                    (btnsElement[1] as HTMLButtonElement).click();
-                });
-                btnsElement[0].addEventListener("click", () => {
-                    genRepoDialog.destroy();
-                });
-                btnsElement[1].addEventListener("click", () => {
-                    fetchPost("/api/repo/createSnapshot", {memo: textareaElement.value}, () => {
-                        renderRepo(repoElement, 1);
-                    });
-                    genRepoDialog.destroy();
-                });
+                if (!window.siyuan.config.readonly && !target.hasAttribute("disabled")) {
+                    target.setAttribute("disabled", "disabled");
+                    fetchPost("/api/repo/checkSnapshot", {}, (response) => {
+                        if (response.data.changed && repoElement.isConnected) {
+                            openSnapshotMemo(repoElement);
+                        }
+                    }).finally(() => target.removeAttribute("disabled"));
+                }
                 event.stopPropagation();
                 event.preventDefault();
                 break;

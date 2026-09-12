@@ -90,11 +90,15 @@ var repoCreateCmd = &cobra.Command{
 			return nil
 		}
 
-		id, err := model.IndexRepo(memo)
+		id, created, err := model.CreateRepoSnapshot(memo)
 		if err != nil {
 			return err
 		}
-		fmt.Println("created snapshot", id)
+		if created {
+			fmt.Println("created snapshot", id)
+		} else {
+			fmt.Println("no changes; existing snapshot", id)
+		}
 		return nil
 	},
 }
@@ -361,7 +365,7 @@ func init() {
 	repoListCmd.Flags().Bool("tag", false, "list tagged snapshots only")
 	repoListCmd.Flags().IntP("page", "p", 1, "page number")
 
-	repoCreateCmd.Flags().String("memo", "", "snapshot memo")
+	repoCreateCmd.Flags().String("memo", "", "snapshot memo (default: Create manually)")
 
 	repoTagCmd.Flags().String("id", "", "snapshot ID")
 	repoTagCmd.Flags().String("name", "", "tag name")

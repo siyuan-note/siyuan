@@ -1,4 +1,6 @@
 {
+	"editSnapshotMemo": "Editar nota do snapshot",
+	"snapshotMemoLocalTip": "Altera apenas a nota do snapshot local",
 	"mobileBarsAutoHide": "Ocultar as barras superior e inferior automaticamente ao rolar",
 	"mobileBarsAutoHideTip": "Role para baixo para ocultar a barra de título, o caminho de navegação e a barra inferior; role para cima para exibi-los",
 	"bodyGradient": "Gradiente de fundo",
@@ -1565,7 +1567,7 @@
 	"cloudTagSnapshot": "Instantâneo de tag em nuvem",
 	"cloudBackupTip": "Por favor, vá para [Histórico de Dados - Instantâneo de Dados] para operar",
 	"snapshotMemo": "Memo do Instantâneo",
-	"snapshotMemoTip": "Por favor, insira o memo do instantâneo",
+	"snapshotMemoTip": "Opcional; padrão: Create manually",
 	"tagSnapshot": "Instantâneo de Tag",
 	"tagSnapshotUpload": "Instantâneo de tag e upload",
 	"tagSnapshotTip": "Não inclua símbolos \\ / : * ? &quot; &#039; &lt; &gt; |",

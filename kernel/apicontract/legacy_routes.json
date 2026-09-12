@@ -400,7 +400,6 @@
   {"method":"POST","path":"/api/ref/getBackmentionDoc","handler":"getBackmentionDoc"},
   {"method":"POST","path":"/api/ref/refreshBacklink","handler":"refreshBacklink"},
   {"method":"POST","path":"/api/repo/checkoutRepo","handler":"checkoutRepo"},
-  {"method":"POST","path":"/api/repo/createSnapshot","handler":"createSnapshot"},
   {"method":"POST","path":"/api/repo/diffRepoSnapshots","handler":"diffRepoSnapshots"},
   {"method":"POST","path":"/api/repo/downloadCloudSnapshot","handler":"downloadCloudSnapshot"},
   {"method":"POST","path":"/api/repo/exportRepoFile","handler":"exportRepoFile"},

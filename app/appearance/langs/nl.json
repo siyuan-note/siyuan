@@ -1,4 +1,6 @@
 {
+	"editSnapshotMemo": "Snapshotnotitie bewerken",
+	"snapshotMemoLocalTip": "Wijzigt alleen de notitie van de lokale snapshot",
 	"mobileBarsAutoHide": "Bovenste en onderste balk automatisch verbergen bij scrollen",
 	"mobileBarsAutoHideTip": "Scroll omlaag om de bovenste titelbalk, het kruimelpad en de onderste navigatiebalk te verbergen; scroll omhoog om ze te tonen",
 	"bodyGradient": "Achtergrondverloop",
@@ -1565,7 +1567,7 @@
 	"cloudTagSnapshot": "Cloud tag-momentopname",
 	"cloudBackupTip": "Ga naar [Gegevensgeschiedenis - Gegevensmomentopname] om te beheren",
 	"snapshotMemo": "Momentopname memo",
-	"snapshotMemoTip": "Voer een memo voor de momentopname in",
+	"snapshotMemoTip": "Optioneel; standaard: Create manually",
 	"tagSnapshot": "Tag momentopname",
 	"tagSnapshotUpload": "Taggen en uploaden",
 	"tagSnapshotTip": "Gebruik geen symbolen \\ / : * ? &quot; &#039; &lt; &gt; |",

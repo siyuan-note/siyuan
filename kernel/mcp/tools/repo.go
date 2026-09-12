@@ -34,7 +34,7 @@ var RepoTool = &Tool{
 			"action":  {Type: "string", Description: "Operation", Enum: []string{"list", "create", "tag", "untag", "checkout", "diff", "search", "purge", "file_get", "file_rollback", "file_open", "file_export"}},
 			"id":      {Type: "string", Description: "Snapshot ID (for tag, checkout, file_get, file_rollback, file_open, file_export)"},
 			"name":    {Type: "string", Description: "Tag name (for tag, untag)"},
-			"memo":    {Type: "string", Description: "Snapshot memo (for create, optional)"},
+			"memo":    {Type: "string", Description: "Snapshot memo (for create, optional; default: Create manually)"},
 			"keyword": {Type: "string", Description: "Search keyword (for search)"},
 			"left":    {Type: "string", Description: "Left snapshot ID (for diff)"},
 			"right":   {Type: "string", Description: "Right snapshot ID (for diff)"},
@@ -130,11 +130,15 @@ func repoList(args map[string]any) (CallToolResult, error) {
 
 func repoCreate(args map[string]any) (CallToolResult, error) {
 	memo, _ := args["memo"].(string)
-	id, err := model.IndexRepo(memo)
+	id, created, err := model.CreateRepoSnapshot(memo)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "create snapshot failed: " + err.Error()}}, IsError: true}, nil
 	}
-	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "snapshot created: " + id}}}, nil
+	message := "no changes; existing snapshot: " + id
+	if created {
+		message = "snapshot created: " + id
+	}
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: message}}}, nil
 }
 
 func repoTag(args map[string]any) (CallToolResult, error) {

@@ -1,4 +1,6 @@
 {
+	"editSnapshotMemo": "Upraviť poznámku snímky",
+	"snapshotMemoLocalTip": "Zmení iba poznámku lokálnej snímky",
 	"mobileBarsAutoHide": "Automaticky skrývať hornú a dolnú lištu pri posúvaní",
 	"mobileBarsAutoHideTip": "Posunutím nadol skryjete hornú lištu názvu, navigačnú cestu a dolnú navigačnú lištu; posunutím nahor ich zobrazíte",
 	"bodyGradient": "Prechod pozadia",
@@ -1565,7 +1567,7 @@
 	"cloudTagSnapshot": "Cloudová snímka tagu",
 	"cloudBackupTip": "Operujte v [História dát - Snímka dát]",
 	"snapshotMemo": "Poznámka k snímke",
-	"snapshotMemoTip": "Zadajte popis k snímke",
+	"snapshotMemoTip": "Voliteľné; predvolené: Create manually",
 	"tagSnapshot": "Snímka tagu",
 	"tagSnapshotUpload": "Snímka tagu a nahranie",
 	"tagSnapshotTip": "Nepoužívajte nepovolené znaky \\ / : * ? \" < > |",

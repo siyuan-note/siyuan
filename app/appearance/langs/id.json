@@ -1,4 +1,6 @@
 {
+	"editSnapshotMemo": "Edit catatan snapshot",
+	"snapshotMemoLocalTip": "Hanya mengubah catatan snapshot lokal",
 	"mobileBarsAutoHide": "Sembunyikan bilah atas dan bawah otomatis saat menggulir",
 	"mobileBarsAutoHideTip": "Gulir ke bawah untuk menyembunyikan bilah judul atas, jejak navigasi, dan bilah navigasi bawah; gulir ke atas untuk menampilkannya",
 	"bodyGradient": "Gradien latar belakang",
@@ -1565,7 +1567,7 @@
 	"cloudTagSnapshot": "Snapshot tag cloud",
 	"cloudBackupTip": "Silakan buka [Riwayat Data - Snapshot Data] untuk mengoperasikan",
 	"snapshotMemo": "Memo Snapshot",
-	"snapshotMemoTip": "Harap masukkan memo snapshot",
+	"snapshotMemoTip": "Opsional; default: Create manually",
 	"tagSnapshot": "Snapshot Tag",
 	"tagSnapshotUpload": "Tag snapshot dan unggah",
 	"tagSnapshotTip": "Jangan sertakan simbol \\ / : * ? &quot; &#039; &lt; &gt; |",

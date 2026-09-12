@@ -1,4 +1,6 @@
 {
+	"editSnapshotMemo": "修改快照备注",
+	"snapshotMemoLocalTip": "仅修改本地快照的备注",
 	"mobileBarsAutoHide": "滚动时自动隐藏顶部和底部栏",
 	"mobileBarsAutoHideTip": "向下滚动时隐藏顶部标题栏、面包屑和底部导航栏，向上滚动时恢复显示",
 	"bodyGradient": "背景渐变",
@@ -1565,7 +1567,7 @@
 	"cloudTagSnapshot": "云端标记的快照",
 	"cloudBackupTip": "请到 [数据历史 - 数据快照] 中进行操作",
 	"snapshotMemo": "快照备注",
-	"snapshotMemoTip": "请输入快照备注",
+	"snapshotMemoTip": "可不填写，默认备注为 Create manually",
 	"tagSnapshot": "标记快照",
 	"tagSnapshotUpload": "标记快照并上传",
 	"tagSnapshotTip": "请勿包含符号 \\ / : * ? &quot; &#039; &lt; &gt; |",

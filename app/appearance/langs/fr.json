@@ -1,4 +1,6 @@
 {
+	"editSnapshotMemo": "Modifier la note de l’instantané",
+	"snapshotMemoLocalTip": "Modifie uniquement la note de l’instantané local",
 	"mobileBarsAutoHide": "Masquer automatiquement les barres supérieure et inférieure pendant le défilement",
 	"mobileBarsAutoHideTip": "Faites défiler vers le bas pour masquer la barre de titre, le fil d’Ariane et la barre de navigation inférieure, et vers le haut pour les afficher",
 	"bodyGradient": "Dégradé de fond",
@@ -1565,7 +1567,7 @@
 	"cloudTagSnapshot": "Instantané de balise cloud",
 	"cloudBackupTip": "Veuillez accéder à [Historique des données - Instantané des données] pour opérer",
 	"snapshotMemo": "Mémo d'instantané",
-	"snapshotMemoTip": "Veuillez entrer le mémo instantané",
+	"snapshotMemoTip": "Facultatif ; valeur par défaut : Create manually",
 	"tagSnapshot": "Instantané de balise",
 	"tagSnapshotUpload": "Tag instantané et téléchargement",
 	"tagSnapshotTip": "Ne pas inclure les symboles \\ / : * ? &quot; &#039; &lt; &gt; |",

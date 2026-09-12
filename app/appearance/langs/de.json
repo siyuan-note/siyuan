@@ -1,4 +1,6 @@
 {
+	"editSnapshotMemo": "Snapshot-Notiz bearbeiten",
+	"snapshotMemoLocalTip": "Ändert nur die Notiz des lokalen Snapshots",
 	"mobileBarsAutoHide": "Obere und untere Leiste beim Scrollen automatisch ausblenden",
 	"mobileBarsAutoHideTip": "Beim Scrollen nach unten werden die obere Titelleiste, die Brotkrumennavigation und die untere Navigationsleiste ausgeblendet, beim Scrollen nach oben wieder angezeigt",
 	"bodyGradient": "Hintergrundverlauf",
@@ -1565,7 +1567,7 @@
 	"cloudTagSnapshot": "Cloud-Tag-Snapshot",
 	"cloudBackupTip": "Bitte gehen Sie zu [Datenhistorie - Datensnapshot], um zu operieren",
 	"snapshotMemo": "Snapshot-Notiz",
-	"snapshotMemoTip": "Bitte geben Sie die Snapshot-Notiz ein",
+	"snapshotMemoTip": "Optional; Standard: Create manually",
 	"tagSnapshot": "Tag-Snapshot",
 	"tagSnapshotUpload": "Tag-Snapshot hochladen",
 	"tagSnapshotTip": "Schließen Sie keine Symbole \\ / : * ? &quot; &#039; &lt; &gt; | ein.",

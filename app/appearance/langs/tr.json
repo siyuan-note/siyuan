@@ -1,4 +1,6 @@
 {
+	"editSnapshotMemo": "Anlık görüntü notunu düzenle",
+	"snapshotMemoLocalTip": "Yalnızca yerel anlık görüntü notunu değiştirir",
 	"mobileBarsAutoHide": "Kaydırırken üst ve alt çubukları otomatik gizle",
 	"mobileBarsAutoHideTip": "Üst başlık çubuğunu, gezinme yolunu ve alt gezinme çubuğunu gizlemek için aşağı, göstermek için yukarı kaydırın",
 	"bodyGradient": "Arka plan renk geçişi",
@@ -1565,7 +1567,7 @@
 	"cloudTagSnapshot": "Bulut etiket anlık görüntüsü",
 	"cloudBackupTip": "[Veri Geçmişi - Veri Anlık Görüntüsü] kısmından işlem yapabilirsin",
 	"snapshotMemo": "Anlık görüntü notu",
-	"snapshotMemoTip": "Lütfen anlık görüntü notunu gir",
+	"snapshotMemoTip": "İsteğe bağlı; varsayılan: Create manually",
 	"tagSnapshot": "Etiket anlık görüntüsü",
 	"tagSnapshotUpload": "Etiket anlık görüntüsü oluştur ve yükle",
 	"tagSnapshotTip": "Şu karakterleri içermemeli: \\ / : * ? &quot; &#039; &lt; &gt; |",

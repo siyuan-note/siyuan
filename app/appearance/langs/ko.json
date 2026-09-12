@@ -1,4 +1,6 @@
 {
+	"editSnapshotMemo": "스냅샷 메모 편집",
+	"snapshotMemoLocalTip": "로컬 스냅샷 메모만 변경합니다",
 	"mobileBarsAutoHide": "스크롤 시 상단 및 하단 표시줄 자동 숨기기",
 	"mobileBarsAutoHideTip": "아래로 스크롤하면 상단 제목 표시줄, 탐색 경로 및 하단 탐색 모음이 숨겨지고 위로 스크롤하면 다시 표시됩니다",
 	"bodyGradient": "배경 그라데이션",
@@ -1565,7 +1567,7 @@
 	"cloudTagSnapshot": "클라우드 태그 스냅샷",
 	"cloudBackupTip": "조작하려면 [데이터 히스토리 - 데이터 스냅샷]으로 이동하세요",
 	"snapshotMemo": "스냅샷 메모",
-	"snapshotMemoTip": "스냅샷 메모를 입력하세요",
+	"snapshotMemoTip": "선택 사항; 기본값: Create manually",
 	"tagSnapshot": "태그 스냅샷",
 	"tagSnapshotUpload": "태그 스냅샷 및 업로드",
 	"tagSnapshotTip": "\\ / : * ? &quot; &#039; &lt; &gt; | 기호를 포함하지 마세요",

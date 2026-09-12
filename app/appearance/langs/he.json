@@ -1,4 +1,6 @@
 {
+	"editSnapshotMemo": "עריכת הערת תמונת המצב",
+	"snapshotMemoLocalTip": "משנה רק את ההערה של תמונת המצב המקומית",
 	"mobileBarsAutoHide": "הסתרה אוטומטית של הסרגל העליון והתחתון בעת גלילה",
 	"mobileBarsAutoHideTip": "גלילה למטה מסתירה את סרגל הכותרת העליון, נתיב הניווט וסרגל הניווט התחתון, וגלילה למעלה מציגה אותם",
 	"bodyGradient": "מעבר צבע ברקע",
@@ -1565,7 +1567,7 @@
 	"cloudTagSnapshot": "צילום תג בענן",
 	"cloudBackupTip": "אנא עבור ל[היסטוריית נתונים - צילום נתונים] לפעולה",
 	"snapshotMemo": "הערת צילום",
-	"snapshotMemoTip": "אנא הכנס את ההערה של הצילום",
+	"snapshotMemoTip": "אופציונלי; ברירת מחדל: Create manually",
 	"tagSnapshot": "צילום תג",
 	"tagSnapshotUpload": "צילום תג והעלה",
 	"tagSnapshotTip": "אל תכלול סמלים \\ / : * ? &quot; &#039; &lt; &gt; |",

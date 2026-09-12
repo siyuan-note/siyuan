@@ -57,6 +57,12 @@ var (
 	GetBlockInfo  = define[BlockInfoRequest, BlockInfoData]("getBlockInfo", "/api/block/getBlockInfo", JSONBody, ResponseOptions{AdditionalCodes: []int{3}, Text: true}, "POST")
 )
 
+var (
+	CreateSnapshot  = define[CreateSnapshotRequest, CreateSnapshotData]("createSnapshot", "/api/repo/createSnapshot", JSONBody, ResponseOptions{}, "POST")
+	CheckSnapshot   = define[EmptyRequest, CheckSnapshotData]("checkSnapshot", "/api/repo/checkSnapshot", NoBody, ResponseOptions{}, "POST")
+	SetSnapshotMemo = define[SetSnapshotMemoRequest, Null]("setSnapshotMemo", "/api/repo/setSnapshotMemo", JSONBody, ResponseOptions{}, "POST")
+)
+
 type EmptyRequest struct{}
 
 type BlockIDRequest struct {

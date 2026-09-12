@@ -1,4 +1,6 @@
 {
+	"editSnapshotMemo": "แก้ไขบันทึกสแนปช็อต",
+	"snapshotMemoLocalTip": "เปลี่ยนเฉพาะบันทึกของสแนปช็อตในเครื่อง",
 	"mobileBarsAutoHide": "ซ่อนแถบด้านบนและด้านล่างอัตโนมัติขณะเลื่อน",
 	"mobileBarsAutoHideTip": "เลื่อนลงเพื่อซ่อนแถบชื่อด้านบน เส้นทางนำทาง และแถบนำทางด้านล่าง เลื่อนขึ้นเพื่อแสดงอีกครั้ง",
 	"bodyGradient": "การไล่สีพื้นหลัง",
@@ -1565,7 +1567,7 @@
 	"cloudTagSnapshot": "สแนปช็อตแท็กคลาวด์",
 	"cloudBackupTip": "โปรดไปที่ [ประวัติข้อมูล - สแนปช็อตข้อมูล] เพื่อดำเนินการ",
 	"snapshotMemo": "บันทึกสแนปช็อต",
-	"snapshotMemoTip": "ป้อนบันทึก",
+	"snapshotMemoTip": "ไม่บังคับ ค่าเริ่มต้น: Create manually",
 	"tagSnapshot": "แท็กสแนปช็อต",
 	"tagSnapshotUpload": "แท็กและอัปโหลด",
 	"tagSnapshotTip": "ห้ามใช้สัญลักษณ์ \\ / : * ? &quot; &#039; &lt; &gt; |",

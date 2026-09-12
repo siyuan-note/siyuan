@@ -1,4 +1,6 @@
 {
+	"editSnapshotMemo": "Edytuj notatkę migawki",
+	"snapshotMemoLocalTip": "Zmienia tylko notatkę lokalnej migawki",
 	"mobileBarsAutoHide": "Automatycznie ukrywaj górny i dolny pasek podczas przewijania",
 	"mobileBarsAutoHideTip": "Przewiń w dół, aby ukryć górny pasek tytułu, ścieżkę nawigacji i dolny pasek nawigacji; przewiń w górę, aby je pokazać",
 	"bodyGradient": "Gradient tła",
@@ -1565,7 +1567,7 @@
 	"cloudTagSnapshot": "Zrzut danych w chmurze tagu",
 	"cloudBackupTip": "Proszę przejść do [Historia danych - Zrzut danych], aby działać",
 	"snapshotMemo": "Notatka zrzutu",
-	"snapshotMemoTip": "Proszę wpisać notatkę zrzutu",
+	"snapshotMemoTip": "Opcjonalnie; domyślnie: Create manually",
 	"tagSnapshot": "Zrzut tagu",
 	"tagSnapshotUpload": "Zrzut tagu i przesyłanie",
 	"tagSnapshotTip": "Nie wliczaj symboli \\ / : * ? &quot; &#039; &lt; &gt; |",

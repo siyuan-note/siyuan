@@ -1,4 +1,6 @@
 {
+	"editSnapshotMemo": "Edit snapshot memo",
+	"snapshotMemoLocalTip": "Changes only the local snapshot memo",
 	"mobileBarsAutoHide": "Auto-hide top and bottom bars while scrolling",
 	"mobileBarsAutoHideTip": "Scroll down to hide the top title bar, breadcrumbs, and bottom navigation bar; scroll up to show them",
 	"bodyGradient": "Background gradient",
@@ -1565,7 +1567,7 @@
 	"cloudTagSnapshot": "Cloud tag snapshot",
 	"cloudBackupTip": "Please go to [Data History - Data Snapshot] to operate",
 	"snapshotMemo": "Snapshot Memo",
-	"snapshotMemoTip": "Please enter the snapshot memo",
+	"snapshotMemoTip": "Optional; default: Create manually",
 	"tagSnapshot": "Tag Snapshot",
 	"tagSnapshotUpload": "Tag snapshot and upload",
 	"tagSnapshotTip": "Do not include symbols \\ / : * ? &quot; &#039; &lt; &gt; |",

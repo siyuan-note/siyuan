@@ -392,7 +392,8 @@ export class Protyle {
                         case "removeBox":
                             if (this.protyle.notebookId === data.data.box) {
                                 /// #if MOBILE
-                                if (!removeMobileSecondaryEditor(this)) {
+                                // 主编辑器由页签管理切换文档，避免切换前显示空白主页
+                                if (!removeMobileSecondaryEditor(this) && !window.siyuan.mobile.tabs) {
                                     setEmpty(app);
                                 }
                                 /// #else
@@ -405,7 +406,8 @@ export class Protyle {
                         case "removeDoc":
                             if (data.data.ids.includes(this.protyle.block.rootID)) {
                                 /// #if MOBILE
-                                if (!removeMobileSecondaryEditor(this)) {
+                                // 主编辑器由页签管理切换文档，避免切换前显示空白主页
+                                if (!removeMobileSecondaryEditor(this) && !window.siyuan.mobile.tabs) {
                                     setEmpty(app);
                                 }
                                 /// #else

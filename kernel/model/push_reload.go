@@ -192,7 +192,7 @@ func refreshDocInfoWithSize(tree *parse.Tree, size uint64) {
 }
 
 func refreshParentDocInfo(tree *parse.Tree) {
-	if nil == tree {
+	if nil == tree || nil == Conf {
 		return
 	}
 
@@ -233,6 +233,11 @@ func pushNotebookIconChanged(boxID, icon string) {
 }
 
 func refreshDocInfo0(tree *parse.Tree, size uint64) {
+	// 异步刷新可能在测试或退出流程中晚于配置释放，此时放弃刷新而不是解引用空配置
+	if nil == tree || nil == tree.Root || nil == Conf {
+		return
+	}
+
 	cTime, _ := time.ParseInLocation("20060102150405", tree.ID[:14], time.Local)
 	mTime := cTime
 	if updated := tree.Root.IALAttr("updated"); "" != updated {

@@ -854,6 +854,9 @@ export class Background {
                 fetchPost("/api/search/searchTag", {
                     k: "",
                 }, (response) => {
+                    if (!listElement.isConnected) {
+                        return;
+                    }
                     let html = "";
                     const currentTags = this.getTags();
                     response.data.tags.forEach((item: string, index: number) => {
@@ -888,6 +891,9 @@ export class Background {
                     fetchPost("/api/search/searchTag", {
                         k: inputElement.value.trim(),
                     }, (response) => {
+                        if (!listElement.isConnected) {
+                            return;
+                        }
                         let searchHTML = "";
                         let hasKey = false;
                         const currentTags = this.getTags();

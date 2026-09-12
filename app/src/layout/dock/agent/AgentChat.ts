@@ -364,7 +364,7 @@ export class AgentChat extends Model {
                 "</span>" : "") +
             "</div>" +
             '<div class="agent-chat__messages-wrap">' +
-            '<div class="agent-chat__messages fn__flex-1"></div>' +
+            '<div class="agent-chat__messages fn__flex-1" data-prevent-swipe></div>' +
             '<span class="agent-chat__scroll-bottom ariaLabel" data-position="west" aria-label="' + L.scrollToBottom + '"><svg><use xlink:href="#iconArrowDown"></use></svg></span>' +
             "</div>" +
             '<div class="agent-chat__input-area">' +
@@ -991,6 +991,10 @@ export class AgentChat extends Model {
                 return;
             }
             if (t.closest(".b3-select")) {
+                return;
+            }
+            // 编辑浮层内的点击保留原有焦点，避免输入操作作用于正文。
+            if (t.closest(".protyle-util")) {
                 return;
             }
             if (this.composer) {

@@ -18,6 +18,7 @@ package sql
 
 import (
 	gosql "database/sql"
+	"reflect"
 	"testing"
 )
 
@@ -102,12 +103,12 @@ func TestGraphChildBlocksAcceptNormalCondition(t *testing.T) {
 
 func TestRootBlockExactMatchCondition(t *testing.T) {
 	condition, arg := rootBlockExactMatchCondition("Math%_\\", true)
-	if "content = ?" != condition || "Math%_\\" != arg {
+	if "content = ? OR name = ? OR instr(',' || alias || ',', ?) > 0" != condition || !reflect.DeepEqual(arg, []any{"Math%_\\", "Math%_\\", ",Math%_\\,"}) {
 		t.Fatalf("unexpected case-sensitive exact match: condition=%q arg=%q", condition, arg)
 	}
 
 	condition, arg = rootBlockExactMatchCondition("Math%_\\", false)
-	if "content LIKE ? ESCAPE '\\'" != condition || "Math\\%\\_\\\\" != arg {
+	if "content LIKE ? ESCAPE '\\' OR name LIKE ? ESCAPE '\\' OR (',' || alias || ',') LIKE ? ESCAPE '\\'" != condition || !reflect.DeepEqual(arg, []any{"Math\\%\\_\\\\", "Math\\%\\_\\\\", "%,Math\\%\\_\\\\,%"}) {
 		t.Fatalf("unexpected case-insensitive exact match: condition=%q arg=%q", condition, arg)
 	}
 }
@@ -144,6 +145,36 @@ func TestQueryLikeEscape(t *testing.T) {
 		}
 		if 1 != len(rows) || "literal" != rows[0]["id"] {
 			t.Fatalf("unexpected query result [stmt=%s]: %#v", stmt, rows)
+		}
+	}
+}
+
+func TestRootBlockExactMatchBeforeLimit(t *testing.T) {
+	testDB := createGraphTestBlocksTable(t)
+	for _, sensitive := range []bool{true, false} {
+		for _, field := range []string{"content", "name", "alias"} {
+			if _, err := testDB.Exec("DELETE FROM blocks"); err != nil {
+				t.Fatal(err)
+			}
+			keyword := "Math%_\\'"
+			value := keyword
+			if field == "alias" {
+				value = "Other," + value + ",Last"
+			}
+			if _, err := testDB.Exec("INSERT INTO blocks (id, content, name, alias) VALUES ('partial', 'Higher Math', 'Higher Math', 'Higher Math')"); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := testDB.Exec("INSERT INTO blocks (id, "+field+") VALUES ('exact', ?)", value); err != nil {
+				t.Fatal(err)
+			}
+			condition, args := rootBlockExactMatchCondition(keyword, sensitive)
+			var id string
+			if err := testDB.QueryRow("SELECT id FROM blocks ORDER BY CASE WHEN "+condition+" THEN 0 ELSE 1 END, rowid LIMIT 1", args...).Scan(&id); err != nil {
+				t.Fatal(err)
+			}
+			if id != "exact" {
+				t.Fatalf("exact %s match lost before limit (sensitive=%t): %s", field, sensitive, id)
+			}
 		}
 	}
 }

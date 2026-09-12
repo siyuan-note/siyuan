@@ -4,6 +4,7 @@ import {Tab} from "../layout/Tab";
 import {initSearchMenu} from "./search";
 import {initDockMenu} from "./dock";
 import {initTopBarMenu} from "./topBar";
+import {initStatusBarMenu} from "./statusBar";
 import {initFileMenu, initNavigationMenu} from "./navigation";
 import {initTabMenu} from "./tab";
 /// #endif
@@ -57,6 +58,13 @@ export class Menus {
                 event.stopPropagation();
             } else {
                 event.preventDefault();
+            }
+            if (target.closest("#status")) {
+                hideTooltip();
+                initStatusBarMenu(target.closest("[data-statusbar-entry]") || undefined)
+                    .popup({x: event.clientX, y: event.clientY});
+                event.stopPropagation();
+                return;
             }
             if (target.id === "toolbar" || target.closest("#drag")) {
                 hideTooltip();

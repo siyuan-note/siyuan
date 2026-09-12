@@ -317,10 +317,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             return;
         }
-        if (matchHotKey(Constants.SIYUAN_KEYMAP.editor.general.undo.default, event) ||
-            matchHotKey(Constants.SIYUAN_KEYMAP.editor.general.redo.default, event)) {
-            event.preventDefault();
-        }
         if (protyle.disabled) {
             if (event.key === "Escape" && !event.isComposing && !event.repeat) {
                 return;

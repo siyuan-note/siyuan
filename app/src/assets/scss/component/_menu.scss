@@ -367,6 +367,11 @@
     -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 0) 0, #000 12px);
   }
 
+  &--list.b3-menu--fullscreen .b3-menu__label {
+    min-width: 0;
+    max-width: none;
+  }
+
   &__items {
     overflow: auto;
     padding: 0 8px;

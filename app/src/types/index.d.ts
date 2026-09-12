@@ -343,9 +343,9 @@ interface Window {
         saveExportFile(url: string): void
         saveExportFileV2?(url: string, requestID: string): void
         changeStatusBarColor(color: string, mode: number): void
-        writeClipboard(text: string): void
-        writeHTMLClipboard(text: string, html: string): void
-        writeSiYuanHTMLClipboard(text: string, html: string, siyuanHTML: string): void
+        writeClipboard(text: string): boolean | void
+        writeHTMLClipboard(text: string, html: string): boolean | void
+        writeSiYuanHTMLClipboard(text: string, html: string, siyuanHTML: string): boolean | void
         readClipboard(): string
         readHTMLClipboard(): string
         readSiYuanHTMLClipboard(): string

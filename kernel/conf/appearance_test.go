@@ -172,3 +172,31 @@ func TestNormalizeEntryVisibilityMigratesEditMode(t *testing.T) {
 		t.Fatalf("legacy mode order should be removed: %+v", profile.Orders)
 	}
 }
+func TestDatabaseMenuMigration(t *testing.T) {
+	config := &EntryVisibility{Version: 4, Active: "custom", Profiles: []*EntryVisibilityProfile{{
+		ID: "custom", Name: "Custom",
+		Entries: map[string]bool{"gutter.single.exportCSV": false, "gutter.single.showDatabaseInFolder": true},
+		Orders:  map[string][]string{"gutter.single": {"pluginBefore", "separator_exportCSV", "showDatabaseInFolder", "pluginMiddle", "exportCSV", "pluginAfter"}},
+	}}}
+	NormalizeEntryVisibility(config, EntryVisibilityProfileFull)
+	profile := config.Profiles[0]
+	if visible, ok := profile.Entries["gutter.single.database.exportCSV"]; !ok || visible {
+		t.Fatal("export visibility was not preserved")
+	}
+	if !profile.Entries["gutter.single.database.showDatabaseInFolder"] {
+		t.Fatal("folder visibility was not preserved")
+	}
+	if _, ok := profile.Entries["gutter.single.exportCSV"]; ok {
+		t.Fatal("legacy visibility remains")
+	}
+	want := []string{"pluginBefore", "separator_exportCSV", "database", "pluginMiddle", "pluginAfter"}
+	for i, key := range want {
+		if len(profile.Orders["gutter.single"]) != len(want) || profile.Orders["gutter.single"][i] != key {
+			t.Fatal("parent order was not preserved")
+		}
+	}
+	children := profile.Orders["gutter.single.database"]
+	if len(children) != 2 || children[0] != "showDatabaseInFolder" || children[1] != "exportCSV" {
+		t.Fatal("child order was not preserved")
+	}
+}

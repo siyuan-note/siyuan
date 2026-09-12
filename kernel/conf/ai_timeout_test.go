@@ -10,6 +10,21 @@ package conf
 
 import "testing"
 
+func TestAgentTimeoutDefaults(t *testing.T) {
+	if DefaultAgentSessionTimeout != 1800 {
+		t.Fatalf("default session timeout changed: %d", DefaultAgentSessionTimeout)
+	}
+	if MaxAgentSessionTimeout != 3600 {
+		t.Fatalf("max session timeout changed: %d", MaxAgentSessionTimeout)
+	}
+	if DefaultAgentConfirmTimeout != 600 {
+		t.Fatalf("default confirmation timeout changed: %d", DefaultAgentConfirmTimeout)
+	}
+	if DefaultAgentSessionTimeout > MaxAgentSessionTimeout {
+		t.Fatalf("default session timeout %d exceeds the max %d", DefaultAgentSessionTimeout, MaxAgentSessionTimeout)
+	}
+}
+
 func TestAINormalizeAgentTimeoutsAndRetries(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -18,9 +33,9 @@ func TestAINormalizeAgentTimeoutsAndRetries(t *testing.T) {
 		wantStreamIdle int
 		wantMaxRetries int
 	}{
-		{name: "defaults", agent: nil, wantSession: 600, wantStreamIdle: 120, wantMaxRetries: 3},
+		{name: "defaults", agent: nil, wantSession: DefaultAgentSessionTimeout, wantStreamIdle: 120, wantMaxRetries: 3},
 		{name: "zero means unlimited session and no retries", agent: &Agent{}, wantSession: 0, wantStreamIdle: 120, wantMaxRetries: 0},
-		{name: "clamps upper bounds", agent: &Agent{SessionTimeout: 7200, StreamIdleTimeout: 900, MaxRetries: 20}, wantSession: 3600, wantStreamIdle: 600, wantMaxRetries: 10},
+		{name: "clamps upper bounds", agent: &Agent{SessionTimeout: 7200, StreamIdleTimeout: 900, MaxRetries: 20}, wantSession: MaxAgentSessionTimeout, wantStreamIdle: 600, wantMaxRetries: 10},
 		{name: "normalizes negative values", agent: &Agent{SessionTimeout: -1, StreamIdleTimeout: -1, MaxRetries: -1}, wantSession: 0, wantStreamIdle: 120, wantMaxRetries: 0},
 	}
 

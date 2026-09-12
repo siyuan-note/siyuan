@@ -55,5 +55,30 @@ export const normalizeEntryVisibilityImportProfile = (
         delete entries["document.more.editMode.preview"];
         delete orders["document.more.editMode"];
     }
+    if (version < 5) {
+        const parent = "gutter.single";
+        const children = ["exportCSV", "showDatabaseInFolder"];
+        children.forEach((key) => {
+            if (typeof entries[`${parent}.${key}`] === "boolean") {
+                entries[`${parent}.database.${key}`] = entries[`${parent}.${key}`];
+                delete entries[`${parent}.${key}`];
+            }
+        });
+        const order = orders[parent];
+        if (order?.some(key => children.includes(key))) {
+            orders[`${parent}.database`] = order.filter(key => children.includes(key));
+            let inserted = false;
+            orders[parent] = order.flatMap((key) => {
+                if (!children.includes(key)) {
+                    return key === "database" ? [] : [key];
+                }
+                if (inserted) {
+                    return [];
+                }
+                inserted = true;
+                return ["database"];
+            });
+        }
+    }
     return {name: profile.name, entries, orders};
 };

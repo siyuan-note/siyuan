@@ -37,10 +37,13 @@ export const initDockMenu = (target?: Element, container?: Element) => {
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem(item).element);
         }
-    } else {
-        buildDockEntryVisibilityMenuItems(container).forEach((item) => {
-            window.siyuan.menus.menu.append(new MenuItem(item).element);
-        });
     }
+    const items = buildDockEntryVisibilityMenuItems(container || target?.closest(".dock") || undefined);
+    if (target && items.length > 0) {
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+    }
+    items.forEach((item) => {
+        window.siyuan.menus.menu.append(new MenuItem(item).element);
+    });
     return window.siyuan.menus.menu;
 };

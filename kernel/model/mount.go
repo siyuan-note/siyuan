@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -181,14 +182,71 @@ func isEncryptedBoxMounted(boxID string) bool {
 }
 
 // removeBoxDir 重试删除刚完成读写的笔记本目录，避免 Windows 延迟释放句柄导致瞬时失败。
+// Go 的 os.RemoveAll 在 Windows 上遇到"目录非空"（并发写入或句柄占用）不会重试，
+// 因此这里在每次重试前主动清空残留内容，并在最终失败时返回残留条目供定位。
 func removeBoxDir(p string) (err error) {
 	for i := 0; i < 5; i++ {
-		if err = filelock.RemoveWithoutFatal(p); nil == err {
+		err = filelock.RemoveWithoutFatal(p)
+		if nil == err {
 			return
 		}
-		if i < 4 {
-			time.Sleep(100 * time.Millisecond)
+
+		// 目录确实已不存在才算删除成功；无法访问（权限、IO 错误）时不能误判为已删除，
+		// 否则调用方会继续清理数据库与运行态，留下"索引清空但目录还在"的笔记本。
+		if _, statErr := os.Stat(p); nil != statErr && os.IsNotExist(statErr) {
+			return nil
 		}
+
+		// 收集残留条目：具体信息可帮助用户定位是哪些文件被占用。
+		// 目录条目同样要收集——它们同样会让 "目录非空" 反复出现。
+		var residual []string
+		if walkErr := filepath.Walk(p, func(path string, info os.FileInfo, walkErr error) error {
+			if nil != walkErr {
+				return nil
+			}
+			if path != p {
+				if rel, relErr := filepath.Rel(p, path); nil == relErr {
+					residual = append(residual, rel)
+				}
+			}
+			return nil
+		}); nil != walkErr {
+			logging.LogWarnf("list residual entries of [%s] failed: %s", p, walkErr)
+		}
+		hasResidual := 0 < len(residual)
+
+		lastAttempt := 4 == i
+		// 先清空残留内容（深路径优先），下一轮重试再删除目录本身，避免 RemoveAll 再次卡在"目录非空"
+		sort.Sort(sort.Reverse(sort.StringSlice(residual)))
+		for _, rel := range residual {
+			if removeErr := filelock.RemoveWithoutFatal(filepath.Join(p, rel)); nil != removeErr {
+				logging.LogWarnf("remove residual entry [%s] failed: %s", rel, removeErr)
+			}
+		}
+
+		if lastAttempt {
+			if hasResidual {
+				err = fmt.Errorf(Conf.Language(387), p, strings.Join(describeResidualEntries(residual), ", "))
+			} else {
+				err = fmt.Errorf(Conf.Language(387), p, err.Error())
+			}
+			return
+		}
+
+		time.Sleep(100 * time.Millisecond)
+	}
+	return
+}
+
+// describeResidualEntries 返回仍然存在的残留条目描述（含目录），最多 3 项。
+func describeResidualEntries(entries []string) (ret []string) {
+	sort.Strings(entries)
+	for _, entry := range entries {
+		if 3 == len(ret) {
+			ret = append(ret, "...")
+			break
+		}
+		ret = append(ret, entry)
 	}
 	return
 }

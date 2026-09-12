@@ -13,7 +13,7 @@ import {loadMobileFileById, updateRecentDocSwitchTime} from "../editor";
 import {openModel} from "../menu/model";
 import {closeModel} from "../util/closePanel";
 import {setEmpty} from "../util/setEmpty";
-import {canCloseTab, orderTabsForOverview, trimTabsToLimit} from "./mobileTabsState";
+import {canCloseTab, moveTab, orderTabsForOverview, toggleTabPin, trimTabsToLimit} from "./mobileTabsState";
 
 const MAX_HISTORY = 32;
 
@@ -117,7 +117,7 @@ const getTabIconHTML = (tab: MobileTab) => getDocumentIconHTML(
     true,
 );
 
-const getPinIcon = (pinned: boolean) => pinned ? "iconPin" : "iconUnpin";
+const getPinIcon = (pinned: boolean) => pinned ? "iconUnpin" : "iconPin";
 
 export class MobileTabs {
     private state: MobileTabsState;
@@ -844,8 +844,7 @@ export class MobileTabs {
         if (!tab) {
             return;
         }
-        tab.pin = !tab.pin;
-        tab.activeAt = Date.now();
+        this.state.tabs = toggleTabPin(this.state.tabs, tabID);
         // 钉住状态随页签列表持久化
         this.persist();
         this.renderOverview();
@@ -895,8 +894,9 @@ export class MobileTabs {
 
     private renderOverviewItem(tab: MobileTab) {
         const pinned = !!tab.pin;
-        const closeHidden = !canCloseTab(pinned, window.siyuan.config.fileTree.openFilesUseCurrentTab);
+        const closeHidden = !canCloseTab(pinned);
         return `<div class="mobile-tabs__item${tab.id === this.state.activeTabID ? " mobile-tabs__item--active" : ""}" data-tab-id="${escapeAttr(tab.id)}">
+    <span class="mobile-tabs__drag" data-action="drag"><svg><use xlink:href="#iconDrag"></use></svg></span>
     ${getTabIconHTML(tab)}
     <span class="mobile-tabs__item-title">${escapeHtml(getTabTitle(tab))}</span>
     <span class="mobile-tabs__item-pin${pinned ? "" : " fn__none"}" aria-hidden="${pinned ? "false" : "true"}" aria-label="${escapeAttr(window.siyuan.languages.pin)}"><svg><use xlink:href="#iconPin"></use></svg></span>
@@ -907,6 +907,20 @@ export class MobileTabs {
     }
 
     private bindOverviewEvents(element: HTMLElement) {
+        let drag: {pointerID: number; tabID: string; item: HTMLElement} | undefined;
+        const finishDrag = (event: PointerEvent) => {
+            if (!drag || drag.pointerID !== event.pointerId) {
+                return;
+            }
+            drag.item.classList.remove("mobile-tabs__item--dragging");
+            drag = undefined;
+            if (element.hasPointerCapture(event.pointerId)) {
+                element.releasePointerCapture(event.pointerId);
+            }
+            this.overviewLongPressTriggered = true;
+            this.suppressOverviewClickUntil = Date.now() + Constants.TIMEOUT_LONGPRESS;
+            this.persist();
+        };
         element.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
             if (this.overviewLongPressTriggered) {
@@ -943,6 +957,29 @@ export class MobileTabs {
         });
 
         const processPointerMove = (event: PointerEvent) => {
+            if (drag) {
+                if (drag.pointerID !== event.pointerId) {
+                    return;
+                }
+                event.preventDefault();
+                const list = drag.item.parentElement;
+                const rect = list.getBoundingClientRect();
+                if (event.clientY < rect.top + 48) {
+                    list.scrollTop -= 16;
+                } else if (event.clientY > rect.bottom - 148) {
+                    list.scrollTop += 16;
+                }
+                const target = document.elementFromPoint(event.clientX, event.clientY)
+                    ?.closest<HTMLElement>("[data-tab-id]");
+                if (target && target !== drag.item && target.parentElement === list) {
+                    const after = event.clientY > target.getBoundingClientRect().top + target.offsetHeight / 2;
+                    this.state.tabs = moveTab(this.state.tabs, drag.tabID, target.dataset.tabId, after);
+                    const nextID = this.state.tabs[this.state.tabs.findIndex((tab) => tab.id === drag.tabID) + 1]?.id;
+                    const next = Array.from(list.children).find((child) => (child as HTMLElement).dataset.tabId === nextID);
+                    list.insertBefore(drag.item, next || null);
+                }
+                return;
+            }
             if (typeof this.overviewPointerX !== "number" || typeof this.overviewPointerY !== "number") {
                 return;
             }
@@ -953,7 +990,7 @@ export class MobileTabs {
             }
         };
         element.addEventListener("pointerdown", (event) => {
-            if (event.button !== 0) {
+            if (event.button !== 0 || !event.isPrimary || drag) {
                 return;
             }
             const itemElement = (event.target as HTMLElement).closest<HTMLElement>("[data-tab-id]");
@@ -961,6 +998,16 @@ export class MobileTabs {
                 return;
             }
             this.cancelOverviewLongPress();
+            if ((event.target as HTMLElement).closest("[data-action='drag']")) {
+                event.preventDefault();
+                drag = {pointerID: event.pointerId, tabID: itemElement.dataset.tabId, item: itemElement};
+                itemElement.classList.add("mobile-tabs__item--dragging");
+                element.setPointerCapture(event.pointerId);
+                return;
+            }
+            if ((event.target as HTMLElement).closest("[data-action]")) {
+                return;
+            }
             this.overviewPointerX = event.clientX;
             this.overviewPointerY = event.clientY;
             this.overviewLongPressTabID = itemElement.dataset.tabId;
@@ -979,6 +1026,9 @@ export class MobileTabs {
         element.addEventListener("pointermove", processPointerMove);
         element.addEventListener("pointerup", () => this.cancelOverviewLongPress());
         element.addEventListener("pointercancel", () => this.cancelOverviewLongPress());
+        element.addEventListener("pointerup", finishDrag);
+        element.addEventListener("pointercancel", finishDrag);
+        element.addEventListener("lostpointercapture", finishDrag);
     }
 
     private cancelOverviewLongPress() {

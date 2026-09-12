@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {updateMenuItemGroupClasses} from "./menuGroup";
+import {updateMenuGroupsOnMutation, updateMenuItemGroupClasses} from "./menuGroup";
 
 const element = (...classes: string[]) => {
     const values = new Set(classes);
@@ -16,6 +16,29 @@ const element = (...classes: string[]) => {
 const items = (...children: HTMLElement[]) => Object.assign(element(), {children});
 
 describe("menu groups", () => {
+    it("updates rounded edges after deleting the first and last history entries", () => {
+        const clear = element("b3-menu__item");
+        const first = element("b3-menu__item");
+        const middle = element("b3-menu__item");
+        const last = element("b3-menu__item");
+        const container = items(clear, element("b3-menu__separator"), first, middle, last);
+        container.classList.add("b3-menu__items");
+        updateMenuItemGroupClasses(container);
+        const mutation = {type: "childList", target: container} as unknown as MutationRecord;
+
+        container.children.splice(2, 1);
+        updateMenuGroupsOnMutation([mutation]);
+        assert.equal(middle.classList.contains("b3-menu__item--group-first"), true);
+        assert.equal(middle.classList.contains("b3-menu__item--group-last"), false);
+
+        container.children.pop();
+        updateMenuGroupsOnMutation([mutation]);
+        assert.equal(middle.classList.contains("b3-menu__item--group-first"), true);
+        assert.equal(middle.classList.contains("b3-menu__item--group-last"), true);
+        assert.equal(clear.classList.contains("b3-menu__item--group-first"), true);
+        assert.equal(clear.classList.contains("b3-menu__item--group-last"), true);
+    });
+
     it("keeps database navigation titles outside rounded action groups", () => {
         const title = element("b3-menu__item", "b3-menu__title");
         const first = element("b3-menu__item");

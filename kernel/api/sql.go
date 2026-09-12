@@ -37,7 +37,13 @@ func flushTransaction(c *gin.Context) {
 
 func SQL(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	var limitInfo *sql.QueryLimitInfo
+	defer func() {
+		c.JSON(http.StatusOK, struct {
+			*gulu.Result
+			*sql.QueryLimitInfo
+		}{ret, limitInfo})
+	}()
 
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
@@ -81,7 +87,7 @@ func SQL(c *gin.Context) {
 		return
 	}
 
-	result, err := sql.Query(stmt, model.Conf.Search.Limit)
+	result, info, err := sql.QueryWithLimitInfo(stmt, model.Conf.Search.Limit)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -89,4 +95,5 @@ func SQL(c *gin.Context) {
 	}
 
 	ret.Data = result
+	limitInfo = &info
 }

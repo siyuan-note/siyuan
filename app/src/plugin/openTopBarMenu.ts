@@ -90,9 +90,12 @@ export const openTopBarMenu = (app: App, target?: Element) => {
                 menuOption.submenu = submenu;
             }
             const customIconElement = item.querySelector(":scope > .b3-menu__icon--custom");
-            const iconElement = (customIconElement || item.querySelector("svg")).cloneNode(true) as HTMLElement;
-            iconElement.classList.add("b3-menu__icon");
-            menuOption.iconHTML = iconElement.outerHTML;
+            const sourceIconElement = customIconElement || item.querySelector("svg");
+            if (sourceIconElement) {
+                const iconElement = sourceIconElement.cloneNode(true) as HTMLElement;
+                iconElement.classList.add("b3-menu__icon");
+                menuOption.iconHTML = iconElement.outerHTML;
+            }
             menu.addItem(menuOption);
             hasPlugin = true;
             hasTopBar = true;

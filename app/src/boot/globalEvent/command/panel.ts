@@ -2,7 +2,7 @@ import {getKeymapBindings, getKeymapItem} from "../../../util/keymapBindings";
 import {Dialog} from "../../../dialog";
 import type {App} from "../../../index";
 import {upDownHint} from "../../../util/upDownHint";
-import {updateHotkeyTip} from "../../../protyle/util/compatibility";
+import {setStorageVal, updateHotkeyTip} from "../../../protyle/util/compatibility";
 import {isMobile} from "../../../util/functions";
 import {Constants} from "../../../constants";
 import {hasClosestByClassName} from "../../../protyle/util/hasClosest";
@@ -11,7 +11,9 @@ import {matchHotKey} from "../../../protyle/util/hotKey";
 import {captureCommandContext} from "../../../command/context";
 import {ensureCommandSystem, executeCommandById} from "../../../command/executor";
 import {initializeEnglishCommandTranslations} from "../../../command/english";
-import {createPaletteFocusLifecycle, queryCommandPalette} from "../../../command/paletteCore";
+import {
+    COMMAND_PALETTE_HISTORY_KEY, createPaletteFocusLifecycle, queryCommandPalette, recordPaletteCommand,
+} from "../../../command/paletteCore";
 import type {ICommandContextSnapshot, ICommandDefinition} from "../../../command/types";
 /// #if MOBILE
 import {activeBlur} from "../../../mobile/util/keyboardToolbar";
@@ -39,7 +41,13 @@ const renderCommands = (listElement: HTMLElement, commands: ICommandDefinition[]
 };
 
 const executePaletteCommand = (app: App, commandId: string, context: ICommandContextSnapshot) => {
-    void executeCommandById(app, commandId, context).catch(error => {
+    void executeCommandById(app, commandId, context).then(result => {
+        if (result.status === "executed") {
+            const history = recordPaletteCommand(window.siyuan.storage[COMMAND_PALETTE_HISTORY_KEY], commandId);
+            window.siyuan.storage[COMMAND_PALETTE_HISTORY_KEY] = history;
+            setStorageVal(COMMAND_PALETTE_HISTORY_KEY, history);
+        }
+    }).catch(error => {
         console.error(`Unable to execute command "${commandId}":`, error);
     });
 };
@@ -117,7 +125,9 @@ export const commandPanel = (app: App) => {
         inputElement.placeholder = window.siyuan.languages.commandPanel;
     }
     const refresh = () => {
-        renderCommands(listElement, queryCommandPalette(registry, context, inputElement.value));
+        renderCommands(listElement, queryCommandPalette(
+            registry, context, inputElement.value, window.siyuan.storage[COMMAND_PALETTE_HISTORY_KEY],
+        ));
     };
     refresh();
     inputElement.focus();

@@ -2,7 +2,7 @@ import {buildEntryVisibilityMenuItems as buildMenuItems,
     buildEntryVisibilityToggleItem as buildToggleItem,
     IEntryVisibilityMenuRuntime,
 } from "./menuItems";
-import {getDockEntryKey, TOP_BAR_ROOT_PATH} from "./catalog";
+import {getDockEntryKey, STATUS_BAR_ROOT_PATH, TOP_BAR_ROOT_PATH} from "./catalog";
 import {getEntryOrder, isEntryVisible, setEntryVisibilityValue} from "./runtime";
 
 const findEntryElement = (path: string) => {
@@ -17,16 +17,29 @@ const findEntryElement = (path: string) => {
         return Array.from(document.querySelectorAll<HTMLElement>(".dock__item[data-type]"))
             .find((item) => getDockEntryKey(item) === key);
     }
+    if (scope === "statusBar") {
+        return Array.from(document.querySelectorAll<HTMLElement>("#status [data-statusbar-entry]"))
+            .find((item) => item.getAttribute("data-statusbar-entry") === key);
+    }
     return undefined;
 };
 
 const getEntryIcon = (path: string): Pick<IMenu, "icon" | "iconHTML"> => {
+    if (path === `${STATUS_BAR_ROOT_PATH}.message` || path === `${STATUS_BAR_ROOT_PATH}.backgroundTask` ||
+        path === `${STATUS_BAR_ROOT_PATH}.counter`) {
+        // 动态状态内容不作为菜单图标，保留默认图标占位。
+        return {};
+    }
     if (path === `${TOP_BAR_ROOT_PATH}.toolbarVIP` || path === `${TOP_BAR_ROOT_PATH}.toolbarTitle`) {
         return {icon: "iconAccount"};
     }
     const element = findEntryElement(path);
     if (!element) {
-        return {iconHTML: ""};
+        return {};
+    }
+    if (element.getAttribute("data-topbar-custom") === "true") {
+        // 插件自定义控件保留空图标占位，不提取其内部内容。
+        return {};
     }
     const customElement = element.querySelector(":scope > .b3-menu__icon--custom");
     if (customElement) {
@@ -50,7 +63,7 @@ const getEntryIcon = (path: string): Pick<IMenu, "icon" | "iconHTML"> => {
         iconElement.classList.add("b3-menu__icon");
         return {iconHTML: iconElement.outerHTML};
     }
-    return {iconHTML: ""};
+    return {};
 };
 
 const getRuntime = (): IEntryVisibilityMenuRuntime => ({

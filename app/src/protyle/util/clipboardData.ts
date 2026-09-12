@@ -23,7 +23,7 @@ export const buildWebClipboardHTML = (textHTML: string, textSiyuan: string) => {
     return `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${textHTML}`;
 };
 
-export const getTextSiyuanFromTextHTML = (html: string) => {
+export const getTextSiyuanFromTextHTML = (html: string, legacyHarmony = false) => {
     if (html.trimStart().startsWith("<html") &&
         html.substring(0, html.indexOf(">")).includes('xmlns:x="urn:schemas-microsoft-com:office:excel"')) {
         // 移除 Microsoft Excel 中的 data-siyuan https://github.com/siyuan-note/siyuan/pull/16338
@@ -35,6 +35,13 @@ export const getTextSiyuanFromTextHTML = (html: string) => {
     const siyuanMatch = html.match(/<!--data-siyuan='([^']+)'-->/);
     let textSiyuan = "";
     let textHtml = html;
+    // 仅在鸿蒙读取旧剪贴板时拆分历史格式，保留存在多个分隔符的歧义内容。
+    if (legacyHarmony && !siyuanMatch) {
+        const parts = html.split("__@text/siyuan@__");
+        if (parts.length === 2 && parts[0].trimEnd().endsWith(">") && /^\s*<[a-zA-Z][^>]*>/.test(parts[1])) {
+            return {textSiyuan: parts[1], textHtml: parts[0]};
+        }
+    }
     if (siyuanMatch) {
         try {
             if (typeof Buffer !== "undefined") {

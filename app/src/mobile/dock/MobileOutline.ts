@@ -544,6 +544,18 @@ export class MobileOutline extends Model {
     }
 
     public reload(callback?: () => void) {
+        if (document.getElementById("editor").classList.contains("fn__none")) {
+            this.reloadId++;
+            this.currentRequestID++;
+            this.blockId = "";
+            this.isPreview = false;
+            this.preFilterExpandIds = null;
+            this.tree.updateData(null);
+            this.tree.element.scrollTop = 0;
+            this.updateDocTitle();
+            this.element.removeAttribute("data-loading");
+            return;
+        }
         const protyle = window.siyuan.mobile.editor?.protyle;
         const blockId = protyle?.block.rootID || this.blockId;
         if (!blockId) {

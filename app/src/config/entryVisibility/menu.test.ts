@@ -11,7 +11,7 @@ const withWindow = (callback: () => void) => {
     const descriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
     Object.defineProperty(globalThis, "window", {
         configurable: true,
-        value: {siyuan: {languages: {}}},
+        value: {siyuan: {languages: {syncNow: "Sync", dailyNote: "Daily note"}}},
     });
     try {
         callback();
@@ -43,7 +43,7 @@ const createRuntime = (options: {
         },
         getEntryIcon: (path) => options.icons?.[path] || {iconHTML: ""},
         readonly: options.readonly || false,
-        languages: {entryHide: "Hide", entryShow: "Show"},
+        languages: {entryHide: "Hide ${name}", entryShow: "Show ${name}"},
     };
     return {runtime, calls};
 };
@@ -116,11 +116,12 @@ test("toggle item hides visible entries and shows hidden ones", () => {
     withWindow(() => {
         const {runtime, calls} = createRuntime({hidden: ["topBar.barDailyNote"]});
         const visible = buildEntryVisibilityToggleItem("topBar.barSync", runtime)!;
-        assert.equal(visible.label, "Hide");
+        assert.equal(visible.label, "Hide Sync");
+        assert.notEqual(visible.id, "topBar.barSync");
         assert.equal(visible.icon, "iconEyeoff");
         visible.click!(undefined as never, undefined as never);
         const hidden = buildEntryVisibilityToggleItem("topBar.barDailyNote", runtime)!;
-        assert.equal(hidden.label, "Show");
+        assert.equal(hidden.label, "Show Daily note");
         assert.equal(hidden.icon, "iconEye");
         hidden.click!(undefined as never, undefined as never);
         assert.equal(buildEntryVisibilityToggleItem("topBar.drag", runtime), undefined);
@@ -139,5 +140,20 @@ test("readonly disables entry visibility menu items", () => {
         assert.ok(items.length > 0);
         items.forEach((item) => assert.equal(item.disabled, true));
         assert.equal(buildEntryVisibilityToggleItem("topBar.barSync", runtime)!.disabled, true);
+    });
+});
+
+test("status bar menu restores hidden entries and excludes the fixed spacer", () => {
+    withWindow(() => {
+        const {runtime, calls} = createRuntime({hidden: ["statusBar.backgroundTask", "statusBar.counter"]});
+        const items = buildEntryVisibilityMenuItems("statusBar", runtime);
+        assert.deepEqual(items.map((item) => item.id), [
+            "statusBar.barDock", "statusBar.message", "statusBar.backgroundTask", "statusBar.counter", "statusBar.statusHelp",
+        ]);
+        const task = items.find((item) => item.id === "statusBar.backgroundTask")!;
+        assert.equal(task.checked, false);
+        task.click!(undefined as never, undefined as never);
+        assert.deepEqual(calls, [{path: "statusBar.backgroundTask", visible: true}]);
+        assert.equal(buildEntryVisibilityToggleItem("statusBar.spacer", runtime), undefined);
     });
 });

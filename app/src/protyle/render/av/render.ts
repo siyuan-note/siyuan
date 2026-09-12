@@ -1144,11 +1144,6 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                         }
                         let isAddingFocusPending = false;
                         if (operation.srcs.length === 1) {
-                            const addedItem = {
-                                itemID: operation.srcs[0].itemID,
-                                previousID: operation.previousID,
-                                groupID: operation.groupID,
-                            };
                             let popCellElement = item.querySelector(`.av__body${groupQuery} [data-id="${operation.srcs[0].itemID}"] .av__cell[data-dtype="block"]`) as HTMLElement;
                             if (!popCellElement) {
                                 const popCellElements = item.querySelectorAll(`.av__body [data-id="${operation.srcs[0].itemID}"] .av__cell[data-dtype="block"]`);
@@ -1162,7 +1157,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                                 if (item.getAttribute("data-av-type") !== "table") {
                                     if (addingFocusTokens.get(addingFocusKey) === addingFocusToken) {
                                         addingFocusTokens.delete(addingFocusKey);
-                                        popTextCell(protyle, [popCellElement], "block", {addedItem});
+                                        popTextCell(protyle, [popCellElement], "block");
                                     }
                                 } else {
                                     isAddingFocusPending = true;
@@ -1183,7 +1178,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                                             genCellValueByElement("block", result.cellElement).block?.content) {
                                             return;
                                         }
-                                        popTextCell(protyle, [result.cellElement], "block", {scrollIntoView: false, addedItem});
+                                        popTextCell(protyle, [result.cellElement], "block", {scrollIntoView: false});
                                     });
                                 }
                             }

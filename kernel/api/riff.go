@@ -115,7 +115,7 @@ func getNotebookRiffCards(c *gin.Context) {
 	notebookID := arg["id"].(string)
 	if model.IsEncryptedBox(notebookID) {
 		ret.Code = -1
-		ret.Msg = model.Conf.Language(313)
+		ret.Msg = model.Conf.Language(393)
 		return
 	}
 	page := int(arg["page"].(float64))

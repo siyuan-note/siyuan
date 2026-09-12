@@ -37,7 +37,7 @@ import {
     mergeDockEntryOrderSnapshot,
 } from "./dockOrder";
 
-export const ENTRY_VISIBILITY_VERSION = 4;
+export const ENTRY_VISIBILITY_VERSION = 5;
 export const ENTRY_PROFILE_SIMPLE = "simple";
 export const ENTRY_PROFILE_FULL = "full";
 export type TEntryVisibilityTemplate = typeof ENTRY_PROFILE_SIMPLE | typeof ENTRY_PROFILE_FULL;

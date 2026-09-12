@@ -1118,6 +1118,62 @@
 					]
 				},
 				{
+					"ID": "20260911103000-twrev15",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260911103000-twrev15",
+						"updated": "20260911103000"
+					},
+					"Children": [
+						{
+							"ID": "20260911103000-twrev16",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260911103000-twrev16",
+								"updated": "20260911103000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "導入包內檔案帶閃卡內容時會被拒絕，報錯會指出包含閃卡的檔案；請在來源筆記本中移除閃卡後重新導出，或改為導入到一般筆記本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260911103000-twrev17",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260911103000-twrev17",
+						"updated": "20260911103000"
+					},
+					"Children": [
+						{
+							"ID": "20260911103000-twrev18",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260911103000-twrev18",
+								"updated": "20260911103000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "導入檔案中指向包外的區塊引用會被降級為純文字，包外的資料庫綁定會轉為非綁定條目"
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20260907120000-tw00048",
 					"Type": "NodeListItem",
 					"ListData": {

@@ -428,7 +428,7 @@ export class MobileFiles extends Model {
                         state.selectedElement.closest("ul[data-url]")?.getAttribute("data-url") ||
                         state.selectedElement.getAttribute("data-url") || "";
                     if (!isMoveTargetAllowed([sourceNotebookId], toURL)) {
-                        showMessage(window.siyuan.languages._kernel[313]);
+                        showMessage(window.siyuan.languages._kernel[391]);
                         this.clearDragIndicators();
                         this.touchDragState = null;
                         return;
@@ -473,7 +473,7 @@ export class MobileFiles extends Model {
                         this.clearDragIndicators();
                         this.touchDragState = null;
                         if (!isMoveTargetAllowed([sourceNotebookId], toURL)) {
-                            showMessage(window.siyuan.languages._kernel[313]);
+                            showMessage(window.siyuan.languages._kernel[391]);
                             return;
                         }
                         const result = await reorderSortedFileTree(
@@ -498,7 +498,7 @@ export class MobileFiles extends Model {
                                 state.selectedElement.closest("ul[data-url]")?.getAttribute("data-url") ||
                                 state.selectedElement.getAttribute("data-url") || "";
                             if (!isMoveTargetAllowed([sourceNotebookId], toURL)) {
-                                showMessage(window.siyuan.languages._kernel[313]);
+                                showMessage(window.siyuan.languages._kernel[391]);
                                 this.clearDragIndicators();
                                 this.touchDragState = null;
                                 return;

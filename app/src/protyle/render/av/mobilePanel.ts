@@ -1,4 +1,5 @@
 import {updateMenuItemGroupClasses} from "../../../menus/menuGroup";
+import {waitForSheetViewport} from "../../../menus/sheetOpen";
 
 export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLElement) => {
     menuElement.classList.add("b3-menu--fullscreen", "b3-menu--sheet");
@@ -18,6 +19,16 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
             }
             updateMenuItemGroupClasses(itemsElement);
         });
+        // 视图分区标题与列表项分属不同层级，按可见分区补齐列表圆角
+        menuElement.querySelectorAll("[data-av-view-section]").forEach((sectionElement) => {
+            sectionElement.querySelector(".b3-menu__item")?.classList.add("b3-menu__title");
+            const items = Array.from(menuElement.querySelectorAll<HTMLElement>(
+                `[data-av-view-visibility="${sectionElement.getAttribute("data-av-view-section")}"]`));
+            items.forEach((item) => item.classList.remove("b3-menu__item--group-first", "b3-menu__item--group-last"));
+            const visibleItems = items.filter((item) => !item.classList.contains("fn__none"));
+            visibleItems[0]?.classList.add("b3-menu__item--group-first");
+            visibleItems[visibleItems.length - 1]?.classList.add("b3-menu__item--group-last");
+        });
     };
     const contentObserver = new MutationObserver(() => {
         // 分组类更新不再次触发自身，页面替换和显隐切换都需要重新分组
@@ -35,6 +46,34 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
     updateContent();
     observeContent();
     window.addEventListener("resize", updateHeight);
+    // 初始定位不参与过渡，确保展开动画从屏幕外开始
+    menuElement.style.transition = "none";
+    menuElement.style.transform = "translateY(100%)";
+    void menuElement.offsetHeight;
+    const size = window.siyuan.mobile.size;
+    const orientation = size.isLandscape ? size.landscape : size.portrait;
+    const cancelOpen = waitForSheetViewport({
+        height: () => Math.min(window.innerHeight, window.visualViewport?.height ?? window.innerHeight),
+        fullHeight: Math.max(window.innerHeight, orientation?.height1 || 0),
+        now: () => performance.now(),
+        requestFrame: callback => requestAnimationFrame(callback),
+        cancelFrame: id => cancelAnimationFrame(id),
+        open: () => {
+            if (panelElement.isConnected) {
+                updateHeight();
+                menuElement.style.transition = "";
+                void menuElement.offsetHeight;
+                menuElement.style.transform = "translateY(0px)";
+            }
+        },
+    });
+    menuElement.addEventListener("transitionend", (event) => {
+        // 展开后恢复视口定位参照，避免固定定位下拉列表受面板变换影响
+        if (event.target === menuElement && event.propertyName === "transform" &&
+            menuElement.style.transform === "translateY(0px)") {
+            menuElement.style.transform = "";
+        }
+    });
 
     let start: {x: number, y: number, time: number};
     let dragging = false;
@@ -109,6 +148,7 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
 
     const removalObserver = new MutationObserver(() => {
         if (!panelElement.isConnected) {
+            cancelOpen();
             contentObserver.disconnect();
             removalObserver.disconnect();
             window.removeEventListener("resize", updateHeight);

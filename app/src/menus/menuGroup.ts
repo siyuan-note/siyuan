@@ -1,3 +1,14 @@
+export const updateMenuGroupsOnMutation = (records: MutationRecord[]) => {
+    const containers = new Set<Element>();
+    records.forEach((record) => {
+        const target = record.target as Element;
+        if (record.type === "childList" && target.classList?.contains("b3-menu__items")) {
+            containers.add(target);
+        }
+    });
+    containers.forEach(updateMenuItemGroupClasses);
+};
+
 export const updateMenuItemGroupClasses = (itemsElement: Element) => {
     const itemElements = Array.from(itemsElement.children).filter((element) =>
         element.classList.contains("b3-menu__item")) as HTMLElement[];

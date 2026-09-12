@@ -47,8 +47,10 @@ import {
 /// #if MOBILE
 import {genMobileBottomBarSettingHTML, mountMobileBottomBarSetting} from "../../mobile/util/mobileBottomBar";
 import {genMobileSidePanelSettingHTML, mountMobileSidePanelSetting} from "../../mobile/util/mobileSidePanelSetting";
+import {genMobileBarsSettingHTML, mountMobileBarsSetting} from "../../mobile/util/mobileBarsSetting";
 /// #endif
 import {genEntryVisibilityHtml, mountEntryVisibility} from "../entryVisibility/ui";
+import {genBodyGradientHtml, mountBodyGradient} from "./bodyGradient";
 
 interface IBootAppearanceListData {
     appearances: IBootAppearanceListItem[];
@@ -876,12 +878,24 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
             options: Constants.SIYUAN_CONFIG_APPEARANCE_DARK_CODE.map(value => ({value})),
         });
     });
+    group.slot({
+        key: "bodyGradient",
+        keywords: [window.siyuan.languages.bodyGradient, window.siyuan.languages.bodyGradientTip],
+        html: genBodyGradientHtml,
+        afterMount: mountBodyGradient,
+    });
 };
 
 const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("controls", window.siyuan.languages.configGroupControls);
 
     /// #if MOBILE
+    group.slot({
+        key: "mobileBarsAutoHide",
+        keywords: [window.siyuan.languages.mobileBarsAutoHide, window.siyuan.languages.mobileBarsAutoHideTip],
+        html: genMobileBarsSettingHTML,
+        afterMount: mountMobileBarsSetting,
+    });
     group.slot({
         key: "mobileBottomBar",
         keywords: [

@@ -253,7 +253,7 @@ export const readClipboard = async () => {
     if (isInHarmony()) {
         text.textPlain = window.JSHarmony.readClipboard();
         text.textHTML = window.JSHarmony.readHTMLClipboard();
-        const textObj = getTextSiyuanFromTextHTML(text.textHTML);
+        const textObj = getTextSiyuanFromTextHTML(text.textHTML, true);
         text.textHTML = textObj.textHtml;
         text.siyuanHTML = textObj.textSiyuan;
         if (!text.siyuanHTML) {
@@ -350,8 +350,7 @@ const writePlainTextFallback = async (text: string) => {
             return true;
         }
         if (isInHarmony()) {
-            window.JSHarmony.writeClipboard(text);
-            return true;
+            return window.JSHarmony.writeClipboard(text) !== false;
         }
         if (isInIOS()) {
             window.webkit.messageHandlers.setClipboard.postMessage(text);
@@ -424,15 +423,16 @@ export const writeClipboardData = async (data: IClipboardWriteData, options: ICl
             return {status: "plain"};
         }
         if (isInHarmony()) {
-            if (textSiyuan) {
-                window.JSHarmony.writeSiYuanHTMLClipboard(textPlain, textHTML, textSiyuan);
+            if (textHTML || textSiyuan) {
+                // 使用通用 HTML 注释封装，使旧版鸿蒙壳也不会写入可见的内部格式分隔符。
+                if (window.JSHarmony.writeHTMLClipboard(textPlain, buildWebClipboardHTML(textHTML, textSiyuan)) === false) {
+                    throw new Error(window.siyuan.languages.clipboardPermissionDenied);
+                }
                 return {status: "rich"};
             }
-            if (textHTML) {
-                window.JSHarmony.writeHTMLClipboard(textPlain, textHTML);
-                return {status: "rich"};
+            if (window.JSHarmony.writeClipboard(textPlain) === false) {
+                throw new Error(window.siyuan.languages.clipboardPermissionDenied);
             }
-            window.JSHarmony.writeClipboard(textPlain);
             return {status: "plain"};
         }
         if (isInIOS()) {
@@ -759,6 +759,7 @@ export const getLocalStorage = (cb: () => void) => {
             version: 1,
             tabs: [],
         };
+        defaultStorage["local-mobile-bars"] = {autoHide: true};
         defaultStorage[Constants.LOCAL_MOBILE_BOTTOM_BAR] = {
             version: 1,
             actions: ["documents", "search", "newDoc", "tabs"],
@@ -800,7 +801,7 @@ export const getLocalStorage = (cb: () => void) => {
 
         [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_EXPORTPATH, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR,
             Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_MOBILE_TABS,
-            Constants.LOCAL_MOBILE_BOTTOM_BAR, Constants.LOCAL_MOBILE_SIDE_PANEL,
+            Constants.LOCAL_MOBILE_BOTTOM_BAR, Constants.LOCAL_MOBILE_SIDE_PANEL, "local-mobile-bars",
             Constants.LOCAL_FONTSTYLES,
             Constants.LOCAL_SEARCHDATA, Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS,
             Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD,

@@ -265,7 +265,7 @@ func heading2Doc(c *gin.Context) {
 	// 禁止跨加密笔记本移动块：加密笔记本是孤岛
 	if bt := treenode.GetBlockTree(srcHeadingID); bt != nil && model.IsEncryptedBox(bt.BoxID) && bt.BoxID != targetNotebook {
 		ret.Code = -1
-		ret.Msg = model.Conf.Language(313)
+		ret.Msg = model.Conf.Language(391)
 		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
@@ -316,7 +316,7 @@ func li2Doc(c *gin.Context) {
 	// 禁止跨加密笔记本移动块：加密笔记本是孤岛
 	if bt := treenode.GetBlockTree(srcListItemID); bt != nil && model.IsEncryptedBox(bt.BoxID) && bt.BoxID != targetNotebook {
 		ret.Code = -1
-		ret.Msg = model.Conf.Language(313)
+		ret.Msg = model.Conf.Language(391)
 		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
@@ -1648,7 +1648,7 @@ func setPublishAccess(c *gin.Context) {
 	ID := arg["id"].(string)
 	if model.IsEncryptedPublishAccessTarget(ID) {
 		ret.Code = -1
-		ret.Msg = model.Conf.Language(313)
+		ret.Msg = model.Conf.Language(394)
 		return
 	}
 	visible := arg["visible"].(bool)
@@ -1710,7 +1710,7 @@ func getPublishAccess(c *gin.Context) {
 		id := ID.(string)
 		if model.IsEncryptedPublishAccessTarget(id) {
 			ret.Code = -1
-			ret.Msg = model.Conf.Language(313)
+			ret.Msg = model.Conf.Language(394)
 			return
 		}
 		IDs = append(IDs, id)

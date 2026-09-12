@@ -992,7 +992,52 @@
   min-width: 1px;
 }
 
+.table__cell-rich > .list[data-type="NodeList"],
+.table__cell-editor .protyle-wysiwyg > .list {
+  // 首层列表抵消单元格的侧边留白，列表标记和正文使用相同的起始间距。
+  margin-inline: -8px;
+}
+
+.table__cell-editor .protyle-wysiwyg [data-node-id] {
+  // 单元格的对齐方式优先于正文的两端对齐设置。
+  text-align: inherit;
+}
+
+.table__cell-rich > :is(.p, .h1, .h2, .h3, .h4, .h5, .h6)[data-table-cell-node],
+.table__cell-editor .protyle-wysiwyg > :is(.p, .h1, .h2, .h3, .h4, .h5, .h6) {
+  // 单元格已提供侧边留白，多段落和标题与普通文本使用相同的对齐边界。
+  padding-inline: 0;
+}
+
 .protyle-wysiwyg [data-type="NodeTable"] {
+  td.dragover__top,
+  td.dragover__bottom,
+  th.dragover__top,
+  th.dragover__bottom {
+    position: relative;
+
+    // 与空单元格的占位行分离，避免占位行高度覆盖插入线高度。
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background-color: var(--b3-theme-primary-lighter);
+      pointer-events: none;
+    }
+  }
+
+  td.dragover__top::before,
+  th.dragover__top::before {
+    top: -4px;
+  }
+
+  td.dragover__bottom::before,
+  th.dragover__bottom::before {
+    bottom: -4px;
+  }
+
   td[tabindex="-1"]:focus,
   th[tabindex="-1"]:focus {
     outline: none;

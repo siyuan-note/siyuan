@@ -25,6 +25,10 @@ body.body--android {
 
 body.mobile-keyboard--open {
   --mobile-bottom-bar-offset: 0px;
+
+  .status {
+    display: none;
+  }
 }
 
 .block__popover {
@@ -526,13 +530,11 @@ body.mobile-keyboard--open {
 }
 
 .mobile-chrome--hidden {
-  .mobile-topbar {
-    visibility: hidden;
-  }
-
+  // 滚动显隐使用位移和透明度，保持栏位渲染层，避免切换可见性时卡顿。
+  .mobile-topbar,
+  #editor > .protyle-breadcrumb,
   .mobile-bottom-bar {
     pointer-events: none;
-    visibility: hidden;
   }
 }
 
@@ -617,8 +619,9 @@ body.mobile-topbar--merged {
     z-index: 5;
     height: var(--mobile-breadcrumb-height);
     border-radius: 0;
+    opacity: var(--mobile-bar-opacity, 1);
     transform: translate3d(0, var(--mobile-bar-translate-y, 0), 0);
-    will-change: transform;
+    will-change: opacity, transform;
   }
 
   > .protyle-content {
@@ -684,6 +687,29 @@ body.mobile-topbar--merged {
       border-color: var(--b3-theme-primary);
       box-shadow: 0 0 0 1px var(--b3-theme-primary-lightest);
     }
+  }
+
+  &__drag {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 40px;
+    margin-right: 4px;
+    touch-action: none;
+    cursor: grab;
+    color: var(--b3-theme-on-surface-light);
+
+    svg {
+      width: 14px;
+      height: 14px;
+      pointer-events: none;
+    }
+  }
+
+  &__item--dragging {
+    opacity: .6;
   }
 
   &__item-pin {
@@ -839,7 +865,7 @@ body.mobile-topbar--merged {
   right: 0;
   bottom: 0;
   z-index: 6;
-  background-color: #000;
+  background-color: transparent;
   opacity: 0;
   transition: opacity 150ms linear;
 
@@ -1454,6 +1480,10 @@ body.mobile-topbar--merged {
 }
 
 .b3-menu {
+  &__scrim {
+    background-color: transparent;
+  }
+
   &--sheet {
     // 菜单入口可能指定宽度，移动端底部菜单始终铺满视口
     top: auto !important;
@@ -1480,7 +1510,7 @@ body.mobile-topbar--merged {
 
 .av__panel {
   > .b3-dialog__scrim {
-    background-color: rgba(0, 0, 0, .2);
+    background-color: transparent;
   }
 
   > .b3-menu {
@@ -1538,23 +1568,31 @@ body.mobile-topbar--merged {
       }
     }
 
+    [data-av-view-visibility] {
+      margin: 0;
+      border-top: 0;
+    }
+
+    [data-av-view-visibility],
+    .av__select-list > .b3-menu__item {
+      &.b3-menu__item--group-first {
+        border-top-left-radius: var(--b3-border-radius-b);
+        border-top-right-radius: var(--b3-border-radius-b);
+      }
+
+      &.b3-menu__item--group-last {
+        border-bottom: 0;
+        border-bottom-left-radius: var(--b3-border-radius-b);
+        border-bottom-right-radius: var(--b3-border-radius-b);
+      }
+    }
+
     .av__select-list {
       min-height: 0;
 
       > .b3-menu__item {
         margin: 0;
         border-top: 0;
-      }
-
-      > .b3-menu__item--group-first {
-        border-top-left-radius: var(--b3-border-radius-b);
-        border-top-right-radius: var(--b3-border-radius-b);
-      }
-
-      > .b3-menu__item--group-last {
-        border-bottom: 0;
-        border-bottom-left-radius: var(--b3-border-radius-b);
-        border-bottom-right-radius: var(--b3-border-radius-b);
       }
     }
 
@@ -1578,7 +1616,7 @@ body.mobile-topbar--merged {
     .b3-menu__title {
       flex-shrink: 0;
       height: auto;
-      min-height: 40px;
+      min-height: 32px;
       padding: 0 8px;
       background-color: var(--b3-theme-surface);
       border: 0 !important;
@@ -1590,10 +1628,16 @@ body.mobile-topbar--merged {
       > .b3-menu__label {
         text-align: left;
         color: var(--b3-theme-on-surface-light);
+        margin: 0;
       }
 
       > .block__icon {
         color: var(--b3-theme-on-surface-light);
+      }
+
+      > [data-type="go-config"] {
+        padding: 0 !important;
+        margin: 0 12px 0 0 !important;
       }
 
       + .b3-menu__separator {
@@ -1675,6 +1719,10 @@ body.mobile-topbar--merged {
 }
 
 .mobile-bottom-sheet-dialog {
+  .b3-dialog__scrim {
+    background-color: transparent;
+  }
+
   .b3-dialog {
     align-items: flex-end;
     box-sizing: border-box;

@@ -1065,7 +1065,8 @@ func statTypesByPath(files []*entity.File) (ret []*TypeCount) {
 	if 10 < len(ret) {
 		otherCount := 0
 		for _, tc := range ret[10:] {
-			tc.Count += otherCount
+			// 累加到 otherCount 上，而不是加到即将被丢弃的元素上，否则 Other 恒为 0
+			otherCount += tc.Count
 		}
 		other := &TypeCount{
 			Type:  "Other",

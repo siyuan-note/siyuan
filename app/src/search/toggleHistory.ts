@@ -83,7 +83,7 @@ export const toggleSearchHistory = (searchElement: Element, config: Config.IUILa
                                     requestElement = searchElement) => {
     const searchInputElement = searchElement.querySelector("#searchInput, #toolbarSearch") as HTMLInputElement;
     const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
-    if (!list.keys || list.keys.length === 0 || (list.length === 1 && list[0] === searchInputElement.value)) {
+    if (!list.keys || list.keys.length === 0) {
         return;
     }
     const menu = new Menu(Constants.MENU_SEARCH_HISTORY);
@@ -102,7 +102,7 @@ export const toggleSearchHistory = (searchElement: Element, config: Config.IUILa
     const separatorElement = menu.addSeparator(1);
     let current = true;
     list.keys.forEach((s: string) => {
-        if (s !== searchInputElement.value && s) {
+        if (s) {
             const menuItem = menu.addItem({
                 iconHTML: "",
                 label: escapeHtml(s),
@@ -124,7 +124,8 @@ export const toggleSearchHistory = (searchElement: Element, config: Config.IUILa
                                 element.remove();
                             }
                         } else {
-                            searchInputElement.value = element.textContent;
+                            searchInputElement.value = s;
+                            saveKeyList("keys", s, config);
                             config.page = 1;
                             /// #if MOBILE
                             updateSearchResult(config, requestElement, true);

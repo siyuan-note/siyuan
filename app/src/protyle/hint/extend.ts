@@ -441,6 +441,7 @@ export const hintSlash = (key: string, protyle: IProtyle, sourceOrHideConfigured
             plugin.protyleSlash.forEach(slash => {
                 allList.push({
                     filter: slash.filter,
+                    showInLite: slash.showInLite,
                     id: slash.id,
                     entryKey: getPluginSlashEntryKey(plugin.name, slash.id,
                         slash.html === "separator" ? "separator" : "entry"),
@@ -468,6 +469,8 @@ export const hintSlash = (key: string, protyle: IProtyle, sourceOrHideConfigured
     }), {
         enabled,
         hideConfiguredCreate,
+        lite: protyle.lite,
+        canUpload: !!(protyle.options.upload.handler || (protyle.options.upload.url && protyle.upload)),
         key,
         order: getEntryOrder(SLASH_MENU_ROOT_PATH),
         visible: (entryKey) => isEntryVisible(getSlashMenuEntryPath(entryKey)),

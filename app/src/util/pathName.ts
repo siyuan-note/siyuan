@@ -389,9 +389,22 @@ export const movePathTo = (options: {
         });
     };
 
+    const saveMovePathHistory = () => {
+        if (inputElement.value) {
+            let list: string[] = window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys;
+            list.splice(0, 0, inputElement.value);
+            list = Array.from(new Set(list));
+            if (list.length > window.siyuan.config.search.limit) {
+                list.splice(window.siyuan.config.search.limit, list.length - window.siyuan.config.search.limit);
+            }
+            window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys = list;
+        }
+        window.siyuan.storage[Constants.LOCAL_MOVE_PATH].k = inputElement.value;
+        setStorageVal(Constants.LOCAL_MOVE_PATH, window.siyuan.storage[Constants.LOCAL_MOVE_PATH]);
+    };
     const toggleMovePathHistory = () => {
         const keys = window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys;
-        if (!keys || keys.length === 0 || (keys.length === 1 && keys[0] === inputElement.value)) {
+        if (!keys || keys.length === 0) {
             return;
         }
         const menu = new Menu(Constants.MENU_MOVE_PATH_HISTORY);
@@ -410,7 +423,7 @@ export const movePathTo = (options: {
         const separatorElement = menu.addSeparator(1);
         let current = true;
         keys.forEach((s: string) => {
-            if (s !== inputElement.value && s) {
+            if (s) {
                 const menuItem = menu.addItem({
                     iconHTML: "",
                     label: escapeHtml(s),
@@ -432,7 +445,8 @@ export const movePathTo = (options: {
                                     element.remove();
                                 }
                             } else {
-                                inputElement.value = element.textContent;
+                                inputElement.value = s;
+                                saveMovePathHistory();
                                 inputEvent();
                                 window.siyuan.menus.menu.remove();
                             }
@@ -464,19 +478,7 @@ export const movePathTo = (options: {
     inputElement.addEventListener("input", (event: InputEvent) => {
         inputEvent(event);
     });
-    inputElement.addEventListener("blur", () => {
-        if (inputElement.value) {
-            let list: string[] = window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys;
-            list.splice(0, 0, inputElement.value);
-            list = Array.from(new Set(list));
-            if (list.length > window.siyuan.config.search.limit) {
-                list.splice(window.siyuan.config.search.limit, list.length - window.siyuan.config.search.limit);
-            }
-            window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys = list;
-        }
-        window.siyuan.storage[Constants.LOCAL_MOVE_PATH].k = inputElement.value;
-        setStorageVal(Constants.LOCAL_MOVE_PATH, window.siyuan.storage[Constants.LOCAL_MOVE_PATH]);
-    });
+    inputElement.addEventListener("blur", saveMovePathHistory);
     const lineHeight = 28;
     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.isComposing) {

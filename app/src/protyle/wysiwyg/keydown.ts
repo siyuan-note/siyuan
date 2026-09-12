@@ -322,6 +322,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             event.stopPropagation();
+            // 只读页签正文获得焦点后，保留复制快捷键的默认行为。
+            if (matchHotKey("⌘C", event)) {
+                return;
+            }
             event.preventDefault();
             return;
         }

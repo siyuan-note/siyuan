@@ -11,7 +11,7 @@ import {avRender} from "../render/av/render";
 import {isHiddenTabContent} from "../render/tabsVisibility";
 import {queueTransaction} from "../util/transactionQueue";
 import {remapTabsDOMIDs} from "../util/tabsCopy";
-import {copyTextByType} from "../toolbar/util";
+import {copySubMenu} from "../../menus/commonMenuItem";
 import {Dialog} from "../../dialog";
 import {showMessage} from "../../dialog/message";
 import {getTaskListMarker, nextTaskListMarker} from "./taskListMarker";
@@ -179,11 +179,7 @@ export const openTabsMenu = (protyle: IProtyle, tabs: HTMLElement, item: HTMLEle
     }
     const lang = window.siyuan.languages;
     const menu = new Menu();
-    menu.addItem({icon: "iconCopy", label: lang.copy, submenu: [{
-        icon: "iconRef",
-        label: lang.copyBlockRef,
-        click: () => {copyTextByType([item.dataset.nodeId], "ref");},
-    }]});
+    menu.addItem({icon: "iconCopy", label: lang.copy, submenu: copySubMenu([item.dataset.nodeId], false)});
     if (canEdit(protyle, tabs)) {
         if (item.hasAttribute("tabs-task")) {
             menu.addItem({icon: "iconCheck", label: lang.customTaskStatus, click: () => editTabTask(protyle, item)});

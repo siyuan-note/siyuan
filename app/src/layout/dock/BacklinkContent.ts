@@ -1,3 +1,4 @@
+import {bindPanelSearch} from "./panelSearch";
 import type {Tab} from "../Tab";
 import {Model} from "../Model";
 import {Tree} from "../../util/Tree";
@@ -289,31 +290,14 @@ export class BacklinkContent extends Model {
 <div class="backlinkMList fn__flex-1"></div>`;
 
         this.inputsElement = this.element.querySelectorAll("input");
-        this.inputsElement.forEach((item) => {
-            item.addEventListener("blur", (event: KeyboardEvent) => {
-                const inputElement = event.target as HTMLInputElement;
-                inputElement.classList.add("fn__none");
-                const filterIconElement = inputElement.parentElement.querySelector('[data-type="search"]');
-                if (inputElement.value) {
-                    filterIconElement.classList.add("block__icon--active");
-                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.search + " " + inputElement.value);
-                } else {
-                    filterIconElement.classList.remove("block__icon--active");
-                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.search);
-                }
+        this.inputsElement.forEach((inputElement) => {
+            const searchElement = inputElement.parentElement.querySelector('[data-type="search"]');
+            const showSearch = bindPanelSearch(inputElement, searchElement, () => this.searchBacklinks(), {
+                trim: false, trigger: "enter",
             });
-            item.addEventListener("keydown", (event: KeyboardEvent) => {
-                if (!event.isComposing && event.key === "Enter") {
-                    this.searchBacklinks();
-                }
-            });
-        });
-        this.element.querySelectorAll('[data-type="search"]').forEach((item, index) => {
-            item.addEventListener("click", (event) => {
+            searchElement.addEventListener("click", (event) => {
                 event.stopPropagation();
-                const inputElement = this.inputsElement[index];
-                inputElement.classList.remove("fn__none");
-                inputElement.select();
+                showSearch();
             });
         });
         this.tree = new Tree({

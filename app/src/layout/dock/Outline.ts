@@ -1,3 +1,4 @@
+import {bindPanelSearch} from "./panelSearch";
 import {Tab} from "../Tab";
 import {Model} from "../Model";
 import {Tree} from "../../util/Tree";
@@ -16,7 +17,7 @@ import {
 import {openFileById} from "../../editor/util";
 import {Constants} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
-import {escapeAttr, escapeHtml} from "../../util/escape";
+import {escapeHtml} from "../../util/escape";
 import {getFileTreeIconHTML} from "../../emoji/fileTreeIcon";
 import {getPreviousBlock} from "../../protyle/wysiwyg/getBlock";
 import type {App} from "../../index";
@@ -104,24 +105,10 @@ export class Outline extends Model {
         this.element = options.tab.panelElement.lastElementChild as HTMLElement;
         this.headerElement = options.tab.panelElement.firstElementChild as HTMLElement;
         const inputElement = this.headerElement.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
-        inputElement.addEventListener("blur", () => {
-            inputElement.classList.add("fn__none");
-            const filterIconElement = inputElement.nextElementSibling as HTMLElement; // search 图标
-            const value = inputElement.value;
-            if (value) {
-                filterIconElement.classList.add("block__icon--active");
-                filterIconElement.setAttribute("aria-label", window.siyuan.languages.search + " " + escapeAttr(value));
-            } else {
-                filterIconElement.classList.remove("block__icon--active");
-                filterIconElement.setAttribute("aria-label", window.siyuan.languages.search);
-            }
-        });
-        inputElement.addEventListener("input", (event: InputEvent) => {
-            if (!event.isComposing) {
-                this.setFilter();
-            }
-        });
-        inputElement.addEventListener("compositionend", () => this.setFilter());
+        const showSearch = bindPanelSearch(inputElement,
+            this.headerElement.querySelector('[data-type="search"]'), () => this.setFilter(), {
+                trim: false,
+            });
         this.tree = new Tree({
             element: this.element,
             data: null,
@@ -271,8 +258,7 @@ export class Outline extends Model {
                             isFocus = false;
                             break;
                         case "search":
-                            inputElement.classList.remove("fn__none");
-                            inputElement.select();
+                            showSearch();
                             break;
                         case "expandLevel":
                             this.showExpandLevelMenu(target);

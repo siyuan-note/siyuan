@@ -1,3 +1,4 @@
+import {bindPanelSearch} from "../../layout/dock/panelSearch";
 import {Tree} from "../../util/Tree";
 import {fetchPost} from "../../util/fetch";
 import {confirmBlockRef} from "../../util/checkBlockRef";
@@ -78,22 +79,10 @@ export class MobileOutline extends Model {
 <div class="b3-list-item fn__none" data-type="doc-title"></div>
 <div class="fn__flex-1" style="padding: 3px 0 calc(8px + env(safe-area-inset-bottom))"></div>`;
         const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
-        inputElement.addEventListener("blur", () => {
-            inputElement.classList.add("fn__none");
-            const filterIconElement = inputElement.nextElementSibling as HTMLElement; // search 图标
-            const value = inputElement.value;
-            if (value) {
-                filterIconElement.classList.add("toolbar__icon--active");
-            } else {
-                filterIconElement.classList.remove("toolbar__icon--active");
-            }
-        });
-        inputElement.addEventListener("input", (event: InputEvent) => {
-            if (!event.isComposing) {
-                this.setFilter();
-            }
-        });
-        inputElement.addEventListener("compositionend", () => this.setFilter());
+        const showSearch = bindPanelSearch(inputElement,
+            this.element.querySelector('[data-type="search"]'), () => this.setFilter(), {
+                trim: false, activeClass: "toolbar__icon--active", updateLabel: false,
+            });
         this.tree = new Tree({
             element: this.element.lastElementChild as HTMLElement,
             data: null,
@@ -192,8 +181,7 @@ export class MobileOutline extends Model {
                     const type = target.getAttribute("data-type");
                     switch (type) {
                         case "search":
-                            inputElement.classList.remove("fn__none");
-                            inputElement.select();
+                            showSearch();
                             break;
                         case "expandLevel":
                             this.showExpandLevelMenu();

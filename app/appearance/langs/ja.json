@@ -1,4 +1,6 @@
 {
+	"flashcardWaitingDue": "次の学習カードまで ${time}",
+	"flashcardFinishSession": "復習を終了",
 	"flashcardAnswerMaxDistance": "解答の最大編集距離",
 	"flashcardAnswerMaxRatio": "解答の最大差分率",
 	"flashcardAnswerTrimWhitespace": "先頭と末尾の空白を除去",

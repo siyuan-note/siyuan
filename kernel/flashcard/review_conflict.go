@@ -160,7 +160,7 @@ func (store *Store) resolveReviewConflictLocked(ctx context.Context, cardID stri
 			return false, errReviewConflictDeferred
 		}
 		if input.Rating != payload.Rating || input.ReviewedAt != payload.ReviewedAt ||
-			len(input.Weights) != 19 || input.EnableShortTerm || input.EnableFuzz {
+			len(input.Weights) != 19 || input.EnableFuzz {
 			return false, errReviewConflictDeferred
 		}
 		preset := SchedulerPreset{
@@ -172,7 +172,7 @@ func (store *Store) resolveReviewConflictLocked(ctx context.Context, cardID stri
 			LeechAction:      input.LeechAction,
 		}
 		request := ReviewRequest{Rating: payload.Rating, ReviewedAt: payload.ReviewedAt}
-		current, err = scheduleReview(current, preset, request)
+		current, err = scheduleReviewWithShortTerm(current, preset, request, input.EnableShortTerm)
 		if err != nil {
 			return false, errReviewConflictDeferred
 		}

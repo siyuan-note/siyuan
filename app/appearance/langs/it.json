@@ -1,4 +1,6 @@
 {
+	"flashcardWaitingDue": "Prossima scheda di apprendimento tra ${time}",
+	"flashcardFinishSession": "Termina sessione",
 	"flashcardAnswerMaxDistance": "Distanza di modifica massima della risposta",
 	"flashcardAnswerMaxRatio": "Rapporto massimo di differenza della risposta",
 	"flashcardAnswerTrimWhitespace": "Rimuovi gli spazi iniziali e finali",

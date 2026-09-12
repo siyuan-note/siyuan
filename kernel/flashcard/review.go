@@ -30,18 +30,19 @@ import (
 
 // ReviewRequest 保存一次正常或强化复习的完整调用输入。
 type ReviewRequest struct {
-	OperationID    string          `json:"operationID"`
-	CardID         string          `json:"cardID"`
-	Rating         ReviewRating    `json:"rating"`
-	ReviewedAt     int64           `json:"reviewedAt"`
-	ReviewDayStart int64           `json:"reviewDayStart,omitempty"`
-	ReviewDayEnd   int64           `json:"reviewDayEnd,omitempty"`
-	DurationMS     int64           `json:"durationMS"`
-	SessionID      string          `json:"sessionID,omitempty"`
-	ReviewSetID    string          `json:"reviewSetID,omitempty"`
-	ReviewMode     string          `json:"reviewMode"`
-	BuryUntil      int64           `json:"buryUntil,omitempty"`
-	AnswerResult   json.RawMessage `json:"answerResult,omitempty"`
+	OperationID     string          `json:"operationID"`
+	CardID          string          `json:"cardID"`
+	Rating          ReviewRating    `json:"rating"`
+	ReviewedAt      int64           `json:"reviewedAt"`
+	ReviewDayStart  int64           `json:"reviewDayStart,omitempty"`
+	ReviewDayEnd    int64           `json:"reviewDayEnd,omitempty"`
+	DurationMS      int64           `json:"durationMS"`
+	SessionID       string          `json:"sessionID,omitempty"`
+	ReviewSetID     string          `json:"reviewSetID,omitempty"`
+	ReviewMode      string          `json:"reviewMode"`
+	BuryUntil       int64           `json:"buryUntil,omitempty"`
+	AnswerResult    json.RawMessage `json:"answerResult,omitempty"`
+	StateRevisionID string          `json:"stateRevisionID,omitempty"`
 }
 
 // ReviewResult 返回持久化事件、前后状态和本次埋藏的兄弟卡。
@@ -147,6 +148,9 @@ func (store *Store) ReviewCard(ctx context.Context, request ReviewRequest) (Revi
 	if err = decodeStrictJSON(stateRevision.Payload, &state); err != nil {
 		return ReviewResult{}, err
 	}
+	if request.StateRevisionID != "" && request.StateRevisionID != stateRevision.RevisionID {
+		return ReviewResult{}, errors.New("flashcard schedule changed after the card was shown")
+	}
 	if state.Suspended && request.ReviewMode == "normal" {
 		return ReviewResult{}, errors.New("suspended flashcard cannot be reviewed normally")
 	}
@@ -192,7 +196,7 @@ func (store *Store) ReviewCard(ctx context.Context, request ReviewRequest) (Revi
 	input := schedulerInput{
 		Rating: request.Rating, ReviewedAt: request.ReviewedAt, RequestRetention: preset.RequestRetention,
 		MaximumInterval: preset.MaximumInterval, Weights: append([]float64(nil), preset.Weights...),
-		EnableShortTerm: false, EnableFuzz: false, BuryUntil: request.BuryUntil,
+		EnableShortTerm: true, EnableFuzz: false, BuryUntil: request.BuryUntil,
 		LeechThreshold: preset.LeechThreshold, LeechAction: preset.LeechAction,
 	}
 	inputJSON, err := CanonicalJSON(input)
@@ -253,7 +257,7 @@ func (store *Store) ReviewCard(ctx context.Context, request ReviewRequest) (Revi
 		result.BuriedSiblingIDs = buriedIDs
 	}
 	if request.SessionID != "" {
-		sessionChange, sessionCard, sessionErr := store.reviewSessionCard(ctx, request, stateRevision.RevisionID)
+		sessionChange, sessionCard, sessionErr := store.reviewSessionCard(ctx, request, state)
 		if sessionErr != nil {
 			return ReviewResult{}, sessionErr
 		}
@@ -302,8 +306,28 @@ func (store *Store) skipBuriedSessionSiblings(ctx context.Context, request Revie
 		if err = decodeStrictJSON(revision.Payload, &sessionCard); err != nil {
 			return nil, nil, err
 		}
-		if sessionCard.Status != "queued" && sessionCard.Status != "shown" {
+		if sessionCard.Status != "queued" && sessionCard.Status != "shown" && sessionCard.Status != "reviewed" {
 			continue
+		}
+		if sessionCard.Status == "reviewed" {
+			stateRevision, stateFound, stateErr := store.projection.CurrentEntity(ctx, EntityReviewState, cardID)
+			if stateErr != nil {
+				return nil, nil, stateErr
+			}
+			if !stateFound || stateRevision.Deleted {
+				continue
+			}
+			var state ReviewState
+			if stateErr = decodeStrictJSON(stateRevision.Payload, &state); stateErr != nil {
+				return nil, nil, stateErr
+			}
+			repeat, repeatErr := store.projection.canRepeatSessionCard(ctx, sessionCard, state)
+			if repeatErr != nil {
+				return nil, nil, repeatErr
+			}
+			if !repeat {
+				continue
+			}
 		}
 		sessionCard.Status = "skipped"
 		sessionCard.SkipReason = "siblingBuried"
@@ -362,7 +386,7 @@ func (store *Store) leechTagChanges(ctx context.Context, operationID, cardID str
 }
 
 func (store *Store) reviewSessionCard(ctx context.Context, request ReviewRequest,
-	stateRevisionID string) (Change, SessionCard, error) {
+	state ReviewState) (Change, SessionCard, error) {
 	if err := store.requireActiveSession(ctx, request.SessionID, request.ReviewSetID, request.ReviewMode); err != nil {
 		return Change{}, SessionCard{}, err
 	}
@@ -378,12 +402,19 @@ func (store *Store) reviewSessionCard(ctx context.Context, request ReviewRequest
 	if err = decodeStrictJSON(revision.Payload, &sessionCard); err != nil {
 		return Change{}, SessionCard{}, err
 	}
-	if sessionCard.Status != "queued" && sessionCard.Status != "shown" {
+	repeating := false
+	if request.ReviewMode == "normal" && request.StateRevisionID != "" && state.Due <= request.ReviewedAt {
+		repeating, err = store.projection.canRepeatSessionCard(ctx, sessionCard, state)
+		if err != nil {
+			return Change{}, SessionCard{}, err
+		}
+	}
+	if sessionCard.Status != "queued" && sessionCard.Status != "shown" && !repeating {
 		return Change{}, SessionCard{}, fmt.Errorf("flashcard session card cannot be reviewed from status [%s]",
 			sessionCard.Status)
 	}
-	if request.ReviewMode == "normal" && sessionCard.StateRevisionID != "" &&
-		sessionCard.StateRevisionID != stateRevisionID {
+	if request.ReviewMode == "normal" && !repeating && sessionCard.StateRevisionID != "" &&
+		sessionCard.StateRevisionID != state.StateRevisionID {
 		return Change{}, SessionCard{}, errors.New("flashcard schedule changed after the study session started")
 	}
 	sessionCard.Status = "reviewed"
@@ -438,10 +469,16 @@ func canonicalOptionalReviewAnswer(value json.RawMessage) (json.RawMessage, erro
 
 func scheduleReview(before ReviewStateSnapshot, preset SchedulerPreset,
 	request ReviewRequest) (ReviewStateSnapshot, error) {
+	return scheduleReviewWithShortTerm(before, preset, request, true)
+}
+
+// scheduleReviewWithShortTerm 按事件保存的短期学习参数计算排期，旧事件继续使用原始参数。
+func scheduleReviewWithShortTerm(before ReviewStateSnapshot, preset SchedulerPreset,
+	request ReviewRequest, enableShortTerm bool) (ReviewStateSnapshot, error) {
 	parameters := fsrs.DefaultParam()
 	parameters.RequestRetention = preset.RequestRetention
 	parameters.MaximumInterval = float64(preset.MaximumInterval)
-	parameters.EnableShortTerm = false
+	parameters.EnableShortTerm = enableShortTerm
 	parameters.EnableFuzz = false
 	if len(preset.Weights) != len(parameters.W) {
 		return ReviewStateSnapshot{}, errors.New("scheduler preset weight count is incompatible with FSRS-6")
@@ -569,6 +606,9 @@ func reviewResultFromBatch(batch OperationBatch, request ReviewRequest) (ReviewR
 				return ReviewResult{}, ErrOperationConflict
 			}
 			result.Event = *change.Event
+			if request.StateRevisionID != "" && request.StateRevisionID != payload.BaseStateRevisionID {
+				return ReviewResult{}, ErrOperationConflict
+			}
 			if payload.BeforeState != nil {
 				result.BeforeState = *payload.BeforeState
 			}

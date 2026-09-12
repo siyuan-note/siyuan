@@ -1,4 +1,6 @@
 {
+	"flashcardWaitingDue": "บัตรเรียนรู้ถัดไปในอีก ${time}",
+	"flashcardFinishSession": "จบการทบทวน",
 	"flashcardAnswerMaxDistance": "ระยะการแก้ไขคำตอบสูงสุด",
 	"flashcardAnswerMaxRatio": "อัตราส่วนความแตกต่างของคำตอบสูงสุด",
 	"flashcardAnswerTrimWhitespace": "ตัดช่องว่างด้านหน้าและด้านท้าย",

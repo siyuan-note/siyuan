@@ -41,7 +41,6 @@ import {
 import type {IFlashcardQueryAST} from "./flashcardV2Query";
 import {
     canUseFlashcardV2ReviewActions,
-    getFlashcardV2ConfirmedQueueStatuses,
     getFlashcardV2ReviewShortcutAction,
     shouldLoadFlashcardV2HeadingChildren,
 } from "./flashcardV2State";
@@ -49,8 +48,10 @@ import {setFlashcardLocateBlockID} from "./flashcardLocate";
 import {flashcardV2FlagMenuItems} from "./flashcardV2Flag";
 import {flashcardV2ReviewDay} from "./flashcardV2Calendar";
 import {openFlashcardReviewTab} from "./openFlashcardReviewTab";
+import {flashcardV2QueueProgress, refreshFlashcardV2Queue, selectFlashcardV2Queue} from "./flashcardV2Queue";
 
 interface IFlashcardV2SessionQueueCard {
+    repeatDue?: number;
     sessionCard: {
         cardID: string;
         status: "queued" | "shown" | "reviewed" | "skipped";
@@ -64,6 +65,7 @@ interface IFlashcardV2SessionQueueCard {
         generationStatus: "active" | "disabledByTemplate" | "orphaned" | "deleted";
     };
     reviewState: {
+        stateRevisionID: string;
         due: number;
         suspended: boolean;
         buriedUntil?: number;
@@ -587,7 +589,7 @@ const renderSessionCard = (dialog: IFlashcardSessionSurface, queue: IFlashcardV2
             answerElement.classList.add("fn__none");
             (answerElement.querySelector(".protyle-wysiwyg") as HTMLElement).innerHTML = "";
             contentElement.className = "card__block fn__flex-1 card__v2-session-content";
-            dialog.element.querySelector("[data-flashcard-count]").textContent = `${index + 1} / ${queue.length}`;
+            dialog.element.querySelector("[data-flashcard-count]").textContent = flashcardV2QueueProgress(queue);
             setActionsVisible(dialog, false);
             let frontReferences = selectReferences(references, model.template.frontSpec);
             if (frontReferences.length === 0) {
@@ -862,6 +864,11 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             let requestPending = false;
             let renderPending = true;
             let completedPending = false;
+            let waitingTimer: number | undefined;
+            const clearWaiting = () => {
+                window.clearInterval(waitingTimer);
+                waitingTimer = undefined;
+            };
             let lastReview: IFlashcardV2LastReview | undefined;
             let renderGeneration = 0;
             let sessionEndEmitted = false;
@@ -893,6 +900,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 height: isMobile() ? "100dvh" : "78vh",
                 content: sessionContent(),
                 destroyCallback: () => {
+                    clearWaiting();
                     renderGeneration++;
                     playbackController?.cancel();
                     if (!sessionFinished) {
@@ -938,6 +946,8 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 });
             };
             const renderCurrent = () => {
+                clearWaiting();
+                completedPending = false;
                 const generation = ++renderGeneration;
                 setFlashcardLocateBlockID(dialog.element);
                 renderPending = true;
@@ -964,12 +974,13 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 }
             };
             const showCompletion = () => {
+                clearWaiting();
                 renderGeneration++;
                 setFlashcardLocateBlockID(dialog.element);
                 renderPending = false;
                 completedPending = true;
                 setReviewActionsEnabled(dialog, true);
-                dialog.element.querySelector("[data-flashcard-count]").textContent = `${queue.length} / ${queue.length}`;
+                dialog.element.querySelector("[data-flashcard-count]").textContent = flashcardV2QueueProgress(queue);
                 const contentElement = dialog.element.querySelector(".card__block");
                 const frontElement = contentElement.querySelector("[data-flashcard-front]");
                 dialog.element.querySelector("[data-flashcard-toolbar]").classList.add("fn__none");
@@ -982,18 +993,67 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 dialog.element.querySelector('[data-flashcard-action="finish"]').classList.add("fn__none");
             };
             const nextCard = () => {
-                playbackController?.cancel();
-                index++;
-                while (index < queue.length && queue[index].sessionCard.status !== "queued" &&
-                queue[index].sessionCard.status !== "shown") {
-                    index++;
-                }
-                if (index < queue.length) {
-                    completedPending = false;
-                    renderCurrent();
+                if (sessionFinished) {
                     return;
                 }
+                playbackController?.cancel();
+                clearWaiting();
+                requestPending = true;
+                renderPending = true;
+                setReviewActionsEnabled(dialog, false);
+                const generation = ++renderGeneration;
+                const queueNow = Date.now();
+                let refreshed = false;
+                void fetchPost("/api/flashcard/getSessionQueue", {
+                    sessionID, now: queueNow, ...flashcardV2ReviewDay(queueNow),
+                }, (response) => {
+                    if (sessionFinished || generation !== renderGeneration) {
+                        return;
+                    }
+                    refreshed = true;
+                    refreshFlashcardV2Queue(queue, response.data.cards as IFlashcardV2SessionQueueCard[]);
+                    requestPending = false;
+                    const selection = selectFlashcardV2Queue(queue, Date.now());
+                    index = selection.index < 0 ? queue.length : selection.index;
+                    if (index < queue.length) {
+                        renderCurrent();
+                    } else if (selection.nextDue) {
+                        showWaiting(selection.nextDue);
+                    } else {
+                        showCompletion();
+                    }
+                }).finally(() => {
+                    if (!refreshed && !sessionFinished && generation === renderGeneration) {
+                        requestPending = false;
+                        showWaiting(0);
+                    }
+                });
+            };
+            const showWaiting = (due: number) => {
                 showCompletion();
+                completedPending = false;
+                renderPending = true;
+                index = queue.length;
+                const front = dialog.element.querySelector("[data-flashcard-front]");
+                front.innerHTML = `<div class="card__empty-icon">⏳</div><div data-flashcard-wait></div>
+<div class="fn__hr"></div><button data-type="finish" class="b3-button">${window.siyuan.languages.flashcardFinishSession}</button>`;
+                if (lastReview) {
+                    front.insertAdjacentHTML("beforeend", `<div class="fn__hr"></div>
+<button data-type="undo-review" class="b3-button b3-button--cancel">${window.siyuan.languages.undo}</button>`);
+                }
+                const label = front.querySelector("[data-flashcard-wait]");
+                const checkedAt = Date.now();
+                const tick = () => {
+                    const seconds = Math.max(0, Math.ceil((due - Date.now()) / 1000));
+                    const time = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+                    label.textContent = due ? window.siyuan.languages.flashcardWaitingDue.replace("${time}", time) :
+                        window.siyuan.languages.loading;
+                    if (!requestPending && (due && seconds === 0 || Date.now() - checkedAt >= (due ? 30000 : 3000))) {
+                        nextCard();
+                    }
+                };
+                waitingTimer = window.setInterval(tick, 1000);
+                tick();
             };
             const refreshQueueAfterFailedReview = (reviewedIndex: number) => {
                 if (sessionFinished || index !== reviewedIndex) {
@@ -1001,28 +1061,31 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     return;
                 }
                 const queueNow = Date.now();
+                const before = queue[reviewedIndex];
+                let advanced = false;
                 return fetchPost("/api/flashcard/getSessionQueue", {
                     sessionID, now: queueNow, ...flashcardV2ReviewDay(queueNow),
                 }, (response) => {
                     if (sessionFinished || index !== reviewedIndex) {
                         return;
                     }
-                    const statuses = getFlashcardV2ConfirmedQueueStatuses(queue,
-                        response.data.cards as IFlashcardV2SessionQueueCard[]);
-                    queue.forEach((item) => {
-                        if (statuses[item.card.id]) {
-                            item.sessionCard.status = statuses[item.card.id];
-                        }
-                    });
-                    if (statuses[queue[reviewedIndex].card.id]) {
+                    const refreshed = response.data.cards as IFlashcardV2SessionQueueCard[];
+                    const current = refreshed.find((item) => item.card.id === before.card.id);
+                    if (!current || current.sessionCard.status !== before.sessionCard.status ||
+                        current.reviewState.stateRevisionID !== before.reviewState.stateRevisionID ||
+                        current.card.generationStatus !== "active" || before.repeatDue && !current.repeatDue) {
+                        refreshFlashcardV2Queue(queue, refreshed);
                         requestPending = false;
-                        if (statuses[queue[reviewedIndex].card.id] === "reviewed") {
-                            lastReview = undefined;
-                            setUndoVisible(dialog, false);
-                        }
+                        lastReview = undefined;
+                        setUndoVisible(dialog, false);
+                        advanced = true;
                         nextCard();
                     }
-                }).finally(() => requestPending = false);
+                }).finally(() => {
+                    if (!advanced) {
+                        requestPending = false;
+                    }
+                });
             };
             const reveal = () => {
                 if (!canUseReviewActions()) {
@@ -1064,7 +1127,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             const skipManagedSessionCards = (cardIDs: string[], reason: string) => {
                 const selected = new Set(cardIDs);
                 const active = queue.filter((item) => selected.has(item.card.id) &&
-                    (item.sessionCard.status === "queued" || item.sessionCard.status === "shown"));
+                    (item.sessionCard.status === "queued" || item.sessionCard.status === "shown" || item.repeatDue));
                 const updateNext = (position: number) => {
                     if (position >= active.length) {
                         requestPending = false;
@@ -1326,6 +1389,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     void fetchPost("/api/flashcard/reviewCard", {
                         operationID: genUUID(),
                         cardID: queue[index].card.id,
+                        stateRevisionID: queue[index].reviewState.stateRevisionID,
                         rating: ratingElement.dataset.rating,
                         reviewedAt,
                         ...flashcardV2ReviewDay(reviewedAt),
@@ -1337,6 +1401,9 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         answerResult: submittedAnswerResult,
                     }, (response) => {
                         reviewed = true;
+                        if (sessionFinished) {
+                            return;
+                        }
                         const result = response.data as IFlashcardV2ReviewResult;
                         queue[reviewedIndex].sessionCard.status = "reviewed";
                         (result.skippedSessionCardIDs || []).forEach((cardID) => {
@@ -1394,7 +1461,16 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         undoneAt: Date.now(),
                     }, (response) => {
                         undone = true;
-                        queue[undoing.index].sessionCard.status = "queued";
+                        if (sessionFinished) {
+                            return;
+                        }
+                        queue[undoing.index].sessionCard = response.data.sessionCard ||
+                            {...queue[undoing.index].sessionCard, status: "queued"};
+                        if (response.data.restoredState) {
+                            queue[undoing.index].reviewState = response.data.restoredState;
+                        }
+                        queue[undoing.index].repeatDue = queue[undoing.index].sessionCard.status === "reviewed" ?
+                            queue[undoing.index].reviewState.due : undefined;
                         undoing.skippedSessionCardIDs.forEach((cardID) => {
                             const item = queue.find((candidate) => candidate.card.id === cardID);
                             if (item) {
@@ -1476,7 +1552,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     reveal();
                     return;
                 }
-                if (target.closest('[data-type="skip"]') && !requestPending) {
+                if (target.closest('[data-type="skip"]') && !requestPending && index < queue.length) {
                     requestPending = true;
                     let skipped = false;
                     void fetchPost("/api/flashcard/updateSessionCard", {

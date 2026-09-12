@@ -1,4 +1,6 @@
 {
+	"flashcardWaitingDue": "Nächste Lernkarte in ${time}",
+	"flashcardFinishSession": "Sitzung beenden",
 	"flashcardAnswerMaxDistance": "Maximale Editierdistanz der Antwort",
 	"flashcardAnswerMaxRatio": "Maximaler Abweichungsanteil der Antwort",
 	"flashcardAnswerTrimWhitespace": "Leerraum am Anfang und Ende entfernen",

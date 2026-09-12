@@ -30,6 +30,18 @@ const (
 )
 
 func TestConcurrentOfflineReviewsResolveDeterministically(t *testing.T) {
+	testConcurrentOfflineReviews(t, false, false)
+}
+
+func TestLegacyConcurrentOfflineReviewsKeepLongTermScheduling(t *testing.T) {
+	testConcurrentOfflineReviews(t, true, true)
+}
+
+func TestMixedConcurrentOfflineReviewsUseRecordedShortTermParameters(t *testing.T) {
+	testConcurrentOfflineReviews(t, true, false)
+}
+
+func testConcurrentOfflineReviews(t *testing.T, legacyA, legacyB bool) {
 	ctx := context.Background()
 	workspace := t.TempDir()
 	root := filepath.Join(workspace, "v2")
@@ -75,10 +87,15 @@ func TestConcurrentOfflineReviewsResolveDeterministically(t *testing.T) {
 		OperationID: "offline-review-b", CardID: cardID, Rating: ReviewHard,
 		ReviewedAt: createdAt + 120000, DurationMS: 1200, ReviewMode: "normal",
 	}
-	if _, err = deviceA.ReviewCard(ctx, requestA); err != nil {
+	var reviewedA ReviewResult
+	if legacyA {
+		reviewedA = applyLegacyLongTermReview(t, ctx, deviceA, requestA, preset)
+	} else if reviewedA, err = deviceA.ReviewCard(ctx, requestA); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = deviceB.ReviewCard(ctx, requestB); err != nil {
+	if legacyB {
+		applyLegacyLongTermReview(t, ctx, deviceB, requestB, preset)
+	} else if _, err = deviceB.ReviewCard(ctx, requestB); err != nil {
 		t.Fatal(err)
 	}
 	if err = deviceA.Close(); err != nil {
@@ -106,6 +123,18 @@ func TestConcurrentOfflineReviewsResolveDeterministically(t *testing.T) {
 	if state.Reps != 2 || state.StateRevisionID != current.RevisionID {
 		_ = merged.Close()
 		t.Fatalf("concurrent reviews were not replayed into one state: %+v", state)
+	}
+	expected, err := scheduleReviewWithShortTerm(reviewedA.BeforeState, preset, requestA, !legacyA)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected, err = scheduleReviewWithShortTerm(expected, preset, requestB, !legacyB)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected.StateRevisionID = state.StateRevisionID
+	if !sameEntityPayload(expected, state.ReviewStateSnapshot) {
+		t.Fatalf("replay changed the recorded scheduling parameters: want=%+v got=%+v", expected, state)
 	}
 	if conflicts, conflictErr := merged.Projection().ConflictCount(ctx); conflictErr != nil || conflicts != 0 {
 		_ = merged.Close()

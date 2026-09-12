@@ -1,4 +1,6 @@
 {
+	"flashcardWaitingDue": "Volgende leerkaart over ${time}",
+	"flashcardFinishSession": "Sessie beëindigen",
 	"flashcardAnswerMaxDistance": "Maximale bewerkingsafstand van het antwoord",
 	"flashcardAnswerMaxRatio": "Maximale verschilverhouding van het antwoord",
 	"flashcardAnswerTrimWhitespace": "Witruimte aan begin en einde verwijderen",

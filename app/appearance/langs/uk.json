@@ -1,4 +1,6 @@
 {
+	"flashcardWaitingDue": "Наступна навчальна картка через ${time}",
+	"flashcardFinishSession": "Завершити сеанс",
 	"flashcardAnswerMaxDistance": "Максимальна відстань редагування відповіді",
 	"flashcardAnswerMaxRatio": "Максимальна частка відмінностей у відповіді",
 	"flashcardAnswerTrimWhitespace": "Видаляти пробіли на початку й у кінці",

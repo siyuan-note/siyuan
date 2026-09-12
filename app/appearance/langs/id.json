@@ -1,4 +1,6 @@
 {
+	"flashcardWaitingDue": "Kartu pembelajaran berikutnya dalam ${time}",
+	"flashcardFinishSession": "Akhiri sesi",
 	"flashcardAnswerMaxDistance": "Jarak sunting maksimum jawaban",
 	"flashcardAnswerMaxRatio": "Rasio perbedaan maksimum jawaban",
 	"flashcardAnswerTrimWhitespace": "Hapus spasi di awal dan akhir",

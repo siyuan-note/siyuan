@@ -1,4 +1,6 @@
 {
+	"flashcardWaitingDue": "下一張學習卡片將在 ${time} 後到期",
+	"flashcardFinishSession": "結束複習",
 	"flashcardAnswerMaxDistance": "答案最大編輯距離",
 	"flashcardAnswerMaxRatio": "答案最大差異比例",
 	"flashcardAnswerTrimWhitespace": "忽略頭尾空白",

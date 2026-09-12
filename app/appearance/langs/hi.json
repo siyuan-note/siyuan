@@ -1,4 +1,6 @@
 {
+	"flashcardWaitingDue": "अगला सीखने वाला कार्ड ${time} में",
+	"flashcardFinishSession": "सत्र समाप्त करें",
 	"flashcardAnswerMaxDistance": "उत्तर की अधिकतम संपादन दूरी",
 	"flashcardAnswerMaxRatio": "उत्तर में अंतर का अधिकतम अनुपात",
 	"flashcardAnswerTrimWhitespace": "शुरू और अंत के खाली स्थान हटाएँ",

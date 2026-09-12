@@ -58,6 +58,7 @@ type SessionQueueCard struct {
 	SessionCard SessionCard `json:"sessionCard"`
 	Card        Card        `json:"card"`
 	ReviewState ReviewState `json:"reviewState"`
+	RepeatDue   int64       `json:"repeatDue,omitempty"`
 }
 
 // SessionCardUpdateRequest 描述跳过、展示或恢复一张会话卡片。
@@ -720,7 +721,7 @@ func (store *Store) UpdateSessionCard(ctx context.Context, request SessionCardUp
 	if err = decodeStrictJSON(current.Payload, &sessionCard); err != nil {
 		return SessionCard{}, err
 	}
-	if sessionCard.Status == "reviewed" {
+	if sessionCard.Status == "reviewed" && request.Status != "skipped" {
 		return SessionCard{}, errors.New("reviewed flashcard cannot be changed to another session state")
 	}
 	sessionCard.Status = request.Status

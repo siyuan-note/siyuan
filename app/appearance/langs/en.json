@@ -1,4 +1,6 @@
 {
+	"flashcardWaitingDue": "Next learning card in ${time}",
+	"flashcardFinishSession": "End session",
 	"flashcardAnswerMaxDistance": "Maximum answer edit distance",
 	"flashcardAnswerMaxRatio": "Maximum answer difference ratio",
 	"flashcardAnswerTrimWhitespace": "Trim leading and trailing whitespace",

@@ -199,11 +199,34 @@ func (projection *Projection) SessionQueueAt(ctx context.Context, sessionID stri
 	}
 	for index := range queue {
 		item := &queue[index]
+		if item.SessionCard.Status == "reviewed" {
+			current, available := eligible[item.Card.ID]
+			if !available {
+				continue
+			}
+			repeat, repeatErr := projection.canRepeatSessionCard(ctx, item.SessionCard, current.ReviewState)
+			if repeatErr != nil {
+				return nil, repeatErr
+			}
+			if !repeat {
+				continue
+			}
+			allowed, selectErr := budget.selectCard(ctx, projection, item.Card.ID, current.EffectivePresetID,
+				current.ReviewState.State)
+			if selectErr != nil {
+				return nil, selectErr
+			}
+			if allowed {
+				item.RepeatDue = current.ReviewState.Due
+			}
+			continue
+		}
 		if item.SessionCard.Status != "queued" && item.SessionCard.Status != "shown" {
 			continue
 		}
 		current, available := eligible[item.Card.ID]
-		if !available || current.ReviewState.Due > now {
+		if !available || current.ReviewState.Due > now ||
+			(item.SessionCard.StateRevisionID != "" && item.SessionCard.StateRevisionID != current.ReviewState.StateRevisionID) {
 			item.SessionCard.Status = "skipped"
 			item.SessionCard.SkipReason = "no-longer-eligible"
 			continue
@@ -225,7 +248,7 @@ func (projection *Projection) eligibleSessionCards(ctx context.Context, queue []
 	now int64) (map[string]CardSearchResult, error) {
 	cardIDs := make([]string, 0, len(queue))
 	for _, item := range queue {
-		if item.SessionCard.Status == "queued" || item.SessionCard.Status == "shown" {
+		if item.SessionCard.Status == "queued" || item.SessionCard.Status == "shown" || item.SessionCard.Status == "reviewed" {
 			cardIDs = append(cardIDs, item.Card.ID)
 		}
 	}

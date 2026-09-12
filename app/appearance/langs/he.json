@@ -1,4 +1,6 @@
 {
+	"flashcardWaitingDue": "כרטיס הלמידה הבא בעוד ${time}",
+	"flashcardFinishSession": "סיום המפגש",
 	"flashcardAnswerMaxDistance": "מרחק עריכה מרבי לתשובה",
 	"flashcardAnswerMaxRatio": "יחס הבדלים מרבי בתשובה",
 	"flashcardAnswerTrimWhitespace": "הסרת רווחים בתחילת הטקסט ובסופו",

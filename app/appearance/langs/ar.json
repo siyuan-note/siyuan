@@ -1,4 +1,6 @@
 {
+	"flashcardWaitingDue": "البطاقة التعليمية التالية بعد ${time}",
+	"flashcardFinishSession": "إنهاء الجلسة",
 	"flashcardAnswerMaxDistance": "أقصى مسافة تحرير للإجابة",
 	"flashcardAnswerMaxRatio": "أقصى نسبة اختلاف للإجابة",
 	"flashcardAnswerTrimWhitespace": "إزالة المسافات في بداية النص ونهايته",

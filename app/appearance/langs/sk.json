@@ -1,4 +1,6 @@
 {
+	"flashcardWaitingDue": "Ďalšia karta na učenie o ${time}",
+	"flashcardFinishSession": "Ukončiť reláciu",
 	"flashcardAnswerMaxDistance": "Maximálna editačná vzdialenosť odpovede",
 	"flashcardAnswerMaxRatio": "Maximálny podiel rozdielov v odpovedi",
 	"flashcardAnswerTrimWhitespace": "Odstrániť medzery na začiatku a konci",

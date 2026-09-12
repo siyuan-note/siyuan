@@ -1,4 +1,6 @@
 {
+	"flashcardWaitingDue": "Sonraki öğrenme kartına ${time} kaldı",
+	"flashcardFinishSession": "Oturumu bitir",
 	"flashcardAnswerMaxDistance": "Yanıtın azami düzenleme uzaklığı",
 	"flashcardAnswerMaxRatio": "Yanıtın azami fark oranı",
 	"flashcardAnswerTrimWhitespace": "Baştaki ve sondaki boşlukları kaldır",

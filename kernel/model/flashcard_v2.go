@@ -970,7 +970,7 @@ func applyFlashcardV2SessionDefaults(request flashcardv2.StudyQueueRequest, newL
 	return request
 }
 
-// GetFlashcardV2SessionQueue 返回会话冻结顺序和当前状态。
+// GetFlashcardV2SessionQueue 返回会话成员的当前状态及本次复习产生的学习回队时间。
 func GetFlashcardV2SessionQueue(ctx context.Context, sessionID string,
 	dayOptions ...flashcardv2.StudyDayOptions) ([]flashcardv2.SessionQueueCard, error) {
 	store, err := requireFlashcardV2Store(ctx, false)

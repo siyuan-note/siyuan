@@ -1,4 +1,6 @@
 {
+	"flashcardWaitingDue": "Следующая учебная карточка через ${time}",
+	"flashcardFinishSession": "Завершить сеанс",
 	"flashcardAnswerMaxDistance": "Максимальное расстояние редактирования ответа",
 	"flashcardAnswerMaxRatio": "Максимальная доля различий в ответе",
 	"flashcardAnswerTrimWhitespace": "Удалять пробелы в начале и конце",

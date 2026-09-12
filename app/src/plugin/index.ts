@@ -291,6 +291,7 @@ export class Plugin {
         const previousLocation = iconElement.getAttribute("data-location");
         if (options.element) {
             this.customTopBarElements.add(iconElement);
+            iconElement.setAttribute("data-topbar-custom", "true");
             iconElement.setAttribute("aria-label", options.title);
             iconElement.setAttribute("data-location", options.position || "right");
         } else {

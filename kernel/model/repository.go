@@ -1771,6 +1771,7 @@ func IndexRepo(memo string) (id string, err error) {
 	}
 
 	util.PushEndlessProgress(Conf.Language(143))
+	defer util.PushClearProgress()
 
 	start := time.Now()
 	latest, _ := repo.Latest()
@@ -1794,7 +1795,6 @@ func IndexRepo(memo string) (id string, err error) {
 		util.PushStatusBar(msg)
 		util.PushMsg(msg, 5000)
 	}
-	util.PushClearProgress()
 	return
 }
 

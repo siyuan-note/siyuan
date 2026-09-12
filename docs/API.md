@@ -2820,7 +2820,7 @@ Saved search criteria use the following fields:
 * `k`: Search keyword
 * `r`: Replacement keyword
 * `types`: Block type flags. Supported keys are `mathBlock`, `table`, `blockquote`, `superBlock`, `paragraph`, `document`, `heading`, `list`, `listItem`, `codeBlock`, `htmlBlock`, `embedBlock`, `databaseBlock`, `audioBlock`, `videoBlock`, `iframeBlock`, `widgetBlock`, and `callout`
-* `subTypes`: Block subtype flags. `h1` through `h6` select heading levels; `o`, `u`, and `t` select ordered, unordered, and task lists
+* `subTypes`: Independent subtype groups: `heading` accepts `h1` through `h6`; `list` and `listItem` each accept `o` (ordered), `u` (unordered), and `t` (task). A missing or empty group, or a group with all flags `false`, leaves that parent type unrestricted by subtype. The parent must still be enabled in `types`. Unknown top-level keys, including the former flat `h1`–`h6` and `o`/`u`/`t` flags, are ignored without error; saved subtype selections in that format must be selected and saved again
 * `replaceTypes`: Replacement type flags. Supported keys are `text`, `imgText`, `imgTitle`, `imgSrc`, `aText`, `aTitle`, `aHref`, `code`, `em`, `strong`, `inlineMath`, `inlineMemo`, `blockRef`, `fileAnnotationRef`, `kbd`, `mark`, `s`, `sub`, `sup`, `tag`, `u`, `docTitle`, `codeBlock`, `mathBlock`, and `htmlBlock`
 
 Boolean flags omitted from `types`, `subTypes`, or `replaceTypes` are treated as `false`.
@@ -2854,10 +2854,15 @@ Creates a criterion or completely replaces the existing criterion with the same 
       "r": "",
       "types": {
         "document": true,
-        "paragraph": true
+        "paragraph": true,
+        "heading": true,
+        "list": true,
+        "listItem": true
       },
       "subTypes": {
-        "h1": true
+        "heading": {"h1": true},
+        "list": {"o": true},
+        "listItem": {"t": true}
       },
       "replaceTypes": {
         "text": true

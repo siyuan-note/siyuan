@@ -2057,16 +2057,7 @@ func buildExactAliasSearchOrderCondition(field, query string) string {
 	return "(',' || " + field + " || ',') LIKE '%," + escapedQuery + ",%' ESCAPE '\\'"
 }
 
-// buildTypeFilter returns a complete SQL predicate (including outer parens)
-// suitable for appending after "AND". When subTypes is empty, the result is
-// equivalent to the previous "type IN (...)" behavior. When subTypes contains
-// at least one heading-level (h1..h6) or list (o/u/t) flag, the predicate is
-// extended so that the corresponding parent type (heading or list/listItem)
-// is restricted to the selected subtypes via "subtype IN (...)".
-//
-// Example output:
-//
-//	(type IN ('p','c') OR (type = 'h' AND subtype IN ('h1','h2')))
+// buildTypeFilter 按父类型独立限制子类型，组内为空时仅按父类型筛选。
 func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
 	prefix := ""
 	if 0 < len(alias) && "" != alias[0] {
@@ -2120,18 +2111,6 @@ func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
 		s.TabItem = Conf.Search.TabItem
 	}
 
-	var headingSubs, listSubs []string
-	for _, h := range []string{"h1", "h2", "h3", "h4", "h5", "h6"} {
-		if subTypes[h] {
-			headingSubs = append(headingSubs, h)
-		}
-	}
-	for _, l := range []string{"o", "u", "t"} {
-		if subTypes[l] {
-			listSubs = append(listSubs, l)
-		}
-	}
-
 	var simpleTypes []string
 	addSimple := func(enabled bool, abbr string) {
 		if enabled {
@@ -2158,29 +2137,30 @@ func buildTypeFilter(types, subTypes map[string]bool, alias ...string) string {
 
 	var clauses []string
 
-	if s.Heading {
-		headingAbbr := treenode.TypeAbbr(ast.NodeHeading.String())
-		if 0 == len(headingSubs) {
-			simpleTypes = append(simpleTypes, headingAbbr)
+	for _, group := range []struct {
+		enabled bool
+		abbr    string
+		prefix  string
+		keys    []string
+	}{
+		{s.Heading, "h", "", []string{"h1", "h2", "h3", "h4", "h5", "h6"}},
+		{s.List, "l", "list:", []string{"o", "u", "t"}},
+		{s.ListItem, "i", "listItem:", []string{"o", "u", "t"}},
+	} {
+		if !group.enabled {
+			continue
+		}
+		var selected []string
+		for _, key := range group.keys {
+			if subTypes[group.prefix+key] {
+				selected = append(selected, key)
+			}
+		}
+		if 0 == len(selected) {
+			simpleTypes = append(simpleTypes, group.abbr)
 		} else {
 			clauses = append(clauses, fmt.Sprintf("(%stype = '%s' AND %ssubtype IN (%s))",
-				prefix, headingAbbr, prefix, sqlQuoteJoin(headingSubs)))
-		}
-	}
-
-	var listTypes []string
-	if s.List {
-		listTypes = append(listTypes, treenode.TypeAbbr(ast.NodeList.String()))
-	}
-	if s.ListItem {
-		listTypes = append(listTypes, treenode.TypeAbbr(ast.NodeListItem.String()))
-	}
-	if 0 < len(listTypes) {
-		if 0 == len(listSubs) {
-			simpleTypes = append(simpleTypes, listTypes...)
-		} else {
-			clauses = append(clauses, fmt.Sprintf("(%stype IN (%s) AND %ssubtype IN (%s))",
-				prefix, sqlQuoteJoin(listTypes), prefix, sqlQuoteJoin(listSubs)))
+				prefix, group.abbr, prefix, sqlQuoteJoin(selected)))
 		}
 	}
 

@@ -6,7 +6,7 @@
 		"id": "20260612192252-sgw2paw",
 		"title": "Command Line Interface",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260913020024"
 	},
 	"Children": [
 		{
@@ -1579,7 +1579,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260618124055-5xyayt6",
-				"updated": "20260618124055"
+				"updated": "20260913020024"
 			},
 			"Children": [
 				{
@@ -4359,7 +4359,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260618124055-ddm1efp",
-				"updated": "20260618124055"
+				"updated": "20260913020024"
 			},
 			"Children": [
 				{
@@ -4392,7 +4392,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20260618124055-jh2j81m",
-				"updated": "20260618124055"
+				"updated": "20260913020024"
 			},
 			"Children": [
 				{
@@ -4596,7 +4596,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Filter by subtype (o=ordered list/u=unordered list/t=task list), repeatable"
+									"Data": "Filter by subtype: h1 through h6 for heading levels; list:o/u/t for list blocks and listItem:o/u/t for list item blocks (o=ordered, u=unordered, t=task), repeatable; bare o/u/t are no longer supported"
 								}
 							]
 						}
@@ -4920,7 +4920,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260618124055-4eyeyfx",
-				"updated": "20260618124055"
+				"updated": "20260913020024"
 			},
 			"Children": [
 				{
@@ -4933,7 +4933,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan search \"keyword\"\nsiyuan search \"keyword\" --notebook box1 --notebook box2\nsiyuan search \"keyword\" --path \"/folder\"\nsiyuan search \"keyword\" --type document --type heading\nsiyuan search \"keyword\" --subtype o --subtype u\nsiyuan search \"keyword\" --method 2\nsiyuan search \"keyword\" --order-by 4 --page 1 --page-size 20\nsiyuan search \"keyword\" --group-by 1\n"
+					"Data": "siyuan search \"keyword\"\nsiyuan search \"keyword\" --notebook box1 --notebook box2\nsiyuan search \"keyword\" --path \"/folder\"\nsiyuan search \"keyword\" --type document --type heading\nsiyuan search \"keyword\" --type listItem --subtype listItem:o --subtype listItem:u\nsiyuan search \"keyword\" --method 2\nsiyuan search \"keyword\" --order-by 4 --page 1 --page-size 20\nsiyuan search \"keyword\" --group-by 1\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

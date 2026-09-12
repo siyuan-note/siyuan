@@ -2759,7 +2759,7 @@
 * `k`：検索キーワード
 * `r`：置換キーワード
 * `types`：ブロックタイプのフラグ。`mathBlock`、`table`、`blockquote`、`superBlock`、`paragraph`、`document`、`heading`、`list`、`listItem`、`codeBlock`、`htmlBlock`、`embedBlock`、`databaseBlock`、`audioBlock`、`videoBlock`、`iframeBlock`、`widgetBlock`、`callout` を使用できます
-* `subTypes`：ブロックサブタイプのフラグ。`h1` から `h6` は見出しレベルを、`o`、`u`、`t` はそれぞれ番号付きリスト、箇条書きリスト、タスクリストを示します
+* `subTypes`：独立したサブタイプグループです。`heading` は `h1` から `h6`、`list` と `listItem` はそれぞれ `o`（順序付き）、`u`（順序なし）、`t`（タスク）を指定します。グループが省略、空、または全フラグが `false` の場合、その親タイプのサブタイプは制限されません。親タイプは `types` で有効にする必要があります。旧形式の `h1` から `h6` および `o`、`u`、`t` を含む未知のトップレベルキーはエラーなく無視されるため、旧形式で保存したサブタイプは選択して保存し直してください
 * `replaceTypes`：置換タイプのフラグ。`text`、`imgText`、`imgTitle`、`imgSrc`、`aText`、`aTitle`、`aHref`、`code`、`em`、`strong`、`inlineMath`、`inlineMemo`、`blockRef`、`fileAnnotationRef`、`kbd`、`mark`、`s`、`sub`、`sup`、`tag`、`u`、`docTitle`、`codeBlock`、`mathBlock`、`htmlBlock` を使用できます
 
 `types`、`subTypes`、`replaceTypes` で省略された真偽値フラグは `false` として扱われます。
@@ -2793,10 +2793,15 @@
       "r": "",
       "types": {
         "document": true,
-        "paragraph": true
+        "paragraph": true,
+        "heading": true,
+        "list": true,
+        "listItem": true
       },
       "subTypes": {
-        "h1": true
+        "heading": {"h1": true},
+        "list": {"o": true},
+        "listItem": {"t": true}
       },
       "replaceTypes": {
         "text": true

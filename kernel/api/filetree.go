@@ -1512,14 +1512,7 @@ func getDoc(c *gin.Context) {
 			queryTypes[t] = b.(bool)
 		}
 	}
-	var querySubTypes map[string]bool
-	if querySubTypesArg := arg["querySubTypes"]; nil != querySubTypesArg {
-		typesArg := querySubTypesArg.(map[string]any)
-		querySubTypes = map[string]bool{}
-		for t, b := range typesArg {
-			querySubTypes[t] = b.(bool)
-		}
-	}
+	querySubTypes := parseSearchSubTypes(arg["querySubTypes"])
 
 	m := arg["mode"] // 0: 仅当前 ID，1：向上 2：向下，3：上下都加载，4：加载末尾
 	mode := 0

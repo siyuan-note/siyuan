@@ -9,6 +9,7 @@ import {escapeHtml} from "../util/escape";
 import {isSensitiveSearchConfig, setStorageVal} from "../protyle/util/compatibility";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {goUnRef, updateSearchResult} from "../mobile/menu/search";
+import {bindSearchSubtypeFilters} from "./subTypes";
 import {getDefaultSubType} from "./getDefault";
 import {hasSearchConfigTemporaryPath, resolvePersistedSearchConfig} from "./config";
 
@@ -62,7 +63,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
                 ${window.siyuan.languages["heading" + h.charAt(1)]}
             </div>
             <span class="fn__space"></span>
-            <input class="b3-switch fn__flex-center" data-subtype="${h}" type="checkbox"${config.subTypes?.[h] ? " checked" : ""}>
+            <input class="b3-switch fn__flex-center" data-group="heading" data-subtype="${h}" type="checkbox"${config.subTypes?.heading?.[h] ? " checked" : ""}>
         </label>`).join("")}<div></div>
     </div>
     <label class="fn__flex b3-label">
@@ -165,45 +166,27 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="superBlock" type="checkbox"${config.types.superBlock ? " checked" : ""}>
     </label>
+    ${(["list", "listItem"] as const).map((group) => `
     <div class="fn__flex b3-label">
-        <span style="margin:0 4px 0 -20px" class="b3-list-item__toggle b3-list-item__toggle--hl fn__pointer" data-toggle-subtype="list">
+        <span style="margin:0 4px 0 -20px" class="b3-list-item__toggle b3-list-item__toggle--hl fn__pointer">
             <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
         </span>
-        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconList"></use></svg>
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#${group === "list" ? "iconList" : "iconListItem"}"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            ${window.siyuan.languages.list1} <sup>[1] [2]</sup>
+            ${window.siyuan.languages[group === "list" ? "list1" : "listItem"]} <sup>[1]</sup>
         </div>
         <span class="fn__space"></span>
-        <input class="b3-switch fn__flex-center" data-type="list" type="checkbox"${config.types.list ? " checked" : ""}>
+        <input class="b3-switch fn__flex-center" data-type="${group}" type="checkbox"${config.types[group] ? " checked" : ""}>
     </div>
-    <div class="fn__none" style="padding-left: 20px;">
+    <div class="fn__none" style="padding-left: 20px">
+        ${(["o", "u", "t"] as const).map((subtype) => `
         <label class="fn__flex b3-label">
-            <div class="fn__flex-1 fn__flex-center">${window.siyuan.languages["ordered-list"]}</div>
+            <div class="fn__flex-1 fn__flex-center">${window.siyuan.languages[{o: "ordered-list", u: "unorderedList", t: "check"}[subtype]]}</div>
             <span class="fn__space"></span>
-            <input class="b3-switch fn__flex-center" data-subtype="o" type="checkbox"${config.subTypes?.o ? " checked" : ""}>
-        </label>
-        <label class="fn__flex b3-label">
-            <div class="fn__flex-1 fn__flex-center">${window.siyuan.languages.unorderedList}</div>
-            <span class="fn__space"></span>
-            <input class="b3-switch fn__flex-center" data-subtype="u" type="checkbox"${config.subTypes?.u ? " checked" : ""}>
-        </label>
-        <label class="fn__flex b3-label">
-            <div class="fn__flex-1 fn__flex-center">${window.siyuan.languages.check}</div>
-            <span class="fn__space"></span>
-            <input class="b3-switch fn__flex-center" data-subtype="t" type="checkbox"${config.subTypes?.t ? " checked" : ""}>
-        </label>
-        <div></div>
-    </div>
-    <label class="fn__flex b3-label">
-        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconListItem"></use></svg>
-        <span class="fn__space"></span>
-        <div class="fn__flex-1 fn__flex-center">
-            ${window.siyuan.languages.listItem} <sup>[1]</sup>
-        </div>
-        <span class="fn__space"></span>
-        <input class="b3-switch fn__flex-center" data-type="listItem" type="checkbox"${config.types.listItem ? " checked" : ""}>
-    </label>
+            <input class="b3-switch fn__flex-center" data-group="${group}" data-subtype="${subtype}" type="checkbox"${config.subTypes?.[group]?.[subtype] ? " checked" : ""}>
+        </label>`).join("")}<div></div>
+    </div>`).join("")}
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconFile"></use></svg>
         <span class="fn__space"></span>
@@ -216,7 +199,6 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
     <span class="fn__space"></span>
     <div class="fn__flex-1">
         <div class="b3-label__text">[1] ${window.siyuan.languages.containerBlockTip1}</div>
-        <div class="b3-label__text">[2] ${window.siyuan.languages.searchSubTypeListTip}</div>
     </div>
 </div>
 <div class="b3-dialog__action">
@@ -235,57 +217,18 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
             item.firstElementChild.classList.toggle("b3-list-item__arrow--open");
         });
     });
-    // Keep parent and subtype toggles in sync.
-    filterDialog.element.querySelectorAll("input[data-subtype]").forEach((item: HTMLInputElement) => {
-        item.addEventListener("change", () => {
-            if (!item.checked) {
-                return;
-            }
-            ({
-                h1: ["heading"], h2: ["heading"], h3: ["heading"],
-                h4: ["heading"], h5: ["heading"], h6: ["heading"],
-                o: ["list", "listItem"],
-                u: ["list", "listItem"],
-                t: ["list", "listItem"],
-            })[item.getAttribute("data-subtype")].forEach((parentType) => {
-                const parentElement = filterDialog.element.querySelector(`input[data-type="${parentType}"]`) as HTMLInputElement;
-                if (parentElement && !parentElement.checked) {
-                    parentElement.checked = true;
-                }
-            });
-        });
-    });
-    const parentSubtypes: Record<string, string[]> = {
-        heading: ["h1", "h2", "h3", "h4", "h5", "h6"],
-        list: ["o", "u", "t"],
-        listItem: ["o", "u", "t"],
-    };
-    Object.keys(parentSubtypes).forEach((key) => {
-        const parentElement = filterDialog.element.querySelector(`input[data-type="${key}"]`) as HTMLInputElement;
-        parentElement.addEventListener("change", () => {
-            if (parentElement.checked) {
-                return;
-            }
-            parentSubtypes[key].forEach((subtype) => {
-                const subtypeBox = filterDialog.element.querySelector(`input[data-subtype="${subtype}"]`) as HTMLInputElement;
-                if (subtypeBox && subtypeBox.checked) {
-                    subtypeBox.checked = false;
-                }
-            });
-        });
-    });
+    bindSearchSubtypeFilters(filterDialog.element);
     const btnsElement = filterDialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
         filterDialog.destroy();
     });
     btnsElement[1].addEventListener("click", () => {
-        if (!config.subTypes) {
-            config.subTypes = getDefaultSubType();
-        }
+        config.subTypes = getDefaultSubType();
         filterDialog.element.querySelectorAll(".b3-switch").forEach((item: HTMLInputElement) => {
             const subtype = item.getAttribute("data-subtype");
             if (subtype) {
-                config.subTypes[subtype as keyof Config.IUILayoutTabSearchConfigSubTypes] = item.checked;
+                const group = item.getAttribute("data-group") as keyof Config.IUILayoutTabSearchConfigSubTypes;
+                (config.subTypes[group] as Record<string, boolean>)[subtype] = item.checked;
             } else {
                 config.types[item.getAttribute("data-type") as keyof (typeof config.types)] = item.checked;
             }

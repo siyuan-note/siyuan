@@ -6,9 +6,61 @@
 		"id": "20211226121322-9argcys",
 		"title": "類型過濾",
 		"type": "doc",
-		"updated": "20251219205040"
+		"updated": "20260913020024"
 	},
 	"Children": [
+		{
+			"ID": "20260913020024-tbxobu2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260913020024-tbxobu2",
+				"updated": "20260913020024"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "搜尋類型篩選"
+				}
+			]
+		},
+		{
+			"ID": "20260913020024-1srsl3h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260913020024-1srsl3h",
+				"updated": "20260913020024"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在搜尋對話方塊中開啟 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜尋類型"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，展開標題、列表區塊或列表項區塊，可分別選擇標題層級或有序、無序、任務子類型。列表區塊與列表項區塊的選擇互不影響，例如僅勾選列表項區塊下的有序即可篩選有序列表項區塊。"
+				}
+			]
+		},
+		{
+			"ID": "20260913020024-bdjjvg6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260913020024-bdjjvg6",
+				"updated": "20260913020024"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "勾選父類型會全選該組子類型，取消父類型會清空該組；勾選任一子類型會勾選其父類型，取消最後一個子類型會取消父類型。未限制子類型的已啟用父類型在對話方塊中顯示為全選。"
+				}
+			]
+		},
 		{
 			"ID": "20211226121740-xjez6e9",
 			"Type": "NodeHeading",

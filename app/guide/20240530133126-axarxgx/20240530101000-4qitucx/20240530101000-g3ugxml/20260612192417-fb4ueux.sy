@@ -6,7 +6,7 @@
 		"id": "20260612192417-fb4ueux",
 		"title": "コマンドラインインターフェース",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260913020024"
 	},
 	"Children": [
 		{
@@ -1579,7 +1579,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260618123956-poyqeb5",
-				"updated": "20260618123956"
+				"updated": "20260913020024"
 			},
 			"Children": [
 				{
@@ -4359,7 +4359,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260618123956-qya0v4w",
-				"updated": "20260618123956"
+				"updated": "20260913020024"
 			},
 			"Children": [
 				{
@@ -4392,7 +4392,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20260618123956-ioyvoyu",
-				"updated": "20260618123956"
+				"updated": "20260913020024"
 			},
 			"Children": [
 				{
@@ -4596,7 +4596,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "サブタイプで絞り込み（o=順序付きリスト/u=順序なしリスト/t=タスクリスト）、繰り返し指定可能"
+									"Data": "サブタイプで絞り込み：h1～h6 は見出しレベル、list:o/u/t はリストブロック、listItem:o/u/t はリスト項目ブロック（o=順序付き、u=順序なし、t=タスク）。繰り返し指定可能。接頭辞のない o/u/t は非対応"
 								}
 							]
 						}
@@ -4920,7 +4920,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260618123956-wsc0r3z",
-				"updated": "20260618123956"
+				"updated": "20260913020024"
 			},
 			"Children": [
 				{
@@ -4933,7 +4933,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan search \"キーワード\"\nsiyuan search \"キーワード\" --notebook box1 --notebook box2\nsiyuan search \"キーワード\" --path \"/ディレクトリ\"\nsiyuan search \"キーワード\" --type document --type heading\nsiyuan search \"キーワード\" --subtype o --subtype u\nsiyuan search \"キーワード\" --method 2\nsiyuan search \"キーワード\" --order-by 4 --page 1 --page-size 20\nsiyuan search \"キーワード\" --group-by 1\n"
+					"Data": "siyuan search \"キーワード\"\nsiyuan search \"キーワード\" --notebook box1 --notebook box2\nsiyuan search \"キーワード\" --path \"/ディレクトリ\"\nsiyuan search \"キーワード\" --type document --type heading\nsiyuan search \"キーワード\" --type listItem --subtype listItem:o --subtype listItem:u\nsiyuan search \"キーワード\" --method 2\nsiyuan search \"キーワード\" --order-by 4 --page 1 --page-size 20\nsiyuan search \"キーワード\" --group-by 1\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

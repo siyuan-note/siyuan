@@ -135,7 +135,7 @@ type Criterion struct {
 	K            string                 `json:"k"`            // 搜索关键字
 	R            string                 `json:"r"`            // 替换关键字
 	Types        *CriterionTypes        `json:"types"`        // 类型过滤选项
-	SubTypes     map[string]bool        `json:"subTypes"`     // 子类型过滤选项
+	SubTypes     SearchSubTypes         `json:"subTypes"`     // 子类型过滤选项
 	ReplaceTypes *CriterionReplaceTypes `json:"replaceTypes"` // 替换类型过滤选项
 }
 

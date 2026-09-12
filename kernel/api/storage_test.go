@@ -51,8 +51,8 @@ func TestCriteriaCRUD(t *testing.T) {
 		return recorder
 	}
 	type criterionData struct {
-		Name     string          `json:"name"`
-		SubTypes map[string]bool `json:"subTypes"`
+		Name     string               `json:"name"`
+		SubTypes model.SearchSubTypes `json:"subTypes"`
 	}
 	getCriteria := func() []criterionData {
 		t.Helper()
@@ -70,21 +70,21 @@ func TestCriteriaCRUD(t *testing.T) {
 		return response.Data
 	}
 
-	setRecorder := perform("/api/storage/setCriterion", `{"criterion":{"name":"Public notes","subTypes":{"h1":true}}}`)
+	setRecorder := perform("/api/storage/setCriterion", `{"criterion":{"name":"Public notes","subTypes":{"heading":{"h1":true},"list":{"o":true},"listItem":{"t":true}}}}`)
 	if responseCode(t, setRecorder) != 0 {
 		t.Fatalf("set criterion failed: %s", setRecorder.Body.String())
 	}
 	criteria := getCriteria()
-	if len(criteria) != 1 || criteria[0].Name != "Public notes" || !criteria[0].SubTypes["h1"] {
+	if len(criteria) != 1 || criteria[0].Name != "Public notes" || !criteria[0].SubTypes.Heading["h1"] || !criteria[0].SubTypes.List["o"] || !criteria[0].SubTypes.ListItem["t"] {
 		t.Fatalf("criterion was not persisted: %#v", criteria)
 	}
 
-	overwriteRecorder := perform("/api/storage/setCriterion", `{"criterion":{"name":"Public notes","subTypes":{"h2":true}}}`)
+	overwriteRecorder := perform("/api/storage/setCriterion", `{"criterion":{"name":"Public notes","subTypes":{"heading":{"h2":true},"list":{"u":true},"listItem":{"o":true}}}}`)
 	if responseCode(t, overwriteRecorder) != 0 {
 		t.Fatalf("overwrite criterion failed: %s", overwriteRecorder.Body.String())
 	}
 	criteria = getCriteria()
-	if len(criteria) != 1 || criteria[0].SubTypes["h1"] || !criteria[0].SubTypes["h2"] {
+	if len(criteria) != 1 || criteria[0].SubTypes.Heading["h1"] || !criteria[0].SubTypes.Heading["h2"] || criteria[0].SubTypes.List["o"] || !criteria[0].SubTypes.List["u"] || criteria[0].SubTypes.ListItem["t"] || !criteria[0].SubTypes.ListItem["o"] {
 		t.Fatalf("criterion was not overwritten: %#v", criteria)
 	}
 

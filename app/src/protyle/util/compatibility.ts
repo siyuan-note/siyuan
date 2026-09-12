@@ -834,9 +834,8 @@ export const getLocalStorage = (cb: () => void) => {
             Object.keys(window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes).length === 0) {
             window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes = Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES);
         }
-        // Migrate stored search data to include subTypes when absent
-        if (!window.siyuan.storage[Constants.LOCAL_SEARCHDATA].subTypes ||
-            Object.keys(window.siyuan.storage[Constants.LOCAL_SEARCHDATA].subTypes).length === 0) {
+        // 缺少子类型配置时补充默认值。
+        if (!window.siyuan.storage[Constants.LOCAL_SEARCHDATA].subTypes) {
             window.siyuan.storage[Constants.LOCAL_SEARCHDATA].subTypes = getDefaultSubType();
         }
         const closedTabs = window.siyuan.storage[Constants.LOCAL_CLOSED_TABS];

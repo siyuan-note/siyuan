@@ -666,13 +666,7 @@ func parseSearchBlockArgs(arg map[string]any) (page, pageSize int, query string,
 		}
 	}
 
-	if nil != arg["subTypes"] {
-		subTypesArg := arg["subTypes"].(map[string]any)
-		subTypes = map[string]bool{}
-		for t, b := range subTypesArg {
-			subTypes[t] = b.(bool)
-		}
-	}
+	subTypes = parseSearchSubTypes(arg["subTypes"])
 
 	// method：0：关键字，1：查询语法，2：SQL，3：正则表达式
 	methodArg := arg["method"]

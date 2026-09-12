@@ -6,9 +6,61 @@
 		"id": "20201222095049-hghafhe",
 		"title": "类型过滤",
 		"type": "doc",
-		"updated": "20251219204304"
+		"updated": "20260913020024"
 	},
 	"Children": [
+		{
+			"ID": "20260913020024-v0jx3m5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260913020024-v0jx3m5",
+				"updated": "20260913020024"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "搜索类型筛选"
+				}
+			]
+		},
+		{
+			"ID": "20260913020024-2q2gbom",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260913020024-2q2gbom",
+				"updated": "20260913020024"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在搜索对话框中打开 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索类型"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，展开标题、列表块或列表项块，可分别选择标题级别或有序、无序、任务子类型。列表块与列表项块的选择互不影响，例如仅勾选列表项块下的有序即可筛选有序列表项块。"
+				}
+			]
+		},
+		{
+			"ID": "20260913020024-mc5ic30",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260913020024-mc5ic30",
+				"updated": "20260913020024"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "勾选父类型会全选该组子类型，取消父类型会清空该组；勾选任一子类型会勾选其父类型，取消最后一个子类型会取消父类型。未限制子类型的已启用父类型在对话框中显示为全选。"
+				}
+			]
+		},
 		{
 			"ID": "20210210103523-ombf290",
 			"Type": "NodeHeading",

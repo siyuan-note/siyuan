@@ -198,18 +198,22 @@ export const saveExportFile = async (uri: string, msgId?: string): Promise<TSave
     /// #endif
 };
 
-export const readText = () => {
+export const readText = (silent = false) => {
     if (isInAndroid()) {
         return window.JSAndroid.readClipboard();
     } else if (isInHarmony()) {
         return window.JSHarmony.readClipboard();
     }
     if (typeof navigator.clipboard === "undefined") {
-        alert(window.siyuan.languages.clipboardPermissionDenied);
+        if (!silent) {
+            alert(window.siyuan.languages.clipboardPermissionDenied);
+        }
         return "";
     }
     return navigator.clipboard.readText().catch(() => {
-        alert(window.siyuan.languages.clipboardPermissionDenied);
+        if (!silent) {
+            alert(window.siyuan.languages.clipboardPermissionDenied);
+        }
     }) || "";
 };
 

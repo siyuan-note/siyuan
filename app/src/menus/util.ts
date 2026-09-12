@@ -246,12 +246,16 @@ export const copyPNGByLink = (link: string) => {
             showMessage(window.siyuan.languages.copied);
         }
     };
-    const imageToPNGClipboard = (image: HTMLImageElement) => {
+    const imageToPNGClipboard = (image: HTMLImageElement, vector = false) => {
         try {
             const canvas = document.createElement("canvas");
-            canvas.width = image.naturalWidth;
-            canvas.height = image.naturalHeight;
-            canvas.getContext("2d").drawImage(image, 0, 0);
+            // 矢量图片以至少两倍分辨率采样，限制额外放大的画布尺寸和像素总量。
+            const scale = vector ? Math.max(1, Math.min(Math.max(2, window.devicePixelRatio || 1),
+                16384 / image.naturalWidth, 16384 / image.naturalHeight,
+                Math.sqrt(16777216 / (image.naturalWidth * image.naturalHeight)))) : 1;
+            canvas.width = Math.round(image.naturalWidth * scale);
+            canvas.height = Math.round(image.naturalHeight * scale);
+            canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
             canvas.toBlob((blob) => {
                 if (blob) {
                     copyBlob(blob);
@@ -274,7 +278,7 @@ export const copyPNGByLink = (link: string) => {
         const objectURL = URL.createObjectURL(blob);
         const tempElement = document.createElement("img");
         tempElement.onload = () => {
-            imageToPNGClipboard(tempElement);
+            imageToPNGClipboard(tempElement, blob.type.split(";")[0].trim().toLowerCase() === "image/svg+xml");
             URL.revokeObjectURL(objectURL);
         };
         tempElement.onerror = () => {

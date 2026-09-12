@@ -512,10 +512,14 @@ func listCloudSyncDir(c *gin.Context) {
 		return
 	}
 
+	checkedSyncDir := model.Conf.Sync.CloudName
+	if conf.ProviderS3 == model.Conf.Sync.Provider {
+		checkedSyncDir = ""
+	}
 	ret.Data = map[string]any{
 		"syncDirs":       syncDirs,
 		"hSize":          hSize,
-		"checkedSyncDir": model.Conf.Sync.CloudName,
+		"checkedSyncDir": checkedSyncDir,
 	}
 }
 

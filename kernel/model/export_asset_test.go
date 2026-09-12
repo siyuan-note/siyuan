@@ -80,6 +80,7 @@ func TestResolveExportAssetPaths(t *testing.T) {
 		videoAsset  = "assets/video file-20260724150608-42z1qwz.webm"
 		audioAsset  = "assets/audio file-20260724150608-42z1qwz.wav?box=20260724163822-tfrplrg"
 		iframeAsset = "assets/frame file-20260724150608-42z1qwz.html"
+		pdfAsset    = "assets/document-20260724150608-42z1qwz.pdf?dataPath=/docs/a.sy#page=3"
 	)
 
 	tests := []struct {
@@ -94,6 +95,7 @@ func TestResolveExportAssetPaths(t *testing.T) {
 				videoAsset:  {videoAsset, videoAsset},
 				audioAsset:  {audioAsset, audioAsset},
 				iframeAsset: {iframeAsset, iframeAsset},
+				pdfAsset:    {pdfAsset, pdfAsset},
 			},
 		},
 		{
@@ -107,6 +109,9 @@ func TestResolveExportAssetPaths(t *testing.T) {
 					"assets/audio file.wav?box=20260724163822-tfrplrg",
 				},
 				iframeAsset: {iframeAsset, "assets/frame file.html"},
+				"assets/document.pdf?dataPath=/docs/a.sy#page=3": {
+					pdfAsset, "assets/document.pdf?dataPath=/docs/a.sy#page=3",
+				},
 			},
 		},
 	}
@@ -123,6 +128,7 @@ func TestResolveExportAssetPaths(t *testing.T) {
 
 			root := &ast.Node{Type: ast.NodeDocument}
 			root.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(imageAsset)})
+			root.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(pdfAsset)})
 			root.AppendChild(&ast.Node{Type: ast.NodeVideo, Tokens: []byte(`<video src="` + videoAsset + `"></video>`)})
 			root.AppendChild(&ast.Node{Type: ast.NodeAudio, Tokens: []byte(`<audio src="` + audioAsset + `"></audio>`)})
 			root.AppendChild(&ast.Node{Type: ast.NodeIFrame, Tokens: []byte(`<iframe src="` + iframeAsset + `"></iframe>`)})

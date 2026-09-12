@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {appendPdfAnnotationId, resolvePdfAssetLink} from "./pdfAssetLink";
+import {appendPdfAnnotationId, getPdfAnnotationReference, resolvePdfAssetLink} from "./pdfAssetLink";
 
 describe("PDF asset link resolution", () => {
     it("keeps an ordinary PDF asset unchanged", () => {
@@ -91,5 +91,53 @@ describe("PDF asset link resolution", () => {
         assert.deepEqual(resolvePdfAssetLink("https://example.com/document.pdf?page=2"), {
             linkAddress: "https://example.com/document.pdf?page=2",
         });
+    });
+});
+
+describe("PDF annotation reference parsing", () => {
+    const annotationId = "20240102123456-abcdefg";
+    const query = "?box=20240101000000-hijklmn&dataPath=/docs/a%20b.sy";
+
+    it("round-trips copied references through the bundled Lute parser", () => {
+        require("../../stage/protyle/js/lute/lute.min.js");
+        const lute = Lute.New();
+        lute.SetFileAnnotationRef(true);
+        lute.SetTextMark(true);
+        lute.SetProtyleWYSIWYG(true);
+        for (const path of ["assets/a.pdf", "assets/文档.PDF", "assets/folder/a%20b.pdf",
+            "assets/document-20240101000000-hijklmn.pdf"]) {
+            for (const suffix of ["", query]) {
+                const reference = appendPdfAnnotationId(path + suffix, annotationId);
+                const markdown = `<<${reference} "anchor">>`;
+                assert.equal(getPdfAnnotationReference(markdown), reference);
+                const dom = lute.Md2BlockDOM(markdown);
+                assert.ok(dom.includes(`data-id="${Lute.EscapeHTMLStr(reference)}"`), dom);
+                assert.equal(lute.BlockDOM2StdMd(dom).trim(), markdown);
+                assert.deepEqual(resolvePdfAssetLink(reference), {linkAddress: path + suffix, pdfParams: annotationId});
+            }
+        }
+    });
+
+    it("accepts empty anchors, escaped quotes and anchorless references", () => {
+        const reference = `assets/a.pdf/${annotationId}${query}`;
+        for (const anchor of ["", " \"\"", " \"a \\\"quote\\\"\""]) {
+            assert.equal(getPdfAnnotationReference(`<<${reference}${anchor}>>`), reference);
+        }
+    });
+
+    it("inserts the annotation before fragments", () => {
+        assert.equal(appendPdfAnnotationId("assets/a.pdf#view", annotationId), `assets/a.pdf/${annotationId}#view`);
+        assert.equal(appendPdfAnnotationId("assets/a.pdf" + query + "#view", annotationId),
+            `assets/a.pdf/${annotationId}${query}#view`);
+    });
+
+    it("rejects invalid paths, IDs and incomplete syntax", () => {
+        for (const reference of [`assets/a.txt/${annotationId}`, `a.pdf/${annotationId}`,
+            `assets/../a.pdf/${annotationId}`, `assets//a.pdf/${annotationId}`,
+            `assets/a.pdf/${annotationId}x`, "assets/a.pdf/20240102123456-ABCDEF_",
+            `assets/<a>.pdf/${annotationId}`]) {
+            assert.equal(getPdfAnnotationReference(`<<${reference} "anchor">>`), undefined);
+        }
+        assert.equal(getPdfAnnotationReference(`<<assets/a.pdf/${annotationId} "anchor">`), undefined);
     });
 });

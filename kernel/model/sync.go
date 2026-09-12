@@ -229,7 +229,7 @@ func SyncDataBeforeEnableEncryptedNotebook() error {
 	if !Conf.Sync.Enabled {
 		return nil
 	}
-	if !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
+	if conf.ProviderS3 != Conf.Sync.Provider && !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
 		return errors.New(Conf.Language(123))
 	}
 	if !checkSync(false, false, true) {
@@ -359,7 +359,7 @@ func checkSync(boot, exit, byHand bool) bool {
 		return false
 	}
 
-	if !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
+	if conf.ProviderS3 != Conf.Sync.Provider && !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
 		if byHand {
 			util.PushMsg(Conf.Language(123), 5000)
 		}
@@ -508,6 +508,9 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 func SetCloudSyncDir(name string) error {
 	release := lockAssetSourceChange()
 	defer release()
+	if conf.ProviderS3 == Conf.Sync.Provider {
+		return errors.New(Conf.Language(131))
+	}
 	if !cloud.IsValidCloudDirName(name) {
 		return errors.New(Conf.Language(37))
 	}
@@ -789,7 +792,7 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 		err = errors.New(formatRepoErrorMsg(err))
 		return
 	}
-	if 1 > len(dirs) {
+	if 1 > len(dirs) && conf.ProviderS3 != Conf.Sync.Provider {
 		dirs = append(dirs, &cloud.Repo{
 			Name:    "main",
 			Size:    0,
@@ -813,10 +816,6 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 	hSize = "-"
 	if conf.ProviderSiYuan == Conf.Sync.Provider {
 		hSize = humanize.BytesCustomCeil(uint64(size), 2)
-	}
-	if conf.ProviderS3 == Conf.Sync.Provider {
-		Conf.Sync.CloudName = syncDirs[0].CloudName
-		Conf.Save()
 	}
 	return
 }

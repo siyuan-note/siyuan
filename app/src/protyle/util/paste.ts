@@ -16,7 +16,8 @@ import {focusByOffset, getEditorRange, getSelectionOffset, getUndoFocusContext} 
 import {blockRender} from "../render/blockRender";
 import {highlightRender} from "../render/highlightRender";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
-import {isDynamicRef, isFileAnnotation} from "../../util/functions";
+import {isDynamicRef} from "../../util/functions";
+import {getPdfAnnotationReference} from "../../editor/pdfAssetLink";
 import {insertHTML} from "./insertHTML";
 import {scrollCenter} from "../../util/highlightById";
 import {hideElements} from "../ui/hideElements";
@@ -1450,6 +1451,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             const selectedText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
             if (selectedText !== "") {
                 const firstLine = textPlain.split("\n")[0];
+                const annotationReference = getPdfAnnotationReference(firstLine);
                 if (isDynamicRef(textPlain)) {
                     protyle.toolbar.range = range;
                     const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
@@ -1461,11 +1463,11 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                         protyle.toolbar.range.selectNodeContents(refElement[0]);
                     }
                     return;
-                } else if (isFileAnnotation(firstLine)) {
+                } else if (annotationReference) {
                     protyle.toolbar.range = range;
                     protyle.toolbar.setInlineMark(protyle, "file-annotation-ref", "range", {
                         type: "file-annotation-ref",
-                        color: firstLine.substring(2).replace(/ ".+">>$/, "")
+                        color: annotationReference
                     });
                     return;
                 } else {

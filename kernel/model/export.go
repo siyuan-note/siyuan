@@ -3402,13 +3402,11 @@ func exportTree(tree *parse.Tree, wysiwyg, richTableCells, keepFold, avHiddenCol
 				return ast.WalkContinue
 			} else if treenode.IsFileAnnotationRef(n) {
 				refID := n.TextMarkFileAnnotationRefID
-				if !strings.Contains(refID, "/") {
-					return ast.WalkSkipChildren
+				if err = processFileAnnotationRef(refID, n, fileAnnotationRefMode, tree.Box); nil != err {
+					return ast.WalkStop
 				}
-
-				status := processFileAnnotationRef(refID, n, fileAnnotationRefMode, tree.Box)
 				unlinks = append(unlinks, n)
-				return status
+				return ast.WalkSkipChildren
 			} else if n.IsTextMarkType("tag") {
 				if !wysiwyg {
 					n.Type = ast.NodeText
@@ -3466,6 +3464,9 @@ func exportTree(tree *parse.Tree, wysiwyg, richTableCells, keepFold, avHiddenCol
 		}
 		return ast.WalkSkipChildren
 	})
+	if nil != err {
+		return nil, err
+	}
 	for _, n := range unlinks {
 		n.Unlink()
 	}
@@ -4334,53 +4335,78 @@ type refAsFootnotes struct {
 	refAnchorText string
 }
 
-func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode int, boxID string) ast.WalkStatus {
-	p := refID[:strings.LastIndex(refID, "/")]
-	absPath, err := GetAssetAbsPathInBox(p, boxID)
+func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode int, boxID string) error {
+	assetLink, annotationID := util.SplitFileAnnotationRef(refID)
+	if "" == annotationID {
+		return fmt.Errorf("invalid file annotation reference [%s]", refID)
+	}
+	p, query, _ := splitAssetReference(assetLink)
+	assetLink = p
+	if "" != query {
+		assetLink += "?" + query
+	}
+	lookupLink := p
+	if decodedPath, decodeErr := url.PathUnescape(p); nil == decodeErr {
+		lookupLink = decodedPath
+	}
+	if "" != query {
+		lookupLink += "?" + query
+	}
+	absPath, err := GetAssetAbsPathInBox(lookupLink, boxID)
 	if err != nil {
-		logging.LogWarnf("get assets abs path by rel path [%s] failed: %s", p, err)
-		return ast.WalkSkipChildren
+		return fmt.Errorf("resolve file annotation asset [%s]: %w", assetLink, err)
 	}
 	sya := absPath + ".sya"
+	// 以实际资源所属笔记本认证标注密文，读取失败时保留源文件并中止导出。
+	assetBoxID := ExtractBoxIDFromAssetsPath(absPath)
+	var dek []byte
+	if IsEncryptedBox(assetBoxID) {
+		HoldBoxReadLock(assetBoxID)
+		defer ReleaseBoxReadLock(assetBoxID)
+		dek, err = GetDEKIfUnlocked(assetBoxID)
+		if err != nil {
+			return err
+		}
+		defer clear(dek)
+	}
 	syaData, readErr := os.ReadFile(sya)
 	if readErr != nil {
-		logging.LogErrorf("read file [%s] failed: %s", sya, readErr)
-		return ast.WalkSkipChildren
+		return fmt.Errorf("read file annotation [%s]: %w", sya, readErr)
 	}
-	// 加密 box 的 .sya 是密文，需先解密
-	if IsEncryptedBox(boxID) {
-		HoldBoxReadLock(boxID)
-		defer ReleaseBoxReadLock(boxID)
-		dek, dekErr := GetDEKIfUnlocked(boxID)
-		if dekErr != nil {
-			logging.LogWarnf("get DEK for file annotation [%s] failed: %s", sya, dekErr)
-			return ast.WalkSkipChildren
-		}
-		plain, decErr := DecryptAsset(boxID, filepath.Base(sya), dek, syaData)
+	if nil != dek {
+		plain, decErr := DecryptAsset(assetBoxID, filepath.Base(sya), dek, syaData)
 		if decErr != nil {
-			logging.LogWarnf("decrypt file annotation [%s] failed: %s", sya, decErr)
-			return ast.WalkSkipChildren
+			return fmt.Errorf("decrypt file annotation [%s]: %w", sya, decErr)
 		}
 		syaData = plain
 	}
-	syaJSON := map[string]any{}
+	syaJSON := map[string]struct {
+		Pages []struct {
+			Index *int `json:"index"`
+		} `json:"pages"`
+		Page *int `json:"page"`
+	}{}
 	if err = gulu.JSON.UnmarshalJSON(syaData, &syaJSON); err != nil {
-		logging.LogErrorf("unmarshal file [%s] failed: %s", sya, err)
-		return ast.WalkSkipChildren
+		return fmt.Errorf("parse file annotation [%s]: %w", sya, err)
 	}
-	annotationID := refID[strings.LastIndex(refID, "/")+1:]
-	annotationData := syaJSON[annotationID]
-	if nil == annotationData {
-		logging.LogErrorf("not found annotation [%s] in .sya", annotationID)
-		return ast.WalkSkipChildren
+	annotationData, found := syaJSON[annotationID]
+	pageIndex := annotationData.Page
+	if 0 < len(annotationData.Pages) {
+		pageIndex = annotationData.Pages[0].Index
 	}
-	pages := annotationData.(map[string]any)["pages"].([]any)
-	page := int(pages[0].(map[string]any)["index"].(float64)) + 1
-	pageStr := strconv.Itoa(page)
+	if !found || nil == pageIndex || *pageIndex < 0 {
+		return fmt.Errorf("missing or invalid annotation [%s] in [%s]", annotationID, sya)
+	}
+	pageStr := strconv.Itoa(*pageIndex + 1)
 
 	refText := n.TextMarkTextContent
 	ext := filepath.Ext(p)
-	file := p[7:len(p)-23-len(ext)] + ext
+	file := strings.TrimPrefix(strings.TrimSuffix(p, ext), "assets/")
+	// 仅剥离完整的节点 ID 后缀，无后缀文件及短文件名保持原样。
+	if len(file) > 23 && file[len(file)-23] == '-' && ast.IsNodeIDPattern(file[len(file)-22:]) {
+		file = file[:len(file)-23]
+	}
+	file += ext
 	fileAnnotationRefLink := &ast.Node{Type: ast.NodeLink}
 	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
 	if 0 == fileAnnotationRefMode {
@@ -4390,11 +4416,11 @@ func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode i
 	}
 	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
 	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
-	dest := p + "#page=" + pageStr // https://github.com/siyuan-note/siyuan/issues/11780
+	dest := assetLink + "#page=" + pageStr // https://github.com/siyuan-note/siyuan/issues/11780
 	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(dest)})
 	fileAnnotationRefLink.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
 	n.InsertBefore(fileAnnotationRefLink)
-	return ast.WalkSkipChildren
+	return nil
 }
 
 func exportPandocConvertZip(boxID, baseFolderName string, docPaths, defBlockIDs []string, pandocFrom, pandocTo, ext string) (zipPath string) {
@@ -4641,9 +4667,14 @@ func removeAssetsID(tree *parse.Tree, assetsOldNew, assetsNewOld map[string]stri
 				continue
 			}
 
-			name := path.Base(dest)
+			assetPath, query, fragment := splitAssetReference(dest)
+			name := path.Base(assetPath)
 			name = util.RemoveID(name)
 			newDest := "assets/" + name
+			if "" != query {
+				newDest += "?" + query
+			}
+			newDest += fragment
 			if existOld := assetsNewOld[newDest]; "" != existOld {
 				if existOld == dest { // 已存在相同资源路径
 					setAssetsLinkDest(node, dest, newDest)

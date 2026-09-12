@@ -2447,11 +2447,8 @@ func fileAnnotationAssetLinkDest(reference string, includeServePath bool) string
 	if !util.IsAssetLinkDest(gulu.Str.ToBytes(reference), includeServePath) {
 		return ""
 	}
-	separator := strings.LastIndexByte(reference, '/')
-	if separator < len("assets/") {
-		return ""
-	}
-	return strings.TrimSpace(reference[:separator])
+	assetLink, _ := util.SplitFileAnnotationRef(reference)
+	return assetLink
 }
 
 func getAttributeViewAssetsLinkDests(

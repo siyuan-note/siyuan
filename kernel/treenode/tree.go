@@ -36,10 +36,14 @@ import (
 )
 
 func NodeHash(node *ast.Node, tree *parse.Tree, luteEngine *lute.Lute) string {
-	ialArray := node.KramdownIAL
-	sort.Slice(ialArray, func(i, j int) bool {
-		return ialArray[i][0] < ialArray[j][0]
-	})
+	var ialArray [][]string
+	if 0 < len(node.KramdownIAL) {
+		ialArray = make([][]string, len(node.KramdownIAL))
+		copy(ialArray, node.KramdownIAL)
+		sort.Slice(ialArray, func(i, j int) bool {
+			return ialArray[i][0] < ialArray[j][0]
+		})
+	}
 	ial := parse.IAL2Tokens(ialArray)
 	var md string
 	if ast.NodeDocument != node.Type {

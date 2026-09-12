@@ -837,6 +837,20 @@ export class Background {
 </div>`,
             bind: (element) => {
                 const listElement = element.querySelector(".b3-list--background");
+                const renderTagList = (html: string) => {
+                    if (!listElement.isConnected || !menu.element.contains(listElement)) {
+                        return;
+                    }
+                    listElement.innerHTML = html;
+                    const filterElement = listElement.parentElement;
+                    filterElement.style.maxHeight = "";
+                    // 异步列表更新后重新计算菜单高度，避免沿用加载占位的高度限制。
+                    window.siyuan.menus.menu.resetPosition();
+                    const maxHeight = (menu.element.lastElementChild as HTMLElement).style.maxHeight;
+                    if (maxHeight) {
+                        filterElement.style.maxHeight = `min(50vh, ${maxHeight})`;
+                    }
+                };
                 fetchPost("/api/search/searchTag", {
                     k: "",
                 }, (response) => {
@@ -848,7 +862,7 @@ export class Background {
     ${currentTags.includes(Lute.UnEscapeHTMLStr(item)) ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
 </div>`;
                     });
-                    listElement.innerHTML = html;
+                    renderTagList(html);
                 });
                 const inputElement = element.querySelector("input");
                 inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -889,7 +903,7 @@ export class Background {
                         if (!hasKey && response.data.k) {
                             searchHTML = `<div data-type="new" class="b3-list-item b3-list-item--narrow${searchHTML ? "" : " b3-list-item--focus"}"><div class="fn__flex-1">${window.siyuan.languages.new} <mark>${escapeHtml(response.data.k)}</mark></div></div>` + searchHTML;
                         }
-                        listElement.innerHTML = searchHTML;
+                        renderTagList(searchHTML);
                     });
                 });
                 listElement.addEventListener("click", (event) => {

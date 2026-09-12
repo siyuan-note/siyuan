@@ -1275,6 +1275,9 @@ Move documents by `id`:
   ```
 
     * `stmt`: SQL statement
+
+Without an explicit outer `LIMIT`, results default to at most `search.limit` rows (the configured search result limit). Use explicit `LIMIT` and `OFFSET` clauses to paginate, with a stable, unique ordering such as `ORDER BY hpath, id`. An explicit outer `LIMIT` overrides the default, including values larger than `search.limit`.
+
 * Return value
 
   ```json
@@ -1283,9 +1286,13 @@ Move documents by `id`:
     "msg": "",
     "data": [
       { "col": "val" }
-    ]
+    ],
+    "limit": 0,
+    "truncated": false
   }
   ```
+
+On success, `data` remains an array. `limit` is the server default limit applied to this query, or `0` when the SQL supplies an explicit outer `LIMIT`; it is not the value of that explicit clause. `truncated` is `true` only when the server default limit omitted at least one result row. Exactly reaching the limit does not imply truncation. For the example above, `LIMIT 7` is explicit, so `limit` is `0` and `truncated` is `false`. These fields are omitted on errors.
 
 Note: To ensure data security, access to this interface is prohibited in Publish Mode.
 

@@ -1171,6 +1171,12 @@ export const hideKeyboardToolbar = () => {
 
 export const hideKeyboardToolbarByApp = (preserveSelection = false) => {
     inlineMathSelection.reset();
+    if (preserveSelection && ["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName)) {
+        // 输入法切换安全键盘时会临时隐藏，保留普通输入框焦点，避免中断密码输入。
+        preventKeyboardToolbarRender();
+        hideKeyboardToolbar();
+        return KeyboardHideResult.PreserveSelection;
+    }
     const tableCellSelectionRestored = preserveSelection && restoreRecentAndroidTableCellSelectAll();
     if (tableCellSelectionRestored) {
         return KeyboardHideResult.RestoreTableCellSelection;

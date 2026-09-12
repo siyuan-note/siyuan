@@ -1,4 +1,6 @@
 {
+	"mobileBarsAutoHide": "捲動時自動隱藏頂部和底部列",
+	"mobileBarsAutoHideTip": "向下捲動時隱藏頂部標題列、麵包屑和底部導覽列，向上捲動時恢復顯示",
 	"bodyGradient": "背景漸層",
 	"bodyGradientTip": "自訂或關閉背景漸層，自動模式依工作空間名稱產生顏色",
 	"bodyGradientAuto": "自動（依工作空間名稱）",

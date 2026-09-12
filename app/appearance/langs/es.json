@@ -1,4 +1,6 @@
 {
+	"mobileBarsAutoHide": "Ocultar automáticamente las barras superior e inferior al desplazarse",
+	"mobileBarsAutoHideTip": "Desplázate hacia abajo para ocultar la barra de título, la ruta de navegación y la barra inferior; hacia arriba para mostrarlas",
 	"bodyGradient": "Degradado de fondo",
 	"bodyGradientTip": "Personalizar o desactivar el degradado de fondo; los colores automáticos se basan en el nombre del espacio de trabajo",
 	"bodyGradientAuto": "Automático (nombre del espacio de trabajo)",

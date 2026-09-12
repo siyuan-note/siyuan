@@ -1,4 +1,6 @@
 {
+	"mobileBarsAutoHide": "Nascondi automaticamente le barre superiore e inferiore durante lo scorrimento",
+	"mobileBarsAutoHideTip": "Scorri verso il basso per nascondere la barra del titolo, il percorso di navigazione e la barra inferiore; verso l’alto per mostrarli",
 	"bodyGradient": "Sfumatura dello sfondo",
 	"bodyGradientTip": "Personalizza o disattiva la sfumatura dello sfondo; i colori automatici si basano sul nome dello spazio di lavoro",
 	"bodyGradientAuto": "Automatico (nome dello spazio di lavoro)",

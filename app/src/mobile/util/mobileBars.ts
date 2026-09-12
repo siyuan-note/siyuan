@@ -4,6 +4,7 @@ import {
     MOBILE_BARS_SCROLL_OPTIONS,
     reduceMobileBarsState,
 } from "./mobileBarsState";
+import {isMobileBarsAutoHide} from "./mobileBarsConfig";
 
 const PANEL_IDS = ["sidebar", "sidebarRight", "menu", "model"];
 
@@ -54,6 +55,9 @@ const renderMobileBars = () => {
     const breadcrumbPositionChanged = breadcrumbElement &&
         breadcrumbElement.style.getPropertyValue("--mobile-bar-translate-y") !== breadcrumbTranslateY;
     breadcrumbElement?.style.setProperty("--mobile-bar-translate-y", breadcrumbTranslateY);
+    breadcrumbElement?.style.setProperty("--mobile-bar-opacity", (1 - progress).toString());
+    breadcrumbElement?.toggleAttribute("inert", immersive);
+    breadcrumbElement?.setAttribute("aria-hidden", immersive ? "true" : "false");
     if (breadcrumbPositionChanged) {
         breadcrumbPositionChange?.();
     }
@@ -117,6 +121,9 @@ const onScroll = () => {
             type: "scroll",
             scrollTop: scrollElement.scrollTop,
         });
+        if (!isMobileBarsAutoHide()) {
+            barsState = reduceMobileBarsState(barsState, {type: "set-reading-bars", visible: true});
+        }
         renderMobileBars();
     });
 };

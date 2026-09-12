@@ -1,4 +1,6 @@
 {
+	"mobileBarsAutoHide": "Bovenste en onderste balk automatisch verbergen bij scrollen",
+	"mobileBarsAutoHideTip": "Scroll omlaag om de bovenste titelbalk, het kruimelpad en de onderste navigatiebalk te verbergen; scroll omhoog om ze te tonen",
 	"bodyGradient": "Achtergrondverloop",
 	"bodyGradientTip": "Pas het achtergrondverloop aan of schakel het uit; automatische kleuren zijn gebaseerd op de naam van de werkruimte",
 	"bodyGradientAuto": "Automatisch (werkruimtenaam)",

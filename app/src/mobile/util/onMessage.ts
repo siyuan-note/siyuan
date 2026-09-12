@@ -1,4 +1,6 @@
 import {openMobileFileById} from "../editor";
+import {MOBILE_BARS_CONFIG_KEY} from "./mobileBarsConfig";
+import {showMobileBars} from "./mobileBars";
 import {
     forceQuit,
     processBacklinkIndexCommit,
@@ -127,6 +129,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "setLocalStorageVal":
                 window.siyuan.storage[data.data.key] = data.data.val;
+                if (data.data.key === MOBILE_BARS_CONFIG_KEY) {
+                    showMobileBars();
+                }
                 if (data.data.key === Constants.LOCAL_MOBILE_BOTTOM_BAR) {
                     renderMobileBottomBar();
                 }
@@ -138,6 +143,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 Object.keys(data.data.keyVals).forEach((k) => {
                     window.siyuan.storage[k] = data.data.keyVals[k];
                 });
+                if (Object.prototype.hasOwnProperty.call(data.data.keyVals, MOBILE_BARS_CONFIG_KEY)) {
+                    showMobileBars();
+                }
                 if (Object.prototype.hasOwnProperty.call(data.data.keyVals, Constants.LOCAL_MOBILE_BOTTOM_BAR)) {
                     renderMobileBottomBar();
                 }
@@ -147,6 +155,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "removeLocalStorageVal":
                 delete window.siyuan.storage[data.data.key];
+                if (data.data.key === MOBILE_BARS_CONFIG_KEY) {
+                    showMobileBars();
+                }
                 if (data.data.key === Constants.LOCAL_MOBILE_BOTTOM_BAR) {
                     renderMobileBottomBar();
                 }
@@ -158,6 +169,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 data.data.keys.forEach((k: string) => {
                     delete window.siyuan.storage[k];
                 });
+                if (data.data.keys.includes(MOBILE_BARS_CONFIG_KEY)) {
+                    showMobileBars();
+                }
                 if (data.data.keys.includes(Constants.LOCAL_MOBILE_BOTTOM_BAR)) {
                     renderMobileBottomBar();
                 }

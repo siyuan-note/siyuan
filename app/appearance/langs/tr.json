@@ -1,4 +1,6 @@
 {
+	"mobileBarsAutoHide": "Kaydırırken üst ve alt çubukları otomatik gizle",
+	"mobileBarsAutoHideTip": "Üst başlık çubuğunu, gezinme yolunu ve alt gezinme çubuğunu gizlemek için aşağı, göstermek için yukarı kaydırın",
 	"bodyGradient": "Arka plan renk geçişi",
 	"bodyGradientTip": "Arka plan renk geçişini özelleştirin veya kapatın; otomatik renkler çalışma alanının adına göre belirlenir",
 	"bodyGradientAuto": "Otomatik (çalışma alanı adı)",

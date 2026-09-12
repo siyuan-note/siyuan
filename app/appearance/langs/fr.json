@@ -1,4 +1,6 @@
 {
+	"mobileBarsAutoHide": "Masquer automatiquement les barres supérieure et inférieure pendant le défilement",
+	"mobileBarsAutoHideTip": "Faites défiler vers le bas pour masquer la barre de titre, le fil d’Ariane et la barre de navigation inférieure, et vers le haut pour les afficher",
 	"bodyGradient": "Dégradé de fond",
 	"bodyGradientTip": "Personnaliser ou désactiver le dégradé de fond ; les couleurs automatiques dépendent du nom de l’espace de travail",
 	"bodyGradientAuto": "Automatique (nom de l’espace de travail)",

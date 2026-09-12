@@ -1,4 +1,6 @@
 {
+	"mobileBarsAutoHide": "Ocultar as barras superior e inferior automaticamente ao rolar",
+	"mobileBarsAutoHideTip": "Role para baixo para ocultar a barra de título, o caminho de navegação e a barra inferior; role para cima para exibi-los",
 	"bodyGradient": "Gradiente de fundo",
 	"bodyGradientTip": "Personalize ou desative o gradiente de fundo; as cores automáticas são baseadas no nome do espaço de trabalho",
 	"bodyGradientAuto": "Automático (nome do espaço de trabalho)",

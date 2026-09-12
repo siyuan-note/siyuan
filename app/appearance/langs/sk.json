@@ -1,4 +1,6 @@
 {
+	"mobileBarsAutoHide": "Automaticky skrývať hornú a dolnú lištu pri posúvaní",
+	"mobileBarsAutoHideTip": "Posunutím nadol skryjete hornú lištu názvu, navigačnú cestu a dolnú navigačnú lištu; posunutím nahor ich zobrazíte",
 	"bodyGradient": "Prechod pozadia",
 	"bodyGradientTip": "Prispôsobte alebo vypnite prechod pozadia; automatické farby vychádzajú z názvu pracovného priestoru",
 	"bodyGradientAuto": "Automaticky (názov pracovného priestoru)",

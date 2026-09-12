@@ -1,4 +1,6 @@
 {
+	"mobileBarsAutoHide": "Sembunyikan bilah atas dan bawah otomatis saat menggulir",
+	"mobileBarsAutoHideTip": "Gulir ke bawah untuk menyembunyikan bilah judul atas, jejak navigasi, dan bilah navigasi bawah; gulir ke atas untuk menampilkannya",
 	"bodyGradient": "Gradien latar belakang",
 	"bodyGradientTip": "Sesuaikan atau nonaktifkan gradien latar belakang; warna otomatis didasarkan pada nama ruang kerja",
 	"bodyGradientAuto": "Otomatis (nama ruang kerja)",

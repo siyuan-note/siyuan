@@ -1,4 +1,6 @@
 {
+	"mobileBarsAutoHide": "Automatycznie ukrywaj górny i dolny pasek podczas przewijania",
+	"mobileBarsAutoHideTip": "Przewiń w dół, aby ukryć górny pasek tytułu, ścieżkę nawigacji i dolny pasek nawigacji; przewiń w górę, aby je pokazać",
 	"bodyGradient": "Gradient tła",
 	"bodyGradientTip": "Dostosuj lub wyłącz gradient tła; automatyczne kolory są oparte na nazwie przestrzeni roboczej",
 	"bodyGradientAuto": "Automatycznie (nazwa przestrzeni roboczej)",

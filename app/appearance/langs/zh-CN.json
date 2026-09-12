@@ -1,4 +1,6 @@
 {
+	"mobileBarsAutoHide": "滚动时自动隐藏顶部和底部栏",
+	"mobileBarsAutoHideTip": "向下滚动时隐藏顶部标题栏、面包屑和底部导航栏，向上滚动时恢复显示",
 	"bodyGradient": "背景渐变",
 	"bodyGradientTip": "自定义或关闭背景渐变，自动模式根据工作空间名称生成颜色",
 	"bodyGradientAuto": "自动（根据工作空间名称）",

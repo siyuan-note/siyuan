@@ -25,14 +25,38 @@ export const orderTabsForOverview = <T extends IMobileTabStateLike>(tabs: readon
 /**
  * 判断页签的关闭按钮是否可用
  *
- * 在“在当前页签打开文件”模式下钉住的页签不显示关闭按钮，避免误关后在当前页签载入其他文档
+ * 钉住的页签仅通过菜单主动关闭
  *
  * @param pinned 页签是否钉住
- * @param openFilesUseCurrentTab 是否在当前页签打开文件
  * @returns 是否显示关闭按钮
  */
-export const canCloseTab = (pinned: boolean, openFilesUseCurrentTab: boolean) => {
-    return !pinned || !openFilesUseCurrentTab;
+export const canCloseTab = (pinned: boolean) => {
+    return !pinned;
+};
+
+// 切换钉住状态时，将页签放到钉住与未钉住分组的交界处。
+export const toggleTabPin = <T extends IMobileTabStateLike>(tabs: readonly T[], tabID: string): T[] => {
+    const tab = tabs.find((item) => item.id === tabID);
+    if (!tab) {
+        return [...tabs];
+    }
+    const remaining = orderTabsForOverview(tabs.filter((item) => item.id !== tabID));
+    remaining.splice(remaining.filter((item) => !!item.pin).length, 0, {...tab, pin: !tab.pin});
+    return remaining;
+};
+
+// 拖拽仅调整同一钉住分组内的顺序，不改变钉住状态和访问时间。
+export const moveTab = <T extends IMobileTabStateLike>(tabs: readonly T[], tabID: string,
+                                                     targetID: string, after: boolean): T[] => {
+    const ordered = orderTabsForOverview(tabs);
+    const tab = ordered.find((item) => item.id === tabID);
+    const target = ordered.find((item) => item.id === targetID);
+    if (!tab || !target || tab === target || !!tab.pin !== !!target.pin) {
+        return ordered;
+    }
+    const remaining = ordered.filter((item) => item.id !== tabID);
+    remaining.splice(remaining.findIndex((item) => item.id === targetID) + (after ? 1 : 0), 0, tab);
+    return remaining;
 };
 
 /**

@@ -687,6 +687,29 @@ body.mobile-topbar--merged {
     }
   }
 
+  &__drag {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 40px;
+    margin-right: 4px;
+    touch-action: none;
+    cursor: grab;
+    color: var(--b3-theme-on-surface-light);
+
+    svg {
+      width: 14px;
+      height: 14px;
+      pointer-events: none;
+    }
+  }
+
+  &__item--dragging {
+    opacity: .6;
+  }
+
   &__item-pin {
     display: flex;
     align-items: center;

@@ -360,21 +360,21 @@ export const movePathTo = (options: {
             }) => {
                 let countHTML = "";
                 if (options.flashcard) {
-                    countHTML = `<span class="fn__flex-1"></span>
-<span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardNewCard}">${item.newFlashcardCount}</span>
+                    countHTML = `<span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardNewCard}">${item.newFlashcardCount}</span>
 <span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardDueCard}">${item.dueFlashcardCount}</span>
 <span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardCard}">${item.flashcardCount}</span>`;
                 }
                 let attributesHTML = "";
                 if (item.name) {
-                    attributesHTML += `<span class="ft__smaller ft__on-surface" style="display: block; line-height: 1.5">${window.siyuan.languages.name} ${escapeHtml(item.name)}</span>`;
+                    attributesHTML += `<span class="b3-list-item__meta fn__flex" style="max-width: 30%" aria-label="${window.siyuan.languages.name} ${escapeAriaLabel(item.name)}"><svg class="b3-list-item__hinticon"><use xlink:href="#iconN"></use></svg><span class="b3-list-item__hinttext">${escapeHtml(item.name)}</span></span>`;
                 }
                 if (item.alias) {
-                    attributesHTML += `<span class="ft__smaller ft__on-surface" style="display: block; line-height: 1.5">${window.siyuan.languages.alias} ${escapeHtml(item.alias)}</span>`;
+                    attributesHTML += `<span class="b3-list-item__meta fn__flex" style="max-width: 30%" aria-label="${window.siyuan.languages.alias} ${escapeAriaLabel(item.alias)}"><svg class="b3-list-item__hinticon"><use xlink:href="#iconA"></use></svg><span class="b3-list-item__hinttext">${escapeHtml(item.alias)}</span></span>`;
                 }
                 fileHTML += `<li class="b3-list-item${fileHTML === "" ? " b3-list-item--focus" : ""}" data-path="${item.path}" data-box="${item.box}"${getFileTreeDefaultIconAttr(item.boxIcon, "notebook")}>
     ${getFileTreeIconHTML(item.boxIcon, "notebook", "b3-list-item__graphic", true)}
-    <span class="b3-list-item__showall" style="padding: 4px 0">${escapeHtml(item.hPath)}${attributesHTML}</span>
+    <span class="b3-list-item__showall fn__flex-1" style="padding: 4px 0; min-width: 0">${escapeHtml(item.hPath)}</span>
+    ${attributesHTML}
     ${countHTML}
 </li>`;
             });

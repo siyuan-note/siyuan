@@ -7,6 +7,8 @@ import {removeLoading} from "../ui/initUI";
 import {focusBlock} from "../util/selection";
 import {invalidateTrackedRanges} from "../util/trackedRange";
 import {PROTYLE_LITE_FRAGMENT_CLASS} from "../util/liteFragment";
+import {isMobile} from "../../util/functions";
+import {bindMobileToolbar} from "./mobileToolbar";
 
 export {PROTYLE_LITE_FRAGMENT_CLASS};
 export const PROTYLE_LITE_HINT_OVERLAY_CLASS = "protyle-hint--lite-overlay";
@@ -70,6 +72,7 @@ export const mountProtyleLiteFragment = (host: HTMLElement,
     document.body.appendChild(hintElement);
     wysiwyg.setAttribute("data-readonly", "false");
     protyle.toolbar.subElement.setAttribute("data-position-boundary", "viewport");
+    const unbindMobileToolbar = isMobile() ? bindMobileToolbar(protyle) : undefined;
 
     const updateEmptyState = () => {
         const empty = isEmptyContent(wysiwyg);
@@ -160,6 +163,7 @@ export const mountProtyleLiteFragment = (host: HTMLElement,
             protyle.undo.clear();
         },
         destroy: () => {
+            unbindMobileToolbar?.();
             contentObserver.disconnect();
             instance.destroy();
             hintElement.remove();

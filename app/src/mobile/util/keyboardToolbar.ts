@@ -888,6 +888,9 @@ const renderKeyboardToolbar = () => {
             hideKeyboardToolbarUtil();
         }
         showKeyboardToolbar();
+        if (document.getElementById("keyboardToolbar").classList.contains("fn__none")) {
+            return;
+        }
         const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
         const range = selection.getRangeAt(0);
         const isProtyle = hasClosestByClassName(range.startContainer, "protyle-wysiwyg", true);

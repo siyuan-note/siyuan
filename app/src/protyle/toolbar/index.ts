@@ -283,7 +283,7 @@ export class Toolbar {
         const endCellElement = hasClosestByTag(range.endContainer, "TD") ||
             hasClosestByTag(range.endContainer, "TH");
         const isCrossCell = !!startCellElement && !!endCellElement && startCellElement !== endCellElement;
-        if (this.element.hasAttribute("data-entry-empty") || isMobile() || !nodeElement || protyle.disabled || (!isCrossBlock && (
+        if (this.element.hasAttribute("data-entry-empty") || (isMobile() && !protyle.lite) || !nodeElement || protyle.disabled || (!isCrossBlock && (
             nodeElement.getAttribute("data-type") === "NodeCodeBlock" ||
             nodeElement.classList.contains("av") ||
             hasClosestByTag(range.startContainer, "CAPTION")
@@ -717,7 +717,7 @@ export class Toolbar {
             return;
         }
 
-        const toolbarElement = isMobile() ? document.querySelector("#keyboardToolbar .keyboard__dynamic").nextElementSibling : this.element;
+        const toolbarElement = isMobile() && !protyle.lite ? document.querySelector("#keyboardToolbar .keyboard__dynamic").nextElementSibling : this.element;
         const actionBtn = action === "toolbar" ? toolbarElement.querySelector(`[data-type="${type}"]`) : undefined;
         const remove = INLINE_FORMAT_TYPES.includes(type) && !textObj ?
             getRangesInlineFormats(ranges).includes(type) :
@@ -987,7 +987,7 @@ export class Toolbar {
                 }
             });
         }
-        const toolbarElement = isMobile() ? document.querySelector("#keyboardToolbar .keyboard__dynamic").nextElementSibling : this.element;
+        const toolbarElement = isMobile() && !protyle.lite ? document.querySelector("#keyboardToolbar .keyboard__dynamic").nextElementSibling : this.element;
         const actionBtn = action === "toolbar" ? toolbarElement.querySelector(`[data-type="${type}"]`) : undefined;
         const newNodes: Node[] = [];
         let startContainer: Node;

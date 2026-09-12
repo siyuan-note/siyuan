@@ -65,6 +65,15 @@ func TestMixedReviewSetsPreservePresetsAndDeduplicate(t *testing.T) {
 	if _, err = store.StartStudySession(ctx, filteredRequest); !errors.Is(err, ErrOperationConflict) {
 		t.Fatalf("retry dropped query: %v", err)
 	}
+	// 卡片列表与多个卡包取交集，显式顺序优先于默认队列顺序。
+	orderedRequest := StudyQueueRequest{OperationID: "mixed-ordered", SessionID: "mixed-ordered",
+		ReviewSetIDs: []string{"set-a", "set-b"}, CardIDs: []string{b[0], a[0], a[1]},
+		Now: now + 1, NewLimit: 10, ReviewLimit: 10, ReviewMode: "reinforcement"}
+	ordered, orderedErr := store.StartStudySession(ctx, orderedRequest)
+	if orderedErr != nil {
+		t.Fatal(orderedErr)
+	}
+	assertOrderedSessionCards(t, ordered.SessionCards, []string{b[0], a[0]})
 	for _, item := range result.SessionCards {
 		presetID := first.ID
 		if item.CardID == b[0] {

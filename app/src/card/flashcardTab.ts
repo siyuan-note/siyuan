@@ -33,11 +33,17 @@ export interface IFlashcardTabOptions {
     id?: string;
     title?: string;
     reviewSetIDs?: string[];
+    // 按输入顺序选择卡片，仍应用范围、复习资格和额度限制。
+    cardIDs?: string[];
     query?: IFlashcardQueryAST;
     reviewMode?: "normal" | "reinforcement";
 }
 
 export const flashcardTabQuery = (options: IFlashcardTabOptions): IFlashcardQueryAST | undefined => {
+    if (options.cardIDs !== undefined && (!Array.isArray(options.cardIDs) || options.cardIDs.length === 0 ||
+        options.cardIDs.some((id) => typeof id !== "string" || !id.trim()))) {
+        throw new Error("Flashcard cardIDs must be a non-empty array of card IDs");
+    }
     if (!["all", "doc", "notebook"].includes(options.type)) {
         throw new Error("Unsupported flashcard scope type");
     }

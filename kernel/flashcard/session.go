@@ -31,6 +31,7 @@ type StudyQueueRequest struct {
 	SessionID        string                                `json:"sessionID"`
 	ReviewSetID      string                                `json:"reviewSetID,omitempty"`
 	ReviewSetIDs     []string                              `json:"reviewSetIDs,omitempty"`
+	CardIDs          []string                              `json:"cardIDs,omitempty"`
 	Query            *QueryAST                             `json:"query,omitempty"`
 	ReviewMode       string                                `json:"reviewMode,omitempty"`
 	Seed             string                                `json:"seed,omitempty"`
@@ -123,6 +124,19 @@ func (store *Store) StartStudySession(ctx context.Context, request StudyQueueReq
 	} else if found {
 		return StudyQueueResult{}, errors.New("flashcard study session already exists")
 	}
+	// 显式卡片先验证身份和访问边界，避免无效选择被资格筛选静默丢弃。
+	for _, cardID := range request.CardIDs {
+		if revision, found, err := store.projection.CurrentEntity(ctx, EntityCard, cardID); err != nil {
+			return StudyQueueResult{}, err
+		} else if !found || revision.Deleted {
+			return StudyQueueResult{}, ErrEntityNotFound
+		}
+	}
+	if request.CardIDs != nil && request.ValidateCardIDs != nil {
+		if err := request.ValidateCardIDs(ctx, request.CardIDs); err != nil {
+			return StudyQueueResult{}, err
+		}
+	}
 
 	mode := request.ReviewMode
 	newLimit := request.NewLimit
@@ -173,7 +187,19 @@ func (store *Store) StartStudySession(ctx context.Context, request StudyQueueReq
 		options.IncludeBuried = request.IncludeBuried
 		options.IncludePaused = request.IncludePaused
 	}
-	results, err := store.projection.SearchCards(ctx, request.Query, options)
+	query := request.Query
+	if request.CardIDs != nil {
+		value, err := json.Marshal(request.CardIDs)
+		if err != nil {
+			return StudyQueueResult{}, err
+		}
+		root := QueryExpression{Operator: QueryPredicate, Field: "cardID", Comparator: QueryIn, Value: value}
+		if query != nil {
+			root = QueryExpression{Operator: QueryAnd, Children: []QueryExpression{root, query.Root}}
+		}
+		query = &QueryAST{Version: QueryVersion, Root: root}
+	}
+	results, err := store.projection.SearchCards(ctx, query, options)
 	if err != nil {
 		return StudyQueueResult{}, err
 	}
@@ -233,7 +259,15 @@ func (store *Store) StartStudySession(ctx context.Context, request StudyQueueReq
 	if seed == "" {
 		seed = request.SessionID
 	}
-	sortStudyQueue(results, reviewSetOrder, seed)
+	if request.CardIDs == nil {
+		sortStudyQueue(results, reviewSetOrder, seed)
+	} else {
+		positions := make(map[string]int, len(request.CardIDs))
+		for index, cardID := range request.CardIDs {
+			positions[cardID] = index
+		}
+		sort.Slice(results, func(i, j int) bool { return positions[results[i].Card.ID] < positions[results[j].Card.ID] })
+	}
 	if mode == "normal" {
 		results, err = store.projection.limitStudyQueueByPreset(ctx, results, request.ReviewDayStart, request.ReviewDayEnd)
 		if err != nil {
@@ -256,7 +290,7 @@ func (store *Store) StartStudySession(ctx context.Context, request StudyQueueReq
 	}
 	session := StudySession{
 		ID: request.SessionID, ReviewSetID: request.ReviewSetID, ReviewSetIDs: request.ReviewSetIDs, QueryAST: queryJSON, ReviewMode: mode,
-		Status: "active", Seed: seed, NewLimit: newLimit, ReviewLimit: reviewLimit,
+		CardIDs: request.CardIDs, Status: "active", Seed: seed, NewLimit: newLimit, ReviewLimit: reviewLimit,
 		IncludeSuspended: request.IncludeSuspended, IncludeBuried: request.IncludeBuried,
 		IncludePaused: request.IncludePaused, SelectionDigest: selectionDigest, StartedAt: request.Now,
 		ReviewDayStart: request.ReviewDayStart, ReviewDayEnd: request.ReviewDayEnd,
@@ -461,6 +495,23 @@ func ChoiceOptionOrder(config ChoiceGenerationConfig, seed, cardID string) ([]st
 }
 
 func (request *StudyQueueRequest) validate() error {
+	if request.CardIDs != nil {
+		if len(request.CardIDs) == 0 {
+			return errors.New("flashcard card selection is empty")
+		}
+		unique := make(map[string]bool, len(request.CardIDs))
+		cardIDs := make([]string, 0, len(request.CardIDs))
+		for _, cardID := range request.CardIDs {
+			if strings.TrimSpace(cardID) == "" {
+				return errors.New("flashcard card ID is empty")
+			}
+			if !unique[cardID] {
+				unique[cardID] = true
+				cardIDs = append(cardIDs, cardID)
+			}
+		}
+		request.CardIDs = cardIDs
+	}
 	if strings.TrimSpace(request.OperationID) == "" || strings.TrimSpace(request.SessionID) == "" || request.Now <= 0 ||
 		request.NewLimit < 0 || request.ReviewLimit < 0 {
 		return errors.New("flashcard study queue identity, time and limits are invalid")
@@ -604,6 +655,11 @@ func studyQueueResultFromBatch(batch OperationBatch, request StudyQueueRequest) 
 	}
 	if result.Session.ID != request.SessionID || result.Session.ReviewSetID != request.ReviewSetID ||
 		result.Session.StartedAt != request.Now || result.Session.Seed != seed {
+		return StudyQueueResult{}, ErrOperationConflict
+	}
+	storedCards, _ := CanonicalJSON(result.Session.CardIDs)
+	requestedCards, _ := CanonicalJSON(request.CardIDs)
+	if string(storedCards) != string(requestedCards) {
 		return StudyQueueResult{}, ErrOperationConflict
 	}
 	storedSets, _ := CanonicalJSON(result.Session.ReviewSetIDs)

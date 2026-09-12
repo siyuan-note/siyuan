@@ -115,6 +115,7 @@ interface IFlashcardV2RenderedCard {
 export interface IFlashcardV2ReviewSessionOptions {
     reviewMode: "normal" | "reinforcement";
     reviewSetIDs?: string[];
+    cardIDs?: string[];
     query?: IFlashcardQueryAST;
     includeSuspended?: boolean;
     includeBuried?: boolean;
@@ -783,6 +784,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
         sessionID,
         reviewSetID,
         reviewSetIDs: options.reviewSetIDs,
+        cardIDs: options.cardIDs,
         query: options.query,
         reviewMode: options.reviewMode,
         seed: sessionID,

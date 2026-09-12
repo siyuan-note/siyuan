@@ -186,6 +186,7 @@ openTab = (options: {
                     review: {
                         reviewMode: options.card.reviewMode || "normal",
                         reviewSetIDs: options.card.reviewSetIDs,
+                        cardIDs: options.card.cardIDs ? Array.from(new Set(options.card.cardIDs)) : undefined,
                         query,
                     },
                     id: options.card.id || "",

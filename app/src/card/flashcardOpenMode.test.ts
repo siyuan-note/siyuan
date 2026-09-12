@@ -34,6 +34,7 @@ test("review set and reinforcement filters survive transfer to another window", 
         includeSuspended: true,
         includeBuried: true,
         includePaused: true,
+        cardIDs: ["third", "first", "second"],
         query: flashcardV2LocationQuery("rootID", "doc"),
     };
     const data = createFlashcardReviewTabData("selected-set", "Set", options);

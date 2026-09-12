@@ -13,6 +13,9 @@ test("document scope and an additional query remain intersected", () => {
 });
 
 test("empty explicit selections never become a global review", () => {
+    for (const cardIDs of [[], [" "], null, [1], "card"] as unknown as string[][]) {
+        assert.throws(() => flashcardTabQuery({type: "all", cardIDs}));
+    }
     assert.throws(() => flashcardTabQuery({type: "all", reviewSetIDs: []}));
     assert.throws(() => flashcardTabQuery({type: "doc"}));
     assert.throws(() => flashcardTabQuery({type: "notebook", id: " "}));
@@ -36,6 +39,7 @@ test("legacy layouts become normal sessions with the same scope and no stale que
 
 test("restoring a new layout preserves mixed sets, query, and reinforcement mode", () => {
     const review = {reviewMode: "reinforcement" as const, reviewSetIDs: ["a", "b"],
+        cardIDs: ["third", "first", "second"],
         query: {version: 1, root: {operator: "matchAll" as const}}};
     const data = normalizeFlashcardTabData({cardType: "all", id: "", review});
     assert.deepEqual(data.review, review);

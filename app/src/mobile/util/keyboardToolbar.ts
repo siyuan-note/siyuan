@@ -887,7 +887,7 @@ const renderKeyboardToolbar = () => {
         if (!showUtil) {
             hideKeyboardToolbarUtil();
         }
-        showKeyboardToolbar();
+        showKeyboardToolbarElement();
         if (document.getElementById("keyboardToolbar").classList.contains("fn__none")) {
             return;
         }
@@ -991,7 +991,7 @@ const renderKeyboardToolbar = () => {
     });
 };
 
-export const showKeyboardToolbar = () => {
+const showKeyboardToolbarElement = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     if (["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName) &&
         !toolbarElement.contains(document.activeElement)) {
@@ -1044,6 +1044,15 @@ export const showKeyboardToolbar = () => {
         });
     }
     scrollKeyboardSelectionIntoView();
+};
+
+export const showKeyboardToolbar = () => {
+    showKeyboardToolbarElement();
+    if (!document.getElementById("keyboardToolbar").classList.contains("fn__none") &&
+        !getCurrentEditor()?.protyle.toolbar.isMultiSelectMode()) {
+        // 原生键盘显示回调也需要刷新操作按钮，避免选区事件被抑制后仅显示工具栏外框。
+        renderKeyboardToolbar();
+    }
 };
 
 const scrollKeyboardSelectionIntoView = () => {

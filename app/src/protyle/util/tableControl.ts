@@ -1534,8 +1534,9 @@ export class TableControl {
                 click: () => this.paste(),
             }).element);
             menu.append(new MenuItem({
-                icon: "iconTrashcan",
+                icon: "iconClear",
                 label: window.siyuan.languages.clear,
+                warning: true,
                 click: () => this.clearCells(),
             }).element);
         }
@@ -1604,6 +1605,7 @@ export class TableControl {
                 menu.append(new MenuItem({
                     icon: "iconClear",
                     label: window.siyuan.languages.clear,
+                    warning: true,
                     click: () => this.clearCells(),
                 }).element);
                 menu.append(new MenuItem({

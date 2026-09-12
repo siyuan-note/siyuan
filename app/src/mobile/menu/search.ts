@@ -382,7 +382,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
     addClearButton({
         inputElement: searchInputElement,
         className: "toolbar__icon",
-        icon: "iconCloseRound",
+        icon: "iconClear",
         clearCB() {
             config.page = 1;
             updateSearchResult(config, element, true);
@@ -402,7 +402,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
     addClearButton({
         inputElement: replaceInputElement,
         className: "toolbar__icon",
-        icon: "iconCloseRound",
+        icon: "iconClear",
     });
     const criteriaData: Config.IUILayoutTabSearchConfig[] = [];
     initCriteriaMenu(element.querySelector("#criteria"), criteriaData, config);
@@ -939,7 +939,7 @@ const goAsset = () => {
     addClearButton({
         inputElement,
         className: "toolbar__icon",
-        icon: "iconCloseRound",
+        icon: "iconClear",
         clearCB() {
             assetInputEvent(assetsElement, localSearch);
         }

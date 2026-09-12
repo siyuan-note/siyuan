@@ -1,4 +1,5 @@
 import {Layout} from "./index";
+import {withFetchTimeout} from "../util/fetchTimeout";
 import {Wnd} from "./Wnd";
 import {Tab} from "./Tab";
 import type {Model} from "./Model";
@@ -210,9 +211,20 @@ export const exportLayout = async (options: {
     errorExit: boolean
 }) => {
     const editors = getAllEditor();
-    for (let i = 0; i < editors.length; i++) {
-        await saveScroll(editors[i].protyle);
-    }
+    await withFetchTimeout(async (signal) => {
+        for (let i = 0; i < editors.length; i++) {
+            if (signal?.aborted) {
+                return;
+            }
+            await saveScroll(editors[i].protyle);
+        }
+    }, undefined, options.errorExit ? 30000 : 0).catch((error) => {
+        if (error?.name !== "TimeoutError") {
+            throw error;
+        }
+        // 关闭时滚动位置保存超时，继续保存布局并执行退出流程。
+        console.warn("Save scroll timed out before closing");
+    });
     if (isWindow()) {
         const layoutJSON: any = {
             layout: {},

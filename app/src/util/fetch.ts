@@ -4,6 +4,7 @@ import {ipcRenderer} from "electron";
 /// #endif
 import {processMessage} from "./processMessage";
 import {kernelError} from "./kernelFault";
+import {withFetchTimeout} from "./fetchTimeout";
 
 export const fetchPost = (
     url: string,
@@ -11,7 +12,9 @@ export const fetchPost = (
     cb?: (response: IWebSocketData) => void,
     headers?: Record<string, string>,
     failCallback?: (response: IWebSocketData) => void,
-    signal?: AbortSignal) => {
+    signal?: AbortSignal,
+    timeout = url === "/api/system/exit" || url === "/api/system/setWorkspaceDir" ||
+        (url === "/api/system/setUILayout" && data?.errorExit) ? 30000 : 0) => {
     const init: RequestInit = {
         method: "POST",
     };
@@ -41,7 +44,7 @@ export const fetchPost = (
         init.signal = signal;
     }
     let isGetFile202 = false;
-    return fetch(url, init).then((response) => {
+    return withFetchTimeout((requestSignal) => fetch(url, {...init, signal: requestSignal}).then((response) => {
         switch (response.status) {
             case 403:
             case 404:
@@ -71,7 +74,7 @@ export const fetchPost = (
                     return response.text();
                 }
         }
-    }).then((response: IWebSocketData) => {
+    }), signal, timeout).then((response: IWebSocketData) => {
         if (failCallback && url === "/api/file/getFile" && isGetFile202) {
             failCallback(response);
             return;

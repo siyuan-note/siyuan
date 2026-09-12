@@ -18,6 +18,7 @@ import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {loadTemplateDirectories, openTemplateManager} from "../template/manager";
 import {Dialog} from "../dialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {focusBlock, focusByRange, getEditorRange} from "../protyle/util/selection";
 /// #if !MOBILE
 import {openAsset, openAssetInBackground, openBy} from "../editor/util";
@@ -374,43 +375,26 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
                 event.preventDefault();
                 break;
             } else if (type === "addCustom") {
-                const addDialog = new Dialog({
+                const addDialog = openInputDialog({
                     title: window.siyuan.languages.attrName,
-                    content: `<div class="b3-dialog__content"><input spellcheck="false" class="b3-text-field fn__block" value=""></div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-                    width: isMobile() ? "92vw" : "520px",
-                });
-                addDialog.element.setAttribute("data-key", Constants.DIALOG_SETCUSTOMATTR);
-                const inputElement = addDialog.element.querySelector("input") as HTMLInputElement;
-                const btnsElement = addDialog.element.querySelectorAll(".b3-button");
-                addDialog.bindInput(inputElement, () => {
-                    (btnsElement[1] as HTMLButtonElement).click();
-                });
-                inputElement.focus();
-                inputElement.select();
-                btnsElement[0].addEventListener("click", () => {
-                    addDialog.destroy();
-                });
-                btnsElement[1].addEventListener("click", () => {
-                    const value = inputElement.value.toLowerCase();
-                    if (!isValidCustomAttrName(value)) {
-                        showMessage(window.siyuan.languages._kernel[25]);
-                        return false;
-                    }
-                    let existElement: HTMLElement | false;
-                    Array.from(dialog.element.querySelectorAll('.custom-attr[data-type="custom"] .b3-label .fn__flex-1')).find((labelItem: HTMLElement) => {
-                        if (labelItem.textContent === value) {
-                            existElement = hasClosestByClassName(labelItem, "b3-label");
-                            return true;
+                    value: "",
+                    onConfirm: (inputValue, addDialog) => {
+                        const value = inputValue.toLowerCase();
+                        if (!isValidCustomAttrName(value)) {
+                            showMessage(window.siyuan.languages._kernel[25]);
+                            return;
                         }
-                    });
-                    if (existElement) {
-                        showMessage(window.siyuan.languages.hasAttrName.replace("${x}", value));
-                    } else {
-                        target.parentElement.insertAdjacentHTML("beforebegin", `<div class="b3-label b3-label--noborder">
+                        let existElement: HTMLElement | false;
+                        Array.from(dialog.element.querySelectorAll('.custom-attr[data-type="custom"] .b3-label .fn__flex-1')).find((labelItem: HTMLElement) => {
+                            if (labelItem.textContent === value) {
+                                existElement = hasClosestByClassName(labelItem, "b3-label");
+                                return true;
+                            }
+                        });
+                        if (existElement) {
+                            showMessage(window.siyuan.languages.hasAttrName.replace("${x}", value));
+                        } else {
+                            target.parentElement.insertAdjacentHTML("beforebegin", `<div class="b3-label b3-label--noborder">
     <div class="fn__flex">
         <span class="fn__flex-1">${value}</span>
         <span data-action="remove" class="block__icon block__icon--show"><svg><use xlink:href="#iconMin"></use></svg></span>
@@ -418,12 +402,14 @@ export const openFileAttr = (attrs: Record<string, string>, focusName = "bookmar
     <div class="fn__hr"></div>
     <textarea style="resize: vertical" spellcheck="false" data-name="custom-${value}" class="b3-text-field fn__block" rows="1" placeholder="${window.siyuan.languages.attrValue1}"></textarea>
 </div>`);
-                        const newInputElement = target.parentElement.previousElementSibling.querySelector(".b3-text-field") as HTMLInputElement;
-                        newInputElement.focus();
-                        bindAttrInput(newInputElement, attrs.id);
-                        addDialog.destroy();
-                    }
+                            const newInputElement = target.parentElement.previousElementSibling.querySelector(".b3-text-field") as HTMLInputElement;
+                            newInputElement.focus();
+                            bindAttrInput(newInputElement, attrs.id);
+                            addDialog.destroy();
+                        }
+                    },
                 });
+                addDialog.element.setAttribute("data-key", Constants.DIALOG_SETCUSTOMATTR);
                 event.stopPropagation();
                 event.preventDefault();
                 break;

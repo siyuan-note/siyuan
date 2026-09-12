@@ -1,6 +1,7 @@
 import type {SettingTabBuilder} from "../setting/builder";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
+import {openInputDialog} from "../../dialog/inputDialog";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {Constants} from "../../constants";
 import {isBrowser, isMobile} from "../../util/functions";
@@ -419,31 +420,16 @@ const mountOIDCButton = (root: HTMLElement) => {
 
 const mountAuthCodeButton = (root: HTMLElement) => {
     root.querySelector("#authCode")?.addEventListener("click", () => {
-        const dialog = new Dialog({
+        const dialog = openInputDialog({
             title: window.siyuan.languages.about5,
-            content: `<div class="b3-dialog__content">
-    <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.about5}" value="${window.siyuan.config.accessAuthCode}">
-    <div class="b3-label__text">${window.siyuan.languages.about6}</div>
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-            width: isMobile() ? "92vw" : "520px",
+            value: window.siyuan.config.accessAuthCode,
+            placeholder: window.siyuan.languages.about5,
+            description: window.siyuan.languages.about6,
+            onConfirm: (value) => {
+                fetchPost("/api/system/setAccessAuthCode", {accessAuthCode: value});
+            },
         });
-        const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
-        const btnsElement = dialog.element.querySelectorAll(".b3-button");
         dialog.element.setAttribute("data-key", Constants.DIALOG_ACCESSAUTHCODE);
-        dialog.bindInput(inputElement, () => {
-            (btnsElement[1] as HTMLButtonElement).click();
-        });
-        inputElement.select();
-        btnsElement[0].addEventListener("click", () => {
-            dialog.destroy();
-        });
-        btnsElement[1].addEventListener("click", () => {
-            fetchPost("/api/system/setAccessAuthCode", {accessAuthCode: inputElement.value});
-        });
     });
 };
 

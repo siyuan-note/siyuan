@@ -16,6 +16,8 @@
 	"flashcardSourceHistory": "Historique de configuration de la source des cartes",
 	"flashcardSourceHistoryTip": "Restaurez les paramètres et les références de blocs en conservant la progression des révisions ; restaurez les questions et réponses depuis l’historique du document lié",
 	"flashcardSourceRestoreConfirm": "Restaurer cette configuration ? Toutes les cartes de cette source seront concernées ; la progression des révisions restera inchangée",
+	"mobileBarsAutoHide": "Masquer automatiquement les barres supérieure et inférieure pendant le défilement",
+	"mobileBarsAutoHideTip": "Faites défiler vers le bas pour masquer la barre de titre, le fil d’Ariane et la barre de navigation inférieure, et vers le haut pour les afficher",
 	"bodyGradient": "Dégradé de fond",
 	"bodyGradientTip": "Personnaliser ou désactiver le dégradé de fond ; les couleurs automatiques dépendent du nom de l’espace de travail",
 	"bodyGradientAuto": "Automatique (nom de l’espace de travail)",

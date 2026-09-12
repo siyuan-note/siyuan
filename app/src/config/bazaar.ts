@@ -791,7 +791,6 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             if (!bazaar._isMountCurrent(mount)) {
                 return;
             }
-            contentElement.removeAttribute("data-loading");
             const activeBtn = contentElement.previousElementSibling.querySelector('.b3-button[data-type^="my"]:not(.b3-button--outline)') as HTMLElement;
             if (activeBtn?.getAttribute("data-type") !== myType) {
                 return;
@@ -898,6 +897,8 @@ type="checkbox">
                     bazaar._refreshReadmeDetail(bazaarType, packageName);
                 }
             }
+        }, undefined, undefined, undefined, 30000).finally(() => {
+            contentElement.removeAttribute("data-loading");
         });
         return true;
     },

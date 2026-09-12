@@ -16,6 +16,8 @@
 	"flashcardSourceHistory": "Historial de configuración de la fuente de tarjetas",
 	"flashcardSourceHistoryTip": "Restaura la configuración y las referencias a bloques conservando el progreso de repaso; recupera preguntas y respuestas desde el historial del documento vinculado",
 	"flashcardSourceRestoreConfirm": "¿Restaurar esta configuración? Afectará a todas las tarjetas de esta fuente; el progreso de repaso no cambiará",
+	"mobileBarsAutoHide": "Ocultar automáticamente las barras superior e inferior al desplazarse",
+	"mobileBarsAutoHideTip": "Desplázate hacia abajo para ocultar la barra de título, la ruta de navegación y la barra inferior; hacia arriba para mostrarlas",
 	"bodyGradient": "Degradado de fondo",
 	"bodyGradientTip": "Personalizar o desactivar el degradado de fondo; los colores automáticos se basan en el nombre del espacio de trabajo",
 	"bodyGradientAuto": "Automático (nombre del espacio de trabajo)",

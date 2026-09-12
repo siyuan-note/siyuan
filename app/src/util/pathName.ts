@@ -19,6 +19,7 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {mergePathSegments} from "./mergePathSegments";
 import {expandFileTree} from "../layout/dock/fileTreeAnimation";
 import {getHostCapabilities} from "./hostCapabilities";
+import {highlightSearchText} from "./searchHighlight";
 
 export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string) => {
     if (!getHostCapabilities().localFileSystem) {
@@ -341,31 +342,46 @@ export const movePathTo = (options: {
         searchTreeElement.classList.add("fn__none");
         searchListElement.classList.remove("fn__none");
         searchListElement.scrollTo(0, 0);
+        const keyword = inputElement.value;
+        const caseSensitive = window.siyuan.config.search.caseSensitive;
         fetchPost("/api/filetree/searchDocs", {
-            k: inputElement.value,
+            k: keyword,
             flashcard: options.flashcard,
             excludeIDs: options.rootIDs,
         }, (data) => {
+            if (inputElement.value !== keyword) {
+                return;
+            }
+            const highlight = (text: string) => highlightSearchText(text, keyword, caseSensitive);
             let fileHTML = "";
             data.data.forEach((item: {
                 boxIcon: string,
                 box: string,
                 hPath: string,
                 path: string,
+                name?: string,
+                alias?: string,
                 newFlashcardCount: string,
                 dueFlashcardCount: string,
                 flashcardCount: string
             }) => {
                 let countHTML = "";
                 if (options.flashcard) {
-                    countHTML = `<span class="fn__flex-1"></span>
-<span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardNewCard}">${item.newFlashcardCount}</span>
+                    countHTML = `<span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardNewCard}">${item.newFlashcardCount}</span>
 <span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardDueCard}">${item.dueFlashcardCount}</span>
 <span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardCard}">${item.flashcardCount}</span>`;
                 }
+                let attributesHTML = "";
+                if (item.name) {
+                    attributesHTML += `<span class="b3-list-item__meta fn__flex" style="max-width: 30%" aria-label="${window.siyuan.languages.name} ${escapeAriaLabel(item.name)}"><svg class="b3-list-item__hinticon"><use xlink:href="#iconN"></use></svg><span class="b3-list-item__hinttext">${highlight(item.name)}</span></span>`;
+                }
+                if (item.alias) {
+                    attributesHTML += `<span class="b3-list-item__meta fn__flex" style="max-width: 30%" aria-label="${window.siyuan.languages.alias} ${escapeAriaLabel(item.alias)}"><svg class="b3-list-item__hinticon"><use xlink:href="#iconA"></use></svg><span class="b3-list-item__hinttext">${highlight(item.alias)}</span></span>`;
+                }
                 fileHTML += `<li class="b3-list-item${fileHTML === "" ? " b3-list-item--focus" : ""}" data-path="${item.path}" data-box="${item.box}"${getFileTreeDefaultIconAttr(item.boxIcon, "notebook")}>
     ${getFileTreeIconHTML(item.boxIcon, "notebook", "b3-list-item__graphic", true)}
-    <span class="b3-list-item__showall" style="padding: 4px 0">${escapeHtml(item.hPath)}</span>
+    <span class="b3-list-item__showall fn__flex-1" style="padding: 4px 0; min-width: 0">${highlight(item.hPath)}</span>
+    ${attributesHTML}
     ${countHTML}
 </li>`;
             });
@@ -373,9 +389,22 @@ export const movePathTo = (options: {
         });
     };
 
+    const saveMovePathHistory = () => {
+        if (inputElement.value) {
+            let list: string[] = window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys;
+            list.splice(0, 0, inputElement.value);
+            list = Array.from(new Set(list));
+            if (list.length > window.siyuan.config.search.limit) {
+                list.splice(window.siyuan.config.search.limit, list.length - window.siyuan.config.search.limit);
+            }
+            window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys = list;
+        }
+        window.siyuan.storage[Constants.LOCAL_MOVE_PATH].k = inputElement.value;
+        setStorageVal(Constants.LOCAL_MOVE_PATH, window.siyuan.storage[Constants.LOCAL_MOVE_PATH]);
+    };
     const toggleMovePathHistory = () => {
         const keys = window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys;
-        if (!keys || keys.length === 0 || (keys.length === 1 && keys[0] === inputElement.value)) {
+        if (!keys || keys.length === 0) {
             return;
         }
         const menu = new Menu(Constants.MENU_MOVE_PATH_HISTORY);
@@ -394,7 +423,7 @@ export const movePathTo = (options: {
         const separatorElement = menu.addSeparator(1);
         let current = true;
         keys.forEach((s: string) => {
-            if (s !== inputElement.value && s) {
+            if (s) {
                 const menuItem = menu.addItem({
                     iconHTML: "",
                     label: escapeHtml(s),
@@ -416,7 +445,8 @@ export const movePathTo = (options: {
                                     element.remove();
                                 }
                             } else {
-                                inputElement.value = element.textContent;
+                                inputElement.value = s;
+                                saveMovePathHistory();
                                 inputEvent();
                                 window.siyuan.menus.menu.remove();
                             }
@@ -448,19 +478,7 @@ export const movePathTo = (options: {
     inputElement.addEventListener("input", (event: InputEvent) => {
         inputEvent(event);
     });
-    inputElement.addEventListener("blur", () => {
-        if (inputElement.value) {
-            let list: string[] = window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys;
-            list.splice(0, 0, inputElement.value);
-            list = Array.from(new Set(list));
-            if (list.length > window.siyuan.config.search.limit) {
-                list.splice(window.siyuan.config.search.limit, list.length - window.siyuan.config.search.limit);
-            }
-            window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys = list;
-        }
-        window.siyuan.storage[Constants.LOCAL_MOVE_PATH].k = inputElement.value;
-        setStorageVal(Constants.LOCAL_MOVE_PATH, window.siyuan.storage[Constants.LOCAL_MOVE_PATH]);
-    });
+    inputElement.addEventListener("blur", saveMovePathHistory);
     const lineHeight = 28;
     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.isComposing) {

@@ -70,6 +70,7 @@ test("custom top bar preserves content and handlers and registers a configurable
     assert.equal(element.innerHTML, "Countdown");
     assert.equal(element.onclick, onclick);
     assert.equal(element.getAttribute("data-menu"), null);
+    assert.equal(element.getAttribute("data-topbar-custom"), "true");
     assert.equal(element.id, "plugin_test:timer");
     assert.equal(element.getAttribute("data-id"), "timer");
     assert.equal(element.getAttribute("data-topbar-entry"), getPluginTopBarEntryKey("test", "timer"));
@@ -94,6 +95,7 @@ test("same ID replaces custom elements and supports switching between icons and 
     assert.equal(replacement.replacement, newIcon);
     assert.equal(replacement.innerHTML, "Countdown");
     assert.equal(newIcon.className, "toolbar__item ariaLabel");
+    assert.equal(newIcon.getAttribute("data-topbar-custom"), null);
     assert.equal(plugin.topBarIcons.length, 1);
     plugin.removeTopBar("timer");
     assert.equal(newIcon.removed, true);
@@ -142,6 +144,38 @@ test("custom elements move into the toolbar and keep their slot until their side
     assert.deepEqual(insertions, ["#barPlugins"]);
     plugin.addTopBar({id: "timer", title: "Left", element, position: "left"});
     assert.deepEqual(insertions, ["#barPlugins", "#drag"]);
+});
+
+test("visibility menu leaves custom controls blank while preserving ordinary plugin icons", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/config/entryVisibility/menu.ts"), "utf8");
+    const compiled = ts.transpileModule(source, {
+        compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
+    }).outputText;
+    const custom = new TestElement();
+    custom.setAttribute("data-topbar-entry", "custom");
+    custom.setAttribute("data-topbar-custom", "true");
+    Object.assign(custom, {querySelector: () => { throw new Error("Custom content must not be inspected"); }});
+    const icon = new TestElement();
+    icon.setAttribute("data-topbar-entry", "icon");
+    Object.assign(icon, {querySelector: (selector: string) => selector === "use" ?
+        {getAttribute: () => "#iconClock"} : null});
+    const dependencies = {
+        TOP_BAR_ROOT_PATH: "topBar",
+        STATUS_BAR_ROOT_PATH: "statusBar",
+        buildEntryVisibilityMenuItems: (_path: string, runtime: {getEntryIcon: (path: string) => object}) => [
+            runtime.getEntryIcon("topBar.custom"), runtime.getEntryIcon("topBar.icon"),
+        ],
+    };
+    const exports: {buildEntryVisibilityMenuItems?: (path: string) => Array<Pick<IMenu, "icon" | "iconHTML">>} = {};
+    runInNewContext(compiled, {
+        exports,
+        require: () => dependencies,
+        document: {querySelectorAll: () => [custom, icon]},
+        window: {siyuan: {config: {readonly: false}, languages: {}}},
+    });
+    const items = exports.buildEntryVisibilityMenuItems("topBar");
+    assert.equal(Object.keys(items[0]).length, 0);
+    assert.equal(items[1].icon, "iconClock");
 });
 
 test("plugin menu supports custom content without SVG icons", () => {

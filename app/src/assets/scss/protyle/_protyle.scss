@@ -949,6 +949,11 @@
 
   .protyle-content {
     overflow: visible;
+
+    &[data-padding-mode="responsive"] {
+      // 单元格由内容参与列宽计算，不能隔离内部列表等块的固有宽度。
+      container-type: normal;
+    }
   }
 
   .protyle-wysiwyg {
@@ -994,8 +999,25 @@
 
 .table__cell-rich > .list[data-type="NodeList"],
 .table__cell-editor .protyle-wysiwyg > .list {
-  // 首层列表抵消单元格的侧边留白，列表标记和正文使用相同的起始间距。
-  margin-inline-start: -8px;
+  // 首层列表只抵消起始侧留白，末端保留在内容容器内，避免窄列裁掉文字和光标。
+  margin-inline: -8px 0;
+}
+
+.table__cell-rich .li [data-table-cell-content],
+.table__cell-editor .protyle-wysiwyg .li [contenteditable="true"] {
+  // 列宽收缩时，列表缩进之外至少保留一个字符的空间。
+  min-width: 1em;
+}
+
+.table__cell-editor .protyle-wysiwyg [data-node-id] {
+  // 单元格的对齐方式优先于正文的两端对齐设置。
+  text-align: inherit;
+}
+
+.table__cell-rich > :is(.p, .h1, .h2, .h3, .h4, .h5, .h6)[data-table-cell-node],
+.table__cell-editor .protyle-wysiwyg > :is(.p, .h1, .h2, .h3, .h4, .h5, .h6) {
+  // 单元格已提供侧边留白，多段落和标题与普通文本使用相同的对齐边界。
+  padding-inline: 0;
 }
 
 .protyle-wysiwyg [data-type="NodeTable"] {

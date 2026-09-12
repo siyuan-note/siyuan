@@ -1,4 +1,5 @@
 import {Dialog} from "../dialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {isMobile, objEquals} from "../util/functions";
 import {MenuItem} from "../menus/Menu";
 import {Constants} from "../constants";
@@ -424,107 +425,94 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
     if (isSensitiveSearchConfig(config)) {
         return;
     }
-    const saveDialog = new Dialog({
+    const saveDialog = openInputDialog({
         title: window.siyuan.languages.saveCriterion,
-        content: `<div class="b3-dialog__content">
-        <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.memo}">
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-        width: isMobile() ? "92vw" : "520px",
-    });
-    saveDialog.element.setAttribute("data-key", Constants.DIALOG_SAVECRITERION);
-    const btnsElement = saveDialog.element.querySelectorAll(".b3-button");
-    saveDialog.bindInput(saveDialog.element.querySelector("input"), () => {
-        btnsElement[1].dispatchEvent(new CustomEvent("click"));
-    });
-    btnsElement[0].addEventListener("click", () => {
-        saveDialog.destroy();
-    });
-    btnsElement[1].addEventListener("click", () => {
-        const inputElement = saveDialog.element.querySelector("input");
-        const value = inputElement.value.trim();
-        if (!value) {
-            showMessage(window.siyuan.languages["_kernel"]["142"]);
-            return;
-        }
-        if (isMobile()) {
-            config.k = (document.querySelector("#toolbarSearch") as HTMLInputElement).value;
-            config.r = (element.querySelector("#toolbarReplace") as HTMLInputElement).value;
-        } else {
-            config.k = (element.querySelector("#searchInput") as HTMLInputElement).value;
-            config.r = (element.querySelector("#replaceInput") as HTMLInputElement).value;
-        }
-        const criteriaElement = element.querySelector("#criteria").firstElementChild;
-        let hasSameName = "";
-        let hasSameConfig = "";
-        criteriaData.forEach(item => {
-            if (item.name === value) {
-                hasSameName = item.name;
+        value: "",
+        placeholder: window.siyuan.languages.memo,
+        onConfirm: (inputValue, saveDialog) => {
+            const inputElement = saveDialog.element.querySelector("input");
+            const value = inputValue.trim();
+            if (!value) {
+                showMessage(window.siyuan.languages["_kernel"]["142"]);
+                return;
             }
-            if (configIsSame(item, config)) {
-                hasSameConfig = item.name;
-            }
-        });
-        inputElement.blur();
-        if (hasSameName && !hasSameConfig) {
-            confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchOverwrite, () => {
-                Array.from(criteriaElement.children).forEach(item => {
-                    if (item.textContent === value) {
-                        item.remove();
-                    }
-                });
-                criteriaData.find((item, index) => {
-                    if (item.name === value) {
-                        criteriaData.splice(index, 1);
-                        return true;
-                    }
-                });
-                saveCriterionData(config, criteriaData, element, value, saveDialog);
-            });
-        } else if (hasSameName && hasSameConfig) {
-            if (hasSameName === hasSameConfig) {
-                saveDialog.destroy();
+            if (isMobile()) {
+                config.k = (document.querySelector("#toolbarSearch") as HTMLInputElement).value;
+                config.r = (element.querySelector("#toolbarReplace") as HTMLInputElement).value;
             } else {
-                const removeName = hasSameName === value ? hasSameConfig : hasSameName;
-                confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchRemoveName.replace("${x}", removeName).replace("${y}", value), () => {
+                config.k = (element.querySelector("#searchInput") as HTMLInputElement).value;
+                config.r = (element.querySelector("#replaceInput") as HTMLInputElement).value;
+            }
+            const criteriaElement = element.querySelector("#criteria").firstElementChild;
+            let hasSameName = "";
+            let hasSameConfig = "";
+            criteriaData.forEach(item => {
+                if (item.name === value) {
+                    hasSameName = item.name;
+                }
+                if (configIsSame(item, config)) {
+                    hasSameConfig = item.name;
+                }
+            });
+            inputElement.blur();
+            if (hasSameName && !hasSameConfig) {
+                confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchOverwrite, () => {
                     Array.from(criteriaElement.children).forEach(item => {
-                        if (item.textContent === hasSameConfig || item.textContent === hasSameName) {
+                        if (item.textContent === value) {
                             item.remove();
                         }
                     });
                     criteriaData.find((item, index) => {
-                        if (item.name === removeName || item.name === hasSameName) {
-                            fetchPost("/api/storage/removeCriterion", {name: removeName});
+                        if (item.name === value) {
                             criteriaData.splice(index, 1);
                             return true;
                         }
                     });
                     saveCriterionData(config, criteriaData, element, value, saveDialog);
                 });
-            }
-        } else if (!hasSameName && hasSameConfig) {
-            confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchUpdateName.replace("${x}", hasSameConfig).replace("${y}", value), () => {
-                Array.from(criteriaElement.children).forEach(item => {
-                    if (item.textContent === hasSameConfig) {
-                        item.remove();
-                    }
+            } else if (hasSameName && hasSameConfig) {
+                if (hasSameName === hasSameConfig) {
+                    saveDialog.destroy();
+                } else {
+                    const removeName = hasSameName === value ? hasSameConfig : hasSameName;
+                    confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchRemoveName.replace("${x}", removeName).replace("${y}", value), () => {
+                        Array.from(criteriaElement.children).forEach(item => {
+                            if (item.textContent === hasSameConfig || item.textContent === hasSameName) {
+                                item.remove();
+                            }
+                        });
+                        criteriaData.find((item, index) => {
+                            if (item.name === removeName || item.name === hasSameName) {
+                                fetchPost("/api/storage/removeCriterion", {name: removeName});
+                                criteriaData.splice(index, 1);
+                                return true;
+                            }
+                        });
+                        saveCriterionData(config, criteriaData, element, value, saveDialog);
+                    });
+                }
+            } else if (!hasSameName && hasSameConfig) {
+                confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchUpdateName.replace("${x}", hasSameConfig).replace("${y}", value), () => {
+                    Array.from(criteriaElement.children).forEach(item => {
+                        if (item.textContent === hasSameConfig) {
+                            item.remove();
+                        }
+                    });
+                    criteriaData.find((item, index) => {
+                        if (item.name === hasSameConfig) {
+                            fetchPost("/api/storage/removeCriterion", {name: hasSameConfig});
+                            criteriaData.splice(index, 1);
+                            return true;
+                        }
+                    });
+                    saveCriterionData(config, criteriaData, element, value, saveDialog);
                 });
-                criteriaData.find((item, index) => {
-                    if (item.name === hasSameConfig) {
-                        fetchPost("/api/storage/removeCriterion", {name: hasSameConfig});
-                        criteriaData.splice(index, 1);
-                        return true;
-                    }
-                });
+            } else {
                 saveCriterionData(config, criteriaData, element, value, saveDialog);
-            });
-        } else {
-            saveCriterionData(config, criteriaData, element, value, saveDialog);
-        }
+            }
+        },
     });
+    saveDialog.element.setAttribute("data-key", Constants.DIALOG_SAVECRITERION);
 };
 
 export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,

@@ -16,6 +16,8 @@
 	"flashcardSourceHistory": "カードソース設定の履歴",
 	"flashcardSourceHistoryTip": "復習の進捗を維持してソース設定とブロック参照を復元します。問題文と解答は関連文書の履歴から復元してください",
 	"flashcardSourceRestoreConfirm": "このソース設定を復元しますか？このソースから生成されたすべてのカードに影響しますが、復習の進捗は変わりません",
+	"mobileBarsAutoHide": "スクロール時に上部と下部のバーを自動的に隠す",
+	"mobileBarsAutoHideTip": "下にスクロールすると上部のタイトルバー、パンくずリスト、下部のナビゲーションバーを隠し、上にスクロールすると再表示します",
 	"bodyGradient": "背景グラデーション",
 	"bodyGradientTip": "背景グラデーションをカスタマイズまたは無効化します。自動モードではワークスペース名に基づいて色を生成します",
 	"bodyGradientAuto": "自動（ワークスペース名に基づく）",

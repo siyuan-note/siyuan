@@ -16,6 +16,8 @@
 	"flashcardSourceHistory": "Card source configuration history",
 	"flashcardSourceHistoryTip": "Restore source settings and block references while keeping review progress; restore questions and answers from the linked document history",
 	"flashcardSourceRestoreConfirm": "Restore this source configuration? All cards from this source are affected; review progress stays unchanged",
+	"mobileBarsAutoHide": "Auto-hide top and bottom bars while scrolling",
+	"mobileBarsAutoHideTip": "Scroll down to hide the top title bar, breadcrumbs, and bottom navigation bar; scroll up to show them",
 	"bodyGradient": "Background gradient",
 	"bodyGradientTip": "Customize or disable the background gradient; automatic colors are based on the workspace name",
 	"bodyGradientAuto": "Automatic (workspace name)",

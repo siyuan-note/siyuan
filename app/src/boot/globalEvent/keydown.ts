@@ -205,21 +205,26 @@ const dialogArrow = (app: App, element: HTMLElement, event: KeyboardEvent) => {
 
 const editKeydown = (app: App, event: KeyboardEvent) => {
     const eventTarget = event.target as HTMLElement;
+    // 页签标题的未处理按键进入全局快捷键，不使用正文中可能残留的选区执行编辑命令。
+    if (eventTarget.closest(".tabs-header")) {
+        return false;
+    }
     if (hasClosestByClassName(eventTarget, "sy__backlink--bottom", true) &&
         !hasClosestByClassName(eventTarget, "protyle", true)) {
         return false;
     }
-    let protyle: IProtyle;
+    // 优先使用事件所属编辑器，避免只读正文获得焦点后仍命中其它编辑器的选区。
+    let protyle = getAllEditor().find(item => item.protyle.element.contains(eventTarget))?.protyle;
     let range: Range;
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
     }
     const activePanelElement = document.querySelector(".layout__tab--active");
     let isFileFocus = false;
-    if (activePanelElement && activePanelElement.classList.contains("sy__file")) {
+    if (!protyle && activePanelElement && activePanelElement.classList.contains("sy__file")) {
         isFileFocus = true;
     }
-    if (range) {
+    if (!protyle && range) {
         window.siyuan.dialogs.find(item => {
             if (item.editors) {
                 Object.keys(item.editors).find(key => {
@@ -304,6 +309,23 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             return false;
         }
     }
+    if (protyle.disabled && [
+        window.siyuan.config.keymap.general.move,
+        window.siyuan.config.keymap.general.addToDatabase,
+        window.siyuan.config.keymap.editor.general.quickMakeCard,
+        window.siyuan.config.keymap.editor.general.duplicate,
+        window.siyuan.config.keymap.editor.general.duplicateCompletely,
+        window.siyuan.config.keymap.editor.general.undo,
+        window.siyuan.config.keymap.editor.general.redo,
+    ].some(keymap => matchHotKey(keymap, event))) {
+        // 内容修改在编辑快捷键入口拦截，不阻断搜索、导航和其它全局操作。
+        event.preventDefault();
+        return true;
+    }
+    // 焦点移动到不可编辑容器后，浏览器可能没有正文选区，或仍保留其它编辑器的选区。
+    if (!range || !protyle.element.contains(range.commonAncestorContainer)) {
+        range = undefined;
+    }
     if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.general.replace, event)) {
         execByCommand({
             command: "replace",
@@ -324,7 +346,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
-    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard, event) && !window.siyuan.config.readonly && !isEncryptedBox(protyle.notebookId)) {
+    if (!isFileFocus && range && matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard, event) && !window.siyuan.config.readonly && !isEncryptedBox(protyle.notebookId)) {
         if (protyle.title?.editElement.contains(range.startContainer)) {
             quickMakeCard(protyle, [protyle.title.element]);
         } else {
@@ -371,7 +393,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
 
-    if (!isFileFocus && !event.repeat && !protyle.disabled &&
+    if (!isFileFocus && range && !event.repeat && !protyle.disabled &&
         matchHotKey(window.siyuan.config.keymap.editor.general.duplicate, event)) {
         event.preventDefault();
         event.stopPropagation();
@@ -412,7 +434,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         zoomOut({protyle, id: protyle.block.rootID, focusId: protyle.block.id});
         return true;
     }
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.focusBreadcrumb, event)) {
+    if (range && matchHotKey(window.siyuan.config.keymap.editor.general.focusBreadcrumb, event)) {
         if (protyle.breadcrumb?.focus(range)) {
             event.preventDefault();
             return true;
@@ -496,7 +518,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     }
     /// #if !MOBILE
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyRichText, event)) {
-        if (!hasClosestBlock(range.startContainer)) {
+        if (!range || !hasClosestBlock(range.startContainer)) {
             return false;
         }
         protyle.wysiwyg.copyRichText();
@@ -505,6 +527,9 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     }
     /// #endif
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyPlainText, event)) {
+        if (!range) {
+            return false;
+        }
         const nodeElement = hasClosestBlock(range.startContainer);
         if (!nodeElement) {
             return false;
@@ -526,6 +551,9 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.duplicateCompletely, event)) {
+        if (!range) {
+            return false;
+        }
         const nodeElement = hasClosestBlock(range.startContainer);
         if (!nodeElement || !nodeElement.classList.contains("av")) {
             return false;

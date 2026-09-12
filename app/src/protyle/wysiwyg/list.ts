@@ -20,7 +20,7 @@ import {
     type TListSubtype
 } from "./listContext";
 import {fetchSyncPost} from "../../util/fetch";
-import {Dialog} from "../../dialog";
+import {openInputDialog} from "../../dialog/inputDialog";
 import {isMobile} from "../../util/functions";
 import {showMessage} from "../../dialog/message";
 import {activateTrackedRangeInsertion, type ITrackedRangeInsertion} from "../util/trackedRange";
@@ -106,40 +106,31 @@ export const openOrderedListStartDialog = (protyle: IProtyle, listElement: HTMLE
         return;
     }
     const initialStart = Number.parseInt(listItemElements[0].getAttribute("data-marker"), 10);
-    const dialog = new Dialog({
+    openInputDialog({
         title: window.siyuan.languages.orderedListStart,
-        content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" type="number" min="0" max="${maxStart}" step="1"></div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
+        value: Number.isFinite(initialStart) ? Math.trunc(initialStart).toString() : "1",
+        type: "number",
+        min: "0",
+        max: String(maxStart),
+        step: "1",
         width: isMobile() ? "92vw" : "360px",
         destroyCallback() {
             if (range?.startContainer?.isConnected) {
                 focusByRange(range);
             }
-        }
-    });
-    const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
-    const buttonElements = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-button");
-    inputElement.value = Number.isFinite(initialStart) ? Math.trunc(initialStart).toString() : "1";
-    dialog.bindInput(inputElement, () => {
-        buttonElements[1].click();
-    });
-    inputElement.select();
-    buttonElements[0].addEventListener("click", () => {
-        dialog.destroy();
-    });
-    buttonElements[1].addEventListener("click", () => {
-        const start = parseOrderedListStart(inputElement.value, listItemElements.length);
-        if (start === undefined) {
-            showMessage(window.siyuan.languages.invalid, 3000, "error");
-            inputElement.focus();
-            inputElement.select();
-            return;
-        }
-        setOrderedListStart(protyle, listElement, start);
-        dialog.destroy();
+        },
+        onConfirm: (value, dialog) => {
+            const start = parseOrderedListStart(value, listItemElements.length);
+            if (start === undefined) {
+                showMessage(window.siyuan.languages.invalid, 3000, "error");
+                const inputElement = dialog.element.querySelector("input");
+                inputElement.focus();
+                inputElement.select();
+                return;
+            }
+            setOrderedListStart(protyle, listElement, start);
+            dialog.destroy();
+        },
     });
 };
 

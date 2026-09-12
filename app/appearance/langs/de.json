@@ -16,6 +16,8 @@
 	"flashcardSourceHistory": "Konfigurationsverlauf der Kartenquelle",
 	"flashcardSourceHistoryTip": "Quelleneinstellungen und Blockreferenzen wiederherstellen und den Lernfortschritt behalten; Fragen und Antworten über den Verlauf des verknüpften Dokuments wiederherstellen",
 	"flashcardSourceRestoreConfirm": "Diese Quellkonfiguration wiederherstellen? Alle Karten dieser Quelle sind betroffen; der Lernfortschritt bleibt unverändert",
+	"mobileBarsAutoHide": "Obere und untere Leiste beim Scrollen automatisch ausblenden",
+	"mobileBarsAutoHideTip": "Beim Scrollen nach unten werden die obere Titelleiste, die Brotkrumennavigation und die untere Navigationsleiste ausgeblendet, beim Scrollen nach oben wieder angezeigt",
 	"bodyGradient": "Hintergrundverlauf",
 	"bodyGradientTip": "Hintergrundverlauf anpassen oder deaktivieren; automatische Farben basieren auf dem Namen des Arbeitsbereichs",
 	"bodyGradientAuto": "Automatisch (Arbeitsbereichsname)",

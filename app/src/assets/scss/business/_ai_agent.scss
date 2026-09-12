@@ -1080,7 +1080,7 @@
   flex-direction: column;
   align-items: flex-end;
   gap: var(--nav-gap, 3px);
-  z-index: 10;
+  z-index: 6;
   border: 1px solid transparent;
   border-radius: var(--b3-border-radius-b);
   padding: 6px 4px 6px 12px;
@@ -1191,7 +1191,7 @@
   font-size: var(--b3-font-size);
   line-height: 1.6;
   color: var(--b3-theme-on-background);
-  padding: 0;
+  padding: 0 !important;
 }
 
 .agent-chat__composer-host .protyle-wysiwyg {

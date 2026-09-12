@@ -82,3 +82,37 @@ test("slash menu separator normalization removes leading, trailing, and consecut
     const items = [separator("s1"), entry("a"), separator("s2"), separator("s3"), entry("b"), separator("s4")];
     assert.deepEqual(normalizeSlashMenuSeparators(items).map((item) => item.entryKey), ["a", "s2", "b"]);
 });
+
+test("lite slash menu hides document-dependent entries and keeps local editing entries", () => {
+    const unavailable = ["database", "databaseTableView", "databaseKanbanView", "databaseGalleryView",
+        "newFileRef", "newSubDocRef", "template", "blockEmbed", "aiWriting", "widget", "unknown"];
+    const available = ["ref", "assets", "heading1", "table", "bold", "mermaid"];
+    const items = [...unavailable, ...available].map((id) => entry(id));
+    assert.deepEqual(resolve(items, {lite: true}).map((item) => item.id), available);
+    assert.deepEqual(resolve(items), items);
+    assert.deepEqual(resolve(items, {lite: true, key: "database"}), []);
+});
+
+test("lite slash menu only offers uploads when an upload implementation is available", () => {
+    const items = [entry("insertAsset"), entry("insertHTMLFile")];
+    assert.deepEqual(resolve(items, {lite: true}), []);
+    assert.deepEqual(resolve(items, {lite: true, canUpload: true}), items);
+});
+
+test("lite slash menu requires plugin opt-in even when its ID matches a built-in entry", () => {
+    const hidden = {...entry("plugin:first:bold"), id: "bold"};
+    const disabled = {...entry("plugin:second:bold"), id: "bold", showInLite: false};
+    const enabled = {...entry("plugin:third:database"), id: "database", showInLite: true};
+    const items = [hidden, disabled, enabled];
+    assert.deepEqual(resolve(items, {lite: true}), [enabled]);
+    assert.deepEqual(resolve(items), items);
+    assert.deepEqual(resolve(items, {lite: true, visible: () => false}), []);
+});
+
+test("lite slash menu preserves configured order and removes empty groups", () => {
+    const items = [separator("separator_1"), entry("database"), separator("separator_2"),
+        entry("bold"), separator("separator_3"), entry("template"), separator("separator_4"),
+        entry("italic"), separator("separator_5")];
+    assert.deepEqual(resolve(items, {lite: true, order: items.map((item) => item.entryKey).reverse()})
+        .map((item) => item.entryKey), ["italic", "separator_4", "bold"]);
+});

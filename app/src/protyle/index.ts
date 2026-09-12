@@ -432,6 +432,9 @@ export class Protyle {
             if (!options.blockId) {
                 // 搜索页签需提前初始化
                 removeLoading(this.protyle);
+                if (this.protyle.lite) {
+                    resize(this.protyle);
+                }
                 return;
             }
 

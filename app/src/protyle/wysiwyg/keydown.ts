@@ -317,16 +317,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             return;
         }
-        if (matchHotKey(Constants.SIYUAN_KEYMAP.editor.general.undo.default, event) ||
-            matchHotKey(Constants.SIYUAN_KEYMAP.editor.general.redo.default, event)) {
-            event.preventDefault();
-        }
-        if (protyle.disabled) {
-            if (event.key === "Escape" && !event.isComposing && !event.repeat) {
-                return;
-            }
-            event.stopPropagation();
-            event.preventDefault();
+        // 只读正文和页签标题不执行正文编辑逻辑，保留默认行为并交给全局快捷键处理器。
+        if (protyle.disabled || event.target.closest(".tabs-header")) {
             return;
         }
         if (!protyle.selectElement.classList.contains("fn__none") &&

@@ -2,6 +2,7 @@ import {isPaidUser, needSubscribe} from "../util/needSubscribe";
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {Dialog} from "../dialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {isMobile} from "../util/functions";
 import {processSync} from "../dialog/processSystem";
@@ -25,36 +26,19 @@ const openSyncSetting = (app?: App) => {
 };
 
 export const addCloudName = (cloudListElement: Element) => {
-    const dialog = new Dialog({
+    const dialog = openInputDialog({
         title: window.siyuan.languages.cloudSyncDir,
-        content: `<div class="b3-dialog__content">
-    <input class="b3-text-field fn__block" value="main">
-    <div class="b3-label__text">${window.siyuan.languages.reposTip}</div>
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-        width: isMobile() ? "92vw" : "520px",
+        value: "main",
+        description: window.siyuan.languages.reposTip,
+        onConfirm: (value, dialog) => {
+            cloudListElement.innerHTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">';
+            fetchPost("/api/sync/createCloudSyncDir", {name: value}, () => {
+                dialog.destroy();
+                renderSyncCloudList(cloudListElement, true);
+            });
+        },
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_SYNCADDCLOUDDIR);
-    const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
-    const btnsElement = dialog.element.querySelectorAll(".b3-button");
-    dialog.bindInput(inputElement, () => {
-        (btnsElement[1] as HTMLButtonElement).click();
-    });
-    inputElement.focus();
-    inputElement.select();
-    btnsElement[0].addEventListener("click", () => {
-        dialog.destroy();
-    });
-    btnsElement[1].addEventListener("click", () => {
-        cloudListElement.innerHTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">';
-        fetchPost("/api/sync/createCloudSyncDir", {name: inputElement.value}, () => {
-            dialog.destroy();
-            renderSyncCloudList(cloudListElement, true);
-        });
-    });
 };
 
 export const bindSyncCloudListEvent = (cloudListElement: Element, cb?: () => void) => {

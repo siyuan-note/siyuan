@@ -14,6 +14,7 @@ import {isMac, saveExportFile} from "../../protyle/util/compatibility";
 /// #if MOBILE
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {Dialog} from "../../dialog";
+import {openInputDialog} from "../../dialog/inputDialog";
 import {isInMobileApp} from "../../protyle/util/compatibility";
 import {pathPosix} from "../../util/pathName";
 import {escapeAttr, escapeHtml} from "../../util/escape";
@@ -116,32 +117,20 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "creatWorkspace") {
-                const createWorkspaceDialog = new Dialog({
+                const createWorkspaceDialog = openInputDialog({
                     title: window.siyuan.languages.new,
-                    content: `<div class="b3-dialog__content">
-    <input class="b3-text-field fn__block">
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
+                    value: "",
                     width: "92vw",
+                    onConfirm: (value, dialog) => {
+                        fetchPost("/api/system/createWorkspaceDir", {
+                            path: pathPosix().join(pathPosix().dirname(window.siyuan.config.system.workspaceDir), value),
+                        }, () => {
+                            renderWorkspaceList(workspaceDirElement);
+                            dialog.destroy();
+                        });
+                    },
                 });
                 createWorkspaceDialog.element.setAttribute("data-key", Constants.DIALOG_CREATEWORKSPACE);
-                const inputElement = createWorkspaceDialog.element.querySelector("input") as HTMLInputElement;
-                inputElement.focus();
-                const btnsElement = createWorkspaceDialog.element.querySelectorAll(".b3-button");
-                btnsElement[0].addEventListener("click", () => {
-                    createWorkspaceDialog.destroy();
-                });
-                btnsElement[1].addEventListener("click", () => {
-                    fetchPost("/api/system/createWorkspaceDir", {
-                        path: pathPosix().join(pathPosix().dirname(window.siyuan.config.system.workspaceDir), inputElement.value),
-                    }, () => {
-                        renderWorkspaceList(workspaceDirElement);
-                        createWorkspaceDialog.destroy();
-                    });
-                });
                 event.preventDefault();
                 event.stopPropagation();
                 break;

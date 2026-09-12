@@ -34,7 +34,11 @@ const focusMobileAppEditor = (element: HTMLElement) => {
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
     protyle.contentElement.className = "protyle-content";
-    if (!isMobile() && !protyle.lite && CSS.supports("container-type", "inline-size") &&
+    if (window.siyuan.config.editor.fullWidth) {
+        protyle.contentElement.dataset.fullwidth = "true";
+        protyle.preview.element.dataset.fullwidth = "true";
+    }
+    if (!isMobile() && CSS.supports("container-type", "inline-size") &&
         CSS.supports("width", "1cqi") && !protyle.options.action.includes(Constants.CB_GET_HISTORY) &&
         !protyle.options.backlinkData) {
         protyle.contentElement.dataset.paddingMode = "responsive";

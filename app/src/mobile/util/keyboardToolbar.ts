@@ -887,7 +887,10 @@ const renderKeyboardToolbar = () => {
         if (!showUtil) {
             hideKeyboardToolbarUtil();
         }
-        showKeyboardToolbar();
+        showKeyboardToolbarElement();
+        if (document.getElementById("keyboardToolbar").classList.contains("fn__none")) {
+            return;
+        }
         const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
         const range = selection.getRangeAt(0);
         const isProtyle = hasClosestByClassName(range.startContainer, "protyle-wysiwyg", true);
@@ -988,7 +991,7 @@ const renderKeyboardToolbar = () => {
     });
 };
 
-export const showKeyboardToolbar = () => {
+const showKeyboardToolbarElement = () => {
     const toolbarElement = document.getElementById("keyboardToolbar");
     if (["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName) &&
         !toolbarElement.contains(document.activeElement)) {
@@ -1041,6 +1044,15 @@ export const showKeyboardToolbar = () => {
         });
     }
     scrollKeyboardSelectionIntoView();
+};
+
+export const showKeyboardToolbar = () => {
+    showKeyboardToolbarElement();
+    if (!document.getElementById("keyboardToolbar").classList.contains("fn__none") &&
+        !getCurrentEditor()?.protyle.toolbar.isMultiSelectMode()) {
+        // 原生键盘显示回调也需要刷新操作按钮，避免选区事件被抑制后仅显示工具栏外框。
+        renderKeyboardToolbar();
+    }
 };
 
 const scrollKeyboardSelectionIntoView = () => {
@@ -1159,6 +1171,12 @@ export const hideKeyboardToolbar = () => {
 
 export const hideKeyboardToolbarByApp = (preserveSelection = false) => {
     inlineMathSelection.reset();
+    if (preserveSelection && ["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName)) {
+        // 输入法切换安全键盘时会临时隐藏，保留普通输入框焦点，避免中断密码输入。
+        preventKeyboardToolbarRender();
+        hideKeyboardToolbar();
+        return KeyboardHideResult.PreserveSelection;
+    }
     const tableCellSelectionRestored = preserveSelection && restoreRecentAndroidTableCellSelectAll();
     if (tableCellSelectionRestored) {
         return KeyboardHideResult.RestoreTableCellSelection;
@@ -1194,6 +1212,9 @@ export const activeBlur = (force = false) => {
 
     if (window.JSAndroid && window.JSAndroid.hideKeyboard) {
         window.JSAndroid.hideKeyboard();
+        // Android 在键盘退场完成后统一清理焦点，避免中断输入法绘制。
+        hideKeyboardToolbar();
+        return;
     } else if (window.JSHarmony && window.JSHarmony.hideKeyboard) {
         window.JSHarmony.hideKeyboard();
     }
@@ -1373,7 +1394,7 @@ export const initKeyboardToolbar = () => {
             <button class="keyboard__action" data-type="inline-math"><svg><use xlink:href="#iconMath"></use></svg></button>
             <button class="keyboard__action" data-type="inline-memo"><svg><use xlink:href="#iconM"></use></svg></button>
             <span class="keyboard__split" data-id="separator_2"></span>
-            <button class="keyboard__action" data-type="clear"><svg><use xlink:href="#iconClear"></use></svg></button>
+            <button class="keyboard__action" data-type="clear"><svg><use xlink:href="#iconEraser"></use></svg></button>
         </div>
     </div>
     <span class="keyboard__split"></span>
@@ -1404,8 +1425,8 @@ export const initKeyboardToolbar = () => {
     toolbarElement.addEventListener("mousedown", event => {
         const buttonElement = hasClosestByTag(event.target as HTMLElement, "BUTTON");
         const type = buttonElement && buttonElement.getAttribute("data-type");
-        if (type === "undo" || type === "redo") {
-            // 保持编辑器焦点，避免异步撤销或重做期间软键盘收起。
+        if (type === "undo" || type === "redo" || type === "block") {
+            // 保持编辑器焦点，避免工具栏操作期间软键盘收起。
             event.preventDefault();
         }
     });
@@ -1687,12 +1708,12 @@ export const initKeyboardToolbar = () => {
             window.JSAndroid?.hideKeyboard();
             return;
         } else if (type === "block") {
+            event.preventDefault();
             protyle.toolbar.range = range;
             keyboardPanelClosing = false;
             hideKeyboardToolbarUtil();
             protyle.gutter.renderMenu(protyle, nodeElement);
             window.siyuan.menus.menu.fullscreen();
-            activeBlur();
             return;
         } else if (type === "outdent") {
             if (nodeElement.classList.contains("code-block")) {

@@ -2,9 +2,11 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     canCloseTab,
+    moveTab,
     orderTabsForOverview,
     pickEvictedTabID,
     trimTabsToLimit,
+    toggleTabPin,
 } from "./mobileTabsState";
 
 type Tab = {
@@ -51,11 +53,42 @@ describe("mobile tabs state", () => {
         assert.deepEqual(orderTabsForOverview([]), []);
     });
 
-    it("hides the close button of pinned tabs only when files open in the current tab", () => {
-        assert.equal(canCloseTab(false, false), true);
-        assert.equal(canCloseTab(false, true), true);
-        assert.equal(canCloseTab(true, false), true);
-        assert.equal(canCloseTab(true, true), false);
+    it("always hides the close button of pinned tabs", () => {
+        assert.equal(canCloseTab(false), true);
+        assert.equal(canCloseTab(true), false);
+    });
+
+    it("places toggled tabs at the group boundary and preserves the order after restoring", () => {
+        const tabs = createTabs([
+            {id: "a", activeAt: 1},
+            {id: "b", activeAt: 2},
+            {id: "c", activeAt: 3},
+            {id: "d", activeAt: 4},
+        ]);
+        let result = toggleTabPin(toggleTabPin(tabs, "d"), "b");
+        assert.deepEqual(result.map((tab) => tab.id), ["d", "b", "a", "c"]);
+        result = toggleTabPin(result, "d");
+        assert.deepEqual(result.map((tab) => tab.id), ["b", "d", "a", "c"]);
+        assert.deepEqual(orderTabsForOverview(JSON.parse(JSON.stringify(result))), result);
+        assert.equal(result.find((tab) => tab.id === "d").activeAt, 4);
+        assert.equal(tabs[3].pin, undefined);
+    });
+
+    it("reorders both groups without crossing the pinned boundary", () => {
+        const tabs = createTabs([
+            {id: "a", pin: true, activeAt: 1},
+            {id: "b", pin: true, activeAt: 2},
+            {id: "c", activeAt: 3},
+            {id: "d", activeAt: 4},
+        ]);
+        let result = moveTab(tabs, "a", "b", true);
+        result = moveTab(result, "d", "c", false);
+        assert.deepEqual(result.map((tab) => tab.id), ["b", "a", "d", "c"]);
+        assert.deepEqual(moveTab(result, "a", "d", true), result);
+        assert.deepEqual(moveTab(result, "d", "a", false), result);
+        assert.deepEqual(moveTab(result, "missing", "a", false), result);
+        assert.deepEqual(moveTab(result, "a", "a", false), result);
+        assert.deepEqual(tabs.map((tab) => tab.id), ["a", "b", "c", "d"]);
     });
 
     it("never evicts pinned tabs or the active tab", () => {

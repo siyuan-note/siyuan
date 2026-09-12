@@ -1,4 +1,5 @@
 import {Dialog} from "../dialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {fetchSyncPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
@@ -281,35 +282,30 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
         }
     };
     const inputPath = (title: string, value: string, callback: (value: string) => Promise<void>, nameOnly = false) => {
-        const prompt = new Dialog({
+        const prompt = openInputDialog({
             title,
+            value,
+            label: nameOnly ? lang.name : lang.savePath,
             width: "min(520px, 92vw)",
-            content: `<div class="b3-dialog__content"><label>${nameOnly ? lang.name : lang.savePath}<div class="fn__hr"></div><input class="b3-text-field fn__block" spellcheck="false"></label></div>
-<div class="b3-dialog__action">
-<button type="button" class="b3-button b3-button--cancel" data-action="cancel">${lang.cancel}</button><div class="fn__space"></div>
-<button type="button" class="b3-button b3-button--text" data-action="confirm">${lang.confirm}</button></div>`
+            onConfirm: (value, prompt) => {
+                const input = prompt.element.querySelector<HTMLInputElement>("input");
+                if (nameOnly) {
+                    input.value = replaceFileName(value);
+                }
+                if (!input.value.trim()) {
+                    input.focus();
+                    return;
+                }
+                if (nameOnly && getTemplateRenameTarget(selected.path, input.value.trim()) === undefined) {
+                    input.setCustomValidity(lang.templateNameTip);
+                    input.reportValidity();
+                    return;
+                }
+                prompt.destroy();
+                void run(() => callback(input.value.trim()));
+            },
         });
         const input = prompt.element.querySelector<HTMLInputElement>("input");
-        input.value = value;
-        prompt.bindInput(input, () => prompt.element.querySelector<HTMLButtonElement>("[data-action=confirm]").click());
-        input.select();
-        prompt.element.querySelector("[data-action=cancel]").addEventListener("click", () => prompt.destroy());
-        prompt.element.querySelector("[data-action=confirm]").addEventListener("click", () => {
-            if (nameOnly) {
-                input.value = replaceFileName(input.value);
-            }
-            if (!input.value.trim()) {
-                input.focus();
-                return;
-            }
-            if (nameOnly && getTemplateRenameTarget(selected.path, input.value.trim()) === undefined) {
-                input.setCustomValidity(lang.templateNameTip);
-                input.reportValidity();
-                return;
-            }
-            prompt.destroy();
-            void run(() => callback(input.value.trim()));
-        });
         input.addEventListener("input", () => input.setCustomValidity(""));
     };
     const move = () => {

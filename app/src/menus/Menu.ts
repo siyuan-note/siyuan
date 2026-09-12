@@ -1,7 +1,7 @@
 import {getEventName, updateHotkeyTip} from "../protyle/util/compatibility";
 import {setPosition} from "../util/setPosition";
 import {getAnchoredMenuPosition} from "./menuPosition";
-import {updateMenuItemGroupClasses} from "./menuGroup";
+import {updateMenuGroupsOnMutation, updateMenuItemGroupClasses} from "./menuGroup";
 import {waitForSheetViewport} from "./sheetOpen";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {isMobile} from "../util/functions";
@@ -56,6 +56,8 @@ export class Menu {
         this.preventDefault = this.preventDefault.bind(this);
 
         this.element = element || document.getElementById("commonMenu");
+        // 菜单项增删后重新分组，使圆角跟随各组的首尾项；仅监听节点变化，避免分组类更新触发循环。
+        new MutationObserver(updateMenuGroupsOnMutation).observe(this.element, {childList: true, subtree: true});
         this.element.querySelector(".b3-menu__title .b3-menu__label").innerHTML = window.siyuan.languages.back;
         const activateKeymapInput = (event: Event) => {
             const target = event.target as HTMLElement;
@@ -67,11 +69,21 @@ export class Menu {
         this.element.addEventListener("focusin", activateKeymapInput);
         this.element.addEventListener("pointerdown", activateKeymapInput);
         if (isMobile()) {
+            const preserveBlockMenuFocus = (event: MouseEvent) => {
+                const name = this.element.getAttribute("data-name");
+                if ((name === Constants.MENU_BLOCK_SINGLE || name === Constants.MENU_BLOCK_MULTI) &&
+                    !(event.target as Element).closest("input, textarea, select, [contenteditable=\"true\"]")) {
+                    // 保留编辑器选区和键盘，同时允许菜单输入框正常获取焦点。
+                    event.preventDefault();
+                }
+            };
+            this.element.addEventListener("mousedown", preserveBlockMenuFocus);
             this.element.addEventListener("touchstart", this.handleSheetTouchStart, {passive: true});
             this.element.addEventListener("touchmove", this.handleSheetTouchMove, {passive: false});
             this.element.addEventListener("touchend", this.handleSheetTouchEnd);
             this.element.addEventListener("touchcancel", this.handleSheetTouchCancel);
             if (this.element.id === "commonMenu") {
+                document.getElementById("commonMenuScrim")?.addEventListener("mousedown", preserveBlockMenuFocus);
                 document.getElementById("commonMenuScrim")?.addEventListener("click", (event) => {
                     event.stopPropagation();
                     this.closeSheet();

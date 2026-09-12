@@ -16,6 +16,8 @@
 	"flashcardSourceHistory": "카드 소스 설정 기록",
 	"flashcardSourceHistoryTip": "복습 진행 상황을 유지하면서 소스 설정과 블록 참조를 복원합니다. 질문과 답변은 연결된 문서 기록에서 복원하세요",
 	"flashcardSourceRestoreConfirm": "이 소스 설정을 복원하시겠습니까? 이 소스의 모든 카드에 영향을 주지만 복습 진행 상황은 유지됩니다",
+	"mobileBarsAutoHide": "스크롤 시 상단 및 하단 표시줄 자동 숨기기",
+	"mobileBarsAutoHideTip": "아래로 스크롤하면 상단 제목 표시줄, 탐색 경로 및 하단 탐색 모음이 숨겨지고 위로 스크롤하면 다시 표시됩니다",
 	"bodyGradient": "배경 그라데이션",
 	"bodyGradientTip": "배경 그라데이션을 사용자 지정하거나 끕니다. 자동 색상은 작업 공간 이름을 기반으로 생성됩니다",
 	"bodyGradientAuto": "자동 (작업 공간 이름 기준)",

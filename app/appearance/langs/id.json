@@ -16,6 +16,8 @@
 	"flashcardSourceHistory": "Riwayat konfigurasi sumber kartu",
 	"flashcardSourceHistoryTip": "Pulihkan pengaturan sumber dan referensi blok dengan mempertahankan kemajuan ulasan; pulihkan pertanyaan dan jawaban dari riwayat dokumen terkait",
 	"flashcardSourceRestoreConfirm": "Pulihkan konfigurasi sumber ini? Semua kartu dari sumber ini akan terpengaruh; kemajuan ulasan tetap sama",
+	"mobileBarsAutoHide": "Sembunyikan bilah atas dan bawah otomatis saat menggulir",
+	"mobileBarsAutoHideTip": "Gulir ke bawah untuk menyembunyikan bilah judul atas, jejak navigasi, dan bilah navigasi bawah; gulir ke atas untuk menampilkannya",
 	"bodyGradient": "Gradien latar belakang",
 	"bodyGradientTip": "Sesuaikan atau nonaktifkan gradien latar belakang; warna otomatis didasarkan pada nama ruang kerja",
 	"bodyGradientAuto": "Otomatis (nama ruang kerja)",

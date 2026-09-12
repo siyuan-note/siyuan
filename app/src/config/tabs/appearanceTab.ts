@@ -47,6 +47,7 @@ import {
 /// #if MOBILE
 import {genMobileBottomBarSettingHTML, mountMobileBottomBarSetting} from "../../mobile/util/mobileBottomBar";
 import {genMobileSidePanelSettingHTML, mountMobileSidePanelSetting} from "../../mobile/util/mobileSidePanelSetting";
+import {genMobileBarsSettingHTML, mountMobileBarsSetting} from "../../mobile/util/mobileBarsSetting";
 /// #endif
 import {genEntryVisibilityHtml, mountEntryVisibility} from "../entryVisibility/ui";
 import {genBodyGradientHtml, mountBodyGradient} from "./bodyGradient";
@@ -889,6 +890,12 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("controls", window.siyuan.languages.configGroupControls);
 
     /// #if MOBILE
+    group.slot({
+        key: "mobileBarsAutoHide",
+        keywords: [window.siyuan.languages.mobileBarsAutoHide, window.siyuan.languages.mobileBarsAutoHideTip],
+        html: genMobileBarsSettingHTML,
+        afterMount: mountMobileBarsSetting,
+    });
     group.slot({
         key: "mobileBottomBar",
         keywords: [

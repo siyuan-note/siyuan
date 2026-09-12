@@ -83,7 +83,10 @@ export class Setting {
                     actionElement.classList.add("fn__block");
                 } else {
                     actionElement.classList.remove("fn__block");
-                    actionElement.classList.add("fn__flex-center", "fn__size200");
+                    actionElement.classList.add("fn__flex-center");
+                    if (!actionElement.classList.contains("b3-switch")) {
+                        actionElement.classList.add("fn__size200");
+                    }
                     contentElement.lastElementChild.insertAdjacentElement("beforeend", actionElement);
                 }
             }

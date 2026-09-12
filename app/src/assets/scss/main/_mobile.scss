@@ -25,6 +25,10 @@ body.body--android {
 
 body.mobile-keyboard--open {
   --mobile-bottom-bar-offset: 0px;
+
+  .status {
+    display: none;
+  }
 }
 
 .block__popover {
@@ -528,6 +532,7 @@ body.mobile-keyboard--open {
 .mobile-chrome--hidden {
   // 滚动显隐使用位移和透明度，保持栏位渲染层，避免切换可见性时卡顿。
   .mobile-topbar,
+  #editor > .protyle-breadcrumb,
   .mobile-bottom-bar {
     pointer-events: none;
   }
@@ -614,8 +619,9 @@ body.mobile-topbar--merged {
     z-index: 5;
     height: var(--mobile-breadcrumb-height);
     border-radius: 0;
+    opacity: var(--mobile-bar-opacity, 1);
     transform: translate3d(0, var(--mobile-bar-translate-y, 0), 0);
-    will-change: transform;
+    will-change: opacity, transform;
   }
 
   > .protyle-content {
@@ -681,6 +687,29 @@ body.mobile-topbar--merged {
       border-color: var(--b3-theme-primary);
       box-shadow: 0 0 0 1px var(--b3-theme-primary-lightest);
     }
+  }
+
+  &__drag {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 40px;
+    margin-right: 4px;
+    touch-action: none;
+    cursor: grab;
+    color: var(--b3-theme-on-surface-light);
+
+    svg {
+      width: 14px;
+      height: 14px;
+      pointer-events: none;
+    }
+  }
+
+  &__item--dragging {
+    opacity: .6;
   }
 
   &__item-pin {

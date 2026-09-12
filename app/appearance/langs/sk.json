@@ -16,6 +16,8 @@
 	"flashcardSourceHistory": "História nastavení zdroja kariet",
 	"flashcardSourceHistoryTip": "Obnovte nastavenia zdroja a odkazy na bloky so zachovaním pokroku opakovania; otázky a odpovede obnovte z histórie prepojeného dokumentu",
 	"flashcardSourceRestoreConfirm": "Obnoviť tieto nastavenia zdroja? Ovplyvní to všetky karty z tohto zdroja; pokrok opakovania zostane nezmenený",
+	"mobileBarsAutoHide": "Automaticky skrývať hornú a dolnú lištu pri posúvaní",
+	"mobileBarsAutoHideTip": "Posunutím nadol skryjete hornú lištu názvu, navigačnú cestu a dolnú navigačnú lištu; posunutím nahor ich zobrazíte",
 	"bodyGradient": "Prechod pozadia",
 	"bodyGradientTip": "Prispôsobte alebo vypnite prechod pozadia; automatické farby vychádzajú z názvu pracovného priestoru",
 	"bodyGradientAuto": "Automaticky (názov pracovného priestoru)",

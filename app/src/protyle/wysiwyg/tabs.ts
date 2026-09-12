@@ -11,8 +11,8 @@ import {avRender} from "../render/av/render";
 import {isHiddenTabContent} from "../render/tabsVisibility";
 import {queueTransaction} from "../util/transactionQueue";
 import {remapTabsDOMIDs} from "../util/tabsCopy";
-import {copyTextByType} from "../toolbar/util";
-import {Dialog} from "../../dialog";
+import {copySubMenu} from "../../menus/commonMenuItem";
+import {openInputDialog} from "../../dialog/inputDialog";
 import {showMessage} from "../../dialog/message";
 import {getTaskListMarker, nextTaskListMarker} from "./taskListMarker";
 import {hideElements} from "../ui/hideElements";
@@ -41,29 +41,21 @@ const editTabTask = (protyle: IProtyle, item: HTMLElement) => {
         return;
     }
     const lang = window.siyuan.languages;
-    const dialog = new Dialog({
+    openInputDialog({
         title: lang.customTaskStatus,
-        content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" maxlength="1"></div>
-<div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${lang.cancel}</button>
-<div class="fn__space"></div><button class="b3-button b3-button--text">${lang.confirm}</button></div>`,
+        value: item.getAttribute("tabs-task") || " ",
         width: "320px",
+        maxLength: 1,
+        onConfirm: (value, dialog) => {
+            const marker = value || " ";
+            if (!getTaskListMarker(`[${marker}]`, false)) {
+                showMessage(lang.invalid, 3000, "error");
+                return;
+            }
+            setTabTask(protyle, item, marker);
+            dialog.destroy();
+        },
     });
-    const input = dialog.element.querySelector("input");
-    input.value = item.getAttribute("tabs-task") || " ";
-    const buttons = dialog.element.querySelectorAll("button");
-    buttons[0].addEventListener("click", () => dialog.destroy());
-    const confirm = () => {
-        const marker = input.value || " ";
-        if (!getTaskListMarker(`[${marker}]`, false)) {
-            showMessage(lang.invalid, 3000, "error");
-            return;
-        }
-        setTabTask(protyle, item, marker);
-        dialog.destroy();
-    };
-    buttons[1].addEventListener("click", confirm);
-    dialog.bindInput(input, confirm);
-    input.select();
 };
 
 const canEdit = (protyle: IProtyle, element: Element) => !protyle.disabled &&
@@ -179,11 +171,7 @@ export const openTabsMenu = (protyle: IProtyle, tabs: HTMLElement, item: HTMLEle
     }
     const lang = window.siyuan.languages;
     const menu = new Menu();
-    menu.addItem({icon: "iconCopy", label: lang.copy, submenu: [{
-        icon: "iconRef",
-        label: lang.copyBlockRef,
-        click: () => {copyTextByType([item.dataset.nodeId], "ref");},
-    }]});
+    menu.addItem({icon: "iconCopy", label: lang.copy, submenu: copySubMenu([item.dataset.nodeId], false)});
     if (canEdit(protyle, tabs)) {
         if (item.hasAttribute("tabs-task")) {
             menu.addItem({icon: "iconCheck", label: lang.customTaskStatus, click: () => editTabTask(protyle, item)});

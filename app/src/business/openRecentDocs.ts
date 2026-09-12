@@ -140,7 +140,7 @@ export const openRecentDocs = () => {
             if (liElement) {
                 dialog.element.querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
                 liElement.classList.add("b3-list-item--focus");
-                window.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter"}));
+                liElement.dispatchEvent(new KeyboardEvent("keydown", {key: "Enter", bubbles: true}));
                 event.stopPropagation();
                 event.preventDefault();
             }

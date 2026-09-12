@@ -6,6 +6,7 @@ import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {genUUID} from "../util/genID";
+import {openFlashcardV2DocumentHistory, openFlashcardV2SourceHistory} from "./flashcardV2SourceHistory";
 import {openFlashcardV2Cleanup} from "./flashcardV2Cleanup";
 import {openFlashcardV2ReviewSession} from "./flashcardV2Session";
 import type {App} from "../index";
@@ -822,7 +823,8 @@ ${result.sourceType === "qa" ? `<span data-type="direction" class="b3-list-item_
 <span data-type="bury" class="fn__none"></span>
 <span data-type="due" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.setDueTime}"><svg><use xlink:href="#iconCalendar"></use></svg></span>
 <span data-type="flag" data-menu="true" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardFlag} - ${escapeAttr(flashcardFlagLabel(result.card.flag, flagDefinitions))}"${flashcardFlagStyle(result.card.flag)}><svg><use xlink:href="#iconBookmark"></use></svg></span>
-<span data-type="history" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.dataHistory}"><svg><use xlink:href="#iconHistory"></use></svg></span>
+<span data-type="history" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardReviewHistory}"><svg><use xlink:href="#iconHistory"></use></svg></span>
+<span data-type="sourceHistory" class="fn__none" aria-label="${window.siyuan.languages.flashcardSourceHistory}"></span>
 ${reviewSetID ? `<span data-type="exclude" class="b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconClose"></use></svg></span>` : '<span data-type="membership" class="fn__none"></span>'}
 <span data-type="reset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.reset}"><svg><use xlink:href="#iconUndo"></use></svg></span>
 <span data-type="more" data-menu="true" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>
@@ -848,6 +850,7 @@ const renderManagedCards = (cards: IFlashcardSearchResult[], grouped: boolean, r
 <svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${escapeHtml(sourceCards[0].sourceTitle || sourceCards[0].sourceBlockID || sourceID)}</span>
 <span class="b3-list-item__meta">${sourceCards.length}</span>
+<span data-type="sourceHistory" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardSourceHistory}"><svg><use xlink:href="#iconHistory"></use></svg></span>
 ${editable && !deleted ? `<span data-type="editSource" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></span>` : ""}
 <span data-type="sourceTags" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.tag}"><svg><use xlink:href="#iconTag"></use></svg></span>
 <span data-type="sourcePreset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardSourcePreset}"><svg><use xlink:href="#iconSettings"></use></svg></span>
@@ -957,7 +960,7 @@ const openFlashcardV2CardHistory = (cardID: string) => {
     let offset = 0;
     let hasNext = false;
     const dialog = new Dialog({
-        title: window.siyuan.languages.dataHistory,
+        title: window.siyuan.languages.flashcardReviewHistory,
         width: isMobile() ? "92vw" : "640px",
         height: "70vh",
         content: `<div class="b3-dialog__content fn__flex-column card__v2-panel"><div class="card__v2-management-pagination"><button data-type="previous" class="b3-button b3-button--outline" disabled>${window.siyuan.languages.previous}</button><span data-type="page" class="b3-list-item__meta"></span><button data-type="next" class="b3-button b3-button--outline" disabled>${window.siyuan.languages.next}</button></div><ul class="b3-list b3-list--background fn__flex-1 card__v2-panel-list"></ul></div>`,
@@ -1877,7 +1880,7 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
                 }
                 if (type === "sourceMore") {
                     const menu = new Menu();
-                    ["editSource", "sourceTags", "sourcePreset", "documentPolicy", "notebookPolicy", "sourceLifecycle"]
+                    ["editSource", "sourceHistory", "sourceTags", "sourcePreset", "documentPolicy", "notebookPolicy", "sourceLifecycle"]
                         .forEach((action) => {
                             const actionElement = item.querySelector(`[data-type="${action}"]`) as HTMLElement;
                             if (!actionElement) {
@@ -1936,6 +1939,13 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
                         }),
                     });
                     addElementAction("flashcardV2History", "history");
+                    addElementAction("flashcardV2SourceHistory", "sourceHistory");
+                    menu.addItem({
+                        id: "flashcardV2DocumentHistory",
+                        label: window.siyuan.languages.fileHistory,
+                        icon: "iconHistory",
+                        click: () => { void openFlashcardV2DocumentHistory(card.sourceRootID || card.sourceBlockID); },
+                    });
                     if (reviewSetID) {
                         addElementAction("flashcardV2Exclude", "exclude");
                     } else {
@@ -1957,6 +1967,13 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
                         selectedCardIDs.delete(item.dataset.id);
                     }
                     refreshSelection();
+                    return;
+                }
+                if (type === "sourceHistory") {
+                    const sourceID = item.dataset.sourceId || cards.find((card) => card.card.id === item.dataset.id)?.card.sourceID;
+                    if (sourceID) {
+                        void openFlashcardV2SourceHistory(sourceID, reloadPage);
+                    }
                     return;
                 }
                 if (type === "sourceTags") {

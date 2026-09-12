@@ -631,6 +631,50 @@ func getFlashcardHistory(c *gin.Context) {
 	ret.Data = map[string]any{"events": history}
 }
 
+func getFlashcardSourceHistory(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	request := &struct {
+		SourceID   string `json:"sourceID"`
+		RevisionID string `json:"revisionID"`
+		Limit      int    `json:"limit"`
+		Offset     int    `json:"offset"`
+	}{Limit: 50}
+	if !bindFlashcardRequest(c, ret, request) {
+		return
+	}
+	if request.RevisionID != "" {
+		version, err := model.GetFlashcardV2SourceHistoryVersion(c.Request.Context(), request.SourceID, request.RevisionID)
+		if err != nil {
+			setFlashcardAPIError(ret, err)
+			return
+		}
+		ret.Data = version
+		return
+	}
+	versions, err := model.GetFlashcardV2SourceHistory(c.Request.Context(), request.SourceID, request.Limit, request.Offset)
+	if err != nil {
+		setFlashcardAPIError(ret, err)
+		return
+	}
+	ret.Data = map[string]any{"versions": versions}
+}
+
+func restoreFlashcardSourceHistory(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	request := &flashcardv2.RestoreSourceHistoryRequest{}
+	if !bindFlashcardRequest(c, ret, request) {
+		return
+	}
+	revision, err := model.RestoreFlashcardV2SourceHistory(c.Request.Context(), *request)
+	if err != nil {
+		setFlashcardAPIError(ret, err)
+		return
+	}
+	ret.Data = revision
+}
+
 func getFlashcardStatistics(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

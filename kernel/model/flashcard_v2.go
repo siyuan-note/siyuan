@@ -1215,6 +1215,147 @@ func GetFlashcardV2History(ctx context.Context, cardID string, limit, offset int
 	return store.Projection().CardHistory(ctx, cardID, limit, offset)
 }
 
+// GetFlashcardV2SourceHistory 返回卡源配置修订，正文仍由文档历史管理。
+func GetFlashcardV2SourceHistory(ctx context.Context, sourceID string, limit, offset int) ([]flashcardv2.EntityRevision, error) {
+	store, err := requireFlashcardV2Store(ctx, false)
+	if err != nil {
+		return nil, err
+	}
+	return store.Projection().SourceHistory(ctx, sourceID, limit, offset)
+}
+
+// FlashcardV2SourceHistoryVersion 为历史引用补充当前可访问的文档位置，缺失正文不伪装成历史正文。
+type FlashcardV2SourceHistoryVersion struct {
+	flashcardv2.SourceHistoryVersion
+	Documents map[string]FlashcardV2HistoryDocument `json:"documents"`
+}
+
+type FlashcardV2HistoryDocument struct {
+	RootID     string `json:"rootID"`
+	NotebookID string `json:"notebookID"`
+	Title      string `json:"title"`
+}
+
+// GetFlashcardV2SourceHistoryVersion 读取历史配置及其引用，允许查看已缺失块的引用。
+func GetFlashcardV2SourceHistoryVersion(ctx context.Context, sourceID, revisionID string) (FlashcardV2SourceHistoryVersion, error) {
+	store, err := requireFlashcardV2Store(ctx, false)
+	if err != nil {
+		return FlashcardV2SourceHistoryVersion{}, err
+	}
+	version, err := store.Projection().SourceHistoryVersion(ctx, sourceID, revisionID)
+	if err != nil {
+		return FlashcardV2SourceHistoryVersion{}, err
+	}
+	result := FlashcardV2SourceHistoryVersion{SourceHistoryVersion: version, Documents: map[string]FlashcardV2HistoryDocument{}}
+	for _, ref := range version.References {
+		if ref.EntityType == "block" {
+			if bt := treenode.GetBlockTree(ref.EntityID); bt != nil {
+				if IsEncryptedBox(bt.BoxID) {
+					return FlashcardV2SourceHistoryVersion{}, errors.New(Conf.Language(393))
+				}
+				result.Documents[ref.EntityID] = FlashcardV2HistoryDocument{RootID: bt.RootID, NotebookID: bt.BoxID, Title: bt.HPath}
+			}
+		}
+	}
+	return result, nil
+}
+
+// RestoreFlashcardV2SourceHistory 校验历史内容引用后原子恢复配置，不回退文档或复习进度。
+func RestoreFlashcardV2SourceHistory(ctx context.Context, request flashcardv2.RestoreSourceHistoryRequest) (flashcardv2.EntityRevision, error) {
+	store, err := requireFlashcardV2Store(ctx, true)
+	if err != nil {
+		return flashcardv2.EntityRevision{}, err
+	}
+	request.ValidateVersion = func(version flashcardv2.SourceHistoryVersion) error {
+		if err := validateFlashcardV2EntityBoundary(flashcardv2.EntityCardSource, false, version.Revision.Payload); err != nil {
+			return err
+		}
+		for _, ref := range version.References {
+			if ref.EntityType == "block" {
+				if err := ValidateFlashcardBlockIDs([]string{ref.EntityID}); err != nil {
+					return err
+				}
+			}
+		}
+		var source flashcardv2.CardSource
+		if err := json.Unmarshal(version.Revision.Payload, &source); err != nil {
+			return err
+		}
+		if err := validateFlashcardV2HistoricalOcclusions(source, version.References, GetBlockDOM); err != nil {
+			return err
+		}
+		if source.SourceType == "image-occlusion" {
+			var config flashcardv2.ImageOcclusionConfig
+			if err := json.Unmarshal(source.GenerationConfig, &config); err != nil {
+				return err
+			}
+			for _, ref := range version.References {
+				if ref.ID == source.PrimaryRefID {
+					return validateFlashcardV2AdvancedSourceInput([]string{ref.EntityID}, nil,
+						flashcardv2.AdvancedModeImageOcclusion, &config, nil)
+				}
+			}
+		}
+		return nil
+	}
+	return store.RestoreSourceHistory(ctx, request)
+}
+
+// validateFlashcardV2HistoricalOcclusions 确认历史挖空仍有对应块或行级标记，避免恢复后遮挡错误内容。
+func validateFlashcardV2HistoricalOcclusions(source flashcardv2.CardSource, references []flashcardv2.CardSourceRef,
+	getDOM func(string) string) error {
+	var ids []string
+	switch source.SourceType {
+	case "cloze":
+		var config flashcardv2.ClozeGenerationConfig
+		if err := json.Unmarshal(source.GenerationConfig, &config); err != nil {
+			return err
+		}
+		for _, occlusion := range config.Occlusions {
+			ids = append(ids, occlusion.ID)
+		}
+	case "ordered":
+		var config flashcardv2.OrderedGenerationConfig
+		if err := json.Unmarshal(source.GenerationConfig, &config); err != nil {
+			return err
+		}
+		for _, step := range config.Steps {
+			ids = append(ids, step.OcclusionIDs...)
+		}
+	default:
+		return nil
+	}
+	wholeBlocks := map[string]bool{}
+	var inlineBlocks []string
+	for _, ref := range references {
+		if ref.EntityType != "block" {
+			continue
+		}
+		if strings.HasPrefix(ref.Role, "occlusion:") {
+			wholeBlocks[strings.TrimPrefix(ref.Role, "occlusion:")] = true
+		} else {
+			inlineBlocks = append(inlineBlocks, getDOM(ref.EntityID))
+		}
+	}
+	for _, id := range ids {
+		if wholeBlocks[id] {
+			continue
+		}
+		found := false
+		attribute := `data-occlusion-id="` + html.EscapeString(id) + `"`
+		for _, dom := range inlineBlocks {
+			if strings.Contains(dom, attribute) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return fmt.Errorf("flashcard inline occlusion [%s] was not found; restore the source document first", id)
+		}
+	}
+	return nil
+}
+
 // GetFlashcardV2Statistics 返回全局、复习集、查询或指定卡片范围的统计。
 func GetFlashcardV2Statistics(ctx context.Context,
 	request flashcardv2.StatisticsRequest) (flashcardv2.StatisticsResult, error) {

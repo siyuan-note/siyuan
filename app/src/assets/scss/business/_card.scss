@@ -120,6 +120,38 @@
     }
   }
 
+  &__v2-source-history {
+    min-height: 0;
+    gap: 12px;
+
+    &-preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+      gap: 16px;
+      overflow: auto;
+      min-height: 0;
+
+      section {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+
+      button {
+        margin-bottom: 8px;
+        white-space: normal;
+        text-align: start;
+      }
+
+      dt {
+        color: var(--b3-theme-on-surface);
+      }
+
+      dd {
+        margin-inline-start: 16px;
+      }
+    }
+  }
+
   &__v2-session {
     box-sizing: border-box;
     height: 100%;

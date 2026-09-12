@@ -330,13 +330,34 @@ func (store *Store) ReconcileSourceCards(ctx context.Context, operationID, sourc
 	if err = decodeStrictJSON(sourceRevision.Payload, &source); err != nil {
 		return ReconcileResult{}, err
 	}
-	templates, err := store.projection.templateRevisionsBySchema(ctx, source.SchemaID)
+	changes, result, err := store.reconcileSourceChanges(ctx, operationID, source, updatedAt)
 	if err != nil {
 		return ReconcileResult{}, err
 	}
-	existing, err := store.projection.cardRevisionsBySource(ctx, sourceID)
+	if len(changes) == 0 {
+		return result, nil
+	}
+	if err = store.projection.ValidateBusinessChanges(ctx, changes); err != nil {
+		return ReconcileResult{}, err
+	}
+	batch, err := store.applyLocked(ctx, operationID, changes)
 	if err != nil {
 		return ReconcileResult{}, err
+	}
+	result.Batch = &batch
+	return result, nil
+}
+
+// reconcileSourceChanges 根据目标卡源生成变更，调用方负责在同一批次中验证和写入。
+func (store *Store) reconcileSourceChanges(ctx context.Context, operationID string, source CardSource,
+	updatedAt int64) ([]Change, ReconcileResult, error) {
+	templates, err := store.projection.templateRevisionsBySchema(ctx, source.SchemaID)
+	if err != nil {
+		return nil, ReconcileResult{}, err
+	}
+	existing, err := store.projection.cardRevisionsBySource(ctx, source.ID)
+	if err != nil {
+		return nil, ReconcileResult{}, err
 	}
 	desired := map[string]Card{}
 	disabledTemplates := map[string]struct{}{}
@@ -346,7 +367,7 @@ func (store *Store) ReconcileSourceCards(ctx context.Context, operationID, sourc
 	for _, templateRevision := range templates {
 		var template CardTemplate
 		if err = decodeStrictJSON(templateRevision.Payload, &template); err != nil {
-			return ReconcileResult{}, err
+			return nil, ReconcileResult{}, err
 		}
 		_, sourceDisabled := disabledTemplates[template.ID]
 		if !template.Enabled || sourceDisabled {
@@ -358,12 +379,12 @@ func (store *Store) ReconcileSourceCards(ctx context.Context, operationID, sourc
 		}
 		variants, variantsErr := EnumerateCardVariants(source, template)
 		if variantsErr != nil {
-			return ReconcileResult{}, variantsErr
+			return nil, ReconcileResult{}, variantsErr
 		}
 		for _, variant := range variants {
 			key := cardVariantMapKey(template.ID, variant.Key)
 			if _, duplicate := desired[key]; duplicate {
-				return ReconcileResult{}, fmt.Errorf("duplicate generated flashcard variant [%s]", key)
+				return nil, ReconcileResult{}, fmt.Errorf("duplicate generated flashcard variant [%s]", key)
 			}
 			status := GenerationActive
 			if source.Status == "orphaned" {
@@ -385,7 +406,7 @@ func (store *Store) ReconcileSourceCards(ctx context.Context, operationID, sourc
 	for _, revision := range existing {
 		var card Card
 		if err = decodeStrictJSON(revision.Payload, &card); err != nil {
-			return ReconcileResult{}, err
+			return nil, ReconcileResult{}, err
 		}
 		existingByKey[cardVariantMapKey(card.TemplateID, card.VariantKey)] = revision
 	}
@@ -402,7 +423,7 @@ func (store *Store) ReconcileSourceCards(ctx context.Context, operationID, sourc
 		if exists {
 			var current Card
 			if err = decodeStrictJSON(existingRevision.Payload, &current); err != nil {
-				return ReconcileResult{}, err
+				return nil, ReconcileResult{}, err
 			}
 			card.ID = current.ID
 			card.CreatedAt = current.CreatedAt
@@ -411,10 +432,10 @@ func (store *Store) ReconcileSourceCards(ctx context.Context, operationID, sourc
 			card.PriorityOverride = current.PriorityOverride
 			stateRevision, stateFound, stateErr := store.projection.CurrentEntity(ctx, EntityReviewState, card.ID)
 			if stateErr != nil {
-				return ReconcileResult{}, stateErr
+				return nil, ReconcileResult{}, stateErr
 			}
 			if !stateFound || stateRevision.Deleted {
-				return ReconcileResult{}, fmt.Errorf("flashcard [%s] has no active review state", card.ID)
+				return nil, ReconcileResult{}, fmt.Errorf("flashcard [%s] has no active review state", card.ID)
 			}
 			card.UpdatedAt = current.UpdatedAt
 			if sameEntityPayload(current, card) {
@@ -427,7 +448,7 @@ func (store *Store) ReconcileSourceCards(ctx context.Context, operationID, sourc
 			revision, revisionErr := NewOperationEntityRevision(operationID, EntityCard, card.ID,
 				[]string{existingRevision.RevisionID}, updatedAt, false, card)
 			if revisionErr != nil {
-				return ReconcileResult{}, revisionErr
+				return nil, ReconcileResult{}, revisionErr
 			}
 			changes = append(changes, Change{Kind: RecordEntityRevision, Revision: &revision})
 			delete(existingByKey, key)
@@ -435,27 +456,27 @@ func (store *Store) ReconcileSourceCards(ctx context.Context, operationID, sourc
 		}
 		priorCard, priorFound, priorErr := store.projection.CurrentEntity(ctx, EntityCard, card.ID)
 		if priorErr != nil {
-			return ReconcileResult{}, priorErr
+			return nil, ReconcileResult{}, priorErr
 		}
 		if priorFound {
 			if priorCard.Deleted {
 				result.Unchanged = append(result.Unchanged, card.ID)
 				continue
 			}
-			return ReconcileResult{}, fmt.Errorf("flashcard [%s] is missing from its business projection", card.ID)
+			return nil, ReconcileResult{}, fmt.Errorf("flashcard [%s] is missing from its business projection", card.ID)
 		}
 		_, stateFound, stateErr := store.projection.CurrentEntity(ctx, EntityReviewState, card.ID)
 		if stateErr != nil {
-			return ReconcileResult{}, stateErr
+			return nil, ReconcileResult{}, stateErr
 		}
 		if stateFound {
-			return ReconcileResult{}, fmt.Errorf("new flashcard [%s] already has a review state", card.ID)
+			return nil, ReconcileResult{}, fmt.Errorf("new flashcard [%s] already has a review state", card.ID)
 		}
 		result.Created = append(result.Created, card.ID)
 		cardRevision, revisionErr := NewOperationEntityRevision(operationID, EntityCard, card.ID, nil, updatedAt,
 			false, card)
 		if revisionErr != nil {
-			return ReconcileResult{}, revisionErr
+			return nil, ReconcileResult{}, revisionErr
 		}
 		stateRevisionID := OperationRevisionID(operationID, EntityReviewState, card.ID)
 		state := ReviewState{
@@ -469,7 +490,7 @@ func (store *Store) ReconcileSourceCards(ctx context.Context, operationID, sourc
 		stateRevision, revisionErr := NewOperationEntityRevision(operationID, EntityReviewState, card.ID, nil,
 			updatedAt, false, state)
 		if revisionErr != nil {
-			return ReconcileResult{}, revisionErr
+			return nil, ReconcileResult{}, revisionErr
 		}
 		changes = append(changes,
 			Change{Kind: RecordEntityRevision, Revision: &cardRevision},
@@ -484,7 +505,7 @@ func (store *Store) ReconcileSourceCards(ctx context.Context, operationID, sourc
 		revision := existingByKey[key]
 		var card Card
 		if err = decodeStrictJSON(revision.Payload, &card); err != nil {
-			return ReconcileResult{}, err
+			return nil, ReconcileResult{}, err
 		}
 		status := GenerationDeleted
 		if _, disabled := disabledTemplates[card.TemplateID]; disabled {
@@ -499,23 +520,12 @@ func (store *Store) ReconcileSourceCards(ctx context.Context, operationID, sourc
 		updatedRevision, revisionErr := NewOperationEntityRevision(operationID, EntityCard, card.ID,
 			[]string{revision.RevisionID}, updatedAt, false, card)
 		if revisionErr != nil {
-			return ReconcileResult{}, revisionErr
+			return nil, ReconcileResult{}, revisionErr
 		}
 		changes = append(changes, Change{Kind: RecordEntityRevision, Revision: &updatedRevision})
 		result.Updated = append(result.Updated, card.ID)
 	}
-	if len(changes) == 0 {
-		return result, nil
-	}
-	if err = store.projection.ValidateBusinessChanges(ctx, changes); err != nil {
-		return ReconcileResult{}, err
-	}
-	batch, err := store.applyLocked(ctx, operationID, changes)
-	if err != nil {
-		return ReconcileResult{}, err
-	}
-	result.Batch = &batch
-	return result, nil
+	return changes, result, nil
 }
 
 func reconcileResultFromBatch(batch OperationBatch, sourceID string, updatedAt int64) (ReconcileResult, error) {

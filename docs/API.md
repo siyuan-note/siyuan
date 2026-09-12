@@ -2,6 +2,7 @@
 | [中文](API.zh-CN.md)
 | [日本語](API.ja.md)
 
+* [Flashcard source history](FLASHCARD-HISTORY-API.md)
 * [Specification](#Specification)
     * [Parameters and return values](#Parameters-and-return-values)
     * [Behavior semantics](#Behavior-semantics)

@@ -1,7 +1,7 @@
 import {fetchPost} from "../util/fetch";
 import {setPosition} from "../util/setPosition";
 import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
-import {setStorageVal, writeText} from "../protyle/util/compatibility";
+import {readText, setStorageVal, writeText} from "../protyle/util/compatibility";
 import {getAllModels} from "../layout/getAll";
 import {focusByRange} from "../protyle/util/selection";
 import {Constants} from "../constants";
@@ -38,6 +38,7 @@ import {isPdfRectAnnotation, mergePdfTextAnnotationRects} from "./pdfTextAnnotat
 export {destroyAnno, registerPdfInstance, unregisterPdfInstance} from "./annoRuntime";
 
 const RECT_RESIZE_MIN_SIZE = 8;
+const rectCopyRequests = new WeakMap<HTMLElement, object>();
 
 export const initAnno = (element: HTMLElement, pdf: any) => {
     destroyAnno(element);
@@ -244,6 +245,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
         };
         const startX = event.clientX;
         const startY = event.clientY;
+        rectCopyRequests.set(target, {});
         let bounds = initial;
         let position: number[];
         const updateAnnotationElement = () => {
@@ -305,6 +307,8 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                 data: JSON.stringify(config),
             });
             hideToolbarMenu(element);
+            copyAnno(appendPdfAnnotationId(pdf.appConfig.file.replace(location.origin, "").substr(1), id),
+                "", pdf, target, true);
         };
         const pointercancel = () => {
             target.classList.remove("pdf__rect--dragging");
@@ -1015,8 +1019,21 @@ export const hlPDFRect = (element: HTMLElement, id: string) => {
     });
 };
 
-const copyAnno = (idPath: string, fileName: string, pdf: any) => {
-    const annotationElement = rectElement;
+const copyAnno = (idPath: string, fileName: string, pdf: any, annotationElement = rectElement, automatic = false) => {
+    const request = {};
+    rectCopyRequests.set(annotationElement, request);
+    const canCopy = async () => {
+        if (!automatic) {
+            return true;
+        }
+        try {
+            const text = await readText(true);
+            return rectCopyRequests.get(annotationElement) === request && annotationElement.isConnected &&
+                typeof text === "string" && text.startsWith(`<<${idPath} `);
+        } catch (error) {
+            return false;
+        }
+    };
     const mode = annotationElement.getAttribute("data-mode");
     const content = annotationElement.getAttribute("data-content");
     const pageElement = hasClosestByClassName(annotationElement, "page");
@@ -1025,7 +1042,11 @@ const copyAnno = (idPath: string, fileName: string, pdf: any) => {
     const positions = annotation?.pages?.find(item => item.index === pageIndex)?.positions;
     const positionHash = positions ? md5(JSON.stringify(positions)).substring(0, 7) : "";
     const position = positions?.[0];
-    setTimeout(() => {
+    const initialCopyCheck = canCopy();
+    setTimeout(async () => {
+        if (!await initialCopyCheck || !await canCopy()) {
+            return;
+        }
         if (mode === "rect" ||
             (mode === "" && annotationElement.childElementCount === 1 && content.startsWith(fileName)) // 兼容历史，以前没有 mode
         ) {
@@ -1034,11 +1055,14 @@ const copyAnno = (idPath: string, fileName: string, pdf: any) => {
             }
             getRectImgData(pdf, pageIndex + 1, position).then((imageData) => {
                 let msg = "";
-                if (Constants.SIZE_UPLOAD_TIP_SIZE <= imageData.blob.size) {
+                if (!automatic && Constants.SIZE_UPLOAD_TIP_SIZE <= imageData.blob.size) {
                     msg = window.siyuan.languages.uploadFileTooLarge.replace("${x}", content + ".png")
                         .replace("${y}", filesize(imageData.blob.size, {standard: "iec"}));
                 }
-                confirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
+                confirmDialog(msg ? window.siyuan.languages.upload : "", msg, async () => {
+                    if (!await canCopy()) {
+                        return;
+                    }
                     const imageName = getRectImageName(content, imageData.rotation, positionHash,
                         PDF_RECT_CAPTURE_PROFILE);
                     const assetsDirPath = getPdfAnnotationAssetsDirPath(pdf.appConfig.file, location.origin);
@@ -1055,9 +1079,9 @@ const copyAnno = (idPath: string, fileName: string, pdf: any) => {
                             skipIfDuplicated: "true",
                             ...(assetsDirPath ? {assetsDirPath} : {}),
                         },
-                    }).then(response => {
+                    }).then(async response => {
                         const path = getAssetUploadSuccesses(response?.data)[0]?.path;
-                        if (path) {
+                        if (path && await canCopy()) {
                             writeText(`<<${idPath} "${content}">>
 ![](${path}){: style="width: ${imageData.displayWidth}px;"}`);
                         }

@@ -2791,6 +2791,7 @@
 		"392": "Obsah šifrovaných zápisníkov nie je súčasťou globálneho indexu, preto nie je dostupný graf vzťahov",
 		"393": "Šifrované zápisníky túto operáciu nepodporujú",
 		"394": "Šifrované zápisníky nepodporujú publikovanie, práva na publikovanie nie je možné nastaviť",
-		"395": "Hromadný export nepodporuje šifrované zápisníky, odomknite ich a exportujte po jednom alebo exportujte bežné zápisníky"
+		"395": "Hromadný export nepodporuje šifrované zápisníky, odomknite ich a exportujte po jednom alebo exportujte bežné zápisníky",
+		"396": "Šifrované zápisníky nepodporujú pripínanie dokumentov"
 	}
 }

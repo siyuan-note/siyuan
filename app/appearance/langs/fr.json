@@ -2791,6 +2791,7 @@
 		"392": "Le contenu des carnets chiffrés ne fait pas partie de l’index global, le graphique des relations n’est donc pas disponible",
 		"393": "Les cahiers chiffrés ne prennent pas en charge cette opération",
 		"394": "Les carnets chiffrés ne prennent pas en charge la publication, les droits de publication ne peuvent pas être configurés",
-		"395": "L’exportation par lots ne prend pas en charge les carnets chiffrés ; déverrouillez-les et exportez-les un par un, ou exportez des carnets ordinaires"
+		"395": "L’exportation par lots ne prend pas en charge les carnets chiffrés ; déverrouillez-les et exportez-les un par un, ou exportez des carnets ordinaires",
+		"396": "Les carnets chiffrés ne permettent pas d’épingler des documents"
 	}
 }

@@ -105,6 +105,9 @@ func TestPinnedDocsValidateAndMaintainReferences(t *testing.T) {
 
 func TestPinnedDocsClosedAndEncryptedNotebook(t *testing.T) {
 	f := setupFileOperationTest(t)
+	originalLangs := util.Langs
+	util.Langs = map[string]map[int]string{Conf.Lang: {396: "加密笔记本不支持置顶文档"}}
+	t.Cleanup(func() { util.Langs = originalLangs })
 	t.Cleanup(func() { forgetRuntimeEncryptedBox(f.box.ID); forgetRuntimeNormalBox(f.box.ID) })
 	if err := UpdatePinnedDocs([]string{f.sourceID}, "pin", "", false); err != nil {
 		t.Fatal(err)
@@ -124,8 +127,8 @@ func TestPinnedDocsClosedAndEncryptedNotebook(t *testing.T) {
 		t.Fatal(err)
 	}
 	forgetRuntimeNormalBox(f.box.ID)
-	if err := UpdatePinnedDocs([]string{f.sourceID}, "pin", "", false); err == nil {
-		t.Fatal("encrypted document accepted")
+	if err := UpdatePinnedDocs([]string{f.sourceID}, "pin", "", false); err == nil || err.Error() != "加密笔记本不支持置顶文档" {
+		t.Fatalf("expected localized encrypted notebook error, got %v", err)
 	}
 	docs, err = GetPinnedDocs()
 	if err != nil || len(docs) != 0 {

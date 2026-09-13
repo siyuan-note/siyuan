@@ -2791,6 +2791,7 @@
 		"392": "Inhoud van versleutelde notitieboeken maakt geen deel uit van de globale index, daarom is de relatietekening niet beschikbaar",
 		"393": "Versleutelde notitieboeken ondersteunen deze bewerking niet",
 		"394": "Versleutelde notitieboeken ondersteunen geen publicatie, publicatierechten kunnen niet worden ingesteld",
-		"395": "Batch-export ondersteunt geen versleutelde notitieboeken, ontgrendel ze en exporteer ze een voor een, of exporteer gewone notitieboeken"
+		"395": "Batch-export ondersteunt geen versleutelde notitieboeken, ontgrendel ze en exporteer ze een voor een, of exporteer gewone notitieboeken",
+		"396": "Versleutelde notitieboeken ondersteunen het vastzetten van documenten niet"
 	}
 }

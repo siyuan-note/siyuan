@@ -2791,6 +2791,7 @@
 		"392": "El contenido de los cuadernos cifrados no forma parte del índice global, por lo que el gráfico de relaciones no está disponible",
 		"393": "Los cuadernos cifrados no admiten esta operación",
 		"394": "Los cuadernos cifrados no admiten publicación, no se pueden configurar permisos de publicación",
-		"395": "La exportación por lotes no admite cuadernos cifrados; desbloquéalos y expórtalos uno por uno, o exporta cuadernos normales"
+		"395": "La exportación por lotes no admite cuadernos cifrados; desbloquéalos y expórtalos uno por uno, o exporta cuadernos normales",
+		"396": "Los cuadernos cifrados no permiten fijar documentos"
 	}
 }

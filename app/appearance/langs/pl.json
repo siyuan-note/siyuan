@@ -2791,6 +2791,7 @@
 		"392": "Treść zaszyfrowanych notatników nie jest częścią indeksu globalnego, dlatego graf relacji jest niedostępny",
 		"393": "Zaszyfrowane notatniki nie obsługują tej operacji",
 		"394": "Zaszyfrowane notatniki nie obsługują publikowania, nie można skonfigurować uprawnień publikowania",
-		"395": "Eksport zbiorczy nie obsługuje zaszyfrowanych notatników, odblokuj je i wyeksportuj pojedynczo albo wyeksportuj zwykłe notatniki"
+		"395": "Eksport zbiorczy nie obsługuje zaszyfrowanych notatników, odblokuj je i wyeksportuj pojedynczo albo wyeksportuj zwykłe notatniki",
+		"396": "Zaszyfrowane notatniki nie obsługują przypinania dokumentów"
 	}
 }

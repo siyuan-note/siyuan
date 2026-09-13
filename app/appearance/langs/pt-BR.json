@@ -2791,6 +2791,7 @@
 		"392": "O conteúdo dos cadernos criptografados não faz parte do índice global, portanto o grafo de relações não está disponível",
 		"393": "Notebooks criptografados não suportam esta operação",
 		"394": "Cadernos criptografados não são compatíveis com publicação, não é possível configurar permissões de publicação",
-		"395": "A exportação em lote não é compatível com cadernos criptografados; desbloqueie-os e exporte um por um, ou exporte cadernos comuns"
+		"395": "A exportação em lote não é compatível com cadernos criptografados; desbloqueie-os e exporte um por um, ou exporte cadernos comuns",
+		"396": "Cadernos criptografados não permitem fixar documentos"
 	}
 }

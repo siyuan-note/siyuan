@@ -2791,6 +2791,7 @@
 		"392": "Konten buku catatan terenkripsi tidak termasuk indeks global, sehingga graf hubungan tidak tersedia",
 		"393": "Buku catatan terenkripsi tidak mendukung operasi ini",
 		"394": "Buku catatan terenkripsi tidak mendukung publikasi, izin publikasi tidak dapat dikonfigurasi",
-		"395": "Ekspor massal tidak mendukung buku catatan terenkripsi, buka kuncinya lalu ekspor satu per satu, atau ekspor buku catatan biasa"
+		"395": "Ekspor massal tidak mendukung buku catatan terenkripsi, buka kuncinya lalu ekspor satu per satu, atau ekspor buku catatan biasa",
+		"396": "Buku catatan terenkripsi tidak mendukung penyematan dokumen"
 	}
 }

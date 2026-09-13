@@ -2791,6 +2791,7 @@
 		"392": "Inhalte verschlüsselter Notizbücher sind nicht Teil des globalen Index, daher ist die Beziehungsgrafik nicht verfügbar",
 		"393": "Verschlüsselte Notizbücher unterstützen diesen Vorgang nicht",
 		"394": "Verschlüsselte Notizbücher unterstützen keine Veröffentlichung, Veröffentlichungsrechte können nicht konfiguriert werden",
-		"395": "Der Stapelentexport unterstützt keine verschlüsselten Notizbücher, bitte entsperren Sie sie und exportieren Sie sie einzeln oder exportieren Sie normale Notizbücher"
+		"395": "Der Stapelentexport unterstützt keine verschlüsselten Notizbücher, bitte entsperren Sie sie und exportieren Sie sie einzeln oder exportieren Sie normale Notizbücher",
+		"396": "Verschlüsselte Notizbücher unterstützen das Anheften von Dokumenten nicht"
 	}
 }

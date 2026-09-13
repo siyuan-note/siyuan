@@ -184,6 +184,9 @@ func UpdatePinnedDocs(ids []string, action, targetID string, after bool) error {
 			continue
 		}
 		bt := treenode.GetBlockTree(id)
+		if bt != nil && IsEncryptedBox(bt.BoxID) {
+			return fmt.Errorf("%s", Conf.Language(396))
+		}
 		if !isPinnableDocument(bt) {
 			return fmt.Errorf("document [%s] cannot be pinned", id)
 		}

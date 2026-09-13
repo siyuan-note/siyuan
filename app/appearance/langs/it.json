@@ -2791,6 +2791,7 @@
 		"392": "Il contenuto dei quaderni crittografati non fa parte dell’indice globale, quindi il grafo delle relazioni non è disponibile",
 		"393": "I quaderni crittografati non supportano questa operazione",
 		"394": "I quaderni crittografati non supportano la pubblicazione, non è possibile configurare i permessi di pubblicazione",
-		"395": "L’esportazione in blocco non supporta i quaderni crittografati, sbloccali ed esportali uno alla volta, oppure esporta quaderni normali"
+		"395": "L’esportazione in blocco non supporta i quaderni crittografati, sbloccali ed esportali uno alla volta, oppure esporta quaderni normali",
+		"396": "I quaderni crittografati non supportano il fissaggio dei documenti"
 	}
 }

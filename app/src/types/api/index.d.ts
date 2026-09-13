@@ -160,6 +160,8 @@ export type HeadingFoldRequestInput = { "id": string; "scope": string; };
 
 export type HeadingLevelRequestInput = { "id"?: string; "ids"?: Array<string>; "level": number; };
 
+export type HeadingNumbersRequestInput = { "id"?: string | null; "notebook"?: string | null; };
+
 export type ImportNotebookCryptoBackupRequestInput = { "file": Blob; "password"?: string; };
 
 export type InlineStyle = { "dark": InlineStyleTheme | null; "hidden"?: boolean; "id": string; "light": InlineStyleTheme | null; "name": string; };
@@ -252,6 +254,8 @@ export type OpenNotebookRequestInput = { "app"?: string | null; "notebook": stri
 
 export type OrderedListStartData = { "found": boolean; "start": number; };
 
+export type OutlineRequestInput = { "id"?: string | null; "notebook"?: string | null; "preview"?: boolean | null; };
+
 export type OutlineStorageRequestInput = { "docID": string; };
 
 export type OutlineStorageSetRequestInput = { "docID": string; "val": { [key: string]: JSONValue }; };
@@ -303,6 +307,8 @@ export type SearchBlockCard = { "due": string; "lapses": number; "lastReview": s
 export type SearchHistoryData = { "histories": Array<string> | null; "pageCount": number; "totalCount": number; };
 
 export type SearchHistoryRequestInput = { "notebook"?: string | null; "op"?: string | null; "page"?: number | null; "query"?: string | null; "type"?: number | null; };
+
+export type SearchPath = { "blocks"?: Array<SearchBlock | null>; "box": string; "children"?: Array<SearchPath | null>; "count": number; "created": string; "depth": number; "folded": boolean; "hPath": string; "id": string; "name": string; "nodeType": string; "number"?: string; "subType": string; "type": string; "updated": string; };
 
 export type SearchSubTypes = { "heading": Record<string, boolean> | null; "list": Record<string, boolean> | null; "listItem": Record<string, boolean> | null; };
 
@@ -689,8 +695,6 @@ export type APILegacyPOSTPath =
     "/api/network/echo/*path" |
     "/api/network/forwardProxy" |
     "/api/network/proxy" |
-    "/api/outline/getDocHeadingNumbers" |
-    "/api/outline/getDocOutline" |
     "/api/petal/loadPetals" |
     "/api/petal/setPetalEnabled" |
     "/api/petal/setPetalPublishEnabled" |
@@ -1399,6 +1403,16 @@ export interface APIPOSTRoutes {
     "/api/notification/pushMsg": {
         request: NotificationRequestInput;
         response: { "code": 0; "data": NotificationData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/outline/getDocHeadingNumbers": {
+        request: HeadingNumbersRequestInput;
+        response: { "code": 0; "data": Record<string, string> | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/outline/getDocOutline": {
+        request: OutlineRequestInput;
+        response: { "code": 0; "data": Array<SearchPath | null> | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/repo/checkSnapshot": {

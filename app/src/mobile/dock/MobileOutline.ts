@@ -578,7 +578,7 @@ export class MobileOutline extends Model {
                 return;
             }
             this.update(response);
-            this.updateDocTitle(protyle?.background?.ial, response.data?.length || 0);
+            this.updateDocTitle(protyle?.background?.ial, Array.isArray(response.data) ? response.data.length : 0);
             callback?.();
         });
     }

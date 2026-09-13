@@ -17,7 +17,7 @@
 package api
 
 import (
-	"net/http"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -26,38 +26,25 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func getDocOutline(c *gin.Context) {
+var getDocOutline = contractHandler(apicontract.GetDocOutline, func(c *gin.Context, request apicontract.OutlineRequest) apicontract.Response[[]*apicontract.SearchPath] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+	if request.ID == nil {
+		return apicontract.Success[[]*apicontract.SearchPath](nil)
 	}
-
-	if nil == arg["id"] {
-		return
-	}
-
-	preview := false
-	if previewArg := arg["preview"]; nil != previewArg {
-		preview = previewArg.(bool)
-	}
-
-	rootID := arg["id"].(string)
+	rootID, preview := *request.ID, request.Preview
 	if util.InvalidIDPattern(rootID, ret) {
-		return
+		return contractFailure[[]*apicontract.SearchPath](ret)
 	}
 
-	notebook, _ := arg["notebook"].(string)
+	notebook := request.Notebook
 	if isEncryptedNotebookDeniedForPublish(c, notebook) {
-		ret.Data = []*model.Path{}
-		return
+		return apicontract.Success([]*apicontract.SearchPath{})
 	}
 	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[[]*apicontract.SearchPath](ret)
 	}
 	var headings []*model.Path
 	var err error
@@ -69,7 +56,7 @@ func getDocOutline(c *gin.Context) {
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[[]*apicontract.SearchPath](ret)
 	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
@@ -85,32 +72,27 @@ func getDocOutline(c *gin.Context) {
 			}
 		}
 	}
-	ret.Data = headings
-}
+	return apicontract.Success(searchPathContracts(headings))
+})
 
-func getDocHeadingNumbers(c *gin.Context) {
+var getDocHeadingNumbers = contractHandler(apicontract.GetDocHeadingNumbers, func(c *gin.Context, request apicontract.HeadingNumbersRequest) apicontract.Response[map[string]string] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+	if request.ID == nil {
+		return apicontract.Success[map[string]string](nil)
 	}
-
-	rootID, ok := arg["id"].(string)
-	if !ok || util.InvalidIDPattern(rootID, ret) {
-		return
+	rootID := *request.ID
+	if util.InvalidIDPattern(rootID, ret) {
+		return contractFailure[map[string]string](ret)
 	}
-
-	notebook, _ := arg["notebook"].(string)
+	notebook := request.Notebook
 	if isEncryptedNotebookDeniedForPublish(c, notebook) {
-		ret.Data = map[string]string{}
-		return
+		return apicontract.Success(map[string]string{})
 	}
 	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[map[string]string](ret)
 	}
 	numbers := map[string]string{}
 	var err error
@@ -122,7 +104,7 @@ func getDocHeadingNumbers(c *gin.Context) {
 	if nil != err {
 		ret.Code = 1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[map[string]string](ret)
 	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
@@ -141,5 +123,5 @@ func getDocHeadingNumbers(c *gin.Context) {
 		}
 	}
 
-	ret.Data = numbers
-}
+	return apicontract.Success(numbers)
+})

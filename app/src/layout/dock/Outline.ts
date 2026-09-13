@@ -313,7 +313,7 @@ export class Outline extends Model {
             }
             this.update(response);
             if (this.blockId) {
-                this.updateDocTitle((options.tab.model as Editor)?.editor?.protyle?.background?.ial, response.data?.length || 0);
+                this.updateDocTitle((options.tab.model as Editor)?.editor?.protyle?.background?.ial, Array.isArray(response.data) ? response.data.length : 0);
             }
         });
     }
@@ -580,7 +580,7 @@ export class Outline extends Model {
                     return;
                 }
                 this.update(response);
-                this.updateDocTitle(null, response.data?.length || 0);
+                this.updateDocTitle(null, Array.isArray(response.data) ? response.data.length : 0);
                 // https://github.com/siyuan-note/siyuan/issues/8372
                 if (getSelection().rangeCount > 0) {
                     const blockElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer);
@@ -769,7 +769,7 @@ export class Outline extends Model {
                 return;
             }
             this.update(response);
-            this.updateDocTitle(protyle?.background?.ial, response.data?.length || 0);
+            this.updateDocTitle(protyle?.background?.ial, Array.isArray(response.data) ? response.data.length : 0);
         });
     }
 

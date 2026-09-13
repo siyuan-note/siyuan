@@ -283,8 +283,6 @@
   {"method":"POST","path":"/api/lute/spinBlockDOM","handler":"spinBlockDOM"},
   {"method":"POST","path":"/api/lute/wpsPresentation2BlockDOM","handler":"wpsPresentation2BlockDOM"},
   {"method":"POST","path":"/api/network/forwardProxy","handler":"forwardProxy"},
-  {"method":"POST","path":"/api/outline/getDocHeadingNumbers","handler":"getDocHeadingNumbers"},
-  {"method":"POST","path":"/api/outline/getDocOutline","handler":"getDocOutline"},
   {"method":"POST","path":"/api/petal/loadPetals","handler":"loadPetals"},
   {"method":"POST","path":"/api/petal/setPetalEnabled","handler":"setPetalEnabled"},
   {"method":"POST","path":"/api/petal/setPetalPublishEnabled","handler":"setPetalPublishEnabled"},

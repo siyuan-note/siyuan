@@ -34,3 +34,16 @@ func searchBlockContracts(blocks []*model.Block) []*apicontract.SearchBlock {
 	}
 	return result
 }
+
+func searchPathContracts(values []*model.Path) []*apicontract.SearchPath {
+	if values == nil {
+		return nil
+	}
+	result := make([]*apicontract.SearchPath, len(values))
+	for i, value := range values {
+		if value != nil {
+			result[i] = &apicontract.SearchPath{ID: value.ID, Box: value.Box, Name: value.Name, Number: value.Number, HPath: value.HPath, Type: value.Type, NodeType: value.NodeType, SubType: value.SubType, Blocks: searchBlockContracts(value.Blocks), Children: searchPathContracts(value.Children), Depth: value.Depth, Count: value.Count, Folded: value.Folded, Updated: value.Updated, Created: value.Created}
+		}
+	}
+	return result
+}

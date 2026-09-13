@@ -410,3 +410,6 @@ var BatchUpdateRecentDocCloseTime = define[RecentDocsUpdateRequest, Null]("batch
 var GetInlineStyles = define[EmptyRequest, *InlineStyles]("getInlineStyles", "/api/storage/getInlineStyles", NoBody, ResponseOptions{}, "POST")
 var SetInlineStyles = define[SetInlineStylesRequest, *InlineStyles]("setInlineStyles", "/api/storage/setInlineStyles", JSONBody, ResponseOptions{}, "POST")
 var SetWorkspaceAVPalette = define[WorkspaceAVPaletteRequest, *InlineStyles]("setWorkspaceAVPalette", "/api/storage/setWorkspaceAVPalette", JSONBody, ResponseOptions{}, "POST")
+
+var GetDocOutline = define[OutlineRequest, []*SearchPath]("getDocOutline", "/api/outline/getDocOutline", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetDocHeadingNumbers = define[HeadingNumbersRequest, map[string]string]("getDocHeadingNumbers", "/api/outline/getDocHeadingNumbers", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")

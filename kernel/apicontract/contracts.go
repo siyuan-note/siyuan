@@ -374,3 +374,5 @@ var ReloadAttributeView = define[BlockIDRequest, Null]("reloadAttributeView", "/
 var ReloadUI = define[EmptyRequest, Null]("reloadUI", "/api/ui/reloadUI", NoBody, ResponseOptions{}, "POST")
 var ReloadIcon = define[EmptyRequest, Null]("reloadIcon", "/api/ui/reloadIcon", NoBody, ResponseOptions{}, "POST")
 var ReloadTheme = define[EmptyRequest, Null]("reloadTheme", "/api/ui/reloadTheme", NoBody, ResponseOptions{}, "POST")
+
+var FlushTransaction = define[EmptyRequest, Null]("flushTransaction", "/api/sqlite/flushTransaction", NoBody, ResponseOptions{}, "POST")

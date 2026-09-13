@@ -17,6 +17,7 @@
 package api
 
 import (
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"net/http"
 
 	"github.com/88250/gulu"
@@ -26,14 +27,14 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func flushTransaction(c *gin.Context) {
+var flushTransaction = contractHandler(apicontract.FlushTransaction, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 	// Add internal kernel API `/api/sqlite/flushTransaction` https://github.com/siyuan-note/siyuan/issues/10005
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
 	model.FlushTxQueue()
 	sql.FlushQueue()
-}
+
+	return apicontract.Success(apicontract.Null{})
+})
 
 func SQL(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

@@ -20,6 +20,7 @@ import {mergePathSegments} from "./mergePathSegments";
 import {expandFileTree} from "../layout/dock/fileTreeAnimation";
 import {getHostCapabilities} from "./hostCapabilities";
 import {highlightSearchText} from "./searchHighlight";
+import {addClearButton} from "./addClearButton";
 
 export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string) => {
     if (!getHostCapabilities().localFileSystem) {
@@ -79,6 +80,7 @@ export const parseSiYuanUriInfo = (uri: URL | string | null | undefined): ISiYua
                 avItemID,
                 avViewID,
                 avGroupID,
+                avStandalone: uriObj.searchParams.get("avStandalone") === "1",
             };
         }
         return null;
@@ -173,7 +175,7 @@ export const getAssetExtension = (assetPath: string) => {
 
 export const getAssetName = (assetPath: string) => {
     const pathWithoutQuery = getAssetPathWithoutQuery(assetPath);
-    return pathPosix().basename(pathWithoutQuery, getAssetExtension(pathWithoutQuery)).replace(/-\d{14}-\w{7}/, "");
+    return pathPosix().basename(pathWithoutQuery, getAssetExtension(pathWithoutQuery)).replace(/-\d{14}-\w{7}$/, "");
 };
 
 export const isLocalPath = (link: string) => {
@@ -446,6 +448,7 @@ export const movePathTo = (options: {
                                 }
                             } else {
                                 inputElement.value = s;
+                                inputElement.dispatchEvent(new Event("change"));
                                 saveMovePathHistory();
                                 inputEvent();
                                 window.siyuan.menus.menu.remove();
@@ -472,6 +475,14 @@ export const movePathTo = (options: {
         });
     };
     inputEvent();
+    addClearButton({
+        inputElement,
+        right: 8,
+        clearCB() {
+            saveMovePathHistory();
+            inputEvent();
+        }
+    });
     inputElement.addEventListener("compositionend", (event: InputEvent) => {
         inputEvent(event);
     });

@@ -272,6 +272,9 @@ export const initWindow = async (app: App) => {
         try {
             if (window.siyuan.config.export.pdfFooter.trim()) {
                 const response = await fetchSyncPost("/api/template/renderSprig", {template: window.siyuan.config.export.pdfFooter});
+                if (response.code !== 0) {
+                    throw new Error(response.msg);
+                }
                 ipcData.pdfOptions.displayHeaderFooter = true;
                 ipcData.pdfOptions.headerTemplate = "<span></span>";
                 ipcData.pdfOptions.footerTemplate = `<div style="text-align:center;width:100%;font-size:10px;line-height:12px;">
@@ -285,6 +288,9 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
             });
             let pdfFilePath = path.join(savePath, replaceLocalPath(ipcData.rootTitle) + ".pdf");
             const responseUnique = await fetchSyncPost("/api/file/getUniqueFilename", {path: pdfFilePath});
+            if (responseUnique.code !== 0 || !responseUnique.data) {
+                return;
+            }
             pdfFilePath = responseUnique.data.path;
             fetchPost("/api/export/exportHTML", {
                 id: ipcData.rootId,

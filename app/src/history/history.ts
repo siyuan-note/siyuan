@@ -1,6 +1,6 @@
-import {openInputDialog} from "../dialog/inputDialog";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {Constants} from "../constants";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -26,50 +26,41 @@ const repoHistoryEditors = new WeakMap<Element, Protyle>();
 const snapshotMemos = new WeakMap<Element, Map<string, string>>();
 
 const openSnapshotMemo = (repoElement: Element, id?: string, memo = "") => {
-    const dialog = new Dialog({
+    const dialog = openInputDialog({
         title: id ? window.siyuan.languages.editSnapshotMemo : window.siyuan.languages.snapshotMemo,
-        content: `<div class="b3-dialog__content">
-    ${id ? `<div class="ft__secondary">${window.siyuan.languages.snapshotMemoLocalTip}</div><div class="fn__hr"></div>` : ""}
-    <textarea class="b3-text-field fn__block" placeholder="${escapeAttr(window.siyuan.languages.snapshotMemoTip)}"></textarea>
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-        width: isMobile() ? "92vw" : "520px",
+        value: memo,
+        multiline: true,
+        placeholder: window.siyuan.languages.snapshotMemoTip,
+        description: id ? window.siyuan.languages.snapshotMemoLocalTip : undefined,
+        onConfirm: async (value, dialog) => {
+            const textarea = dialog.element.querySelector("textarea");
+            const button = dialog.element.querySelector<HTMLButtonElement>(".b3-button--text");
+            if (button.disabled) {
+                return;
+            }
+            button.disabled = true;
+            textarea.readOnly = true;
+            try {
+                if (id) {
+                    await fetchPost("/api/repo/setSnapshotMemo", {id, memo: value}, () => {
+                        dialog.destroy();
+                        renderRepo(repoElement, parseInt(repoElement.getAttribute("data-page")) || 1);
+                    });
+                } else {
+                    await fetchPost("/api/repo/createSnapshot", {memo: value}, (response) => {
+                        if (response.data.created) {
+                            dialog.destroy();
+                            renderRepo(repoElement, 1);
+                        }
+                    });
+                }
+            } finally {
+                button.disabled = false;
+                textarea.readOnly = false;
+            }
+        },
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_SNAPSHOTMEMO);
-    const textarea = dialog.element.querySelector("textarea");
-    textarea.value = memo;
-    textarea.focus();
-    const buttons = dialog.element.querySelectorAll("button");
-    dialog.bindInput(textarea, () => buttons[1].click());
-    buttons[0].addEventListener("click", () => dialog.destroy());
-    buttons[1].addEventListener("click", async () => {
-        if (buttons[1].disabled) {
-            return;
-        }
-        buttons[1].disabled = true;
-        textarea.readOnly = true;
-        try {
-            if (id) {
-                await fetchPost("/api/repo/setSnapshotMemo", {id, memo: textarea.value}, () => {
-                    dialog.destroy();
-                    renderRepo(repoElement, parseInt(repoElement.getAttribute("data-page")) || 1);
-                });
-            } else {
-                await fetchPost("/api/repo/createSnapshot", {memo: textarea.value}, (response) => {
-                    if (response.data.created) {
-                        dialog.destroy();
-                        renderRepo(repoElement, 1);
-                    }
-                });
-            }
-        } finally {
-            buttons[1].disabled = false;
-            textarea.readOnly = false;
-        }
-    });
 };
 
 const renderDoc = (element: HTMLElement, currentPage: number) => {

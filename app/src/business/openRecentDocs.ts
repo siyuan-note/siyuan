@@ -13,8 +13,8 @@ import {hideElements} from "../protyle/ui/hideElements";
 
 const renderRecentDocsContent = async (data: {
     rootID: string,
-    icon: string,
-    title: string,
+    icon?: string,
+    title?: string,
     viewedAt?: number,
     closedAt?: number,
     openAt?: number,
@@ -22,10 +22,10 @@ const renderRecentDocsContent = async (data: {
     let tabHtml = "";
     let index = 0;
     data.forEach((item) => {
-        if (!key || item.title.toLowerCase().includes(key.toLowerCase())) {
+        if (!key || (item.title || "").toLowerCase().includes(key.toLowerCase())) {
             tabHtml += `<li data-index="${index}" data-node-id="${item.rootID}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
     ${getFileTreeIconHTML(item.icon, "file", "b3-list-item__graphic", true)}
-    <span class="b3-list-item__text">${escapeHtml(item.title)}</span>
+    <span class="b3-list-item__text">${escapeHtml(item.title || "")}</span>
 </li>`;
             index++;
         }

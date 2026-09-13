@@ -56,8 +56,8 @@ import {
 } from "./dockOrder";
 
 const getVisibleEntryCatalog = () => isMobile() ? entryCatalog.filter(item =>
-    item.key === TOOLBAR_ENTRY_ROOT_PATH || item.key === "documentPanel")
-    .map(item => item.key === "documentPanel" ? item : ({...item, children: item.children.filter(child => child.type === "separator" ||
+    item.key === TOOLBAR_ENTRY_ROOT_PATH)
+    .map(item => ({...item, children: item.children.filter(child => child.type === "separator" ||
         MOBILE_TOOLBAR_NAMES.includes(child.key) || child.key.startsWith("plugin:"))})) : entryCatalog;
 
 const renderTouchOrderButtons = (enabled: boolean) => isMobile() && enabled ? ["up", "down"].map(direction =>

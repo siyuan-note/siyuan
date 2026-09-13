@@ -297,7 +297,7 @@ const buildKeymapPluginCommandHtml = (item: Plugin) => {
     const html: string[] = [];
     for (const command of item.commands) {
         html.push(genKeymapRowHtml(
-            command.langText || (item.i18n ? item.i18n[command.langKey] : "") || command.langKey,
+            String(command.langText || (item.i18n ? item.i18n[command.langKey] : "") || command.langKey),
             pluginKeyPrefix + command.langKey,
             ensurePluginKeymap(item.name, command.langKey, command.hotkey),
         ));

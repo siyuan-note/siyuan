@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260910080119"
+		"updated": "20260913160005"
 	},
 	"Children": [
 		{
@@ -16278,7 +16278,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002135-5dfw1yo",
-				"updated": "20260811122156"
+				"updated": "20260913160005"
 			},
 			"Children": [
 				{
@@ -16298,7 +16298,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20220619002135-s399g7e",
-				"updated": "20260811122156"
+				"updated": "20260913160005"
 			},
 			"Children": [
 				{
@@ -16504,25 +16504,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "You need to use "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "click"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ to select the first document"
+									"Data": "Select visible rows from the most recently clicked document; clicking a parent document name or icon to expand it also sets the anchor. Repeated Shift clicks extend or shrink the range while keeping the anchor. If the anchor is unavailable, use a visible selected document; without one, select only the clicked document"
 								}
 							]
 						}

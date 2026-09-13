@@ -1,9 +1,48 @@
-import type {APIPOSTRoutes, FetchGet, FetchPost, FetchSyncPost} from "../src/types/api";
+import type {APIPOSTRoutes, FetchGet, FetchPost, FetchSyncPost, JSONValue} from "../src/types/api";
+import {ContractFormData} from "../src/util/contractFormData";
 
 declare const fetchPost: FetchPost;
 declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
+
+fetchPost("/api/query/sql", {stmt: "SELECT 1", mode: "readonly"}, response => {
+    if (response.code === 0) {
+        const limit: number = response.limit;
+        const truncated: boolean = response.truncated;
+        const value: string | number | boolean | null | undefined = response.data[0]?.n;
+        void [limit, truncated, value];
+    }
+});
+// @ts-expect-error 查询语句不可缺省。
+fetchPost("/api/query/sql", {});
+// @ts-expect-error 查询模式必须为字符串或空值。
+fetchPost("/api/query/sql", {stmt: "SELECT 1", mode: true});
+
+fetchPost("/api/file/getFile", {path: "data/storage/plugin.json"}, response => {
+    const content: JSONValue = response;
+    // @ts-expect-error 文件内容可能是文本、数组或空值，不能直接按信封读取。
+    void response.data;
+    void content;
+});
+// @ts-expect-error 文件路径不可缺省。
+fetchPost("/api/file/getFile", {});
+// @ts-expect-error 文件路径必须为字符串。
+fetchPost("/api/file/getFile", {path: 1});
+fetchPost("/api/file/putFile", new ContractFormData({path: "temp/dir", isDir: "true"}));
+fetchPost("/api/file/putFile", new ContractFormData({path: "temp/file", file: new Blob()}));
+// @ts-expect-error 上传文件字段必须为二进制文件。
+fetchPost("/api/file/putFile", new ContractFormData({file: "file"}));
+// @ts-expect-error 表单布尔值以字符串传输。
+fetchPost("/api/file/putFile", new ContractFormData({isDir: true}));
+
+fetchSyncPost("/api/notebook/importNotebookCryptoBackup", new ContractFormData({file: new Blob(), password: "password"}));
+// @ts-expect-error 上传请求必须包含文件。
+fetchSyncPost("/api/notebook/importNotebookCryptoBackup", new ContractFormData({password: "password"}));
+// @ts-expect-error 文件字段不能使用字符串。
+fetchSyncPost("/api/notebook/importNotebookCryptoBackup", new ContractFormData({file: "backup.json"}));
+// @ts-expect-error 普通表单没有已校验的字段类型。
+fetchSyncPost("/api/notebook/importNotebookCryptoBackup", new FormData());
 
 fetchPost("/api/system/version");
 fetchPost("/api/notebook/lsNotebooks");
@@ -98,7 +137,49 @@ async function checkAsyncResult() {
 }
 void checkAsyncResult;
 
+fetchPost("/api/block/getHeadingDeleteTransaction", {id: "id"}, response => {
+    const operation = response.data?.doOperations?.[0];
+    if (operation) {
+        const data: string | {createEmptyParagraph: boolean} | null = operation.data;
+        const result: string | string[] | null = operation.retData;
+        // @ts-expect-error 块操作载荷不能退化为任意对象。
+        void operation.data.content;
+        // @ts-expect-error 返回值也可能是文本或空值，不能直接当作数组。
+        const ids: string[] = operation.retData;
+        void [data, result, ids];
+    }
+});
+
 declare const notebooks: APIPOSTRoutes["/api/notebook/lsNotebooks"]["response"];
+
+fetchPost("/api/block/checkBlockRef", {scope: "blocks", ids: ["id"]}, response => {
+    const hasReference: boolean = response.data;
+    void hasReference;
+});
+// @ts-expect-error 引用检查仅接受字符串数组。
+fetchPost("/api/block/checkBlockRef", {ids: [42]});
+// @ts-expect-error 标题级别必须为数字。
+fetchPost("/api/block/getHeadingLevelTransaction", {id: "id", level: "2"});
+// @ts-expect-error 文档标题转换开关必须为布尔值。
+fetchPost("/api/block/getDocHeadingLevelTransaction", {id: "id", withSubheadings: "true"});
+fetchPost("/api/block/getDocHeadingLevelTransaction", {id: "id"}, response => {
+    if (response.data) {
+        const counts: number[] = response.data.counts;
+        // @ts-expect-error 标题转换结果没有内容字段。
+        void response.data.content;
+        void counts;
+    }
+});
+fetchPost("/api/block/getRecentUpdatedBlocks", {}, response => {
+    const block = response.data?.[0];
+    if (block) {
+        const content: string = block.content;
+        // @ts-expect-error 最近更新块的内容不是数字。
+        const invalid: number = block.content;
+        void [content, invalid];
+    }
+});
+
 if (notebooks.code === 0) {
     // @ts-expect-error 成功码下的空数据也必须在严格模式下被检查。
     void notebooks.data.notebooks;

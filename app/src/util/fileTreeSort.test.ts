@@ -41,6 +41,18 @@ const elementWithAttrs = (attrs: Record<string, string>, notebookSortMode = "15"
     }),
 }) as unknown as Element;
 
+test("pinned lists without a notebook sort ancestor fall back to global sorting", () => {
+    withWindow(() => {
+        const list = {
+            getAttribute: (): string | null => null,
+            closest: (): Element | null => null,
+        } as unknown as Element;
+        assert.equal(getFileTreeListSortMode(list), 6);
+        assert.equal(isCustomFileTreeList(list), true);
+        assert.equal(getConfiguredChildrenSortMode(list), null);
+    });
+});
+
 interface ITreeElement {
     tagName: string;
     attrs: Record<string, string>;

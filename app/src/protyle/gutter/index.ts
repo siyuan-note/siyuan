@@ -160,15 +160,17 @@ const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
     NodeTabs: "tabs",
     NodeTabItem: "tabItem",
     NodeSuperBlock: "superBlock",
-    NodeTable: "table",
+    NodeTable: "tableBlock",
+    NodeHTMLBlock: "htmlBlock",
+    NodeIFrame: "iframeBlock",
     NodeCodeBlock: "code",
     NodeMathBlock: "math",
     NodeBlockQueryEmbed: "blockEmbed",
     NodeThematicBreak: "line",
-    NodeVideo: "video",
-    NodeAudio: "audio",
-    NodeWidget: "widget",
-    NodeAttributeView: "database",
+    NodeVideo: "videoBlock",
+    NodeAudio: "audioBlock",
+    NodeWidget: "widgetBlock",
+    NodeAttributeView: "databaseBlock",
     NodeCustomBlock: "custom",
 };
 
@@ -1114,7 +1116,7 @@ export class Gutter {
         }, {
             id: "table",
             icon: "iconTable",
-            label: window.siyuan.languages.table,
+            label: window.siyuan.languages.tableBlock,
             accelerator: window.siyuan.config.keymap.editor.insert.table.custom,
             type: "table",
         }, {
@@ -2126,6 +2128,9 @@ export class Gutter {
                 id,
                 notebook: protyle.notebookId,
             }).then((response) => {
+                if (response.code !== 0) {
+                    return undefined;
+                }
                 const start = response.data?.start;
                 return response.data?.found && typeof start === "number" && Number.isInteger(start) ? start : undefined;
             }).catch(() => undefined) : undefined;
@@ -2444,7 +2449,7 @@ export class Gutter {
                     id: "table",
                     type: "submenu",
                     icon: "iconTable",
-                    label: window.siyuan.languages.table,
+                    label: window.siyuan.languages.tableBlock,
                     submenu: tableMenu(protyle, nodeElement, cellElement as HTMLTableCellElement, range,
                         true).menus as IMenu[]
                 }).element);
@@ -2490,7 +2495,7 @@ export class Gutter {
                     id: "database",
                     type: "submenu",
                     icon: "iconDatabase",
-                    label: window.siyuan.languages.database,
+                    label: window.siyuan.languages.databaseBlock,
                     submenu,
                 }).element);
             }
@@ -2517,7 +2522,7 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "html",
                 icon: "iconHTML5",
-                label: "HTML",
+                label: window.siyuan.languages.htmlBlock,
                 click() {
                     protyle.toolbar.showRender(protyle, nodeElement);
                 }
@@ -2687,7 +2692,8 @@ export class Gutter {
                             fetchPost("/api/block/getHeadingDeleteTransaction", {
                                 id,
                             }, async (deleteResponse) => {
-                                const deletedIDs = deleteResponse.data.doOperations.map(
+                                const headingTransaction: {doOperations: IOperation[], undoOperations: IOperation[]} = deleteResponse.data;
+                                const deletedIDs = headingTransaction.doOperations.map(
                                     (operation: IOperation) => operation.id);
                                 if (!await confirmBlockRef({
                                     scope: "blocks",
@@ -2706,7 +2712,7 @@ export class Gutter {
                                 if (!protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`)) {
                                     return;
                                 }
-                                deleteResponse.data.doOperations.forEach((operation: IOperation) => {
+                                headingTransaction.doOperations.forEach((operation: IOperation) => {
                                     protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                                         itemElement.remove();
                                     });
@@ -2715,19 +2721,19 @@ export class Gutter {
                                     const newID = Lute.NewNodeID();
                                     const emptyElement = genEmptyElement(false, false, newID);
                                     protyle.wysiwyg.element.insertAdjacentElement("afterbegin", emptyElement);
-                                    deleteResponse.data.doOperations.push({
+                                    headingTransaction.doOperations.push({
                                         action: "insert",
                                         data: emptyElement.outerHTML,
                                         id: newID,
                                         parentID: protyle.block.parentID
                                     });
-                                    deleteResponse.data.undoOperations.push({
+                                    headingTransaction.undoOperations.push({
                                         action: "delete",
                                         id: newID,
                                     });
                                     focusBlock(emptyElement);
                                 }
-                                transaction(protyle, deleteResponse.data.doOperations, deleteResponse.data.undoOperations);
+                                transaction(protyle, headingTransaction.doOperations, headingTransaction.undoOperations);
                             });
                         });
                     }
@@ -2740,7 +2746,8 @@ export class Gutter {
                         fetchPost("/api/block/getHeadingDeleteTransaction", {
                             id,
                         }, async (response) => {
-                            const deletedIDs = response.data.doOperations.map((operation: IOperation) => operation.id);
+                            const headingTransaction: {doOperations: IOperation[], undoOperations: IOperation[]} = response.data;
+                            const deletedIDs = headingTransaction.doOperations.map((operation: IOperation) => operation.id);
                             if (!await confirmBlockRef({
                                 scope: "blocks",
                                 ids: deletedIDs,
@@ -2752,7 +2759,7 @@ export class Gutter {
                             if (!protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`)) {
                                 return;
                             }
-                            response.data.doOperations.forEach((operation: IOperation) => {
+                            headingTransaction.doOperations.forEach((operation: IOperation) => {
                                 protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                                     itemElement.remove();
                                 });
@@ -2761,19 +2768,19 @@ export class Gutter {
                                 const newID = Lute.NewNodeID();
                                 const emptyElement = genEmptyElement(false, false, newID);
                                 protyle.wysiwyg.element.insertAdjacentElement("afterbegin", emptyElement);
-                                response.data.doOperations.push({
+                                headingTransaction.doOperations.push({
                                     action: "insert",
                                     data: emptyElement.outerHTML,
                                     id: newID,
                                     parentID: protyle.block.parentID
                                 });
-                                response.data.undoOperations.push({
+                                headingTransaction.undoOperations.push({
                                     action: "delete",
                                     id: newID,
                                 });
                                 focusBlock(emptyElement);
                             }
-                            transaction(protyle, response.data.doOperations, response.data.undoOperations);
+                            transaction(protyle, headingTransaction.doOperations, headingTransaction.undoOperations);
                         });
                     }
                 }).element);
@@ -4028,7 +4035,7 @@ export const addBlockToAgent = async (blockIds: string[]) => {
         let label = id;
         try {
             const resp = await fetchSyncPost("/api/block/getRefText", {id});
-            if (resp && resp.data) {
+            if (resp.code === 0 && resp.data) {
                 label = resp.data;
             }
         } catch {

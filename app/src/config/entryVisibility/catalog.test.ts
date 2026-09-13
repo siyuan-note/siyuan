@@ -865,7 +865,6 @@ test("multiple document and notebook entries follow their document tree menus", 
         "rebuildDataIndex",
         "sort",
         "publishAccess",
-        "pinnedDocs",
     ]);
     assert.deepEqual(getEntryCatalogChildren("docTree.notebooks").map((item) => item.key), [
         "sort",
@@ -884,14 +883,19 @@ test("multiple document and notebook entries follow their document tree menus", 
     assert.ok(getEntryCatalogChildren("docTree.multi").some((item) => item.key === "delete"));
 });
 
-test("pinned area visibility is independent of dock visibility and menu ordering", () => {
-    assert.deepEqual(getEntryCatalogChildren("documentPanel").map(item => item.key), ["pinnedDocs"]);
-    assert.equal(getEntryCatalogNode("documentPanel.pinnedDocs")?.simple, true);
-    assert.equal(getEntryCatalogDefaultVisibility("documentPanel.pinnedDocs"), false);
-    assert.equal(getEntryCatalogCustomDefaultVisibility("documentPanel.pinnedDocs"), false);
-    assert.equal(getEntryCatalogDefaultVisibility("docTree.panel.pinnedDocs"), true);
-    assert.equal(isEntryOrderSortable("documentPanel"), false);
-    assert.equal(getEntryCatalogNode("docTree.panel.pinnedDocs")?.simple, true);
+test("document multi-selection includes both pin actions before the existing separator", () => {
+    const keys = getEntryCatalogChildren("docTree.multi").map(item => item.key);
+    assert.deepEqual(keys.slice(keys.indexOf("delete"), keys.indexOf("separator_1") + 1),
+        ["delete", "pinDoc", "unpinDoc", "separator_1"]);
+    for (const key of ["pinDoc", "unpinDoc"]) {
+        assert.equal(getEntryCatalogNode(`docTree.multi.${key}`)?.simple, true);
+        assert.equal(getEntryCatalogDefaultVisibility(`docTree.multi.${key}`), true);
+    }
+});
+
+test("pinned area has no configurable visibility switch", () => {
+    assert.equal(getEntryCatalogNode("documentPanel.pinnedDocs"), undefined);
+    assert.equal(getEntryCatalogNode("docTree.panel.pinnedDocs"), undefined);
     assert.equal(getEntryCatalogNode("dock.pinnedDocs"), undefined);
 });
 
@@ -963,6 +967,9 @@ test("configuration labels distinguish block scopes and size controls", () => {
                     entryDock: "Dock",
                     height: "Height",
                     entryDocumentStatistics: "Document statistics",
+                    tableBlock: "Table block",
+                    databaseBlock: "Database block",
+                    htmlBlock: "HTML block",
                 },
             },
         },
@@ -983,12 +990,27 @@ test("configuration labels distinguish block scopes and size controls", () => {
         assert.equal(getEntryCatalogNode("inline.image.height.heightInput")?.label(), "Pixel height");
         assert.equal(getEntryCatalogNode("inline.image.height.heightDrag")?.label(), "Percentage height");
         assert.equal(getEntryCatalogNode("document.more.docInfo")?.label(), "Document statistics");
+        assert.equal(getEntryCatalogNode("gutter.single.table")?.label(), "Table block");
+        assert.equal(getEntryCatalogNode("gutter.single.database")?.label(), "Database block");
+        assert.equal(getEntryCatalogNode("gutter.single.html")?.label(), "HTML block");
+        assert.equal(getEntryCatalogNode("gutter.single.turnInto.table")?.label(), "Table block");
+        assert.equal(getEntryCatalogNode("gutter.multi.turnInto.table")?.label(), "Table block");
     } finally {
         if (windowDescriptor) {
             Object.defineProperty(globalThis, "window", windowDescriptor);
         } else {
             Reflect.deleteProperty(globalThis, "window");
         }
+    }
+});
+
+test("notebook pin entries follow settings and precede sorting", () => {
+    const keys = getEntryCatalogChildren("docTree.notebook").map(item => item.key);
+    assert.deepEqual(keys.slice(keys.indexOf("config"), keys.indexOf("sort") + 1),
+        ["config", "pinDoc", "unpinDoc", "sort"]);
+    for (const key of ["pinDoc", "unpinDoc"]) {
+        assert.equal(getEntryCatalogNode(`docTree.notebook.${key}`)?.simple, true);
+        assert.equal(getEntryCatalogNode(`docTree.notebook.${key}`)?.type, "entry");
     }
 });
 

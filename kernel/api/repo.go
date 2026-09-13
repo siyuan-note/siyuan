@@ -204,31 +204,19 @@ func diffRepoSnapshots(c *gin.Context) {
 	}
 }
 
-func getCloudSpace(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	sync, backup, hSize, hAssetSize, hTotalSize, exchangeSize, hTrafficUploadSize, hTrafficDownloadSize, htrafficAPIGet, hTrafficAPIPut, err := model.GetCloudSpace()
+var getCloudSpace = contractHandler(apicontract.GetCloudSpace, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.CloudSpaceData] {
+	sync, backup, hSize, hAssetSize, hTotalSize, exchangeSize, hTrafficUploadSize, hTrafficDownloadSize, hTrafficAPIGet, hTrafficAPIPut, err := model.GetCloudSpace()
 	if err != nil {
-		ret.Code = 1
-		ret.Msg = err.Error()
 		util.PushErrMsg(err.Error(), 3000)
-		return
+		return apicontract.Failure[apicontract.CloudSpaceData](1, err.Error())
 	}
-
-	ret.Data = map[string]any{
-		"sync":                 sync,
-		"backup":               backup,
-		"hAssetSize":           hAssetSize,
-		"hSize":                hSize,
-		"hTotalSize":           hTotalSize,
-		"hExchangeSize":        exchangeSize,
-		"hTrafficUploadSize":   hTrafficUploadSize,
-		"hTrafficDownloadSize": hTrafficDownloadSize,
-		"hTrafficAPIGet":       htrafficAPIGet,
-		"hTrafficAPIPut":       hTrafficAPIPut,
-	}
-}
+	return apicontract.Success(apicontract.CloudSpaceData{
+		Sync: cloudSyncContract(sync), Backup: cloudBackupContract(backup),
+		HAssetSize: hAssetSize, HSize: hSize, HTotalSize: hTotalSize, HExchangeSize: exchangeSize,
+		HTrafficUploadSize: hTrafficUploadSize, HTrafficDownloadSize: hTrafficDownloadSize,
+		HTrafficAPIGet: hTrafficAPIGet, HTrafficAPIPut: hTrafficAPIPut,
+	})
+})
 
 func checkoutRepo(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

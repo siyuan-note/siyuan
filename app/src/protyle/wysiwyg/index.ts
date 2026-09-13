@@ -104,6 +104,7 @@ import {
     getTextSiyuanFromTextHTML,
     isInAndroid,
     isInIOS,
+    isAndroid,
     isIPhone,
     isMac,
     isOnlyMeta,
@@ -489,8 +490,8 @@ export class WYSIWYG {
         this.element = document.createElement("div");
         this.element.className = "protyle-wysiwyg";
         this.element.setAttribute("spellcheck", "false");
-        // iPhone 根编辑宿主会绕过区块结构生成富文本 DOM，具体内容节点仍保持可编辑。
-        this.element.setAttribute("contenteditable", isIPhone() ? "false" : "true");
+        // Android 和 iPhone 的原生编辑限于正文节点，避免输入法修改列表等结构容器。
+        this.element.setAttribute("contenteditable", (isIPhone() || isAndroid()) ? "false" : "true");
         if (window.siyuan.config.editor.displayBookmarkIcon) {
             this.element.classList.add("protyle-wysiwyg--attr");
         }
@@ -845,6 +846,9 @@ export class WYSIWYG {
                                 id: item.getAttribute("data-node-id"),
                                 notebook: protyle.notebookId,
                             });
+                            if (response.code !== 0) {
+                                return;
+                            }
                             itemHTML = response.data.dom;
                         } else {
                             itemHTML = removeEmbed(item);
@@ -3200,6 +3204,10 @@ export class WYSIWYG {
                             id: item.getAttribute("data-node-id"),
                             notebook: protyle.notebookId,
                         });
+                        if (response.code !== 0) {
+                            clearAutoSelectedBlock();
+                            return;
+                        }
                         itemHTML = response.data.dom;
                     } else {
                         itemHTML = removeEmbed(item);

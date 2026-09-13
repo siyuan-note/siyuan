@@ -477,7 +477,7 @@ const bindAccountAuthForm = (
         }, (loginResponse) => {
             if (loginResponse.code === 1) {
                 showMessage(loginResponse.msg);
-                needCaptcha = loginResponse.data.needCaptcha;
+                needCaptcha = loginResponse.data && "needCaptcha" in loginResponse.data ? loginResponse.data.needCaptcha || "" : "";
                 if (needCaptcha) {
                     // 验证码
                     captchaInput.value = "";
@@ -487,6 +487,9 @@ const bindAccountAuthForm = (
                 return;
             }
             if (loginResponse.code === 10) {
+                if (!loginResponse.data || !("token" in loginResponse.data) || !loginResponse.data.token) {
+                    return;
+                }
                 // 两步验证
                 authFormRoot.querySelector("#form1")?.classList.add("fn__none");
                 authFormRoot.querySelector("#form2")?.classList.remove("fn__none");

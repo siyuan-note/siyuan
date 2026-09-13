@@ -1,4 +1,5 @@
 import {Constants} from "../../constants";
+import {openStandaloneDatabaseItemByURI} from "../../protyle/render/av/openStandaloneDatabaseItem";
 import {closeModel, closePanel} from "./closePanel";
 import {getCurrentEditor, openMobileFileById} from "../editor";
 import {openMobileOnboarding} from "../../onboarding";
@@ -360,6 +361,9 @@ export const initFramework = async (app: App, isStart: boolean) => {
         }
         const info = parseUriInfo();
         if (info.id) {
+            if (openStandaloneDatabaseItemByURI(app, info)) {
+                return;
+            }
             if (info.avItemID) {
                 queueAVLocateRequest(info.id, {
                     itemID: info.avItemID,

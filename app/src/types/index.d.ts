@@ -5,6 +5,8 @@ type TDock = "file" | "outline" | "inbox" | "bookmark" | "tag" | "graph" | "glob
 type TTab = "Outline" | "Graph" | "Backlink" | "Asset" | "Editor" | "Search" | "siyuan-card"
 type TOperation =
     "insert"
+    | "appendInsert"
+    | "prependInsert"
     | "restoreCreatedDoc"
     | "removeCreatedDoc"
     | "update"
@@ -817,7 +819,7 @@ interface IOperation {
     viewID?: string // 多个属性视图操作使用，用于推送时不影响其他视图
     viewIDs?: string[] // setAttrViewColHidden 批量指定数据库视图
     name?: string // addAttrViewCol 专享
-    type?: TAVCol // addAttrViewCol 专享
+    type?: TAVCol | "" // 非属性视图操作返回空字符串
     deckID?: string // add/removeFlashcards 专享
     blockIDs?: string[] // add/removeFlashcards 专享
     removeDest?: boolean // removeAttrViewCol 专享
@@ -923,7 +925,7 @@ interface IPluginData {
     name: string,
     js: string,
     css: string,
-    i18n: Record<string, string>
+    i18n: Record<string, import("./api").JSONValue>
 }
 
 interface IPluginDockTab {
@@ -1735,4 +1737,5 @@ interface ISiYuanUriBlockInfo {
     avItemID?: string;
     avViewID?: string;
     avGroupID?: string;
+    avStandalone?: boolean;
 }

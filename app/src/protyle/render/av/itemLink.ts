@@ -7,6 +7,7 @@ export const genAVItemLink = (databaseBlockID: string, viewID: string, itemID: s
     const params = new URLSearchParams({
         avViewID: viewID,
         avItemID: itemID,
+        avStandalone: "1",
     });
     if (groupID) {
         params.set("avGroupID", groupID);

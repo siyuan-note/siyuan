@@ -17,73 +17,62 @@
 package api
 
 import (
-	"net/http"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func reloadTag(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var reloadTag = contractHandler(apicontract.ReloadTag, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 
 	model.ReloadTag()
-}
 
-func reloadFiletree(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	return apicontract.Success(apicontract.Null{})
+})
+
+var reloadFiletree = contractHandler(apicontract.ReloadFiletree, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 
 	model.ReloadFiletree()
-}
 
-func reloadProtyle(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	return apicontract.Success(apicontract.Null{})
+})
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
+var reloadProtyle = contractHandler(apicontract.ReloadProtyle, func(c *gin.Context, request apicontract.BlockIDRequest) apicontract.Response[apicontract.Null] {
 
-	id := arg["id"].(string)
+	id := request.ID
 	model.ReloadProtyle(id)
-}
 
-func reloadAttributeView(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	return apicontract.Success(apicontract.Null{})
+})
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
+var reloadAttributeView = contractHandler(apicontract.ReloadAttributeView, func(c *gin.Context, request apicontract.BlockIDRequest) apicontract.Response[apicontract.Null] {
 
-	id := arg["id"].(string)
+	id := request.ID
 	model.ReloadAttrView(id)
-}
 
-func reloadUI(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	return apicontract.Success(apicontract.Null{})
+})
+
+var reloadUI = contractHandler(apicontract.ReloadUI, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 
 	util.ReloadUI()
-}
 
-func reloadIcon(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	return apicontract.Success(apicontract.Null{})
+})
+
+var reloadIcon = contractHandler(apicontract.ReloadIcon, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 
 	model.LoadIcons()
 	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
-}
 
-func reloadTheme(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	return apicontract.Success(apicontract.Null{})
+})
+
+var reloadTheme = contractHandler(apicontract.ReloadTheme, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 
 	model.LoadThemes()
 	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
-}
+
+	return apicontract.Success(apicontract.Null{})
+})

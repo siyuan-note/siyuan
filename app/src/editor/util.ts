@@ -754,7 +754,7 @@ export const updateOutline = (models: IModels, protyle: IProtyle, reload = false
                 item.isPreview = !protyle.preview.element.classList.contains("fn__none");
                 item.update(response, blockId, protyle?.notebookId || "");
                 if (protyle) {
-                    item.updateDocTitle(protyle.background.ial, response.data?.length || 0);
+                    item.updateDocTitle(protyle.background.ial, Array.isArray(response.data) ? response.data.length : 0);
                     if (getSelection().rangeCount > 0) {
                         const startContainer = getSelection().getRangeAt(0).startContainer;
                         if (protyle.wysiwyg.element.contains(startContainer)) {

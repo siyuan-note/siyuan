@@ -2194,6 +2194,9 @@ export const turnsOneInto = async (options: {
                 id: options.id,
                 notebook: options.protyle.notebookId,
             });
+            if (response.code !== 0) {
+                return;
+            }
             if (!source.isConnected || source.outerHTML !== snapshot) {
                 return;
             }

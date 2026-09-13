@@ -1,4 +1,4 @@
-# Pinned documents in the document tree
+# Pinned documents in the document panel
 
 [中文](PINNED-DOCUMENTS.zh-CN.md)
 
@@ -6,21 +6,27 @@ Related issue: https://github.com/siyuan-note/siyuan/issues/19401
 
 ## Feature scope
 
-The pinned section appears at the top of the document tree panel and uses pinned documents as roots for their actual child documents. Root entry order is independent of document hierarchy and source-document sorting. Expanded children use source-document data directly. Desktop and mobile clients share the implementation. The section can collapse, has a maximum height, and scrolls independently.
+The pinned section appears at the top of the document panel and uses pinned documents as roots for their actual child documents. Root entry order is independent of document hierarchy and source-document sorting. Expanded children use source-document data directly. Desktop and mobile clients share the implementation. The section can collapse, has a maximum height, and scrolls independently.
 
 ## User interaction
 
-The section is hidden by default. Enable it through Document panel - More - Pinned or the document-panel group in entry visibility settings, including on mobile. Successfully pinning a document explicitly enables the section and saves that setting. A failed pin, unpin, or incoming synchronized pin data does not change visibility. Hiding the section removes its layout space without unpinning documents or resetting order or expansion state. Showing it again refreshes source-document data. Visibility uses the independent configuration identifier `documentPanel.pinnedDocs`, separate from dock-icon and menu-item visibility, and preserves the user's saved choice.
+The section appears when it contains pinned documents and hides automatically when empty, on both desktop and mobile. Pin the first document through its context menu; once the section is visible, documents can also be added by dragging. Unpinning the last document hides the section. Incoming synchronized pin data updates visibility in the same way. There is no separate visibility switch, and previously saved visibility settings no longer affect the section. Collapsing the section preserves its entries and their order.
 
 | Operation | Behavior |
 |---|---|
 | Pin from a menu | Insert the entry at the top; the same menu item becomes Unpin for an already pinned document |
+| Notebook More menu | When notebook root documents are enabled, offer Pin or Unpin for an ordinary notebook's root document; expand the pinned entry to browse its visible top-level documents |
+| Multiple selected documents | Offer both Pin and Unpin regardless of existing pin status; hide Pin if any selected document belongs to an encrypted notebook |
+| Context menu or More on a pinned document | Open the document menu, including Unpin and Rename |
+| Click a document icon | On desktop, open the icon picker or follow the configured icon expansion behavior; mobile expands or opens the document |
 | Drop on a root insertion line | Create or reorder a pinned entry without moving the source document |
 | Drop between child documents | Reorder actual documents, using the existing sort-conflict confirmation |
 | Drop in the middle of a document row | Move into the actual document, using existing move validation |
 | Unpin a parent document | Remove only that root entry; independently pinned children remain |
+| Collapse the document panel | Collapse the pinned section and clear its descendant expansion state; keep the pinned entries and their order |
 | Rename or move | Reload the source document for every entry; cross-notebook moves maintain the notebook identifier |
 | Close an ordinary notebook | Retain unavailable entries and allow unpinning; keep titles already read in the current session, or show the document ID when the title is unavailable |
+| Hide a document | Omit the entry but preserve its stored position; restore it when unhidden, and reject new pins while hidden. Unhide it before unpinning through the pinned section. The notebook root document's internal hidden attribute is exempt. Hidden children do not count toward the expansion arrow |
 | Delete a document or notebook | Remove related entries; list reads also filter missing source documents |
 | Encrypted notebook | Hide the pin operation; the server rejects additions and filters any existing invalid entries |
 

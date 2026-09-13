@@ -1,4 +1,5 @@
 import {Layout} from "./index";
+import {openStandaloneDatabaseItemByURI} from "../protyle/render/av/openStandaloneDatabaseItem";
 import {withFetchTimeout} from "../util/fetchTimeout";
 import {Wnd} from "./Wnd";
 import {Tab} from "./Tab";
@@ -569,7 +570,9 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
     });
 
     const info = parseUriInfo();
-    if (info.id) {
+    if (info.id && openStandaloneDatabaseItemByURI(app, info)) {
+        // 独立条目链接不需要打开数据库所在文档。
+    } else if (info.id) {
         if (info.avItemID) {
             queueAVLocateRequest(info.id, {
                 itemID: info.avItemID,

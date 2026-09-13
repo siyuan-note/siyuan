@@ -42,7 +42,7 @@ func ReadRoutes(apiDir string) ([]Route, map[string]string, error) {
 		}
 		ast.Inspect(file, func(node ast.Node) bool {
 			if spec, ok := node.(*ast.ValueSpec); ok && len(spec.Names) == 1 && len(spec.Values) == 1 {
-				if call, ok := spec.Values[0].(*ast.CallExpr); ok && len(call.Args) == 2 {
+				if call, ok := spec.Values[0].(*ast.CallExpr); ok && len(call.Args) >= 2 {
 					if fun, ok := call.Fun.(*ast.Ident); ok && fun.Name == "contractHandler" {
 						if endpoint, ok := call.Args[0].(*ast.SelectorExpr); ok {
 							bindings[spec.Names[0].Name] = endpointNames[endpoint.Sel.Name]

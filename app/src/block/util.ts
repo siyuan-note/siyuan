@@ -45,6 +45,9 @@ export const getCancelSBOperations = async (nodeElement: Element, options: {
             id,
             notebook: options.notebookID,
         });
+        if (response.code !== 0) {
+            throw new Error(response.msg);
+        }
         const template = document.createElement("template");
         template.innerHTML = normalizeHTMLAssetIFrameBlockDOM(response.data?.dom || "");
         const fullSuperBlockElement = template.content.querySelector(`[data-node-id="${id}"]`);
@@ -505,23 +508,26 @@ export const genHeadingElement = (headElement: Element, getHTML = false, addWbr 
 export const getLangByType = (type: string) => {
     let lang = type;
     switch (type) {
+        case "NodeHTMLBlock":
+            lang = window.siyuan.languages.htmlBlock;
+            break;
         case "NodeIFrame":
-            lang = "IFrame";
+            lang = window.siyuan.languages.iframeBlock;
             break;
         case "NodeAttributeView":
-            lang = window.siyuan.languages.database;
+            lang = window.siyuan.languages.databaseBlock;
             break;
         case "NodeThematicBreak":
             lang = window.siyuan.languages.line;
             break;
         case "NodeWidget":
-            lang = window.siyuan.languages.widget;
+            lang = window.siyuan.languages.widgetBlock;
             break;
         case "NodeVideo":
-            lang = window.siyuan.languages.video;
+            lang = window.siyuan.languages.videoBlock;
             break;
         case "NodeAudio":
-            lang = window.siyuan.languages.audio;
+            lang = window.siyuan.languages.audioBlock;
             break;
         case "NodeCustomBlock":
             lang = window.siyuan.languages.custom;

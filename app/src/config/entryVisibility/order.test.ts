@@ -40,17 +40,44 @@ test("pin entries merge into document menus without moving existing plugin slots
     assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
 });
 
-test("pinned area switch merges into panel menus while preserving plugin slots", () => {
+test("notebook pin actions merge into saved menus and preserve plugin slots", () => {
+    const entries = getEntryCatalogChildren("docTree.notebook");
+    const defaults = entries.map(item => item.key);
+    const saved = defaults.filter(key => !["pinDoc", "unpinDoc"].includes(key));
+    saved.splice(1, 0, "plugin:example:item");
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+    assert.deepEqual(merged.filter(key => !["pinDoc", "unpinDoc"].includes(key)), saved);
+    assert.deepEqual(merged.slice(merged.indexOf("config"), merged.indexOf("sort") + 1),
+        ["config", "pinDoc", "unpinDoc", "sort"]);
+    const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+    assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
+});
+
+test("removed pinned area switch is not rendered while plugin slots are preserved", () => {
     const entries = getEntryCatalogChildren("docTree.panel");
     const defaults = entries.map(item => item.key);
-    const saved = defaults.filter(key => key !== "pinnedDocs");
+    const saved = [...defaults, "pinnedDocs"];
     saved.splice(1, 0, "plugin:example:item");
     const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
     assert.deepEqual(merged.filter(key => key !== "pinnedDocs" && key !== "plugin:example:item"),
-        saved.filter(key => key !== "plugin:example:item"));
+        saved.filter(key => key !== "pinnedDocs" && key !== "plugin:example:item"));
     assert.equal(merged[1], "plugin:example:item");
-    assert.equal(merged[merged.length - 1], "pinnedDocs");
-    assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, new Set<string>()), merged);
+    const rendered = resolveEntryOrder([...defaults, "plugin:example:item"], merged, new Set<string>());
+    assert.deepEqual(rendered, saved.filter(key => key !== "pinnedDocs"));
+});
+
+test("multi-document pin actions merge without losing plugin slots or separators", () => {
+    const entries = getEntryCatalogChildren("docTree.multi");
+    const defaults = entries.map(item => item.key);
+    const saved = defaults.filter(key => key !== "pinDoc" && key !== "unpinDoc");
+    saved.splice(1, 0, "plugin:example:item");
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+    const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+    const rendered = resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators);
+    assert.equal(rendered[1], "plugin:example:item");
+    assert.deepEqual(rendered.slice(rendered.indexOf("delete"), rendered.indexOf("separator_1") + 1),
+        ["delete", "pinDoc", "unpinDoc", "separator_1"]);
+    assert.deepEqual(rendered.filter(key => key !== "pinDoc" && key !== "unpinDoc"), saved);
 });
 
 test("entry order ignores unknown and duplicate keys", () => {

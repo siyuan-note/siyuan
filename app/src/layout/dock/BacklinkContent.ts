@@ -1111,7 +1111,7 @@ export class BacklinkContent extends Model {
         const viewStateGeneration = this.viewStateGeneration;
         const contextRequestVersion = this.contextRequestVersions[index];
         const requestGeneration = ++record.requestGeneration;
-        const param: {[key: string]: string | number | boolean | IBacklinkSourceFilter} = {
+        const param: import("../../types/api").BacklinkDocumentRequestInput = {
             defID: blockId,
             refTreeID: docId,
             highlight: !isSupportCSSHL(),
@@ -1137,7 +1137,7 @@ export class BacklinkContent extends Model {
                 requestGeneration !== record.requestGeneration) {
                 return;
             }
-            if (!response.data) {
+            if (response.code !== 0 || !response.data) {
                 return;
             }
             svgElement.removeAttribute("disabled");
@@ -1949,7 +1949,7 @@ export class BacklinkContent extends Model {
                 this.markDirty();
                 return;
             }
-            if (!response.data) {
+            if (response.code !== 0 || !response.data || !("revision" in response.data)) {
                 if (this.showingLoading || init) {
                     this.render(undefined, init);
                 }

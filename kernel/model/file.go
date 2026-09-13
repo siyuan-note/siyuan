@@ -535,19 +535,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 				if nil == doc {
 					continue
 				}
-				subFiles, err := os.ReadDir(filepath.Join(boxLocalPath, file.path))
-				if err == nil {
-					for _, subFile := range subFiles {
-						subDocFilePath := path.Join(file.path, subFile.Name())
-						if subIAL := box.docIAL(subDocFilePath); "true" == subIAL[DocHiddenAttr] {
-							continue
-						}
-
-						if strings.HasSuffix(subFile.Name(), ".sy") {
-							doc.SubFileCount++
-						}
-					}
-				}
+				doc.SubFileCount, _ = visibleDocCount(box.ID, file.path, box.docIAL, nil)
 
 				if flashcard {
 					rootID := util.GetTreeID(parentDocPath)

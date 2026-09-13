@@ -1,4 +1,5 @@
 import {bindPanelSearch} from "../../layout/dock/panelSearch";
+import type {BlockBreadcrumbRequestInput} from "../../types/api";
 import {Tree} from "../../util/Tree";
 import {fetchPost} from "../../util/fetch";
 import {confirmBlockRef} from "../../util/checkBlockRef";
@@ -460,7 +461,7 @@ export class MobileOutline extends Model {
             if (previousElement) {
                 this.setCurrentById(previousElement.getAttribute("data-node-id"));
             } else {
-                const breadcrumbParam: Record<string, any> = {
+                const breadcrumbParam: BlockBreadcrumbRequestInput = {
                     id: nodeElement.getAttribute("data-node-id"),
                     excludeTypes: []
                 };
@@ -577,7 +578,7 @@ export class MobileOutline extends Model {
                 return;
             }
             this.update(response);
-            this.updateDocTitle(protyle?.background?.ial, response.data?.length || 0);
+            this.updateDocTitle(protyle?.background?.ial, Array.isArray(response.data) ? response.data.length : 0);
             callback?.();
         });
     }
@@ -1124,7 +1125,8 @@ export class MobileOutline extends Model {
                         fetchPost("/api/block/getHeadingDeleteTransaction", {
                             id,
                         }, async (deleteResponse) => {
-                            const deletedIDs = deleteResponse.data.doOperations.map(
+                            const headingTransaction: {doOperations: IOperation[], undoOperations: IOperation[]} = deleteResponse.data;
+                            const deletedIDs = headingTransaction.doOperations.map(
                                 (operation: IOperation) => operation.id);
                             if (!await confirmBlockRef({
                                 scope: "blocks",
@@ -1143,7 +1145,7 @@ export class MobileOutline extends Model {
                             if (!data.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`)) {
                                 return;
                             }
-                            deleteResponse.data.doOperations.forEach((operation: IOperation) => {
+                            headingTransaction.doOperations.forEach((operation: IOperation) => {
                                 data.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                                     itemElement.remove();
                                 });
@@ -1152,19 +1154,19 @@ export class MobileOutline extends Model {
                                 const newID = Lute.NewNodeID();
                                 const emptyElement = genEmptyElement(false, false, newID);
                                 data.protyle.wysiwyg.element.insertAdjacentElement("afterbegin", emptyElement);
-                                deleteResponse.data.doOperations.push({
+                                headingTransaction.doOperations.push({
                                     action: "insert",
                                     data: emptyElement.outerHTML,
                                     id: newID,
                                     parentID: data.protyle.block.parentID
                                 });
-                                deleteResponse.data.undoOperations.push({
+                                headingTransaction.undoOperations.push({
                                     action: "delete",
                                     id: newID,
                                 });
                                 focusBlock(emptyElement);
                             }
-                            transaction(data.protyle, deleteResponse.data.doOperations, deleteResponse.data.undoOperations);
+                            transaction(data.protyle, headingTransaction.doOperations, headingTransaction.undoOperations);
                         });
                     });
                 }
@@ -1180,7 +1182,8 @@ export class MobileOutline extends Model {
                     fetchPost("/api/block/getHeadingDeleteTransaction", {
                         id,
                     }, async (response) => {
-                        const deletedIDs = response.data.doOperations.map((operation: IOperation) => operation.id);
+                        const headingTransaction: {doOperations: IOperation[], undoOperations: IOperation[]} = response.data;
+                        const deletedIDs = headingTransaction.doOperations.map((operation: IOperation) => operation.id);
                         if (!await confirmBlockRef({
                             scope: "blocks",
                             ids: deletedIDs,
@@ -1192,7 +1195,7 @@ export class MobileOutline extends Model {
                         if (!data.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`)) {
                             return;
                         }
-                        response.data.doOperations.forEach((operation: IOperation) => {
+                        headingTransaction.doOperations.forEach((operation: IOperation) => {
                             data.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                                 itemElement.remove();
                             });
@@ -1201,19 +1204,19 @@ export class MobileOutline extends Model {
                             const newID = Lute.NewNodeID();
                             const emptyElement = genEmptyElement(false, false, newID);
                             data.protyle.wysiwyg.element.insertAdjacentElement("afterbegin", emptyElement);
-                            response.data.doOperations.push({
+                            headingTransaction.doOperations.push({
                                 action: "insert",
                                 data: emptyElement.outerHTML,
                                 id: newID,
                                 parentID: data.protyle.block.parentID
                             });
-                            response.data.undoOperations.push({
+                            headingTransaction.undoOperations.push({
                                 action: "delete",
                                 id: newID,
                             });
                             focusBlock(emptyElement);
                         }
-                        transaction(data.protyle, response.data.doOperations, response.data.undoOperations);
+                        transaction(data.protyle, headingTransaction.doOperations, headingTransaction.undoOperations);
                     });
                 }
             }).element);

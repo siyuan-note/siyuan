@@ -3,14 +3,14 @@ import * as assert from "node:assert/strict";
 import {escapeAVItemLinkText, formatAVItemLinks, genAVItemLink} from "./itemLink";
 
 describe("database item links", () => {
-    it("generates links with the current item location", () => {
+    it("generates standalone links retaining the current item location", () => {
         assert.equal(
             genAVItemLink("database-id", "view-id", "item-id"),
-            "siyuan://blocks/database-id?avViewID=view-id&avItemID=item-id",
+            "siyuan://blocks/database-id?avViewID=view-id&avItemID=item-id&avStandalone=1",
         );
         assert.equal(
             genAVItemLink("database-id", "view-id", "item-id", "group-id"),
-            "siyuan://blocks/database-id?avViewID=view-id&avItemID=item-id&avGroupID=group-id",
+            "siyuan://blocks/database-id?avViewID=view-id&avItemID=item-id&avStandalone=1&avGroupID=group-id",
         );
     });
 

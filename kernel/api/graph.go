@@ -17,126 +17,81 @@
 package api
 
 import (
-	"net/http"
-
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func resetGraph(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
+var resetGraph = contractHandler(apicontract.ResetGraph, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.ResetGraphData] {
 	graph := conf.NewGlobalGraph()
 	model.Conf.Graph.Global = graph
 	model.Conf.Save()
-	ret.Data = map[string]any{
-		"conf": graph,
-	}
-}
+	return apicontract.Success(apicontract.ResetGraphData{Conf: globalGraphContract(graph)})
+})
 
-func resetLocalGraph(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
+var resetLocalGraph = contractHandler(apicontract.ResetLocalGraph, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.ResetLocalGraphData] {
 	graph := conf.NewLocalGraph()
 	model.Conf.Graph.Local = graph
 	model.Conf.Save()
-	ret.Data = map[string]any{
-		"conf": graph,
-	}
+	return apicontract.Success(apicontract.ResetLocalGraphData{Conf: localGraphContract(graph)})
+})
+
+func globalGraphContract(graph *conf.GlobalGraph) apicontract.GlobalGraphConf {
+	return apicontract.GlobalGraphConf{MinRefs: graph.MinRefs, DailyNote: graph.DailyNote, Type: (*apicontract.GraphTypeFilter)(graph.TypeFilter), D3: (*apicontract.GraphD3)(graph.D3)}
 }
 
-func setGraphConf(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+func localGraphContract(graph *conf.LocalGraph) apicontract.LocalGraphConf {
+	return apicontract.LocalGraphConf{DailyNote: graph.DailyNote, Type: (*apicontract.GraphTypeFilter)(graph.TypeFilter), D3: (*apicontract.GraphD3)(graph.D3)}
+}
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var graphType string
-	var confArg map[string]any
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("type", &graphType, true, true),
-		util.BindJsonArg("conf", &confArg, true, false),
-	) {
-		return
-	}
-	graphConf, err := gulu.JSON.MarshalJSON(confArg)
+var setGraphConf = contractHandler(apicontract.SetGraphConf, func(c *gin.Context, request apicontract.SetGraphConfRequest) apicontract.Response[apicontract.GraphConfigurationData] {
+	graphType := request.Type
+	graphConf, err := gulu.JSON.MarshalJSON(request.Conf)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.GraphConfigurationData](-1, err.Error())
 	}
-
 	switch graphType {
 	case "global":
 		global := conf.NewGlobalGraph()
 		if err = gulu.JSON.UnmarshalJSON(graphConf, global); err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return
+			return apicontract.Failure[apicontract.GraphConfigurationData](-1, err.Error())
 		}
 		if model.IsAdminRoleContext(c) && !model.IsReadOnlyRoleContext(c) {
 			model.Conf.Graph.Global = global
 			model.Conf.Save()
 		}
-		ret.Data = global
+		return apicontract.Success(apicontract.GlobalGraphConfiguration(globalGraphContract(global)))
 	case "local":
 		local := conf.NewLocalGraph()
 		if err = gulu.JSON.UnmarshalJSON(graphConf, local); err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return
+			return apicontract.Failure[apicontract.GraphConfigurationData](-1, err.Error())
 		}
 		if model.IsAdminRoleContext(c) && !model.IsReadOnlyRoleContext(c) {
 			model.Conf.Graph.Local = local
 			model.Conf.Save()
 		}
-		ret.Data = local
+		return apicontract.Success(apicontract.LocalGraphConfiguration(localGraphContract(local)))
 	default:
-		ret.Code = -1
+		return apicontract.Failure[apicontract.GraphConfigurationData](-1, "")
 	}
-}
+})
 
-func getGraph(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var getGraph = contractHandler(apicontract.GetGraph, func(c *gin.Context, request apicontract.GlobalGraphRequest) apicontract.Response[apicontract.GlobalGraphData] {
+	fail := func(message string) apicontract.Response[apicontract.GlobalGraphData] {
+		return apicontract.GetGraph.FailureWithData(-1, message, apicontract.GraphQueryEcho[apicontract.GlobalGraphResult](request.ReqID))
 	}
-
-	reqId := arg["reqId"]
-	ret.Data = map[string]any{"reqId": reqId}
-
-	var query string
-	var confArg map[string]any
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("k", &query, false, false),
-		util.BindJsonArg("conf", &confArg, true, false),
-	) {
-		return
-	}
-	graphConf, err := gulu.JSON.MarshalJSON(confArg)
+	query := request.K
+	graphConf, err := gulu.JSON.MarshalJSON(request.Conf)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return fail(err.Error())
 	}
 
 	global := conf.NewGlobalGraph()
 	if err = gulu.JSON.UnmarshalJSON(graphConf, global); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return fail(err.Error())
 	}
 
 	if model.IsAdminRoleContext(c) && !model.IsReadOnlyRoleContext(c) {
@@ -149,63 +104,33 @@ func getGraph(c *gin.Context) {
 		publishAccess := model.GetPublishAccess()
 		nodes, links = model.FilterGraphByPublishAccess(c, publishAccess, nodes, links)
 	}
-	ret.Data = map[string]any{
-		"nodes": nodes,
-		"links": links,
-		"conf":  global,
-		"box":   boxID,
-		"reqId": reqId,
-	}
-}
+	return apicontract.Success(apicontract.GraphQueryResult(apicontract.GlobalGraphResult{GraphElements: graphElementsContract(request.ReqID, boxID, nodes, links), Conf: globalGraphContract(global)}))
+})
 
-func getLocalGraph(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var getLocalGraph = contractHandler(apicontract.GetLocalGraph, func(c *gin.Context, request apicontract.LocalGraphRequest) apicontract.Response[apicontract.LocalGraphData] {
+	fail := func(message string) apicontract.Response[apicontract.LocalGraphData] {
+		return apicontract.GetLocalGraph.FailureWithData(-1, message, apicontract.GraphQueryEcho[apicontract.LocalGraphResult](request.ReqID))
 	}
-
-	reqId := arg["reqId"]
-	ret.Data = map[string]any{"reqId": reqId}
-	if nil == arg["id"] {
-		return
+	if request.ID == nil {
+		return apicontract.Success(apicontract.GraphQueryEcho[apicontract.LocalGraphResult](request.ReqID))
 	}
-
-	var keyword, id string
-	var confArg map[string]any
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("k", &keyword, false, false),
-		util.BindJsonArg("id", &id, true, true),
-		util.BindJsonArg("conf", &confArg, true, false),
-	) {
-		return
-	}
-	notebook, _ := arg["notebook"].(string)
+	id, keyword := *request.ID, request.K
+	notebook := request.Notebook
 	if model.IsEncryptedBox(notebook) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(392)
-		return
+		return fail(model.Conf.Language(392))
 	}
 	if bt := treenode.GetBlockTree(id); bt != nil && model.IsEncryptedBox(bt.BoxID) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(392)
-		return
+		return fail(model.Conf.Language(392))
 	}
 
-	graphConf, err := gulu.JSON.MarshalJSON(confArg)
+	graphConf, err := gulu.JSON.MarshalJSON(request.Conf)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return fail(err.Error())
 	}
 
 	local := conf.NewLocalGraph()
 	if err = gulu.JSON.UnmarshalJSON(graphConf, local); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return fail(err.Error())
 	}
 
 	if model.IsAdminRoleContext(c) && !model.IsReadOnlyRoleContext(c) {
@@ -218,12 +143,29 @@ func getLocalGraph(c *gin.Context) {
 		publishAccess := model.GetPublishAccess()
 		nodes, links = model.FilterGraphByPublishAccess(c, publishAccess, nodes, links)
 	}
-	ret.Data = map[string]any{
-		"id":    id,
-		"box":   boxID,
-		"nodes": nodes,
-		"links": links,
-		"conf":  local,
-		"reqId": reqId,
+	return apicontract.Success(apicontract.GraphQueryResult(apicontract.LocalGraphResult{GraphElements: graphElementsContract(request.ReqID, boxID, nodes, links), ID: id, Conf: localGraphContract(local)}))
+})
+
+func graphElementsContract(reqID apicontract.JSONValue, boxID string, nodes []*model.GraphNode, links []*model.GraphLink) apicontract.GraphElements {
+	result := apicontract.GraphElements{GraphCorrelation: apicontract.GraphCorrelation{ReqID: reqID}, Box: boxID}
+	if nodes != nil {
+		result.Nodes = make([]*apicontract.GraphNode, len(nodes))
 	}
+	for i, node := range nodes {
+		result.Nodes[i] = (*apicontract.GraphNode)(node)
+	}
+	if links != nil {
+		result.Links = make([]*apicontract.GraphLink, len(links))
+	}
+	for i, link := range links {
+		if link == nil {
+			continue
+		}
+		converted := &apicontract.GraphLink{From: link.From, To: link.To, Ref: link.Ref}
+		if link.Arrows != nil {
+			converted.Arrows = &apicontract.GraphArrows{To: (*apicontract.GraphArrowsTo)(link.Arrows.To)}
+		}
+		result.Links[i] = converted
+	}
+	return result
 }

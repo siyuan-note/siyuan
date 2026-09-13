@@ -8,6 +8,8 @@ and finds:
 - Duplicate keys: keys that appear multiple times in the same file
 using statistical methods.
 
+同时以 en.json 为基准，校验内核消息的 Go 格式参数索引和动词。
+
 Usage:
     python scripts/check-lang-keys.py
     python scripts/check-lang-keys.py -d app/appearance/langs
@@ -18,8 +20,8 @@ Options:
     -h, --help       Show help message and exit
 
 Exit codes:
-    0    All language files have complete keys
-    1    Some language files have missing or extra keys
+    0    All language files have complete keys and compatible kernel placeholders
+    1    Language files have key, format, or loading errors
 """
 
 import json
@@ -198,6 +200,71 @@ def load_lang_file(file_path):
         return None, None, [], {}
 
 
+def format_arguments(message):
+    """按 Go fmt 的参数索引解析动词，保留每个参数的使用次数和用途。"""
+    arguments = Counter()
+    next_arg = 1
+    pos = 0
+    while pos < len(message):
+        if message[pos] != "%":
+            pos += 1
+            continue
+        start = pos
+        pos += 1
+        while pos < len(message) and message[pos] in "+-# 0":
+            pos += 1
+        # 索引可指定宽度、精度或值；每次消费参数后，后续隐式参数从下一位开始。
+        while pos < len(message):
+            char = message[pos]
+            if char == "[":
+                match = re.match(r"\[([1-9][0-9]*)\]", message[pos:])
+                if not match:
+                    raise ValueError(f"Invalid argument index at offset {pos}")
+                next_arg = int(match.group(1))
+                pos += len(match.group(0))
+            elif char == "*":
+                arguments[(next_arg, "*")] += 1
+                next_arg += 1
+                pos += 1
+            elif char in "0123456789.":
+                pos += 1
+            else:
+                break
+        if pos == len(message) or message[pos] not in "vTtbcdoOxXUeEfFgGspq%":
+            raise ValueError(f"Invalid format directive at offset {start}")
+        verb = message[pos]
+        pos += 1
+        if verb != "%":
+            arguments[(next_arg, verb)] += 1
+            next_arg += 1
+    return arguments
+
+
+def check_kernel_placeholders(lang_data):
+    """以英文数字键为基准，检查所有内核消息的参数及格式动词。"""
+    reference = lang_data.get("en.json", {}).get("_kernel")
+    if not isinstance(reference, dict):
+        print("Error: en.json must contain a _kernel object")
+        return False
+    valid = True
+    for name, data in lang_data.items():
+        kernel = data.get("_kernel", {})
+        for key, message in reference.items():
+            if not key.isdecimal():
+                continue
+            try:
+                expected = format_arguments(message)
+                actual = format_arguments(kernel[key])
+                if actual == expected:
+                    continue
+                detail = f"expected {dict(expected)}, got {dict(actual)}"
+            except (KeyError, TypeError, ValueError) as error:
+                detail = str(error)
+            print(f"Error: {name} _kernel.{key}: {detail}")
+            valid = False
+    return valid
+
+
 def check_lang_keys(langs_dir):
     """Check if language file keys are complete.
 
@@ -219,14 +286,18 @@ def check_lang_keys(langs_dir):
 
     # Load all language files
     lang_keys = {}
+    lang_data = {}
+    load_failed = False
     duplicate_keys_by_file = {}
     key_order_by_file = {}
     
     for lang_file in sorted(langs_path.glob("*.json")):
         keys, data, duplicates, key_order = load_lang_file(lang_file)
         if keys is None:
+            load_failed = True
             continue
         lang_keys[lang_file.name] = keys
+        lang_data[lang_file.name] = data
         if duplicates:
             duplicate_keys_by_file[lang_file.name] = duplicates
         key_order_by_file[lang_file.name] = key_order
@@ -266,7 +337,7 @@ def check_lang_keys(langs_dir):
     print(f"Unexpected keys: {len(unexpected_keys)}\n")
 
     # Check keys for each file
-    all_complete = True
+    all_complete = check_kernel_placeholders(lang_data) and not load_failed
     file_issues = {}  # {lang_name: {'missing': set, 'extra': set, 'duplicates': list}}
 
     for lang_name, keys in lang_keys.items():
@@ -284,8 +355,10 @@ def check_lang_keys(langs_dir):
 
     # Output results
     if all_complete and not file_issues:
-        print("All language files have complete keys!")
+        print("All language files have complete keys and compatible kernel placeholders!")
         return True
+    if not file_issues:
+        return False
 
     # Report issues grouped by file
     print("Issues found:")

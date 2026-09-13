@@ -21,7 +21,7 @@ const getPluginStyle = async () => {
     const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
     let css = "";
     // 为加快启动速度，不进行 await
-    response.data.forEach((item: IPluginData) => {
+    (response.code === 0 && Array.isArray(response.data) ? response.data : []).forEach(item => {
         css += item.css || "";
     });
     return css;

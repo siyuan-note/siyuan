@@ -123,7 +123,7 @@ const getLifecycleManager = (app: App) => {
 const createPluginDataLoader = () => {
     let promise: Promise<IPluginData[]>;
     return (name: string) => {
-        promise ??= fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()}).then(response => response.data);
+        promise ??= fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()}).then(response => response.code === 0 && Array.isArray(response.data) ? response.data : []);
         return promise.then(items => items.find(item => item.name === name));
     };
 };
@@ -141,7 +141,7 @@ export const loadPlugins = async (app: App, names?: string[], init = true) => {
     } else {
         const batch = manager.beginLoadBatch(!manager.isStarted());
         const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
-        tasks = (response.data as IPluginData[]).map(item => manager.requestBatchLoad(item.name, item, batch));
+        tasks = (response.code === 0 && Array.isArray(response.data) ? response.data : []).map(item => manager.requestBatchLoad(item.name, item, batch));
         shouldStart = manager.isLatestLoadBatch(batch);
     }
     if (shouldStart) {

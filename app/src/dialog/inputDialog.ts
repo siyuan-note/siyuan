@@ -96,6 +96,8 @@ export const openInputDialog = (options: {
         });
     }
     inputElement.focus();
-    inputElement.select();
+    if (!options.multiline) {
+        inputElement.select();
+    }
     return dialog;
 };

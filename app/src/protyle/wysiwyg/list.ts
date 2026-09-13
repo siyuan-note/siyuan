@@ -169,6 +169,9 @@ const getListElementByID = async (protyle: IProtyle, listID: string) => {
         id: listID,
         notebook: protyle.notebookId,
     });
+    if (response.code !== 0) {
+        return;
+    }
     const template = document.createElement("template");
     template.innerHTML = normalizeHTMLAssetIFrameBlockDOM(response.data?.dom || "");
     const listElement = template.content.firstElementChild as HTMLElement;
@@ -364,7 +367,10 @@ const getFocusedListTailItem = async (protyle: IProtyle, listID: string, current
         n: 1,
         notebook: protyle.notebookId,
     });
-    const tailBlock = tailResponse.data?.[0] as {id?: string, type?: string} | undefined;
+    if (tailResponse.code !== 0) {
+        return;
+    }
+    const tailBlock = tailResponse.data?.[0];
     if (!tailBlock?.id || tailBlock.type !== "i") {
         return;
     }
@@ -376,6 +382,9 @@ const getFocusedListTailItem = async (protyle: IProtyle, listID: string, current
         id: tailBlock.id,
         notebook: protyle.notebookId,
     });
+    if (domResponse.code !== 0) {
+        return;
+    }
     const template = document.createElement("template");
     template.innerHTML = domResponse.data?.dom || "";
     const tailItemElement = template.content.firstElementChild as HTMLElement;

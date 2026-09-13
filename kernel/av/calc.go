@@ -1688,7 +1688,7 @@ func calcFieldRelation(collection Collection, field Field, fieldIndex int) {
 		for _, item := range collection.GetItems() {
 			values := item.GetValues()
 			if nil != values[fieldIndex] && nil != values[fieldIndex].Relation {
-				countValues++
+				countValues += len(values[fieldIndex].Relation.BlockIDs)
 			}
 		}
 		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countValues), NumberFormatNone)}
@@ -1779,7 +1779,7 @@ func calcFieldRollup(collection Collection, field Field, fieldIndex int) {
 		for _, item := range collection.GetItems() {
 			values := item.GetValues()
 			if nil != values[fieldIndex] && nil != values[fieldIndex].Rollup {
-				countValues++
+				countValues += len(values[fieldIndex].Rollup.Contents)
 			}
 		}
 		calc.Result = &Value{Number: NewFormattedValueNumber(float64(countValues), NumberFormatNone)}

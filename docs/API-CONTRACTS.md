@@ -18,7 +18,23 @@ Arrays, maps, and nested structs recursively validate request constraints. A `nu
 
 `Notebook` is an API payload. Business models map to it explicitly, and regression tests compare complete JSON across encryption states. Contract changes do not alter `.sy`, database, history, sync, or encryption formats.
 
+Notebook creation, renaming, removal, closing, icon updates, and sorting use typed contracts. Renaming, removal, and icon updates trim notebook IDs; closing preserves whitespace for ID validation. Empty names and icons remain available to business validation, and rename failures retain their message display duration.
+
+Encrypted notebook lifecycle endpoints use typed requests and responses while retaining password trimming, fractional-minute truncation, negative-minute clamping, administrative authorization, lease acquisition, and mount rollback. Key derivation, ciphertext formats, and recovery material remain model-layer responsibilities.
+
 ## Compatibility requirements
+
+History contracts retain path trimming, optional highlight defaults, fractional history-type truncation, and null versus empty result arrays. Version comparison checks both reference objects before their fields and acquires notebook leases in sorted order. Content reads and document, asset, and attribute-view rollbacks retain their history-path lease checks; notebook rollback keeps its existing model-level recovery behavior.
+
+Import contracts preserve archive cleanup, first-upload selection, untrimmed Markdown paths, and staged-token trimming and lifetime. Automatic SiYuan imports declare document, token, notebook, and notebook-collection results; mount failures retain the document payload. Obsidian task cancellation retains its task snapshot on failure. Notebook mounting, encrypted import handling, and creation notifications remain in the existing business operations.
+
+Backlink contracts preserve untrimmed query fields, optional flag defaults, source-filter normalization, and revision hashes. Missing list IDs still return null; unchanged revisions retain the existing fields with null arrays. Candidate-definition failures retain their empty `refDefs` payload. Publish filtering, encrypted-notebook admission, and request-held leases remain in the handlers, and context payloads retain recursive block paths and attribute-view reference targets.
+
+Graph contracts preserve partial configuration defaults, case-insensitive configuration fields, and numeric normalization. Query responses distinguish full graph data from correlation-only payloads, including errors and local queries without an ID; node and link arrays retain their original nullability. Configuration persistence still requires administrator access outside read-only mode. Publish filtering and encrypted-notebook rejection retain their existing order relative to configuration decoding.
+
+Template contracts retain path checks before mode and source validation, explicit-mode precedence over the legacy preview flag, database-mode defaults, and the code `1` overwrite prompt. File management keeps Go struct JSON binding and its fixed parse-error message, with separate list, source, revision, and null payloads. Revision checks, symlink restrictions, and sync invalidation remain in the existing model operations.
+
+SQL query contracts retain `limit` and `truncated` at the success envelope's top level. `SuccessSQL` attaches this metadata while failures omit it. Row names come from the query; each value is a JSON scalar, preserving integer digits and Base64 serialization of binary values. Statement trimming, optional mode handling, single-statement and read-only checks, and code `1` query errors remain unchanged.
 
 Contract maintenance must preserve existing observable API behavior. Changes to type definitions or handler structure alone must not change call semantics:
 
@@ -36,7 +52,33 @@ Read-only middleware may still return a prompt object containing `closeTimeout`.
 
 Use `FailureWithTimeout` when a business error must preserve its message display duration. Contract-based block queries use `holdContractBlockRequest` to retain lease checks for explicit notebooks and accompanying IDs. Individual entry points still specify whether state queries permit deleted IDs.
 
+`StructJSONBody` is reserved for endpoints that already use Go JSON struct binding. It preserves case-insensitive field matching, null handling, and parser errors; required business fields are validated by the handler. It must not be used to relax a migrated endpoint's request rules. Endpoints that return their result payload on failure explicitly set `DataOnError` and use the endpoint's typed `FailureWithData` method.
+
+Notebook configuration updates use a typed partial object. The `legacyobject` field option preserves the existing JSON round-trip's numeric normalization and case-insensitive struct binding; optional pointer fields leave existing values unchanged when omitted or null. Encryption fields are decoded for input compatibility but never applied by the configuration patch. `Base64Bytes` explicitly models historical byte-slice inputs as Base64 strings or byte arrays.
+
+`JSONValue` is reserved for fields whose wire protocol explicitly accepts arbitrary JSON, such as an echoed correlation ID. Its schema is a recursive union of null, booleans, numbers, strings, arrays, and objects; it does not stand in for a structured request or response. Word-count results retain their fixed statistics fields independently of the correlation value.
+
+Heading transaction queries return `BlockTransaction` with typed operations and preserve empty, null, and undo-operation payloads. `BlockOperationResult` declares the finite union of text, block ID arrays, and null. Conversion from the model's polymorphic fields rejects unsupported types; attribute-view operations require their own payload contracts. The editor's operation type also accepts the empty column-type field returned by non-attribute-view operations.
+
+All `/api/block/` routes use contracts. Heading-level queries retain batch-ID precedence, deduplication, fractional-level truncation, document struct binding, and message display durations. Document conversion results include the six heading counts and typed transactions. Reference checks validate only the fields used by the selected scope, preserve ignored fields and notebook trimming rules, and retain boolean error payloads, publish filtering, and notebook leases through response serialization. These exceptional input rules use private, endpoint-specific typed decoders; ordinary endpoints continue to use field declarations. Recent-update results use a recursive `SearchBlock` payload, including nullable references, children, and card metadata.
+
+Storage contracts keep arbitrary JSON limited to storage values; keys, recent documents, search criteria, inline styles, and attribute-view palettes have structured types. Recent-document mutations retain their read-only no-op before parsing the body. An optional typed `beforeDecode` callback on `contractHandler` preserves this ordering and may return a response before decoding; route checks still require an explicit endpoint binding. Inline-style version 1 updates preserve existing built-in configuration, while version 2 and palette requests retain their struct-decoding compatibility.
+
+## Multipart requests
+
+Optional `*string` form fields preserve omission separately from an explicit empty string; use `nonnullable` because multipart text fields cannot contain JSON null. Import handlers use this distinction for defaults and delayed field validation. Upload progress starts before multipart parsing, and parse failures clear it before responding; Gin's cached form is reused for typed binding.
+
+`BinaryOutput` declares raw file responses with `BinaryContent` and `SuccessBinary`. The adapter preserves bytes and media type, while `ErrorStatus` declares the distinct HTTP status for JSON failures (`getFile` uses 202). The schema records binary success and typed JSON errors; `ValidateHTTPResponse` checks the status and media type before validating an error envelope. Generated route responses expose `Blob`, while the existing fetch helpers expose `JSONValue` because they parse file contents as text or JSON according to their existing behavior. JSON file contents can contain arbitrary JSON; this does not relax the structured error contract.
+
+`FormBody` supports endpoints such as `putFile` that accept both URL-encoded and multipart forms. It preserves Gin `PostForm` parsing, including first-value selection and available fields after parsing errors. Conditional requirements and delayed validation remain in the handler: directory creation does not require a file, and modification-time validation occurs after writing. The generated caller type uses the same typed form interface as multipart uploads.
+
+Use `MultipartBody` for file uploads. Request structs declare string fields and `*multipart.FileHeader` fields using their wire names; file schemas use `type: string` and `format: binary`, generating `Blob` declarations. The adapter retains Gin multipart parsing and binds the first value for repeated fields. File contents remain available through `Open`, so handlers preserve their read and recovery logic. Unsupported field types and binding options fail generation.
+
+Frontend callers construct `ContractFormData` from typed fields before passing it to the existing fetch functions. The generated signatures require the endpoint's fields and distinguish file values from strings; raw `FormData` cannot satisfy a migrated upload contract. Optional fields are omitted and string values are not trimmed. Plugin callers can implement the generated `APIFormData<Request>` interface when constructing their forms.
+
 ## Endpoint maintenance
+
+Dynamic multipart endpoints use `MultipartFields` to retain every text value and file under each field name. Its request schema maps field names to arrays of text or binary values; `ContractFormData` appends each array item as a repeated form field. This is distinct from fixed-field uploads, which continue to bind the first value. Broadcast publication preserves text-before-file processing and its per-message error results. Endpoint-specific `DecodeFailure` handling preserves existing parsing error codes and payloads.
 
 1. Define or update transport types and endpoints in the contract package, specifying request bodies, error codes, null values, defaults, and historical input compatibility
 2. Bind business entry points through `contractHandler`, preserving route middleware order, authorization, and lease scope

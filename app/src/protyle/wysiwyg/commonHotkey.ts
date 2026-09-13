@@ -298,6 +298,9 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
                 id: item.getAttribute("data-node-id"),
                 notebook: protyle.notebookId,
             });
+            if (response.code !== 0) {
+                return;
+            }
             const foldTempElement = document.createElement("template");
             foldTempElement.innerHTML = normalizeHTMLAssetIFrameBlockDOM(response.data.dom);
             tempElement = foldTempElement.content.firstElementChild as HTMLElement;

@@ -19,6 +19,9 @@ func sortedKeys[V any](values map[string]V) []string {
 func quote(value string) string { data, _ := json.Marshal(value); return string(data) }
 
 func (b *Bundle) typeScript(schema *Schema) string {
+	if schema.Format == "binary" {
+		return "Blob"
+	}
 	if schema.Ref != "" {
 		return strings.TrimPrefix(schema.Ref, "#/$defs/")
 	}
@@ -76,6 +79,9 @@ func (b *Bundle) typeScript(schema *Schema) string {
 		return "Array<" + b.typeScript(schema.Items) + ">"
 	case "object":
 		if additional, ok := schema.AdditionalProperties.(*Schema); ok {
+			if additional.Ref == "#/$defs/JSONValue" {
+				return "{ [key: string]: JSONValue }"
+			}
 			return "Record<string, " + b.typeScript(additional) + ">"
 		}
 		if len(schema.Properties) == 0 {
@@ -129,8 +135,12 @@ func (b *Bundle) TypeScript(legacy []Route) []byte {
 			if endpoint.Method != method {
 				continue
 			}
-			fmt.Fprintf(&output, "    %s: {\n        request: %s;\n        response: %s;\n        body: %s;\n    };\n",
+			fmt.Fprintf(&output, "    %s: {\n        request: %s;\n        response: %s;\n        body: %s;\n",
 				quote(endpoint.Path), b.typeScript(endpoint.Request), b.typeScript(endpoint.Response), quote(string(endpoint.Body)))
+			if endpoint.Output != "" {
+				fmt.Fprintf(&output, "        output: %s;\n", quote(string(endpoint.Output)))
+			}
+			output.WriteString("    };\n")
 		}
 		output.WriteString("}\n\n")
 	}
@@ -162,7 +172,12 @@ export interface APILegacyResponse {
 }
 
 type APIContract = {request: unknown; response: unknown; body: string};
-type APIRequestArgs<C extends APIContract> = C["body"] extends "json"
+export interface APIFormData<Request> extends FormData {
+    readonly apiRequest: Request;
+}
+type APIRequestArgs<C extends APIContract> = C["body"] extends "multipart" | "form"
+    ? [data: APIFormData<C["request"]>]
+    : C["body"] extends "json" | "structJSON"
     ? [data: C["request"]]
     : [data?: C["request"] | null];
 type NonNegative<C extends number> = C extends C ? ` + "`${C}` extends `-${string}`" + ` ? never : C : never;
@@ -171,7 +186,7 @@ export type APICallbackResponse<R> = R extends {code: infer C extends number}
     : never;
 
 type APIPostTail<C extends APIContract> = [
-    cb?: (response: APICallbackResponse<C["response"]>) => void,
+    cb?: (response: C extends {output: "binary"} ? JSONValue : APICallbackResponse<C["response"]>) => void,
     headers?: Record<string, string>,
     failCallback?: (response: APIFetchFailure) => void,
     signal?: AbortSignal,
@@ -202,7 +217,9 @@ export type FetchSyncPost<Legacy = APILegacyResponse> = <Path extends string>(
         ? [...APIRequestArgs<APIPOSTRoutes[Path]>, ...APISyncTail]
         : Path extends APILegacyPOSTPath ? [data?: any, ...tail: APISyncTail]
         : string extends Path ? [data?: any, ...tail: APISyncTail] : never
-) => Promise<Path extends keyof APIPOSTRoutes ? APIPOSTRoutes[Path]["response"] | APITransportError : Legacy>;
+) => Promise<Path extends keyof APIPOSTRoutes
+    ? APIPOSTRoutes[Path] extends {output: "binary"} ? JSONValue : APIPOSTRoutes[Path]["response"] | APITransportError
+    : Legacy>;
 
 export type FetchGet<Legacy = APILegacyResponse | string> = <Path extends string>(
     url: Path,

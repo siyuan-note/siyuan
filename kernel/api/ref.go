@@ -17,31 +17,25 @@
 package api
 
 import (
-	"net/http"
+	"encoding/json"
 	"strconv"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func refreshBacklink(c *gin.Context) {
+var refreshBacklink = contractHandler(apicontract.RefreshBacklink, func(c *gin.Context, request apicontract.RefreshBacklinkRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+	if util.InvalidIDPattern(request.ID, ret) {
+		return contractFailure[apicontract.Null](ret)
 	}
-
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) || util.InvalidIDPattern(id, ret) {
-		return
-	}
-	model.RefreshBacklink(id)
+	model.RefreshBacklink(request.ID)
 	model.FlushTxQueue()
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 func isBacklinkDocAccessible(c *gin.Context, refTreeID string) bool {
 	if !model.IsReadOnlyRoleContext(c) {
@@ -51,41 +45,25 @@ func isBacklinkDocAccessible(c *gin.Context, refTreeID string) bool {
 	return model.CheckBlockIdAccessableByPublishAccess(c, model.GetPublishAccess(), refTreeID)
 }
 
-func getBackmentionDoc(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	defID := arg["defID"].(string)
-	refTreeID := arg["refTreeID"].(string)
-	knownRevision, _ := arg["knownRevision"].(string)
-	keyword := arg["keyword"].(string)
-	var notebook string
-	if val, ok := arg["notebook"]; ok {
-		notebook = val.(string)
-	}
+var getBackmentionDoc = contractHandler(apicontract.GetBackmentionDoc, func(c *gin.Context, request apicontract.BackmentionDocumentRequest) apicontract.Response[apicontract.BacklinkContextData] {
+	defID, refTreeID := request.DefID, request.RefTreeID
+	knownRevision, keyword, notebook := request.KnownRevision, request.Keyword, request.Notebook
 	encryptedNotebookDenied := isEncryptedNotebookDeniedForPublish(c, notebook)
 	if notebook != "" && !model.IsEncryptedBox(notebook) {
 		notebook = ""
 	}
 	if !encryptedNotebookDenied {
 		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
-			ret.Code = 1
-			ret.Msg = err.Error()
-			return
+			return apicontract.Failure[apicontract.BacklinkContextData](1, err.Error())
 		}
 	}
 	containChildren := model.Conf.Editor.BacklinkContainChildren
-	if val, ok := arg["containChildren"]; ok {
-		containChildren = val.(bool)
+	if request.ContainChildren != nil {
+		containChildren = *request.ContainChildren
 	}
 	highlight := true
-	if val, ok := arg["highlight"]; ok {
-		highlight = val.(bool)
+	if request.Highlight != nil {
+		highlight = *request.Highlight
 	}
 
 	var backlinks []*model.Backlink
@@ -110,47 +88,62 @@ func getBackmentionDoc(c *gin.Context) {
 		Keywords        []string
 	}{defID, refTreeID, keyword, notebook, containChildren, highlight, items, keywords})
 	if knownRevision == revision {
-		ret.Data = &backlinkContextResult{Unchanged: true, Revision: revision}
-		return
+		return apicontract.Success(apicontract.BacklinkContextData{Unchanged: true, Revision: revision})
 	}
-	ret.Data = &backlinkContextResult{Revision: revision, Backmentions: items, Keywords: keywords}
+	return apicontract.Success(apicontract.BacklinkContextData{Revision: revision, Backmentions: backlinkContextContracts(items), Keywords: keywords})
+})
+
+func backlinkContextContracts(items []*backlinkContextResponse) []*apicontract.BacklinkContext {
+	if items == nil {
+		return nil
+	}
+	ret := make([]*apicontract.BacklinkContext, len(items))
+	for i, item := range items {
+		if item == nil {
+			continue
+		}
+		value := &apicontract.BacklinkContext{Type: item.Type, ReferenceBlockID: item.ReferenceBlockID, ID: item.ID,
+			DOM: item.DOM, BlockPaths: blockPathContracts(item.BlockPaths), Expand: item.Expand, Revision: item.Revision}
+		if item.AttributeViewTargets != nil {
+			value.AttributeViewTargets = make([]*apicontract.BacklinkAttributeViewTarget, len(item.AttributeViewTargets))
+			for j, target := range item.AttributeViewTargets {
+				if target == nil {
+					continue
+				}
+				converted := &apicontract.BacklinkAttributeViewTarget{BlockID: target.BlockID}
+				if target.Matches != nil {
+					converted.Matches = make([]*apicontract.BacklinkAttributeViewMatch, len(target.Matches))
+					for k, match := range target.Matches {
+						converted.Matches[k] = (*apicontract.BacklinkAttributeViewMatch)(match)
+					}
+				}
+				value.AttributeViewTargets[j] = converted
+			}
+		}
+		ret[i] = value
+	}
+	return ret
 }
 
-func getBacklinkDoc(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	defID := arg["defID"].(string)
-	refTreeID := arg["refTreeID"].(string)
-	knownRevision, _ := arg["knownRevision"].(string)
-	keyword := arg["keyword"].(string)
-	var notebook string
-	if val, ok := arg["notebook"]; ok {
-		notebook = val.(string)
-	}
+var getBacklinkDoc = contractHandler(apicontract.GetBacklinkDoc, func(c *gin.Context, request apicontract.BacklinkDocumentRequest) apicontract.Response[apicontract.BacklinkContextData] {
+	defID, refTreeID := request.DefID, request.RefTreeID
+	knownRevision, keyword, notebook := request.KnownRevision, request.Keyword, request.Notebook
 	encryptedNotebookDenied := isEncryptedNotebookDeniedForPublish(c, notebook)
 	if notebook != "" && !model.IsEncryptedBox(notebook) {
 		notebook = ""
 	}
 	if !encryptedNotebookDenied {
 		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
-			ret.Code = 1
-			ret.Msg = err.Error()
-			return
+			return apicontract.Failure[apicontract.BacklinkContextData](1, err.Error())
 		}
 	}
 	containChildren := model.Conf.Editor.BacklinkContainChildren
-	if val, ok := arg["containChildren"]; ok {
-		containChildren = val.(bool)
+	if request.ContainChildren != nil {
+		containChildren = *request.ContainChildren
 	}
 	highlight := true
-	if val, ok := arg["highlight"]; ok {
-		highlight = val.(bool)
+	if request.Highlight != nil {
+		highlight = *request.Highlight
 	}
 
 	var backlinks []*model.Backlink
@@ -158,9 +151,9 @@ func getBacklinkDoc(c *gin.Context) {
 	if encryptedNotebookDenied || !isBacklinkDocAccessible(c, refTreeID) {
 		backlinks, keywords = []*model.Backlink{}, []string{}
 	} else if notebook != "" && model.IsEncryptedBox(notebook) {
-		backlinks, keywords = model.GetBacklinkDocInBox(defID, refTreeID, keyword, containChildren, highlight, notebook, parseBacklinkSourceFilter(arg))
+		backlinks, keywords = model.GetBacklinkDocInBox(defID, refTreeID, keyword, containChildren, highlight, notebook, backlinkSourceFilterModel(request.SourceFilter))
 	} else {
-		backlinks, keywords = model.GetBacklinkDoc(defID, refTreeID, keyword, containChildren, highlight, parseBacklinkSourceFilter(arg))
+		backlinks, keywords = model.GetBacklinkDoc(defID, refTreeID, keyword, containChildren, highlight, backlinkSourceFilterModel(request.SourceFilter))
 	}
 	keywords = canonicalBacklinkKeywords(keywords)
 	items := newBacklinkContextResponses(backlinks)
@@ -175,80 +168,75 @@ func getBacklinkDoc(c *gin.Context) {
 		Keywords        []string
 	}{defID, refTreeID, keyword, notebook, containChildren, highlight, items, keywords})
 	if knownRevision == revision {
-		ret.Data = &backlinkContextResult{Unchanged: true, Revision: revision}
-		return
+		return apicontract.Success(apicontract.BacklinkContextData{Unchanged: true, Revision: revision})
 	}
-	ret.Data = &backlinkContextResult{Revision: revision, Backlinks: items, Keywords: keywords}
+	return apicontract.Success(apicontract.BacklinkContextData{Revision: revision, Backlinks: backlinkContextContracts(items), Keywords: keywords})
+})
+
+func backlinkSourceFilterModel(filter *apicontract.BacklinkSourceFilter) *model.BacklinkSourceFilter {
+	if filter == nil {
+		return nil
+	}
+	return model.NormalizeBacklinkSourceFilter(&model.BacklinkSourceFilter{DailyNote: filter.DailyNote, ExcludeSelf: filter.ExcludeSelf,
+		ExcludedRefDefIDs: filter.ExcludedRefDefIDs, ExcludedNotebookIDs: filter.ExcludedNotebookIDs})
 }
 
-func getBacklink2(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var getBacklink2 = contractHandler(apicontract.GetBacklink2, func(c *gin.Context, request apicontract.BacklinkListRequest) apicontract.Response[apicontract.BacklinkListData] {
+	if request.ID == nil {
+		return apicontract.Success(apicontract.BacklinkListData{})
 	}
-
-	if nil == arg["id"] {
-		return
-	}
-
-	id := arg["id"].(string)
-	knownRevision, _ := arg["knownRevision"].(string)
-	keyword := arg["k"].(string)
-	mentionKeyword := arg["mk"].(string)
+	id, knownRevision := *request.ID, request.KnownRevision
+	keyword, mentionKeyword := request.K, request.MK
 	includeMentions := true
-	if val, ok := arg["includeMentions"].(bool); ok {
-		includeMentions = val
+	if request.IncludeMentions != nil {
+		includeMentions = *request.IncludeMentions
 	}
-	sortArg := arg["sort"]
 	sort := util.SortModeUpdatedDESC
-	if nil != sortArg {
-		sort, _ = strconv.Atoi(sortArg.(string))
+	if request.Sort != nil {
+		sort, _ = strconv.Atoi(*request.Sort)
 	}
-	mentionSortArg := arg["mSort"]
 	mentionSort := util.SortModeUpdatedDESC
-	if nil != mentionSortArg {
-		mentionSort, _ = strconv.Atoi(mentionSortArg.(string))
+	if request.MentionSort != nil {
+		mentionSort, _ = strconv.Atoi(*request.MentionSort)
 	}
 	containChildren := model.Conf.Editor.BacklinkContainChildren
-	if val, ok := arg["containChildren"]; ok {
-		containChildren = val.(bool)
+	if request.ContainChildren != nil {
+		containChildren = *request.ContainChildren
 	}
-	sourceFilter := parseBacklinkSourceFilter(arg)
-	if candidates, _ := arg["refDefCandidates"].(bool); candidates {
-		defs := []*model.BacklinkRefDef{}
-		ret.Data = map[string]any{"refDefs": defs}
-		notebook, _ := arg["notebook"].(string)
+	sourceFilter := backlinkSourceFilterModel(request.SourceFilter)
+	if request.RefDefCandidates {
+		empty := apicontract.BacklinkDefinitionsResult([]*apicontract.BacklinkRefDef{})
+		notebook := request.Notebook
 		if model.IsReadOnlyRoleContext(c) || isEncryptedNotebookDeniedForPublish(c, notebook) {
-			return
+			return apicontract.Success(empty)
 		}
 		if err := holdEncryptedBoxRequest(c, notebook); nil != err {
-			ret.Code, ret.Msg = 1, err.Error()
-			return
+			return apicontract.GetBacklink2.FailureWithData(1, err.Error(), empty)
 		}
 		if !model.IsEncryptedBox(notebook) {
 			notebook = ""
 		}
 		defs, err := model.GetBacklinkRefDefs(id, keyword, containChildren, notebook, sourceFilter)
 		if nil != err {
-			ret.Code, ret.Msg = 1, err.Error()
-			return
+			return apicontract.GetBacklink2.FailureWithData(1, err.Error(), empty)
 		}
-		ret.Data = map[string]any{"refDefs": defs}
-		return
+		var converted []*apicontract.BacklinkRefDef
+		if defs != nil {
+			converted = make([]*apicontract.BacklinkRefDef, len(defs))
+			for i, def := range defs {
+				converted[i] = (*apicontract.BacklinkRefDef)(def)
+			}
+		}
+		return apicontract.Success(apicontract.BacklinkDefinitionsResult(converted))
 	}
 	var boxID string
 	var backlinks, backmentions []*model.Path
 	var linkRefsCount, mentionsCount int
 	// 加密笔记本的反链面板走 InBox 版（查加密 content db）
-	notebook, _ := arg["notebook"].(string)
+	notebook := request.Notebook
 	if !isEncryptedNotebookDeniedForPublish(c, notebook) {
 		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
-			ret.Code = 1
-			ret.Msg = err.Error()
-			return
+			return apicontract.Failure[apicontract.BacklinkListData](1, err.Error())
 		}
 		if notebook != "" && model.IsEncryptedBox(notebook) {
 			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2InBoxWithOptions(id, keyword, mentionKeyword, sort, mentionSort, containChildren, notebook, sourceFilter, includeMentions)
@@ -304,11 +292,18 @@ func getBacklink2(c *gin.Context) {
 		boxID,
 	})
 	if knownRevision == response.Revision {
-		ret.Data = &backlinkListResponse{Unchanged: true, Revision: response.Revision}
-		return
+		return apicontract.Success(apicontract.BacklinkListResult(apicontract.BacklinkList{Unchanged: true, Revision: response.Revision}))
 	}
-	ret.Data = response
-}
+	encoded, err := json.Marshal(response)
+	if err != nil {
+		return apicontract.Failure[apicontract.BacklinkListData](-1, err.Error())
+	}
+	var result apicontract.BacklinkList
+	if err = json.Unmarshal(encoded, &result); err != nil {
+		return apicontract.Failure[apicontract.BacklinkListData](-1, err.Error())
+	}
+	return apicontract.Success(apicontract.BacklinkListResult(result))
+})
 
 func parseBacklinkSourceFilter(arg map[string]any) *model.BacklinkSourceFilter {
 	filterArg, ok := arg["sourceFilter"].(map[string]any)

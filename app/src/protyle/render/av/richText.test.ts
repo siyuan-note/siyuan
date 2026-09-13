@@ -514,6 +514,30 @@ describe("attribute view text value creation", () => {
 });
 
 describe("attribute view rich text DOM policy", () => {
+    it("preserves code content and prepares block and inline math for preview rendering", {
+        skip: hasDOM && typeof Lute !== "undefined" ? false :
+            "The Node test environment does not provide DOM and Lute globals",
+    }, async () => {
+        Object.assign(globalThis, {NODE_ENV: "test", SIYUAN_VERSION: "test"});
+        const richText = await import("./richText");
+        const {genRenderFrame} = await import("../util");
+        const template = document.createElement("template");
+        template.innerHTML = richText.getAVRichTextPreviewHTML([
+            "```go", "package main", "```", "", "$$", "x^2", "$$", "", "$a^2 + b^2$",
+        ].join("\n"));
+
+        const code = template.content.querySelector("pre.code-block > code");
+        assert.equal(code?.textContent, "package main\n");
+        assert.equal(code.parentElement.dataset.language, "go");
+        assert.equal(template.content.querySelector(".protyle-action"), null);
+        const blockMath = template.content.querySelector<HTMLElement>('div[data-subtype="math"]');
+        assert.equal(blockMath?.dataset.content, "x^2");
+        assert.doesNotThrow(() => genRenderFrame(blockMath));
+        assert.ok(blockMath.firstElementChild.firstElementChild);
+        assert.equal(template.content.querySelector<HTMLElement>('span[data-subtype="math"]')?.dataset.content,
+            "a^2 + b^2");
+    });
+
     it("preserves supported headings and inline marks while dropping unsupported blocks", {
         skip: hasDOM ? false : "The Node test environment does not provide a DOM implementation",
     }, async () => {

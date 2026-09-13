@@ -1,3 +1,4 @@
+import type {BlockQueryRequestInput} from "../types/api";
 import {getAllModels} from "../layout/getAll";
 /// #if !BROWSER
 import * as path from "path";
@@ -1265,7 +1266,7 @@ export const getArticle = (options: {
         }
         options.edit.protyle.scroll.lastScrollTop = 0;
         addLoading(options.edit.protyle);
-        const docInfoParam: IObject = {
+        const docInfoParam: BlockQueryRequestInput = {
             id: options.id,
         };
         if (isEncryptedBox(options.edit.protyle.notebookId)) {

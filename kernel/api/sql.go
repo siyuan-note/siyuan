@@ -17,83 +17,58 @@
 package api
 
 import (
-	"net/http"
+	"encoding/json"
 
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/sql"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func flushTransaction(c *gin.Context) {
+var flushTransaction = contractHandler(apicontract.FlushTransaction, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 	// Add internal kernel API `/api/sqlite/flushTransaction` https://github.com/siyuan-note/siyuan/issues/10005
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
 	model.FlushTxQueue()
 	sql.FlushQueue()
-}
 
-func SQL(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	var limitInfo *sql.QueryLimitInfo
-	defer func() {
-		c.JSON(http.StatusOK, struct {
-			*gulu.Result
-			*sql.QueryLimitInfo
-		}{ret, limitInfo})
-	}()
+	return apicontract.Success(apicontract.Null{})
+})
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var stmt, mode string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("stmt", &stmt, true, true),
-		util.BindJsonArg("mode", &mode, false, false),
-	) {
-		return
-	}
-
+var SQL = contractHandler(apicontract.QuerySQL, func(c *gin.Context, request apicontract.SQLQueryRequest) apicontract.Response[apicontract.SQLRows] {
+	stmt, mode := request.Stmt, request.Mode
 	switch mode {
 	case "":
 		// 默认模式，允许单条语句
 		if err := sql.CheckSingleStatement(stmt); err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return
+			return apicontract.Failure[apicontract.SQLRows](-1, err.Error())
 		}
 	case "readonly":
 		// 只读模式，允许单条语句
 		if err := sql.CheckSingleStatement(stmt); err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return
+			return apicontract.Failure[apicontract.SQLRows](-1, err.Error())
 		}
 		if err := sql.CheckReadonlyStatement(stmt); err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return
+			return apicontract.Failure[apicontract.SQLRows](-1, err.Error())
 		}
 	case "multiple":
 		// 多语句模式，不做校验
 	default:
 		// 未知模式
-		ret.Code = -1
-		ret.Msg = "unknown [mode]"
-		return
+		return apicontract.Failure[apicontract.SQLRows](-1, "unknown [mode]")
 	}
 
 	result, info, err := sql.QueryWithLimitInfo(stmt, model.Conf.Search.Limit)
 	if err != nil {
-		ret.Code = 1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.SQLRows](1, err.Error())
 	}
 
-	ret.Data = result
-	limitInfo = &info
-}
+	data, err := json.Marshal(result)
+	if err != nil {
+		return apicontract.Failure[apicontract.SQLRows](1, err.Error())
+	}
+	var rows apicontract.SQLRows
+	if err = json.Unmarshal(data, &rows); err != nil {
+		return apicontract.Failure[apicontract.SQLRows](1, err.Error())
+	}
+	return apicontract.SuccessSQL(rows, info.Limit, info.Truncated)
+})

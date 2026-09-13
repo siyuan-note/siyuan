@@ -224,6 +224,8 @@ View the API token in <kbd>Settings - Authentication - API token</kbd>. Use it i
   }
   ```
 
+The close endpoint validates the notebook ID without trimming whitespace. Typed request and response declarations are generated in `app/src/types/api/index.d.ts` and synchronized to `petal`.
+
 ### Rename a notebook
 
 * `/api/notebook/renameNotebook`
@@ -2819,7 +2821,7 @@ Saved search criteria use the following fields:
 * `idPath`: Search scope path array
 * `k`: Search keyword
 * `r`: Replacement keyword
-* `types`: Block type flags. Supported keys are `mathBlock`, `table`, `blockquote`, `superBlock`, `paragraph`, `document`, `heading`, `list`, `listItem`, `codeBlock`, `htmlBlock`, `embedBlock`, `databaseBlock`, `audioBlock`, `videoBlock`, `iframeBlock`, `widgetBlock`, and `callout`
+* `types`: Block type flags. Supported keys are `mathBlock`, `table`, `blockquote`, `superBlock`, `paragraph`, `document`, `heading`, `list`, `listItem`, `codeBlock`, `htmlBlock`, `embedBlock`, `databaseBlock`, `audioBlock`, `videoBlock`, `iframeBlock`, `widgetBlock`, `callout`, `tabs`, and `tabItem`
 * `subTypes`: Independent subtype groups: `heading` accepts `h1` through `h6`; `list` and `listItem` each accept `o` (ordered), `u` (unordered), and `t` (task). A missing or empty group, or a group with all flags `false`, leaves that parent type unrestricted by subtype. The parent must still be enabled in `types`. Unknown top-level keys, including the former flat `h1`–`h6` and `o`/`u`/`t` flags, are ignored without error; saved subtype selections in that format must be selected and saved again
 * `replaceTypes`: Replacement type flags. Supported keys are `text`, `imgText`, `imgTitle`, `imgSrc`, `aText`, `aTitle`, `aHref`, `code`, `em`, `strong`, `inlineMath`, `inlineMemo`, `blockRef`, `fileAnnotationRef`, `kbd`, `mark`, `s`, `sub`, `sup`, `tag`, `u`, `docTitle`, `codeBlock`, `mathBlock`, and `htmlBlock`
 

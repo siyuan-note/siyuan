@@ -17,94 +17,57 @@
 package api
 
 import (
-	"net/http"
-
-	"github.com/88250/gulu"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func loadPetals(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var loadPetals = contractHandler(apicontract.LoadPetals, func(c *gin.Context, request apicontract.LoadPetalsRequest) apicontract.Response[[]*apicontract.Petal] {
+	values := model.LoadPetals(request.Frontend, model.IsReadOnlyRoleContext(c))
+	var result []*apicontract.Petal
+	if values != nil {
+		result = make([]*apicontract.Petal, len(values))
 	}
-
-	var frontend string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("frontend", &frontend, true, true)) {
-		return
+	for i, value := range values {
+		item, err := petalContract(value)
+		if err != nil {
+			return apicontract.Failure[[]*apicontract.Petal](-1, err.Error())
+		}
+		result[i] = item
 	}
-	isPublish := model.IsReadOnlyRoleContext(c)
+	return apicontract.Success(result)
+})
 
-	ret.Data = model.LoadPetals(frontend, isPublish)
-}
-
-func setPetalEnabled(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var packageName, app string
-	var enabled bool
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("packageName", &packageName, true, true),
-		util.BindJsonArg("enabled", &enabled, true, false),
-		util.BindJsonArg("app", &app, false, false),
-	) {
-		return
-	}
-
-	data, err := model.SetPetalEnabled(packageName, enabled)
+var setPetalEnabled = contractHandler(apicontract.SetPetalEnabled, func(c *gin.Context, request apicontract.SetPetalEnabledRequest) apicontract.Response[*apicontract.Petal] {
+	data, err := model.SetPetalEnabled(request.PackageName, request.Enabled)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[*apicontract.Petal](-1, err.Error())
 	}
-
-	ret.Data = data
-	if enabled {
-		reloadPluginSet := hashset.New(packageName)
-		model.PushReloadPlugin(nil, nil, reloadPluginSet, nil, app, "")
+	if request.Enabled {
+		reloadPluginSet := hashset.New(request.PackageName)
+		model.PushReloadPlugin(nil, nil, reloadPluginSet, nil, request.App, "")
 	} else {
-		unloadPluginSet := hashset.New(packageName)
-		model.PushReloadPlugin(nil, unloadPluginSet, nil, nil, app, "")
+		unloadPluginSet := hashset.New(request.PackageName)
+		model.PushReloadPlugin(nil, unloadPluginSet, nil, nil, request.App, "")
 	}
-}
-
-func setPetalPublishEnabled(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var packageName string
-	var enabled bool
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("packageName", &packageName, true, true),
-		util.BindJsonArg("enabled", &enabled, true, false),
-	) {
-		return
-	}
-
-	data, err := model.SetPetalPublishEnabled(packageName, enabled)
+	result, err := petalContract(data)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[*apicontract.Petal](-1, err.Error())
 	}
+	return apicontract.Success(result)
+})
 
-	ret.Data = data
+var setPetalPublishEnabled = contractHandler(apicontract.SetPetalPublishEnabled, func(c *gin.Context, request apicontract.SetPetalPublishEnabledRequest) apicontract.Response[*apicontract.Petal] {
+	data, err := model.SetPetalPublishEnabled(request.PackageName, request.Enabled)
+	if err != nil {
+		return apicontract.Failure[*apicontract.Petal](-1, err.Error())
+	}
 	util.ReloadPublishServiceSessions()
-}
+	result, err := petalContract(data)
+	if err != nil {
+		return apicontract.Failure[*apicontract.Petal](-1, err.Error())
+	}
+	return apicontract.Success(result)
+})

@@ -235,14 +235,18 @@ func HandleAssetsChangeEvent(assetAbsPath string) {
 }
 
 func removeAssetThumbnail(assetAbsPath string) {
-	if util.IsCompressibleAssetImage(assetAbsPath) {
-		p := filepath.ToSlash(assetAbsPath)
-		_, after, found := strings.Cut(p, "assets/")
-		if !found {
-			return
-		}
-		thumbnailPath := filepath.Join(util.TempDir, "thumbnails", "assets", after)
-		os.RemoveAll(thumbnailPath)
+	relativePath, err := filepath.Rel(util.DataDir, assetAbsPath)
+	if err != nil {
+		return
+	}
+	// 按数据目录内的资源路径匹配缩略图缓存，保留资源子目录和文件名大小写。
+	assetPath, _, ok := AssetPathFromDataRelativePath(filepath.ToSlash(relativePath))
+	if !ok || !util.IsCompressibleAssetImage(assetPath) {
+		return
+	}
+	thumbnailPath := filepath.Join(util.TempDir, "thumbnails", assetPath)
+	if err = os.Remove(thumbnailPath); err != nil && !os.IsNotExist(err) {
+		logging.LogErrorf("remove asset thumbnail [%s] failed: %s", thumbnailPath, err)
 	}
 }
 

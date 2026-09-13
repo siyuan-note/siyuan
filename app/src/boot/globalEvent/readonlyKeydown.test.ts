@@ -65,6 +65,7 @@ const globalFixture = (disabled: boolean, hasRange = true, foreignRange = false)
         isOnlyMeta: () => false,
         matchHotKey: (binding: string, event: {key: string}) => binding === event.key,
         execByCommand: ({command}: {command: string}) => calls.push(command),
+        onlyProtyleCommand: ({command}: {command: string}) => calls.push(command),
     });
     return {edit: (event: any) => edit({}, event), calls};
 };
@@ -107,6 +108,52 @@ test("editable undo still executes", () => {
         assert.equal(fixture.edit(keyboardEvent("undo")), true);
         assert.deepEqual(fixture.calls, ["undo"]);
     }
+});
+
+test("document readonly shortcut works without a body selection", () => {
+    for (const disabled of [false, true]) {
+        for (const [hasRange, foreignRange] of [[true, false], [false, false], [true, true]]) {
+            const fixture = globalFixture(disabled, hasRange, foreignRange);
+            assert.equal(fixture.edit(keyboardEvent("switchReadonly")), true);
+            assert.deepEqual(fixture.calls, ["switchReadonly"]);
+        }
+    }
+});
+
+test("body shortcuts follow the current document while preserving focused panel priority", () => {
+    const calls: string[] = [];
+    const element = (selector: string) => ({closest: (value: string) => value.split(", ").includes(selector)});
+    const body = element("body");
+    const firstDocument = element(".protyle");
+    const secondDocument = element(".protyle");
+    const filePanel = element(".sy__file");
+    let activeDocument = firstDocument;
+    let activePanel: ReturnType<typeof element> | undefined = undefined;
+    const dispatch = loadFunction("src/boot/globalEvent/keydown.ts", "windowKeyDown", {
+        filterHotkey: () => false,
+        switchDialog: undefined,
+        searchKeydown: () => false,
+        isWindow: () => false,
+        bindMenuKeydown: () => false,
+        bindAVPanelKeydown: () => false,
+        document: {body, querySelector: () => activePanel},
+        getActiveTab: () => ({panelElement: activeDocument}),
+        editKeydown: () => {
+            calls.push(activeDocument === firstDocument ? "first" : "second");
+            return true;
+        },
+        fileTreeKeydown: () => {
+            calls.push("files");
+            return true;
+        },
+    });
+    const event = {...keyboardEvent("switchReadonly"), target: body};
+    dispatch({}, event);
+    activeDocument = secondDocument;
+    dispatch({}, event);
+    activePanel = filePanel;
+    dispatch({}, event);
+    assert.deepEqual(calls, ["first", "second", "files"]);
 });
 
 test("native command availability protects readonly content across command panel and shortcuts", () => {

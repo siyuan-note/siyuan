@@ -288,29 +288,9 @@ func BoxDocSubFileCountForPublish(boxID string, publishAccess PublishAccess) int
 }
 
 func boxDocSubFileCount(boxID string, include func(string) bool) int {
-	entries, err := os.ReadDir(filepath.Join(util.DataDir, boxID))
-	if err != nil {
-		return 0
-	}
-	ret := 0
-	for _, entry := range entries {
-		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".sy") {
-			continue
-		}
-		id := strings.TrimSuffix(entry.Name(), ".sy")
-		if id == boxID || !ast.IsNodeIDPattern(id) {
-			continue
-		}
-		p := "/" + entry.Name()
-		if nil != include && !include(p) {
-			continue
-		}
-		ial := filesys.DocIAL(filepath.Join(util.DataDir, boxID, entry.Name()))
-		if "true" == ial[DocHiddenAttr] {
-			continue
-		}
-		ret++
-	}
+	ret, _ := visibleDocCount(boxID, "/", func(p string) map[string]string {
+		return filesys.DocIAL(filepath.Join(util.DataDir, boxID, p))
+	}, include)
 	return ret
 }
 

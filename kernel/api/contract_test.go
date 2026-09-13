@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"net/http"
 	"net/http/httptest"
 	"os"
 	"os/exec"
@@ -25,14 +24,11 @@ import (
 
 func requireAPIContract(t *testing.T, method, path string, recorder *httptest.ResponseRecorder) {
 	t.Helper()
-	if recorder.Code != http.StatusOK || !strings.HasPrefix(recorder.Header().Get("Content-Type"), "application/json") {
-		t.Fatalf("unexpected transport response for %s: %d %v", path, recorder.Code, recorder.Header())
-	}
 	bundle, err := apicontract.BuildBundle()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := bundle.ValidateResponse(method, path, recorder.Body.Bytes()); err != nil {
+	if err := bundle.ValidateHTTPResponse(method, path, recorder.Code, recorder.Header().Get("Content-Type"), recorder.Body.Bytes()); err != nil {
 		t.Fatalf("response violates %s: %v\n%s", path, err, recorder.Body.String())
 	}
 }
@@ -162,6 +158,9 @@ func TestAPIContractHandlers(t *testing.T) {
 		return response
 	}
 	admin := model.RoleAdministrator
+	testSQLContractQueries(t)
+	testGraphResetContracts(t)
+	testGraphQueryContracts(t, docID)
 	blockQueries := []struct {
 		path    string
 		handler gin.HandlerFunc

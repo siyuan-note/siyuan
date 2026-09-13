@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -52,6 +53,7 @@ func TestCriteriaCRUD(t *testing.T) {
 	}
 	type criterionData struct {
 		Name     string               `json:"name"`
+		Types    map[string]bool      `json:"types"`
 		SubTypes model.SearchSubTypes `json:"subTypes"`
 	}
 	getCriteria := func() []criterionData {
@@ -86,6 +88,32 @@ func TestCriteriaCRUD(t *testing.T) {
 	criteria = getCriteria()
 	if len(criteria) != 1 || criteria[0].SubTypes.Heading["h1"] || !criteria[0].SubTypes.Heading["h2"] || criteria[0].SubTypes.List["o"] || !criteria[0].SubTypes.List["u"] || criteria[0].SubTypes.ListItem["t"] || !criteria[0].SubTypes.ListItem["o"] {
 		t.Fatalf("criterion was not overwritten: %#v", criteria)
+	}
+
+	typeKeys := []string{
+		"document", "heading", "paragraph", "list", "listItem", "codeBlock", "mathBlock", "table",
+		"blockquote", "superBlock", "htmlBlock", "embedBlock", "databaseBlock", "audioBlock",
+		"videoBlock", "iframeBlock", "widgetBlock", "callout", "tabs", "tabItem",
+	}
+	for _, enabled := range []bool{true, false} {
+		wantTypes := make(map[string]bool, len(typeKeys))
+		for _, key := range typeKeys {
+			wantTypes[key] = enabled
+		}
+		body, err := json.Marshal(map[string]criterionData{
+			"criterion": {Name: "Public notes", Types: wantTypes},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		recorder := perform("/api/storage/setCriterion", string(body))
+		if responseCode(t, recorder) != 0 {
+			t.Fatalf("set criterion types failed: %s", recorder.Body.String())
+		}
+		criteria = getCriteria()
+		if len(criteria) != 1 || !reflect.DeepEqual(criteria[0].Types, wantTypes) {
+			t.Fatalf("criterion type keys or values changed after persistence: got %#v, want %#v", criteria, wantTypes)
+		}
 	}
 
 	removeRecorder := perform("/api/storage/removeCriterion", `{"name":"Public notes"}`)

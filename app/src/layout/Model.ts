@@ -3,9 +3,6 @@ import {Constants} from "../constants";
 import type {Tab} from "./Tab";
 /// #endif
 import type {App} from "../index";
-import {kernelError} from "../util/kernelFault";
-import {processMessage} from "../util/processMessage";
-import {reloadSync} from "../util/reloadSync";
 
 interface IConnectOptions {
     id: string,
@@ -39,6 +36,8 @@ export class Model {
     }
 
     private processWebSocketMessage(data: string, callback: (data: IWebSocketData) => void) {
+        // 消息处理依赖面板子类，调用时加载以避免基类初始化期间形成循环依赖。
+        const {processMessage}: typeof import("../util/processMessage") = require("../util/processMessage");
         callback.call(this, processMessage(JSON.parse(data)));
     }
 
@@ -62,6 +61,7 @@ export class Model {
             }
             const logElement = document.getElementById("errorLog");
             if (logElement) {
+                const {reloadSync}: typeof import("../util/reloadSync") = require("../util/reloadSync");
                 // 内核中断后无法 catch fetch 请求错误，重连会导致无法执行 transactionsTimeout
                 reloadSync(this.app, {upsertRootIDs: [], removeRootIDs: []});
                 window.siyuan.dialogs.find(item => {
@@ -106,6 +106,7 @@ export class Model {
         };
         ws.onerror = (err: Event & { target: { url: string, readyState: number } }) => {
             if (err.target.url.endsWith("&type=main") && err.target.readyState === 3) {
+                const {kernelError}: typeof import("../util/kernelFault") = require("../util/kernelFault");
                 kernelError();
             }
         };

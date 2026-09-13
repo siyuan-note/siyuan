@@ -1,12 +1,22 @@
 // 包 apicontract 定义 HTTP 接口的线协议，不依赖内核启动或持久化模型。
 package apicontract
 
-import "reflect"
+import (
+	"io"
+	"reflect"
+)
 
 type BodyMode string
 
+type OutputMode string
+
+const BinaryOutput OutputMode = "binary"
+
 const (
 	JSONBody           BodyMode = "json"
+	MultipartBody      BodyMode = "multipart"
+	FormBody           BodyMode = "form"
+	StructJSONBody     BodyMode = "structJSON"
 	NoBody             BodyMode = "none"
 	LegacyOptionalBody BodyMode = "legacyOptional"
 )
@@ -21,19 +31,67 @@ type Definition struct {
 	ErrorCodes      []int
 	ErrorText       bool
 	DataNonNullable bool
+	DataOnError     bool
+	Output          OutputMode
+	ErrorStatus     int
 }
 
 type Endpoint[Request, Data any] struct {
-	definition Definition
+	definition    Definition
+	decodeRequest func(io.Reader) (Request, error)
+	decodeFailure func(error) Response[Data]
 }
 
 type ResponseOptions struct {
 	AdditionalCodes []int
 	Text            bool
 	NonNullable     bool
+	DataOnError     bool
+	Output          OutputMode
+	ErrorStatus     int
 }
 
 var definitions []Definition
+
+var (
+	GetChildBlocks     = define[BlockQueryRequest, []*ChildBlock]("getChildBlocks", "/api/block/getChildBlocks", JSONBody, ResponseOptions{NonNullable: true}, "POST")
+	GetTailChildBlocks = define[TailChildBlocksRequest, []*ChildBlock]("getTailChildBlocks", "/api/block/getTailChildBlocks", JSONBody, ResponseOptions{NonNullable: true}, "POST")
+)
+
+var (
+	CheckBlocksExist            = define[CheckBlocksExistRequest, map[string]bool]("checkBlocksExist", "/api/block/checkBlocksExist", JSONBody, ResponseOptions{}, "POST")
+	GetOrderedListContinueStart = define[BlockQueryRequest, OrderedListStartData]("getOrderedListContinueStart", "/api/block/getOrderedListContinueStart", JSONBody, ResponseOptions{}, "POST")
+)
+
+var (
+	GetContentWordCount = define[ContentWordCountRequest, WordCountData]("getContentWordCount", "/api/block/getContentWordCount", JSONBody, ResponseOptions{}, "POST")
+	GetBlocksWordCount  = define[BlocksWordCountRequest, WordCountData]("getBlocksWordCount", "/api/block/getBlocksWordCount", JSONBody, ResponseOptions{}, "POST")
+)
+
+var SetNotebookConf = define[SetNotebookConfRequest, *NotebookConf]("setNotebookConf", "/api/notebook/setNotebookConf", JSONBody, ResponseOptions{}, "POST")
+
+var ReorderNotebooks = define[ReorderNotebooksRequest, *ReorderData]("reorderNotebooks", "/api/notebook/reorder", StructJSONBody, ResponseOptions{DataOnError: true}, "POST")
+
+var (
+	OpenNotebook    = define[OpenNotebookRequest, Null]("openNotebook", "/api/notebook/openNotebook", JSONBody, ResponseOptions{}, "POST")
+	GetNotebookConf = define[CloseNotebookRequest, NotebookConfData]("getNotebookConf", "/api/notebook/getNotebookConf", JSONBody, ResponseOptions{}, "POST")
+)
+
+var ImportNotebookCryptoBackup = define[ImportNotebookCryptoBackupRequest, Null]("importNotebookCryptoBackup", "/api/notebook/importNotebookCryptoBackup", MultipartBody, ResponseOptions{}, "POST")
+
+var (
+	GetNotebookInfo            = define[NotebookIDRequest, NotebookInfoData]("getNotebookInfo", "/api/notebook/getNotebookInfo", JSONBody, ResponseOptions{}, "POST")
+	GetEncryptedNotebookStatus = define[EmptyRequest, EncryptedNotebookStatusData]("getEncryptedNotebookStatus", "/api/notebook/getEncryptedNotebookStatus", NoBody, ResponseOptions{}, "POST")
+)
+
+var (
+	SetNotebookIcon    = define[SetNotebookIconRequest, Null]("setNotebookIcon", "/api/notebook/setNotebookIcon", JSONBody, ResponseOptions{}, "POST")
+	ChangeSortNotebook = define[ChangeSortNotebookRequest, Null]("changeSortNotebook", "/api/notebook/changeSortNotebook", JSONBody, ResponseOptions{}, "POST")
+	RenameNotebook     = define[RenameNotebookRequest, Null]("renameNotebook", "/api/notebook/renameNotebook", JSONBody, ResponseOptions{}, "POST")
+	RemoveNotebook     = define[NotebookIDRequest, Null]("removeNotebook", "/api/notebook/removeNotebook", JSONBody, ResponseOptions{}, "POST")
+	CreateNotebook     = define[CreateNotebookRequest, CreateNotebookData]("createNotebook", "/api/notebook/createNotebook", JSONBody, ResponseOptions{}, "POST")
+	CloseNotebook      = define[CloseNotebookRequest, Null]("closeNotebook", "/api/notebook/closeNotebook", JSONBody, ResponseOptions{}, "POST")
+)
 
 var (
 	GetPinnedDocs    = define[EmptyRequest, []PinnedDoc]("getPinnedDocs", "/api/filetree/getPinnedDocs", NoBody, ResponseOptions{NonNullable: true}, "POST")
@@ -43,7 +101,8 @@ var (
 func define[Request, Data any](name, path string, body BodyMode, response ResponseOptions, methods ...string) Endpoint[Request, Data] {
 	d := Definition{Name: name, Path: path, Methods: methods, Body: body,
 		Request: reflect.TypeFor[Request](), Data: reflect.TypeFor[Data](),
-		ErrorCodes: append([]int{-1}, response.AdditionalCodes...), ErrorText: response.Text, DataNonNullable: response.NonNullable}
+		ErrorCodes: append([]int{-1}, response.AdditionalCodes...), ErrorText: response.Text, DataNonNullable: response.NonNullable, DataOnError: response.DataOnError,
+		Output: response.Output, ErrorStatus: response.ErrorStatus}
 	definitions = append(definitions, d)
 	return Endpoint[Request, Data]{definition: d}
 }
@@ -211,3 +270,262 @@ var (
 	AppendHeadingChildren = define[AppendHeadingChildrenRequest, Null]("appendHeadingChildren", "/api/block/appendHeadingChildren", JSONBody, ResponseOptions{}, "POST")
 	GetDocBlocksOrders    = define[DocOrdersRequest, []string]("getDocBlocksOrders", "/api/block/getDocBlocksOrders", JSONBody, ResponseOptions{}, "POST")
 )
+
+var (
+	EnableEncryptedNotebooks   = define[NotebookPasswordRequest, Null]("enableEncryptedNotebooks", "/api/notebook/enableEncryptedNotebooks", JSONBody, ResponseOptions{}, "POST")
+	DisableEncryptedNotebooks  = define[EmptyRequest, Null]("disableEncryptedNotebooks", "/api/notebook/disableEncryptedNotebooks", NoBody, ResponseOptions{}, "POST")
+	CreateEncryptedNotebook    = define[CreateEncryptedNotebookRequest, CreateNotebookData]("createEncryptedNotebook", "/api/notebook/createEncryptedNotebook", JSONBody, ResponseOptions{}, "POST")
+	UnlockNotebook             = define[UnlockNotebookRequest, Null]("unlockNotebook", "/api/notebook/unlockNotebook", JSONBody, ResponseOptions{}, "POST")
+	UnlockAndOpenNotebook      = define[UnlockNotebookRequest, Null]("unlockAndOpenNotebook", "/api/notebook/unlockAndOpenNotebook", JSONBody, ResponseOptions{}, "POST")
+	LockNotebook               = define[NotebookIDRequest, Null]("lockNotebook", "/api/notebook/lockNotebook", JSONBody, ResponseOptions{}, "POST")
+	SetNotebookCryptoAutoLock  = define[NotebookCryptoAutoLockRequest, Null]("setNotebookCryptoAutoLock", "/api/notebook/setNotebookCryptoAutoLock", JSONBody, ResponseOptions{}, "POST")
+	ChangeMasterPassword       = define[ChangeMasterPasswordRequest, Null]("changeMasterPassword", "/api/notebook/changeMasterPassword", JSONBody, ResponseOptions{}, "POST")
+	ExportNotebookCryptoBackup = define[EmptyRequest, NotebookCryptoBackupData]("exportNotebookCryptoBackup", "/api/notebook/exportNotebookCryptoBackup", NoBody, ResponseOptions{}, "POST")
+	TouchEncryptedNotebooks    = define[EmptyRequest, Null]("touchEncryptedNotebooks", "/api/notebook/touchEncryptedNotebooks", NoBody, ResponseOptions{}, "POST")
+)
+
+var (
+	GetBlockDOM           = define[BlockQueryRequest, BlockDOMData]("getBlockDOM", "/api/block/getBlockDOM", JSONBody, ResponseOptions{}, "POST")
+	GetBlockDOMWithEmbed  = define[BlockQueryRequest, BlockDOMData]("getBlockDOMWithEmbed", "/api/block/getBlockDOMWithEmbed", JSONBody, ResponseOptions{}, "POST")
+	GetBlockDOMs          = define[BlocksQueryRequest, map[string]string]("getBlockDOMs", "/api/block/getBlockDOMs", JSONBody, ResponseOptions{}, "POST")
+	GetBlockDOMsWithEmbed = define[BlocksQueryRequest, map[string]string]("getBlockDOMsWithEmbed", "/api/block/getBlockDOMsWithEmbed", JSONBody, ResponseOptions{}, "POST")
+	GetBlockKramdown      = define[BlockKramdownRequest, BlockKramdownData]("getBlockKramdown", "/api/block/getBlockKramdown", JSONBody, ResponseOptions{}, "POST")
+	GetBlockKramdowns     = define[BlocksKramdownRequest, map[string]string]("getBlockKramdowns", "/api/block/getBlockKramdowns", JSONBody, ResponseOptions{}, "POST")
+)
+
+var (
+	GetRefText                  = define[BlockQueryRequest, string]("getRefText", "/api/block/getRefText", JSONBody, ResponseOptions{}, "POST")
+	GetRefIDs                   = define[RefIDsRequest, RefIDsData]("getRefIDs", "/api/block/getRefIDs", JSONBody, ResponseOptions{}, "POST")
+	GetRefIDsByFileAnnotationID = define[FileAnnotationRefRequest, RefDefsData]("getRefIDsByFileAnnotationID", "/api/block/getRefIDsByFileAnnotationID", JSONBody, ResponseOptions{}, "POST")
+	GetBlockDefIDsByRefText     = define[RefTextQueryRequest, RefDefsData]("getBlockDefIDsByRefText", "/api/block/getBlockDefIDsByRefText", JSONBody, ResponseOptions{}, "POST")
+)
+
+var (
+	GetBlockTreeInfos          = define[BlocksQueryRequest, map[string]*BlockTreeInfo]("getBlockTreeInfos", "/api/block/getBlockTreeInfos", JSONBody, ResponseOptions{}, "POST")
+	GetBlockBreadcrumb         = define[BlockBreadcrumbRequest, []*BlockPath]("getBlockBreadcrumb", "/api/block/getBlockBreadcrumb", JSONBody, ResponseOptions{}, "POST")
+	GetBlockBreadcrumbChildren = define[BlockBreadcrumbChildrenRequest, *BlockBreadcrumbChildren]("getBlockBreadcrumbChildren", "/api/block/getBlockBreadcrumbChildren", JSONBody, ResponseOptions{}, "POST")
+)
+
+var GetDocInfo = define[BlockQueryRequest, *DocInfo]("getDocInfo", "/api/block/getDocInfo", JSONBody, ResponseOptions{}, "POST")
+
+var GetDocsInfo = define[DocsInfoRequest, []*DocInfo]("getDocsInfo", "/api/block/getDocsInfo", JSONBody, ResponseOptions{}, "POST")
+
+var GetTreeStat = define[TreeStatRequest, TreeStatData]("getTreeStat", "/api/block/getTreeStat", JSONBody, ResponseOptions{}, "POST")
+
+var TransferBlockRef = define[TransferBlockRefRequest, Null]("transferBlockRef", "/api/block/transferBlockRef", JSONBody, ResponseOptions{}, "POST")
+
+var SwapBlockRef = define[SwapBlockRefRequest, Null]("swapBlockRef", "/api/block/swapBlockRef", JSONBody, ResponseOptions{}, "POST")
+
+var SetBlockReminder = define[BlockReminderRequest, Null]("setBlockReminder", "/api/block/setBlockReminder", JSONBody, ResponseOptions{}, "POST")
+
+var UnfoldBlock = define[BlockIDRequest, Null]("unfoldBlock", "/api/block/unfoldBlock", JSONBody, ResponseOptions{}, "POST")
+
+var FoldBlock = define[BlockIDRequest, Null]("foldBlock", "/api/block/foldBlock", JSONBody, ResponseOptions{}, "POST")
+
+var MoveBlock = define[MoveBlockRequest, Null]("moveBlock", "/api/block/moveBlock", JSONBody, ResponseOptions{}, "POST")
+
+var GetHeadingDeleteTransaction = define[BlockIDRequest, *BlockTransaction]("getHeadingDeleteTransaction", "/api/block/getHeadingDeleteTransaction", JSONBody, ResponseOptions{}, "POST")
+
+var GetHeadingInsertTransaction = define[BlockIDRequest, *BlockTransaction]("getHeadingInsertTransaction", "/api/block/getHeadingInsertTransaction", JSONBody, ResponseOptions{}, "POST")
+
+var GetHeadingFoldTransaction = define[HeadingFoldRequest, *BlockTransaction]("getHeadingFoldTransaction", "/api/block/getHeadingFoldTransaction", JSONBody, ResponseOptions{}, "POST")
+
+var UpdateTaskListItemMarker = define[TaskListMarkerRequest, []*BlockTransaction]("updateTaskListItemMarker", "/api/block/updateTaskListItemMarker", JSONBody, ResponseOptions{}, "POST")
+
+var BatchUpdateTaskListItemMarker = define[BatchTaskListMarkerRequest, []*BlockTransaction]("batchUpdateTaskListItemMarker", "/api/block/batchUpdateTaskListItemMarker", JSONBody, ResponseOptions{}, "POST")
+
+var MoveOutlineHeading = define[MoveBlockRequest, []*BlockTransaction]("moveOutlineHeading", "/api/block/moveOutlineHeading", JSONBody, ResponseOptions{}, "POST")
+
+var AppendDailyNoteBlock = define[DailyNoteBlockRequest, []*BlockTransaction]("appendDailyNoteBlock", "/api/block/appendDailyNoteBlock", JSONBody, ResponseOptions{}, "POST")
+
+var PrependDailyNoteBlock = define[DailyNoteBlockRequest, []*BlockTransaction]("prependDailyNoteBlock", "/api/block/prependDailyNoteBlock", JSONBody, ResponseOptions{}, "POST")
+
+var AppendBlock = define[AppendBlockRequest, []*BlockTransaction]("appendBlock", "/api/block/appendBlock", JSONBody, ResponseOptions{}, "POST")
+
+var PrependBlock = define[PrependBlockRequest, []*BlockTransaction]("prependBlock", "/api/block/prependBlock", JSONBody, ResponseOptions{}, "POST")
+
+var BatchAppendBlock = define[BatchParentBlockRequest, []*BlockTransaction]("batchAppendBlock", "/api/block/batchAppendBlock", JSONBody, ResponseOptions{}, "POST")
+
+var BatchPrependBlock = define[BatchParentBlockRequest, []*BlockTransaction]("batchPrependBlock", "/api/block/batchPrependBlock", JSONBody, ResponseOptions{}, "POST")
+
+var InsertBlock = define[InsertBlockRequest, []*BlockTransaction]("insertBlock", "/api/block/insertBlock", JSONBody, ResponseOptions{}, "POST")
+
+var BatchInsertBlock = define[BatchInsertBlockRequest, []*BlockTransaction]("batchInsertBlock", "/api/block/batchInsertBlock", JSONBody, ResponseOptions{}, "POST")
+
+var UpdateBlock = define[UpdateBlockRequest, []*BlockTransaction]("updateBlock", "/api/block/updateBlock", JSONBody, ResponseOptions{}, "POST")
+
+var BatchUpdateBlock = define[BatchUpdateBlockRequest, []*BlockTransaction]("batchUpdateBlock", "/api/block/batchUpdateBlock", JSONBody, ResponseOptions{}, "POST")
+
+var DeleteBlock = define[DeleteBlockRequest, []*BlockTransaction]("deleteBlock", "/api/block/deleteBlock", JSONBody, ResponseOptions{}, "POST")
+
+var CheckBlockRef = define[CheckBlockRefRequest, bool]("checkBlockRef", "/api/block/checkBlockRef", JSONBody, ResponseOptions{DataOnError: true}, "POST")
+
+var GetHeadingLevelTransaction = define[HeadingLevelRequest, *BlockTransaction]("getHeadingLevelTransaction", "/api/block/getHeadingLevelTransaction", JSONBody, ResponseOptions{}, "POST")
+
+var GetDocHeadingLevelTransaction = define[DocHeadingLevelRequest, *DocHeadingLevelData]("getDocHeadingLevelTransaction", "/api/block/getDocHeadingLevelTransaction", StructJSONBody, ResponseOptions{}, "POST")
+
+var GetRecentUpdatedBlocks = define[EmptyRequest, []*SearchBlock]("getRecentUpdatedBlocks", "/api/block/getRecentUpdatedBlocks", NoBody, ResponseOptions{}, "POST")
+
+var Zip = define[ZipRequest, Null]("zip", "/api/archive/zip", JSONBody, ResponseOptions{}, "POST")
+var Unzip = define[UnzipRequest, Null]("unzip", "/api/archive/unzip", JSONBody, ResponseOptions{}, "POST")
+var AutoSpace = define[TrimmedIDRequest, Null]("autoSpace", "/api/format/autoSpace", JSONBody, ResponseOptions{}, "POST")
+var NetAssets2LocalAssets = define[TrimmedIDRequest, Null]("netAssets2LocalAssets", "/api/format/netAssets2LocalAssets", JSONBody, ResponseOptions{}, "POST")
+var NetImg2LocalAssets = define[NetImageAssetsRequest, Null]("netImg2LocalAssets", "/api/format/netImg2LocalAssets", JSONBody, ResponseOptions{}, "POST")
+var PushMsg = define[NotificationRequest, NotificationData]("pushMsg", "/api/notification/pushMsg", JSONBody, ResponseOptions{}, "POST")
+var PushErrMsg = define[NotificationRequest, NotificationData]("pushErrMsg", "/api/notification/pushErrMsg", JSONBody, ResponseOptions{}, "POST")
+var GetBookmark = define[EmptyRequest, []*Bookmark]("getBookmark", "/api/bookmark/getBookmark", NoBody, ResponseOptions{}, "POST")
+var GetSnippet = define[GetSnippetRequest, SnippetsData]("getSnippet", "/api/snippet/getSnippet", JSONBody, ResponseOptions{}, "POST")
+var SetSnippet = define[SetSnippetRequest, Null]("setSnippet", "/api/snippet/setSnippet", JSONBody, ResponseOptions{}, "POST")
+var RemoveSnippet = define[TrimmedIDRequest, *Snippet]("removeSnippet", "/api/snippet/removeSnippet", JSONBody, ResponseOptions{}, "POST")
+var FlushTransaction = define[EmptyRequest, Null]("flushTransaction", "/api/sqlite/flushTransaction", NoBody, ResponseOptions{}, "POST")
+var CopyStdMarkdown = define[CopyStdMarkdownRequest, string]("copyStdMarkdown", "/api/lute/copyStdMarkdown", JSONBody, ResponseOptions{}, "POST")
+var Md2HTML = define[MarkdownHTMLRequest, HTMLData]("md2HTML", "/api/lute/md2html", JSONBody, ResponseOptions{}, "POST")
+var SpinBlockDOM = define[DOMTextRequest, DOMData]("spinBlockDOM", "/api/lute/spinBlockDOM", JSONBody, ResponseOptions{AdditionalCodes: []int{413}}, "POST")
+
+var ReloadTag = define[EmptyRequest, Null]("reloadTag", "/api/ui/reloadTag", NoBody, ResponseOptions{}, "POST")
+var ReloadFiletree = define[EmptyRequest, Null]("reloadFiletree", "/api/ui/reloadFiletree", NoBody, ResponseOptions{}, "POST")
+var ReloadProtyle = define[BlockIDRequest, Null]("reloadProtyle", "/api/ui/reloadProtyle", JSONBody, ResponseOptions{}, "POST")
+var ReloadAttributeView = define[BlockIDRequest, Null]("reloadAttributeView", "/api/ui/reloadAttributeView", JSONBody, ResponseOptions{}, "POST")
+var ReloadUI = define[EmptyRequest, Null]("reloadUI", "/api/ui/reloadUI", NoBody, ResponseOptions{}, "POST")
+var ReloadIcon = define[EmptyRequest, Null]("reloadIcon", "/api/ui/reloadIcon", NoBody, ResponseOptions{}, "POST")
+var ReloadTheme = define[EmptyRequest, Null]("reloadTheme", "/api/ui/reloadTheme", NoBody, ResponseOptions{}, "POST")
+
+var GetLocalStorage = define[EmptyRequest, map[string]JSONValue]("getLocalStorage", "/api/storage/getLocalStorage", NoBody, ResponseOptions{}, "POST")
+var GetLocalStorageVal = define[StorageKeyRequest, JSONValue]("getLocalStorageVal", "/api/storage/getLocalStorageVal", JSONBody, ResponseOptions{}, "POST")
+var GetLocalStorageVals = define[StorageKeysRequest, map[string]JSONValue]("getLocalStorageVals", "/api/storage/getLocalStorageVals", JSONBody, ResponseOptions{}, "POST")
+var SetLocalStorageVal = define[StorageSetRequest, Null]("setLocalStorageVal", "/api/storage/setLocalStorageVal", JSONBody, ResponseOptions{}, "POST")
+var SetLocalStorageVals = define[StorageSetKeysRequest, Null]("setLocalStorageVals", "/api/storage/setLocalStorageVals", JSONBody, ResponseOptions{}, "POST")
+var RemoveLocalStorageVal = define[StorageRemoveRequest, Null]("removeLocalStorageVal", "/api/storage/removeLocalStorageVal", JSONBody, ResponseOptions{}, "POST")
+var RemoveLocalStorageVals = define[StorageRemoveKeysRequest, Null]("removeLocalStorageVals", "/api/storage/removeLocalStorageVals", JSONBody, ResponseOptions{}, "POST")
+var GetOutlineStorage = define[OutlineStorageRequest, map[string]JSONValue]("getOutlineStorage", "/api/storage/getOutlineStorage", JSONBody, ResponseOptions{}, "POST")
+var SetOutlineStorage = define[OutlineStorageSetRequest, Null]("setOutlineStorage", "/api/storage/setOutlineStorage", JSONBody, ResponseOptions{}, "POST")
+var RemoveOutlineStorage = define[OutlineStorageRequest, Null]("removeOutlineStorage", "/api/storage/removeOutlineStorage", JSONBody, ResponseOptions{}, "POST")
+var GetViewState = define[StorageKeyRequest, map[string]JSONValue]("getViewState", "/api/storage/getViewState", JSONBody, ResponseOptions{}, "POST")
+var PatchViewState = define[ViewStatePatchRequest, map[string]JSONValue]("patchViewState", "/api/storage/patchViewState", JSONBody, ResponseOptions{}, "POST")
+var RemoveViewState = define[StorageKeyRequest, Null]("removeViewState", "/api/storage/removeViewState", JSONBody, ResponseOptions{}, "POST")
+var GetRecentDocs = define[RecentDocsRequest, []*RecentDoc]("getRecentDocs", "/api/storage/getRecentDocs", LegacyOptionalBody, ResponseOptions{}, "POST")
+
+var ResetBlockAttrs = define[EmptyRequest, Null]("resetBlockAttrs", "/api/attr/resetBlockAttrs", NoBody, ResponseOptions{}, "POST")
+var SearchAttributeViewNonRelationKey = define[EmptyRequest, Null]("searchAttributeViewNonRelationKey", "/api/av/searchAttributeViewNonRelationKey", NoBody, ResponseOptions{}, "POST")
+var SetLocalStorage = define[EmptyRequest, Null]("setLocalStorage", "/api/storage/setLocalStorage", NoBody, ResponseOptions{}, "POST")
+var DeprecatedReloadUI = define[EmptyRequest, Null]("deprecatedReloadUI", "/api/system/reloadUI", NoBody, ResponseOptions{}, "POST")
+
+var GetCriteria = define[EmptyRequest, []*Criterion]("getCriteria", "/api/storage/getCriteria", NoBody, ResponseOptions{}, "POST")
+var SetCriterion = define[SetCriterionRequest, Null]("setCriterion", "/api/storage/setCriterion", JSONBody, ResponseOptions{}, "POST")
+var RemoveCriterion = define[RemoveCriterionRequest, Null]("removeCriterion", "/api/storage/removeCriterion", JSONBody, ResponseOptions{}, "POST")
+
+var UpdateRecentDocOpenTime = define[RecentDocUpdateRequest, Null]("updateRecentDocOpenTime", "/api/storage/updateRecentDocOpenTime", JSONBody, ResponseOptions{}, "POST")
+var UpdateRecentDocViewTime = define[RecentDocUpdateRequest, Null]("updateRecentDocViewTime", "/api/storage/updateRecentDocViewTime", JSONBody, ResponseOptions{}, "POST")
+var UpdateRecentDocCloseTime = define[RecentDocUpdateRequest, Null]("updateRecentDocCloseTime", "/api/storage/updateRecentDocCloseTime", JSONBody, ResponseOptions{}, "POST")
+var BatchUpdateRecentDocCloseTime = define[RecentDocsUpdateRequest, Null]("batchUpdateRecentDocCloseTime", "/api/storage/batchUpdateRecentDocCloseTime", JSONBody, ResponseOptions{}, "POST")
+
+var GetDocOutline = define[OutlineRequest, []*SearchPath]("getDocOutline", "/api/outline/getDocOutline", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetDocHeadingNumbers = define[HeadingNumbersRequest, map[string]string]("getDocHeadingNumbers", "/api/outline/getDocHeadingNumbers", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+var GetInlineStyles = define[EmptyRequest, *InlineStyles]("getInlineStyles", "/api/storage/getInlineStyles", NoBody, ResponseOptions{}, "POST")
+var SetInlineStyles = define[SetInlineStylesRequest, *InlineStyles]("setInlineStyles", "/api/storage/setInlineStyles", JSONBody, ResponseOptions{}, "POST")
+var SetWorkspaceAVPalette = define[WorkspaceAVPaletteRequest, *InlineStyles]("setWorkspaceAVPalette", "/api/storage/setWorkspaceAVPalette", JSONBody, ResponseOptions{}, "POST")
+
+var HTML2BlockDOM = define[HTMLClipboardRequest, HTMLClipboardData]("html2BlockDOM", "/api/lute/html2BlockDOM", JSONBody, ResponseOptions{}, "POST")
+
+var WPSPresentation2BlockDOM = define[WPSPresentationRequest, WPSPresentationData]("wpsPresentation2BlockDOM", "/api/lute/wpsPresentation2BlockDOM", JSONBody, ResponseOptions{DataOnError: true}, "POST")
+
+var LoadPetals = define[LoadPetalsRequest, []*Petal]("loadPetals", "/api/petal/loadPetals", JSONBody, ResponseOptions{}, "POST")
+
+var SetPetalEnabled = define[SetPetalEnabledRequest, *Petal]("setPetalEnabled", "/api/petal/setPetalEnabled", JSONBody, ResponseOptions{}, "POST")
+
+var SetPetalPublishEnabled = define[SetPetalPublishEnabledRequest, *Petal]("setPetalPublishEnabled", "/api/petal/setPetalPublishEnabled", JSONBody, ResponseOptions{}, "POST")
+
+var Pandoc = define[PandocRequest, PandocData]("pandoc", "/api/convert/pandoc", JSONBody, ResponseOptions{}, "POST")
+
+var PostBroadcastMessage = define[BroadcastMessageRequest, BroadcastChannelData]("postMessage", "/api/broadcast/postMessage", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+var GetBroadcastChannelInfo = define[BroadcastChannelRequest, BroadcastChannelData]("getChannelInfo", "/api/broadcast/getChannelInfo", JSONBody, ResponseOptions{}, "POST")
+
+var GetBroadcastChannels = define[EmptyRequest, BroadcastChannelsData]("getChannels", "/api/broadcast/getChannels", NoBody, ResponseOptions{}, "POST")
+
+var BroadcastPublish = define[MultipartFields, BroadcastPublishData]("broadcastPublish", "/api/broadcast/publish", MultipartBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+var SetCloudReminder = define[CloudReminderRequest, Null]("setCloudReminder", "/api/cloud/setCloudReminder", JSONBody, ResponseOptions{}, "POST")
+var GetCloudSpace = define[EmptyRequest, CloudSpaceData]("getCloudSpace", "/api/cloud/getCloudSpace", NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+var RemoveShorthands = define[RemoveShorthandsRequest, Null]("removeShorthands", "/api/inbox/removeShorthands", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetShorthand = define[TrimmedIDRequest, *Shorthand]("getShorthand", "/api/inbox/getShorthand", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetShorthands = define[ShorthandsRequest, *ShorthandsData]("getShorthands", "/api/inbox/getShorthands", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+var ReadClipboardFilePaths = define[EmptyRequest, []ClipboardFile]("readFilePaths", "/api/clipboard/readFilePaths", NoBody, ResponseOptions{NonNullable: true}, "POST")
+var WriteClipboardFilePath = define[ClipboardPathRequest, Null]("writeFilePath", "/api/clipboard/writeFilePath", JSONBody, ResponseOptions{}, "POST")
+var PrepareRichText = define[PrepareRichTextRequest, *RichClipboardPrepared]("prepareRichText", "/api/clipboard/prepareRichText", JSONBody, ResponseOptions{}, "POST")
+var CleanupRichText = define[CleanupRichTextRequest, Null]("cleanupRichText", "/api/clipboard/cleanupRichText", JSONBody, ResponseOptions{}, "POST")
+
+var StartFreeTrial = define[EmptyRequest, Null]("startFreeTrial", "/api/account/startFreeTrial", NoBody, ResponseOptions{}, "POST")
+
+var UseActivationCode = define[ActivationCodeRequest, Null]("useActivationcode", "/api/account/useActivationcode", JSONBody, ResponseOptions{}, "POST")
+
+var CheckActivationCode = define[CheckActivationCodeRequest, Null]("checkActivationcode", "/api/account/checkActivationcode", JSONBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
+
+var DeactivateUser = define[EmptyRequest, Null]("deactivateUser", "/api/account/deactivate", NoBody, ResponseOptions{}, "POST")
+
+var AccountLogin = define[AccountLoginRequest, *AccountLoginData]("login", "/api/account/login", JSONBody, ResponseOptions{AdditionalCodes: []int{1, 10}, DataOnError: true}, "POST")
+
+var GetUniqueFilename = define[FilePathRequest, FilePathData]("getUniqueFilename", "/api/file/getUniqueFilename", JSONBody, ResponseOptions{AdditionalCodes: []int{-3}}, "POST")
+
+var ReadDirectory = define[ReadDirectoryRequest, []DirectoryEntry]("readDir", "/api/file/readDir", JSONBody, ResponseOptions{AdditionalCodes: []int{-3, 403, 404, 409, 500}, NonNullable: true}, "POST")
+
+var RenameFile = define[RenameFileRequest, Null]("renameFile", "/api/file/renameFile", JSONBody, ResponseOptions{AdditionalCodes: []int{-3, 403, 404, 409, 500}}, "POST")
+
+var RemoveFile = define[RemoveFileRequest, Null]("removeFile", "/api/file/removeFile", JSONBody, ResponseOptions{AdditionalCodes: []int{-3, 403, 404, 500}}, "POST")
+
+var GlobalCopyFiles = define[CopyFilesRequest, Null]("globalCopyFiles", "/api/file/globalCopyFiles", JSONBody, ResponseOptions{AdditionalCodes: []int{-2, -3, 403}}, "POST")
+
+var WorkspaceCopyFiles = define[CopyFilesRequest, Null]("workspaceCopyFiles", "/api/file/workspaceCopyFiles", JSONBody, ResponseOptions{AdditionalCodes: []int{-2, -3, 403}}, "POST")
+
+var CopyFile = define[CopyFileRequest, Null]("copyFile", "/api/file/copyFile", JSONBody, ResponseOptions{AdditionalCodes: []int{-2}}, "POST")
+
+var PutFile = define[PutFileRequest, Null]("putFile", "/api/file/putFile", FormBody, ResponseOptions{AdditionalCodes: []int{-3, 400, 403, 500}}, "POST")
+
+var GetFile = define[FilePathRequest, BinaryContent]("getFile", "/api/file/getFile", JSONBody,
+	ResponseOptions{Output: BinaryOutput, ErrorStatus: 202, AdditionalCodes: []int{-3, 403, 404, 409, 500, 503}}, "POST")
+
+var QuerySQL = define[SQLQueryRequest, SQLRows]("SQL", "/api/query/sql", JSONBody, ResponseOptions{AdditionalCodes: []int{1}, NonNullable: true}, "POST")
+
+var RenderSprig = define[RenderSprigRequest, string]("renderSprig", "/api/template/renderSprig", JSONBody, ResponseOptions{}, "POST")
+var GetDocSaveAsTemplateInfo = define[TemplateDocumentRequest, TemplateDocumentInfo]("getDocSaveAsTemplateInfo", "/api/template/getDocSaveAsTemplateInfo", JSONBody, ResponseOptions{}, "POST")
+var DocSaveAsTemplate = define[SaveTemplateRequest, Null]("docSaveAsTemplate", "/api/template/docSaveAsTemplate", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var RenderTemplate = define[RenderTemplateRequest, RenderTemplateData]("renderTemplate", "/api/template/render", JSONBody, ResponseOptions{}, "POST")
+var ManageTemplateFiles = define[TemplateFileRequest, TemplateManagementData]("manageTemplateFiles", "/api/template/manage", StructJSONBody, ResponseOptions{}, "POST")
+
+var ResetGraph = define[EmptyRequest, ResetGraphData]("resetGraph", "/api/graph/resetGraph", NoBody, ResponseOptions{}, "POST")
+var ResetLocalGraph = define[EmptyRequest, ResetLocalGraphData]("resetLocalGraph", "/api/graph/resetLocalGraph", NoBody, ResponseOptions{}, "POST")
+var SetGraphConf = define[SetGraphConfRequest, GraphConfigurationData]("setGraphConf", "/api/graph/setGraphConf", JSONBody, ResponseOptions{}, "POST")
+var GetGraph = define[GlobalGraphRequest, GlobalGraphData]("getGraph", "/api/graph/getGraph", JSONBody, ResponseOptions{DataOnError: true}, "POST")
+var GetLocalGraph = define[LocalGraphRequest, LocalGraphData]("getLocalGraph", "/api/graph/getLocalGraph", JSONBody, ResponseOptions{DataOnError: true}, "POST")
+
+var RefreshBacklink = define[RefreshBacklinkRequest, Null]("refreshBacklink", "/api/ref/refreshBacklink", JSONBody, ResponseOptions{}, "POST")
+var GetBackmentionDoc = define[BackmentionDocumentRequest, BacklinkContextData]("getBackmentionDoc", "/api/ref/getBackmentionDoc", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetBacklinkDoc = define[BacklinkDocumentRequest, BacklinkContextData]("getBacklinkDoc", "/api/ref/getBacklinkDoc", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetBacklink2 = define[BacklinkListRequest, BacklinkListData]("getBacklink2", "/api/ref/getBacklink2", JSONBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
+
+var ContinueImportSY = define[ContinueImportSYRequest, ImportDocumentData]("continueImportSY", "/api/import/continueImportSY", JSONBody, ResponseOptions{}, "POST")
+var CancelImportSY = define[ImportTokenRequest, Null]("cancelImportSY", "/api/import/cancelImportSY", JSONBody, ResponseOptions{}, "POST")
+var StartObsidianVaultAnalysis = define[ObsidianAnalysisRequest, *ObsidianVaultTask]("startObsidianVaultAnalysis", "/api/import/startObsidianVaultAnalysis", JSONBody, ResponseOptions{}, "POST")
+var GetObsidianVaultTask = define[ObsidianTaskRequest, *ObsidianVaultTask]("getObsidianVaultTask", "/api/import/getObsidianVaultTask", JSONBody, ResponseOptions{}, "POST")
+var StartObsidianVaultImport = define[ObsidianImportRequest, *ObsidianVaultTask]("startObsidianVaultImport", "/api/import/startObsidianVaultImport", JSONBody, ResponseOptions{}, "POST")
+var CancelObsidianVaultTask = define[ObsidianTaskRequest, *ObsidianVaultTask]("cancelObsidianVaultTask", "/api/import/cancelObsidianVaultTask", JSONBody, ResponseOptions{DataOnError: true}, "POST")
+var ImportStdMd = define[ImportMarkdownRequest, Null]("importStdMd", "/api/import/importStdMd", JSONBody, ResponseOptions{}, "POST")
+var ImportData = define[ImportDataRequest, Null]("importData", "/api/import/importData", MultipartBody, ResponseOptions{}, "POST")
+var ImportZipMd = define[ImportZipMarkdownRequest, Null]("importZipMd", "/api/import/importZipMd", MultipartBody, ResponseOptions{}, "POST")
+var ImportSY = define[ImportSYRequest, Null]("importSY", "/api/import/importSY", MultipartBody, ResponseOptions{}, "POST")
+var ImportSYNotebook = define[ImportDataRequest, ImportNotebookData]("importSYNotebook", "/api/import/importSYNotebook", MultipartBody, ResponseOptions{}, "POST")
+var ImportSYAuto = define[ImportSYRequest, ImportAutoData]("importSYAuto", "/api/import/importSYAuto", MultipartBody, ResponseOptions{DataOnError: true}, "POST")
+
+var GetHistoryItems = define[HistoryItemsRequest, HistoryItemsData]("getHistoryItems", "/api/history/getHistoryItems", JSONBody, ResponseOptions{}, "POST")
+var GetNotebookHistory = define[EmptyRequest, NotebookHistoryData]("getNotebookHistory", "/api/history/getNotebookHistory", NoBody, ResponseOptions{}, "POST")
+var GetDocHistoryContent = define[DocHistoryContentRequest, DocHistoryContentData]("getDocHistoryContent", "/api/history/getDocHistoryContent", JSONBody, ResponseOptions{}, "POST")
+var CreateDocHistory = define[CreateDocHistoryRequest, Null]("createDocHistory", "/api/history/createDocHistory", JSONBody, ResponseOptions{}, "POST")
+var CreateAssetHistory = define[CreateAssetHistoryRequest, Null]("createAssetHistory", "/api/history/createAssetHistory", JSONBody, ResponseOptions{}, "POST")
+var RollbackDocHistory = define[HistoryPathRequest, Null]("rollbackDocHistory", "/api/history/rollbackDocHistory", JSONBody, ResponseOptions{}, "POST")
+var RollbackAssetsHistory = define[HistoryPathRequest, Null]("rollbackAssetsHistory", "/api/history/rollbackAssetsHistory", JSONBody, ResponseOptions{}, "POST")
+var RollbackNotebookHistory = define[HistoryPathRequest, Null]("rollbackNotebookHistory", "/api/history/rollbackNotebookHistory", JSONBody, ResponseOptions{}, "POST")
+var RollbackAttributeViewHistory = define[HistoryPathRequest, Null]("rollbackAttributeViewHistory", "/api/history/rollbackAttributeViewHistory", JSONBody, ResponseOptions{}, "POST")
+var DiffDocVersions = define[DiffDocVersionsRequest, *DocVersionDiffResult]("diffDocVersions", "/api/history/diffDocVersions", JSONBody, ResponseOptions{}, "POST")

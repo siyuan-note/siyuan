@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260908202835"
+		"updated": "20260913160005"
 	},
 	"Children": [
 		{
@@ -16272,7 +16272,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20240530101000-mifghto",
-				"updated": "20260811122156"
+				"updated": "20260913160005"
 			},
 			"Children": [
 				{
@@ -16292,7 +16292,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-4iuhg30",
-				"updated": "20260811122156"
+				"updated": "20260913160005"
 			},
 			"Children": [
 				{
@@ -16490,25 +16490,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "まずは "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "クリック"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ で最初の文書を選択する必要があります"
+									"Data": "最後にクリックしたドキュメントを起点として、表示されている行を範囲選択します。親ドキュメントの名前やアイコンをクリックして展開した場合も起点を更新します。Shift を押しながら繰り返しクリックすると、起点を維持したまま選択範囲を拡大・縮小できます。起点が無効な場合は表示中の選択済みドキュメントを使い、該当するものがなければクリックしたドキュメントだけを選択します"
 								}
 							]
 						}

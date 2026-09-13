@@ -52,7 +52,7 @@ import {
     setBlockSelectionModeElement
 } from "../wysiwyg/blockSelection";
 import {countBlockWord} from "../../layout/status";
-import {genTemplateDocTreePlanHTML, ITemplateDocTreePlan} from "../../template/docTree";
+import {genTemplateDocTreePlanHTML} from "../../template/docTree";
 
 const slashBuiltinStyleIDs: Partial<Record<string, TBuiltinInlineStyleID>> = {
     infoStyle: "info",
@@ -686,7 +686,7 @@ export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement
             highlightRender(protyle.wysiwyg.element);
             hideElements(["util"], protyle);
         };
-        const docTreePlan = response.data.docTreePlan as ITemplateDocTreePlan | undefined;
+        const docTreePlan = response.data.docTreePlan;
         if (docTreePlan?.id) {
             hideElements(["util"], protyle);
             confirmDialog(window.siyuan.languages.template, genTemplateDocTreePlanHTML(docTreePlan, window.siyuan.languages.newSubDoc), () => {

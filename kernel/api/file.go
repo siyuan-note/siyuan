@@ -33,6 +33,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -97,31 +98,16 @@ func copyDecryptedAsset(src, dest string) error {
 	return nil
 }
 
-func getUniqueFilename(c *gin.Context) {
+var getUniqueFilename = contractHandler(apicontract.GetUniqueFilename, func(c *gin.Context, request apicontract.FilePathRequest) apicontract.Response[apicontract.FilePathData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var filePath string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("path", &filePath, true, true),
-	) {
-		return
-	}
-
+	filePath := request.Path
 	if rejectEncryptedBoxPath(filePath) {
 		ret.Code = -3
 		ret.Msg = model.Conf.Language(321)
-		return
+		return contractFailure[apicontract.FilePathData](ret)
 	}
-	ret.Data = map[string]any{
-		"path": util.GetUniqueFilename(filePath),
-	}
-}
+	return apicontract.Success(apicontract.FilePathData{Path: util.GetUniqueFilename(filePath)})
+})
 
 // prepareFileAssets 在原始文件 API 完成权限校验后补齐目录或文件的资源内容。
 func prepareFileAssets(absPath string) error {
@@ -145,45 +131,20 @@ func prepareFileAssets(absPath string) error {
 	return model.EnsureAssetPrefixLocal(absPath)
 }
 
-func globalCopyFiles(c *gin.Context) {
+var globalCopyFiles = contractHandler(apicontract.GlobalCopyFiles, func(c *gin.Context, request apicontract.CopyFilesRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 	var changedPaths []string
 	defer func() {
 		model.IncSyncIfNeeded(changedPaths...)
 	}()
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var srcsArg []any
-	var destDirArg string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("srcs", &srcsArg, true, true),        // 绝对路径
-		util.BindJsonArg("destDir", &destDirArg, true, false), // 相对于工作空间的路径
-	) {
-		return
-	}
-
-	var srcs []string
-	for _, s := range srcsArg {
-		str, elemOk := s.(string)
-		if !elemOk {
-			ret.Code = -1
-			ret.Msg = "Field [srcs]: each element should be of type [String]"
-			return
-		}
-		srcs = append(srcs, str)
-	}
-
+	srcs, destDirArg := request.Srcs, request.DestDir
 	for i, src := range srcs {
 		if !filepath.IsAbs(src) {
 			logging.LogErrorf("global copy files src [%s] is not an absolute path", src)
 			ret.Code = -1
 			ret.Msg = "Field [srcs]: each path must be absolute"
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 
 		absSrc, _ := filepath.Abs(src)
@@ -192,24 +153,24 @@ func globalCopyFiles(c *gin.Context) {
 			logging.LogErrorf("refuse to copy sensitive file [%s]", src)
 			ret.Code = -2
 			ret.Msg = fmt.Sprintf("refuse to copy sensitive file [%s]", src)
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 
 		if rejectEncryptedBoxPath(absSrc) {
 			ret.Code = -3
 			ret.Msg = model.Conf.Language(321)
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 
 		if err := prepareFileAssets(absSrc); err != nil {
 			ret.Code = -1
 			ret.Msg = err.Error()
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		if !filelock.IsExist(absSrc) {
 			ret.Code = -1
 			ret.Msg = fmt.Sprintf("file [%s] does not exist", src)
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		srcs[i] = absSrc
 	}
@@ -218,32 +179,32 @@ func globalCopyFiles(c *gin.Context) {
 	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	// 在 MkdirAll 前拒绝加密笔记本目录，避免在加密笔记本内创建明文目录
 	if rejectEncryptedBoxPath(destDir) {
 		ret.Code = -1
 		ret.Msg = "copying encrypted notebook files is not supported via this API"
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	if filelock.IsExist(destDir) {
 		destInfo, statErr := os.Stat(destDir)
 		if statErr != nil {
 			ret.Code = -1
 			ret.Msg = statErr.Error()
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		if !destInfo.IsDir() {
 			ret.Code = -1
 			ret.Msg = fmt.Sprintf("Field [destDir]: path [%s] is not a directory", destDirArg)
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 	} else {
 		if err = os.MkdirAll(destDir, 0755); err != nil {
 			logging.LogErrorf("make dir [%s] failed: %s", destDir, err)
 			ret.Code = -1
 			ret.Msg = err.Error()
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 	}
 
@@ -252,91 +213,61 @@ func globalCopyFiles(c *gin.Context) {
 		if rejectEncryptedBoxPath(dest) {
 			ret.Code = -3
 			ret.Msg = model.Conf.Language(321)
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		// 拒绝目标已存在的 symlink：os.Create 会跟随 symlink，可能写入加密笔记本内部
 		if li, lerr := os.Lstat(dest); lerr == nil && li.Mode()&os.ModeSymlink != 0 {
 			ret.Code = -1
 			ret.Msg = "destination path is a symlink, which is not supported"
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		if err := filelock.Copy(src, dest); err != nil {
 			logging.LogErrorf("copy file [%s] to [%s] failed: %s", src, dest, err)
 			ret.Code = -1
 			ret.Msg = err.Error()
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		changedPaths = append(changedPaths, dest)
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func workspaceCopyFiles(c *gin.Context) {
+var workspaceCopyFiles = contractHandler(apicontract.WorkspaceCopyFiles, func(c *gin.Context, request apicontract.CopyFilesRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 	var changedPaths []string
 	defer func() {
 		model.IncSyncIfNeeded(changedPaths...)
 	}()
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var srcsArg []any
-	var destDirArg string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("srcs", &srcsArg, true, true),        // 相对于工作空间的路径
-		util.BindJsonArg("destDir", &destDirArg, true, false), // 相对于工作空间的路径
-	) {
-		return
-	}
-
-	var relSrcs []string
-	for _, s := range srcsArg {
-		str, elemOk := s.(string)
-		if !elemOk {
-			ret.Code = -1
-			ret.Msg = "Field [srcs]: each element should be of type [String]"
-			return
-		}
-		str = strings.TrimSpace(str)
-		if str == "" {
-			ret.Code = -1
-			ret.Msg = "Field [srcs]: path must not be empty"
-			return
-		}
-		relSrcs = append(relSrcs, str)
-	}
-
+	relSrcs, destDirArg := request.Srcs, request.DestDir
 	var absSrcs []string
 	for _, src := range relSrcs {
 		absSrc, err := util.GetAbsPathInWorkspace(src)
 		if err != nil {
 			ret.Code = http.StatusForbidden
 			ret.Msg = err.Error()
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		if util.IsSensitivePath(absSrc) {
 			logging.LogErrorf("refuse to copy sensitive file [%s]", src)
 			ret.Code = -2
 			ret.Msg = fmt.Sprintf("refuse to copy sensitive file [%s]", src)
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		if rejectEncryptedBoxPath(absSrc) {
 			ret.Code = -3
 			ret.Msg = model.Conf.Language(321)
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		if err = prepareFileAssets(absSrc); err != nil {
 			ret.Code = -1
 			ret.Msg = err.Error()
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		if !filelock.IsExist(absSrc) {
 			ret.Code = -1
 			ret.Msg = fmt.Sprintf("file [%s] does not exist", src)
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		absSrcs = append(absSrcs, absSrc)
 	}
@@ -345,32 +276,32 @@ func workspaceCopyFiles(c *gin.Context) {
 	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	// 在 MkdirAll 前拒绝加密笔记本目录，避免在加密笔记本内创建明文目录
 	if rejectEncryptedBoxPath(destDir) {
 		ret.Code = -1
 		ret.Msg = "copying encrypted notebook files is not supported via this API"
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	if filelock.IsExist(destDir) {
 		destInfo, err := os.Stat(destDir)
 		if err != nil {
 			ret.Code = -1
 			ret.Msg = err.Error()
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		if !destInfo.IsDir() {
 			ret.Code = -1
 			ret.Msg = "Field [destDir]: path is not a directory"
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 	} else {
 		if err = os.MkdirAll(destDir, 0755); err != nil {
 			logging.LogErrorf("make dir [%s] failed: %s", destDir, err)
 			ret.Code = -1
 			ret.Msg = err.Error()
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 	}
 
@@ -379,46 +310,33 @@ func workspaceCopyFiles(c *gin.Context) {
 		if rejectEncryptedBoxPath(dest) {
 			ret.Code = -3
 			ret.Msg = model.Conf.Language(321)
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		if li, lerr := os.Lstat(dest); lerr == nil && li.Mode()&os.ModeSymlink != 0 {
 			ret.Code = -1
 			ret.Msg = "destination path is a symlink, which is not supported"
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		if err := filelock.Copy(absSrc, dest); err != nil {
 			logging.LogErrorf("copy file [%s] to [%s] failed: %s", absSrc, dest, err)
 			ret.Code = -1
 			ret.Msg = err.Error()
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		changedPaths = append(changedPaths, dest)
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func copyFile(c *gin.Context) {
+var copyFile = contractHandler(apicontract.CopyFile, func(c *gin.Context, request apicontract.CopyFileRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var src, dest string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("src", &src, true, true),   // 资源路径，由 GetAssetAbsPath 解析
-		util.BindJsonArg("dest", &dest, true, true), // 绝对路径
-	) {
-		return
-	}
-
+	src, dest := request.Src, request.Dest
 	if !filepath.IsAbs(dest) {
 		logging.LogErrorf("copy file dest [%s] is not an absolute path", dest)
 		ret.Code = -1
 		ret.Msg = "Field [dest]: path must be absolute"
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
 	}
 
 	src, err := model.GetAssetAbsPathInBox(src, "")
@@ -426,8 +344,7 @@ func copyFile(c *gin.Context) {
 		logging.LogErrorf("get asset [%s] abs path failed: %s", src, err)
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
 	}
 
 	// 加密笔记本的文件不允许通过原始文件 API 复制（src 读出密文/明文，dest 写入破坏加密存储）
@@ -439,93 +356,73 @@ func copyFile(c *gin.Context) {
 			if err = holdEncryptedBoxRequest(c, boxID); err != nil {
 				ret.Code = -1
 				ret.Msg = model.Conf.Language(314)
-				return
+				return contractFailure[apicontract.Null](ret)
 			}
 			if err = copyDecryptedAsset(src, dest); err != nil {
 				ret.Code = -1
 				ret.Msg = err.Error()
-				ret.Data = map[string]any{"closeTimeout": 5000}
-				return
+				return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
 			}
-			return
+			return apicontract.Success(apicontract.Null{})
 		}
 		ret.Code = -1
 		ret.Msg = "copying encrypted notebook files is not supported via this API"
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
 	}
 
 	if err = prepareFileAssets(src); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 7000)
 	}
 	info, err := os.Stat(src)
 	if err != nil {
 		logging.LogErrorf("stat [%s] failed: %s", src, err)
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
 	}
 
 	if info.IsDir() {
 		ret.Code = -1
 		ret.Msg = "Field [src]: path is a directory"
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
 	}
 
 	if util.IsSensitivePath(dest) {
 		logging.LogErrorf("refuse to copy sensitive file [%s]", dest)
 		ret.Code = -2
 		ret.Msg = fmt.Sprintf("refuse to copy sensitive file [%s]", dest)
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	if err = filelock.Copy(src, dest); err != nil {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", src, dest, err)
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
 	}
 
 	model.IncSyncIfNeeded(dest)
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func getFile(c *gin.Context) {
+var getFile = contractHandler(apicontract.GetFile, func(c *gin.Context, request apicontract.FilePathRequest) apicontract.Response[apicontract.BinaryContent] {
 	ret := gulu.Ret.NewResult()
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		ret.Code = -1
-		c.JSON(http.StatusAccepted, ret)
-		return
-	}
-
-	var filePath string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("path", &filePath, true, true),
-	) {
-		c.JSON(http.StatusAccepted, ret)
-		return
-	}
+	filePath := request.Path
 
 	fileAbsPath, err := util.GetAbsPathInWorkspace(filePath)
 	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
-		c.JSON(http.StatusAccepted, ret)
-		return
+		return contractFailure[apicontract.BinaryContent](ret)
 	}
 	// 加密笔记本的任何文件都不允许通过原始文件 API 读取（不只 .sy）：
 	// 密文对插件无意义，且可能被误解析或泄漏；合法读取走专用 API（已加密感知）
 	if rejectEncryptedBoxPath(fileAbsPath) {
 		ret.Code = -3
 		ret.Msg = model.Conf.Language(321)
-		c.JSON(http.StatusAccepted, ret)
-		return
+		return contractFailure[apicontract.BinaryContent](ret)
 	}
 	// 解析符号链接（Windows 下含目录联接）后再做授权判断，防止 reader 通过 data/assets
 	// 等目录下的链接读取工作空间外的文件（security advisory GHSA-g7gf-v79m-jwrm）
@@ -534,15 +431,13 @@ func getFile(c *gin.Context) {
 		logging.LogErrorf("resolve symlinks for [%s] failed: %s", fileAbsPath, err)
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
-		c.JSON(http.StatusAccepted, ret)
-		return
+		return contractFailure[apicontract.BinaryContent](ret)
 	}
 	// 符号链接指向加密笔记本时同样拒绝读取，防止密文泄漏
 	if rejectEncryptedBoxPath(resolvedPath) {
 		ret.Code = -3
 		ret.Msg = model.Conf.Language(321)
-		c.JSON(http.StatusAccepted, ret)
-		return
+		return contractFailure[apicontract.BinaryContent](ret)
 	}
 	fileAbsPath = resolvedPath
 
@@ -553,11 +448,10 @@ func getFile(c *gin.Context) {
 		if !gulu.File.IsSubPath(util.NormalizeAndResolve(util.WorkspaceDir), util.NormalizeAndResolve(fileAbsPath)) {
 			ret.Code = http.StatusForbidden
 			ret.Msg = http.StatusText(http.StatusForbidden)
-			c.JSON(http.StatusAccepted, ret)
-			return
+			return contractFailure[apicontract.BinaryContent](ret)
 		}
 		if refuseToAccess(c, fileAbsPath, ret) {
-			return
+			return contractFailure[apicontract.BinaryContent](ret)
 		}
 	}
 
@@ -566,8 +460,7 @@ func getFile(c *gin.Context) {
 		if !model.CheckAbsPathAccessableByPublishAccess(c, fileAbsPath, publishAccess) {
 			ret.Code = http.StatusForbidden
 			ret.Msg = http.StatusText(http.StatusForbidden)
-			c.JSON(http.StatusAccepted, ret)
-			return
+			return contractFailure[apicontract.BinaryContent](ret)
 		}
 	}
 
@@ -578,8 +471,7 @@ func getFile(c *gin.Context) {
 				ret.Code = http.StatusNotFound
 			}
 			ret.Msg = err.Error()
-			c.JSON(http.StatusAccepted, ret)
-			return
+			return contractFailure[apicontract.BinaryContent](ret)
 		}
 	}
 	info, err := os.Stat(fileAbsPath)
@@ -589,22 +481,19 @@ func getFile(c *gin.Context) {
 			ret.Code = http.StatusNotFound
 		}
 		ret.Msg = err.Error()
-		c.JSON(http.StatusAccepted, ret)
-		return
+		return contractFailure[apicontract.BinaryContent](ret)
 	}
 	if info.IsDir() {
 		ret.Code = http.StatusConflict
 		ret.Msg = "path is a directory"
-		c.JSON(http.StatusAccepted, ret)
-		return
+		return contractFailure[apicontract.BinaryContent](ret)
 	}
 	data, err := filelock.ReadFile(fileAbsPath)
 	if err != nil {
 		logging.LogErrorf("read file [%s] failed: %s", fileAbsPath, err)
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = err.Error()
-		c.JSON(http.StatusAccepted, ret)
-		return
+		return contractFailure[apicontract.BinaryContent](ret)
 	}
 
 	contentType := mime.TypeByExtension(filepath.Ext(fileAbsPath))
@@ -616,8 +505,8 @@ func getFile(c *gin.Context) {
 	if "" == contentType {
 		contentType = "application/octet-stream"
 	}
-	c.Data(http.StatusOK, contentType, data)
-}
+	return apicontract.SuccessBinary(contentType, data)
+})
 
 func refuseToAccess(c *gin.Context, fileAbsPath string, ret *gulu.Result) bool {
 	// 禁止访问敏感文件（conf 目录下的 conf.json 与 TLS 密钥材料、data/snippets/conf.json、
@@ -626,7 +515,6 @@ func refuseToAccess(c *gin.Context, fileAbsPath string, ret *gulu.Result) bool {
 	if util.IsForbiddenAbsPath(fileAbsPath) {
 		ret.Code = http.StatusForbidden
 		ret.Msg = http.StatusText(http.StatusForbidden)
-		c.JSON(http.StatusAccepted, ret)
 		return true
 	}
 
@@ -635,60 +523,45 @@ func refuseToAccess(c *gin.Context, fileAbsPath string, ret *gulu.Result) bool {
 	if !model.CheckAbsPathAccessableByPublishAccess(c, fileAbsPath, publishAccess) {
 		ret.Code = http.StatusForbidden
 		ret.Msg = http.StatusText(http.StatusForbidden)
-		c.JSON(http.StatusAccepted, ret)
 		return true
 	}
 
 	return false
 }
 
-func readDir(c *gin.Context) {
+var readDir = contractHandler(apicontract.ReadDirectory, func(c *gin.Context, request apicontract.ReadDirectoryRequest) apicontract.Response[[]apicontract.DirectoryEntry] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		c.JSON(http.StatusOK, ret)
-		return
-	}
-
-	var dirPath string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("path", &dirPath, true, false),
-	) {
-		return
-	}
-
+	dirPath := request.Path
 	dirAbsPath, err := util.GetAbsPathInWorkspace(dirPath)
 	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
-		return
+		return contractFailure[[]apicontract.DirectoryEntry](ret)
 	}
 	// 加密笔记本的任何目录都不允许通过原始文件 API 枚举（不只 .sy）：
 	// 目录结构、文档 ID、随机化资产名和时间戳可能泄漏信息；合法读取走专用 API（已加密感知）
 	if rejectEncryptedBoxPath(dirAbsPath) {
 		ret.Code = -3
 		ret.Msg = model.Conf.Language(321)
-		return
+		return contractFailure[[]apicontract.DirectoryEntry](ret)
 	}
 	info, err := os.Stat(dirAbsPath)
 	if os.IsNotExist(err) {
 		ret.Code = http.StatusNotFound
 		ret.Msg = "path does not exist"
-		return
+		return contractFailure[[]apicontract.DirectoryEntry](ret)
 	}
 	if err != nil {
 		logging.LogErrorf("stat [%s] failed: %s", dirAbsPath, err)
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
-		return
+		return contractFailure[[]apicontract.DirectoryEntry](ret)
 	}
 	if !info.IsDir() {
 		logging.LogErrorf("file [%s] is not a directory", dirAbsPath)
 		ret.Code = http.StatusConflict
 		ret.Msg = "path is not a directory"
-		return
+		return contractFailure[[]apicontract.DirectoryEntry](ret)
 	}
 
 	entries, err := os.ReadDir(dirAbsPath)
@@ -696,10 +569,10 @@ func readDir(c *gin.Context) {
 		logging.LogErrorf("read dir [%s] failed: %s", dirAbsPath, err)
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
-		return
+		return contractFailure[[]apicontract.DirectoryEntry](ret)
 	}
 
-	files := []map[string]any{}
+	files := []apicontract.DirectoryEntry{}
 	for _, entry := range entries {
 		path := filepath.Join(dirAbsPath, entry.Name())
 		info, err = os.Stat(path)
@@ -707,54 +580,34 @@ func readDir(c *gin.Context) {
 			logging.LogErrorf("stat [%s] failed: %s", path, err)
 			ret.Code = http.StatusInternalServerError
 			ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
-			return
+			return contractFailure[[]apicontract.DirectoryEntry](ret)
 		}
-		files = append(files, map[string]any{
-			"name":      entry.Name(),
-			"isDir":     info.IsDir(),
-			"isSymlink": util.IsSymlink(entry),
-			"updated":   info.ModTime().Unix(),
-		})
+		files = append(files, apicontract.DirectoryEntry{Name: entry.Name(), IsDir: info.IsDir(), IsSymlink: util.IsSymlink(entry), Updated: info.ModTime().Unix()})
 	}
 
-	ret.Data = files
-}
+	return apicontract.Success(files)
+})
 
-func renameFile(c *gin.Context) {
+var renameFile = contractHandler(apicontract.RenameFile, func(c *gin.Context, request apicontract.RenameFileRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		c.JSON(http.StatusOK, ret)
-		return
-	}
-
-	var srcPath, destPath string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("path", &srcPath, true, true),
-		util.BindJsonArg("newPath", &destPath, true, true),
-	) {
-		return
-	}
-
+	srcPath, destPath := request.Path, request.NewPath
 	srcAbsPath, err := util.GetAbsPathInWorkspace(srcPath)
 	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	destAbsPath, err := util.GetAbsPathInWorkspace(destPath)
 	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	// 加密笔记本的文件不允许通过原始文件 API 重命名（会破坏加密存储结构/跨 box 搬运密文）
 	if rejectEncryptedBoxPath(srcAbsPath) || rejectEncryptedBoxPath(destAbsPath) {
 		ret.Code = -3
 		ret.Msg = model.Conf.Language(321)
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	if err = prepareFileAssets(srcAbsPath); err == nil {
 		err = prepareFileAssets(destAbsPath)
@@ -762,7 +615,7 @@ func renameFile(c *gin.Context) {
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	srcInfo, srcStatErr := os.Stat(srcAbsPath)
 	if srcStatErr != nil {
@@ -771,18 +624,18 @@ func renameFile(c *gin.Context) {
 			ret.Code = http.StatusNotFound
 		}
 		ret.Msg = srcStatErr.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	if filelock.IsExist(destAbsPath) {
 		ret.Code = http.StatusConflict
 		ret.Msg = "Field [newPath]: path already exists"
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	if srcInfo.IsDir() && gulu.File.IsSubPath(srcAbsPath, destAbsPath) {
 		ret.Code = http.StatusConflict
 		ret.Msg = "Field [newPath]: cannot rename a directory into its own subdirectory"
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	affectsSync := model.PathsAffectSync(srcAbsPath)
 
@@ -793,19 +646,19 @@ func renameFile(c *gin.Context) {
 			logging.LogErrorf("stat [%s] failed: %s", destParent, statErr)
 			ret.Code = http.StatusInternalServerError
 			ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		if !parentInfo.IsDir() {
 			ret.Code = http.StatusConflict
 			ret.Msg = fmt.Sprintf("Field [newPath]: parent path [%s] is not a directory", filepath.Dir(destPath))
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 	} else {
 		if err = os.MkdirAll(destParent, 0755); err != nil {
 			logging.LogErrorf("make dir [%s] failed: %s", destParent, err)
 			ret.Code = http.StatusInternalServerError
 			ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 	}
 
@@ -813,61 +666,48 @@ func renameFile(c *gin.Context) {
 		logging.LogErrorf("rename file failed: %s", err)
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	if affectsSync || model.PathsAffectSync(destAbsPath) {
 		model.IncSync()
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func removeFile(c *gin.Context) {
+var removeFile = contractHandler(apicontract.RemoveFile, func(c *gin.Context, request apicontract.RemoveFileRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		c.JSON(http.StatusOK, ret)
-		return
-	}
-
-	var app, filePath string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("app", &app, false, false),
-		util.BindJsonArg("path", &filePath, true, true),
-	) {
-		return
-	}
+	app, filePath := request.App, request.Path
 	app = resolveFileAPIAppID(c, app)
 
 	fileAbsPath, err := util.GetAbsPathInWorkspace(filePath)
 	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	// 加密笔记本的文件不允许通过原始文件 API 删除（破坏加密存储结构）
 	if rejectEncryptedBoxPath(fileAbsPath) {
 		ret.Code = -3
 		ret.Msg = model.Conf.Language(321)
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	if err = prepareFileAssets(fileAbsPath); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	_, err = os.Stat(fileAbsPath)
 	if os.IsNotExist(err) {
 		ret.Code = http.StatusNotFound
 		ret.Msg = "path does not exist"
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	if err != nil {
 		logging.LogErrorf("stat [%s] failed: %s", fileAbsPath, err)
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	affectsSync := model.PathsAffectSync(fileAbsPath)
 
@@ -875,36 +715,36 @@ func removeFile(c *gin.Context) {
 		logging.LogErrorf("remove [%s] failed: %s", fileAbsPath, err)
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	model.PushPluginStorageDataChanged(fileAbsPath, app)
 
 	if affectsSync {
 		model.IncSync()
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func putFile(c *gin.Context) {
+var putFile = contractHandler(apicontract.PutFile, func(c *gin.Context, request apicontract.PutFileRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	isDirStr := c.PostForm("isDir")
+	isDirStr := request.IsDir
 	isDir, _ := strconv.ParseBool(isDirStr)
-	app := resolveFileAPIAppID(c, c.PostForm("app"))
+	app := resolveFileAPIAppID(c, request.App)
 
 	var err error
-	filePath := c.PostForm("path")
+	filePath := request.Path
 	filePath = strings.TrimSpace(filePath)
 	if filePath == "" {
 		ret.Code = http.StatusBadRequest
 		ret.Msg = "path must not be empty"
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	fileAbsPath, err := util.GetAbsPathInWorkspace(filePath)
 	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	// 加密笔记本的任何文件都不允许通过原始文件 API 写入（不只 .sy）：
@@ -912,7 +752,7 @@ func putFile(c *gin.Context) {
 	if rejectEncryptedBoxPath(fileAbsPath) {
 		ret.Code = -3
 		ret.Msg = model.Conf.Language(321)
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	fileExists := filelock.IsExist(fileAbsPath)
@@ -920,7 +760,7 @@ func putFile(c *gin.Context) {
 		if !util.IsValidUploadFileName(filepath.Base(fileAbsPath)) { // Improve kernel API `/api/file/putFile` parameter validation https://github.com/siyuan-note/siyuan/issues/14658
 			ret.Code = http.StatusBadRequest
 			ret.Msg = "invalid file path. For details, please check https://github.com/siyuan-note/siyuan/issues/14658"
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 	} else {
 		info, statErr := os.Stat(fileAbsPath)
@@ -928,12 +768,12 @@ func putFile(c *gin.Context) {
 			logging.LogErrorf("stat file [%s] failed: %s", fileAbsPath, statErr)
 			ret.Code = http.StatusInternalServerError
 			ret.Msg = statErr.Error()
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		if info.IsDir() && !isDir {
 			ret.Code = http.StatusBadRequest
 			ret.Msg = "path is a directory"
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 	}
 
@@ -943,12 +783,12 @@ func putFile(c *gin.Context) {
 			logging.LogErrorf("make dir [%s] failed: %s", fileAbsPath, err)
 		}
 	} else {
-		fileHeader, _ := c.FormFile("file")
+		fileHeader := request.File
 		if nil == fileHeader {
 			logging.LogErrorf("form file is nil [path=%s]", fileAbsPath)
 			ret.Code = http.StatusBadRequest
 			ret.Msg = "Field [file] must not be empty"
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 
 		for range 1 {
@@ -982,10 +822,10 @@ func putFile(c *gin.Context) {
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
-	modTimeStr := c.PostForm("modTime")
+	modTimeStr := request.ModTime
 	modTime := time.Now()
 	if "" != modTimeStr {
 		modTimeInt, parseErr := strconv.ParseInt(modTimeStr, 10, 64)
@@ -993,7 +833,7 @@ func putFile(c *gin.Context) {
 			logging.LogErrorf("parse mod time [%s] failed: %s", modTimeStr, parseErr)
 			ret.Code = http.StatusInternalServerError
 			ret.Msg = parseErr.Error()
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		modTime = millisecond2Time(modTimeInt)
 	}
@@ -1001,14 +841,15 @@ func putFile(c *gin.Context) {
 		logging.LogErrorf("change time failed: %s", err)
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	if !isDir {
 		model.PushPluginStorageDataChanged(fileAbsPath, app)
 		model.IncSyncIfNeeded(fileAbsPath)
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 func millisecond2Time(t int64) time.Time {
 	sec := t / 1000

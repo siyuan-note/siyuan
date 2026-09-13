@@ -472,7 +472,11 @@ export class Graph extends Model {
                 if (requestVersion !== this.requestVersion) {
                     return;
                 }
-                this.graphData = response.data;
+                if (response.code !== 0 || !response.data?.conf) {
+                    element.classList.remove("fn__rotate");
+                    return;
+                }
+                this.graphData = {nodes: response.data.nodes, links: response.data.links, box: response.data.box};
                 window.siyuan.config.graph.global = response.data.conf;
                 this.onGraph(undefined, resetLayout);
                 element.classList.remove("fn__rotate");
@@ -489,7 +493,7 @@ export class Graph extends Model {
                     return;
                 }
                 element.classList.remove("fn__rotate");
-                if (response.code !== 0) {
+                if (response.code !== 0 || !response.data?.conf) {
                     this.graphData = undefined;
                     this.onGraph();
                     return;
@@ -512,7 +516,7 @@ export class Graph extends Model {
                         return;
                     }
                 }
-                this.graphData = response.data;
+                this.graphData = {nodes: response.data.nodes, links: response.data.links, box: response.data.box};
                 window.siyuan.config.graph.local = response.data.conf;
                 this.onGraph(this.blockId, resetLayout);
             });

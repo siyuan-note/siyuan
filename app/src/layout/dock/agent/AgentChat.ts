@@ -49,6 +49,7 @@ import {Menu} from "../../../plugin/Menu";
 import {getAgentDefaultModelID, getUsableAgentModels} from "./agentModel";
 import {AgentScrollStateMode, resolveAgentScrollState} from "./AgentScrollState";
 import {AgentSessionRun, AgentSessionRuns} from "./AgentSessionRuns";
+import {fullscreen} from "../../../protyle/breadcrumb/action";
 
 // 限制注入用户轮次上下文的可见块 ID 数量，以控制 token 开销。
 // 与 kernel/agent/agent.go 中的 maxVisibleBlockIDs 保持一致。
@@ -343,8 +344,7 @@ export class AgentChat extends Model {
 
         const L = window.siyuan.languages;
 
-        panel.innerHTML = '<div class="agent-chat fn__flex-column fn__flex-1">' +
-            '<div class="block__icons fn__hidescrollbar">' +
+        panel.innerHTML = '<div class="block__icons fn__hidescrollbar">' +
             (this.host.mobile && !this.host.mobileSidebar ? '<span data-type="back" class="block__icon ariaLabel" aria-label="' + L.back + '">' +
                 '<svg><use xlink:href="#iconLeft"></use></svg></span>' : "") +
             '<div class="block__logo fn__flex-1 agent-chat__title">' + (L.agentChat || "Agent") + "</div>" +
@@ -356,6 +356,8 @@ export class AgentChat extends Model {
             '<svg><use xlink:href="#iconFolderClock"></use></svg>' +
             "</span>" +
             '<span class="fn__space"></span>' +
+            (!this.host.mobile ? '<span data-type="fullscreen" class="block__icon ariaLabel" data-position="north" aria-label="' + L.fullscreen + '">' +
+                '<svg><use xlink:href="#iconFullscreen"></use></svg></span><span class="fn__space"></span>' : "") +
             (!this.host.mobile || !this.host.mobileSidebar ? '<span data-type="' + (this.host.mobile ? "close" : "min") +
                 '" class="block__icon ariaLabel" data-position="north" aria-label="' +
                 (this.host.mobile ? window.siyuan.languages.close : window.siyuan.languages.min +
@@ -363,6 +365,7 @@ export class AgentChat extends Model {
                 '<svg><use xlink:href="#' + (this.host.mobile ? "iconCloseRound" : "iconMin") + '"></use></svg>' +
                 "</span>" : "") +
             "</div>" +
+            '<div class="agent-chat fn__flex-column fn__flex-1">' +
             '<div class="agent-chat__messages-wrap">' +
             '<div class="agent-chat__messages fn__flex-1" data-prevent-swipe></div>' +
             '<span class="agent-chat__scroll-bottom ariaLabel" data-position="west" aria-label="' + L.scrollToBottom + '"><svg><use xlink:href="#iconArrowDown"></use></svg></span>' +
@@ -964,6 +967,16 @@ export class AgentChat extends Model {
             while (target && !target.isEqualNode(this.panelElement)) {
                 if (target.classList.contains("block__icon")) {
                     const type = target.getAttribute("data-type");
+                    if (type === "fullscreen" && !this.host.mobile) {
+                        e.stopPropagation();
+                        fullscreen(this.panelElement, target);
+                        const minElement = this.panelElement.querySelector('.block__icons [data-type="min"]') as HTMLElement;
+                        const isFullscreen = this.panelElement.classList.contains("fullscreen");
+                        minElement.style.transition = isFullscreen ? "none" : "";
+                        minElement.classList.toggle("fn__none", isFullscreen);
+                        minElement.previousElementSibling.classList.toggle("fn__none", isFullscreen);
+                        return;
+                    }
                     if (type === "back") {
                         e.stopPropagation();
                         this.host.close();

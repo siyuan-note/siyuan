@@ -189,7 +189,7 @@ const docTreeDocument = () => {
 
 const docTreeMultiple = () => {
     const [copy, move, addToDatabase, remove, riffCard, openBy, exportEntry] = docTreeCommon(true);
-    return [copy, move, addToDatabase, remove, separator("separator_1"), riffCard,
+    return [copy, move, addToDatabase, remove, node("pinDoc", lang("pinDoc")), node("unpinDoc", lang("unpinDoc")), separator("separator_1"), riffCard,
         separator("separator_2"), openBy, exportEntry];
 };
 
@@ -228,7 +228,7 @@ const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), tr
         node("heading6", lang("heading6")),
         ...(!multi ? [node("superBlock", lang("superBlock"))] : []),
         node("code", lang("code")),
-        node("table", lang("table")),
+        node("table", lang("tableBlock")),
         node("line", lang("line")),
         node("math", lang("math")),
         node("includeSublists", lang("includeSublists"), true, [
@@ -295,7 +295,7 @@ const gutterHeight = () => node("height", lang("height"), true, [
     node("default", lang("default")),
 ]);
 
-const gutterTable = () => node("table", lang("table"), true, [
+const gutterTable = () => node("table", lang("tableBlock"), true, [
     node("useDefaultWidth", lang("useDefaultWidth")),
     node("distributeAllColWidths", lang("distributeAllColWidths")),
     node("useDefaultWidthForAllColumns", lang("useDefaultWidthForAllColumns")),
@@ -395,7 +395,7 @@ const gutterSingle = () => [
     separator("separator_table"),
     gutterTable(),
     separator("separator_exportCSV"),
-    node("database", lang("database"), true, [
+    node("database", lang("databaseBlock"), true, [
         node("exportCSV", () => `${window.siyuan.languages.export} CSV`),
         node("showDatabaseInFolder", lang("showInFolder")),
     ]),
@@ -423,7 +423,7 @@ const gutterSingle = () => [
         node("openBy", lang("openBy")),
     ]),
     separator("separator_html"),
-    node("html", literal("HTML")),
+    node("html", lang("htmlBlock")),
     separator("separator_blockEmbed"),
     node("blockEmbed", lang("blockEmbed"), true, [
         node("refresh", lang("refresh")),
@@ -669,14 +669,6 @@ export const entryCatalog: IEntryCatalogSection[] = [
     statusBarCatalogSection,
     dockCatalogSection,
     {
-        key: "documentPanel",
-        label: lang("entryDocPanel"),
-        sortable: false,
-        children: [node("pinnedDocs", lang("pinnedDocs"), true, undefined, undefined, {
-            defaultVisible: () => false,
-        })],
-    },
-    {
         key: "docTree.panel",
         label: location(lang("entryDocPanel"), lang("more")),
         children: [
@@ -686,7 +678,6 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("rebuildDataIndex", lang("rebuildDataIndex")),
             node("sort", lang("sort"), true, sortChildren()),
             node("publishAccess", lang("publishAccess")),
-            node("pinnedDocs", lang("pinnedDocs")),
         ],
     },
     {
@@ -696,6 +687,8 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("openDocument", lang("openDocument")),
             node("rename", lang("rename")),
             node("config", lang("config")),
+            node("pinDoc", lang("pinDoc")),
+            node("unpinDoc", lang("unpinDoc")),
             node("sort", lang("sort"), true, sortChildren("sortByFiletree")),
             node("riffCard", lang("riffCard"), false),
             node("search", lang("search")),

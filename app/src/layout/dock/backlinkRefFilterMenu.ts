@@ -23,7 +23,7 @@ export const loadBacklinkRefFilterMenu = async (options: {
         id: options.id, k: options.keyword, mk: "", notebook: options.notebook,
         sourceFilter: options.filter, refDefCandidates: true,
     });
-    if (!options.isCurrent() || response.code !== 0) {
+    if (!options.isCurrent() || response.code !== 0 || !response.data || !("refDefs" in response.data)) {
         return [];
     }
     const candidates: IRefDef[] = response.data.refDefs || [];

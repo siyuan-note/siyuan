@@ -224,6 +224,8 @@ if (response.code === 0 && response.data) {
   }
   ```
 
+关闭接口校验笔记本 ID 时不会去除两端空白。请求与响应类型声明生成于 `app/src/types/api/index.d.ts`，并同步到 `petal`。
+
 ### 重命名笔记本
 
 * `/api/notebook/renameNotebook`
@@ -2774,7 +2776,7 @@ if (response.code === 0 && response.data) {
 * `idPath`：搜索范围路径数组
 * `k`：搜索关键字
 * `r`：替换关键字
-* `types`：块类型开关，支持 `mathBlock`、`table`、`blockquote`、`superBlock`、`paragraph`、`document`、`heading`、`list`、`listItem`、`codeBlock`、`htmlBlock`、`embedBlock`、`databaseBlock`、`audioBlock`、`videoBlock`、`iframeBlock`、`widgetBlock` 和 `callout`
+* `types`：块类型开关，支持 `mathBlock`、`table`、`blockquote`、`superBlock`、`paragraph`、`document`、`heading`、`list`、`listItem`、`codeBlock`、`htmlBlock`、`embedBlock`、`databaseBlock`、`audioBlock`、`videoBlock`、`iframeBlock`、`widgetBlock`、`callout`、`tabs` 和 `tabItem`
 * `subTypes`：独立的子类型分组，`heading` 使用 `h1` 至 `h6`，`list` 和 `listItem` 分别使用 `o`（有序）、`u`（无序）和 `t`（任务）。分组缺省、为空或所有开关为 `false` 时，不限制该父类型的子类型；父类型仍须在 `types` 中启用。未知顶层键（包括旧扁平格式的 `h1` 至 `h6` 和 `o`、`u`、`t`）会被忽略且不报错，旧格式中保存的子类型选择需要重新选择并保存
 * `replaceTypes`：替换类型开关，支持 `text`、`imgText`、`imgTitle`、`imgSrc`、`aText`、`aTitle`、`aHref`、`code`、`em`、`strong`、`inlineMath`、`inlineMemo`、`blockRef`、`fileAnnotationRef`、`kbd`、`mark`、`s`、`sub`、`sup`、`tag`、`u`、`docTitle`、`codeBlock`、`mathBlock` 和 `htmlBlock`
 

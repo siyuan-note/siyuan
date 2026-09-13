@@ -55,6 +55,7 @@ export const toggleReplaceHistory = (replaceInputElement: HTMLInputElement) => {
                             }
                         } else {
                             replaceInputElement.value = element.textContent;
+                            replaceInputElement.dispatchEvent(new Event("change"));
                             window.siyuan.menus.menu.remove();
                         }
                         itemEvent.preventDefault();
@@ -125,6 +126,7 @@ export const toggleSearchHistory = (searchElement: Element, config: Config.IUILa
                             }
                         } else {
                             searchInputElement.value = s;
+                            searchInputElement.dispatchEvent(new Event("change"));
                             saveKeyList("keys", s, config);
                             config.page = 1;
                             /// #if MOBILE
@@ -201,6 +203,7 @@ export const toggleAssetHistory = (assetElement: Element) => {
                             }
                         } else {
                             assetInputElement.value = element.textContent;
+                            assetInputElement.dispatchEvent(new Event("change"));
                             assetInputEvent(assetElement);
                             window.siyuan.menus.menu.remove();
                         }

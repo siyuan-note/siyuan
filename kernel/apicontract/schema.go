@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"mime"
+	"mime/multipart"
 	"reflect"
 	"sort"
 	"strings"
@@ -13,6 +15,7 @@ import (
 type Schema struct {
 	Ref                  string             `json:"$ref,omitempty"`
 	Type                 string             `json:"type,omitempty"`
+	Format               string             `json:"format,omitempty"`
 	Enum                 []any              `json:"enum,omitempty"`
 	AnyOf                []*Schema          `json:"anyOf,omitempty"`
 	Properties           map[string]*Schema `json:"properties,omitempty"`
@@ -22,12 +25,14 @@ type Schema struct {
 }
 
 type EndpointSchema struct {
-	Method   string   `json:"method"`
-	Path     string   `json:"path"`
-	Handler  string   `json:"handler"`
-	Body     BodyMode `json:"body"`
-	Request  *Schema  `json:"request"`
-	Response *Schema  `json:"response"`
+	Method      string     `json:"method"`
+	Path        string     `json:"path"`
+	Handler     string     `json:"handler"`
+	Body        BodyMode   `json:"body"`
+	Request     *Schema    `json:"request"`
+	Response    *Schema    `json:"response"`
+	Output      OutputMode `json:"output,omitempty"`
+	ErrorStatus int        `json:"errorStatus,omitempty"`
 }
 
 type Bundle struct {
@@ -70,6 +75,131 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if t == reflect.TypeFor[ImportAutoData]() {
+		var variants []*Schema
+		for _, member := range []reflect.Type{reflect.TypeFor[ImportAutoDocument](), reflect.TypeFor[ImportAutoNotebook](), reflect.TypeFor[ImportAutoNotebooks]()} {
+			variant, err := b.schema(member, false)
+			if err != nil {
+				return nil, err
+			}
+			variants = append(variants, variant)
+		}
+		return &Schema{AnyOf: variants}, nil
+	}
+	if t == reflect.TypeFor[ImportNotebookData]() {
+		one, err := b.schema(reflect.TypeFor[ImportedNotebook](), false)
+		if err != nil {
+			return nil, err
+		}
+		many, err := b.schema(reflect.TypeFor[ImportedNotebooks](), false)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{one, many}}, nil
+	}
+	if t == reflect.TypeFor[BacklinkListData]() {
+		list, err := b.schema(reflect.TypeFor[BacklinkList](), false)
+		if err != nil {
+			return nil, err
+		}
+		definitions, err := b.schema(reflect.TypeFor[BacklinkRefDefs](), false)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{list, definitions, {Type: "null"}}}, nil
+	}
+	if t == reflect.TypeFor[GlobalGraphData]() || t == reflect.TypeFor[LocalGraphData]() {
+		resultType := reflect.TypeFor[GlobalGraphResult]()
+		if t == reflect.TypeFor[LocalGraphData]() {
+			resultType = reflect.TypeFor[LocalGraphResult]()
+		}
+		result, err := b.schema(resultType, false)
+		if err != nil {
+			return nil, err
+		}
+		correlation, err := b.schema(reflect.TypeFor[GraphCorrelation](), false)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{result, correlation}}, nil
+	}
+	if t == reflect.TypeFor[GraphConfiguration]() {
+		return b.schema(reflect.TypeFor[GraphConfigurationFields](), true)
+	}
+	if t == reflect.TypeFor[GraphConfigurationData]() {
+		global, err := b.schema(reflect.TypeFor[GlobalGraphConf](), false)
+		if err != nil {
+			return nil, err
+		}
+		local, err := b.schema(reflect.TypeFor[LocalGraphConf](), false)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{global, local}}, nil
+	}
+	if t == reflect.TypeFor[TemplateManagementData]() {
+		var variants []*Schema
+		for _, member := range []reflect.Type{reflect.TypeFor[[]TemplateFileEntry](), reflect.TypeFor[TemplateFileSource](), reflect.TypeFor[TemplateFileRevision]()} {
+			variant, err := b.schema(member, false)
+			if err != nil {
+				return nil, err
+			}
+			variants = append(variants, nonnullable(variant))
+		}
+		return &Schema{AnyOf: append(variants, &Schema{Type: "null"})}, nil
+	}
+	if t == reflect.TypeFor[SQLValue]() {
+		return &Schema{AnyOf: []*Schema{{Type: "null"}, {Type: "string"}, {Type: "number"}, {Type: "boolean"}}}, nil
+	}
+	if t == reflect.TypeFor[BinaryContent]() {
+		if input {
+			return nil, fmt.Errorf("binary content can only appear in responses")
+		}
+		return &Schema{Type: "string", Format: "binary"}, nil
+	}
+	if t == reflect.TypeFor[MultipartFields]() {
+		if !input {
+			return nil, fmt.Errorf("multipart fields can only appear in requests")
+		}
+		return &Schema{Type: "object", AdditionalProperties: &Schema{Type: "array", Items: &Schema{AnyOf: []*Schema{{Type: "string"}, {Type: "string", Format: "binary"}}}}}, nil
+	}
+	if t == reflect.TypeFor[HTMLClipboardData]() {
+		preflight, err := b.schema(reflect.TypeFor[HTMLClipboardPreflight](), input)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{{Type: "string"}, preflight}}, nil
+	}
+	if t == reflect.TypeFor[BlockOperationData]() {
+		options, err := b.schema(reflect.TypeFor[BlockDeleteData](), input)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{{Type: "null"}, {Type: "string"}, options}}, nil
+	}
+	if t == reflect.TypeFor[BlockOperationResult]() {
+		return &Schema{AnyOf: []*Schema{{Type: "null"}, {Type: "string"}, {Type: "array", Items: &Schema{Type: "string"}}}}, nil
+	}
+	if t == reflect.TypeFor[JSONValue]() {
+		ref := &Schema{Ref: "#/$defs/JSONValue"}
+		b.definitions["JSONValue"] = &Schema{AnyOf: []*Schema{
+			{Type: "null"}, {Type: "boolean"}, {Type: "number"}, {Type: "string"},
+			{Type: "array", Items: ref}, {Type: "object", AdditionalProperties: ref},
+		}}
+		return ref, nil
+	}
+	if t == reflect.TypeFor[Base64Bytes]() {
+		if input {
+			return nullable(&Schema{AnyOf: []*Schema{{Type: "string"}, {Type: "array", Items: &Schema{Type: "integer"}}}}), nil
+		}
+		return nullable(&Schema{Type: "string"}), nil
+	}
+	if t == reflect.TypeFor[*multipart.FileHeader]() {
+		if !input {
+			return nil, fmt.Errorf("uploaded files are request-only")
+		}
+		return &Schema{Type: "string", Format: "binary"}, nil
+	}
 	if t == reflect.TypeFor[Null]() {
 		return &Schema{Type: "null"}, nil
 	}
@@ -195,6 +325,10 @@ func (b *schemaBuilder) fields(object *Schema, t reflect.Type, input bool) error
 		for _, option := range strings.Split(field.Tag.Get("api"), ",") {
 			switch {
 			case option == "", option == "optional", option == "nullable", option == "nonnullable":
+			case option == "legacyobject":
+				if field.Type.Kind() != reflect.Pointer || field.Type.Elem().Kind() != reflect.Struct {
+					return fmt.Errorf("legacyobject requires a struct pointer: %s.%s", t, name)
+				}
 			case option == "trim", option == "ignoretype", strings.HasPrefix(option, "enum="):
 				if field.Type.Kind() != reflect.String {
 					return fmt.Errorf("API option %s requires a string: %s.%s", option, t, name)
@@ -218,7 +352,15 @@ func (b *schemaBuilder) fields(object *Schema, t reflect.Type, input bool) error
 			}
 		} else if len(tag) > 1 && tag[1] == "omitempty" {
 			optional = true
-			child = nonnullable(child)
+			if field.Type.Kind() == reflect.Pointer {
+				// 仅外层空指针被省略，内层指针或集合仍可序列化为 null。
+				child, err = b.schema(field.Type.Elem(), false)
+				if err != nil {
+					return err
+				}
+			} else {
+				child = nonnullable(child)
+			}
 		}
 		if has("nonnullable") {
 			child = nonnullable(child)
@@ -254,8 +396,25 @@ func BuildBundle() (*Bundle, error) {
 	b := &schemaBuilder{definitions: map[string]*Schema{}, owners: map[string]reflect.Type{}}
 	bundle := &Bundle{Dialect: "https://json-schema.org/draft/2020-12/schema", Definitions: b.definitions}
 	for _, definition := range Definitions() {
+		if definition.Output != "" && definition.Output != BinaryOutput {
+			return nil, fmt.Errorf("unsupported response output: %s", definition.Name)
+		}
+		if (definition.Output == BinaryOutput) != (definition.Data == reflect.TypeFor[BinaryContent]()) {
+			return nil, fmt.Errorf("binary output requires BinaryContent: %s", definition.Name)
+		}
+		if definition.Output == BinaryOutput && (definition.DataOnError || definition.DataNonNullable) {
+			return nil, fmt.Errorf("binary output cannot use JSON data options: %s", definition.Name)
+		}
+		if definition.Output == BinaryOutput && (definition.ErrorStatus < 201 || definition.ErrorStatus > 599) {
+			return nil, fmt.Errorf("binary output requires a distinct error status: %s", definition.Name)
+		}
 		if definition.Request.Kind() != reflect.Struct {
 			return nil, fmt.Errorf("request contract must be a struct: %s", definition.Name)
+		}
+		if definition.Body == MultipartBody || definition.Body == FormBody {
+			if err := validateMultipartRequest(definition.Request); err != nil {
+				return nil, err
+			}
 		}
 		request, err := b.schema(definition.Request, true)
 		if err != nil {
@@ -269,6 +428,18 @@ func BuildBundle() (*Bundle, error) {
 			data = nonnullable(data)
 		}
 		success := object(map[string]*Schema{"code": {Type: "integer", Enum: []any{0}}, "msg": {Type: "string"}, "data": data}, "code", "msg", "data")
+		if definition.Data == reflect.TypeFor[SQLRows]() {
+			success.Properties["limit"] = &Schema{Type: "integer"}
+			success.Properties["truncated"] = &Schema{Type: "boolean"}
+			success.Required = append(success.Required, "limit", "truncated")
+		}
+		if definition.Output == BinaryOutput {
+			success = data
+			// fetch 按媒体类型将文件读作文本或 JSON，JSON 文件本身没有信封约束。
+			if _, err := b.schema(reflect.TypeFor[JSONValue](), false); err != nil {
+				return nil, err
+			}
+		}
 		var codes []any
 		for _, code := range definition.ErrorCodes {
 			codes = append(codes, code)
@@ -278,12 +449,16 @@ func BuildBundle() (*Bundle, error) {
 		if definition.ErrorText {
 			errorData.AnyOf = append(errorData.AnyOf, &Schema{Type: "string"})
 		}
+		if definition.DataOnError {
+			errorData.AnyOf = append(errorData.AnyOf, data)
+		}
 		failure := object(map[string]*Schema{"code": {Type: "integer", Enum: codes}, "msg": {Type: "string"}, "data": errorData}, "code", "msg", "data")
 		// 中间件可能使用带命令元数据的统一信封，保留这些额外的顶层字段。
 		failure.AdditionalProperties = true
 		response := &Schema{AnyOf: []*Schema{success, failure}}
 		for _, method := range definition.Methods {
-			bundle.Endpoints = append(bundle.Endpoints, EndpointSchema{method, definition.Path, definition.Name, definition.Body, request, response})
+			bundle.Endpoints = append(bundle.Endpoints, EndpointSchema{Method: method, Path: definition.Path, Handler: definition.Name,
+				Body: definition.Body, Request: request, Response: response, Output: definition.Output, ErrorStatus: definition.ErrorStatus})
 		}
 	}
 	sort.Slice(bundle.Endpoints, func(i, j int) bool {
@@ -299,8 +474,44 @@ func (b *Bundle) ValidateResponse(method, path string, payload []byte) error {
 	}
 	for _, endpoint := range b.Endpoints {
 		if endpoint.Method == method && endpoint.Path == path {
+			if endpoint.Output == BinaryOutput {
+				return fmt.Errorf("binary endpoint requires HTTP response validation")
+			}
 			return b.validate(endpoint.Response, value, "$")
 		}
+	}
+	return fmt.Errorf("unregistered API contract: %s %s", method, path)
+}
+
+// ValidateHTTPResponse 同时校验响应状态、媒体类型和对应的载荷，原始文件不尝试解析为 JSON。
+func (b *Bundle) ValidateHTTPResponse(method, path string, status int, contentType string, payload []byte) error {
+	for _, endpoint := range b.Endpoints {
+		if endpoint.Method != method || endpoint.Path != path {
+			continue
+		}
+		mediaType, _, err := mime.ParseMediaType(contentType)
+		if err != nil {
+			return fmt.Errorf("invalid response content type: %w", err)
+		}
+		if endpoint.Output == BinaryOutput && status == 200 {
+			return nil
+		}
+		expectedStatus := 200
+		response := endpoint.Response
+		if endpoint.Output == BinaryOutput {
+			if endpoint.ErrorStatus != 0 {
+				expectedStatus = endpoint.ErrorStatus
+			}
+			response = endpoint.Response.AnyOf[1]
+		}
+		if status != expectedStatus || mediaType != "application/json" {
+			return fmt.Errorf("unexpected response status or media type: %d %s", status, contentType)
+		}
+		var value any
+		if err := json.Unmarshal(payload, &value); err != nil {
+			return err
+		}
+		return b.validate(response, value, "$")
 	}
 	return fmt.Errorf("unregistered API contract: %s %s", method, path)
 }

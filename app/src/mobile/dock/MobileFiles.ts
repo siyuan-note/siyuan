@@ -26,6 +26,7 @@ import {newFileInTree} from "../../util/newFile";
 import {MenuItem} from "../../menus/Menu";
 import type {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {setStorageVal} from "../../protyle/util/compatibility";
 import {showMessage} from "../../dialog/message";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
@@ -131,13 +132,13 @@ export class MobileFiles extends Model {
                 if (type === "refresh") {
                     if (!target.getAttribute("disabled")) {
                         target.setAttribute("disabled", "disabled");
-                        const notebooks: string[] = [];
-                        Array.from(this.element.children).forEach(item => {
-                            notebooks.push(item.getAttribute("data-url"));
-                        });
-                        refreshFileTree(() => {
+                        confirmDialog(window.siyuan.languages.rebuildDataIndex, window.siyuan.languages.rebuildDataIndexTip, () => {
+                            refreshFileTree(() => {
+                                target.removeAttribute("disabled");
+                                this.init(false);
+                            });
+                        }, () => {
                             target.removeAttribute("disabled");
-                            this.init(false);
                         });
                     }
                     event.preventDefault();
@@ -151,6 +152,7 @@ export class MobileFiles extends Model {
                 } else if (type === "newNotebook") {
                     newNotebook();
                 } else if (type === "collapse") {
+                    this.pinnedDocs.collapse();
                     Array.from(this.element.children).forEach(item => {
                         const liElement = item.firstElementChild;
                         const toggleElement = liElement.querySelector(".b3-list-item__arrow");
@@ -607,7 +609,7 @@ export class MobileFiles extends Model {
     }
 
     private handleMsgCallback(data: IWebSocketData) {
-        if (data) { this.pinnedDocs?.scheduleRefresh(); }
+        if (data) { this.pinnedDocs?.onFileTreeMessage(data); }
         if (data) {
             switch (data.cmd) {
                 case "moveDocs":
@@ -1401,6 +1403,7 @@ export class MobileFiles extends Model {
         if (!target) {
             return;
         }
+        this.pinnedDocs.clearSelection();
         this.element.querySelectorAll("li.b3-list-item--focus").forEach((liItem) => {
             liItem.classList.remove("b3-list-item--focus");
         });

@@ -28,6 +28,18 @@ test("entry order inserts document sorting after attributes in existing profiles
     ), ["search", "rename", "attr", "sort", "riffCard"]);
 });
 
+test("pin entries merge into document menus without moving existing plugin slots", () => {
+    const entries = getEntryCatalogChildren("docTree.document");
+    const defaults = entries.map(item => item.key);
+    const saved = defaults.filter(key => !["pinDoc", "unpinDoc"].includes(key));
+    saved.splice(1, 0, "plugin:example:item");
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+    assert.deepEqual(merged.filter(key => !["pinDoc", "unpinDoc"].includes(key)), saved);
+    assert.deepEqual(merged.slice(merged.indexOf("attr"), merged.indexOf("sort") + 1), ["attr", "pinDoc", "unpinDoc", "sort"]);
+    const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+    assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
+});
+
 test("entry order ignores unknown and duplicate keys", () => {
     assert.deepEqual(mergeEntryOrder(["a", "b", "c"], ["missing", "c", "c", "a"]), ["c", "a", "b"]);
 });

@@ -75,6 +75,7 @@ import {
 import {clearDocumentTabMovePreview} from "../tabDrag";
 import {reorderSortedFileTree} from "../../util/fileTreeReorder";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {PinnedDocs} from "./PinnedDocs";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -82,6 +83,7 @@ export class Files extends Model {
     public closeElement: HTMLElement;
     public lastSelectedElement: Element = null;
     private actionsElement: HTMLElement;
+    private pinnedDocs: PinnedDocs;
     private reloadNotebookInfoTimeout: number;
     private docSortModeRefreshTimeout: number;
     private docSortModeChanges = new Map<string, IDocSortModeChanged>();
@@ -123,6 +125,9 @@ export class Files extends Model {
         this.actionsElement = options.tab.panelElement.firstElementChild as HTMLElement;
         this.element = this.actionsElement.nextElementSibling as HTMLElement;
         this.closeElement = options.tab.panelElement.lastElementChild as HTMLElement;
+        this.pinnedDocs = new PinnedDocs(options.app, this.element, (id) => {
+            openFileById({app: options.app, id, action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]});
+        });
         this.closeElement.addEventListener("click", (event) => {
             setPanelFocus(this.element.parentElement);
             let target = event.target as HTMLElement;
@@ -1165,6 +1170,7 @@ export class Files extends Model {
     }
 
     private handleMsgCallback(data: IWebSocketData) {
+        if (data) { this.pinnedDocs?.scheduleRefresh(); }
         if (data) {
             switch (data.cmd) {
                 case "reloadDocInfo":
@@ -1464,6 +1470,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
     }
 
     public init(init = true) {
+        this.pinnedDocs?.scheduleRefresh();
         let html = "";
         let closeHtml = "";
         let closeCounter = 0;
@@ -1675,6 +1682,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
     }
 
     public onDocSortModeChanged(data: IDocSortModeChanged) {
+        this.pinnedDocs?.scheduleRefresh();
         updateFileTreeSortMode(data, this.element);
         this.docSortModeChanges.set(`${data.scope}:${data.box}:${data.id}:${data.path}`, data);
         window.clearTimeout(this.docSortModeRefreshTimeout);
@@ -2135,6 +2143,10 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
     </span>
     ${countHTML}
 </li>`;
+    }
+
+    public destroy() {
+        this.pinnedDocs.destroy();
     }
 
     private initMoreMenu() {

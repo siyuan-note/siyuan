@@ -356,6 +356,7 @@ func RemoveBox(boxID string) (err error) {
 	if err = removeBoxDir(localPath); err != nil {
 		return
 	}
+	maintainPinnedDocs(nil, boxID, "")
 	// 目录删除成功后再清理，避免删除失败时提前移除数据库条目。
 	flushDeletedAttributeViewBlocks(deletedAttrViewBlockIDs)
 	// 加密笔记本删除时清理其独立加密 db 文件（含 WAL/SHM），避免残留

@@ -1,4 +1,7 @@
 {
+	"pinnedDocs": "ピン留めしたドキュメント",
+	"pinDoc": "パネルにピン留め",
+	"unpinDoc": "パネルのピン留めを解除",
 	"editSnapshotMemo": "スナップショットのメモを編集",
 	"snapshotMemoLocalTip": "ローカルのスナップショットのメモのみを変更します",
 	"mobileBarsAutoHide": "スクロール時に上部と下部のバーを自動的に隠す",

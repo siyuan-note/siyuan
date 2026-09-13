@@ -173,6 +173,8 @@ const docTreeDocument = () => {
         separator("separator_2"),
         node("rename", lang("rename")),
         node("attr", lang("attr")),
+        node("pinDoc", lang("pinDoc")),
+        node("unpinDoc", lang("unpinDoc")),
         node("sort", lang("sort"), true, sortChildren("sortByParent")),
         riffCard,
         node("search", lang("search")),

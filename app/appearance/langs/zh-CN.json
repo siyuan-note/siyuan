@@ -1,4 +1,7 @@
 {
+	"pinnedDocs": "置顶文档",
+	"pinDoc": "置顶到面板",
+	"unpinDoc": "取消面板置顶",
 	"editSnapshotMemo": "修改快照备注",
 	"snapshotMemoLocalTip": "仅修改本地快照的备注",
 	"mobileBarsAutoHide": "滚动时自动隐藏顶部和底部栏",

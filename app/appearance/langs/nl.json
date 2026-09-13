@@ -1,4 +1,7 @@
 {
+	"pinnedDocs": "Vastgemaakte documenten",
+	"pinDoc": "Vastmaken aan paneel",
+	"unpinDoc": "Losmaken van paneel",
 	"editSnapshotMemo": "Snapshotnotitie bewerken",
 	"snapshotMemoLocalTip": "Wijzigt alleen de notitie van de lokale snapshot",
 	"mobileBarsAutoHide": "Bovenste en onderste balk automatisch verbergen bij scrollen",

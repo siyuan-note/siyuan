@@ -1,4 +1,7 @@
 {
+	"pinnedDocs": "Pinned documents",
+	"pinDoc": "Pin to panel",
+	"unpinDoc": "Unpin from panel",
 	"editSnapshotMemo": "Edit snapshot memo",
 	"snapshotMemoLocalTip": "Changes only the local snapshot memo",
 	"mobileBarsAutoHide": "Auto-hide top and bottom bars while scrolling",

@@ -58,10 +58,12 @@ import {
     updateFileTreeSortMode
 } from "../../util/fileTreeSort";
 import {MobileOpenedFileSelection} from "./mobileOpenedFileSelection";
+import {PinnedDocs} from "../../layout/dock/PinnedDocs";
 
 export class MobileFiles extends Model {
     public element: HTMLElement;
     private actionsElement: HTMLElement;
+    private pinnedDocs: PinnedDocs;
     private closeElement: HTMLElement;
     private reloadNotebookInfoTimeout: number;
     private docSortModeRefreshTimeout: number;
@@ -108,6 +110,9 @@ export class MobileFiles extends Model {
 </ul>`;
         this.actionsElement = filesElement.firstElementChild as HTMLElement;
         this.element = this.actionsElement.nextElementSibling as HTMLElement;
+        this.pinnedDocs = new PinnedDocs(app, this.element, (id, notebook) => {
+            openMobileFileById(app, id, [Constants.CB_GET_SCROLL], undefined, notebook);
+        }, true);
         this.closeElement = this.element.nextElementSibling as HTMLElement;
         filesElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             let target = event.target as HTMLElement;
@@ -347,6 +352,14 @@ export class MobileFiles extends Model {
                 dragOverScroll({clientY: touch.clientY} as MouseEvent, this.element.getBoundingClientRect(), this.element);
 
                 const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (target && this.pinnedDocs.element.contains(target)) {
+                    this.clearDragIndicators();
+                    if (state.selectedElement.dataset.type === "navigation-file") {
+                        this.pinnedDocs.previewDrop(touch.clientX, touch.clientY);
+                    }
+                    return;
+                }
+                this.pinnedDocs.clearDrop();
                 const liElement = target?.closest(".b3-list-item") as HTMLElement;
                 if (!liElement) return;
 
@@ -385,13 +398,20 @@ export class MobileFiles extends Model {
             }
         }, {passive: false});
 
-        filesElement.addEventListener("touchend", async () => {
+        filesElement.addEventListener("touchend", async (event: TouchEvent) => {
             const state = this.touchDragState;
             if (!state) return;
             stopScrollAnimation();
             state.selectedElement.style.opacity = "";
             if (state.isDragging) {
                 state.ghostElement?.remove();
+                const touch = event.changedTouches[0];
+                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (target && this.pinnedDocs.element.contains(target) && state.selectedElement.dataset.type === "navigation-file") {
+                    this.touchDragState = null;
+                    await this.pinnedDocs.drop([state.selectedElement.dataset.nodeId], touch.clientX, touch.clientY);
+                    return;
+                }
                 const newElement = this.element.querySelector(".dragover, .dragover__bottom, .dragover__top");
                 if (!newElement) {
                     this.touchDragState = null;
@@ -587,6 +607,7 @@ export class MobileFiles extends Model {
     }
 
     private handleMsgCallback(data: IWebSocketData) {
+        if (data) { this.pinnedDocs?.scheduleRefresh(); }
         if (data) {
             switch (data.cmd) {
                 case "moveDocs":
@@ -736,6 +757,10 @@ export class MobileFiles extends Model {
             el.classList.remove("dragover__top", "dragover__bottom", "dragover");
         });
     };
+
+    public destroy() {
+        this.pinnedDocs.destroy();
+    }
 
     private genSort() {
         window.siyuan.menus.menu.remove();
@@ -907,6 +932,7 @@ export class MobileFiles extends Model {
     }
 
     public init(init = true) {
+        this.pinnedDocs?.scheduleRefresh();
         let html = "";
         let closeHtml = "";
         let closeCounter = 0;
@@ -1190,6 +1216,7 @@ export class MobileFiles extends Model {
     }
 
     public onDocSortModeChanged(data: IDocSortModeChanged) {
+        this.pinnedDocs?.scheduleRefresh();
         updateFileTreeSortMode(data, this.element);
         this.docSortModeChanges.set(`${data.scope}:${data.box}:${data.id}:${data.path}`, data);
         window.clearTimeout(this.docSortModeRefreshTimeout);

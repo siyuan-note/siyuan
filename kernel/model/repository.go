@@ -2458,6 +2458,9 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	removedBoxConfs, removedBoxCryptoBackups := map[string]bool{}, map[string]bool{}
 	for _, file := range mergeResult.Upserts {
 		upserts = append(upserts, file.Path)
+		if file.Path == "/storage/pinned-docs.json" {
+			needReloadFiletree = true
+		}
 		if strings.HasPrefix(file.Path, "/storage/riff/") {
 			needReloadFlashcard = true
 		}
@@ -2531,6 +2534,9 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	unloadPluginSet, uninstallPluginSet := hashset.New(), hashset.New()
 	for _, file := range mergeResult.Removes {
 		removes = append(removes, file.Path)
+		if file.Path == "/storage/pinned-docs.json" {
+			needReloadFiletree = true
+		}
 		if strings.HasPrefix(file.Path, "/storage/riff/") {
 			needReloadFlashcard = true
 		}

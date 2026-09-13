@@ -160,6 +160,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/notebook/touchEncryptedNotebooks", model.CheckAuth, model.CheckAdminRole, touchEncryptedNotebooks)
 
 	ginServer.Handle("POST", "/api/filetree/searchDocs", model.CheckAuth, searchDocs)
+	ginServer.Handle("POST", "/api/filetree/getPinnedDocs", model.CheckAuth, model.CheckAdminRole, getPinnedDocs)
+	ginServer.Handle("POST", "/api/filetree/updatePinnedDocs", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, updatePinnedDocs)
 	ginServer.Handle("POST", "/api/filetree/listDocsByPath", model.CheckAuth, listDocsByPath)
 	ginServer.Handle("POST", "/api/filetree/getDoc", model.CheckAuth, getDoc)
 	ginServer.Handle("POST", "/api/filetree/getDocCreateSavePath", model.CheckAuth, getDocCreateSavePath)

@@ -1,4 +1,7 @@
 {
+	"pinnedDocs": "Documenti fissati",
+	"pinDoc": "Fissa nel pannello",
+	"unpinDoc": "Rimuovi dal pannello",
 	"editSnapshotMemo": "Modifica nota dell’istantanea",
 	"snapshotMemoLocalTip": "Modifica solo la nota dell’istantanea locale",
 	"mobileBarsAutoHide": "Nascondi automaticamente le barre superiore e inferiore durante lo scorrimento",

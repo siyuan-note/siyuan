@@ -1,4 +1,7 @@
 {
+	"pinnedDocs": "Sabitlenmiş belgeler",
+	"pinDoc": "Panele sabitle",
+	"unpinDoc": "Panelden sabitlemeyi kaldır",
 	"editSnapshotMemo": "Anlık görüntü notunu düzenle",
 	"snapshotMemoLocalTip": "Yalnızca yerel anlık görüntü notunu değiştirir",
 	"mobileBarsAutoHide": "Kaydırırken üst ve alt çubukları otomatik gizle",

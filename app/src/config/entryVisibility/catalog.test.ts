@@ -980,6 +980,15 @@ test("configuration labels distinguish block scopes and size controls", () => {
     }
 });
 
+test("document tree pin entries follow attributes and precede sorting", () => {
+    const keys = getEntryCatalogChildren("docTree.document").map(item => item.key);
+    assert.deepEqual(keys.slice(keys.indexOf("attr"), keys.indexOf("sort") + 1), ["attr", "pinDoc", "unpinDoc", "sort"]);
+    for (const key of ["pinDoc", "unpinDoc"]) {
+        assert.equal(getEntryCatalogNode(`docTree.document.${key}`)?.simple, true);
+        assert.equal(getEntryCatalogNode(`docTree.document.${key}`)?.type, "entry");
+    }
+});
+
 test("document tree creation entries match menu order and remain available in the Simple profile", () => {
     const entries = getEntryCatalogChildren("docTree.document");
     const creationKeys = ["newDocAbove", "newDocBelow", "newSiblingDoc"];
@@ -1004,8 +1013,10 @@ test("document tree creation entries match menu order and remain available in th
 test("document tree sort menus follow their scope inheritance options", () => {
     const documentEntries = getEntryCatalogChildren("docTree.document");
     const attrIndex = documentEntries.findIndex((item) => item.key === "attr");
-    assert.deepEqual(documentEntries.slice(attrIndex, attrIndex + 3).map((item) => item.key), [
+    assert.deepEqual(documentEntries.slice(attrIndex, attrIndex + 5).map((item) => item.key), [
         "attr",
+        "pinDoc",
+        "unpinDoc",
         "sort",
         "riffCard",
     ]);

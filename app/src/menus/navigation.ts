@@ -5,6 +5,7 @@ import * as path from "path";
 /// #endif
 import {MenuItem} from "./Menu";
 import {getDisplayName, getNotebookName, getTopPaths, isEncryptedBox, pathPosix, useShell} from "../util/pathName";
+import {pinnedDocIDs, updatePinnedDocs} from "../util/pinnedDocs";
 import {showMessage} from "../dialog/message";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
@@ -813,6 +814,23 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 });
             }
         }).element);
+        if (!isEncryptedBox(notebookId)) {
+            const pinned = pinnedDocIDs.has(id);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "pinDoc",
+                icon: "iconPin",
+                label: window.siyuan.languages.pinDoc,
+                click: () => { updatePinnedDocs([id], "pin"); },
+            }).element);
+            if (pinned) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "unpinDoc",
+                    icon: "iconUnpin",
+                    label: window.siyuan.languages.unpinDoc,
+                    click: () => { updatePinnedDocs([id], "unpin"); },
+                }).element);
+            }
+        }
         const configuredSortMode = getConfiguredChildrenSortMode(liElement);
         const sortSubMenu = sortMenu("document", configuredSortMode, (sortMode) => {
             fetchPost("/api/filetree/setDocSortMode", {

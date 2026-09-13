@@ -35,6 +35,11 @@ type ResponseOptions struct {
 
 var definitions []Definition
 
+var (
+	GetPinnedDocs    = define[EmptyRequest, []PinnedDoc]("getPinnedDocs", "/api/filetree/getPinnedDocs", NoBody, ResponseOptions{NonNullable: true}, "POST")
+	UpdatePinnedDocs = define[UpdatePinnedDocsRequest, Null]("updatePinnedDocs", "/api/filetree/updatePinnedDocs", JSONBody, ResponseOptions{}, "POST")
+)
+
 func define[Request, Data any](name, path string, body BodyMode, response ResponseOptions, methods ...string) Endpoint[Request, Data] {
 	d := Definition{Name: name, Path: path, Methods: methods, Body: body,
 		Request: reflect.TypeFor[Request](), Data: reflect.TypeFor[Data](),

@@ -1,4 +1,7 @@
 {
+	"pinnedDocs": "고정된 문서",
+	"pinDoc": "패널에 고정",
+	"unpinDoc": "패널에서 고정 해제",
 	"editSnapshotMemo": "스냅샷 메모 편집",
 	"snapshotMemoLocalTip": "로컬 스냅샷 메모만 변경합니다",
 	"mobileBarsAutoHide": "스크롤 시 상단 및 하단 표시줄 자동 숨기기",

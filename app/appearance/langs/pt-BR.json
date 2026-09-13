@@ -1,4 +1,7 @@
 {
+	"pinnedDocs": "Documentos fixados",
+	"pinDoc": "Fixar no painel",
+	"unpinDoc": "Desafixar do painel",
 	"editSnapshotMemo": "Editar nota do snapshot",
 	"snapshotMemoLocalTip": "Altera apenas a nota do snapshot local",
 	"mobileBarsAutoHide": "Ocultar as barras superior e inferior automaticamente ao rolar",

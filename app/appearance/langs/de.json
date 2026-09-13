@@ -1,4 +1,7 @@
 {
+	"pinnedDocs": "Angeheftete Dokumente",
+	"pinDoc": "Im Panel anheften",
+	"unpinDoc": "Vom Panel lösen",
 	"editSnapshotMemo": "Snapshot-Notiz bearbeiten",
 	"snapshotMemoLocalTip": "Ändert nur die Notiz des lokalen Snapshots",
 	"mobileBarsAutoHide": "Obere und untere Leiste beim Scrollen automatisch ausblenden",

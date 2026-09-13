@@ -1,4 +1,7 @@
 {
+	"pinnedDocs": "Pripnuté dokumenty",
+	"pinDoc": "Pripnúť na panel",
+	"unpinDoc": "Odopnúť z panela",
 	"editSnapshotMemo": "Upraviť poznámku snímky",
 	"snapshotMemoLocalTip": "Zmení iba poznámku lokálnej snímky",
 	"mobileBarsAutoHide": "Automaticky skrývať hornú a dolnú lištu pri posúvaní",

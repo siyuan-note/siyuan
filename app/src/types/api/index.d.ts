@@ -66,6 +66,8 @@ export type NetworkServeTLSRequestInput = { "networkServeTLS": boolean; };
 
 export type Notebook = { "closed": boolean; "dueFlashcardCount": number; "encrypted": boolean; "flashcardCount": number; "icon": string; "id": string; "name": string; "newFlashcardCount": number; "sort": number; "sortMode": number; "state"?: "Locked" | "Unlocking" | "Unlocked" | "Locking" | "Error"; "subFileCount": number; "unlocked": boolean; };
 
+export type PinnedDoc = { "childrenSortMode": number | null; "icon": string; "id": string; "name": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
+
 export type PublishedBlockInfo = { "publishAccessRequired": true; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
 
 export type RemoveBookmarkRequestInput = { "bookmark": string; };
@@ -93,6 +95,8 @@ export type TagData = { "children": Array<TagData | null> | null; "count": numbe
 export type UnfoldedParentData = { "parentID": string; };
 
 export type UpdateChannelRequestInput = { "updateChannel": string; };
+
+export type UpdatePinnedDocsRequestInput = { "action": string; "after"?: boolean; "ids": Array<string>; "targetID"?: string; };
 
 export type VirtualBlockRefRequestInput = { "keywords": Array<string>; };
 
@@ -789,6 +793,16 @@ export interface APIPOSTRoutes {
     };
     "/api/bookmark/renameBookmark": {
         request: RenameBookmarkRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getPinnedDocs": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<PinnedDoc>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/filetree/updatePinnedDocs": {
+        request: UpdatePinnedDocsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };

@@ -651,6 +651,53 @@
       ],
       "additionalProperties": false
     },
+    "PinnedDoc": {
+      "type": "object",
+      "properties": {
+        "childrenSortMode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "icon": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "subFileCount": {
+          "type": "integer"
+        },
+        "unavailable": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "childrenSortMode",
+        "icon",
+        "id",
+        "name",
+        "notebook",
+        "path",
+        "subFileCount",
+        "unavailable"
+      ],
+      "additionalProperties": false
+    },
     "PublishedBlockInfo": {
       "type": "object",
       "properties": {
@@ -967,6 +1014,31 @@
       },
       "required": [
         "updateChannel"
+      ],
+      "additionalProperties": false
+    },
+    "UpdatePinnedDocsRequestInput": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "after": {
+          "type": "boolean"
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "targetID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "ids"
       ],
       "additionalProperties": false
     },
@@ -2645,6 +2717,159 @@
       "body": "json",
       "request": {
         "$ref": "#/$defs/RenameBookmarkRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/filetree/getPinnedDocs",
+      "handler": "getPinnedDocs",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/PinnedDoc"
+                }
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/filetree/updatePinnedDocs",
+      "handler": "updatePinnedDocs",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/UpdatePinnedDocsRequestInput"
       },
       "response": {
         "anyOf": [

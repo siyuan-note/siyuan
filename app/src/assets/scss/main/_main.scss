@@ -43,6 +43,7 @@ body {
   border-radius: 0;
 
   &.sy__graph,
+  &.sy__agentChat,
   &.sy__globalGraph {
     background-color: var(--b3-theme-background);
   }

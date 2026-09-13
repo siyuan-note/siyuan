@@ -721,10 +721,12 @@ export class Dock {
                 clearTimeout(this.hideResizeTimeout);
                 this.hideDock();
             }
-            if ((type === "graph" || type === "globalGraph")) {
+            if (type === "graph" || type === "globalGraph" || type === "agentChat") {
                 if (this.layout.element.querySelector(".fullscreen")) {
                     document.getElementById("drag")?.classList.remove("fn__hidden");
                 }
+            }
+            if (type === "graph" || type === "globalGraph") {
                 const graph = this.data[type] as Graph;
                 graph.destroy();
             }
@@ -900,7 +902,7 @@ export class Dock {
                 }
                 this.layout.element.style.marginTop = "var(--b3-layout-space)";
             }
-            if ((type === "graph" || type === "globalGraph") && this.layout.element.querySelector(".fullscreen")) {
+            if ((type === "graph" || type === "globalGraph" || type === "agentChat") && this.layout.element.querySelector(".fullscreen")) {
                 document.getElementById("drag")?.classList.add("fn__hidden");
             }
             if (!this.isFloating()) {

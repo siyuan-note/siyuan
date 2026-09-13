@@ -21,6 +21,7 @@ The section appears when it contains pinned documents and hides automatically wh
 | Drop between child documents | Reorder actual documents, using the existing sort-conflict confirmation |
 | Drop in the middle of a document row | Move into the actual document, using existing move validation |
 | Unpin a parent document | Remove only that root entry; independently pinned children remain |
+| Collapse the document panel | Collapse the pinned section and clear its descendant expansion state; keep the pinned entries and their order |
 | Rename or move | Reload the source document for every entry; cross-notebook moves maintain the notebook identifier |
 | Close an ordinary notebook | Retain unavailable entries and allow unpinning; keep titles already read in the current session, or show the document ID when the title is unavailable |
 | Delete a document or notebook | Remove related entries; list reads also filter missing source documents |

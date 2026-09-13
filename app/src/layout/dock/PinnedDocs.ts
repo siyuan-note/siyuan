@@ -140,6 +140,21 @@ export class PinnedDocs {
         this.refreshTimer = window.setTimeout(() => this.refresh(), 150);
     }
 
+    public collapse() {
+        this.generation++;
+        this.expanded.clear();
+        localStorage.setItem("siyuan-pinned-docs-expanded", "[]");
+        localStorage.setItem("siyuan-pinned-docs-collapsed", "true");
+        this.setCollapsed(true);
+        this.list.querySelectorAll<HTMLElement>("[data-pin-root=true]").forEach(row => {
+            row.nextElementSibling.replaceChildren();
+            row.nextElementSibling.classList.add("fn__none");
+            row.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
+            if (row.hasAttribute("aria-expanded")) { row.setAttribute("aria-expanded", "false"); }
+        });
+        this.scheduleRefresh();
+    }
+
     private setCollapsed(collapsed: boolean) {
         this.element.lastElementChild.classList.toggle("fn__none", collapsed);
         this.element.firstElementChild.setAttribute("aria-expanded", String(!collapsed));
@@ -251,6 +266,7 @@ export class PinnedDocs {
             await this.appendDoc(children, {...doc, notebook: row.dataset.notebook},
                 `${row.dataset.pinRow}/${doc.id}`, row.dataset.pinRow.split("/").length, generation);
         }
+        if (generation !== this.generation || !this.expanded.has(row.dataset.pinRow)) { return; }
         children.classList.remove("fn__none");
         row.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
         row.setAttribute("aria-expanded", "true");

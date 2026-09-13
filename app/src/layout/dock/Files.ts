@@ -185,6 +185,7 @@ export class Files extends Model {
         });
         // 为了快捷键的 dispatch
         this.actionsElement.querySelector('[data-type="collapse"]').addEventListener("click", () => {
+            this.pinnedDocs.collapse();
             Array.from(this.element.children).forEach(item => {
                 const liElement = item.firstElementChild;
                 const toggleElement = liElement.querySelector(".b3-list-item__arrow");

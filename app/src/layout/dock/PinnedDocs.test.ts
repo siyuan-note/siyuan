@@ -8,6 +8,8 @@ import * as ts from "typescript";
 interface IPanelHarness {
     element: unknown;
     refresh(): Promise<void>;
+    collapse(): void;
+    expanded: Set<string>;
     list: unknown;
     generation: number;
     names: Map<string, string>;
@@ -27,6 +29,7 @@ interface IPanelHarness {
 }
 
 const loadPanel = (fetchCode = 0) => {
+    const storage = new Map<string, string>();
     const docs: {id: string, notebook: string, name: string}[] = [];
     const config = {readonly: false, fileTree: {docIconClickExpand: false, parentDocClickExpand: false}};
     const calls: {kind: string, args: unknown[]}[] = [];
@@ -40,6 +43,7 @@ const loadPanel = (fetchCode = 0) => {
     }).outputText;
     runInNewContext(source, {
         exports,
+        localStorage: {setItem: (key: string, value: string) => storage.set(key, value)},
         window: {siyuan: {config, notebooks: []}},
         document: {activeElement: null, createElement: () => ({
             dataset: {}, children: [] as unknown[],
@@ -62,8 +66,37 @@ const loadPanel = (fetchCode = 0) => {
     const panel = Object.create(exports.PinnedDocs.prototype) as IPanelHarness;
     panel.clearDrop = () => { panel.dropTarget = undefined; };
     panel.scheduleRefresh = () => {};
-    return {panel, calls, config, docs};
+    return {panel, calls, config, docs, storage};
 };
+
+test("collapse clears descendant expansion and persists the closed section", async () => {
+    const {panel, storage, calls} = loadPanel();
+    panel.generation = 3;
+    panel.expanded = new Set(["root", "root/child"]);
+    const states: unknown[] = [];
+    const row = {
+        nextElementSibling: {replaceChildren: () => states.push("clear"), classList: {add: (name: string) => states.push(name)}},
+        querySelector: () => ({classList: {remove: (name: string) => states.push(name)}}),
+        hasAttribute: () => true,
+        setAttribute: (name: string, value: string) => states.push([name, value]),
+    };
+    panel.list = {querySelectorAll: () => [row]};
+    panel.element = {
+        lastElementChild: {classList: {toggle: (name: string, value: boolean) => states.push([name, value])}},
+        firstElementChild: {setAttribute: (name: string, value: string) => states.push([name, value])},
+        querySelector: () => ({classList: {toggle: () => {}}}),
+    };
+    panel.collapse();
+    assert.equal(panel.generation, 4);
+    assert.equal(panel.expanded.size, 0);
+    assert.equal(storage.get("siyuan-pinned-docs-expanded"), "[]");
+    assert.equal(storage.get("siyuan-pinned-docs-collapsed"), "true");
+    assert.deepEqual(states, [["fn__none", true], ["aria-expanded", "false"], "clear", "fn__none",
+        "b3-list-item__arrow--open", ["aria-expanded", "false"]]);
+    await panel.loadChildren({dataset: {notebook: "notebook", path: "/root.sy", pinRow: "root"}}, {}, 3);
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].args[0], "/api/filetree/listDocsByPath");
+});
 
 test("pinned document more actions open the source document menu", () => {
     const {panel, calls} = loadPanel();

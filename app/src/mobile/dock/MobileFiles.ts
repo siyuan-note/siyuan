@@ -151,6 +151,7 @@ export class MobileFiles extends Model {
                 } else if (type === "newNotebook") {
                     newNotebook();
                 } else if (type === "collapse") {
+                    this.pinnedDocs.collapse();
                     Array.from(this.element.children).forEach(item => {
                         const liElement = item.firstElementChild;
                         const toggleElement = liElement.querySelector(".b3-list-item__arrow");

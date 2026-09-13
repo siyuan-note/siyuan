@@ -534,6 +534,10 @@ export const isIPhone = () => {
     return navigator.userAgent.indexOf("iPhone") > -1;
 };
 
+export const isAndroid = () => {
+    return /Android/i.test(navigator.userAgent);
+};
+
 export const isIOSDevice = () => {
     return isIOSPlatform(navigator);
 };

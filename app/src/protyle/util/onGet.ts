@@ -34,7 +34,7 @@ import {getEmbeddedDocInfoResponse} from "./docInfo";
 import {updateWidgetCacheVersion} from "./widgetCache";
 import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
 import {getSavedTabFocusTarget, hasFocusOffsets} from "./focusRestore";
-import {isIPhone, isPhablet} from "./compatibility";
+import {isAndroid, isIPhone, isPhablet} from "./compatibility";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {disposeCustomBlocksInElement, setCustomBlockRootReady} from "../../plugin/customBlockRender";
 import {invalidateTrackedRanges, invalidateTrackedRangesInElement} from "./trackedRange";
@@ -541,7 +541,7 @@ export const enableProtyle = (protyle: IProtyle) => {
         /// #endif
     }
     // 解除只读时保留 Android 和 iPhone 的正文编辑边界，结构容器保持不可编辑。
-    protyle.wysiwyg.element.setAttribute("contenteditable", (isIPhone() || /Android/i.test(navigator.userAgent)) ? "false" : "true");
+    protyle.wysiwyg.element.setAttribute("contenteditable", (isIPhone() || isAndroid()) ? "false" : "true");
     protyle.wysiwyg.element.style.userSelect = "";
     // 用于区分移动端样式
     protyle.wysiwyg.element.setAttribute("data-readonly", "false");

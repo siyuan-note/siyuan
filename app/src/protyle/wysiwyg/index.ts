@@ -104,6 +104,7 @@ import {
     getTextSiyuanFromTextHTML,
     isInAndroid,
     isInIOS,
+    isAndroid,
     isIPhone,
     isMac,
     isOnlyMeta,
@@ -490,7 +491,7 @@ export class WYSIWYG {
         this.element.className = "protyle-wysiwyg";
         this.element.setAttribute("spellcheck", "false");
         // Android 和 iPhone 的原生编辑限于正文节点，避免输入法修改列表等结构容器。
-        this.element.setAttribute("contenteditable", (isIPhone() || /Android/i.test(navigator.userAgent)) ? "false" : "true");
+        this.element.setAttribute("contenteditable", (isIPhone() || isAndroid()) ? "false" : "true");
         if (window.siyuan.config.editor.displayBookmarkIcon) {
             this.element.classList.add("protyle-wysiwyg--attr");
         }

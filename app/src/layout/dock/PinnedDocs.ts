@@ -12,6 +12,7 @@ import {reorderSortedFileTree} from "../../util/fileTreeReorder";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
 import {MenuItem} from "../../menus/Menu";
 import {newFileInTree} from "../../util/newFile";
+import {isOnlyMeta} from "../../protyle/util/compatibility";
 import {FILE_TREE_CHILDREN_SORT_MODE, FILE_TREE_EFFECTIVE_SORT_MODE} from "../../util/fileTreeSort";
 
 interface IPinnedDoc {
@@ -294,6 +295,24 @@ export class PinnedDocs {
         localStorage.setItem("siyuan-pinned-docs-expanded", JSON.stringify([...this.expanded]));
     }
 
+    public clearSelection() {
+        this.list.querySelectorAll(".b3-list-item--focus").forEach(item => {
+            item.classList.remove("b3-list-item--focus");
+            item.removeAttribute("select-start");
+            item.removeAttribute("select-end");
+        });
+    }
+
+    private selectRow(row: HTMLElement) {
+        this.clearSelection();
+        this.sourceTree.querySelectorAll(".b3-list-item--focus").forEach(item => {
+            item.classList.remove("b3-list-item--focus");
+            item.removeAttribute("select-start");
+            item.removeAttribute("select-end");
+        });
+        row.classList.add("b3-list-item--focus");
+    }
+
     private click(event: MouseEvent) {
         event.stopPropagation();
         if (this.suppressClick) { event.preventDefault(); return; }
@@ -306,6 +325,11 @@ export class PinnedDocs {
         }
         const row = target.closest<HTMLElement>("[data-pin-row]");
         if (!row) { return; }
+        if (isOnlyMeta(event) && !event.altKey && !event.shiftKey) {
+            event.preventDefault();
+            row.classList.toggle("b3-list-item--focus");
+            return;
+        }
         if (target.closest("[data-pin-more]")) {
             this.menu(row, event.clientX, event.clientY);
         } else if (target.closest("[data-pin-new]")) {
@@ -314,6 +338,7 @@ export class PinnedDocs {
             this.toggle(row);
         } else if (target.closest(".b3-list-item__icon") && row.dataset.unavailable !== "true") {
             if (this.mobile || window.siyuan.config.fileTree.docIconClickExpand) {
+                this.selectRow(row);
                 if (Number(row.dataset.count) > 0) { this.toggle(row); } else { this.open(row.dataset.nodeId, row.dataset.notebook); }
             } else if (!window.siyuan.config.readonly) {
                 const icon = target.closest<HTMLElement>(".b3-list-item__icon");
@@ -322,12 +347,11 @@ export class PinnedDocs {
                     undefined, icon.querySelector("img"));
             }
         } else if (row.dataset.unavailable !== "true") {
+            this.selectRow(row);
             if (window.siyuan.config.fileTree.parentDocClickExpand && Number(row.dataset.count) > 0) {
                 this.toggle(row);
                 return;
             }
-            this.list.querySelectorAll(".b3-list-item--focus").forEach(item => item.classList.remove("b3-list-item--focus"));
-            row.classList.add("b3-list-item--focus");
             this.open(row.dataset.nodeId, row.dataset.notebook);
         }
     }

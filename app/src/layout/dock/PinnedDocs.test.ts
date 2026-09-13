@@ -8,6 +8,8 @@ import * as ts from "typescript";
 interface IPanelHarness {
     element: unknown;
     heading: unknown;
+    sourceTree: unknown;
+    clearSelection(): void;
     refresh(): Promise<void>;
     collapse(): void;
     expanded: Set<string>;
@@ -53,6 +55,7 @@ const loadPanel = (fetchCode = 0) => {
             append(child: unknown) { this.children.push(child); },
         })},
         require: (name: string) => {
+            if (name.endsWith("/compatibility")) { return {isOnlyMeta: (event: MouseEvent) => Boolean(event.ctrlKey)}; }
             if (name.endsWith("/fileTreeIcon")) { return {getFileTreeIconHTML: () => ""}; }
             if (name.endsWith("/escape")) { return {escapeHtml: (value: string) => value}; }
             if (name.endsWith("/emoji")) { return {openEmojiPanel: record("icon")}; }
@@ -71,6 +74,8 @@ const loadPanel = (fetchCode = 0) => {
     const panel = Object.create(exports.PinnedDocs.prototype) as IPanelHarness;
     panel.clearDrop = () => { panel.dropTarget = undefined; };
     panel.scheduleRefresh = () => {};
+    panel.list = {querySelectorAll: (): unknown[] => []};
+    panel.sourceTree = {querySelectorAll: (): unknown[] => []};
     return {panel, calls, config, docs, storage};
 };
 
@@ -134,7 +139,7 @@ test("pinned roots share one list and retain each document notebook without wrap
 
 test("pinned icons respect editing, expansion and readonly settings", () => {
     const {panel, calls, config} = loadPanel();
-    const row = {dataset: {nodeId: "document", notebook: "notebook", count: "1"}};
+    const row = {dataset: {nodeId: "document", notebook: "notebook", count: "1"}, classList: {add: () => {}}};
     const icon = {getBoundingClientRect: () => ({left: 1, bottom: 2, height: 3, width: 4}), querySelector: (): Element | null => null};
     const event = {stopPropagation: () => {}, target: {closest: (selector: string) =>
         selector === "[data-pin-row]" ? row : selector === ".b3-list-item__icon" ? icon : null}};
@@ -194,6 +199,32 @@ test("panel clicks never bubble into the mobile source tree handler", () => {
     panel.click({stopPropagation: () => stopped++, target: {closest: (): Element | null => null}});
     assert.equal(stopped, 2);
     assert.equal(prevented, 1);
+});
+
+test("modifier clicks toggle pins without opening and ordinary clicks clear source selection", () => {
+    const {panel} = loadPanel();
+    let focused = true;
+    let opened = 0;
+    let sourceCleared = 0;
+    const row = {dataset: {nodeId: "doc", notebook: "box"}, classList: {
+        toggle: () => { focused = !focused; }, add: () => { focused = true; }, remove: () => { focused = false; },
+    }, removeAttribute: () => {}};
+    panel.list = {querySelectorAll: () => [row]};
+    panel.sourceTree = {querySelectorAll: () => [{classList: {remove: () => sourceCleared++}, removeAttribute: () => {}}]};
+    panel.open = () => opened++;
+    const event = {ctrlKey: true, stopPropagation: () => {}, preventDefault: () => {},
+        target: {closest: (selector: string) => selector === "[data-pin-row]" ? row : null}};
+    panel.click(event);
+    assert.equal(focused, false);
+    panel.click(event);
+    assert.equal(focused, true);
+    assert.equal(opened, 0);
+    event.ctrlKey = false;
+    panel.click(event);
+    assert.equal(opened, 1);
+    assert.equal(sourceCleared, 1);
+    panel.clearSelection();
+    assert.equal(focused, false);
 });
 
 test("notebook root expansion requests physical root while documents keep their own paths", async () => {

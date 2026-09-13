@@ -1944,6 +1944,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         if (!target) {
             return;
         }
+        this.pinnedDocs.clearSelection();
         this.element.querySelectorAll("li.b3-list-item--focus").forEach((liItem) => {
             liItem.classList.remove("b3-list-item--focus");
         });

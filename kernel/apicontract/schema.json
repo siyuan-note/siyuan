@@ -237,6 +237,703 @@
       ],
       "additionalProperties": false
     },
+    "BacklinkAttributeViewMatch": {
+      "type": "object",
+      "properties": {
+        "defIDs": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "itemID": {
+          "type": "string"
+        },
+        "keyID": {
+          "type": "string"
+        },
+        "keyName": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "valueID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "defIDs",
+        "itemID",
+        "keyID",
+        "keyName",
+        "title",
+        "valueID"
+      ],
+      "additionalProperties": false
+    },
+    "BacklinkAttributeViewTarget": {
+      "type": "object",
+      "properties": {
+        "blockID": {
+          "type": "string"
+        },
+        "matches": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BacklinkAttributeViewMatch"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "blockID",
+        "matches"
+      ],
+      "additionalProperties": false
+    },
+    "BacklinkContext": {
+      "type": "object",
+      "properties": {
+        "attributeViewTargets": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/BacklinkAttributeViewTarget"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "blockPaths": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BlockPath"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dom": {
+          "type": "string"
+        },
+        "expand": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "referenceBlockID": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "blockPaths",
+        "dom",
+        "expand",
+        "id",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "BacklinkContextData": {
+      "type": "object",
+      "properties": {
+        "backlinks": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BacklinkContext"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backmentions": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BacklinkContext"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keywords": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "revision": {
+          "type": "string"
+        },
+        "unchanged": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "backlinks",
+        "backmentions",
+        "keywords",
+        "revision",
+        "unchanged"
+      ],
+      "additionalProperties": false
+    },
+    "BacklinkDocumentRequestInput": {
+      "type": "object",
+      "properties": {
+        "containChildren": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "defID": {
+          "type": "string"
+        },
+        "highlight": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keyword": {
+          "type": "string"
+        },
+        "knownRevision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "refTreeID": {
+          "type": "string"
+        },
+        "sourceFilter": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BacklinkSourceFilterInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "defID",
+        "keyword",
+        "refTreeID"
+      ],
+      "additionalProperties": false
+    },
+    "BacklinkList": {
+      "type": "object",
+      "properties": {
+        "backlinks": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BacklinkPath"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backmentions": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BacklinkPath"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "box": {
+          "type": "string"
+        },
+        "k": {
+          "type": "string"
+        },
+        "linkRefsCount": {
+          "type": "integer"
+        },
+        "mentionsCount": {
+          "type": "integer"
+        },
+        "mk": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "unchanged": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "backlinks",
+        "backmentions",
+        "box",
+        "k",
+        "linkRefsCount",
+        "mentionsCount",
+        "mk",
+        "revision",
+        "unchanged"
+      ],
+      "additionalProperties": false
+    },
+    "BacklinkListRequestInput": {
+      "type": "object",
+      "properties": {
+        "containChildren": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "includeMentions": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "k": {
+          "type": "string"
+        },
+        "knownRevision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mSort": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mk": {
+          "type": "string"
+        },
+        "notebook": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "refDefCandidates": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sort": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sourceFilter": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BacklinkSourceFilterInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "BacklinkPath": {
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SearchBlock"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "box": {
+          "type": "string"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SearchPath"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "count": {
+          "type": "integer"
+        },
+        "created": {
+          "type": "string"
+        },
+        "depth": {
+          "type": "integer"
+        },
+        "folded": {
+          "type": "boolean"
+        },
+        "hPath": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "nodeType": {
+          "type": "string"
+        },
+        "number": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "subType": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "updated": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "box",
+        "count",
+        "created",
+        "depth",
+        "folded",
+        "hPath",
+        "id",
+        "name",
+        "nodeType",
+        "revision",
+        "subType",
+        "type",
+        "updated"
+      ],
+      "additionalProperties": false
+    },
+    "BacklinkRefDef": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "path",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "BacklinkRefDefs": {
+      "type": "object",
+      "properties": {
+        "refDefs": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BacklinkRefDef"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "refDefs"
+      ],
+      "additionalProperties": false
+    },
+    "BacklinkSourceFilterInput": {
+      "type": "object",
+      "properties": {
+        "dailyNote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "excludeSelf": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "excludedNotebookIDs": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "excludedRefDefIDs": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "BackmentionDocumentRequestInput": {
+      "type": "object",
+      "properties": {
+        "containChildren": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "defID": {
+          "type": "string"
+        },
+        "highlight": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keyword": {
+          "type": "string"
+        },
+        "knownRevision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "refTreeID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "defID",
+        "keyword",
+        "refTreeID"
+      ],
+      "additionalProperties": false
+    },
     "BatchInsertBlockRequestInput": {
       "type": "object",
       "properties": {
@@ -6772,6 +7469,18 @@
       },
       "required": [
         "anchor"
+      ],
+      "additionalProperties": false
+    },
+    "RefreshBacklinkRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
       ],
       "additionalProperties": false
     },
@@ -21379,6 +22088,332 @@
                 "enum": [
                   -1,
                   1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ref/getBacklink2",
+      "handler": "getBacklink2",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/BacklinkListRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BacklinkList"
+                  },
+                  {
+                    "$ref": "#/$defs/BacklinkRefDefs"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/BacklinkList"
+                      },
+                      {
+                        "$ref": "#/$defs/BacklinkRefDefs"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ref/getBacklinkDoc",
+      "handler": "getBacklinkDoc",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/BacklinkDocumentRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BacklinkContextData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ref/getBackmentionDoc",
+      "handler": "getBackmentionDoc",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/BackmentionDocumentRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BacklinkContextData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/ref/refreshBacklink",
+      "handler": "refreshBacklink",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/RefreshBacklinkRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
                 ]
               },
               "data": {

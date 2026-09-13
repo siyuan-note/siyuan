@@ -75,6 +75,17 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if t == reflect.TypeFor[BacklinkListData]() {
+		list, err := b.schema(reflect.TypeFor[BacklinkList](), false)
+		if err != nil {
+			return nil, err
+		}
+		definitions, err := b.schema(reflect.TypeFor[BacklinkRefDefs](), false)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{list, definitions, {Type: "null"}}}, nil
+	}
 	if t == reflect.TypeFor[GlobalGraphData]() || t == reflect.TypeFor[LocalGraphData]() {
 		resultType := reflect.TypeFor[GlobalGraphResult]()
 		if t == reflect.TypeFor[LocalGraphData]() {

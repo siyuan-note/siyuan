@@ -500,3 +500,8 @@ var ResetLocalGraph = define[EmptyRequest, ResetLocalGraphData]("resetLocalGraph
 var SetGraphConf = define[SetGraphConfRequest, GraphConfigurationData]("setGraphConf", "/api/graph/setGraphConf", JSONBody, ResponseOptions{}, "POST")
 var GetGraph = define[GlobalGraphRequest, GlobalGraphData]("getGraph", "/api/graph/getGraph", JSONBody, ResponseOptions{DataOnError: true}, "POST")
 var GetLocalGraph = define[LocalGraphRequest, LocalGraphData]("getLocalGraph", "/api/graph/getLocalGraph", JSONBody, ResponseOptions{DataOnError: true}, "POST")
+
+var RefreshBacklink = define[RefreshBacklinkRequest, Null]("refreshBacklink", "/api/ref/refreshBacklink", JSONBody, ResponseOptions{}, "POST")
+var GetBackmentionDoc = define[BackmentionDocumentRequest, BacklinkContextData]("getBackmentionDoc", "/api/ref/getBackmentionDoc", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetBacklinkDoc = define[BacklinkDocumentRequest, BacklinkContextData]("getBacklinkDoc", "/api/ref/getBacklinkDoc", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetBacklink2 = define[BacklinkListRequest, BacklinkListData]("getBacklink2", "/api/ref/getBacklink2", JSONBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")

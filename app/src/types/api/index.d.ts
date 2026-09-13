@@ -20,6 +20,30 @@ export type AttributeViewCustomColorInput = { "dark"?: AttributeViewColorThemeIn
 
 export type AutoLaunchRequestInput = { "autoLaunch": number; };
 
+export type BacklinkAttributeViewMatch = { "defIDs": Array<string> | null; "itemID": string; "keyID": string; "keyName": string; "title": string; "valueID": string; };
+
+export type BacklinkAttributeViewTarget = { "blockID": string; "matches": Array<BacklinkAttributeViewMatch | null> | null; };
+
+export type BacklinkContext = { "attributeViewTargets"?: Array<BacklinkAttributeViewTarget | null>; "blockPaths": Array<BlockPath | null> | null; "dom": string; "expand": boolean; "id": string; "referenceBlockID"?: string; "revision": string; "type"?: string; };
+
+export type BacklinkContextData = { "backlinks": Array<BacklinkContext | null> | null; "backmentions": Array<BacklinkContext | null> | null; "keywords": Array<string> | null; "revision": string; "unchanged": boolean; };
+
+export type BacklinkDocumentRequestInput = { "containChildren"?: boolean | null; "defID": string; "highlight"?: boolean | null; "keyword": string; "knownRevision"?: string | null; "notebook"?: string; "refTreeID": string; "sourceFilter"?: BacklinkSourceFilterInput | null; };
+
+export type BacklinkList = { "backlinks": Array<BacklinkPath | null> | null; "backmentions": Array<BacklinkPath | null> | null; "box": string; "k": string; "linkRefsCount": number; "mentionsCount": number; "mk": string; "revision": string; "unchanged": boolean; };
+
+export type BacklinkListRequestInput = { "containChildren"?: boolean | null; "id"?: string | null; "includeMentions"?: boolean | null; "k"?: string; "knownRevision"?: string | null; "mSort"?: string | null; "mk"?: string; "notebook"?: string | null; "refDefCandidates"?: boolean | null; "sort"?: string | null; "sourceFilter"?: BacklinkSourceFilterInput | null; };
+
+export type BacklinkPath = { "blocks"?: Array<SearchBlock | null>; "box": string; "children"?: Array<SearchPath | null>; "count": number; "created": string; "depth": number; "folded": boolean; "hPath": string; "id": string; "name": string; "nodeType": string; "number"?: string; "revision": string; "subType": string; "type": string; "updated": string; };
+
+export type BacklinkRefDef = { "id": string; "path": string; "text": string; };
+
+export type BacklinkRefDefs = { "refDefs": Array<BacklinkRefDef | null> | null; };
+
+export type BacklinkSourceFilterInput = { "dailyNote"?: string | null; "excludeSelf"?: boolean | null; "excludedNotebookIDs"?: Array<string> | null; "excludedRefDefIDs"?: Array<string> | null; };
+
+export type BackmentionDocumentRequestInput = { "containChildren"?: boolean | null; "defID": string; "highlight"?: boolean | null; "keyword": string; "knownRevision"?: string | null; "notebook"?: string; "refTreeID": string; };
+
 export type BatchInsertBlockRequestInput = { "blocks": Array<BlockInsertInputInput>; };
 
 export type BatchParentBlockRequestInput = { "blocks": Array<PrependBlockRequestInput>; };
@@ -391,6 +415,8 @@ export type RefIDsData = { "originalRefBlockIDs": Record<string, string> | null;
 export type RefIDsRequestInput = { "id"?: string | null; "ids"?: Array<string> | null; "notebook"?: string | null; };
 
 export type RefTextQueryRequestInput = { "anchor": string; "notebook"?: string | null; };
+
+export type RefreshBacklinkRequestInput = { "id": string; };
 
 export type RemoveBookmarkRequestInput = { "bookmark": string; };
 
@@ -831,10 +857,6 @@ export type APILegacyPOSTPath =
     "/api/plugin/listLoadedPlugins" |
     "/api/plugin/rpc" |
     "/api/plugin/rpc/:name" |
-    "/api/ref/getBacklink2" |
-    "/api/ref/getBacklinkDoc" |
-    "/api/ref/getBackmentionDoc" |
-    "/api/ref/refreshBacklink" |
     "/api/repo/checkoutRepo" |
     "/api/repo/diffRepoSnapshots" |
     "/api/repo/downloadCloudSnapshot" |
@@ -1747,6 +1769,26 @@ export interface APIPOSTRoutes {
     "/api/query/sql": {
         request: SQLQueryRequestInput;
         response: { "code": 0; "data": Array<Record<string, null | string | number | boolean> | null>; "limit": number; "msg": string; "truncated": boolean; } | ({ "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; } & { "limit"?: never; "truncated"?: never; });
+        body: "json";
+    };
+    "/api/ref/getBacklink2": {
+        request: BacklinkListRequestInput;
+        response: { "code": 0; "data": BacklinkList | BacklinkRefDefs | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | BacklinkList | BacklinkRefDefs | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ref/getBacklinkDoc": {
+        request: BacklinkDocumentRequestInput;
+        response: { "code": 0; "data": BacklinkContextData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ref/getBackmentionDoc": {
+        request: BackmentionDocumentRequestInput;
+        response: { "code": 0; "data": BacklinkContextData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ref/refreshBacklink": {
+        request: RefreshBacklinkRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/repo/checkSnapshot": {

@@ -42,6 +42,7 @@ func TestPublishReaderBacklinkRefCandidates(t *testing.T) {
 		`{"id":"20260909160000-archive","k":"","mk":"","refDefCandidates":true,"sourceFilter":{"excludedRefDefIDs":["20260909160001-private"]}}`))
 	request.Header.Set("Content-Type", "application/json")
 	engine.ServeHTTP(recorder, request)
+	requireAPIContract(t, "POST", "/api/ref/getBacklink2", recorder)
 	var response struct {
 		Code int `json:"code"`
 		Data struct {

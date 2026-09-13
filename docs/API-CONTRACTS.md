@@ -24,6 +24,8 @@ Encrypted notebook lifecycle endpoints use typed requests and responses while re
 
 ## Compatibility requirements
 
+Backlink contracts preserve untrimmed query fields, optional flag defaults, source-filter normalization, and revision hashes. Missing list IDs still return null; unchanged revisions retain the existing fields with null arrays. Candidate-definition failures retain their empty `refDefs` payload. Publish filtering, encrypted-notebook admission, and request-held leases remain in the handlers, and context payloads retain recursive block paths and attribute-view reference targets.
+
 Graph contracts preserve partial configuration defaults, case-insensitive configuration fields, and numeric normalization. Query responses distinguish full graph data from correlation-only payloads, including errors and local queries without an ID; node and link arrays retain their original nullability. Configuration persistence still requires administrator access outside read-only mode. Publish filtering and encrypted-notebook rejection retain their existing order relative to configuration decoding.
 
 Template contracts retain path checks before mode and source validation, explicit-mode precedence over the legacy preview flag, database-mode defaults, and the code `1` overwrite prompt. File management keeps Go struct JSON binding and its fixed parse-error message, with separate list, source, revision, and null payloads. Revision checks, symlink restrictions, and sync invalidation remain in the existing model operations.

@@ -1,4 +1,5 @@
 {
+	"enterMasterPassword": "Введите главный пароль",
 	"orderedListItemBlock": "Блок элемента упорядоченного списка",
 	"unorderedListItemBlock": "Блок элемента неупорядоченного списка",
 	"taskListItemBlock": "Блок элемента списка задач",

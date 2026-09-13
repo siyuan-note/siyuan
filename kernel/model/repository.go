@@ -1746,7 +1746,12 @@ func IndexRepo(memo string) (id string, err error) {
 }
 
 func normalizeSnapshotMemo(memo string) string {
-	memo = strings.TrimSpace(gulu.Str.RemoveInvisible(memo))
+	// 按行清理不可见字符，保留多行备注的换行。
+	lines := strings.Split(strings.ReplaceAll(memo, "\r\n", "\n"), "\n")
+	for i, line := range lines {
+		lines[i] = gulu.Str.RemoveInvisible(line)
+	}
+	memo = strings.TrimSpace(strings.Join(lines, "\n"))
 	if memo == "" {
 		return "Create manually"
 	}

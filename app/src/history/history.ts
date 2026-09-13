@@ -1,3 +1,4 @@
+import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {openInputDialog} from "../dialog/inputDialog";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -30,6 +31,7 @@ const openSnapshotMemo = (repoElement: Element, id?: string, memo = "") => {
         title: id ? window.siyuan.languages.editSnapshotMemo : window.siyuan.languages.snapshotMemo,
         value: memo,
         multiline: true,
+        resize: "vertical",
         placeholder: window.siyuan.languages.snapshotMemoTip,
         description: id ? window.siyuan.languages.snapshotMemoLocalTip : undefined,
         onConfirm: async (value, dialog) => {
@@ -1054,48 +1056,40 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.preventDefault();
                 break;
             } else if (type === "genTag") {
-                const genTagDialog = new Dialog({
+                const genTagDialog = openInputDialog({
                     title: window.siyuan.languages.tagSnapshot,
-                    content: `<div class="b3-dialog__content">
-    <input class="b3-text-field fn__block" value="${dayjs().format("YYYYMMDDHHmmss")}" placeholder="${window.siyuan.languages.tagSnapshotTip}">
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.tagSnapshot}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.tagSnapshotUpload}</button>
-</div>`,
-                    width: isMobile() ? "92vw" : "520px",
-                });
-                genTagDialog.element.setAttribute("data-key", Constants.DIALOG_SNAPSHOTTAG);
-                const inputElement = genTagDialog.element.querySelector(".b3-text-field") as HTMLInputElement;
-                inputElement.select();
-                const btnsElement = genTagDialog.element.querySelectorAll(".b3-button");
-                btnsElement[0].addEventListener("click", () => {
-                    genTagDialog.destroy();
-                });
-                btnsElement[2].addEventListener("click", () => {
-                    fetchPost("/api/repo/tagSnapshot", {
-                        id: target.parentElement.getAttribute("data-id"),
-                        name: inputElement.value
-                    }, () => {
-                        fetchPost("/api/repo/uploadCloudSnapshot", {
-                            tag: inputElement.value,
-                            id: target.parentElement.getAttribute("data-id")
+                    value: dayjs().format("YYYYMMDDHHmmss"),
+                    placeholder: window.siyuan.languages.tagSnapshotTip,
+                    confirmText: window.siyuan.languages.tagSnapshot,
+                    actions: [{
+                        text: window.siyuan.languages.tagSnapshotUpload,
+                        position: "afterConfirm",
+                        onClick: (value, genTagDialog) => {
+                            fetchPost("/api/repo/tagSnapshot", {
+                                id: target.parentElement.getAttribute("data-id"),
+                                name: value
+                            }, () => {
+                                fetchPost("/api/repo/uploadCloudSnapshot", {
+                                    tag: value,
+                                    id: target.parentElement.getAttribute("data-id")
+                                }, () => {
+                                    renderRepo(repoElement, 1);
+                                });
+                            });
+                            genTagDialog.destroy();
+                        },
+                    }],
+                    onConfirm: (value, genTagDialog) => {
+                        fetchPost("/api/repo/tagSnapshot", {
+                            id: target.parentElement.getAttribute("data-id"),
+                            name: value
                         }, () => {
                             renderRepo(repoElement, 1);
                         });
-                    });
-                    genTagDialog.destroy();
+                        genTagDialog.destroy();
+                    },
                 });
-                btnsElement[1].addEventListener("click", () => {
-                    fetchPost("/api/repo/tagSnapshot", {
-                        id: target.parentElement.getAttribute("data-id"),
-                        name: inputElement.value
-                    }, () => {
-                        renderRepo(repoElement, 1);
-                    });
-                    genTagDialog.destroy();
-                });
+                genTagDialog.element.setAttribute("data-key", Constants.DIALOG_SNAPSHOTTAG);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -1110,38 +1104,46 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
 
                 if (totalPage > 1) {
-                    confirmDialog(
-                        window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
-                        `<input class="b3-text-field fn__block" type="number" min="1" max="${totalPage}" value="${currentPage}">`,
-                        (confirmD) => {
-                            const inputElement = confirmD.element.querySelector(".b3-text-field") as HTMLInputElement;
-                            if (inputElement.value === "") {
+                    openInputDialog({
+                        title: window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
+                        value: String(currentPage),
+                        type: "number",
+                        min: "1",
+                        max: String(totalPage),
+                        onConfirm: (value, dialog) => {
+                            if (!Number.isFinite(parseInt(value))) {
+                                showMessage(window.siyuan.languages.jumpToPage.replace("${x}", totalPage));
                                 return;
                             }
-                            let page = parseInt(inputElement.value);
+                            let page = parseInt(value);
                             page = Math.max(1, Math.min(page, totalPage));
                             renderRepo(repoElement, page);
-                        }
-                    );
+                            dialog.destroy();
+                        },
+                    });
                 }
             } else if (type === "jumpHistoryPage") {
                 const currentPage = parseInt(historyElement.getAttribute("data-page"));
                 const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
 
                 if (totalPage > 1) {
-                    confirmDialog(
-                        window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
-                        `<input class="b3-text-field fn__block" type="number" min="1" max="${totalPage}" value="${currentPage}">`,
-                        (confirmD) => {
-                            const inputElement = confirmD.element.querySelector(".b3-text-field") as HTMLInputElement;
-                            if (inputElement.value === "") {
+                    openInputDialog({
+                        title: window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
+                        value: String(currentPage),
+                        type: "number",
+                        min: "1",
+                        max: String(totalPage),
+                        onConfirm: (value, dialog) => {
+                            if (!Number.isFinite(parseInt(value))) {
+                                showMessage(window.siyuan.languages.jumpToPage.replace("${x}", totalPage));
                                 return;
                             }
-                            let page = parseInt(inputElement.value);
+                            let page = parseInt(value);
                             page = Math.max(1, Math.min(page, totalPage));
                             renderDoc(firstPanelElement, page);
-                        }
-                    );
+                            dialog.destroy();
+                        },
+                    });
                 }
             } else if ((type === "docprevious" || type === "docnext") && target.getAttribute("disabled") !== "disabled") {
                 const currentPage = parseInt(firstPanelElement.getAttribute("data-page"));

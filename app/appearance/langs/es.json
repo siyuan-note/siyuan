@@ -1,4 +1,5 @@
 {
+	"enterMasterPassword": "Introduce la contraseña maestra",
 	"orderedListItemBlock": "Bloque de elemento de lista ordenada",
 	"unorderedListItemBlock": "Bloque de elemento de lista no ordenada",
 	"taskListItemBlock": "Bloque de elemento de lista de tareas",

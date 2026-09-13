@@ -588,19 +588,55 @@ export const exportMd = (id: string) => {
     <div>${window.siyuan.languages.duplicateMirror}<div class="b3-label__text">${window.siyuan.languages.templateDatabaseReferenceTip}</div></div>
 </label>` : "";
 
-                const dialog = new Dialog({
+                const maxNameLen = 32;
+                const name = replaceFileName(info.name).substring(0, maxNameLen);
+                const dialog = openInputDialog({
                     title: window.siyuan.languages.fileName,
-                    content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value="">
+                    value: name,
+                    extraContent: `
 <div class="fn__hr"></div>
 <label>${window.siyuan.languages.savePath}<div class="fn__hr"></div><select class="b3-select fn__block" data-template-directory><option value="">/</option></select></label>
 <div class="fn__hr"></div>
 <button type="button" class="b3-button b3-button--outline" data-template-manager>${window.siyuan.languages.templateManager}</button>
-${databaseOptions}</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-                    width: isMobile() ? "92vw" : "520px",
+${databaseOptions}`,
+                    onConfirm: (value, dialog) => {
+                        const inputElement = dialog.element.querySelector<HTMLInputElement>("[data-dialog-input]");
+                        let templateName = value.trim() === "" ? window.siyuan.languages.untitled :
+                            replaceFileName(value);
+                        if (templateName.length > maxNameLen) {
+                            templateName = templateName.substring(0, maxNameLen);
+                        }
+                        inputElement.value = templateName;
+                        const selectedDatabaseMode = (dialog.element.querySelector(
+                            "input[name=\"templateDatabaseMode\"]:checked") as HTMLInputElement)?.value;
+                        const databaseMode: "copy" | "reference" = selectedDatabaseMode === "reference" ?
+                            "reference" : "copy";
+                        const requestData = {
+                            id,
+                            name: templateName,
+                            directory: directoryElement.value,
+                            overwrite: false,
+                            databaseMode,
+                        };
+                        fetchPost("/api/template/docSaveAsTemplate", requestData, response => {
+                            if (response.code === 1) {
+                                // 重名
+                                confirmDialog(window.siyuan.languages.export, window.siyuan.languages.exportTplTip, () => {
+                                    fetchPost("/api/template/docSaveAsTemplate", {
+                                        ...requestData,
+                                        overwrite: true
+                                    }, resp => {
+                                        if (resp.code === 0) {
+                                            showMessage(window.siyuan.languages.exportTplSucc);
+                                        }
+                                    });
+                                });
+                                return;
+                            }
+                            showMessage(window.siyuan.languages.exportTplSucc);
+                        });
+                        dialog.destroy();
+                    },
                 });
                 dialog.element.setAttribute("data-key", Constants.DIALOG_EXPORTTEMPLATE);
                 const directoryElement = dialog.element.querySelector<HTMLSelectElement>("[data-template-directory]");
@@ -610,59 +646,6 @@ ${databaseOptions}</div>
                     openTemplateManager(id, () => {
                         void loadTemplateDirectories(directoryElement).catch(console.error);
                     });
-                });
-                const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
-                const btnsElement = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
-                dialog.bindInput(inputElement, () => {
-                    (btnsElement[1] as HTMLButtonElement).click();
-                });
-                const maxNameLen = 32;
-                let name = replaceFileName(info.name);
-                if (name.length > maxNameLen) {
-                    name = name.substring(0, maxNameLen);
-                }
-                inputElement.value = name;
-                inputElement.focus();
-                inputElement.select();
-                btnsElement[0].addEventListener("click", () => {
-                    dialog.destroy();
-                });
-                btnsElement[1].addEventListener("click", () => {
-                    let templateName = inputElement.value.trim() === "" ? window.siyuan.languages.untitled :
-                        replaceFileName(inputElement.value);
-                    if (templateName.length > maxNameLen) {
-                        templateName = templateName.substring(0, maxNameLen);
-                    }
-                    inputElement.value = templateName;
-                    const selectedDatabaseMode = (dialog.element.querySelector(
-                        "input[name=\"templateDatabaseMode\"]:checked") as HTMLInputElement)?.value;
-                    const databaseMode: "copy" | "reference" = selectedDatabaseMode === "reference" ?
-                        "reference" : "copy";
-                    const requestData = {
-                        id,
-                        name: templateName,
-                        directory: directoryElement.value,
-                        overwrite: false,
-                        databaseMode,
-                    };
-                    fetchPost("/api/template/docSaveAsTemplate", requestData, response => {
-                        if (response.code === 1) {
-                            // 重名
-                            confirmDialog(window.siyuan.languages.export, window.siyuan.languages.exportTplTip, () => {
-                                fetchPost("/api/template/docSaveAsTemplate", {
-                                    ...requestData,
-                                    overwrite: true
-                                }, resp => {
-                                    if (resp.code === 0) {
-                                        showMessage(window.siyuan.languages.exportTplSucc);
-                                    }
-                                });
-                            });
-                            return;
-                        }
-                        showMessage(window.siyuan.languages.exportTplSucc);
-                    });
-                    dialog.destroy();
                 });
             }
         }, {

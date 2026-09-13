@@ -540,14 +540,14 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct: string, fi
     <div class="fn__flex-1 fn__flex" data-type="editors">
         <div class="fn__none fn__flex-1 fn__flex-column">
             <div class="history__date">${dayjs(response.data.left.created).format("YYYY-MM-DD HH:mm")}</div>
-            <div class="protyle-title__input ft__center ft__breakword">${escapeHtml(response.data.left.title)}</div>
+            <div class="protyle-title__input ft__center ft__breakword"></div>
             <div class="ft__center"></div>
             <textarea class="history__text fn__none fn__flex-1" readonly></textarea>
             <div class="fn__flex-1"></div>
         </div>
         <div class="fn__none fn__flex-1 fn__flex-column" style="border-left: 1px solid var(--b3-border-color);">
-            <div class="history__date">${escapeHtml(response.data.right.title)} ${dayjs(response.data.right.created).format("YYYY-MM-DD HH:mm")}</div>
-            <div class="protyle-title__input ft__center ft__breakword">${escapeHtml(response.data.right.title)}</div>
+            <div class="history__date">${dayjs(response.data.right.created).format("YYYY-MM-DD HH:mm")}</div>
+            <div class="protyle-title__input ft__center ft__breakword"></div>
             <div class="ft__center"></div>
             <textarea class="history__text fn__none fn__flex-1" readonly></textarea>
             <div class="fn__flex-1"></div>

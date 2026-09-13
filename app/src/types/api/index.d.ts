@@ -202,6 +202,8 @@ export type CheckBlocksExistRequestInput = { "id"?: string | null; "ids": Array<
 
 export type CheckSnapshotData = { "changed": boolean; };
 
+export type CheckoutRepoRequestInput = { "id": string; "sessionID"?: string | null; };
+
 export type ChildBlock = { "content"?: string; "id": string; "markdown"?: string; "subType"?: string; "type": string; };
 
 export type CleanupRichTextRequestInput = { "batch": string; "groups": Array<string>; };
@@ -272,6 +274,8 @@ export type DeleteBlockRequestInput = { "id": string; };
 
 export type DiffDocVersionsRequestInput = { "left": DocVersionRefInput; "right": DocVersionRefInput; };
 
+export type DiffRepoSnapshotsRequestInput = { "left": string; "right": string; };
+
 export type DirectoryEntry = { "isDir": boolean; "isSymlink": boolean; "name": string; "updated": number; };
 
 export type DocAttrView = { "id": string; "name": string; };
@@ -298,6 +302,8 @@ export type DocVersionRefInput = { "id"?: string | null; "path"?: string | null;
 
 export type DocsInfoRequestInput = { "av": boolean; "ids": Array<string>; "refCount": boolean; };
 
+export type DownloadCloudSnapshotRequestInput = { "id": string; "tag": string; };
+
 export type DownloadInstallPkgRequestInput = { "downloadInstallPkg": boolean; };
 
 export type EditorReadOnlyRequestInput = { "readonly": boolean; };
@@ -313,6 +319,8 @@ export type EmptyRequestInput = Record<string, never>;
 export type EncryptedNotebookStatus = { "id": string; "name": string; "state": "Locked" | "Unlocking" | "Unlocked" | "Locking" | "Error"; "unlocked": boolean; };
 
 export type EncryptedNotebookStatusData = { "boxes": Array<EncryptedNotebookStatus>; "count": number; "enabled": boolean; "hasHistoryDependency": boolean; "migrationBoxes": Array<string> | null; "migrationPending": boolean; "state": "Disabled" | "Enabled" | "RecoveryRequired"; };
+
+export type ExportRepoFileRequestInput = { "id": string; };
 
 export type FileAnnotationRefRequestInput = { "id": string; "notebook"?: string | null; };
 
@@ -348,6 +356,8 @@ export type GetBazaarThemeRequestInput = { "frontend"?: string | null; "keyword"
 
 export type GetBazaarWidgetRequestInput = { "keyword"?: string | null; };
 
+export type GetCloudRepoSnapshotsRequestInput = { "page": number; };
+
 export type GetEmbedBlockRequestInput = { "breadcrumb"?: boolean | null; "embedBlockID": string; "headingMode"?: number | null; "includeIDs": Array<string>; "notebook"?: string | null; };
 
 export type GetInstalledIconRequestInput = { "keyword"?: string | null; };
@@ -361,6 +371,12 @@ export type GetInstalledTemplateRequestInput = { "keyword"?: string | null; };
 export type GetInstalledThemeRequestInput = { "frontend"?: string | null; "keyword"?: string | null; };
 
 export type GetInstalledWidgetRequestInput = { "keyword"?: string | null; };
+
+export type GetRepoDocHistoryRequestInput = { "id": string; "page": number; };
+
+export type GetRepoFileRequestInput = { "id": string; };
+
+export type GetRepoSnapshotsRequestInput = { "page": number; };
 
 export type GetSnippetRequestInput = { "enabled": number; "keyword"?: string | null; "type": string; };
 
@@ -432,6 +448,8 @@ export type ImportMarkdownRequestInput = { "localPath": string; "notebook": stri
 
 export type ImportNotebookCryptoBackupRequestInput = { "file": Blob; "password"?: string; };
 
+export type ImportRepoKeyRequestInput = { "key": string; };
+
 export type ImportSYRequestInput = { "file"?: Blob; "notebook"?: string; "toPath"?: string; };
 
 export type ImportTokenRequestInput = { "token": string; };
@@ -441,6 +459,8 @@ export type ImportZipMarkdownRequestInput = { "file"?: Blob; "notebook"?: string
 export type ImportedNotebook = { "notebook": Notebook | null; };
 
 export type ImportedNotebooks = { "notebooks": Array<Notebook | null> | null; };
+
+export type InitRepoKeyFromPassphraseRequestInput = { "pass": string; };
 
 export type InlineStyle = { "dark": InlineStyleTheme | null; "hidden"?: boolean; "id": string; "light": InlineStyleTheme | null; "name": string; };
 
@@ -572,6 +592,8 @@ export type ObsidianVaultTask = { "analysis"?: ObsidianVaultAnalysis; "detail"?:
 
 export type OpenNotebookRequestInput = { "app"?: string | null; "notebook": string; };
 
+export type OpenRepoSnapshotFileRequestInput = { "id": string; };
+
 export type OrderedListStartData = { "found": boolean; "start": number; };
 
 export type OutlineRequestInput = { "id"?: string | null; "notebook"?: string | null; "preview"?: boolean | null; };
@@ -634,9 +656,13 @@ export type RefreshBacklinkRequestInput = { "id": string; };
 
 export type RemoveBookmarkRequestInput = { "bookmark": string; };
 
+export type RemoveCloudRepoTagSnapshotRequestInput = { "tag": string; };
+
 export type RemoveCriterionRequestInput = { "name": string; };
 
 export type RemoveFileRequestInput = { "app"?: string | null; "path": string; };
+
+export type RemoveRepoTagSnapshotRequestInput = { "tag": string; };
 
 export type RemoveShorthandsRequestInput = { "ids": Array<string>; };
 
@@ -661,6 +687,40 @@ export type RenderTemplateRequestInput = { "content"?: string; "id": string; "mo
 export type ReorderData = { "changed": boolean; "notebook"?: string; "parentPath"?: string; };
 
 export type ReorderNotebooksRequestInput = { "position"?: string | null; "sourceIDs"?: Array<string> | null; "targetID"?: string | null; };
+
+export type RepoCloudSnapshotsData = { "pageCount": number; "snapshots": Array<RepoLog | null> | null; "totalCount": number; };
+
+export type RepoCloudTagsData = { "snapshots": Array<RepoLog | null> | null; };
+
+export type RepoDiffData = { "addsLeft": Array<RepoDiffFile | null> | null; "left": RepoDiffIndex | null; "removesRight": Array<RepoDiffFile | null> | null; "right": RepoDiffIndex | null; "updatesLeft": Array<RepoDiffFile | null> | null; "updatesRight": Array<RepoDiffFile | null> | null; };
+
+export type RepoDiffFile = { "fileID": string; "hPath"?: string; "hSize": string; "indexID": string; "path": string; "title": string; "updated": number; };
+
+export type RepoDiffIndex = { "created": number; "id": string; };
+
+export type RepoDocHistory = { "fileID": string; "hSize": string; "indexID": string; "title": string; "updated": number; };
+
+export type RepoDocHistoryData = { "files": Array<RepoDocHistory | null> | null; "pageCount": number; "totalCount": number; };
+
+export type RepoExportData = { "path": string; };
+
+export type RepoFile = { "chunks": Array<string> | null; "id": string; "path": string; "size": number; "updated": number; };
+
+export type RepoKeyData = { "key": string; };
+
+export type RepoLog = { "count": number; "created": number; "files": Array<RepoFile | null> | null; "hCreated": string; "hSize": string; "hTagUpdated": string; "id": string; "memo": string; "size": number; "systemID": string; "systemName": string; "systemOS": string; "tag": string; };
+
+export type RepoOpenFileData = { "content": string; "displayInText": boolean; "title": string; "updated": number; };
+
+export type RepoSearchData = { "files": Array<RepoDiffFile | null> | null; "pageCount": number; "totalCount": number; };
+
+export type RepoSnapshot = { "count": number; "created": number; "files": Array<RepoFile | null> | null; "hCreated": string; "hSize": string; "hTagUpdated": string; "id": string; "memo": string; "requiresDownload": boolean; "size": number; "systemID": string; "systemName": string; "systemOS": string; "tag": string; "typesCount": Array<RepoTypeCount | null> | null; };
+
+export type RepoSnapshotsData = { "pageCount": number; "snapshots": Array<RepoSnapshot | null> | null; "totalCount": number; };
+
+export type RepoTagsData = { "snapshots": Array<RepoSnapshot | null> | null; };
+
+export type RepoTypeCount = { "count": number; "type": string; };
 
 export type ResetGraphData = { "conf": GlobalGraphConf; };
 
@@ -706,6 +766,8 @@ export type RiffReviewedCardInput = { "cardID": string; };
 
 export type RiffTreeDueCardsRequestInput = { "reviewedCards"?: Array<RiffReviewedCardInput> | null; "rootID": string; };
 
+export type RollbackRepoSnapshotFileRequestInput = { "id": string; };
+
 export type SQLQueryRequestInput = { "mode"?: string | null; "stmt": string; };
 
 export type SaveTemplateRequestInput = { "databaseMode"?: string; "directory"?: string; "id": string; "name": string; "overwrite": boolean; };
@@ -750,6 +812,8 @@ export type SearchRefCorrelation = { "reqId": JSONValue; };
 
 export type SearchRefResult = { "blocks": Array<SearchBlock | null> | null; "k": string; "newDoc": boolean; "reqId": JSONValue; };
 
+export type SearchRepoFileRequestInput = { "keyword": string; "page": number; };
+
 export type SearchSubTypes = { "heading": Record<string, boolean> | null; "list": Record<string, boolean> | null; "listItem": Record<string, boolean> | null; };
 
 export type SearchSubTypesInput = { "heading"?: Record<string, boolean> | null; "list"?: Record<string, boolean> | null; "listItem"?: Record<string, boolean> | null; };
@@ -785,6 +849,10 @@ export type SetNotebookIconRequestInput = { "icon": string; "notebook": string; 
 export type SetPetalEnabledRequestInput = { "app"?: string | null; "enabled": boolean; "packageName": string; };
 
 export type SetPetalPublishEnabledRequestInput = { "enabled": boolean; "packageName": string; };
+
+export type SetRepoIndexRetentionDaysRequestInput = { "days": number; };
+
+export type SetRetentionIndexesDailyRequestInput = { "indexes": number; };
 
 export type SetRiffCardsDueRequestInput = { "cardDues": Array<RiffCardDueInput>; };
 
@@ -872,6 +940,8 @@ export type SyncWebDAVInput = { "concurrentReqs"?: number | null; "endpoint"?: s
 
 export type TagData = { "children": Array<TagData | null> | null; "count": number; "depth": number; "label": string; "name": string; "type": string; };
 
+export type TagSnapshotRequestInput = { "id": string; "name": string; };
+
 export type TailChildBlocksRequestInput = { "id": string; "ids"?: Array<string> | null; "n"?: number | null; "notebook"?: string | null; };
 
 export type TaskListMarkerRequestInput = { "id": string; "marker": string; };
@@ -925,6 +995,8 @@ export type UpdateChannelRequestInput = { "updateChannel": string; };
 export type UpdateEmbedBlockRequestInput = { "content": string; "id": string; };
 
 export type UpdatePinnedDocsRequestInput = { "action": string; "after"?: boolean; "ids": Array<string>; "targetID"?: string; };
+
+export type UploadCloudSnapshotRequestInput = { "id": string; "tag": string; };
 
 export type ViewStatePatchRequestInput = { "key": string; "removeKeys"?: Array<string> | null; "values"?: { [key: string]: JSONValue }; };
 
@@ -1180,31 +1252,6 @@ export type APILegacyPOSTPath =
     "/api/network/echo/*path" |
     "/api/network/forwardProxy" |
     "/api/network/proxy" |
-    "/api/repo/checkoutRepo" |
-    "/api/repo/diffRepoSnapshots" |
-    "/api/repo/downloadCloudSnapshot" |
-    "/api/repo/exportRepoFile" |
-    "/api/repo/getCloudRepoSnapshots" |
-    "/api/repo/getCloudRepoTagSnapshots" |
-    "/api/repo/getRepoDocHistory" |
-    "/api/repo/getRepoFile" |
-    "/api/repo/getRepoSnapshots" |
-    "/api/repo/getRepoTagSnapshots" |
-    "/api/repo/importRepoKey" |
-    "/api/repo/initRepoKey" |
-    "/api/repo/initRepoKeyFromPassphrase" |
-    "/api/repo/openRepoSnapshotFile" |
-    "/api/repo/purgeCloudRepo" |
-    "/api/repo/purgeRepo" |
-    "/api/repo/removeCloudRepoTagSnapshot" |
-    "/api/repo/removeRepoTagSnapshot" |
-    "/api/repo/resetRepo" |
-    "/api/repo/rollbackRepoSnapshotFile" |
-    "/api/repo/searchRepoFile" |
-    "/api/repo/setRepoIndexRetentionDays" |
-    "/api/repo/setRetentionIndexesDaily" |
-    "/api/repo/tagSnapshot" |
-    "/api/repo/uploadCloudSnapshot" |
     "/api/setting/getBootAppearances" |
     "/api/setting/getCloudUser" |
     "/api/setting/getPublish" |
@@ -2352,13 +2399,139 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": CheckSnapshotData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
+    "/api/repo/checkoutRepo": {
+        request: CheckoutRepoRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/repo/createSnapshot": {
         request: CreateSnapshotRequestInput;
         response: { "code": 0; "data": CreateSnapshotData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/repo/diffRepoSnapshots": {
+        request: DiffRepoSnapshotsRequestInput;
+        response: { "code": 0; "data": RepoDiffData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/downloadCloudSnapshot": {
+        request: DownloadCloudSnapshotRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/exportRepoFile": {
+        request: ExportRepoFileRequestInput;
+        response: { "code": 0; "data": RepoExportData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/getCloudRepoSnapshots": {
+        request: GetCloudRepoSnapshotsRequestInput;
+        response: { "code": 0; "data": RepoCloudSnapshotsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/getCloudRepoTagSnapshots": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": RepoCloudTagsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/repo/getRepoDocHistory": {
+        request: GetRepoDocHistoryRequestInput;
+        response: { "code": 0; "data": RepoDocHistoryData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/getRepoFile": {
+        request: GetRepoFileRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        output: "binary";
+    };
+    "/api/repo/getRepoSnapshots": {
+        request: GetRepoSnapshotsRequestInput;
+        response: { "code": 0; "data": RepoSnapshotsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/getRepoTagSnapshots": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": RepoTagsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/repo/importRepoKey": {
+        request: ImportRepoKeyRequestInput;
+        response: { "code": 0; "data": RepoKeyData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/initRepoKey": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": RepoKeyData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/repo/initRepoKeyFromPassphrase": {
+        request: InitRepoKeyFromPassphraseRequestInput;
+        response: { "code": 0; "data": RepoKeyData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/openRepoSnapshotFile": {
+        request: OpenRepoSnapshotFileRequestInput;
+        response: { "code": 0; "data": RepoOpenFileData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/purgeCloudRepo": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/repo/purgeRepo": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/repo/removeCloudRepoTagSnapshot": {
+        request: RemoveCloudRepoTagSnapshotRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/removeRepoTagSnapshot": {
+        request: RemoveRepoTagSnapshotRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/resetRepo": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/repo/rollbackRepoSnapshotFile": {
+        request: RollbackRepoSnapshotFileRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/searchRepoFile": {
+        request: SearchRepoFileRequestInput;
+        response: { "code": 0; "data": RepoSearchData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/setRepoIndexRetentionDays": {
+        request: SetRepoIndexRetentionDaysRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/setRetentionIndexesDaily": {
+        request: SetRetentionIndexesDailyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/repo/setSnapshotMemo": {
         request: SetSnapshotMemoRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/tagSnapshot": {
+        request: TagSnapshotRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/uploadCloudSnapshot": {
+        request: UploadCloudSnapshotRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };

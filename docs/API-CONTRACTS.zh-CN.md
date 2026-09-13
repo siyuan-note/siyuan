@@ -24,6 +24,8 @@
 
 ## 兼容要求
 
+仓库契约保留密钥编码、快照元数据、数值截断与保留期限默认值、云端分页及文件访问租约。仓库文件读取保留媒体类型和原始字节，空文件保留成功信封。文件成功与 JSON 失败均返回 HTTP 200。对于显式声明的共用状态，`ValidateHTTPResponse` 接受文件原始字节，`ValidateErrorResponse` 单独验证已知错误载荷。密钥材料、加密文件格式及快照恢复行为保持不变。
+
 闪卡契约保留数值截断、分页默认值、可选的已复习卡片列表、块结果的空值以及非空牌组列表。笔记本和文档准入仍先于延迟的分页错误。卡片与牌组修改保留模型层校验及持久化行为，加密笔记本限制保持不变。
 
 同步契约保留数值截断、手动模式下的条件方向校验、配置字段匹配与 JSON 数字归一化，以及消息显示时长。同步配置导入要求恰好一个文件，并保留加密包内容与恢复路径。鉴权及只读检查仍先于请求体解码，同步和笔记本加密继续由模型层处理。
@@ -120,7 +122,7 @@ pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts
 
 ```text
 go test ./apicontract/...
-go test -tags "fts5 sqlcipher" ./api -run "TestAPIContract|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestContract.*NotebookResponseLease" -count=1
+go test -tags "fts5 sqlcipher" ./api ./plugin -run "TestAPIContract|TestBazaarContract|TestRepoContract|TestRepoFileWireCompatibility|TestRPC.*Contract|TestRPCWebSocketOriginCheck|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestContract.*NotebookResponseLease" -count=1
 ```
 
 `tsconfig.api.json` 单独启用严格检查并检查声明文件，覆盖参数错误、字段拼写、必填请求体、成功与失败分支、可空值和方法不匹配。主应用继续沿用现有配置，不假定全部调用都启用了严格空值检查。处理函数测试使用临时工作区和独立测试进程，不启动或重启运行中的内核。

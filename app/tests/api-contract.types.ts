@@ -6,6 +6,19 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
+fetchPost("/api/repo/getRepoSnapshots", {page: 1}, response => {
+    const snapshots = response.data.snapshots;
+    void snapshots;
+});
+fetchPost("/api/repo/getRepoFile", {id: "file"}, response => {
+    const content: JSONValue = response;
+    void content;
+});
+// @ts-expect-error 仓库保留时间必须为数值。
+fetchPost("/api/repo/setRepoIndexRetentionDays", {days: "180"});
+// @ts-expect-error 导入仓库密钥需要密钥字段。
+fetchPost("/api/repo/importRepoKey", {});
+
 fetchPost("/api/riff/getRiffDecks", {}, response => {
     const decks: Array<{id: string; name: string} | null> = response.data;
     void decks;

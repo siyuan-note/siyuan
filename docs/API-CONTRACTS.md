@@ -24,6 +24,8 @@ Encrypted notebook lifecycle endpoints use typed requests and responses while re
 
 ## Compatibility requirements
 
+Repository contracts retain key encoding, snapshot metadata, numeric truncation and retention defaults, cloud pagination, and file access leases. Repository-file reads retain their media type and bytes; empty files retain the success envelope. Both file success and JSON failure use HTTP 200. For this explicitly declared shared status, `ValidateHTTPResponse` accepts raw file bytes and `ValidateErrorResponse` separately verifies known error payloads. No key material, encrypted file format, or snapshot recovery behavior changes.
+
 Flashcard contracts retain numeric truncation, pagination defaults, optional reviewed-card lists, nullable block results, and non-null deck lists. Notebook and document admission still occurs before deferred pagination errors. Card and deck mutations keep their model-layer validation and persistence behavior; encrypted notebook restrictions remain unchanged.
 
 Sync contracts retain numeric truncation, conditional direction validation in manual mode, configuration field matching and JSON numeric normalization, and message display durations. Provider imports require exactly one file and preserve encrypted package contents and recovery paths. Authorization and read-only checks still precede body decoding; synchronization and notebook encryption remain in the model layer.
@@ -120,7 +122,7 @@ Run from `kernel/`:
 
 ```text
 go test ./apicontract/...
-go test -tags "fts5 sqlcipher" ./api -run "TestAPIContract|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestContract.*NotebookResponseLease" -count=1
+go test -tags "fts5 sqlcipher" ./api ./plugin -run "TestAPIContract|TestBazaarContract|TestRepoContract|TestRepoFileWireCompatibility|TestRPC.*Contract|TestRPCWebSocketOriginCheck|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestContract.*NotebookResponseLease" -count=1
 ```
 
 `tsconfig.api.json` separately enables strict checks and declaration-file checking for invalid parameters, misspelled fields, required bodies, success and failure branches, nullability, and method mismatches. The main application retains its existing configuration; do not assume strict null checks apply to every call. Handler tests use temporary workspaces and isolated test processes without starting or restarting the running kernel.

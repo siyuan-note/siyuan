@@ -8,6 +8,7 @@ import {Protyle} from "../protyle";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import * as dayjs from "dayjs";
 import {fetchPost} from "../util/fetch";
+import type {APICallbackResponse, APIPOSTRoutes} from "../types/api";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {isMobile} from "../util/functions";
 import {showDiff} from "./diff";
@@ -405,7 +406,8 @@ const renderRepo = (element: Element, currentPage: number) => {
             renderRepoSearchResult(response, element);
         });
     } else if (selectValue === "getRepoTagSnapshots" || selectValue === "getCloudRepoTagSnapshots") {
-        fetchPost(`/api/repo/${selectValue}`, {}, (response) => {
+        const endpoint = `/api/repo/${selectValue}` as const;
+        fetchPost(endpoint, {}, (response: APICallbackResponse<APIPOSTRoutes[typeof endpoint]["response"]>) => {
             renderRepoItem(response, element, selectValue);
             selectElement.disabled = false;
         });

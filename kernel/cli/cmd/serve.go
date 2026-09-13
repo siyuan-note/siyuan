@@ -104,7 +104,7 @@ func init() {
 	serveCmd.Flags().StringVar(&servePort, "port", "0", "port of the HTTP server")
 	serveCmd.Flags().StringVar(&serveReadOnly, "readonly", "false", "read-only mode")
 	serveCmd.Flags().StringVar(&serveAccessAuthCode, "accessAuthCode", "", "access auth code")
-	serveCmd.Flags().StringVar(&serveLang, "lang", "", "ar/de/en/es/fr/he/hi/id/it/ja/ko/nl/pl/pt-BR/ru/sk/th/tr/uk/zh-CN/zh-TW")
+	serveCmd.Flags().StringVar(&serveLang, "lang", "", "ar/de/en/es/fr/he/hi/id/it/ja/ko/nl/pl/pt-BR/ru/sk/sr/th/tr/uk/zh-CN/zh-TW")
 	serveCmd.Flags().StringVar(&serveMode, "mode", "prod", "dev/prod (non-prod values must not be used on network-exposed instances)")
 	serveCmd.Flags().BoolVar(&serveSSL, "ssl", false, "for https and wss")
 	serveCmd.Flags().BoolVar(&serveAttachUI, "attach-ui", false, "attach kernel lifecycle to desktop UI process (used by Electron)")

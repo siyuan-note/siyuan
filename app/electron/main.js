@@ -1117,6 +1117,7 @@ const resolveAppLanguage = (languageTags) => {
         "pt": "pt-BR",
         "ru": "ru",
         "sk": "sk",
+        "sr": "sr",
         "th": "th",
         "tr": "tr",
         "uk": "uk",

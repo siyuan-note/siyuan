@@ -494,3 +494,9 @@ var GetDocSaveAsTemplateInfo = define[TemplateDocumentRequest, TemplateDocumentI
 var DocSaveAsTemplate = define[SaveTemplateRequest, Null]("docSaveAsTemplate", "/api/template/docSaveAsTemplate", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var RenderTemplate = define[RenderTemplateRequest, RenderTemplateData]("renderTemplate", "/api/template/render", JSONBody, ResponseOptions{}, "POST")
 var ManageTemplateFiles = define[TemplateFileRequest, TemplateManagementData]("manageTemplateFiles", "/api/template/manage", StructJSONBody, ResponseOptions{}, "POST")
+
+var ResetGraph = define[EmptyRequest, ResetGraphData]("resetGraph", "/api/graph/resetGraph", NoBody, ResponseOptions{}, "POST")
+var ResetLocalGraph = define[EmptyRequest, ResetLocalGraphData]("resetLocalGraph", "/api/graph/resetLocalGraph", NoBody, ResponseOptions{}, "POST")
+var SetGraphConf = define[SetGraphConfRequest, GraphConfigurationData]("setGraphConf", "/api/graph/setGraphConf", JSONBody, ResponseOptions{}, "POST")
+var GetGraph = define[GlobalGraphRequest, GlobalGraphData]("getGraph", "/api/graph/getGraph", JSONBody, ResponseOptions{DataOnError: true}, "POST")
+var GetLocalGraph = define[LocalGraphRequest, LocalGraphData]("getLocalGraph", "/api/graph/getLocalGraph", JSONBody, ResponseOptions{DataOnError: true}, "POST")

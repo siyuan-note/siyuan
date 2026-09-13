@@ -75,6 +75,35 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if t == reflect.TypeFor[GlobalGraphData]() || t == reflect.TypeFor[LocalGraphData]() {
+		resultType := reflect.TypeFor[GlobalGraphResult]()
+		if t == reflect.TypeFor[LocalGraphData]() {
+			resultType = reflect.TypeFor[LocalGraphResult]()
+		}
+		result, err := b.schema(resultType, false)
+		if err != nil {
+			return nil, err
+		}
+		correlation, err := b.schema(reflect.TypeFor[GraphCorrelation](), false)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{result, correlation}}, nil
+	}
+	if t == reflect.TypeFor[GraphConfiguration]() {
+		return b.schema(reflect.TypeFor[GraphConfigurationFields](), true)
+	}
+	if t == reflect.TypeFor[GraphConfigurationData]() {
+		global, err := b.schema(reflect.TypeFor[GlobalGraphConf](), false)
+		if err != nil {
+			return nil, err
+		}
+		local, err := b.schema(reflect.TypeFor[LocalGraphConf](), false)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{global, local}}, nil
+	}
 	if t == reflect.TypeFor[TemplateManagementData]() {
 		var variants []*Schema
 		for _, member := range []reflect.Type{reflect.TypeFor[[]TemplateFileEntry](), reflect.TypeFor[TemplateFileSource](), reflect.TypeFor[TemplateFileRevision]()} {

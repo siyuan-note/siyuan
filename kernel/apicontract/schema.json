@@ -3517,6 +3517,595 @@
       },
       "additionalProperties": false
     },
+    "GlobalGraphConf": {
+      "type": "object",
+      "properties": {
+        "d3": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GraphD3"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dailyNote": {
+          "type": "boolean"
+        },
+        "minRefs": {
+          "type": "integer"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GraphTypeFilter"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "d3",
+        "dailyNote",
+        "minRefs",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "GlobalGraphRequestInput": {
+      "type": "object",
+      "properties": {
+        "conf": {
+          "$ref": "#/$defs/GraphConfigurationFieldsInput"
+        },
+        "k": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reqId": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JSONValue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "conf"
+      ],
+      "additionalProperties": false
+    },
+    "GlobalGraphResult": {
+      "type": "object",
+      "properties": {
+        "box": {
+          "type": "string"
+        },
+        "conf": {
+          "$ref": "#/$defs/GlobalGraphConf"
+        },
+        "links": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/GraphLink"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nodes": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/GraphNode"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reqId": {
+          "$ref": "#/$defs/JSONValue"
+        }
+      },
+      "required": [
+        "box",
+        "conf",
+        "links",
+        "nodes",
+        "reqId"
+      ],
+      "additionalProperties": false
+    },
+    "GraphArrows": {
+      "type": "object",
+      "properties": {
+        "to": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GraphArrowsTo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "GraphArrowsTo": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "additionalProperties": false
+    },
+    "GraphConfigurationFieldsInput": {
+      "type": "object",
+      "properties": {
+        "d3": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GraphD3Input"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dailyNote": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "minRefs": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GraphTypeFilterInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "GraphCorrelation": {
+      "type": "object",
+      "properties": {
+        "reqId": {
+          "$ref": "#/$defs/JSONValue"
+        }
+      },
+      "required": [
+        "reqId"
+      ],
+      "additionalProperties": false
+    },
+    "GraphD3": {
+      "type": "object",
+      "properties": {
+        "arrow": {
+          "type": "boolean"
+        },
+        "centerStrength": {
+          "type": "number"
+        },
+        "collideRadius": {
+          "type": "number"
+        },
+        "collideStrength": {
+          "type": "number"
+        },
+        "lineOpacity": {
+          "type": "number"
+        },
+        "linkDistance": {
+          "type": "integer"
+        },
+        "linkWidth": {
+          "type": "number"
+        },
+        "nodeSize": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "arrow",
+        "centerStrength",
+        "collideRadius",
+        "collideStrength",
+        "lineOpacity",
+        "linkDistance",
+        "linkWidth",
+        "nodeSize"
+      ],
+      "additionalProperties": false
+    },
+    "GraphD3Input": {
+      "type": "object",
+      "properties": {
+        "arrow": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "centerStrength": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "collideRadius": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "collideStrength": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lineOpacity": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "linkDistance": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "linkWidth": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nodeSize": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "GraphLink": {
+      "type": "object",
+      "properties": {
+        "arrows": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GraphArrows"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "from": {
+          "type": "string"
+        },
+        "ref": {
+          "type": "boolean"
+        },
+        "to": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "arrows",
+        "from",
+        "ref",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "GraphNode": {
+      "type": "object",
+      "properties": {
+        "box": {
+          "type": "string"
+        },
+        "defs": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "refs": {
+          "type": "integer"
+        },
+        "size": {
+          "type": "number"
+        },
+        "title": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "box",
+        "defs",
+        "id",
+        "label",
+        "path",
+        "refs",
+        "size",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "GraphTypeFilter": {
+      "type": "object",
+      "properties": {
+        "blockquote": {
+          "type": "boolean"
+        },
+        "callout": {
+          "type": "boolean"
+        },
+        "code": {
+          "type": "boolean"
+        },
+        "heading": {
+          "type": "boolean"
+        },
+        "list": {
+          "type": "boolean"
+        },
+        "listItem": {
+          "type": "boolean"
+        },
+        "math": {
+          "type": "boolean"
+        },
+        "paragraph": {
+          "type": "boolean"
+        },
+        "super": {
+          "type": "boolean"
+        },
+        "table": {
+          "type": "boolean"
+        },
+        "tag": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "blockquote",
+        "callout",
+        "code",
+        "heading",
+        "list",
+        "listItem",
+        "math",
+        "paragraph",
+        "super",
+        "table",
+        "tag"
+      ],
+      "additionalProperties": false
+    },
+    "GraphTypeFilterInput": {
+      "type": "object",
+      "properties": {
+        "blockquote": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "callout": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "code": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "heading": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "list": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "listItem": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "math": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "paragraph": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "super": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "table": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tag": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "HTMLClipboardPreflight": {
       "type": "object",
       "properties": {
@@ -4693,6 +5282,165 @@
       },
       "required": [
         "frontend"
+      ],
+      "additionalProperties": false
+    },
+    "LocalGraphConf": {
+      "type": "object",
+      "properties": {
+        "d3": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GraphD3"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dailyNote": {
+          "type": "boolean"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GraphTypeFilter"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "d3",
+        "dailyNote",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "LocalGraphRequestInput": {
+      "type": "object",
+      "properties": {
+        "conf": {
+          "$ref": "#/$defs/GraphConfigurationFieldsInput"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "k": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notebook": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reqId": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JSONValue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "LocalGraphResult": {
+      "type": "object",
+      "properties": {
+        "box": {
+          "type": "string"
+        },
+        "conf": {
+          "$ref": "#/$defs/LocalGraphConf"
+        },
+        "id": {
+          "type": "string"
+        },
+        "links": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/GraphLink"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nodes": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/GraphNode"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reqId": {
+          "$ref": "#/$defs/JSONValue"
+        }
+      },
+      "required": [
+        "box",
+        "conf",
+        "id",
+        "links",
+        "nodes",
+        "reqId"
       ],
       "additionalProperties": false
     },
@@ -6291,6 +7039,30 @@
       },
       "additionalProperties": false
     },
+    "ResetGraphData": {
+      "type": "object",
+      "properties": {
+        "conf": {
+          "$ref": "#/$defs/GlobalGraphConf"
+        }
+      },
+      "required": [
+        "conf"
+      ],
+      "additionalProperties": false
+    },
+    "ResetLocalGraphData": {
+      "type": "object",
+      "properties": {
+        "conf": {
+          "$ref": "#/$defs/LocalGraphConf"
+        }
+      },
+      "required": [
+        "conf"
+      ],
+      "additionalProperties": false
+    },
     "RichClipboardAssetInput": {
       "type": "object",
       "properties": {
@@ -6963,6 +7735,22 @@
       },
       "required": [
         "criterion"
+      ],
+      "additionalProperties": false
+    },
+    "SetGraphConfRequestInput": {
+      "type": "object",
+      "properties": {
+        "conf": {
+          "$ref": "#/$defs/GraphConfigurationFieldsInput"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "conf",
+        "type"
       ],
       "additionalProperties": false
     },
@@ -16777,6 +17565,422 @@
               },
               "data": {
                 "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/graph/getGraph",
+      "handler": "getGraph",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GlobalGraphRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/GlobalGraphResult"
+                  },
+                  {
+                    "$ref": "#/$defs/GraphCorrelation"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/GlobalGraphResult"
+                      },
+                      {
+                        "$ref": "#/$defs/GraphCorrelation"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/graph/getLocalGraph",
+      "handler": "getLocalGraph",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/LocalGraphRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/LocalGraphResult"
+                  },
+                  {
+                    "$ref": "#/$defs/GraphCorrelation"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/LocalGraphResult"
+                      },
+                      {
+                        "$ref": "#/$defs/GraphCorrelation"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/graph/resetGraph",
+      "handler": "resetGraph",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/ResetGraphData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/graph/resetLocalGraph",
+      "handler": "resetLocalGraph",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/ResetLocalGraphData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/graph/setGraphConf",
+      "handler": "setGraphConf",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetGraphConfRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/GlobalGraphConf"
+                  },
+                  {
+                    "$ref": "#/$defs/LocalGraphConf"
+                  }
+                ]
               },
               "msg": {
                 "type": "string"

@@ -138,7 +138,9 @@ func TestPinnedDocsClosedAndEncryptedNotebook(t *testing.T) {
 
 func TestPinnedDocsSupportNotebookRoot(t *testing.T) {
 	f := setupFileOperationTest(t)
+	addFileOperationTestDoc(t, f, "20260718000005-abcdefg", "Hidden", true)
 	root := treenode.NewTree(f.box.ID, "/"+f.box.ID+".sy", "/Notebook", "Notebook")
+	root.Root.SetIALAttr(DocHiddenAttr, "true")
 	if _, err := filesys.WriteTree(root); err != nil {
 		t.Fatal(err)
 	}
@@ -166,5 +168,80 @@ func TestPinnedDocsSupportNotebookRoot(t *testing.T) {
 	docs, err = GetPinnedDocs()
 	if err != nil || len(docs) != 0 {
 		t.Fatalf("notebook root unpin failed: %+v, %v", docs, err)
+	}
+}
+
+func TestPinnedDocsHiddenVisibilityAndCounts(t *testing.T) {
+	f := setupFileOperationTest(t)
+	parent := addFileOperationTestDoc(t, f, "20260718000003-abcdefg", "Parent", false)
+	child := treenode.NewTree(f.box.ID, "/"+parent.ID+"/20260718000004-abcdefg.sy", "/Parent/Child", "Child")
+	writeChild := func() {
+		t.Helper()
+		if _, err := filesys.WriteTree(child); err != nil {
+			t.Fatal(err)
+		}
+		cache.RemoveDocIAL(child.Path)
+	}
+	writeChild()
+	t.Cleanup(func() { cache.RemoveTreeData(child.ID); cache.RemoveDocIAL(child.Path) })
+	if err := UpdatePinnedDocs([]string{parent.ID}, "pin", "", false); err != nil {
+		t.Fatal(err)
+	}
+	for _, hidden := range []bool{false, true, false} {
+		if hidden {
+			child.Root.SetIALAttr(DocHiddenAttr, "true")
+		} else {
+			child.Root.RemoveIALAttr(DocHiddenAttr)
+		}
+		writeChild()
+		docs, err := GetPinnedDocs()
+		children, _, listErr := ListDocTree(f.box.ID, "/"+parent.ID, util.SortModeNameASC, false, false, 100)
+		want := 1
+		if hidden {
+			want = 0
+		}
+		if len(children) != want {
+			t.Fatalf("expected %d visible children, got %d", want, len(children))
+		}
+		if err != nil || listErr != nil || len(docs) != 1 || docs[0].SubFileCount != len(children) {
+			t.Fatalf("pin count differs from visible children: %+v, %v, %v", docs, err, listErr)
+		}
+		top, _, err := ListDocTree(f.box.ID, "/", util.SortModeNameASC, false, false, 100)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, doc := range top {
+			if doc.ID == parent.ID && doc.SubFileCount != len(children) {
+				t.Fatalf("source count differs from pin: %+v", doc)
+			}
+		}
+	}
+	storagePath := filepath.Join(util.DataDir, "storage", "pinned-docs.json")
+	before, _ := os.ReadFile(storagePath)
+	for _, hidden := range []bool{true, false} {
+		if hidden {
+			parent.Root.SetIALAttr(DocHiddenAttr, "true")
+		} else {
+			parent.Root.RemoveIALAttr(DocHiddenAttr)
+		}
+		if _, err := filesys.WriteTree(parent); err != nil {
+			t.Fatal(err)
+		}
+		cache.RemoveDocIAL(parent.Path)
+		docs, err := GetPinnedDocs()
+		if err != nil || hidden && len(docs) != 0 || !hidden && len(docs) != 1 {
+			t.Fatalf("unexpected hidden pin visibility: %+v, %v", docs, err)
+		}
+		if hidden && UpdatePinnedDocs([]string{parent.ID}, "pin", "", false) == nil {
+			t.Fatal("hidden document accepted for pinning")
+		}
+		top, _, err := ListDocTree(f.box.ID, "/", util.SortModeNameASC, false, false, 100)
+		if err != nil || BoxDocSubFileCount(f.box.ID) != len(top) {
+			t.Fatalf("notebook count differs: %v", err)
+		}
+		after, _ := os.ReadFile(storagePath)
+		if string(before) != string(after) {
+			t.Fatal("visibility changed stored pins")
+		}
 	}
 }

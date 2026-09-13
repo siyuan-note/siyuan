@@ -25,6 +25,7 @@ The section appears when it contains pinned documents and hides automatically wh
 | Collapse the document panel | Collapse the pinned section and clear its descendant expansion state; keep the pinned entries and their order |
 | Rename or move | Reload the source document for every entry; cross-notebook moves maintain the notebook identifier |
 | Close an ordinary notebook | Retain unavailable entries and allow unpinning; keep titles already read in the current session, or show the document ID when the title is unavailable |
+| Hide a document | Omit the entry but preserve its stored position; restore it when unhidden, and reject new pins while hidden. Unhide it before unpinning through the pinned section. The notebook root document's internal hidden attribute is exempt. Hidden children do not count toward the expansion arrow |
 | Delete a document or notebook | Remove related entries; list reads also filter missing source documents |
 | Encrypted notebook | Hide the pin operation; the server rejects additions and filters any existing invalid entries |
 

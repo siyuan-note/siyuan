@@ -1,4 +1,6 @@
-# SiYuan `.sy` 文件 JSON 结构规范 —— AI 读写指南
+# SiYuan `.sy` 文件 JSON 结构规范：读写参考
+
+[English](SY-FORMAT.md)
 
 > 规范写入基准：普通文档为 Spec `2`，包含页签的文档为 Spec `3`，使用表格单元格富文本的文档为 Spec `4`；兼容读取器可以升级旧版或缺少 `Spec` 的数据。
 > 核验样本：`20200825162036-4dx365o.sy`（排版元素）、`20200905090211-2vixtlf.sy`（内容块类型）。
@@ -6,7 +8,7 @@
 > 本指南描述普通笔记本中的明文 `.sy` JSON，或已解锁加密笔记本的解密后 AST。加密笔记本磁盘上的 `.sy` 文件是密文，不能当作 JSON 直接编辑。
 > 配套文档：[`WORKSPACE.zh-CN.md`](./WORKSPACE.zh-CN.md) 讲工作区在磁盘上的整体布局（笔记本、父子文档、资源文件的组织方式）；本文档专注 `.sy` 文件**内部**的 JSON 结构。
 
-## 0. 一句话本质
+## 0. 概述
 
 明文 `.sy` 文件是序列化为 JSON 的 Lute AST 树。根节点为 `NodeDocument`，正文是递归嵌套的 `Children` 数组。不存在单独维护的 JSON Schema；Lute 的 `ast.Node` 和 `ListData` Go 结构体是序列化格式的事实来源。树中保存文档 AST 及其 IAL，资源文件、属性视图定义和可重建索引则位于树外。
 
@@ -218,7 +220,7 @@ NodeList                        NodeList
   ] }
 ```
 
-### 5.4 `ListData` 字段全解（★ 最易踩坑）
+### 5.4 `ListData` 字段全解
 
 | 字段 | 类型（代码） | JSON 表现 | 说明 |
 |---|---|---|---|
@@ -508,7 +510,7 @@ NodeList                        NodeList
 - 删除线**仅支持双波浪 `~~x~~`**，不支持单波浪 `~x~`（`SetGFMStrikethrough1(false)`）。
 - 反斜杠转义不是 `NodeTextMark` 子类型：它对应独立的 `NodeBackslash` 节点，不会出现在 `TextMarkType` 取值中。
 
-### 6.3 带样式的内联文本（★ 必须成对）
+### 6.3 带样式的内联文本：配对规则
 
 带颜色/特效的 `NodeTextMark`（带 `Properties.style`）**后面必须紧跟一个** `NodeKramdownSpanIAL`，且二者 style 文本一致：
 
@@ -555,7 +557,7 @@ NodeList                        NodeList
 
 ---
 
-## 7. base64 编码约定（★ 必读）
+## 7. base64 编码约定
 
 | 字段 | 编码 | 例 |
 |---|---|---|

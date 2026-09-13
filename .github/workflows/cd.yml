@@ -336,7 +336,7 @@ jobs:
               SIYUAN_E2E_SHARD="${shard}" \
               SIYUAN_TEST_RESULTS_DIR="test-results-${shard}" \
               PLAYWRIGHT_HTML_OUTPUT_DIR="playwright-report-${shard}" \
-              pnpm exec playwright test --config=playwright.focused.config.ts \
+              pnpm exec playwright test --config=config/playwright.focused.config.ts \
                 --global-timeout=1500000 --workers=1 \
                 --reporter=line,html --output="test-results-${shard}"
             ) &

@@ -124,6 +124,9 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
                         } else if (!hasPreviousSibling(mathElement) && ["TH", "TD"].includes(mathElement.parentElement.tagName)) {
                             // 单元格中只有数学公式时，光标无法移动到数学公式前
                             mathElement.insertAdjacentText("afterbegin", Constants.ZWSP);
+                        } else if (!hasPreviousSibling(mathElement)) {
+                            // 段首公式前保留可编辑文本，使全选后的组合输入从文本边界开始。
+                            mathElement.insertAdjacentText("beforebegin", Constants.ZWSP);
                         }
                     }
 

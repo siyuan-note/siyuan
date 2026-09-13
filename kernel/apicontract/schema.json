@@ -1133,6 +1133,59 @@
       ],
       "additionalProperties": false
     },
+    "CheckBlockRefRequestInput": {
+      "type": "object",
+      "properties": {
+        "deletedIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "exactIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notebook": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "scope": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
     "CheckBlocksExistRequestInput": {
       "type": "object",
       "properties": {
@@ -1369,6 +1422,99 @@
         "id",
         "name"
       ],
+      "additionalProperties": false
+    },
+    "DocHeadingLevelData": {
+      "type": "object",
+      "properties": {
+        "counts": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "title": {
+          "type": "string"
+        },
+        "transaction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BlockTransaction"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "withSubheadingCounts": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      },
+      "required": [
+        "counts",
+        "title",
+        "transaction",
+        "withSubheadingCounts"
+      ],
+      "additionalProperties": false
+    },
+    "DocHeadingLevelRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notebook": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "withSubheadings": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
       "additionalProperties": false
     },
     "DocInfo": {
@@ -1773,6 +1919,27 @@
       "required": [
         "id",
         "scope"
+      ],
+      "additionalProperties": false
+    },
+    "HeadingLevelRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "level": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "level"
       ],
       "additionalProperties": false
     },
@@ -2998,6 +3165,216 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "SearchBlock": {
+      "type": "object",
+      "properties": {
+        "alias": {
+          "type": "string"
+        },
+        "box": {
+          "type": "string"
+        },
+        "children": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SearchBlock"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "content": {
+          "type": "string"
+        },
+        "count": {
+          "type": "integer"
+        },
+        "created": {
+          "type": "string"
+        },
+        "defID": {
+          "type": "string"
+        },
+        "defPath": {
+          "type": "string"
+        },
+        "depth": {
+          "type": "integer"
+        },
+        "fcontent": {
+          "type": "string"
+        },
+        "folded": {
+          "type": "boolean"
+        },
+        "hPath": {
+          "type": "string"
+        },
+        "ial": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "markdown": {
+          "type": "string"
+        },
+        "memo": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "number": {
+          "type": "string"
+        },
+        "parentID": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "refCount": {
+          "type": "integer"
+        },
+        "refText": {
+          "type": "string"
+        },
+        "refs": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SearchBlock"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "riffCard": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SearchBlockCard"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "riffCardID": {
+          "type": "string"
+        },
+        "rootID": {
+          "type": "string"
+        },
+        "sort": {
+          "type": "integer"
+        },
+        "subType": {
+          "type": "string"
+        },
+        "tag": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "updated": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "alias",
+        "box",
+        "children",
+        "content",
+        "count",
+        "created",
+        "defID",
+        "defPath",
+        "depth",
+        "fcontent",
+        "folded",
+        "hPath",
+        "ial",
+        "id",
+        "markdown",
+        "memo",
+        "name",
+        "parentID",
+        "path",
+        "refCount",
+        "refText",
+        "refs",
+        "riffCard",
+        "riffCardID",
+        "rootID",
+        "sort",
+        "subType",
+        "tag",
+        "type",
+        "updated"
+      ],
+      "additionalProperties": false
+    },
+    "SearchBlockCard": {
+      "type": "object",
+      "properties": {
+        "due": {
+          "type": "string"
+        },
+        "lapses": {
+          "type": "integer"
+        },
+        "lastReview": {
+          "type": "string"
+        },
+        "reps": {
+          "type": "integer"
+        },
+        "state": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "due",
+        "lapses",
+        "lastReview",
+        "reps",
+        "state"
+      ],
       "additionalProperties": false
     },
     "SearchHistoryData": {
@@ -5040,6 +5417,84 @@
     },
     {
       "method": "POST",
+      "path": "/api/block/checkBlockRef",
+      "handler": "checkBlockRef",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/CheckBlockRefRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "boolean"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/block/checkBlocksExist",
       "handler": "checkBlocksExist",
       "body": "json",
@@ -6897,6 +7352,88 @@
     },
     {
       "method": "POST",
+      "path": "/api/block/getDocHeadingLevelTransaction",
+      "handler": "getDocHeadingLevelTransaction",
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/DocHeadingLevelRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/DocHeadingLevelData"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/block/getDocInfo",
       "handler": "getDocInfo",
       "body": "json",
@@ -7477,6 +8014,88 @@
     },
     {
       "method": "POST",
+      "path": "/api/block/getHeadingLevelTransaction",
+      "handler": "getHeadingLevelTransaction",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/HeadingLevelRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BlockTransaction"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/block/getOrderedListContinueStart",
       "handler": "getOrderedListContinueStart",
       "body": "json",
@@ -7496,6 +8115,98 @@
               },
               "data": {
                 "$ref": "#/$defs/OrderedListStartData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/block/getRecentUpdatedBlocks",
+      "handler": "getRecentUpdatedBlocks",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/SearchBlock"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "msg": {
                 "type": "string"

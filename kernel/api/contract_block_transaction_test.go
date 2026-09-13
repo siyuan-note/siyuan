@@ -113,6 +113,7 @@ func TestAPIContractHeadingTransactions(t *testing.T) {
 	engine.POST("/api/block/getHeadingDeleteTransaction", getHeadingDeleteTransaction)
 	engine.POST("/api/block/getHeadingInsertTransaction", getHeadingInsertTransaction)
 	engine.POST("/api/block/getHeadingFoldTransaction", getHeadingFoldTransaction)
+	testAPIContractRemainingBlockQueries(t, engine, box.ID, docID, heading.ID)
 	for _, entry := range []struct {
 		path, id, scope string
 		code            int

@@ -121,6 +121,35 @@ fetchPost("/api/block/getHeadingDeleteTransaction", {id: "id"}, response => {
 });
 
 declare const notebooks: APIPOSTRoutes["/api/notebook/lsNotebooks"]["response"];
+
+fetchPost("/api/block/checkBlockRef", {scope: "blocks", ids: ["id"]}, response => {
+    const hasReference: boolean = response.data;
+    void hasReference;
+});
+// @ts-expect-error 引用检查仅接受字符串数组。
+fetchPost("/api/block/checkBlockRef", {ids: [42]});
+// @ts-expect-error 标题级别必须为数字。
+fetchPost("/api/block/getHeadingLevelTransaction", {id: "id", level: "2"});
+// @ts-expect-error 文档标题转换开关必须为布尔值。
+fetchPost("/api/block/getDocHeadingLevelTransaction", {id: "id", withSubheadings: "true"});
+fetchPost("/api/block/getDocHeadingLevelTransaction", {id: "id"}, response => {
+    if (response.data) {
+        const counts: number[] = response.data.counts;
+        // @ts-expect-error 标题转换结果没有内容字段。
+        void response.data.content;
+        void counts;
+    }
+});
+fetchPost("/api/block/getRecentUpdatedBlocks", {}, response => {
+    const block = response.data?.[0];
+    if (block) {
+        const content: string = block.content;
+        // @ts-expect-error 最近更新块的内容不是数字。
+        const invalid: number = block.content;
+        void [content, invalid];
+    }
+});
+
 if (notebooks.code === 0) {
     // @ts-expect-error 成功码下的空数据也必须在严格模式下被检查。
     void notebooks.data.notebooks;

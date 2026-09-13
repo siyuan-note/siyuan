@@ -18,6 +18,9 @@ func (e Endpoint[Request, Data]) Decode(reader io.Reader) (request Request, err 
 	if reader == nil {
 		reader = bytes.NewReader(nil)
 	}
+	if e.decodeRequest != nil {
+		return e.decodeRequest(reader)
+	}
 	if e.definition.Body == StructJSONBody {
 		err = json.NewDecoder(reader).Decode(&request)
 		if err != nil {

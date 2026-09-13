@@ -72,6 +72,8 @@ export type ChangeMasterPasswordRequestInput = { "newPassword": string; "oldPass
 
 export type ChangeSortNotebookRequestInput = { "notebooks": Array<string>; };
 
+export type CheckBlockRefRequestInput = { "deletedIDs"?: Array<string>; "exactIDs"?: Array<string>; "id"?: string | null; "ids"?: Array<string>; "notebook"?: string | null; "paths"?: Array<string>; "scope"?: string; };
+
 export type CheckBlocksExistRequestInput = { "id"?: string | null; "ids": Array<JSONValue>; "notebook"?: string | null; };
 
 export type CheckSnapshotData = { "changed": boolean; };
@@ -100,6 +102,10 @@ export type DeleteBlockRequestInput = { "id": string; };
 
 export type DocAttrView = { "id": string; "name": string; };
 
+export type DocHeadingLevelData = { "counts": Array<number>; "title": string; "transaction": BlockTransaction | null; "withSubheadingCounts": Array<number>; };
+
+export type DocHeadingLevelRequestInput = { "id"?: string | null; "notebook"?: string | null; "source"?: number | null; "target"?: number | null; "withSubheadings"?: boolean | null; };
+
 export type DocInfo = { "attrViews": Array<DocAttrView | null> | null; "ial": Record<string, string> | null; "icon": string; "id": string; "name": string; "refCount": number; "refIDs": Array<string> | null; "rootID": string; "subFileCount": number; };
 
 export type DocOrdersRequestInput = { "id": string; };
@@ -127,6 +133,8 @@ export type GetTagRequestInput = { "app"?: string | null; "ignoreMaxListHint"?: 
 export type HeadingChildrenRequestInput = { "id": string; "removeFoldAttr"?: boolean | null; };
 
 export type HeadingFoldRequestInput = { "id": string; "scope": string; };
+
+export type HeadingLevelRequestInput = { "id"?: string; "ids"?: Array<string>; "level": number; };
 
 export type ImportNotebookCryptoBackupRequestInput = { "file": Blob; "password"?: string; };
 
@@ -209,6 +217,10 @@ export type RenameTagRequestInput = { "newLabel": string; "oldLabel": string; };
 export type ReorderData = { "changed": boolean; "notebook"?: string; "parentPath"?: string; };
 
 export type ReorderNotebooksRequestInput = { "position"?: string | null; "sourceIDs"?: Array<string> | null; "targetID"?: string | null; };
+
+export type SearchBlock = { "alias": string; "box": string; "children": Array<SearchBlock | null> | null; "content": string; "count": number; "created": string; "defID": string; "defPath": string; "depth": number; "fcontent": string; "folded": boolean; "hPath": string; "ial": Record<string, string> | null; "id": string; "markdown": string; "memo": string; "name": string; "number"?: string; "parentID": string; "path": string; "refCount": number; "refText": string; "refs": Array<SearchBlock | null> | null; "riffCard": SearchBlockCard | null; "riffCardID": string; "rootID": string; "sort": number; "subType": string; "tag": string; "type": string; "updated": string; };
+
+export type SearchBlockCard = { "due": string; "lapses": number; "lastReview": string; "reps": number; "state": number; };
 
 export type SearchHistoryData = { "histories": Array<string> | null; "pageCount": number; "totalCount": number; };
 
@@ -432,10 +444,6 @@ export type APILegacyPOSTPath =
     "/api/bazaar/uninstallBazaarTheme" |
     "/api/bazaar/uninstallBazaarWidget" |
     "/api/bazaar/updateBazaarPackage" |
-    "/api/block/checkBlockRef" |
-    "/api/block/getDocHeadingLevelTransaction" |
-    "/api/block/getHeadingLevelTransaction" |
-    "/api/block/getRecentUpdatedBlocks" |
     "/api/bookmark/getBookmark" |
     "/api/broadcast/getChannelInfo" |
     "/api/broadcast/getChannels" |
@@ -857,6 +865,11 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": BlockFoldData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/block/checkBlockRef": {
+        request: CheckBlockRefRequestInput;
+        response: { "code": 0; "data": boolean; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | boolean; "msg": string; };
+        body: "json";
+    };
     "/api/block/checkBlocksExist": {
         request: CheckBlocksExistRequestInput;
         response: { "code": 0; "data": Record<string, boolean> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -972,6 +985,11 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/block/getDocHeadingLevelTransaction": {
+        request: DocHeadingLevelRequestInput;
+        response: { "code": 0; "data": DocHeadingLevelData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+    };
     "/api/block/getDocInfo": {
         request: BlockQueryRequestInput;
         response: { "code": 0; "data": DocInfo | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -1007,10 +1025,20 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": BlockTransaction | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/block/getHeadingLevelTransaction": {
+        request: HeadingLevelRequestInput;
+        response: { "code": 0; "data": BlockTransaction | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/block/getOrderedListContinueStart": {
         request: BlockQueryRequestInput;
         response: { "code": 0; "data": OrderedListStartData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+    };
+    "/api/block/getRecentUpdatedBlocks": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<SearchBlock | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
     };
     "/api/block/getRefIDs": {
         request: RefIDsRequestInput;

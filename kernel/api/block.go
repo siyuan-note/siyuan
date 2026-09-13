@@ -35,51 +35,14 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func checkBlockRef(c *gin.Context) {
+var checkBlockRef = contractHandler(apicontract.CheckBlockRef, func(c *gin.Context, request apicontract.CheckBlockRefRequest) apicontract.Response[bool] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	scope := ""
-	if scopeArg, exists := arg["scope"]; exists {
-		var valid bool
-		scope, valid = scopeArg.(string)
-		if !valid {
-			ret.Code = -1
-			ret.Msg = "Field [scope] should be of type [String]"
-			return
-		}
-	}
-	if "" == strings.TrimSpace(scope) {
-		scope = "blocks"
-	}
-	switch scope {
+	switch request.Scope {
 	case "blocks":
-		ids, parsed := parseBlockRefStringArray(arg, "ids", ret, true)
-		if !parsed {
-			return
-		}
-		var exactIDs []string
-		if _, exists := arg["exactIDs"]; exists {
-			exactIDs, parsed = parseBlockRefStringArray(arg, "exactIDs", ret, false)
-			if !parsed {
-				return
-			}
-		}
-		var deletedIDs []string
-		if _, exists := arg["deletedIDs"]; exists {
-			deletedIDs, parsed = parseBlockRefStringArray(arg, "deletedIDs", ret, false)
-			if !parsed {
-				return
-			}
-		}
+		ids, exactIDs, deletedIDs := request.IDs, request.ExactIDs, request.DeletedIDs
 		for _, id := range ids {
 			if util.InvalidIDPattern(id, ret) {
-				return
+				return contractFailure[bool](ret)
 			}
 		}
 		idSet := map[string]struct{}{}
@@ -88,48 +51,41 @@ func checkBlockRef(c *gin.Context) {
 		}
 		for _, id := range exactIDs {
 			if util.InvalidIDPattern(id, ret) {
-				return
+				return contractFailure[bool](ret)
 			}
 			if _, exists := idSet[id]; !exists {
 				ret.Code = -1
 				ret.Msg = "Field [exactIDs] should be a subset of field [ids]"
-				return
+				return contractFailure[bool](ret)
 			}
 		}
 		for _, id := range deletedIDs {
 			if util.InvalidIDPattern(id, ret) {
-				return
+				return contractFailure[bool](ret)
 			}
 			if _, exists := idSet[id]; !exists {
 				ret.Code = -1
 				ret.Msg = "Field [deletedIDs] should be a subset of field [ids]"
-				return
+				return contractFailure[bool](ret)
 			}
 		}
-		notebook, valid := util.ParseJsonArg[string]("notebook", arg, ret, false, false)
-		if !valid {
-			return
-		}
+		notebook := request.Notebook
 		if "" != notebook && util.InvalidIDPattern(notebook, ret) {
-			return
+			return contractFailure[bool](ret)
 		}
-		if !holdBlockRequest(c, ret, notebook, arg, true) {
-			return
+		if err := holdEncryptedBlockRequests(c, notebook, append([]string{request.ID}, request.IDs...), true); err != nil {
+			return apicontract.Failure[bool](-1, err.Error())
 		}
 		ids = filterBlockIDsByPublishAccess(c, ids, notebook)
 		exactIDs = filterBlockIDsByPublishAccess(c, exactIDs, notebook)
 		deletedIDs = filterBlockIDsByPublishAccess(c, deletedIDs, notebook)
-		var err error
-		ret.Data, err = model.CheckBlockRefInBox(ids, exactIDs, deletedIDs, notebook)
+		data, err := model.CheckBlockRefInBox(ids, exactIDs, deletedIDs, notebook)
 		if err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
+			return apicontract.CheckBlockRef.FailureWithData(-1, err.Error(), data)
 		}
+		return apicontract.Success(data)
 	case "documents":
-		paths, parsed := parseBlockRefStringArray(arg, "paths", ret, true)
-		if !parsed {
-			return
-		}
+		paths := request.Paths
 		if model.IsReadOnlyRoleContext(c) {
 			publishAccess := model.GetPublishAccess()
 			var accessiblePaths []string
@@ -141,25 +97,20 @@ func checkBlockRef(c *gin.Context) {
 			paths = accessiblePaths
 		}
 		if 0 == len(paths) {
-			ret.Data = false
-			return
+			return apicontract.Success(false)
 		}
-		var err error
-		ret.Data, err = model.CheckDocsRef(paths)
+		data, err := model.CheckDocsRef(paths)
 		if err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
+			return apicontract.CheckBlockRef.FailureWithData(-1, err.Error(), data)
 		}
+		return apicontract.Success(data)
 	case "notebook":
-		var notebook string
-		if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, true)) {
-			return
-		}
+		notebook := request.Notebook
 		if util.InvalidIDPattern(notebook, ret) {
-			return
+			return contractFailure[bool](ret)
 		}
-		if !holdBlockRequest(c, ret, notebook, arg) {
-			return
+		if err := holdEncryptedBlockRequests(c, notebook, append([]string{request.ID}, request.IDs...), false); err != nil {
+			return apicontract.Failure[bool](-1, err.Error())
 		}
 		if model.IsReadOnlyRoleContext(c) {
 			publishAccess := model.GetPublishAccess()
@@ -171,39 +122,20 @@ func checkBlockRef(c *gin.Context) {
 				}
 			}
 			if !accessible {
-				ret.Data = false
-				return
+				return apicontract.Success(false)
 			}
 		}
-		var err error
-		ret.Data, err = model.CheckNotebookRef(notebook)
+		data, err := model.CheckNotebookRef(notebook)
 		if err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
+			return apicontract.CheckBlockRef.FailureWithData(-1, err.Error(), data)
 		}
+		return apicontract.Success(data)
 	default:
 		ret.Code = -1
 		ret.Msg = "invalid block ref check scope"
 	}
-}
-
-func parseBlockRefStringArray(arg map[string]any, key string, ret *gulu.Result, rejectEmpty bool) (values []string, ok bool) {
-	var raw []any
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg(key, &raw, true, rejectEmpty)) {
-		return
-	}
-	for _, value := range raw {
-		str, isString := value.(string)
-		if !isString || "" == strings.TrimSpace(str) {
-			ret.Code = -1
-			ret.Msg = fmt.Sprintf("Field [%s] should contain non-empty strings", key)
-			return nil, false
-		}
-		values = append(values, str)
-	}
-	values = gulu.Str.RemoveDuplicatedElem(values)
-	return values, true
-}
+	return contractFailure[bool](ret)
+})
 
 var getBlockTreeInfos = contractHandler(apicontract.GetBlockTreeInfos, func(c *gin.Context, request apicontract.BlocksQueryRequest) apicontract.Response[map[string]*apicontract.BlockTreeInfo] {
 	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)
@@ -311,63 +243,32 @@ var getHeadingInsertTransaction = contractHandler(apicontract.GetHeadingInsertTr
 	return blockTransactionResponse(transaction)
 })
 
-func getDocHeadingLevelTransaction(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-	var arg struct {
-		ID              string `json:"id"`
-		Notebook        string `json:"notebook"`
-		Source          int    `json:"source"`
-		Target          int    `json:"target"`
-		WithSubheadings bool   `json:"withSubheadings"`
+var getDocHeadingLevelTransaction = contractHandler(apicontract.GetDocHeadingLevelTransaction, func(c *gin.Context, request apicontract.DocHeadingLevelRequest) apicontract.Response[*apicontract.DocHeadingLevelData] {
+	if request.ID == "" || request.Source < 0 || request.Source > 6 || request.Target < 0 || request.Target > 6 || (request.Source == 0) != (request.Target == 0) {
+		return apicontract.Failure[*apicontract.DocHeadingLevelData](-1, "invalid heading conversion parameters")
 	}
-	if err := c.ShouldBindJSON(&arg); err != nil || arg.ID == "" ||
-		arg.Source < 0 || arg.Source > 6 || arg.Target < 0 || arg.Target > 6 ||
-		(arg.Source == 0) != (arg.Target == 0) {
-		ret.Code = -1
-		ret.Msg = "invalid heading conversion parameters"
-		return
-	}
-	result, err := model.GetDocHeadingLevelTransaction(arg.ID, arg.Notebook, arg.Source, arg.Target, arg.WithSubheadings)
+	result, err := model.GetDocHeadingLevelTransaction(request.ID, request.Notebook, request.Source, request.Target, request.WithSubheadings)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[*apicontract.DocHeadingLevelData](-1, err.Error())
 	}
-	ret.Data = result
-}
-
-func getHeadingLevelTransaction(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	level := int(arg["level"].(float64))
-
-	var ids []string
-	if idsArg, ok := arg["ids"].([]any); ok {
-		for _, id := range idsArg {
-			ids = append(ids, id.(string))
-		}
-		ids = gulu.Str.RemoveDuplicatedElem(ids)
-	} else {
-		ids = []string{arg["id"].(string)}
-	}
-
-	transaction, err := model.GetHeadingLevelBatchTransaction(ids, level)
+	transaction, err := blockTransactionContract(result.Transaction)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return
+		return apicontract.Failure[*apicontract.DocHeadingLevelData](-1, err.Error())
 	}
+	return apicontract.Success(&apicontract.DocHeadingLevelData{Counts: result.Counts[:], WithSubheadingCounts: result.WithSubheadingCounts[:], Title: result.Title, Transaction: transaction})
+})
 
-	ret.Data = transaction
-}
+var getHeadingLevelTransaction = contractHandler(apicontract.GetHeadingLevelTransaction, func(c *gin.Context, request apicontract.HeadingLevelRequest) apicontract.Response[*apicontract.BlockTransaction] {
+	ids := request.IDs
+	if ids == nil {
+		ids = []string{request.ID}
+	}
+	transaction, err := model.GetHeadingLevelBatchTransaction(ids, int(request.Level))
+	if err != nil {
+		return apicontract.FailureWithTimeout[*apicontract.BlockTransaction](-1, err.Error(), 7000)
+	}
+	return blockTransactionResponse(transaction)
+})
 
 var getHeadingFoldTransaction = contractHandler(apicontract.GetHeadingFoldTransaction, func(c *gin.Context, request apicontract.HeadingFoldRequest) apicontract.Response[*apicontract.BlockTransaction] {
 	id := request.ID
@@ -534,17 +435,14 @@ var getDocsInfo = contractHandler(apicontract.GetDocsInfo, func(c *gin.Context, 
 	return apicontract.Success(docInfoContracts(info))
 })
 
-func getRecentUpdatedBlocks(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
+var getRecentUpdatedBlocks = contractHandler(apicontract.GetRecentUpdatedBlocks, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.SearchBlock] {
 	blocks := model.RecentUpdatedBlocks()
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
 	}
-	ret.Data = blocks
-}
+	return apicontract.Success(searchBlockContracts(blocks))
+})
 
 var getContentWordCount = contractHandler(apicontract.GetContentWordCount, func(c *gin.Context, request apicontract.ContentWordCountRequest) apicontract.Response[apicontract.WordCountData] {
 	return apicontract.Success(apicontract.WordCountData{ReqID: request.ReqID, Stat: blockStatContract(filesys.ContentStat(request.Content))})

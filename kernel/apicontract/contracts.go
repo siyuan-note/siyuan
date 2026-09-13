@@ -1,7 +1,10 @@
 // 包 apicontract 定义 HTTP 接口的线协议，不依赖内核启动或持久化模型。
 package apicontract
 
-import "reflect"
+import (
+	"io"
+	"reflect"
+)
 
 type BodyMode string
 
@@ -27,7 +30,8 @@ type Definition struct {
 }
 
 type Endpoint[Request, Data any] struct {
-	definition Definition
+	definition    Definition
+	decodeRequest func(io.Reader) (Request, error)
 }
 
 type ResponseOptions struct {
@@ -342,3 +346,11 @@ var UpdateBlock = define[UpdateBlockRequest, []*BlockTransaction]("updateBlock",
 var BatchUpdateBlock = define[BatchUpdateBlockRequest, []*BlockTransaction]("batchUpdateBlock", "/api/block/batchUpdateBlock", JSONBody, ResponseOptions{}, "POST")
 
 var DeleteBlock = define[DeleteBlockRequest, []*BlockTransaction]("deleteBlock", "/api/block/deleteBlock", JSONBody, ResponseOptions{}, "POST")
+
+var CheckBlockRef = define[CheckBlockRefRequest, bool]("checkBlockRef", "/api/block/checkBlockRef", JSONBody, ResponseOptions{DataOnError: true}, "POST")
+
+var GetHeadingLevelTransaction = define[HeadingLevelRequest, *BlockTransaction]("getHeadingLevelTransaction", "/api/block/getHeadingLevelTransaction", JSONBody, ResponseOptions{}, "POST")
+
+var GetDocHeadingLevelTransaction = define[DocHeadingLevelRequest, *DocHeadingLevelData]("getDocHeadingLevelTransaction", "/api/block/getDocHeadingLevelTransaction", StructJSONBody, ResponseOptions{}, "POST")
+
+var GetRecentUpdatedBlocks = define[EmptyRequest, []*SearchBlock]("getRecentUpdatedBlocks", "/api/block/getRecentUpdatedBlocks", NoBody, ResponseOptions{}, "POST")

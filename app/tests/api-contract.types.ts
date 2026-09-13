@@ -6,6 +6,29 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
+fetchPost("/api/search/fullTextSearchBlock", {query: "text", subTypes: {heading: {h1: true}}}, response => {
+    if (response.data) {
+        const count: number = response.data.matchedBlockCount;
+        const docMode: boolean = response.data.docMode;
+        void [count, docMode];
+    }
+});
+fetchPost("/api/search/searchRefBlock", {reqId: [1]}, response => {
+    const reqId: JSONValue = response.data.reqId;
+    // @ts-expect-error 仅回传请求标识的结果没有块数组。
+    const blocks: unknown[] = response.data.blocks;
+    void [reqId, blocks];
+});
+fetchPost("/api/search/searchEmbedBlock", {embedBlockID: "id", stmt: "select * from blocks", excludeIDs: [null, "id"]});
+// @ts-expect-error 普通嵌入查询不接受空值块 ID。
+fetchPost("/api/search/getEmbedBlock", {embedBlockID: "id", includeIDs: [null]});
+// @ts-expect-error 子类型筛选使用布尔值。
+fetchPost("/api/search/fullTextSearchBlock", {subTypes: {heading: {h1: "true"}}});
+// @ts-expect-error 替换操作必须提供待替换文本。
+fetchPost("/api/search/findReplace", {k: "text", ids: []});
+// @ts-expect-error 搜索分页参数使用数字。
+fetchPost("/api/search/fullTextSearchAssetContent", {page: "1"});
+
 fetchPost("/api/query/sql", {stmt: "SELECT 1", mode: "readonly"}, response => {
     if (response.code === 0) {
         const limit: number = response.limit;

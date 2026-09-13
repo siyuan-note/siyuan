@@ -612,7 +612,7 @@ export class Hint {
     private genSearchHTML(protyle: IProtyle, searchElement: HTMLInputElement, nodeElement: false | HTMLElement, oldValue: string, source: THintSource) {
         const createTarget = this.prepareCreateTarget(protyle, "ref");
         this.element.lastElementChild.innerHTML = '<div class="ft__center"><img style="height:32px;width:32px;" src="/stage/loading-pure.svg"></div>';
-        const searchParam: IObject = {
+        const searchParam: import("../../types/api").SearchRefBlockRequestInput = {
             k: searchElement.value,
             id: nodeElement ? nodeElement.getAttribute("data-node-id") : protyle.block.parentID,
             beforeLen: Math.floor((Math.max(protyle.element.clientWidth / 2, 320) - 58) / 28.8),

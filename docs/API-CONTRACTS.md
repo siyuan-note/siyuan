@@ -24,6 +24,8 @@ Encrypted notebook lifecycle endpoints use typed requests and responses while re
 
 ## Compatibility requirements
 
+Search contracts retain pagination defaults and numeric truncation, path validation and deduplication, ignored historical subtype filters, and null versus empty arrays. Reference search distinguishes correlation-only responses from block results and retains notebook admission before deferred parameter validation. SQL search authorization, publish filtering, encrypted notebook leases, cancellation responses, and read-only embed-update no-ops remain in their original order. Desktop and mobile callers share generated request types.
+
 History contracts retain path trimming, optional highlight defaults, fractional history-type truncation, and null versus empty result arrays. Version comparison checks both reference objects before their fields and acquires notebook leases in sorted order. Content reads and document, asset, and attribute-view rollbacks retain their history-path lease checks; notebook rollback keeps its existing model-level recovery behavior.
 
 Import contracts preserve archive cleanup, first-upload selection, untrimmed Markdown paths, and staged-token trimming and lifetime. Automatic SiYuan imports declare document, token, notebook, and notebook-collection results; mount failures retain the document payload. Obsidian task cancellation retains its task snapshot on failure. Notebook mounting, encrypted import handling, and creation notifications remain in the existing business operations.

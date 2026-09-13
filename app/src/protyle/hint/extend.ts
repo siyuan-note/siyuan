@@ -549,7 +549,7 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
     const nodeElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
     const createTarget = protyle.hint.prepareCreateTarget(protyle, "ref");
     protyle.hint.genLoading(protyle);
-    let refParam: IObject;
+    let refParam: import("../../types/api").SearchRefBlockRequestInput;
     if (protyle.lite) {
         refParam = {k: key, id: "", rootID: "", beforeLen: 48, isDatabase: false, isSquareBrackets: true};
     } else {
@@ -633,7 +633,7 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
     }
     protyle.hint.genLoading(protyle);
     const nodeElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
-    const embedParam: IObject = {
+    const embedParam: import("../../types/api").SearchRefBlockRequestInput = {
         k: key,
         isDatabase: false,
         beforeLen: Math.floor((Math.max(protyle.element.clientWidth / 2, 320) - 58) / 28.8),

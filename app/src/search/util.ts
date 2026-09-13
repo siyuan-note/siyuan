@@ -1,4 +1,4 @@
-import type {BlockQueryRequestInput} from "../types/api";
+import type {APICallbackResponse, APIPOSTRoutes, BlockQueryRequestInput, FullTextSearchBlockRequestInput} from "../types/api";
 import {getAllModels} from "../layout/getAll";
 /// #if !BROWSER
 import * as path from "path";
@@ -1381,14 +1381,14 @@ export const replace = (element: Element, config: Config.IUILayoutTabSearchConfi
         k: config.method === 0 || config.method === 1 ? getKeyByLiElement(currentList) : searchInputElement.value,
         r: replaceInputElement.value,
         method: config.method,
-        types: config.types,
+        types: {...config.types},
         subTypes: config.subTypes,
         paths: config.idPath || [],
         groupBy: config.group,
         orderBy: config.sort,
         page: config.page,
         ids: isAll ? [] : [currentId],
-        replaceTypes: config.replaceTypes
+        replaceTypes: {...config.replaceTypes}
     }, (response) => {
         loadElement.classList.add("fn__none");
         if (response.code === 1) {
@@ -1507,10 +1507,10 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                 previousElement.setAttribute("disabled", "disabled");
             }
             const endpoint = requestConfig.method === 4 ? "/api/search/semanticSearchBlock" : "/api/search/fullTextSearchBlock";
-            const searchParam: Record<string, any> = {
+            const searchParam: FullTextSearchBlockRequestInput = {
                 query: requestConfig.query,
                 method: requestConfig.method,
-                types: requestConfig.types,
+                types: {...requestConfig.types},
                 subTypes: requestConfig.subTypes,
                 paths: requestConfig.idPath || [],
                 groupBy: requestConfig.group,
@@ -1531,7 +1531,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                 method: requestConfig.method,
                 version,
                 run(signal: AbortSignal, isCurrent: () => boolean) {
-                    return fetchPost(endpoint, searchParam, (response) => {
+                    return fetchPost(endpoint, searchParam, (response: APICallbackResponse<APIPOSTRoutes[typeof endpoint]["response"]>) => {
                         if (!isCurrent()) {
                             return;
                         }
@@ -1544,7 +1544,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                         onSearch(blocks, edit, element, requestConfig, requestFocusId);
                         if (response.data.matchedBlockCount > 0) {
                             let text = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
-                            if (response.data.docMode) {
+                            if ("docMode" in response.data && response.data.docMode) {
                                 text = window.siyuan.languages.matchDoc.replace("${x}", response.data.matchedRootCount);
                             }
                             searchResultElement.innerHTML = `${requestConfig.page}/${response.data.pageCount || 1}<span class="fn__space"></span>
@@ -1552,7 +1552,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                         } else {
                             searchResultElement.innerHTML = "";
                         }
-                        searchResultElement.setAttribute("data-pagecount", response.data.pageCount || 1);
+                        searchResultElement.setAttribute("data-pagecount", String(response.data.pageCount || 1));
                     }, undefined, undefined, signal);
                 }
             };

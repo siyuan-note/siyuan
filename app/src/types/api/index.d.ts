@@ -10,6 +10,12 @@ export type AppendBlockRequestInput = { "data": string; "dataType": string; "par
 
 export type AppendHeadingChildrenRequestInput = { "childrenDOM": string; "id": string; };
 
+export type AssetContent = { "content": string; "ext": string; "hSize": string; "id": string; "name": string; "path": string; "size": number; "updated": number; };
+
+export type AssetContentData = { "assetContent": AssetContent | null; };
+
+export type AssetContentRequestInput = { "id": string; "query": string; "queryMethod": number; };
+
 export type AttributeViewColorTheme = { "backgroundColor": string; "color": string; };
 
 export type AttributeViewColorThemeInput = { "backgroundColor"?: string | null; "color"?: string | null; };
@@ -230,6 +236,10 @@ export type DownloadInstallPkgRequestInput = { "downloadInstallPkg": boolean; };
 
 export type EditorReadOnlyRequestInput = { "readonly": boolean; };
 
+export type EmbedBlock = { "allowChildOperation": boolean; "block": SearchBlock | null; "blockPaths": Array<BlockPath | null> | null; };
+
+export type EmbedBlocksData = { "blocks": Array<EmbedBlock | null> | null; };
+
 export type EmbedStat = { "complete": boolean; "cycleCount": number; "depthLimitCount": number; "failedQueryCount": number; "failedResultCount": number; "jsEmbedCount": number; "queryEmbedCount": number; "resultCount": number; "truncatedQueryCount": number; };
 
 export type EmptyRequestInput = Record<string, never>;
@@ -244,7 +254,15 @@ export type FilePathData = { "path": string; };
 
 export type FilePathRequestInput = { "path": string; };
 
+export type FindReplaceRequestInput = { "groupBy"?: number | null; "ids": Array<string>; "k": string; "method"?: number | null; "orderBy"?: number | null; "page"?: number | null; "pageSize"?: number | null; "paths"?: Array<string> | null; "query"?: string | null; "r": string; "replaceTypes"?: Record<string, boolean> | null; "subTypes"?: SearchSubtypeFilterInput | null; "types"?: Record<string, boolean> | null; };
+
 export type FullBlockInfo = { "box": string; "path": string; "rootChildID": string; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
+
+export type FullTextSearchBlockData = { "blocks": Array<SearchBlock | null> | null; "docMode": boolean; "matchedBlockCount": number; "matchedRootCount": number; "pageCount": number; };
+
+export type FullTextSearchBlockRequestInput = { "groupBy"?: number | null; "method"?: number | null; "notebook"?: string | null; "orderBy"?: number | null; "page"?: number | null; "pageSize"?: number | null; "paths"?: Array<string> | null; "query"?: string | null; "searchHPath"?: boolean | null; "subTypes"?: SearchSubtypeFilterInput | null; "types"?: Record<string, boolean> | null; };
+
+export type GetEmbedBlockRequestInput = { "breadcrumb"?: boolean | null; "embedBlockID": string; "headingMode"?: number | null; "includeIDs": Array<string>; "notebook"?: string | null; };
 
 export type GetSnippetRequestInput = { "enabled": number; "keyword"?: string | null; "type": string; };
 
@@ -526,23 +544,63 @@ export type SQLQueryRequestInput = { "mode"?: string | null; "stmt": string; };
 
 export type SaveTemplateRequestInput = { "databaseMode"?: string; "directory"?: string; "id": string; "name": string; "overwrite": boolean; };
 
+export type SearchAsset = { "hName": string; "path": string; "updated": number; };
+
+export type SearchAssetContentData = { "assetContents": Array<AssetContent | null> | null; "matchedAssetCount": number; "pageCount": number; };
+
+export type SearchAssetContentRequestInput = { "method"?: number | null; "orderBy"?: number | null; "page"?: number | null; "pageSize"?: number | null; "query"?: string | null; "types"?: Record<string, boolean> | null; };
+
+export type SearchAssetRequestInput = { "exts"?: Array<string> | null; "k": string; };
+
 export type SearchBlock = { "alias": string; "box": string; "children": Array<SearchBlock | null> | null; "content": string; "count": number; "created": string; "defID": string; "defPath": string; "depth": number; "fcontent": string; "folded": boolean; "hPath": string; "ial": Record<string, string> | null; "id": string; "markdown": string; "memo": string; "name": string; "number"?: string; "parentID": string; "path": string; "refCount": number; "refText": string; "refs": Array<SearchBlock | null> | null; "riffCard": SearchBlockCard | null; "riffCardID": string; "rootID": string; "sort": number; "subType": string; "tag": string; "type": string; "updated": string; };
 
 export type SearchBlockCard = { "due": string; "lapses": number; "lastReview": string; "reps": number; "state": number; };
+
+export type SearchBlockRequestInput = { "groupBy"?: number | null; "method"?: number | null; "orderBy"?: number | null; "page"?: number | null; "pageSize"?: number | null; "paths"?: Array<string> | null; "query"?: string | null; "subTypes"?: SearchSubtypeFilterInput | null; "types"?: Record<string, boolean> | null; };
+
+export type SearchBlocksData = { "blocks": Array<SearchBlock | null> | null; "matchedBlockCount": number; "matchedRootCount": number; "pageCount": number; };
+
+export type SearchEmbedBlockRequestInput = { "breadcrumb"?: boolean | null; "embedBlockID": string; "excludeIDs": Array<string | null>; "headingMode"?: number | null; "notebook"?: string | null; "stmt": string; };
+
+export type SearchHeadingFilterInput = { "h1"?: boolean | null; "h2"?: boolean | null; "h3"?: boolean | null; "h4"?: boolean | null; "h5"?: boolean | null; "h6"?: boolean | null; };
 
 export type SearchHistoryData = { "histories": Array<string> | null; "pageCount": number; "totalCount": number; };
 
 export type SearchHistoryRequestInput = { "notebook"?: string | null; "op"?: string | null; "page"?: number | null; "query"?: string | null; "type"?: number | null; };
 
+export type SearchKeywordRequestInput = { "k": string; };
+
+export type SearchListFilterInput = { "o"?: boolean | null; "t"?: boolean | null; "u"?: boolean | null; };
+
+export type SearchPageRequestInput = { "page"?: number | null; "pageSize"?: number | null; };
+
 export type SearchPath = { "blocks"?: Array<SearchBlock | null>; "box": string; "children"?: Array<SearchPath | null>; "count": number; "created": string; "depth": number; "folded": boolean; "hPath": string; "id": string; "name": string; "nodeType": string; "number"?: string; "subType": string; "type": string; "updated": string; };
+
+export type SearchPathRequestInput = { "path": string; };
+
+export type SearchRefBlockRequestInput = { "beforeLen"?: number; "id"?: string | null; "isDatabase"?: boolean | null; "isSquareBrackets"?: boolean | null; "k"?: string; "notebook"?: string | null; "reqId"?: JSONValue | null; "rootID"?: string; };
+
+export type SearchRefCorrelation = { "reqId": JSONValue; };
+
+export type SearchRefResult = { "blocks": Array<SearchBlock | null> | null; "k": string; "newDoc": boolean; "reqId": JSONValue; };
 
 export type SearchSubTypes = { "heading": Record<string, boolean> | null; "list": Record<string, boolean> | null; "listItem": Record<string, boolean> | null; };
 
 export type SearchSubTypesInput = { "heading"?: Record<string, boolean> | null; "list"?: Record<string, boolean> | null; "listItem"?: Record<string, boolean> | null; };
 
+export type SearchSubtypeFilterInput = { "heading"?: SearchHeadingFilterInput | null; "list"?: SearchListFilterInput | null; "listItem"?: SearchListFilterInput | null; };
+
 export type SearchTagData = { "k": string; "tags": Array<string>; };
 
 export type SearchTagRequestInput = { "k": string; };
+
+export type SearchTemplateData = { "k": string; "templates": Array<SearchTemplateResult | null> | null; };
+
+export type SearchTemplateResult = { "content": string; "path": string; "relativePath": string; };
+
+export type SearchWidgetData = { "k": string; "widgets": Array<SearchWidgetResult | null> | null; };
+
+export type SearchWidgetResult = { "content": string; "name": string; };
 
 export type SetBlockAttrsRequestInput = { "attrs": Record<string, string | null>; "id": string; };
 
@@ -633,6 +691,8 @@ export type UnzipRequestInput = { "path": string; "zipPath": string; };
 export type UpdateBlockRequestInput = { "data": string; "dataType": string; "id": string; "lockType"?: boolean | null; };
 
 export type UpdateChannelRequestInput = { "updateChannel": string; };
+
+export type UpdateEmbedBlockRequestInput = { "content": string; "id": string; };
 
 export type UpdatePinnedDocsRequestInput = { "action": string; "after"?: boolean; "ids": Array<string>; "targetID"?: string; };
 
@@ -943,21 +1003,6 @@ export type APILegacyPOSTPath =
     "/api/riff/resetRiffCards" |
     "/api/riff/reviewRiffCard" |
     "/api/riff/skipReviewRiffCard" |
-    "/api/search/findReplace" |
-    "/api/search/fullTextSearchAssetContent" |
-    "/api/search/fullTextSearchBlock" |
-    "/api/search/getAssetContent" |
-    "/api/search/getAssetContentByPath" |
-    "/api/search/getEmbedBlock" |
-    "/api/search/listInvalidBlockRefs" |
-    "/api/search/removeTemplate" |
-    "/api/search/searchAsset" |
-    "/api/search/searchEmbedBlock" |
-    "/api/search/searchRefBlock" |
-    "/api/search/searchTemplate" |
-    "/api/search/searchWidget" |
-    "/api/search/semanticSearchBlock" |
-    "/api/search/updateEmbedBlock" |
     "/api/setting/getBootAppearances" |
     "/api/setting/getCloudUser" |
     "/api/setting/getPublish" |
@@ -1960,9 +2005,84 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/search/findReplace": {
+        request: FindReplaceRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/fullTextSearchAssetContent": {
+        request: SearchAssetContentRequestInput;
+        response: { "code": 0; "data": SearchAssetContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/fullTextSearchBlock": {
+        request: FullTextSearchBlockRequestInput;
+        response: { "code": 0; "data": FullTextSearchBlockData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/getAssetContent": {
+        request: AssetContentRequestInput;
+        response: { "code": 0; "data": AssetContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/getAssetContentByPath": {
+        request: SearchPathRequestInput;
+        response: { "code": 0; "data": AssetContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/getEmbedBlock": {
+        request: GetEmbedBlockRequestInput;
+        response: { "code": 0; "data": EmbedBlocksData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/listInvalidBlockRefs": {
+        request: SearchPageRequestInput;
+        response: { "code": 0; "data": SearchBlocksData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/removeTemplate": {
+        request: SearchPathRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/searchAsset": {
+        request: SearchAssetRequestInput;
+        response: { "code": 0; "data": Array<SearchAsset | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/searchEmbedBlock": {
+        request: SearchEmbedBlockRequestInput;
+        response: { "code": 0; "data": EmbedBlocksData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/searchRefBlock": {
+        request: SearchRefBlockRequestInput;
+        response: { "code": 0; "data": SearchRefResult | (SearchRefCorrelation & { "blocks"?: never; "k"?: never; "newDoc"?: never; }); "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | SearchRefResult | (SearchRefCorrelation & { "blocks"?: never; "k"?: never; "newDoc"?: never; }); "msg": string; };
+        body: "json";
+    };
     "/api/search/searchTag": {
         request: SearchTagRequestInput;
         response: { "code": 0; "data": SearchTagData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/searchTemplate": {
+        request: SearchKeywordRequestInput;
+        response: { "code": 0; "data": SearchTemplateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/searchWidget": {
+        request: SearchKeywordRequestInput;
+        response: { "code": 0; "data": SearchWidgetData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/semanticSearchBlock": {
+        request: SearchBlockRequestInput;
+        response: { "code": 0; "data": SearchBlocksData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/updateEmbedBlock": {
+        request: UpdateEmbedBlockRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/setting/addVirtualBlockRefExclude": {

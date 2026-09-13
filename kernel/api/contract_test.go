@@ -161,6 +161,7 @@ func TestAPIContractHandlers(t *testing.T) {
 	testSQLContractQueries(t)
 	testGraphResetContracts(t)
 	testGraphQueryContracts(t, docID)
+	testSearchQueryContracts(t, docID)
 	blockQueries := []struct {
 		path    string
 		handler gin.HandlerFunc

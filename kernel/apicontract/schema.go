@@ -108,6 +108,17 @@ func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
 		}
 		return &Schema{AnyOf: []*Schema{list, definitions, {Type: "null"}}}, nil
 	}
+	if t == reflect.TypeFor[SearchRefData]() {
+		result, err := b.schema(reflect.TypeFor[SearchRefResult](), false)
+		if err != nil {
+			return nil, err
+		}
+		correlation, err := b.schema(reflect.TypeFor[SearchRefCorrelation](), false)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{result, correlation}}, nil
+	}
 	if t == reflect.TypeFor[GlobalGraphData]() || t == reflect.TypeFor[LocalGraphData]() {
 		resultType := reflect.TypeFor[GlobalGraphResult]()
 		if t == reflect.TypeFor[LocalGraphData]() {

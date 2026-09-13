@@ -90,6 +90,16 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if t == reflect.TypeFor[*NetworkEchoTLS]() || t == reflect.TypeFor[*NetworkEchoURL]() || t == reflect.TypeFor[*NetworkEchoCookies]() {
+		schema, err := networkEchoSchema(b, t.Elem())
+		if err != nil {
+			return nil, err
+		}
+		return nullable(schema), nil
+	}
+	if t == reflect.TypeFor[NetworkEchoTLS]() || t == reflect.TypeFor[NetworkEchoURL]() || t == reflect.TypeFor[NetworkEchoCookies]() {
+		return networkEchoSchema(b, t)
+	}
 	if t == reflect.TypeFor[*AISession]() {
 		schema, err := aiSessionPayloadSchema(b, input)
 		if err != nil {

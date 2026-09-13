@@ -449,3 +449,27 @@ fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {id: "av", page: "2"});
 fetchPost("/api/av/renderSnapshotAttributeView", {id: "av"});
 // @ts-expect-error 条目 ID 数组只接受字符串。
 fetchPost("/api/av/createAttributeViewItemDocs", {avID: "av", blockID: "block", saveMode: "subDoc", itemIDs: [1]});
+
+fetchPost("/api/network/forwardProxy", {url: "https://example.com", payload: {nested: [null, true, 1]}, headers: [{"X-Value": [1, true]}]}, response => {
+    if (response.code === 0) {
+        const upstreamStatus: number = response.data.status;
+        const body: string = response.data.body;
+        void [upstreamStatus, body];
+    }
+});
+// @ts-expect-error 转发目标地址不可缺失。
+fetchPost("/api/network/forwardProxy", {payload: "body"});
+// @ts-expect-error 超时参数必须是数字。
+fetchPost("/api/network/forwardProxy", {url: "https://example.com", timeout: "1000"});
+fetchPost("/api/network/echo", {arbitrary: [1, true]}, response => {
+    if (response.code === 0) {
+        const raw: string | null = response.data.Context.RawData;
+        const version: number | undefined = response.data.Request.TLS?.Version;
+        void [raw, version];
+        // @ts-expect-error 回显字段具有确定的结构。
+        const invalid: string = response.data.Request.ContentLength;
+        void invalid;
+    }
+});
+const networkRawBody: APIPOSTRoutes["/api/network/proxy"]["request"] = new Blob(["raw"]);
+void networkRawBody;

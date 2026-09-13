@@ -687,7 +687,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Any("/plugin/private/:name/*path", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, pluginPrivateWebServer)
 
 	ginServer.Any("/api/network/echo", model.CheckAuth, model.CheckAdminRole, echo)
-	ginServer.Any("/api/network/echo/*path", model.CheckAuth, model.CheckAdminRole, echo)
+	ginServer.Any("/api/network/echo/*path", model.CheckAuth, model.CheckAdminRole, echoPath)
 	ginServer.Handle("POST", "/api/network/forwardProxy", model.CheckAuth, model.CheckAdminRole, forwardProxy)
 
 	ginServer.Any("/api/network/proxy", model.CheckAuth, model.CheckAdminRole, httpProxy)

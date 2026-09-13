@@ -1230,6 +1230,60 @@ export type NetImageAssetsRequestInput = { "id": string; "url"?: string | null; 
 
 export type NetworkData = { "proxy": NetworkProxy | null; };
 
+export type NetworkEchoAttributeTypeAndValue = { "Type": Array<number> | null; "Value": null | string | number | boolean | Array<number> | (NetworkEchoRawValue & { "BitLength"?: never; }) | (NetworkEchoBitString & { "Class"?: never; "FullBytes"?: never; "IsCompound"?: never; "Tag"?: never; }); };
+
+export type NetworkEchoBitString = { "BitLength": number; "Bytes": string | null; };
+
+export type NetworkEchoCertificate = { "AuthorityKeyId": string | null; "BasicConstraintsValid": boolean; "CRLDistributionPoints": Array<string> | null; "DNSNames": Array<string> | null; "EmailAddresses": Array<string> | null; "ExcludedDNSDomains": Array<string> | null; "ExcludedEmailAddresses": Array<string> | null; "ExcludedIPRanges": Array<NetworkEchoIPNet | null> | null; "ExcludedURIDomains": Array<string> | null; "ExtKeyUsage": Array<number> | null; "Extensions": Array<NetworkEchoExtension> | null; "ExtraExtensions": Array<NetworkEchoExtension> | null; "IPAddresses": Array<string> | null; "InhibitAnyPolicy": number; "InhibitAnyPolicyZero": boolean; "InhibitPolicyMapping": number; "InhibitPolicyMappingZero": boolean; "IsCA": boolean; "Issuer": NetworkEchoName; "IssuingCertificateURL": Array<string> | null; "KeyUsage": number; "MaxPathLen": number; "MaxPathLenZero": boolean; "NotAfter": string; "NotBefore": string; "OCSPServer": Array<string> | null; "PermittedDNSDomains": Array<string> | null; "PermittedDNSDomainsCritical": boolean; "PermittedEmailAddresses": Array<string> | null; "PermittedIPRanges": Array<NetworkEchoIPNet | null> | null; "PermittedURIDomains": Array<string> | null; "Policies": Array<string> | null; "PolicyIdentifiers": Array<Array<number> | null> | null; "PolicyMappings": Array<NetworkEchoPolicyMapping> | null; "PublicKey": null | string | (NetworkEchoRSAPublicKey & { "Curve"?: never; "G"?: never; "P"?: never; "Q"?: never; "X"?: never; "Y"?: never; }) | (NetworkEchoECDSAPublicKey & { "E"?: never; "G"?: never; "N"?: never; "P"?: never; "Q"?: never; }) | (NetworkEchoDSAPublicKey & { "Curve"?: never; "E"?: never; "N"?: never; "X"?: never; }); "PublicKeyAlgorithm": number; "Raw": string | null; "RawIssuer": string | null; "RawSubject": string | null; "RawSubjectPublicKeyInfo": string | null; "RawTBSCertificate": string | null; "RequireExplicitPolicy": number; "RequireExplicitPolicyZero": boolean; "SerialNumber": number | null; "Signature": string | null; "SignatureAlgorithm": number; "Subject": NetworkEchoName; "SubjectKeyId": string | null; "URIs": Array<NetworkEchoURL | null> | null; "UnhandledCriticalExtensions": Array<Array<number> | null> | null; "UnknownExtKeyUsage": Array<Array<number> | null> | null; "Version": number; };
+
+export type NetworkEchoConnectionState = { "CipherSuite": number; "CurveID": number; "DidResume": boolean; "ECHAccepted": boolean; "HandshakeComplete": boolean; "HelloRetryRequest": boolean; "NegotiatedProtocol": string; "NegotiatedProtocolIsMutual": boolean; "OCSPResponse": string | null; "PeerCertificates": Array<NetworkEchoCertificate | null> | null; "ServerName": string; "SignedCertificateTimestamps": Array<string | null> | null; "TLSUnique": string | null; "VerifiedChains": Array<Array<NetworkEchoCertificate | null> | null> | null; "Version": number; };
+
+export type NetworkEchoContext = { "ClientIP": string; "ContentType": string; "FullPath": string; "HandlerNames": Array<string> | null; "IsWebsocket": boolean; "Params": Array<NetworkEchoParam> | null; "RawData": string | null; "RemoteIP": string; };
+
+export type NetworkEchoCookie = { "Domain": string; "Expires": string; "HttpOnly": boolean; "MaxAge": number; "Name": string; "Partitioned": boolean; "Path": string; "Quoted": boolean; "Raw": string; "RawExpires": string; "SameSite": number; "Secure": boolean; "Unparsed": Array<string> | null; "Value": string; };
+
+export type NetworkEchoCurveParams = { "B": number | null; "BitSize": number; "Gx": number | null; "Gy": number | null; "N": number | null; "Name": string; "P": number | null; };
+
+export type NetworkEchoDSAPublicKey = { "G": number | null; "P": number | null; "Q": number | null; "Y": number | null; };
+
+export type NetworkEchoData = { "Context": NetworkEchoContext; "Request": NetworkEchoRequest; "URL": NetworkEchoURLInfo; "User": NetworkEchoUser; };
+
+export type NetworkEchoECDSAPublicKey = { "Curve": (Record<string, never> & { "B"?: never; "BitSize"?: never; "Gx"?: never; "Gy"?: never; "N"?: never; "Name"?: never; "P"?: never; }) | NetworkEchoCurveParams | null; "X": number | null; "Y": number | null; };
+
+export type NetworkEchoExtension = { "Critical": boolean; "Id": Array<number> | null; "Value": string | null; };
+
+export type NetworkEchoFile = { "Content": string; "Filename": string; "Header": Record<string, Array<string> | null> | null; "Size": number; };
+
+export type NetworkEchoIPNet = { "IP": string; "Mask": string | null; };
+
+export type NetworkEchoMultipart = { "File": Record<string, Array<NetworkEchoFile> | null> | null; "Value": Record<string, Array<string> | null> | null; };
+
+export type NetworkEchoName = { "CommonName": string; "Country": Array<string> | null; "ExtraNames": Array<NetworkEchoAttributeTypeAndValue> | null; "Locality": Array<string> | null; "Names": Array<NetworkEchoAttributeTypeAndValue> | null; "Organization": Array<string> | null; "OrganizationalUnit": Array<string> | null; "PostalCode": Array<string> | null; "Province": Array<string> | null; "SerialNumber": string; "StreetAddress": Array<string> | null; };
+
+export type NetworkEchoParam = { "Key": string; "Value": string; };
+
+export type NetworkEchoParameters = { "G": number | null; "P": number | null; "Q": number | null; };
+
+export type NetworkEchoPolicyMapping = { "IssuerDomainPolicy": string; "SubjectDomainPolicy": string; };
+
+export type NetworkEchoRSAPublicKey = { "E": number; "N": number | null; };
+
+export type NetworkEchoRawValue = { "Bytes": string | null; "Class": number; "FullBytes": string | null; "IsCompound": boolean; "Tag": number; };
+
+export type NetworkEchoRequest = { "Close": boolean; "ContentLength": number; "Cookies": Array<NetworkEchoCookie | null> | null; "Form": Record<string, Array<string> | null> | null; "Header": Record<string, Array<string> | null> | null; "Host": string; "Method": string; "MultipartForm": NetworkEchoMultipart | null; "PostForm": Record<string, Array<string> | null> | null; "Proto": string; "ProtoMajor": number; "ProtoMinor": number; "Referer": string; "RemoteAddr": string; "TLS": NetworkEchoConnectionState | null; "Trailer": Record<string, Array<string> | null> | null; "TransferEncoding": Array<string> | null; "URL": NetworkEchoURL | null; "UserAgent": string; };
+
+export type NetworkEchoURL = { "ForceQuery": boolean; "Fragment": string; "Host": string; "OmitHost": boolean; "Opaque": string; "Path": string; "RawFragment": string; "RawPath": string; "RawQuery": string; "Scheme": string; "User": NetworkEchoUserinfo | null; };
+
+export type NetworkEchoURLInfo = { "EscapedFragment": string; "EscapedPath": string; "Hostname": string; "IsAbs": boolean; "Port": string; "Query": Record<string, Array<string> | null> | null; "Redacted": string; "RequestURI": string; "String": string; };
+
+export type NetworkEchoUser = { "Exists": boolean; "Password": string; "Username": string; };
+
+export type NetworkEchoUserinfo = Record<string, never>;
+
+export type NetworkForwardData = { "body": string; "bodyEncoding": string; "contentType": string; "elapsed": number; "headers": Record<string, Array<string> | null> | null; "status": number; "url": string; };
+
+export type NetworkForwardRequestInput = { "contentType"?: string | null; "headers"?: Array<{ [key: string]: JSONValue } | null> | null; "method"?: string | null; "payload"?: JSONValue | null; "payloadEncoding"?: string | null; "redirect"?: boolean | null; "responseEncoding"?: string | null; "timeout"?: number | null; "url": string; };
+
 export type NetworkProxy = { "host": string; "port": string; "scheme": string; };
 
 export type NetworkProxyInput = { "host": string; "port": string; "scheme": string; };
@@ -1319,6 +1373,8 @@ export type PrepareRichTextRequestInput = { "assets": Array<RichClipboardAssetIn
 export type PrependBlockRequestInput = { "data": string; "dataType": string; "parentID": string; };
 
 export type ProcessPDFRequestInput = { "id": string; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; "path": string; "removeAssets": boolean; "watermark": boolean; };
+
+export type ProxyFailure = { "code": number; "msg": string; };
 
 export type PublishedBlockInfo = { "publishAccessRequired": true; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
 
@@ -1950,18 +2006,13 @@ export type ZipRequestInput = { "path": string; "zipPath": string; };
 
 export type APILegacyGETPath =
     "/api/icon/getDynamicIcon" |
-    "/api/network/echo" |
-    "/api/network/echo/*path" |
-    "/api/network/proxy" |
     "/api/system/bootProgressSSE" |
     "/api/system/getBootAppearance" |
     "/api/system/getCaptcha" |
     "/api/system/oidc/callback" |
     "/es/broadcast/subscribe" |
-    "/es/network/proxy" |
     "/plugin/private/:name/*path" |
-    "/ws/broadcast" |
-    "/ws/network/proxy";
+    "/ws/broadcast";
 
 export interface APIGETRoutes {
     "/api/ai/mcp/oauth/callback/:flowID": {
@@ -1970,6 +2021,23 @@ export interface APIGETRoutes {
         body: "none";
         output: "binary";
         contentVariants: [{"status":200,"contentType":"text/html"},{"status":400,"contentType":"text/html"},{"status":403,"contentType":"text/plain"}];
+    };
+    "/api/network/echo": {
+        request: Blob;
+        response: { "code": 0; "data": NetworkEchoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "raw";
+    };
+    "/api/network/echo/*path": {
+        request: Blob;
+        response: { "code": 0; "data": NetworkEchoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "raw";
+    };
+    "/api/network/proxy": {
+        request: Blob;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "raw";
+        output: "proxy";
+        proxy: {"kind":"http","contentType":"application/octet-stream","upstreamStatuses":true};
     };
     "/api/plugin": {
         request: EmptyRequestInput;
@@ -1996,6 +2064,20 @@ export interface APIGETRoutes {
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
+    "/es/network/proxy": {
+        request: EmptyRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        output: "proxy";
+        proxy: {"kind":"eventSource","contentType":"text/event-stream","upstreamStatuses":true};
+    };
+    "/ws/network/proxy": {
+        request: EmptyRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        output: "proxy";
+        proxy: {"kind":"websocket","upstreamStatuses":false,"frames":["text","binary","close"]};
+    };
     "/ws/plugin/rpc": {
         request: EmptyRequestInput;
         response: (PluginRPCFailure & { "code"?: never; "data"?: never; "msg"?: never; }) | ({ "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; } & { "error"?: never; "id"?: never; "jsonrpc"?: never; });
@@ -2014,10 +2096,6 @@ export interface APIGETRoutes {
 
 export type APILegacyPOSTPath =
     "/api/extension/copy" |
-    "/api/network/echo" |
-    "/api/network/echo/*path" |
-    "/api/network/forwardProxy" |
-    "/api/network/proxy" |
     "/api/system/addCustomEmoji" |
     "/api/system/checkUpdate" |
     "/api/system/checkWorkspaceDir" |
@@ -3803,6 +3881,28 @@ export interface APIPOSTRoutes {
         request: WPSPresentationRequestInput;
         response: { "code": 0; "data": WPSPresentationData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "converted"?: never; "dom"?: never; }) | null | (WPSPresentationData & { "closeTimeout"?: never; }); "msg": string; };
         body: "json";
+    };
+    "/api/network/echo": {
+        request: Blob;
+        response: { "code": 0; "data": NetworkEchoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "raw";
+    };
+    "/api/network/echo/*path": {
+        request: Blob;
+        response: { "code": 0; "data": NetworkEchoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "raw";
+    };
+    "/api/network/forwardProxy": {
+        request: NetworkForwardRequestInput;
+        response: { "code": 0; "data": NetworkForwardData; "msg": string; } | { "code": -1 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 10; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/network/proxy": {
+        request: Blob;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "raw";
+        output: "proxy";
+        proxy: {"kind":"http","contentType":"application/octet-stream","upstreamStatuses":true};
     };
     "/api/notebook/changeMasterPassword": {
         request: ChangeMasterPasswordRequestInput;

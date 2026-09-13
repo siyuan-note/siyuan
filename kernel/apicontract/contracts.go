@@ -935,3 +935,10 @@ var AIAgentChat = define[AIAgentChatRequest, Null]("agentChat", "/api/ai/agent/c
 var AIMCPOAuthCallback = define[EmptyRequest, BinaryContent]("mcpOAuthCallback", "/api/ai/mcp/oauth/callback/:flowID", NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}, HTTPContentVariant{Status: 403, ContentType: "text/plain"}), "GET")
 var AIGetSession = define[AISessionIDRequest, *AISession]("getSession", "/api/ai/agent/getSession", StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{500}}, "POST")
 var AISaveSession = define[AISession, AISessionSaveData]("saveSession", "/api/ai/agent/saveSession", StructJSONBody, ResponseOptions{DataOnError: true, AdditionalErrorStatuses: []int{400, 409, 500}}, "POST")
+
+var NetworkEcho = define[EmptyRequest, NetworkEchoData]("echo", "/api/network/echo", RawBody, ResponseOptions{}, "ANY")
+var NetworkEchoPath = define[EmptyRequest, NetworkEchoData]("echoPath", "/api/network/echo/*path", RawBody, ResponseOptions{}, "ANY")
+var NetworkForwardProxy = define[NetworkForwardRequest, NetworkForwardData]("forwardProxy", "/api/network/forwardProxy", JSONBody, ResponseOptions{AdditionalCodes: []int{1, 2, 3, 4, 5, 6, 7, 8, 10}}, "POST")
+var NetworkHTTPProxy = define[EmptyRequest, ProxyFailure]("httpProxy", "/api/network/proxy", RawBody, ProxyOptions(HTTPProxy), "ANY")
+var NetworkEventSourceProxy = define[EmptyRequest, ProxyFailure]("esProxy", "/es/network/proxy", NoBody, ProxyOptions(EventSourceProxy), "GET")
+var NetworkWebSocketProxy = define[EmptyRequest, ProxyFailure]("wsProxy", "/ws/network/proxy", NoBody, ProxyOptions(WebSocketProxy), "GET")

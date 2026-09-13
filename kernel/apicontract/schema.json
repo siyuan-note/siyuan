@@ -26240,6 +26240,2096 @@
       ],
       "additionalProperties": false
     },
+    "NetworkEchoAttributeTypeAndValue": {
+      "type": "object",
+      "properties": {
+        "Type": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Value": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            {
+              "$ref": "#/$defs/NetworkEchoRawValue"
+            },
+            {
+              "$ref": "#/$defs/NetworkEchoBitString"
+            }
+          ]
+        }
+      },
+      "required": [
+        "Type",
+        "Value"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoBitString": {
+      "type": "object",
+      "properties": {
+        "BitLength": {
+          "type": "integer"
+        },
+        "Bytes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "BitLength",
+        "Bytes"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoCertificate": {
+      "type": "object",
+      "properties": {
+        "AuthorityKeyId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "BasicConstraintsValid": {
+          "type": "boolean"
+        },
+        "CRLDistributionPoints": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "DNSNames": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "EmailAddresses": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ExcludedDNSDomains": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ExcludedEmailAddresses": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ExcludedIPRanges": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/NetworkEchoIPNet"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ExcludedURIDomains": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ExtKeyUsage": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Extensions": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/NetworkEchoExtension"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ExtraExtensions": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/NetworkEchoExtension"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "IPAddresses": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "InhibitAnyPolicy": {
+          "type": "integer"
+        },
+        "InhibitAnyPolicyZero": {
+          "type": "boolean"
+        },
+        "InhibitPolicyMapping": {
+          "type": "integer"
+        },
+        "InhibitPolicyMappingZero": {
+          "type": "boolean"
+        },
+        "IsCA": {
+          "type": "boolean"
+        },
+        "Issuer": {
+          "$ref": "#/$defs/NetworkEchoName"
+        },
+        "IssuingCertificateURL": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "KeyUsage": {
+          "type": "integer"
+        },
+        "MaxPathLen": {
+          "type": "integer"
+        },
+        "MaxPathLenZero": {
+          "type": "boolean"
+        },
+        "NotAfter": {
+          "type": "string"
+        },
+        "NotBefore": {
+          "type": "string"
+        },
+        "OCSPServer": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "PermittedDNSDomains": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "PermittedDNSDomainsCritical": {
+          "type": "boolean"
+        },
+        "PermittedEmailAddresses": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "PermittedIPRanges": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/NetworkEchoIPNet"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "PermittedURIDomains": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Policies": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "PolicyIdentifiers": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "PolicyMappings": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/NetworkEchoPolicyMapping"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "PublicKey": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/NetworkEchoRSAPublicKey"
+            },
+            {
+              "$ref": "#/$defs/NetworkEchoECDSAPublicKey"
+            },
+            {
+              "$ref": "#/$defs/NetworkEchoDSAPublicKey"
+            }
+          ]
+        },
+        "PublicKeyAlgorithm": {
+          "type": "integer"
+        },
+        "Raw": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "RawIssuer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "RawSubject": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "RawSubjectPublicKeyInfo": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "RawTBSCertificate": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "RequireExplicitPolicy": {
+          "type": "integer"
+        },
+        "RequireExplicitPolicyZero": {
+          "type": "boolean"
+        },
+        "SerialNumber": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Signature": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "SignatureAlgorithm": {
+          "type": "integer"
+        },
+        "Subject": {
+          "$ref": "#/$defs/NetworkEchoName"
+        },
+        "SubjectKeyId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "URIs": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/NetworkEchoURL"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "UnhandledCriticalExtensions": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "UnknownExtKeyUsage": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Version": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "AuthorityKeyId",
+        "BasicConstraintsValid",
+        "CRLDistributionPoints",
+        "DNSNames",
+        "EmailAddresses",
+        "ExcludedDNSDomains",
+        "ExcludedEmailAddresses",
+        "ExcludedIPRanges",
+        "ExcludedURIDomains",
+        "ExtKeyUsage",
+        "Extensions",
+        "ExtraExtensions",
+        "IPAddresses",
+        "InhibitAnyPolicy",
+        "InhibitAnyPolicyZero",
+        "InhibitPolicyMapping",
+        "InhibitPolicyMappingZero",
+        "IsCA",
+        "Issuer",
+        "IssuingCertificateURL",
+        "KeyUsage",
+        "MaxPathLen",
+        "MaxPathLenZero",
+        "NotAfter",
+        "NotBefore",
+        "OCSPServer",
+        "PermittedDNSDomains",
+        "PermittedDNSDomainsCritical",
+        "PermittedEmailAddresses",
+        "PermittedIPRanges",
+        "PermittedURIDomains",
+        "Policies",
+        "PolicyIdentifiers",
+        "PolicyMappings",
+        "PublicKey",
+        "PublicKeyAlgorithm",
+        "Raw",
+        "RawIssuer",
+        "RawSubject",
+        "RawSubjectPublicKeyInfo",
+        "RawTBSCertificate",
+        "RequireExplicitPolicy",
+        "RequireExplicitPolicyZero",
+        "SerialNumber",
+        "Signature",
+        "SignatureAlgorithm",
+        "Subject",
+        "SubjectKeyId",
+        "URIs",
+        "UnhandledCriticalExtensions",
+        "UnknownExtKeyUsage",
+        "Version"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoConnectionState": {
+      "type": "object",
+      "properties": {
+        "CipherSuite": {
+          "type": "integer"
+        },
+        "CurveID": {
+          "type": "integer"
+        },
+        "DidResume": {
+          "type": "boolean"
+        },
+        "ECHAccepted": {
+          "type": "boolean"
+        },
+        "HandshakeComplete": {
+          "type": "boolean"
+        },
+        "HelloRetryRequest": {
+          "type": "boolean"
+        },
+        "NegotiatedProtocol": {
+          "type": "string"
+        },
+        "NegotiatedProtocolIsMutual": {
+          "type": "boolean"
+        },
+        "OCSPResponse": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "PeerCertificates": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/NetworkEchoCertificate"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ServerName": {
+          "type": "string"
+        },
+        "SignedCertificateTimestamps": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "TLSUnique": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "VerifiedChains": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/NetworkEchoCertificate"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Version": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "CipherSuite",
+        "CurveID",
+        "DidResume",
+        "ECHAccepted",
+        "HandshakeComplete",
+        "HelloRetryRequest",
+        "NegotiatedProtocol",
+        "NegotiatedProtocolIsMutual",
+        "OCSPResponse",
+        "PeerCertificates",
+        "ServerName",
+        "SignedCertificateTimestamps",
+        "TLSUnique",
+        "VerifiedChains",
+        "Version"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoContext": {
+      "type": "object",
+      "properties": {
+        "ClientIP": {
+          "type": "string"
+        },
+        "ContentType": {
+          "type": "string"
+        },
+        "FullPath": {
+          "type": "string"
+        },
+        "HandlerNames": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "IsWebsocket": {
+          "type": "boolean"
+        },
+        "Params": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/NetworkEchoParam"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "RawData": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "RemoteIP": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ClientIP",
+        "ContentType",
+        "FullPath",
+        "HandlerNames",
+        "IsWebsocket",
+        "Params",
+        "RawData",
+        "RemoteIP"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoCookie": {
+      "type": "object",
+      "properties": {
+        "Domain": {
+          "type": "string"
+        },
+        "Expires": {
+          "type": "string"
+        },
+        "HttpOnly": {
+          "type": "boolean"
+        },
+        "MaxAge": {
+          "type": "integer"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Partitioned": {
+          "type": "boolean"
+        },
+        "Path": {
+          "type": "string"
+        },
+        "Quoted": {
+          "type": "boolean"
+        },
+        "Raw": {
+          "type": "string"
+        },
+        "RawExpires": {
+          "type": "string"
+        },
+        "SameSite": {
+          "type": "integer"
+        },
+        "Secure": {
+          "type": "boolean"
+        },
+        "Unparsed": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Domain",
+        "Expires",
+        "HttpOnly",
+        "MaxAge",
+        "Name",
+        "Partitioned",
+        "Path",
+        "Quoted",
+        "Raw",
+        "RawExpires",
+        "SameSite",
+        "Secure",
+        "Unparsed",
+        "Value"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoCurveParams": {
+      "type": "object",
+      "properties": {
+        "B": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "BitSize": {
+          "type": "integer"
+        },
+        "Gx": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Gy": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "N": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Name": {
+          "type": "string"
+        },
+        "P": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "B",
+        "BitSize",
+        "Gx",
+        "Gy",
+        "N",
+        "Name",
+        "P"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoDSAPublicKey": {
+      "type": "object",
+      "properties": {
+        "G": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "P": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Q": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Y": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "G",
+        "P",
+        "Q",
+        "Y"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoData": {
+      "type": "object",
+      "properties": {
+        "Context": {
+          "$ref": "#/$defs/NetworkEchoContext"
+        },
+        "Request": {
+          "$ref": "#/$defs/NetworkEchoRequest"
+        },
+        "URL": {
+          "$ref": "#/$defs/NetworkEchoURLInfo"
+        },
+        "User": {
+          "$ref": "#/$defs/NetworkEchoUser"
+        }
+      },
+      "required": [
+        "Context",
+        "Request",
+        "URL",
+        "User"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoECDSAPublicKey": {
+      "type": "object",
+      "properties": {
+        "Curve": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false
+                },
+                {
+                  "$ref": "#/$defs/NetworkEchoCurveParams"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "X": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Y": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "Curve",
+        "X",
+        "Y"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoExtension": {
+      "type": "object",
+      "properties": {
+        "Critical": {
+          "type": "boolean"
+        },
+        "Id": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "Critical",
+        "Id",
+        "Value"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoFile": {
+      "type": "object",
+      "properties": {
+        "Content": {
+          "type": "string"
+        },
+        "Filename": {
+          "type": "string"
+        },
+        "Header": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Size": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "Content",
+        "Filename",
+        "Header",
+        "Size"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoIPNet": {
+      "type": "object",
+      "properties": {
+        "IP": {
+          "type": "string"
+        },
+        "Mask": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "IP",
+        "Mask"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoMultipart": {
+      "type": "object",
+      "properties": {
+        "File": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/$defs/NetworkEchoFile"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Value": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "File",
+        "Value"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoName": {
+      "type": "object",
+      "properties": {
+        "CommonName": {
+          "type": "string"
+        },
+        "Country": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ExtraNames": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/NetworkEchoAttributeTypeAndValue"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Locality": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Names": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/NetworkEchoAttributeTypeAndValue"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Organization": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "OrganizationalUnit": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "PostalCode": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Province": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "SerialNumber": {
+          "type": "string"
+        },
+        "StreetAddress": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "CommonName",
+        "Country",
+        "ExtraNames",
+        "Locality",
+        "Names",
+        "Organization",
+        "OrganizationalUnit",
+        "PostalCode",
+        "Province",
+        "SerialNumber",
+        "StreetAddress"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoParam": {
+      "type": "object",
+      "properties": {
+        "Key": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Key",
+        "Value"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoParameters": {
+      "type": "object",
+      "properties": {
+        "G": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "P": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Q": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "G",
+        "P",
+        "Q"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoPolicyMapping": {
+      "type": "object",
+      "properties": {
+        "IssuerDomainPolicy": {
+          "type": "string"
+        },
+        "SubjectDomainPolicy": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "IssuerDomainPolicy",
+        "SubjectDomainPolicy"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoRSAPublicKey": {
+      "type": "object",
+      "properties": {
+        "E": {
+          "type": "integer"
+        },
+        "N": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "E",
+        "N"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoRawValue": {
+      "type": "object",
+      "properties": {
+        "Bytes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Class": {
+          "type": "integer"
+        },
+        "FullBytes": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "IsCompound": {
+          "type": "boolean"
+        },
+        "Tag": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "Bytes",
+        "Class",
+        "FullBytes",
+        "IsCompound",
+        "Tag"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoRequest": {
+      "type": "object",
+      "properties": {
+        "Close": {
+          "type": "boolean"
+        },
+        "ContentLength": {
+          "type": "integer"
+        },
+        "Cookies": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/NetworkEchoCookie"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Form": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Header": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Host": {
+          "type": "string"
+        },
+        "Method": {
+          "type": "string"
+        },
+        "MultipartForm": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NetworkEchoMultipart"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "PostForm": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Proto": {
+          "type": "string"
+        },
+        "ProtoMajor": {
+          "type": "integer"
+        },
+        "ProtoMinor": {
+          "type": "integer"
+        },
+        "Referer": {
+          "type": "string"
+        },
+        "RemoteAddr": {
+          "type": "string"
+        },
+        "TLS": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NetworkEchoConnectionState"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Trailer": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "TransferEncoding": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "URL": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NetworkEchoURL"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "UserAgent": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Close",
+        "ContentLength",
+        "Cookies",
+        "Form",
+        "Header",
+        "Host",
+        "Method",
+        "MultipartForm",
+        "PostForm",
+        "Proto",
+        "ProtoMajor",
+        "ProtoMinor",
+        "Referer",
+        "RemoteAddr",
+        "TLS",
+        "Trailer",
+        "TransferEncoding",
+        "URL",
+        "UserAgent"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoURL": {
+      "type": "object",
+      "properties": {
+        "ForceQuery": {
+          "type": "boolean"
+        },
+        "Fragment": {
+          "type": "string"
+        },
+        "Host": {
+          "type": "string"
+        },
+        "OmitHost": {
+          "type": "boolean"
+        },
+        "Opaque": {
+          "type": "string"
+        },
+        "Path": {
+          "type": "string"
+        },
+        "RawFragment": {
+          "type": "string"
+        },
+        "RawPath": {
+          "type": "string"
+        },
+        "RawQuery": {
+          "type": "string"
+        },
+        "Scheme": {
+          "type": "string"
+        },
+        "User": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NetworkEchoUserinfo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "ForceQuery",
+        "Fragment",
+        "Host",
+        "OmitHost",
+        "Opaque",
+        "Path",
+        "RawFragment",
+        "RawPath",
+        "RawQuery",
+        "Scheme",
+        "User"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoURLInfo": {
+      "type": "object",
+      "properties": {
+        "EscapedFragment": {
+          "type": "string"
+        },
+        "EscapedPath": {
+          "type": "string"
+        },
+        "Hostname": {
+          "type": "string"
+        },
+        "IsAbs": {
+          "type": "boolean"
+        },
+        "Port": {
+          "type": "string"
+        },
+        "Query": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "Redacted": {
+          "type": "string"
+        },
+        "RequestURI": {
+          "type": "string"
+        },
+        "String": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "EscapedFragment",
+        "EscapedPath",
+        "Hostname",
+        "IsAbs",
+        "Port",
+        "Query",
+        "Redacted",
+        "RequestURI",
+        "String"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoUser": {
+      "type": "object",
+      "properties": {
+        "Exists": {
+          "type": "boolean"
+        },
+        "Password": {
+          "type": "string"
+        },
+        "Username": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Exists",
+        "Password",
+        "Username"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkEchoUserinfo": {
+      "type": "object",
+      "additionalProperties": false
+    },
+    "NetworkForwardData": {
+      "type": "object",
+      "properties": {
+        "body": {
+          "type": "string"
+        },
+        "bodyEncoding": {
+          "type": "string"
+        },
+        "contentType": {
+          "type": "string"
+        },
+        "elapsed": {
+          "type": "integer"
+        },
+        "headers": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "type": "integer"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "body",
+        "bodyEncoding",
+        "contentType",
+        "elapsed",
+        "headers",
+        "status",
+        "url"
+      ],
+      "additionalProperties": false
+    },
+    "NetworkForwardRequestInput": {
+      "type": "object",
+      "properties": {
+        "contentType": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "headers": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/$defs/JSONValue"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "method": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JSONValue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payloadEncoding": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "redirect": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "responseEncoding": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timeout": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "additionalProperties": false
+    },
     "NetworkProxy": {
       "type": "object",
       "properties": {
@@ -27745,6 +29835,22 @@
         "path",
         "removeAssets",
         "watermark"
+      ],
+      "additionalProperties": false
+    },
+    "ProxyFailure": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer"
+        },
+        "msg": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "msg"
       ],
       "additionalProperties": false
     },
@@ -40404,6 +42510,436 @@
   },
   "endpoints": [
     {
+      "method": "CONNECT",
+      "path": "/api/network/echo",
+      "handler": "echo",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkEchoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "CONNECT",
+      "path": "/api/network/echo/*path",
+      "handler": "echoPath",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkEchoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "CONNECT",
+      "path": "/api/network/proxy",
+      "handler": "httpProxy",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "proxy",
+      "proxy": {
+        "kind": "http",
+        "contentType": "application/octet-stream",
+        "upstreamStatuses": true
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/network/echo",
+      "handler": "echo",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkEchoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/network/echo/*path",
+      "handler": "echoPath",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkEchoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/network/proxy",
+      "handler": "httpProxy",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "proxy",
+      "proxy": {
+        "kind": "http",
+        "contentType": "application/octet-stream",
+        "upstreamStatuses": true
+      }
+    },
+    {
       "method": "GET",
       "path": "/api/ai/mcp/oauth/callback/:flowID",
       "handler": "mcpOAuthCallback",
@@ -40474,6 +43010,221 @@
           "contentType": "text/plain"
         }
       ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/network/echo",
+      "handler": "echo",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkEchoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/network/echo/*path",
+      "handler": "echoPath",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkEchoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/network/proxy",
+      "handler": "httpProxy",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "proxy",
+      "proxy": {
+        "kind": "http",
+        "contentType": "application/octet-stream",
+        "upstreamStatuses": true
+      }
     },
     {
       "method": "GET",
@@ -40891,6 +43642,134 @@
     },
     {
       "method": "GET",
+      "path": "/es/network/proxy",
+      "handler": "esProxy",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "proxy",
+      "proxy": {
+        "kind": "eventSource",
+        "contentType": "text/event-stream",
+        "upstreamStatuses": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/ws/network/proxy",
+      "handler": "wsProxy",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "proxy",
+      "proxy": {
+        "kind": "websocket",
+        "upstreamStatuses": false,
+        "frames": [
+          "text",
+          "binary",
+          "close"
+        ]
+      }
+    },
+    {
+      "method": "GET",
       "path": "/ws/plugin/rpc",
       "handler": "pluginJsonRpcWebSocket",
       "body": "none",
@@ -41087,6 +43966,651 @@
           ]
         },
         "failureStatus": 404
+      }
+    },
+    {
+      "method": "HEAD",
+      "path": "/api/network/echo",
+      "handler": "echo",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkEchoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "HEAD",
+      "path": "/api/network/echo/*path",
+      "handler": "echoPath",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkEchoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "HEAD",
+      "path": "/api/network/proxy",
+      "handler": "httpProxy",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "proxy",
+      "proxy": {
+        "kind": "http",
+        "contentType": "application/octet-stream",
+        "upstreamStatuses": true
+      }
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/api/network/echo",
+      "handler": "echo",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkEchoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/api/network/echo/*path",
+      "handler": "echoPath",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkEchoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "OPTIONS",
+      "path": "/api/network/proxy",
+      "handler": "httpProxy",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "proxy",
+      "proxy": {
+        "kind": "http",
+        "contentType": "application/octet-stream",
+        "upstreamStatuses": true
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/network/echo",
+      "handler": "echo",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkEchoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/network/echo/*path",
+      "handler": "echoPath",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkEchoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/network/proxy",
+      "handler": "httpProxy",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "proxy",
+      "proxy": {
+        "kind": "http",
+        "contentType": "application/octet-stream",
+        "upstreamStatuses": true
       }
     },
     {
@@ -68184,6 +71708,305 @@
     },
     {
       "method": "POST",
+      "path": "/api/network/echo",
+      "handler": "echo",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkEchoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/network/echo/*path",
+      "handler": "echoPath",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkEchoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/network/forwardProxy",
+      "handler": "forwardProxy",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/NetworkForwardRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkForwardData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1,
+                  2,
+                  3,
+                  4,
+                  5,
+                  6,
+                  7,
+                  8,
+                  10
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/network/proxy",
+      "handler": "httpProxy",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "proxy",
+      "proxy": {
+        "kind": "http",
+        "contentType": "application/octet-stream",
+        "upstreamStatuses": true
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/notebook/changeMasterPassword",
       "handler": "changeMasterPassword",
       "body": "json",
@@ -84898,6 +88721,436 @@
             "additionalProperties": true
           }
         ]
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/network/echo",
+      "handler": "echo",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkEchoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/network/echo/*path",
+      "handler": "echoPath",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkEchoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/network/proxy",
+      "handler": "httpProxy",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "proxy",
+      "proxy": {
+        "kind": "http",
+        "contentType": "application/octet-stream",
+        "upstreamStatuses": true
+      }
+    },
+    {
+      "method": "TRACE",
+      "path": "/api/network/echo",
+      "handler": "echo",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkEchoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "TRACE",
+      "path": "/api/network/echo/*path",
+      "handler": "echoPath",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/NetworkEchoData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "TRACE",
+      "path": "/api/network/proxy",
+      "handler": "httpProxy",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "proxy",
+      "proxy": {
+        "kind": "http",
+        "contentType": "application/octet-stream",
+        "upstreamStatuses": true
       }
     }
   ]

@@ -41,17 +41,16 @@ var exportMdCmd = &cobra.Command{
 		}
 
 		output, _ := cmd.Flags().GetString("output")
-		if dryRun && output != "" {
+		if dryRun {
+			if output == "" {
+				output = "stdout"
+			}
 			fmt.Printf("[dry-run] Would export markdown for document %s to %s\n", id, output)
 			return nil
 		}
 
 		_, content := model.ExportMarkdownContent(id, 4, 0, true, false, false, false, false)
-		if output != "" {
-			return os.WriteFile(output, []byte(content), 0644)
-		}
-		fmt.Print(content)
-		return nil
+		return writeExportContent(content, output)
 	},
 }
 
@@ -65,17 +64,16 @@ var exportHTMLCmd = &cobra.Command{
 		}
 
 		output, _ := cmd.Flags().GetString("output")
-		if dryRun && output != "" {
+		if dryRun {
+			if output == "" {
+				output = "stdout"
+			}
 			fmt.Printf("[dry-run] Would export HTML for document %s to %s\n", id, output)
 			return nil
 		}
 
 		_, dom, _ := model.ExportHTML(id, "", false, false, false)
-		if output != "" {
-			return os.WriteFile(output, []byte(dom), 0644)
-		}
-		fmt.Print(dom)
-		return nil
+		return writeExportContent(dom, output)
 	},
 }
 
@@ -89,17 +87,16 @@ var exportPreviewCmd = &cobra.Command{
 		}
 
 		output, _ := cmd.Flags().GetString("output")
-		if dryRun && output != "" {
+		if dryRun {
+			if output == "" {
+				output = "stdout"
+			}
 			fmt.Printf("[dry-run] Would export preview HTML for document %s to %s\n", id, output)
 			return nil
 		}
 
 		html := model.ExportPreview(id, false)
-		if output != "" {
-			return os.WriteFile(output, []byte(html), 0644)
-		}
-		fmt.Print(html)
-		return nil
+		return writeExportContent(html, output)
 	},
 }
 
@@ -269,4 +266,15 @@ func init() {
 	exportCmd.AddCommand(exportSYCmd)
 	exportCmd.AddCommand(exportMdZipCmd)
 	exportCmd.AddCommand(exportDataCmd)
+}
+
+func writeExportContent(content, output string) error {
+	if content == "" {
+		return fmt.Errorf("export failed: empty content")
+	}
+	if output != "" {
+		return os.WriteFile(output, []byte(content), 0644)
+	}
+	fmt.Print(content)
+	return nil
 }

@@ -6,10 +6,11 @@ import (
 
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func skipReadonlyStorageMutation(c *gin.Context) *apicontract.Response[apicontract.Null] {
-	if model.IsReadOnlyRoleContext(c) {
+	if util.ReadOnly || model.IsReadOnlyRoleContext(c) {
 		response := apicontract.Success(apicontract.Null{})
 		return &response
 	}

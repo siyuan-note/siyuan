@@ -55,7 +55,9 @@ var syncPushCmd = &cobra.Command{
 			return nil
 		}
 
-		model.SyncDataUpload()
+		if err := model.SyncDataUpload(); err != nil {
+			return err
+		}
 		fmt.Println("ok")
 		return nil
 	},
@@ -70,7 +72,9 @@ var syncPullCmd = &cobra.Command{
 			return nil
 		}
 
-		model.SyncDataDownload()
+		if err := model.SyncDataDownload(); err != nil {
+			return err
+		}
 		fmt.Println("ok")
 		return nil
 	},

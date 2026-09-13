@@ -9,11 +9,43 @@
 package model
 
 import (
+	gosql "database/sql"
 	"strings"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
 )
+
+func TestGraphSearchLiteralWildcards(t *testing.T) {
+	previous := Conf
+	Conf = &AppConf{Search: conf.NewSearch()}
+	Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo = true, true, true
+	t.Cleanup(func() { Conf = previous })
+	db, err := gosql.Open("sqlite3_extended", ":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	for _, keyword := range []string{"%", "_", "a_b", "a%b", `a\b`, "a'b", "#a_b#", "#a%b#"} {
+		for _, field := range []string{"content", "name", "alias", "memo"} {
+			if strings.HasPrefix(keyword, "#") && field != "content" {
+				continue
+			}
+			for _, value := range []string{keyword, "unrelated axb"} {
+				fields := map[string]string{"content": "", "name": "", "alias": "", "memo": ""}
+				fields[field] = value
+				var matched bool
+				query := "SELECT " + query2Stmt(keyword) + " FROM (SELECT ? AS content, ? AS name, ? AS alias, ? AS memo, '' AS ial)"
+				if err = db.QueryRow(query, fields["content"], fields["name"], fields["alias"], fields["memo"]).Scan(&matched); err != nil {
+					t.Fatalf("%s: %v", query, err)
+				}
+				if matched != (value == keyword) {
+					t.Fatalf("keyword %q field %s value %q: matched=%v", keyword, field, value, matched)
+				}
+			}
+		}
+	}
+}
 
 func TestMarkLinkedNodesWithSize(t *testing.T) {
 	nodes := []*GraphNode{

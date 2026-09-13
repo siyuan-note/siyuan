@@ -35,7 +35,9 @@ var removeUnusedAttributeView = contractHandler(apicontract.RemoveUnusedAttribut
 	if util.InvalidIDPattern(request.ID, ret) {
 		return contractFailure[apicontract.AVIDData](ret)
 	}
-	model.RemoveUnusedAttributeView(request.ID)
+	if err := model.RemoveUnusedAttributeView(request.ID); err != nil {
+		return apicontract.Failure[apicontract.AVIDData](-1, err.Error())
+	}
 	return apicontract.Success(apicontract.AVIDData{ID: request.ID})
 })
 

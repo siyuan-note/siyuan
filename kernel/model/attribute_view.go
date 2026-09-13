@@ -52,16 +52,28 @@ import (
 	"github.com/xrash/smetrics"
 )
 
-func RemoveUnusedAttributeView(id string) {
-	// 防御性校验：ID 必须是合法的节点 ID 格式，防止通过路径穿越读取或删除任意文件
+func ValidateUnusedAttributeView(id string) error {
 	if !ast.IsNodeIDPattern(id) {
+		return fmt.Errorf("invalid attribute view ID: %s", id)
+	}
+	for _, item := range UnusedAttributeViews(false) {
+		if item.Item == id {
+			return nil
+		}
+	}
+	return fmt.Errorf("attribute view is not unused: %s", id)
+}
+
+func RemoveUnusedAttributeView(id string) (err error) {
+	// 防御性校验：ID 必须是合法的节点 ID 格式，防止通过路径穿越读取或删除任意文件
+	if err = ValidateUnusedAttributeView(id); err != nil {
 		return
 	}
 
 	base := filepath.Join(util.DataDir, "storage", "av")
 	absPath := filepath.Join(base, id+".json")
 	if !filelock.IsExist(absPath) {
-		return
+		return fmt.Errorf("attribute view not found: %s", id)
 	}
 
 	historyDir, err := getHistoryDir(HistoryOpClean)

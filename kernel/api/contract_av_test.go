@@ -1,16 +1,57 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
+	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestAVContractRemoveReferencedDatabase(t *testing.T) {
+	fixture := setupAttributeViewContextFilterAPITest(t)
+	block := treenode.GetBlockTree(fixture.databaseID)
+	if block == nil {
+		t.Fatal("database carrier is missing")
+	}
+	boxConf := conf.NewBoxConf()
+	boxConf.Closed = false
+	if err := (&model.Box{ID: block.BoxID}).SaveConf(boxConf); err != nil {
+		t.Fatal(err)
+	}
+	file := filepath.Join(util.DataDir, "storage", "av", fixture.attrView.ID+".json")
+	original, err := os.ReadFile(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := "/api/av/removeUnusedAttributeView"
+	response := callAttributeViewContextFilterAPI(t, path, map[string]any{"id": fixture.attrView.ID}, removeUnusedAttributeView)
+	requireAPIContract(t, http.MethodPost, path, response)
+	var result struct {
+		Code int             `json:"code"`
+		Data json.RawMessage `json:"data"`
+	}
+	if err = json.Unmarshal(response.Body.Bytes(), &result); err != nil {
+		t.Fatal(err)
+	}
+	if response.Code != http.StatusOK || result.Code != -1 || string(result.Data) != "null" {
+		t.Fatalf("referenced database cleanup response: %s", response.Body.String())
+	}
+	remaining, err := os.ReadFile(file)
+	if err != nil || !bytes.Equal(original, remaining) {
+		t.Fatalf("referenced database changed: %v", err)
+	}
+}
 
 func assertAVContractJSONEqual(t *testing.T, want, got any) {
 	t.Helper()

@@ -4,11 +4,21 @@
 
 ## Scope
 
-This document defines type declarations, compatibility requirements, generated artifacts, and verification for kernel HTTP APIs. Endpoint definitions are maintained in `kernel/apicontract/contracts.go`. The migration is complete and `kernel/apicontract/legacy_routes.json` is empty. New endpoints must define type contracts and must not be added to the legacy list.
+This document defines type declarations, compatibility requirements, generated artifacts, and verification for kernel HTTP APIs. Transport types and endpoint definitions are maintained in the module files under `kernel/apicontract/`; `contracts.go` collects the endpoint registry. The migration is complete and `kernel/apicontract/legacy_routes.json` is empty. New endpoints must define type contracts and must not be added to the legacy list.
+
+## Endpoint maintenance
+
+1. Define or update transport types and endpoints in the contract package, specifying request bodies, error codes, null values, defaults, and historical input compatibility
+2. Bind business entry points through `contractHandler`, preserving route middleware order, authorization, and lease scope
+3. Keep `legacy_routes.json` empty; when deleting an endpoint, remove both its route registration and contract definition
+4. Update actual-response, input-compatibility, and strict type tests; run generation and correct calls identified by the compiler
+5. Synchronize generated and related public declarations in `petal`; update API documentation for public endpoints
+
+Generation checks inspect actual route and handler declarations to verify methods, paths, handlers, and contract adapters. CI compares the legacy list with the pre-change list and prevents additional records. Do not bypass contract checks with `any`, type assertions, or changes to the legacy list.
 
 ## Contracts and implementation
 
-`kernel/apicontract/contracts.go` defines requests, responses, and endpoints. The contract package is independent of kernel startup, databases, and persistence models, so the generator runs independently. API entry points bind endpoints through `contractHandler`; Go generic signatures constrain request parameters and successful return values. Constructors set response payloads rather than assigning directly to generic `ret.Data`. Existing helpers continue to validate business rules, and `contractFailure` preserves their error codes, messages, and supported error payloads.
+Module files under `kernel/apicontract/` define requests, responses, and endpoints; `contracts.go` collects them in the endpoint registry. The contract package is independent of kernel startup, databases, and persistence models, so the generator runs independently. API entry points bind endpoints through `contractHandler`; Go generic signatures constrain request parameters and successful return values. Constructors set response payloads rather than assigning directly to generic `ret.Data`. Existing helpers continue to validate business rules, and `contractFailure` preserves their error codes, messages, and supported error payloads.
 
 The generator produces `app/src/types/api/index.d.ts` and `kernel/apicontract/schema.json` from the same Go types. The schema contains shared `$defs` and each endpoint's request and response schemas. Tests validate actual HTTP responses against those same schemas. Type declarations do not validate JSON at runtime; handler tests in CI validate serialized results.
 
@@ -84,11 +94,11 @@ Endpoint-specific behavior is recorded jointly in contract definitions, compatib
 
 `ignoretype` and `filterstrings` apply only to explicitly declared historical parameter compatibility. Generated request types describe canonical calls; compatibility decoding may accept and ignore a wider set of old inputs, with tests covering those exceptions. There is no global switch to fall back to old parsing after binding fails.
 
-Read-only middleware may still return a prompt object containing `closeTimeout`. Ordinary `fetchPost` callbacks receive only nonnegative codes retained after message processing; block-info code `3` still requires handling. `fetchSyncPost` and `fetchGet` preserve complete responses. Dynamic URLs retain existing signatures. Static POST paths must come from contracts or recorded legacy routes, and invalid parameters cannot fall back through another overload. Use an explicit `string` variable when constructing a template URL with an open-ended range.
+Read-only middleware may still return a prompt object containing `closeTimeout`. Ordinary `fetchPost` callbacks receive only nonnegative codes retained after message processing; block-info code `3` still requires handling. `fetchSyncPost` and `fetchGet` preserve complete responses. Dynamic URLs retain existing signatures. Static POST paths must come from contracts, and invalid parameters cannot fall back through another overload. Use an explicit `string` variable when constructing a template URL with an open-ended range.
 
 Use `FailureWithTimeout` when a business error must preserve its message display duration. Contract-based block queries use `holdContractBlockRequest` to retain lease checks for explicit notebooks and accompanying IDs. Individual entry points still specify whether state queries permit deleted IDs.
 
-`StructJSONBody` is reserved for endpoints that already use Go JSON struct binding. It preserves case-insensitive field matching, null handling, and parser errors; required business fields are validated by the handler. It must not be used to relax a migrated endpoint's request rules. Endpoints that return their result payload on failure explicitly set `DataOnError` and use the endpoint's typed `FailureWithData` method.
+`StructJSONBody` is reserved for endpoints that already use Go JSON struct binding. It preserves case-insensitive field matching, null handling, and parser errors; required business fields are validated by the handler. It must not be used to relax an existing endpoint's request rules. Endpoints that return their result payload on failure explicitly set `DataOnError` and use the endpoint's typed `FailureWithData` method.
 
 Notebook configuration updates use a typed partial object. The `legacyobject` field option preserves the existing JSON round-trip's numeric normalization and case-insensitive struct binding; optional pointer fields leave existing values unchanged when omitted or null. Encryption fields are decoded for input compatibility but never applied by the configuration patch. `Base64Bytes` explicitly models historical byte-slice inputs as Base64 strings or byte arrays.
 
@@ -124,33 +134,22 @@ Use `MultipartBody` for file uploads. Request structs declare string fields and 
 
 Fixed fields declared as `[]*multipart.FileHeader` receive all files in their original order and generate `Array<Blob>`. An optional absent file list remains nil. Text and single-file fields still select the first value. `SuccessWithMessage` retains nonempty messages on successful responses, including partial batch uploads.
 
-Frontend callers construct `ContractFormData` from typed fields before passing it to the existing fetch functions. The generated signatures require the endpoint's fields and distinguish file values from strings; raw `FormData` cannot satisfy a migrated upload contract. Optional fields are omitted and string values are not trimmed. Plugin callers can implement the generated `APIFormData<Request>` interface when constructing their forms.
-
-## Endpoint maintenance
+Frontend callers construct `ContractFormData` from typed fields before passing it to the existing fetch functions. The generated signatures require the endpoint's fields and distinguish file values from strings; raw `FormData` cannot satisfy an upload contract. Optional fields are omitted and string values are not trimmed. Plugin callers can implement the generated `APIFormData<Request>` interface when constructing their forms.
 
 Dynamic multipart endpoints use `MultipartFields` to retain every text value and file under each field name. Its request schema maps field names to arrays of text or binary values; `ContractFormData` appends each array item as a repeated form field. This is distinct from fixed-field uploads, which continue to bind the first value. Broadcast publication preserves text-before-file processing and its per-message error results. Endpoint-specific `DecodeFailure` handling preserves existing parsing error codes and payloads.
-
-1. Define or update transport types and endpoints in the contract package, specifying request bodies, error codes, null values, defaults, and historical input compatibility
-2. Bind business entry points through `contractHandler`, preserving route middleware order, authorization, and lease scope
-3. Routes with type contracts must not also appear in `legacy_routes.json`; remove records for deleted endpoints, and never add new endpoints to the list
-4. Update actual-response, input-compatibility, and strict type tests; run generation and correct calls identified by the compiler
-5. Synchronize generated and related public declarations in `petal`; update API documentation for public endpoints
-
-Generation checks inspect actual route and handler declarations to verify methods, paths, handlers, and contract adapters. CI compares the legacy list with the pre-change list and prevents additional records. Do not bypass contract checks with `any`, type assertions, or changes to the legacy list.
 
 ## Generation and verification
 
 Run from `app/`:
 
 ```text
-pnpm run api:generate
 pnpm run api:generate --petal ../../petal
 pnpm run api:check --petal ../../petal
 pnpm run lint
 pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts src/util/contractFormData.test.ts src/config/systemConfig.test.ts src/util/keymapBindings.test.ts src/config/tabs/cloudUser.test.ts src/protyle/util/transactionContract.test.ts
 ```
 
-The `--petal` path is relative to the generator's working directory, `kernel/`; the example refers to a sibling repository. CI checks only this repository's artifacts. Local synchronization across repositories uses this option to verify plugin declarations.
+The generation command updates both this repository and `petal`; a separate generation run without `--petal` is unnecessary. The `--petal` path is relative to the generator's working directory, `kernel/`; the example refers to a sibling repository. CI checks only this repository's artifacts. Local synchronization across repositories uses this option to verify plugin declarations.
 
 Run from `kernel/`:
 

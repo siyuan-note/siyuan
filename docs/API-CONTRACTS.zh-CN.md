@@ -4,11 +4,21 @@
 
 ## 适用范围
 
-本文规定内核 HTTP 接口的类型定义、兼容要求、生成产物和验证流程。端点定义以 `kernel/apicontract/contracts.go` 为准；迁移已完成，`kernel/apicontract/legacy_routes.json` 清单为空。新增接口必须定义类型契约，不得加入该清单。
+本文规定内核 HTTP 接口的类型定义、兼容要求、生成产物和验证流程。传输类型与端点定义位于 `kernel/apicontract/` 下的各模块文件，`contracts.go` 汇总端点注册表；迁移已完成，`kernel/apicontract/legacy_routes.json` 清单为空。新增接口必须定义类型契约，不得加入该清单。
+
+## 接口维护流程
+
+1. 在契约包中定义或更新传输类型与端点，明确请求体、错误码、空值、默认值和历史输入兼容规则
+2. 用 `contractHandler` 绑定业务入口，保持路由中间件顺序、授权和租约范围
+3. 保持 `legacy_routes.json` 为空；删除接口时同步移除路由注册和契约定义
+4. 更新实际响应、兼容输入和严格类型测试，运行生成器，再修正编译器指出的调用问题
+5. 同步 `petal` 的生成声明和相关公共声明；公开接口同步更新接口文档
+
+生成检查读取实际路由与处理函数声明，验证方法、路径、处理函数和契约适配器的对应关系。CI 对照变更前的清单阻止增加存量记录。不得通过 `any`、类型断言或修改存量清单绕过契约检查。
 
 ## 契约与实现
 
-`kernel/apicontract/contracts.go` 定义请求、响应和端点。契约包独立于内核启动、数据库和持久化模型，生成器可以单独运行。API 入口通过 `contractHandler` 绑定端点，请求参数和成功返回值受到 Go 泛型签名约束；响应载荷通过构造函数设置，不能直接给通用 `ret.Data` 赋值。业务校验继续使用现有辅助函数，`contractFailure` 保留其错误码、消息和已支持的错误载荷。
+`kernel/apicontract/` 下的各模块文件定义请求、响应和端点，`contracts.go` 将其汇总到端点注册表。契约包独立于内核启动、数据库和持久化模型，生成器可以单独运行。API 入口通过 `contractHandler` 绑定端点，请求参数和成功返回值受到 Go 泛型签名约束；响应载荷通过构造函数设置，不能直接给通用 `ret.Data` 赋值。业务校验继续使用现有辅助函数，`contractFailure` 保留其错误码、消息和已支持的错误载荷。
 
 生成器从同一组 Go 类型生成 `app/src/types/api/index.d.ts` 和 `kernel/apicontract/schema.json`。后者包含共享的 `$defs` 和每个端点的请求、响应 schema，测试使用同一套 schema 检查实际 HTTP 响应。类型声明不会在运行时验证 JSON，CI 中的处理函数测试负责验证序列化结果。
 
@@ -84,11 +94,11 @@ SQL 查询契约保留成功信封顶层的 `limit` 和 `truncated`。`SuccessSQ
 
 `ignoretype` 和 `filterstrings` 仅用于声明过的旧参数兼容行为。生成的请求类型描述规范调用形式；兼容解码可能接受并忽略更宽的旧输入，兼容测试明确覆盖这些例外。不存在全局「绑定失败后回退旧解析」的开关。
 
-只读中间件仍可返回带 `closeTimeout` 的提示对象。`fetchPost` 的普通回调只接收消息处理后保留的非负错误码，块信息接口的 `3` 仍须处理；`fetchSyncPost` 和 `fetchGet` 保留完整响应。动态 URL 保留存量签名；静态 POST 路径必须来自契约或存量路由，错误参数不能通过重载回退。拼接出开放范围的模板 URL 时使用显式 `string` 变量。
+只读中间件仍可返回带 `closeTimeout` 的提示对象。`fetchPost` 的普通回调只接收消息处理后保留的非负错误码，块信息接口的 `3` 仍须处理；`fetchSyncPost` 和 `fetchGet` 保留完整响应。动态 URL 保留存量签名；静态 POST 路径必须来自契约，错误参数不能通过重载回退。拼接出开放范围的模板 URL 时使用显式 `string` 变量。
 
 业务错误需要保留提示显示时长时使用 `FailureWithTimeout`。使用契约的块查询通过 `holdContractBlockRequest` 保留显式笔记本及附带 ID 的租约检查；状态查询允许已删除 ID 的行为仍由对应入口明确指定。
 
-`StructJSONBody` 用于已经采用 Go JSON 结构体绑定的接口，保留字段名大小写兼容、空值处理和解析错误，业务必填字段继续由处理函数校验。不得用它放宽已迁移接口的请求规则。失败时仍返回业务结果的端点显式设置 `DataOnError`，并调用端点自身的类型化 `FailureWithData` 方法。
+`StructJSONBody` 用于已经采用 Go JSON 结构体绑定的接口，保留字段名大小写兼容、空值处理和解析错误，业务必填字段继续由处理函数校验。不得用它放宽现有接口的请求规则。失败时仍返回业务结果的端点显式设置 `DataOnError`，并调用端点自身的类型化 `FailureWithData` 方法。
 
 笔记本配置更新使用类型化的部分对象。字段选项 `legacyobject` 保留既有 JSON 往返转换中的数字归一化和结构体字段名大小写兼容；可缺省指针字段在缺失或为 null 时保留原值。加密字段仅为输入兼容而解码，配置补丁不会应用这些字段。`Base64Bytes` 显式描述字节切片的 Base64 字符串或字节数组输入。
 
@@ -102,8 +112,6 @@ SQL 查询契约保留成功信封顶层的 `limit` 和 `truncated`。`SuccessSQ
 
 `DirectJSONOutput` 保留直接返回 JSON 对象或数组的独立协议，不添加内核信封，此类载荷使用 `SuccessDirectJSON` 返回。支持通知空响应的端点显式声明 `NoContent` 并返回 `SuccessNoContent`；HTTP 校验要求状态码为 204 且响应体为空。鉴权和只读错误仍保留内核错误信封。生成声明记录直接输出模式及可选的空响应支持。
 
-`WebSocketOutput` 通过 `WebSocketOptions` 声明入站和出站消息类型及插件准入失败状态。`UpgradeWebSocket` 在 `contractHandler` 的响应阶段将写入器交给连接生命周期；`RejectWebSocket` 序列化声明的拒绝载荷。生成的路由元数据包含双向消息模式，`ValidateWebSocketMessage` 单独校验连接内消息，避免与握手响应或中间件信封混淆。握手校验检查 HTTP 状态和响应体，网络回归验证升级头、Origin 拒绝、消息交互和取消后的连接关闭。
-
 ## 文件与流式协议
 
 `RawSSEOptions` 和 `RawWebSocketOptions` 声明以字节为载荷的广播协议，通过 `ValidateRawSSEEvent` 和 `ValidateRawWebSocketFrame` 单独校验事件及帧元数据；JSON 事件与 RPC 消息保留各自既有校验。原始 WebSocket 的错误由升级器写出，不使用 `RejectWebSocket`。
@@ -113,6 +121,8 @@ JSON SSE 接口通过 `SSEOptions` 和 `SSEEvent` 声明各事件名称及载荷
 允许空 HTTP 响应的端点通过 `EmptyResponseStatuses` 列出允许状态，并返回 `EmptyHTTPResponse`；其他响应继续使用各自声明的结构。`RedirectHTTPContent` 保留标准重定向状态、Location 响应头和转义后的 HTML 正文。`RawBody` 将未读取的原始请求流留给协议处理函数。`ProxyOptions` 区分 HTTP 字节、EventSource 字节和 WebSocket 帧，保留上游状态，不将其解释为内核业务错误码。代理准入错误与中间件信封分别校验。`ANY` 注册仍按一条记录检查覆盖率，生成元数据时展开为路由器的九种 HTTP 方法。响应校验保留 JSON 数字精度，包括超过浮点范围的证书整数，不改变请求侧的数字转换。
 
 页面响应通过 `HTTPContentOptions` 声明允许的 HTTP 状态与媒体类型组合，通过 `SuccessHTTPContent` 保留原始字节，复用既有二进制传输并单独处理 JSON 中间件错误。`FastJSON` 为指定的大体量响应保留快速 JSON 编码，不改变有类型载荷及响应信封；编码失败时仍回退到标准编码器。
+
+`WebSocketOutput` 通过 `WebSocketOptions` 声明入站和出站消息类型及插件准入失败状态。`UpgradeWebSocket` 在 `contractHandler` 的响应阶段将写入器交给连接生命周期；`RejectWebSocket` 序列化声明的拒绝载荷。生成的路由元数据包含双向消息模式，`ValidateWebSocketMessage` 单独校验连接内消息，避免与握手响应或中间件信封混淆。握手校验检查 HTTP 状态和响应体，网络回归验证升级头、Origin 拒绝、消息交互和取消后的连接关闭。
 
 可选的 `*string` 表单字段区分未传字段与显式空字符串，并使用 `nonnullable`，因为表单文本不能包含 JSON 空值。导入处理器据此保留默认值和延后校验的行为。上传进度在解析表单前启动，解析失败时先清理进度再返回；类型绑定复用 Gin 缓存的表单。
 
@@ -124,33 +134,22 @@ JSON SSE 接口通过 `SSEOptions` 和 `SSEEvent` 声明各事件名称及载荷
 
 声明为 `[]*multipart.FileHeader` 的固定字段按原顺序接收全部文件，生成 `Array<Blob>`。可选文件列表缺省时保留 nil；文本与单文件字段仍取首值。`SuccessWithMessage` 保留成功响应中的非空提示，包括批量上传部分成功的情况。
 
-前端从类型化字段构造 `ContractFormData`，再交给现有请求函数。生成签名检查端点所需字段并区分文件与字符串，普通 `FormData` 不能满足已迁移上传接口的契约。可缺省字段不写入表单，字符串不裁剪空白。插件调用方构造表单时可实现生成的 `APIFormData<Request>` 接口。
-
-## 接口维护流程
+前端从类型化字段构造 `ContractFormData`，再交给现有请求函数。生成签名检查端点所需字段并区分文件与字符串，普通 `FormData` 不能满足上传接口的契约。可缺省字段不写入表单，字符串不裁剪空白。插件调用方构造表单时可实现生成的 `APIFormData<Request>` 接口。
 
 动态上传接口使用 `MultipartFields` 保留每个字段名对应的全部文本值和文件。请求模式将字段名映射为文本或二进制值的数组，`ContractFormData` 将数组中的每一项追加为同名表单字段。固定字段上传仍绑定首个值。广播发布保留先处理文本、再处理文件的顺序及逐条消息的错误结果。端点专用的 `DecodeFailure` 处理保留原有解析错误码和载荷。
-
-1. 在契约包中定义或更新传输类型与端点，明确请求体、错误码、空值、默认值和历史输入兼容规则
-2. 用 `contractHandler` 绑定业务入口，保持路由中间件顺序、授权和租约范围
-3. 使用类型契约的路由不得同时出现在 `legacy_routes.json`；删除接口时同步移除对应记录，新增接口不得加入该清单
-4. 更新实际响应、兼容输入和严格类型测试，运行生成器，再修正编译器指出的调用问题
-5. 同步 `petal` 的生成声明和相关公共声明；公开接口同步更新接口文档
-
-生成检查读取实际路由与处理函数声明，验证方法、路径、处理函数和契约适配器的对应关系。CI 对照变更前的清单阻止增加存量记录。不得通过 `any`、类型断言或修改存量清单绕过契约检查。
 
 ## 生成与验证
 
 在 `app/` 下运行：
 
 ```text
-pnpm run api:generate
 pnpm run api:generate --petal ../../petal
 pnpm run api:check --petal ../../petal
 pnpm run lint
 pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts src/util/contractFormData.test.ts src/config/systemConfig.test.ts src/util/keymapBindings.test.ts src/config/tabs/cloudUser.test.ts src/protyle/util/transactionContract.test.ts
 ```
 
-`--petal` 路径相对于生成器的工作目录 `kernel/`，示例对应同级仓库。CI 只检查本仓库产物，本地跨仓库同步须使用该参数核对插件声明。
+上述生成命令同时更新本仓库与 `petal`，无须再单独执行不带 `--petal` 的生成命令。`--petal` 路径相对于生成器的工作目录 `kernel/`，示例对应同级仓库。CI 只检查本仓库产物，本地跨仓库同步须使用该参数核对插件声明。
 
 在 `kernel/` 下运行：
 

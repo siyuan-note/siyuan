@@ -105,16 +105,15 @@ func RenderGoTemplateAtInBox(templateContent string, now time.Time, boxID string
 
 // RemoveTemplate 删除模板文件，路径必须限定在 <data>/templates/ 目录内，防止任意文件被删除
 func RemoveTemplate(p string) (err error) {
-	abs := p
-	if !filepath.IsAbs(abs) {
-		abs = filepath.Join(util.DataDir, "templates", p)
+	root, rel, err := openTemplatePath(p)
+	if err != nil {
+		return err
 	}
-	abs = filepath.Clean(abs)
-	templatesRoot := filepath.Clean(filepath.Join(util.DataDir, "templates"))
-	if !gulu.File.IsSubPath(templatesRoot, abs) {
-		return errors.New("template path is outside templates directory")
-	}
-	err = filelock.Remove(abs)
+	defer root.Close()
+	abs := filepath.Join(root.Name(), rel)
+	filelock.Lock(abs)
+	defer filelock.Unlock(abs)
+	err = root.RemoveAll(rel)
 	if err != nil {
 		logging.LogErrorf("remove template failed: %s", err)
 	}

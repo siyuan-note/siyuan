@@ -1224,6 +1224,11 @@ export const activeBlur = (force = false) => {
 
 export const initKeyboardToolbar = () => {
     let composing = false;
+    window.addEventListener("siyuan-mobile-keyboard-hiding", () => {
+        // 键盘退场前先隐藏工具栏，焦点和选区由原生端在动画结束后清理。
+        preventKeyboardToolbarRender();
+        hideKeyboardToolbar();
+    });
     document.addEventListener("focusin", () => {
         if (["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName) &&
             !document.getElementById("keyboardToolbar").contains(document.activeElement)) {

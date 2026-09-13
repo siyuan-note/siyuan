@@ -165,7 +165,6 @@
   {"method":"POST","path":"/api/clipboard/writeFilePath","handler":"writeFilePath"},
   {"method":"POST","path":"/api/cloud/getCloudSpace","handler":"getCloudSpace"},
   {"method":"POST","path":"/api/cloud/setCloudReminder","handler":"setCloudReminder"},
-  {"method":"POST","path":"/api/convert/pandoc","handler":"pandoc"},
   {"method":"POST","path":"/api/export/copyExportFile","handler":"copyExportFile"},
   {"method":"POST","path":"/api/export/export2Liandi","handler":"export2Liandi"},
   {"method":"POST","path":"/api/export/exportAsFile","handler":"exportAsFile"},

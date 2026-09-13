@@ -5006,6 +5006,43 @@
       ],
       "additionalProperties": false
     },
+    "PandocData": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "PandocRequestInput": {
+      "type": "object",
+      "properties": {
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dir": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "additionalProperties": false
+    },
     "Petal": {
       "type": "object",
       "properties": {
@@ -13280,6 +13317,81 @@
               },
               "data": {
                 "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/convert/pandoc",
+      "handler": "pandoc",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/PandocRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/PandocData"
               },
               "msg": {
                 "type": "string"

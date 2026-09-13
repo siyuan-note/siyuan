@@ -276,6 +276,10 @@ export type OutlineStorageRequestInput = { "docID": string; };
 
 export type OutlineStorageSetRequestInput = { "docID": string; "val": { [key: string]: JSONValue }; };
 
+export type PandocData = { "path": string; };
+
+export type PandocRequestInput = { "args": Array<string>; "dir"?: string | null; };
+
 export type Petal = { "css": string; "disabledInPublish": boolean; "disallowInstall": boolean; "displayName": string; "enabled": boolean; "i18n": { [key: string]: JSONValue } | null; "incompatible": boolean; "js": string; "kernel": KernelPetal; "name": string; "userDisabledInPublish": boolean; "version": string; };
 
 export type PinnedDoc = { "childrenSortMode": number | null; "icon": string; "id": string; "name": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
@@ -600,7 +604,6 @@ export type APILegacyPOSTPath =
     "/api/clipboard/writeFilePath" |
     "/api/cloud/getCloudSpace" |
     "/api/cloud/setCloudReminder" |
-    "/api/convert/pandoc" |
     "/api/export/copyExportFile" |
     "/api/export/export2Liandi" |
     "/api/export/exportAsFile" |
@@ -1251,6 +1254,11 @@ export interface APIPOSTRoutes {
     "/api/bookmark/renameBookmark": {
         request: RenameBookmarkRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/convert/pandoc": {
+        request: PandocRequestInput;
+        response: { "code": 0; "data": PandocData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/filetree/getPinnedDocs": {

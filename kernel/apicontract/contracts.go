@@ -425,3 +425,5 @@ var LoadPetals = define[LoadPetalsRequest, []*Petal]("loadPetals", "/api/petal/l
 var SetPetalEnabled = define[SetPetalEnabledRequest, *Petal]("setPetalEnabled", "/api/petal/setPetalEnabled", JSONBody, ResponseOptions{}, "POST")
 
 var SetPetalPublishEnabled = define[SetPetalPublishEnabledRequest, *Petal]("setPetalPublishEnabled", "/api/petal/setPetalPublishEnabled", JSONBody, ResponseOptions{}, "POST")
+
+var Pandoc = define[PandocRequest, PandocData]("pandoc", "/api/convert/pandoc", JSONBody, ResponseOptions{}, "POST")

@@ -11,6 +11,7 @@ import {electronUndo} from "../protyle/undo";
 import {escapeAttr} from "../util/escape";
 import {setMenuInputCurrent} from "./menuKeyboard";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
+import {activeBlur} from "../mobile/util/keyboardToolbar";
 /// #if !MOBILE
 import {applyMenuEntryVisibility} from "../config/entryVisibility/runtime";
 /// #endif
@@ -73,7 +74,7 @@ export class Menu {
                 const name = this.element.getAttribute("data-name");
                 if ((name === Constants.MENU_BLOCK_SINGLE || name === Constants.MENU_BLOCK_MULTI) &&
                     !(event.target as Element).closest("input, textarea, select, [contenteditable=\"true\"]")) {
-                    // 保留编辑器选区和键盘，同时允许菜单输入框正常获取焦点。
+                    // 保留编辑器选区，同时允许菜单输入框正常获取焦点。
                     event.preventDefault();
                 }
             };
@@ -637,6 +638,8 @@ export class Menu {
             this.element.lastElementChild.scrollTop = 0;
             return;
         }
+        // 主动打开菜单时跳过键盘弹出保护锁，收起键盘后再展开面板。
+        activeBlur(true);
         clearTimeout(fullscreenCloseTimeout);
         this.element.querySelectorAll(":scope > .b3-menu__items, .b3-menu__submenu > .b3-menu__items")
             .forEach(updateMenuItemGroupClasses);

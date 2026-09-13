@@ -794,45 +794,35 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
                 return;
             }
             // 导入前需输入主密码校验（备份文件不含密码，校验用导入备份对应的主密码）
-            const passwordDialog = new Dialog({
+            openInputDialog({
                 title: window.siyuan.languages.masterPassword,
-                content: `<div class="b3-dialog__content">
-    <input type="password" placeholder="${window.siyuan.languages.masterPassword}" class="b3-text-field fn__block">
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
-    <div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
+                value: "",
+                type: "password",
+                placeholder: window.siyuan.languages.masterPassword,
                 width: "520px",
-            });
-            const pwdInput = passwordDialog.element.querySelector(".b3-text-field") as HTMLInputElement;
-            passwordDialog.element.querySelector(".b3-button--cancel")?.addEventListener("click", () => {
-                passwordDialog.destroy();
-            });
-            passwordDialog.element.querySelector(".b3-button--text")?.addEventListener("click", () => {
-                const password = pwdInput.value.trim();
-                if (!password) {
-                    showMessage(window.siyuan.languages.masterPassword);
-                    return;
-                }
-                const formData = new FormData();
-                formData.append("file", file);
-                formData.append("password", password);
-                fetch("/api/notebook/importNotebookCryptoBackup", {
-                    method: "POST",
-                    body: formData,
-                }).then((res) => res.json()).then((response: IWebSocketData) => {
-                    if (response.code === -1) {
-                        showMessage(response.msg, 6000, "error");
+                onConfirm: (value, passwordDialog) => {
+                    const password = value.trim();
+                    if (!password) {
+                        showMessage(window.siyuan.languages.masterPassword);
                         return;
                     }
-                    showMessage(window.siyuan.languages.importNotebookCryptoBackupTip);
-                    passwordDialog.destroy();
-                    refresh();
-                });
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    formData.append("password", password);
+                    fetch("/api/notebook/importNotebookCryptoBackup", {
+                        method: "POST",
+                        body: formData,
+                    }).then((res) => res.json()).then((response: IWebSocketData) => {
+                        if (response.code === -1) {
+                            showMessage(response.msg, 6000, "error");
+                            return;
+                        }
+                        showMessage(window.siyuan.languages.importNotebookCryptoBackupTip);
+                        passwordDialog.destroy();
+                        refresh();
+                    });
+                },
             });
-            pwdInput.focus();
         };
         fileInput.click();
     });

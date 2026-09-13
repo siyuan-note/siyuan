@@ -1,0 +1,186 @@
+import * as assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import {it} from "node:test";
+import {runInNewContext} from "node:vm";
+import {createSourceFile, forEachChild, isCallExpression, ModuleKind, ScriptTarget, transpileModule} from "typescript";
+
+class Control {
+    value = "";
+    disabled = false;
+    dataset: Record<string, string> = {};
+    listeners: Record<string, () => void> = {};
+    addEventListener(type: string, listener: () => void) {
+        this.listeners[type] = listener;
+    }
+    click() {
+        if (!this.disabled) {
+            this.listeners.click?.();
+        }
+    }
+    focus() {}
+    select() {}
+}
+
+class Input extends Control {
+    type = "text";
+}
+
+const loadDialog = () => {
+    class TestDialog {
+        input: Control;
+        cancel = new Control();
+        confirm = new Control();
+        actions: Control[];
+        closed = false;
+        enter?: () => void;
+        element: {
+            querySelector: (selector: string) => Control,
+            querySelectorAll: (selector: string) => Control[],
+        };
+        constructor(public options: {content: string}) {
+            this.input = options.content.includes("<textarea") ? new Control() : new Input();
+            this.actions = Array.from(options.content.matchAll(/data-input-action="(\d+)"/g), match => {
+                const control = new Control();
+                control.dataset.inputAction = match[1];
+                return control;
+            });
+            this.element = {
+                querySelector: selector => ({
+                    "[data-dialog-input]": this.input,
+                    "[data-input-cancel]": this.cancel,
+                    "[data-input-confirm]": this.confirm,
+                })[selector],
+                querySelectorAll: () => this.actions,
+            };
+        }
+        bindInput(input: Control, enter: () => void) {
+            assert.equal(input, this.input);
+            this.enter = enter;
+        }
+        destroy() {
+            this.closed = true;
+        }
+    }
+    const exports = {} as {openInputDialog: (options: Record<string, unknown>) => TestDialog};
+    runInNewContext(transpileModule(readFileSync("src/dialog/inputDialog.ts", "utf8"), {
+        compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2020},
+    }).outputText, {
+        exports,
+        HTMLInputElement: Input,
+        window: {siyuan: {languages: {confirm: "Confirm", cancel: "Cancel"}}},
+        require: (name: string) => {
+            if (name === "./index") {
+                return {Dialog: TestDialog};
+            }
+            if (name === "../util/functions") {
+                return {isMobile: () => false};
+            }
+            if (name === "../util/escape") {
+                return {escapeHtml: (value: string) => value.replace(/</g, "&lt;")};
+            }
+            throw new Error(name);
+        },
+    });
+    return exports.openInputDialog;
+};
+
+it("keeps validation and closing with the caller and respects a disabled confirm button", () => {
+    const open = loadDialog();
+    let calls = 0;
+    const dialog = open({
+        title: "Password",
+        value: "",
+        type: "password",
+        onConfirm: (value: string, current: {destroy: () => void}) => {
+            calls++;
+            if (value) {
+                current.destroy();
+            }
+        },
+    });
+    assert.equal((dialog.input as Input).type, "password");
+    dialog.enter();
+    assert.equal(dialog.closed, false);
+    dialog.confirm.disabled = true;
+    dialog.enter();
+    assert.equal(calls, 1);
+    dialog.confirm.disabled = false;
+    dialog.input.value = "secret";
+    dialog.enter();
+    assert.equal(dialog.closed, true);
+});
+
+it("uses the primary action for Enter and leaves extra content buttons independent", () => {
+    const open = loadDialog();
+    const calls: string[] = [];
+    const dialog = open({
+        title: "Template",
+        value: "<name>",
+        extraContent: '<button class="b3-button">Manager</button>',
+        confirmText: "Update",
+        actions: [{text: "Delete", position: "beforeCancel", onClick: (value: string) => calls.push("delete:" + value)},
+            {text: "Rename", onClick: (value: string) => calls.push("rename:" + value)},
+            {text: "Upload", position: "afterConfirm", onClick: (value: string) => calls.push("upload:" + value)}],
+        onConfirm: (value: string) => calls.push("confirm:" + value),
+    });
+    assert.equal(dialog.input.value, "<name>");
+    assert.equal(dialog.options.content.includes("<name>"), false);
+    assert.deepEqual(dialog.actions.map(action => action.dataset.inputAction), ["0", "1", "2"]);
+    dialog.input.value = "changed";
+    dialog.enter();
+    dialog.actions.forEach(action => action.click());
+    assert.deepEqual(calls, ["confirm:changed", "delete:changed", "rename:changed", "upload:changed"]);
+    assert.equal(dialog.closed, false);
+    dialog.cancel.click();
+    assert.equal(dialog.closed, true);
+});
+
+it("supports multiline values and lets autocomplete own keyboard events", () => {
+    const open = loadDialog();
+    const dialog = open({title: "AI", value: "one\ntwo", multiline: true, onConfirm: () => {}});
+    assert.equal(dialog.input instanceof Input, false);
+    assert.equal(dialog.input.value, "one\ntwo");
+    const autocomplete = open({title: "Tag", value: "tag", bindInput: false, onConfirm: () => {}});
+    assert.equal(autocomplete.enter, undefined);
+});
+
+for (const file of ["src/history/doc.ts", "src/history/history.ts"]) {
+    it(`${file} keeps all page jump dialogs open for empty input and clamps valid pages`, () => {
+        const source = createSourceFile(file, readFileSync(file, "utf8"), ScriptTarget.Latest, true);
+        const dialogs: {onConfirm: (value: string, dialog: {destroy: () => void}) => void}[] = [];
+        const pages: number[] = [];
+        let messages = 0;
+        const visit = (node: import("typescript").Node) => {
+            if (isCallExpression(node) && node.expression.getText(source) === "openInputDialog" &&
+                node.arguments[0].getText(source).includes("jumpToPage")) {
+                runInNewContext(transpileModule(node.getText(source), {
+                    compilerOptions: {target: ScriptTarget.ES2020},
+                }).outputText, {
+                    openInputDialog: (options: typeof dialogs[number]) => dialogs.push(options),
+                    window: {siyuan: {languages: {jumpToPage: "Page ${x}"}}},
+                    totalPage: 5, currentPage: 2, pageNumElement: {textContent: "2"}, target: {textContent: "2"},
+                    options: {id: "doc"}, fileElement: {}, repoElement: {}, firstPanelElement: {},
+                    showMessage: () => messages++,
+                    renderDoc: (element: unknown, page: number) => pages.push(page),
+                    renderRepo: (element: unknown, page: number) => pages.push(page),
+                });
+            }
+            forEachChild(node, visit);
+        };
+        visit(source);
+        assert.equal(dialogs.length, 2);
+        for (const options of dialogs) {
+            let closed = false;
+            const dialog = {destroy: () => { closed = true; }};
+            options.onConfirm("", dialog);
+            assert.equal(closed, false);
+            options.onConfirm("invalid", dialog);
+            assert.equal(closed, false);
+            options.onConfirm("99", dialog);
+            assert.equal(closed, true);
+            options.onConfirm("0", dialog);
+        }
+        assert.equal(messages, 4);
+        assert.deepEqual(pages, [5, 1, 5, 1]);
+    });
+}

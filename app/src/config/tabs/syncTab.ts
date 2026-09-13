@@ -1,3 +1,4 @@
+import {openInputDialog} from "../../dialog/inputDialog";
 import type {SettingTabBuilder} from "../setting/builder";
 import {registerAccountGroup} from "./accountUi";
 import {Constants} from "../../constants";
@@ -7,7 +8,6 @@ import {showMessage} from "../../dialog/message";
 import {processSync} from "../../dialog/processSystem";
 import {writeText} from "../../protyle/util/compatibility";
 import {bindSyncCloudListEvent, renderSyncCloudList, setKey} from "../../sync/syncGuide";
-import {Dialog} from "../../dialog";
 import {genConfigItemMainHtml, genConfigItemName} from "../render/fragments";
 import {getLANSyncSearchAvailability, getSyncProviderConfigKeywords} from "./syncUi";
 import {mountLANSyncStatus, mountSyncAssetDownloadMode, patchSyncConfig} from "./syncRuntime";
@@ -224,31 +224,20 @@ const mountRepoKey = (root: HTMLElement) => {
     };
     toggleRepoKeyActions();
     root.querySelector("#importKey")?.addEventListener("click", () => {
-        const passwordDialog = new Dialog({
+        const passwordDialog = openInputDialog({
             title: "🔑 " + window.siyuan.languages.key,
-            content: `<div class="b3-dialog__content">
-    <input type="text" spellcheck="false" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.keyPlaceholder}">
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
+            value: "",
+            placeholder: window.siyuan.languages.keyPlaceholder,
             width: "520px",
+            onConfirm: (value, passwordDialog) => {
+                fetchPost("/api/repo/importRepoKey", {key: value}, (response) => {
+                    window.siyuan.config.repo.key = response.data.key;
+                    toggleRepoKeyActions();
+                    passwordDialog.destroy();
+                });
+            },
         });
         passwordDialog.element.setAttribute("data-key", Constants.DIALOG_PASSWORD);
-        const inputElement = passwordDialog.element.querySelector("input");
-        inputElement.focus();
-        const btnsElement = passwordDialog.element.querySelectorAll(".b3-button");
-        btnsElement[0].addEventListener("click", () => {
-            passwordDialog.destroy();
-        });
-        btnsElement[1].addEventListener("click", () => {
-            fetchPost("/api/repo/importRepoKey", {key: inputElement.value}, (response) => {
-                window.siyuan.config.repo.key = response.data.key;
-                toggleRepoKeyActions();
-                passwordDialog.destroy();
-            });
-        });
     });
     root.querySelector("#initKey")?.addEventListener("click", () => {
         confirmDialog("🔑 " + window.siyuan.languages.genKey, window.siyuan.languages.initRepoKeyTip, () => {

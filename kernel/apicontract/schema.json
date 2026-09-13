@@ -13167,6 +13167,106 @@
       ],
       "additionalProperties": false
     },
+    "AssetReference": {
+      "type": "object",
+      "properties": {
+        "avID": {
+          "type": "string"
+        },
+        "blockID": {
+          "type": "string"
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "relinkable": {
+          "type": "boolean"
+        },
+        "replacement": {
+          "type": "string"
+        },
+        "rootID": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "valueID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "avID",
+        "blockID",
+        "notebook",
+        "path",
+        "reason",
+        "reference",
+        "relinkable",
+        "replacement",
+        "rootID",
+        "type",
+        "valueID"
+      ],
+      "additionalProperties": false
+    },
+    "AssetReferencesData": {
+      "type": "object",
+      "properties": {
+        "dryRun": {
+          "type": "boolean"
+        },
+        "historyPath": {
+          "type": "string"
+        },
+        "references": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AssetReference"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "skippedNotebooks": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "updated": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "dryRun",
+        "historyPath",
+        "references",
+        "skippedNotebooks",
+        "updated"
+      ],
+      "additionalProperties": false
+    },
     "AssetRenameData": {
       "type": "object",
       "properties": {
@@ -23887,6 +23987,18 @@
       ],
       "additionalProperties": false
     },
+    "FindAssetReferencesRequestInput": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
     "FindReplaceRequestInput": {
       "type": "object",
       "properties": {
@@ -32148,6 +32260,25 @@
       },
       "required": [
         "id"
+      ],
+      "additionalProperties": false
+    },
+    "RelinkAssetRequestInput": {
+      "type": "object",
+      "properties": {
+        "dryRun": {
+          "type": "boolean"
+        },
+        "newPath": {
+          "type": "string"
+        },
+        "oldPath": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "newPath",
+        "oldPath"
       ],
       "additionalProperties": false
     },
@@ -110676,6 +110807,81 @@
     },
     {
       "method": "POST",
+      "path": "/api/asset/findAssetReferences",
+      "handler": "findAssetReferences",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/FindAssetReferencesRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AssetReferencesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/asset/fullReindexAssetContent",
       "handler": "fullReindexAssetContent",
       "body": "none",
@@ -111466,6 +111672,84 @@
                   },
                   {
                     "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/asset/relinkAsset",
+      "handler": "relinkAsset",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/RelinkAssetRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/AssetReferencesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/AssetReferencesData"
                   }
                 ]
               },

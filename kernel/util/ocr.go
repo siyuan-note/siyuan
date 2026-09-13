@@ -125,19 +125,18 @@ func SaveAssetsTexts() {
 		assetsTextsLock.Unlock()
 		return
 	}
-	assetsTextsLock.Unlock()
-
 	if err = filelock.WriteFile(assetsTextsPath, data); err != nil {
+		assetsTextsLock.Unlock()
 		logging.LogErrorf("write assets texts failed: %s", err)
 		return
 	}
+	assetsTextsChanged.Store(false)
+	assetsTextsLock.Unlock()
 	debug.FreeOSMemory()
 
 	if elapsed := time.Since(start).Seconds(); 2 < elapsed {
 		logging.LogWarnf("save assets texts [size=%s] to [%s], elapsed [%.2fs]", humanize.BytesCustomCeil(uint64(len(data)), 2), assetsTextsPath, elapsed)
 	}
-
-	assetsTextsChanged.Store(false)
 }
 
 func SetAssetText(asset, text string) {

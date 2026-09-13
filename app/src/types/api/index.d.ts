@@ -508,6 +508,10 @@ export type AssetPathsCloudUploadRequestInput = { "ignorePushMsg"?: boolean | nu
 
 export type AssetPathsData = { "paths": Array<string> | null; };
 
+export type AssetReference = { "avID": string; "blockID": string; "notebook": string; "path": string; "reason": string; "reference": string; "relinkable": boolean; "replacement": string; "rootID": string; "type": string; "valueID": string; };
+
+export type AssetReferencesData = { "dryRun": boolean; "historyPath": string; "references": Array<AssetReference> | null; "skippedNotebooks": Array<string> | null; "updated": number; };
+
 export type AssetRenameData = { "newPath": string; };
 
 export type AssetStatData = { "created": number; "downloaded"?: false; "hCreated": string; "hSize": string; "hUpdated": string; "size": number; "updated": number; };
@@ -1002,6 +1006,8 @@ export type FileTreeSortModeRequestInput = { "id"?: string | null; "sortMode": n
 
 export type FileTreeTrimIDRequestInput = { "id": string; };
 
+export type FindAssetReferencesRequestInput = { "path": string; };
+
 export type FindReplaceRequestInput = { "groupBy"?: number | null; "ids": Array<string>; "k": string; "method"?: number | null; "orderBy"?: number | null; "page"?: number | null; "pageSize"?: number | null; "paths"?: Array<string> | null; "query"?: string | null; "r": string; "replaceTypes"?: Record<string, boolean> | null; "subTypes"?: SearchSubtypeFilterInput | null; "types"?: Record<string, boolean> | null; };
 
 export type FullBlockInfo = { "box": string; "path": string; "rootChildID": string; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
@@ -1429,6 +1435,8 @@ export type RefIDsRequestInput = { "id"?: string | null; "ids"?: Array<string> |
 export type RefTextQueryRequestInput = { "anchor": string; "notebook"?: string | null; };
 
 export type RefreshBacklinkRequestInput = { "id": string; };
+
+export type RelinkAssetRequestInput = { "dryRun"?: boolean; "newPath": string; "oldPath": string; };
 
 export type RemoveAttributeViewBlocksRequestInput = { "avID": string; "srcIDs": Array<string>; };
 
@@ -2580,6 +2588,11 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/asset/findAssetReferences": {
+        request: FindAssetReferencesRequestInput;
+        response: { "code": 0; "data": AssetReferencesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/asset/fullReindexAssetContent": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2628,6 +2641,11 @@ export interface APIPOSTRoutes {
     "/api/asset/ocr": {
         request: AssetPathRequestInput;
         response: { "code": 0; "data": AssetOCRData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/relinkAsset": {
+        request: RelinkAssetRequestInput;
+        response: { "code": 0; "data": AssetReferencesData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "dryRun"?: never; "historyPath"?: never; "references"?: never; "skippedNotebooks"?: never; "updated"?: never; }) | null | (AssetReferencesData & { "closeTimeout"?: never; }); "msg": string; };
         body: "json";
     };
     "/api/asset/removeUnusedAsset": {

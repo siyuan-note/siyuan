@@ -1,7 +1,7 @@
 {
 	"pinnedDocs": "Documents épinglés",
-	"pinDoc": "Épingler au panneau",
-	"unpinDoc": "Détacher du panneau",
+	"pinDoc": "Épingler",
+	"unpinDoc": "Détacher",
 	"editSnapshotMemo": "Modifier la note de l’instantané",
 	"snapshotMemoLocalTip": "Modifie uniquement la note de l’instantané local",
 	"mobileBarsAutoHide": "Masquer automatiquement les barres supérieure et inférieure pendant le défilement",

@@ -42,7 +42,7 @@ export class PinnedDocs {
     constructor(private app: App, private sourceTree: HTMLElement, private open: (id: string, notebook: string) => void,
                 private mobile = false) {
         this.element = document.createElement("div");
-        this.element.className = "file-tree__pins fn__flex-column";
+        this.element.className = "file-tree__pins b3-list--background fn__flex-column";
         this.element.style.cssText = "flex-shrink:0;max-height:40%;min-height:30px;overflow:hidden;border-bottom:1px solid var(--b3-border-color)";
         this.element.innerHTML = `<button class="b3-list-item" type="button" data-pin-heading="true"><span class="b3-list-item__toggle"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span><span class="b3-list-item__text">${window.siyuan.languages.pinnedDocs}</span></button><div class="fn__flex-1" style="overflow:auto;min-height:0"><ul class="b3-list"></ul></div>`;
         this.list = this.element.lastElementChild.firstElementChild as HTMLElement;
@@ -318,7 +318,7 @@ export class PinnedDocs {
         if (source && (!row || row.closest("[data-encrypted=true]"))) { return false; }
         if (!row) {
             this.dropTarget = {id: "", position: "pin-before"};
-            this.element.firstElementChild.classList.add("dragover__top");
+            this.element.firstElementChild.classList.add("dragover__bottom");
         } else {
             if (row.dataset.unavailable === "true") { return false; }
             const rect = row.getBoundingClientRect();

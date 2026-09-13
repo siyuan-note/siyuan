@@ -817,19 +817,11 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
         if (!isEncryptedBox(notebookId)) {
             const pinned = pinnedDocIDs.has(id);
             window.siyuan.menus.menu.append(new MenuItem({
-                id: "pinDoc",
-                icon: "iconPin",
-                label: window.siyuan.languages.pinDoc,
-                click: () => { updatePinnedDocs([id], "pin"); },
+                id: pinned ? "unpinDoc" : "pinDoc",
+                icon: pinned ? "iconUnpin" : "iconPin",
+                label: pinned ? window.siyuan.languages.unpinDoc : window.siyuan.languages.pinDoc,
+                click: () => { updatePinnedDocs([id], pinned ? "unpin" : "pin"); },
             }).element);
-            if (pinned) {
-                window.siyuan.menus.menu.append(new MenuItem({
-                    id: "unpinDoc",
-                    icon: "iconUnpin",
-                    label: window.siyuan.languages.unpinDoc,
-                    click: () => { updatePinnedDocs([id], "unpin"); },
-                }).element);
-            }
         }
         const configuredSortMode = getConfiguredChildrenSortMode(liElement);
         const sortSubMenu = sortMenu("document", configuredSortMode, (sortMode) => {

@@ -1,7 +1,7 @@
 {
 	"pinnedDocs": "Dokumen disematkan",
-	"pinDoc": "Sematkan ke panel",
-	"unpinDoc": "Lepaskan dari panel",
+	"pinDoc": "Sematkan",
+	"unpinDoc": "Lepaskan",
 	"editSnapshotMemo": "Edit catatan snapshot",
 	"snapshotMemoLocalTip": "Hanya mengubah catatan snapshot lokal",
 	"mobileBarsAutoHide": "Sembunyikan bilah atas dan bawah otomatis saat menggulir",

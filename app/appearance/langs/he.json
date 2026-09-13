@@ -1,7 +1,7 @@
 {
 	"pinnedDocs": "מסמכים מוצמדים",
-	"pinDoc": "הצמדה ללוח",
-	"unpinDoc": "ביטול הצמדה ללוח",
+	"pinDoc": "הצמדה",
+	"unpinDoc": "ביטול הצמדה",
 	"editSnapshotMemo": "עריכת הערת תמונת המצב",
 	"snapshotMemoLocalTip": "משנה רק את ההערה של תמונת המצב המקומית",
 	"mobileBarsAutoHide": "הסתרה אוטומטית של הסרגל העליון והתחתון בעת גלילה",

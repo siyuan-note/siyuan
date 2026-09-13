@@ -1,7 +1,7 @@
 {
 	"pinnedDocs": "Documentos fijados",
-	"pinDoc": "Fijar en el panel",
-	"unpinDoc": "Desfijar del panel",
+	"pinDoc": "Fijar",
+	"unpinDoc": "Desfijar",
 	"editSnapshotMemo": "Editar nota de la instantánea",
 	"snapshotMemoLocalTip": "Solo cambia la nota de la instantánea local",
 	"mobileBarsAutoHide": "Ocultar automáticamente las barras superior e inferior al desplazarse",

@@ -1,7 +1,7 @@
 {
 	"pinnedDocs": "Przypięte dokumenty",
-	"pinDoc": "Przypnij do panelu",
-	"unpinDoc": "Odepnij od panelu",
+	"pinDoc": "Przypnij",
+	"unpinDoc": "Odepnij",
 	"editSnapshotMemo": "Edytuj notatkę migawki",
 	"snapshotMemoLocalTip": "Zmienia tylko notatkę lokalnej migawki",
 	"mobileBarsAutoHide": "Automatycznie ukrywaj górny i dolny pasek podczas przewijania",

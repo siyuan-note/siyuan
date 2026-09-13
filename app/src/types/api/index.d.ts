@@ -378,6 +378,12 @@ export type RenameNotebookRequestInput = { "name": string; "notebook": string; }
 
 export type RenameTagRequestInput = { "newLabel": string; "oldLabel": string; };
 
+export type RenderSprigRequestInput = { "template": string; };
+
+export type RenderTemplateData = { "content": string; "docTreePlan"?: TemplatePlan; "path": string; };
+
+export type RenderTemplateRequestInput = { "content"?: string; "id": string; "mode"?: string | null; "path": string; "preview"?: boolean | null; };
+
 export type ReorderData = { "changed": boolean; "notebook"?: string; "parentPath"?: string; };
 
 export type ReorderNotebooksRequestInput = { "position"?: string | null; "sourceIDs"?: Array<string> | null; "targetID"?: string | null; };
@@ -389,6 +395,8 @@ export type RichClipboardPrepared = { "assets": Array<RichClipboardPreparedAsset
 export type RichClipboardPreparedAsset = { "index": number; "path": string; };
 
 export type SQLQueryRequestInput = { "mode"?: string | null; "stmt": string; };
+
+export type SaveTemplateRequestInput = { "databaseMode"?: string; "directory"?: string; "id": string; "name": string; "overwrite": boolean; };
 
 export type SearchBlock = { "alias": string; "box": string; "children": Array<SearchBlock | null> | null; "content": string; "count": number; "created": string; "defID": string; "defPath": string; "depth": number; "fcontent": string; "folded": boolean; "hPath": string; "ial": Record<string, string> | null; "id": string; "markdown": string; "memo": string; "name": string; "number"?: string; "parentID": string; "path": string; "refCount": number; "refText": string; "refs": Array<SearchBlock | null> | null; "riffCard": SearchBlockCard | null; "riffCardID": string; "rootID": string; "sort": number; "subType": string; "tag": string; "type": string; "updated": string; };
 
@@ -461,6 +469,22 @@ export type TagData = { "children": Array<TagData | null> | null; "count": numbe
 export type TailChildBlocksRequestInput = { "id": string; "ids"?: Array<string> | null; "n"?: number | null; "notebook"?: string | null; };
 
 export type TaskListMarkerRequestInput = { "id": string; "marker": string; };
+
+export type TemplateDocumentInfo = { "directory": string; "hasDatabase": boolean; "name": string; };
+
+export type TemplateDocumentRequestInput = { "id": string; };
+
+export type TemplateFileEntry = { "isDir": boolean; "isPackage"?: boolean; "path": string; };
+
+export type TemplateFileRequestInput = { "action"?: string; "content"?: string; "path"?: string; "revision"?: string; "target"?: string; };
+
+export type TemplateFileRevision = { "revision": string; };
+
+export type TemplateFileSource = { "content": string; "path"?: string; "revision": string; };
+
+export type TemplatePlan = { "count": number; "id": string; "nodes": Array<TemplatePlanNode | null> | null; };
+
+export type TemplatePlanNode = { "depth": number; "hPath": string; "id": string; "parentID": string; "title": string; };
 
 export type TransferBlockRefRequestInput = { "fromID": string; "refIDs"?: Array<string> | null; "reloadUI"?: boolean | null; "toID": string; };
 
@@ -923,11 +947,6 @@ export type APILegacyPOSTPath =
     "/api/system/setUILayout" |
     "/api/system/setWorkspaceDir" |
     "/api/system/uiproc" |
-    "/api/template/docSaveAsTemplate" |
-    "/api/template/getDocSaveAsTemplateInfo" |
-    "/api/template/manage" |
-    "/api/template/render" |
-    "/api/template/renderSprig" |
     "/api/transactions" |
     "/api/transactions/clearHistory" |
     "/api/transactions/redo" |
@@ -1965,6 +1984,31 @@ export interface APIPOSTRoutes {
     "/api/tag/renameTag": {
         request: RenameTagRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/template/docSaveAsTemplate": {
+        request: SaveTemplateRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/template/getDocSaveAsTemplateInfo": {
+        request: TemplateDocumentRequestInput;
+        response: { "code": 0; "data": TemplateDocumentInfo; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/template/manage": {
+        request: TemplateFileRequestInput;
+        response: { "code": 0; "data": Array<TemplateFileEntry> | TemplateFileSource | TemplateFileRevision | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/template/render": {
+        request: RenderTemplateRequestInput;
+        response: { "code": 0; "data": RenderTemplateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/template/renderSprig": {
+        request: RenderSprigRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/ui/reloadAttributeView": {

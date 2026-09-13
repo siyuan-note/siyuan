@@ -571,7 +571,7 @@ export const exportMd = (id: string) => {
                 if (response.code !== 0) {
                     return;
                 }
-                const info = response.data as {name: string, directory: string, hasDatabase: boolean};
+                const info = response.data;
                 const databaseOptions = info.hasDatabase ? `<div class="fn__hr"></div>
 <div class="b3-label__text">${window.siyuan.languages.templateDatabaseMode}</div>
 <label class="fn__flex b3-label">

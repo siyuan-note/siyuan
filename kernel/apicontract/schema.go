@@ -75,6 +75,17 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if t == reflect.TypeFor[TemplateManagementData]() {
+		var variants []*Schema
+		for _, member := range []reflect.Type{reflect.TypeFor[[]TemplateFileEntry](), reflect.TypeFor[TemplateFileSource](), reflect.TypeFor[TemplateFileRevision]()} {
+			variant, err := b.schema(member, false)
+			if err != nil {
+				return nil, err
+			}
+			variants = append(variants, nonnullable(variant))
+		}
+		return &Schema{AnyOf: append(variants, &Schema{Type: "null"})}, nil
+	}
 	if t == reflect.TypeFor[SQLValue]() {
 		return &Schema{AnyOf: []*Schema{{Type: "null"}, {Type: "string"}, {Type: "number"}, {Type: "boolean"}}}, nil
 	}

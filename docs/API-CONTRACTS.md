@@ -24,6 +24,8 @@ Encrypted notebook lifecycle endpoints use typed requests and responses while re
 
 ## Compatibility requirements
 
+Template contracts retain path checks before mode and source validation, explicit-mode precedence over the legacy preview flag, database-mode defaults, and the code `1` overwrite prompt. File management keeps Go struct JSON binding and its fixed parse-error message, with separate list, source, revision, and null payloads. Revision checks, symlink restrictions, and sync invalidation remain in the existing model operations.
+
 SQL query contracts retain `limit` and `truncated` at the success envelope's top level. `SuccessSQL` attaches this metadata while failures omit it. Row names come from the query; each value is a JSON scalar, preserving integer digits and Base64 serialization of binary values. Statement trimming, optional mode handling, single-statement and read-only checks, and code `1` query errors remain unchanged.
 
 Contract maintenance must preserve existing observable API behavior. Changes to type definitions or handler structure alone must not change call semantics:

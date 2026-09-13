@@ -21,18 +21,27 @@ type Schema struct {
 	Properties           map[string]*Schema `json:"properties,omitempty"`
 	Required             []string           `json:"required,omitempty"`
 	Items                *Schema            `json:"items,omitempty"`
+	MinItems             int                `json:"minItems,omitempty"`
 	AdditionalProperties any                `json:"additionalProperties,omitempty"`
 }
 
 type EndpointSchema struct {
-	Method      string     `json:"method"`
-	Path        string     `json:"path"`
-	Handler     string     `json:"handler"`
-	Body        BodyMode   `json:"body"`
-	Request     *Schema    `json:"request"`
-	Response    *Schema    `json:"response"`
-	Output      OutputMode `json:"output,omitempty"`
-	ErrorStatus int        `json:"errorStatus,omitempty"`
+	Method      string           `json:"method"`
+	Path        string           `json:"path"`
+	Handler     string           `json:"handler"`
+	Body        BodyMode         `json:"body"`
+	Request     *Schema          `json:"request"`
+	Response    *Schema          `json:"response"`
+	Output      OutputMode       `json:"output,omitempty"`
+	ErrorStatus int              `json:"errorStatus,omitempty"`
+	NoContent   bool             `json:"noContent,omitempty"`
+	WebSocket   *WebSocketSchema `json:"websocket,omitempty"`
+}
+
+type WebSocketSchema struct {
+	Incoming      *Schema `json:"incoming"`
+	Outgoing      *Schema `json:"outgoing"`
+	FailureStatus int     `json:"failureStatus"`
 }
 
 type Bundle struct {
@@ -75,6 +84,62 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if t == reflect.TypeFor[PluginRPCMessage]() {
+		response, err := b.schema(reflect.TypeFor[PluginRPCResponse](), false)
+		if err != nil {
+			return nil, err
+		}
+		notification, err := b.schema(reflect.TypeFor[PluginRPCNotification](), false)
+		if err != nil {
+			return nil, err
+		}
+		// 展开单条回复分支，使声明生成器能排除通知中的 ID 和回复中的 method。
+		variants := append([]*Schema{}, response.AnyOf[0].AnyOf...)
+		variants = append(variants, response.AnyOf[1], notification)
+		return &Schema{AnyOf: variants}, nil
+	}
+	if t == reflect.TypeFor[*JSONValue]() {
+		value, err := b.schema(reflect.TypeFor[JSONValue](), input)
+		if err != nil {
+			return nil, err
+		}
+		return nullable(value), nil
+	}
+	if t == reflect.TypeFor[PluginRPCID]() || t == reflect.TypeFor[*PluginRPCID]() {
+		return &Schema{AnyOf: []*Schema{{Type: "string"}, {Type: "number"}, {Type: "null"}}}, nil
+	}
+	if t == reflect.TypeFor[PluginRPCParams]() {
+		value, err := b.schema(reflect.TypeFor[JSONValue](), input)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{{Type: "array", Items: value}, {Type: "object", AdditionalProperties: value}}}, nil
+	}
+	if t == reflect.TypeFor[PluginRPCBatchRequest]() {
+		call, err := b.schema(reflect.TypeFor[PluginRPCRequestFields](), true)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{call, {Type: "array", Items: call, MinItems: 1}}}, nil
+	}
+	if t == reflect.TypeFor[PluginRPCReply]() {
+		success, err := b.schema(reflect.TypeFor[PluginRPCSuccess](), false)
+		if err != nil {
+			return nil, err
+		}
+		failure, err := b.schema(reflect.TypeFor[PluginRPCFailure](), false)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{success, failure}}, nil
+	}
+	if t == reflect.TypeFor[PluginRPCResponse]() {
+		reply, err := b.schema(reflect.TypeFor[PluginRPCReply](), false)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{reply, {Type: "array", Items: reply, MinItems: 1}}}, nil
+	}
 	if t == reflect.TypeFor[ImportAutoData]() {
 		var variants []*Schema
 		for _, member := range []reflect.Type{reflect.TypeFor[ImportAutoDocument](), reflect.TypeFor[ImportAutoNotebook](), reflect.TypeFor[ImportAutoNotebooks]()} {
@@ -407,8 +472,37 @@ func BuildBundle() (*Bundle, error) {
 	b := &schemaBuilder{definitions: map[string]*Schema{}, owners: map[string]reflect.Type{}}
 	bundle := &Bundle{Dialect: "https://json-schema.org/draft/2020-12/schema", Definitions: b.definitions}
 	for _, definition := range Definitions() {
-		if definition.Output != "" && definition.Output != BinaryOutput {
+		if definition.Output != "" && definition.Output != BinaryOutput && definition.Output != DirectJSONOutput && definition.Output != WebSocketOutput {
 			return nil, fmt.Errorf("unsupported response output: %s", definition.Name)
+		}
+		if definition.NoContent && definition.Output != DirectJSONOutput {
+			return nil, fmt.Errorf("empty responses require direct JSON output: %s", definition.Name)
+		}
+		var websocket *WebSocketSchema
+		if (definition.Output == WebSocketOutput) != (definition.WebSocket != nil) {
+			return nil, fmt.Errorf("WebSocket output requires message declarations: %s", definition.Name)
+		}
+		if ws := definition.WebSocket; ws != nil {
+			if definition.Body != NoBody || definition.DataOnError || definition.ErrorStatus != 0 || ws.FailureStatus < 400 || ws.FailureStatus > 599 {
+				return nil, fmt.Errorf("invalid WebSocket response options: %s", definition.Name)
+			}
+			for _, method := range definition.Methods {
+				if method != "GET" {
+					return nil, fmt.Errorf("WebSocket upgrade requires GET: %s", definition.Name)
+				}
+			}
+			incoming, err := b.schema(ws.Incoming, true)
+			if err != nil {
+				return nil, err
+			}
+			outgoing, err := b.schema(ws.Outgoing, false)
+			if err != nil {
+				return nil, err
+			}
+			websocket = &WebSocketSchema{Incoming: incoming, Outgoing: outgoing, FailureStatus: ws.FailureStatus}
+		}
+		if definition.Output == DirectJSONOutput && (definition.DataOnError || definition.ErrorStatus != 0) {
+			return nil, fmt.Errorf("direct JSON output cannot use envelope data or error status options: %s", definition.Name)
 		}
 		if (definition.Output == BinaryOutput) != (definition.Data == reflect.TypeFor[BinaryContent]()) {
 			return nil, fmt.Errorf("binary output requires BinaryContent: %s", definition.Name)
@@ -451,6 +545,9 @@ func BuildBundle() (*Bundle, error) {
 				return nil, err
 			}
 		}
+		if definition.Output == DirectJSONOutput || definition.Output == WebSocketOutput {
+			success = data
+		}
 		var codes []any
 		for _, code := range definition.ErrorCodes {
 			codes = append(codes, code)
@@ -469,7 +566,7 @@ func BuildBundle() (*Bundle, error) {
 		response := &Schema{AnyOf: []*Schema{success, failure}}
 		for _, method := range definition.Methods {
 			bundle.Endpoints = append(bundle.Endpoints, EndpointSchema{Method: method, Path: definition.Path, Handler: definition.Name,
-				Body: definition.Body, Request: request, Response: response, Output: definition.Output, ErrorStatus: definition.ErrorStatus})
+				Body: definition.Body, Request: request, Response: response, Output: definition.Output, ErrorStatus: definition.ErrorStatus, NoContent: definition.NoContent, WebSocket: websocket})
 		}
 	}
 	sort.Slice(bundle.Endpoints, func(i, j int) bool {
@@ -485,7 +582,7 @@ func (b *Bundle) ValidateResponse(method, path string, payload []byte) error {
 	}
 	for _, endpoint := range b.Endpoints {
 		if endpoint.Method == method && endpoint.Path == path {
-			if endpoint.Output == BinaryOutput {
+			if endpoint.Output == BinaryOutput || endpoint.Output == WebSocketOutput {
 				return fmt.Errorf("binary endpoint requires HTTP response validation")
 			}
 			return b.validate(endpoint.Response, value, "$")
@@ -500,6 +597,18 @@ func (b *Bundle) ValidateHTTPResponse(method, path string, status int, contentTy
 		if endpoint.Method != method || endpoint.Path != path {
 			continue
 		}
+		if endpoint.NoContent && status == 204 {
+			if len(payload) != 0 {
+				return fmt.Errorf("empty response must not contain a body")
+			}
+			return nil
+		}
+		if endpoint.WebSocket != nil && status == 101 {
+			if len(payload) != 0 {
+				return fmt.Errorf("WebSocket upgrade must not contain an HTTP body")
+			}
+			return nil
+		}
 		mediaType, _, err := mime.ParseMediaType(contentType)
 		if err != nil {
 			return fmt.Errorf("invalid response content type: %w", err)
@@ -509,6 +618,16 @@ func (b *Bundle) ValidateHTTPResponse(method, path string, status int, contentTy
 		}
 		expectedStatus := 200
 		response := endpoint.Response
+		if endpoint.WebSocket != nil {
+			if status == 400 && mediaType == "text/plain" {
+				return nil
+			}
+			response = endpoint.Response.AnyOf[1]
+			if status == endpoint.WebSocket.FailureStatus {
+				expectedStatus = status
+				response = endpoint.Response.AnyOf[0]
+			}
+		}
 		if endpoint.Output == BinaryOutput {
 			if endpoint.ErrorStatus != 0 {
 				expectedStatus = endpoint.ErrorStatus
@@ -572,6 +691,9 @@ func (b *Bundle) validate(schema *Schema, value any, path string) error {
 		array, ok := value.([]any)
 		valid = ok
 		if ok {
+			if len(array) < schema.MinItems {
+				return fmt.Errorf("%s has too few array items", path)
+			}
 			for i, element := range array {
 				if err := b.validate(schema.Items, element, fmt.Sprintf("%s[%d]", path, i)); err != nil {
 					return err

@@ -192,8 +192,11 @@ export class Kernel implements IKernelPlugin {
 
     async #initState() {
         const response = await fetchSyncPost("/api/plugin/getLoadedPlugin", { name: this.#name });
-        if (this.state.code === -1 && response.data?.stateCode != null) {
-            this.state.code = response.data.stateCode;
+        if (this.state.code === -1 && response.code === 0 && response.data?.stateCode != null) {
+            const state = response.data.stateCode;
+            if (state === 0 || state === 1 || state === 2 || state === 3 || state === 4 || state === 5) {
+                this.state.code = state;
+            }
         }
     }
 

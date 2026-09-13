@@ -43,6 +43,14 @@ func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, D
 	return func(c *gin.Context) {
 		writeResponse := func(response apicontract.Response[Data]) {
 			status := endpoint.Status(response)
+			if upgrade := response.Upgrade(); upgrade != nil {
+				upgrade(c.Writer, c.Request)
+				return
+			}
+			if status == 204 {
+				c.Status(status)
+				return
+			}
 			if content := response.Binary(); content != nil {
 				c.Data(status, content.ContentType, content.Bytes)
 				return

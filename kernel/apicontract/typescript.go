@@ -38,15 +38,13 @@ func (b *Bundle) typeScript(schema *Schema) string {
 		// 联合成员缺少的字段标记为可选 never，保留精确的属性存在性和判别能力。
 		allProperties := map[string]bool{}
 		objects := make([]*Schema, len(schema.AnyOf))
-		allObjects := true
 		for i, option := range schema.AnyOf {
 			target := option
 			if option.Ref != "" {
 				target = b.Definitions[strings.TrimPrefix(option.Ref, "#/$defs/")]
 			}
 			if target == nil || target.Type != "object" {
-				allObjects = false
-				break
+				continue
 			}
 			objects[i] = target
 			for key := range target.Properties {
@@ -55,7 +53,7 @@ func (b *Bundle) typeScript(schema *Schema) string {
 		}
 		for i, option := range schema.AnyOf {
 			variant := b.typeScript(option)
-			if allObjects {
+			if objects[i] != nil {
 				var absent []string
 				for _, key := range sortedKeys(allProperties) {
 					if _, exists := objects[i].Properties[key]; !exists {
@@ -76,6 +74,10 @@ func (b *Bundle) typeScript(schema *Schema) string {
 	case "null", "string", "boolean":
 		return schema.Type
 	case "array":
+		if schema.MinItems == 1 {
+			item := b.typeScript(schema.Items)
+			return "[" + item + ", ...Array<" + item + ">]"
+		}
 		return "Array<" + b.typeScript(schema.Items) + ">"
 	case "object":
 		if additional, ok := schema.AdditionalProperties.(*Schema); ok {
@@ -140,6 +142,12 @@ func (b *Bundle) TypeScript(legacy []Route) []byte {
 			if endpoint.Output != "" {
 				fmt.Fprintf(&output, "        output: %s;\n", quote(string(endpoint.Output)))
 			}
+			if endpoint.NoContent {
+				output.WriteString("        noContent: true;\n")
+			}
+			if ws := endpoint.WebSocket; ws != nil {
+				fmt.Fprintf(&output, "        websocket: { incoming: %s; outgoing: %s; failureStatus: %d; };\n", b.typeScript(ws.Incoming), b.typeScript(ws.Outgoing), ws.FailureStatus)
+			}
 			output.WriteString("    };\n")
 		}
 		output.WriteString("}\n\n")
@@ -185,8 +193,10 @@ export type APICallbackResponse<R> = R extends {code: infer C extends number}
     ? NonNegative<C> extends never ? never : R & {code: NonNegative<C>}
     : never;
 
+type APIDirectCallbackResponse<R> = R extends {code: number} ? APICallbackResponse<R> : R;
+
 type APIPostTail<C extends APIContract> = [
-    cb?: (response: C extends {output: "binary"} ? JSONValue : APICallbackResponse<C["response"]>) => void,
+    cb?: (response: C extends {output: "binary"} ? JSONValue : C extends {output: "directJSON"} ? APIDirectCallbackResponse<C["response"]> | (C extends {noContent: true} ? "" : never) : APICallbackResponse<C["response"]>) => void,
     headers?: Record<string, string>,
     failCallback?: (response: APIFetchFailure) => void,
     signal?: AbortSignal,
@@ -224,7 +234,7 @@ export type FetchSyncPost<Legacy = APILegacyResponse> = <Path extends string>(
 export type FetchGet<Legacy = APILegacyResponse | string> = <Path extends string>(
     url: Path,
     ...args: Path extends keyof APIGETRoutes
-        ? [cb: (response: APIGETRoutes[Path]["response"]) => void]
+        ? [cb: (response: APIGETRoutes[Path]["response"] | (APIGETRoutes[Path] extends {output: "websocket"} ? string : never)) => void]
         : Path extends keyof APIPOSTRoutes ? never
         : [cb: (response: Legacy) => void]
 ) => void;

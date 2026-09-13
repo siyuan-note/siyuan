@@ -1,10 +1,69 @@
-import type {APIPOSTRoutes, FetchGet, FetchPost, FetchSyncPost, JSONValue} from "../src/types/api";
+import type {APIGETRoutes, APIPOSTRoutes, FetchGet, FetchPost, FetchSyncPost, JSONValue} from "../src/types/api";
 import {ContractFormData} from "../src/util/contractFormData";
 
 declare const fetchPost: FetchPost;
 declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
+
+type RPCWebSocket = APIGETRoutes["/ws/plugin/rpc"]["websocket"];
+const rpcCall: RPCWebSocket["incoming"] = {jsonrpc: "2.0", method: "call", id: 1};
+const rpcNotice: RPCWebSocket["outgoing"] = {jsonrpc: "2.0", method: "event", params: null};
+// @ts-expect-error 批量调用不能为空。
+const rpcEmptyBatch: RPCWebSocket["incoming"] = [];
+// @ts-expect-error 出站通知不能携带调用 ID。
+const rpcInvalidNotice: RPCWebSocket["outgoing"] = {jsonrpc: "2.0", method: "event", id: 1};
+// @ts-expect-error HTTP 中间件信封不是连接内的消息。
+const rpcInvalidFrame: RPCWebSocket["outgoing"] = {code: -1, msg: "denied", data: null};
+void [rpcCall, rpcNotice, rpcEmptyBatch, rpcInvalidNotice, rpcInvalidFrame];
+
+fetchPost("/api/plugin/rpc", {jsonrpc: "2.0", method: "notify"}, response => {
+    const empty: "" | object = response;
+    // @ts-expect-error 纯通知请求的回调可能为空字符串。
+    const objectOnly: object = response;
+    void [empty, objectOnly];
+});
+fetchGet("/ws/plugin/rpc", response => {
+    if (typeof response === "string") {
+        const rejection: string = response;
+        void rejection;
+    }
+    // @ts-expect-error 普通 GET 可能收到拒绝升级的文本。
+    const objectOnly: object = response;
+    void objectOnly;
+});
+
+fetchPost("/api/plugin/rpc", {jsonrpc: "2.0", method: "call", params: {key: [1, true]}, id: 1}, response => {
+    if (response !== "" && !Array.isArray(response) && "jsonrpc" in response) {
+        const version: "2.0" = response.jsonrpc;
+        const id: string | number | null = response.id;
+        void [version, id];
+    }
+});
+fetchPost("/api/plugin/rpc/:name", [{jsonrpc: "2.0", method: "notify"}, {jsonrpc: "2.0", method: "call", id: null}]);
+// @ts-expect-error RPC 请求需要协议版本。
+fetchPost("/api/plugin/rpc", {method: "call"});
+// @ts-expect-error RPC 关联标识不接受布尔值。
+fetchPost("/api/plugin/rpc", {jsonrpc: "2.0", method: "call", id: true});
+// @ts-expect-error RPC 参数应为数组或对象。
+fetchPost("/api/plugin/rpc", {jsonrpc: "2.0", method: "call", params: "text"});
+
+fetchPost("/api/plugin/getLoadedPlugin", {name: "plugin"}, response => {
+    if (response.code === 0 && response.data) {
+        const state: number = response.data.stateCode;
+        const descriptions: string[] | null | undefined = response.data.methods?.[0]?.descriptions;
+        void [state, descriptions];
+    }
+    // @ts-expect-error 插件查询的非零业务码不携带插件信息。
+    const state: number = response.data.stateCode;
+    void state;
+});
+// @ts-expect-error 插件名称必须为字符串。
+fetchPost("/api/plugin/getLoadedPlugin", {name: 1});
+fetchPost("/api/plugin/listLoadedPlugins", undefined, response => {
+    const name: string | undefined = response.data?.[0]?.name;
+    void name;
+});
 
 fetchPost("/api/search/fullTextSearchBlock", {query: "text", subTypes: {heading: {h1: true}}}, response => {
     if (response.data) {

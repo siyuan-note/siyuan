@@ -388,6 +388,10 @@ export type ListNotebooksRequestInput = { "flashcard"?: boolean | null; };
 
 export type LoadPetalsRequestInput = { "frontend": string; };
 
+export type LoadedPlugin = { "methods": Array<PluginRPCMethod | null> | null; "name": string; "state": string; "stateCode": number; };
+
+export type LoadedPluginRequestInput = { "name": string; };
+
 export type LocalGraphConf = { "d3": GraphD3 | null; "dailyNote": boolean; "type": GraphTypeFilter | null; };
 
 export type LocalGraphRequestInput = { "conf"?: GraphConfigurationFieldsInput; "id"?: string | null; "k"?: string | null; "notebook"?: string | null; "reqId"?: JSONValue | null; "type"?: string | null; };
@@ -471,6 +475,18 @@ export type PandocRequestInput = { "args": Array<string>; "dir"?: string | null;
 export type Petal = { "css": string; "disabledInPublish": boolean; "disallowInstall": boolean; "displayName": string; "enabled": boolean; "i18n": { [key: string]: JSONValue } | null; "incompatible": boolean; "js": string; "kernel": KernelPetal; "name": string; "userDisabledInPublish": boolean; "version": string; };
 
 export type PinnedDoc = { "childrenSortMode": number | null; "icon": string; "id": string; "name": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
+
+export type PluginRPCError = { "code": number; "data"?: JSONValue; "message": string; };
+
+export type PluginRPCFailure = { "error": PluginRPCError | null; "id": string | number | null; "jsonrpc": "2.0"; };
+
+export type PluginRPCMethod = { "descriptions": Array<string> | null; "name": string; };
+
+export type PluginRPCNotification = { "jsonrpc": "2.0"; "method": string; "params"?: JSONValue; };
+
+export type PluginRPCRequestFieldsInput = { "id"?: string | number | null; "jsonrpc": "2.0"; "method": string; "params"?: Array<JSONValue> | { [key: string]: JSONValue } | null; };
+
+export type PluginRPCSuccess = { "id": string | number | null; "jsonrpc": "2.0"; "result": JSONValue; };
 
 export type PrepareRichTextRequestInput = { "assets": Array<RichClipboardAssetInput>; };
 
@@ -720,9 +736,6 @@ export type APILegacyGETPath =
     "/api/network/echo" |
     "/api/network/echo/*path" |
     "/api/network/proxy" |
-    "/api/plugin" |
-    "/api/plugin/rpc" |
-    "/api/plugin/rpc/:name" |
     "/api/system/bootProgressSSE" |
     "/api/system/getBootAppearance" |
     "/api/system/getCaptcha" |
@@ -731,11 +744,24 @@ export type APILegacyGETPath =
     "/es/network/proxy" |
     "/plugin/private/:name/*path" |
     "/ws/broadcast" |
-    "/ws/network/proxy" |
-    "/ws/plugin/rpc" |
-    "/ws/plugin/rpc/:name";
+    "/ws/network/proxy";
 
 export interface APIGETRoutes {
+    "/api/plugin": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<LoadedPlugin | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/plugin/rpc": {
+        request: LoadedPluginRequestInput;
+        response: { "code": 0; "data": LoadedPlugin | null; "msg": string; } | { "code": -1 | 1 | 2 | 3 | 4; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/plugin/rpc/:name": {
+        request: LoadedPluginRequestInput;
+        response: { "code": 0; "data": LoadedPlugin | null; "msg": string; } | { "code": -1 | 1 | 2 | 3 | 4; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/system/bootProgress": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": BootProgressData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -745,6 +771,20 @@ export interface APIGETRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+    };
+    "/ws/plugin/rpc": {
+        request: EmptyRequestInput;
+        response: (PluginRPCFailure & { "code"?: never; "data"?: never; "msg"?: never; }) | ({ "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; } & { "error"?: never; "id"?: never; "jsonrpc"?: never; });
+        body: "none";
+        output: "websocket";
+        websocket: { incoming: PluginRPCRequestFieldsInput | [PluginRPCRequestFieldsInput, ...Array<PluginRPCRequestFieldsInput>]; outgoing: (PluginRPCSuccess & { "error"?: never; "method"?: never; "params"?: never; }) | (PluginRPCFailure & { "method"?: never; "params"?: never; "result"?: never; }) | [(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; }), ...Array<(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; })>] | (PluginRPCNotification & { "error"?: never; "id"?: never; "result"?: never; }); failureStatus: 404; };
+    };
+    "/ws/plugin/rpc/:name": {
+        request: EmptyRequestInput;
+        response: (PluginRPCFailure & { "code"?: never; "data"?: never; "msg"?: never; }) | ({ "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; } & { "error"?: never; "id"?: never; "jsonrpc"?: never; });
+        body: "none";
+        output: "websocket";
+        websocket: { incoming: PluginRPCRequestFieldsInput | [PluginRPCRequestFieldsInput, ...Array<PluginRPCRequestFieldsInput>]; outgoing: (PluginRPCSuccess & { "error"?: never; "method"?: never; "params"?: never; }) | (PluginRPCFailure & { "method"?: never; "params"?: never; "result"?: never; }) | [(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; }), ...Array<(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; })>] | (PluginRPCNotification & { "error"?: never; "id"?: never; "result"?: never; }); failureStatus: 404; };
     };
 }
 
@@ -957,10 +997,6 @@ export type APILegacyPOSTPath =
     "/api/network/echo/*path" |
     "/api/network/forwardProxy" |
     "/api/network/proxy" |
-    "/api/plugin/getLoadedPlugin" |
-    "/api/plugin/listLoadedPlugins" |
-    "/api/plugin/rpc" |
-    "/api/plugin/rpc/:name" |
     "/api/repo/checkoutRepo" |
     "/api/repo/diffRepoSnapshots" |
     "/api/repo/downloadCloudSnapshot" |
@@ -1807,7 +1843,7 @@ export interface APIPOSTRoutes {
     };
     "/api/lute/wpsPresentation2BlockDOM": {
         request: WPSPresentationRequestInput;
-        response: { "code": 0; "data": WPSPresentationData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | WPSPresentationData; "msg": string; };
+        response: { "code": 0; "data": WPSPresentationData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "converted"?: never; "dom"?: never; }) | null | (WPSPresentationData & { "closeTimeout"?: never; }); "msg": string; };
         body: "json";
     };
     "/api/notebook/changeMasterPassword": {
@@ -1965,6 +2001,30 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": Petal | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/plugin/getLoadedPlugin": {
+        request: LoadedPluginRequestInput;
+        response: { "code": 0; "data": LoadedPlugin | null; "msg": string; } | { "code": -1 | 1 | 2 | 3 | 4; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/plugin/listLoadedPlugins": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<LoadedPlugin | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/plugin/rpc": {
+        request: PluginRPCRequestFieldsInput | [PluginRPCRequestFieldsInput, ...Array<PluginRPCRequestFieldsInput>];
+        response: (PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; }) | [(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; }), ...Array<(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; })>] | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        output: "directJSON";
+        noContent: true;
+    };
+    "/api/plugin/rpc/:name": {
+        request: PluginRPCRequestFieldsInput | [PluginRPCRequestFieldsInput, ...Array<PluginRPCRequestFieldsInput>];
+        response: (PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; }) | [(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; }), ...Array<(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; })>] | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        output: "directJSON";
+        noContent: true;
+    };
     "/api/query/sql": {
         request: SQLQueryRequestInput;
         response: { "code": 0; "data": Array<Record<string, null | string | number | boolean> | null>; "limit": number; "msg": string; "truncated": boolean; } | ({ "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; } & { "limit"?: never; "truncated"?: never; });
@@ -1972,7 +2032,7 @@ export interface APIPOSTRoutes {
     };
     "/api/ref/getBacklink2": {
         request: BacklinkListRequestInput;
-        response: { "code": 0; "data": BacklinkList | BacklinkRefDefs | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | BacklinkList | BacklinkRefDefs | null; "msg": string; };
+        response: { "code": 0; "data": (BacklinkList & { "refDefs"?: never; }) | (BacklinkRefDefs & { "backlinks"?: never; "backmentions"?: never; "box"?: never; "k"?: never; "linkRefsCount"?: never; "mentionsCount"?: never; "mk"?: never; "revision"?: never; "unchanged"?: never; }) | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | (BacklinkList & { "refDefs"?: never; }) | (BacklinkRefDefs & { "backlinks"?: never; "backmentions"?: never; "box"?: never; "k"?: never; "linkRefsCount"?: never; "mentionsCount"?: never; "mk"?: never; "revision"?: never; "unchanged"?: never; }) | null; "msg": string; };
         body: "json";
     };
     "/api/ref/getBacklinkDoc": {
@@ -2372,7 +2432,7 @@ export interface APIPOSTRoutes {
     };
     "/api/template/manage": {
         request: TemplateFileRequestInput;
-        response: { "code": 0; "data": Array<TemplateFileEntry> | TemplateFileSource | TemplateFileRevision | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": Array<TemplateFileEntry> | TemplateFileSource | (TemplateFileRevision & { "content"?: never; "path"?: never; }) | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
     };
     "/api/template/render": {
@@ -2459,8 +2519,10 @@ export type APICallbackResponse<R> = R extends {code: infer C extends number}
     ? NonNegative<C> extends never ? never : R & {code: NonNegative<C>}
     : never;
 
+type APIDirectCallbackResponse<R> = R extends {code: number} ? APICallbackResponse<R> : R;
+
 type APIPostTail<C extends APIContract> = [
-    cb?: (response: C extends {output: "binary"} ? JSONValue : APICallbackResponse<C["response"]>) => void,
+    cb?: (response: C extends {output: "binary"} ? JSONValue : C extends {output: "directJSON"} ? APIDirectCallbackResponse<C["response"]> | (C extends {noContent: true} ? "" : never) : APICallbackResponse<C["response"]>) => void,
     headers?: Record<string, string>,
     failCallback?: (response: APIFetchFailure) => void,
     signal?: AbortSignal,
@@ -2498,7 +2560,7 @@ export type FetchSyncPost<Legacy = APILegacyResponse> = <Path extends string>(
 export type FetchGet<Legacy = APILegacyResponse | string> = <Path extends string>(
     url: Path,
     ...args: Path extends keyof APIGETRoutes
-        ? [cb: (response: APIGETRoutes[Path]["response"]) => void]
+        ? [cb: (response: APIGETRoutes[Path]["response"] | (APIGETRoutes[Path] extends {output: "websocket"} ? string : never)) => void]
         : Path extends keyof APIPOSTRoutes ? never
         : [cb: (response: Legacy) => void]
 ) => void;

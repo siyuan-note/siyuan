@@ -12,6 +12,10 @@ type OutputMode string
 
 const BinaryOutput OutputMode = "binary"
 
+const DirectJSONOutput OutputMode = "directJSON"
+
+const WebSocketOutput OutputMode = "websocket"
+
 const (
 	JSONBody           BodyMode = "json"
 	MultipartBody      BodyMode = "multipart"
@@ -34,6 +38,8 @@ type Definition struct {
 	DataOnError     bool
 	Output          OutputMode
 	ErrorStatus     int
+	NoContent       bool
+	WebSocket       *WebSocketDefinition
 }
 
 type Endpoint[Request, Data any] struct {
@@ -49,6 +55,8 @@ type ResponseOptions struct {
 	DataOnError     bool
 	Output          OutputMode
 	ErrorStatus     int
+	NoContent       bool
+	WebSocket       *WebSocketDefinition
 }
 
 var definitions []Definition
@@ -102,7 +110,7 @@ func define[Request, Data any](name, path string, body BodyMode, response Respon
 	d := Definition{Name: name, Path: path, Methods: methods, Body: body,
 		Request: reflect.TypeFor[Request](), Data: reflect.TypeFor[Data](),
 		ErrorCodes: append([]int{-1}, response.AdditionalCodes...), ErrorText: response.Text, DataNonNullable: response.NonNullable, DataOnError: response.DataOnError,
-		Output: response.Output, ErrorStatus: response.ErrorStatus}
+		Output: response.Output, ErrorStatus: response.ErrorStatus, NoContent: response.NoContent, WebSocket: response.WebSocket}
 	definitions = append(definitions, d)
 	return Endpoint[Request, Data]{definition: d}
 }
@@ -545,3 +553,21 @@ var FindReplace = define[FindReplaceRequest, Null]("findReplace", "/api/search/f
 var SemanticSearchBlock = define[SearchBlockRequest, SearchBlocksData]("semanticSearchBlock", "/api/search/semanticSearchBlock", JSONBody, ResponseOptions{}, "POST")
 var FullTextSearchBlock = define[FullTextSearchBlockRequest, *FullTextSearchBlockData]("fullTextSearchBlock", "/api/search/fullTextSearchBlock", JSONBody, ResponseOptions{}, "POST")
 var SearchRefBlock = define[SearchRefBlockRequest, SearchRefData]("searchRefBlock", "/api/search/searchRefBlock", JSONBody, ResponseOptions{DataOnError: true}, "POST")
+
+var ListLoadedPlugins = define[EmptyRequest, []*LoadedPlugin]("listLoadedPlugins", "/api/plugin/listLoadedPlugins", NoBody, ResponseOptions{}, "POST")
+
+var ListLoadedPluginsGET = define[EmptyRequest, []*LoadedPlugin]("listLoadedPluginsGET", "/api/plugin", NoBody, ResponseOptions{}, "GET")
+
+var GetLoadedPlugin = define[LoadedPluginRequest, *LoadedPlugin]("getLoadedPlugin", "/api/plugin/getLoadedPlugin", JSONBody, ResponseOptions{AdditionalCodes: []int{1, 2, 3, 4}}, "POST")
+
+var GetLoadedPluginRPC = define[LoadedPluginRequest, *LoadedPlugin]("getLoadedPluginRPC", "/api/plugin/rpc", JSONBody, ResponseOptions{AdditionalCodes: []int{1, 2, 3, 4}}, "GET")
+
+var GetLoadedPluginRPCByName = define[LoadedPluginRequest, *LoadedPlugin]("getLoadedPluginRPCByName", "/api/plugin/rpc/:name", JSONBody, ResponseOptions{AdditionalCodes: []int{1, 2, 3, 4}}, "GET")
+
+var PluginRPCHTTP = define[PluginRPCBatchRequest, PluginRPCResponse]("pluginJsonRpcHttp", "/api/plugin/rpc", JSONBody, ResponseOptions{Output: DirectJSONOutput, NoContent: true}, "POST")
+
+var PluginRPCHTTPByName = define[PluginRPCBatchRequest, PluginRPCResponse]("pluginJsonRpcHttpByName", "/api/plugin/rpc/:name", JSONBody, ResponseOptions{Output: DirectJSONOutput, NoContent: true}, "POST")
+
+var PluginRPCWebSocket = define[EmptyRequest, PluginRPCFailure]("pluginJsonRpcWebSocket", "/ws/plugin/rpc", NoBody, WebSocketOptions[PluginRPCBatchRequest, PluginRPCMessage](404), "GET")
+
+var PluginRPCWebSocketByName = define[EmptyRequest, PluginRPCFailure]("pluginJsonRpcWebSocketByName", "/ws/plugin/rpc/:name", NoBody, WebSocketOptions[PluginRPCBatchRequest, PluginRPCMessage](404), "GET")

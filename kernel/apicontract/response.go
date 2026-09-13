@@ -3,6 +3,7 @@ package apicontract
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 )
 
 // BinaryContent 保留文件的原始字节和媒体类型，不经过 JSON 编码。
@@ -17,8 +18,42 @@ func SuccessBinary(contentType string, data []byte) Response[BinaryContent] {
 
 func (r Response[Data]) Binary() *BinaryContent { return r.binary }
 
+// SuccessDirectJSON 返回协议自身定义的 JSON 载荷，不添加统一信封。
+func SuccessDirectJSON[Data any](data Data) Response[Data] {
+	return Response[Data]{data: data, directJSON: true}
+}
+
+// SuccessNoContent 保留通知类请求的空响应，是否允许由端点声明控制。
+func SuccessNoContent[Data any]() Response[Data] {
+	return Response[Data]{noContent: true}
+}
+
 // Status 只为显式声明的非 JSON 协议使用独立错误状态。
 func (e Endpoint[Request, Data]) Status(r Response[Data]) int {
+	if r.upgrade != nil || r.websocketFailure {
+		if e.definition.Output != WebSocketOutput || e.definition.WebSocket == nil {
+			panic("endpoint does not declare WebSocket output")
+		}
+		if r.upgrade != nil {
+			return 101
+		}
+		return e.definition.WebSocket.FailureStatus
+	}
+	if e.definition.Output == WebSocketOutput && r.code == 0 {
+		panic("WebSocket response requires an upgrade or rejection")
+	}
+	if r.noContent {
+		if e.definition.Output != DirectJSONOutput || !e.definition.NoContent {
+			panic("endpoint does not declare an empty response")
+		}
+		return 204
+	}
+	if r.directJSON && e.definition.Output != DirectJSONOutput {
+		panic("endpoint does not declare a direct JSON response")
+	}
+	if e.definition.Output == DirectJSONOutput && r.code == 0 && !r.directJSON {
+		panic("direct JSON response requires SuccessDirectJSON")
+	}
 	if e.definition.Output == BinaryOutput {
 		if r.binary != nil {
 			return 200
@@ -58,11 +93,15 @@ func (Null) MarshalJSON() ([]byte, error) { return []byte("null"), nil }
 
 // Response 的载荷仅能通过有类型的成功构造函数或明确的错误构造函数设置。
 type Response[Data any] struct {
-	code       int
-	msg        string
-	data       any
-	binary     *BinaryContent
-	queryLimit *SQLQueryLimit
+	code             int
+	msg              string
+	data             any
+	binary           *BinaryContent
+	queryLimit       *SQLQueryLimit
+	directJSON       bool
+	noContent        bool
+	upgrade          func(http.ResponseWriter, *http.Request)
+	websocketFailure bool
 }
 
 func Success[Data any](data Data) Response[Data] { return Response[Data]{data: data} }
@@ -83,6 +122,18 @@ func FailureWithTimeout[Data any](code int, msg string, milliseconds int) Respon
 }
 
 func (r Response[Data]) MarshalJSON() ([]byte, error) {
+	if r.upgrade != nil {
+		return nil, fmt.Errorf("WebSocket upgrade cannot be encoded as JSON")
+	}
+	if r.websocketFailure {
+		return json.Marshal(r.data)
+	}
+	if r.noContent {
+		return nil, fmt.Errorf("empty response cannot be encoded as JSON")
+	}
+	if r.directJSON {
+		return json.Marshal(r.data)
+	}
 	if r.binary != nil {
 		return nil, fmt.Errorf("binary response cannot be encoded as JSON")
 	}

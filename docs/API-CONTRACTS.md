@@ -24,7 +24,7 @@ Encrypted notebook lifecycle endpoints use typed requests and responses while re
 
 ## Compatibility requirements
 
-All 629 method/path registrations in `kernel/api/router.go` are contracted, and the legacy list is empty. The four `ANY` registrations expand to 661 concrete method/path pairs in generated metadata. Static resources, the main application WebSocket, and other transport services registered by `kernel/server/serve.go` are outside this API route inventory.
+At migration completion on September 14, 2026, all 629 method/path registrations in `kernel/api/router.go` were contracted and the legacy list was empty. At that baseline, four `ANY` registrations expanded to 661 concrete method/path pairs in generated metadata. Use the generator and route coverage checks for current counts as endpoints are added. Static resources, the main application WebSocket, and other transport services registered by `kernel/server/serve.go` are outside this API route inventory.
 
 System contracts retain complete configuration, workspace management, uploads, authentication, OIDC response variants, boot streams, and empty or binary responses. Persisted layout and shortcut values are narrowed where the frontend consumes them, preserving existing default repair, obsolete-key cleanup, and binding filtering. Configuration export, import, and shutdown keep their existing lifecycle and encryption behavior.
 
@@ -102,7 +102,7 @@ Storage contracts keep arbitrary JSON limited to storage values; keys, recent do
 
 `DirectJSONOutput` preserves protocols that return their own JSON objects or arrays without the kernel envelope. Use `SuccessDirectJSON` for these payloads. Endpoints that also support empty notification responses explicitly declare `NoContent` and return `SuccessNoContent`; HTTP validation requires status 204 and an empty body. Authentication and read-only failures retain the kernel error envelope. Generated declarations record the direct output mode and optional empty-response support.
 
-## Multipart requests
+## File and streaming protocols
 
 `RawSSEOptions` and `RawWebSocketOptions` declare byte-oriented broadcast protocols. Use `ValidateRawSSEEvent` and `ValidateRawWebSocketFrame` to check their event and frame metadata independently; JSON event and RPC message declarations retain their existing validation. Raw WebSocket failures are written by the upgrader rather than `RejectWebSocket`.
 
@@ -147,7 +147,7 @@ pnpm run api:generate
 pnpm run api:generate --petal ../../petal
 pnpm run api:check --petal ../../petal
 pnpm run lint
-pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts
+pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts src/util/contractFormData.test.ts src/config/systemConfig.test.ts src/util/keymapBindings.test.ts src/config/tabs/cloudUser.test.ts src/protyle/util/transactionContract.test.ts
 ```
 
 The `--petal` path is relative to the generator's working directory, `kernel/`; the example refers to a sibling repository. CI checks only this repository's artifacts. Local synchronization across repositories uses this option to verify plugin declarations.
@@ -156,8 +156,10 @@ Run from `kernel/`:
 
 ```text
 go test ./apicontract/...
-go test -tags "fts5 sqlcipher" ./model -run "TestMultipartUpload|TestInsertLocalAssets|TestRecordAssetUpload|TestReadRTFD|TestCopyRTFD" -count=1
-go test -tags "fts5 sqlcipher" ./api ./plugin -run "TestAPIContract|TestAsset.*Contract|TestInsertLocalAssets|TestSetFileAnnotation|TestDeferredAsset|TestExportBrowserHTML|TestCopyExport|TestBazaarContract|TestRepoContract|TestRepoFileWireCompatibility|TestRPC.*Contract|TestRPCWebSocketOriginCheck|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestContract.*NotebookResponseLease" -count=1
+go test -tags "fts5 sqlcipher" ./model -run "TestMultipartUpload|TestInsertLocalAssets|TestRecordAssetUpload|TestReadRTFD|TestCopyRTFD|Test.*OIDC" -count=1
+go test -tags "fts5 sqlcipher" ./api ./plugin -run "Test.*Contract|TestPluginService|TestGetDynamicIcon|TestInsertLocalAssets|TestSetFileAnnotation|TestDeferredAsset|TestExportBrowserHTML|TestCopyExport|TestRepoFileWireCompatibility|TestRPCWebSocketOriginCheck|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestHTTPProxyResponseSecurityHeaders|TestEventSourceProxyResponseSecurityHeaders|TestForwardProxy|TestConfigureForwardProxy|TestAttributeViewLayoutRejectsReadonlyKernel|TestAttributeViewEditorEndpointsRejectReader|TestMutateViewStateByRoleAndReadonly" -count=1
 ```
 
 `tsconfig.api.json` separately enables strict checks and declaration-file checking for invalid parameters, misspelled fields, required bodies, success and failure branches, nullability, and method mismatches. The main application retains its existing configuration; do not assume strict null checks apply to every call. Handler tests use temporary workspaces and isolated test processes without starting or restarting the running kernel.
+
+Name Go contract regression tests with `Contract` in the test name so the CI selector includes them. Existing protocol-specific suites have explicit selectors. When adding frontend contract consumers or model compatibility cases, update both the CI command and the commands above to include their regression coverage.

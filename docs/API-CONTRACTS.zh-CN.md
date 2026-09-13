@@ -24,7 +24,7 @@
 
 ## 兼容要求
 
-`kernel/api/router.go` 中的 629 条方法和路径注册均已接入契约，旧路由清单为空。其中 4 条 `ANY` 注册在生成声明中展开为 661 条具体方法和路径。由 `kernel/server/serve.go` 注册的静态资源、应用主 WebSocket 和其他传输服务不属于这份 API 路由清单。
+2026 年 9 月 14 日迁移完成时，`kernel/api/router.go` 中的 629 条方法和路径注册均已接入契约，旧路由清单为空。该基线中的 4 条 `ANY` 注册在生成声明中展开为 661 条具体方法和路径。后续新增接口时，以生成器和路由覆盖检查的统计为准。由 `kernel/server/serve.go` 注册的静态资源、应用主 WebSocket 和其他传输服务不属于这份 API 路由清单。
 
 系统契约保留完整配置、工作空间管理、上传、认证、OIDC 响应分支、启动事件流以及空响应和二进制响应。前端在读取持久化布局和快捷键的位置收窄类型，保留原有默认值修复、废弃键清理和绑定过滤逻辑。配置导入、导出和退出保持原有生命周期及加密行为。
 
@@ -104,7 +104,7 @@ SQL 查询契约保留成功信封顶层的 `limit` 和 `truncated`。`SuccessSQ
 
 `WebSocketOutput` 通过 `WebSocketOptions` 声明入站和出站消息类型及插件准入失败状态。`UpgradeWebSocket` 在 `contractHandler` 的响应阶段将写入器交给连接生命周期；`RejectWebSocket` 序列化声明的拒绝载荷。生成的路由元数据包含双向消息模式，`ValidateWebSocketMessage` 单独校验连接内消息，避免与握手响应或中间件信封混淆。握手校验检查 HTTP 状态和响应体，网络回归验证升级头、Origin 拒绝、消息交互和取消后的连接关闭。
 
-## 文件上传请求
+## 文件与流式协议
 
 `RawSSEOptions` 和 `RawWebSocketOptions` 声明以字节为载荷的广播协议，通过 `ValidateRawSSEEvent` 和 `ValidateRawWebSocketFrame` 单独校验事件及帧元数据；JSON 事件与 RPC 消息保留各自既有校验。原始 WebSocket 的错误由升级器写出，不使用 `RejectWebSocket`。
 
@@ -147,7 +147,7 @@ pnpm run api:generate
 pnpm run api:generate --petal ../../petal
 pnpm run api:check --petal ../../petal
 pnpm run lint
-pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts
+pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts src/util/contractFormData.test.ts src/config/systemConfig.test.ts src/util/keymapBindings.test.ts src/config/tabs/cloudUser.test.ts src/protyle/util/transactionContract.test.ts
 ```
 
 `--petal` 路径相对于生成器的工作目录 `kernel/`，示例对应同级仓库。CI 只检查本仓库产物，本地跨仓库同步须使用该参数核对插件声明。
@@ -156,8 +156,10 @@ pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts
 
 ```text
 go test ./apicontract/...
-go test -tags "fts5 sqlcipher" ./model -run "TestMultipartUpload|TestInsertLocalAssets|TestRecordAssetUpload|TestReadRTFD|TestCopyRTFD" -count=1
-go test -tags "fts5 sqlcipher" ./api ./plugin -run "TestAPIContract|TestAsset.*Contract|TestInsertLocalAssets|TestSetFileAnnotation|TestDeferredAsset|TestExportBrowserHTML|TestCopyExport|TestBazaarContract|TestRepoContract|TestRepoFileWireCompatibility|TestRPC.*Contract|TestRPCWebSocketOriginCheck|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestContract.*NotebookResponseLease" -count=1
+go test -tags "fts5 sqlcipher" ./model -run "TestMultipartUpload|TestInsertLocalAssets|TestRecordAssetUpload|TestReadRTFD|TestCopyRTFD|Test.*OIDC" -count=1
+go test -tags "fts5 sqlcipher" ./api ./plugin -run "Test.*Contract|TestPluginService|TestGetDynamicIcon|TestInsertLocalAssets|TestSetFileAnnotation|TestDeferredAsset|TestExportBrowserHTML|TestCopyExport|TestRepoFileWireCompatibility|TestRPCWebSocketOriginCheck|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestHTTPProxyResponseSecurityHeaders|TestEventSourceProxyResponseSecurityHeaders|TestForwardProxy|TestConfigureForwardProxy|TestAttributeViewLayoutRejectsReadonlyKernel|TestAttributeViewEditorEndpointsRejectReader|TestMutateViewStateByRoleAndReadonly" -count=1
 ```
 
 `tsconfig.api.json` 单独启用严格检查并检查声明文件，覆盖参数错误、字段拼写、必填请求体、成功与失败分支、可空值和方法不匹配。主应用继续沿用现有配置，不假定全部调用都启用了严格空值检查。处理函数测试使用临时工作区和独立测试进程，不启动或重启运行中的内核。
+
+Go 契约回归测试的名称应包含 `Contract`，以纳入 CI 的筛选范围；既有专用协议用例通过显式规则选择。新增前端契约调用方或模型兼容用例时，同步更新 CI 与上述命令，确保对应回归被执行。

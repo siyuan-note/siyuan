@@ -1,5 +1,6 @@
 import {closePanel} from "../util/closePanel";
-import type {APICallbackResponse, APIPOSTRoutes, FullTextSearchBlockRequestInput} from "../../types/api";
+import {buildSearchRequest} from "../../search/config";
+import type {APICallbackResponse, APIPOSTRoutes} from "../../types/api";
 import {getCurrentEditor, openMobileFileById} from "../editor";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
@@ -316,17 +317,7 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
                 previousElement.setAttribute("disabled", "disabled");
             }
             const endpoint = requestConfig.method === 4 ? "/api/search/semanticSearchBlock" : "/api/search/fullTextSearchBlock";
-            const searchParam: FullTextSearchBlockRequestInput = {
-                query: requestConfig.query,
-                method: requestConfig.method,
-                types: {...requestConfig.types},
-                subTypes: requestConfig.subTypes,
-                paths: requestConfig.idPath || [],
-                groupBy: requestConfig.group,
-                orderBy: requestConfig.sort,
-                page: requestConfig.page,
-                pageSize: 32,
-            };
+            const searchParam = buildSearchRequest(requestConfig);
             // 限定在单个加密 box 内搜索时带 notebook，让内核走加密 db；跨 box 或全局搜索走原函数
             const idPaths = requestConfig.idPath || [];
             if (idPaths.length > 0) {

@@ -13,6 +13,8 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/spf13/cobra"
 )
 
 func TestWriteBlockWriteResult(t *testing.T) {
@@ -48,5 +50,18 @@ func TestWriteBlockWriteResult(t *testing.T) {
 func TestWriteBlockWriteResultRejectsEmptyID(t *testing.T) {
 	if err := writeBlockWriteResult(&bytes.Buffer{}, ""); err == nil {
 		t.Fatal("expected empty block ID to fail")
+	}
+}
+
+func TestBlockDeleteRejectsMissingBlock(t *testing.T) {
+	previous := dryRun
+	t.Cleanup(func() { dryRun = previous })
+	for _, dry := range []bool{false, true} {
+		dryRun = dry
+		command := &cobra.Command{}
+		command.Flags().String("id", "20260913000000-missing", "")
+		if err := blockDeleteCmd.RunE(command, nil); err == nil || !strings.Contains(err.Error(), "block not found") {
+			t.Fatalf("missing block accepted (dry-run=%v): %v", dry, err)
+		}
 	}
 }

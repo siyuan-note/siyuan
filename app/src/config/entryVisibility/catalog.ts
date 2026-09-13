@@ -616,6 +616,7 @@ const topBarBuiltinChildren = [
     node("barSearch", lang("globalSearch")),
     node("barZoom", lang("zoom")),
     node("barMode", lang("appearanceMode")),
+    // 仅在平板原生应用中显示，保留目录标识以兼容已有可见性和排序配置。
     node("barExit", lang("safeQuit")),
 ];
 

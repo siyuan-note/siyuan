@@ -4,6 +4,7 @@ import {buildEntryVisibilityMenuItems as buildMenuItems,
 } from "./menuItems";
 import {getDockEntryKey, STATUS_BAR_ROOT_PATH, TOP_BAR_ROOT_PATH} from "./catalog";
 import {getEntryOrder, isEntryVisible, setEntryVisibilityValue} from "./runtime";
+import {isInMobileApp} from "../../protyle/util/compatibility";
 
 const findEntryElement = (path: string) => {
     const separatorIndex = path.indexOf(".");
@@ -67,6 +68,7 @@ const getEntryIcon = (path: string): Pick<IMenu, "icon" | "iconHTML"> => {
 };
 
 const getRuntime = (): IEntryVisibilityMenuRuntime => ({
+    isInMobileApp: isInMobileApp(),
     getEntryOrder,
     isEntryVisible,
     setEntryVisibilityValue,

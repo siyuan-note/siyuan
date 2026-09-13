@@ -217,7 +217,7 @@ const genItem = (items: SnapshotDiffItem[], hasUndo = true) => {
     let html = "";
     items.forEach((item) => {
         const compareID = item.compareFile ? ` data-id2="${item.compareFile.fileID}"` : "";
-        html += `<li class="b3-list-item b3-list-item--hide-action history__diff-item"${compareID} data-created="${item.file.updated}" data-id="${item.file.fileID}" data-kind="${item.kind}" data-title="${escapeAttr(escapeHtml(item.file.title))}">
+        html += `<li class="b3-list-item b3-list-item--hide-action history__diff-item"${compareID} data-created="${item.file.updated}" data-id="${item.file.fileID}" data-path="${escapeAttr(item.file.path)}" data-kind="${item.kind}" data-title="${escapeAttr(escapeHtml(item.file.title))}">
     <span class="history__diff-file">
         <span class="history__diff-title">${escapeHtml(item.file.title)}</span>
         <span class="history__diff-path" title="${escapeAttr(item.file.path)} ${item.file.hSize}">${escapeHtml(item.file.path)}</span>
@@ -483,12 +483,13 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
                 event.stopPropagation();
                 break;
             } else if (target.classList.contains("block__icon")) {
+                const selectedPath = dialog.element.querySelector<HTMLElement>(".history__side .b3-list-item--focus")?.dataset.path;
                 if (target.getAttribute("data-direct") === "left") {
                     target.setAttribute("data-direct", "right");
-                    genHTML(right, left, dialog, "right", filterState);
+                    genHTML(app, right, left, dialog, "right", filterState, selectedPath);
                 } else {
                     target.setAttribute("data-direct", "left");
-                    genHTML(left, right, dialog, "left", filterState);
+                    genHTML(app, left, right, dialog, "left", filterState, selectedPath);
                 }
                 event.preventDefault();
                 event.stopPropagation();
@@ -506,11 +507,12 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
             target = target.parentElement;
         }
     });
-    genHTML(left, right, dialog, "left", filterState);
+    genHTML(app, left, right, dialog, "left", filterState);
     (document.activeElement as HTMLElement)?.blur();
 };
 
-const genHTML = (left: string, right: string, dialog: Dialog, direct: string, filterState: SnapshotDiffFilterState) => {
+const genHTML = (app: App, left: string, right: string, dialog: Dialog, direct: string,
+                 filterState: SnapshotDiffFilterState, selectedPath?: string) => {
     leftEditor = undefined;
     rightEditor = undefined;
     const isPhone = isMobile();
@@ -555,5 +557,19 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct: string, fi
     </div>
 </div>`;
         resizeSide(dialog.element.querySelector(".history__resize"), dialog.element.querySelector(".history__side"), "sideDiffWidth");
+        if (selectedPath !== undefined) {
+            const selectedElement = Array.from(dialog.element.querySelectorAll<HTMLElement>(".history__side .history__diff-item"))
+                .find((item) => item.dataset.path === selectedPath);
+            if (selectedElement) {
+                const groupElement = selectedElement.parentElement;
+                const operationElement = groupElement.previousElementSibling as HTMLElement;
+                filterState.expanded.add(operationElement.dataset.operation as SnapshotOperation);
+                groupElement.classList.remove("fn__none");
+                operationElement.querySelector("svg").classList.add("b3-list-item__arrow--open");
+                selectedElement.classList.add("b3-list-item--focus");
+                selectedElement.scrollIntoView({block: "nearest"});
+                renderCompare(app, selectedElement);
+            }
+        }
     });
 };

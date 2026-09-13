@@ -1095,6 +1095,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 oldIds.push(e.getAttribute("data-node-id"));
             });
             const existResponse = await fetchSyncPost("/api/block/checkBlocksExist", {ids: oldIds});
+            if (existResponse.code !== 0) {
+                return;
+            }
             range = restorePasteInsertRange();
             if (!range) {
                 return;

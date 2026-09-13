@@ -57,6 +57,54 @@ func TestImplicitNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, false, false)
 }
 
+func TestContractRefIDsNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, true, false)
+}
+
+func TestContractDocInfoNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, true, false)
+}
+
+func TestContractTreeStatNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, false, false)
+}
+
+func TestContractBreadcrumbNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, true, false)
+}
+
+func TestContractBreadcrumbChildrenNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, false, false)
+}
+
+func TestContractTreeInfosNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, false, true)
+}
+
+func TestContractChildNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, false, false)
+}
+
+func TestContractTailChildNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, true, false)
+}
+
+func TestContractDOMNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, false, false)
+}
+
+func TestContractDOMsNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, false, true)
+}
+
+func TestContractEmbedDOMNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, true, false)
+}
+
+func TestContractEmbedDOMsNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, false, true)
+}
+
 func TestExplicitNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, true, false)
 }
@@ -153,6 +201,18 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	engine.Use(boxLeaseMiddleware)
 	engine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, model.RoleAdministrator); c.Next() })
 	engine.POST("/api/block/getBlockKramdown", getBlockKramdown)
+	engine.POST("/api/block/getRefIDs", getRefIDs)
+	engine.POST("/api/block/getDocInfo", getDocInfo)
+	engine.POST("/api/block/getTreeStat", getTreeStat)
+	engine.POST("/api/block/getBlockBreadcrumb", getBlockBreadcrumb)
+	engine.POST("/api/block/getBlockBreadcrumbChildren", getBlockBreadcrumbChildren)
+	engine.POST("/api/block/getBlockTreeInfos", getBlockTreeInfos)
+	engine.POST("/api/block/getChildBlocks", getChildBlocks)
+	engine.POST("/api/block/getTailChildBlocks", getTailChildBlocks)
+	engine.POST("/api/block/getBlockDOM", getBlockDOM)
+	engine.POST("/api/block/getBlockDOMs", getBlockDOMs)
+	engine.POST("/api/block/getBlockDOMWithEmbed", getBlockDOMWithEmbed)
+	engine.POST("/api/block/getBlockDOMsWithEmbed", getBlockDOMsWithEmbed)
 	engine.POST("/api/block/getBlockKramdowns", getBlockKramdowns)
 	engine.POST("/api/block/getBlockInfo", getBlockInfo)
 	engine.POST("/api/block/getBlockSiblingID", getBlockSiblingID)
@@ -175,6 +235,31 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	}
 	typedQuery := false
 	switch t.Name() {
+	case "TestContractDocInfoNotebookResponseLease":
+		endpoint, typedQuery = "/api/block/getDocInfo", true
+	case "TestContractTreeStatNotebookResponseLease":
+		endpoint, typedQuery = "/api/block/getTreeStat", true
+		args["includeEmbed"] = true
+	case "TestContractBreadcrumbNotebookResponseLease":
+		endpoint, typedQuery = "/api/block/getBlockBreadcrumb", true
+	case "TestContractBreadcrumbChildrenNotebookResponseLease":
+		endpoint, typedQuery = "/api/block/getBlockBreadcrumbChildren", true
+	case "TestContractTreeInfosNotebookResponseLease":
+		endpoint, typedQuery = "/api/block/getBlockTreeInfos", true
+	case "TestContractRefIDsNotebookResponseLease":
+		endpoint, typedQuery = "/api/block/getRefIDs", true
+	case "TestContractChildNotebookResponseLease":
+		endpoint, typedQuery = "/api/block/getChildBlocks", true
+	case "TestContractTailChildNotebookResponseLease":
+		endpoint, typedQuery = "/api/block/getTailChildBlocks", true
+	case "TestContractDOMNotebookResponseLease":
+		endpoint = "/api/block/getBlockDOM"
+	case "TestContractDOMsNotebookResponseLease":
+		endpoint = "/api/block/getBlockDOMs"
+	case "TestContractEmbedDOMNotebookResponseLease":
+		endpoint = "/api/block/getBlockDOMWithEmbed"
+	case "TestContractEmbedDOMsNotebookResponseLease":
+		endpoint = "/api/block/getBlockDOMsWithEmbed"
 	case "TestContractSiblingNotebookResponseLease":
 		endpoint, typedQuery = "/api/block/getBlockSiblingID", true
 	case "TestContractBatchIndexesNotebookResponseLease":

@@ -1,3 +1,4 @@
+import type {BlockBreadcrumbRequestInput, BlockQueryRequestInput, TreeStatRequestInput} from "../../types/api";
 import {getIconByType} from "../../editor/getIcon";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
@@ -135,7 +136,7 @@ ${padHTML}
                 } else if (type === "doc") {
                     // 不使用 window.siyuan.shiftIsPressed ，否则窗口未激活时按 Shift 点击块标无法打开属性面板 https://github.com/siyuan-note/siyuan/issues/15075
                     if (event.shiftKey) {
-                        const docInfoParam: IObject = {
+                        const docInfoParam: BlockQueryRequestInput = {
                             id: protyle.block.rootID
                         };
                         if (isEncryptedBox(protyle.notebookId)) {
@@ -429,7 +430,7 @@ ${padHTML}
 
     private async genChildrenMenuItems(protyle: IProtyle, id: string, currentPathIDs: Set<string>,
                                        excludeTypes: string[], offset = 0): Promise<IMenu[]> {
-        const request: Record<string, any> = {
+        const request = {
             id,
             offset,
             limit: 64,
@@ -445,10 +446,10 @@ ${padHTML}
         if (rootID !== protyle.block.rootID) {
             return [];
         }
-        const data = response.data as {
-            items: IBreadcrumb[],
-            hasMore: boolean,
-        };
+        if (response.code !== 0) {
+            return [];
+        }
+        const data = response.data;
         if (!data?.items) {
             return [];
         }
@@ -640,7 +641,7 @@ ${padHTML}
             return;
         }
         const id = blockElement.getAttribute("data-node-id");
-        const breadcrumbParam: Record<string, any> = {id, excludeTypes: [], notebook: protyle.notebookId};
+        const breadcrumbParam: BlockBreadcrumbRequestInput = {id, excludeTypes: [], notebook: protyle.notebookId};
         this.mobileMenuLoading = true;
         const rootID = protyle.block.rootID;
         await waitForPendingTransactions(protyle);
@@ -695,7 +696,7 @@ ${padHTML}
         if (cursorNodeElement) {
             id = cursorNodeElement.getAttribute("data-node-id");
         }
-        const statRequest: IObject = {
+        const statRequest: TreeStatRequestInput = {
             id: id || (protyle.block.showAll ? protyle.block.id : protyle.block.rootID)
         };
         if (isEncryptedBox(protyle.notebookId)) {
@@ -1170,7 +1171,7 @@ ${padHTML}
             // 闪卡面包屑不能显示答案
             excludeTypes.push("NodeTextMark-mark");
         }
-        const breadcrumbParam: Record<string, any> = {id, excludeTypes, notebook: protyle.notebookId};
+        const breadcrumbParam = {id, excludeTypes, notebook: protyle.notebookId};
         // 等待当前块的创建事务完成，并丢弃切换文档或选择位置后过期的读取。
         const isCurrent = () => requestID === this.renderRequestID && rootID === protyle.block.rootID &&
             blockElement.isConnected;

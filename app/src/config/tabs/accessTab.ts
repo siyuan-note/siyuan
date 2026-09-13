@@ -1,5 +1,6 @@
 import type {SettingTabBuilder} from "../setting/builder";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {ContractFormData} from "../../util/contractFormData";
 import {Dialog} from "../../dialog";
 import {openInputDialog} from "../../dialog/inputDialog";
 import {confirmDialog} from "../../dialog/confirmDialog";
@@ -735,7 +736,9 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
         desc: window.siyuan.languages.encryptedNotebookAutoLockDesc,
         min: 0,
         save: (value) => {
-            fetchPost("/api/notebook/setNotebookCryptoAutoLock", {autoLockMinutes: value});
+            if (typeof value === "number") {
+                fetchPost("/api/notebook/setNotebookCryptoAutoLock", {autoLockMinutes: value});
+            }
         },
     });
 };
@@ -769,10 +772,6 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
             return;
         }
         fetchPost("/api/notebook/exportNotebookCryptoBackup", {}, async (response) => {
-            if (response.code === -1) {
-                showMessage(response.msg, 6000, "error");
-                return;
-            }
             const result = await saveExportFile(response.data.file);
             if (result.status === "success") {
                 showMessage(window.siyuan.languages.exportNotebookCryptoBackupTip);
@@ -816,14 +815,9 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
                     showMessage(window.siyuan.languages.masterPassword);
                     return;
                 }
-                const formData = new FormData();
-                formData.append("file", file);
-                formData.append("password", password);
-                fetch("/api/notebook/importNotebookCryptoBackup", {
-                    method: "POST",
-                    body: formData,
-                }).then((res) => res.json()).then((response: IWebSocketData) => {
-                    if (response.code === -1) {
+                const formData = new ContractFormData({file, password});
+                fetchSyncPost("/api/notebook/importNotebookCryptoBackup", formData, undefined, false).then((response) => {
+                    if (response.code !== 0) {
                         showMessage(response.msg, 6000, "error");
                         return;
                     }

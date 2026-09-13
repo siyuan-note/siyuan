@@ -1,3 +1,4 @@
+import type {BlockQueryRequestInput} from "../../types/api";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, exportMd, movePathToMenu, openFileAttr, openFileWechatNotify,} from "../../menus/commonMenuItem";
@@ -38,7 +39,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
         window.siyuan.menus.menu.remove();
         return;
     }
-    const docInfoParam: IObject = {
+    const docInfoParam: BlockQueryRequestInput = {
         id: protyle.block.rootID
     };
     if (isEncryptedBox(protyle.notebookId)) {
@@ -81,6 +82,9 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                     })
                 ]);
 
+                if (responseHTML.code !== 0 || responseText.code !== 0) {
+                    return;
+                }
                 const {textHTML, textSiyuan} = buildBlockDOMClipboardRichData(protyle.lute, responseHTML.data.dom);
                 const result = await writeClipboardData({
                     textPlain: responseText.data.content,

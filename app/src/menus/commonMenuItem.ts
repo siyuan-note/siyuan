@@ -1,3 +1,4 @@
+import type {BlockQueryRequestInput} from "../types/api";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {getSearch, isMobile, isValidCustomAttrName} from "../util/functions";
 import {getAssetExtension, isEncryptedBox, isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
@@ -123,7 +124,7 @@ export const openWechatNotify = (nodeElement: Element) => {
 };
 
 export const openFileWechatNotify = (protyle: IProtyle) => {
-    const docInfoParam: IObject = {
+    const docInfoParam: BlockQueryRequestInput = {
         id: protyle.block.rootID
     };
     if (isEncryptedBox(protyle.notebookId)) {
@@ -1073,7 +1074,7 @@ export const renameMenu = (options: {
         label: window.siyuan.languages.rename,
         click: () => {
             if (options.type === "file" && options.docId) {
-                const docInfoParam: IObject = {
+                const docInfoParam: BlockQueryRequestInput = {
                     id: options.docId
                 };
                 if (isEncryptedBox(options.notebookId)) {

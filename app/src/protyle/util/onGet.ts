@@ -1,3 +1,4 @@
+import type {BlockQueryRequestInput} from "../../types/api";
 import {Constants} from "../../constants";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
@@ -213,7 +214,7 @@ export const onGet = (options: {
         return;
     }
 
-    const docInfoParam: IObject = {
+    const docInfoParam: BlockQueryRequestInput = {
         id: options.protyle.block.rootID
     };
     if (isEncryptedBox(options.protyle.notebookId)) {

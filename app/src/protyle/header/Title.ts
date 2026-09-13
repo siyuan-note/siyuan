@@ -1,3 +1,4 @@
+import type {BlockQueryRequestInput} from "../../types/api";
 import {
     focusByOffset,
     focusByRange,
@@ -165,7 +166,7 @@ export class Title {
                     event.preventDefault();
                     event.stopPropagation();
                 } else if (matchHotKey(window.siyuan.config.keymap.editor.general.attr, event)) {
-                    const docInfoParam: IObject = {
+                    const docInfoParam: BlockQueryRequestInput = {
                         id: protyle.block.rootID
                     };
                     if (isEncryptedBox(protyle.notebookId)) {
@@ -186,7 +187,7 @@ export class Title {
             iconElement.addEventListener("click", (event) => {
                 // 不使用 window.siyuan.shiftIsPressed ，否则窗口未激活时按 Shift 点击块标无法打开属性面板 https://github.com/siyuan-note/siyuan/issues/15075
                 if (event.shiftKey) {
-                    const docInfoParam: IObject = {
+                    const docInfoParam: BlockQueryRequestInput = {
                         id: protyle.block.rootID
                     };
                     if (isEncryptedBox(protyle.notebookId)) {
@@ -325,7 +326,7 @@ export class Title {
                 return;
             }
             /// #endif
-            const docInfoParam: IObject = {
+            const docInfoParam: BlockQueryRequestInput = {
                 id: protyle.block.rootID
             };
             if (isEncryptedBox(protyle.notebookId)) {

@@ -45,6 +45,9 @@ export const getCancelSBOperations = async (nodeElement: Element, options: {
             id,
             notebook: options.notebookID,
         });
+        if (response.code !== 0) {
+            throw new Error(response.msg);
+        }
         const template = document.createElement("template");
         template.innerHTML = normalizeHTMLAssetIFrameBlockDOM(response.data?.dom || "");
         const fullSuperBlockElement = template.content.querySelector(`[data-node-id="${id}"]`);

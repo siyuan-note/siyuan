@@ -245,8 +245,11 @@ export const foldHeadingGroup = async (protyle: IProtyle, nodeElement: Element,
         }
         const id = nodeElement.getAttribute("data-node-id");
         const response = await fetchSyncPost("/api/block/getHeadingFoldTransaction", {id, scope});
-        const doOperations = response.data?.doOperations as IOperation[];
-        const undoOperations = response.data?.undoOperations as IOperation[];
+        if (response.code !== 0) {
+            return;
+        }
+        const doOperations = response.data?.doOperations;
+        const undoOperations = response.data?.undoOperations;
         if (!doOperations || !undoOperations || doOperations.length === 0) {
             return;
         }
@@ -328,6 +331,9 @@ const foldBlocksRecursively0 = async (protyle: IProtyle, nodeElements: Element[]
                 id: element.getAttribute("data-node-id"),
                 notebook: protyle.notebookId,
             });
+            if (response.code !== 0) {
+                throw new Error(response.msg);
+            }
             fullHTML = response.data.dom;
         }
         return {element, fullHTML, occurrenceID: getViewFoldOccurrenceID(protyle, element)};

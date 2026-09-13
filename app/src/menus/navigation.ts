@@ -1,3 +1,4 @@
+import type {BlockQueryRequestInput} from "../types/api";
 import {copySubMenu, exportMd, movePathToMenu, openFileAttr, renameMenu,} from "./commonMenuItem";
 /// #if !BROWSER
 import {FileFilter, ipcRenderer} from "electron";
@@ -803,7 +804,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             label: window.siyuan.languages.attr,
             icon: "iconAttr",
             click() {
-                const docInfoParam: IObject = {
+                const docInfoParam: BlockQueryRequestInput = {
                     id
                 };
                 if (isEncryptedBox(notebookId)) {

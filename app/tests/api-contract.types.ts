@@ -1,9 +1,18 @@
 import type {APIPOSTRoutes, FetchGet, FetchPost, FetchSyncPost} from "../src/types/api";
+import {ContractFormData} from "../src/util/contractFormData";
 
 declare const fetchPost: FetchPost;
 declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
+
+fetchSyncPost("/api/notebook/importNotebookCryptoBackup", new ContractFormData({file: new Blob(), password: "password"}));
+// @ts-expect-error 上传请求必须包含文件。
+fetchSyncPost("/api/notebook/importNotebookCryptoBackup", new ContractFormData({password: "password"}));
+// @ts-expect-error 文件字段不能使用字符串。
+fetchSyncPost("/api/notebook/importNotebookCryptoBackup", new ContractFormData({file: "backup.json"}));
+// @ts-expect-error 普通表单没有已校验的字段类型。
+fetchSyncPost("/api/notebook/importNotebookCryptoBackup", new FormData());
 
 fetchPost("/api/system/version");
 fetchPost("/api/notebook/lsNotebooks");
@@ -97,6 +106,19 @@ async function checkAsyncResult() {
     }
 }
 void checkAsyncResult;
+
+fetchPost("/api/block/getHeadingDeleteTransaction", {id: "id"}, response => {
+    const operation = response.data?.doOperations?.[0];
+    if (operation) {
+        const data: string | {createEmptyParagraph: boolean} | null = operation.data;
+        const result: string | string[] | null = operation.retData;
+        // @ts-expect-error 块操作载荷不能退化为任意对象。
+        void operation.data.content;
+        // @ts-expect-error 返回值也可能是文本或空值，不能直接当作数组。
+        const ids: string[] = operation.retData;
+        void [data, result, ids];
+    }
+});
 
 declare const notebooks: APIPOSTRoutes["/api/notebook/lsNotebooks"]["response"];
 if (notebooks.code === 0) {

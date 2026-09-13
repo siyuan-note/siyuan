@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"mime/multipart"
 	"reflect"
 	"sort"
 	"strings"
@@ -13,6 +14,7 @@ import (
 type Schema struct {
 	Ref                  string             `json:"$ref,omitempty"`
 	Type                 string             `json:"type,omitempty"`
+	Format               string             `json:"format,omitempty"`
 	Enum                 []any              `json:"enum,omitempty"`
 	AnyOf                []*Schema          `json:"anyOf,omitempty"`
 	Properties           map[string]*Schema `json:"properties,omitempty"`
@@ -70,6 +72,36 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if t == reflect.TypeFor[BlockOperationData]() {
+		options, err := b.schema(reflect.TypeFor[BlockDeleteData](), input)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{{Type: "null"}, {Type: "string"}, options}}, nil
+	}
+	if t == reflect.TypeFor[BlockOperationResult]() {
+		return &Schema{AnyOf: []*Schema{{Type: "null"}, {Type: "string"}, {Type: "array", Items: &Schema{Type: "string"}}}}, nil
+	}
+	if t == reflect.TypeFor[JSONValue]() {
+		ref := &Schema{Ref: "#/$defs/JSONValue"}
+		b.definitions["JSONValue"] = &Schema{AnyOf: []*Schema{
+			{Type: "null"}, {Type: "boolean"}, {Type: "number"}, {Type: "string"},
+			{Type: "array", Items: ref}, {Type: "object", AdditionalProperties: ref},
+		}}
+		return ref, nil
+	}
+	if t == reflect.TypeFor[Base64Bytes]() {
+		if input {
+			return nullable(&Schema{AnyOf: []*Schema{{Type: "string"}, {Type: "array", Items: &Schema{Type: "integer"}}}}), nil
+		}
+		return nullable(&Schema{Type: "string"}), nil
+	}
+	if t == reflect.TypeFor[*multipart.FileHeader]() {
+		if !input {
+			return nil, fmt.Errorf("uploaded files are request-only")
+		}
+		return &Schema{Type: "string", Format: "binary"}, nil
+	}
 	if t == reflect.TypeFor[Null]() {
 		return &Schema{Type: "null"}, nil
 	}
@@ -195,6 +227,10 @@ func (b *schemaBuilder) fields(object *Schema, t reflect.Type, input bool) error
 		for _, option := range strings.Split(field.Tag.Get("api"), ",") {
 			switch {
 			case option == "", option == "optional", option == "nullable", option == "nonnullable":
+			case option == "legacyobject":
+				if field.Type.Kind() != reflect.Pointer || field.Type.Elem().Kind() != reflect.Struct {
+					return fmt.Errorf("legacyobject requires a struct pointer: %s.%s", t, name)
+				}
 			case option == "trim", option == "ignoretype", strings.HasPrefix(option, "enum="):
 				if field.Type.Kind() != reflect.String {
 					return fmt.Errorf("API option %s requires a string: %s.%s", option, t, name)
@@ -218,7 +254,15 @@ func (b *schemaBuilder) fields(object *Schema, t reflect.Type, input bool) error
 			}
 		} else if len(tag) > 1 && tag[1] == "omitempty" {
 			optional = true
-			child = nonnullable(child)
+			if field.Type.Kind() == reflect.Pointer {
+				// 仅外层空指针被省略，内层指针或集合仍可序列化为 null。
+				child, err = b.schema(field.Type.Elem(), false)
+				if err != nil {
+					return err
+				}
+			} else {
+				child = nonnullable(child)
+			}
 		}
 		if has("nonnullable") {
 			child = nonnullable(child)
@@ -257,6 +301,11 @@ func BuildBundle() (*Bundle, error) {
 		if definition.Request.Kind() != reflect.Struct {
 			return nil, fmt.Errorf("request contract must be a struct: %s", definition.Name)
 		}
+		if definition.Body == MultipartBody {
+			if err := validateMultipartRequest(definition.Request); err != nil {
+				return nil, err
+			}
+		}
 		request, err := b.schema(definition.Request, true)
 		if err != nil {
 			return nil, err
@@ -277,6 +326,9 @@ func BuildBundle() (*Bundle, error) {
 		errorData := nullable(object(map[string]*Schema{"closeTimeout": {Type: "number"}}, "closeTimeout"))
 		if definition.ErrorText {
 			errorData.AnyOf = append(errorData.AnyOf, &Schema{Type: "string"})
+		}
+		if definition.DataOnError {
+			errorData.AnyOf = append(errorData.AnyOf, data)
 		}
 		failure := object(map[string]*Schema{"code": {Type: "integer", Enum: codes}, "msg": {Type: "string"}, "data": errorData}, "code", "msg", "data")
 		// 中间件可能使用带命令元数据的统一信封，保留这些额外的顶层字段。

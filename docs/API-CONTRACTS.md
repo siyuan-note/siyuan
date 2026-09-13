@@ -20,6 +20,8 @@ Arrays, maps, and nested structs recursively validate request constraints. A `nu
 
 Notebook creation, renaming, removal, closing, icon updates, and sorting use typed contracts. Renaming, removal, and icon updates trim notebook IDs; closing preserves whitespace for ID validation. Empty names and icons remain available to business validation, and rename failures retain their message display duration.
 
+Encrypted notebook lifecycle endpoints use typed requests and responses while retaining password trimming, fractional-minute truncation, negative-minute clamping, administrative authorization, lease acquisition, and mount rollback. Key derivation, ciphertext formats, and recovery material remain model-layer responsibilities.
+
 ## Compatibility requirements
 
 Contract maintenance must preserve existing observable API behavior. Changes to type definitions or handler structure alone must not change call semantics:
@@ -37,6 +39,20 @@ Endpoint-specific behavior is recorded jointly in contract definitions, compatib
 Read-only middleware may still return a prompt object containing `closeTimeout`. Ordinary `fetchPost` callbacks receive only nonnegative codes retained after message processing; block-info code `3` still requires handling. `fetchSyncPost` and `fetchGet` preserve complete responses. Dynamic URLs retain existing signatures. Static POST paths must come from contracts or recorded legacy routes, and invalid parameters cannot fall back through another overload. Use an explicit `string` variable when constructing a template URL with an open-ended range.
 
 Use `FailureWithTimeout` when a business error must preserve its message display duration. Contract-based block queries use `holdContractBlockRequest` to retain lease checks for explicit notebooks and accompanying IDs. Individual entry points still specify whether state queries permit deleted IDs.
+
+`StructJSONBody` is reserved for endpoints that already use Go JSON struct binding. It preserves case-insensitive field matching, null handling, and parser errors; required business fields are validated by the handler. It must not be used to relax a migrated endpoint's request rules. Endpoints that return their result payload on failure explicitly set `DataOnError` and use the endpoint's typed `FailureWithData` method.
+
+Notebook configuration updates use a typed partial object. The `legacyobject` field option preserves the existing JSON round-trip's numeric normalization and case-insensitive struct binding; optional pointer fields leave existing values unchanged when omitted or null. Encryption fields are decoded for input compatibility but never applied by the configuration patch. `Base64Bytes` explicitly models historical byte-slice inputs as Base64 strings or byte arrays.
+
+`JSONValue` is reserved for fields whose wire protocol explicitly accepts arbitrary JSON, such as an echoed correlation ID. Its schema is a recursive union of null, booleans, numbers, strings, arrays, and objects; it does not stand in for a structured request or response. Word-count results retain their fixed statistics fields independently of the correlation value.
+
+Heading transaction queries return `BlockTransaction` with typed operations and preserve empty, null, and undo-operation payloads. `BlockOperationResult` declares the finite union of text, block ID arrays, and null. Conversion from the model's polymorphic fields rejects unsupported types; attribute-view operations require their own payload contracts. The editor's operation type also accepts the empty column-type field returned by non-attribute-view operations.
+
+## Multipart requests
+
+Use `MultipartBody` for file uploads. Request structs declare string fields and `*multipart.FileHeader` fields using their wire names; file schemas use `type: string` and `format: binary`, generating `Blob` declarations. The adapter retains Gin multipart parsing and binds the first value for repeated fields. File contents remain available through `Open`, so handlers preserve their read and recovery logic. Unsupported field types and binding options fail generation.
+
+Frontend callers construct `ContractFormData` from typed fields before passing it to the existing fetch functions. The generated signatures require the endpoint's fields and distinguish file values from strings; raw `FormData` cannot satisfy a migrated upload contract. Optional fields are omitted and string values are not trimmed. Plugin callers can implement the generated `APIFormData<Request>` interface when constructing their forms.
 
 ## Endpoint maintenance
 

@@ -1,3 +1,4 @@
+import type {BlockQueryRequestInput} from "../types/api";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {getDisplayName, getNotebookName, isEncryptedBox} from "../util/pathName";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -22,7 +23,7 @@ export const deleteFile = async (notebookId: string, pathString: string) => {
         });
         return;
     }
-    const docInfoParam: IObject = {
+    const docInfoParam: BlockQueryRequestInput = {
         id: getDisplayName(pathString, true, true)
     };
     if (isEncryptedBox(notebookId)) {

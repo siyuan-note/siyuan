@@ -19,6 +19,9 @@ func sortedKeys[V any](values map[string]V) []string {
 func quote(value string) string { data, _ := json.Marshal(value); return string(data) }
 
 func (b *Bundle) typeScript(schema *Schema) string {
+	if schema.Format == "binary" {
+		return "Blob"
+	}
 	if schema.Ref != "" {
 		return strings.TrimPrefix(schema.Ref, "#/$defs/")
 	}
@@ -76,6 +79,9 @@ func (b *Bundle) typeScript(schema *Schema) string {
 		return "Array<" + b.typeScript(schema.Items) + ">"
 	case "object":
 		if additional, ok := schema.AdditionalProperties.(*Schema); ok {
+			if additional.Ref == "#/$defs/JSONValue" {
+				return "{ [key: string]: JSONValue }"
+			}
 			return "Record<string, " + b.typeScript(additional) + ">"
 		}
 		if len(schema.Properties) == 0 {
@@ -162,7 +168,12 @@ export interface APILegacyResponse {
 }
 
 type APIContract = {request: unknown; response: unknown; body: string};
-type APIRequestArgs<C extends APIContract> = C["body"] extends "json"
+export interface APIFormData<Request> extends FormData {
+    readonly apiRequest: Request;
+}
+type APIRequestArgs<C extends APIContract> = C["body"] extends "multipart"
+    ? [data: APIFormData<C["request"]>]
+    : C["body"] extends "json" | "structJSON"
     ? [data: C["request"]]
     : [data?: C["request"] | null];
 type NonNegative<C extends number> = C extends C ? ` + "`${C}` extends `-${string}`" + ` ? never : C : never;

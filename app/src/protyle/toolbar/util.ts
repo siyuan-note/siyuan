@@ -379,6 +379,9 @@ export const copyTextByType = async (ids: string[],
         }
         if (type === "ref") {
             const response = await fetchSyncPost("/api/block/getRefText", {id});
+            if (response.code !== 0) {
+                return;
+            }
             text += `((${id} '${response.data}'))`;
         } else if (type === "blockEmbed") {
             text += `{{select * from blocks where id='${id}'}}`;
@@ -386,6 +389,9 @@ export const copyTextByType = async (ids: string[],
             text += `siyuan://blocks/${id}`;
         } else if (type === "protocolMd") {
             const response = await fetchSyncPost("/api/block/getRefText", {id});
+            if (response.code !== 0) {
+                return;
+            }
             text += `[${response.data.replace("[", "\\[").replace("]", "\\]")}](siyuan://blocks/${id})`;
         } else if (type === "hPath") {
             const response = await fetchSyncPost("/api/filetree/getHPathByID", {id});

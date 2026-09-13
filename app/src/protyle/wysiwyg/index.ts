@@ -845,6 +845,9 @@ export class WYSIWYG {
                                 id: item.getAttribute("data-node-id"),
                                 notebook: protyle.notebookId,
                             });
+                            if (response.code !== 0) {
+                                return;
+                            }
                             itemHTML = response.data.dom;
                         } else {
                             itemHTML = removeEmbed(item);
@@ -3200,6 +3203,10 @@ export class WYSIWYG {
                             id: item.getAttribute("data-node-id"),
                             notebook: protyle.notebookId,
                         });
+                        if (response.code !== 0) {
+                            clearAutoSelectedBlock();
+                            return;
+                        }
                         itemHTML = response.data.dom;
                     } else {
                         itemHTML = removeEmbed(item);

@@ -2,6 +2,14 @@ package apicontract
 
 import "encoding/json"
 
+// FailureWithData 仅为显式声明失败载荷的端点保留业务结果。
+func (e Endpoint[Request, Data]) FailureWithData(code int, msg string, data Data) Response[Data] {
+	if !e.definition.DataOnError {
+		panic("endpoint does not declare data on error")
+	}
+	return Response[Data]{code: code, msg: msg, data: data}
+}
+
 // Null 表示成功但没有数据，线协议始终写出 null。
 type Null struct{}
 

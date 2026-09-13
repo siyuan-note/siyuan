@@ -2126,6 +2126,9 @@ export class Gutter {
                 id,
                 notebook: protyle.notebookId,
             }).then((response) => {
+                if (response.code !== 0) {
+                    return undefined;
+                }
                 const start = response.data?.start;
                 return response.data?.found && typeof start === "number" && Number.isInteger(start) ? start : undefined;
             }).catch(() => undefined) : undefined;
@@ -2687,7 +2690,8 @@ export class Gutter {
                             fetchPost("/api/block/getHeadingDeleteTransaction", {
                                 id,
                             }, async (deleteResponse) => {
-                                const deletedIDs = deleteResponse.data.doOperations.map(
+                                const headingTransaction: {doOperations: IOperation[], undoOperations: IOperation[]} = deleteResponse.data;
+                                const deletedIDs = headingTransaction.doOperations.map(
                                     (operation: IOperation) => operation.id);
                                 if (!await confirmBlockRef({
                                     scope: "blocks",
@@ -2706,7 +2710,7 @@ export class Gutter {
                                 if (!protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`)) {
                                     return;
                                 }
-                                deleteResponse.data.doOperations.forEach((operation: IOperation) => {
+                                headingTransaction.doOperations.forEach((operation: IOperation) => {
                                     protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                                         itemElement.remove();
                                     });
@@ -2715,19 +2719,19 @@ export class Gutter {
                                     const newID = Lute.NewNodeID();
                                     const emptyElement = genEmptyElement(false, false, newID);
                                     protyle.wysiwyg.element.insertAdjacentElement("afterbegin", emptyElement);
-                                    deleteResponse.data.doOperations.push({
+                                    headingTransaction.doOperations.push({
                                         action: "insert",
                                         data: emptyElement.outerHTML,
                                         id: newID,
                                         parentID: protyle.block.parentID
                                     });
-                                    deleteResponse.data.undoOperations.push({
+                                    headingTransaction.undoOperations.push({
                                         action: "delete",
                                         id: newID,
                                     });
                                     focusBlock(emptyElement);
                                 }
-                                transaction(protyle, deleteResponse.data.doOperations, deleteResponse.data.undoOperations);
+                                transaction(protyle, headingTransaction.doOperations, headingTransaction.undoOperations);
                             });
                         });
                     }
@@ -2740,7 +2744,8 @@ export class Gutter {
                         fetchPost("/api/block/getHeadingDeleteTransaction", {
                             id,
                         }, async (response) => {
-                            const deletedIDs = response.data.doOperations.map((operation: IOperation) => operation.id);
+                            const headingTransaction: {doOperations: IOperation[], undoOperations: IOperation[]} = response.data;
+                            const deletedIDs = headingTransaction.doOperations.map((operation: IOperation) => operation.id);
                             if (!await confirmBlockRef({
                                 scope: "blocks",
                                 ids: deletedIDs,
@@ -2752,7 +2757,7 @@ export class Gutter {
                             if (!protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`)) {
                                 return;
                             }
-                            response.data.doOperations.forEach((operation: IOperation) => {
+                            headingTransaction.doOperations.forEach((operation: IOperation) => {
                                 protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                                     itemElement.remove();
                                 });
@@ -2761,19 +2766,19 @@ export class Gutter {
                                 const newID = Lute.NewNodeID();
                                 const emptyElement = genEmptyElement(false, false, newID);
                                 protyle.wysiwyg.element.insertAdjacentElement("afterbegin", emptyElement);
-                                response.data.doOperations.push({
+                                headingTransaction.doOperations.push({
                                     action: "insert",
                                     data: emptyElement.outerHTML,
                                     id: newID,
                                     parentID: protyle.block.parentID
                                 });
-                                response.data.undoOperations.push({
+                                headingTransaction.undoOperations.push({
                                     action: "delete",
                                     id: newID,
                                 });
                                 focusBlock(emptyElement);
                             }
-                            transaction(protyle, response.data.doOperations, response.data.undoOperations);
+                            transaction(protyle, headingTransaction.doOperations, headingTransaction.undoOperations);
                         });
                     }
                 }).element);
@@ -4028,7 +4033,7 @@ export const addBlockToAgent = async (blockIds: string[]) => {
         let label = id;
         try {
             const resp = await fetchSyncPost("/api/block/getRefText", {id});
-            if (resp && resp.data) {
+            if (resp.code === 0 && resp.data) {
                 label = resp.data;
             }
         } catch {

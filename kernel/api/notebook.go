@@ -17,9 +17,7 @@
 package api
 
 import (
-	"fmt"
 	"io"
-	"net/http"
 	"sort"
 	"strings"
 	"time"
@@ -32,45 +30,33 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func getNotebookInfo(c *gin.Context) {
+var getNotebookInfo = contractHandler(apicontract.GetNotebookInfo, func(c *gin.Context, request apicontract.NotebookIDRequest) apicontract.Response[apicontract.NotebookInfoData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var boxID string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &boxID, true, true)) {
-		return
-	}
+	boxID := request.Notebook
 	if util.InvalidIDPattern(boxID, ret) {
-		return
+		return contractFailure[apicontract.NotebookInfoData](ret)
 	}
 
 	box := model.Conf.Box(boxID)
 	if nil == box {
 		ret.Code = -1
 		ret.Msg = "notebook [" + boxID + "] not found"
-		return
+		return contractFailure[apicontract.NotebookInfoData](ret)
 	}
 	if model.IsReadOnlyRoleContext(c) && !isNotebookVisibleByPublishAccess(box, model.GetPublishAccess()) {
 		ret.Code = -1
 		ret.Msg = "notebook [" + boxID + "] not found"
-		return
+		return contractFailure[apicontract.NotebookInfoData](ret)
 	}
 	if err := holdEncryptedBoxRequest(c, boxID); err != nil {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(314)
-		return
+		return contractFailure[apicontract.NotebookInfoData](ret)
 	}
 
 	boxInfo := box.GetInfo()
-	ret.Data = map[string]any{
-		"boxInfo": boxInfo,
-	}
-}
+	return apicontract.Success(apicontract.NotebookInfoData{BoxInfo: notebookInfoContract(boxInfo)})
+})
 
 var setNotebookIcon = contractHandler(apicontract.SetNotebookIcon, func(c *gin.Context, request apicontract.SetNotebookIconRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
@@ -103,31 +89,22 @@ var changeSortNotebook = contractHandler(apicontract.ChangeSortNotebook, func(c 
 	return apicontract.Success(apicontract.Null{})
 })
 
-func reorderNotebooks(c *gin.Context) {
+var reorderNotebooks = contractHandler(apicontract.ReorderNotebooks, func(c *gin.Context, request apicontract.ReorderNotebooksRequest) apicontract.Response[*apicontract.ReorderData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	request := &struct {
-		SourceIDs []string `json:"sourceIDs"`
-		TargetID  string   `json:"targetID"`
-		Position  string   `json:"position"`
-	}{}
-	if err := c.ShouldBindJSON(request); nil != err {
-		ret.Code = -1
-		ret.Msg = fmt.Sprintf("Parses request [%s] failed: %s", c.Request.URL.Path, err)
-		return
-	}
 	if !validateReorderRequest(request.SourceIDs, request.TargetID, request.Position, ret) {
-		return
+		return contractFailure[*apicontract.ReorderData](ret)
 	}
 
 	result, err := model.ReorderNotebooks(request.SourceIDs, request.TargetID, request.Position)
-	ret.Data = result
-	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
+	var data *apicontract.ReorderData
+	if result != nil {
+		data = &apicontract.ReorderData{Changed: result.Changed, Notebook: result.Notebook, ParentPath: result.ParentPath}
 	}
-}
+	if nil != err {
+		return apicontract.ReorderNotebooks.FailureWithData(-1, err.Error(), data)
+	}
+	return apicontract.Success(data)
+})
 
 var renameNotebook = contractHandler(apicontract.RenameNotebook, func(c *gin.Context, request apicontract.RenameNotebookRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
@@ -221,34 +198,24 @@ var createNotebook = contractHandler(apicontract.CreateNotebook, func(c *gin.Con
 	return apicontract.Success(apicontract.CreateNotebookData{Notebook: notebookContract(box)})
 })
 
-func openNotebook(c *gin.Context) {
+var openNotebook = contractHandler(apicontract.OpenNotebook, func(c *gin.Context, request apicontract.OpenNotebookRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	notebook := request.Notebook
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var notebook string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, true)) {
-		return
-	}
 	if util.InvalidIDPattern(notebook, ret) {
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	isUserGuide := model.IsUserGuide(notebook)
 	if util.ReadOnly && !isUserGuide {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(34)
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
 	}
 	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(314)
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	msgId := util.PushMsg(model.Conf.Language(45), 1000*60*15)
@@ -257,14 +224,14 @@ func openNotebook(c *gin.Context) {
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	box := model.Conf.Box(notebook)
 	if nil == box {
 		ret.Code = -1
 		ret.Msg = "opened notebook [" + notebook + "] not found"
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	evt := util.NewCmdResult("mount", 0, util.PushModeBroadcast)
@@ -275,11 +242,7 @@ func openNotebook(c *gin.Context) {
 	util.PushEvent(evt)
 
 	if isUserGuide {
-		appArg := arg["app"]
-		app := ""
-		if nil != appArg {
-			app = appArg.(string)
-		}
+		app := request.App
 
 		go func() {
 			var startID string
@@ -302,7 +265,8 @@ func openNotebook(c *gin.Context) {
 			}
 		}()
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 var closeNotebook = contractHandler(apicontract.CloseNotebook, func(c *gin.Context, request apicontract.CloseNotebookRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
@@ -315,36 +279,30 @@ var closeNotebook = contractHandler(apicontract.CloseNotebook, func(c *gin.Conte
 	return apicontract.Success(apicontract.Null{})
 })
 
-func getNotebookConf(c *gin.Context) {
+var getNotebookConf = contractHandler(apicontract.GetNotebookConf, func(c *gin.Context, request apicontract.CloseNotebookRequest) apicontract.Response[apicontract.NotebookConfData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	notebook := request.Notebook
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	notebook := arg["notebook"].(string)
 	if util.InvalidIDPattern(notebook, ret) {
-		return
+		return contractFailure[apicontract.NotebookConfData](ret)
 	}
 
 	box := model.Conf.GetBox(notebook)
 	if nil == box {
 		ret.Code = -1
 		ret.Msg = "notebook [" + notebook + "] not found"
-		return
+		return contractFailure[apicontract.NotebookConfData](ret)
 	}
 	if model.IsReadOnlyRoleContext(c) && !isNotebookVisibleByPublishAccess(box, model.GetPublishAccess()) {
 		ret.Code = -1
 		ret.Msg = "notebook [" + notebook + "] not found"
-		return
+		return contractFailure[apicontract.NotebookConfData](ret)
 	}
 	if model.IsBoxUnlocked(notebook) {
 		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
 			ret.Code = -1
 			ret.Msg = model.Conf.Language(314)
-			return
+			return contractFailure[apicontract.NotebookConfData](ret)
 		}
 	}
 
@@ -352,61 +310,35 @@ func getNotebookConf(c *gin.Context) {
 	if !model.IsAdminRoleContext(c) {
 		model.HideBoxConfSecret(boxConf)
 	}
-	ret.Data = map[string]any{
-		"box":  box.ID,
-		"name": box.Name,
-		"conf": boxConf,
-	}
-}
 
-func setNotebookConf(c *gin.Context) {
+	return apicontract.Success(apicontract.NotebookConfData{Box: box.ID, Name: box.Name, Conf: notebookConfContract(boxConf)})
+})
+
+var setNotebookConf = contractHandler(apicontract.SetNotebookConf, func(c *gin.Context, request apicontract.SetNotebookConfRequest) apicontract.Response[*apicontract.NotebookConf] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	notebook := request.Notebook
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	notebook := arg["notebook"].(string)
 	if util.InvalidIDPattern(notebook, ret) {
-		return
+		return contractFailure[*apicontract.NotebookConf](ret)
 	}
 
 	box := model.Conf.GetBox(notebook)
 	if nil == box {
 		ret.Code = -1
 		ret.Msg = "notebook [" + notebook + "] not found"
-		return
+		return contractFailure[*apicontract.NotebookConf](ret)
 	}
 	if model.IsBoxUnlocked(notebook) {
 		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
 			ret.Code = -1
 			ret.Msg = model.Conf.Language(314)
-			return
+			return contractFailure[*apicontract.NotebookConf](ret)
 		}
-	}
-
-	param, err := gulu.JSON.MarshalJSON(arg["conf"])
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
 	}
 
 	boxConf := box.GetConf()
 	oldSortMode := boxConf.SortMode
-	// 深拷贝加密相关字段，防止反序列化请求体时被覆盖
-	// BoxCrypt 是指针，UnmarshalJSON 会修改同一指针对象，必须用 model 层辅助函数深拷贝
-	savedBoxCrypt := model.DeepCopyBoxEncryption(boxConf.BoxCrypt)
-	savedEncrypted := boxConf.Encrypted
-	if err = gulu.JSON.UnmarshalJSON(param, boxConf); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	boxConf.Encrypted = savedEncrypted
-	boxConf.BoxCrypt = savedBoxCrypt
+	applyNotebookConfPatch(boxConf, request.Conf)
 
 	boxConf.DocCreateSavePath = util.TrimSpaceInPath(boxConf.DocCreateSavePath)
 	boxConf.DocCreateTemplatePath = util.NormalizeTemplatePath(boxConf.DocCreateTemplatePath)
@@ -422,7 +354,7 @@ func setNotebookConf(c *gin.Context) {
 	if "/" == boxConf.DailyNoteSavePath {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(49)
-		return
+		return contractFailure[*apicontract.NotebookConf](ret)
 	}
 
 	boxConf.DailyNoteTemplatePath = util.NormalizeTemplatePath(boxConf.DailyNoteTemplatePath)
@@ -430,13 +362,13 @@ func setNotebookConf(c *gin.Context) {
 	if err := box.SaveConf(boxConf); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[*apicontract.NotebookConf](ret)
 	}
 	if oldSortMode != boxConf.SortMode {
 		model.PushDocSortModeChanged("notebook", notebook, "", "/", &boxConf.SortMode)
 	}
-	ret.Data = boxConf
-}
+	return apicontract.Success(notebookConfContract(boxConf))
+})
 
 var lsNotebooks = contractHandler(apicontract.ListNotebooks, func(c *gin.Context, request apicontract.ListNotebooksRequest) apicontract.Response[*apicontract.ListNotebooksData] {
 	ret := gulu.Ret.NewResult()
@@ -528,68 +460,45 @@ func isNotebookVisibleByPublishAccess(notebook *model.Box, publishAccess model.P
 }
 
 // enableEncryptedNotebooks 先同步数据，再恢复既有配置或启用加密笔记本并设置主密码。
-func enableEncryptedNotebooks(c *gin.Context) {
+var enableEncryptedNotebooks = contractHandler(apicontract.EnableEncryptedNotebooks, func(c *gin.Context, request apicontract.NotebookPasswordRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var password string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("password", &password, true, true)) {
-		return
-	}
+	password := request.Password
 
 	if err := model.EnableEncryptedNotebookWithSync(password); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 // disableEncryptedNotebooks 关闭加密笔记本功能。前置：没有加密笔记本存在。
-func disableEncryptedNotebooks(c *gin.Context) {
+var disableEncryptedNotebooks = contractHandler(apicontract.DisableEncryptedNotebooks, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
 	if err := model.DisableEncryptedNotebook(); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 // createEncryptedNotebook 创建一个新的加密笔记本。前置：加密功能已启用。
 // 创建时需提供主密码（用于派生 KEK 包络 DEK）。创建成功后内核已原子完成挂载。
-func createEncryptedNotebook(c *gin.Context) {
+var createEncryptedNotebook = contractHandler(apicontract.CreateEncryptedNotebook, func(c *gin.Context, request apicontract.CreateEncryptedNotebookRequest) apicontract.Response[apicontract.CreateNotebookData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var name, password string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("name", &name, true, false),
-		util.BindJsonArg("password", &password, true, true),
-	) {
-		return
-	}
+	name, password := request.Name, request.Password
 
 	id, err := model.CreateEncryptedBox(name, password)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.CreateNotebookData](ret)
 	}
 	if err = holdEncryptedBoxRequest(c, id); err != nil {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(314)
-		return
+		return contractFailure[apicontract.CreateNotebookData](ret)
 	}
 
 	// 创建时 DEK 已缓存 + 加密 db 已打开，此处直接挂载；失败则锁定回滚，避免 DEK 残留
@@ -599,7 +508,7 @@ func createEncryptedNotebook(c *gin.Context) {
 		model.LockBox(id)
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.CreateNotebookData](ret)
 	}
 
 	box := model.Conf.Box(id)
@@ -610,90 +519,63 @@ func createEncryptedNotebook(c *gin.Context) {
 	}
 	util.PushEvent(evt)
 
-	ret.Data = map[string]any{
-		"notebook": box,
-	}
-}
+	return apicontract.Success(apicontract.CreateNotebookData{Notebook: notebookContract(box)})
+})
 
 // unlockNotebook 用主密码派生 KEK 并解出指定加密笔记本的 DEK，缓存到内存。
 // 解锁后该笔记本即可被 Mount。每次调用跑一次 Argon2id（约 1 秒）。
-func unlockNotebook(c *gin.Context) {
+var unlockNotebook = contractHandler(apicontract.UnlockNotebook, func(c *gin.Context, request apicontract.UnlockNotebookRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var notebook, password string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("notebook", &notebook, true, true),
-		util.BindJsonArg("password", &password, true, true),
-	) {
-		return
-	}
+	notebook, password := request.Notebook, request.Password
 
 	if util.InvalidIDPattern(notebook, ret) {
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	boxCrypt, err := model.GetBoxEncryption(notebook)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(318)
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	if boxCrypt == nil || len(boxCrypt.WrappedDEK) == 0 {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(319)
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	if err := model.UnlockBox(notebook, password, boxCrypt); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	if err = holdEncryptedBoxRequest(c, notebook); err != nil {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(314)
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 // unlockAndOpenNotebook 原子化解锁并挂载加密笔记本，挂载失败时由模型层在同一转换锁内回滚本次解锁。
-func unlockAndOpenNotebook(c *gin.Context) {
+var unlockAndOpenNotebook = contractHandler(apicontract.UnlockAndOpenNotebook, func(c *gin.Context, request apicontract.UnlockNotebookRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var notebook, password string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("notebook", &notebook, true, true),
-		util.BindJsonArg("password", &password, true, true),
-	) {
-		return
-	}
+	notebook, password := request.Notebook, request.Password
 
 	if util.InvalidIDPattern(notebook, ret) {
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	boxCrypt, err := model.GetBoxEncryption(notebook)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(318)
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	if boxCrypt == nil || len(boxCrypt.WrappedDEK) == 0 {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(319)
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	msgId := util.PushMsg(model.Conf.Language(45), 1000*60*15)
@@ -702,12 +584,12 @@ func unlockAndOpenNotebook(c *gin.Context) {
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	if err = holdEncryptedBoxRequest(c, notebook); err != nil {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(314)
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	box := model.Conf.Box(notebook)
@@ -716,7 +598,7 @@ func unlockAndOpenNotebook(c *gin.Context) {
 		model.LockBox(notebook)
 		ret.Code = -1
 		ret.Msg = "opened notebook [" + notebook + "] not found"
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	evt := util.NewCmdResult("mount", 0, util.PushModeBroadcast)
@@ -725,97 +607,64 @@ func unlockAndOpenNotebook(c *gin.Context) {
 		"existed": existed,
 	}
 	util.PushEvent(evt)
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 // lockNotebook 锁定指定加密笔记本：清除其 DEK 缓存并 Unmount。
-func lockNotebook(c *gin.Context) {
+var lockNotebook = contractHandler(apicontract.LockNotebook, func(c *gin.Context, request apicontract.NotebookIDRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var notebook string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, true)) {
-		return
-	}
+	notebook := request.Notebook
 
 	if util.InvalidIDPattern(notebook, ret) {
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	if !model.IsEncryptedBox(notebook) {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(319)
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	// Unmount 内部的 unmount0 会清 DEK + 关闭加密 db，无需单独 LockBox。
 	// 反过来若先 LockBox 会关闭 db，导致 Unmount 的 Unindex 操作无 db 可用。
 	model.Unmount(notebook)
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 // setNotebookCryptoAutoLock 设置加密笔记本自动锁定闲置分钟数。
-func setNotebookCryptoAutoLock(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var autoLockMinutes float64
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("autoLockMinutes", &autoLockMinutes, true, false)) {
-		return
-	}
+var setNotebookCryptoAutoLock = contractHandler(apicontract.SetNotebookCryptoAutoLock, func(c *gin.Context, request apicontract.NotebookCryptoAutoLockRequest) apicontract.Response[apicontract.Null] {
+	autoLockMinutes := request.AutoLockMinutes
 
 	minutes := max(int(autoLockMinutes), 0)
 
 	model.SetAutoLockMinutes(minutes)
 	model.Conf.Save()
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 // touchEncryptedNotebooks 由前端真实用户交互或 headless 客户端显式保活调用，刷新已解锁加密笔记本的闲置计时。
-func touchEncryptedNotebooks(c *gin.Context) {
+var touchEncryptedNotebooks = contractHandler(apicontract.TouchEncryptedNotebooks, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 	model.TouchUnlockedEncryptedBoxes()
-	c.JSON(http.StatusOK, gulu.Ret.NewResult())
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 // changeMasterPassword 修改加密笔记本的主密码。
 // 用旧密码校验后，用新密码派生新 KEK，重新加密 verifier 和所有加密笔记本的 WrappedDEK。
 // 必须在所有加密笔记本都已锁定（DEK 不在内存）的状态下调用。
-func changeMasterPassword(c *gin.Context) {
+var changeMasterPassword = contractHandler(apicontract.ChangeMasterPassword, func(c *gin.Context, request apicontract.ChangeMasterPasswordRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var oldPassword, newPassword string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("oldPassword", &oldPassword, true, true),
-		util.BindJsonArg("newPassword", &newPassword, true, true),
-	) {
-		return
-	}
+	oldPassword, newPassword := request.OldPassword, request.NewPassword
 
 	if err := model.ChangeMasterPassword(oldPassword, newPassword); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 // getEncryptedNotebookStatus 返回加密笔记本功能的启用状态和各笔记本解锁信息。
-func getEncryptedNotebookStatus(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
+var getEncryptedNotebookStatus = contractHandler(apicontract.GetEncryptedNotebookStatus, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.EncryptedNotebookStatusData] {
 	model.NotebookCryptoMuLock()
 	boxIDs := model.ListAllEncryptedBoxIDs()
 	model.NotebookCryptoMuUnlock()
@@ -825,87 +674,58 @@ func getEncryptedNotebookStatus(c *gin.Context) {
 	hasHistoryDependency := model.HasEncryptedNotebookHistory()
 	state := model.NotebookCryptoLifecycleState(len(boxIDs) > 0 || hasHistoryDependency)
 
-	boxes := make([]map[string]any, 0, len(boxIDs))
+	boxes := make([]apicontract.EncryptedNotebookStatus, 0, len(boxIDs))
 	for _, id := range boxIDs {
 		box := model.Conf.Box(id)
 		name := ""
 		if box != nil {
 			name = box.Name
 		}
-		boxes = append(boxes, map[string]any{
-			"id":       id,
-			"name":     name,
-			"unlocked": model.IsBoxUnlocked(id),
-			"state":    model.GetEncryptedBoxState(id),
-		})
+		boxes = append(boxes, apicontract.EncryptedNotebookStatus{ID: id, Name: name, Unlocked: model.IsBoxUnlocked(id), State: string(model.GetEncryptedBoxState(id))})
 	}
 
-	ret.Data = map[string]any{
-		"enabled":              state == model.NotebookCryptoStateEnabled,
-		"state":                state,
-		"count":                len(boxIDs),
-		"boxes":                boxes,
-		"migrationPending":     pendingMigration,
-		"migrationBoxes":       migrationBoxes,
-		"hasHistoryDependency": hasHistoryDependency,
-	}
-}
+	return apicontract.Success(apicontract.EncryptedNotebookStatusData{
+		Enabled: state == model.NotebookCryptoStateEnabled, State: string(state), Count: len(boxIDs), Boxes: boxes,
+		MigrationPending: pendingMigration, MigrationBoxes: migrationBoxes, HasHistoryDependency: hasHistoryDependency,
+	})
+})
 
 // exportNotebookCryptoBackup 导出密钥备份文件到 export 目录供下载。
 // 备份文件不含主密码（salt 不保密、verifier 是密文），用户主动保存作为同步之外的独立恢复途径。
-func exportNotebookCryptoBackup(c *gin.Context) {
+var exportNotebookCryptoBackup = contractHandler(apicontract.ExportNotebookCryptoBackup, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.NotebookCryptoBackupData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
 	downloadPath, err := model.ExportNotebookCryptoBackup()
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.NotebookCryptoBackupData](ret)
 	}
-	ret.Data = map[string]any{
-		"file": downloadPath,
-	}
-}
+	return apicontract.Success(apicontract.NotebookCryptoBackupData{File: downloadPath})
+})
 
 // importNotebookCryptoBackup 导入密钥备份文件，恢复加密配置。
 // 用于新设备、重装或 RecoveryRequired 状态下手动恢复；完整且已启用的配置拒绝覆盖。
-func importNotebookCryptoBackup(c *gin.Context) {
+var importNotebookCryptoBackup = contractHandler(apicontract.ImportNotebookCryptoBackup, func(c *gin.Context, request apicontract.ImportNotebookCryptoBackupRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	form, err := c.MultipartForm()
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	if 1 > len(form.File["file"]) {
-		ret.Code = -1
-		ret.Msg = "file not found"
-		return
-	}
-	fh := form.File["file"][0]
+	fh := request.File
 	f, err := fh.Open()
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	defer f.Close()
 	data, err := io.ReadAll(f)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
-	password := ""
-	if vals := form.Value["password"]; len(vals) > 0 {
-		password = vals[0]
-	}
+	password := request.Password
 	if err := model.ImportNotebookCryptoBackup(data, password); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})

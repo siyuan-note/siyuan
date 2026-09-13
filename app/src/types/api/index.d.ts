@@ -1,10 +1,30 @@
 // 此文件由内核契约生成，请运行 pnpm run api:generate 更新。
 
+export type AppendBlockRequestInput = { "data": string; "dataType": string; "parentID": string; };
+
 export type AppendHeadingChildrenRequestInput = { "childrenDOM": string; "id": string; };
 
 export type AutoLaunchRequestInput = { "autoLaunch": number; };
 
+export type BatchInsertBlockRequestInput = { "blocks": Array<BlockInsertInputInput>; };
+
+export type BatchParentBlockRequestInput = { "blocks": Array<PrependBlockRequestInput>; };
+
 export type BatchSetBlockAttrsRequestInput = { "blockAttrs": Array<SetBlockAttrsRequestInput>; };
+
+export type BatchTaskListMarkerRequestInput = { "items": Array<TaskListMarkerRequestInput>; };
+
+export type BatchUpdateBlockRequestInput = { "blocks": Array<UpdateBlockRequestInput>; };
+
+export type BlockBreadcrumbChildren = { "hasMore": boolean; "items": Array<BlockPath | null> | null; };
+
+export type BlockBreadcrumbChildrenRequestInput = { "excludeTypes"?: Array<string> | null; "id": string; "ids"?: Array<string> | null; "limit"?: number | null; "notebook"?: string | null; "offset"?: number | null; };
+
+export type BlockBreadcrumbRequestInput = { "excludeTypes"?: Array<string> | null; "id": string; "ids"?: Array<string> | null; "notebook"?: string | null; };
+
+export type BlockDOMData = { "dom": string; "id": string; };
+
+export type BlockDeleteData = { "createEmptyParagraph": boolean; };
 
 export type BlockFoldData = { "isFolded": boolean; "isRoot": boolean; };
 
@@ -16,21 +36,53 @@ export type BlockInfoData = (FullBlockInfo & { "publishAccessRequired"?: never; 
 
 export type BlockInfoRequestInput = { "id": string; "ids"?: Array<string> | null; "notebook"?: string | null; };
 
+export type BlockInsertInputInput = { "data": string; "dataType": string; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; };
+
+export type BlockKramdownData = { "id": string; "kramdown": string; };
+
+export type BlockKramdownRequestInput = { "id": string; "ids"?: Array<string> | null; "mode"?: string | null; "notebook"?: string | null; };
+
+export type BlockOperation = { "action": "delete" | "insert" | "update" | "foldHeading" | "unfoldHeading" | "setAttrs" | "moveOutlineHeading" | "appendInsert" | "prependInsert"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "context": Record<string, string> | null; "data": null | string | BlockDeleteData; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null | string | Array<string>; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": null; "targetGroupID": string; "type": ""; "viewID": string; "viewIDs"?: Array<string>; };
+
+export type BlockPath = { "children": Array<BlockPath | null> | null; "hasChildren"?: boolean; "id": string; "name": string; "subType": string; "type": string; };
+
 export type BlockQueryRequestInput = { "id": string; "ids"?: Array<string> | null; "notebook"?: string | null; };
 
 export type BlockRelevantData = { "nextID": string; "parentID": string; "previousID": string; };
 
+export type BlockReminderRequestInput = { "id": string; "timed": string; };
+
 export type BlockSiblingData = { "next": string; "parent": string; "previous": string; };
+
+export type BlockStat = { "blockCount": number; "imageCount": number; "linkCount": number; "refCount": number; "runeCount": number; "wordCount": number; };
+
+export type BlockTransaction = { "doOperations": Array<BlockOperation | null> | null; "templateDocTreePlanID"?: string; "timestamp": number; "undoOperations": Array<BlockOperation | null> | null; };
+
+export type BlockTreeInfo = { "id": string; "nextID": string; "nextType": string; "parentID": string; "parentType": string; "previousID": string; "previousType": string; "type": string; };
+
+export type BlocksKramdownRequestInput = { "id"?: string | null; "ids": Array<string>; "mode"?: string | null; "notebook"?: string | null; };
 
 export type BlocksQueryRequestInput = { "id"?: string | null; "ids": Array<string>; "notebook"?: string | null; };
 
+export type BlocksWordCountRequestInput = { "id"?: string | null; "ids": Array<string>; "notebook"?: string | null; "reqId"?: JSONValue | null; };
+
 export type BootProgressData = { "details": string; "progress": number; };
+
+export type ChangeMasterPasswordRequestInput = { "newPassword": string; "oldPassword": string; };
 
 export type ChangeSortNotebookRequestInput = { "notebooks": Array<string>; };
 
+export type CheckBlocksExistRequestInput = { "id"?: string | null; "ids": Array<JSONValue>; "notebook"?: string | null; };
+
 export type CheckSnapshotData = { "changed": boolean; };
 
+export type ChildBlock = { "content"?: string; "id": string; "markdown"?: string; "subType"?: string; "type": string; };
+
 export type CloseNotebookRequestInput = { "notebook": string; };
+
+export type ContentWordCountRequestInput = { "content": string; "reqId"?: JSONValue | null; };
+
+export type CreateEncryptedNotebookRequestInput = { "name": string; "password": string; };
 
 export type CreateNotebookData = { "notebook": Notebook | null; };
 
@@ -42,13 +94,31 @@ export type CreateSnapshotRequestInput = { "memo"?: string; };
 
 export type DOMTextRequestInput = { "dom": string; };
 
+export type DailyNoteBlockRequestInput = { "data": string; "dataType": string; "notebook": string; };
+
+export type DeleteBlockRequestInput = { "id": string; };
+
+export type DocAttrView = { "id": string; "name": string; };
+
+export type DocInfo = { "attrViews": Array<DocAttrView | null> | null; "ial": Record<string, string> | null; "icon": string; "id": string; "name": string; "refCount": number; "refIDs": Array<string> | null; "rootID": string; "subFileCount": number; };
+
 export type DocOrdersRequestInput = { "id": string; };
+
+export type DocsInfoRequestInput = { "av": boolean; "ids": Array<string>; "refCount": boolean; };
 
 export type DownloadInstallPkgRequestInput = { "downloadInstallPkg": boolean; };
 
 export type EditorReadOnlyRequestInput = { "readonly": boolean; };
 
+export type EmbedStat = { "complete": boolean; "cycleCount": number; "depthLimitCount": number; "failedQueryCount": number; "failedResultCount": number; "jsEmbedCount": number; "queryEmbedCount": number; "resultCount": number; "truncatedQueryCount": number; };
+
 export type EmptyRequestInput = Record<string, never>;
+
+export type EncryptedNotebookStatus = { "id": string; "name": string; "state": "Locked" | "Unlocking" | "Unlocked" | "Locking" | "Error"; "unlocked": boolean; };
+
+export type EncryptedNotebookStatusData = { "boxes": Array<EncryptedNotebookStatus>; "count": number; "enabled": boolean; "hasHistoryDependency": boolean; "migrationBoxes": Array<string> | null; "migrationPending": boolean; "state": "Disabled" | "Enabled" | "RecoveryRequired"; };
+
+export type FileAnnotationRefRequestInput = { "id": string; "notebook"?: string | null; };
 
 export type FullBlockInfo = { "box": string; "path": string; "rootChildID": string; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
 
@@ -56,11 +126,21 @@ export type GetTagRequestInput = { "app"?: string | null; "ignoreMaxListHint"?: 
 
 export type HeadingChildrenRequestInput = { "id": string; "removeFoldAttr"?: boolean | null; };
 
+export type HeadingFoldRequestInput = { "id": string; "scope": string; };
+
+export type ImportNotebookCryptoBackupRequestInput = { "file": Blob; "password"?: string; };
+
+export type InsertBlockRequestInput = { "data": string; "dataType": string; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; };
+
+export type JSONValue = null | boolean | number | string | Array<JSONValue> | { [key: string]: JSONValue };
+
 export type ListNotebooksData = { "boxDocEnabled": boolean; "notebooks": Array<Notebook | null> | null; };
 
 export type ListNotebooksRequestInput = { "flashcard"?: boolean | null; };
 
 export type LockScreenRequestInput = { "lockScreenMode": number; };
+
+export type MoveBlockRequestInput = { "id": string; "parentID"?: string | null; "previousID"?: string | null; };
 
 export type NetworkData = { "proxy": NetworkProxy | null; };
 
@@ -74,11 +154,47 @@ export type NetworkServeTLSRequestInput = { "networkServeTLS": boolean; };
 
 export type Notebook = { "closed": boolean; "dueFlashcardCount": number; "encrypted": boolean; "flashcardCount": number; "icon": string; "id": string; "name": string; "newFlashcardCount": number; "sort": number; "sortMode": number; "state"?: "Locked" | "Unlocking" | "Unlocked" | "Locking" | "Error"; "subFileCount": number; "unlocked": boolean; };
 
+export type NotebookConf = { "boxCrypt": NotebookEncryption | null; "closed": boolean; "dailyNoteSavePath": string; "dailyNoteTemplatePath": string; "docCreateSaveBox": string; "docCreateSavePath": string; "docCreateTemplatePath": string; "encrypted": boolean; "icon": string; "name": string; "refCreateSaveBox": string; "refCreateSavePath": string; "sort": number; "sortMode": number; };
+
+export type NotebookConfData = { "box": string; "conf": NotebookConf | null; "name": string; };
+
+export type NotebookConfPatchInput = { "boxCrypt"?: NotebookEncryptionPatchInput | null; "closed"?: boolean | null; "dailyNoteSavePath"?: string | null; "dailyNoteTemplatePath"?: string | null; "docCreateSaveBox"?: string | null; "docCreateSavePath"?: string | null; "docCreateTemplatePath"?: string | null; "encrypted"?: boolean | null; "icon"?: string | null; "name"?: string | null; "refCreateSaveBox"?: string | null; "refCreateSavePath"?: string | null; "sort"?: number | null; "sortMode"?: number | null; };
+
+export type NotebookCryptoAutoLockRequestInput = { "autoLockMinutes": number; };
+
+export type NotebookCryptoBackupData = { "file": string; };
+
+export type NotebookEncryption = { "createdAt": number; "metadata"?: string; "spec": number; "wrapNonce": string | null; "wrappedDEK": string | null; };
+
+export type NotebookEncryptionPatchInput = { "createdAt"?: number | null; "metadata"?: string | Array<number> | null; "spec"?: number | null; "wrapNonce"?: string | Array<number> | null; "wrappedDEK"?: string | Array<number> | null; };
+
 export type NotebookIDRequestInput = { "notebook": string; };
+
+export type NotebookInfo = { "ctime": number; "docCount": number; "hCtime": string; "hMtime": string; "hSize": string; "id": string; "mtime": number; "name": string; "size": number; };
+
+export type NotebookInfoData = { "boxInfo": NotebookInfo | null; };
+
+export type NotebookPasswordRequestInput = { "password": string; };
+
+export type OpenNotebookRequestInput = { "app"?: string | null; "notebook": string; };
+
+export type OrderedListStartData = { "found": boolean; "start": number; };
 
 export type PinnedDoc = { "childrenSortMode": number | null; "icon": string; "id": string; "name": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
 
+export type PrependBlockRequestInput = { "data": string; "dataType": string; "parentID": string; };
+
 export type PublishedBlockInfo = { "publishAccessRequired": true; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
+
+export type RefDefs = { "defIDs": Array<string> | null; "refID": string; };
+
+export type RefDefsData = { "refDefs": Array<RefDefs>; };
+
+export type RefIDsData = { "originalRefBlockIDs": Record<string, string> | null; "refDefs": Array<RefDefs | null> | null; };
+
+export type RefIDsRequestInput = { "id"?: string | null; "ids"?: Array<string> | null; "notebook"?: string | null; };
+
+export type RefTextQueryRequestInput = { "anchor": string; "notebook"?: string | null; };
 
 export type RemoveBookmarkRequestInput = { "bookmark": string; };
 
@@ -90,6 +206,10 @@ export type RenameNotebookRequestInput = { "name": string; "notebook": string; }
 
 export type RenameTagRequestInput = { "newLabel": string; "oldLabel": string; };
 
+export type ReorderData = { "changed": boolean; "notebook"?: string; "parentPath"?: string; };
+
+export type ReorderNotebooksRequestInput = { "position"?: string | null; "sourceIDs"?: Array<string> | null; "targetID"?: string | null; };
+
 export type SearchHistoryData = { "histories": Array<string> | null; "pageCount": number; "totalCount": number; };
 
 export type SearchHistoryRequestInput = { "notebook"?: string | null; "op"?: string | null; "page"?: number | null; "query"?: string | null; "type"?: number | null; };
@@ -100,19 +220,39 @@ export type SearchTagRequestInput = { "k": string; };
 
 export type SetBlockAttrsRequestInput = { "attrs": Record<string, string | null>; "id": string; };
 
+export type SetNotebookConfRequestInput = { "conf"?: NotebookConfPatchInput | null; "notebook": string; };
+
 export type SetNotebookIconRequestInput = { "icon": string; "notebook": string; };
 
 export type SetSnapshotMemoRequestInput = { "id": string; "memo": string; };
 
+export type SwapBlockRefRequestInput = { "defID": string; "includeChildren": boolean; "refID": string; };
+
 export type TagData = { "children": Array<TagData | null> | null; "count": number; "depth": number; "label": string; "name": string; "type": string; };
 
+export type TailChildBlocksRequestInput = { "id": string; "ids"?: Array<string> | null; "n"?: number | null; "notebook"?: string | null; };
+
+export type TaskListMarkerRequestInput = { "id": string; "marker": string; };
+
+export type TransferBlockRefRequestInput = { "fromID": string; "refIDs"?: Array<string> | null; "reloadUI"?: boolean | null; "toID": string; };
+
+export type TreeStatData = { "containsEmbed"?: boolean; "embedStat"?: EmbedStat | null; "reqId": JSONValue; "stat": BlockStat | null; "statWithEmbed"?: BlockStat | null; };
+
+export type TreeStatRequestInput = { "id": string; "ids"?: Array<string> | null; "includeEmbed"?: boolean | null; "notebook"?: string | null; "reqId"?: JSONValue | null; };
+
 export type UnfoldedParentData = { "parentID": string; };
+
+export type UnlockNotebookRequestInput = { "notebook": string; "password": string; };
+
+export type UpdateBlockRequestInput = { "data": string; "dataType": string; "id": string; "lockType"?: boolean | null; };
 
 export type UpdateChannelRequestInput = { "updateChannel": string; };
 
 export type UpdatePinnedDocsRequestInput = { "action": string; "after"?: boolean; "ids": Array<string>; "targetID"?: string; };
 
 export type VirtualBlockRefRequestInput = { "keywords": Array<string>; };
+
+export type WordCountData = { "reqId": JSONValue; "stat": BlockStat | null; };
 
 export type WorkspaceInfoData = { "siyuanVer": string; "workspaceDir": string; };
 
@@ -292,55 +432,10 @@ export type APILegacyPOSTPath =
     "/api/bazaar/uninstallBazaarTheme" |
     "/api/bazaar/uninstallBazaarWidget" |
     "/api/bazaar/updateBazaarPackage" |
-    "/api/block/appendBlock" |
-    "/api/block/appendDailyNoteBlock" |
-    "/api/block/batchAppendBlock" |
-    "/api/block/batchInsertBlock" |
-    "/api/block/batchPrependBlock" |
-    "/api/block/batchUpdateBlock" |
-    "/api/block/batchUpdateTaskListItemMarker" |
     "/api/block/checkBlockRef" |
-    "/api/block/checkBlocksExist" |
-    "/api/block/deleteBlock" |
-    "/api/block/foldBlock" |
-    "/api/block/getBlockBreadcrumb" |
-    "/api/block/getBlockBreadcrumbChildren" |
-    "/api/block/getBlockDOM" |
-    "/api/block/getBlockDOMWithEmbed" |
-    "/api/block/getBlockDOMs" |
-    "/api/block/getBlockDOMsWithEmbed" |
-    "/api/block/getBlockDefIDsByRefText" |
-    "/api/block/getBlockKramdown" |
-    "/api/block/getBlockKramdowns" |
-    "/api/block/getBlockTreeInfos" |
-    "/api/block/getBlocksWordCount" |
-    "/api/block/getChildBlocks" |
-    "/api/block/getContentWordCount" |
     "/api/block/getDocHeadingLevelTransaction" |
-    "/api/block/getDocInfo" |
-    "/api/block/getDocsInfo" |
-    "/api/block/getHeadingDeleteTransaction" |
-    "/api/block/getHeadingFoldTransaction" |
-    "/api/block/getHeadingInsertTransaction" |
     "/api/block/getHeadingLevelTransaction" |
-    "/api/block/getOrderedListContinueStart" |
     "/api/block/getRecentUpdatedBlocks" |
-    "/api/block/getRefIDs" |
-    "/api/block/getRefIDsByFileAnnotationID" |
-    "/api/block/getRefText" |
-    "/api/block/getTailChildBlocks" |
-    "/api/block/getTreeStat" |
-    "/api/block/insertBlock" |
-    "/api/block/moveBlock" |
-    "/api/block/moveOutlineHeading" |
-    "/api/block/prependBlock" |
-    "/api/block/prependDailyNoteBlock" |
-    "/api/block/setBlockReminder" |
-    "/api/block/swapBlockRef" |
-    "/api/block/transferBlockRef" |
-    "/api/block/unfoldBlock" |
-    "/api/block/updateBlock" |
-    "/api/block/updateTaskListItemMarker" |
     "/api/bookmark/getBookmark" |
     "/api/broadcast/getChannelInfo" |
     "/api/broadcast/getChannels" |
@@ -476,23 +571,6 @@ export type APILegacyPOSTPath =
     "/api/network/echo/*path" |
     "/api/network/forwardProxy" |
     "/api/network/proxy" |
-    "/api/notebook/changeMasterPassword" |
-    "/api/notebook/createEncryptedNotebook" |
-    "/api/notebook/disableEncryptedNotebooks" |
-    "/api/notebook/enableEncryptedNotebooks" |
-    "/api/notebook/exportNotebookCryptoBackup" |
-    "/api/notebook/getEncryptedNotebookStatus" |
-    "/api/notebook/getNotebookConf" |
-    "/api/notebook/getNotebookInfo" |
-    "/api/notebook/importNotebookCryptoBackup" |
-    "/api/notebook/lockNotebook" |
-    "/api/notebook/openNotebook" |
-    "/api/notebook/reorder" |
-    "/api/notebook/setNotebookConf" |
-    "/api/notebook/setNotebookCryptoAutoLock" |
-    "/api/notebook/touchEncryptedNotebooks" |
-    "/api/notebook/unlockAndOpenNotebook" |
-    "/api/notebook/unlockNotebook" |
     "/api/notification/pushErrMsg" |
     "/api/notification/pushMsg" |
     "/api/outline/getDocHeadingNumbers" |
@@ -729,9 +807,44 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/block/appendBlock": {
+        request: AppendBlockRequestInput;
+        response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/appendDailyNoteBlock": {
+        request: DailyNoteBlockRequestInput;
+        response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/block/appendHeadingChildren": {
         request: AppendHeadingChildrenRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/batchAppendBlock": {
+        request: BatchParentBlockRequestInput;
+        response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/batchInsertBlock": {
+        request: BatchInsertBlockRequestInput;
+        response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/batchPrependBlock": {
+        request: BatchParentBlockRequestInput;
+        response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/batchUpdateBlock": {
+        request: BatchUpdateBlockRequestInput;
+        response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/batchUpdateTaskListItemMarker": {
+        request: BatchTaskListMarkerRequestInput;
+        response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/block/checkBlockExist": {
@@ -744,6 +857,56 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": BlockFoldData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/block/checkBlocksExist": {
+        request: CheckBlocksExistRequestInput;
+        response: { "code": 0; "data": Record<string, boolean> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/deleteBlock": {
+        request: DeleteBlockRequestInput;
+        response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/foldBlock": {
+        request: BlockIDRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getBlockBreadcrumb": {
+        request: BlockBreadcrumbRequestInput;
+        response: { "code": 0; "data": Array<BlockPath | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getBlockBreadcrumbChildren": {
+        request: BlockBreadcrumbChildrenRequestInput;
+        response: { "code": 0; "data": BlockBreadcrumbChildren | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getBlockDOM": {
+        request: BlockQueryRequestInput;
+        response: { "code": 0; "data": BlockDOMData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getBlockDOMWithEmbed": {
+        request: BlockQueryRequestInput;
+        response: { "code": 0; "data": BlockDOMData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getBlockDOMs": {
+        request: BlocksQueryRequestInput;
+        response: { "code": 0; "data": Record<string, string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getBlockDOMsWithEmbed": {
+        request: BlocksQueryRequestInput;
+        response: { "code": 0; "data": Record<string, string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getBlockDefIDsByRefText": {
+        request: RefTextQueryRequestInput;
+        response: { "code": 0; "data": RefDefsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/block/getBlockIndex": {
         request: BlockQueryRequestInput;
         response: { "code": 0; "data": number; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -752,6 +915,16 @@ export interface APIPOSTRoutes {
     "/api/block/getBlockInfo": {
         request: BlockInfoRequestInput;
         response: { "code": 0; "data": BlockInfoData; "msg": string; } | { "code": -1 | 3; "data": { "closeTimeout": number; } | null | string; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getBlockKramdown": {
+        request: BlockKramdownRequestInput;
+        response: { "code": 0; "data": BlockKramdownData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getBlockKramdowns": {
+        request: BlocksKramdownRequestInput;
+        response: { "code": 0; "data": Record<string, string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/block/getBlockRelevantIDs": {
@@ -764,9 +937,29 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": BlockSiblingData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/block/getBlockTreeInfos": {
+        request: BlocksQueryRequestInput;
+        response: { "code": 0; "data": Record<string, BlockTreeInfo | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/block/getBlocksIndexes": {
         request: BlocksQueryRequestInput;
         response: { "code": 0; "data": Record<string, number> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getBlocksWordCount": {
+        request: BlocksWordCountRequestInput;
+        response: { "code": 0; "data": WordCountData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getChildBlocks": {
+        request: BlockQueryRequestInput;
+        response: { "code": 0; "data": Array<ChildBlock | null>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getContentWordCount": {
+        request: ContentWordCountRequestInput;
+        response: { "code": 0; "data": WordCountData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/block/getDOMText": {
@@ -779,6 +972,16 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/block/getDocInfo": {
+        request: BlockQueryRequestInput;
+        response: { "code": 0; "data": DocInfo | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getDocsInfo": {
+        request: DocsInfoRequestInput;
+        response: { "code": 0; "data": Array<DocInfo | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/block/getHeadingChildrenDOM": {
         request: HeadingChildrenRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -789,9 +992,109 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/block/getHeadingDeleteTransaction": {
+        request: BlockIDRequestInput;
+        response: { "code": 0; "data": BlockTransaction | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getHeadingFoldTransaction": {
+        request: HeadingFoldRequestInput;
+        response: { "code": 0; "data": BlockTransaction | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getHeadingInsertTransaction": {
+        request: BlockIDRequestInput;
+        response: { "code": 0; "data": BlockTransaction | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getOrderedListContinueStart": {
+        request: BlockQueryRequestInput;
+        response: { "code": 0; "data": OrderedListStartData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getRefIDs": {
+        request: RefIDsRequestInput;
+        response: { "code": 0; "data": RefIDsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getRefIDsByFileAnnotationID": {
+        request: FileAnnotationRefRequestInput;
+        response: { "code": 0; "data": RefDefsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getRefText": {
+        request: BlockQueryRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getTailChildBlocks": {
+        request: TailChildBlocksRequestInput;
+        response: { "code": 0; "data": Array<ChildBlock | null>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/getTreeStat": {
+        request: TreeStatRequestInput;
+        response: { "code": 0; "data": TreeStatData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/block/getUnfoldedParentID": {
         request: BlockQueryRequestInput;
         response: { "code": 0; "data": UnfoldedParentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/insertBlock": {
+        request: InsertBlockRequestInput;
+        response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/moveBlock": {
+        request: MoveBlockRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/moveOutlineHeading": {
+        request: MoveBlockRequestInput;
+        response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/prependBlock": {
+        request: PrependBlockRequestInput;
+        response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/prependDailyNoteBlock": {
+        request: DailyNoteBlockRequestInput;
+        response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/setBlockReminder": {
+        request: BlockReminderRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/swapBlockRef": {
+        request: SwapBlockRefRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/transferBlockRef": {
+        request: TransferBlockRefRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/unfoldBlock": {
+        request: BlockIDRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/updateBlock": {
+        request: UpdateBlockRequestInput;
+        response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/block/updateTaskListItemMarker": {
+        request: TaskListMarkerRequestInput;
+        response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/bookmark/removeBookmark": {
@@ -829,6 +1132,11 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": SearchHistoryData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/notebook/changeMasterPassword": {
+        request: ChangeMasterPasswordRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/notebook/changeSortNotebook": {
         request: ChangeSortNotebookRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -839,15 +1147,65 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/notebook/createEncryptedNotebook": {
+        request: CreateEncryptedNotebookRequestInput;
+        response: { "code": 0; "data": CreateNotebookData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/notebook/createNotebook": {
         request: CreateNotebookRequestInput;
         response: { "code": 0; "data": CreateNotebookData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/notebook/disableEncryptedNotebooks": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/notebook/enableEncryptedNotebooks": {
+        request: NotebookPasswordRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/notebook/exportNotebookCryptoBackup": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": NotebookCryptoBackupData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/notebook/getEncryptedNotebookStatus": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": EncryptedNotebookStatusData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/notebook/getNotebookConf": {
+        request: CloseNotebookRequestInput;
+        response: { "code": 0; "data": NotebookConfData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/notebook/getNotebookInfo": {
+        request: NotebookIDRequestInput;
+        response: { "code": 0; "data": NotebookInfoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/notebook/importNotebookCryptoBackup": {
+        request: ImportNotebookCryptoBackupRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+    };
+    "/api/notebook/lockNotebook": {
+        request: NotebookIDRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/notebook/lsNotebooks": {
         request: ListNotebooksRequestInput;
         response: { "code": 0; "data": ListNotebooksData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "legacyOptional";
+    };
+    "/api/notebook/openNotebook": {
+        request: OpenNotebookRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
     };
     "/api/notebook/removeNotebook": {
         request: NotebookIDRequestInput;
@@ -859,8 +1217,38 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/notebook/reorder": {
+        request: ReorderNotebooksRequestInput;
+        response: { "code": 0; "data": ReorderData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | ReorderData | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/notebook/setNotebookConf": {
+        request: SetNotebookConfRequestInput;
+        response: { "code": 0; "data": NotebookConf | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/notebook/setNotebookCryptoAutoLock": {
+        request: NotebookCryptoAutoLockRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/notebook/setNotebookIcon": {
         request: SetNotebookIconRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/notebook/touchEncryptedNotebooks": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/notebook/unlockAndOpenNotebook": {
+        request: UnlockNotebookRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/notebook/unlockNotebook": {
+        request: UnlockNotebookRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
@@ -1035,7 +1423,12 @@ export interface APILegacyResponse {
 }
 
 type APIContract = {request: unknown; response: unknown; body: string};
-type APIRequestArgs<C extends APIContract> = C["body"] extends "json"
+export interface APIFormData<Request> extends FormData {
+    readonly apiRequest: Request;
+}
+type APIRequestArgs<C extends APIContract> = C["body"] extends "multipart"
+    ? [data: APIFormData<C["request"]>]
+    : C["body"] extends "json" | "structJSON"
     ? [data: C["request"]]
     : [data?: C["request"] | null];
 type NonNegative<C extends number> = C extends C ? `${C}` extends `-${string}` ? never : C : never;

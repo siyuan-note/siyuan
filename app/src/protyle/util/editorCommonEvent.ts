@@ -693,6 +693,9 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     for (let j = 0; j < copyFoldHeadingIds.length; j++) {
         const childrenItem = copyFoldHeadingIds[j];
         const responseTransaction = await fetchSyncPost("/api/block/getHeadingInsertTransaction", {id: childrenItem.oldId});
+        if (responseTransaction.code !== 0) {
+            throw new Error(responseTransaction.msg);
+        }
         responseTransaction.data.doOperations.splice(0, 1);
         responseTransaction.data.doOperations[0].previousID = childrenItem.newId;
         responseTransaction.data.undoOperations.splice(0, 1);

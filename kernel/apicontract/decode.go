@@ -18,6 +18,13 @@ func (e Endpoint[Request, Data]) Decode(reader io.Reader) (request Request, err 
 	if reader == nil {
 		reader = bytes.NewReader(nil)
 	}
+	if e.definition.Body == StructJSONBody {
+		err = json.NewDecoder(reader).Decode(&request)
+		if err != nil {
+			err = fmt.Errorf("Parses request [%s] failed: %s", e.definition.Path, err)
+		}
+		return
+	}
 	var fields map[string]json.RawMessage
 	err = json.NewDecoder(reader).Decode(&fields)
 	if err != nil {
@@ -83,6 +90,17 @@ func decodeRequestFields(value reflect.Value, fields map[string]json.RawMessage)
 		var decodeErr error
 		if isNull && has("nullable") {
 			value.Field(i).SetZero()
+		} else if has("legacyobject") {
+			// 配置补丁先按 JSON 数字语义归一化，再按结构体字段名兼容绑定。
+			var normalized any
+			decodeErr = json.Unmarshal(raw, &normalized)
+			if decodeErr == nil {
+				var data []byte
+				data, decodeErr = json.Marshal(normalized)
+				if decodeErr == nil {
+					decodeErr = json.Unmarshal(data, value.Field(i).Addr().Interface())
+				}
+			}
 		} else {
 			decodeErr = decodeRequestValue(raw, value.Field(i))
 		}
@@ -138,6 +156,9 @@ func decodeRequestFields(value reflect.Value, fields map[string]json.RawMessage)
 
 // decodeRequestValue 递归绑定复合参数，避免数组元素和嵌套字段绕过空值及必填检查。
 func decodeRequestValue(raw json.RawMessage, value reflect.Value) error {
+	if value.Type() == reflect.TypeFor[JSONValue]() {
+		return json.Unmarshal(raw, value.Addr().Interface())
+	}
 	if bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
 		switch value.Kind() {
 		case reflect.Pointer, reflect.Map, reflect.Slice:

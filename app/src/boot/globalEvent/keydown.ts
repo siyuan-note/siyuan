@@ -1,3 +1,4 @@
+import type {BlockQueryRequestInput} from "../../types/api";
 import {
     copyPlainText,
     isMac,
@@ -715,7 +716,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.rename, event)) {
         window.siyuan.menus.menu.remove();
         if (isFile) {
-            const docInfoParam: IObject = {
+            const docInfoParam: BlockQueryRequestInput = {
                 id: liElements[0].getAttribute("data-node-id")
             };
             if (isEncryptedBox(notebookId)) {

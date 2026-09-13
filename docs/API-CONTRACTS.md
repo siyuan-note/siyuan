@@ -86,6 +86,10 @@ Storage contracts keep arbitrary JSON limited to storage values; keys, recent do
 
 ## Multipart requests
 
+SSE endpoints declare each event name and payload with `SSEOptions` and `SSEEvent`. `StreamSSE` executes the existing stream lifecycle within the request; cancellation and cleanup remain inside that lifecycle. HTTP validation distinguishes `text/event-stream` from the declared pre-stream JSON failures, while `ValidateSSEEvent` checks each JSON event payload separately. Generated metadata exposes the event types; buffered fetch helpers still return the complete stream as text.
+
+Page responses use `HTTPContentOptions` to declare permitted HTTP status and media-type pairs and `SuccessHTTPContent` to preserve their bytes. This uses the existing binary transport and keeps JSON middleware errors separate. `FastJSON` preserves selected large responses' accelerated JSON encoder without changing their typed payloads or response envelope; encoding failures retain the standard encoder fallback.
+
 `WebSocketOutput` uses `WebSocketOptions` to declare incoming and outgoing message types and the plugin admission failure status. `UpgradeWebSocket` hands the response writer to the connection lifecycle from `contractHandler`; `RejectWebSocket` serializes the declared rejection payload. Generated route metadata includes both message schemas, and `ValidateWebSocketMessage` validates frames separately from handshake responses and middleware envelopes. Handshake validation checks HTTP status and body; network regression tests verify upgrade headers, Origin rejection, message exchange, and cancellation.
 
 Optional `*string` form fields preserve omission separately from an explicit empty string; use `nonnullable` because multipart text fields cannot contain JSON null. Import handlers use this distinction for defaults and delayed field validation. Upload progress starts before multipart parsing, and parse failures clear it before responding; Gin's cached form is reused for typed binding.

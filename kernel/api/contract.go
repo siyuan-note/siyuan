@@ -7,6 +7,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	goccyJSON "github.com/goccy/go-json"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -42,9 +43,16 @@ func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, D
 	handler func(*gin.Context, Request) apicontract.Response[Data], beforeDecode ...func(*gin.Context) *apicontract.Response[Data]) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		writeResponse := func(response apicontract.Response[Data]) {
+			if after := response.AfterWrite(); after != nil {
+				defer after()
+			}
 			status := endpoint.Status(response)
 			if upgrade := response.Upgrade(); upgrade != nil {
 				upgrade(c.Writer, c.Request)
+				return
+			}
+			if stream := response.Stream(); stream != nil {
+				stream(c.Writer, c.Request)
 				return
 			}
 			if status == 204 {
@@ -54,6 +62,12 @@ func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, D
 			if content := response.Binary(); content != nil {
 				c.Data(status, content.ContentType, content.Bytes)
 				return
+			}
+			if endpoint.Definition().FastJSON {
+				if data, err := response.MarshalWith(goccyJSON.Marshal); err == nil && len(data) > 0 {
+					c.Data(status, "application/json; charset=utf-8", data)
+					return
+				}
 			}
 			c.JSON(status, response)
 		}

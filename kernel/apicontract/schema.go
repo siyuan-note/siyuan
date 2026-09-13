@@ -27,17 +27,19 @@ type Schema struct {
 }
 
 type EndpointSchema struct {
-	Method                  string           `json:"method"`
-	Path                    string           `json:"path"`
-	Handler                 string           `json:"handler"`
-	Body                    BodyMode         `json:"body"`
-	Request                 *Schema          `json:"request"`
-	Response                *Schema          `json:"response"`
-	Output                  OutputMode       `json:"output,omitempty"`
-	ErrorStatus             int              `json:"errorStatus,omitempty"`
-	NoContent               bool             `json:"noContent,omitempty"`
-	WebSocket               *WebSocketSchema `json:"websocket,omitempty"`
-	AdditionalErrorStatuses []int            `json:"additionalErrorStatuses,omitempty"`
+	Method                  string               `json:"method"`
+	Path                    string               `json:"path"`
+	Handler                 string               `json:"handler"`
+	Body                    BodyMode             `json:"body"`
+	Request                 *Schema              `json:"request"`
+	Response                *Schema              `json:"response"`
+	Output                  OutputMode           `json:"output,omitempty"`
+	ErrorStatus             int                  `json:"errorStatus,omitempty"`
+	NoContent               bool                 `json:"noContent,omitempty"`
+	WebSocket               *WebSocketSchema     `json:"websocket,omitempty"`
+	SSE                     *SSESchema           `json:"sse,omitempty"`
+	ContentVariants         []HTTPContentVariant `json:"contentVariants,omitempty"`
+	AdditionalErrorStatuses []int                `json:"additionalErrorStatuses,omitempty"`
 }
 
 type WebSocketSchema struct {
@@ -493,18 +495,38 @@ func BuildBundle() (*Bundle, error) {
 	b := &schemaBuilder{definitions: map[string]*Schema{}, owners: map[string]reflect.Type{}}
 	bundle := &Bundle{Dialect: "https://json-schema.org/draft/2020-12/schema", Definitions: b.definitions}
 	for _, definition := range Definitions() {
+		if definition.FastJSON && definition.Output != "" {
+			return nil, fmt.Errorf("fast JSON requires envelope output: %s", definition.Name)
+		}
+		if err := validateContentVariants(definition); err != nil {
+			return nil, err
+		}
 		for _, status := range definition.AdditionalErrorStatuses {
-			if definition.Output != "" || status < 400 || status > 599 {
+			if (definition.Output != "" && definition.Output != SSEOutput) || status < 400 || status > 599 {
 				return nil, fmt.Errorf("invalid JSON error status: %s", definition.Name)
 			}
 		}
-		if definition.Output != "" && definition.Output != BinaryOutput && definition.Output != DirectJSONOutput && definition.Output != WebSocketOutput {
+		if definition.Output != "" && definition.Output != BinaryOutput && definition.Output != DirectJSONOutput && definition.Output != WebSocketOutput && definition.Output != SSEOutput {
 			return nil, fmt.Errorf("unsupported response output: %s", definition.Name)
 		}
 		if definition.NoContent && definition.Output != DirectJSONOutput {
 			return nil, fmt.Errorf("empty responses require direct JSON output: %s", definition.Name)
 		}
 		var websocket *WebSocketSchema
+		var sse *SSESchema
+		if (definition.Output == SSEOutput) != (definition.SSE != nil) {
+			return nil, fmt.Errorf("SSE output requires event declarations: %s", definition.Name)
+		}
+		if definition.SSE != nil {
+			if definition.DataOnError || definition.ErrorStatus != 0 || definition.DataNonNullable {
+				return nil, fmt.Errorf("invalid SSE response options: %s", definition.Name)
+			}
+			var err error
+			sse, err = b.sseSchema(definition.SSE)
+			if err != nil {
+				return nil, err
+			}
+		}
 		if (definition.Output == WebSocketOutput) != (definition.WebSocket != nil) {
 			return nil, fmt.Errorf("WebSocket output requires message declarations: %s", definition.Name)
 		}
@@ -574,6 +596,9 @@ func BuildBundle() (*Bundle, error) {
 		if definition.Output == DirectJSONOutput || definition.Output == WebSocketOutput {
 			success = data
 		}
+		if definition.Output == SSEOutput {
+			success = &Schema{Type: "string"}
+		}
 		var codes []any
 		for _, code := range definition.ErrorCodes {
 			codes = append(codes, code)
@@ -593,7 +618,7 @@ func BuildBundle() (*Bundle, error) {
 		for _, method := range definition.Methods {
 			bundle.Endpoints = append(bundle.Endpoints, EndpointSchema{Method: method, Path: definition.Path, Handler: definition.Name,
 				Body: definition.Body, Request: request, Response: response, Output: definition.Output, ErrorStatus: definition.ErrorStatus, NoContent: definition.NoContent, WebSocket: websocket,
-				AdditionalErrorStatuses: definition.AdditionalErrorStatuses})
+				AdditionalErrorStatuses: definition.AdditionalErrorStatuses, SSE: sse, ContentVariants: definition.ContentVariants})
 		}
 	}
 	sort.Slice(bundle.Endpoints, func(i, j int) bool {
@@ -623,7 +648,7 @@ func (b *Bundle) ValidateResponse(method, path string, payload []byte) error {
 	}
 	for _, endpoint := range b.Endpoints {
 		if endpoint.Method == method && endpoint.Path == path {
-			if endpoint.Output == BinaryOutput || endpoint.Output == WebSocketOutput {
+			if endpoint.Output == BinaryOutput || endpoint.Output == WebSocketOutput || endpoint.Output == SSEOutput {
 				return fmt.Errorf("binary endpoint requires HTTP response validation")
 			}
 			return b.validate(endpoint.Response, value, "$")
@@ -654,11 +679,19 @@ func (b *Bundle) ValidateHTTPResponse(method, path string, status int, contentTy
 		if err != nil {
 			return fmt.Errorf("invalid response content type: %w", err)
 		}
-		if endpoint.Output == BinaryOutput && status == 200 {
+		if endpoint.Output == BinaryOutput {
+			if len(endpoint.ContentVariants) == 0 && status == 200 || matchesContentVariant(endpoint.ContentVariants, status, mediaType) {
+				return nil
+			}
+		}
+		if endpoint.SSE != nil && status == 200 && mediaType == "text/event-stream" {
 			return nil
 		}
 		expectedStatus := 200
 		response := endpoint.Response
+		if endpoint.SSE != nil {
+			response = endpoint.Response.AnyOf[1]
+		}
 		for _, extraStatus := range endpoint.AdditionalErrorStatuses {
 			if status == extraStatus {
 				expectedStatus = status

@@ -87,13 +87,18 @@ func (b *Bundle) typeScript(schema *Schema) string {
 		}
 		return "Array<" + b.typeScript(schema.Items) + ">"
 	case "object":
+		var indexSignature string
 		if additional, ok := schema.AdditionalProperties.(*Schema); ok {
 			if additional.Ref == "#/$defs/JSONValue" {
-				return "{ [key: string]: JSONValue }"
+				indexSignature = "{ [key: string]: JSONValue }"
+			} else {
+				indexSignature = "Record<string, " + b.typeScript(additional) + ">"
 			}
-			return "Record<string, " + b.typeScript(additional) + ">"
 		}
 		if len(schema.Properties) == 0 {
+			if indexSignature != "" {
+				return indexSignature
+			}
 			return "Record<string, never>"
 		}
 		required := map[string]bool{}
@@ -108,7 +113,11 @@ func (b *Bundle) typeScript(schema *Schema) string {
 			}
 			fields = append(fields, quote(key)+optional+": "+b.typeScript(schema.Properties[key])+";")
 		}
-		return "{ " + strings.Join(fields, " ") + " }"
+		object := "{ " + strings.Join(fields, " ") + " }"
+		if indexSignature != "" {
+			return "(" + object + " & " + indexSignature + ")"
+		}
+		return object
 	default:
 		panic("unsupported TypeScript schema: " + schema.Type)
 	}
@@ -156,8 +165,19 @@ func (b *Bundle) TypeScript(legacy []Route) []byte {
 				statuses, _ := json.Marshal(endpoint.AdditionalErrorStatuses)
 				fmt.Fprintf(&output, "        additionalErrorStatuses: %s;\n", statuses)
 			}
+			if len(endpoint.ContentVariants) > 0 {
+				variants, _ := json.Marshal(endpoint.ContentVariants)
+				fmt.Fprintf(&output, "        contentVariants: %s;\n", variants)
+			}
 			if ws := endpoint.WebSocket; ws != nil {
 				fmt.Fprintf(&output, "        websocket: { incoming: %s; outgoing: %s; failureStatus: %d; };\n", b.typeScript(ws.Incoming), b.typeScript(ws.Outgoing), ws.FailureStatus)
+			}
+			if sse := endpoint.SSE; sse != nil {
+				output.WriteString("        sse: { events: { ")
+				for _, name := range sortedKeys(sse.Events) {
+					fmt.Fprintf(&output, "%s: %s; ", quote(name), b.typeScript(sse.Events[name]))
+				}
+				output.WriteString("}; };\n")
 			}
 			output.WriteString("    };\n")
 		}
@@ -207,7 +227,7 @@ export type APICallbackResponse<R> = R extends {code: infer C extends number}
 type APIDirectCallbackResponse<R> = R extends {code: number} ? APICallbackResponse<R> : R;
 
 type APIPostTail<C extends APIContract> = [
-    cb?: (response: C extends {output: "binary"} ? JSONValue : C extends {output: "directJSON"} ? APIDirectCallbackResponse<C["response"]> | (C extends {noContent: true} ? "" : never) : APICallbackResponse<C["response"]>) => void,
+    cb?: (response: C extends {output: "binary"} ? JSONValue : C extends {output: "directJSON"} ? APIDirectCallbackResponse<C["response"]> | (C extends {noContent: true} ? "" : never) : C extends {output: "sse"} ? string | APICallbackResponse<C["response"]> : APICallbackResponse<C["response"]>) => void,
     headers?: Record<string, string>,
     failCallback?: (response: APIFetchFailure) => void,
     signal?: AbortSignal,

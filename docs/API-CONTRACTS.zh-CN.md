@@ -88,6 +88,10 @@ SQL 查询契约保留成功信封顶层的 `limit` 和 `truncated`。`SuccessSQ
 
 ## 文件上传请求
 
+SSE 接口通过 `SSEOptions` 和 `SSEEvent` 声明各事件名称及载荷。`StreamSSE` 在请求上下文内执行原有流生命周期，取消与清理仍在该生命周期内完成。HTTP 校验区分 `text/event-stream` 与声明过的流建立前 JSON 错误，`ValidateSSEEvent` 单独校验各事件的 JSON 载荷。生成声明包含事件类型；缓冲式 fetch 辅助函数仍将完整流作为文本返回。
+
+页面响应通过 `HTTPContentOptions` 声明允许的 HTTP 状态与媒体类型组合，通过 `SuccessHTTPContent` 保留原始字节，复用既有二进制传输并单独处理 JSON 中间件错误。`FastJSON` 为指定的大体量响应保留快速 JSON 编码，不改变有类型载荷及响应信封；编码失败时仍回退到标准编码器。
+
 可选的 `*string` 表单字段区分未传字段与显式空字符串，并使用 `nonnullable`，因为表单文本不能包含 JSON 空值。导入处理器据此保留默认值和延后校验的行为。上传进度在解析表单前启动，解析失败时先清理进度再返回；类型绑定复用 Gin 缓存的表单。
 
 `BinaryOutput` 通过 `BinaryContent` 和 `SuccessBinary` 声明原始文件响应。适配器保留字节和媒体类型，`ErrorStatus` 声明 JSON 失败响应使用的独立 HTTP 状态（`getFile` 使用 202）。schema 记录二进制成功响应和类型化 JSON 错误；`ValidateHTTPResponse` 先检查状态和媒体类型，再验证错误信封。生成的路由响应使用 `Blob`，现有 fetch 函数则使用 `JSONValue`，因为它们保留将文件内容解析为文本或 JSON 的行为。JSON 文件内容可以是任意 JSON，但结构化错误契约不因此放宽。

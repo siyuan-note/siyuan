@@ -4067,6 +4067,26 @@
         }
       ]
     },
+    "KernelPetal": {
+      "type": "object",
+      "properties": {
+        "existed": {
+          "type": "boolean"
+        },
+        "incompatible": {
+          "type": "boolean"
+        },
+        "js": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "existed",
+        "incompatible",
+        "js"
+      ],
+      "additionalProperties": false
+    },
     "ListNotebooksData": {
       "type": "object",
       "properties": {
@@ -4114,6 +4134,18 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "LoadPetalsRequestInput": {
+      "type": "object",
+      "properties": {
+        "frontend": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "frontend"
+      ],
       "additionalProperties": false
     },
     "LockScreenRequestInput": {
@@ -4971,6 +5003,72 @@
       "required": [
         "docID",
         "val"
+      ],
+      "additionalProperties": false
+    },
+    "Petal": {
+      "type": "object",
+      "properties": {
+        "css": {
+          "type": "string"
+        },
+        "disabledInPublish": {
+          "type": "boolean"
+        },
+        "disallowInstall": {
+          "type": "boolean"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "i18n": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/JSONValue"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "incompatible": {
+          "type": "boolean"
+        },
+        "js": {
+          "type": "string"
+        },
+        "kernel": {
+          "$ref": "#/$defs/KernelPetal"
+        },
+        "name": {
+          "type": "string"
+        },
+        "userDisabledInPublish": {
+          "type": "boolean"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "css",
+        "disabledInPublish",
+        "disallowInstall",
+        "displayName",
+        "enabled",
+        "i18n",
+        "incompatible",
+        "js",
+        "kernel",
+        "name",
+        "userDisabledInPublish",
+        "version"
       ],
       "additionalProperties": false
     },
@@ -6089,6 +6187,48 @@
       "required": [
         "icon",
         "notebook"
+      ],
+      "additionalProperties": false
+    },
+    "SetPetalEnabledRequestInput": {
+      "type": "object",
+      "properties": {
+        "app": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "packageName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "enabled",
+        "packageName"
+      ],
+      "additionalProperties": false
+    },
+    "SetPetalPublishEnabledRequestInput": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "packageName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "enabled",
+        "packageName"
       ],
       "additionalProperties": false
     },
@@ -16308,6 +16448,262 @@
                 "enum": [
                   -1,
                   1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/petal/loadPetals",
+      "handler": "loadPetals",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/LoadPetalsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/Petal"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/petal/setPetalEnabled",
+      "handler": "setPetalEnabled",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetPetalEnabledRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Petal"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/petal/setPetalPublishEnabled",
+      "handler": "setPetalPublishEnabled",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetPetalPublishEnabledRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Petal"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
                 ]
               },
               "data": {

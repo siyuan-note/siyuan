@@ -419,3 +419,9 @@ var SetWorkspaceAVPalette = define[WorkspaceAVPaletteRequest, *InlineStyles]("se
 var HTML2BlockDOM = define[HTMLClipboardRequest, HTMLClipboardData]("html2BlockDOM", "/api/lute/html2BlockDOM", JSONBody, ResponseOptions{}, "POST")
 
 var WPSPresentation2BlockDOM = define[WPSPresentationRequest, WPSPresentationData]("wpsPresentation2BlockDOM", "/api/lute/wpsPresentation2BlockDOM", JSONBody, ResponseOptions{DataOnError: true}, "POST")
+
+var LoadPetals = define[LoadPetalsRequest, []*Petal]("loadPetals", "/api/petal/loadPetals", JSONBody, ResponseOptions{}, "POST")
+
+var SetPetalEnabled = define[SetPetalEnabledRequest, *Petal]("setPetalEnabled", "/api/petal/setPetalEnabled", JSONBody, ResponseOptions{}, "POST")
+
+var SetPetalPublishEnabled = define[SetPetalPublishEnabledRequest, *Petal]("setPetalPublishEnabled", "/api/petal/setPetalPublishEnabled", JSONBody, ResponseOptions{}, "POST")

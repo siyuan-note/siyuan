@@ -57,7 +57,7 @@ const refreshPluginToolbars = () => {
 
 export class Plugin {
     private app: App;
-    public i18n: Record<string, string>;
+    public i18n: Record<string, import("../types/api").JSONValue>;
     public eventBus: EventBus;
     public kernel: Kernel;
     public data: any = {};
@@ -104,7 +104,7 @@ export class Plugin {
         app: App,
         name: string,
         displayName: string,
-        i18n: Record<string, string>
+        i18n: Record<string, import("../types/api").JSONValue>
     }) {
         this.app = options.app;
         this.i18n = options.i18n;

@@ -212,9 +212,13 @@ export type InsertBlockRequestInput = { "data": string; "dataType": string; "nex
 
 export type JSONValue = null | boolean | number | string | Array<JSONValue> | { [key: string]: JSONValue };
 
+export type KernelPetal = { "existed": boolean; "incompatible": boolean; "js": string; };
+
 export type ListNotebooksData = { "boxDocEnabled": boolean; "notebooks": Array<Notebook | null> | null; };
 
 export type ListNotebooksRequestInput = { "flashcard"?: boolean | null; };
+
+export type LoadPetalsRequestInput = { "frontend": string; };
 
 export type LockScreenRequestInput = { "lockScreenMode": number; };
 
@@ -271,6 +275,8 @@ export type OutlineRequestInput = { "id"?: string | null; "notebook"?: string | 
 export type OutlineStorageRequestInput = { "docID": string; };
 
 export type OutlineStorageSetRequestInput = { "docID": string; "val": { [key: string]: JSONValue }; };
+
+export type Petal = { "css": string; "disabledInPublish": boolean; "disallowInstall": boolean; "displayName": string; "enabled": boolean; "i18n": { [key: string]: JSONValue } | null; "incompatible": boolean; "js": string; "kernel": KernelPetal; "name": string; "userDisabledInPublish": boolean; "version": string; };
 
 export type PinnedDoc = { "childrenSortMode": number | null; "icon": string; "id": string; "name": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
 
@@ -339,6 +345,10 @@ export type SetInlineStylesRequestInput = { "app"?: string | null; "av"?: Inline
 export type SetNotebookConfRequestInput = { "conf"?: NotebookConfPatchInput | null; "notebook": string; };
 
 export type SetNotebookIconRequestInput = { "icon": string; "notebook": string; };
+
+export type SetPetalEnabledRequestInput = { "app"?: string | null; "enabled": boolean; "packageName": string; };
+
+export type SetPetalPublishEnabledRequestInput = { "enabled": boolean; "packageName": string; };
 
 export type SetSnapshotMemoRequestInput = { "id": string; "memo": string; };
 
@@ -706,9 +716,6 @@ export type APILegacyPOSTPath =
     "/api/network/echo/*path" |
     "/api/network/forwardProxy" |
     "/api/network/proxy" |
-    "/api/petal/loadPetals" |
-    "/api/petal/setPetalEnabled" |
-    "/api/petal/setPetalPublishEnabled" |
     "/api/plugin/getLoadedPlugin" |
     "/api/plugin/listLoadedPlugins" |
     "/api/plugin/rpc" |
@@ -1449,6 +1456,21 @@ export interface APIPOSTRoutes {
     "/api/outline/getDocOutline": {
         request: OutlineRequestInput;
         response: { "code": 0; "data": Array<SearchPath | null> | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/petal/loadPetals": {
+        request: LoadPetalsRequestInput;
+        response: { "code": 0; "data": Array<Petal | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/petal/setPetalEnabled": {
+        request: SetPetalEnabledRequestInput;
+        response: { "code": 0; "data": Petal | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/petal/setPetalPublishEnabled": {
+        request: SetPetalPublishEnabledRequestInput;
+        response: { "code": 0; "data": Petal | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/repo/checkSnapshot": {

@@ -925,7 +925,7 @@ interface IPluginData {
     name: string,
     js: string,
     css: string,
-    i18n: Record<string, string>
+    i18n: Record<string, import("./api").JSONValue>
 }
 
 interface IPluginDockTab {

@@ -12,6 +12,7 @@ type WebSocketDefinition struct {
 	Incoming      reflect.Type
 	Outgoing      reflect.Type
 	FailureStatus int
+	Raw           *RawWebSocketDefinition
 }
 
 func WebSocketOptions[Incoming, Outgoing any](failureStatus int) ResponseOptions {
@@ -42,6 +43,9 @@ func (b *Bundle) ValidateWebSocketMessage(method, path string, incoming bool, pa
 		}
 		if endpoint.WebSocket == nil {
 			return fmt.Errorf("endpoint does not declare WebSocket messages")
+		}
+		if endpoint.WebSocket.Raw != nil {
+			return nil
 		}
 		schema := endpoint.WebSocket.Outgoing
 		if incoming {

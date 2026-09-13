@@ -178,14 +178,24 @@ func (b *Bundle) TypeScript(legacy []Route) []byte {
 				fmt.Fprintf(&output, "        contentVariants: %s;\n", variants)
 			}
 			if ws := endpoint.WebSocket; ws != nil {
-				fmt.Fprintf(&output, "        websocket: { incoming: %s; outgoing: %s; failureStatus: %d; };\n", b.typeScript(ws.Incoming), b.typeScript(ws.Outgoing), ws.FailureStatus)
+				fmt.Fprintf(&output, "        websocket: { incoming: %s; outgoing: %s; failureStatus: %d;", b.typeScript(ws.Incoming), b.typeScript(ws.Outgoing), ws.FailureStatus)
+				if ws.Raw != nil {
+					raw, _ := json.Marshal(ws.Raw)
+					fmt.Fprintf(&output, " raw: %s;", raw)
+				}
+				output.WriteString(" };\n")
 			}
 			if sse := endpoint.SSE; sse != nil {
-				output.WriteString("        sse: { events: { ")
-				for _, name := range sortedKeys(sse.Events) {
-					fmt.Fprintf(&output, "%s: %s; ", quote(name), b.typeScript(sse.Events[name]))
+				if sse.Raw != nil {
+					raw, _ := json.Marshal(sse.Raw)
+					fmt.Fprintf(&output, "        sse: { raw: %s; };\n", raw)
+				} else {
+					output.WriteString("        sse: { events: { ")
+					for _, name := range sortedKeys(sse.Events) {
+						fmt.Fprintf(&output, "%s: %s; ", quote(name), b.typeScript(sse.Events[name]))
+					}
+					output.WriteString("}; };\n")
 				}
-				output.WriteString("}; };\n")
 			}
 			if proxy := endpoint.Proxy; proxy != nil {
 				protocol, _ := json.Marshal(proxy)

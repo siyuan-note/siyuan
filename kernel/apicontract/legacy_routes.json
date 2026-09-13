@@ -1,4 +1,1 @@
-[
-  {"method":"GET","path":"/es/broadcast/subscribe","handler":"broadcastSubscribe"},
-  {"method":"GET","path":"/ws/broadcast","handler":"broadcast"}
-]
+[]

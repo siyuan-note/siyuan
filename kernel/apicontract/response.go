@@ -62,6 +62,9 @@ func (e Endpoint[Request, Data]) Status(r Response[Data]) int {
 		if e.definition.Output != WebSocketOutput || e.definition.WebSocket == nil {
 			panic("endpoint does not declare WebSocket output")
 		}
+		if r.websocketFailure && e.definition.WebSocket.Raw != nil {
+			panic("raw WebSocket errors must be written by the upgrader")
+		}
 		if r.upgrade != nil {
 			return 101
 		}

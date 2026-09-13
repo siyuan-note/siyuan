@@ -105209,6 +105209,70 @@
     },
     {
       "method": "GET",
+      "path": "/es/broadcast/subscribe",
+      "handler": "broadcastSubscribe",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "sse",
+      "sse": {
+        "raw": {
+          "eventNames": "dynamic",
+          "dataEncoding": "raw",
+          "id": true,
+          "retry": true
+        }
+      }
+    },
+    {
+      "method": "GET",
       "path": "/es/network/proxy",
       "handler": "esProxy",
       "body": "none",
@@ -105543,6 +105607,89 @@
             "data"
           ],
           "additionalProperties": false
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/ws/broadcast",
+      "handler": "broadcast",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "null"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "websocket",
+      "websocket": {
+        "incoming": {
+          "type": "string",
+          "format": "binary"
+        },
+        "outgoing": {
+          "type": "string",
+          "format": "binary"
+        },
+        "failureStatus": 0,
+        "raw": {
+          "frames": [
+            1,
+            2,
+            8,
+            9,
+            10
+          ],
+          "upgradeErrorStatuses": [
+            400,
+            403,
+            405,
+            500
+          ],
+          "emptyClosedResponse": true
         }
       }
     },

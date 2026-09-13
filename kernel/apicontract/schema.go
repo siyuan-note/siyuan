@@ -46,9 +46,10 @@ type EndpointSchema struct {
 }
 
 type WebSocketSchema struct {
-	Incoming      *Schema `json:"incoming"`
-	Outgoing      *Schema `json:"outgoing"`
-	FailureStatus int     `json:"failureStatus"`
+	Incoming      *Schema                 `json:"incoming"`
+	Outgoing      *Schema                 `json:"outgoing"`
+	FailureStatus int                     `json:"failureStatus"`
+	Raw           *RawWebSocketDefinition `json:"raw,omitempty"`
 }
 
 type Bundle struct {
@@ -597,7 +598,7 @@ func BuildBundle() (*Bundle, error) {
 			return nil, fmt.Errorf("WebSocket output requires message declarations: %s", definition.Name)
 		}
 		if ws := definition.WebSocket; ws != nil {
-			if definition.Body != NoBody || definition.DataOnError || definition.ErrorStatus != 0 || ws.FailureStatus < 400 || ws.FailureStatus > 599 {
+			if definition.Body != NoBody || definition.DataOnError || definition.ErrorStatus != 0 || ws.Raw == nil && (ws.FailureStatus < 400 || ws.FailureStatus > 599) {
 				return nil, fmt.Errorf("invalid WebSocket response options: %s", definition.Name)
 			}
 			for _, method := range definition.Methods {
@@ -605,15 +606,26 @@ func BuildBundle() (*Bundle, error) {
 					return nil, fmt.Errorf("WebSocket upgrade requires GET: %s", definition.Name)
 				}
 			}
-			incoming, err := b.schema(ws.Incoming, true)
-			if err != nil {
-				return nil, err
+			if ws.Raw != nil {
+				if definition.Data != reflect.TypeFor[Null]() {
+					return nil, fmt.Errorf("raw WebSocket output requires Null data: %s", definition.Name)
+				}
+				var err error
+				websocket, err = rawWebSocketSchema(ws)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				incoming, err := b.schema(ws.Incoming, true)
+				if err != nil {
+					return nil, err
+				}
+				outgoing, err := b.schema(ws.Outgoing, false)
+				if err != nil {
+					return nil, err
+				}
+				websocket = &WebSocketSchema{Incoming: incoming, Outgoing: outgoing, FailureStatus: ws.FailureStatus}
 			}
-			outgoing, err := b.schema(ws.Outgoing, false)
-			if err != nil {
-				return nil, err
-			}
-			websocket = &WebSocketSchema{Incoming: incoming, Outgoing: outgoing, FailureStatus: ws.FailureStatus}
 		}
 		if definition.Output == DirectJSONOutput && (definition.DataOnError || definition.ErrorStatus != 0) {
 			return nil, fmt.Errorf("direct JSON output cannot use envelope data or error status options: %s", definition.Name)
@@ -754,6 +766,11 @@ func (b *Bundle) ValidateHTTPResponse(method, path string, status int, contentTy
 				return fmt.Errorf("empty response must not contain a body")
 			}
 			return nil
+		}
+		if endpoint.WebSocket != nil {
+			if handled, err := validateRawWebSocketHTTP(endpoint.WebSocket, status, contentType, payload); handled {
+				return err
+			}
 		}
 		if endpoint.WebSocket != nil && status == 101 {
 			if len(payload) != 0 {

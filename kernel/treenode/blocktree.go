@@ -498,7 +498,7 @@ func GetBlockTree(id string) (ret *BlockTree) {
 // 入参 abbrType 对应 BlockTree.Type（如 "d"/"h"/"p"），由 TypeAbbr 写入。
 func IsContainerType(abbrType string) bool {
 	switch abbrType {
-	case "d", "b", "l", "i", "s", "callout":
+	case "d", "b", "l", "i", "s", "callout", "tab":
 		return true
 	}
 	return false

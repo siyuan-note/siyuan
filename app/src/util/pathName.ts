@@ -174,7 +174,7 @@ export const getAssetExtension = (assetPath: string) => {
 
 export const getAssetName = (assetPath: string) => {
     const pathWithoutQuery = getAssetPathWithoutQuery(assetPath);
-    return pathPosix().basename(pathWithoutQuery, getAssetExtension(pathWithoutQuery)).replace(/-\d{14}-\w{7}/, "");
+    return pathPosix().basename(pathWithoutQuery, getAssetExtension(pathWithoutQuery)).replace(/-\d{14}-\w{7}$/, "");
 };
 
 export const isLocalPath = (link: string) => {

@@ -150,6 +150,8 @@ export type LockScreenRequestInput = { "lockScreenMode": number; };
 
 export type MoveBlockRequestInput = { "id": string; "parentID"?: string | null; "previousID"?: string | null; };
 
+export type NetImageAssetsRequestInput = { "id": string; "url"?: string | null; };
+
 export type NetworkData = { "proxy": NetworkProxy | null; };
 
 export type NetworkProxy = { "host": string; "port": string; "scheme": string; };
@@ -251,6 +253,8 @@ export type TransferBlockRefRequestInput = { "fromID": string; "refIDs"?: Array<
 export type TreeStatData = { "containsEmbed"?: boolean; "embedStat"?: EmbedStat | null; "reqId": JSONValue; "stat": BlockStat | null; "statWithEmbed"?: BlockStat | null; };
 
 export type TreeStatRequestInput = { "id": string; "ids"?: Array<string> | null; "includeEmbed"?: boolean | null; "notebook"?: string | null; "reqId"?: JSONValue | null; };
+
+export type TrimmedIDRequestInput = { "id": string; };
 
 export type UnfoldedParentData = { "parentID": string; };
 
@@ -539,9 +543,6 @@ export type APILegacyPOSTPath =
     "/api/filetree/setPublishAccess" |
     "/api/filetree/setSort" |
     "/api/filetree/upsertIndexes" |
-    "/api/format/autoSpace" |
-    "/api/format/netAssets2LocalAssets" |
-    "/api/format/netImg2LocalAssets" |
     "/api/graph/getGraph" |
     "/api/graph/getLocalGraph" |
     "/api/graph/resetGraph" |
@@ -1154,6 +1155,21 @@ export interface APIPOSTRoutes {
     };
     "/api/filetree/updatePinnedDocs": {
         request: UpdatePinnedDocsRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/format/autoSpace": {
+        request: TrimmedIDRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/format/netAssets2LocalAssets": {
+        request: TrimmedIDRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/format/netImg2LocalAssets": {
+        request: NetImageAssetsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };

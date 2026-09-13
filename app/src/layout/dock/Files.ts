@@ -1149,7 +1149,7 @@ export class Files extends Model {
     }
 
     private handleMsgCallback(data: IWebSocketData) {
-        if (data) { this.pinnedDocs?.scheduleRefresh(); }
+        if (data) { this.pinnedDocs?.onFileTreeMessage(data); }
         if (data) {
             switch (data.cmd) {
                 case "reloadDocInfo":

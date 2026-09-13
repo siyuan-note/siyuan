@@ -41,6 +41,34 @@ export class PinnedDocs {
     private dragging = false;
     private sourceEvents = new AbortController();
     private names = new Map<string, string>();
+    private rootSnapshot: string;
+    private dirtyChildren = new Set<string>();
+    private refreshAllChildren = false;
+
+    public onFileTreeMessage(data: IWebSocketData) {
+        switch (data.cmd) {
+            case "pinnedDocsChanged":
+                this.scheduleRefresh("");
+                break;
+            case "rename":
+                this.scheduleRefresh(data.data.id);
+                break;
+            case "moveDocs":
+            case "removeDoc":
+            case "create":
+            case "heading2doc":
+            case "createdailynote":
+            case "li2doc":
+            case "closeBox":
+            case "removeBox":
+            case "mount":
+            case "notebookIconChanged":
+            case "renamenotebook":
+            case "boxDocFeatureChanged":
+                this.scheduleRefresh();
+                break;
+        }
+    }
 
     constructor(private app: App, private sourceTree: HTMLElement, private open: (id: string, notebook: string) => void,
                 private mobile = false) {
@@ -144,9 +172,25 @@ export class PinnedDocs {
         this.sourceEvents.abort();
     }
 
-    public scheduleRefresh() {
+    public scheduleRefresh(changedID?: string) {
+        if (changedID === undefined) {
+            this.refreshAllChildren = true;
+        } else if (changedID) {
+            this.list.querySelectorAll<HTMLElement>("[data-pin-row]").forEach(row => {
+                if (row.dataset.nodeId === changedID) {
+                    const key = row.dataset.pinRow;
+                    const separator = key.lastIndexOf("/");
+                    if (separator > 0) { this.dirtyChildren.add(key.slice(0, separator)); }
+                }
+            });
+        }
         window.clearTimeout(this.refreshTimer);
-        this.refreshTimer = window.setTimeout(() => this.refresh(), 150);
+        this.refreshTimer = window.setTimeout(() => {
+            const dirty = this.refreshAllChildren ? undefined : this.dirtyChildren;
+            this.dirtyChildren = new Set();
+            this.refreshAllChildren = false;
+            this.refresh(dirty);
+        }, 150);
     }
 
     public collapse() {
@@ -157,6 +201,7 @@ export class PinnedDocs {
         this.setCollapsed(true);
         this.list.querySelectorAll<HTMLElement>("[data-pin-root=true]").forEach(row => {
             row.nextElementSibling.replaceChildren();
+            row.nextElementSibling.removeAttribute("data-pin-snapshot");
             row.nextElementSibling.classList.add("fn__none");
             row.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
             if (row.hasAttribute("aria-expanded")) { row.setAttribute("aria-expanded", "false"); }
@@ -170,7 +215,7 @@ export class PinnedDocs {
         this.heading.querySelector("svg").classList.toggle("b3-list-item__arrow--open", !collapsed);
     }
 
-    public async refresh() {
+    public async refresh(dirtyChildren?: Set<string>) {
         if (this.disposed || window.siyuan.isPublish || this.dragging || this.touch?.dragging) {
             return;
         }
@@ -184,6 +229,17 @@ export class PinnedDocs {
         const selected = new Set(Array.from(this.list.querySelectorAll<HTMLElement>(".b3-list-item--focus"), row => row.dataset.pinRow));
         pinnedDocIDs.clear();
         response.data.forEach(doc => pinnedDocIDs.add(doc.id));
+        const snapshot = JSON.stringify(response.data);
+        if (snapshot === this.rootSnapshot) {
+            const rows = Array.from(this.list.querySelectorAll<HTMLElement>("[data-pin-row]"));
+            for (const row of rows) {
+                if (this.expanded.has(row.dataset.pinRow) &&
+                    (dirtyChildren ? dirtyChildren.has(row.dataset.pinRow) : row.dataset.pinRoot === "true")) {
+                    await this.loadChildren(row, row.nextElementSibling as HTMLElement, generation, !dirtyChildren);
+                }
+            }
+            return;
+        }
         const list = document.createElement("ul");
         for (const doc of response.data) {
             if (doc.unavailable) {
@@ -194,6 +250,7 @@ export class PinnedDocs {
             await this.appendDoc(list, doc, doc.id, 0, generation);
         }
         if (generation === this.generation && !this.disposed) {
+            this.rootSnapshot = snapshot;
             this.list.replaceChildren(...Array.from(list.children));
             this.element.classList.toggle("fn__none", response.data.length === 0);
             this.list.querySelectorAll<HTMLElement>("[data-pin-row]").forEach(row => {
@@ -259,7 +316,7 @@ export class PinnedDocs {
         }
     }
 
-    private async loadChildren(row: HTMLElement, children: HTMLElement, generation: number) {
+    private async loadChildren(row: HTMLElement, children: HTMLElement, generation: number, refreshDescendants = true) {
         const response = await fetchSyncPost("/api/filetree/listDocsByPath", {
             notebook: row.dataset.notebook,
             path: row.dataset.nodeId === row.dataset.notebook ? "/" : row.dataset.path,
@@ -268,11 +325,27 @@ export class PinnedDocs {
         if (response.code !== 0 || generation !== this.generation || !this.expanded.has(row.dataset.pinRow)) {
             return;
         }
-        children.replaceChildren();
-        children.setAttribute(FILE_TREE_EFFECTIVE_SORT_MODE, String(response.data.effectiveSortMode));
-        for (const doc of response.data.files) {
-            await this.appendDoc(children, {...doc, notebook: row.dataset.notebook},
-                `${row.dataset.pinRow}/${doc.id}`, row.dataset.pinRow.split("/").length, generation);
+        const snapshot = JSON.stringify({sort: response.data.effectiveSortMode, files: response.data.files.map((doc: IFile) => ({
+            id: doc.id, name: doc.name, path: doc.path, icon: doc.icon, subFileCount: doc.subFileCount,
+            childrenSortMode: doc.childrenSortMode,
+        }))});
+        if (children.dataset.pinSnapshot === snapshot) {
+            if (refreshDescendants) {
+                for (const child of Array.from(children.querySelectorAll<HTMLElement>(":scope > [data-pin-row]"))) {
+                    if (this.expanded.has(child.dataset.pinRow)) {
+                        await this.loadChildren(child, child.nextElementSibling as HTMLElement, generation);
+                    }
+                }
+            }
+        } else {
+            children.replaceChildren();
+            children.setAttribute(FILE_TREE_EFFECTIVE_SORT_MODE, String(response.data.effectiveSortMode));
+            for (const doc of response.data.files) {
+                await this.appendDoc(children, {...doc, notebook: row.dataset.notebook},
+                    `${row.dataset.pinRow}/${doc.id}`, row.dataset.pinRow.split("/").length, generation);
+            }
+            if (generation !== this.generation || !this.expanded.has(row.dataset.pinRow)) { return; }
+            children.dataset.pinSnapshot = snapshot;
         }
         if (generation !== this.generation || !this.expanded.has(row.dataset.pinRow)) { return; }
         children.classList.remove("fn__none");

@@ -10,11 +10,13 @@ interface IPanelHarness {
     heading: unknown;
     sourceTree: unknown;
     clearSelection(): void;
-    refresh(): Promise<void>;
+    refresh(dirtyChildren?: Set<string>): Promise<void>;
+    onFileTreeMessage(data: {cmd: string, data?: {id: string}}): void;
     collapse(): void;
     expanded: Set<string>;
     list: unknown;
     generation: number;
+    rootSnapshot: string;
     names: Map<string, string>;
     appendDoc(...args: unknown[]): Promise<void>;
     loadChildren(row: unknown, children: unknown, generation: number): Promise<void>;
@@ -26,7 +28,7 @@ interface IPanelHarness {
     mobile?: boolean;
     previewDrop(): void;
     clearDrop(): void;
-    scheduleRefresh(): void;
+    scheduleRefresh(changedID?: string): void;
     dropTarget?: {id: string, position: string};
     suppressClick?: boolean;
 }
@@ -34,11 +36,12 @@ interface IPanelHarness {
 const loadPanel = (fetchCode = 0) => {
     const storage = new Map<string, string>();
     const docs: {id: string, notebook: string, name: string}[] = [];
+    const childData = {effectiveSortMode: 6, files: [] as {id: string, name: string, icon?: string}[]};
     const config = {readonly: false, fileTree: {docIconClickExpand: false, parentDocClickExpand: false}};
     const calls: {kind: string, args: unknown[]}[] = [];
     const record = (kind: string) => async (...args: unknown[]) => {
         calls.push({kind, args});
-        return {code: kind === "http" ? fetchCode : 0, data: docs};
+        return {code: kind === "http" ? fetchCode : 0, data: args[0] === "/api/filetree/listDocsByPath" ? childData : docs};
     };
     const exports: {PinnedDocs?: {prototype: object}} = {};
     const source = ts.transpileModule(readFileSync(join(__dirname, "PinnedDocs.ts"), "utf8"), {
@@ -76,7 +79,7 @@ const loadPanel = (fetchCode = 0) => {
     panel.scheduleRefresh = () => {};
     panel.list = {querySelectorAll: (): unknown[] => []};
     panel.sourceTree = {querySelectorAll: (): unknown[] => []};
-    return {panel, calls, config, docs, storage};
+    return {panel, calls, config, docs, storage, childData};
 };
 
 test("collapse clears descendant expansion and persists the closed section", async () => {
@@ -85,7 +88,7 @@ test("collapse clears descendant expansion and persists the closed section", asy
     panel.expanded = new Set(["root", "root/child"]);
     const states: unknown[] = [];
     const row = {
-        nextElementSibling: {replaceChildren: () => states.push("clear"), classList: {add: (name: string) => states.push(name)}},
+        nextElementSibling: {replaceChildren: () => states.push("clear"), removeAttribute: () => {}, classList: {add: (name: string) => states.push(name)}},
         querySelector: () => ({classList: {remove: (name: string) => states.push(name)}}),
         hasAttribute: () => true,
         setAttribute: (name: string, value: string) => states.push([name, value]),
@@ -249,6 +252,7 @@ test("pinned area follows list contents on initial load, pin, unpin and sync", a
         states.push(hidden);
     }}};
     await panel.refresh();
+    await panel.refresh(new Set());
     docs.push({id: "document", notebook: "notebook", name: "Document"});
     await panel.refresh();
     docs.length = 0;
@@ -257,4 +261,62 @@ test("pinned area follows list contents on initial load, pin, unpin and sync", a
     await panel.refresh();
     assert.deepEqual(states, [true, false, true, false]);
     assert.ok(calls.every(call => call.kind === "http" && call.args[0] === "/api/filetree/getPinnedDocs"));
+});
+
+test("rename refresh is not repeated by delayed document info or notebook info pushes", () => {
+    const {panel} = loadPanel();
+    const updates: (string | undefined)[] = [];
+    panel.scheduleRefresh = id => updates.push(id);
+    panel.onFileTreeMessage({cmd: "rename", data: {id: "document"}});
+    panel.onFileTreeMessage({cmd: "reloadDocInfo"});
+    panel.onFileTreeMessage({cmd: "reloadNotebookInfo"});
+    panel.onFileTreeMessage({cmd: "reloadFiletree"});
+    assert.deepEqual(updates, ["document"]);
+    panel.onFileTreeMessage({cmd: "pinnedDocsChanged"});
+    panel.onFileTreeMessage({cmd: "moveDocs"});
+    assert.deepEqual(updates, ["document", "", undefined]);
+});
+
+test("unchanged child lists preserve DOM while title, icon and order changes rebuild", async () => {
+    const {panel, childData} = loadPanel();
+    panel.generation = 1;
+    panel.expanded = new Set(["root"]);
+    panel.appendDoc = async () => {};
+    let rebuilds = 0;
+    const children = {dataset: {} as Record<string, string>, replaceChildren: () => rebuilds++,
+        setAttribute: () => {}, querySelectorAll: (): unknown[] => [], classList: {remove: () => {}}};
+    const row = {dataset: {notebook: "box", nodeId: "root", path: "/root.sy", pinRow: "root"},
+        querySelector: () => ({classList: {add: () => {}}}), setAttribute: () => {}};
+    childData.files.push({id: "one", name: "One"}, {id: "two", name: "Two"});
+    await panel.loadChildren(row, children, 1);
+    await panel.loadChildren(row, children, 1);
+    assert.equal(rebuilds, 1);
+    childData.files[0].name = "Renamed";
+    await panel.loadChildren(row, children, 1);
+    childData.files[0].icon = "1f600";
+    await panel.loadChildren(row, children, 1);
+    childData.files.reverse();
+    await panel.loadChildren(row, children, 1);
+    assert.equal(rebuilds, 4);
+});
+
+test("unchanged roots still refresh the affected expanded child list without replacing root rows", async () => {
+    const {panel, docs} = loadPanel();
+    docs.push({id: "root", notebook: "box", name: "Root"});
+    panel.rootSnapshot = JSON.stringify(docs);
+    panel.generation = 0;
+    panel.expanded = new Set(["root", "root/parent", "other"]);
+    const keys = ["root", "root/parent", "other"];
+    const rows = keys.map(key => ({dataset: {pinRow: key, pinRoot: String(!key.includes("/"))}}));
+    panel.list = {scrollTop: 0, contains: () => false, querySelectorAll: (selector: string) =>
+        selector === "[data-pin-row]" ? rows : [], replaceChildren: () => assert.fail("root DOM was rebuilt")};
+    const refreshed: string[] = [];
+    panel.loadChildren = async (row: typeof rows[number]) => { refreshed.push(row.dataset.pinRow); };
+    await panel.refresh(new Set(["root/parent"]));
+    assert.deepEqual(refreshed, ["root/parent"]);
+    refreshed.length = 0;
+    await panel.refresh(new Set());
+    assert.deepEqual(refreshed, []);
+    await panel.refresh();
+    assert.deepEqual(refreshed, ["root", "other"]);
 });

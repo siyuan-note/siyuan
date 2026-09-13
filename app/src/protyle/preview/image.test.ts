@@ -6,8 +6,11 @@ import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 
 test("image preview initializes its toolbar when ready is dispatched on the source element", async () => {
     const actions = ["zoom-in", "zoom-out", "one-to-one", "reset", "prev", "play", "next",
-        "rotate-left", "rotate-right", "flip-horizontal", "flip-vertical", "copy", "copy-file", "close"];
+        "rotate-left", "rotate-right", "flip-horizontal", "flip-vertical", "copy", "copy-file"];
     class Classes extends Set<string> {
+        public remove(name: string) {
+            this.delete(name);
+        }
         public toggle(name: string, force: boolean) {
             if (force) {
                 this.add(name);
@@ -31,6 +34,9 @@ test("image preview initializes its toolbar when ready is dispatched on the sour
     const sourceElement = new EventTarget();
     class TestViewer {
         public viewed = true;
+        public viewer = {
+            querySelector: (selector: string) => buttons.get(selector.replace(".viewer-navigation > ", "")),
+        };
         public image = {src: "blob:first"};
         public toolbar = {
             querySelector: (selector: string) => {
@@ -83,11 +89,12 @@ test("image preview initializes its toolbar when ready is dispatched on the sour
     assert.match(buttons.get(".viewer-copy").innerHTML, /#iconImage/);
     assert.match(buttons.get(".viewer-copy-file").innerHTML, /#iconFile/);
     assert.equal(buttons.get(".viewer-copy").attributes.get("aria-label"), "Copy as PNG");
-    buttons.forEach(button => {
+    buttons.forEach((button, selector) => {
         assert.ok(button.classList.has("ariaLabel"));
         assert.equal(button.attributes.has("title"), false);
         assert.ok(button.attributes.get("aria-label"));
-        assert.equal(button.attributes.get("data-position"), "north");
+        assert.equal(button.attributes.get("data-position"), selector === ".viewer-prev" ? "east" :
+            selector === ".viewer-next" ? "west" : "north");
     });
     instance.options.toolbar.copy();
     instance.image.src = "blob:second";

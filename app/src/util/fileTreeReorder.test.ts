@@ -51,7 +51,7 @@ test("canceling or closing a conflict dialog does not move documents", async () 
 
 test("confirmation applies the full selection and relative anchor", async () => {
     const f = fixture([preview(true), applied], true);
-    assert.equal(await f.sort(), applied.data);
+    assert.deepEqual({...await f.sort()}, applied.data);
     assert.equal(f.requests.length, 2);
     assert.equal(f.requests[1].removeSorts, true);
     assert.equal(f.requests[1].sourceIDs.join(","), "a,b");

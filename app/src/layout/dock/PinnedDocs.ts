@@ -14,6 +14,7 @@ import {MenuItem} from "../../menus/Menu";
 import {newFileInTree} from "../../util/newFile";
 import {isOnlyMeta} from "../../protyle/util/compatibility";
 import {FILE_TREE_CHILDREN_SORT_MODE, FILE_TREE_EFFECTIVE_SORT_MODE} from "../../util/fileTreeSort";
+import {setFileTreeVisibility} from "./fileTreeAnimation";
 
 interface IPinnedDoc {
     id: string;
@@ -202,8 +203,8 @@ export class PinnedDocs {
         this.scheduleRefresh();
     }
 
-    private setCollapsed(collapsed: boolean) {
-        this.list.classList.toggle("fn__none", collapsed);
+    private setCollapsed(collapsed: boolean, animate = false) {
+        setFileTreeVisibility(this.list, !collapsed, animate);
         this.heading.setAttribute("aria-expanded", String(!collapsed));
         this.heading.querySelector("svg").classList.toggle("b3-list-item__arrow--open", !collapsed);
     }
@@ -352,9 +353,12 @@ export class PinnedDocs {
         if (expand) {
             this.expanded.add(key);
             await this.loadChildren(row, row.nextElementSibling as HTMLElement, this.generation);
+            if (this.expanded.has(key)) {
+                setFileTreeVisibility(row.nextElementSibling as HTMLElement, true, true);
+            }
         } else {
             this.expanded.delete(key);
-            row.nextElementSibling.classList.add("fn__none");
+            setFileTreeVisibility(row.nextElementSibling as HTMLElement, false, true);
             row.querySelector("svg").classList.remove("b3-list-item__arrow--open");
             row.setAttribute("aria-expanded", "false");
         }
@@ -385,7 +389,7 @@ export class PinnedDocs {
         const target = event.target as Element;
         if (target.closest("[data-pin-heading]")) {
             const collapsed = this.heading.getAttribute("aria-expanded") === "true";
-            this.setCollapsed(collapsed);
+            this.setCollapsed(collapsed, true);
             localStorage.setItem("siyuan-pinned-docs-collapsed", String(collapsed));
             return;
         }
@@ -453,13 +457,16 @@ export class PinnedDocs {
         if (source && (!row || row.closest("[data-encrypted=true]"))) { return false; }
         if (!row) {
             this.dropTarget = {id: "", position: "pin-before"};
-            this.heading.classList.add("dragover__bottom");
+            this.heading.classList.add(target.closest("[data-pin-heading]") ? "dragover" : "dragover__bottom");
         } else {
             if (row.dataset.unavailable === "true") { return false; }
             const rect = row.getBoundingClientRect();
             const position = source && row.dataset.type === "navigation-root" ? "inside" :
                 getPinnedDropPosition(row.dataset.pinRoot === "true", (y - rect.top) / rect.height);
-            this.dropTarget = {id: row.dataset.nodeId || row.dataset.url, position};
+            const id = source && row.dataset.type === "navigation-root" ?
+                row.closest<HTMLElement>("ul[data-url]")?.dataset.url : row.dataset.nodeId;
+            if (!id) { return false; }
+            this.dropTarget = {id, position};
             row.classList.add(position === "inside" ? "dragover" : position.endsWith("before") ? "dragover__top" : "dragover__bottom");
         }
         const scrollElement = source ? this.sourceTree : this.list;

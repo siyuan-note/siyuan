@@ -1,3 +1,4 @@
+import type {FileTreeGetDocRequestInput} from "../types/api";
 import type {APICallbackResponse, APIPOSTRoutes, BlockQueryRequestInput} from "../types/api";
 import {getAllModels} from "../layout/getAll";
 /// #if !BROWSER
@@ -1277,15 +1278,14 @@ export const getArticle = (options: {
             if (articleId !== options.id) {
                 return;
             }
-            const getDocParam: Record<string, any> = {
+            const getDocParam: FileTreeGetDocRequestInput = {
                 id: options.id,
                 query: options.value || null,
                 queryMethod: options.config?.method || null,
-                queryTypes: options.config?.types || null,
+                queryTypes: options.config?.types ? {...options.config.types} : null,
                 querySubTypes: options.config?.subTypes || null,
                 mode: zoomIn ? 0 : 3,
                 size: zoomIn ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
-                zoom: zoomIn,
                 highlight: !isSupportCSSHL(),
             };
             if (isEncryptedBox(options.edit.protyle.notebookId)) {
@@ -1311,6 +1311,9 @@ export const getArticle = (options: {
                     protyle: options.edit.protyle,
                     action: zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HTML],
                     afterCB() {
+                        if (getResponse.code !== 0) {
+                            return;
+                        }
                         const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
                         if (isSupportCSSHL()) {
                             let observer: ResizeObserver;

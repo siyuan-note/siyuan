@@ -1,3 +1,4 @@
+import type {FileTreeGetDocRequestInput} from "../types/api";
 import {isPhablet} from "../protyle/util/compatibility";
 import {Tab} from "../layout/Tab";
 import {Editor} from "./index";
@@ -441,7 +442,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
         revealTabsForTarget(nodeElement);
     }
     if ((!nodeElement || nodeElement?.clientHeight === 0) && options.id !== options.rootID) {
-        const getDocParam: IObject = {
+        const getDocParam: FileTreeGetDocRequestInput = {
             id: options.id,
             mode: (options.action && options.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0,
             size: window.siyuan.config.editor.dynamicLoadBlocks,

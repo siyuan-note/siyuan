@@ -1,3 +1,4 @@
+import type {FileTreeGetDocRequestInput} from "../types/api";
 import {Protyle} from "../protyle";
 import {setEditor} from "./util/setEmpty";
 import {closePanel} from "./util/closePanel";
@@ -237,7 +238,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                     }
                 });
             } else {
-                const getDocParam: IObject = {
+                const getDocParam: FileTreeGetDocRequestInput = {
                     id,
                     includeDocInfo: true,
                     size: actionList.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,

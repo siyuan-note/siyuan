@@ -24,6 +24,9 @@ export const fetchNewDailyNote = (app: App, notebook: string) => {
         notebook,
         app: Constants.SIYUAN_APPID,
     }, (response) => {
+        if (response.code !== 0) {
+            return;
+        }
         /// #if MOBILE
         openMobileFileById(app, response.data.id, [Constants.CB_GET_SCROLL, Constants.CB_GET_FOCUS]);
         /// #else

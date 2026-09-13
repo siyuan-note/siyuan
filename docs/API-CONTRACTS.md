@@ -24,6 +24,8 @@ Encrypted notebook lifecycle endpoints use typed requests and responses while re
 
 ## Compatibility requirements
 
+Document-tree contracts retain conditional parameter validation, path and sorting semantics, omitted callbacks, pagination defaults, and document response variants. Publish authentication preserves HTTP 429 and `Retry-After` through explicitly declared additional error statuses. Publish and encrypted-notebook admission remain before deferred field validation, and document leases cover response serialization.
+
 Asset contracts retain nullable result lists, per-file upload order and duplicate names, successful partial-upload messages, and local-insertion failure payloads. OCR columns remain string-valued. Annotation validation, published-file admission, encrypted reads and writes, deferred downloads, and upload target selection keep their existing behavior. The non-API upload entry uses the same typed model operation.
 
 Export contracts retain Markdown option defaults and numeric truncation, notebook-list filtering, ignored title-option types, optional HTML folders, and file-upload field selection. Error responses preserve message durations and empty-string resource payloads. Publish filtering, encrypted-notebook admission, response-held leases, and temporary export cleanup remain in the existing lifecycle.

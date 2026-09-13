@@ -422,6 +422,96 @@ export type FilePathData = { "path": string; };
 
 export type FilePathRequestInput = { "path": string; };
 
+export type FileTreeAuthPublishRequestInput = { "id": string; "password": string; };
+
+export type FileTreeChangeSortRequestInput = { "notebook": string; "paths": Array<string>; };
+
+export type FileTreeCreateData = { "id": string; };
+
+export type FileTreeCreateMarkdownRequestInput = { "clippingHref"?: string | null; "docCreateTemplatePath"?: string | null; "id"?: string | null; "listDocTree"?: boolean | null; "markdown": string; "notebook": string; "parentID"?: string | null; "path": string; "sortPosition"?: string | null; "sortTargetID"?: string | null; "tags"?: string | null; "titleEmpty"?: boolean; "withMath"?: boolean | null; };
+
+export type FileTreeCreateRequestInput = { "docCreateTemplatePath"?: string | null; "listDocTree"?: boolean | null; "md": string; "notebook": string; "path": string; "sortPosition"?: string | null; "sortTargetID"?: string | null; "sorts"?: Array<string> | null; "title": string; };
+
+export type FileTreeCreateSavePathData = { "box": string; "docCreateTemplatePath": string; "path": string; };
+
+export type FileTreeDailyNoteRequestInput = { "app"?: string | null; "notebook": string; };
+
+export type FileTreeDocFile = { "children"?: Array<FileTreeDocFile | null>; "id": string; };
+
+export type FileTreeDocHeadingData = { "srcTreeBox": string; "srcTreePath": string; };
+
+export type FileTreeDocHeadingRequestInput = { "after": boolean; "srcID": string; "targetID": string; };
+
+export type FileTreeDocPathData = { "notebook": string; "path": string; };
+
+export type FileTreeDocTreeData = { "tree": Array<FileTreeDocFile | null> | null; };
+
+export type FileTreeDuplicateData = { "hPath": string; "id": string; "notebook": string; "path": string; };
+
+export type FileTreeFile = { "alias": string; "bookmark": string; "childrenSortMode": number | null; "count": number; "ctime": number; "dueFlashcardCount": number; "flashcardCount": number; "hCtime": string; "hMtime": string; "hSize": string; "icon": string; "id": string; "memo": string; "mtime": number; "name": string; "name1": string; "newFlashcardCount": number; "path": string; "size": number; "sort": number; "subFileCount": number; "titleEmpty"?: boolean; };
+
+export type FileTreeGetDocData = { "blockCount": number; "box": string; "content": string; "docInfo"?: DocInfo; "eof": boolean; "headingNumbers": Record<string, string> | null; "id": string; "isBacklinkExpand": boolean; "isSyncing": boolean; "keywords": Array<string> | null; "mode": number; "parent2ID": string; "parentID": string; "path": string; "publishAccessRequired": boolean; "reqId": JSONValue; "rootID": string; "scroll": boolean; "type": string; };
+
+export type FileTreeGetDocRequestInput = { "endID"?: string | null; "highlight"?: boolean | null; "id": string; "includeDocInfo"?: boolean | null; "index"?: number | null; "isBacklink"?: boolean | null; "mode"?: number | null; "notebook"?: string | null; "originalRefBlockIDs"?: Record<string, string> | null; "query"?: string | null; "queryMethod"?: number | null; "querySubTypes"?: SearchSubtypeFilterInput | null; "queryTypes"?: Record<string, boolean> | null; "reqId"?: JSONValue | null; "size"?: number | null; "startID"?: string | null; };
+
+export type FileTreeHeadingDocRequestInput = { "previousPath"?: string | null; "srcHeadingID": string; "targetNoteBook": string; "targetPath"?: string | null; "toTop"?: boolean | null; };
+
+export type FileTreeIDRequestInput = { "id": string; };
+
+export type FileTreeListData = { "box": string; "effectiveSortMode": number; "files": Array<FileTreeFile | null> | null; "path": string; };
+
+export type FileTreeListItemDocRequestInput = { "previousPath"?: string | null; "srcListItemID": string; "targetNoteBook": string; "targetPath"?: string | null; "toTop"?: boolean | null; };
+
+export type FileTreeListRequestInput = { "app"?: string | null; "flashcard"?: boolean | null; "ignoreMaxListHint"?: boolean | null; "maxListCount"?: number | null; "notebook": string; "path": string; "showHidden"?: boolean | null; "sort"?: number | null; };
+
+export type FileTreeMoveIDsRequestInput = { "callback"?: JSONValue | null; "fromIDs": Array<string>; "toID": string; };
+
+export type FileTreeMoveRequestInput = { "callback"?: JSONValue | null; "fromPaths": Array<string>; "toNotebook": string; "toPath": string; };
+
+export type FileTreeNotebookRequestInput = { "notebook": string; };
+
+export type FileTreeOptionalIDRequestInput = { "id"?: string | null; };
+
+export type FileTreeOptionalPathRequestInput = { "notebook"?: string | null; "path"?: string | null; };
+
+export type FileTreePathRequestInput = { "notebook": string; "path": string; };
+
+export type FileTreePathsRequestInput = { "paths": Array<string>; };
+
+export type FileTreePublishData = { "publishAccess": Array<FileTreePublishItem | null> | null; };
+
+export type FileTreePublishIDsRequestInput = { "ids": Array<string>; };
+
+export type FileTreePublishItem = { "disable": boolean; "id": string; "password": string; "visible": boolean; };
+
+export type FileTreeRenameIDRequestInput = { "id"?: string | null; "title": string; };
+
+export type FileTreeRenameRequestInput = { "notebook": string; "path": string; "title": string; };
+
+export type FileTreeReorderData = { "changed": boolean; "conflict"?: boolean; "notebook"?: string; "parentPath"?: string; };
+
+export type FileTreeReorderRequestInput = { "position"?: string | null; "preview"?: boolean | null; "removeSorts"?: boolean | null; "respectSort"?: boolean | null; "sourceIDs"?: Array<string> | null; "targetID"?: string | null; };
+
+export type FileTreeSavePathData = { "box": string; "path": string; };
+
+export type FileTreeSearchDoc = { "alias"?: string; "box": string; "boxIcon": string; "dueFlashcardCount"?: string; "flashcardCount"?: string; "hPath": string; "name"?: string; "newFlashcardCount"?: string; "path": string; };
+
+export type FileTreeSearchRequestInput = { "excludeIDs"?: Array<string> | null; "flashcard"?: boolean | null; "k": string; };
+
+export type FileTreeSetPublishRequestInput = { "disable": boolean; "id": string; "password": string; "visible": boolean; };
+
+export type FileTreeSetSortData = { "docIDs": Array<string> | null; "notebookIDs": Array<string> | null; };
+
+export type FileTreeSetSortRequestInput = { "docSorts"?: Array<FileTreeSortItemInput | null> | null; "notebookSorts"?: Array<FileTreeSortItemInput | null> | null; };
+
+export type FileTreeSortItemInput = { "id"?: string | null; "sort"?: number | null; };
+
+export type FileTreeSortModeData = { "box": string; "effectiveSortMode": number; "id": string; "path": string; "sortMode": number | null; };
+
+export type FileTreeSortModeRequestInput = { "id"?: string | null; "sortMode": number | null; };
+
+export type FileTreeTrimIDRequestInput = { "id": string; };
+
 export type FindReplaceRequestInput = { "groupBy"?: number | null; "ids": Array<string>; "k": string; "method"?: number | null; "orderBy"?: number | null; "page"?: number | null; "pageSize"?: number | null; "paths"?: Array<string> | null; "query"?: string | null; "r": string; "replaceTypes"?: Record<string, boolean> | null; "subTypes"?: SearchSubtypeFilterInput | null; "types"?: Record<string, boolean> | null; };
 
 export type FullBlockInfo = { "box": string; "path": string; "rootChildID": string; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
@@ -1265,43 +1355,6 @@ export type APILegacyPOSTPath =
     "/api/av/sortAttributeViewKey" |
     "/api/av/sortAttributeViewViewKey" |
     "/api/extension/copy" |
-    "/api/filetree/authFilePublishAccess" |
-    "/api/filetree/changeSort" |
-    "/api/filetree/createDailyNote" |
-    "/api/filetree/createDoc" |
-    "/api/filetree/createDocWithMd" |
-    "/api/filetree/doc2Heading" |
-    "/api/filetree/duplicateDoc" |
-    "/api/filetree/getDoc" |
-    "/api/filetree/getDocCreateSavePath" |
-    "/api/filetree/getFullHPathByID" |
-    "/api/filetree/getHPathByID" |
-    "/api/filetree/getHPathByPath" |
-    "/api/filetree/getHPathsByPaths" |
-    "/api/filetree/getIDsByHPath" |
-    "/api/filetree/getPathByID" |
-    "/api/filetree/getPublishAccess" |
-    "/api/filetree/getRefCreateSavePath" |
-    "/api/filetree/getShorthandSavePath" |
-    "/api/filetree/heading2Doc" |
-    "/api/filetree/li2Doc" |
-    "/api/filetree/listDocTree" |
-    "/api/filetree/listDocsByPath" |
-    "/api/filetree/moveDocs" |
-    "/api/filetree/moveDocsByID" |
-    "/api/filetree/moveLocalShorthands" |
-    "/api/filetree/removeDoc" |
-    "/api/filetree/removeDocByID" |
-    "/api/filetree/removeDocs" |
-    "/api/filetree/removeIndexes" |
-    "/api/filetree/renameDoc" |
-    "/api/filetree/renameDocByID" |
-    "/api/filetree/reorderDocs" |
-    "/api/filetree/searchDocs" |
-    "/api/filetree/setDocSortMode" |
-    "/api/filetree/setPublishAccess" |
-    "/api/filetree/setSort" |
-    "/api/filetree/upsertIndexes" |
     "/api/network/echo" |
     "/api/network/echo/*path" |
     "/api/network/forwardProxy" |
@@ -2299,13 +2352,199 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -2 | -3 | 403; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/filetree/authFilePublishAccess": {
+        request: FileTreeAuthPublishRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        additionalErrorStatuses: [429];
+    };
+    "/api/filetree/changeSort": {
+        request: FileTreeChangeSortRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/createDailyNote": {
+        request: FileTreeDailyNoteRequestInput;
+        response: { "code": 0; "data": FileTreeCreateData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/createDoc": {
+        request: FileTreeCreateRequestInput;
+        response: { "code": 0; "data": FileTreeCreateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/createDocWithMd": {
+        request: FileTreeCreateMarkdownRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/doc2Heading": {
+        request: FileTreeDocHeadingRequestInput;
+        response: { "code": 0; "data": FileTreeDocHeadingData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/duplicateDoc": {
+        request: FileTreeIDRequestInput;
+        response: { "code": 0; "data": FileTreeDuplicateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getDoc": {
+        request: FileTreeGetDocRequestInput;
+        response: { "code": 0; "data": FileTreeGetDocData; "msg": string; } | { "code": -1 | 1 | 3; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getDocCreateSavePath": {
+        request: FileTreeNotebookRequestInput;
+        response: { "code": 0; "data": FileTreeCreateSavePathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getFullHPathByID": {
+        request: FileTreeOptionalIDRequestInput;
+        response: { "code": 0; "data": string | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getHPathByID": {
+        request: FileTreeIDRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getHPathByPath": {
+        request: FileTreePathRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getHPathsByPaths": {
+        request: FileTreePathsRequestInput;
+        response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getIDsByHPath": {
+        request: FileTreeOptionalPathRequestInput;
+        response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getPathByID": {
+        request: FileTreeTrimIDRequestInput;
+        response: { "code": 0; "data": FileTreeDocPathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/filetree/getPinnedDocs": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<PinnedDoc>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
+    "/api/filetree/getPublishAccess": {
+        request: FileTreePublishIDsRequestInput;
+        response: { "code": 0; "data": FileTreePublishData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getRefCreateSavePath": {
+        request: FileTreeNotebookRequestInput;
+        response: { "code": 0; "data": FileTreeSavePathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getShorthandSavePath": {
+        request: FileTreeNotebookRequestInput;
+        response: { "code": 0; "data": FileTreeSavePathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/heading2Doc": {
+        request: FileTreeHeadingDocRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/li2Doc": {
+        request: FileTreeListItemDocRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/listDocTree": {
+        request: FileTreePathRequestInput;
+        response: { "code": 0; "data": FileTreeDocTreeData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/listDocsByPath": {
+        request: FileTreeListRequestInput;
+        response: { "code": 0; "data": FileTreeListData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/moveDocs": {
+        request: FileTreeMoveRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/moveDocsByID": {
+        request: FileTreeMoveIDsRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/moveLocalShorthands": {
+        request: FileTreeNotebookRequestInput;
+        response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/removeDoc": {
+        request: FileTreePathRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/removeDocByID": {
+        request: FileTreeTrimIDRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/removeDocs": {
+        request: FileTreePathsRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/removeIndexes": {
+        request: FileTreePathsRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/renameDoc": {
+        request: FileTreeRenameRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/renameDocByID": {
+        request: FileTreeRenameIDRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/reorderDocs": {
+        request: FileTreeReorderRequestInput;
+        response: { "code": 0; "data": FileTreeReorderData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | FileTreeReorderData | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/filetree/searchDocs": {
+        request: FileTreeSearchRequestInput;
+        response: { "code": 0; "data": Array<FileTreeSearchDoc | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/setDocSortMode": {
+        request: FileTreeSortModeRequestInput;
+        response: { "code": 0; "data": FileTreeSortModeData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | FileTreeSortModeData | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/filetree/setPublishAccess": {
+        request: FileTreeSetPublishRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/setSort": {
+        request: FileTreeSetSortRequestInput;
+        response: { "code": 0; "data": FileTreeSetSortData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | FileTreeSetSortData | null; "msg": string; };
+        body: "structJSON";
+    };
     "/api/filetree/updatePinnedDocs": {
         request: UpdatePinnedDocsRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/upsertIndexes": {
+        request: FileTreePathsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };

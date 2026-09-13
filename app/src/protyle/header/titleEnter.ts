@@ -1,3 +1,4 @@
+import type {FileTreeGetDocRequestInput} from "../../types/api";
 import {getTitleEnterAction} from "./titleEnterCore";
 import {isDocumentBoundaryLoaded} from "../util/documentRange";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
@@ -77,7 +78,7 @@ export const enterDocumentFromTitle = (protyle: IProtyle, options?: {
         if (!isValid() || protyle.block.rootID !== rootID) {
             return;
         }
-        const getDocParam: IObject = {
+        const getDocParam: FileTreeGetDocRequestInput = {
             id: rootID,
             mode: 0,
             size: window.siyuan.config.editor.dynamicLoadBlocks,

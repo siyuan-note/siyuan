@@ -6,6 +6,35 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
+fetchPost("/api/filetree/getDoc", {id: "document", notebook: "box", querySubTypes: {heading: {h1: true}}}, response => {
+    if (response.code === 0) {
+        const content: string = response.data.content;
+        const required: boolean = response.data.publishAccessRequired;
+        void [content, required];
+    } else {
+        const prompt: 1 | 3 = response.code;
+        void prompt;
+    }
+});
+fetchPost("/api/filetree/getFullHPathByID", {}, response => {
+    const path: string | null = response.data;
+    void path;
+});
+fetchPost("/api/filetree/setDocSortMode", {id: "document", sortMode: null});
+fetchPost("/api/filetree/moveDocs", {fromPaths: [], toPath: "/", toNotebook: "box", callback: {request: 1}});
+// @ts-expect-error 文档读取必须提供 ID。
+fetchPost("/api/filetree/getDoc", {});
+// @ts-expect-error 文档加载数量必须为数值。
+fetchPost("/api/filetree/getDoc", {id: "document", size: "10"});
+// @ts-expect-error 文档排序方式必须为整数或 null。
+fetchPost("/api/filetree/setDocSortMode", {id: "document", sortMode: "1"});
+// @ts-expect-error 文档排序方式字段不能省略。
+fetchPost("/api/filetree/setDocSortMode", {id: "document"});
+// @ts-expect-error 文档创建字段不能拼错。
+fetchPost("/api/filetree/createDocWithMd", {notebook: "box", path: "/Doc", markDown: "text"});
+// @ts-expect-error 发布配置必须提供完整字段。
+fetchPost("/api/filetree/setPublishAccess", {id: "document", visible: true});
+
 fetchPost("/api/asset/upload", new ContractFormData({"file[]": [new Blob(), new Blob()], assetsDirPath: "assets"}), response => {
     const uploaded: string | undefined = response.data.succMap?.["example.txt"];
     void uploaded;

@@ -218,7 +218,7 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                 updateReadonly: true,
                 data: response,
                 protyle,
-                action: response.data.rootID === response.data.id ? [] : [Constants.CB_GET_ALL],
+                action: response.code === 0 && response.data.rootID === response.data.id ? [] : [Constants.CB_GET_ALL],
                 afterCB: () => {
                     if (!isCurrentFlashcardLoad(revealState, generation) ||
                         protyle.element.classList.contains("fn__none")) {

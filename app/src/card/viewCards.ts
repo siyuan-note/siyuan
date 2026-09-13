@@ -368,7 +368,7 @@ const getArticle = (edit: Protyle, id: string) => {
                 updateReadonly: true,
                 data: getResponse,
                 protyle: edit.protyle,
-                action: getResponse.data.rootID === getResponse.data.id ? [] : [Constants.CB_GET_ALL],
+                action: getResponse.code === 0 && getResponse.data.rootID === getResponse.data.id ? [] : [Constants.CB_GET_ALL],
             });
         });
     });

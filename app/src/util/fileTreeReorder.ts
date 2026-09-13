@@ -28,5 +28,7 @@ export const reorderSortedFileTree = async (sourceIDs: string[], targetID: strin
     if (response.data?.conflict && !removeSorts) {
         return reorderSortedFileTree(sourceIDs, targetID, after);
     }
-    return response.data;
+    if (response.data?.notebook !== undefined && response.data?.parentPath !== undefined) {
+        return {notebook: response.data.notebook, parentPath: response.data.parentPath};
+    }
 };

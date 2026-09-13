@@ -1,3 +1,4 @@
+import type {FileTreeGetDocRequestInput} from "../../types/api";
 import {matchHotKey} from "../util/hotKey";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {isMac, writeText} from "../util/compatibility";
@@ -441,7 +442,7 @@ export const goHome = (protyle: IProtyle, focusEditor = true) => {
         protyle.contentElement.scrollTop = 0;
         protyle.scroll.lastScrollTop = 1;
     } else {
-        const getDocParam: IObject = {
+        const getDocParam: FileTreeGetDocRequestInput = {
             id: protyle.block.rootID,
             mode: 0,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
@@ -463,7 +464,7 @@ export const goHome = (protyle: IProtyle, focusEditor = true) => {
 export const goEnd = (protyle: IProtyle, focusEditor = true) => {
     if (!protyle.scroll.element.classList.contains("fn__none") &&
         protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2") {
-        const getDocParam: IObject = {
+        const getDocParam: FileTreeGetDocRequestInput = {
             id: protyle.block.rootID,
             mode: 4,
             size: window.siyuan.config.editor.dynamicLoadBlocks,

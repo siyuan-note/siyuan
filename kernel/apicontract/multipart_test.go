@@ -45,3 +45,28 @@ func TestPutFileFormFields(t *testing.T) {
 		t.Fatalf("conditional field validation belongs to the handler: %v", err)
 	}
 }
+
+func TestImportZipMarkdownFormPresence(t *testing.T) {
+	request, err := ImportZipMd.DecodeMultipart(&multipart.Form{})
+	if err != nil || request.Notebook != nil || request.ToPath != nil {
+		t.Fatalf("absent import paths changed: %+v, %v", request, err)
+	}
+	first := &multipart.FileHeader{Filename: "first.zip"}
+	request, err = ImportZipMd.DecodeMultipart(&multipart.Form{Value: map[string][]string{"notebook": {"", "ignored"}, "toPath": {" / ", "ignored"}, "skipRoot": {"TRUE", "true"}}, File: map[string][]*multipart.FileHeader{"file": {first, {Filename: "ignored.zip"}}}})
+	if err != nil || request.Notebook == nil || *request.Notebook != "" || request.ToPath == nil || *request.ToPath != " / " || request.SkipRoot != "TRUE" || request.File != first {
+		t.Fatalf("import form presence or first-value semantics changed: %+v, %v", request, err)
+	}
+}
+
+func TestImportSYTargetPath(t *testing.T) {
+	request, err := ImportSY.DecodeMultipart(&multipart.Form{})
+	if err != nil || request.TargetPath() != "/" {
+		t.Fatalf("default import path changed: %+v, %v", request, err)
+	}
+	for _, path := range []string{"", " / "} {
+		request, err = ImportSY.DecodeMultipart(&multipart.Form{Value: map[string][]string{"toPath": {path, "ignored"}, "notebook": {" box ", "ignored"}}})
+		if err != nil || request.TargetPath() != path || request.Notebook != " box " {
+			t.Fatalf("explicit import path changed: %+v, %v", request, err)
+		}
+	}
+}

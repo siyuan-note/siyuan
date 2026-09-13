@@ -75,6 +75,28 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if t == reflect.TypeFor[ImportAutoData]() {
+		var variants []*Schema
+		for _, member := range []reflect.Type{reflect.TypeFor[ImportAutoDocument](), reflect.TypeFor[ImportAutoNotebook](), reflect.TypeFor[ImportAutoNotebooks]()} {
+			variant, err := b.schema(member, false)
+			if err != nil {
+				return nil, err
+			}
+			variants = append(variants, variant)
+		}
+		return &Schema{AnyOf: variants}, nil
+	}
+	if t == reflect.TypeFor[ImportNotebookData]() {
+		one, err := b.schema(reflect.TypeFor[ImportedNotebook](), false)
+		if err != nil {
+			return nil, err
+		}
+		many, err := b.schema(reflect.TypeFor[ImportedNotebooks](), false)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{one, many}}, nil
+	}
 	if t == reflect.TypeFor[BacklinkListData]() {
 		list, err := b.schema(reflect.TypeFor[BacklinkList](), false)
 		if err != nil {

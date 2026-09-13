@@ -22,7 +22,7 @@ func validateMultipartRequest(t reflect.Type) error {
 		if !field.IsExported() || field.Anonymous || field.Tag.Get("json") == "" {
 			return fmt.Errorf("multipart fields must be named and exported: %s", field.Name)
 		}
-		if field.Type != reflect.TypeFor[string]() && field.Type != reflect.TypeFor[*multipart.FileHeader]() {
+		if field.Type != reflect.TypeFor[string]() && field.Type != reflect.TypeFor[*string]() && field.Type != reflect.TypeFor[*multipart.FileHeader]() {
 			return fmt.Errorf("unsupported multipart field: %s", field.Name)
 		}
 		for _, option := range strings.Split(field.Tag.Get("api"), ",") {
@@ -67,7 +67,7 @@ func (e Endpoint[Request, Data]) DecodeMultipart(form *multipart.Form) (request 
 				continue
 			}
 			value.Field(i).Set(reflect.ValueOf(files[0]))
-		case reflect.TypeFor[string]():
+		case reflect.TypeFor[string](), reflect.TypeFor[*string]():
 			values := form.Value[name]
 			if len(values) == 0 {
 				if !optional {
@@ -75,7 +75,13 @@ func (e Endpoint[Request, Data]) DecodeMultipart(form *multipart.Form) (request 
 				}
 				continue
 			}
-			value.Field(i).SetString(values[0])
+			if field.Type.Kind() == reflect.Pointer {
+				text := reflect.New(field.Type.Elem())
+				text.Elem().SetString(values[0])
+				value.Field(i).Set(text)
+			} else {
+				value.Field(i).SetString(values[0])
+			}
 		default:
 			return request, fmt.Errorf("unsupported multipart field: %s", name)
 		}

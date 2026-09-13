@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -31,6 +30,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -39,173 +39,122 @@ const stagedSYImportTTL = 30 * time.Minute
 
 var stagedSYImportLock sync.Mutex
 
-func importSY(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(200, ret)
-
+// beginImportUpload 在解析上传数据前显示进度；成功解析的表单由 Gin 缓存，供契约绑定复用。
+func beginImportUpload[Data any](c *gin.Context) *apicontract.Response[Data] {
 	util.PushEndlessProgress(model.Conf.Language(73))
-	defer util.ClearPushProgress(100)
-
-	form, writePath, cleanup, err := saveImportUpload(c)
-	if err != nil {
-		logging.LogErrorf("save import .sy.zip failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+	if _, err := c.MultipartForm(); err != nil {
+		util.ClearPushProgress(100)
+		logging.LogErrorf("parse import upload failed: %s", err)
+		response := apicontract.Failure[Data](-1, err.Error())
+		return &response
 	}
-	defer cleanup()
-
-	var notebook string
-	if values := form.Value["notebook"]; len(values) > 0 {
-		notebook = values[0]
-	}
-	toPath := "/"
-	if values := form.Value["toPath"]; len(values) > 0 {
-		toPath = values[0]
-	}
-
-	err = model.ImportSY(writePath, notebook, toPath)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	return nil
 }
 
-func importSYNotebook(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var importSY = contractHandler(apicontract.ImportSY, func(c *gin.Context, request apicontract.ImportSYRequest) apicontract.Response[apicontract.Null] {
+	defer util.ClearPushProgress(100)
+	writePath, cleanup, err := saveImportUploadFile(c, request.File)
+	if err != nil {
+		logging.LogErrorf("save import .sy.zip failed: %s", err)
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
+	defer cleanup()
+	err = model.ImportSY(writePath, request.Notebook, request.TargetPath())
+	if err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
+	return apicontract.Success(apicontract.Null{})
+}, beginImportUpload[apicontract.Null])
 
-	util.PushEndlessProgress(model.Conf.Language(73))
+var importSYNotebook = contractHandler(apicontract.ImportSYNotebook, func(c *gin.Context, request apicontract.ImportDataRequest) apicontract.Response[apicontract.ImportNotebookData] {
 	defer util.ClearPushProgress(100)
 
-	_, writePath, cleanup, err := saveImportUpload(c)
+	writePath, cleanup, err := saveImportUploadFile(c, request.File)
 	if err != nil {
 		logging.LogErrorf("save notebook import .sy.zip failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.ImportNotebookData](-1, err.Error())
 	}
 	defer cleanup()
 	if ids, bundle, bundleErr := model.ImportSYNotebookBundle(writePath); bundle {
 		if bundleErr != nil {
-			ret.Code = -1
-			ret.Msg = bundleErr.Error()
-			return
+			return apicontract.Failure[apicontract.ImportNotebookData](-1, bundleErr.Error())
 		}
 		boxes, mountErr := mountImportedNotebooks(ids)
 		if nil != mountErr {
-			ret.Code = -1
-			ret.Msg = mountErr.Error()
-			return
+			return apicontract.Failure[apicontract.ImportNotebookData](-1, mountErr.Error())
 		}
-		ret.Data = map[string]any{"notebooks": boxes}
-		return
+		return apicontract.Success(apicontract.ImportedNotebooksResult(importedNotebookContracts(boxes)))
 	}
 
 	id, err := model.ImportSYNotebook(writePath)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.ImportNotebookData](-1, err.Error())
 	}
 
 	existed, err := model.Mount(id)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.ImportNotebookData](-1, err.Error())
 	}
 	box := model.Conf.Box(id)
 	if box == nil {
-		ret.Code = -1
-		ret.Msg = "opened notebook [" + id + "] not found"
-		return
+		return apicontract.Failure[apicontract.ImportNotebookData](-1, "opened notebook ["+id+"] not found")
 	}
 
-	ret.Data = map[string]any{"notebook": box}
 	event := util.NewCmdResult("createnotebook", 0, util.PushModeBroadcast)
 	event.Data = map[string]any{"box": box, "existed": existed}
 	util.PushEvent(event)
-}
+	return apicontract.Success(apicontract.ImportedNotebookResult(notebookContract(box)))
+}, beginImportUpload[apicontract.ImportNotebookData])
 
-func importSYAuto(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	util.PushEndlessProgress(model.Conf.Language(73))
+var importSYAuto = contractHandler(apicontract.ImportSYAuto, func(c *gin.Context, request apicontract.ImportSYRequest) apicontract.Response[apicontract.ImportAutoData] {
 	defer util.ClearPushProgress(100)
 
-	form, writePath, cleanup, err := saveImportUpload(c)
+	writePath, cleanup, err := saveImportUploadFile(c, request.File)
 	if err != nil {
 		logging.LogErrorf("save automatic import .sy.zip failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.ImportAutoData](-1, err.Error())
 	}
 	defer cleanup()
 	if ids, bundle, bundleErr := model.ImportSYNotebookBundle(writePath); bundle {
 		if bundleErr != nil {
-			ret.Code = -1
-			ret.Msg = bundleErr.Error()
-			return
+			return apicontract.Failure[apicontract.ImportAutoData](-1, bundleErr.Error())
 		}
 		boxes, mountErr := mountImportedNotebooks(ids)
 		if nil != mountErr {
-			ret.Code = -1
-			ret.Msg = mountErr.Error()
-			return
+			return apicontract.Failure[apicontract.ImportAutoData](-1, mountErr.Error())
 		}
-		ret.Data = map[string]any{"type": "notebooks", "notebooks": boxes}
-		return
+		return apicontract.Success(apicontract.AutoImportedNotebooks(importedNotebookContracts(boxes)))
 	}
 
-	var notebook string
-	if values := form.Value["notebook"]; len(values) > 0 {
-		notebook = values[0]
-	}
-	toPath := "/"
-	if values := form.Value["toPath"]; len(values) > 0 {
-		toPath = values[0]
-	}
-	createdBoxID, createdNotebook, err := model.ImportSYAuto(writePath, notebook, toPath)
+	createdBoxID, createdNotebook, err := model.ImportSYAuto(writePath, request.Notebook, request.TargetPath())
 	if errors.Is(err, model.ErrSYTargetNotebookRequired) {
 		token, stageErr := stageSYImport(writePath)
 		if stageErr != nil {
-			ret.Code = -1
-			ret.Msg = stageErr.Error()
-			return
+			return apicontract.Failure[apicontract.ImportAutoData](-1, stageErr.Error())
 		}
-		ret.Data = map[string]any{"type": "document", "token": token}
-		return
+		return apicontract.Success(apicontract.AutoImportedDocument(token))
 	}
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.ImportAutoData](-1, err.Error())
 	}
 
-	ret.Data = map[string]any{"type": "document"}
+	document := apicontract.AutoImportedDocument("")
 	if !createdNotebook {
-		return
+		return apicontract.Success(document)
 	}
 	existed, err := model.Mount(createdBoxID)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.ImportSYAuto.FailureWithData(-1, err.Error(), document)
 	}
 	box := model.Conf.Box(createdBoxID)
 	if nil == box {
-		ret.Code = -1
-		ret.Msg = "opened notebook [" + createdBoxID + "] not found"
-		return
+		return apicontract.ImportSYAuto.FailureWithData(-1, "opened notebook ["+createdBoxID+"] not found", document)
 	}
-	ret.Data = map[string]any{"type": "notebook", "notebook": box}
 	event := util.NewCmdResult("createnotebook", 0, util.PushModeBroadcast)
 	event.Data = map[string]any{"box": box, "existed": existed}
 	util.PushEvent(event)
-}
+	return apicontract.Success(apicontract.AutoImportedNotebook(notebookContract(box)))
+}, beginImportUpload[apicontract.ImportAutoData])
 
 func mountImportedNotebooks(ids []string) (ret []*model.Box, err error) {
 	for _, id := range ids {
@@ -226,60 +175,31 @@ func mountImportedNotebooks(ids []string) (ret []*model.Box, err error) {
 	return
 }
 
-func continueImportSY(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-	var token, notebook string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("token", &token, true, true),
-		util.BindJsonArg("notebook", &notebook, true, true)) {
-		return
-	}
-	zipPath, err := claimStagedSYImport(token)
+var continueImportSY = contractHandler(apicontract.ContinueImportSY, func(c *gin.Context, request apicontract.ContinueImportSYRequest) apicontract.Response[apicontract.ImportDocumentData] {
+	zipPath, err := claimStagedSYImport(request.Token)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.ImportDocumentData](-1, err.Error())
 	}
 	defer os.Remove(zipPath)
-	if err = model.ImportSY(zipPath, notebook, "/"); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+	if err = model.ImportSY(zipPath, request.Notebook, "/"); err != nil {
+		return apicontract.Failure[apicontract.ImportDocumentData](-1, err.Error())
 	}
-	ret.Data = map[string]any{"type": "document"}
-}
+	return apicontract.Success(apicontract.ImportDocumentData{Type: "document"})
+})
 
-func cancelImportSY(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-	var token string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("token", &token, true, true)) {
-		return
-	}
+var cancelImportSY = contractHandler(apicontract.CancelImportSY, func(c *gin.Context, request apicontract.ImportTokenRequest) apicontract.Response[apicontract.Null] {
+	token := request.Token
 	if !isValidSYImportToken(token) {
-		ret.Code = -1
-		ret.Msg = "invalid import token"
-		return
+		return apicontract.Failure[apicontract.Null](-1, "invalid import token")
 	}
 	stagedSYImportLock.Lock()
 	defer stagedSYImportLock.Unlock()
 	cleanupStagedSYImports()
 	if err := os.Remove(stagedSYImportPath(token)); err != nil && !os.IsNotExist(err) {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 func stageSYImport(srcPath string) (token string, err error) {
 	stagedSYImportLock.Lock()
@@ -359,15 +279,9 @@ func isValidSYImportToken(token string) bool {
 	return true
 }
 
-func saveImportUpload(c *gin.Context) (form *multipart.Form, writePath string, cleanup func(), err error) {
-	form, err = c.MultipartForm()
-	if err != nil {
-		return
-	}
-	files := form.File["file"]
-	if len(files) < 1 {
-		err = errors.New("no file found")
-		return
+func saveImportUploadFile(c *gin.Context, file *multipart.FileHeader) (writePath string, cleanup func(), err error) {
+	if file == nil {
+		return "", nil, errors.New("no file found")
 	}
 
 	importDir := filepath.Join(util.TempDir, "import", gulu.Rand.String(7))
@@ -375,47 +289,28 @@ func saveImportUpload(c *gin.Context) (form *multipart.Form, writePath string, c
 		return
 	}
 	cleanup = func() { _ = os.RemoveAll(importDir) }
-	writePath = filepath.Join(importDir, filepath.Base(files[0].Filename))
+	writePath = filepath.Join(importDir, filepath.Base(file.Filename))
 	if !gulu.File.IsSubPath(importDir, writePath) {
 		err = errors.New("import path is not sub path of import dir")
 		cleanup()
 		return
 	}
 
-	if err = c.SaveUploadedFile(files[0], writePath); err != nil {
+	if err = c.SaveUploadedFile(file, writePath); err != nil {
 		cleanup()
 	}
 	return
 }
 
-func importData(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	util.PushEndlessProgress(model.Conf.Language(73))
+var importData = contractHandler(apicontract.ImportData, func(c *gin.Context, request apicontract.ImportDataRequest) apicontract.Response[apicontract.Null] {
 	defer util.ClearPushProgress(100)
-
-	form, err := c.MultipartForm()
-	if err != nil {
-		logging.LogErrorf("import data failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+	if request.File == nil {
+		return apicontract.Failure[apicontract.Null](-1, "file not found")
 	}
-
-	if 1 > len(form.File["file"]) {
-		logging.LogErrorf("import data failed: %s", err)
-		ret.Code = -1
-		ret.Msg = "file not found"
-		return
-	}
-
 	importDir := filepath.Join(util.TempDir, "import")
-	err = os.MkdirAll(importDir, 0755)
+	err := os.MkdirAll(importDir, 0755)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = "create temp import dir failed"
-		return
+		return apicontract.Failure[apicontract.Null](-1, "create temp import dir failed")
 	}
 	dataZipPath := filepath.Join(importDir, util.CurrentTimeSecondsStr()+".zip")
 	defer os.RemoveAll(dataZipPath)
@@ -434,77 +329,51 @@ func importData(c *gin.Context) {
 	dataZipFile, err = os.Create(dataZipPath)
 	if err != nil {
 		logging.LogErrorf("create temp file failed: %s", err)
-		ret.Code = -1
-		ret.Msg = "create temp file failed"
-		return
+		return apicontract.Failure[apicontract.Null](-1, "create temp file failed")
 	}
-	file := form.File["file"][0]
+	file := request.File
 	logging.LogInfof("import data [name=%s, size=%d]", file.Filename, file.Size)
 	fileReader, err = file.Open()
 	if err != nil {
 		logging.LogErrorf("open upload file failed: %s", err)
-		ret.Code = -1
-		ret.Msg = "open file failed"
-		return
+		return apicontract.Failure[apicontract.Null](-1, "open file failed")
 	}
 	_, err = io.Copy(dataZipFile, fileReader)
 	if err != nil {
 		logging.LogErrorf("read upload file failed: %s", err)
-		ret.Code = -1
-		ret.Msg = "read file failed"
-		return
+		return apicontract.Failure[apicontract.Null](-1, "read file failed")
 	}
 	if err = dataZipFile.Close(); err != nil {
 		logging.LogErrorf("close file failed: %s", err)
-		ret.Code = -1
-		ret.Msg = "close file failed"
-		return
+		return apicontract.Failure[apicontract.Null](-1, "close file failed")
 	}
 	dataZipFile = nil
 	if err = fileReader.Close(); err != nil {
 		logging.LogErrorf("close upload reader failed: %s", err)
-		ret.Code = -1
-		ret.Msg = "close file failed"
-		return
+		return apicontract.Failure[apicontract.Null](-1, "close file failed")
 	}
 	fileReader = nil
 
 	err = model.ImportData(dataZipPath)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+}, beginImportUpload[apicontract.Null])
 
-func importStdMd(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	notebook := arg["notebook"].(string)
-	localPath := arg["localPath"].(string)
-	toPath := arg["toPath"].(string)
-	skipRoot, _ := arg["skipRoot"].(bool)
+var importStdMd = contractHandler(apicontract.ImportStdMd, func(c *gin.Context, request apicontract.ImportMarkdownRequest) apicontract.Response[apicontract.Null] {
+	notebook, localPath, toPath, skipRoot := request.Notebook, request.LocalPath, request.ToPath, request.SkipRoot
 
 	if gulu.File.IsSubPath(util.WorkingDir, localPath) {
 		msg := fmt.Sprintf("import from local path [%s] failed: local path is sub path of working dir", localPath)
 		logging.LogError(msg)
-		ret.Code = -1
-		ret.Msg = msg
-		return
+		return apicontract.Failure[apicontract.Null](-1, msg)
 	}
 
 	if util.IsSensitivePath(localPath) {
 		msg := fmt.Sprintf("import from local path [%s] failed: local path is sensitive path", localPath)
 		logging.LogError(msg)
-		ret.Code = -1
-		ret.Msg = msg
-		return
+		return apicontract.Failure[apicontract.Null](-1, msg)
 	}
 
 	var err error
@@ -514,49 +383,28 @@ func importStdMd(c *gin.Context) {
 		err = model.ImportFromLocalPath(notebook, localPath, toPath)
 	}
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func importZipMd(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(200, ret)
-
-	util.PushEndlessProgress(model.Conf.Language(73))
+var importZipMd = contractHandler(apicontract.ImportZipMd, func(c *gin.Context, request apicontract.ImportZipMarkdownRequest) apicontract.Response[apicontract.Null] {
 	defer util.ClearPushProgress(100)
-
-	form, err := c.MultipartForm()
-	if err != nil {
-		logging.LogErrorf("parse import .zip failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+	file := request.File
+	if file == nil {
+		return apicontract.Failure[apicontract.Null](-1, "no file found")
 	}
-
-	files := form.File["file"]
-	if 1 > len(files) {
-		logging.LogErrorf("parse import .zip failed, no file found")
-		ret.Code = -1
-		ret.Msg = "no file found"
-		return
-	}
-	file := files[0]
 	importDir := filepath.Join(util.TempDir, "import")
+	var err error
 	if err = os.MkdirAll(importDir, 0755); err != nil {
 		logging.LogErrorf("make import dir [%s] failed: %s", importDir, err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	writePath := filepath.Join(importDir, file.Filename)
 	if !gulu.File.IsSubPath(importDir, writePath) {
 		logging.LogErrorf("import path [%s] is not sub path of import dir [%s]", writePath, importDir)
-		ret.Code = -1
-		ret.Msg = "import path is not sub path of import dir"
-		return
+		return apicontract.Failure[apicontract.Null](-1, "import path is not sub path of import dir")
 	}
 
 	defer os.RemoveAll(writePath)
@@ -575,42 +423,38 @@ func importZipMd(c *gin.Context) {
 	reader, err = file.Open()
 	if err != nil {
 		logging.LogErrorf("read import .zip failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	writer, err = os.OpenFile(writePath, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		logging.LogErrorf("open import .zip [%s] failed: %s", writePath, err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if _, err = io.Copy(writer, reader); err != nil {
 		logging.LogErrorf("write import .zip failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if err = writer.Close(); err != nil {
 		logging.LogErrorf("close import .zip [%s] failed: %s", writePath, err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	writer = nil
 	if err = reader.Close(); err != nil {
 		logging.LogErrorf("close import upload reader failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	reader = nil
 
-	notebook := form.Value["notebook"][0]
-	toPath := form.Value["toPath"][0]
-	skipRoot := len(form.Value["skipRoot"]) > 0 && form.Value["skipRoot"][0] == "true"
+	if request.Notebook == nil {
+		return apicontract.Failure[apicontract.Null](-1, "Field [notebook] is required")
+	}
+	if request.ToPath == nil {
+		return apicontract.Failure[apicontract.Null](-1, "Field [toPath] is required")
+	}
+	notebook := *request.Notebook
+	toPath := *request.ToPath
+	skipRoot := request.SkipRoot == "true"
 
 	// 准备解压路径
 	filenameMain := strings.TrimSuffix(file.Filename, filepath.Ext(file.Filename))
@@ -622,9 +466,7 @@ func importZipMd(c *gin.Context) {
 	err = gulu.Zip.Unzip(writePath, unzipPath)
 	if err != nil {
 		logging.LogErrorf("unzip import .zip failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 
 	// 调用本地导入逻辑
@@ -635,95 +477,71 @@ func importZipMd(c *gin.Context) {
 	}
 
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
+	return apicontract.Success(apicontract.Null{})
+}, beginImportUpload[apicontract.Null])
+
+var startObsidianVaultAnalysis = contractHandler(apicontract.StartObsidianVaultAnalysis, func(c *gin.Context, request apicontract.ObsidianAnalysisRequest) apicontract.Response[*apicontract.ObsidianVaultTask] {
+	task, err := model.StartObsidianVaultAnalysis(request.LocalPath)
+	if err != nil {
+		return apicontract.Failure[*apicontract.ObsidianVaultTask](-1, err.Error())
+	}
+	return apicontract.Success(obsidianTaskContract(task))
+})
+
+var getObsidianVaultTask = contractHandler(apicontract.GetObsidianVaultTask, func(c *gin.Context, request apicontract.ObsidianTaskRequest) apicontract.Response[*apicontract.ObsidianVaultTask] {
+	ret := gulu.Ret.NewResult()
+	if util.InvalidIDPattern(request.TaskID, ret) {
+		return contractFailure[*apicontract.ObsidianVaultTask](ret)
+	}
+	task, err := model.GetObsidianVaultTask(request.TaskID)
+	if err != nil {
+		return apicontract.Failure[*apicontract.ObsidianVaultTask](-1, err.Error())
+	}
+	return apicontract.Success(obsidianTaskContract(task))
+})
+
+var startObsidianVaultImport = contractHandler(apicontract.StartObsidianVaultImport, func(c *gin.Context, request apicontract.ObsidianImportRequest) apicontract.Response[*apicontract.ObsidianVaultTask] {
+	ret := gulu.Ret.NewResult()
+	if util.InvalidIDPattern(request.TaskID, ret) {
+		return contractFailure[*apicontract.ObsidianVaultTask](ret)
+	}
+	task, err := model.StartObsidianVaultImport(request.TaskID, request.NotebookName)
+	if err != nil {
+		return apicontract.Failure[*apicontract.ObsidianVaultTask](-1, err.Error())
+	}
+	return apicontract.Success(obsidianTaskContract(task))
+})
+
+var cancelObsidianVaultTask = contractHandler(apicontract.CancelObsidianVaultTask, func(c *gin.Context, request apicontract.ObsidianTaskRequest) apicontract.Response[*apicontract.ObsidianVaultTask] {
+	ret := gulu.Ret.NewResult()
+	if util.InvalidIDPattern(request.TaskID, ret) {
+		return contractFailure[*apicontract.ObsidianVaultTask](ret)
+	}
+	task, err := model.CancelObsidianVaultTask(request.TaskID)
+	if err != nil {
+		return apicontract.CancelObsidianVaultTask.FailureWithData(-1, err.Error(), obsidianTaskContract(task))
+	}
+	return apicontract.Success(obsidianTaskContract(task))
+})
+
+func obsidianTaskContract(task *model.ObsidianVaultTask) *apicontract.ObsidianVaultTask {
+	if task == nil {
+		return nil
+	}
+	return &apicontract.ObsidianVaultTask{TaskID: task.TaskID, State: task.State, Progress: task.Progress,
+		Message: task.Message, Error: task.Error, Detail: task.Detail,
+		Analysis: (*apicontract.ObsidianVaultAnalysis)(task.Analysis), Result: (*apicontract.ObsidianVaultImportResult)(task.Result)}
 }
 
-func startObsidianVaultAnalysis(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+func importedNotebookContracts(boxes []*model.Box) []*apicontract.Notebook {
+	if boxes == nil {
+		return nil
 	}
-	var localPath string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("localPath", &localPath, true, true)) {
-		return
+	result := make([]*apicontract.Notebook, len(boxes))
+	for i, box := range boxes {
+		result[i] = notebookContract(box)
 	}
-	task, err := model.StartObsidianVaultAnalysis(localPath)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	ret.Data = task
-}
-
-func getObsidianVaultTask(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-	var taskID string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("taskID", &taskID, true, true)) || util.InvalidIDPattern(taskID, ret) {
-		return
-	}
-	task, err := model.GetObsidianVaultTask(taskID)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	ret.Data = task
-}
-
-func startObsidianVaultImport(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-	var taskID, notebookName string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("taskID", &taskID, true, true),
-		util.BindJsonArg("notebookName", &notebookName, true, true)) || util.InvalidIDPattern(taskID, ret) {
-		return
-	}
-	task, err := model.StartObsidianVaultImport(taskID, notebookName)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	ret.Data = task
-}
-
-func cancelObsidianVaultTask(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-	var taskID string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("taskID", &taskID, true, true)) || util.InvalidIDPattern(taskID, ret) {
-		return
-	}
-	task, err := model.CancelObsidianVaultTask(taskID)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = task
-		return
-	}
-	ret.Data = task
+	return result
 }

@@ -24,6 +24,8 @@ Encrypted notebook lifecycle endpoints use typed requests and responses while re
 
 ## Compatibility requirements
 
+Import contracts preserve archive cleanup, first-upload selection, untrimmed Markdown paths, and staged-token trimming and lifetime. Automatic SiYuan imports declare document, token, notebook, and notebook-collection results; mount failures retain the document payload. Obsidian task cancellation retains its task snapshot on failure. Notebook mounting, encrypted import handling, and creation notifications remain in the existing business operations.
+
 Backlink contracts preserve untrimmed query fields, optional flag defaults, source-filter normalization, and revision hashes. Missing list IDs still return null; unchanged revisions retain the existing fields with null arrays. Candidate-definition failures retain their empty `refDefs` payload. Publish filtering, encrypted-notebook admission, and request-held leases remain in the handlers, and context payloads retain recursive block paths and attribute-view reference targets.
 
 Graph contracts preserve partial configuration defaults, case-insensitive configuration fields, and numeric normalization. Query responses distinguish full graph data from correlation-only payloads, including errors and local queries without an ID; node and link arrays retain their original nullability. Configuration persistence still requires administrator access outside read-only mode. Publish filtering and encrypted-notebook rejection retain their existing order relative to configuration decoding.
@@ -61,6 +63,8 @@ All `/api/block/` routes use contracts. Heading-level queries retain batch-ID pr
 Storage contracts keep arbitrary JSON limited to storage values; keys, recent documents, search criteria, inline styles, and attribute-view palettes have structured types. Recent-document mutations retain their read-only no-op before parsing the body. An optional typed `beforeDecode` callback on `contractHandler` preserves this ordering and may return a response before decoding; route checks still require an explicit endpoint binding. Inline-style version 1 updates preserve existing built-in configuration, while version 2 and palette requests retain their struct-decoding compatibility.
 
 ## Multipart requests
+
+Optional `*string` form fields preserve omission separately from an explicit empty string; use `nonnullable` because multipart text fields cannot contain JSON null. Import handlers use this distinction for defaults and delayed field validation. Upload progress starts before multipart parsing, and parse failures clear it before responding; Gin's cached form is reused for typed binding.
 
 `BinaryOutput` declares raw file responses with `BinaryContent` and `SuccessBinary`. The adapter preserves bytes and media type, while `ErrorStatus` declares the distinct HTTP status for JSON failures (`getFile` uses 202). The schema records binary success and typed JSON errors; `ValidateHTTPResponse` checks the status and media type before validating an error envelope. Generated route responses expose `Blob`, while the existing fetch helpers expose `JSONValue` because they parse file contents as text or JSON according to their existing behavior. JSON file contents can contain arbitrary JSON; this does not relax the structured error contract.
 

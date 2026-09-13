@@ -2582,6 +2582,22 @@
       ],
       "additionalProperties": false
     },
+    "ContinueImportSYRequestInput": {
+      "type": "object",
+      "properties": {
+        "notebook": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "notebook",
+        "token"
+      ],
+      "additionalProperties": false
+    },
     "CopyFileRequestInput": {
       "type": "object",
       "properties": {
@@ -5054,6 +5070,141 @@
       },
       "additionalProperties": false
     },
+    "ImportAutoDocument": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "document"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "ImportAutoNotebook": {
+      "type": "object",
+      "properties": {
+        "notebook": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Notebook"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "notebook"
+          ]
+        }
+      },
+      "required": [
+        "notebook",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "ImportAutoNotebooks": {
+      "type": "object",
+      "properties": {
+        "notebooks": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Notebook"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "notebooks"
+          ]
+        }
+      },
+      "required": [
+        "notebooks",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "ImportDataRequestInput": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "format": "binary"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ImportDocumentData": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "document"
+          ]
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "ImportMarkdownRequestInput": {
+      "type": "object",
+      "properties": {
+        "localPath": {
+          "type": "string"
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "skipRoot": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "toPath": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "localPath",
+        "notebook",
+        "toPath"
+      ],
+      "additionalProperties": false
+    },
     "ImportNotebookCryptoBackupRequestInput": {
       "type": "object",
       "properties": {
@@ -5067,6 +5218,101 @@
       },
       "required": [
         "file"
+      ],
+      "additionalProperties": false
+    },
+    "ImportSYRequestInput": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "format": "binary"
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "toPath": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ImportTokenRequestInput": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "token"
+      ],
+      "additionalProperties": false
+    },
+    "ImportZipMarkdownRequestInput": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "format": "binary"
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "skipRoot": {
+          "type": "string"
+        },
+        "toPath": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ImportedNotebook": {
+      "type": "object",
+      "properties": {
+        "notebook": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Notebook"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "notebook"
+      ],
+      "additionalProperties": false
+    },
+    "ImportedNotebooks": {
+      "type": "object",
+      "properties": {
+        "notebooks": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Notebook"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "notebooks"
       ],
       "additionalProperties": false
     },
@@ -6891,6 +7137,269 @@
       },
       "required": [
         "msg"
+      ],
+      "additionalProperties": false
+    },
+    "ObsidianAnalysisRequestInput": {
+      "type": "object",
+      "properties": {
+        "localPath": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "localPath"
+      ],
+      "additionalProperties": false
+    },
+    "ObsidianImportRequestInput": {
+      "type": "object",
+      "properties": {
+        "notebookName": {
+          "type": "string"
+        },
+        "taskID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "notebookName",
+        "taskID"
+      ],
+      "additionalProperties": false
+    },
+    "ObsidianTaskRequestInput": {
+      "type": "object",
+      "properties": {
+        "taskID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "taskID"
+      ],
+      "additionalProperties": false
+    },
+    "ObsidianVaultAnalysis": {
+      "type": "object",
+      "properties": {
+        "ambiguousCount": {
+          "type": "integer"
+        },
+        "blockIDCount": {
+          "type": "integer"
+        },
+        "blockingErrors": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "commentCount": {
+          "type": "integer"
+        },
+        "embedCount": {
+          "type": "integer"
+        },
+        "footnoteCount": {
+          "type": "integer"
+        },
+        "importableAssetCount": {
+          "type": "integer"
+        },
+        "importableAssetSize": {
+          "type": "integer"
+        },
+        "markdownCount": {
+          "type": "integer"
+        },
+        "missingCount": {
+          "type": "integer"
+        },
+        "nameAdjustmentCount": {
+          "type": "integer"
+        },
+        "notebookName": {
+          "type": "string"
+        },
+        "skippedHiddenCount": {
+          "type": "integer"
+        },
+        "skippedLinkCount": {
+          "type": "integer"
+        },
+        "skippedNestedVaultCount": {
+          "type": "integer"
+        },
+        "skippedSpecialCount": {
+          "type": "integer"
+        },
+        "syntheticParentCount": {
+          "type": "integer"
+        },
+        "unreferencedFileCount": {
+          "type": "integer"
+        },
+        "unsupportedCount": {
+          "type": "integer"
+        },
+        "vaultName": {
+          "type": "string"
+        },
+        "vaultPath": {
+          "type": "string"
+        },
+        "warnings": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "wikiLinkCount": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ambiguousCount",
+        "blockIDCount",
+        "blockingErrors",
+        "commentCount",
+        "embedCount",
+        "footnoteCount",
+        "importableAssetCount",
+        "importableAssetSize",
+        "markdownCount",
+        "missingCount",
+        "nameAdjustmentCount",
+        "notebookName",
+        "skippedHiddenCount",
+        "skippedLinkCount",
+        "skippedNestedVaultCount",
+        "skippedSpecialCount",
+        "syntheticParentCount",
+        "unreferencedFileCount",
+        "unsupportedCount",
+        "vaultName",
+        "vaultPath",
+        "warnings",
+        "wikiLinkCount"
+      ],
+      "additionalProperties": false
+    },
+    "ObsidianVaultImportResult": {
+      "type": "object",
+      "properties": {
+        "convertedEmbedCount": {
+          "type": "integer"
+        },
+        "convertedFootnoteCount": {
+          "type": "integer"
+        },
+        "convertedLinkCount": {
+          "type": "integer"
+        },
+        "failedStage": {
+          "type": "string"
+        },
+        "importedAttachmentCount": {
+          "type": "integer"
+        },
+        "incomplete": {
+          "type": "boolean"
+        },
+        "markdownCount": {
+          "type": "integer"
+        },
+        "nameAdjustmentCount": {
+          "type": "integer"
+        },
+        "notebookID": {
+          "type": "string"
+        },
+        "notebookName": {
+          "type": "string"
+        },
+        "preservedCommentCount": {
+          "type": "integer"
+        },
+        "preservedUnresolvedCount": {
+          "type": "integer"
+        },
+        "skippedPathCount": {
+          "type": "integer"
+        },
+        "syntheticParentCount": {
+          "type": "integer"
+        },
+        "unreferencedFileCount": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "convertedEmbedCount",
+        "convertedFootnoteCount",
+        "convertedLinkCount",
+        "importedAttachmentCount",
+        "incomplete",
+        "markdownCount",
+        "nameAdjustmentCount",
+        "notebookID",
+        "notebookName",
+        "preservedCommentCount",
+        "preservedUnresolvedCount",
+        "skippedPathCount",
+        "syntheticParentCount",
+        "unreferencedFileCount"
+      ],
+      "additionalProperties": false
+    },
+    "ObsidianVaultTask": {
+      "type": "object",
+      "properties": {
+        "analysis": {
+          "$ref": "#/$defs/ObsidianVaultAnalysis"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "progress": {
+          "type": "integer"
+        },
+        "result": {
+          "$ref": "#/$defs/ObsidianVaultImportResult"
+        },
+        "state": {
+          "type": "string"
+        },
+        "taskID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "message",
+        "progress",
+        "state",
+        "taskID"
       ],
       "additionalProperties": false
     },
@@ -18915,6 +19424,974 @@
               },
               "data": {
                 "$ref": "#/$defs/SearchHistoryData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/cancelImportSY",
+      "handler": "cancelImportSY",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/ImportTokenRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/cancelObsidianVaultTask",
+      "handler": "cancelObsidianVaultTask",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/ObsidianTaskRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ObsidianVaultTask"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/ObsidianVaultTask"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/continueImportSY",
+      "handler": "continueImportSY",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/ContinueImportSYRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/ImportDocumentData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/getObsidianVaultTask",
+      "handler": "getObsidianVaultTask",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/ObsidianTaskRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ObsidianVaultTask"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/importData",
+      "handler": "importData",
+      "body": "multipart",
+      "request": {
+        "$ref": "#/$defs/ImportDataRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/importSY",
+      "handler": "importSY",
+      "body": "multipart",
+      "request": {
+        "$ref": "#/$defs/ImportSYRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/importSYAuto",
+      "handler": "importSYAuto",
+      "body": "multipart",
+      "request": {
+        "$ref": "#/$defs/ImportSYRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ImportAutoDocument"
+                  },
+                  {
+                    "$ref": "#/$defs/ImportAutoNotebook"
+                  },
+                  {
+                    "$ref": "#/$defs/ImportAutoNotebooks"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/ImportAutoDocument"
+                      },
+                      {
+                        "$ref": "#/$defs/ImportAutoNotebook"
+                      },
+                      {
+                        "$ref": "#/$defs/ImportAutoNotebooks"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/importSYNotebook",
+      "handler": "importSYNotebook",
+      "body": "multipart",
+      "request": {
+        "$ref": "#/$defs/ImportDataRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ImportedNotebook"
+                  },
+                  {
+                    "$ref": "#/$defs/ImportedNotebooks"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/importStdMd",
+      "handler": "importStdMd",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/ImportMarkdownRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/importZipMd",
+      "handler": "importZipMd",
+      "body": "multipart",
+      "request": {
+        "$ref": "#/$defs/ImportZipMarkdownRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/startObsidianVaultAnalysis",
+      "handler": "startObsidianVaultAnalysis",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/ObsidianAnalysisRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ObsidianVaultTask"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/import/startObsidianVaultImport",
+      "handler": "startObsidianVaultImport",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/ObsidianImportRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ObsidianVaultTask"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "msg": {
                 "type": "string"

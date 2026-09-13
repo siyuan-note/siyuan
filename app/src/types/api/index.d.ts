@@ -156,6 +156,8 @@ export type CloudSync = { "cloudName": string; "hSize": string; "saveDir": strin
 
 export type ContentWordCountRequestInput = { "content": string; "reqId"?: JSONValue | null; };
 
+export type ContinueImportSYRequestInput = { "notebook": string; "token": string; };
+
 export type CopyFileRequestInput = { "dest": string; "src": string; };
 
 export type CopyFilesRequestInput = { "destDir": string; "srcs": Array<string>; };
@@ -270,7 +272,29 @@ export type HeadingLevelRequestInput = { "id"?: string; "ids"?: Array<string>; "
 
 export type HeadingNumbersRequestInput = { "id"?: string | null; "notebook"?: string | null; };
 
+export type ImportAutoDocument = { "token"?: string; "type": "document"; };
+
+export type ImportAutoNotebook = { "notebook": Notebook | null; "type": "notebook"; };
+
+export type ImportAutoNotebooks = { "notebooks": Array<Notebook | null> | null; "type": "notebooks"; };
+
+export type ImportDataRequestInput = { "file"?: Blob; };
+
+export type ImportDocumentData = { "type": "document"; };
+
+export type ImportMarkdownRequestInput = { "localPath": string; "notebook": string; "skipRoot"?: boolean | null; "toPath": string; };
+
 export type ImportNotebookCryptoBackupRequestInput = { "file": Blob; "password"?: string; };
+
+export type ImportSYRequestInput = { "file"?: Blob; "notebook"?: string; "toPath"?: string; };
+
+export type ImportTokenRequestInput = { "token": string; };
+
+export type ImportZipMarkdownRequestInput = { "file"?: Blob; "notebook"?: string; "skipRoot"?: string; "toPath"?: string; };
+
+export type ImportedNotebook = { "notebook": Notebook | null; };
+
+export type ImportedNotebooks = { "notebooks": Array<Notebook | null> | null; };
 
 export type InlineStyle = { "dark": InlineStyleTheme | null; "hidden"?: boolean; "id": string; "light": InlineStyleTheme | null; "name": string; };
 
@@ -369,6 +393,18 @@ export type NotebookPasswordRequestInput = { "password": string; };
 export type NotificationData = { "id": string; };
 
 export type NotificationRequestInput = { "msg": string; "timeout"?: number | null; };
+
+export type ObsidianAnalysisRequestInput = { "localPath": string; };
+
+export type ObsidianImportRequestInput = { "notebookName": string; "taskID": string; };
+
+export type ObsidianTaskRequestInput = { "taskID": string; };
+
+export type ObsidianVaultAnalysis = { "ambiguousCount": number; "blockIDCount": number; "blockingErrors": Array<string> | null; "commentCount": number; "embedCount": number; "footnoteCount": number; "importableAssetCount": number; "importableAssetSize": number; "markdownCount": number; "missingCount": number; "nameAdjustmentCount": number; "notebookName": string; "skippedHiddenCount": number; "skippedLinkCount": number; "skippedNestedVaultCount": number; "skippedSpecialCount": number; "syntheticParentCount": number; "unreferencedFileCount": number; "unsupportedCount": number; "vaultName": string; "vaultPath": string; "warnings": Array<string> | null; "wikiLinkCount": number; };
+
+export type ObsidianVaultImportResult = { "convertedEmbedCount": number; "convertedFootnoteCount": number; "convertedLinkCount": number; "failedStage"?: string; "importedAttachmentCount": number; "incomplete": boolean; "markdownCount": number; "nameAdjustmentCount": number; "notebookID": string; "notebookName": string; "preservedCommentCount": number; "preservedUnresolvedCount": number; "skippedPathCount": number; "syntheticParentCount": number; "unreferencedFileCount": number; };
+
+export type ObsidianVaultTask = { "analysis"?: ObsidianVaultAnalysis; "detail"?: string; "error"?: string; "message": string; "progress": number; "result"?: ObsidianVaultImportResult; "state": string; "taskID": string; };
 
 export type OpenNotebookRequestInput = { "app"?: string | null; "notebook": string; };
 
@@ -837,18 +873,6 @@ export type APILegacyPOSTPath =
     "/api/history/rollbackAttributeViewHistory" |
     "/api/history/rollbackDocHistory" |
     "/api/history/rollbackNotebookHistory" |
-    "/api/import/cancelImportSY" |
-    "/api/import/cancelObsidianVaultTask" |
-    "/api/import/continueImportSY" |
-    "/api/import/getObsidianVaultTask" |
-    "/api/import/importData" |
-    "/api/import/importSY" |
-    "/api/import/importSYAuto" |
-    "/api/import/importSYNotebook" |
-    "/api/import/importStdMd" |
-    "/api/import/importZipMd" |
-    "/api/import/startObsidianVaultAnalysis" |
-    "/api/import/startObsidianVaultImport" |
     "/api/network/echo" |
     "/api/network/echo/*path" |
     "/api/network/forwardProxy" |
@@ -1569,6 +1593,66 @@ export interface APIPOSTRoutes {
     "/api/history/searchHistory": {
         request: SearchHistoryRequestInput;
         response: { "code": 0; "data": SearchHistoryData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/import/cancelImportSY": {
+        request: ImportTokenRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/import/cancelObsidianVaultTask": {
+        request: ObsidianTaskRequestInput;
+        response: { "code": 0; "data": ObsidianVaultTask | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | ObsidianVaultTask | null; "msg": string; };
+        body: "json";
+    };
+    "/api/import/continueImportSY": {
+        request: ContinueImportSYRequestInput;
+        response: { "code": 0; "data": ImportDocumentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/import/getObsidianVaultTask": {
+        request: ObsidianTaskRequestInput;
+        response: { "code": 0; "data": ObsidianVaultTask | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/import/importData": {
+        request: ImportDataRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+    };
+    "/api/import/importSY": {
+        request: ImportSYRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+    };
+    "/api/import/importSYAuto": {
+        request: ImportSYRequestInput;
+        response: { "code": 0; "data": (ImportAutoDocument & { "notebook"?: never; "notebooks"?: never; }) | (ImportAutoNotebook & { "notebooks"?: never; "token"?: never; }) | (ImportAutoNotebooks & { "notebook"?: never; "token"?: never; }); "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | (ImportAutoDocument & { "notebook"?: never; "notebooks"?: never; }) | (ImportAutoNotebook & { "notebooks"?: never; "token"?: never; }) | (ImportAutoNotebooks & { "notebook"?: never; "token"?: never; }); "msg": string; };
+        body: "multipart";
+    };
+    "/api/import/importSYNotebook": {
+        request: ImportDataRequestInput;
+        response: { "code": 0; "data": (ImportedNotebook & { "notebooks"?: never; }) | (ImportedNotebooks & { "notebook"?: never; }); "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+    };
+    "/api/import/importStdMd": {
+        request: ImportMarkdownRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/import/importZipMd": {
+        request: ImportZipMarkdownRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+    };
+    "/api/import/startObsidianVaultAnalysis": {
+        request: ObsidianAnalysisRequestInput;
+        response: { "code": 0; "data": ObsidianVaultTask | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/import/startObsidianVaultImport": {
+        request: ObsidianImportRequestInput;
+        response: { "code": 0; "data": ObsidianVaultTask | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/inbox/getShorthand": {

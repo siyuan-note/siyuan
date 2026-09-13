@@ -10,6 +10,7 @@ import {pinnedDocIDs, updatePinnedDocs} from "../util/pinnedDocs";
 import {showMessage} from "../dialog/message";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
+import {ContractFormData} from "../util/contractFormData";
 import {onGetnotebookconf} from "./onGetnotebookconf";
 /// #if !MOBILE
 import {openSearch} from "../search/spread";
@@ -1097,10 +1098,7 @@ export const genImportMenu = (notebookId: string, pathString: string) => {
                     element.querySelector(".b3-form__upload").addEventListener("change", (event: InputEvent & {
                         target: HTMLInputElement
                     }) => {
-                        const formData = new FormData();
-                        formData.append("file", event.target.files[0]);
-                        formData.append("notebook", notebookId);
-                        formData.append("toPath", pathString);
+                        const formData = new ContractFormData({file: event.target.files[0], notebook: notebookId, toPath: pathString});
                         fetchPost("/api/import/importSY", formData, () => {
                             reloadDocTree();
                         });
@@ -1115,10 +1113,7 @@ export const genImportMenu = (notebookId: string, pathString: string) => {
                     element.querySelector(".b3-form__upload").addEventListener("change", (event: InputEvent & {
                         target: HTMLInputElement
                     }) => {
-                        const formData = new FormData();
-                        formData.append("file", event.target.files[0]);
-                        formData.append("notebook", notebookId);
-                        formData.append("toPath", pathString);
+                        const formData = new ContractFormData({file: event.target.files[0], notebook: notebookId, toPath: pathString});
                         fetchPost("/api/import/importZipMd", formData, () => {
                             reloadDocTree();
                         });

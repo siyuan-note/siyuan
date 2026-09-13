@@ -2,6 +2,7 @@ import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
 import {isMobile} from "./functions";
 import {fetchPost, fetchSyncPost} from "./fetch";
+import {ContractFormData} from "./contractFormData";
 import {Dialog} from "../dialog";
 import {getOpenNotebookCount} from "./pathName";
 import {replaceFileName, validateName} from "../editor/rename";
@@ -118,8 +119,7 @@ export const importNotebook = (file: File) => {
     if (!getHostCapabilities().importExport) {
         return;
     }
-    const formData = new FormData();
-    formData.append("file", file);
+    const formData = new ContractFormData({file});
     fetchPost("/api/import/importSYNotebook", formData);
 };
 
@@ -227,11 +227,7 @@ export const newNotebook = () => {
         }
         event.target.value = "";
         createNotebookForImport(file.name.replace(/\.zip$/i, ""), (notebookID) => {
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("notebook", notebookID);
-            formData.append("toPath", "/");
-            formData.append("skipRoot", "true");
+            const formData = new ContractFormData({file, notebook: notebookID, toPath: "/", skipRoot: "true"});
             fetchPost("/api/import/importZipMd", formData);
         });
     });

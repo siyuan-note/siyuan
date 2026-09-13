@@ -483,3 +483,83 @@ fetchPost("/plugin/private/:name/*path", {extension: [true, null, 1]}, response 
     const code: number = response.code;
     void code;
 });
+
+fetchPost("/api/system/exit", {execInstallPkg: 2.9, setCurrentWorkspace: null});
+fetchPost("/api/system/setOIDC", {enabled: false, scopes: null, claimRules: [{claim: "group", values: null}]});
+fetchPost("/api/system/setUILayout", {layout: {extension: [null, false, 1]}});
+fetchPost("/api/system/importConf", new ContractFormData({file: [new Blob(["config"])]}));
+// @ts-expect-error 配置导入使用文件列表。
+fetchPost("/api/system/importConf", new ContractFormData({file: new Blob(["config"])}));
+// @ts-expect-error 系统请求的数值标志不能使用字符串。
+fetchPost("/api/system/exit", {execInstallPkg: "2"});
+fetchPost("/api/system/getConf", {}, response => {
+    if (response.code === 0 && response.data.conf) {
+        const enabled: boolean | undefined = response.data.conf.notebookCrypto?.enabled;
+        const layout: JSONValue | undefined = response.data.conf.uiLayout?.layout;
+        void enabled;
+        void layout;
+        // @ts-expect-error 配置声明不包含未定义字段。
+        const unmodeled = response.data.conf.unmodeled;
+        void unmodeled;
+    }
+});
+fetchPost("/api/system/oidc/poll", {pollToken: "token"}, response => {
+    if (response.code === 0 && response.data.status === "completed") {
+        const to: string = response.data.to;
+        void to;
+    }
+});
+fetchPost("/api/system/oidc/mobileCallback", {callbackURL: "siyuan:/oidc-callback"}, response => {
+    if (response.code === 0) {
+        if (response.data.validation === true) {
+            const validated: true = response.data.validation;
+            void validated;
+        } else {
+            const to: string = response.data.to;
+            void to;
+        }
+    }
+});
+
+const transactionContractRequest: APIPOSTRoutes["/api/transactions"]["request"] = {
+    reqId: 1,
+    transactions: [{doOperations: [{action: "setAttrViewPageSize", data: 50}, {action: "updateAttrViewCell", data: {text: null}}]}],
+};
+void transactionContractRequest;
+
+const invalidTransactionContractRequest: APIPOSTRoutes["/api/transactions"]["request"] = {
+    reqId: 1,
+    transactions: [{doOperations: [
+        // @ts-expect-error 已知数值操作不能借用未知操作的兼容分支传入字符串。
+        {action: "setAttrViewPageSize", data: "50"},
+    ]}],
+};
+void invalidTransactionContractRequest;
+
+const invalidUnknownTransactionRequest: APIPOSTRoutes["/api/transactions"]["request"] = {
+    reqId: 1,
+    transactions: [{doOperations: [
+        // @ts-expect-error 未注册操作必须使用显式的兼容操作类型。
+        {action: "unregistered-plugin-operation", data: {plugin: true}},
+    ]}],
+};
+void invalidUnknownTransactionRequest;
+
+const broadcastFrame: APIGETRoutes["/ws/broadcast"]["websocket"]["outgoing"] = new Blob([new Uint8Array([0, 255])]);
+const broadcastDataEncoding: APIGETRoutes["/es/broadcast/subscribe"]["sse"]["raw"]["dataEncoding"] = "raw";
+void [broadcastFrame, broadcastDataEncoding];
+// @ts-expect-error 广播原始帧不能当作 JSON 对象。
+const invalidBroadcastFrame: APIGETRoutes["/ws/broadcast"]["websocket"]["outgoing"] = {message: "text"};
+void invalidBroadcastFrame;
+
+fetchPost("/api/extension/copy", new ContractFormData({dom: "<p>clip</p>", "https://example.com/image.png": new Blob(["image"])}), response => {
+    if (response.code === 0 && response.data) {
+        const markdown: string = response.data.md;
+        const withMath: boolean = response.data.withMath;
+        void [markdown, withMath];
+    }
+});
+// @ts-expect-error 剪藏请求必须携带 DOM 文本。
+fetchPost("/api/extension/copy", new ContractFormData({notebook: "notebook"}));
+const iconOutput: APIGETRoutes["/api/icon/getDynamicIcon"]["output"] = "binary";
+void iconOutput;

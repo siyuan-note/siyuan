@@ -233,7 +233,7 @@ export const getLocalFiles = async () => {
         }
     } else {
         const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
-        if (xmlString.data.length > 0) {
+        if (xmlString.code === 0 && Array.isArray(xmlString.data) && xmlString.data.length > 0) {
             localFiles = xmlString.data;
         }
     }

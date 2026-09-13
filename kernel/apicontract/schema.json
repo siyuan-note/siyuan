@@ -1569,6 +1569,65 @@
       ],
       "additionalProperties": false
     },
+    "CleanupRichTextRequestInput": {
+      "type": "object",
+      "properties": {
+        "batch": {
+          "type": "string"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "batch",
+        "groups"
+      ],
+      "additionalProperties": false
+    },
+    "ClipboardFile": {
+      "type": "object",
+      "properties": {
+        "isDir": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "size": {
+          "type": "integer"
+        },
+        "updated": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "isDir",
+        "name",
+        "path",
+        "size",
+        "updated"
+      ],
+      "additionalProperties": false
+    },
+    "ClipboardPathRequestInput": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
     "CloseNotebookRequestInput": {
       "type": "object",
       "properties": {
@@ -5445,6 +5504,21 @@
       ],
       "additionalProperties": false
     },
+    "PrepareRichTextRequestInput": {
+      "type": "object",
+      "properties": {
+        "assets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RichClipboardAssetInput"
+          }
+        }
+      },
+      "required": [
+        "assets"
+      ],
+      "additionalProperties": false
+    },
     "PrependBlockRequestInput": {
       "type": "object",
       "properties": {
@@ -5873,6 +5947,81 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "RichClipboardAssetInput": {
+      "type": "object",
+      "properties": {
+        "box": {
+          "type": "string"
+        },
+        "index": {
+          "type": "integer"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "index",
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "RichClipboardPrepared": {
+      "type": "object",
+      "properties": {
+        "assets": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/RichClipboardPreparedAsset"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "batch": {
+          "type": "string"
+        },
+        "groups": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "assets",
+        "batch",
+        "groups"
+      ],
+      "additionalProperties": false
+    },
+    "RichClipboardPreparedAsset": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "index",
+        "path"
+      ],
       "additionalProperties": false
     },
     "SearchBlock": {
@@ -14084,6 +14233,316 @@
                 "enum": [
                   -1,
                   1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/clipboard/cleanupRichText",
+      "handler": "cleanupRichText",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/CleanupRichTextRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/clipboard/prepareRichText",
+      "handler": "prepareRichText",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/PrepareRichTextRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/RichClipboardPrepared"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/clipboard/readFilePaths",
+      "handler": "readFilePaths",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/ClipboardFile"
+                }
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/clipboard/writeFilePath",
+      "handler": "writeFilePath",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/ClipboardPathRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
                 ]
               },
               "data": {

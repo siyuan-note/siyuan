@@ -442,3 +442,8 @@ var GetCloudSpace = define[EmptyRequest, CloudSpaceData]("getCloudSpace", "/api/
 var RemoveShorthands = define[RemoveShorthandsRequest, Null]("removeShorthands", "/api/inbox/removeShorthands", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetShorthand = define[TrimmedIDRequest, *Shorthand]("getShorthand", "/api/inbox/getShorthand", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
 var GetShorthands = define[ShorthandsRequest, *ShorthandsData]("getShorthands", "/api/inbox/getShorthands", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+var ReadClipboardFilePaths = define[EmptyRequest, []ClipboardFile]("readFilePaths", "/api/clipboard/readFilePaths", NoBody, ResponseOptions{NonNullable: true}, "POST")
+var WriteClipboardFilePath = define[ClipboardPathRequest, Null]("writeFilePath", "/api/clipboard/writeFilePath", JSONBody, ResponseOptions{}, "POST")
+var PrepareRichText = define[PrepareRichTextRequest, *RichClipboardPrepared]("prepareRichText", "/api/clipboard/prepareRichText", JSONBody, ResponseOptions{}, "POST")
+var CleanupRichText = define[CleanupRichTextRequest, Null]("cleanupRichText", "/api/clipboard/cleanupRichText", JSONBody, ResponseOptions{}, "POST")

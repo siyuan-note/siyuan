@@ -17,29 +17,25 @@
 package api
 
 import (
-	"fmt"
-	"net/http"
 	"os"
-	"strings"
 
 	"github.com/88250/clipboard"
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func readFilePaths(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var readFilePaths = contractHandler(apicontract.ReadClipboardFilePaths, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]apicontract.ClipboardFile] {
 
 	var paths []string
 	if !gulu.OS.IsLinux() { // Linux 端不再支持 `粘贴为纯文本` 时处理文件绝对路径 https://github.com/siyuan-note/siyuan/issues/5825
 		paths, _ = clipboard.ReadFilePaths()
 	}
 
-	data := []map[string]any{}
+	data := []apicontract.ClipboardFile{}
 	for _, path := range paths {
 		fi, err := os.Stat(path)
 		if nil != err {
@@ -47,143 +43,56 @@ func readFilePaths(c *gin.Context) {
 			continue
 		}
 
-		data = append(data, map[string]any{
-			"name":    fi.Name(),
-			"size":    fi.Size(),
-			"isDir":   fi.IsDir(),
-			"updated": fi.ModTime().UnixMilli(),
-			"path":    path,
-		})
+		data = append(data, apicontract.ClipboardFile{Name: fi.Name(), Size: fi.Size(), IsDir: fi.IsDir(), Updated: fi.ModTime().UnixMilli(), Path: path})
 	}
-	ret.Data = data
-}
+	return apicontract.Success(data)
+})
 
-func writeFilePath(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var pathArg string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("path", &pathArg, true, true)) {
-		return
-	}
-
+var writeFilePath = contractHandler(apicontract.WriteClipboardFilePath, func(c *gin.Context, request apicontract.ClipboardPathRequest) apicontract.Response[apicontract.Null] {
+	pathArg := request.Path
 	absPath, err := model.GetAssetAbsPathInBox(pathArg, "")
 	if err != nil {
 		logging.LogErrorf("get asset [%s] abs path failed: %s", pathArg, err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 5000)
 	}
 	if model.IsEncryptedAssetPath(absPath) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(314)
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, model.Conf.Language(314), 5000)
 	}
 
 	if err = model.EnsureAssetPrefixLocal(absPath); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 7000)
 	}
 	if err = util.WriteFilePaths([]string{absPath}); err != nil {
 		logging.LogErrorf("write file path to clipboard failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 5000)
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func prepareRichText(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var prepareRichText = contractHandler(apicontract.PrepareRichText, func(c *gin.Context, request apicontract.PrepareRichTextRequest) apicontract.Response[*apicontract.RichClipboardPrepared] {
+	assets := make([]model.RichClipboardAsset, 0, len(request.Assets))
+	for _, asset := range request.Assets {
+		assets = append(assets, model.RichClipboardAsset{Index: asset.Index, Path: asset.Path, Box: asset.Box})
 	}
-	assetsArg, ok := util.ParseJsonArg[[]any]("assets", arg, ret, true, true)
-	if !ok {
-		return
-	}
-
-	assets := make([]model.RichClipboardAsset, 0, len(assetsArg))
-	for i, rawAsset := range assetsArg {
-		assetArg, typeOK := rawAsset.(map[string]any)
-		if !typeOK {
-			ret.Code = -1
-			ret.Msg = fmt.Sprintf("Field [assets.%d] should be of type [Object]", i)
-			return
-		}
-
-		index, indexOK := assetArg["index"].(float64)
-		path, pathOK := assetArg["path"].(string)
-		if !indexOK || index < 0 || index != float64(int(index)) || !pathOK || strings.TrimSpace(path) == "" {
-			ret.Code = -1
-			ret.Msg = fmt.Sprintf("Invalid rich clipboard asset at index [%d]", i)
-			return
-		}
-
-		box := ""
-		if boxArg, exists := assetArg["box"]; exists {
-			box, typeOK = boxArg.(string)
-			if !typeOK {
-				ret.Code = -1
-				ret.Msg = fmt.Sprintf("Field [assets.%d.box] should be of type [String]", i)
-				return
-			}
-		}
-		assets = append(assets, model.RichClipboardAsset{
-			Index: int(index),
-			Path:  strings.TrimSpace(path),
-			Box:   strings.TrimSpace(box),
-		})
-	}
-
 	prepared, err := model.PrepareRichClipboardAssets(assets)
 	if err != nil {
 		logging.LogWarnf("prepare rich clipboard assets failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[*apicontract.RichClipboardPrepared](-1, err.Error())
 	}
-	ret.Data = prepared
-}
+	if prepared == nil {
+		return apicontract.Success[*apicontract.RichClipboardPrepared](nil)
+	}
+	result := &apicontract.RichClipboardPrepared{Batch: prepared.Batch, Groups: prepared.Groups}
+	if prepared.Assets != nil {
+		result.Assets = make([]apicontract.RichClipboardPreparedAsset, 0, len(prepared.Assets))
+	}
+	for _, asset := range prepared.Assets {
+		result.Assets = append(result.Assets, apicontract.RichClipboardPreparedAsset{Index: asset.Index, Path: asset.Path})
+	}
+	return apicontract.Success(result)
+})
 
-func cleanupRichText(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-	batch, ok := util.ParseJsonArg[string]("batch", arg, ret, true, true)
-	if !ok {
-		return
-	}
-	groupsArg, ok := util.ParseJsonArg[[]any]("groups", arg, ret, true, true)
-	if !ok {
-		return
-	}
-
-	groups := make([]string, 0, len(groupsArg))
-	for i, rawGroup := range groupsArg {
-		group, typeOK := rawGroup.(string)
-		if !typeOK {
-			ret.Code = -1
-			ret.Msg = fmt.Sprintf("Field [groups.%d] should be of type [String]", i)
-			return
-		}
-		groups = append(groups, group)
-	}
-	model.CleanupRichClipboardBatch(batch, groups)
-}
+var cleanupRichText = contractHandler(apicontract.CleanupRichText, func(c *gin.Context, request apicontract.CleanupRichTextRequest) apicontract.Response[apicontract.Null] {
+	model.CleanupRichClipboardBatch(request.Batch, request.Groups)
+	return apicontract.Success(apicontract.Null{})
+})

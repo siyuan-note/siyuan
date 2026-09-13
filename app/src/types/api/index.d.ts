@@ -106,6 +106,12 @@ export type CheckSnapshotData = { "changed": boolean; };
 
 export type ChildBlock = { "content"?: string; "id": string; "markdown"?: string; "subType"?: string; "type": string; };
 
+export type CleanupRichTextRequestInput = { "batch": string; "groups": Array<string>; };
+
+export type ClipboardFile = { "isDir": boolean; "name": string; "path": string; "size": number; "updated": number; };
+
+export type ClipboardPathRequestInput = { "path": string; };
+
 export type CloseNotebookRequestInput = { "notebook": string; };
 
 export type CloudBackup = { "hSize": string; "saveDir": string; "size": number; "updated": string; };
@@ -308,6 +314,8 @@ export type Petal = { "css": string; "disabledInPublish": boolean; "disallowInst
 
 export type PinnedDoc = { "childrenSortMode": number | null; "icon": string; "id": string; "name": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
 
+export type PrepareRichTextRequestInput = { "assets": Array<RichClipboardAssetInput>; };
+
 export type PrependBlockRequestInput = { "data": string; "dataType": string; "parentID": string; };
 
 export type PublishedBlockInfo = { "publishAccessRequired": true; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
@@ -347,6 +355,12 @@ export type RenameTagRequestInput = { "newLabel": string; "oldLabel": string; };
 export type ReorderData = { "changed": boolean; "notebook"?: string; "parentPath"?: string; };
 
 export type ReorderNotebooksRequestInput = { "position"?: string | null; "sourceIDs"?: Array<string> | null; "targetID"?: string | null; };
+
+export type RichClipboardAssetInput = { "box"?: string; "index": number; "path": string; };
+
+export type RichClipboardPrepared = { "assets": Array<RichClipboardPreparedAsset> | null; "batch": string; "groups": Array<string> | null; };
+
+export type RichClipboardPreparedAsset = { "index": number; "path": string; };
 
 export type SearchBlock = { "alias": string; "box": string; "children": Array<SearchBlock | null> | null; "content": string; "count": number; "created": string; "defID": string; "defPath": string; "depth": number; "fcontent": string; "folded": boolean; "hPath": string; "ial": Record<string, string> | null; "id": string; "markdown": string; "memo": string; "name": string; "number"?: string; "parentID": string; "path": string; "refCount": number; "refText": string; "refs": Array<SearchBlock | null> | null; "riffCard": SearchBlockCard | null; "riffCardID": string; "rootID": string; "sort": number; "subType": string; "tag": string; "type": string; "updated": string; };
 
@@ -630,10 +644,6 @@ export type APILegacyPOSTPath =
     "/api/bazaar/uninstallBazaarTheme" |
     "/api/bazaar/uninstallBazaarWidget" |
     "/api/bazaar/updateBazaarPackage" |
-    "/api/clipboard/cleanupRichText" |
-    "/api/clipboard/prepareRichText" |
-    "/api/clipboard/readFilePaths" |
-    "/api/clipboard/writeFilePath" |
     "/api/export/copyExportFile" |
     "/api/export/export2Liandi" |
     "/api/export/exportAsFile" |
@@ -1302,6 +1312,26 @@ export interface APIPOSTRoutes {
         request: Record<string, Array<string | Blob>>;
         response: { "code": 0; "data": BroadcastPublishData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "multipart";
+    };
+    "/api/clipboard/cleanupRichText": {
+        request: CleanupRichTextRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/clipboard/prepareRichText": {
+        request: PrepareRichTextRequestInput;
+        response: { "code": 0; "data": RichClipboardPrepared | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/clipboard/readFilePaths": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<ClipboardFile>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/clipboard/writeFilePath": {
+        request: ClipboardPathRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
     };
     "/api/cloud/getCloudSpace": {
         request: EmptyRequestInput;

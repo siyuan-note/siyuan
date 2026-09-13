@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 )
 
 // BinaryContent 保留文件的原始字节和媒体类型，不经过 JSON 编码。
@@ -30,6 +31,12 @@ func SuccessNoContent[Data any]() Response[Data] {
 
 // Status 只为显式声明的非 JSON 协议使用独立错误状态。
 func (e Endpoint[Request, Data]) Status(r Response[Data]) int {
+	if r.httpStatus != 0 {
+		if e.definition.Output != "" || r.code == 0 || !slices.Contains(e.definition.AdditionalErrorStatuses, r.httpStatus) {
+			panic("endpoint does not declare this JSON error status")
+		}
+		return r.httpStatus
+	}
 	if r.upgrade != nil || r.websocketFailure {
 		if e.definition.Output != WebSocketOutput || e.definition.WebSocket == nil {
 			panic("endpoint does not declare WebSocket output")
@@ -102,6 +109,17 @@ type Response[Data any] struct {
 	noContent        bool
 	upgrade          func(http.ResponseWriter, *http.Request)
 	websocketFailure bool
+	httpStatus       int
+}
+
+// WithHTTPStatus 只为声明过的业务错误保留额外 HTTP 状态。
+func (e Endpoint[Request, Data]) WithHTTPStatus(response Response[Data], status int) Response[Data] {
+	response.httpStatus = status
+	if status == 0 {
+		panic("HTTP status must be explicit")
+	}
+	e.Status(response)
+	return response
 }
 
 func Success[Data any](data Data) Response[Data] { return Response[Data]{data: data} }

@@ -152,6 +152,10 @@ func (b *Bundle) TypeScript(legacy []Route) []byte {
 			if endpoint.NoContent {
 				output.WriteString("        noContent: true;\n")
 			}
+			if len(endpoint.AdditionalErrorStatuses) > 0 {
+				statuses, _ := json.Marshal(endpoint.AdditionalErrorStatuses)
+				fmt.Fprintf(&output, "        additionalErrorStatuses: %s;\n", statuses)
+			}
 			if ws := endpoint.WebSocket; ws != nil {
 				fmt.Fprintf(&output, "        websocket: { incoming: %s; outgoing: %s; failureStatus: %d; };\n", b.typeScript(ws.Incoming), b.typeScript(ws.Outgoing), ws.FailureStatus)
 			}

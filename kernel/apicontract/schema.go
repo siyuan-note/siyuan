@@ -27,16 +27,17 @@ type Schema struct {
 }
 
 type EndpointSchema struct {
-	Method      string           `json:"method"`
-	Path        string           `json:"path"`
-	Handler     string           `json:"handler"`
-	Body        BodyMode         `json:"body"`
-	Request     *Schema          `json:"request"`
-	Response    *Schema          `json:"response"`
-	Output      OutputMode       `json:"output,omitempty"`
-	ErrorStatus int              `json:"errorStatus,omitempty"`
-	NoContent   bool             `json:"noContent,omitempty"`
-	WebSocket   *WebSocketSchema `json:"websocket,omitempty"`
+	Method                  string           `json:"method"`
+	Path                    string           `json:"path"`
+	Handler                 string           `json:"handler"`
+	Body                    BodyMode         `json:"body"`
+	Request                 *Schema          `json:"request"`
+	Response                *Schema          `json:"response"`
+	Output                  OutputMode       `json:"output,omitempty"`
+	ErrorStatus             int              `json:"errorStatus,omitempty"`
+	NoContent               bool             `json:"noContent,omitempty"`
+	WebSocket               *WebSocketSchema `json:"websocket,omitempty"`
+	AdditionalErrorStatuses []int            `json:"additionalErrorStatuses,omitempty"`
 }
 
 type WebSocketSchema struct {
@@ -486,6 +487,11 @@ func BuildBundle() (*Bundle, error) {
 	b := &schemaBuilder{definitions: map[string]*Schema{}, owners: map[string]reflect.Type{}}
 	bundle := &Bundle{Dialect: "https://json-schema.org/draft/2020-12/schema", Definitions: b.definitions}
 	for _, definition := range Definitions() {
+		for _, status := range definition.AdditionalErrorStatuses {
+			if definition.Output != "" || status < 400 || status > 599 {
+				return nil, fmt.Errorf("invalid JSON error status: %s", definition.Name)
+			}
+		}
 		if definition.Output != "" && definition.Output != BinaryOutput && definition.Output != DirectJSONOutput && definition.Output != WebSocketOutput {
 			return nil, fmt.Errorf("unsupported response output: %s", definition.Name)
 		}
@@ -524,8 +530,8 @@ func BuildBundle() (*Bundle, error) {
 		if definition.Output == BinaryOutput && (definition.DataOnError || definition.DataNonNullable) {
 			return nil, fmt.Errorf("binary output cannot use JSON data options: %s", definition.Name)
 		}
-		if definition.Output == BinaryOutput && (definition.ErrorStatus < 201 || definition.ErrorStatus > 599) {
-			return nil, fmt.Errorf("binary output requires a distinct error status: %s", definition.Name)
+		if definition.Output == BinaryOutput && (definition.ErrorStatus < 200 || definition.ErrorStatus > 599) {
+			return nil, fmt.Errorf("binary output requires an explicit error status: %s", definition.Name)
 		}
 		if definition.Request.Kind() != reflect.Struct {
 			return nil, fmt.Errorf("request contract must be a struct: %s", definition.Name)
@@ -580,13 +586,28 @@ func BuildBundle() (*Bundle, error) {
 		response := &Schema{AnyOf: []*Schema{success, failure}}
 		for _, method := range definition.Methods {
 			bundle.Endpoints = append(bundle.Endpoints, EndpointSchema{Method: method, Path: definition.Path, Handler: definition.Name,
-				Body: definition.Body, Request: request, Response: response, Output: definition.Output, ErrorStatus: definition.ErrorStatus, NoContent: definition.NoContent, WebSocket: websocket})
+				Body: definition.Body, Request: request, Response: response, Output: definition.Output, ErrorStatus: definition.ErrorStatus, NoContent: definition.NoContent, WebSocket: websocket,
+				AdditionalErrorStatuses: definition.AdditionalErrorStatuses})
 		}
 	}
 	sort.Slice(bundle.Endpoints, func(i, j int) bool {
 		return bundle.Endpoints[i].Method+bundle.Endpoints[i].Path < bundle.Endpoints[j].Method+bundle.Endpoints[j].Path
 	})
 	return bundle, nil
+}
+
+// ValidateErrorResponse 在原始文件与错误共用 HTTP 状态时，单独验证已知的错误分支。
+func (b *Bundle) ValidateErrorResponse(method, path string, payload []byte) error {
+	var value any
+	if err := json.Unmarshal(payload, &value); err != nil {
+		return err
+	}
+	for _, endpoint := range b.Endpoints {
+		if endpoint.Method == method && endpoint.Path == path {
+			return b.validate(endpoint.Response.AnyOf[1], value, "$")
+		}
+	}
+	return fmt.Errorf("unregistered API contract: %s %s", method, path)
 }
 
 func (b *Bundle) ValidateResponse(method, path string, payload []byte) error {
@@ -632,6 +653,12 @@ func (b *Bundle) ValidateHTTPResponse(method, path string, status int, contentTy
 		}
 		expectedStatus := 200
 		response := endpoint.Response
+		for _, extraStatus := range endpoint.AdditionalErrorStatuses {
+			if status == extraStatus {
+				expectedStatus = status
+				response = endpoint.Response.AnyOf[1]
+			}
+		}
 		if endpoint.WebSocket != nil {
 			if status == 400 && mediaType == "text/plain" {
 				return nil

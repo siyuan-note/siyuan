@@ -26,20 +26,21 @@ const (
 )
 
 type Definition struct {
-	Name            string
-	Path            string
-	Methods         []string
-	Body            BodyMode
-	Request         reflect.Type
-	Data            reflect.Type
-	ErrorCodes      []int
-	ErrorText       bool
-	DataNonNullable bool
-	DataOnError     bool
-	Output          OutputMode
-	ErrorStatus     int
-	NoContent       bool
-	WebSocket       *WebSocketDefinition
+	Name                    string
+	Path                    string
+	Methods                 []string
+	Body                    BodyMode
+	Request                 reflect.Type
+	Data                    reflect.Type
+	ErrorCodes              []int
+	ErrorText               bool
+	DataNonNullable         bool
+	DataOnError             bool
+	Output                  OutputMode
+	ErrorStatus             int
+	NoContent               bool
+	WebSocket               *WebSocketDefinition
+	AdditionalErrorStatuses []int
 }
 
 type Endpoint[Request, Data any] struct {
@@ -49,14 +50,15 @@ type Endpoint[Request, Data any] struct {
 }
 
 type ResponseOptions struct {
-	AdditionalCodes []int
-	Text            bool
-	NonNullable     bool
-	DataOnError     bool
-	Output          OutputMode
-	ErrorStatus     int
-	NoContent       bool
-	WebSocket       *WebSocketDefinition
+	AdditionalCodes         []int
+	Text                    bool
+	NonNullable             bool
+	DataOnError             bool
+	Output                  OutputMode
+	ErrorStatus             int
+	NoContent               bool
+	WebSocket               *WebSocketDefinition
+	AdditionalErrorStatuses []int
 }
 
 var definitions []Definition
@@ -110,7 +112,8 @@ func define[Request, Data any](name, path string, body BodyMode, response Respon
 	d := Definition{Name: name, Path: path, Methods: methods, Body: body,
 		Request: reflect.TypeFor[Request](), Data: reflect.TypeFor[Data](),
 		ErrorCodes: append([]int{-1}, response.AdditionalCodes...), ErrorText: response.Text, DataNonNullable: response.NonNullable, DataOnError: response.DataOnError,
-		Output: response.Output, ErrorStatus: response.ErrorStatus, NoContent: response.NoContent, WebSocket: response.WebSocket}
+		Output: response.Output, ErrorStatus: response.ErrorStatus, NoContent: response.NoContent, WebSocket: response.WebSocket,
+		AdditionalErrorStatuses: append([]int(nil), response.AdditionalErrorStatuses...)}
 	definitions = append(definitions, d)
 	return Endpoint[Request, Data]{definition: d}
 }

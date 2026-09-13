@@ -186,6 +186,10 @@ export type NotebookInfoData = { "boxInfo": NotebookInfo | null; };
 
 export type NotebookPasswordRequestInput = { "password": string; };
 
+export type NotificationData = { "id": string; };
+
+export type NotificationRequestInput = { "msg": string; "timeout"?: number | null; };
+
 export type OpenNotebookRequestInput = { "app"?: string | null; "notebook": string; };
 
 export type OrderedListStartData = { "found": boolean; "start": number; };
@@ -582,8 +586,6 @@ export type APILegacyPOSTPath =
     "/api/network/echo/*path" |
     "/api/network/forwardProxy" |
     "/api/network/proxy" |
-    "/api/notification/pushErrMsg" |
-    "/api/notification/pushMsg" |
     "/api/outline/getDocHeadingNumbers" |
     "/api/outline/getDocOutline" |
     "/api/petal/loadPetals" |
@@ -1306,6 +1308,16 @@ export interface APIPOSTRoutes {
     "/api/notebook/unlockNotebook": {
         request: UnlockNotebookRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/notification/pushErrMsg": {
+        request: NotificationRequestInput;
+        response: { "code": 0; "data": NotificationData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/notification/pushMsg": {
+        request: NotificationRequestInput;
+        response: { "code": 0; "data": NotificationData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/repo/checkSnapshot": {

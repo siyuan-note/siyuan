@@ -361,3 +361,6 @@ var Unzip = define[UnzipRequest, Null]("unzip", "/api/archive/unzip", JSONBody, 
 var AutoSpace = define[TrimmedIDRequest, Null]("autoSpace", "/api/format/autoSpace", JSONBody, ResponseOptions{}, "POST")
 var NetAssets2LocalAssets = define[TrimmedIDRequest, Null]("netAssets2LocalAssets", "/api/format/netAssets2LocalAssets", JSONBody, ResponseOptions{}, "POST")
 var NetImg2LocalAssets = define[NetImageAssetsRequest, Null]("netImg2LocalAssets", "/api/format/netImg2LocalAssets", JSONBody, ResponseOptions{}, "POST")
+
+var PushMsg = define[NotificationRequest, NotificationData]("pushMsg", "/api/notification/pushMsg", JSONBody, ResponseOptions{}, "POST")
+var PushErrMsg = define[NotificationRequest, NotificationData]("pushErrMsg", "/api/notification/pushErrMsg", JSONBody, ResponseOptions{}, "POST")

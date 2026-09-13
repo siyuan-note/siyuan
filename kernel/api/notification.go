@@ -17,63 +17,36 @@
 package api
 
 import (
-	"net/http"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func pushMsg(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var pushMsg = contractHandler(apicontract.PushMsg, func(c *gin.Context, request apicontract.NotificationRequest) apicontract.Response[apicontract.NotificationData] {
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var msg string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("msg", &msg, true, true)) {
-		return
-	}
-
+	msg := request.Msg
 	timeout := 7000
-	if nil != arg["timeout"] {
-		timeout = int(arg["timeout"].(float64))
+	if request.Timeout != nil {
+		timeout = int(*request.Timeout)
 	}
 
 	msg = util.SanitizeHTML(msg)
 	msgId := util.PushMsg(msg, timeout)
 
-	ret.Data = map[string]any{
-		"id": msgId,
-	}
-}
+	return apicontract.Success(apicontract.NotificationData{ID: msgId})
+})
 
-func pushErrMsg(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var pushErrMsg = contractHandler(apicontract.PushErrMsg, func(c *gin.Context, request apicontract.NotificationRequest) apicontract.Response[apicontract.NotificationData] {
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var msg string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("msg", &msg, true, true)) {
-		return
-	}
-
+	msg := request.Msg
 	timeout := 7000
-	if nil != arg["timeout"] {
-		timeout = int(arg["timeout"].(float64))
+	if request.Timeout != nil {
+		timeout = int(*request.Timeout)
 	}
 
 	msg = util.SanitizeHTML(msg)
 	msgId := util.PushErrMsg(msg, timeout)
 
-	ret.Data = map[string]any{
-		"id": msgId,
-	}
-}
+	return apicontract.Success(apicontract.NotificationData{ID: msgId})
+})

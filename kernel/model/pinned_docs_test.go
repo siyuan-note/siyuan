@@ -6,6 +6,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -127,5 +130,38 @@ func TestPinnedDocsClosedAndEncryptedNotebook(t *testing.T) {
 	docs, err = GetPinnedDocs()
 	if err != nil || len(docs) != 0 {
 		t.Fatalf("encrypted document exposed: %+v, %v", docs, err)
+	}
+}
+
+func TestPinnedDocsSupportNotebookRoot(t *testing.T) {
+	f := setupFileOperationTest(t)
+	root := treenode.NewTree(f.box.ID, "/"+f.box.ID+".sy", "/Notebook", "Notebook")
+	if _, err := filesys.WriteTree(root); err != nil {
+		t.Fatal(err)
+	}
+	treenode.UpsertBlockTree(root)
+	t.Cleanup(func() { cache.RemoveTreeData(root.ID); cache.RemoveDocIAL(root.Path) })
+	if err := UpdatePinnedDocs([]string{root.ID}, "pin", "", false); err != nil {
+		t.Fatal(err)
+	}
+	docs, err := GetPinnedDocs()
+	if err != nil || len(docs) != 1 {
+		t.Fatalf("notebook root missing: %+v, %v", docs, err)
+	}
+	if docs[0].ID != root.ID || docs[0].Path != root.Path || docs[0].SubFileCount != 2 {
+		t.Fatalf("incorrect root document or child count: %+v", docs[0])
+	}
+	if isSortableDocument(treenode.GetBlockTree(root.ID)) {
+		t.Fatal("pinning changed source sorting eligibility")
+	}
+	if err := UpdatePinnedDocs([]string{f.childID}, "pin", "", false); err == nil {
+		t.Fatal("non-document block accepted")
+	}
+	if err := UpdatePinnedDocs([]string{root.ID}, "unpin", "", false); err != nil {
+		t.Fatal(err)
+	}
+	docs, err = GetPinnedDocs()
+	if err != nil || len(docs) != 0 {
+		t.Fatalf("notebook root unpin failed: %+v, %v", docs, err)
 	}
 }

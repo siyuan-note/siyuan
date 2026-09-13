@@ -6,6 +6,7 @@ import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 
 interface IPanelHarness {
+    loadChildren(row: unknown, children: unknown, generation: number): Promise<void>;
     drop(ids: string[], x: number, y: number): Promise<void>;
     click(event: unknown): void;
     previewDrop(): void;
@@ -15,11 +16,11 @@ interface IPanelHarness {
     suppressClick?: boolean;
 }
 
-const loadPanel = () => {
+const loadPanel = (fetchCode = 0) => {
     const calls: {kind: string, args: unknown[]}[] = [];
     const record = (kind: string) => async (...args: unknown[]) => {
         calls.push({kind, args});
-        return {code: 0};
+        return {code: kind === "http" ? fetchCode : 0};
     };
     const exports: {PinnedDocs?: {prototype: object}} = {};
     const source = ts.transpileModule(readFileSync(join(__dirname, "PinnedDocs.ts"), "utf8"), {
@@ -80,4 +81,13 @@ test("panel clicks never bubble into the mobile source tree handler", () => {
     panel.click({stopPropagation: () => stopped++, target: {closest: (): Element | null => null}});
     assert.equal(stopped, 2);
     assert.equal(prevented, 1);
+});
+
+test("notebook root expansion requests physical root while documents keep their own paths", async () => {
+    const {panel, calls} = loadPanel(-1);
+    for (const id of ["notebook", "document"]) {
+        await panel.loadChildren({dataset: {notebook: "notebook", nodeId: id, path: `/${id}.sy`}}, {}, 0);
+    }
+    assert.equal(JSON.stringify(calls[0].args[1]), JSON.stringify({notebook: "notebook", path: "/", maxListCount: 0}));
+    assert.equal(JSON.stringify(calls[1].args[1]), JSON.stringify({notebook: "notebook", path: "/document.sy", maxListCount: 0}));
 });

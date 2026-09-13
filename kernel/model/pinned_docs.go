@@ -35,6 +35,11 @@ type PinnedDoc struct {
 
 var pinnedDocsLock sync.Mutex
 
+// 置顶入口允许普通笔记本根文档，不使用同级排序对根文档的排除规则。
+func isPinnableDocument(tree *treenode.BlockTree) bool {
+	return tree != nil && tree.ID == tree.RootID && tree.Type == "d" && !IsEncryptedBox(tree.BoxID)
+}
+
 func readPinnedDocs() (ret pinnedDocsStorage, err error) {
 	ret = pinnedDocsStorage{Version: 1, Docs: []pinnedDocRef{}}
 	data, err := filelock.ReadFile(filepath.Join(util.DataDir, "storage", "pinned-docs.json"))
@@ -113,7 +118,7 @@ func GetPinnedDocs() (ret []PinnedDoc, err error) {
 			ret = append(ret, doc)
 			continue
 		}
-		if !isSortableDocument(bt) {
+		if !isPinnableDocument(bt) {
 			continue
 		}
 		info := box.Stat(bt.Path)
@@ -133,12 +138,16 @@ func GetPinnedDocs() (ret []PinnedDoc, err error) {
 		if file.TitleEmpty {
 			doc.Name = Conf.Language(16)
 		}
-		entries, readErr := os.ReadDir(filepath.Join(util.DataDir, boxID, strings.TrimSuffix(bt.Path, ".sy")))
+		childrenPath := strings.TrimSuffix(bt.Path, ".sy")
+		if ref.ID == boxID {
+			childrenPath = "/"
+		}
+		entries, readErr := os.ReadDir(filepath.Join(util.DataDir, boxID, childrenPath))
 		if readErr != nil && !os.IsNotExist(readErr) {
 			return nil, readErr
 		}
 		for _, entry := range entries {
-			if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".sy") && ast.IsNodeIDPattern(strings.TrimSuffix(entry.Name(), ".sy")) {
+			if !entry.IsDir() && entry.Name() != ref.ID+".sy" && strings.HasSuffix(entry.Name(), ".sy") && ast.IsNodeIDPattern(strings.TrimSuffix(entry.Name(), ".sy")) {
 				doc.SubFileCount++
 			}
 		}
@@ -175,7 +184,7 @@ func UpdatePinnedDocs(ids []string, action, targetID string, after bool) error {
 			continue
 		}
 		bt := treenode.GetBlockTree(id)
-		if !isSortableDocument(bt) || IsEncryptedBox(bt.BoxID) {
+		if !isPinnableDocument(bt) {
 			return fmt.Errorf("document [%s] cannot be pinned", id)
 		}
 		box := Conf.Box(bt.BoxID)

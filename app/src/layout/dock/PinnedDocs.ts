@@ -230,7 +230,8 @@ export class PinnedDocs {
 
     private async loadChildren(row: HTMLElement, children: HTMLElement, generation: number) {
         const response = await fetchSyncPost("/api/filetree/listDocsByPath", {
-            notebook: row.dataset.notebook, path: row.dataset.path,
+            notebook: row.dataset.notebook,
+            path: row.dataset.nodeId === row.dataset.notebook ? "/" : row.dataset.path,
             maxListCount: 0,
         });
         if (response.code !== 0 || generation !== this.generation || !this.expanded.has(row.dataset.pinRow)) {

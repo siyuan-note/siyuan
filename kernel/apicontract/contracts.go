@@ -995,3 +995,9 @@ var SystemSetOIDC = define[SystemOIDCRequest, *SystemOIDC]("setOIDC", "/api/syst
 var SystemSetUILayout = define[SystemUILayoutRequest, Null]("setUILayout", "/api/system/setUILayout", JSONBody, ResponseOptions{}, "POST")
 var SystemSetWorkspaceDir = define[SystemPathRequest, Null]("setWorkspaceDir", "/api/system/setWorkspaceDir", JSONBody, ResponseOptions{}, "POST")
 var SystemAddUIProcess = define[SystemUIProcessRequest, Null]("addUIProcess", "/api/system/uiproc", NoBody, ResponseOptions{EmptyResponseStatuses: []int{200}}, "POST")
+
+var PerformTransactions = define[PerformTransactionsRequest, []*Transaction]("performTransactions", "/api/transactions", JSONBody, ResponseOptions{}, "POST")
+var UndoState = define[TransactionUndoStateRequest, TransactionUndoState]("undoState", "/api/transactions/undoState", JSONBody, ResponseOptions{}, "POST")
+var PerformUndo = define[TransactionHistoryRequest, TransactionHistoryResult]("performUndo", "/api/transactions/undo", JSONBody, ResponseOptions{}, "POST")
+var PerformRedo = define[TransactionHistoryRequest, TransactionHistoryResult]("performRedo", "/api/transactions/redo", JSONBody, ResponseOptions{}, "POST")
+var ClearHistory = define[TransactionClearHistoryRequest, Null]("clearHistory", "/api/transactions/clearHistory", JSONBody, ResponseOptions{}, "POST")

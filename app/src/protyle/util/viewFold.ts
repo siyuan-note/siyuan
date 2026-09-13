@@ -473,7 +473,7 @@ const stripFoldAttribute = (operation: IOperation) => {
     return operation;
 };
 
-const sanitizeOperations = (operations: IOperation[] = []) => operations.flatMap(operation => {
+const sanitizeOperations = (operations: IOperation[] = []) => operations.flatMap<IOperation>(operation => {
     if (operation.action === "foldHeading" || operation.action === "unfoldHeading") {
         return [];
     }
@@ -481,14 +481,14 @@ const sanitizeOperations = (operations: IOperation[] = []) => operations.flatMap
     if (!stripped) {
         return [];
     }
-    if (["update", "insert", "append"].includes(stripped.action) && typeof stripped.data === "string") {
+    if ((stripped.action === "update" || stripped.action === "insert" || stripped.action === "append") && typeof stripped.data === "string") {
         return [{...stripped, data: sanitizeViewFoldHTML(stripped.data)}];
     }
     return [stripped];
 });
 
 const sanitizeOperationHTML = (operations: IOperation[] = []) => operations.map(operation => {
-    if (["update", "insert", "append"].includes(operation.action) && typeof operation.data === "string") {
+    if ((operation.action === "update" || operation.action === "insert" || operation.action === "append") && typeof operation.data === "string") {
         return {...operation, data: sanitizeViewFoldHTML(operation.data)};
     }
     return operation;

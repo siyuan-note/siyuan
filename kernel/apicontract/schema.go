@@ -91,6 +91,9 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if schema, err := transactionPayloadSchema(b, t, input); schema != nil || err != nil {
+		return schema, err
+	}
 	if schema, err := systemVariantSchema(b, t, input); schema != nil || err != nil {
 		return schema, err
 	}

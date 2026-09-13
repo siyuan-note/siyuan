@@ -129,12 +129,13 @@ export const shouldShowAVPasteSkeleton = (rows: unknown[][]) => {
 };
 
 export const compactAVCellOperations = (operations: IOperation[]) => {
-    const cellOperations = operations.filter(operation => operation.action === "updateAttrViewCell");
+    const cellOperations = operations.filter((operation): operation is Extract<IOperation, {action: "updateAttrViewCell"}> =>
+        operation.action === "updateAttrViewCell");
     if (cellOperations.length < 2) {
         return operations;
     }
-    const otherOperations = operations.filter(operation => operation.action !== "updateAttrViewCell");
-    const operationsByAV = new Map<string, IOperation[]>();
+    const otherOperations: IOperation[] = operations.filter(operation => operation.action !== "updateAttrViewCell");
+    const operationsByAV = new Map<string, Extract<IOperation, {action: "updateAttrViewCell"}>[]>();
     cellOperations.forEach(operation => {
         const avID = operation.avID || "";
         const groupedOperations = operationsByAV.get(avID) || [];

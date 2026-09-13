@@ -799,16 +799,16 @@ export const setFreezeColumn = (protyle: IProtyle, blockElement: Element, freeze
     if (freezeColId === oldFreezeColId) {
         return;
     }
-    const operation = {
-        action: "setAttrViewColPin" as TOperation,
+    const operation: Extract<IOperation, {action: "setAttrViewColPin"}> = {
+        action: "setAttrViewColPin",
         id: freezeColId || oldFreezeColId,
         avID: blockElement.getAttribute("data-av-id"),
         data: !!freezeColId,
         blockID: blockElement.getAttribute("data-node-id"),
         viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
     };
-    const undoOperation = {
-        action: "setAttrViewColPin" as TOperation,
+    const undoOperation: Extract<IOperation, {action: "setAttrViewColPin"}> = {
+        action: "setAttrViewColPin",
         id: oldFreezeColId || freezeColId,
         avID: operation.avID,
         data: !!oldFreezeColId,
@@ -834,8 +834,8 @@ const setAVColumnWidths = (protyle: IProtyle, blockElement: HTMLElement, widths:
     if (Object.keys(newWidths).length === 0) {
         return;
     }
-    const operation = {
-        action: "setAttrViewColsWidth" as TOperation,
+    const operation: Extract<IOperation, {action: "setAttrViewColsWidth"}> = {
+        action: "setAttrViewColsWidth",
         avID: blockElement.dataset.avId,
         blockID: blockElement.dataset.nodeId,
         viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),

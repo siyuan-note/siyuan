@@ -1062,7 +1062,10 @@ export class MobileOutline extends Model {
                                 return;
                             }
                             let previousID = deleteResponse.data.doOperations[deleteResponse.data.doOperations.length - 1].id;
-                            deleteResponse.data.undoOperations.find((operationsItem: IOperation, index: number) => {
+                            deleteResponse.data.undoOperations.find((operationsItem, index: number) => {
+                                if (typeof operationsItem.data !== "string") {
+                                    return false;
+                                }
                                 const startIndex = operationsItem.data.indexOf(' data-subtype="h');
                                 if (index > 0 && startIndex > -1 && startIndex < 260 && parseInt(operationsItem.data.substring(startIndex + 16, startIndex + 17)) === currentLevel + 1) {
                                     previousID = deleteResponse.data.undoOperations[index - 1].id;

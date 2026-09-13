@@ -1,9 +1,4 @@
 [
   {"method":"GET","path":"/es/broadcast/subscribe","handler":"broadcastSubscribe"},
-  {"method":"GET","path":"/ws/broadcast","handler":"broadcast"},
-  {"method":"POST","path":"/api/transactions","handler":"performTransactions"},
-  {"method":"POST","path":"/api/transactions/clearHistory","handler":"clearHistory"},
-  {"method":"POST","path":"/api/transactions/redo","handler":"performRedo"},
-  {"method":"POST","path":"/api/transactions/undo","handler":"performUndo"},
-  {"method":"POST","path":"/api/transactions/undoState","handler":"undoState"}
+  {"method":"GET","path":"/ws/broadcast","handler":"broadcast"}
 ]

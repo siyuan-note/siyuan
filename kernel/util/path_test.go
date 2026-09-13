@@ -172,6 +172,10 @@ func TestIsSensitivePathWorkspaceFilesNotBlocked(t *testing.T) {
 
 // TestIsSensitivePathSymlinkWorkspace 验证工作空间父目录为符号链接时的真实路径判定。
 func TestIsSensitivePathSymlinkWorkspace(t *testing.T) {
+	if filepath.Separator == '/' {
+		// 该用例需要系统敏感目录作为父目录，确保工作空间前缀相同的相邻目录仍被拦截。
+		t.Setenv("TMPDIR", "/var/tmp")
+	}
 	realHome, err := filepath.EvalSymlinks(t.TempDir())
 	if err != nil {
 		t.Fatal(err)

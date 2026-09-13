@@ -522,7 +522,6 @@ export class Dock {
     }
 
     private resetDockPosition(show: boolean, preferredSize?: number) {
-        this.layout.element.classList.remove("layout--closing");
         const size = typeof preferredSize === "number" && preferredSize > 0 ? preferredSize : this.getCurrentSize();
         if (this.position === "Left") {
             this.layout.element.setAttribute("style", `${show ? "margin-right: var(--b3-layout-space);" : ""}width:${size}px;opacity:${show ? 1 : 0};min-height:8px;`);
@@ -724,7 +723,6 @@ export class Dock {
                 this.panelVisible = true;
                 this.collapsedPanelSize = "";
                 this.layout.element.classList.remove("fn__none");
-                this.layout.element.classList.add("layout--closing");
                 if (this.position === "Left") {
                     this.layout.element.style.width = "0px";
                     this.layout.element.style.marginRight = "0px";
@@ -903,7 +901,6 @@ export class Dock {
                 });
             }
             // dock 显示
-            this.layout.element.classList.remove("layout--closing");
             if (this.position === "Left") {
                 if (this.layout.element.style.width === "0px") {
                     this.layout.element.style.width = this.getMaxSize() + "px";

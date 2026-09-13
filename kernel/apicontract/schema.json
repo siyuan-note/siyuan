@@ -2065,6 +2065,9 @@
         "formatPainterTip": {
           "type": "boolean"
         },
+        "selectAllIncompleteTip": {
+          "type": "boolean"
+        },
         "selectAllTip": {
           "type": "boolean"
         },

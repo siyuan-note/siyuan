@@ -358,12 +358,13 @@ type BazaarStatusBar struct {
 	MsgDataSyncDisabled                       bool `json:"msgDataSyncDisabled"`
 }
 type BazaarNotifications struct {
-	DocTreeMaxList       bool  `json:"docTreeMaxList"`             // 文档面板展开上限提示，默认启用
-	TagMaxList           bool  `json:"tagMaxList"`                 // 标签面板展开上限提示，默认启用
-	WorkspaceNotSSD      bool  `json:"workspaceNotSSD"`            // 工作空间未放置在固态硬盘警告，默认启用
-	BrowserCompatibility bool  `json:"browserCompatibility"`       // 浏览器兼容性提示，默认启用
-	SelectAllTip         *bool `json:"selectAllTip,omitempty"`     // 编辑器全选提示，nil 时默认启用
-	FormatPainterTip     *bool `json:"formatPainterTip,omitempty"` // 格式刷启用和退出提示，nil 时默认启用
+	DocTreeMaxList         bool  `json:"docTreeMaxList"`                   // 文档面板展开上限提示，默认启用
+	TagMaxList             bool  `json:"tagMaxList"`                       // 标签面板展开上限提示，默认启用
+	WorkspaceNotSSD        bool  `json:"workspaceNotSSD"`                  // 工作空间未放置在固态硬盘警告，默认启用
+	BrowserCompatibility   bool  `json:"browserCompatibility"`             // 浏览器兼容性提示，默认启用
+	SelectAllTip           *bool `json:"selectAllTip,omitempty"`           // 编辑器全选提示，nil 时默认启用
+	SelectAllIncompleteTip *bool `json:"selectAllIncompleteTip,omitempty"` // 编辑器全选不完整提示，nil 时默认启用
+	FormatPainterTip       *bool `json:"formatPainterTip,omitempty"`       // 格式刷启用和退出提示，nil 时默认启用
 }
 type BazaarRatingResult struct {
 	success *BazaarRatingData

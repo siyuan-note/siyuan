@@ -706,6 +706,7 @@ func bazaarNotifications(value *util.Notifications) *apicontract.BazaarNotificat
 	ret.WorkspaceNotSSD = value.WorkspaceNotSSD
 	ret.BrowserCompatibility = value.BrowserCompatibility
 	ret.SelectAllTip = value.SelectAllTip
+	ret.SelectAllIncompleteTip = value.SelectAllIncompleteTip
 	ret.FormatPainterTip = value.FormatPainterTip
 	return ret
 }

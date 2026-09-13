@@ -44,7 +44,8 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
    - Domains: `ld246.com` only in `zh-CN.json`; use `liuyun.io` in all other languages
    - In `zh-TW` localization and the Traditional Chinese user guide, consistently translate the content-model term Block as `區塊`, including compounds (e.g. `子區塊`, `程式碼區塊`, `區塊 ID`); never abbreviate it as `塊`, and count blocks with `個區塊`
    - Translate Block Reference as `區塊引用` and Blockquote as `引述區塊`; preserve non-content-block terms such as `分塊` (data chunks) and `覈取方塊` (Checkbox)
-   - After modifying i18n files, run `python scripts/check-lang-keys.py` to verify key completeness across all language files
+   - Preserve each `_kernel` message's Go format argument positions and verbs from `en.json`; when translation requires a different order, use explicit argument indexes such as `%[4]s` and `%[3]d`. Preserve `%%` for literal percent signs
+   - After modifying i18n files, run `python scripts/check-lang-keys.py` to verify key completeness and kernel format argument compatibility across all language files
 2. **Cross-platform scripting:**
    - Do not assume the current shell is Bash, zsh, or PowerShell. Confirm the shell before using shell-specific syntax; otherwise avoid constructs such as `&&`, heredocs, and `/dev/null`
    - For simple sequences, use separate command calls and set the command working directory instead of chaining `cd` with another command

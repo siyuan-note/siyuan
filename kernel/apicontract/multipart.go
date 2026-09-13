@@ -14,7 +14,7 @@ type MultipartFields struct {
 }
 
 func validateMultipartRequest(t reflect.Type) error {
-	if t == reflect.TypeFor[MultipartFields]() {
+	if t == reflect.TypeFor[MultipartFields]() || t == reflect.TypeFor[ExtensionCopyRequest]() {
 		return nil
 	}
 	for i := 0; i < t.NumField(); i++ {
@@ -43,6 +43,14 @@ func (e Endpoint[Request, Data]) DecodeMultipart(form *multipart.Form) (request 
 		return request, fmt.Errorf("multipart form is missing")
 	}
 	value := reflect.ValueOf(&request).Elem()
+	if value.Type() == reflect.TypeFor[ExtensionCopyRequest]() {
+		decoded, decodeErr := decodeExtensionCopyForm(form)
+		if decodeErr != nil {
+			return request, decodeErr
+		}
+		value.Set(reflect.ValueOf(decoded))
+		return
+	}
 	if value.Type() == reflect.TypeFor[MultipartFields]() {
 		value.Set(reflect.ValueOf(MultipartFields{Value: form.Value, File: form.File}))
 		return

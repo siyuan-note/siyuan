@@ -91,6 +91,12 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if t == reflect.TypeFor[ExtensionCopyRequest]() {
+		if !input {
+			return nil, fmt.Errorf("extension upload fields can only appear in requests")
+		}
+		return extensionCopyRequestSchema(), nil
+	}
 	if t == reflect.TypeFor[PluginServiceContent]() {
 		value, err := b.schema(reflect.TypeFor[JSONValue](), false)
 		if err != nil {

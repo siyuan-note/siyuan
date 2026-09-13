@@ -20255,6 +20255,22 @@
       ],
       "additionalProperties": false
     },
+    "ExtensionCopyData": {
+      "type": "object",
+      "properties": {
+        "md": {
+          "type": "string"
+        },
+        "withMath": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "md",
+        "withMath"
+      ],
+      "additionalProperties": false
+    },
     "FileAnnotationRefRequestInput": {
       "type": "object",
       "properties": {
@@ -66494,6 +66510,147 @@
                   },
                   {
                     "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/extension/copy",
+      "handler": "extensionCopy",
+      "body": "multipart",
+      "request": {
+        "type": "object",
+        "properties": {
+          "assets": {
+            "type": "string"
+          },
+          "clipType": {
+            "type": "string"
+          },
+          "dom": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "notebook": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "dom"
+        ],
+        "additionalProperties": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string",
+                  "format": "binary"
+                }
+              ]
+            },
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ExtensionCopyData"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/ExtensionCopyData"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   }
                 ]
               },

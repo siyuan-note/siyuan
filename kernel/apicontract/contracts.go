@@ -948,3 +948,5 @@ var NetworkWebSocketProxy = define[EmptyRequest, ProxyFailure]("wsProxy", "/ws/n
 var PluginPrivateService = define[EmptyRequest, PluginServiceContent]("pluginPrivateWebServer", "/plugin/private/:name/*path", RawBody, PluginServiceOptions(), "ANY")
 
 var GetDynamicIcon = define[DynamicIconRequest, BinaryContent]("getDynamicIcon", "/api/icon/getDynamicIcon", NoBody, ResponseOptions{Output: BinaryOutput, ErrorStatus: 200, ContentVariants: []HTTPContentVariant{{Status: 200, ContentType: "image/svg+xml"}}, EmptyResponseStatuses: []int{500}}, "GET")
+
+var ExtensionCopy = define[ExtensionCopyRequest, *ExtensionCopyData]("extensionCopy", "/api/extension/copy", MultipartBody, ResponseOptions{DataOnError: true}, "POST")

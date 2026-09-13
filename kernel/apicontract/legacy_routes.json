@@ -5,7 +5,6 @@
   {"method":"GET","path":"/api/system/oidc/callback","handler":"model.OIDCCallback"},
   {"method":"GET","path":"/es/broadcast/subscribe","handler":"broadcastSubscribe"},
   {"method":"GET","path":"/ws/broadcast","handler":"broadcast"},
-  {"method":"POST","path":"/api/extension/copy","handler":"extensionCopy"},
   {"method":"POST","path":"/api/system/addCustomEmoji","handler":"addCustomEmoji"},
   {"method":"POST","path":"/api/system/checkUpdate","handler":"checkUpdate"},
   {"method":"POST","path":"/api/system/checkWorkspaceDir","handler":"checkWorkspaceDir"},

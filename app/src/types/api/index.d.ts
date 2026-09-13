@@ -882,6 +882,8 @@ export type ExportURLData = { "url": string; };
 
 export type ExportZipData = { "zip": string; };
 
+export type ExtensionCopyData = { "md": string; "withMath": boolean; };
+
 export type FileAnnotationRefRequestInput = { "id": string; "notebook"?: string | null; };
 
 export type FilePathData = { "path": string; };
@@ -2110,7 +2112,6 @@ export interface APIGETRoutes {
 }
 
 export type APILegacyPOSTPath =
-    "/api/extension/copy" |
     "/api/system/addCustomEmoji" |
     "/api/system/checkUpdate" |
     "/api/system/checkWorkspaceDir" |
@@ -3448,6 +3449,11 @@ export interface APIPOSTRoutes {
         request: ProcessPDFRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+    };
+    "/api/extension/copy": {
+        request: ({ "assets"?: string; "clipType"?: string; "dom": string; "href"?: string; "notebook"?: string; } & Record<string, string | Blob | Array<string | Blob>>);
+        response: { "code": 0; "data": ExtensionCopyData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | ExtensionCopyData | null; "msg": string; };
+        body: "multipart";
     };
     "/api/file/copyFile": {
         request: CopyFileRequestInput;

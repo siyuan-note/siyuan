@@ -1,5 +1,6 @@
 import {addScript, addScriptSync} from "../protyle/util/addScript";
 import {Constants} from "../constants";
+import {openStandaloneDatabaseItemByURI} from "../protyle/render/av/openStandaloneDatabaseItem";
 import {onMessage} from "./util/onMessage";
 import {genUUID} from "../util/genID";
 import {
@@ -310,6 +311,9 @@ window.hideKeyboardToolbar = hideKeyboardToolbarByApp;
 window.openFileByURL = (openURL) => {
     const blockInfo = parseSiYuanUriInfo(openURL);
     if (blockInfo != null) {
+        if (openStandaloneDatabaseItemByURI(siyuanApp, blockInfo)) {
+            return true;
+        }
         if (blockInfo.avItemID) {
             queueAVLocateRequest(blockInfo.id, {
                 itemID: blockInfo.avItemID,

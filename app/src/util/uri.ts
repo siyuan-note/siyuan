@@ -14,6 +14,7 @@ import {isBazaarAvailable} from "./bazaarAvailability";
 
 import type {App} from "../index";
 import {openDatabaseItem} from "../protyle/render/av/openDatabaseItem";
+import {openStandaloneDatabaseItemByURI} from "../protyle/render/av/openStandaloneDatabaseItem";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 
 const bazaarTypes = new Set<TBazaarType>(["plugins", "themes", "icons", "templates", "widgets"]);
@@ -25,29 +26,32 @@ const processSiYuanUriBlocks = (app: App, uriObj: URL): boolean => {
         window.siyuan.editorIsFullscreen = blockInfo.fullscreen;
         fetchPost("/api/block/checkBlockExist", { id }, existResponse => {
             if (existResponse.data) {
-                checkFold(id, (zoomIn) => {
-                    if (blockInfo.avItemID) {
-                        void openDatabaseItem(app, {
-                            databaseBlockID: id,
-                            itemID: blockInfo.avItemID,
-                            viewID: blockInfo.avViewID,
-                            groupID: blockInfo.avGroupID,
+                if (!openStandaloneDatabaseItemByURI(app, blockInfo)) {
+                    checkFold(id, (zoomIn) => {
+                        if (blockInfo.avItemID) {
+                            void openDatabaseItem(app, {
+                                databaseBlockID: id,
+                                itemID: blockInfo.avItemID,
+                                viewID: blockInfo.avViewID,
+                                groupID: blockInfo.avGroupID,
+                            });
+                            return;
+                        }
+                        /// #if !MOBILE
+                        openFileById({
+                            app,
+                            id,
+                            action: (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] :
+                                [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+                            zoomIn: zoomIn || focus,
                         });
-                        return;
-                    }
-                    /// #if !MOBILE
-                    openFileById({
-                        app,
-                        id,
-                        action: (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] :
+                        /// #else
+                        openMobileFileById(app, id, (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] :
                             [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-                        zoomIn: zoomIn || focus,
+                        "start");
+                        /// #endif
                     });
-                    /// #else
-                    openMobileFileById(app, id, (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] :
-                        [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL], "start");
-                    /// #endif
-                });
+                }
                 /// #if !BROWSER
                 ipcRenderer.send(Constants.SIYUAN_CMD, "show");
                 /// #endif

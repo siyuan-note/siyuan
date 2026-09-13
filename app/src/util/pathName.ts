@@ -80,6 +80,7 @@ export const parseSiYuanUriInfo = (uri: URL | string | null | undefined): ISiYua
                 avItemID,
                 avViewID,
                 avGroupID,
+                avStandalone: uriObj.searchParams.get("avStandalone") === "1",
             };
         }
         return null;

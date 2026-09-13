@@ -1,4 +1,5 @@
 import {Constants} from "./constants";
+import {openStandaloneDatabaseItemByURI} from "./protyle/render/av/openStandaloneDatabaseItem";
 /// #if BROWSER
 import "./util/iosWindowControls";
 /// #endif
@@ -355,6 +356,9 @@ const siyuanApp = new App();
 window.openFileByURL = (openURL) => {
     const blockInfo = parseSiYuanUriInfo(openURL);
     if (blockInfo != null) {
+        if (openStandaloneDatabaseItemByURI(siyuanApp, blockInfo)) {
+            return true;
+        }
         if (blockInfo.avItemID) {
             queueAVLocateRequest(blockInfo.id, {
                 itemID: blockInfo.avItemID,

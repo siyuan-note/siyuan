@@ -1737,4 +1737,5 @@ interface ISiYuanUriBlockInfo {
     avItemID?: string;
     avViewID?: string;
     avGroupID?: string;
+    avStandalone?: boolean;
 }

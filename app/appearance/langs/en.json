@@ -1,4 +1,12 @@
 {
+	"tableBlock": "Table block",
+	"databaseBlock": "Database block",
+	"widgetBlock": "Widget block",
+	"videoBlock": "Video block",
+	"audioBlock": "Audio block",
+	"documentBlock": "Document block",
+	"htmlBlock": "HTML block",
+	"iframeBlock": "IFrame block",
 	"pinnedDocs": "Pinned",
 	"pinDoc": "Pin",
 	"unpinDoc": "Unpin",

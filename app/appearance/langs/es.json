@@ -1,4 +1,12 @@
 {
+	"tableBlock": "Bloque de tabla",
+	"databaseBlock": "Bloque de base de datos",
+	"widgetBlock": "Bloque de widget",
+	"videoBlock": "Bloque de vídeo",
+	"audioBlock": "Bloque de audio",
+	"documentBlock": "Bloque de documento",
+	"htmlBlock": "Bloque HTML",
+	"iframeBlock": "Bloque IFrame",
 	"pinnedDocs": "Fijados",
 	"pinDoc": "Fijar",
 	"unpinDoc": "Desfijar",

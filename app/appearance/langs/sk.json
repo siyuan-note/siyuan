@@ -1,4 +1,12 @@
 {
+	"tableBlock": "Blok tabuľky",
+	"databaseBlock": "Blok databázy",
+	"widgetBlock": "Blok miniaplikácie",
+	"videoBlock": "Blok videa",
+	"audioBlock": "Blok zvuku",
+	"documentBlock": "Blok dokumentu",
+	"htmlBlock": "Blok HTML",
+	"iframeBlock": "Blok IFrame",
 	"pinnedDocs": "Pripnuté",
 	"pinDoc": "Pripnúť",
 	"unpinDoc": "Odopnúť",

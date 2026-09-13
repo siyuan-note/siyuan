@@ -1,4 +1,12 @@
 {
+	"tableBlock": "Блок таблицы",
+	"databaseBlock": "Блок базы данных",
+	"widgetBlock": "Блок виджета",
+	"videoBlock": "Блок видео",
+	"audioBlock": "Блок аудио",
+	"documentBlock": "Блок документа",
+	"htmlBlock": "Блок HTML",
+	"iframeBlock": "Блок IFrame",
 	"pinnedDocs": "Закреплённые",
 	"pinDoc": "Закрепить",
 	"unpinDoc": "Открепить",

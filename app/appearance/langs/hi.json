@@ -1,4 +1,12 @@
 {
+	"tableBlock": "तालिका ब्लॉक",
+	"databaseBlock": "डेटाबेस ब्लॉक",
+	"widgetBlock": "विजेट ब्लॉक",
+	"videoBlock": "वीडियो ब्लॉक",
+	"audioBlock": "ऑडियो ब्लॉक",
+	"documentBlock": "दस्तावेज़ ब्लॉक",
+	"htmlBlock": "HTML ब्लॉक",
+	"iframeBlock": "IFrame ब्लॉक",
 	"pinnedDocs": "पिन किए गए",
 	"pinDoc": "पिन करें",
 	"unpinDoc": "अनपिन करें",

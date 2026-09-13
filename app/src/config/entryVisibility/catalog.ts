@@ -228,7 +228,7 @@ const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), tr
         node("heading6", lang("heading6")),
         ...(!multi ? [node("superBlock", lang("superBlock"))] : []),
         node("code", lang("code")),
-        node("table", lang("table")),
+        node("table", lang("tableBlock")),
         node("line", lang("line")),
         node("math", lang("math")),
         node("includeSublists", lang("includeSublists"), true, [
@@ -295,7 +295,7 @@ const gutterHeight = () => node("height", lang("height"), true, [
     node("default", lang("default")),
 ]);
 
-const gutterTable = () => node("table", lang("table"), true, [
+const gutterTable = () => node("table", lang("tableBlock"), true, [
     node("useDefaultWidth", lang("useDefaultWidth")),
     node("distributeAllColWidths", lang("distributeAllColWidths")),
     node("useDefaultWidthForAllColumns", lang("useDefaultWidthForAllColumns")),
@@ -395,7 +395,7 @@ const gutterSingle = () => [
     separator("separator_table"),
     gutterTable(),
     separator("separator_exportCSV"),
-    node("database", lang("database"), true, [
+    node("database", lang("databaseBlock"), true, [
         node("exportCSV", () => `${window.siyuan.languages.export} CSV`),
         node("showDatabaseInFolder", lang("showInFolder")),
     ]),
@@ -423,7 +423,7 @@ const gutterSingle = () => [
         node("openBy", lang("openBy")),
     ]),
     separator("separator_html"),
-    node("html", literal("HTML")),
+    node("html", lang("htmlBlock")),
     separator("separator_blockEmbed"),
     node("blockEmbed", lang("blockEmbed"), true, [
         node("refresh", lang("refresh")),

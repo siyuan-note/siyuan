@@ -1,4 +1,12 @@
 {
+	"tableBlock": "บล็อกตาราง",
+	"databaseBlock": "บล็อกฐานข้อมูล",
+	"widgetBlock": "บล็อกวิดเจ็ต",
+	"videoBlock": "บล็อกวิดีโอ",
+	"audioBlock": "บล็อกเสียง",
+	"documentBlock": "บล็อกเอกสาร",
+	"htmlBlock": "บล็อก HTML",
+	"iframeBlock": "บล็อก IFrame",
 	"pinnedDocs": "ปักหมุด",
 	"pinDoc": "ปักหมุด",
 	"unpinDoc": "เลิกปักหมุด",

@@ -160,15 +160,17 @@ const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
     NodeTabs: "tabs",
     NodeTabItem: "tabItem",
     NodeSuperBlock: "superBlock",
-    NodeTable: "table",
+    NodeTable: "tableBlock",
+    NodeHTMLBlock: "htmlBlock",
+    NodeIFrame: "iframeBlock",
     NodeCodeBlock: "code",
     NodeMathBlock: "math",
     NodeBlockQueryEmbed: "blockEmbed",
     NodeThematicBreak: "line",
-    NodeVideo: "video",
-    NodeAudio: "audio",
-    NodeWidget: "widget",
-    NodeAttributeView: "database",
+    NodeVideo: "videoBlock",
+    NodeAudio: "audioBlock",
+    NodeWidget: "widgetBlock",
+    NodeAttributeView: "databaseBlock",
     NodeCustomBlock: "custom",
 };
 
@@ -1114,7 +1116,7 @@ export class Gutter {
         }, {
             id: "table",
             icon: "iconTable",
-            label: window.siyuan.languages.table,
+            label: window.siyuan.languages.tableBlock,
             accelerator: window.siyuan.config.keymap.editor.insert.table.custom,
             type: "table",
         }, {
@@ -2447,7 +2449,7 @@ export class Gutter {
                     id: "table",
                     type: "submenu",
                     icon: "iconTable",
-                    label: window.siyuan.languages.table,
+                    label: window.siyuan.languages.tableBlock,
                     submenu: tableMenu(protyle, nodeElement, cellElement as HTMLTableCellElement, range,
                         true).menus as IMenu[]
                 }).element);
@@ -2493,7 +2495,7 @@ export class Gutter {
                     id: "database",
                     type: "submenu",
                     icon: "iconDatabase",
-                    label: window.siyuan.languages.database,
+                    label: window.siyuan.languages.databaseBlock,
                     submenu,
                 }).element);
             }
@@ -2520,7 +2522,7 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "html",
                 icon: "iconHTML5",
-                label: "HTML",
+                label: window.siyuan.languages.htmlBlock,
                 click() {
                     protyle.toolbar.showRender(protyle, nodeElement);
                 }

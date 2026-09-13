@@ -1,4 +1,12 @@
 {
+	"tableBlock": "표 블록",
+	"databaseBlock": "데이터베이스 블록",
+	"widgetBlock": "위젯 블록",
+	"videoBlock": "동영상 블록",
+	"audioBlock": "오디오 블록",
+	"documentBlock": "문서 블록",
+	"htmlBlock": "HTML 블록",
+	"iframeBlock": "IFrame 블록",
 	"pinnedDocs": "고정됨",
 	"pinDoc": "고정",
 	"unpinDoc": "고정 해제",

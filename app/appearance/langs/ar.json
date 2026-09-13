@@ -1,4 +1,12 @@
 {
+	"tableBlock": "كتلة جدول",
+	"databaseBlock": "كتلة قاعدة بيانات",
+	"widgetBlock": "كتلة عنصر واجهة",
+	"videoBlock": "كتلة فيديو",
+	"audioBlock": "كتلة صوت",
+	"documentBlock": "كتلة مستند",
+	"htmlBlock": "كتلة HTML",
+	"iframeBlock": "كتلة IFrame",
 	"pinnedDocs": "المثبتة",
 	"pinDoc": "تثبيت",
 	"unpinDoc": "إلغاء التثبيت",

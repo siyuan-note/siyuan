@@ -30,7 +30,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconTable"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            ${window.siyuan.languages.table}
+            ${window.siyuan.languages.tableBlock}
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="table" type="checkbox"${config.types.table ? " checked" : ""}>
@@ -79,7 +79,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconHTML5"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            HTML
+            ${window.siyuan.languages.htmlBlock}
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="htmlBlock" type="checkbox"${config.types.htmlBlock ? " checked" : ""}>
@@ -88,7 +88,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconDatabase"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            ${window.siyuan.languages.database}
+            ${window.siyuan.languages.databaseBlock}
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="databaseBlock" type="checkbox"${config.types.databaseBlock ? " checked" : ""}>
@@ -106,7 +106,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconVideo"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            ${window.siyuan.languages.video}
+            ${window.siyuan.languages.videoBlock}
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="videoBlock" type="checkbox"${config.types.videoBlock ? " checked" : ""}>
@@ -115,7 +115,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconRecord"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            ${window.siyuan.languages.audio}
+            ${window.siyuan.languages.audioBlock}
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="audioBlock" type="checkbox"${config.types.audioBlock ? " checked" : ""}>
@@ -124,7 +124,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconGlobe"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            IFrame
+            ${window.siyuan.languages.iframeBlock}
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="iframeBlock" type="checkbox"${config.types.iframeBlock ? " checked" : ""}>
@@ -133,7 +133,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconBoth"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            ${window.siyuan.languages.widget}
+            ${window.siyuan.languages.widgetBlock}
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="widgetBlock" type="checkbox"${config.types.widgetBlock ? " checked" : ""}>
@@ -191,7 +191,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconFile"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            ${window.siyuan.languages.doc}
+            ${window.siyuan.languages.documentBlock}
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="document" type="checkbox"${config.types.document ? " checked" : ""}>

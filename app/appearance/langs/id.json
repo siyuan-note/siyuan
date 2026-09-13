@@ -1,4 +1,12 @@
 {
+	"tableBlock": "Blok tabel",
+	"databaseBlock": "Blok basis data",
+	"widgetBlock": "Blok widget",
+	"videoBlock": "Blok video",
+	"audioBlock": "Blok audio",
+	"documentBlock": "Blok dokumen",
+	"htmlBlock": "Blok HTML",
+	"iframeBlock": "Blok IFrame",
 	"pinnedDocs": "Disematkan",
 	"pinDoc": "Sematkan",
 	"unpinDoc": "Lepaskan",

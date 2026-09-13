@@ -957,6 +957,9 @@ test("configuration labels distinguish block scopes and size controls", () => {
                     entryDock: "Dock",
                     height: "Height",
                     entryDocumentStatistics: "Document statistics",
+                    tableBlock: "Table block",
+                    databaseBlock: "Database block",
+                    htmlBlock: "HTML block",
                 },
             },
         },
@@ -977,6 +980,11 @@ test("configuration labels distinguish block scopes and size controls", () => {
         assert.equal(getEntryCatalogNode("inline.image.height.heightInput")?.label(), "Pixel height");
         assert.equal(getEntryCatalogNode("inline.image.height.heightDrag")?.label(), "Percentage height");
         assert.equal(getEntryCatalogNode("document.more.docInfo")?.label(), "Document statistics");
+        assert.equal(getEntryCatalogNode("gutter.single.table")?.label(), "Table block");
+        assert.equal(getEntryCatalogNode("gutter.single.database")?.label(), "Database block");
+        assert.equal(getEntryCatalogNode("gutter.single.html")?.label(), "HTML block");
+        assert.equal(getEntryCatalogNode("gutter.single.turnInto.table")?.label(), "Table block");
+        assert.equal(getEntryCatalogNode("gutter.multi.turnInto.table")?.label(), "Table block");
     } finally {
         if (windowDescriptor) {
             Object.defineProperty(globalThis, "window", windowDescriptor);

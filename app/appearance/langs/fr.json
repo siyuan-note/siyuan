@@ -1,4 +1,12 @@
 {
+	"tableBlock": "Bloc de tableau",
+	"databaseBlock": "Bloc de base de données",
+	"widgetBlock": "Bloc de widget",
+	"videoBlock": "Bloc vidéo",
+	"audioBlock": "Bloc audio",
+	"documentBlock": "Bloc de document",
+	"htmlBlock": "Bloc HTML",
+	"iframeBlock": "Bloc IFrame",
 	"pinnedDocs": "Épinglés",
 	"pinDoc": "Épingler",
 	"unpinDoc": "Détacher",

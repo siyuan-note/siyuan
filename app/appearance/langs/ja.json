@@ -1,4 +1,12 @@
 {
+	"tableBlock": "表ブロック",
+	"databaseBlock": "データベースブロック",
+	"widgetBlock": "ウィジェットブロック",
+	"videoBlock": "動画ブロック",
+	"audioBlock": "音声ブロック",
+	"documentBlock": "ドキュメントブロック",
+	"htmlBlock": "HTML ブロック",
+	"iframeBlock": "IFrame ブロック",
 	"pinnedDocs": "ピン留め",
 	"pinDoc": "ピン留め",
 	"unpinDoc": "ピン留めを解除",

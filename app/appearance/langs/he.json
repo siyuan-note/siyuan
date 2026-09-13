@@ -1,4 +1,12 @@
 {
+	"tableBlock": "בלוק טבלה",
+	"databaseBlock": "בלוק מסד נתונים",
+	"widgetBlock": "בלוק וידג׳ט",
+	"videoBlock": "בלוק וידאו",
+	"audioBlock": "בלוק שמע",
+	"documentBlock": "בלוק מסמך",
+	"htmlBlock": "בלוק HTML",
+	"iframeBlock": "בלוק IFrame",
 	"pinnedDocs": "מוצמדים",
 	"pinDoc": "הצמדה",
 	"unpinDoc": "ביטול הצמדה",

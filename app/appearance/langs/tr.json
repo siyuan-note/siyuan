@@ -1,4 +1,12 @@
 {
+	"tableBlock": "Tablo bloğu",
+	"databaseBlock": "Veritabanı bloğu",
+	"widgetBlock": "Widget bloğu",
+	"videoBlock": "Video bloğu",
+	"audioBlock": "Ses bloğu",
+	"documentBlock": "Belge bloğu",
+	"htmlBlock": "HTML bloğu",
+	"iframeBlock": "IFrame bloğu",
 	"pinnedDocs": "Sabitlenenler",
 	"pinDoc": "Sabitle",
 	"unpinDoc": "Sabitlemeyi kaldır",

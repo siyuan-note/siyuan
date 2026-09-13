@@ -20,6 +20,19 @@ type Route struct {
 
 func (r Route) Key() string { return r.Method + " " + r.Path }
 
+// ExpandMethods 按路由器的 Any 注册行为展开实际 HTTP 方法。
+func ExpandMethods(methods []string) []string {
+	var result []string
+	for _, method := range methods {
+		if method == "ANY" {
+			result = append(result, "GET", "POST", "PUT", "PATCH", "HEAD", "OPTIONS", "DELETE", "CONNECT", "TRACE")
+		} else {
+			result = append(result, method)
+		}
+	}
+	return result
+}
+
 // ReadRoutes 读取实际路由及处理函数声明，防止契约与独立登记表各自漂移。
 func ReadRoutes(apiDir string) ([]Route, map[string]string, error) {
 	var routes []Route

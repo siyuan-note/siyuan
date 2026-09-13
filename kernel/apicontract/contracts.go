@@ -41,8 +41,10 @@ type Definition struct {
 	NoContent               bool
 	WebSocket               *WebSocketDefinition
 	SSE                     *SSEDefinition
+	Proxy                   *ProxyDefinition
 	ContentVariants         []HTTPContentVariant
 	FastJSON                bool
+	EmptyResponseStatuses   []int
 	AdditionalErrorStatuses []int
 }
 
@@ -62,8 +64,10 @@ type ResponseOptions struct {
 	NoContent               bool
 	WebSocket               *WebSocketDefinition
 	SSE                     *SSEDefinition
+	Proxy                   *ProxyDefinition
 	ContentVariants         []HTTPContentVariant
 	FastJSON                bool
+	EmptyResponseStatuses   []int
 	AdditionalErrorStatuses []int
 }
 
@@ -118,8 +122,9 @@ func define[Request, Data any](name, path string, body BodyMode, response Respon
 	d := Definition{Name: name, Path: path, Methods: methods, Body: body,
 		Request: reflect.TypeFor[Request](), Data: reflect.TypeFor[Data](),
 		ErrorCodes: append([]int{-1}, response.AdditionalCodes...), ErrorText: response.Text, DataNonNullable: response.NonNullable, DataOnError: response.DataOnError,
-		Output: response.Output, ErrorStatus: response.ErrorStatus, NoContent: response.NoContent, WebSocket: response.WebSocket, SSE: response.SSE,
-		AdditionalErrorStatuses: append([]int(nil), response.AdditionalErrorStatuses...), ContentVariants: append([]HTTPContentVariant(nil), response.ContentVariants...), FastJSON: response.FastJSON}
+		Output: response.Output, ErrorStatus: response.ErrorStatus, NoContent: response.NoContent, WebSocket: response.WebSocket, SSE: response.SSE, Proxy: response.Proxy,
+		AdditionalErrorStatuses: append([]int(nil), response.AdditionalErrorStatuses...), ContentVariants: append([]HTTPContentVariant(nil), response.ContentVariants...), FastJSON: response.FastJSON,
+		EmptyResponseStatuses: append([]int(nil), response.EmptyResponseStatuses...)}
 	definitions = append(definitions, d)
 	return Endpoint[Request, Data]{definition: d}
 }
@@ -846,42 +851,6 @@ var LogoutCloudUser = define[EmptyRequest, Null]("logoutCloudUser", "/api/settin
 var Login2faCloudUser = define[SettingLogin2faRequest, Login2faEnvelope]("login2faCloudUser", "/api/setting/login2faCloudUser", JSONBody, ResponseOptions{Output: DirectJSONOutput}, "POST")
 var SetEmoji = define[SettingEmojiRequest, Null]("setEmoji", "/api/setting/setEmoji", JSONBody, ResponseOptions{}, "POST")
 
-var AIChatGPT = define[AIMessageRequest, string]("chatGPT", "/api/ai/chatGPT", JSONBody, ResponseOptions{}, "POST")
-var AIChatGPTWithAction = define[AIActionRequest, string]("chatGPTWithAction", "/api/ai/chatGPTWithAction", JSONBody, ResponseOptions{}, "POST")
-var AIListEditorActions = define[EmptyRequest, []*AIEditorAction]("lsAIEditorActions", "/api/ai/editor/lsActions", NoBody, ResponseOptions{}, "POST")
-var AISaveEditorAction = define[AIEditorActionSaveRequest, *AIEditorAction]("saveAIEditorAction", "/api/ai/editor/saveAction", JSONBody, ResponseOptions{}, "POST")
-var AIRemoveEditorAction = define[AIEditorActionIDRequest, Null]("removeAIEditorAction", "/api/ai/editor/removeAction", JSONBody, ResponseOptions{}, "POST")
-var AITestModel = define[AIModelRequest, AIModelTestData]("testModel", "/api/ai/testModel", JSONBody, ResponseOptions{}, "POST")
-var AITestEmbeddingModel = define[EmptyRequest, AIEmbeddingTestData]("testEmbeddingModel", "/api/ai/testEmbeddingModel", NoBody, ResponseOptions{}, "POST")
-var AITestRerankModel = define[EmptyRequest, AIRerankTestData]("testRerankModel", "/api/ai/testRerankModel", NoBody, ResponseOptions{}, "POST")
-var AIListModels = define[AIProviderRequest, AIModelsData]("listModels", "/api/ai/listModels", JSONBody, ResponseOptions{}, "POST")
-var AIGetEmbeddingStat = define[EmptyRequest, *AIEmbeddingStat]("embeddingStat", "/api/ai/embeddingStat", NoBody, ResponseOptions{}, "POST")
-var AIGetMCPStatus = define[EmptyRequest, []AIMCPStatus]("mcpStatus", "/api/ai/mcpStatus", NoBody, ResponseOptions{}, "POST")
-var AIGetMCPEnvironment = define[EmptyRequest, AIMCPEnvironmentData]("mcpEnvironmentVariables", "/api/ai/mcpEnvironmentVariables", NoBody, ResponseOptions{}, "POST")
-var AIMCPOAuthAuthorize = define[AIMCPIDRequest, Null]("mcpOAuthAuthorize", "/api/ai/mcpOAuthAuthorize", JSONBody, ResponseOptions{}, "POST")
-var AIMCPOAuthDisconnect = define[AIMCPIDRequest, Null]("mcpOAuthDisconnect", "/api/ai/mcpOAuthDisconnect", JSONBody, ResponseOptions{}, "POST")
-var AIReindexEmbedding = define[EmptyRequest, Null]("reindexEmbedding", "/api/ai/reindexEmbedding", NoBody, ResponseOptions{}, "POST")
-var AIRetryFailedEmbedding = define[EmptyRequest, Null]("retryFailedEmbedding", "/api/ai/retryFailedEmbedding", NoBody, ResponseOptions{}, "POST")
-var AIAgentConfirm = define[AIConfirmRequest, Null]("agentChatConfirm", "/api/ai/agent/confirm", StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409}}, "POST")
-var AIAgentSetPermission = define[AIPermissionRequest, AIPermissionData]("setAgentSessionPermission", "/api/ai/agent/setPermission", StructJSONBody, ResponseOptions{}, "POST")
-var AIAgentQuestion = define[AIQuestionRequest, Null]("agentChatQuestion", "/api/ai/agent/question", StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409}}, "POST")
-var AIAgentBrowserCapabilityResult = define[AIBrowserCapabilityResultRequest, Null]("agentChatBrowserCapabilityResult", "/api/ai/agent/browserCapabilityResult", StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409}}, "POST")
-var AIListCapabilities = define[EmptyRequest, []AICapabilityManifest]("lsCapabilities", "/api/ai/lsCapabilities", NoBody, ResponseOptions{}, "POST")
-var AIAgentTitle = define[AITitleRequest, string]("agentChatTitle", "/api/ai/agent/title", StructJSONBody, ResponseOptions{}, "POST")
-var AIListSessions = define[AISessionsRequest, AISessionList]("lsSessions", "/api/ai/agent/lsSessions", StructJSONBody, ResponseOptions{}, "POST")
-var AIRemoveSession = define[AISessionIDRequest, Null]("removeSession", "/api/ai/agent/removeSession", StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409, 500}}, "POST")
-var AIListSkills = define[EmptyRequest, []AISkillInfo]("lsSkills", "/api/ai/agent/lsSkills", NoBody, ResponseOptions{}, "POST")
-var AIListUserSkills = define[EmptyRequest, []AIUserSkillInfo]("lsUserSkills", "/api/ai/agent/lsUserSkills", NoBody, ResponseOptions{}, "POST")
-var AIGetSkill = define[AISkillNameRequest, AISkillData]("getSkill", "/api/ai/agent/getSkill", StructJSONBody, ResponseOptions{}, "POST")
-var AISaveSkill = define[AISkillSaveRequest, Null]("saveSkill", "/api/ai/agent/saveSkill", StructJSONBody, ResponseOptions{}, "POST")
-var AIRemoveSkill = define[AISkillNameRequest, Null]("removeSkill", "/api/ai/agent/removeSkill", StructJSONBody, ResponseOptions{}, "POST")
-var AIRenameSkill = define[AISkillRenameRequest, Null]("renameSkill", "/api/ai/agent/renameSkill", StructJSONBody, ResponseOptions{}, "POST")
-var AIEditorChat = define[AIEditorChatRequest, Null]("aiEditorChat", "/api/ai/editor/chat", StructJSONBody, aiEditorSSEOptions(), "POST")
-var AIAgentChat = define[AIAgentChatRequest, Null]("agentChat", "/api/ai/agent/chat", StructJSONBody, aiAgentSSEOptions(), "POST")
-var AIMCPOAuthCallback = define[EmptyRequest, BinaryContent]("mcpOAuthCallback", "/api/ai/mcp/oauth/callback/:flowID", NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}, HTTPContentVariant{Status: 403, ContentType: "text/plain"}), "GET")
-var AIGetSession = define[AISessionIDRequest, *AISession]("getSession", "/api/ai/agent/getSession", StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{500}}, "POST")
-var AISaveSession = define[AISession, AISessionSaveData]("saveSession", "/api/ai/agent/saveSession", StructJSONBody, ResponseOptions{DataOnError: true, AdditionalErrorStatuses: []int{400, 409, 500}}, "POST")
-
 var RemoveUnusedAttributeView = define[RemoveUnusedAttributeViewRequest, AVIDData]("removeUnusedAttributeView", "/api/av/removeUnusedAttributeView", JSONBody, ResponseOptions{}, "POST")
 var RemoveUnusedAttributeViews = define[EmptyRequest, AVPathsData]("removeUnusedAttributeViews", "/api/av/removeUnusedAttributeViews", NoBody, ResponseOptions{}, "POST")
 var GetUnusedAttributeViews = define[EmptyRequest, []*AssetUnusedItem]("getUnusedAttributeViews", "/api/av/getUnusedAttributeViews", NoBody, ResponseOptions{}, "POST")
@@ -929,3 +898,40 @@ var GetAttributeViewBacklinks = define[GetAttributeViewBacklinksRequest, *AVAttr
 var SetAttributeViewBlockAttr = define[SetAttributeViewBlockAttrRequest, AVValueData]("setAttributeViewBlockAttr", "/api/av/setAttributeViewBlockAttr", JSONBody, ResponseOptions{}, "POST")
 var BatchSetAttributeViewBlockAttrs = define[BatchSetAttributeViewBlockAttrsRequest, Null]("batchSetAttributeViewBlockAttrs", "/api/av/batchSetAttributeViewBlockAttrs", JSONBody, ResponseOptions{}, "POST")
 var GetAttributeViewRowSort = define[GetAttributeViewRowSortRequest, AVRowSortPreview]("getAttributeViewRowSort", "/api/av/getAttributeViewRowSort", StructJSONBody, ResponseOptions{}, "POST")
+
+var AIChatGPT = define[AIMessageRequest, string]("chatGPT", "/api/ai/chatGPT", JSONBody, ResponseOptions{}, "POST")
+var AIChatGPTWithAction = define[AIActionRequest, string]("chatGPTWithAction", "/api/ai/chatGPTWithAction", JSONBody, ResponseOptions{}, "POST")
+var AIListEditorActions = define[EmptyRequest, []*AIEditorAction]("lsAIEditorActions", "/api/ai/editor/lsActions", NoBody, ResponseOptions{}, "POST")
+var AISaveEditorAction = define[AIEditorActionSaveRequest, *AIEditorAction]("saveAIEditorAction", "/api/ai/editor/saveAction", JSONBody, ResponseOptions{}, "POST")
+var AIRemoveEditorAction = define[AIEditorActionIDRequest, Null]("removeAIEditorAction", "/api/ai/editor/removeAction", JSONBody, ResponseOptions{}, "POST")
+var AITestModel = define[AIModelRequest, AIModelTestData]("testModel", "/api/ai/testModel", JSONBody, ResponseOptions{}, "POST")
+var AITestEmbeddingModel = define[EmptyRequest, AIEmbeddingTestData]("testEmbeddingModel", "/api/ai/testEmbeddingModel", NoBody, ResponseOptions{}, "POST")
+var AITestRerankModel = define[EmptyRequest, AIRerankTestData]("testRerankModel", "/api/ai/testRerankModel", NoBody, ResponseOptions{}, "POST")
+var AIListModels = define[AIProviderRequest, AIModelsData]("listModels", "/api/ai/listModels", JSONBody, ResponseOptions{}, "POST")
+var AIGetEmbeddingStat = define[EmptyRequest, *AIEmbeddingStat]("embeddingStat", "/api/ai/embeddingStat", NoBody, ResponseOptions{}, "POST")
+var AIGetMCPStatus = define[EmptyRequest, []AIMCPStatus]("mcpStatus", "/api/ai/mcpStatus", NoBody, ResponseOptions{}, "POST")
+var AIGetMCPEnvironment = define[EmptyRequest, AIMCPEnvironmentData]("mcpEnvironmentVariables", "/api/ai/mcpEnvironmentVariables", NoBody, ResponseOptions{}, "POST")
+var AIMCPOAuthAuthorize = define[AIMCPIDRequest, Null]("mcpOAuthAuthorize", "/api/ai/mcpOAuthAuthorize", JSONBody, ResponseOptions{}, "POST")
+var AIMCPOAuthDisconnect = define[AIMCPIDRequest, Null]("mcpOAuthDisconnect", "/api/ai/mcpOAuthDisconnect", JSONBody, ResponseOptions{}, "POST")
+var AIReindexEmbedding = define[EmptyRequest, Null]("reindexEmbedding", "/api/ai/reindexEmbedding", NoBody, ResponseOptions{}, "POST")
+var AIRetryFailedEmbedding = define[EmptyRequest, Null]("retryFailedEmbedding", "/api/ai/retryFailedEmbedding", NoBody, ResponseOptions{}, "POST")
+var AIAgentConfirm = define[AIConfirmRequest, Null]("agentChatConfirm", "/api/ai/agent/confirm", StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409}}, "POST")
+var AIAgentSetPermission = define[AIPermissionRequest, AIPermissionData]("setAgentSessionPermission", "/api/ai/agent/setPermission", StructJSONBody, ResponseOptions{}, "POST")
+var AIAgentQuestion = define[AIQuestionRequest, Null]("agentChatQuestion", "/api/ai/agent/question", StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409}}, "POST")
+var AIAgentBrowserCapabilityResult = define[AIBrowserCapabilityResultRequest, Null]("agentChatBrowserCapabilityResult", "/api/ai/agent/browserCapabilityResult", StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409}}, "POST")
+var AIListCapabilities = define[EmptyRequest, []AICapabilityManifest]("lsCapabilities", "/api/ai/lsCapabilities", NoBody, ResponseOptions{}, "POST")
+var AIAgentTitle = define[AITitleRequest, string]("agentChatTitle", "/api/ai/agent/title", StructJSONBody, ResponseOptions{}, "POST")
+var AIListSessions = define[AISessionsRequest, AISessionList]("lsSessions", "/api/ai/agent/lsSessions", StructJSONBody, ResponseOptions{}, "POST")
+var AIRemoveSession = define[AISessionIDRequest, Null]("removeSession", "/api/ai/agent/removeSession", StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409, 500}}, "POST")
+var AIListSkills = define[EmptyRequest, []AISkillInfo]("lsSkills", "/api/ai/agent/lsSkills", NoBody, ResponseOptions{}, "POST")
+var AIListUserSkills = define[EmptyRequest, []AIUserSkillInfo]("lsUserSkills", "/api/ai/agent/lsUserSkills", NoBody, ResponseOptions{}, "POST")
+var AIGetSkill = define[AISkillNameRequest, AISkillData]("getSkill", "/api/ai/agent/getSkill", StructJSONBody, ResponseOptions{}, "POST")
+var AISaveSkill = define[AISkillSaveRequest, Null]("saveSkill", "/api/ai/agent/saveSkill", StructJSONBody, ResponseOptions{}, "POST")
+var AIRemoveSkill = define[AISkillNameRequest, Null]("removeSkill", "/api/ai/agent/removeSkill", StructJSONBody, ResponseOptions{}, "POST")
+var AIRenameSkill = define[AISkillRenameRequest, Null]("renameSkill", "/api/ai/agent/renameSkill", StructJSONBody, ResponseOptions{}, "POST")
+
+var AIEditorChat = define[AIEditorChatRequest, Null]("aiEditorChat", "/api/ai/editor/chat", StructJSONBody, aiEditorSSEOptions(), "POST")
+var AIAgentChat = define[AIAgentChatRequest, Null]("agentChat", "/api/ai/agent/chat", StructJSONBody, aiAgentSSEOptions(), "POST")
+var AIMCPOAuthCallback = define[EmptyRequest, BinaryContent]("mcpOAuthCallback", "/api/ai/mcp/oauth/callback/:flowID", NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}, HTTPContentVariant{Status: 403, ContentType: "text/plain"}), "GET")
+var AIGetSession = define[AISessionIDRequest, *AISession]("getSession", "/api/ai/agent/getSession", StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{500}}, "POST")
+var AISaveSession = define[AISession, AISessionSaveData]("saveSession", "/api/ai/agent/saveSession", StructJSONBody, ResponseOptions{DataOnError: true, AdditionalErrorStatuses: []int{400, 409, 500}}, "POST")

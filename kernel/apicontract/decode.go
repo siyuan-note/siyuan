@@ -12,7 +12,7 @@ import (
 
 // Decode 按精确的 JSON 字段名绑定请求，缺失、null 和兼容转换由字段声明控制。
 func (e Endpoint[Request, Data]) Decode(reader io.Reader) (request Request, err error) {
-	if e.definition.Body == NoBody {
+	if e.definition.Body == NoBody || e.definition.Body == RawBody {
 		return
 	}
 	if reader == nil {

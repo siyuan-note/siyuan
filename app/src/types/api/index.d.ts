@@ -4921,6 +4921,8 @@ export interface APIFormData<Request> extends FormData {
 }
 type APIRequestArgs<C extends APIContract> = C["body"] extends "multipart" | "form"
     ? [data: APIFormData<C["request"]>]
+    : C["body"] extends "raw"
+    ? [data?: JSONValue | FormData | null]
     : C["body"] extends "json" | "structJSON"
     ? [data: C["request"]]
     : [data?: C["request"] | null];
@@ -4931,8 +4933,12 @@ export type APICallbackResponse<R> = R extends {code: infer C extends number}
 
 type APIDirectCallbackResponse<R> = R extends {code: number} ? APICallbackResponse<R> : R;
 
+type APIEmptyResponse<C> = C extends {emptyResponseStatuses: ReadonlyArray<number>} ? "" : never;
+type APIPostEmptyResponse<C> = C extends {emptyResponseStatuses: infer S extends ReadonlyArray<number>}
+    ? Exclude<S[number], 401 | 403 | 404> extends never ? never : "" : never;
+
 type APIPostTail<C extends APIContract> = [
-    cb?: (response: C extends {output: "binary"} ? JSONValue : C extends {output: "directJSON"} ? APIDirectCallbackResponse<C["response"]> | (C extends {noContent: true} ? "" : never) : C extends {output: "sse"} ? string | APICallbackResponse<C["response"]> : APICallbackResponse<C["response"]>) => void,
+    cb?: (response: (C extends {output: "binary" | "proxy"} ? JSONValue : C extends {output: "directJSON"} ? APIDirectCallbackResponse<C["response"]> | (C extends {noContent: true} ? "" : never) : C extends {output: "sse"} ? string | APICallbackResponse<C["response"]> : APICallbackResponse<C["response"]>) | APIPostEmptyResponse<C>) => void,
     headers?: Record<string, string>,
     failCallback?: (response: APIFetchFailure) => void,
     signal?: AbortSignal,
@@ -4964,13 +4970,13 @@ export type FetchSyncPost<Legacy = APILegacyResponse> = <Path extends string>(
         : Path extends APILegacyPOSTPath ? [data?: any, ...tail: APISyncTail]
         : string extends Path ? [data?: any, ...tail: APISyncTail] : never
 ) => Promise<Path extends keyof APIPOSTRoutes
-    ? APIPOSTRoutes[Path] extends {output: "binary"} ? JSONValue : APIPOSTRoutes[Path]["response"] | APITransportError
+    ? APIPOSTRoutes[Path] extends {output: "binary" | "proxy"} ? JSONValue : APIPOSTRoutes[Path]["response"] | APITransportError
     : Legacy>;
 
 export type FetchGet<Legacy = APILegacyResponse | string> = <Path extends string>(
     url: Path,
     ...args: Path extends keyof APIGETRoutes
-        ? [cb: (response: APIGETRoutes[Path]["response"] | (APIGETRoutes[Path] extends {output: "websocket"} ? string : never)) => void]
+        ? [cb: (response: APIGETRoutes[Path] extends {output: "binary" | "proxy"} ? JSONValue : APIGETRoutes[Path]["response"] | APIEmptyResponse<APIGETRoutes[Path]> | (APIGETRoutes[Path] extends {output: "websocket" | "sse"} ? string : never)) => void]
         : Path extends keyof APIPOSTRoutes ? never
         : [cb: (response: Legacy) => void]
 ) => void;

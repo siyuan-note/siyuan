@@ -94,7 +94,9 @@ SQL 查询契约保留成功信封顶层的 `limit` 和 `truncated`。`SuccessSQ
 
 ## 文件上传请求
 
-SSE 接口通过 `SSEOptions` 和 `SSEEvent` 声明各事件名称及载荷。`StreamSSE` 在请求上下文内执行原有流生命周期，取消与清理仍在该生命周期内完成。HTTP 校验区分 `text/event-stream` 与声明过的流建立前 JSON 错误，`ValidateSSEEvent` 单独校验各事件的 JSON 载荷。生成声明包含事件类型；缓冲式 fetch 辅助函数仍将完整流作为文本返回。
+SSE 接口通过 `SSEOptions` 和 `SSEEvent` 声明各事件名称及载荷。`StreamSSE` 在请求上下文内执行原有流生命周期，取消与清理仍在该生命周期内完成。HTTP 校验区分 `text/event-stream` 与声明过的流建立前 JSON 错误，`ValidateSSEEvent` 单独校验各事件的 JSON 载荷。生成声明包含事件类型。`fetchPost` 和 `fetchGet` 将完整流缓冲为文本，`fetchSyncPost` 仍解析 JSON，不用于读取事件流。
+
+允许空 HTTP 响应的端点通过 `EmptyResponseStatuses` 列出允许状态，并返回 `EmptyHTTPResponse`；其他响应继续使用各自声明的结构。`RedirectHTTPContent` 保留标准重定向状态、Location 响应头和转义后的 HTML 正文。`RawBody` 将未读取的原始请求流留给协议处理函数。`ProxyOptions` 区分 HTTP 字节、EventSource 字节和 WebSocket 帧，保留上游状态，不将其解释为内核业务错误码。代理准入错误与中间件信封分别校验。`ANY` 注册仍按一条记录检查覆盖率，生成元数据时展开为路由器的九种 HTTP 方法。响应校验保留 JSON 数字精度，包括超过浮点范围的证书整数，不改变请求侧的数字转换。
 
 页面响应通过 `HTTPContentOptions` 声明允许的 HTTP 状态与媒体类型组合，通过 `SuccessHTTPContent` 保留原始字节，复用既有二进制传输并单独处理 JSON 中间件错误。`FastJSON` 为指定的大体量响应保留快速 JSON 编码，不改变有类型载荷及响应信封；编码失败时仍回退到标准编码器。
 

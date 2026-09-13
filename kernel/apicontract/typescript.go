@@ -127,6 +127,10 @@ func (b *Bundle) TypeScript(legacy []Route) []byte {
 	var output strings.Builder
 	output.WriteString("// 此文件由内核契约生成，请运行 pnpm run api:generate 更新。\n\n")
 	for _, name := range sortedKeys(b.Definitions) {
+		if name == "UnknownTransactionAction" {
+			fmt.Fprintf(&output, "export type %s = string & { readonly __unknownTransactionAction: unique symbol };\n\n", name)
+			continue
+		}
 		fmt.Fprintf(&output, "export type %s = %s;\n\n", name, b.typeScript(b.Definitions[name]))
 	}
 	for _, method := range []string{"GET", "POST"} {
@@ -161,6 +165,10 @@ func (b *Bundle) TypeScript(legacy []Route) []byte {
 			if endpoint.NoContent {
 				output.WriteString("        noContent: true;\n")
 			}
+			if len(endpoint.EmptyResponseStatuses) > 0 {
+				statuses, _ := json.Marshal(endpoint.EmptyResponseStatuses)
+				fmt.Fprintf(&output, "        emptyResponseStatuses: %s;\n", statuses)
+			}
 			if len(endpoint.AdditionalErrorStatuses) > 0 {
 				statuses, _ := json.Marshal(endpoint.AdditionalErrorStatuses)
 				fmt.Fprintf(&output, "        additionalErrorStatuses: %s;\n", statuses)
@@ -178,6 +186,10 @@ func (b *Bundle) TypeScript(legacy []Route) []byte {
 					fmt.Fprintf(&output, "%s: %s; ", quote(name), b.typeScript(sse.Events[name]))
 				}
 				output.WriteString("}; };\n")
+			}
+			if proxy := endpoint.Proxy; proxy != nil {
+				protocol, _ := json.Marshal(proxy)
+				fmt.Fprintf(&output, "        proxy: %s;\n", protocol)
 			}
 			output.WriteString("    };\n")
 		}
@@ -216,6 +228,8 @@ export interface APIFormData<Request> extends FormData {
 }
 type APIRequestArgs<C extends APIContract> = C["body"] extends "multipart" | "form"
     ? [data: APIFormData<C["request"]>]
+    : C["body"] extends "raw"
+    ? [data?: JSONValue | FormData | null]
     : C["body"] extends "json" | "structJSON"
     ? [data: C["request"]]
     : [data?: C["request"] | null];
@@ -226,8 +240,12 @@ export type APICallbackResponse<R> = R extends {code: infer C extends number}
 
 type APIDirectCallbackResponse<R> = R extends {code: number} ? APICallbackResponse<R> : R;
 
+type APIEmptyResponse<C> = C extends {emptyResponseStatuses: ReadonlyArray<number>} ? "" : never;
+type APIPostEmptyResponse<C> = C extends {emptyResponseStatuses: infer S extends ReadonlyArray<number>}
+    ? Exclude<S[number], 401 | 403 | 404> extends never ? never : "" : never;
+
 type APIPostTail<C extends APIContract> = [
-    cb?: (response: C extends {output: "binary"} ? JSONValue : C extends {output: "directJSON"} ? APIDirectCallbackResponse<C["response"]> | (C extends {noContent: true} ? "" : never) : C extends {output: "sse"} ? string | APICallbackResponse<C["response"]> : APICallbackResponse<C["response"]>) => void,
+    cb?: (response: (C extends {output: "binary" | "proxy"} ? JSONValue : C extends {output: "directJSON"} ? APIDirectCallbackResponse<C["response"]> | (C extends {noContent: true} ? "" : never) : C extends {output: "sse"} ? string | APICallbackResponse<C["response"]> : APICallbackResponse<C["response"]>) | APIPostEmptyResponse<C>) => void,
     headers?: Record<string, string>,
     failCallback?: (response: APIFetchFailure) => void,
     signal?: AbortSignal,
@@ -259,13 +277,13 @@ export type FetchSyncPost<Legacy = APILegacyResponse> = <Path extends string>(
         : Path extends APILegacyPOSTPath ? [data?: any, ...tail: APISyncTail]
         : string extends Path ? [data?: any, ...tail: APISyncTail] : never
 ) => Promise<Path extends keyof APIPOSTRoutes
-    ? APIPOSTRoutes[Path] extends {output: "binary"} ? JSONValue : APIPOSTRoutes[Path]["response"] | APITransportError
+    ? APIPOSTRoutes[Path] extends {output: "binary" | "proxy"} ? JSONValue : APIPOSTRoutes[Path]["response"] | APITransportError
     : Legacy>;
 
 export type FetchGet<Legacy = APILegacyResponse | string> = <Path extends string>(
     url: Path,
     ...args: Path extends keyof APIGETRoutes
-        ? [cb: (response: APIGETRoutes[Path]["response"] | (APIGETRoutes[Path] extends {output: "websocket"} ? string : never)) => void]
+        ? [cb: (response: APIGETRoutes[Path] extends {output: "binary" | "proxy"} ? JSONValue : APIGETRoutes[Path]["response"] | APIEmptyResponse<APIGETRoutes[Path]> | (APIGETRoutes[Path] extends {output: "websocket" | "sse"} ? string : never)) => void]
         : Path extends keyof APIPOSTRoutes ? never
         : [cb: (response: Legacy) => void]
 ) => void;

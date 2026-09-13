@@ -334,6 +334,8 @@ export type RemoveBookmarkRequestInput = { "bookmark": string; };
 
 export type RemoveCriterionRequestInput = { "name": string; };
 
+export type RemoveShorthandsRequestInput = { "ids": Array<string>; };
+
 export type RemoveTagRequestInput = { "label": string; };
 
 export type RenameBookmarkRequestInput = { "newBookmark": string; "oldBookmark": string; };
@@ -381,6 +383,16 @@ export type SetPetalPublishEnabledRequestInput = { "enabled": boolean; "packageN
 export type SetSnapshotMemoRequestInput = { "id": string; "memo": string; };
 
 export type SetSnippetRequestInput = { "snippets": Array<SnippetInput>; };
+
+export type Shorthand = { "hCreated": string; "oId": string; "shorthandContent": string; "shorthandDesc": string; "shorthandFrom": number; "shorthandMd": string; "shorthandTitle": string; "shorthandURL": string; };
+
+export type ShorthandPage = { "pagination": ShorthandPagination; "shorthands": Array<Shorthand | null>; };
+
+export type ShorthandPagination = { "paginationPageCount": number; "paginationPageNums": Array<number> | null; "paginationRecordCount": number; };
+
+export type ShorthandsData = { "code": number; "data": ShorthandPage; "msg": string; };
+
+export type ShorthandsRequestInput = { "page": number; };
 
 export type Snippet = { "content": string; "disabledInPublish": boolean; "enabled": boolean; "id": string; "name": string; "type": string; };
 
@@ -730,9 +742,6 @@ export type APILegacyPOSTPath =
     "/api/import/importZipMd" |
     "/api/import/startObsidianVaultAnalysis" |
     "/api/import/startObsidianVaultImport" |
-    "/api/inbox/getShorthand" |
-    "/api/inbox/getShorthands" |
-    "/api/inbox/removeShorthands" |
     "/api/network/echo" |
     "/api/network/echo/*path" |
     "/api/network/forwardProxy" |
@@ -1347,6 +1356,21 @@ export interface APIPOSTRoutes {
     "/api/history/searchHistory": {
         request: SearchHistoryRequestInput;
         response: { "code": 0; "data": SearchHistoryData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/inbox/getShorthand": {
+        request: TrimmedIDRequestInput;
+        response: { "code": 0; "data": Shorthand | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/inbox/getShorthands": {
+        request: ShorthandsRequestInput;
+        response: { "code": 0; "data": ShorthandsData | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/inbox/removeShorthands": {
+        request: RemoveShorthandsRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/lute/copyStdMarkdown": {

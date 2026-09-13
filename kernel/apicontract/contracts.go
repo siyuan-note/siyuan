@@ -438,3 +438,7 @@ var BroadcastPublish = define[MultipartFields, BroadcastPublishData]("broadcastP
 
 var SetCloudReminder = define[CloudReminderRequest, Null]("setCloudReminder", "/api/cloud/setCloudReminder", JSONBody, ResponseOptions{}, "POST")
 var GetCloudSpace = define[EmptyRequest, CloudSpaceData]("getCloudSpace", "/api/cloud/getCloudSpace", NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+var RemoveShorthands = define[RemoveShorthandsRequest, Null]("removeShorthands", "/api/inbox/removeShorthands", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetShorthand = define[TrimmedIDRequest, *Shorthand]("getShorthand", "/api/inbox/getShorthand", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetShorthands = define[ShorthandsRequest, *ShorthandsData]("getShorthands", "/api/inbox/getShorthands", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")

@@ -5743,6 +5743,21 @@
       ],
       "additionalProperties": false
     },
+    "RemoveShorthandsRequestInput": {
+      "type": "object",
+      "properties": {
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "ids"
+      ],
+      "additionalProperties": false
+    },
     "RemoveTagRequestInput": {
       "type": "object",
       "properties": {
@@ -6586,6 +6601,134 @@
       },
       "required": [
         "snippets"
+      ],
+      "additionalProperties": false
+    },
+    "Shorthand": {
+      "type": "object",
+      "properties": {
+        "hCreated": {
+          "type": "string"
+        },
+        "oId": {
+          "type": "string"
+        },
+        "shorthandContent": {
+          "type": "string"
+        },
+        "shorthandDesc": {
+          "type": "string"
+        },
+        "shorthandFrom": {
+          "type": "integer"
+        },
+        "shorthandMd": {
+          "type": "string"
+        },
+        "shorthandTitle": {
+          "type": "string"
+        },
+        "shorthandURL": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "hCreated",
+        "oId",
+        "shorthandContent",
+        "shorthandDesc",
+        "shorthandFrom",
+        "shorthandMd",
+        "shorthandTitle",
+        "shorthandURL"
+      ],
+      "additionalProperties": false
+    },
+    "ShorthandPage": {
+      "type": "object",
+      "properties": {
+        "pagination": {
+          "$ref": "#/$defs/ShorthandPagination"
+        },
+        "shorthands": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Shorthand"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "pagination",
+        "shorthands"
+      ],
+      "additionalProperties": false
+    },
+    "ShorthandPagination": {
+      "type": "object",
+      "properties": {
+        "paginationPageCount": {
+          "type": "integer"
+        },
+        "paginationPageNums": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "paginationRecordCount": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "paginationPageCount",
+        "paginationPageNums",
+        "paginationRecordCount"
+      ],
+      "additionalProperties": false
+    },
+    "ShorthandsData": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/$defs/ShorthandPage"
+        },
+        "msg": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "data",
+        "msg"
+      ],
+      "additionalProperties": false
+    },
+    "ShorthandsRequestInput": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "page"
       ],
       "additionalProperties": false
     },
@@ -14770,6 +14913,248 @@
                 "type": "integer",
                 "enum": [
                   -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/inbox/getShorthand",
+      "handler": "getShorthand",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/TrimmedIDRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Shorthand"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/inbox/getShorthands",
+      "handler": "getShorthands",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/ShorthandsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/ShorthandsData"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/inbox/removeShorthands",
+      "handler": "removeShorthands",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/RemoveShorthandsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
                 ]
               },
               "data": {

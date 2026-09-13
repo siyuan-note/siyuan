@@ -1302,9 +1302,10 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
 
     // 当前焦点范围先处理快捷键，未命中再按固定顺序处理通用操作。
-    // 面板通过活动样式记录焦点，点击后按键事件的目标可能是 body。
+    // 按键目标为 body 时，优先使用活动面板，否则回退到活动窗口的当前页签。
     const shortcutTarget = event.target === document.body ?
-        document.querySelector<HTMLElement>(".layout__tab--active") || document.body : event.target as HTMLElement;
+        document.querySelector<HTMLElement>(".layout__tab--active") || getActiveTab()?.panelElement || document.body :
+        event.target as HTMLElement;
     if (!shortcutTarget.closest("input, textarea, .b3-menu, .av__panel, .av__mask")) {
         if (shortcutTarget.closest(".protyle") && editKeydown(app, event)) {
             return;

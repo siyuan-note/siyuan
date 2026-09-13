@@ -2366,6 +2366,8 @@ const createBootWindow = () => {
         resizable: false,
         icon: path.join(appDir, "stage", "icon-large.png"),
         webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false,
             webSecurity: false,
         },
     });

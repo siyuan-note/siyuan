@@ -1,0 +1,105 @@
+// SiYuan - From thought to insight, with agents
+// Copyright (c) 2020-present, b3log.org
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+package server
+
+import (
+	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
+)
+
+func TestAppearanceFileBoundaries(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	originalPath, originalMode, originalConf := util.AppearancePath, util.Mode, model.Conf
+	util.AppearancePath, util.Mode = filepath.Join(t.TempDir(), "conf", "appearance"), "prod"
+	model.Conf = model.NewAppConf()
+	model.Conf.AccessAuthCode = "test-password"
+	t.Cleanup(func() {
+		util.AppearancePath, util.Mode, model.Conf = originalPath, originalMode, originalConf
+	})
+	outside := t.TempDir()
+	write := func(name, content string) {
+		t.Helper()
+		if err := os.MkdirAll(filepath.Dir(name), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(name, []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, name := range []string{"themes/local/theme.css", "icons/local/icon.js", "fonts/font.woff"} {
+		write(filepath.Join(util.AppearancePath, name), "resource")
+	}
+	write(filepath.Join(util.AppearancePath, "langs/en.json"), `{"fallback":"English"}`)
+	write(filepath.Join(util.AppearancePath, "langs/fr.json"), `{"label":"French"}`)
+	write(filepath.Join(filepath.Dir(util.AppearancePath), "conf.json"), `{"secret":"credential"}`)
+	write(filepath.Join(outside, "theme.css"), "resource")
+	write(filepath.Join(outside, "icon.js"), "resource")
+	engine := gin.New()
+	serveAppearance(engine)
+	check := func(path string, status int, body string) {
+		t.Helper()
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest("GET", "/appearance/"+path, nil))
+		if recorder.Code != status || (body != "" && !strings.Contains(recorder.Body.String(), body)) || strings.Contains(recorder.Body.String(), "credential") {
+			t.Fatalf("%s: status=%d body=%q, want %d %q", path, recorder.Code, recorder.Body.String(), status, body)
+		}
+	}
+	check("themes/local/theme.css", 200, "resource")
+	check("icons/local/icon.js", 200, "resource")
+	check("fonts/font.woff", 200, "resource")
+	check("langs/fr.json", 200, `"fallback":"English"`)
+	check("langs/missing.json", 200, "English")
+	check("themes/local/theme.js", 200, "")
+	check("themes/local/", 404, "")
+	check("../conf.json", 403, "")
+	link := func(target, name string) {
+		t.Helper()
+		if err := os.Symlink(target, filepath.Join(util.AppearancePath, name)); err != nil {
+			t.Skipf("symlinks unavailable: %s", err)
+		}
+	}
+	link(outside, "themes/linked")
+	link(outside, "icons/linked")
+	check("themes/linked/theme.css", 200, "resource")
+	check("icons/linked/icon.js", 200, "resource")
+	link("theme.css", "themes/local/alias.css")
+	check("themes/local/alias.css", 200, "resource")
+	link(filepath.Dir(util.AppearancePath), "themes/local/escape")
+	link(filepath.Join(filepath.Dir(util.AppearancePath), "conf.json"), "langs/leak.json")
+	link(filepath.Join(filepath.Dir(util.AppearancePath), "conf.json"), "themes/local/theme.js")
+	check("themes/local/escape/conf.json", 403, "")
+	check("themes/local/escape/theme.js", 403, "")
+	check("themes/local/theme.js", 403, "")
+	check("langs/leak.json", 403, "")
+	if err := os.Symlink(filepath.Dir(util.AppearancePath), filepath.Join(outside, "escape")); err != nil {
+		t.Fatal(err)
+	}
+	check("themes/linked/escape/conf.json", 403, "")
+	if err := os.Remove(filepath.Join(util.AppearancePath, "langs/en.json")); err != nil {
+		t.Fatal(err)
+	}
+	link(filepath.Join(filepath.Dir(util.AppearancePath), "conf.json"), "langs/en.json")
+	check("langs/fr.json", 403, "")
+	check("langs/en.json", 403, "")
+}

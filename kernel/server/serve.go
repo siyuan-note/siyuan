@@ -740,9 +740,9 @@ func serveAppearance(ginServer *gin.Engine) {
 		appearancePath = filepath.Join(util.WorkingDir, "appearance")
 	}
 	siyuan.GET("/appearance/*filepath", func(c *gin.Context) {
-		filePath := filepath.Join(appearancePath, strings.TrimPrefix(c.Request.URL.Path, "/appearance/"))
-		if !gulu.File.IsSubPath(appearancePath, filePath) {
-			c.Status(http.StatusUnauthorized)
+		filePath, status := resolveAppearanceFile(appearancePath, strings.TrimPrefix(c.Request.URL.Path, "/appearance/"))
+		if status != 0 {
+			c.Status(status)
 			return
 		}
 
@@ -762,7 +762,11 @@ func serveAppearance(ginServer *gin.Engine) {
 			if "zh-CN" != lang && "en" != lang {
 				// 多语言配置缺失项使用对应英文配置项补齐 https://github.com/siyuan-note/siyuan/issues/5322
 
-				enUSFilePath := filepath.Join(appearancePath, "langs", "en.json")
+				enUSFilePath, status := resolveAppearanceFile(appearancePath, "langs/en.json")
+				if status != 0 {
+					c.Status(status)
+					return
+				}
 				enUSData, err := os.ReadFile(enUSFilePath)
 				if err != nil {
 					logging.LogErrorf("read en_US.json [%s] failed: %s", enUSFilePath, err)

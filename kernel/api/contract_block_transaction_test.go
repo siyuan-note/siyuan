@@ -69,6 +69,18 @@ func TestAPIContractHeadingTransactions(t *testing.T) {
 	util.HistoryDir = filepath.Join(root, "history")
 	util.DBPath, util.HistoryDBPath, util.AssetContentDBPath, util.BlockTreeDBPath = filepath.Join(root, "siyuan.db"), filepath.Join(root, "history.db"), filepath.Join(root, "asset_content.db"), filepath.Join(root, "blocktree.db")
 	model.Conf = model.NewAppConf()
+	model.Conf.Lang = "en"
+	langData, err := os.ReadFile(filepath.Join("..", "..", "app", "appearance", "langs", "en.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var language struct {
+		Time map[string]any `json:"_time"`
+	}
+	if err = json.Unmarshal(langData, &language); err != nil {
+		t.Fatal(err)
+	}
+	util.TimeLangs[model.Conf.Lang] = language.Time
 	model.Conf.FileTree, model.Conf.Sync, model.Conf.NotebookCrypto = conf.NewFileTree(), conf.NewSync(), conf.NewNotebookCrypto()
 	model.Conf.Search, model.Conf.Editor, model.Conf.Export = conf.NewSearch(), conf.NewEditor(), conf.NewExport()
 	box := &model.Box{ID: ast.NewNodeID()}
@@ -279,8 +291,8 @@ func testAPIContractBlockEdits(t *testing.T, engine *gin.Engine, boxID, docID, h
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err = json.Marshal(tree.Root)
-	if err != nil || !strings.Contains(string(data), "replacement document") || strings.Contains(string(data), "daily append") {
-		t.Fatalf("document content was not replaced: %s, %v", data, err)
+	content := tree.Root.Text()
+	if !strings.Contains(content, "replacement document") || strings.Contains(content, "daily append") {
+		t.Fatalf("document content was not replaced: %s", content)
 	}
 }

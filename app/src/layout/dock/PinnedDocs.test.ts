@@ -7,6 +7,7 @@ import * as ts from "typescript";
 
 interface IPanelHarness {
     element: unknown;
+    heading: unknown;
     refresh(): Promise<void>;
     collapse(): void;
     expanded: Set<string>;
@@ -44,12 +45,16 @@ const loadPanel = (fetchCode = 0) => {
     runInNewContext(source, {
         exports,
         localStorage: {setItem: (key: string, value: string) => storage.set(key, value)},
-        window: {siyuan: {config, notebooks: []}},
-        document: {activeElement: null, createElement: () => ({
+        window: {siyuan: {config, notebooks: [], languages: {}}},
+        document: {activeElement: null, createElement: (tagName: string) => ({
+            tagName, style: {setProperty: () => {}},
+            setAttribute: () => {}, addEventListener: () => {},
             dataset: {}, children: [] as unknown[],
             append(child: unknown) { this.children.push(child); },
         })},
         require: (name: string) => {
+            if (name.endsWith("/fileTreeIcon")) { return {getFileTreeIconHTML: () => ""}; }
+            if (name.endsWith("/escape")) { return {escapeHtml: (value: string) => value}; }
             if (name.endsWith("/emoji")) { return {openEmojiPanel: record("icon")}; }
             if (name.endsWith("/navigation")) {
                 return {initFileMenu: (...args: unknown[]) => {
@@ -80,10 +85,9 @@ test("collapse clears descendant expansion and persists the closed section", asy
         hasAttribute: () => true,
         setAttribute: (name: string, value: string) => states.push([name, value]),
     };
-    panel.list = {querySelectorAll: () => [row]};
-    panel.element = {
-        lastElementChild: {classList: {toggle: (name: string, value: boolean) => states.push([name, value])}},
-        firstElementChild: {setAttribute: (name: string, value: string) => states.push([name, value])},
+    panel.list = {querySelectorAll: () => [row], classList: {toggle: (name: string, value: boolean) => states.push([name, value])}};
+    panel.heading = {
+        setAttribute: (name: string, value: string) => states.push([name, value]),
         querySelector: () => ({classList: {toggle: () => {}}}),
     };
     panel.collapse();
@@ -111,6 +115,21 @@ test("pinned document more actions open the source document menu", () => {
     panel.mobile = true;
     panel.menu(row, 10, 20);
     assert.equal(calls[3].kind, "fullscreen");
+});
+
+test("pinned roots share one list and retain each document notebook without wrapper lists", async () => {
+    const {panel} = loadPanel();
+    panel.expanded = new Set();
+    const children: {tagName: string, dataset: Record<string, string>}[] = [];
+    const parent = {append: (child: typeof children[number]) => children.push(child)};
+    for (const notebook of ["first", "second"]) {
+        await panel.appendDoc(parent, {id: notebook + "-doc", notebook, name: "Document", path: "/doc.sy", subFileCount: 0}, notebook, 0, 0);
+    }
+    assert.deepEqual(children.map(child => child.tagName), ["li", "ul", "li", "ul"]);
+    assert.equal(children[0].dataset.notebook, "first");
+    assert.equal(children[2].dataset.notebook, "second");
+    assert.equal(children[1].dataset.url, "first");
+    assert.equal(children[3].dataset.url, "second");
 });
 
 test("pinned icons respect editing, expansion and readonly settings", () => {
@@ -192,7 +211,7 @@ test("pinned area follows list contents on initial load, pin, unpin and sync", a
     panel.generation = 0;
     panel.names = new Map();
     panel.appendDoc = async () => {};
-    panel.list = {parentElement: {scrollTop: 0}, contains: () => false,
+    panel.list = {scrollTop: 0, contains: () => false,
         querySelectorAll: (): unknown[] => [], replaceChildren: () => {}};
     panel.element = {classList: {toggle: (name: string, hidden: boolean) => {
         assert.equal(name, "fn__none");

@@ -81,7 +81,7 @@ export const deleteFiles = async (liElements: Element[]) => {
     if (liElements.length === 1) {
         const itemTopULElement = hasTopClosestByTag(liElements[0], "UL");
         if (itemTopULElement) {
-            const itemNotebookId = itemTopULElement.getAttribute("data-url");
+            const itemNotebookId = liElements[0].getAttribute("data-notebook") || itemTopULElement.getAttribute("data-url");
             if (liElements[0].getAttribute("data-type") === "navigation-file") {
                 deleteFile(itemNotebookId, liElements[0].getAttribute("data-path"));
             } else {

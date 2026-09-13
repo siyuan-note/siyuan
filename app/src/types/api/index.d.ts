@@ -108,6 +108,14 @@ export type ChildBlock = { "content"?: string; "id": string; "markdown"?: string
 
 export type CloseNotebookRequestInput = { "notebook": string; };
 
+export type CloudBackup = { "hSize": string; "saveDir": string; "size": number; "updated": string; };
+
+export type CloudReminderRequestInput = { "content": string; "id": string; "timed": string; };
+
+export type CloudSpaceData = { "backup": CloudBackup | null; "hAssetSize": string; "hExchangeSize": string; "hSize": string; "hTotalSize": string; "hTrafficAPIGet": string; "hTrafficAPIPut": string; "hTrafficDownloadSize": string; "hTrafficUploadSize": string; "sync": CloudSync | null; };
+
+export type CloudSync = { "cloudName": string; "hSize": string; "saveDir": string; "size": number; "updated": string; };
+
 export type ContentWordCountRequestInput = { "content": string; "reqId"?: JSONValue | null; };
 
 export type CopyStdMarkdownRequestInput = { "adjustHeadingLevel"?: boolean | null; "assetsDestSpace2Underscore"?: boolean | null; "fillCSSVar"?: boolean | null; "id": string; "imgTag"?: boolean | null; };
@@ -614,8 +622,6 @@ export type APILegacyPOSTPath =
     "/api/clipboard/prepareRichText" |
     "/api/clipboard/readFilePaths" |
     "/api/clipboard/writeFilePath" |
-    "/api/cloud/getCloudSpace" |
-    "/api/cloud/setCloudReminder" |
     "/api/export/copyExportFile" |
     "/api/export/export2Liandi" |
     "/api/export/exportAsFile" |
@@ -1287,6 +1293,16 @@ export interface APIPOSTRoutes {
         request: Record<string, Array<string | Blob>>;
         response: { "code": 0; "data": BroadcastPublishData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "multipart";
+    };
+    "/api/cloud/getCloudSpace": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": CloudSpaceData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/cloud/setCloudReminder": {
+        request: CloudReminderRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
     };
     "/api/convert/pandoc": {
         request: PandocRequestInput;

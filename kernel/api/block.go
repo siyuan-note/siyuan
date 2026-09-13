@@ -19,7 +19,6 @@ package api
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -289,26 +288,12 @@ var setBlockReminder = contractHandler(apicontract.SetBlockReminder, func(c *gin
 	return apicontract.Success(apicontract.Null{})
 })
 
-func setCloudReminder(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var setCloudReminder = contractHandler(apicontract.SetCloudReminder, func(c *gin.Context, request apicontract.CloudReminderRequest) apicontract.Response[apicontract.Null] {
+	if err := model.SetCloudReminder(request.ID, request.Content, request.Timed); err != nil {
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 7000)
 	}
-
-	id := arg["id"].(string)
-	timed := arg["timed"].(string) // yyyyMMddHHmmss
-	content := arg["content"].(string)
-	err := model.SetCloudReminder(id, content, timed)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return
-	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 var getUnfoldedParentID = contractHandler(apicontract.GetUnfoldedParentID, func(c *gin.Context, request apicontract.BlockQueryRequest) apicontract.Response[apicontract.UnfoldedParentData] {
 	boxID, err := holdContractBlockRequest(c, request.Notebook, request.ID, request.IDs, false)

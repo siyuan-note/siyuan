@@ -1581,6 +1581,140 @@
       ],
       "additionalProperties": false
     },
+    "CloudBackup": {
+      "type": "object",
+      "properties": {
+        "hSize": {
+          "type": "string"
+        },
+        "saveDir": {
+          "type": "string"
+        },
+        "size": {
+          "type": "integer"
+        },
+        "updated": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "hSize",
+        "saveDir",
+        "size",
+        "updated"
+      ],
+      "additionalProperties": false
+    },
+    "CloudReminderRequestInput": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "timed": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "content",
+        "id",
+        "timed"
+      ],
+      "additionalProperties": false
+    },
+    "CloudSpaceData": {
+      "type": "object",
+      "properties": {
+        "backup": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CloudBackup"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hAssetSize": {
+          "type": "string"
+        },
+        "hExchangeSize": {
+          "type": "string"
+        },
+        "hSize": {
+          "type": "string"
+        },
+        "hTotalSize": {
+          "type": "string"
+        },
+        "hTrafficAPIGet": {
+          "type": "string"
+        },
+        "hTrafficAPIPut": {
+          "type": "string"
+        },
+        "hTrafficDownloadSize": {
+          "type": "string"
+        },
+        "hTrafficUploadSize": {
+          "type": "string"
+        },
+        "sync": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CloudSync"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "backup",
+        "hAssetSize",
+        "hExchangeSize",
+        "hSize",
+        "hTotalSize",
+        "hTrafficAPIGet",
+        "hTrafficAPIPut",
+        "hTrafficDownloadSize",
+        "hTrafficUploadSize",
+        "sync"
+      ],
+      "additionalProperties": false
+    },
+    "CloudSync": {
+      "type": "object",
+      "properties": {
+        "cloudName": {
+          "type": "string"
+        },
+        "hSize": {
+          "type": "string"
+        },
+        "saveDir": {
+          "type": "string"
+        },
+        "size": {
+          "type": "integer"
+        },
+        "updated": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "cloudName",
+        "hSize",
+        "saveDir",
+        "size",
+        "updated"
+      ],
+      "additionalProperties": false
+    },
     "ContentWordCountRequestInput": {
       "type": "object",
       "properties": {
@@ -13807,6 +13941,157 @@
                 "enum": [
                   -1,
                   1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/cloud/getCloudSpace",
+      "handler": "getCloudSpace",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/CloudSpaceData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/cloud/setCloudReminder",
+      "handler": "setCloudReminder",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/CloudReminderRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
                 ]
               },
               "data": {

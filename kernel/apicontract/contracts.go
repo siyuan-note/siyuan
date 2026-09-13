@@ -435,3 +435,6 @@ var GetBroadcastChannelInfo = define[BroadcastChannelRequest, BroadcastChannelDa
 var GetBroadcastChannels = define[EmptyRequest, BroadcastChannelsData]("getChannels", "/api/broadcast/getChannels", NoBody, ResponseOptions{}, "POST")
 
 var BroadcastPublish = define[MultipartFields, BroadcastPublishData]("broadcastPublish", "/api/broadcast/publish", MultipartBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+var SetCloudReminder = define[CloudReminderRequest, Null]("setCloudReminder", "/api/cloud/setCloudReminder", JSONBody, ResponseOptions{}, "POST")
+var GetCloudSpace = define[EmptyRequest, CloudSpaceData]("getCloudSpace", "/api/cloud/getCloudSpace", NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")

@@ -118,9 +118,9 @@ export class Scroll {
         this.parentElement.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
             if (hasClosestByClassName(target, "protyle-scroll__up")) {
-                goHome(protyle);
+                goHome(protyle, false);
             } else if (hasClosestByClassName(target, "protyle-scroll__down")) {
-                goEnd(protyle);
+                goEnd(protyle, false);
             } else if (target.classList.contains("b3-slider")) {
                 this.setIndex(protyle);
             }

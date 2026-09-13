@@ -431,11 +431,13 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
     scrollCenter(protyle);
 };
 
-export const goHome = (protyle: IProtyle) => {
+export const goHome = (protyle: IProtyle, focusEditor = true) => {
     if (protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-index") === "0" ||
         protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" ||
         protyle.options.backlinkData) {
-        focusBlock(protyle.wysiwyg.element.firstElementChild);
+        if (focusEditor) {
+            focusBlock(protyle.wysiwyg.element.firstElementChild);
+        }
         protyle.contentElement.scrollTop = 0;
         protyle.scroll.lastScrollTop = 1;
     } else {
@@ -448,12 +450,17 @@ export const goHome = (protyle: IProtyle) => {
             getDocParam.notebook = protyle.notebookId;
         }
         fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
-            onGet({data: getResponse, protyle, action: [Constants.CB_GET_FOCUS]});
+            onGet({
+                data: getResponse,
+                protyle,
+                action: [Constants.CB_GET_FOCUS],
+                suppressFocus: !focusEditor,
+            });
         });
     }
 };
 
-export const goEnd = (protyle: IProtyle) => {
+export const goEnd = (protyle: IProtyle, focusEditor = true) => {
     if (!protyle.scroll.element.classList.contains("fn__none") &&
         protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2") {
         const getDocParam: IObject = {
@@ -469,15 +476,20 @@ export const goEnd = (protyle: IProtyle) => {
                 data: getResponse,
                 protyle,
                 action: [Constants.CB_GET_FOCUS],
+                suppressFocus: !focusEditor,
                 afterCB() {
-                    focusBlock(protyle.wysiwyg.element.lastElementChild, undefined, false);
+                    if (focusEditor) {
+                        focusBlock(protyle.wysiwyg.element.lastElementChild, undefined, false);
+                    }
                 }
             });
         });
     } else {
         protyle.contentElement.scrollTop = protyle.contentElement.scrollHeight;
         protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop;
-        focusBlock(protyle.wysiwyg.element.lastElementChild, undefined, false);
+        if (focusEditor) {
+            focusBlock(protyle.wysiwyg.element.lastElementChild, undefined, false);
+        }
     }
 };
 

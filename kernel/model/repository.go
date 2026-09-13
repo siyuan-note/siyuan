@@ -1065,7 +1065,7 @@ func statTypesByPath(files []*entity.File) (ret []*TypeCount) {
 	if 10 < len(ret) {
 		otherCount := 0
 		for _, tc := range ret[10:] {
-			tc.Count += otherCount
+			otherCount += tc.Count
 		}
 		other := &TypeCount{
 			Type:  "Other",

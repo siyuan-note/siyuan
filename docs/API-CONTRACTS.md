@@ -24,6 +24,8 @@ Encrypted notebook lifecycle endpoints use typed requests and responses while re
 
 ## Compatibility requirements
 
+History contracts retain path trimming, optional highlight defaults, fractional history-type truncation, and null versus empty result arrays. Version comparison checks both reference objects before their fields and acquires notebook leases in sorted order. Content reads and document, asset, and attribute-view rollbacks retain their history-path lease checks; notebook rollback keeps its existing model-level recovery behavior.
+
 Import contracts preserve archive cleanup, first-upload selection, untrimmed Markdown paths, and staged-token trimming and lifetime. Automatic SiYuan imports declare document, token, notebook, and notebook-collection results; mount failures retain the document payload. Obsidian task cancellation retains its task snapshot on failure. Notebook mounting, encrypted import handling, and creation notifications remain in the existing business operations.
 
 Backlink contracts preserve untrimmed query fields, optional flag defaults, source-filter normalization, and revision hashes. Missing list IDs still return null; unchanged revisions retain the existing fields with null arrays. Candidate-definition failures retain their empty `refDefs` payload. Publish filtering, encrypted-notebook admission, and request-held leases remain in the handlers, and context payloads retain recursive block paths and attribute-view reference targets.

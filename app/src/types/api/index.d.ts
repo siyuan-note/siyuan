@@ -164,6 +164,10 @@ export type CopyFilesRequestInput = { "destDir": string; "srcs": Array<string>; 
 
 export type CopyStdMarkdownRequestInput = { "adjustHeadingLevel"?: boolean | null; "assetsDestSpace2Underscore"?: boolean | null; "fillCSSVar"?: boolean | null; "id": string; "imgTag"?: boolean | null; };
 
+export type CreateAssetHistoryRequestInput = { "path": string; };
+
+export type CreateDocHistoryRequestInput = { "id": string; };
+
 export type CreateEncryptedNotebookRequestInput = { "name": string; "password": string; };
 
 export type CreateNotebookData = { "notebook": Notebook | null; };
@@ -194,6 +198,8 @@ export type DailyNoteBlockRequestInput = { "data": string; "dataType": string; "
 
 export type DeleteBlockRequestInput = { "id": string; };
 
+export type DiffDocVersionsRequestInput = { "left": DocVersionRefInput; "right": DocVersionRefInput; };
+
 export type DirectoryEntry = { "isDir": boolean; "isSymlink": boolean; "name": string; "updated": number; };
 
 export type DocAttrView = { "id": string; "name": string; };
@@ -202,9 +208,21 @@ export type DocHeadingLevelData = { "counts": Array<number>; "title": string; "t
 
 export type DocHeadingLevelRequestInput = { "id"?: string | null; "notebook"?: string | null; "source"?: number | null; "target"?: number | null; "withSubheadings"?: boolean | null; };
 
+export type DocHistoryContentData = { "content": string; "id": string; "isLargeDoc": boolean; "rootID": string; };
+
+export type DocHistoryContentRequestInput = { "highlight"?: boolean | null; "historyPath": string; "k"?: string | null; };
+
 export type DocInfo = { "attrViews": Array<DocAttrView | null> | null; "ial": Record<string, string> | null; "icon": string; "id": string; "name": string; "refCount": number; "refIDs": Array<string> | null; "rootID": string; "subFileCount": number; };
 
 export type DocOrdersRequestInput = { "id": string; };
+
+export type DocVersionDiffContent = { "content": string; "id": string; "rootID": string; "title": string; };
+
+export type DocVersionDiffResult = { "differences": Array<DocVersionDifference | null> | null; "fallback": boolean; "large": boolean; "left": DocVersionDiffContent | null; "message": string; "right": DocVersionDiffContent | null; "titleModified": boolean; };
+
+export type DocVersionDifference = { "id": string; "statuses": Array<string> | null; };
+
+export type DocVersionRefInput = { "id"?: string | null; "path"?: string | null; "snapshot"?: string | null; "type": string; };
 
 export type DocsInfoRequestInput = { "av": boolean; "ids": Array<string>; "refCount": boolean; };
 
@@ -271,6 +289,16 @@ export type HeadingFoldRequestInput = { "id": string; "scope": string; };
 export type HeadingLevelRequestInput = { "id"?: string; "ids"?: Array<string>; "level": number; };
 
 export type HeadingNumbersRequestInput = { "id"?: string | null; "notebook"?: string | null; };
+
+export type History = { "hCreated": string; "items": Array<HistoryItem | null> | null; };
+
+export type HistoryItem = { "id": string; "notebook": string; "op": string; "path": string; "title": string; };
+
+export type HistoryItemsData = { "items": Array<HistoryItem | null> | null; };
+
+export type HistoryItemsRequestInput = { "created": string; "notebook"?: string | null; "op"?: string | null; "query"?: string | null; "type"?: number | null; };
+
+export type HistoryPathRequestInput = { "historyPath": string; };
 
 export type ImportAutoDocument = { "token"?: string; "type": "document"; };
 
@@ -381,6 +409,8 @@ export type NotebookCryptoBackupData = { "file": string; };
 export type NotebookEncryption = { "createdAt": number; "metadata"?: string; "spec": number; "wrapNonce": string | null; "wrappedDEK": string | null; };
 
 export type NotebookEncryptionPatchInput = { "createdAt"?: number | null; "metadata"?: string | Array<number> | null; "spec"?: number | null; "wrapNonce"?: string | Array<number> | null; "wrappedDEK"?: string | Array<number> | null; };
+
+export type NotebookHistoryData = { "histories": Array<History | null> | null; };
 
 export type NotebookIDRequestInput = { "notebook": string; };
 
@@ -863,16 +893,6 @@ export type APILegacyPOSTPath =
     "/api/filetree/setPublishAccess" |
     "/api/filetree/setSort" |
     "/api/filetree/upsertIndexes" |
-    "/api/history/createAssetHistory" |
-    "/api/history/createDocHistory" |
-    "/api/history/diffDocVersions" |
-    "/api/history/getDocHistoryContent" |
-    "/api/history/getHistoryItems" |
-    "/api/history/getNotebookHistory" |
-    "/api/history/rollbackAssetsHistory" |
-    "/api/history/rollbackAttributeViewHistory" |
-    "/api/history/rollbackDocHistory" |
-    "/api/history/rollbackNotebookHistory" |
     "/api/network/echo" |
     "/api/network/echo/*path" |
     "/api/network/forwardProxy" |
@@ -1585,10 +1605,60 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
+    "/api/history/createAssetHistory": {
+        request: CreateAssetHistoryRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/history/createDocHistory": {
+        request: CreateDocHistoryRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/history/diffDocVersions": {
+        request: DiffDocVersionsRequestInput;
+        response: { "code": 0; "data": DocVersionDiffResult | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/history/getDocHistoryContent": {
+        request: DocHistoryContentRequestInput;
+        response: { "code": 0; "data": DocHistoryContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/history/getHistoryItems": {
+        request: HistoryItemsRequestInput;
+        response: { "code": 0; "data": HistoryItemsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/history/getNotebookHistory": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": NotebookHistoryData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
     "/api/history/reindexHistory": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+    };
+    "/api/history/rollbackAssetsHistory": {
+        request: HistoryPathRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/history/rollbackAttributeViewHistory": {
+        request: HistoryPathRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/history/rollbackDocHistory": {
+        request: HistoryPathRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/history/rollbackNotebookHistory": {
+        request: HistoryPathRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
     };
     "/api/history/searchHistory": {
         request: SearchHistoryRequestInput;

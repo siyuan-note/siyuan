@@ -1549,6 +1549,8 @@ export const initKeyboardToolbar = () => {
                 hideKeyboardToolbarUtil(true);
                 restoreKeyboardToolbarRange(protyle, range);
             } else {
+                // 主动收起前先结束编辑焦点，避免 WebView 在触摸结束后重新唤起输入法。
+                (document.activeElement as HTMLElement)?.blur();
                 // 用户主动收起键盘时跳过弹出保护锁。
                 activeBlur(true);
             }

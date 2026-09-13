@@ -1280,6 +1280,15 @@ func createTreeTx(tree *parse.Tree) {
 var createDocLock = sync.Mutex{}
 
 func CreateDocByMd(boxID, p, title, md string, sorts []string, arg map[string]any) (tree *parse.Tree, err error) {
+	return createDocByMd(boxID, p, title, md, sorts, arg, false)
+}
+
+// CreateDocByMdSync 同步创建 Markdown 文档并返回事务落盘错误，供成功后需要清理源数据的调用方使用。
+func CreateDocByMdSync(boxID, p, title, md string, sorts []string, arg map[string]any) (tree *parse.Tree, err error) {
+	return createDocByMd(boxID, p, title, md, sorts, arg, true)
+}
+
+func createDocByMd(boxID, p, title, md string, sorts []string, arg map[string]any, syncWrite bool) (tree *parse.Tree, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
@@ -1304,7 +1313,7 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string, arg map[string]an
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
 	dom := luteEngine.Md2BlockDOM(md, false)
-	tree, err = createDoc(box.ID, p, title, dom, false)
+	tree, err = createDoc0(box.ID, p, title, dom, false, syncWrite)
 	if err != nil {
 		return
 	}

@@ -22,6 +22,7 @@ type Schema struct {
 	Required             []string           `json:"required,omitempty"`
 	Items                *Schema            `json:"items,omitempty"`
 	MinItems             int                `json:"minItems,omitempty"`
+	MaxItems             *int               `json:"maxItems,omitempty"`
 	AdditionalProperties any                `json:"additionalProperties,omitempty"`
 }
 
@@ -84,6 +85,9 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if schema, err := bazaarPayloadSchema(b, t, input); schema != nil || err != nil {
+		return schema, err
+	}
 	if t == reflect.TypeFor[PluginRPCMessage]() {
 		response, err := b.schema(reflect.TypeFor[PluginRPCResponse](), false)
 		if err != nil {
@@ -316,6 +320,16 @@ func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		return &Schema{Type: "integer"}, nil
+	case reflect.Array:
+		if input {
+			return nil, fmt.Errorf("fixed array request binding requires an explicit decoder: %s", t)
+		}
+		child, err := b.schema(t.Elem(), input)
+		if err != nil {
+			return nil, err
+		}
+		length := t.Len()
+		return &Schema{Type: "array", Items: child, MinItems: length, MaxItems: &length}, nil
 	case reflect.Slice:
 		if t.Elem().Kind() == reflect.Uint8 {
 			return nil, fmt.Errorf("byte encoding requires an explicit schema: %s", t)
@@ -693,6 +707,9 @@ func (b *Bundle) validate(schema *Schema, value any, path string) error {
 		if ok {
 			if len(array) < schema.MinItems {
 				return fmt.Errorf("%s has too few array items", path)
+			}
+			if schema.MaxItems != nil && len(array) > *schema.MaxItems {
+				return fmt.Errorf("%s has too many array items", path)
 			}
 			for i, element := range array {
 				if err := b.validate(schema.Items, element, fmt.Sprintf("%s[%d]", path, i)); err != nil {

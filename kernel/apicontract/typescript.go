@@ -74,6 +74,13 @@ func (b *Bundle) typeScript(schema *Schema) string {
 	case "null", "string", "boolean":
 		return schema.Type
 	case "array":
+		if schema.MaxItems != nil && schema.MinItems == *schema.MaxItems {
+			items := make([]string, schema.MinItems)
+			for i := range items {
+				items[i] = b.typeScript(schema.Items)
+			}
+			return "[" + strings.Join(items, ", ") + "]"
+		}
 		if schema.MinItems == 1 {
 			item := b.typeScript(schema.Items)
 			return "[" + item + ", ...Array<" + item + ">]"

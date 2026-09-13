@@ -60,6 +60,66 @@ export type BatchTaskListMarkerRequestInput = { "items": Array<TaskListMarkerReq
 
 export type BatchUpdateBlockRequestInput = { "blocks": Array<UpdateBlockRequestInput>; };
 
+export type BatchUpdatePackageRequestInput = { "frontend": string; };
+
+export type BazaarAppearance = { "bodyGradient": BazaarBodyGradient | null; "closeButtonBehavior": number; "codeBlockThemeDark": string; "codeBlockThemeLight": string; "darkThemes": Array<BazaarAppearanceTheme | null> | null; "entryVisibility": BazaarEntryVisibility | null; "globalFontFamilies": Array<BazaarEditorFont | null> | null; "hideStatusBar": boolean; "hideToolbar": boolean; "icon": string; "iconVer": string; "icons": Array<BazaarAppearanceIcon | null> | null; "lang": string; "lightThemes": Array<BazaarAppearanceTheme | null> | null; "mode": number; "modeOS": boolean; "notifications": BazaarNotifications | null; "statusBar": BazaarStatusBar | null; "themeDark": string; "themeJS": boolean; "themeLight": string; "themeVer": string; };
+
+export type BazaarAppearanceIcon = { "label": string; "name": string; };
+
+export type BazaarAppearancePackagesData = { "appearance": BazaarAppearance | null; "packages": Array<BazaarPackage | null> | null; };
+
+export type BazaarAppearanceTheme = { "frontends"?: Array<string>; "label": string; "name": string; };
+
+export type BazaarBodyGradient = { "dark": BazaarBodyGradientColor; "light": BazaarBodyGradientColor; "mode": string; };
+
+export type BazaarBodyGradientColor = { "color": string; "opacity": number; };
+
+export type BazaarEditorFont = { "displayName": string; "family": string; "weight": number; };
+
+export type BazaarEntryVisibility = { "active": string; "profiles": Array<BazaarEntryVisibilityProfile | null> | null; "version": number; };
+
+export type BazaarEntryVisibilityProfile = { "entries": Record<string, boolean> | null; "id": string; "name": string; "orders": Record<string, Array<string> | null> | null; };
+
+export type BazaarFunding = { "custom": Array<string> | null; "github": string; "links"?: Array<BazaarFundingLink>; "openCollective": string; "patreon": string; };
+
+export type BazaarFundingLink = { "label": string; "url": string; };
+
+export type BazaarLocalInstallData = { "minAppVersion"?: string; "packageName": string; "packageType": string; "updated": boolean; };
+
+export type BazaarLocalInstallError = { "minAppVersion": string; "packageName": string; "packageType": string; "reason": "install-failed" | "package-exists" | "package-incompatible"; };
+
+export type BazaarLocalInstallResult = (BazaarLocalInstallData & { "reason"?: never; }) | (BazaarLocalInstallError & { "updated"?: never; });
+
+export type BazaarNotifications = { "browserCompatibility": boolean; "docTreeMaxList": boolean; "formatPainterTip"?: boolean; "selectAllTip"?: boolean; "tagMaxList": boolean; "workspaceNotSSD": boolean; };
+
+export type BazaarPackage = { "alternatives"?: Array<string>; "author": string; "backends": Array<string> | null; "bazaarIncompatible"?: boolean; "bootAppearances"?: Array<string>; "current": boolean; "deprecated"?: boolean; "deprecatedReason"?: Record<string, string>; "description": Record<string, string> | null; "disabledInPublish": boolean; "disallowInstall": boolean; "disallowUpdate": boolean; "displayName": Record<string, string> | null; "downloads": number; "enabled"?: boolean; "frontends": Array<string> | null; "funding": BazaarFunding | null; "hInstallDate": string; "hInstallSize": string; "hSize": string; "hUpdated": string; "hasStorageData"?: boolean; "icon"?: string; "iconURL": string; "installSize": number; "installTime": number; "installed": boolean; "installedIncompatible"?: boolean; "invalidReason"?: "missing-manifest" | "invalid-manifest" | "name-mismatch"; "kernels": Array<string> | null; "keywords": Array<string> | null; "minAppVersion": string; "modes"?: Array<string> | null; "name": string; "openIssues": number; "outdated": boolean; "preferredDeprecatedReason"?: string; "preferredDesc": string; "preferredFunding": string; "preferredName": string; "preferredReadme": string; "preview"?: string; "previewURL": string; "rating"?: BazaarPackageRating; "ratingAvailable": boolean; "readme": Record<string, string> | null; "repoHash": string; "repoRef"?: string; "repoURL": string; "size": number; "stars": number; "updateRequiredMinAppVer"?: string; "updateTime": number; "updated": string; "url": string; "userDisabledInPublish"?: boolean; "version": string; };
+
+export type BazaarPackageDetail = { "available": BazaarPackage | null; "installed": BazaarPackage | null; };
+
+export type BazaarPackageRating = { "average": number; "count": number; "distribution": [number, number, number, number, number]; };
+
+export type BazaarPackageSizeData = { "hInstallSize": string; "installSize": number; };
+
+export type BazaarPackagesData = { "packages": Array<BazaarPackage | null> | null; };
+
+export type BazaarREADMEData = { "html": string; };
+
+export type BazaarRatingData = { "rating"?: BazaarPackageRating; "ratingAvailable": boolean; "userRating": number; };
+
+export type BazaarRatingError = { "errorCode": "bazaarRatingRateLimited" | "bazaarPackagePending"; };
+
+export type BazaarRatingResult = (BazaarRatingData & { "errorCode"?: never; }) | (BazaarRatingError & { "rating"?: never; "ratingAvailable"?: never; "userRating"?: never; });
+
+export type BazaarRatingsData = { "eligiblePackageNames": Array<string> | null; "ratings": Record<string, BazaarPackageRating | null> | null; };
+
+export type BazaarStatusBar = { "msgDataSyncDisabled": boolean; "msgTaskAssetDatabaseIndexCommitDisabled": boolean; "msgTaskDatabaseIndexCommitDisabled": boolean; "msgTaskHistoryDatabaseIndexCommitDisabled": boolean; "msgTaskHistoryGenerateFileDisabled": boolean; "version": number; };
+
+export type BazaarUpdatedData = { "icons": Array<BazaarPackageDetail | null> | null; "plugins": Array<BazaarPackageDetail | null> | null; "templates": Array<BazaarPackageDetail | null> | null; "themes": Array<BazaarPackageDetail | null> | null; "widgets": Array<BazaarPackageDetail | null> | null; };
+
+export type BazaarUserRatingsData = { "eligiblePackageNames": Array<string> | null; "userRatings": Record<string, number> | null; };
+
+export type BazaarUserRatingsResult = (BazaarUserRatingsData & { "errorCode"?: never; }) | (BazaarRatingError & { "eligiblePackageNames"?: never; "userRatings"?: never; });
+
 export type BlockBreadcrumbChildren = { "hasMore": boolean; "items": Array<BlockPath | null> | null; };
 
 export type BlockBreadcrumbChildrenRequestInput = { "excludeTypes"?: Array<string> | null; "id": string; "ids"?: Array<string> | null; "limit"?: number | null; "notebook"?: string | null; "offset"?: number | null; };
@@ -262,11 +322,45 @@ export type FullTextSearchBlockData = { "blocks": Array<SearchBlock | null> | nu
 
 export type FullTextSearchBlockRequestInput = { "groupBy"?: number | null; "method"?: number | null; "notebook"?: string | null; "orderBy"?: number | null; "page"?: number | null; "pageSize"?: number | null; "paths"?: Array<string> | null; "query"?: string | null; "searchHPath"?: boolean | null; "subTypes"?: SearchSubtypeFilterInput | null; "types"?: Record<string, boolean> | null; };
 
+export type GetBazaarIconRequestInput = { "keyword"?: string | null; };
+
+export type GetBazaarPackageREADMERequestInput = { "packageType": string; "repoHash": string; "repoURL": string; };
+
+export type GetBazaarPackageRatingRequestInput = { "packageName": string; "packageType": string; };
+
+export type GetBazaarPackageRatingsRequestInput = { "packageNames": Array<string>; "packageType": string; };
+
+export type GetBazaarPackageRequestInput = { "frontend"?: string | null; "packageName": string; "packageType": string; };
+
+export type GetBazaarPackageUserRatingsRequestInput = { "packageNames": Array<string>; "packageType": string; };
+
+export type GetBazaarPluginRequestInput = { "frontend": string; "keyword"?: string | null; };
+
+export type GetBazaarTemplateRequestInput = { "keyword"?: string | null; };
+
+export type GetBazaarThemeRequestInput = { "frontend"?: string | null; "keyword"?: string | null; };
+
+export type GetBazaarWidgetRequestInput = { "keyword"?: string | null; };
+
 export type GetEmbedBlockRequestInput = { "breadcrumb"?: boolean | null; "embedBlockID": string; "headingMode"?: number | null; "includeIDs": Array<string>; "notebook"?: string | null; };
+
+export type GetInstalledIconRequestInput = { "keyword"?: string | null; };
+
+export type GetInstalledPackageSizeRequestInput = { "packageName": string; "packageType": string; };
+
+export type GetInstalledPluginRequestInput = { "frontend": string; "keyword"?: string | null; };
+
+export type GetInstalledTemplateRequestInput = { "keyword"?: string | null; };
+
+export type GetInstalledThemeRequestInput = { "frontend"?: string | null; "keyword"?: string | null; };
+
+export type GetInstalledWidgetRequestInput = { "keyword"?: string | null; };
 
 export type GetSnippetRequestInput = { "enabled": number; "keyword"?: string | null; "type": string; };
 
 export type GetTagRequestInput = { "app"?: string | null; "ignoreMaxListHint"?: boolean | null; "sort"?: number | null; };
+
+export type GetUpdatedPackageRequestInput = { "frontend": string; };
 
 export type GlobalGraphConf = { "d3": GraphD3 | null; "dailyNote": boolean; "minRefs": number; "type": GraphTypeFilter | null; };
 
@@ -377,6 +471,18 @@ export type InlineStyleThemeInput = { "backgroundColor"?: string | null; "color"
 export type InlineStyles = { "av": InlineStyleAV | null; "builtin": InlineStyleBuiltin | null; "order": InlineStyleOrder | null; "styles": Array<InlineStyle | null> | null; "version": number; };
 
 export type InsertBlockRequestInput = { "data": string; "dataType": string; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; };
+
+export type InstallBazaarIconRequestInput = { "keyword"?: string | null; "packageName": string; "repoHash": string; "repoRef"?: string | null; "repoURL": string; };
+
+export type InstallBazaarPluginRequestInput = { "frontend": string; "keyword"?: string | null; "packageName": string; "repoHash": string; "repoRef"?: string | null; "repoURL": string; };
+
+export type InstallBazaarTemplateRequestInput = { "keyword"?: string | null; "packageName": string; "repoHash": string; "repoRef"?: string | null; "repoURL": string; };
+
+export type InstallBazaarThemeRequestInput = { "frontend"?: string | null; "keyword"?: string | null; "mode"?: number; "modeOS"?: boolean; "packageName": string; "repoHash": string; "repoRef"?: string | null; "repoURL": string; };
+
+export type InstallBazaarWidgetRequestInput = { "keyword"?: string | null; "packageName": string; "repoHash": string; "repoRef"?: string | null; "repoURL": string; };
+
+export type InstallLocalBazaarPackageRequestInput = { "file"?: Blob; "frontend"?: string; "overwrite"?: string; };
 
 export type JSONValue = null | boolean | number | string | Array<JSONValue> | { [key: string]: JSONValue };
 
@@ -618,6 +724,8 @@ export type SearchWidgetData = { "k": string; "widgets": Array<SearchWidgetResul
 
 export type SearchWidgetResult = { "content": string; "name": string; };
 
+export type SetBazaarPackageRatingRequestInput = { "packageName": string; "packageType": string; "rating": number; };
+
 export type SetBlockAttrsRequestInput = { "attrs": Record<string, string | null>; "id": string; };
 
 export type SetCriterionRequestInput = { "criterion": CriterionInput | null; };
@@ -700,9 +808,21 @@ export type TrimmedIDRequestInput = { "id": string; };
 
 export type UnfoldedParentData = { "parentID": string; };
 
+export type UninstallBazaarIconRequestInput = { "keyword"?: string | null; "packageName": string; };
+
+export type UninstallBazaarPluginRequestInput = { "frontend"?: string | null; "keyword"?: string | null; "packageName": string; };
+
+export type UninstallBazaarTemplateRequestInput = { "keyword"?: string | null; "packageName": string; };
+
+export type UninstallBazaarThemeRequestInput = { "frontend"?: string | null; "keyword"?: string | null; "packageName": string; };
+
+export type UninstallBazaarWidgetRequestInput = { "keyword"?: string | null; "packageName": string; };
+
 export type UnlockNotebookRequestInput = { "notebook": string; "password": string; };
 
 export type UnzipRequestInput = { "path": string; "zipPath": string; };
+
+export type UpdateBazaarPackageRequestInput = { "frontend": string; "keyword"?: string | null; "packageName": string; "packageType": string; };
 
 export type UpdateBlockRequestInput = { "data": string; "dataType": string; "id": string; "lockType"?: boolean | null; };
 
@@ -890,37 +1010,6 @@ export type APILegacyPOSTPath =
     "/api/av/setDatabaseBlockView" |
     "/api/av/sortAttributeViewKey" |
     "/api/av/sortAttributeViewViewKey" |
-    "/api/bazaar/batchUpdatePackage" |
-    "/api/bazaar/getBazaarIcon" |
-    "/api/bazaar/getBazaarPackage" |
-    "/api/bazaar/getBazaarPackageREADME" |
-    "/api/bazaar/getBazaarPackageRating" |
-    "/api/bazaar/getBazaarPackageRatings" |
-    "/api/bazaar/getBazaarPackageUserRatings" |
-    "/api/bazaar/getBazaarPlugin" |
-    "/api/bazaar/getBazaarTemplate" |
-    "/api/bazaar/getBazaarTheme" |
-    "/api/bazaar/getBazaarWidget" |
-    "/api/bazaar/getInstalledIcon" |
-    "/api/bazaar/getInstalledPackageSize" |
-    "/api/bazaar/getInstalledPlugin" |
-    "/api/bazaar/getInstalledTemplate" |
-    "/api/bazaar/getInstalledTheme" |
-    "/api/bazaar/getInstalledWidget" |
-    "/api/bazaar/getUpdatedPackage" |
-    "/api/bazaar/installBazaarIcon" |
-    "/api/bazaar/installBazaarPlugin" |
-    "/api/bazaar/installBazaarTemplate" |
-    "/api/bazaar/installBazaarTheme" |
-    "/api/bazaar/installBazaarWidget" |
-    "/api/bazaar/installLocalBazaarPackage" |
-    "/api/bazaar/setBazaarPackageRating" |
-    "/api/bazaar/uninstallBazaarIcon" |
-    "/api/bazaar/uninstallBazaarPlugin" |
-    "/api/bazaar/uninstallBazaarTemplate" |
-    "/api/bazaar/uninstallBazaarTheme" |
-    "/api/bazaar/uninstallBazaarWidget" |
-    "/api/bazaar/updateBazaarPackage" |
     "/api/export/copyExportFile" |
     "/api/export/export2Liandi" |
     "/api/export/exportAsFile" |
@@ -1204,6 +1293,161 @@ export interface APIPOSTRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+    };
+    "/api/bazaar/batchUpdatePackage": {
+        request: BatchUpdatePackageRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarIcon": {
+        request: GetBazaarIconRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarPackage": {
+        request: GetBazaarPackageRequestInput;
+        response: { "code": 0; "data": BazaarPackageDetail; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarPackageREADME": {
+        request: GetBazaarPackageREADMERequestInput;
+        response: { "code": 0; "data": BazaarREADMEData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarPackageRating": {
+        request: GetBazaarPackageRatingRequestInput;
+        response: { "code": 0; "data": BazaarRatingResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | BazaarRatingResult; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarPackageRatings": {
+        request: GetBazaarPackageRatingsRequestInput;
+        response: { "code": 0; "data": BazaarRatingsData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarPackageUserRatings": {
+        request: GetBazaarPackageUserRatingsRequestInput;
+        response: { "code": 0; "data": BazaarUserRatingsResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | BazaarUserRatingsResult; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarPlugin": {
+        request: GetBazaarPluginRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarTemplate": {
+        request: GetBazaarTemplateRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarTheme": {
+        request: GetBazaarThemeRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarWidget": {
+        request: GetBazaarWidgetRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getInstalledIcon": {
+        request: GetInstalledIconRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getInstalledPackageSize": {
+        request: GetInstalledPackageSizeRequestInput;
+        response: { "code": 0; "data": BazaarPackageSizeData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getInstalledPlugin": {
+        request: GetInstalledPluginRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getInstalledTemplate": {
+        request: GetInstalledTemplateRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getInstalledTheme": {
+        request: GetInstalledThemeRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getInstalledWidget": {
+        request: GetInstalledWidgetRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getUpdatedPackage": {
+        request: GetUpdatedPackageRequestInput;
+        response: { "code": 0; "data": BazaarUpdatedData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/installBazaarIcon": {
+        request: InstallBazaarIconRequestInput;
+        response: { "code": 0; "data": BazaarAppearancePackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/installBazaarPlugin": {
+        request: InstallBazaarPluginRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/installBazaarTemplate": {
+        request: InstallBazaarTemplateRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/installBazaarTheme": {
+        request: InstallBazaarThemeRequestInput;
+        response: { "code": 0; "data": BazaarAppearancePackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/installBazaarWidget": {
+        request: InstallBazaarWidgetRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/installLocalBazaarPackage": {
+        request: InstallLocalBazaarPackageRequestInput;
+        response: { "code": 0; "data": BazaarLocalInstallResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | BazaarLocalInstallResult; "msg": string; };
+        body: "multipart";
+    };
+    "/api/bazaar/setBazaarPackageRating": {
+        request: SetBazaarPackageRatingRequestInput;
+        response: { "code": 0; "data": BazaarRatingResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | BazaarRatingResult; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/uninstallBazaarIcon": {
+        request: UninstallBazaarIconRequestInput;
+        response: { "code": 0; "data": BazaarAppearancePackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/uninstallBazaarPlugin": {
+        request: UninstallBazaarPluginRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/uninstallBazaarTemplate": {
+        request: UninstallBazaarTemplateRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/uninstallBazaarTheme": {
+        request: UninstallBazaarThemeRequestInput;
+        response: { "code": 0; "data": BazaarAppearancePackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/uninstallBazaarWidget": {
+        request: UninstallBazaarWidgetRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/updateBazaarPackage": {
+        request: UpdateBazaarPackageRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
     };
     "/api/block/appendBlock": {
         request: AppendBlockRequestInput;

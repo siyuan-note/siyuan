@@ -1088,6 +1088,1294 @@
       ],
       "additionalProperties": false
     },
+    "BatchUpdatePackageRequestInput": {
+      "type": "object",
+      "properties": {
+        "frontend": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "frontend"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarAppearance": {
+      "type": "object",
+      "properties": {
+        "bodyGradient": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BazaarBodyGradient"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "closeButtonBehavior": {
+          "type": "integer"
+        },
+        "codeBlockThemeDark": {
+          "type": "string"
+        },
+        "codeBlockThemeLight": {
+          "type": "string"
+        },
+        "darkThemes": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BazaarAppearanceTheme"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "entryVisibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BazaarEntryVisibility"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "globalFontFamilies": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BazaarEditorFont"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hideStatusBar": {
+          "type": "boolean"
+        },
+        "hideToolbar": {
+          "type": "boolean"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "iconVer": {
+          "type": "string"
+        },
+        "icons": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BazaarAppearanceIcon"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lang": {
+          "type": "string"
+        },
+        "lightThemes": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BazaarAppearanceTheme"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "type": "integer"
+        },
+        "modeOS": {
+          "type": "boolean"
+        },
+        "notifications": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BazaarNotifications"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "statusBar": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BazaarStatusBar"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "themeDark": {
+          "type": "string"
+        },
+        "themeJS": {
+          "type": "boolean"
+        },
+        "themeLight": {
+          "type": "string"
+        },
+        "themeVer": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "bodyGradient",
+        "closeButtonBehavior",
+        "codeBlockThemeDark",
+        "codeBlockThemeLight",
+        "darkThemes",
+        "entryVisibility",
+        "globalFontFamilies",
+        "hideStatusBar",
+        "hideToolbar",
+        "icon",
+        "iconVer",
+        "icons",
+        "lang",
+        "lightThemes",
+        "mode",
+        "modeOS",
+        "notifications",
+        "statusBar",
+        "themeDark",
+        "themeJS",
+        "themeLight",
+        "themeVer"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarAppearanceIcon": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarAppearancePackagesData": {
+      "type": "object",
+      "properties": {
+        "appearance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BazaarAppearance"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "packages": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BazaarPackage"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "appearance",
+        "packages"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarAppearanceTheme": {
+      "type": "object",
+      "properties": {
+        "frontends": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "label": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarBodyGradient": {
+      "type": "object",
+      "properties": {
+        "dark": {
+          "$ref": "#/$defs/BazaarBodyGradientColor"
+        },
+        "light": {
+          "$ref": "#/$defs/BazaarBodyGradientColor"
+        },
+        "mode": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "dark",
+        "light",
+        "mode"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarBodyGradientColor": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "type": "string"
+        },
+        "opacity": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "color",
+        "opacity"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarEditorFont": {
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string"
+        },
+        "family": {
+          "type": "string"
+        },
+        "weight": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "displayName",
+        "family",
+        "weight"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarEntryVisibility": {
+      "type": "object",
+      "properties": {
+        "active": {
+          "type": "string"
+        },
+        "profiles": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BazaarEntryVisibilityProfile"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "active",
+        "profiles",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarEntryVisibilityProfile": {
+      "type": "object",
+      "properties": {
+        "entries": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "boolean"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "orders": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "entries",
+        "id",
+        "name",
+        "orders"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarFunding": {
+      "type": "object",
+      "properties": {
+        "custom": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "github": {
+          "type": "string"
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/BazaarFundingLink"
+          }
+        },
+        "openCollective": {
+          "type": "string"
+        },
+        "patreon": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "custom",
+        "github",
+        "openCollective",
+        "patreon"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarFundingLink": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "url"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarLocalInstallData": {
+      "type": "object",
+      "properties": {
+        "minAppVersion": {
+          "type": "string"
+        },
+        "packageName": {
+          "type": "string"
+        },
+        "packageType": {
+          "type": "string"
+        },
+        "updated": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "packageName",
+        "packageType",
+        "updated"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarLocalInstallError": {
+      "type": "object",
+      "properties": {
+        "minAppVersion": {
+          "type": "string"
+        },
+        "packageName": {
+          "type": "string"
+        },
+        "packageType": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "install-failed",
+            "package-exists",
+            "package-incompatible"
+          ]
+        }
+      },
+      "required": [
+        "minAppVersion",
+        "packageName",
+        "packageType",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarLocalInstallResult": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BazaarLocalInstallData"
+        },
+        {
+          "$ref": "#/$defs/BazaarLocalInstallError"
+        }
+      ]
+    },
+    "BazaarNotifications": {
+      "type": "object",
+      "properties": {
+        "browserCompatibility": {
+          "type": "boolean"
+        },
+        "docTreeMaxList": {
+          "type": "boolean"
+        },
+        "formatPainterTip": {
+          "type": "boolean"
+        },
+        "selectAllTip": {
+          "type": "boolean"
+        },
+        "tagMaxList": {
+          "type": "boolean"
+        },
+        "workspaceNotSSD": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "browserCompatibility",
+        "docTreeMaxList",
+        "tagMaxList",
+        "workspaceNotSSD"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarPackage": {
+      "type": "object",
+      "properties": {
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "author": {
+          "type": "string"
+        },
+        "backends": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "bazaarIncompatible": {
+          "type": "boolean"
+        },
+        "bootAppearances": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "current": {
+          "type": "boolean"
+        },
+        "deprecated": {
+          "type": "boolean"
+        },
+        "deprecatedReason": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "disabledInPublish": {
+          "type": "boolean"
+        },
+        "disallowInstall": {
+          "type": "boolean"
+        },
+        "disallowUpdate": {
+          "type": "boolean"
+        },
+        "displayName": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "downloads": {
+          "type": "integer"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "frontends": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "funding": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BazaarFunding"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hInstallDate": {
+          "type": "string"
+        },
+        "hInstallSize": {
+          "type": "string"
+        },
+        "hSize": {
+          "type": "string"
+        },
+        "hUpdated": {
+          "type": "string"
+        },
+        "hasStorageData": {
+          "type": "boolean"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "iconURL": {
+          "type": "string"
+        },
+        "installSize": {
+          "type": "integer"
+        },
+        "installTime": {
+          "type": "integer"
+        },
+        "installed": {
+          "type": "boolean"
+        },
+        "installedIncompatible": {
+          "type": "boolean"
+        },
+        "invalidReason": {
+          "type": "string",
+          "enum": [
+            "missing-manifest",
+            "invalid-manifest",
+            "name-mismatch"
+          ]
+        },
+        "kernels": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keywords": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "minAppVersion": {
+          "type": "string"
+        },
+        "modes": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "openIssues": {
+          "type": "integer"
+        },
+        "outdated": {
+          "type": "boolean"
+        },
+        "preferredDeprecatedReason": {
+          "type": "string"
+        },
+        "preferredDesc": {
+          "type": "string"
+        },
+        "preferredFunding": {
+          "type": "string"
+        },
+        "preferredName": {
+          "type": "string"
+        },
+        "preferredReadme": {
+          "type": "string"
+        },
+        "preview": {
+          "type": "string"
+        },
+        "previewURL": {
+          "type": "string"
+        },
+        "rating": {
+          "$ref": "#/$defs/BazaarPackageRating"
+        },
+        "ratingAvailable": {
+          "type": "boolean"
+        },
+        "readme": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "repoHash": {
+          "type": "string"
+        },
+        "repoRef": {
+          "type": "string"
+        },
+        "repoURL": {
+          "type": "string"
+        },
+        "size": {
+          "type": "integer"
+        },
+        "stars": {
+          "type": "integer"
+        },
+        "updateRequiredMinAppVer": {
+          "type": "string"
+        },
+        "updateTime": {
+          "type": "integer"
+        },
+        "updated": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "userDisabledInPublish": {
+          "type": "boolean"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "author",
+        "backends",
+        "current",
+        "description",
+        "disabledInPublish",
+        "disallowInstall",
+        "disallowUpdate",
+        "displayName",
+        "downloads",
+        "frontends",
+        "funding",
+        "hInstallDate",
+        "hInstallSize",
+        "hSize",
+        "hUpdated",
+        "iconURL",
+        "installSize",
+        "installTime",
+        "installed",
+        "kernels",
+        "keywords",
+        "minAppVersion",
+        "name",
+        "openIssues",
+        "outdated",
+        "preferredDesc",
+        "preferredFunding",
+        "preferredName",
+        "preferredReadme",
+        "previewURL",
+        "ratingAvailable",
+        "readme",
+        "repoHash",
+        "repoURL",
+        "size",
+        "stars",
+        "updateTime",
+        "updated",
+        "url",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarPackageDetail": {
+      "type": "object",
+      "properties": {
+        "available": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BazaarPackage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "installed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BazaarPackage"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "available",
+        "installed"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarPackageRating": {
+      "type": "object",
+      "properties": {
+        "average": {
+          "type": "number"
+        },
+        "count": {
+          "type": "integer"
+        },
+        "distribution": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 5,
+          "maxItems": 5
+        }
+      },
+      "required": [
+        "average",
+        "count",
+        "distribution"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarPackageSizeData": {
+      "type": "object",
+      "properties": {
+        "hInstallSize": {
+          "type": "string"
+        },
+        "installSize": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "hInstallSize",
+        "installSize"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarPackagesData": {
+      "type": "object",
+      "properties": {
+        "packages": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BazaarPackage"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "packages"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarREADMEData": {
+      "type": "object",
+      "properties": {
+        "html": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "html"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarRatingData": {
+      "type": "object",
+      "properties": {
+        "rating": {
+          "$ref": "#/$defs/BazaarPackageRating"
+        },
+        "ratingAvailable": {
+          "type": "boolean"
+        },
+        "userRating": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "ratingAvailable",
+        "userRating"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarRatingError": {
+      "type": "object",
+      "properties": {
+        "errorCode": {
+          "type": "string",
+          "enum": [
+            "bazaarRatingRateLimited",
+            "bazaarPackagePending"
+          ]
+        }
+      },
+      "required": [
+        "errorCode"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarRatingResult": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BazaarRatingData"
+        },
+        {
+          "$ref": "#/$defs/BazaarRatingError"
+        }
+      ]
+    },
+    "BazaarRatingsData": {
+      "type": "object",
+      "properties": {
+        "eligiblePackageNames": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ratings": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BazaarPackageRating"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "eligiblePackageNames",
+        "ratings"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarStatusBar": {
+      "type": "object",
+      "properties": {
+        "msgDataSyncDisabled": {
+          "type": "boolean"
+        },
+        "msgTaskAssetDatabaseIndexCommitDisabled": {
+          "type": "boolean"
+        },
+        "msgTaskDatabaseIndexCommitDisabled": {
+          "type": "boolean"
+        },
+        "msgTaskHistoryDatabaseIndexCommitDisabled": {
+          "type": "boolean"
+        },
+        "msgTaskHistoryGenerateFileDisabled": {
+          "type": "boolean"
+        },
+        "version": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "msgDataSyncDisabled",
+        "msgTaskAssetDatabaseIndexCommitDisabled",
+        "msgTaskDatabaseIndexCommitDisabled",
+        "msgTaskHistoryDatabaseIndexCommitDisabled",
+        "msgTaskHistoryGenerateFileDisabled",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarUpdatedData": {
+      "type": "object",
+      "properties": {
+        "icons": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BazaarPackageDetail"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "plugins": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BazaarPackageDetail"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "templates": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BazaarPackageDetail"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "themes": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BazaarPackageDetail"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "widgets": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/BazaarPackageDetail"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "icons",
+        "plugins",
+        "templates",
+        "themes",
+        "widgets"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarUserRatingsData": {
+      "type": "object",
+      "properties": {
+        "eligiblePackageNames": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "userRatings": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "eligiblePackageNames",
+        "userRatings"
+      ],
+      "additionalProperties": false
+    },
+    "BazaarUserRatingsResult": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BazaarUserRatingsData"
+        },
+        {
+          "$ref": "#/$defs/BazaarRatingError"
+        }
+      ]
+    },
     "BlockBreadcrumbChildren": {
       "type": "object",
       "properties": {
@@ -4874,6 +6162,202 @@
       },
       "additionalProperties": false
     },
+    "GetBazaarIconRequestInput": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "GetBazaarPackageREADMERequestInput": {
+      "type": "object",
+      "properties": {
+        "packageType": {
+          "type": "string"
+        },
+        "repoHash": {
+          "type": "string"
+        },
+        "repoURL": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "packageType",
+        "repoHash",
+        "repoURL"
+      ],
+      "additionalProperties": false
+    },
+    "GetBazaarPackageRatingRequestInput": {
+      "type": "object",
+      "properties": {
+        "packageName": {
+          "type": "string"
+        },
+        "packageType": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "packageName",
+        "packageType"
+      ],
+      "additionalProperties": false
+    },
+    "GetBazaarPackageRatingsRequestInput": {
+      "type": "object",
+      "properties": {
+        "packageNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "packageType": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "packageNames",
+        "packageType"
+      ],
+      "additionalProperties": false
+    },
+    "GetBazaarPackageRequestInput": {
+      "type": "object",
+      "properties": {
+        "frontend": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "packageName": {
+          "type": "string"
+        },
+        "packageType": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "packageName",
+        "packageType"
+      ],
+      "additionalProperties": false
+    },
+    "GetBazaarPackageUserRatingsRequestInput": {
+      "type": "object",
+      "properties": {
+        "packageNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "packageType": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "packageNames",
+        "packageType"
+      ],
+      "additionalProperties": false
+    },
+    "GetBazaarPluginRequestInput": {
+      "type": "object",
+      "properties": {
+        "frontend": {
+          "type": "string"
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "frontend"
+      ],
+      "additionalProperties": false
+    },
+    "GetBazaarTemplateRequestInput": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "GetBazaarThemeRequestInput": {
+      "type": "object",
+      "properties": {
+        "frontend": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "GetBazaarWidgetRequestInput": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "GetEmbedBlockRequestInput": {
       "type": "object",
       "properties": {
@@ -4921,6 +6405,118 @@
         "embedBlockID",
         "includeIDs"
       ],
+      "additionalProperties": false
+    },
+    "GetInstalledIconRequestInput": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "GetInstalledPackageSizeRequestInput": {
+      "type": "object",
+      "properties": {
+        "packageName": {
+          "type": "string"
+        },
+        "packageType": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "packageName",
+        "packageType"
+      ],
+      "additionalProperties": false
+    },
+    "GetInstalledPluginRequestInput": {
+      "type": "object",
+      "properties": {
+        "frontend": {
+          "type": "string"
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "frontend"
+      ],
+      "additionalProperties": false
+    },
+    "GetInstalledTemplateRequestInput": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "GetInstalledThemeRequestInput": {
+      "type": "object",
+      "properties": {
+        "frontend": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "GetInstalledWidgetRequestInput": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
       "additionalProperties": false
     },
     "GetSnippetRequestInput": {
@@ -4983,6 +6579,18 @@
           ]
         }
       },
+      "additionalProperties": false
+    },
+    "GetUpdatedPackageRequestInput": {
+      "type": "object",
+      "properties": {
+        "frontend": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "frontend"
+      ],
       "additionalProperties": false
     },
     "GlobalGraphConf": {
@@ -7026,6 +8634,242 @@
         "data",
         "dataType"
       ],
+      "additionalProperties": false
+    },
+    "InstallBazaarIconRequestInput": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "packageName": {
+          "type": "string"
+        },
+        "repoHash": {
+          "type": "string"
+        },
+        "repoRef": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "repoURL": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "packageName",
+        "repoHash",
+        "repoURL"
+      ],
+      "additionalProperties": false
+    },
+    "InstallBazaarPluginRequestInput": {
+      "type": "object",
+      "properties": {
+        "frontend": {
+          "type": "string"
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "packageName": {
+          "type": "string"
+        },
+        "repoHash": {
+          "type": "string"
+        },
+        "repoRef": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "repoURL": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "frontend",
+        "packageName",
+        "repoHash",
+        "repoURL"
+      ],
+      "additionalProperties": false
+    },
+    "InstallBazaarTemplateRequestInput": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "packageName": {
+          "type": "string"
+        },
+        "repoHash": {
+          "type": "string"
+        },
+        "repoRef": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "repoURL": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "packageName",
+        "repoHash",
+        "repoURL"
+      ],
+      "additionalProperties": false
+    },
+    "InstallBazaarThemeRequestInput": {
+      "type": "object",
+      "properties": {
+        "frontend": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "type": "number"
+        },
+        "modeOS": {
+          "type": "boolean"
+        },
+        "packageName": {
+          "type": "string"
+        },
+        "repoHash": {
+          "type": "string"
+        },
+        "repoRef": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "repoURL": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "packageName",
+        "repoHash",
+        "repoURL"
+      ],
+      "additionalProperties": false
+    },
+    "InstallBazaarWidgetRequestInput": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "packageName": {
+          "type": "string"
+        },
+        "repoHash": {
+          "type": "string"
+        },
+        "repoRef": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "repoURL": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "packageName",
+        "repoHash",
+        "repoURL"
+      ],
+      "additionalProperties": false
+    },
+    "InstallLocalBazaarPackageRequestInput": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "format": "binary"
+        },
+        "frontend": {
+          "type": "string"
+        },
+        "overwrite": {
+          "type": "string"
+        }
+      },
       "additionalProperties": false
     },
     "JSONValue": {
@@ -10859,6 +12703,26 @@
       ],
       "additionalProperties": false
     },
+    "SetBazaarPackageRatingRequestInput": {
+      "type": "object",
+      "properties": {
+        "packageName": {
+          "type": "string"
+        },
+        "packageType": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "packageName",
+        "packageType",
+        "rating"
+      ],
+      "additionalProperties": false
+    },
     "SetBlockAttrsRequestInput": {
       "type": "object",
       "properties": {
@@ -11910,6 +13774,136 @@
       ],
       "additionalProperties": false
     },
+    "UninstallBazaarIconRequestInput": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "packageName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "packageName"
+      ],
+      "additionalProperties": false
+    },
+    "UninstallBazaarPluginRequestInput": {
+      "type": "object",
+      "properties": {
+        "frontend": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "packageName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "packageName"
+      ],
+      "additionalProperties": false
+    },
+    "UninstallBazaarTemplateRequestInput": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "packageName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "packageName"
+      ],
+      "additionalProperties": false
+    },
+    "UninstallBazaarThemeRequestInput": {
+      "type": "object",
+      "properties": {
+        "frontend": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "packageName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "packageName"
+      ],
+      "additionalProperties": false
+    },
+    "UninstallBazaarWidgetRequestInput": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "packageName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "packageName"
+      ],
+      "additionalProperties": false
+    },
     "UnlockNotebookRequestInput": {
       "type": "object",
       "properties": {
@@ -11939,6 +13933,36 @@
       "required": [
         "path",
         "zipPath"
+      ],
+      "additionalProperties": false
+    },
+    "UpdateBazaarPackageRequestInput": {
+      "type": "object",
+      "properties": {
+        "frontend": {
+          "type": "string"
+        },
+        "keyword": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "packageName": {
+          "type": "string"
+        },
+        "packageType": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "frontend",
+        "packageName",
+        "packageType"
       ],
       "additionalProperties": false
     },
@@ -13963,6 +15987,2374 @@
                 "type": "integer",
                 "enum": [
                   -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/batchUpdatePackage",
+      "handler": "batchUpdatePackage",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/BatchUpdatePackageRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/getBazaarIcon",
+      "handler": "getBazaarIcon",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetBazaarIconRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/getBazaarPackage",
+      "handler": "getBazaarPackage",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetBazaarPackageRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackageDetail"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/getBazaarPackageREADME",
+      "handler": "getBazaarPackageREADME",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetBazaarPackageREADMERequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarREADMEData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/getBazaarPackageRating",
+      "handler": "getBazaarPackageRating",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetBazaarPackageRatingRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarRatingResult"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/BazaarRatingResult"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/getBazaarPackageRatings",
+      "handler": "getBazaarPackageRatings",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetBazaarPackageRatingsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarRatingsData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/getBazaarPackageUserRatings",
+      "handler": "getBazaarPackageUserRatings",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetBazaarPackageUserRatingsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarUserRatingsResult"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/BazaarUserRatingsResult"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/getBazaarPlugin",
+      "handler": "getBazaarPlugin",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetBazaarPluginRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/getBazaarTemplate",
+      "handler": "getBazaarTemplate",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetBazaarTemplateRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/getBazaarTheme",
+      "handler": "getBazaarTheme",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetBazaarThemeRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/getBazaarWidget",
+      "handler": "getBazaarWidget",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetBazaarWidgetRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/getInstalledIcon",
+      "handler": "getInstalledIcon",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetInstalledIconRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/getInstalledPackageSize",
+      "handler": "getInstalledPackageSize",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetInstalledPackageSizeRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackageSizeData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/getInstalledPlugin",
+      "handler": "getInstalledPlugin",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetInstalledPluginRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/getInstalledTemplate",
+      "handler": "getInstalledTemplate",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetInstalledTemplateRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/getInstalledTheme",
+      "handler": "getInstalledTheme",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetInstalledThemeRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/getInstalledWidget",
+      "handler": "getInstalledWidget",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetInstalledWidgetRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/getUpdatedPackage",
+      "handler": "getUpdatedPackage",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/GetUpdatedPackageRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarUpdatedData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/installBazaarIcon",
+      "handler": "installBazaarIcon",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/InstallBazaarIconRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarAppearancePackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/installBazaarPlugin",
+      "handler": "installBazaarPlugin",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/InstallBazaarPluginRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/installBazaarTemplate",
+      "handler": "installBazaarTemplate",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/InstallBazaarTemplateRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/installBazaarTheme",
+      "handler": "installBazaarTheme",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/InstallBazaarThemeRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarAppearancePackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/installBazaarWidget",
+      "handler": "installBazaarWidget",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/InstallBazaarWidgetRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/installLocalBazaarPackage",
+      "handler": "installLocalBazaarPackage",
+      "body": "multipart",
+      "request": {
+        "$ref": "#/$defs/InstallLocalBazaarPackageRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarLocalInstallResult"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/BazaarLocalInstallResult"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/setBazaarPackageRating",
+      "handler": "setBazaarPackageRating",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetBazaarPackageRatingRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarRatingResult"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/BazaarRatingResult"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/uninstallBazaarIcon",
+      "handler": "uninstallBazaarIcon",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/UninstallBazaarIconRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarAppearancePackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/uninstallBazaarPlugin",
+      "handler": "uninstallBazaarPlugin",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/UninstallBazaarPluginRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/uninstallBazaarTemplate",
+      "handler": "uninstallBazaarTemplate",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/UninstallBazaarTemplateRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/uninstallBazaarTheme",
+      "handler": "uninstallBazaarTheme",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/UninstallBazaarThemeRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarAppearancePackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/uninstallBazaarWidget",
+      "handler": "uninstallBazaarWidget",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/UninstallBazaarWidgetRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/bazaar/updateBazaarPackage",
+      "handler": "updateBazaarPackage",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/UpdateBazaarPackageRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/BazaarPackagesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
                 ]
               },
               "data": {

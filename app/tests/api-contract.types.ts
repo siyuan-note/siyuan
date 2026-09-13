@@ -6,6 +6,18 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
+fetchPost("/api/bazaar/getBazaarPackageRating", {packageType: "plugin", packageName: "example"}, response => {
+    if (response.data && "rating" in response.data && response.data.rating) {
+        const distribution: [number, number, number, number, number] = response.data.rating.distribution;
+        void distribution;
+    }
+});
+// @ts-expect-error 集市评分参数必须为数值。
+fetchPost("/api/bazaar/setBazaarPackageRating", {packageType: "plugin", packageName: "example", rating: "5"});
+// @ts-expect-error 集市包名列表只能包含字符串。
+fetchPost("/api/bazaar/getBazaarPackageRatings", {packageType: "plugin", packageNames: [1]});
+fetchPost("/api/bazaar/installLocalBazaarPackage", new ContractFormData({file: new Blob(), overwrite: "true"}));
+
 type RPCWebSocket = APIGETRoutes["/ws/plugin/rpc"]["websocket"];
 const rpcCall: RPCWebSocket["incoming"] = {jsonrpc: "2.0", method: "call", id: 1};
 const rpcNotice: RPCWebSocket["outgoing"] = {jsonrpc: "2.0", method: "event", params: null};

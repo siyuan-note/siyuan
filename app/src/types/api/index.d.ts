@@ -786,13 +786,6 @@ export type APILegacyPOSTPath =
     "/api/transactions/redo" |
     "/api/transactions/undo" |
     "/api/transactions/undoState" |
-    "/api/ui/reloadAttributeView" |
-    "/api/ui/reloadFiletree" |
-    "/api/ui/reloadIcon" |
-    "/api/ui/reloadProtyle" |
-    "/api/ui/reloadTag" |
-    "/api/ui/reloadTheme" |
-    "/api/ui/reloadUI" |
     "/plugin/private/:name/*path";
 
 export interface APIPOSTRoutes {
@@ -1470,6 +1463,41 @@ export interface APIPOSTRoutes {
         request: RenameTagRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+    };
+    "/api/ui/reloadAttributeView": {
+        request: BlockIDRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ui/reloadFiletree": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/ui/reloadIcon": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/ui/reloadProtyle": {
+        request: BlockIDRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ui/reloadTag": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/ui/reloadTheme": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/ui/reloadUI": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
     };
 }
 

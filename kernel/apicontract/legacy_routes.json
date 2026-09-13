@@ -483,12 +483,5 @@
   {"method":"POST","path":"/api/transactions/clearHistory","handler":"clearHistory"},
   {"method":"POST","path":"/api/transactions/redo","handler":"performRedo"},
   {"method":"POST","path":"/api/transactions/undo","handler":"performUndo"},
-  {"method":"POST","path":"/api/transactions/undoState","handler":"undoState"},
-  {"method":"POST","path":"/api/ui/reloadAttributeView","handler":"reloadAttributeView"},
-  {"method":"POST","path":"/api/ui/reloadFiletree","handler":"reloadFiletree"},
-  {"method":"POST","path":"/api/ui/reloadIcon","handler":"reloadIcon"},
-  {"method":"POST","path":"/api/ui/reloadProtyle","handler":"reloadProtyle"},
-  {"method":"POST","path":"/api/ui/reloadTag","handler":"reloadTag"},
-  {"method":"POST","path":"/api/ui/reloadTheme","handler":"reloadTheme"},
-  {"method":"POST","path":"/api/ui/reloadUI","handler":"reloadUI"}
+  {"method":"POST","path":"/api/transactions/undoState","handler":"undoState"}
 ]

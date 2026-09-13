@@ -366,3 +366,11 @@ var PushMsg = define[NotificationRequest, NotificationData]("pushMsg", "/api/not
 var PushErrMsg = define[NotificationRequest, NotificationData]("pushErrMsg", "/api/notification/pushErrMsg", JSONBody, ResponseOptions{}, "POST")
 
 var GetBookmark = define[EmptyRequest, []*Bookmark]("getBookmark", "/api/bookmark/getBookmark", NoBody, ResponseOptions{}, "POST")
+
+var ReloadTag = define[EmptyRequest, Null]("reloadTag", "/api/ui/reloadTag", NoBody, ResponseOptions{}, "POST")
+var ReloadFiletree = define[EmptyRequest, Null]("reloadFiletree", "/api/ui/reloadFiletree", NoBody, ResponseOptions{}, "POST")
+var ReloadProtyle = define[BlockIDRequest, Null]("reloadProtyle", "/api/ui/reloadProtyle", JSONBody, ResponseOptions{}, "POST")
+var ReloadAttributeView = define[BlockIDRequest, Null]("reloadAttributeView", "/api/ui/reloadAttributeView", JSONBody, ResponseOptions{}, "POST")
+var ReloadUI = define[EmptyRequest, Null]("reloadUI", "/api/ui/reloadUI", NoBody, ResponseOptions{}, "POST")
+var ReloadIcon = define[EmptyRequest, Null]("reloadIcon", "/api/ui/reloadIcon", NoBody, ResponseOptions{}, "POST")
+var ReloadTheme = define[EmptyRequest, Null]("reloadTheme", "/api/ui/reloadTheme", NoBody, ResponseOptions{}, "POST")

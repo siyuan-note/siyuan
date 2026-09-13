@@ -39,6 +39,51 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestRemoveAssetThumbnail(t *testing.T) {
+	originalDataDir, originalTempDir := util.DataDir, util.TempDir
+	t.Cleanup(func() { util.DataDir, util.TempDir = originalDataDir, originalTempDir })
+	root := filepath.Join(t.TempDir(), "assets", "workspace")
+	util.DataDir = filepath.Join(root, "data")
+	util.TempDir = filepath.Join(root, "temp")
+	for _, test := range []struct {
+		name      string
+		source    string
+		thumbnail string
+		remove    bool
+	}{
+		{"global", "assets/photo.png", "assets/photo.png", true},
+		{"uppercase", "assets/Photo.JPG", "assets/Photo.JPG", true},
+		{"nested", "assets/nested/assets/photo.jpeg", "assets/nested/assets/photo.jpeg", true},
+		{"notebook", "20260101120000-abc1234/assets/photo.png", "assets/photo.png", true},
+		{"document", "20260101120000-abc1234/20260101120001-def5678/assets/photo.png", "assets/photo.png", true},
+		{"unsupported", "assets/photo.txt", "assets/photo.txt", false},
+		{"outside", "../assets/photo.png", "assets/photo.png", false},
+		{"nonasset", "storage/assets/photo.png", "assets/photo.png", false},
+		{"similar directory", "otherassets/photo.png", "assets/photo.png", false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			thumbnailPath := filepath.Join(util.TempDir, "thumbnails", filepath.FromSlash(test.thumbnail))
+			if err := os.MkdirAll(filepath.Dir(thumbnailPath), 0755); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(thumbnailPath, []byte("cached image"), 0644); err != nil {
+				t.Fatal(err)
+			}
+			assetAbsPath := filepath.Join(util.DataDir, filepath.FromSlash(test.source))
+			removeAssetThumbnail(assetAbsPath)
+			_, err := os.Stat(thumbnailPath)
+			if test.remove {
+				if !os.IsNotExist(err) {
+					t.Fatalf("thumbnail should be removed: %v", err)
+				}
+				removeAssetThumbnail(assetAbsPath)
+			} else if err != nil {
+				t.Fatalf("unrelated thumbnail should be preserved: %v", err)
+			}
+		})
+	}
+}
+
 func TestGenerateImageDoesNotRequireDocument(t *testing.T) {
 	var source bytes.Buffer
 	if err := png.Encode(&source, image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {

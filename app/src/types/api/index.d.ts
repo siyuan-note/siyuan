@@ -386,7 +386,6 @@ export type APILegacyPOSTPath =
     "/api/asset/upload" |
     "/api/asset/uploadCloud" |
     "/api/asset/uploadCloudByAssetsPaths" |
-    "/api/attr/resetBlockAttrs" |
     "/api/av/addAttributeViewBlocks" |
     "/api/av/addAttributeViewKey" |
     "/api/av/appendAttributeViewDetachedBlocksWithValues" |
@@ -424,7 +423,6 @@ export type APILegacyPOSTPath =
     "/api/av/renderHistoryAttributeView" |
     "/api/av/renderSnapshotAttributeView" |
     "/api/av/searchAttributeView" |
-    "/api/av/searchAttributeViewNonRelationKey" |
     "/api/av/searchAttributeViewRelationKey" |
     "/api/av/searchAttributeViewRollupDestKeys" |
     "/api/av/setAttrViewContextFilter" |
@@ -709,7 +707,6 @@ export type APILegacyPOSTPath =
     "/api/storage/removeViewState" |
     "/api/storage/setCriterion" |
     "/api/storage/setInlineStyles" |
-    "/api/storage/setLocalStorage" |
     "/api/storage/setLocalStorageVal" |
     "/api/storage/setLocalStorageVals" |
     "/api/storage/setOutlineStorage" |
@@ -771,7 +768,6 @@ export type APILegacyPOSTPath =
     "/api/system/oidc/validateActivate" |
     "/api/system/oidc/validateCancel" |
     "/api/system/oidc/validatePoll" |
-    "/api/system/reloadUI" |
     "/api/system/removeCustomFont" |
     "/api/system/removeWorkspaceDir" |
     "/api/system/removeWorkspaceDirPhysically" |
@@ -825,10 +821,20 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
+    "/api/attr/resetBlockAttrs": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
     "/api/attr/setBlockAttrs": {
         request: SetBlockAttrsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+    };
+    "/api/av/searchAttributeViewNonRelationKey": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
     };
     "/api/block/appendBlock": {
         request: AppendBlockRequestInput;
@@ -1390,6 +1396,11 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
+    "/api/storage/setLocalStorage": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
     "/api/system/addMicrosoftDefenderExclusion": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -1426,6 +1437,11 @@ export interface APIPOSTRoutes {
         body: "none";
     };
     "/api/system/rebuildDataIndex": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/reloadUI": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";

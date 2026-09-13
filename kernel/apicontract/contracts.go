@@ -380,3 +380,8 @@ var FlushTransaction = define[EmptyRequest, Null]("flushTransaction", "/api/sqli
 var GetSnippet = define[GetSnippetRequest, SnippetsData]("getSnippet", "/api/snippet/getSnippet", JSONBody, ResponseOptions{}, "POST")
 var SetSnippet = define[SetSnippetRequest, Null]("setSnippet", "/api/snippet/setSnippet", JSONBody, ResponseOptions{}, "POST")
 var RemoveSnippet = define[TrimmedIDRequest, *Snippet]("removeSnippet", "/api/snippet/removeSnippet", JSONBody, ResponseOptions{}, "POST")
+
+var ResetBlockAttrs = define[EmptyRequest, Null]("resetBlockAttrs", "/api/attr/resetBlockAttrs", NoBody, ResponseOptions{}, "POST")
+var SearchAttributeViewNonRelationKey = define[EmptyRequest, Null]("searchAttributeViewNonRelationKey", "/api/av/searchAttributeViewNonRelationKey", NoBody, ResponseOptions{}, "POST")
+var SetLocalStorage = define[EmptyRequest, Null]("setLocalStorage", "/api/storage/setLocalStorage", NoBody, ResponseOptions{}, "POST")
+var DeprecatedReloadUI = define[EmptyRequest, Null]("deprecatedReloadUI", "/api/system/reloadUI", NoBody, ResponseOptions{}, "POST")

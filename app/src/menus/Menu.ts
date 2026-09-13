@@ -638,7 +638,8 @@ export class Menu {
             this.element.lastElementChild.scrollTop = 0;
             return;
         }
-        // 主动打开菜单时跳过键盘弹出保护锁，收起键盘后再展开面板。
+        // 先结束编辑焦点，避免工具栏保留的焦点阻止输入法收起，再跳过键盘弹出保护锁。
+        (document.activeElement as HTMLElement)?.blur();
         activeBlur(true);
         clearTimeout(fullscreenCloseTimeout);
         this.element.querySelectorAll(":scope > .b3-menu__items, .b3-menu__submenu > .b3-menu__items")

@@ -1,4 +1,7 @@
 {
+	"orderedListItemBlock": "क्रमांकित सूची आइटम ब्लॉक",
+	"unorderedListItemBlock": "अक्रमित सूची आइटम ब्लॉक",
+	"taskListItemBlock": "कार्य सूची आइटम ब्लॉक",
 	"tableBlock": "तालिका ब्लॉक",
 	"databaseBlock": "डेटाबेस ब्लॉक",
 	"widgetBlock": "विजेट ब्लॉक",

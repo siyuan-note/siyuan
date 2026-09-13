@@ -1,4 +1,7 @@
 {
+	"orderedListItemBlock": "Блок элемента упорядоченного списка",
+	"unorderedListItemBlock": "Блок элемента неупорядоченного списка",
+	"taskListItemBlock": "Блок элемента списка задач",
 	"tableBlock": "Блок таблицы",
 	"databaseBlock": "Блок базы данных",
 	"widgetBlock": "Блок виджета",

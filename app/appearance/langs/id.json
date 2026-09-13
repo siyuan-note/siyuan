@@ -1,4 +1,7 @@
 {
+	"orderedListItemBlock": "Blok item daftar berurutan",
+	"unorderedListItemBlock": "Blok item daftar tidak berurutan",
+	"taskListItemBlock": "Blok item daftar tugas",
 	"tableBlock": "Blok tabel",
 	"databaseBlock": "Blok basis data",
 	"widgetBlock": "Blok widget",

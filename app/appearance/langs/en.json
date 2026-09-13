@@ -1,4 +1,7 @@
 {
+	"orderedListItemBlock": "Ordered list item block",
+	"unorderedListItemBlock": "Unordered list item block",
+	"taskListItemBlock": "Task list item block",
 	"tableBlock": "Table block",
 	"databaseBlock": "Database block",
 	"widgetBlock": "Widget block",

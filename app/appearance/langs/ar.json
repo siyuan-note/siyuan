@@ -1,4 +1,7 @@
 {
+	"orderedListItemBlock": "كتلة عنصر قائمة مرقمة",
+	"unorderedListItemBlock": "كتلة عنصر قائمة غير مرتبة",
+	"taskListItemBlock": "كتلة عنصر قائمة مهام",
 	"tableBlock": "كتلة جدول",
 	"databaseBlock": "كتلة قاعدة بيانات",
 	"widgetBlock": "كتلة عنصر واجهة",

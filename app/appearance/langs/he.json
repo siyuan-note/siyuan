@@ -1,4 +1,7 @@
 {
+	"orderedListItemBlock": "בלוק פריט ברשימה מסודרת",
+	"unorderedListItemBlock": "בלוק פריט ברשימה לא מסודרת",
+	"taskListItemBlock": "בלוק פריט ברשימת משימות",
 	"tableBlock": "בלוק טבלה",
 	"databaseBlock": "בלוק מסד נתונים",
 	"widgetBlock": "בלוק וידג׳ט",

@@ -1,4 +1,7 @@
 {
+	"orderedListItemBlock": "Bloc d’élément de liste ordonnée",
+	"unorderedListItemBlock": "Bloc d’élément de liste non ordonnée",
+	"taskListItemBlock": "Bloc d’élément de liste de tâches",
 	"tableBlock": "Bloc de tableau",
 	"databaseBlock": "Bloc de base de données",
 	"widgetBlock": "Bloc de widget",

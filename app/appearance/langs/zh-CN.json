@@ -1,4 +1,7 @@
 {
+	"orderedListItemBlock": "有序列表项块",
+	"unorderedListItemBlock": "无序列表项块",
+	"taskListItemBlock": "任务列表项块",
 	"tableBlock": "表格块",
 	"databaseBlock": "数据库块",
 	"widgetBlock": "挂件块",

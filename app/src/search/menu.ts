@@ -182,7 +182,9 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
     <div class="fn__none" style="padding-left: 20px">
         ${(["o", "u", "t"] as const).map((subtype) => `
         <label class="fn__flex b3-label">
-            <div class="fn__flex-1 fn__flex-center">${window.siyuan.languages[{o: "ordered-list", u: "unorderedList", t: "check"}[subtype]]}</div>
+            <div class="fn__flex-1 fn__flex-center">${window.siyuan.languages[(group === "listItem" ?
+                {o: "orderedListItemBlock", u: "unorderedListItemBlock", t: "taskListItemBlock"} :
+                {o: "ordered-list", u: "unorderedList", t: "check"})[subtype]]}</div>
             <span class="fn__space"></span>
             <input class="b3-switch fn__flex-center" data-group="${group}" data-subtype="${subtype}" type="checkbox"${config.subTypes?.[group]?.[subtype] ? " checked" : ""}>
         </label>`).join("")}<div></div>

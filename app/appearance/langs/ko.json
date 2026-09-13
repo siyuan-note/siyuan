@@ -1,4 +1,7 @@
 {
+	"orderedListItemBlock": "순서 있는 목록 항목 블록",
+	"unorderedListItemBlock": "순서 없는 목록 항목 블록",
+	"taskListItemBlock": "작업 목록 항목 블록",
 	"tableBlock": "표 블록",
 	"databaseBlock": "데이터베이스 블록",
 	"widgetBlock": "위젯 블록",

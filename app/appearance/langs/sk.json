@@ -1,4 +1,7 @@
 {
+	"orderedListItemBlock": "Blok položky číslovaného zoznamu",
+	"unorderedListItemBlock": "Blok položky neusporiadaného zoznamu",
+	"taskListItemBlock": "Blok položky zoznamu úloh",
 	"tableBlock": "Blok tabuľky",
 	"databaseBlock": "Blok databázy",
 	"widgetBlock": "Blok miniaplikácie",

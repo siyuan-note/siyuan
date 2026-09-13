@@ -1,4 +1,7 @@
 {
+	"orderedListItemBlock": "บล็อกหน่วยรายการเรียงลำดับ",
+	"unorderedListItemBlock": "บล็อกหน่วยรายการไม่เรียงลำดับ",
+	"taskListItemBlock": "บล็อกหน่วยรายการงาน",
 	"tableBlock": "บล็อกตาราง",
 	"databaseBlock": "บล็อกฐานข้อมูล",
 	"widgetBlock": "บล็อกวิดเจ็ต",

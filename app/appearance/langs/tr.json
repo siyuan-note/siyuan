@@ -1,4 +1,7 @@
 {
+	"orderedListItemBlock": "Sıralı liste öğesi bloğu",
+	"unorderedListItemBlock": "Sırasız liste öğesi bloğu",
+	"taskListItemBlock": "Görev listesi öğesi bloğu",
 	"tableBlock": "Tablo bloğu",
 	"databaseBlock": "Veritabanı bloğu",
 	"widgetBlock": "Widget bloğu",

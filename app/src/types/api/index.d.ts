@@ -220,6 +220,10 @@ export type CloudSpaceData = { "backup": CloudBackup | null; "hAssetSize": strin
 
 export type CloudSync = { "cloudName": string; "hSize": string; "saveDir": string; "size": number; "updated": string; };
 
+export type CloudSyncDir = { "cloudName": string; "hSize": string; "saveDir": string; "size": number; "updated": string; };
+
+export type CloudSyncDirsData = { "checkedSyncDir": string; "hSize": string; "syncDirs": Array<CloudSyncDir | null> | null; };
+
 export type ContentWordCountRequestInput = { "content": string; "reqId"?: JSONValue | null; };
 
 export type ContinueImportSYRequestInput = { "notebook": string; "token": string; };
@@ -578,6 +582,8 @@ export type PandocData = { "path": string; };
 
 export type PandocRequestInput = { "args": Array<string>; "dir"?: string | null; };
 
+export type PerformSyncRequestInput = { "mobileSwitch"?: boolean | null; "upload"?: boolean; };
+
 export type Petal = { "css": string; "disabledInPublish": boolean; "disallowInstall": boolean; "displayName": string; "enabled": boolean; "i18n": { [key: string]: JSONValue } | null; "incompatible": boolean; "js": string; "kernel": KernelPetal; "name": string; "userDisabledInPublish": boolean; "version": string; };
 
 export type PinnedDoc = { "childrenSortMode": number | null; "icon": string; "id": string; "name": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
@@ -746,6 +752,12 @@ export type SetSnapshotMemoRequestInput = { "id": string; "memo": string; };
 
 export type SetSnippetRequestInput = { "snippets": Array<SnippetInput>; };
 
+export type SetSyncLocalRequestInput = { "local": SyncLocalInput; };
+
+export type SetSyncS3RequestInput = { "s3": SyncS3Input; };
+
+export type SetSyncWebDAVRequestInput = { "webdav": SyncWebDAVInput; };
+
 export type Shorthand = { "hCreated": string; "oId": string; "shorthandContent": string; "shorthandDesc": string; "shorthandFrom": number; "shorthandMd": string; "shorthandTitle": string; "shorthandURL": string; };
 
 export type ShorthandPage = { "pagination": ShorthandPagination; "shorthands": Array<Shorthand | null>; };
@@ -775,6 +787,48 @@ export type StorageSetKeysRequestInput = { "app"?: string | null; "keyVals": { [
 export type StorageSetRequestInput = { "app"?: string | null; "key": string; "val"?: JSONValue | null; };
 
 export type SwapBlockRefRequestInput = { "defID": string; "includeChildren": boolean; "refID": string; };
+
+export type SyncAssetDownloadModeData = { "assetDownloadMode": number; };
+
+export type SyncEnabledRequestInput = { "enabled": boolean; };
+
+export type SyncInfoData = { "kernel": string; "kernels": Array<SyncOnlineKernel | null> | null; "stat": string; "synced": number; };
+
+export type SyncIntervalRequestInput = { "interval": number; };
+
+export type SyncLANRequestInput = { "enabled": boolean; "maxConcurrentReqs"?: number | null; };
+
+export type SyncLANStatus = { "active": boolean; "connectedPeers": number; "discoveredPeers": number; "enabled": boolean; "maxConcurrentReqs": number; };
+
+export type SyncLocal = { "concurrentReqs": number; "endpoint": string; "timeout": number; };
+
+export type SyncLocalData = { "local": SyncLocal | null; };
+
+export type SyncLocalInput = { "concurrentReqs"?: number | null; "endpoint"?: string | null; "timeout"?: number | null; };
+
+export type SyncModeRequestInput = { "mode": number; };
+
+export type SyncNameRequestInput = { "name": string; };
+
+export type SyncOnlineKernel = { "hostname": string; "id": string; "os": string; "ver": string; };
+
+export type SyncProviderExportData = { "name": string; "zip": string; };
+
+export type SyncProviderImportRequestInput = { "file"?: Blob; };
+
+export type SyncProviderRequestInput = { "provider": number; };
+
+export type SyncS3 = { "accessKey": string; "bucket": string; "concurrentReqs": number; "endpoint": string; "pathStyle": boolean; "region": string; "secretKey": string; "skipTlsVerify": boolean; "timeout": number; };
+
+export type SyncS3Data = { "s3": SyncS3 | null; };
+
+export type SyncS3Input = { "accessKey"?: string | null; "bucket"?: string | null; "concurrentReqs"?: number | null; "endpoint"?: string | null; "pathStyle"?: boolean | null; "region"?: string | null; "secretKey"?: string | null; "skipTlsVerify"?: boolean | null; "timeout"?: number | null; };
+
+export type SyncWebDAV = { "concurrentReqs": number; "endpoint": string; "password": string; "skipTlsVerify": boolean; "timeout": number; "username": string; };
+
+export type SyncWebDAVData = { "webdav": SyncWebDAV | null; };
+
+export type SyncWebDAVInput = { "concurrentReqs"?: number | null; "endpoint"?: string | null; "password"?: string | null; "skipTlsVerify"?: boolean | null; "timeout"?: number | null; "username"?: string | null; };
 
 export type TagData = { "children": Array<TagData | null> | null; "count": number; "depth": number; "label": string; "name": string; "type": string; };
 
@@ -1152,30 +1206,6 @@ export type APILegacyPOSTPath =
     "/api/setting/setSnippet" |
     "/api/setting/setTheme" |
     "/api/setting/setVariables" |
-    "/api/sync/createCloudSyncDir" |
-    "/api/sync/exportSyncProviderS3" |
-    "/api/sync/exportSyncProviderWebDAV" |
-    "/api/sync/getBootSync" |
-    "/api/sync/getSyncInfo" |
-    "/api/sync/getSyncLANStatus" |
-    "/api/sync/importSyncProviderS3" |
-    "/api/sync/importSyncProviderWebDAV" |
-    "/api/sync/listCloudSyncDir" |
-    "/api/sync/performBootSync" |
-    "/api/sync/performSync" |
-    "/api/sync/removeCloudSyncDir" |
-    "/api/sync/setCloudSyncDir" |
-    "/api/sync/setSyncAssetDownloadMode" |
-    "/api/sync/setSyncEnable" |
-    "/api/sync/setSyncGenerateConflictDoc" |
-    "/api/sync/setSyncInterval" |
-    "/api/sync/setSyncLAN" |
-    "/api/sync/setSyncMode" |
-    "/api/sync/setSyncPerception" |
-    "/api/sync/setSyncProvider" |
-    "/api/sync/setSyncProviderLocal" |
-    "/api/sync/setSyncProviderS3" |
-    "/api/sync/setSyncProviderWebDAV" |
     "/api/system/addCustomEmoji" |
     "/api/system/checkUpdate" |
     "/api/system/checkWorkspaceDir" |
@@ -2557,6 +2587,126 @@ export interface APIPOSTRoutes {
     "/api/storage/updateRecentDocViewTime": {
         request: RecentDocUpdateRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/createCloudSyncDir": {
+        request: SyncNameRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/exportSyncProviderS3": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SyncProviderExportData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/sync/exportSyncProviderWebDAV": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SyncProviderExportData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/sync/getBootSync": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/sync/getSyncInfo": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SyncInfoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/sync/getSyncLANStatus": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SyncLANStatus; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/sync/importSyncProviderS3": {
+        request: SyncProviderImportRequestInput;
+        response: { "code": 0; "data": SyncS3Data; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "s3"?: never; }) | null | (SyncS3Data & { "closeTimeout"?: never; }); "msg": string; };
+        body: "multipart";
+    };
+    "/api/sync/importSyncProviderWebDAV": {
+        request: SyncProviderImportRequestInput;
+        response: { "code": 0; "data": SyncWebDAVData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "webdav"?: never; }) | null | (SyncWebDAVData & { "closeTimeout"?: never; }); "msg": string; };
+        body: "multipart";
+    };
+    "/api/sync/listCloudSyncDir": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": CloudSyncDirsData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/sync/performBootSync": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/sync/performSync": {
+        request: PerformSyncRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/removeCloudSyncDir": {
+        request: SyncNameRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setCloudSyncDir": {
+        request: SyncNameRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncAssetDownloadMode": {
+        request: SyncModeRequestInput;
+        response: { "code": 0; "data": SyncAssetDownloadModeData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncEnable": {
+        request: SyncEnabledRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncGenerateConflictDoc": {
+        request: SyncEnabledRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncInterval": {
+        request: SyncIntervalRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncLAN": {
+        request: SyncLANRequestInput;
+        response: { "code": 0; "data": SyncLANStatus; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncMode": {
+        request: SyncModeRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncPerception": {
+        request: SyncEnabledRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncProvider": {
+        request: SyncProviderRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncProviderLocal": {
+        request: SetSyncLocalRequestInput;
+        response: { "code": 0; "data": SyncLocalData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncProviderS3": {
+        request: SetSyncS3RequestInput;
+        response: { "code": 0; "data": SyncS3Data; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncProviderWebDAV": {
+        request: SetSyncWebDAVRequestInput;
+        response: { "code": 0; "data": SyncWebDAVData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/system/addMicrosoftDefenderExclusion": {

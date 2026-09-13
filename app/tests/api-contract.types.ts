@@ -6,6 +6,17 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
+fetchPost("/api/sync/setSyncLAN", {enabled: true, maxConcurrentReqs: 2.5}, response => {
+    const peers: number = response.data.connectedPeers;
+    void peers;
+});
+fetchPost("/api/sync/setSyncProviderS3", {s3: {endpoint: "https://example.invalid", pathStyle: true}});
+// @ts-expect-error 同步开关只接受布尔值。
+fetchPost("/api/sync/setSyncEnable", {enabled: "true"});
+// @ts-expect-error 同步配置中的超时不是字符串。
+fetchPost("/api/sync/setSyncProviderS3", {s3: {timeout: "30"}});
+fetchPost("/api/sync/importSyncProviderWebDAV", new ContractFormData({file: new Blob()}));
+
 fetchPost("/api/bazaar/getBazaarPackageRating", {packageType: "plugin", packageName: "example"}, response => {
     if (response.data && "rating" in response.data && response.data.rating) {
         const distribution: [number, number, number, number, number] = response.data.rating.distribution;

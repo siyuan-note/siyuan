@@ -2,6 +2,8 @@ import {Dialog} from "../dialog";
 import {Constants} from "../constants";
 import {escapeHtml} from "../util/escape";
 import {fetchPost} from "../util/fetch";
+import {ContractFormData} from "../util/contractFormData";
+import type {APICallbackResponse, APIPOSTRoutes} from "../types/api";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {showMessage} from "../dialog/message";
 import {importObsidianVault} from "./importObsidian";
@@ -281,8 +283,8 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
         bindFileInput(provider, (file, input) => {
             input.value = "";
             const isS3 = provider === "s3";
-            postFile(isS3 ? "/api/sync/importSyncProviderS3" : "/api/sync/importSyncProviderWebDAV", file, {}, (response) => {
-                if (isS3) {
+            fetchPost(isS3 ? "/api/sync/importSyncProviderS3" : "/api/sync/importSyncProviderWebDAV", new ContractFormData({file}), (response: APICallbackResponse<APIPOSTRoutes["/api/sync/importSyncProviderS3" | "/api/sync/importSyncProviderWebDAV"]["response"]>) => {
+                if ("s3" in response.data) {
                     window.siyuan.config.sync.s3 = response.data.s3;
                 } else {
                     window.siyuan.config.sync.webdav = response.data.webdav;

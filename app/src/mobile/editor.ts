@@ -22,7 +22,6 @@ import {stickyRow} from "../protyle/render/av/row";
 import {invalidateTrackedRanges} from "../protyle/util/trackedRange";
 import {getActiveMobileSecondaryEditor} from "./util/secondaryEditors";
 import {closeMobileBacklinkSheets} from "./util/backlinkPanels";
-import {focusByRange} from "../protyle/util/selection";
 
 export const getCurrentEditor = () => {
     return getActiveMobileSecondaryEditor() || window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
@@ -85,16 +84,13 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             void window.siyuan.mobile.docks.file?.selectOpenedFile(protyle.notebookId, protyle.path);
         }
         afterOpen?.(protyle);
+        const titleElement = document.getElementById("toolbarName") as HTMLInputElement;
         if (isValid() && action.includes(Constants.CB_GET_OPENNEW) && !protyle.disabled &&
-            protyle.title?.editElement.isContentEditable) {
+            titleElement && !titleElement.readOnly && !titleElement.disabled) {
             // 新建文档加载完成后聚焦标题，通过移动端焦点桥接唤起键盘。
-            const titleElement = protyle.title.editElement;
             protyle.contentElement.scrollTop = 0;
             titleElement.focus({preventScroll: true});
-            const range = document.createRange();
-            range.selectNodeContents(titleElement);
-            range.collapse(false);
-            focusByRange(range);
+            titleElement.setSelectionRange(titleElement.value.length, titleElement.value.length);
         }
     };
     const fail = (invalid = false) => {

@@ -1,6 +1,5 @@
 import {mountHelp, newNotebook} from "../../util/mount";
 import {newFile} from "../../util/newFile";
-import {getOpenNotebookCount} from "../../util/pathName";
 import {popSearch} from "../menu/search";
 import {getRecentDocs} from "../menu/getRecentDocs";
 import {openHistory} from "../../history/history";
@@ -39,10 +38,10 @@ export const setEmpty = (app: App) => {
 <div id="emptyHistory" class="b3-list-item${window.siyuan.config.readonly ? " fn__none" : ""}">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconHistory"></use></svg><span class="fn__space"></span><span class="b3-list-item__text">${window.siyuan.languages.dataHistory}</span>
 </div>
-<div id="emptyNewFile" class="b3-list-item${(getOpenNotebookCount() > 0 || !window.siyuan.config.readonly) ? "" : " fn__none"}">
+<div id="emptyNewFile" class="b3-list-item${window.siyuan.config.readonly ? " fn__none" : ""}">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconAddDoc"></use></svg><span class="fn__space"></span><span class="b3-list-item__text">${window.siyuan.languages.newFile}</span>
 </div>
-<div class="b3-list-item" id="emptyNewNotebook${window.siyuan.config.readonly ? " fn__none" : ""}">
+<div class="b3-list-item${window.siyuan.config.readonly ? " fn__none" : ""}" id="emptyNewNotebook">
     <svg class="b3-list-item__graphic"><use xlink:href="#iconNewNoteBook"></use></svg><span class="fn__space"></span><span class="b3-list-item__text">${window.siyuan.languages.newNotebook}</span>
 </div>
 <div class="b3-list-item${window.siyuan.config.readonly ? " fn__none" : ""}" id="emptyHelp">

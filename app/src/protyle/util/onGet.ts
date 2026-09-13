@@ -540,7 +540,8 @@ export const enableProtyle = (protyle: IProtyle) => {
         updateMobileTitleReadonly(protyle);
         /// #endif
     }
-    protyle.wysiwyg.element.setAttribute("contenteditable", isIPhone() ? "false" : "true");
+    // 解除只读时保留 Android 和 iPhone 的正文编辑边界，结构容器保持不可编辑。
+    protyle.wysiwyg.element.setAttribute("contenteditable", (isIPhone() || /Android/i.test(navigator.userAgent)) ? "false" : "true");
     protyle.wysiwyg.element.style.userSelect = "";
     // 用于区分移动端样式
     protyle.wysiwyg.element.setAttribute("data-readonly", "false");

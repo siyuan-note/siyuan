@@ -489,8 +489,8 @@ export class WYSIWYG {
         this.element = document.createElement("div");
         this.element.className = "protyle-wysiwyg";
         this.element.setAttribute("spellcheck", "false");
-        // iPhone 根编辑宿主会绕过区块结构生成富文本 DOM，具体内容节点仍保持可编辑。
-        this.element.setAttribute("contenteditable", isIPhone() ? "false" : "true");
+        // Android 和 iPhone 的原生编辑限于正文节点，避免输入法修改列表等结构容器。
+        this.element.setAttribute("contenteditable", (isIPhone() || /Android/i.test(navigator.userAgent)) ? "false" : "true");
         if (window.siyuan.config.editor.displayBookmarkIcon) {
             this.element.classList.add("protyle-wysiwyg--attr");
         }

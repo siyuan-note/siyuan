@@ -28,8 +28,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -51,11 +51,6 @@ const (
 	presentationMLNamespace            = "http://schemas.openxmlformats.org/presentationml/2006/main"
 	presentationMLStrictNamespace      = "http://purl.oclc.org/ooxml/presentationml/main"
 )
-
-type wpsPresentationConversionResult struct {
-	Converted bool   `json:"converted"`
-	DOM       string `json:"dom"`
-}
 
 type wpsPresentationBulletKind uint8
 
@@ -143,31 +138,16 @@ type wpsPresentationListStackEntry struct {
 	list     *wpsPresentationHTMLList
 }
 
-func wpsPresentation2BlockDOM(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	result := &wpsPresentationConversionResult{}
-	ret.Data = result
-	defer c.JSON(http.StatusOK, ret)
+var wpsPresentation2BlockDOM = contractHandler(apicontract.WPSPresentation2BlockDOM, func(c *gin.Context, request apicontract.WPSPresentationRequest) apicontract.Response[apicontract.WPSPresentationData] {
+	result := apicontract.WPSPresentationData{}
+	if request.Type == "texts" || request.Type == "objects" {
+		result.DOM, result.Converted = convertWPSPresentation(request.Data, request.Text, request.Type)
+	}
+	return apicontract.Success(result)
+}, func(c *gin.Context) *apicontract.Response[apicontract.WPSPresentationData] {
 	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxWPSPresentationRequestBytes)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var encoded, text, clipboardType string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("data", &encoded, true, true),
-		util.BindJsonArg("text", &text, false, false),
-		util.BindJsonArg("type", &clipboardType, true, true)) {
-		return
-	}
-	if clipboardType != "texts" && clipboardType != "objects" {
-		return
-	}
-
-	result.DOM, result.Converted = convertWPSPresentation(encoded, text, clipboardType)
-}
+	return nil
+})
 
 func convertWPSPresentation(encoded, text, clipboardType string) (dom string, converted bool) {
 	htmlContent, converted := wpsPresentationHTML(encoded, text, clipboardType)

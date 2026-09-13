@@ -94,6 +94,8 @@ export type CloseNotebookRequestInput = { "notebook": string; };
 
 export type ContentWordCountRequestInput = { "content": string; "reqId"?: JSONValue | null; };
 
+export type CopyStdMarkdownRequestInput = { "adjustHeadingLevel"?: boolean | null; "assetsDestSpace2Underscore"?: boolean | null; "fillCSSVar"?: boolean | null; "id": string; "imgTag"?: boolean | null; };
+
 export type CreateEncryptedNotebookRequestInput = { "name": string; "password": string; };
 
 export type CreateNotebookData = { "notebook": Notebook | null; };
@@ -115,6 +117,8 @@ export type CriterionReplaceTypesInput = { "aHref"?: boolean | null; "aText"?: b
 export type CriterionTypes = { "audioBlock": boolean; "blockquote": boolean; "callout": boolean; "codeBlock": boolean; "databaseBlock": boolean; "document": boolean; "embedBlock": boolean; "heading": boolean; "htmlBlock": boolean; "iframeBlock": boolean; "list": boolean; "listItem": boolean; "mathBlock": boolean; "paragraph": boolean; "superBlock": boolean; "table": boolean; "videoBlock": boolean; "widgetBlock": boolean; };
 
 export type CriterionTypesInput = { "audioBlock"?: boolean | null; "blockquote"?: boolean | null; "callout"?: boolean | null; "codeBlock"?: boolean | null; "databaseBlock"?: boolean | null; "document"?: boolean | null; "embedBlock"?: boolean | null; "heading"?: boolean | null; "htmlBlock"?: boolean | null; "iframeBlock"?: boolean | null; "list"?: boolean | null; "listItem"?: boolean | null; "mathBlock"?: boolean | null; "paragraph"?: boolean | null; "superBlock"?: boolean | null; "table"?: boolean | null; "videoBlock"?: boolean | null; "widgetBlock"?: boolean | null; };
+
+export type DOMData = { "dom": string; };
 
 export type DOMTextRequestInput = { "dom": string; };
 
@@ -153,6 +157,12 @@ export type FullBlockInfo = { "box": string; "path": string; "rootChildID": stri
 export type GetSnippetRequestInput = { "enabled": number; "keyword"?: string | null; "type": string; };
 
 export type GetTagRequestInput = { "app"?: string | null; "ignoreMaxListHint"?: boolean | null; "sort"?: number | null; };
+
+export type HTMLClipboardPreflight = { "converted": boolean; "dom"?: string; "normalizedHTML"?: string; "useHTML": boolean; };
+
+export type HTMLClipboardRequestInput = { "dom": string; "mathML"?: string | null; "notebook"?: string | null; "office"?: string | null; "officeMathHTML"?: string | null; "preflight"?: boolean | null; "preparedHTML"?: boolean | null; "preserveSourceFormat"?: boolean | null; "skipBase64Assets"?: boolean | null; "skipInlineSVGAssets"?: boolean | null; "skipLocalAssets"?: boolean | null; "text"?: string | null; "wps"?: string | null; };
+
+export type HTMLData = { "html": string; };
 
 export type HeadingChildrenRequestInput = { "id": string; "removeFoldAttr"?: boolean | null; };
 
@@ -207,6 +217,8 @@ export type ListNotebooksData = { "boxDocEnabled": boolean; "notebooks": Array<N
 export type ListNotebooksRequestInput = { "flashcard"?: boolean | null; };
 
 export type LockScreenRequestInput = { "lockScreenMode": number; };
+
+export type MarkdownHTMLRequestInput = { "markdown": string; "mode"?: string | null; };
 
 export type MoveBlockRequestInput = { "id": string; "parentID"?: string | null; "previousID"?: string | null; };
 
@@ -381,6 +393,10 @@ export type UpdatePinnedDocsRequestInput = { "action": string; "after"?: boolean
 export type ViewStatePatchRequestInput = { "key": string; "removeKeys"?: Array<string> | null; "values"?: { [key: string]: JSONValue }; };
 
 export type VirtualBlockRefRequestInput = { "keywords": Array<string>; };
+
+export type WPSPresentationData = { "converted": boolean; "dom": string; };
+
+export type WPSPresentationRequestInput = { "data": string; "text"?: string | null; "type": string; };
 
 export type WordCountData = { "reqId": JSONValue; "stat": BlockStat | null; };
 
@@ -686,11 +702,6 @@ export type APILegacyPOSTPath =
     "/api/inbox/getShorthand" |
     "/api/inbox/getShorthands" |
     "/api/inbox/removeShorthands" |
-    "/api/lute/copyStdMarkdown" |
-    "/api/lute/html2BlockDOM" |
-    "/api/lute/md2html" |
-    "/api/lute/spinBlockDOM" |
-    "/api/lute/wpsPresentation2BlockDOM" |
     "/api/network/echo" |
     "/api/network/echo/*path" |
     "/api/network/forwardProxy" |
@@ -1273,6 +1284,31 @@ export interface APIPOSTRoutes {
     "/api/history/searchHistory": {
         request: SearchHistoryRequestInput;
         response: { "code": 0; "data": SearchHistoryData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/lute/copyStdMarkdown": {
+        request: CopyStdMarkdownRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/lute/html2BlockDOM": {
+        request: HTMLClipboardRequestInput;
+        response: { "code": 0; "data": string | HTMLClipboardPreflight; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/lute/md2html": {
+        request: MarkdownHTMLRequestInput;
+        response: { "code": 0; "data": HTMLData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/lute/spinBlockDOM": {
+        request: DOMTextRequestInput;
+        response: { "code": 0; "data": DOMData; "msg": string; } | { "code": -1 | 413; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/lute/wpsPresentation2BlockDOM": {
+        request: WPSPresentationRequestInput;
+        response: { "code": 0; "data": WPSPresentationData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | WPSPresentationData; "msg": string; };
         body: "json";
     };
     "/api/notebook/changeMasterPassword": {

@@ -2,6 +2,14 @@ package apicontract
 
 import "encoding/json"
 
+// DecodeFailure 保留端点在请求解析失败时声明的响应载荷。
+func (e Endpoint[Request, Data]) DecodeFailure(err error) Response[Data] {
+	if e.decodeFailure != nil {
+		return e.decodeFailure(err)
+	}
+	return Failure[Data](-1, err.Error())
+}
+
 // FailureWithData 仅为显式声明失败载荷的端点保留业务结果。
 func (e Endpoint[Request, Data]) FailureWithData(code int, msg string, data Data) Response[Data] {
 	if !e.definition.DataOnError {

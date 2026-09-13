@@ -72,6 +72,13 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if t == reflect.TypeFor[HTMLClipboardData]() {
+		preflight, err := b.schema(reflect.TypeFor[HTMLClipboardPreflight](), input)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{{Type: "string"}, preflight}}, nil
+	}
 	if t == reflect.TypeFor[BlockOperationData]() {
 		options, err := b.schema(reflect.TypeFor[BlockDeleteData](), input)
 		if err != nil {

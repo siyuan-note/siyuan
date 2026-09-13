@@ -61,7 +61,7 @@ func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, D
 			request, err = endpoint.Decode(c.Request.Body)
 		}
 		if err != nil {
-			c.JSON(http.StatusOK, apicontract.Failure[Data](-1, err.Error()))
+			c.JSON(http.StatusOK, endpoint.DecodeFailure(err))
 			return
 		}
 		c.JSON(http.StatusOK, handler(c, request))

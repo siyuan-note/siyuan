@@ -32,6 +32,7 @@ type Definition struct {
 type Endpoint[Request, Data any] struct {
 	definition    Definition
 	decodeRequest func(io.Reader) (Request, error)
+	decodeFailure func(error) Response[Data]
 }
 
 type ResponseOptions struct {
@@ -357,15 +358,19 @@ var GetRecentUpdatedBlocks = define[EmptyRequest, []*SearchBlock]("getRecentUpda
 
 var Zip = define[ZipRequest, Null]("zip", "/api/archive/zip", JSONBody, ResponseOptions{}, "POST")
 var Unzip = define[UnzipRequest, Null]("unzip", "/api/archive/unzip", JSONBody, ResponseOptions{}, "POST")
-
 var AutoSpace = define[TrimmedIDRequest, Null]("autoSpace", "/api/format/autoSpace", JSONBody, ResponseOptions{}, "POST")
 var NetAssets2LocalAssets = define[TrimmedIDRequest, Null]("netAssets2LocalAssets", "/api/format/netAssets2LocalAssets", JSONBody, ResponseOptions{}, "POST")
 var NetImg2LocalAssets = define[NetImageAssetsRequest, Null]("netImg2LocalAssets", "/api/format/netImg2LocalAssets", JSONBody, ResponseOptions{}, "POST")
-
 var PushMsg = define[NotificationRequest, NotificationData]("pushMsg", "/api/notification/pushMsg", JSONBody, ResponseOptions{}, "POST")
 var PushErrMsg = define[NotificationRequest, NotificationData]("pushErrMsg", "/api/notification/pushErrMsg", JSONBody, ResponseOptions{}, "POST")
-
 var GetBookmark = define[EmptyRequest, []*Bookmark]("getBookmark", "/api/bookmark/getBookmark", NoBody, ResponseOptions{}, "POST")
+var GetSnippet = define[GetSnippetRequest, SnippetsData]("getSnippet", "/api/snippet/getSnippet", JSONBody, ResponseOptions{}, "POST")
+var SetSnippet = define[SetSnippetRequest, Null]("setSnippet", "/api/snippet/setSnippet", JSONBody, ResponseOptions{}, "POST")
+var RemoveSnippet = define[TrimmedIDRequest, *Snippet]("removeSnippet", "/api/snippet/removeSnippet", JSONBody, ResponseOptions{}, "POST")
+var FlushTransaction = define[EmptyRequest, Null]("flushTransaction", "/api/sqlite/flushTransaction", NoBody, ResponseOptions{}, "POST")
+var CopyStdMarkdown = define[CopyStdMarkdownRequest, string]("copyStdMarkdown", "/api/lute/copyStdMarkdown", JSONBody, ResponseOptions{}, "POST")
+var Md2HTML = define[MarkdownHTMLRequest, HTMLData]("md2HTML", "/api/lute/md2html", JSONBody, ResponseOptions{}, "POST")
+var SpinBlockDOM = define[DOMTextRequest, DOMData]("spinBlockDOM", "/api/lute/spinBlockDOM", JSONBody, ResponseOptions{AdditionalCodes: []int{413}}, "POST")
 
 var ReloadTag = define[EmptyRequest, Null]("reloadTag", "/api/ui/reloadTag", NoBody, ResponseOptions{}, "POST")
 var ReloadFiletree = define[EmptyRequest, Null]("reloadFiletree", "/api/ui/reloadFiletree", NoBody, ResponseOptions{}, "POST")
@@ -374,17 +379,6 @@ var ReloadAttributeView = define[BlockIDRequest, Null]("reloadAttributeView", "/
 var ReloadUI = define[EmptyRequest, Null]("reloadUI", "/api/ui/reloadUI", NoBody, ResponseOptions{}, "POST")
 var ReloadIcon = define[EmptyRequest, Null]("reloadIcon", "/api/ui/reloadIcon", NoBody, ResponseOptions{}, "POST")
 var ReloadTheme = define[EmptyRequest, Null]("reloadTheme", "/api/ui/reloadTheme", NoBody, ResponseOptions{}, "POST")
-
-var FlushTransaction = define[EmptyRequest, Null]("flushTransaction", "/api/sqlite/flushTransaction", NoBody, ResponseOptions{}, "POST")
-
-var GetSnippet = define[GetSnippetRequest, SnippetsData]("getSnippet", "/api/snippet/getSnippet", JSONBody, ResponseOptions{}, "POST")
-var SetSnippet = define[SetSnippetRequest, Null]("setSnippet", "/api/snippet/setSnippet", JSONBody, ResponseOptions{}, "POST")
-var RemoveSnippet = define[TrimmedIDRequest, *Snippet]("removeSnippet", "/api/snippet/removeSnippet", JSONBody, ResponseOptions{}, "POST")
-
-var ResetBlockAttrs = define[EmptyRequest, Null]("resetBlockAttrs", "/api/attr/resetBlockAttrs", NoBody, ResponseOptions{}, "POST")
-var SearchAttributeViewNonRelationKey = define[EmptyRequest, Null]("searchAttributeViewNonRelationKey", "/api/av/searchAttributeViewNonRelationKey", NoBody, ResponseOptions{}, "POST")
-var SetLocalStorage = define[EmptyRequest, Null]("setLocalStorage", "/api/storage/setLocalStorage", NoBody, ResponseOptions{}, "POST")
-var DeprecatedReloadUI = define[EmptyRequest, Null]("deprecatedReloadUI", "/api/system/reloadUI", NoBody, ResponseOptions{}, "POST")
 
 var GetLocalStorage = define[EmptyRequest, map[string]JSONValue]("getLocalStorage", "/api/storage/getLocalStorage", NoBody, ResponseOptions{}, "POST")
 var GetLocalStorageVal = define[StorageKeyRequest, JSONValue]("getLocalStorageVal", "/api/storage/getLocalStorageVal", JSONBody, ResponseOptions{}, "POST")
@@ -400,16 +394,28 @@ var GetViewState = define[StorageKeyRequest, map[string]JSONValue]("getViewState
 var PatchViewState = define[ViewStatePatchRequest, map[string]JSONValue]("patchViewState", "/api/storage/patchViewState", JSONBody, ResponseOptions{}, "POST")
 var RemoveViewState = define[StorageKeyRequest, Null]("removeViewState", "/api/storage/removeViewState", JSONBody, ResponseOptions{}, "POST")
 var GetRecentDocs = define[RecentDocsRequest, []*RecentDoc]("getRecentDocs", "/api/storage/getRecentDocs", LegacyOptionalBody, ResponseOptions{}, "POST")
+
+var ResetBlockAttrs = define[EmptyRequest, Null]("resetBlockAttrs", "/api/attr/resetBlockAttrs", NoBody, ResponseOptions{}, "POST")
+var SearchAttributeViewNonRelationKey = define[EmptyRequest, Null]("searchAttributeViewNonRelationKey", "/api/av/searchAttributeViewNonRelationKey", NoBody, ResponseOptions{}, "POST")
+var SetLocalStorage = define[EmptyRequest, Null]("setLocalStorage", "/api/storage/setLocalStorage", NoBody, ResponseOptions{}, "POST")
+var DeprecatedReloadUI = define[EmptyRequest, Null]("deprecatedReloadUI", "/api/system/reloadUI", NoBody, ResponseOptions{}, "POST")
+
 var GetCriteria = define[EmptyRequest, []*Criterion]("getCriteria", "/api/storage/getCriteria", NoBody, ResponseOptions{}, "POST")
 var SetCriterion = define[SetCriterionRequest, Null]("setCriterion", "/api/storage/setCriterion", JSONBody, ResponseOptions{}, "POST")
 var RemoveCriterion = define[RemoveCriterionRequest, Null]("removeCriterion", "/api/storage/removeCriterion", JSONBody, ResponseOptions{}, "POST")
+
 var UpdateRecentDocOpenTime = define[RecentDocUpdateRequest, Null]("updateRecentDocOpenTime", "/api/storage/updateRecentDocOpenTime", JSONBody, ResponseOptions{}, "POST")
 var UpdateRecentDocViewTime = define[RecentDocUpdateRequest, Null]("updateRecentDocViewTime", "/api/storage/updateRecentDocViewTime", JSONBody, ResponseOptions{}, "POST")
 var UpdateRecentDocCloseTime = define[RecentDocUpdateRequest, Null]("updateRecentDocCloseTime", "/api/storage/updateRecentDocCloseTime", JSONBody, ResponseOptions{}, "POST")
 var BatchUpdateRecentDocCloseTime = define[RecentDocsUpdateRequest, Null]("batchUpdateRecentDocCloseTime", "/api/storage/batchUpdateRecentDocCloseTime", JSONBody, ResponseOptions{}, "POST")
+
+var GetDocOutline = define[OutlineRequest, []*SearchPath]("getDocOutline", "/api/outline/getDocOutline", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetDocHeadingNumbers = define[HeadingNumbersRequest, map[string]string]("getDocHeadingNumbers", "/api/outline/getDocHeadingNumbers", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
 var GetInlineStyles = define[EmptyRequest, *InlineStyles]("getInlineStyles", "/api/storage/getInlineStyles", NoBody, ResponseOptions{}, "POST")
 var SetInlineStyles = define[SetInlineStylesRequest, *InlineStyles]("setInlineStyles", "/api/storage/setInlineStyles", JSONBody, ResponseOptions{}, "POST")
 var SetWorkspaceAVPalette = define[WorkspaceAVPaletteRequest, *InlineStyles]("setWorkspaceAVPalette", "/api/storage/setWorkspaceAVPalette", JSONBody, ResponseOptions{}, "POST")
 
-var GetDocOutline = define[OutlineRequest, []*SearchPath]("getDocOutline", "/api/outline/getDocOutline", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
-var GetDocHeadingNumbers = define[HeadingNumbersRequest, map[string]string]("getDocHeadingNumbers", "/api/outline/getDocHeadingNumbers", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var HTML2BlockDOM = define[HTMLClipboardRequest, HTMLClipboardData]("html2BlockDOM", "/api/lute/html2BlockDOM", JSONBody, ResponseOptions{}, "POST")
+
+var WPSPresentation2BlockDOM = define[WPSPresentationRequest, WPSPresentationData]("wpsPresentation2BlockDOM", "/api/lute/wpsPresentation2BlockDOM", JSONBody, ResponseOptions{DataOnError: true}, "POST")

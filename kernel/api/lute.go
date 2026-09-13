@@ -17,6 +17,7 @@
 package api
 
 import (
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"html"
 	"net/http"
 	"os"
@@ -42,36 +43,10 @@ const maxSpinBlockDOMBytes = 1024 * 1024
 // maxHTML2BlockDOMRequestBytes 限制 html2BlockDOM 请求体的最大字节数。
 const maxHTML2BlockDOMRequestBytes int64 = 128 * 1024 * 1024
 
-func copyStdMarkdown(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var copyStdMarkdown = contractHandler(apicontract.CopyStdMarkdown, func(c *gin.Context, request apicontract.CopyStdMarkdownRequest) apicontract.Response[string] {
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	id := arg["id"].(string)
-	assetsDestSpace2Underscore := false
-	if nil != arg["assetsDestSpace2Underscore"] {
-		assetsDestSpace2Underscore = arg["assetsDestSpace2Underscore"].(bool)
-	}
-
-	fillCSSVar := false
-	if nil != arg["fillCSSVar"] {
-		fillCSSVar = arg["fillCSSVar"].(bool)
-	}
-
-	adjustHeadingLevel := false
-	if nil != arg["adjustHeadingLevel"] {
-		adjustHeadingLevel = arg["adjustHeadingLevel"].(bool)
-	}
-
-	imgTag := false
-	if nil != arg["imgTag"] {
-		imgTag = arg["imgTag"].(bool)
-	}
-
+	id := request.ID
+	assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag := request.AssetsDestSpace2Underscore, request.FillCSSVar, request.AdjustHeadingLevel, request.ImgTag
 	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
 	var publishAccess model.PublishAccess
 	var accessChecker model.EmbedBlockAccessChecker
@@ -88,46 +63,32 @@ func copyStdMarkdown(c *gin.Context) {
 			markdownContent = model.FilterContentByPublishAccess(c, publishAccess, bt.BoxID, bt.Path, markdownContent, true)
 		}
 	}
-	ret.Data = markdownContent
-}
+	return apicontract.Success(markdownContent)
+})
 
-func html2BlockDOM(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-	limitHTML2BlockDOMRequestBody(c, maxHTML2BlockDOMRequestBytes)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var dom string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("dom", &dom, true, false)) {
-		return
-	}
+var html2BlockDOM = contractHandler(apicontract.HTML2BlockDOM, func(c *gin.Context, request apicontract.HTMLClipboardRequest) apicontract.Response[apicontract.HTMLClipboardData] {
+	dom := request.DOM
 	// 可选 notebook 参数：指定目标加密笔记本时资源写入 box 内并加密
 	boxID := ""
-	if notebook, ok := arg["notebook"].(string); ok && notebook != "" {
+	if notebook := request.Notebook; notebook != "" {
 		if model.IsEncryptedBox(notebook) {
 			boxID = notebook
 		}
 	}
 	if err := holdEncryptedBoxRequest(c, boxID); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.HTMLClipboardData](-1, err.Error())
 	}
-	text, _ := arg["text"].(string)
-	mathML, _ := arg["mathML"].(string)
-	office, _ := arg["office"].(string)
-	officeMathHTML, _ := arg["officeMathHTML"].(string)
-	wps, _ := arg["wps"].(string)
-	skipLocalAssets, _ := arg["skipLocalAssets"].(bool)
-	skipBase64Assets, _ := arg["skipBase64Assets"].(bool)
-	skipInlineSVGAssets, _ := arg["skipInlineSVGAssets"].(bool)
-	preflight, _ := arg["preflight"].(bool)
-	preparedHTML, _ := arg["preparedHTML"].(bool)
-	preserveSourceFormat, _ := arg["preserveSourceFormat"].(bool)
+	text := request.Text
+	mathML := request.MathML
+	office := request.Office
+	officeMathHTML := request.OfficeMathHTML
+	wps := request.WPS
+	skipLocalAssets := request.SkipLocalAssets
+	skipBase64Assets := request.SkipBase64Assets
+	skipInlineSVGAssets := request.SkipInlineSVGAssets
+	preflight := request.Preflight
+	preparedHTML := request.PreparedHTML
+	preserveSourceFormat := request.PreserveSourceFormat
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
 	luteEngine.SetHTML2MarkdownAttrs([]string{"alias", "memo", "bookmark", "custom-*"})
@@ -135,11 +96,10 @@ func html2BlockDOM(c *gin.Context) {
 		preserveSourceFormat, preparedHTML, convertClipboardMath, convertOfficeHTMLClipboardMath)
 	if !useHTML {
 		if preflight {
-			ret.Data = map[string]any{"converted": true, "dom": dom, "useHTML": false}
+			return apicontract.Success(apicontract.HTMLClipboardPrepared(apicontract.HTMLClipboardPreflight{Converted: true, DOM: &dom, UseHTML: false}))
 		} else {
-			ret.Data = dom
+			return apicontract.Success(apicontract.HTMLClipboardText(dom))
 		}
-		return
 	}
 	if preflight {
 		skipLocalAssets = true
@@ -153,11 +113,11 @@ func html2BlockDOM(c *gin.Context) {
 	})
 	if nil == tree {
 		if preflight {
-			ret.Data = map[string]any{"converted": false, "dom": "Failed to convert", "normalizedHTML": normalizedHTML, "useHTML": true}
+			failedDOM := "Failed to convert"
+			return apicontract.Success(apicontract.HTMLClipboardPrepared(apicontract.HTMLClipboardPreflight{DOM: &failedDOM, NormalizedHTML: &normalizedHTML, UseHTML: true}))
 		} else {
-			ret.Data = "Failed to convert"
+			return apicontract.Success(apicontract.HTMLClipboardText("Failed to convert"))
 		}
-		return
 	}
 
 	var unlinks []*ast.Node
@@ -274,11 +234,11 @@ func html2BlockDOM(c *gin.Context) {
 	md, err := lute.FormatNodeSync(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
 	if nil != err {
 		if preflight {
-			ret.Data = map[string]any{"converted": false, "dom": "Failed to convert", "normalizedHTML": normalizedHTML, "useHTML": true}
+			failedDOM := "Failed to convert"
+			return apicontract.Success(apicontract.HTMLClipboardPrepared(apicontract.HTMLClipboardPreflight{DOM: &failedDOM, NormalizedHTML: &normalizedHTML, UseHTML: true}))
 		} else {
-			ret.Data = "Failed to convert"
+			return apicontract.Success(apicontract.HTMLClipboardText("Failed to convert"))
 		}
-		return
 	}
 
 	tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
@@ -291,11 +251,14 @@ func html2BlockDOM(c *gin.Context) {
 	renderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	output := renderer.Render()
 	if preflight {
-		ret.Data = map[string]any{"converted": true, "normalizedHTML": normalizedHTML, "useHTML": true}
+		return apicontract.Success(apicontract.HTMLClipboardPrepared(apicontract.HTMLClipboardPreflight{Converted: true, NormalizedHTML: &normalizedHTML, UseHTML: true}))
 	} else {
-		ret.Data = gulu.Str.FromBytes(output)
+		return apicontract.Success(apicontract.HTMLClipboardText(gulu.Str.FromBytes(output)))
 	}
-}
+}, func(c *gin.Context) *apicontract.Response[apicontract.HTMLClipboardData] {
+	limitHTML2BlockDOMRequestBody(c, maxHTML2BlockDOMRequestBytes)
+	return nil
+})
 
 func removeWhitespaceTextMarkStyles(tree *parse.Tree) {
 	var unlinks []*ast.Node
@@ -468,50 +431,27 @@ func msWordCommentID(anchor *goquery.Selection, style string) string {
 	return ""
 }
 
-func spinBlockDOM(c *gin.Context) {
+var spinBlockDOM = contractHandler(apicontract.SpinBlockDOM, func(c *gin.Context, request apicontract.DOMTextRequest) apicontract.Response[apicontract.DOMData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var dom string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("dom", &dom, true, false)) {
-		return
-	}
+	dom := request.DOM
 	if len(dom) > maxSpinBlockDOMBytes {
 		// 限制输入大小，避免解析超大 DOM 导致资源消耗
 		ret.Code = http.StatusRequestEntityTooLarge
 		ret.Msg = "dom input exceeds the maximum permitted size"
-		return
+		return contractFailure[apicontract.DOMData](ret)
 	}
 	luteEngine := model.NewLute()
 
 	dom = luteEngine.SpinBlockDOM(dom)
-	ret.Data = map[string]any{
-		"dom": dom,
-	}
-}
+	return apicontract.Success(apicontract.DOMData{DOM: dom})
+})
 
 // md2HTML 将 Markdown 转换为 HTML。
-func md2HTML(c *gin.Context) {
+var md2HTML = contractHandler(apicontract.Md2HTML, func(c *gin.Context, request apicontract.MarkdownHTMLRequest) apicontract.Response[apicontract.HTMLData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var markdown, mode string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("markdown", &markdown, true, false),
-		util.BindJsonArg("mode", &mode, false, false),
-	) {
-		return
-	}
+	markdown, mode := request.Markdown, request.Mode
 
 	var html string
 	switch mode {
@@ -522,10 +462,8 @@ func md2HTML(c *gin.Context) {
 	default:
 		ret.Code = -1
 		ret.Msg = "unknown [mode]"
-		return
+		return contractFailure[apicontract.HTMLData](ret)
 	}
 
-	ret.Data = map[string]any{
-		"html": html,
-	}
-}
+	return apicontract.Success(apicontract.HTMLData{HTML: html})
+})

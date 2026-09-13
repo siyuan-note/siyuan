@@ -2,6 +2,7 @@ import {MenuItem} from "./Menu";
 import {Constants} from "../constants";
 import {buildDockEntryVisibilityMenuItems, buildEntryVisibilityToggleItem} from "../config/entryVisibility/menu";
 import {getDockEntryKey, refreshDockCatalog} from "../config/entryVisibility/catalog";
+import {togglePinDock} from "./dockLayout";
 
 const moveMenuItem = (label: string, target: Element) => {
     return new MenuItem({
@@ -38,12 +39,26 @@ export const initDockMenu = (target?: Element, container?: Element) => {
             window.siyuan.menus.menu.append(new MenuItem(item).element);
         }
     }
-    const items = buildDockEntryVisibilityMenuItems(container || target?.closest(".dock") || undefined);
+    const context = target || container;
+    const dockContainer = context?.closest(".dock");
+    const items = buildDockEntryVisibilityMenuItems(dockContainer || undefined);
     if (target && items.length > 0) {
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     }
     items.forEach((item) => {
         window.siyuan.menus.menu.append(new MenuItem(item).element);
     });
+    if (dockContainer) {
+        const {leftDock, rightDock, bottomDock} = window.siyuan.layout;
+        const isBottom = bottomDock.elements.some((element) => element.contains(context));
+        const position = isBottom ? "Bottom" : dockContainer.id === "dockLeft" ? "Left" : "Right";
+        const dock = isBottom ? bottomDock : position === "Left" ? leftDock : rightDock;
+        if (target || items.length > 0) {
+            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        }
+        window.siyuan.menus.menu.append(new MenuItem(togglePinDock(
+            `switch${position}Dock`, dock, `iconPanel${position}`, `iconPanel${position}Dashed`
+        )).element);
+    }
     return window.siyuan.menus.menu;
 };

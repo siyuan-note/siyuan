@@ -25,6 +25,8 @@ export const AV_RICH_TEXT_PREVIEW_SANITIZE_OPTIONS = {
     ALLOWED_ATTR: AV_RICH_TEXT_PREVIEW_ALLOWED_ATTRIBUTES,
     ALLOW_ARIA_ATTR: false,
     ALLOW_DATA_ATTR: false,
+    // 公式源码是纯文本，不按链接地址过滤；链接属性仍使用独立的地址校验。
+    ADD_URI_SAFE_ATTR: ["data-content"],
     ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|siyuan|tel|web\+siyuan):|[#/?]|\.\.?\/|[^a-z]|[a-z0-9._~-]+(?:[/?#]|$))/i,
 };
 const BUILTIN_INLINE_COLOR_COUNT = 13;

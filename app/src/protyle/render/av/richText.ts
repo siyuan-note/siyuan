@@ -340,9 +340,7 @@ export const getAVRichTextBlockDOM = (markdown: string, images = false) => markd
 const getAVRichTextPreviewBlockDOM = (blockDOM: string) => {
     const template = document.createElement("template");
     template.innerHTML = cleanAVRichTextBlockDOMStructure(blockDOM);
-    // 待办操作节点携带勾选状态，需要保留到 HTML 转换完成。
-    template.content.querySelectorAll(".protyle-action:not(.protyle-action--task)")
-        .forEach((element) => element.remove());
+    // 代码块操作节点和待办操作节点参与内容解析，需要保留到 HTML 转换完成。
     return (template.innerHTML || "").trim();
 };
 
@@ -359,7 +357,7 @@ const prepareAVRichTextPreviewHTML = (html: string) => {
         element.className = "render-node";
         element.dataset.subtype = "math";
         element.dataset.content = content;
-        element.textContent = "";
+        element.replaceChildren(document.createElement("div"));
     });
     template.content.querySelectorAll<HTMLElement>("pre > code").forEach((element) => {
         const languageClass = Array.from(element.classList).find((className) => className.startsWith("language-"));

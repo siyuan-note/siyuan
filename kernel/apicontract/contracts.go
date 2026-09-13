@@ -364,3 +364,5 @@ var NetImg2LocalAssets = define[NetImageAssetsRequest, Null]("netImg2LocalAssets
 
 var PushMsg = define[NotificationRequest, NotificationData]("pushMsg", "/api/notification/pushMsg", JSONBody, ResponseOptions{}, "POST")
 var PushErrMsg = define[NotificationRequest, NotificationData]("pushErrMsg", "/api/notification/pushErrMsg", JSONBody, ResponseOptions{}, "POST")
+
+var GetBookmark = define[EmptyRequest, []*Bookmark]("getBookmark", "/api/bookmark/getBookmark", NoBody, ResponseOptions{}, "POST")

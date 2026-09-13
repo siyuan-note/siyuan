@@ -66,6 +66,8 @@ export type BlocksQueryRequestInput = { "id"?: string | null; "ids": Array<strin
 
 export type BlocksWordCountRequestInput = { "id"?: string | null; "ids": Array<string>; "notebook"?: string | null; "reqId"?: JSONValue | null; };
 
+export type Bookmark = { "blocks": Array<SearchBlock | null> | null; "count": number; "depth": number; "name": string; "type": string; };
+
 export type BootProgressData = { "details": string; "progress": number; };
 
 export type ChangeMasterPasswordRequestInput = { "newPassword": string; "oldPassword": string; };
@@ -454,7 +456,6 @@ export type APILegacyPOSTPath =
     "/api/bazaar/uninstallBazaarTheme" |
     "/api/bazaar/uninstallBazaarWidget" |
     "/api/bazaar/updateBazaarPackage" |
-    "/api/bookmark/getBookmark" |
     "/api/broadcast/getChannelInfo" |
     "/api/broadcast/getChannels" |
     "/api/broadcast/postMessage" |
@@ -1139,6 +1140,11 @@ export interface APIPOSTRoutes {
         request: TaskListMarkerRequestInput;
         response: { "code": 0; "data": Array<BlockTransaction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+    };
+    "/api/bookmark/getBookmark": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<Bookmark | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
     };
     "/api/bookmark/removeBookmark": {
         request: RemoveBookmarkRequestInput;

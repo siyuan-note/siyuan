@@ -17,17 +17,12 @@
 package api
 
 import (
-	"net/http"
-
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 )
 
-func getBookmark(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var getBookmark = contractHandler(apicontract.GetBookmark, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.Bookmark] {
 
 	bookmarks := model.BuildBookmark()
 	if model.IsReadOnlyRoleContext(c) {
@@ -42,8 +37,8 @@ func getBookmark(c *gin.Context) {
 		}
 		bookmarks = tempBookmarks
 	}
-	ret.Data = bookmarks
-}
+	return apicontract.Success(bookmarkContracts(bookmarks))
+})
 
 var removeBookmark = contractHandler(apicontract.RemoveBookmark, func(c *gin.Context, request apicontract.RemoveBookmarkRequest) apicontract.Response[apicontract.Null] {
 	if err := model.RemoveBookmark(request.Bookmark); err != nil {

@@ -157,7 +157,6 @@
   {"method":"POST","path":"/api/bazaar/uninstallBazaarTheme","handler":"uninstallBazaarTheme"},
   {"method":"POST","path":"/api/bazaar/uninstallBazaarWidget","handler":"uninstallBazaarWidget"},
   {"method":"POST","path":"/api/bazaar/updateBazaarPackage","handler":"updateBazaarPackage"},
-  {"method":"POST","path":"/api/bookmark/getBookmark","handler":"getBookmark"},
   {"method":"POST","path":"/api/broadcast/getChannelInfo","handler":"getChannelInfo"},
   {"method":"POST","path":"/api/broadcast/getChannels","handler":"getChannels"},
   {"method":"POST","path":"/api/broadcast/postMessage","handler":"postMessage"},

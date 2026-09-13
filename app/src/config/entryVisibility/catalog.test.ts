@@ -1004,6 +1004,16 @@ test("configuration labels distinguish block scopes and size controls", () => {
     }
 });
 
+test("notebook pin entries follow settings and precede sorting", () => {
+    const keys = getEntryCatalogChildren("docTree.notebook").map(item => item.key);
+    assert.deepEqual(keys.slice(keys.indexOf("config"), keys.indexOf("sort") + 1),
+        ["config", "pinDoc", "unpinDoc", "sort"]);
+    for (const key of ["pinDoc", "unpinDoc"]) {
+        assert.equal(getEntryCatalogNode(`docTree.notebook.${key}`)?.simple, true);
+        assert.equal(getEntryCatalogNode(`docTree.notebook.${key}`)?.type, "entry");
+    }
+});
+
 test("document tree pin entries follow attributes and precede sorting", () => {
     const keys = getEntryCatalogChildren("docTree.document").map(item => item.key);
     assert.deepEqual(keys.slice(keys.indexOf("attr"), keys.indexOf("sort") + 1), ["attr", "pinDoc", "unpinDoc", "sort"]);

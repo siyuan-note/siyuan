@@ -40,6 +40,19 @@ test("pin entries merge into document menus without moving existing plugin slots
     assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
 });
 
+test("notebook pin actions merge into saved menus and preserve plugin slots", () => {
+    const entries = getEntryCatalogChildren("docTree.notebook");
+    const defaults = entries.map(item => item.key);
+    const saved = defaults.filter(key => !["pinDoc", "unpinDoc"].includes(key));
+    saved.splice(1, 0, "plugin:example:item");
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+    assert.deepEqual(merged.filter(key => !["pinDoc", "unpinDoc"].includes(key)), saved);
+    assert.deepEqual(merged.slice(merged.indexOf("config"), merged.indexOf("sort") + 1),
+        ["config", "pinDoc", "unpinDoc", "sort"]);
+    const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+    assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
+});
+
 test("removed pinned area switch is not rendered while plugin slots are preserved", () => {
     const entries = getEntryCatalogChildren("docTree.panel");
     const defaults = entries.map(item => item.key);

@@ -487,6 +487,16 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 });
             }
         }).element);
+        if (window.siyuan.config.fileTree.boxDocEnabled && liElement.getAttribute("data-node-id") &&
+            !isEncryptedBox(notebookId)) {
+            const pinned = pinnedDocIDs.has(notebookId);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: pinned ? "unpinDoc" : "pinDoc",
+                icon: pinned ? "iconUnpin" : "iconPin",
+                label: pinned ? window.siyuan.languages.unpinDoc : window.siyuan.languages.pinDoc,
+                click: () => { updatePinnedDocs([notebookId], pinned ? "unpin" : "pin"); },
+            }).element);
+        }
         const subMenu = sortMenu("notebook", parseInt(liElement.parentElement.getAttribute("data-sortmode")), (sort) => {
             if (sort === null) {
                 return;

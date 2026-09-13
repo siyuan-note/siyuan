@@ -15,6 +15,7 @@ The section appears when it contains pinned documents and hides automatically wh
 | Operation | Behavior |
 |---|---|
 | Pin from a menu | Insert the entry at the top; the same menu item becomes Unpin for an already pinned document |
+| Notebook More menu | When notebook root documents are enabled, offer Pin or Unpin for an ordinary notebook's root document; expand the pinned entry to browse its visible top-level documents |
 | Multiple selected documents | Offer both Pin and Unpin regardless of existing pin status; hide Pin if any selected document belongs to an encrypted notebook |
 | Context menu or More on a pinned document | Open the document menu, including Unpin and Rename |
 | Click a document icon | On desktop, open the icon picker or follow the configured icon expansion behavior; mobile expands or opens the document |

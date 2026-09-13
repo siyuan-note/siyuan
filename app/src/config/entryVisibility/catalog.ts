@@ -687,6 +687,8 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("openDocument", lang("openDocument")),
             node("rename", lang("rename")),
             node("config", lang("config")),
+            node("pinDoc", lang("pinDoc")),
+            node("unpinDoc", lang("unpinDoc")),
             node("sort", lang("sort"), true, sortChildren("sortByFiletree")),
             node("riffCard", lang("riffCard"), false),
             node("search", lang("search")),

@@ -376,3 +376,7 @@ var ReloadIcon = define[EmptyRequest, Null]("reloadIcon", "/api/ui/reloadIcon", 
 var ReloadTheme = define[EmptyRequest, Null]("reloadTheme", "/api/ui/reloadTheme", NoBody, ResponseOptions{}, "POST")
 
 var FlushTransaction = define[EmptyRequest, Null]("flushTransaction", "/api/sqlite/flushTransaction", NoBody, ResponseOptions{}, "POST")
+
+var GetSnippet = define[GetSnippetRequest, SnippetsData]("getSnippet", "/api/snippet/getSnippet", JSONBody, ResponseOptions{}, "POST")
+var SetSnippet = define[SetSnippetRequest, Null]("setSnippet", "/api/snippet/setSnippet", JSONBody, ResponseOptions{}, "POST")
+var RemoveSnippet = define[TrimmedIDRequest, *Snippet]("removeSnippet", "/api/snippet/removeSnippet", JSONBody, ResponseOptions{}, "POST")

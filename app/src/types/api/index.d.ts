@@ -130,6 +130,8 @@ export type FileAnnotationRefRequestInput = { "id": string; "notebook"?: string 
 
 export type FullBlockInfo = { "box": string; "path": string; "rootChildID": string; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
 
+export type GetSnippetRequestInput = { "enabled": number; "keyword"?: string | null; "type": string; };
+
 export type GetTagRequestInput = { "app"?: string | null; "ignoreMaxListHint"?: boolean | null; "sort"?: number | null; };
 
 export type HeadingChildrenRequestInput = { "id": string; "removeFoldAttr"?: boolean | null; };
@@ -245,6 +247,14 @@ export type SetNotebookConfRequestInput = { "conf"?: NotebookConfPatchInput | nu
 export type SetNotebookIconRequestInput = { "icon": string; "notebook": string; };
 
 export type SetSnapshotMemoRequestInput = { "id": string; "memo": string; };
+
+export type SetSnippetRequestInput = { "snippets": Array<SnippetInput>; };
+
+export type Snippet = { "content": string; "disabledInPublish": boolean; "enabled": boolean; "id": string; "name": string; "type": string; };
+
+export type SnippetInput = { "content": string; "disabledInPublish"?: boolean | null; "enabled": boolean; "id": string; "name": string; "type": string; };
+
+export type SnippetsData = { "snippets": Array<Snippet | null>; };
 
 export type SwapBlockRefRequestInput = { "defID": string; "includeChildren": boolean; "refID": string; };
 
@@ -682,9 +692,6 @@ export type APILegacyPOSTPath =
     "/api/setting/setSnippet" |
     "/api/setting/setTheme" |
     "/api/setting/setVariables" |
-    "/api/snippet/getSnippet" |
-    "/api/snippet/removeSnippet" |
-    "/api/snippet/setSnippet" |
     "/api/storage/batchUpdateRecentDocCloseTime" |
     "/api/storage/getCriteria" |
     "/api/storage/getInlineStyles" |
@@ -1360,6 +1367,21 @@ export interface APIPOSTRoutes {
     };
     "/api/setting/setEditorReadOnly": {
         request: EditorReadOnlyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/snippet/getSnippet": {
+        request: GetSnippetRequestInput;
+        response: { "code": 0; "data": SnippetsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/snippet/removeSnippet": {
+        request: TrimmedIDRequestInput;
+        response: { "code": 0; "data": Snippet | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/snippet/setSnippet": {
+        request: SetSnippetRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };

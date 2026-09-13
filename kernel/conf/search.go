@@ -132,17 +132,25 @@ func (s *Search) SetHanSensitive(v bool) {
 	s.HanSensitive = new(v)
 }
 
+func SearchLikePattern(keyword string) string {
+	return "'%" + EscapeSearchLikePattern(keyword) + "%' ESCAPE '\\'"
+}
+
+func EscapeSearchLikePattern(keyword string) string {
+	return strings.NewReplacer("\\", "\\\\", "%", "\\%", "_", "\\_", "'", "''").Replace(keyword)
+}
+
 func (s *Search) NAMFilter(keyword string) string {
-	keyword = strings.TrimSpace(keyword)
+	pattern := SearchLikePattern(strings.TrimSpace(keyword))
 	buf := bytes.Buffer{}
 	if s.Name {
-		buf.WriteString(" OR name LIKE '%" + keyword + "%'")
+		buf.WriteString(" OR name LIKE " + pattern)
 	}
 	if s.Alias {
-		buf.WriteString(" OR alias LIKE '%" + keyword + "%'")
+		buf.WriteString(" OR alias LIKE " + pattern)
 	}
 	if s.Memo {
-		buf.WriteString(" OR memo LIKE '%" + keyword + "%'")
+		buf.WriteString(" OR memo LIKE " + pattern)
 	}
 	return buf.String()
 }

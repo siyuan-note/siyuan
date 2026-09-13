@@ -27,6 +27,7 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -679,9 +680,9 @@ func query2Stmt(queryStr string) (ret string) {
 				return ast.WalkContinue
 			}
 			if n.IsTextMarkType("tag") {
-				// 转义单引号，避免标签内容闭合 SQL 字符串字面量造成注入
+				// 标签内容在构造 LIKE 条件时统一转义，避免改变查询语义。
 				// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-5rwv-4j4c-f954
-				tags = append(tags, strings.ReplaceAll(n.Text(), "'", "''"))
+				tags = append(tags, n.Text())
 			}
 			return ast.WalkContinue
 		})
@@ -695,8 +696,7 @@ func query2Stmt(queryStr string) (ret string) {
 			if "" == part {
 				continue
 			}
-			part = strings.ReplaceAll(part, "'", "''")
-			buf.WriteString("(content LIKE '%" + part + "%'")
+			buf.WriteString("(content LIKE " + conf.SearchLikePattern(part))
 			buf.WriteString(Conf.Search.NAMFilter(part))
 			buf.WriteString(")")
 			if i < len(parts)-1 {
@@ -709,14 +709,14 @@ func query2Stmt(queryStr string) (ret string) {
 				buf.WriteString(" OR ")
 			}
 			for i, tag := range tags {
-				buf.WriteString("(content LIKE '%#" + tag + "#%')")
+				buf.WriteString("(content LIKE " + conf.SearchLikePattern("#"+tag+"#") + ")")
 				if i < len(tags)-1 {
 					buf.WriteString(" AND ")
 				}
 			}
 			buf.WriteString(" OR ")
 			for i, tag := range tags {
-				buf.WriteString("ial LIKE '%tags=\"%" + tag + "%\"%'")
+				buf.WriteString("ial LIKE '%tags=\"%" + conf.EscapeSearchLikePattern(tag) + "%\"%' ESCAPE '\\'")
 				if i < len(tags)-1 {
 					buf.WriteString(" AND ")
 				}

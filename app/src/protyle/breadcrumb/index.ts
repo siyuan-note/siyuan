@@ -42,6 +42,7 @@ import {genEmbedStatTip, type IBlockStat, type IEmbedStat} from "../../layout/st
 import {mountBreadcrumbButtons} from "../../plugin/breadcrumbButton";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {waitForPendingTransactions} from "../util/transactionQueue";
+import {bindMobileMenuKeyboard} from "../../mobile/util/keyboardToolbar";
 
 const genDocumentStatLabel = (stat: IBlockStat, statWithEmbed?: IBlockStat, embedStat?: IEmbedStat) => {
     const runeEmbedAttrs = statWithEmbed ? ` class="ariaLabel" data-position="north" aria-label="${escapeAriaLabel(genEmbedStatTip(window.siyuan.languages.runeCountWithEmbed, statWithEmbed.runeCount, embedStat))}"` : "";
@@ -90,7 +91,10 @@ ${padHTML}
 <button class="block__icon fn__flex-center fn__none ariaLabel" data-type="context" aria-label="${window.siyuan.languages.context}"><svg><use xlink:href="#iconAlignCenter"></use></svg></button>`;
         this.element = element.firstElementChild as HTMLElement;
         mountBreadcrumbButtons(protyle, element.querySelector(".protyle-breadcrumb__plugin"));
+        const takeMenuKeyboard = bindMobileMenuKeyboard(element,
+            'button[data-type="mobile-menu"], button[data-type="doc"], button[data-type="more"]', () => protyle);
         element.addEventListener("click", async (event) => {
+            const restoreMenuKeyboard = takeMenuKeyboard();
             let target = event.target as HTMLElement;
             if (event.composedPath().some(item => item instanceof HTMLElement && item.hasAttribute("data-plugin-name"))) {
                 return;
@@ -129,7 +133,7 @@ ${padHTML}
                     event.preventDefault();
                     break;
                 } else if (type === "mobile-menu") {
-                    this.genMobileMenu(protyle);
+                    this.genMobileMenu(protyle, restoreMenuKeyboard);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -147,7 +151,8 @@ ${padHTML}
                         });
                     } else {
                         const targetRect = target.getBoundingClientRect();
-                        openTitleMenu(protyle, {x: targetRect.right, y: targetRect.bottom, h: targetRect.height, isLeft: true}, Constants.MENU_FROM_TITLE_BREADCRUMB);
+                        openTitleMenu(protyle, {x: targetRect.right, y: targetRect.bottom, h: targetRect.height, isLeft: true},
+                            Constants.MENU_FROM_TITLE_BREADCRUMB, restoreMenuKeyboard);
                     }
                     event.stopPropagation();
                     event.preventDefault();
@@ -159,7 +164,7 @@ ${padHTML}
                         y: targetRect.bottom,
                         h: targetRect.height,
                         isLeft: true,
-                    });
+                    }, restoreMenuKeyboard);
                     event.stopPropagation();
                     event.preventDefault();
                     break;
@@ -617,8 +622,12 @@ ${padHTML}
         });
     }
 
-    private async genMobileMenu(protyle: IProtyle) {
+    private async genMobileMenu(protyle: IProtyle, restoreKeyboard?: () => void) {
         if (protyle.lite || protyle.toolbar.isMultiSelectMode() || this.mobileMenuLoading) {
+            return;
+        }
+        if (window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_BREADCRUMB_MOBILE_PATH) {
+            window.siyuan.menus.menu.closeSheet();
             return;
         }
         const menu = new Menu(Constants.MENU_BREADCRUMB_MOBILE_PATH);
@@ -669,7 +678,7 @@ ${padHTML}
                     }
                 });
             });
-            menu.fullscreen();
+            window.siyuan.menus.menu.fullscreen("all", restoreKeyboard);
         }).finally(() => {
             this.mobileMenuLoading = false;
         });
@@ -684,11 +693,15 @@ ${padHTML}
         }
     }
 
-    public async showMenu(protyle: IProtyle, position: IPosition) {
+    public async showMenu(protyle: IProtyle, position: IPosition, restoreKeyboard?: () => void) {
         const requestID = ++this.menuRequestID;
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
             window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_BREADCRUMB_MORE) {
-            window.siyuan.menus.menu.remove();
+            if (isMobile()) {
+                window.siyuan.menus.menu.closeSheet();
+            } else {
+                window.siyuan.menus.menu.remove();
+            }
             return;
         }
         let id;
@@ -1111,7 +1124,7 @@ ${padHTML}
                 });
             }
             /// #if MOBILE
-            window.siyuan.menus.menu.fullscreen();
+            window.siyuan.menus.menu.fullscreen("all", restoreKeyboard);
             /// #else
             window.siyuan.menus.menu.popup(position);
             /// #endif

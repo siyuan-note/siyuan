@@ -41,6 +41,7 @@ export class Menu {
     private suppressSheetClick = false;
     private targetPositionFrame: number | undefined;
     private cancelSheetOpen: (() => void) | undefined;
+    private restoreKeyboard: (() => void) | undefined;
 
     private updateTargetPosition = () => {
         if (typeof this.targetPositionFrame === "number") {
@@ -301,7 +302,7 @@ export class Menu {
         this.finishSheetTouch();
     };
 
-    private closeSheet() {
+    public closeSheet() {
         this.cancelSheetOpen?.();
         this.cancelSheetOpen = undefined;
         if (!this.element.classList.contains("b3-menu--sheet")) {
@@ -315,6 +316,10 @@ export class Menu {
         this.element.style.transform = "translateY(100%)";
         this.hideFullscreenScrim();
         fullscreenCloseTimeout = window.setTimeout(() => this.removeImmediately(), Constants.TIMEOUT_DBLCLICK);
+        const restoreKeyboard = this.restoreKeyboard;
+        this.restoreKeyboard = undefined;
+        // 在关闭手势中恢复焦点，使浏览器端也能响应用户操作弹出软键盘。
+        restoreKeyboard?.();
     }
 
     private updateSheetTitle() {
@@ -449,6 +454,10 @@ export class Menu {
                 }
                 return;
             }
+            if (isMobile()) {
+                this.closeSheet();
+                return;
+            }
         }
         this.removeImmediately();
     }
@@ -470,6 +479,8 @@ export class Menu {
     }
 
     private removeImmediately() {
+        // 菜单动作和菜单替换只清理状态，避免跳转或弹窗后抢回编辑焦点。
+        this.restoreKeyboard = undefined;
         this.cancelSheetOpen?.();
         this.cancelSheetOpen = undefined;
         const menuName = this.element.getAttribute("data-name");
@@ -607,7 +618,7 @@ export class Menu {
         }
     }
 
-    public fullscreen(position: "bottom" | "all" = "all") {
+    public fullscreen(position: "bottom" | "all" = "all", restoreKeyboard?: () => void) {
         this.cancelSheetOpen?.();
         this.cancelSheetOpen = undefined;
         applyMenuConfig(this.element);
@@ -639,6 +650,7 @@ export class Menu {
             return;
         }
         // 先结束编辑焦点，避免工具栏保留的焦点阻止输入法收起，再跳过键盘弹出保护锁。
+        this.restoreKeyboard = restoreKeyboard;
         (document.activeElement as HTMLElement)?.blur();
         activeBlur(true);
         clearTimeout(fullscreenCloseTimeout);

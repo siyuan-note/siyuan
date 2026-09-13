@@ -31,12 +31,17 @@ import {buildBlockDOMClipboardRichData} from "../util/blockDOMClipboard";
 import {buildWebClipboardHTML} from "../util/clipboardData";
 import {exportImage} from "../export/util";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {isMobile} from "../../util/functions";
 
-export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: string) => {
+export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: string, restoreKeyboard?: () => void) => {
     hideTooltip();
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
         window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_TITLE) {
-        window.siyuan.menus.menu.remove();
+        if (isMobile()) {
+            window.siyuan.menus.menu.closeSheet();
+        } else {
+            window.siyuan.menus.menu.remove();
+        }
         return;
     }
     const docInfoParam: BlockQueryRequestInput = {
@@ -370,7 +375,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
             label: `${window.siyuan.languages.modifiedAt} ${dayjs(response.data.ial.updated).format("YYYY-MM-DD HH:mm:ss")}<br>${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14)).format("YYYY-MM-DD HH:mm:ss")}`
         }).element);
         /// #if MOBILE
-        window.siyuan.menus.menu.fullscreen();
+        window.siyuan.menus.menu.fullscreen("all", restoreKeyboard);
         /// #else
         window.siyuan.menus.menu.popup(position);
         /// #endif

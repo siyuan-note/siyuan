@@ -52,6 +52,9 @@ export const addClearButton = (options: {
     options.inputElement.addEventListener("input", () => {
         update(options.inputElement, clearElement, options.right, contenteditable);
     });
+    options.inputElement.addEventListener("change", () => {
+        update(options.inputElement, clearElement, options.right, contenteditable);
+    });
     // contenteditable 剪切不会触发 input
     if (contenteditable) {
         options.inputElement.addEventListener("cut", () => {

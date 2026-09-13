@@ -152,8 +152,10 @@ const updateConfig = (element: Element, newConfig: Config.IUILayoutTabSearchConf
     }
     if (newConfig.k || clear) {
         (document.querySelector("#toolbarSearch") as HTMLInputElement).value = newConfig.k;
+        document.querySelector("#toolbarSearch").dispatchEvent(new Event("change"));
     }
     (element.querySelector("#toolbarReplace") as HTMLInputElement).value = newConfig.r;
+    element.querySelector("#toolbarReplace").dispatchEvent(new Event("change"));
     config = JSON.parse(JSON.stringify(newConfig));
     window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
     setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);

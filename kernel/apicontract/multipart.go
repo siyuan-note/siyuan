@@ -7,7 +7,16 @@ import (
 	"strings"
 )
 
+// MultipartFields 按字段名保留全部文本值和文件，同名字段不会合并或截断。
+type MultipartFields struct {
+	Value map[string][]string
+	File  map[string][]*multipart.FileHeader
+}
+
 func validateMultipartRequest(t reflect.Type) error {
+	if t == reflect.TypeFor[MultipartFields]() {
+		return nil
+	}
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 		if !field.IsExported() || field.Anonymous || field.Tag.Get("json") == "" {
@@ -34,6 +43,10 @@ func (e Endpoint[Request, Data]) DecodeMultipart(form *multipart.Form) (request 
 		return request, fmt.Errorf("multipart form is missing")
 	}
 	value := reflect.ValueOf(&request).Elem()
+	if value.Type() == reflect.TypeFor[MultipartFields]() {
+		value.Set(reflect.ValueOf(MultipartFields{Value: form.Value, File: form.File}))
+		return
+	}
 	if value.Kind() != reflect.Struct {
 		return request, fmt.Errorf("multipart request must be a struct")
 	}

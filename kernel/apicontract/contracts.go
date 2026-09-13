@@ -427,3 +427,11 @@ var SetPetalEnabled = define[SetPetalEnabledRequest, *Petal]("setPetalEnabled", 
 var SetPetalPublishEnabled = define[SetPetalPublishEnabledRequest, *Petal]("setPetalPublishEnabled", "/api/petal/setPetalPublishEnabled", JSONBody, ResponseOptions{}, "POST")
 
 var Pandoc = define[PandocRequest, PandocData]("pandoc", "/api/convert/pandoc", JSONBody, ResponseOptions{}, "POST")
+
+var PostBroadcastMessage = define[BroadcastMessageRequest, BroadcastChannelData]("postMessage", "/api/broadcast/postMessage", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+var GetBroadcastChannelInfo = define[BroadcastChannelRequest, BroadcastChannelData]("getChannelInfo", "/api/broadcast/getChannelInfo", JSONBody, ResponseOptions{}, "POST")
+
+var GetBroadcastChannels = define[EmptyRequest, BroadcastChannelsData]("getChannels", "/api/broadcast/getChannels", NoBody, ResponseOptions{}, "POST")
+
+var BroadcastPublish = define[MultipartFields, BroadcastPublishData]("broadcastPublish", "/api/broadcast/publish", MultipartBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")

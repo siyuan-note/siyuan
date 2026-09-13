@@ -78,6 +78,22 @@ export type Bookmark = { "blocks": Array<SearchBlock | null> | null; "count": nu
 
 export type BootProgressData = { "details": string; "progress": number; };
 
+export type BroadcastChannel = { "count": number; "name": string; };
+
+export type BroadcastChannelData = { "channel": BroadcastChannel | null; };
+
+export type BroadcastChannelRequestInput = { "name": string; };
+
+export type BroadcastChannelsData = { "channels": Array<BroadcastChannel | null>; };
+
+export type BroadcastMessageRequestInput = { "channel": string; "message": string; };
+
+export type BroadcastPublishData = { "results": Array<BroadcastPublishResult | null>; };
+
+export type BroadcastPublishMessage = { "filename": string; "size": number; "type": "string" | "binary"; };
+
+export type BroadcastPublishResult = { "channel": BroadcastChannel; "code": number; "message": BroadcastPublishMessage; "msg": string; };
+
 export type ChangeMasterPasswordRequestInput = { "newPassword": string; "oldPassword": string; };
 
 export type ChangeSortNotebookRequestInput = { "notebooks": Array<string>; };
@@ -594,10 +610,6 @@ export type APILegacyPOSTPath =
     "/api/bazaar/uninstallBazaarTheme" |
     "/api/bazaar/uninstallBazaarWidget" |
     "/api/bazaar/updateBazaarPackage" |
-    "/api/broadcast/getChannelInfo" |
-    "/api/broadcast/getChannels" |
-    "/api/broadcast/postMessage" |
-    "/api/broadcast/publish" |
     "/api/clipboard/cleanupRichText" |
     "/api/clipboard/prepareRichText" |
     "/api/clipboard/readFilePaths" |
@@ -1255,6 +1267,26 @@ export interface APIPOSTRoutes {
         request: RenameBookmarkRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+    };
+    "/api/broadcast/getChannelInfo": {
+        request: BroadcastChannelRequestInput;
+        response: { "code": 0; "data": BroadcastChannelData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/broadcast/getChannels": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": BroadcastChannelsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/broadcast/postMessage": {
+        request: BroadcastMessageRequestInput;
+        response: { "code": 0; "data": BroadcastChannelData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/broadcast/publish": {
+        request: Record<string, Array<string | Blob>>;
+        response: { "code": 0; "data": BroadcastPublishData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
     };
     "/api/convert/pandoc": {
         request: PandocRequestInput;

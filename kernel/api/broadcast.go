@@ -22,12 +22,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/88250/gulu"
 	"github.com/asaskevich/EventBus"
 	"github.com/gin-contrib/sse"
 	"github.com/gin-gonic/gin"
 	"github.com/olahol/melody"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -346,20 +346,6 @@ type ChannelInfo struct {
 	Count int    `json:"count"`
 }
 
-type PublishMessage struct {
-	Type     MessageType `json:"type"`     // "string" | "binary"
-	Size     int         `json:"size"`     // message size
-	Filename string      `json:"filename"` // empty string for string-message
-}
-
-type PublishResult struct {
-	Code int    `json:"code"` // 0: success
-	Msg  string `json:"msg"`  // error message
-
-	Channel ChannelInfo    `json:"channel"`
-	Message PublishMessage `json:"message"`
-}
-
 // broadcast create a broadcast channel WebSocket connection
 //
 // @param
@@ -577,23 +563,11 @@ func broadcastSubscribe(c *gin.Context) {
 //			}[],
 //		},
 //	}
-func broadcastPublish(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	results := []*PublishResult{}
-
-	// Multipart form
-	form, err := c.MultipartForm()
-	if err != nil {
-		ret.Code = 1
-		ret.Msg = err.Error()
-		return
-	}
-
+var broadcastPublish = contractHandler(apicontract.BroadcastPublish, func(c *gin.Context, request apicontract.MultipartFields) apicontract.Response[apicontract.BroadcastPublishData] {
+	results := []*apicontract.BroadcastPublishResult{}
 	// Broadcast string messages
-	for name, values := range form.Value {
-		channel := ChannelInfo{
+	for name, values := range request.Value {
+		channel := apicontract.BroadcastChannel{
 			Name:  name,
 			Count: 0,
 		}
@@ -608,12 +582,12 @@ func broadcastPublish(c *gin.Context) {
 
 		// Broadcast each string message to the same channel
 		for _, value := range values {
-			result := &PublishResult{
+			result := &apicontract.BroadcastPublishResult{
 				Code:    0,
 				Msg:     "",
 				Channel: channel,
-				Message: PublishMessage{
-					Type:     MessageTypeString,
+				Message: apicontract.BroadcastPublishMessage{
+					Type:     string(MessageTypeString),
 					Size:     len(value),
 					Filename: "",
 				},
@@ -633,8 +607,8 @@ func broadcastPublish(c *gin.Context) {
 	}
 
 	// Broadcast binary message
-	for name, files := range form.File {
-		channel := ChannelInfo{
+	for name, files := range request.File {
+		channel := apicontract.BroadcastChannel{
 			Name:  name,
 			Count: 0,
 		}
@@ -649,12 +623,12 @@ func broadcastPublish(c *gin.Context) {
 
 		// Broadcast each binary message to the same channel
 		for _, file := range files {
-			result := &PublishResult{
+			result := &apicontract.BroadcastPublishResult{
 				Code:    0,
 				Msg:     "",
 				Channel: channel,
-				Message: PublishMessage{
-					Type:     MessageTypeBinary,
+				Message: apicontract.BroadcastPublishMessage{
+					Type:     string(MessageTypeBinary),
 					Size:     int(file.Size),
 					Filename: file.Filename,
 				},
@@ -688,10 +662,8 @@ func broadcastPublish(c *gin.Context) {
 		}
 	}
 
-	ret.Data = map[string]any{
-		"results": results,
-	}
-}
+	return apicontract.Success(apicontract.BroadcastPublishData{Results: results})
+})
 
 // postMessage send string message to a broadcast channel
 //
@@ -714,24 +686,10 @@ func broadcastPublish(c *gin.Context) {
 //			},
 //		},
 //	}
-func postMessage(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var postMessage = contractHandler(apicontract.PostBroadcastMessage, func(c *gin.Context, request apicontract.BroadcastMessageRequest) apicontract.Response[apicontract.BroadcastChannelData] {
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var message, channelName string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("message", &message, true, true),
-		util.BindJsonArg("channel", &channelName, true, true),
-	) {
-		return
-	}
-
-	channel := &ChannelInfo{
+	message, channelName := request.Message, request.Channel
+	channel := &apicontract.BroadcastChannel{
 		Name:  channelName,
 		Count: 0,
 	}
@@ -744,15 +702,11 @@ func postMessage(c *gin.Context) {
 		if _, err := broadcastChannel.BroadcastString(message); err != nil {
 			logging.LogErrorf("broadcast message failed: %s", err)
 
-			ret.Code = 1
-			ret.Msg = err.Error()
-			return
+			return apicontract.Failure[apicontract.BroadcastChannelData](1, err.Error())
 		}
 	}
-	ret.Data = map[string]any{
-		"channel": channel,
-	}
-}
+	return apicontract.Success(apicontract.BroadcastChannelData{Channel: channel})
+})
 
 // getChannelInfo gets the information of a broadcast channel
 //
@@ -774,21 +728,10 @@ func postMessage(c *gin.Context) {
 //			},
 //		},
 //	}
-func getChannelInfo(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var getChannelInfo = contractHandler(apicontract.GetBroadcastChannelInfo, func(c *gin.Context, request apicontract.BroadcastChannelRequest) apicontract.Response[apicontract.BroadcastChannelData] {
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var name string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", &name, true, true)) {
-		return
-	}
-
-	channel := &ChannelInfo{
+	name := request.Name
+	channel := &apicontract.BroadcastChannel{
 		Name:  name,
 		Count: 0,
 	}
@@ -800,10 +743,8 @@ func getChannelInfo(c *gin.Context) {
 		channel.Count = broadcastChannel.SubscriberCount()
 	}
 
-	ret.Data = map[string]any{
-		"channel": channel,
-	}
-}
+	return apicontract.Success(apicontract.BroadcastChannelData{Channel: channel})
+})
 
 // getChannels gets the channel name and lintener number of all broadcast chanel
 //
@@ -819,20 +760,16 @@ func getChannelInfo(c *gin.Context) {
 //			}[],
 //		},
 //	}
-func getChannels(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var getChannels = contractHandler(apicontract.GetBroadcastChannels, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.BroadcastChannelsData] {
 
-	channels := []*ChannelInfo{}
+	channels := []*apicontract.BroadcastChannel{}
 	BroadcastChannels.Range(func(key, value any) bool {
 		broadcastChannel := value.(*BroadcastChannel)
-		channels = append(channels, &ChannelInfo{
+		channels = append(channels, &apicontract.BroadcastChannel{
 			Name:  key.(string),
 			Count: broadcastChannel.SubscriberCount(),
 		})
 		return true
 	})
-	ret.Data = map[string]any{
-		"channels": channels,
-	}
-}
+	return apicontract.Success(apicontract.BroadcastChannelsData{Channels: channels})
+})

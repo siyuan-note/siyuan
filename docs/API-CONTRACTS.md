@@ -60,6 +60,8 @@ Frontend callers construct `ContractFormData` from typed fields before passing i
 
 ## Endpoint maintenance
 
+Dynamic multipart endpoints use `MultipartFields` to retain every text value and file under each field name. Its request schema maps field names to arrays of text or binary values; `ContractFormData` appends each array item as a repeated form field. This is distinct from fixed-field uploads, which continue to bind the first value. Broadcast publication preserves text-before-file processing and its per-message error results. Endpoint-specific `DecodeFailure` handling preserves existing parsing error codes and payloads.
+
 1. Define or update transport types and endpoints in the contract package, specifying request bodies, error codes, null values, defaults, and historical input compatibility
 2. Bind business entry points through `contractHandler`, preserving route middleware order, authorization, and lease scope
 3. Routes with type contracts must not also appear in `legacy_routes.json`; remove records for deleted endpoints, and never add new endpoints to the list

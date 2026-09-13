@@ -72,6 +72,12 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if t == reflect.TypeFor[MultipartFields]() {
+		if !input {
+			return nil, fmt.Errorf("multipart fields can only appear in requests")
+		}
+		return &Schema{Type: "object", AdditionalProperties: &Schema{Type: "array", Items: &Schema{AnyOf: []*Schema{{Type: "string"}, {Type: "string", Format: "binary"}}}}}, nil
+	}
 	if t == reflect.TypeFor[HTMLClipboardData]() {
 		preflight, err := b.schema(reflect.TypeFor[HTMLClipboardPreflight](), input)
 		if err != nil {

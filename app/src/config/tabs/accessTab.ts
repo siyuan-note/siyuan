@@ -802,7 +802,7 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
                 onConfirm: (value, passwordDialog) => {
                     const password = value.trim();
                     if (!password) {
-                        showMessage(window.siyuan.languages.masterPassword);
+                        showMessage(window.siyuan.languages.enterMasterPassword);
                         return;
                     }
                     const formData = new ContractFormData({file, password});

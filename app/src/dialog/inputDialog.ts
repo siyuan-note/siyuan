@@ -11,6 +11,7 @@ export const openInputDialog = (options: {
     maxLength?: number,
     type?: "text" | "number" | "password",
     multiline?: boolean,
+    resize?: "none" | "vertical",
     min?: string,
     max?: string,
     step?: string,
@@ -32,7 +33,7 @@ export const openInputDialog = (options: {
     destroyCallback?: (options?: IObject) => void,
 }): Dialog => {
     const inputHTML = options.multiline ?
-        '<textarea spellcheck="false" class="b3-text-field fn__block" style="resize:none" data-dialog-input></textarea>' :
+        `<textarea spellcheck="false" class="b3-text-field fn__block" style="resize:${options.resize || "none"};${options.resize === "vertical" ? "min-height:28px;max-height:min(480px, 50vh)" : ""}" data-dialog-input></textarea>` :
         '<input spellcheck="false" class="b3-text-field fn__block" value="" data-dialog-input>';
     const actionsHTML = (position: "beforeCancel" | "beforeConfirm" | "afterConfirm") =>
         (options.actions || []).map((action, index) => (action.position || "beforeConfirm") === position ?
@@ -82,11 +83,14 @@ export const openInputDialog = (options: {
         dialog.destroy();
     });
     confirmElement.addEventListener("click", () => {
+        // 提交时将焦点交回输入框，校验未通过时可直接继续输入。
+        inputElement.focus();
         // 校验、提交和关闭时机由调用方决定。
         options.onConfirm(inputElement.value, dialog);
     });
     dialog.element.querySelectorAll<HTMLButtonElement>("[data-input-action]").forEach(button => {
         button.addEventListener("click", () => {
+            inputElement.focus();
             options.actions[Number(button.dataset.inputAction)].onClick(inputElement.value, dialog);
         });
     });

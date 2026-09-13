@@ -30,6 +30,7 @@ const openSnapshotMemo = (repoElement: Element, id?: string, memo = "") => {
         title: id ? window.siyuan.languages.editSnapshotMemo : window.siyuan.languages.snapshotMemo,
         value: memo,
         multiline: true,
+        resize: "vertical",
         placeholder: window.siyuan.languages.snapshotMemoTip,
         description: id ? window.siyuan.languages.snapshotMemoLocalTip : undefined,
         onConfirm: async (value, dialog) => {

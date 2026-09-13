@@ -1,4 +1,5 @@
 {
+	"enterMasterPassword": "Please enter the master password",
 	"orderedListItemBlock": "Ordered list item block",
 	"unorderedListItemBlock": "Unordered list item block",
 	"taskListItemBlock": "Task list item block",

@@ -1,4 +1,5 @@
 {
+	"enterMasterPassword": "Veuillez saisir le mot de passe principal",
 	"orderedListItemBlock": "Bloc d’élément de liste ordonnée",
 	"unorderedListItemBlock": "Bloc d’élément de liste non ordonnée",
 	"taskListItemBlock": "Bloc d’élément de liste de tâches",

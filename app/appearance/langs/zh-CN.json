@@ -1,4 +1,5 @@
 {
+	"enterMasterPassword": "请输入主密码",
 	"orderedListItemBlock": "有序列表项块",
 	"unorderedListItemBlock": "无序列表项块",
 	"taskListItemBlock": "任务列表项块",

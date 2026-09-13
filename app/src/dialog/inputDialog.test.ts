@@ -7,6 +7,7 @@ import {createSourceFile, forEachChild, isCallExpression, ModuleKind, ScriptTarg
 class Control {
     value = "";
     disabled = false;
+    focusCount = 0;
     dataset: Record<string, string> = {};
     listeners: Record<string, () => void> = {};
     addEventListener(type: string, listener: () => void) {
@@ -17,7 +18,9 @@ class Control {
             this.listeners.click?.();
         }
     }
-    focus() {}
+    focus() {
+        this.focusCount++;
+    }
     select() {}
 }
 
@@ -99,8 +102,10 @@ it("keeps validation and closing with the caller and respects a disabled confirm
         },
     });
     assert.equal((dialog.input as Input).type, "password");
-    dialog.enter();
+    const initialFocusCount = dialog.input.focusCount;
+    dialog.confirm.click();
     assert.equal(dialog.closed, false);
+    assert.equal(dialog.input.focusCount, initialFocusCount + 1);
     dialog.confirm.disabled = true;
     dialog.enter();
     assert.equal(calls, 1);
@@ -129,6 +134,7 @@ it("uses the primary action for Enter and leaves extra content buttons independe
     dialog.input.value = "changed";
     dialog.enter();
     dialog.actions.forEach(action => action.click());
+    assert.equal(dialog.input.focusCount, 5);
     assert.deepEqual(calls, ["confirm:changed", "delete:changed", "rename:changed", "upload:changed"]);
     assert.equal(dialog.closed, false);
     dialog.cancel.click();

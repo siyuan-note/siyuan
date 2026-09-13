@@ -14,8 +14,10 @@ func TestSnapshotMemoDefaults(t *testing.T) {
 			t.Fatalf("default for %q: %q", memo, got)
 		}
 	}
-	if got := normalizeSnapshotMemo("  hello\n备注  "); got != "hello备注" {
-		t.Fatalf("memo lost: %q", got)
+	for _, memo := range []string{"  hello\n\n备注  ", "  hello\r\n\r\n备注  ", "  hello\u200b\n\n备注  "} {
+		if got := normalizeSnapshotMemo(memo); got != "hello\n\n备注" {
+			t.Fatalf("memo lost for %q: %q", memo, got)
+		}
 	}
 }
 
@@ -40,8 +42,12 @@ func TestSnapshotManualFlow(t *testing.T) {
 	if err != nil || created || id2 != id {
 		t.Fatalf("unchanged: id=%s created=%v err=%v", id2, created, err)
 	}
-	if err = SetRepoSnapshotMemo(id, "edited"); err != nil {
+	if err = SetRepoSnapshotMemo(id, "edited\n\n备注"); err != nil {
 		t.Fatal(err)
+	}
+	latest, err = partial.Latest()
+	if err != nil || latest.Memo != "edited\n\n备注" {
+		t.Fatalf("multiline memo: %v %v", latest, err)
 	}
 	changed, err = CheckRepoSnapshot()
 	if err != nil || changed {

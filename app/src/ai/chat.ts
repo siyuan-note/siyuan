@@ -11,6 +11,7 @@ export const AIChat = (protyle: IProtyle, element: HTMLElement) => {
         title: "✨ " + window.siyuan.languages.aiWriting,
         value: "",
         multiline: true,
+        resize: "vertical",
         onConfirm: (inputValue, dialog) => {
             if (!inputValue.trim()) {
                 showMessage(window.siyuan.languages["_kernel"][142]);

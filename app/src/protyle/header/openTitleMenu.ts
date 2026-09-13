@@ -218,7 +218,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                 accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
                 click: () => {
                     fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
-                        openCardByData(protyle.app, response.data, "doc", protyle.block.rootID, response.data.name);
+                        openCardByData(protyle.app, response.data, "doc", protyle.block.rootID);
                     });
                 }
             }, {

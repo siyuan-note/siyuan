@@ -24,6 +24,8 @@ Encrypted notebook lifecycle endpoints use typed requests and responses while re
 
 ## Compatibility requirements
 
+Flashcard contracts retain numeric truncation, pagination defaults, optional reviewed-card lists, nullable block results, and non-null deck lists. Notebook and document admission still occurs before deferred pagination errors. Card and deck mutations keep their model-layer validation and persistence behavior; encrypted notebook restrictions remain unchanged.
+
 Sync contracts retain numeric truncation, conditional direction validation in manual mode, configuration field matching and JSON numeric normalization, and message display durations. Provider imports require exactly one file and preserve encrypted package contents and recovery paths. Authorization and read-only checks still precede body decoding; synchronization and notebook encryption remain in the model layer.
 
 Marketplace contracts retain required-field ordering, whitespace handling, theme mode dependencies, rating availability and rate-limit payloads, and local-package upload errors. Package and appearance responses declare their complete nested structures, including the fixed five-element rating distribution. Upload requests keep first-file selection and overwrite parsing. Installation, removal, authentication, and publish restrictions remain in the existing business handlers and middleware.

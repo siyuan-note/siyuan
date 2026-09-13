@@ -244,6 +244,8 @@ export type CreateNotebookData = { "notebook": Notebook | null; };
 
 export type CreateNotebookRequestInput = { "name": string; };
 
+export type CreateRiffDeckRequestInput = { "name": string; };
+
 export type CreateSnapshotData = { "created": boolean; "id": string; };
 
 export type CreateSnapshotRequestInput = { "memo"?: string; };
@@ -646,6 +648,8 @@ export type RenameFileRequestInput = { "newPath": string; "path": string; };
 
 export type RenameNotebookRequestInput = { "name": string; "notebook": string; };
 
+export type RenameRiffDeckRequestInput = { "deckID": string; "name": string; };
+
 export type RenameTagRequestInput = { "newLabel": string; "oldLabel": string; };
 
 export type RenderSprigRequestInput = { "template": string; };
@@ -662,11 +666,45 @@ export type ResetGraphData = { "conf": GlobalGraphConf; };
 
 export type ResetLocalGraphData = { "conf": LocalGraphConf; };
 
+export type ResetRiffCardsRequestInput = { "blockIDs"?: Array<string> | null; "deckID": string; "id": string; "type": string; };
+
+export type ReviewRiffCardRequestInput = { "cardID": string; "deckID": string; "rating": number; "reviewedCards"?: Array<RiffReviewedCardInput> | null; };
+
 export type RichClipboardAssetInput = { "box"?: string; "index": number; "path": string; };
 
 export type RichClipboardPrepared = { "assets": Array<RichClipboardPreparedAsset> | null; "batch": string; "groups": Array<string> | null; };
 
 export type RichClipboardPreparedAsset = { "index": number; "path": string; };
+
+export type RiffBlockIDsRequestInput = { "blockIDs": Array<string>; };
+
+export type RiffBlocksData = { "blocks": Array<SearchBlock | null> | null; };
+
+export type RiffCardDueInput = { "due": string; "id": string; };
+
+export type RiffCardRequestInput = { "cardID": string; "deckID": string; };
+
+export type RiffCardsData = { "blocks": Array<SearchBlock | null> | null; "pageCount": number; "total": number; };
+
+export type RiffCardsRequestInput = { "id": string; "page": number; "pageSize"?: number | null; };
+
+export type RiffDeck = { "created": string; "id": string; "name": string; "size": number; "updated": string; };
+
+export type RiffDeckCardsRequestInput = { "blockIDs": Array<string>; "deckID": string; };
+
+export type RiffDeckRequestInput = { "deckID": string; };
+
+export type RiffDueCard = { "blockID": string; "cardID": string; "deckID": string; "lapses": number; "lastReview": number; "nextDues": Record<string, string> | null; "reps": number; "state": number; };
+
+export type RiffDueCardsData = { "cards": Array<RiffDueCard | null> | null; "unreviewedCount": number; "unreviewedNewCardCount": number; "unreviewedOldCardCount": number; };
+
+export type RiffDueCardsRequestInput = { "deckID": string; "reviewedCards"?: Array<RiffReviewedCardInput> | null; };
+
+export type RiffNotebookDueCardsRequestInput = { "notebook": string; "reviewedCards"?: Array<RiffReviewedCardInput> | null; };
+
+export type RiffReviewedCardInput = { "cardID": string; };
+
+export type RiffTreeDueCardsRequestInput = { "reviewedCards"?: Array<RiffReviewedCardInput> | null; "rootID": string; };
 
 export type SQLQueryRequestInput = { "mode"?: string | null; "stmt": string; };
 
@@ -747,6 +785,8 @@ export type SetNotebookIconRequestInput = { "icon": string; "notebook": string; 
 export type SetPetalEnabledRequestInput = { "app"?: string | null; "enabled": boolean; "packageName": string; };
 
 export type SetPetalPublishEnabledRequestInput = { "enabled": boolean; "packageName": string; };
+
+export type SetRiffCardsDueRequestInput = { "cardDues": Array<RiffCardDueInput>; };
 
 export type SetSnapshotMemoRequestInput = { "id": string; "memo": string; };
 
@@ -1165,23 +1205,6 @@ export type APILegacyPOSTPath =
     "/api/repo/setRetentionIndexesDaily" |
     "/api/repo/tagSnapshot" |
     "/api/repo/uploadCloudSnapshot" |
-    "/api/riff/addRiffCards" |
-    "/api/riff/batchSetRiffCardsDueTime" |
-    "/api/riff/createRiffDeck" |
-    "/api/riff/getNotebookRiffCards" |
-    "/api/riff/getNotebookRiffDueCards" |
-    "/api/riff/getRiffCards" |
-    "/api/riff/getRiffCardsByBlockIDs" |
-    "/api/riff/getRiffDecks" |
-    "/api/riff/getRiffDueCards" |
-    "/api/riff/getTreeRiffCards" |
-    "/api/riff/getTreeRiffDueCards" |
-    "/api/riff/removeRiffCards" |
-    "/api/riff/removeRiffDeck" |
-    "/api/riff/renameRiffDeck" |
-    "/api/riff/resetRiffCards" |
-    "/api/riff/reviewRiffCard" |
-    "/api/riff/skipReviewRiffCard" |
     "/api/setting/getBootAppearances" |
     "/api/setting/getCloudUser" |
     "/api/setting/getPublish" |
@@ -2336,6 +2359,91 @@ export interface APIPOSTRoutes {
     };
     "/api/repo/setSnapshotMemo": {
         request: SetSnapshotMemoRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/addRiffCards": {
+        request: RiffDeckCardsRequestInput;
+        response: { "code": 0; "data": RiffDeck | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/batchSetRiffCardsDueTime": {
+        request: SetRiffCardsDueRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/createRiffDeck": {
+        request: CreateRiffDeckRequestInput;
+        response: { "code": 0; "data": RiffDeck | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/getNotebookRiffCards": {
+        request: RiffCardsRequestInput;
+        response: { "code": 0; "data": RiffCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/getNotebookRiffDueCards": {
+        request: RiffNotebookDueCardsRequestInput;
+        response: { "code": 0; "data": RiffDueCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/getRiffCards": {
+        request: RiffCardsRequestInput;
+        response: { "code": 0; "data": RiffCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/getRiffCardsByBlockIDs": {
+        request: RiffBlockIDsRequestInput;
+        response: { "code": 0; "data": RiffBlocksData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/getRiffDecks": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<RiffDeck | null>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/riff/getRiffDueCards": {
+        request: RiffDueCardsRequestInput;
+        response: { "code": 0; "data": RiffDueCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/getTreeRiffCards": {
+        request: RiffCardsRequestInput;
+        response: { "code": 0; "data": RiffCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/getTreeRiffDueCards": {
+        request: RiffTreeDueCardsRequestInput;
+        response: { "code": 0; "data": RiffDueCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/removeRiffCards": {
+        request: RiffDeckCardsRequestInput;
+        response: { "code": 0; "data": RiffDeck | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/removeRiffDeck": {
+        request: RiffDeckRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/renameRiffDeck": {
+        request: RenameRiffDeckRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/resetRiffCards": {
+        request: ResetRiffCardsRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/reviewRiffCard": {
+        request: ReviewRiffCardRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/skipReviewRiffCard": {
+        request: RiffCardRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };

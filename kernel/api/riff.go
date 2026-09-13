@@ -17,467 +17,207 @@
 package api
 
 import (
-	"net/http"
-	"time"
-
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/riff"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"strconv"
+	"time"
 )
 
-func getRiffCardsByBlockIDs(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-	blockIDsArg := arg["blockIDs"].([]any)
-	var blockIDs []string
-	for _, blockID := range blockIDsArg {
-		blockIDs = append(blockIDs, blockID.(string))
-	}
+var getRiffCardsByBlockIDs = contractHandler(apicontract.GetRiffCardsByBlockIDs, func(c *gin.Context, request apicontract.RiffBlockIDsRequest) apicontract.Response[apicontract.RiffBlocksData] {
+	blockIDs := riffBlockIDs(request.BlockIDs)
 	if err := model.ValidateFlashcardBlockIDs(blockIDs); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.RiffBlocksData](-1, err.Error())
 	}
+	return apicontract.Success(apicontract.RiffBlocksData{Blocks: searchBlockContracts(model.GetFlashcardsByBlockIDs(blockIDs))})
+})
 
-	blocks := model.GetFlashcardsByBlockIDs(blockIDs)
-	ret.Data = map[string]any{
-		"blocks": blocks,
-	}
-}
-
-func batchSetRiffCardsDueTime(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
+var batchSetRiffCardsDueTime = contractHandler(apicontract.BatchSetRiffCardsDueTime, func(c *gin.Context, request apicontract.SetRiffCardsDueRequest) apicontract.Response[apicontract.Null] {
 	var cardDues []*model.SetFlashcardDueTime
-	for _, cardDueArg := range arg["cardDues"].([]any) {
-		cardDue := cardDueArg.(map[string]any)
-		cardDues = append(cardDues, &model.SetFlashcardDueTime{
-			ID:  cardDue["id"].(string),
-			Due: cardDue["due"].(string),
-		})
+	for _, due := range request.CardDues {
+		cardDues = append(cardDues, &model.SetFlashcardDueTime{ID: due.ID, Due: due.Due})
 	}
+	if err := model.SetFlashcardsDueTime(cardDues); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
+	return apicontract.Success(apicontract.Null{})
+})
 
-	err := model.SetFlashcardsDueTime(cardDues)
+var resetRiffCards = contractHandler(apicontract.ResetRiffCards, func(c *gin.Context, request apicontract.ResetRiffCardsRequest) apicontract.Response[apicontract.Null] {
+	if err := model.ResetFlashcards(request.Type, request.ID, request.DeckID, riffBlockIDs(request.BlockIDs)); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
+	return apicontract.Success(apicontract.Null{})
+})
+
+var getNotebookRiffCards = contractHandler(apicontract.GetNotebookRiffCards, func(c *gin.Context, request apicontract.RiffCardsRequest) apicontract.Response[apicontract.RiffCardsData] {
+	if model.IsEncryptedBox(request.ID) {
+		return apicontract.Failure[apicontract.RiffCardsData](-1, model.Conf.Language(393))
+	}
+	page, pageSize, err := request.Pagination()
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		return apicontract.Failure[apicontract.RiffCardsData](-1, err.Error())
 	}
-}
+	blocks, total, pageCount := model.GetNotebookFlashcards(request.ID, page, pageSize)
+	return apicontract.Success(riffCardsData(blocks, total, pageCount))
+})
 
-func resetRiffCards(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var getTreeRiffCards = contractHandler(apicontract.GetTreeRiffCards, func(c *gin.Context, request apicontract.RiffCardsRequest) apicontract.Response[apicontract.RiffCardsData] {
+	if err := model.ValidateFlashcardBlockIDs([]string{request.ID}); err != nil {
+		return apicontract.Failure[apicontract.RiffCardsData](-1, err.Error())
 	}
-
-	typ := arg["type"].(string)      // notebook, tree, deck
-	id := arg["id"].(string)         // notebook ID, root ID, deck ID
-	deckID := arg["deckID"].(string) // deck ID
-	blockIDsArg := arg["blockIDs"]   // 如果不传入 blockIDs （或者传入实参为空数组），则重置所有卡片
-	var blockIDs []string
-	if nil != blockIDsArg {
-		for _, blockID := range blockIDsArg.([]any) {
-			blockIDs = append(blockIDs, blockID.(string))
-		}
-	}
-
-	if err := model.ResetFlashcards(typ, id, deckID, blockIDs); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-	}
-}
-
-func getNotebookRiffCards(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	notebookID := arg["id"].(string)
-	if model.IsEncryptedBox(notebookID) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(393)
-		return
-	}
-	page := int(arg["page"].(float64))
-	pageSize := 20
-	if nil != arg["pageSize"] {
-		pageSize = int(arg["pageSize"].(float64))
-	}
-	blockIDs, total, pageCount := model.GetNotebookFlashcards(notebookID, page, pageSize)
-	ret.Data = map[string]any{
-		"blocks":    blockIDs,
-		"total":     total,
-		"pageCount": pageCount,
-	}
-}
-
-func getTreeRiffCards(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	rootID := arg["id"].(string)
-	if err := model.ValidateFlashcardBlockIDs([]string{rootID}); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	page := int(arg["page"].(float64))
-	pageSize := 20
-	if nil != arg["pageSize"] {
-		pageSize = int(arg["pageSize"].(float64))
-	}
-	blockIDs, total, pageCount := model.GetTreeFlashcards(rootID, page, pageSize)
-	ret.Data = map[string]any{
-		"blocks":    blockIDs,
-		"total":     total,
-		"pageCount": pageCount,
-	}
-}
-
-func getRiffCards(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	deckID := arg["id"].(string)
-	page := int(arg["page"].(float64))
-	pageSize := 20
-	if nil != arg["pageSize"] {
-		pageSize = int(arg["pageSize"].(float64))
-	}
-	blocks, total, pageCount := model.GetDeckFlashcards(deckID, page, pageSize)
-	ret.Data = map[string]any{
-		"blocks":    blocks,
-		"total":     total,
-		"pageCount": pageCount,
-	}
-}
-
-func reviewRiffCard(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	deckID := arg["deckID"].(string)
-	cardID := arg["cardID"].(string)
-	rating := int(arg["rating"].(float64))
-	reviewedCardIDs := getReviewedCards(arg)
-	err := model.ReviewFlashcard(deckID, cardID, riff.Rating(rating), reviewedCardIDs)
+	page, pageSize, err := request.Pagination()
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.RiffCardsData](-1, err.Error())
 	}
-}
+	blocks, total, pageCount := model.GetTreeFlashcards(request.ID, page, pageSize)
+	return apicontract.Success(riffCardsData(blocks, total, pageCount))
+})
 
-func skipReviewRiffCard(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	deckID := arg["deckID"].(string)
-	cardID := arg["cardID"].(string)
-	err := model.SkipReviewFlashcard(deckID, cardID)
+var getRiffCards = contractHandler(apicontract.GetRiffCards, func(c *gin.Context, request apicontract.RiffCardsRequest) apicontract.Response[apicontract.RiffCardsData] {
+	page, pageSize, err := request.Pagination()
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.RiffCardsData](-1, err.Error())
 	}
-}
+	blocks, total, pageCount := model.GetDeckFlashcards(request.ID, page, pageSize)
+	return apicontract.Success(riffCardsData(blocks, total, pageCount))
+})
 
-func getNotebookRiffDueCards(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var reviewRiffCard = contractHandler(apicontract.ReviewRiffCard, func(c *gin.Context, request apicontract.ReviewRiffCardRequest) apicontract.Response[apicontract.Null] {
+	if err := model.ReviewFlashcard(request.DeckID, request.CardID, riff.Rating(int(request.Rating)), request.IDs()); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
+	return apicontract.Success(apicontract.Null{})
+})
 
-	notebookID := arg["notebook"].(string)
-	reviewedCardIDs := getReviewedCards(arg)
-	cards, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount, err := model.GetNotebookDueFlashcards(notebookID, reviewedCardIDs)
+var skipReviewRiffCard = contractHandler(apicontract.SkipReviewRiffCard, func(c *gin.Context, request apicontract.RiffCardRequest) apicontract.Response[apicontract.Null] {
+	if err := model.SkipReviewFlashcard(request.DeckID, request.CardID); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
+	return apicontract.Success(apicontract.Null{})
+})
+
+var getNotebookRiffDueCards = contractHandler(apicontract.GetNotebookRiffDueCards, func(c *gin.Context, request apicontract.RiffNotebookDueCardsRequest) apicontract.Response[apicontract.RiffDueCardsData] {
+	cards, count, newCount, oldCount, err := model.GetNotebookDueFlashcards(request.Notebook, request.IDs())
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.RiffDueCardsData](-1, err.Error())
 	}
+	return apicontract.Success(riffDueCardsData(cards, count, newCount, oldCount))
+})
 
-	ret.Data = map[string]any{
-		"cards":                  cards,
-		"unreviewedCount":        unreviewedCount,
-		"unreviewedNewCardCount": unreviewedNewCardCount,
-		"unreviewedOldCardCount": unreviewedOldCardCount,
-	}
-}
-
-func getTreeRiffDueCards(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	rootID := arg["rootID"].(string)
-	reviewedCardIDs := getReviewedCards(arg)
-	cards, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount, err := model.GetTreeDueFlashcards(rootID, reviewedCardIDs)
+var getTreeRiffDueCards = contractHandler(apicontract.GetTreeRiffDueCards, func(c *gin.Context, request apicontract.RiffTreeDueCardsRequest) apicontract.Response[apicontract.RiffDueCardsData] {
+	cards, count, newCount, oldCount, err := model.GetTreeDueFlashcards(request.RootID, request.IDs())
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.RiffDueCardsData](-1, err.Error())
 	}
+	return apicontract.Success(riffDueCardsData(cards, count, newCount, oldCount))
+})
 
-	ret.Data = map[string]any{
-		"cards":                  cards,
-		"unreviewedCount":        unreviewedCount,
-		"unreviewedNewCardCount": unreviewedNewCardCount,
-		"unreviewedOldCardCount": unreviewedOldCardCount,
-	}
-}
-
-func getRiffDueCards(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	deckID := arg["deckID"].(string)
-	reviewedCardIDs := getReviewedCards(arg)
-	cards, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount, err := model.GetDueFlashcards(deckID, reviewedCardIDs)
+var getRiffDueCards = contractHandler(apicontract.GetRiffDueCards, func(c *gin.Context, request apicontract.RiffDueCardsRequest) apicontract.Response[apicontract.RiffDueCardsData] {
+	cards, count, newCount, oldCount, err := model.GetDueFlashcards(request.DeckID, request.IDs())
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.RiffDueCardsData](-1, err.Error())
 	}
+	return apicontract.Success(riffDueCardsData(cards, count, newCount, oldCount))
+})
 
-	ret.Data = map[string]any{
-		"cards":                  cards,
-		"unreviewedCount":        unreviewedCount,
-		"unreviewedNewCardCount": unreviewedNewCardCount,
-		"unreviewedOldCardCount": unreviewedOldCardCount,
-	}
-}
-
-func getReviewedCards(arg map[string]any) (ret []string) {
-	if nil == arg["reviewedCards"] {
-		return
-	}
-
-	reviewedCardsArg := arg["reviewedCards"].([]any)
-	for _, card := range reviewedCardsArg {
-		c := card.(map[string]any)
-		cardID := c["cardID"].(string)
-		ret = append(ret, cardID)
-	}
-	return
-}
-
-func removeRiffCards(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	deckID := arg["deckID"].(string)
-	blockIDsArg := arg["blockIDs"].([]any)
-	var blockIDs []string
-	for _, blockID := range blockIDsArg {
-		blockIDs = append(blockIDs, blockID.(string))
-	}
+var removeRiffCards = contractHandler(apicontract.RemoveRiffCards, func(c *gin.Context, request apicontract.RiffDeckCardsRequest) apicontract.Response[*apicontract.RiffDeck] {
+	blockIDs := riffBlockIDs(request.BlockIDs)
 	if err := model.ValidateFlashcardBlockIDs(blockIDs); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
 	}
-
-	transactions := []*model.Transaction{
-		{
-			DoOperations: []*model.Operation{
-				{
-					Action:   "removeFlashcards",
-					DeckID:   deckID,
-					BlockIDs: blockIDs,
-				},
-			},
-		},
-	}
-
+	transactions := []*model.Transaction{{DoOperations: []*model.Operation{{Action: "removeFlashcards", DeckID: request.DeckID, BlockIDs: blockIDs}}}}
 	model.PerformTransactions(&transactions)
 	model.FlushTxQueue()
-
-	if "" != deckID {
-		deck := model.Decks[deckID]
-		ret.Data = deckData(deck)
+	if request.DeckID != "" {
+		return apicontract.Success(deckData(model.Decks[request.DeckID]))
 	}
-	// All 卡包不返回数据
-}
+	return apicontract.Success[*apicontract.RiffDeck](nil)
+})
 
-func addRiffCards(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	deckID := arg["deckID"].(string)
-	blockIDsArg := arg["blockIDs"].([]any)
-	var blockIDs []string
-	for _, blockID := range blockIDsArg {
-		blockIDs = append(blockIDs, blockID.(string))
-	}
+var addRiffCards = contractHandler(apicontract.AddRiffCards, func(c *gin.Context, request apicontract.RiffDeckCardsRequest) apicontract.Response[*apicontract.RiffDeck] {
+	blockIDs := riffBlockIDs(request.BlockIDs)
 	if err := model.ValidateFlashcardBlockIDs(blockIDs); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
 	}
-
-	transactions := []*model.Transaction{
-		{
-			DoOperations: []*model.Operation{
-				{
-					Action:   "addFlashcards",
-					DeckID:   deckID,
-					BlockIDs: blockIDs,
-				},
-			},
-		},
-	}
-
+	transactions := []*model.Transaction{{DoOperations: []*model.Operation{{Action: "addFlashcards", DeckID: request.DeckID, BlockIDs: blockIDs}}}}
 	model.PerformTransactions(&transactions)
 	model.FlushTxQueue()
+	return apicontract.Success(deckData(model.Decks[request.DeckID]))
+})
 
-	deck := model.Decks[deckID]
-	ret.Data = deckData(deck)
-}
-
-func renameRiffDeck(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var renameRiffDeck = contractHandler(apicontract.RenameRiffDeck, func(c *gin.Context, request apicontract.RenameRiffDeckRequest) apicontract.Response[apicontract.Null] {
+	if err := model.RenameDeck(request.DeckID, request.Name); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
+	return apicontract.Success(apicontract.Null{})
+})
 
-	deckID := arg["deckID"].(string)
-	name := arg["name"].(string)
-	err := model.RenameDeck(deckID, name)
+var removeRiffDeck = contractHandler(apicontract.RemoveRiffDeck, func(c *gin.Context, request apicontract.RiffDeckRequest) apicontract.Response[apicontract.Null] {
+	ret := gulu.Ret.NewResult()
+	if util.InvalidIDPattern(request.DeckID, ret) {
+		return contractFailure[apicontract.Null](ret)
+	}
+	if err := model.RemoveDeck(request.DeckID); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
+	return apicontract.Success(apicontract.Null{})
+})
+
+var createRiffDeck = contractHandler(apicontract.CreateRiffDeck, func(c *gin.Context, request apicontract.CreateRiffDeckRequest) apicontract.Response[*apicontract.RiffDeck] {
+	deck, err := model.CreateDeck(request.Name)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[*apicontract.RiffDeck](-1, err.Error())
 	}
-}
+	return apicontract.Success(deckData(deck))
+})
 
-func removeRiffDeck(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	deckID := arg["deckID"].(string)
-	if util.InvalidIDPattern(deckID, ret) {
-		return
-	}
-
-	err := model.RemoveDeck(deckID)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-}
-
-func createRiffDeck(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	name := arg["name"].(string)
-	deck, err := model.CreateDeck(name)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	ret.Data = deckData(deck)
-}
-
-func getRiffDecks(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
+var getRiffDecks = contractHandler(apicontract.GetRiffDecks, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.RiffDeck] {
 	decks := model.GetDecks()
-	var data []any
+	data := make([]*apicontract.RiffDeck, 0, len(decks))
 	for _, deck := range decks {
 		data = append(data, deckData(deck))
 	}
-	if 1 > len(data) {
-		data = []any{}
-	}
-	ret.Data = data
+	return apicontract.Success(data)
+})
+
+func deckData(deck *riff.Deck) *apicontract.RiffDeck {
+	return &apicontract.RiffDeck{ID: deck.ID, Name: deck.Name, Size: model.CountSupportedFlashcards(deck),
+		Created: time.UnixMilli(deck.Created).Format("2006-01-02 15:04:05"), Updated: time.UnixMilli(deck.Updated).Format("2006-01-02 15:04:05")}
 }
 
-func deckData(deck *riff.Deck) map[string]any {
-	return map[string]any{
-		"id":      deck.ID,
-		"name":    deck.Name,
-		"size":    model.CountSupportedFlashcards(deck),
-		"created": time.UnixMilli(deck.Created).Format("2006-01-02 15:04:05"),
-		"updated": time.UnixMilli(deck.Updated).Format("2006-01-02 15:04:05"),
+func riffBlockIDs(ids []string) []string {
+	if len(ids) == 0 {
+		return nil
 	}
+	return ids
+}
+
+func riffCardsData(blocks []*model.Block, total, pageCount int) apicontract.RiffCardsData {
+	return apicontract.RiffCardsData{Blocks: searchBlockContracts(blocks), Total: total, PageCount: pageCount}
+}
+
+func riffDueCardsData(cards []*model.Flashcard, count, newCount, oldCount int) apicontract.RiffDueCardsData {
+	var values []*apicontract.RiffDueCard
+	if cards != nil {
+		values = make([]*apicontract.RiffDueCard, len(cards))
+		for i, card := range cards {
+			if card == nil {
+				continue
+			}
+			var nextDues map[string]string
+			if card.NextDues != nil {
+				nextDues = make(map[string]string, len(card.NextDues))
+				for rating, due := range card.NextDues {
+					nextDues[strconv.Itoa(int(rating))] = due
+				}
+			}
+			values[i] = &apicontract.RiffDueCard{DeckID: card.DeckID, CardID: card.CardID, BlockID: card.BlockID,
+				Lapses: card.Lapses, Reps: card.Reps, State: int(card.State), LastReview: card.LastReview, NextDues: nextDues}
+		}
+	}
+	return apicontract.RiffDueCardsData{Cards: values, UnreviewedCount: count, UnreviewedNewCardCount: newCount, UnreviewedOldCardCount: oldCount}
 }

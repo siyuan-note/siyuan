@@ -6,6 +6,20 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
+fetchPost("/api/riff/getRiffDecks", {}, response => {
+    const decks: Array<{id: string; name: string} | null> = response.data;
+    void decks;
+});
+fetchPost("/api/riff/resetRiffCards", {type: "deck", id: "deck", deckID: "deck", blockIDs: null});
+fetchPost("/api/riff/getRiffDueCards", {deckID: "deck"}, response => {
+    const due: string | undefined = response.data.cards?.[0]?.nextDues?.["1"];
+    void due;
+});
+// @ts-expect-error 复习卡片时必须提供评分。
+fetchPost("/api/riff/reviewRiffCard", {deckID: "deck", cardID: "card"});
+// @ts-expect-error 复习评分必须为数值。
+fetchPost("/api/riff/reviewRiffCard", {deckID: "deck", cardID: "card", rating: "1"});
+
 fetchPost("/api/sync/setSyncLAN", {enabled: true, maxConcurrentReqs: 2.5}, response => {
     const peers: number = response.data.connectedPeers;
     void peers;

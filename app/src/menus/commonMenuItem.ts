@@ -540,6 +540,9 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
                     fillCSSVar: false,
                     adjustHeadingLevel: false
                 });
+                if (response.code !== 0) {
+                    return;
+                }
                 const text = response.data.content;
                 writeText(text);
                 if (focusElement) {

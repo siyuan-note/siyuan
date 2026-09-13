@@ -230,6 +230,8 @@ export type ContentWordCountRequestInput = { "content": string; "reqId"?: JSONVa
 
 export type ContinueImportSYRequestInput = { "notebook": string; "token": string; };
 
+export type CopyExportFileRequestInput = { "dest": string; "srcPath": string; };
+
 export type CopyFileRequestInput = { "dest": string; "src": string; };
 
 export type CopyFilesRequestInput = { "destDir": string; "srcs": Array<string>; };
@@ -320,7 +322,63 @@ export type EncryptedNotebookStatus = { "id": string; "name": string; "state": "
 
 export type EncryptedNotebookStatusData = { "boxes": Array<EncryptedNotebookStatus>; "count": number; "enabled": boolean; "hasHistoryDependency": boolean; "migrationBoxes": Array<string> | null; "migrationPending": boolean; "state": "Disabled" | "Enabled" | "RecoveryRequired"; };
 
+export type ExportAsFileRequestInput = { "file": Blob; "type": string; };
+
+export type ExportAttributeViewRequestInput = { "blockID": string; "id": string; };
+
+export type ExportBrowserHTMLRequestInput = { "folder": string; "html": string; "name": string; };
+
+export type ExportDocumentsMarkdownRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "ids": Array<string>; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
+
+export type ExportDocxRequestInput = { "id": string; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; "removeAssets": boolean; "savePath": string; };
+
+export type ExportFileData = { "file": string; };
+
+export type ExportFolderRequestInput = { "folder": string; };
+
+export type ExportHTMLData = { "content": string; "folder"?: string; "id": string; "name": string; };
+
+export type ExportHTMLRequestInput = { "addTitle"?: boolean | null; "customTitle"?: string | null; "id": string; "keepFold"?: boolean | null; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; "pdf": boolean; "savePath"?: string | null; };
+
+export type ExportIDRequestInput = { "id": string; };
+
+export type ExportIDsRequestInput = { "ids": Array<string>; };
+
+export type ExportMarkdownContentData = { "content": string; "hPath": string; };
+
+export type ExportMarkdownContentRequestInput = { "addTitle"?: boolean | null; "adjustHeadingLevel"?: boolean | null; "embedMode"?: number | null; "fillCSSVar"?: boolean | null; "id": string; "imgTag"?: boolean | null; "refMode"?: number | null; "yfm"?: boolean | null; };
+
+export type ExportMarkdownHTMLRequestInput = { "id": string; "savePath"?: string | null; };
+
+export type ExportMarkdownRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "id": string; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
+
+export type ExportNameData = { "name": string; };
+
+export type ExportNamedZipData = { "name": string; "zip": string; };
+
+export type ExportNotebookMarkdownRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "notebook": string; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
+
+export type ExportNotebooksMarkdownRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "notebooks"?: Array<string> | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
+
+export type ExportNotebooksRequestInput = { "notebooks"?: Array<string> | null; };
+
+export type ExportPathData = { "path": string; };
+
+export type ExportPreviewData = { "fillCSSVar": boolean; "html": string; };
+
+export type ExportPreviewHTMLData = { "attrs": Record<string, string> | null; "content": string; "id": string; "name": string; "type": string; };
+
+export type ExportPreviewHTMLRequestInput = { "addTitle"?: boolean | null; "customTitle"?: string | null; "id": string; "image"?: boolean | null; "keepFold"?: boolean | null; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; };
+
 export type ExportRepoFileRequestInput = { "id": string; };
+
+export type ExportResourcesRequestInput = { "name"?: string | null; "paths"?: Array<string> | null; };
+
+export type ExportTempContentRequestInput = { "content": string; "id"?: string | null; };
+
+export type ExportURLData = { "url": string; };
+
+export type ExportZipData = { "zip": string; };
 
 export type FileAnnotationRefRequestInput = { "id": string; "notebook"?: string | null; };
 
@@ -627,6 +685,8 @@ export type PluginRPCSuccess = { "id": string | number | null; "jsonrpc": "2.0";
 export type PrepareRichTextRequestInput = { "assets": Array<RichClipboardAssetInput>; };
 
 export type PrependBlockRequestInput = { "data": string; "dataType": string; "parentID": string; };
+
+export type ProcessPDFRequestInput = { "id": string; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; "path": string; "removeAssets": boolean; "watermark": boolean; };
 
 export type PublishedBlockInfo = { "publishAccessRequired": true; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
 
@@ -1176,40 +1236,6 @@ export type APILegacyPOSTPath =
     "/api/av/setDatabaseBlockView" |
     "/api/av/sortAttributeViewKey" |
     "/api/av/sortAttributeViewViewKey" |
-    "/api/export/copyExportFile" |
-    "/api/export/export2Liandi" |
-    "/api/export/exportAsFile" |
-    "/api/export/exportAsciiDoc" |
-    "/api/export/exportAttributeView" |
-    "/api/export/exportBrowserHTML" |
-    "/api/export/exportCodeBlock" |
-    "/api/export/exportData" |
-    "/api/export/exportDataInFolder" |
-    "/api/export/exportDocx" |
-    "/api/export/exportEPUB" |
-    "/api/export/exportHTML" |
-    "/api/export/exportMd" |
-    "/api/export/exportMdContent" |
-    "/api/export/exportMdHTML" |
-    "/api/export/exportMds" |
-    "/api/export/exportMediaWiki" |
-    "/api/export/exportNotebookMd" |
-    "/api/export/exportNotebookSY" |
-    "/api/export/exportNotebooksMd" |
-    "/api/export/exportNotebooksSY" |
-    "/api/export/exportODT" |
-    "/api/export/exportOPML" |
-    "/api/export/exportOrgMode" |
-    "/api/export/exportPreviewHTML" |
-    "/api/export/exportRTF" |
-    "/api/export/exportReStructuredText" |
-    "/api/export/exportResources" |
-    "/api/export/exportSY" |
-    "/api/export/exportSYs" |
-    "/api/export/exportTempContent" |
-    "/api/export/exportTextile" |
-    "/api/export/preview" |
-    "/api/export/processPDF" |
     "/api/extension/copy" |
     "/api/filetree/authFilePublishAccess" |
     "/api/filetree/changeSort" |
@@ -1927,6 +1953,176 @@ export interface APIPOSTRoutes {
     "/api/convert/pandoc": {
         request: PandocRequestInput;
         response: { "code": 0; "data": PandocData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/copyExportFile": {
+        request: CopyExportFileRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -2; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/export2Liandi": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportAsFile": {
+        request: ExportAsFileRequestInput;
+        response: { "code": 0; "data": ExportFileData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+    };
+    "/api/export/exportAsciiDoc": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportAttributeView": {
+        request: ExportAttributeViewRequestInput;
+        response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportBrowserHTML": {
+        request: ExportBrowserHTMLRequestInput;
+        response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportCodeBlock": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportPathData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportData": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/export/exportDataInFolder": {
+        request: ExportFolderRequestInput;
+        response: { "code": 0; "data": ExportNameData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportDocx": {
+        request: ExportDocxRequestInput;
+        response: { "code": 0; "data": ExportPathData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportEPUB": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportHTML": {
+        request: ExportHTMLRequestInput;
+        response: { "code": 0; "data": ExportHTMLData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportMd": {
+        request: ExportMarkdownRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportMdContent": {
+        request: ExportMarkdownContentRequestInput;
+        response: { "code": 0; "data": ExportMarkdownContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportMdHTML": {
+        request: ExportMarkdownHTMLRequestInput;
+        response: { "code": 0; "data": ExportHTMLData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportMds": {
+        request: ExportDocumentsMarkdownRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportMediaWiki": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportNotebookMd": {
+        request: ExportNotebookMarkdownRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportNotebookSY": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportNotebooksMd": {
+        request: ExportNotebooksMarkdownRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportNotebooksSY": {
+        request: ExportNotebooksRequestInput;
+        response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportODT": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportOPML": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportOrgMode": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportPreviewHTML": {
+        request: ExportPreviewHTMLRequestInput;
+        response: { "code": 0; "data": ExportPreviewHTMLData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportRTF": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportReStructuredText": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportResources": {
+        request: ExportResourcesRequestInput;
+        response: { "code": 0; "data": ExportPathData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | string; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportSY": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportSYs": {
+        request: ExportIDsRequestInput;
+        response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportTempContent": {
+        request: ExportTempContentRequestInput;
+        response: { "code": 0; "data": ExportURLData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportTextile": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/preview": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportPreviewData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/processPDF": {
+        request: ProcessPDFRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/file/copyFile": {

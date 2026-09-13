@@ -6,6 +6,30 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
+fetchPost("/api/export/exportHTML", {id: "document", pdf: false}, response => {
+    const folder: string | undefined = response.data.folder;
+    void folder;
+});
+fetchPost("/api/export/exportMd", {id: "document", blockRefMode: 1.5, addTitle: null}, response => {
+    const zip: string = response.data.zip;
+    void zip;
+});
+fetchPost("/api/export/exportCodeBlock", {id: "block"}, response => {
+    if (response.code === 0) {
+        const path: string = response.data.path;
+        void path;
+    }
+});
+fetchPost("/api/export/exportAsFile", new ContractFormData({file: new Blob(), type: "text/plain"}));
+// @ts-expect-error HTML 导出必须显式指定 PDF 模式。
+fetchPost("/api/export/exportHTML", {id: "document"});
+// @ts-expect-error Markdown 导出模式必须为数字。
+fetchPost("/api/export/exportMd", {id: "document", blockRefMode: "1"});
+// @ts-expect-error 文件上传必须包含 MIME 类型。
+fetchPost("/api/export/exportAsFile", new ContractFormData({file: new Blob()}));
+// @ts-expect-error 导出请求不能包含拼错的参数。
+fetchPost("/api/export/exportHTML", {id: "document", pdf: false, savepath: ""});
+
 fetchPost("/api/repo/getRepoSnapshots", {page: 1}, response => {
     const snapshots = response.data.snapshots;
     void snapshots;

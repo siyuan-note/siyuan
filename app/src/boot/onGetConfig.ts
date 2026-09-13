@@ -297,7 +297,6 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                 pdf: true,
                 addTitle: ipcData.addTitle,
                 customTitle: ipcData.customTitle,
-                removeAssets: ipcData.removeAssets,
                 merge: ipcData.mergeSubdocs,
                 mergeDocHeadingMode: ipcData.mergeDocHeadingMode,
                 mergeContentHeadingMode: ipcData.mergeContentHeadingMode,

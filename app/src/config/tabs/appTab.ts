@@ -362,7 +362,9 @@ const mountExportData = (root: HTMLElement) => {
     root.querySelector("#exportData")?.addEventListener("click", async () => {
         /// #if BROWSER
         fetchPost("/api/export/exportData", {}, (response) => {
-            saveExportFile(response.data.zip);
+            if (response.code === 0) {
+                saveExportFile(response.data.zip);
+            }
         });
         /// #else
         const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {

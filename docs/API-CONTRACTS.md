@@ -24,6 +24,8 @@ Encrypted notebook lifecycle endpoints use typed requests and responses while re
 
 ## Compatibility requirements
 
+Export contracts retain Markdown option defaults and numeric truncation, notebook-list filtering, ignored title-option types, optional HTML folders, and file-upload field selection. Error responses preserve message durations and empty-string resource payloads. Publish filtering, encrypted-notebook admission, response-held leases, and temporary export cleanup remain in the existing lifecycle.
+
 Repository contracts retain key encoding, snapshot metadata, numeric truncation and retention defaults, cloud pagination, and file access leases. Repository-file reads retain their media type and bytes; empty files retain the success envelope. Both file success and JSON failure use HTTP 200. For this explicitly declared shared status, `ValidateHTTPResponse` accepts raw file bytes and `ValidateErrorResponse` separately verifies known error payloads. No key material, encrypted file format, or snapshot recovery behavior changes.
 
 Flashcard contracts retain numeric truncation, pagination defaults, optional reviewed-card lists, nullable block results, and non-null deck lists. Notebook and document admission still occurs before deferred pagination errors. Card and deck mutations keep their model-layer validation and persistence behavior; encrypted notebook restrictions remain unchanged.

@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"io"
 	"mime"
-	"net/http"
 	"net/url"
 	"os"
 	"path"
@@ -35,681 +34,395 @@ import (
 	"github.com/mssola/useragent"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func exportCodeBlock(c *gin.Context) {
+var exportCodeBlock = contractHandler(apicontract.ExportCodeBlock, func(c *gin.Context, request apicontract.ExportIDRequest) apicontract.Response[apicontract.ExportPathData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
-		return
-	}
+	id := request.ID
 	if !holdEncryptedExportRequest(c, id, ret) {
-		return
+		return contractFailure[apicontract.ExportPathData](ret)
 	}
 	filePath, err := model.ExportCodeBlock(id)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.ExportPathData](ret.Code, ret.Msg, 7000)
 	}
 
-	ret.Data = map[string]any{
-		"path": filePath,
-	}
-}
+	return apicontract.Success(apicontract.ExportPathData{Path: filePath})
+})
 
-func exportAttributeView(c *gin.Context) {
+var exportAttributeView = contractHandler(apicontract.ExportAttributeView, func(c *gin.Context, request apicontract.ExportAttributeViewRequest) apicontract.Response[apicontract.ExportZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var avID, blockID string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("id", &avID, true, true),
-		util.BindJsonArg("blockID", &blockID, true, true),
-	) {
-		return
-	}
+	avID := request.ID
+	blockID := request.BlockID
 	if !holdEncryptedExportRequest(c, blockID, ret) {
-		return
+		return contractFailure[apicontract.ExportZipData](ret)
 	}
 	zipPath, err := model.ExportAv2CSV(avID, blockID)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.ExportZipData](ret.Code, ret.Msg, 7000)
 	}
 
-	ret.Data = map[string]any{
-		"zip": zipPath,
-	}
-}
+	return apicontract.Success(apicontract.ExportZipData{Zip: zipPath})
+})
 
-func exportEPUB(c *gin.Context) {
+var exportEPUB = contractHandler(apicontract.ExportEPUB, func(c *gin.Context, request apicontract.ExportIDRequest) apicontract.Response[apicontract.ExportNamedZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
-		return
-	}
+	id := request.ID
 	if !holdEncryptedExportRequest(c, id, ret) {
-		return
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "epub", ".epub")
-	ret.Data = map[string]any{
-		"name": name,
-		"zip":  zipPath,
-	}
-}
+	return apicontract.Success(apicontract.ExportNamedZipData{Name: name, Zip: zipPath})
+})
 
-func exportRTF(c *gin.Context) {
+var exportRTF = contractHandler(apicontract.ExportRTF, func(c *gin.Context, request apicontract.ExportIDRequest) apicontract.Response[apicontract.ExportNamedZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
-		return
-	}
+	id := request.ID
 	if !holdEncryptedExportRequest(c, id, ret) {
-		return
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "rtf", ".rtf")
-	ret.Data = map[string]any{
-		"name": name,
-		"zip":  zipPath,
-	}
-}
+	return apicontract.Success(apicontract.ExportNamedZipData{Name: name, Zip: zipPath})
+})
 
-func exportODT(c *gin.Context) {
+var exportODT = contractHandler(apicontract.ExportODT, func(c *gin.Context, request apicontract.ExportIDRequest) apicontract.Response[apicontract.ExportNamedZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
-		return
-	}
+	id := request.ID
 	if !holdEncryptedExportRequest(c, id, ret) {
-		return
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "odt", ".odt")
-	ret.Data = map[string]any{
-		"name": name,
-		"zip":  zipPath,
-	}
-}
+	return apicontract.Success(apicontract.ExportNamedZipData{Name: name, Zip: zipPath})
+})
 
-func exportMediaWiki(c *gin.Context) {
+var exportMediaWiki = contractHandler(apicontract.ExportMediaWiki, func(c *gin.Context, request apicontract.ExportIDRequest) apicontract.Response[apicontract.ExportNamedZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
-		return
-	}
+	id := request.ID
 	if !holdEncryptedExportRequest(c, id, ret) {
-		return
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "mediawiki", ".wiki")
-	ret.Data = map[string]any{
-		"name": name,
-		"zip":  zipPath,
-	}
-}
+	return apicontract.Success(apicontract.ExportNamedZipData{Name: name, Zip: zipPath})
+})
 
-func exportOrgMode(c *gin.Context) {
+var exportOrgMode = contractHandler(apicontract.ExportOrgMode, func(c *gin.Context, request apicontract.ExportIDRequest) apicontract.Response[apicontract.ExportNamedZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
-		return
-	}
+	id := request.ID
 	if !holdEncryptedExportRequest(c, id, ret) {
-		return
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "org", ".org")
-	ret.Data = map[string]any{
-		"name": name,
-		"zip":  zipPath,
-	}
-}
+	return apicontract.Success(apicontract.ExportNamedZipData{Name: name, Zip: zipPath})
+})
 
-func exportOPML(c *gin.Context) {
+var exportOPML = contractHandler(apicontract.ExportOPML, func(c *gin.Context, request apicontract.ExportIDRequest) apicontract.Response[apicontract.ExportNamedZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
-		return
-	}
+	id := request.ID
 	if !holdEncryptedExportRequest(c, id, ret) {
-		return
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "opml", ".opml")
-	ret.Data = map[string]any{
-		"name": name,
-		"zip":  zipPath,
-	}
-}
+	return apicontract.Success(apicontract.ExportNamedZipData{Name: name, Zip: zipPath})
+})
 
-func exportTextile(c *gin.Context) {
+var exportTextile = contractHandler(apicontract.ExportTextile, func(c *gin.Context, request apicontract.ExportIDRequest) apicontract.Response[apicontract.ExportNamedZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
-		return
-	}
+	id := request.ID
 	if !holdEncryptedExportRequest(c, id, ret) {
-		return
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "textile", ".textile")
-	ret.Data = map[string]any{
-		"name": name,
-		"zip":  zipPath,
-	}
-}
+	return apicontract.Success(apicontract.ExportNamedZipData{Name: name, Zip: zipPath})
+})
 
-func exportAsciiDoc(c *gin.Context) {
+var exportAsciiDoc = contractHandler(apicontract.ExportAsciiDoc, func(c *gin.Context, request apicontract.ExportIDRequest) apicontract.Response[apicontract.ExportNamedZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
-		return
-	}
+	id := request.ID
 	if !holdEncryptedExportRequest(c, id, ret) {
-		return
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "asciidoc", ".adoc")
-	ret.Data = map[string]any{
-		"name": name,
-		"zip":  zipPath,
-	}
-}
+	return apicontract.Success(apicontract.ExportNamedZipData{Name: name, Zip: zipPath})
+})
 
-func exportReStructuredText(c *gin.Context) {
+var exportReStructuredText = contractHandler(apicontract.ExportReStructuredText, func(c *gin.Context, request apicontract.ExportIDRequest) apicontract.Response[apicontract.ExportNamedZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
-		return
-	}
+	id := request.ID
 	if !holdEncryptedExportRequest(c, id, ret) {
-		return
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "rst", ".rst")
-	ret.Data = map[string]any{
-		"name": name,
-		"zip":  zipPath,
-	}
-}
+	return apicontract.Success(apicontract.ExportNamedZipData{Name: name, Zip: zipPath})
+})
 
-func export2Liandi(c *gin.Context) {
+var export2Liandi = contractHandler(apicontract.Export2Liandi, func(c *gin.Context, request apicontract.ExportIDRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
-		return
-	}
+	id := request.ID
 	err := model.Export2Liandi(id)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func exportDataInFolder(c *gin.Context) {
+var exportDataInFolder = contractHandler(apicontract.ExportDataInFolder, func(c *gin.Context, request apicontract.ExportFolderRequest) apicontract.Response[apicontract.ExportNameData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var exportFolder string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("folder", &exportFolder, true, true)) {
-		return
-	}
+	exportFolder := request.Folder
 	name, err := model.ExportDataInFolder(exportFolder)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.ExportNameData](ret.Code, ret.Msg, 7000)
 	}
-	ret.Data = map[string]any{
-		"name": name,
-	}
-}
+	return apicontract.Success(apicontract.ExportNameData{Name: name})
+})
 
-func exportData(c *gin.Context) {
+var exportData = contractHandler(apicontract.ExportData, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.ExportZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
 	zipPath, err := model.ExportData()
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.ExportZipData](ret.Code, ret.Msg, 7000)
 	}
-	ret.Data = map[string]any{
-		"zip": zipPath,
-	}
-}
+	return apicontract.Success(apicontract.ExportZipData{Zip: zipPath})
+})
 
-func exportResources(c *gin.Context) {
+var exportResources = contractHandler(apicontract.ExportResources, func(c *gin.Context, request apicontract.ExportResourcesRequest) apicontract.Response[apicontract.ExportPathData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
 
 	var name string
-	if nil != arg["name"] {
-		name = util.TruncateLenFileName(arg["name"].(string))
+	if request.Name != nil {
+		name = util.TruncateLenFileName(*request.Name)
 	}
 	if name == "" {
 		name = time.Now().Format("export-2006-01-02_15-04-05") // 生成的 *.zip 文件主文件名
 	}
 
-	if nil == arg["paths"] {
+	if request.Paths == nil {
 		ret.Code = 1
-		ret.Data = ""
-		ret.Msg = "[paths] is required"
-		return
+		return apicontract.FailureWithText[apicontract.ExportPathData](1, "[paths] is required", "")
 	}
 
-	var resourcePaths []string // 文件/文件夹在工作空间中的路径
-	for _, resourcePath := range arg["paths"].([]any) {
-		resourcePaths = append(resourcePaths, resourcePath.(string))
-	}
+	resourcePaths := exportStrings(*request.Paths)
 
 	zipFilePath, err := model.ExportResources(resourcePaths, name)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.ExportPathData](ret.Code, ret.Msg, 7000)
 	}
-	ret.Data = map[string]any{
-		"path": zipFilePath, // 相对于工作空间目录的路径
-	}
-}
+	return apicontract.Success(apicontract.ExportPathData{Path: zipFilePath})
+})
 
-func exportNotebookMd(c *gin.Context) {
+var exportNotebookMd = contractHandler(apicontract.ExportNotebookMd, func(c *gin.Context, request apicontract.ExportNotebookMarkdownRequest) apicontract.Response[apicontract.ExportNamedZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var notebook string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, true)) {
-		return
-	}
+	notebook := request.Notebook
 	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(314)
-		return
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
-	zipPath := model.ExportNotebookMarkdownWithOptions(notebook, model.ParseExportOptions(arg))
-	ret.Data = map[string]any{
-		"name": path.Base(zipPath),
-		"zip":  zipPath,
+	if err := request.Validate(); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
-}
+	zipPath := model.ExportNotebookMarkdownWithOptions(notebook, exportMarkdownOptions(request.ExportMarkdownOptions))
+	return apicontract.Success(apicontract.ExportNamedZipData{Name: path.Base(zipPath), Zip: zipPath})
+})
 
-func exportNotebooksMd(c *gin.Context) {
+var exportNotebooksMd = contractHandler(apicontract.ExportNotebooksMd, func(c *gin.Context, request apicontract.ExportNotebooksMarkdownRequest) apicontract.Response[apicontract.ExportNamedZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-	notebooks := parseExportNotebookIDs(arg)
+	notebooks := request.IDs()
 	if len(notebooks) < 1 {
 		ret.Code = -1
-		return
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
 	for _, notebook := range notebooks {
 		if model.IsEncryptedBox(notebook) {
 			ret.Code = -1
 			ret.Msg = model.Conf.Language(395)
-			return
+			return contractFailure[apicontract.ExportNamedZipData](ret)
 		}
 	}
-	zipPath := model.ExportNotebooksMarkdownWithOptions(notebooks, model.ParseExportOptions(arg))
-	ret.Data = map[string]any{
-		"name": path.Base(zipPath),
-		"zip":  zipPath,
+	if err := request.Validate(); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
-}
+	zipPath := model.ExportNotebooksMarkdownWithOptions(notebooks, exportMarkdownOptions(request.ExportMarkdownOptions))
+	return apicontract.Success(apicontract.ExportNamedZipData{Name: path.Base(zipPath), Zip: zipPath})
+})
 
-func exportMds(c *gin.Context) {
+var exportMds = contractHandler(apicontract.ExportMds, func(c *gin.Context, request apicontract.ExportDocumentsMarkdownRequest) apicontract.Response[apicontract.ExportNamedZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	idsArg := arg["ids"].([]any)
-	var ids []string
-	for _, id := range idsArg {
-		ids = append(ids, id.(string))
-	}
+	ids := exportStrings(request.IDs)
 	if !holdEncryptedExportRequests(c, ids, ret) {
-		return
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
 
-	name, zipPath := model.ExportPandocConvertZipWithOptions(ids, "", ".md", model.ParseExportOptions(arg))
-	ret.Data = map[string]any{
-		"name": name,
-		"zip":  zipPath,
+	if err := request.Validate(); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
-}
+	name, zipPath := model.ExportPandocConvertZipWithOptions(ids, "", ".md", exportMarkdownOptions(request.ExportMarkdownOptions))
+	return apicontract.Success(apicontract.ExportNamedZipData{Name: name, Zip: zipPath})
+})
 
-func exportMd(c *gin.Context) {
+var exportMd = contractHandler(apicontract.ExportMd, func(c *gin.Context, request apicontract.ExportMarkdownRequest) apicontract.Response[apicontract.ExportNamedZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
-		return
-	}
+	id := request.ID
 	if !holdEncryptedExportRequest(c, id, ret) {
-		return
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
-	name, zipPath := model.ExportPandocConvertZipWithOptions([]string{id}, "", ".md", model.ParseExportOptions(arg))
-	ret.Data = map[string]any{
-		"name": name,
-		"zip":  zipPath,
+	if err := request.Validate(); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return contractFailure[apicontract.ExportNamedZipData](ret)
 	}
-}
+	name, zipPath := model.ExportPandocConvertZipWithOptions([]string{id}, "", ".md", exportMarkdownOptions(request.ExportMarkdownOptions))
+	return apicontract.Success(apicontract.ExportNamedZipData{Name: name, Zip: zipPath})
+})
 
-func exportNotebookSY(c *gin.Context) {
+var exportNotebookSY = contractHandler(apicontract.ExportNotebookSY, func(c *gin.Context, request apicontract.ExportIDRequest) apicontract.Response[apicontract.ExportZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
-		return
-	}
+	id := request.ID
 	if err := holdEncryptedBoxRequest(c, id); err != nil {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(314)
-		return
+		return contractFailure[apicontract.ExportZipData](ret)
 	}
 	zipPath := model.ExportNotebookSY(id)
-	ret.Data = map[string]any{
-		"zip": zipPath,
-	}
-}
+	return apicontract.Success(apicontract.ExportZipData{Zip: zipPath})
+})
 
-func exportNotebooksSY(c *gin.Context) {
+var exportNotebooksSY = contractHandler(apicontract.ExportNotebooksSY, func(c *gin.Context, request apicontract.ExportNotebooksRequest) apicontract.Response[apicontract.ExportZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-	notebooks := parseExportNotebookIDs(arg)
+	notebooks := request.IDs()
 	if len(notebooks) < 1 {
 		ret.Code = -1
-		return
+		return contractFailure[apicontract.ExportZipData](ret)
 	}
 	for _, notebook := range notebooks {
 		if model.IsEncryptedBox(notebook) {
 			ret.Code = -1
 			ret.Msg = model.Conf.Language(395)
-			return
+			return contractFailure[apicontract.ExportZipData](ret)
 		}
 	}
 	zipPath := model.ExportNotebooksSY(notebooks)
-	ret.Data = map[string]any{
-		"zip": zipPath,
-	}
-}
+	return apicontract.Success(apicontract.ExportZipData{Zip: zipPath})
+})
 
-func parseExportNotebookIDs(arg map[string]any) (ret []string) {
-	values, ok := arg["notebooks"].([]any)
-	if !ok {
-		return
-	}
-	for _, value := range values {
-		if notebook, valueOK := value.(string); valueOK && notebook != "" {
-			ret = append(ret, notebook)
-		}
-	}
-	return
-}
-
-func exportSYs(c *gin.Context) {
+var exportSYs = contractHandler(apicontract.ExportSYs, func(c *gin.Context, request apicontract.ExportIDsRequest) apicontract.Response[apicontract.ExportZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	idsArg := arg["ids"].([]any)
-	var ids []string
-	for _, id := range idsArg {
-		ids = append(ids, id.(string))
-	}
+	ids := exportStrings(request.IDs)
 	if !holdEncryptedExportRequests(c, ids, ret) {
-		return
+		return contractFailure[apicontract.ExportZipData](ret)
 	}
 
 	zipPath := model.ExportSYs(ids)
-	ret.Data = map[string]any{
-		"zip": zipPath,
-	}
-}
+	return apicontract.Success(apicontract.ExportZipData{Zip: zipPath})
+})
 
-func exportSY(c *gin.Context) {
+var exportSY = contractHandler(apicontract.ExportSY, func(c *gin.Context, request apicontract.ExportIDRequest) apicontract.Response[apicontract.ExportZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
-		return
-	}
+	id := request.ID
 	if !holdEncryptedExportRequest(c, id, ret) {
-		return
+		return contractFailure[apicontract.ExportZipData](ret)
 	}
 	zipPath := model.ExportSYs([]string{id})
-	ret.Data = map[string]any{
-		"zip": zipPath,
-	}
-}
+	return apicontract.Success(apicontract.ExportZipData{Zip: zipPath})
+})
 
-func exportMdContent(c *gin.Context) {
+var exportMdContent = contractHandler(apicontract.ExportMdContent, func(c *gin.Context, request apicontract.ExportMarkdownContentRequest) apicontract.Response[apicontract.ExportMarkdownContentData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
-		return
-	}
+	id := request.ID
 	if util.InvalidIDPattern(id, ret) {
-		return
+		return contractFailure[apicontract.ExportMarkdownContentData](ret)
 	}
 	if !holdEncryptedExportRequest(c, id, ret) {
-		return
+		return contractFailure[apicontract.ExportMarkdownContentData](ret)
 	}
 
-	refMode := model.Conf.Export.BlockRefMode
-	if nil != arg["refMode"] {
-		refMode = int(arg["refMode"].(float64))
+	if err := request.Validate(); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return contractFailure[apicontract.ExportMarkdownContentData](ret)
 	}
-
-	embedMode := model.Conf.Export.BlockEmbedMode
-	if nil != arg["embedMode"] {
-		embedMode = int(arg["embedMode"].(float64))
+	refMode, embedMode, yfm := model.Conf.Export.BlockRefMode, model.Conf.Export.BlockEmbedMode, true
+	if request.RefMode != nil {
+		refMode = int(*request.RefMode)
 	}
-
-	yfm := true
-	if nil != arg["yfm"] {
-		yfm = arg["yfm"].(bool)
+	if request.EmbedMode != nil {
+		embedMode = int(*request.EmbedMode)
 	}
-
-	var fillCSSVar, adjustHeadingLevel, imgTag bool
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("fillCSSVar", &fillCSSVar, false, false),
-		util.BindJsonArg("adjustHeadingLevel", &adjustHeadingLevel, false, false),
-		util.BindJsonArg("imgTag", &imgTag, false, false),
-	) {
-		return
+	if request.YFM != nil {
+		yfm = *request.YFM
 	}
-
+	fillCSSVar, adjustHeadingLevel, imgTag := request.FillCSSVar, request.AdjustHeadingLevel, request.ImgTag
 	addTitle := model.Conf.Export.AddTitle
-	if nil != arg["addTitle"] {
-		if arg["addTitle"].(bool) {
-			addTitle = true
-		} else {
-			addTitle = false
-		}
+	if request.AddTitle != nil {
+		addTitle = *request.AddTitle
 	}
 
 	hPath, content := model.ExportMarkdownContent(id, refMode, embedMode, yfm, fillCSSVar, adjustHeadingLevel, imgTag, addTitle)
-	ret.Data = map[string]any{
-		"hPath":   hPath,
-		"content": content,
-	}
-}
+	return apicontract.Success(apicontract.ExportMarkdownContentData{HPath: hPath, Content: content})
+})
 
-func exportDocx(c *gin.Context) {
+var exportDocx = contractHandler(apicontract.ExportDocx, func(c *gin.Context, request apicontract.ExportDocxRequest) apicontract.Response[apicontract.ExportPathData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id, savePath, mergeDocHeadingMode, mergeContentHeadingMode string
-	var removeAssets, merge bool
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("id", &id, true, true),
-		util.BindJsonArg("savePath", &savePath, true, true),
-		util.BindJsonArg("removeAssets", &removeAssets, true, false),
-		util.BindJsonArg("merge", &merge, false, false),
-		util.BindJsonArg("mergeDocHeadingMode", &mergeDocHeadingMode, false, false),
-		util.BindJsonArg("mergeContentHeadingMode", &mergeContentHeadingMode, false, false),
-	) {
-		return
-	}
+	id := request.ID
+	savePath := request.SavePath
+	removeAssets := request.RemoveAssets
+	merge := request.Merge
+	mergeDocHeadingMode := request.MergeDocHeadingMode
+	mergeContentHeadingMode := request.MergeContentHeadingMode
 	if !holdEncryptedExportRequest(c, id, ret) {
-		return
+		return contractFailure[apicontract.ExportPathData](ret)
 	}
 
 	// savePath 由客户端指定，禁止写入加密笔记本目录（明文导出物会绕过加密、锁定后残留）
 	if rejectEncryptedBoxPath(savePath) {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(383)
-		return
+		return contractFailure[apicontract.ExportPathData](ret)
 	}
 
 	mergeHeadingOptions := model.MergeHeadingOptions{DocHeadingMode: mergeDocHeadingMode, ContentHeadingMode: mergeContentHeadingMode}
@@ -717,32 +430,18 @@ func exportDocx(c *gin.Context) {
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.ExportPathData](ret.Code, ret.Msg, 7000)
 	}
-	ret.Data = map[string]any{
-		"path": fullPath,
-	}
-}
+	return apicontract.Success(apicontract.ExportPathData{Path: fullPath})
+})
 
-func exportMdHTML(c *gin.Context) {
+var exportMdHTML = contractHandler(apicontract.ExportMdHTML, func(c *gin.Context, request apicontract.ExportMarkdownHTMLRequest) apicontract.Response[apicontract.ExportHTMLData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id, savePath string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("id", &id, true, true),
-		util.BindJsonArg("savePath", &savePath, false, false),
-	) {
-		return
-	}
+	id := request.ID
+	savePath := request.SavePath
 	if !holdEncryptedExportRequest(c, id, ret) {
-		return
+		return contractFailure[apicontract.ExportHTMLData](ret)
 	}
 
 	savePath = strings.TrimSpace(savePath)
@@ -754,48 +453,27 @@ func exportMdHTML(c *gin.Context) {
 		}
 		tmpDir := filepath.Join(util.TempDir, "export", folderName)
 		name, content := model.ExportMarkdownHTML(id, tmpDir, false, false)
-		ret.Data = map[string]any{
-			"id":      id,
-			"name":    name,
-			"content": content,
-			"folder":  folderName,
-		}
-		return
+		return apicontract.Success(apicontract.ExportHTMLData{ID: id, Name: name, Content: content, Folder: folderName})
 	}
 
 	// savePath 由客户端指定，禁止写入加密笔记本目录（明文导出物会绕过加密、锁定后残留）
 	if rejectEncryptedBoxPath(savePath) {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(383)
-		return
+		return contractFailure[apicontract.ExportHTMLData](ret)
 	}
 
 	name, content := model.ExportMarkdownHTML(id, savePath, false, false)
-	ret.Data = map[string]any{
-		"id":      id,
-		"name":    name,
-		"content": content,
-	}
-}
+	return apicontract.Success(apicontract.ExportHTMLData{ID: id, Name: name, Content: content})
+})
 
-func exportTempContent(c *gin.Context) {
+var exportTempContent = contractHandler(apicontract.ExportTempContent, func(c *gin.Context, request apicontract.ExportTempContentRequest) apicontract.Response[apicontract.ExportURLData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var content, id string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("content", &content, true, false),
-		util.BindJsonArg("id", &id, false, false),
-	) {
-		return
-	}
+	content := request.Content
+	id := request.ID
 	if !holdEncryptedExportRequest(c, id, ret) {
-		return
+		return contractFailure[apicontract.ExportURLData](ret)
 	}
 	tmpExport := filepath.Join(util.TempDir, "export")
 	// 加密笔记本的临时导出归入 boxID 子目录，确保 LockBox 清理和服务端校验锁定状态
@@ -808,15 +486,13 @@ func exportTempContent(c *gin.Context) {
 	if err := os.MkdirAll(tmpExport, 0755); err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.ExportURLData](ret.Code, ret.Msg, 7000)
 	}
 	p := filepath.Join(tmpExport, gulu.Rand.String(7))
 	if err := os.WriteFile(p, []byte(content), 0644); err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.ExportURLData](ret.Code, ret.Msg, 7000)
 	}
 	baseName := filepath.Base(p)
 	urlPath := "/export/"
@@ -834,28 +510,15 @@ func exportTempContent(c *gin.Context) {
 	} else {
 		urlPath = path.Join(urlPath, "temp", baseName)
 	}
-	ret.Data = map[string]any{
-		"url": util.ServerURL.Scheme + "://" + util.LocalHost + ":" + util.ServerPort + urlPath,
-	}
-}
+	return apicontract.Success(apicontract.ExportURLData{URL: util.ServerURL.Scheme + "://" + util.LocalHost + ":" + util.ServerPort + urlPath})
+})
 
-func exportBrowserHTML(c *gin.Context) {
+var exportBrowserHTML = contractHandler(apicontract.ExportBrowserHTML, func(c *gin.Context, request apicontract.ExportBrowserHTMLRequest) apicontract.Response[apicontract.ExportZipData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var folder, htmlContent, name string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("folder", &folder, true, true),
-		util.BindJsonArg("html", &htmlContent, true, true),
-		util.BindJsonArg("name", &name, true, true),
-	) {
-		return
-	}
+	folder := request.Folder
+	htmlContent := request.HTML
+	name := request.Name
 
 	// folder 由客户端指定，禁止包含 ..、绝对路径等穿越组件，防止在导出目录之外写入 index.html
 	exportDir := filepath.Join(util.TempDir, "export")
@@ -863,7 +526,7 @@ func exportBrowserHTML(c *gin.Context) {
 	if !gulu.File.IsSubPath(exportDir, tmpDir) {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(383)
-		return
+		return contractFailure[apicontract.ExportZipData](ret)
 	}
 
 	// 检测是否来自加密笔记本：folder 形如 <boxID>/<folderName>
@@ -875,7 +538,7 @@ func exportBrowserHTML(c *gin.Context) {
 		if err := holdEncryptedBoxRequest(c, boxID); err != nil {
 			ret.Code = -1
 			ret.Msg = model.Conf.Language(314)
-			return
+			return contractFailure[apicontract.ExportZipData](ret)
 		}
 	}
 
@@ -883,8 +546,7 @@ func exportBrowserHTML(c *gin.Context) {
 	if err := filelock.WriteFile(htmlPath, []byte(htmlContent)); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = nil
-		return
+		return contractFailure[apicontract.ExportZipData](ret)
 	}
 
 	zipFileName := util.FilterFileName(name) + ".zip"
@@ -895,7 +557,7 @@ func exportBrowserHTML(c *gin.Context) {
 		if err := os.MkdirAll(filepath.Dir(zipAbsPath), 0755); err != nil {
 			ret.Code = -1
 			ret.Msg = err.Error()
-			return
+			return contractFailure[apicontract.ExportZipData](ret)
 		}
 	} else {
 		zipAbsPath = filepath.Join(util.TempDir, "export", zipFileName)
@@ -905,8 +567,7 @@ func exportBrowserHTML(c *gin.Context) {
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = nil
-		return
+		return contractFailure[apicontract.ExportZipData](ret)
 	}
 
 	err = zip.AddDirectory("", tmpDir, func(string) {})
@@ -915,16 +576,14 @@ func exportBrowserHTML(c *gin.Context) {
 		_ = os.Remove(zipAbsPath)
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = nil
-		return
+		return contractFailure[apicontract.ExportZipData](ret)
 	}
 
 	if err = zip.Close(); err != nil {
 		_ = os.Remove(zipAbsPath)
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = nil
-		return
+		return contractFailure[apicontract.ExportZipData](ret)
 	}
 
 	os.RemoveAll(tmpDir)
@@ -935,36 +594,21 @@ func exportBrowserHTML(c *gin.Context) {
 	} else {
 		zipURL = "/export/" + url.PathEscape(filepath.Base(zipAbsPath))
 	}
-	ret.Data = map[string]any{
-		"zip": zipURL,
-	}
-}
+	return apicontract.Success(apicontract.ExportZipData{Zip: zipURL})
+})
 
-func exportPreviewHTML(c *gin.Context) {
+var exportPreviewHTML = contractHandler(apicontract.ExportPreviewHTML, func(c *gin.Context, request apicontract.ExportPreviewHTMLRequest) apicontract.Response[apicontract.ExportPreviewHTMLData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id, mergeDocHeadingMode, mergeContentHeadingMode string
-	var keepFold, merge, image bool
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("id", &id, true, true),
-		util.BindJsonArg("keepFold", &keepFold, false, false),
-		util.BindJsonArg("merge", &merge, false, false),
-		util.BindJsonArg("image", &image, false, false),
-		util.BindJsonArg("mergeDocHeadingMode", &mergeDocHeadingMode, false, false),
-		util.BindJsonArg("mergeContentHeadingMode", &mergeContentHeadingMode, false, false),
-	) {
-		return
-	}
+	id := request.ID
+	keepFold := request.KeepFold
+	merge := request.Merge
+	mergeDocHeadingMode := request.MergeDocHeadingMode
+	mergeContentHeadingMode := request.MergeContentHeadingMode
 	if !holdEncryptedExportRequest(c, id, ret) {
-		return
+		return contractFailure[apicontract.ExportPreviewHTMLData](ret)
 	}
-	addTitle, customTitle := exportTitleOptions(arg)
+	addTitle, customTitle := exportTitleOptions(request.ExportTitleOptions)
 	mergeHeadingOptions := model.MergeHeadingOptions{DocHeadingMode: mergeDocHeadingMode, ContentHeadingMode: mergeContentHeadingMode}
 	name, content, node := model.ExportHTMLWithTitle(id, "", true, keepFold, merge, addTitle, customTitle, mergeHeadingOptions)
 	// 导出 PDF 预览时点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5894
@@ -978,42 +622,24 @@ func exportPreviewHTML(c *gin.Context) {
 		typ = node.Type.String()
 	}
 
-	ret.Data = map[string]any{
-		"id":      id,
-		"name":    name,
-		"content": content,
-		"attrs":   attrs,
-		"type":    typ,
-	}
-}
+	return apicontract.Success(apicontract.ExportPreviewHTMLData{ID: id, Name: name, Content: content, Attrs: attrs, Type: typ})
+})
 
-func exportHTML(c *gin.Context) {
+var exportHTML = contractHandler(apicontract.ExportHTML, func(c *gin.Context, request apicontract.ExportHTMLRequest) apicontract.Response[apicontract.ExportHTMLData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id, savePath, mergeDocHeadingMode, mergeContentHeadingMode string
-	var pdf, keepFold, merge bool
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("id", &id, true, true),
-		util.BindJsonArg("pdf", &pdf, true, false),
-		util.BindJsonArg("savePath", &savePath, false, false),
-		util.BindJsonArg("keepFold", &keepFold, false, false),
-		util.BindJsonArg("merge", &merge, false, false),
-		util.BindJsonArg("mergeDocHeadingMode", &mergeDocHeadingMode, false, false),
-		util.BindJsonArg("mergeContentHeadingMode", &mergeContentHeadingMode, false, false),
-	) {
-		return
-	}
+	id := request.ID
+	pdf := request.PDF
+	savePath := request.SavePath
+	keepFold := request.KeepFold
+	merge := request.Merge
+	mergeDocHeadingMode := request.MergeDocHeadingMode
+	mergeContentHeadingMode := request.MergeContentHeadingMode
 	if !holdEncryptedExportRequest(c, id, ret) {
-		return
+		return contractFailure[apicontract.ExportHTMLData](ret)
 	}
 
-	addTitle, customTitle := exportTitleOptions(arg)
+	addTitle, customTitle := exportTitleOptions(request.ExportTitleOptions)
 	mergeHeadingOptions := model.MergeHeadingOptions{DocHeadingMode: mergeDocHeadingMode, ContentHeadingMode: mergeContentHeadingMode}
 	savePath = strings.TrimSpace(savePath)
 	if savePath == "" {
@@ -1024,39 +650,49 @@ func exportHTML(c *gin.Context) {
 		}
 		tmpDir := filepath.Join(util.TempDir, "export", folderName)
 		name, content, _ := model.ExportHTMLWithTitle(id, tmpDir, pdf, keepFold, merge, addTitle, customTitle, mergeHeadingOptions)
-		ret.Data = map[string]any{
-			"id":      id,
-			"name":    name,
-			"content": content,
-			"folder":  folderName,
-		}
-		return
+		return apicontract.Success(apicontract.ExportHTMLData{ID: id, Name: name, Content: content, Folder: folderName})
 	}
 
 	// savePath 由客户端指定，禁止写入加密笔记本目录（明文导出物会绕过加密、锁定后残留）
 	if rejectEncryptedBoxPath(savePath) {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(383)
-		return
+		return contractFailure[apicontract.ExportHTMLData](ret)
 	}
 
 	name, content, _ := model.ExportHTMLWithTitle(id, savePath, pdf, keepFold, merge, addTitle, customTitle, mergeHeadingOptions)
-	ret.Data = map[string]any{
-		"id":      id,
-		"name":    name,
-		"content": content,
+	return apicontract.Success(apicontract.ExportHTMLData{ID: id, Name: name, Content: content})
+})
+
+func exportTitleOptions(options apicontract.ExportTitleOptions) (addTitle bool, customTitle string) {
+	addTitle = model.Conf.Export.AddTitle
+	if options.AddTitle != nil {
+		addTitle = *options.AddTitle
 	}
+	return addTitle, strings.TrimSpace(options.CustomTitle)
 }
 
-func exportTitleOptions(arg map[string]any) (addTitle bool, customTitle string) {
-	addTitle = model.Conf.Export.AddTitle
-	if value, ok := arg["addTitle"].(bool); ok {
-		addTitle = value
+func exportStrings(values []string) []string {
+	if len(values) == 0 {
+		return nil
 	}
-	if value, ok := arg["customTitle"].(string); ok {
-		customTitle = strings.TrimSpace(value)
+	return values
+}
+
+func exportMarkdownOptions(options apicontract.ExportMarkdownOptions) *model.ExportOptions {
+	integer := func(value *float64) *int {
+		if value == nil {
+			return nil
+		}
+		result := int(*value)
+		return &result
 	}
-	return
+	return &model.ExportOptions{AddTitle: options.AddTitle, InlineMemo: options.InlineMemo,
+		BlockRefMode: integer(options.BlockRefMode), BlockEmbedMode: integer(options.BlockEmbedMode),
+		FileAnnotationRefMode: integer(options.FileAnnotationRefMode), BlockRefTextLeft: options.BlockRefTextLeft,
+		BlockRefTextRight: options.BlockRefTextRight, TagOpenMarker: options.TagOpenMarker, TagCloseMarker: options.TagCloseMarker,
+		IncludeSubDocs: options.IncludeSubDocs, IncludeRelatedDocs: options.IncludeRelatedDocs,
+		MarkdownYFM: options.MarkdownYFM, RemoveAssetsID: options.RemoveAssetsID}
 }
 
 func holdEncryptedExportRequest(c *gin.Context, id string, ret *gulu.Result) bool {
@@ -1081,50 +717,28 @@ func holdEncryptedExportRequests(c *gin.Context, ids []string, ret *gulu.Result)
 	return true
 }
 
-func processPDF(c *gin.Context) {
+var processPDF = contractHandler(apicontract.ProcessPDF, func(c *gin.Context, request apicontract.ProcessPDFRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id, pdfPath, mergeDocHeadingMode, mergeContentHeadingMode string
-	var merge bool
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("id", &id, true, true),
-		util.BindJsonArg("path", &pdfPath, true, true),
-		util.BindJsonArg("merge", &merge, false, false),
-		util.BindJsonArg("mergeDocHeadingMode", &mergeDocHeadingMode, false, false),
-		util.BindJsonArg("mergeContentHeadingMode", &mergeContentHeadingMode, false, false),
-	) {
-		return
-	}
-	removeAssets := arg["removeAssets"].(bool)
-	watermark := arg["watermark"].(bool)
+	id := request.ID
+	pdfPath := request.Path
+	merge := request.Merge
+	mergeDocHeadingMode := request.MergeDocHeadingMode
+	mergeContentHeadingMode := request.MergeContentHeadingMode
+	removeAssets := request.RemoveAssets
+	watermark := request.Watermark
 	mergeHeadingOptions := model.MergeHeadingOptions{DocHeadingMode: mergeDocHeadingMode, ContentHeadingMode: mergeContentHeadingMode}
 	err := model.ProcessPDF(id, pdfPath, merge, removeAssets, watermark, mergeHeadingOptions)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func exportPreview(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
-		return
-	}
+var exportPreview = contractHandler(apicontract.ExportPreview, func(c *gin.Context, request apicontract.ExportIDRequest) apicontract.Response[apicontract.ExportPreviewData] {
+	id := request.ID
 
 	userAgentStr := c.GetHeader("User-Agent")
 	fillCSSVar := true
@@ -1153,31 +767,20 @@ func exportPreview(c *gin.Context) {
 			stdHTML = model.FilterContentByPublishAccess(c, publishAccess, bt.BoxID, bt.Path, stdHTML, true)
 		}
 	}
-	ret.Data = map[string]any{
-		"html":       stdHTML,
-		"fillCSSVar": fillCSSVar,
-	}
-}
+	return apicontract.Success(apicontract.ExportPreviewData{HTML: stdHTML, FillCSSVar: fillCSSVar})
+})
 
-func exportAsFile(c *gin.Context) {
+var exportAsFile = contractHandler(apicontract.ExportAsFile, func(c *gin.Context, request apicontract.ExportAsFileRequest) apicontract.Response[apicontract.ExportFileData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	form, err := c.MultipartForm()
-	if err != nil {
-		logging.LogErrorf("export as file failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	file := request.File
 
-	file := form.File["file"][0]
 	reader, err := file.Open()
 	if err != nil {
 		logging.LogErrorf("export as file failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.ExportFileData](ret)
 	}
 	defer reader.Close()
 
@@ -1186,11 +789,11 @@ func exportAsFile(c *gin.Context) {
 		logging.LogErrorf("export as file failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.ExportFileData](ret)
 	}
 
 	name := "file-" + file.Filename
-	typ := form.Value["type"][0]
+	typ := request.Type
 	exts, _ := mime.ExtensionsByType(typ)
 	if 0 < len(exts) && filepath.Ext(name) != exts[0] {
 		name += exts[0]
@@ -1202,7 +805,7 @@ func exportAsFile(c *gin.Context) {
 		logging.LogErrorf("export as file failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.ExportFileData](ret)
 	}
 
 	tmp := filepath.Join(tmpDir, name)
@@ -1211,35 +814,22 @@ func exportAsFile(c *gin.Context) {
 		logging.LogErrorf("export as file failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.ExportFileData](ret)
 	}
 
-	ret.Data = map[string]any{
-		"file": path.Join("/export/", name),
-	}
-}
+	return apicontract.Success(apicontract.ExportFileData{File: path.Join("/export/", name)})
+})
 
-func copyExportFile(c *gin.Context) {
+var copyExportFile = contractHandler(apicontract.CopyExportFile, func(c *gin.Context, request apicontract.CopyExportFileRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var srcPath, dest string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("srcPath", &srcPath, true, true),
-		util.BindJsonArg("dest", &dest, true, true),
-	) {
-		return
-	}
+	srcPath := request.SrcPath
+	dest := request.Dest
 
 	if !filepath.IsAbs(dest) {
 		ret.Code = -1
 		ret.Msg = "dest must be an absolute path"
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	srcPath = filepath.Clean(srcPath)
@@ -1253,7 +843,7 @@ func copyExportFile(c *gin.Context) {
 	if !gulu.File.IsSubPath(exportBaseDir, srcFullPath) && srcFullPath != exportBaseDir {
 		ret.Code = -1
 		ret.Msg = "invalid source path"
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	// 加密导出受控路径（<boxID>/<kind>/<file>）：按注册表无条件校验，不依赖 IsEncryptedBox。
@@ -1266,19 +856,19 @@ func copyExportFile(c *gin.Context) {
 		if !ok {
 			ret.Code = -1
 			ret.Msg = "export file is not available"
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		if err := holdEncryptedBoxRequest(c, boxID); err != nil {
 			ret.Code = -1
 			ret.Msg = model.Conf.Language(314)
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		model.HoldBoxReadLock(boxID)
 		if _, dekErr := model.GetDEKIfUnlocked(boxID); dekErr != nil {
 			model.ReleaseBoxReadLock(boxID)
 			ret.Code = -1
 			ret.Msg = model.Conf.Language(314)
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 		defer model.ReleaseBoxReadLock(boxID)
 	}
@@ -1286,16 +876,17 @@ func copyExportFile(c *gin.Context) {
 	if util.IsSensitivePath(dest) {
 		ret.Code = -2
 		ret.Msg = "refuse to copy to sensitive path: " + dest
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	if err := copyExportFileToDestination(srcFullPath, dest); err != nil {
 		logging.LogErrorf("copy export file [%s] to [%s] failed: %s", srcFullPath, dest, err)
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 func copyExportFileToDestination(src, dest string) (err error) {
 	filelock.Lock(src)

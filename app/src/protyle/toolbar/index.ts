@@ -1,4 +1,5 @@
 import {Divider} from "./Divider";
+import {ContractFormData} from "../../util/contractFormData";
 import {Font, hasSameTextStyle, setFontStyle} from "./Font";
 import {
     FONT_FAMILY_EXCLUDED_BLOCK_TYPES,
@@ -1678,9 +1679,7 @@ export class Toolbar {
                 fetch(renderElement.querySelector("object").getAttribute("data")).then(function (response) {
                     return response.blob();
                 }).then(function (blob) {
-                    const formData = new FormData();
-                    formData.append("file", blob);
-                    formData.append("type", "image/svg+xml");
+                    const formData = new ContractFormData({file: blob, type: "image/svg+xml"});
                     fetchPost("/api/export/exportAsFile", formData, (response) => {
                         saveExportFile(response.data.file, msgId);
                     });
@@ -1692,9 +1691,7 @@ export class Toolbar {
                     (renderElement as HTMLHtmlElement).style.display = "inline-block";
                     window.htmlToImage.toBlob(renderElement).then(blob => {
                         (renderElement as HTMLHtmlElement).style.display = "";
-                        const formData = new FormData();
-                        formData.append("file", blob);
-                        formData.append("type", "image/png");
+                        const formData = new ContractFormData({file: blob, type: "image/png"});
                         fetchPost("/api/export/exportAsFile", formData, (response) => {
                             saveExportFile(response.data.file, msgId);
                         });

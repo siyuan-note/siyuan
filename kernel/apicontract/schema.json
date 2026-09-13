@@ -18767,6 +18767,33 @@
       ],
       "additionalProperties": false
     },
+    "DynamicIconRequestInput": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "lang": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "weekdayType": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
     "EditorReadOnlyRequestInput": {
       "type": "object",
       "properties": {
@@ -43563,6 +43590,73 @@
           "status": 403,
           "contentType": "text/plain"
         }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/icon/getDynamicIcon",
+      "handler": "getDynamicIcon",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/DynamicIconRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 200,
+      "contentVariants": [
+        {
+          "status": 200,
+          "contentType": "image/svg+xml"
+        }
+      ],
+      "emptyResponseStatuses": [
+        500
       ]
     },
     {

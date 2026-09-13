@@ -808,6 +808,8 @@ export type DownloadInstallPkgRequestInput = { "downloadInstallPkg": boolean; };
 
 export type DuplicateAttributeViewBlockRequestInput = { "avID": string; };
 
+export type DynamicIconRequestInput = { "color"?: string; "content"?: string; "date"?: string; "id"?: string; "lang"?: string; "type"?: string; "weekdayType"?: string; };
+
 export type EditorReadOnlyRequestInput = { "readonly": boolean; };
 
 export type EmbedBlock = { "allowChildOperation": boolean; "block": SearchBlock | null; "blockPaths": Array<BlockPath | null> | null; };
@@ -2005,7 +2007,6 @@ export type WorkspaceInfoData = { "siyuanVer": string; "workspaceDir": string; }
 export type ZipRequestInput = { "path": string; "zipPath": string; };
 
 export type APILegacyGETPath =
-    "/api/icon/getDynamicIcon" |
     "/api/system/bootProgressSSE" |
     "/api/system/getBootAppearance" |
     "/api/system/getCaptcha" |
@@ -2020,6 +2021,14 @@ export interface APIGETRoutes {
         body: "none";
         output: "binary";
         contentVariants: [{"status":200,"contentType":"text/html"},{"status":400,"contentType":"text/html"},{"status":403,"contentType":"text/plain"}];
+    };
+    "/api/icon/getDynamicIcon": {
+        request: DynamicIconRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        output: "binary";
+        emptyResponseStatuses: [500];
+        contentVariants: [{"status":200,"contentType":"image/svg+xml"}];
     };
     "/api/network/echo": {
         request: Blob;

@@ -1,5 +1,4 @@
 [
-  {"method":"GET","path":"/api/icon/getDynamicIcon","handler":"getDynamicIcon"},
   {"method":"GET","path":"/api/system/bootProgressSSE","handler":"bootProgressSSE"},
   {"method":"GET","path":"/api/system/getBootAppearance","handler":"getBootAppearance"},
   {"method":"GET","path":"/api/system/getCaptcha","handler":"model.GetCaptcha"},

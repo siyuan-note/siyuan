@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -113,7 +114,7 @@ func darkenColor(hexColor string, factor float64) string {
 	return fmt.Sprintf("#%02X%02X%02X", r, g, b)
 }
 
-func getDynamicIcon(c *gin.Context) {
+var getDynamicIcon = contractHandler(apicontract.GetDynamicIcon, func(c *gin.Context, request apicontract.DynamicIconRequest) apicontract.Response[apicontract.BinaryContent] {
 	// Add internal kernel API `/api/icon/getDynamicIcon` https://github.com/siyuan-note/siyuan/pull/12939
 
 	iconType := c.Query("type")
@@ -170,8 +171,7 @@ func getDynamicIcon(c *gin.Context) {
 		var err error
 		svg, err = util.SanitizeSVG(svg)
 		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return
+			return apicontract.EmptyHTTPResponse[apicontract.BinaryContent](http.StatusInternalServerError)
 		}
 	}
 
@@ -180,8 +180,8 @@ func getDynamicIcon(c *gin.Context) {
 	c.Header("X-Content-Type-Options", "nosniff")
 	c.Header("Cache-Control", "no-cache")
 	c.Header("Pragma", "no-cache")
-	c.String(http.StatusOK, svg)
-}
+	return apicontract.SuccessBinary("image/svg+xml", []byte(svg))
+})
 
 func getDateInfo(dateStr string, lang string, weekdayType string) map[string]any {
 	// 设置默认值

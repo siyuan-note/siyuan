@@ -8,6 +8,48 @@ const compiled = transpileModule(readFileSync("src/protyle/render/av/row.ts", "u
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
 }).outputText;
 
+test("sticky views follow visible breadcrumbs and return to the viewport top when hidden", () => {
+    const exports: {stickyRow?: (block: unknown, scroll: unknown, status: string) => void} = {};
+    runInNewContext(compiled, {
+        exports,
+        require: () => ({hasTopClosestByAttribute: () => false}),
+        window: {innerHeight: 800},
+    });
+    const views = {
+        classList: {contains: (name: string) => name === "av__views--fixed"},
+        offsetHeight: 40,
+        style: {top: "", left: "", width: ""},
+        nextElementSibling: {
+            classList: {contains: (name: string) => name === "av__views-placeholder"},
+            getBoundingClientRect: () => ({top: -100, left: 20, width: 400}),
+        },
+    };
+    const block = {
+        classList: {contains: () => false},
+        dataset: {avType: "gallery"},
+        querySelector: (selector: string) => selector === ".av__views" ? views : null,
+        getBoundingClientRect: () => ({bottom: 600}),
+    };
+    let hidden = false;
+    const scroll = {
+        scrollTop: 200,
+        getBoundingClientRect: () => ({top: 24, bottom: 800}),
+        previousElementSibling: {
+            classList: {contains: (name: string) => name === "protyle-breadcrumb"},
+            getAttribute: () => hidden ? "true" : null,
+            getBoundingClientRect: () => ({bottom: 72}),
+        },
+    };
+    exports.stickyRow(block, scroll, "top");
+    assert.equal(views.style.top, "72px");
+    hidden = true;
+    exports.stickyRow(block, scroll, "top");
+    assert.equal(views.style.top, "24px");
+    hidden = false;
+    exports.stickyRow(block, scroll, "top");
+    assert.equal(views.style.top, "72px");
+});
+
 test("backlink scrolling clears fixed rows and their spacers without calculating window positions", () => {
     const exports: {stickyRow?: (block: unknown, scroll: unknown, status: string) => void} = {};
     runInNewContext(compiled, {exports, require: () => ({})});

@@ -432,6 +432,7 @@ declare namespace Config {
         | "pt-BR"
         | "ru"
         | "sk"
+        | "sr"
         | "tr"
         | "uk"
         | "th"

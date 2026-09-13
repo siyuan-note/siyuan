@@ -39,6 +39,7 @@ var LangLegacyToBCP47 = map[string]string{
 	"th_TH":  "th",
 	"tr_TR":  "tr",
 	"sk_SK":  "sk",
+	"sr_RS":  "sr",
 }
 
 // langBCP47ToLegacy 从 BCP 47 标准语言代码映射到历史下划线标识。

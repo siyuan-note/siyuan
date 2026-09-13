@@ -1,47 +1,53 @@
-# 资源文件按需下载
+# On-demand asset downloads
 
-对应需求：https://github.com/siyuan-note/siyuan/issues/19149
+[中文](ASSET-DOWNLOAD.zh-CN.md)
 
-## 功能边界
+Related issue: https://github.com/siyuan-note/siyuan/issues/19149
 
-`sync.assetDownloadMode` 是设备配置，`0` 为全部下载，`1` 为按需下载，默认值为 `0`。桌面端和移动端共用设置及内核实现，适用于官方云、S3、WebDAV 和本地文件系统同步。
+## Feature scope
 
-按需模式始终同步完整文件元数据以及文档、数据库、配置、密钥等非资源内容。资源目录中的 `ocr-texts.json`、PDF 批注 `.sya` 文件和隐藏辅助文件也保持完整同步。没有自动清理已下载资源的策略；在已有完整数据的设备上启用按需模式，不会立即减少磁盘占用。
+`sync.assetDownloadMode` is a device setting: `0` downloads everything and `1` downloads on demand; the default is `0`. Desktop and mobile clients share the setting and kernel implementation. It applies to official cloud, S3, WebDAV, and local filesystem sync.
 
-首次访问未下载资源时，先复用本地仓库已有的分块，再按需下载缺少的分块。下载成功后，该资源在后续同步中继续更新。已有本地内容不依赖联网、账号登录或同步开关。需要访问云端时沿用数据同步的账号及服务权限。
+On-demand mode always synchronizes complete file metadata and non-asset content, including documents, databases, configuration, and keys. Asset-directory `ocr-texts.json`, PDF annotation `.sya` files, and hidden helper files also remain fully synchronized. Downloaded assets are not automatically evicted. Enabling on-demand mode on a device that already has all content does not immediately reduce disk usage.
 
-## 逻辑数据与本地内容
+## User interaction
 
-`dejavu` 在工作空间的 `conf/asset-downloads.json` 中保存经过仓库密钥认证加密的设备状态，包含显式版本、来源标识、未下载资源的完整文件版本，以及未完成应用操作的恢复日志。状态不参与数据同步。仓库中的 `asset-downloads-v1` 标记用于检测当前实现遗漏配置或丢失状态；状态丢失、未知版本或认证失败均返回错误并保留原始材料。
+The first access to an undownloaded asset reuses chunks already in the local repository and downloads only the missing chunks. Once downloaded, the asset continues to receive updates during subsequent syncs. Existing local content does not require a network connection, account login, or enabled sync. Cloud access uses the account and service permissions of data sync.
 
-未下载资源仍属于当前数据和快照的逻辑文件清单。索引不能将其本地缺席解释为删除，同步不能上传尚未下载的旧版本分块。已经物化的文件由普通索引继续跟踪；资源删除、改名和移动入口先补齐相关内容，再执行原有文件操作。
+## Data and storage
 
-修改同步忽略规则时，先补齐新被忽略的未下载资源，再停止跟踪，保留本地内容和历史分块；无法获取内容时保留原状态并报错。仅上传模式只补齐实际上传候选所需的分块，不将未访问的资源物化到工作区。
+`dejavu` stores device state in the workspace's `conf/asset-downloads.json`, authenticated and encrypted with the repository key. It contains an explicit version, a source identity, complete file versions for undownloaded assets, and a recovery journal for unfinished apply operations. This state is not synchronized. The repository's `asset-downloads-v1` marker detects missing configuration or lost state in the current implementation. Missing state, unknown versions, and authentication failures return errors and preserve the original material.
 
-同步合并采用可恢复的应用日志，记录目标资源清单、变更前版本和云端基线。应用前检查本地文件是否仍符合预期，保留下载期间的本地额外修改。恢复只能由同步流程显式发起，创建仓库实例和读取资源不会顺带改写文档。文件及引用更新后，另行保留待确认的变更记录，直到内核完成缓存、索引和界面更新；中途失败也按磁盘实际状态处理已经落盘的部分，重试不会遗漏这些变更。待确认记录是设备状态第一版中的可选字段，现有不含该字段的已认证状态和应用日志仍可读取并恢复，不改变加密格式。来源切换与资源物化串行化，仓库内部操作共享原有互斥锁，并重新读取已认证的设备状态，避免旧实例覆盖新状态。
+Undownloaded assets remain part of the logical file inventory of current data and snapshots. Indexing must not interpret their absence from local disk as deletion, and sync must not upload chunks from an undownloaded old version. Ordinary indexing continues to track materialized files. Asset deletion, rename, and move operations fetch the relevant content before performing the existing file operation.
 
-按需读取和历史分块补齐会上报实际发生的云端下载流量与请求次数，批量补齐合并上报；复用本地分块和局域网下载不计入云端流量，重复读取不会重复上报。
+Changing sync ignore rules first fetches newly ignored undownloaded assets, then stops tracking them while retaining local content and historical chunks. If content cannot be obtained, the previous state is retained and an error is returned. Upload-only mode fetches only chunks required by actual upload candidates and does not materialize unvisited assets in the workspace.
 
-## 读取、导出与加密
+Sync merge uses a recoverable apply journal that records the target asset inventory, previous versions, and cloud baseline. Before applying changes, it verifies that local files still match expectations and preserves additional local edits made during downloading. Only sync explicitly initiates recovery; creating a repository instance or reading an asset does not rewrite documents as a side effect. After files and references are updated, pending change records remain until the kernel finishes cache, index, and UI updates. Partial failures use the actual disk state to account for changes already written, so retries do not omit them. Pending records are an optional field in device-state version 1. Existing authenticated state and journals without that field remain readable and recoverable without changing the encryption format. Source switching and asset materialization are serialized. Repository operations share the existing mutex and reload authenticated device state so an old instance cannot overwrite newer state.
 
-内部逻辑路径解析、资源搜索、缺失检查和文件大小查询只读取逻辑元数据，不触发下载。实际显示图片、播放音视频、打开 PDF、访问资源链接、复制资源或导出时才补齐内容。用于为外部打开准备实际文件路径的 `/api/asset/resolveAssetPath` 也会先补齐资源。HTTP 和原始文件 API 先完成路径、符号链接、发布权限及加密笔记本权限检查，再执行下载。
+On-demand reads and historical chunk retrieval report actual cloud download traffic and request counts, aggregating batch retrieval. Local chunk reuse and LAN downloads do not count as cloud traffic, and repeated reads do not report the same traffic again.
 
-导出在持有笔记本读锁和创建产物之前预取引用资源，按每个文档实际所属的笔记本和完整路径读取，范围包含子文档、关联文档、脚注、查询嵌入、题头图、数据库及关联数据库中的资源。单文件导出中的脚注资源不受是否另行导出关联文档影响。目录资源根据逻辑清单补齐，不能只依靠磁盘遍历。下载或复制失败向上传播，不将缺少资源的产物报告为成功。
+## Implementation and interfaces
 
-加密资源下载后仍保持原始密文，读取和导出继续由现有认证解密流程处理，兼容已发布的资源格式。不改变密钥信封、主盐、AAD 或密钥派生，不通过明文回退处理认证错误。读取和明文导出前检查笔记本准入，不在持有笔记本读锁期间等待网络。锁定笔记本的资源读取请求和仅枚举文件名不会触发下载；完整同步、密文备份及删除前保存历史可以补齐原始密文。
+### Reads and exports
 
-## 快照与来源变更
+Internal logical-path resolution, asset search, missing-asset checks, and file-size queries use logical metadata without downloading content. Displaying images, playing audio or video, opening PDFs, following asset links, copying assets, and exporting fetch content when needed. `/api/asset/resolveAssetPath`, which prepares a physical path for external opening, also fetches the asset first. HTTP and raw file APIs validate paths, symbolic links, publish permissions, and encrypted-notebook permissions before downloading.
 
-按需设备的本地快照可能只有部分资源内容，界面通过 `requiresDownload` 独立提示。读取历史资源按该快照的精确文件版本补齐分块，不覆盖工作区当前资源。完整云端快照下载检查所有目标文件的分块，即使其元数据已经存在也不跳过检查；失败时不创建成功标签。
+Exports prefetch referenced assets before holding notebook read locks and creating output artifacts. Reads use each document's actual notebook and complete path. The scope includes child and related documents, footnotes, query embeds, title images, databases, and related-database assets. Footnote assets in single-file exports are included independently of whether related documents are exported separately. Directory assets are completed from the logical inventory rather than disk traversal alone. Download and copy failures propagate to the caller; an output with missing assets is not reported as successful.
 
-恢复快照前，先补齐当前工作区和目标快照所需的资源。切回全部下载时，同时补齐当前资源和所有保留快照缺少的历史内容；失败则保留原设置。切换同步来源、云端清理、删除当前云目录及重置仓库或密钥前检查这些依赖，未完成时保留原来源。重建仓库前，只有旧状态认证成功且依赖完整，才能清除设备状态和标记。
+Downloaded encrypted assets retain their original ciphertext. Existing authenticated decryption handles reads and exports, preserving compatibility with released asset formats. Key envelopes, MasterSalt, AAD, and key derivation do not change, and authentication errors never fall back to plaintext. Notebook admission is checked before reading or plaintext export, and network waits do not occur while holding a notebook read lock. Reading an asset in a locked notebook or merely enumerating filenames does not download content. Full sync, ciphertext backups, and history preservation before deletion may fetch original ciphertext.
 
-官方云登出允许保留原来源标识，以便本地索引和已下载快照继续使用，随后重新认证原账号。存在未完成依赖时，跨区登录、换账号和注销账号受完整性检查保护。
+## Compatibility and recovery
 
-未补齐的历史快照仍依赖对应云端内容的保留。其他设备清理云端或外部删除云对象可能使历史版本无法下载，因此部分本地快照不等价于完整离线备份。需要离线备份或更换来源时，应先完成全部下载。旧版本客户端不了解设备状态标记，降级前也必须完成全部下载；标记不能阻止旧版本把未下载文件当作本地删除。
+Local snapshots on on-demand devices may contain only part of the asset content; the UI indicates this separately through `requiresDownload`. Historical asset reads retrieve chunks for that snapshot's exact file version without overwriting current workspace assets. Downloading a complete cloud snapshot checks every target file's chunks even when its metadata already exists. Failure does not create a success tag.
 
-## 开发与验证
+Before restoring a snapshot, fetch the assets required by both the current workspace and the target snapshot. Switching back to full download fetches current assets and missing historical content in all retained snapshots; failure preserves the previous setting. Source switching, cloud cleanup, deletion of the current cloud directory, and repository or key resets check these dependencies and retain the previous source while they are incomplete. Repository rebuilding may clear device state and its marker only after authenticating the old state and completing its dependencies.
 
-实现同时涉及 `siyuan`、`dejavu` 和 `petal`。内核调用新增的 `dejavu` 资源下载及快照完整性接口，发布时应先发布依赖并更新模块版本。本地开发可使用临时 `replace` 指向 `dejavu` 检出，该替换不能提交。
+Signing out of the official cloud can retain the original source identity so local indexing and downloaded snapshots remain usable, followed by reauthentication with the original account. While dependencies remain incomplete, changing regions, changing accounts, and deleting the account are protected by integrity checks.
 
-回归覆盖完整与按需设备互相同步、单向同步、重复索引、远端版本更新、并发物化、本地修改保护、应用中断恢复、状态认证失败、来源变更、历史快照补齐、目录资源导出和已有加密资源格式。前端执行 `pnpm run lint`，语言执行 `python scripts/check-lang-keys.py`；不通过构建前端产物或编译运行内核进行验证。
+Incomplete historical snapshots still depend on retention of the corresponding cloud content. Cloud cleanup by another device or external deletion of cloud objects may make old versions unavailable. A partial local snapshot is therefore not a complete offline backup. Complete all downloads before making an offline backup or changing sources. Older clients do not understand the device-state marker, so full download is also required before downgrading; the marker cannot prevent an old client from treating undownloaded files as local deletions.
+
+## Verification
+
+Implementation spans `siyuan`, `dejavu`, and `petal`. The kernel uses `dejavu` asset-download and snapshot-completeness APIs. Publish the dependency and update the module version before release. Local development may use a temporary `replace` pointing to the `dejavu` checkout; do not commit it.
+
+Regression coverage includes sync between full and on-demand devices, one-way sync, repeated indexing, remote version updates, concurrent materialization, local-edit protection, interrupted apply recovery, state authentication failures, source changes, historical snapshot completion, directory-asset exports, and existing encrypted asset formats. Run `pnpm run lint` for the frontend and `python scripts/check-lang-keys.py` for translations. Do not verify by building frontend artifacts or compiling and running the kernel.

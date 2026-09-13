@@ -1,10 +1,12 @@
-# SiYuan Workspace File-System Layout — Reference
+# SiYuan Workspace File-System Layout
+
+[中文](WORKSPACE.zh-CN.md)
 
 > This document describes how a SiYuan workspace is organized on disk.
 > It complements [`SY-FORMAT.md`](./SY-FORMAT.md): the latter covers the **internal** JSON structure of a `.sy` file, while this one covers the **overall** file-system layout of the workspace.
 > All conclusions are verified against a real workspace and the kernel source.
 
-## 0. In one sentence
+## 0. Overview
 
 A SiYuan workspace is a **self-describing** directory tree: notebooks, documents, and assets live on disk as files and directories. **The filename is the ID; the directory structure is the document hierarchy.** The file system contains the authoritative source content, while SQLite databases under `temp/` are rebuildable indexes and caches. Normal-notebook content is readable directly; encrypted-notebook content is ciphertext and must be accessed through the unlocked kernel.
 
@@ -81,7 +83,7 @@ The first level of `data/` mixes two kinds of entries:
 1. **Fixed data directories:** `.siyuan/`, `assets/`, `templates/`, `widgets/`, `plugins/`, `emojis/`, `snippets/`, `public/`, `storage/`.
 2. **Notebook directories:** each is a folder named with the notebook ID.
 
-### Reserved-filename list (★ avoid when writing files)
+### Reserved-filename list
 
 `IsReservedFilename`:
 
@@ -109,7 +111,7 @@ That is, the physical path segments `assets` / `templates` / `widgets` / `emojis
 
 ---
 
-## 4. Inside a notebook (★ core: parent-child document pairing)
+## 4. Inside a notebook: parent-child document pairing
 
 This is the single most important convention in the whole layout:
 
@@ -238,7 +240,7 @@ Two coexisting locations:
 
 Asset-link prefix recognition: only `assets/`, `emojis/`, `plugins/`, `public/`, and `widgets/` are accepted as legal asset-link prefixes.
 
-Encrypted notebooks must use notebook-local assets. Asset content and its original name reside in the same encrypted container, and physical filenames use a desensitized `<16-random-characters>-<blockID>.<ext>` form; direct inspection does not recover the original asset name. See [ENCRYPTED-NOTEBOOK.md §7](./ENCRYPTED-NOTEBOOK.md#7-sy--assets--database-file-encryption).
+Encrypted notebooks must use notebook-local assets. Asset content and its original name reside in the same encrypted container, and physical filenames use a desensitized `<16-random-characters>-<blockID>.<ext>` form; direct inspection does not recover the original asset name. See [encrypted file formats](./ENCRYPTED-NOTEBOOK.md#sy--assets--database-file-encryption).
 
 ---
 

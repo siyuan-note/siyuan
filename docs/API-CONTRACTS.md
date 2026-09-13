@@ -1,52 +1,54 @@
-# 内核接口类型契约
+# Kernel API type contracts
 
-首批覆盖 `/api/system/version`、`/api/attr/getBlockAttrs`、`/api/attr/setBlockAttrs`、`/api/search/searchTag`、`/api/notebook/lsNotebooks`、`/api/history/searchHistory` 和 `/api/block/getBlockInfo`。版本接口同时支持 GET 和 POST，因此共登记 8 个方法与路径组合。
+[中文](API-CONTRACTS.zh-CN.md)
 
-截至本次迁移，契约覆盖 53 个接口、55 个方法与路径组合，存量清单仍有 572 条路由记录。后续已覆盖的范围包括快照创建与备注、系统基础查询和部分设置、属性批量读写、标签查询与标签/书签改名删除、部分编辑器设置，以及块位置、折叠状态和标题子节点查询。完整名单以 `kernel/apicontract/contracts.go` 为准；剩余工作以 `legacy_routes.json` 为准，全量迁移尚未完成。
+## Scope
 
-## 契约与实现
+This document defines type declarations, compatibility requirements, generated artifacts, and verification for kernel HTTP APIs. Endpoint definitions are maintained in `kernel/apicontract/contracts.go`. `kernel/apicontract/legacy_routes.json` records routes that use existing handling, including non-JSON responses, dynamic paths, and `ANY` registrations. New endpoints must define type contracts and must not be added to the legacy list.
 
-`kernel/apicontract/contracts.go` 定义请求、响应和端点。契约包独立于内核启动、数据库和持久化模型，生成器可以单独运行。API 入口通过 `contractHandler` 绑定端点，请求参数和成功返回值受到 Go 泛型签名约束；响应载荷通过构造函数设置，不能直接给通用 `ret.Data` 赋值。业务校验继续使用现有辅助函数，`contractFailure` 保留其错误码、消息和已支持的错误载荷。
+## Contracts and implementation
 
-生成器从同一组 Go 类型生成 `app/src/types/api/index.d.ts` 和 `kernel/apicontract/schema.json`。后者包含共享的 `$defs` 和每个端点的请求、响应 schema，测试使用同一套 schema 检查实际 HTTP 响应。类型声明不会在运行时验证 JSON，CI 中的处理函数测试负责验证序列化结果。
+`kernel/apicontract/contracts.go` defines requests, responses, and endpoints. The contract package is independent of kernel startup, databases, and persistence models, so the generator runs independently. API entry points bind endpoints through `contractHandler`; Go generic signatures constrain request parameters and successful return values. Constructors set response payloads rather than assigning directly to generic `ret.Data`. Existing helpers continue to validate business rules, and `contractFailure` preserves their error codes, messages, and supported error payloads.
 
-输入和输出分别处理。`json` tag 控制线协议字段名；请求字段默认必填，`api:"optional"` 表示可缺省，`nullable` 表示接受 `null`，指针保留可空语义。输出字段的 `omitempty` 只控制输出省略，不推导请求必填性。嵌入结构体展平，递归类型通过引用表示；接口联合、常量字段和自定义编解码需要显式建模。未支持的类型、字段冲突和未知 JSON tag 会使生成失败，不会降级为 `any`。
+The generator produces `app/src/types/api/index.d.ts` and `kernel/apicontract/schema.json` from the same Go types. The schema contains shared `$defs` and each endpoint's request and response schemas. Tests validate actual HTTP responses against those same schemas. Type declarations do not validate JSON at runtime; handler tests in CI validate serialized results.
 
-数组、字典和嵌套结构体递归检查请求约束，字符串数组中的 `null` 不会被转换为空字符串，批量属性中的 `null` 值仍表示删除属性。标签树单独定义递归传输结构；前端共享树节点中的笔记本和文档路径字段为可选，反映标签节点不返回这些字段的实际行为。
+Input and output are handled separately. The `json` tag determines wire field names. Request fields are required by default; `api:"optional"` permits omission, `nullable` accepts `null`, and pointers preserve nullability. Output `omitempty` controls omission only and does not determine request requirements. Embedded structs are flattened, and recursive types use references. Interface unions, constant fields, and custom encoding or decoding require explicit modeling. Unsupported types, conflicting fields, and unknown JSON tags fail generation without falling back to `any`.
 
-`Notebook` 是接口载荷，业务模型通过显式转换映射到该载荷，回归测试比较完整 JSON，包括各个加密状态。修改契约不会改变 `.sy`、数据库、历史、同步或加密格式。
+Arrays, maps, and nested structs recursively validate request constraints. A `null` in a string array is not converted to an empty string; `null` values in batch attributes still mean deletion. The tag tree has a dedicated recursive transport structure. Notebook and document-path fields are optional in shared frontend tree nodes because tag nodes do not return them.
 
-## 保留的兼容行为
+`Notebook` is an API payload. Business models map to it explicitly, and regression tests compare complete JSON across encryption states. Contract changes do not alter `.sy`, database, history, sync, or encryption formats.
 
-| 接口 | 兼容边界 |
-|---|---|
-| `version` | 不要求请求体，响应数据是字符串 |
-| `getBlockAttrs` | 必须有 ID，成功时始终返回属性字典，没有属性时保持 `{}` |
-| `setBlockAttrs` | 属性值为字符串或 `null`；`null` 删除属性，成功时数据为 `null` |
-| `searchTag` | 允许空关键词，空结果保持 `[]` |
-| `lsNotebooks` | 保留空请求体、`null` 和旧解析失败时的默认分支；合法对象中的错误布尔类型返回错误；保留业务失败时原有的成功码与空数据 |
-| `searchHistory` | 数字先按 JSON 浮点值解码，再沿用原有整数转换；缺省或 `null` 保留默认值，数字字符串不作为数字接受 |
-| `getBlockInfo` | 保留 ID 去空白、可选笔记本参数和附带 ID 的租约检查；分别声明完整信息、发布密码提示和错误响应 |
+## Compatibility requirements
 
-`ignoretype` 和 `filterstrings` 仅用于声明过的旧参数兼容行为。生成的请求类型描述规范调用形式；兼容解码可能接受并忽略更宽的旧输入，兼容测试明确覆盖这些例外。不存在全局“绑定失败后回退旧解析”的开关。
+Contract maintenance must preserve existing observable API behavior. Changes to type definitions or handler structure alone must not change call semantics:
 
-只读中间件仍可返回带 `closeTimeout` 的提示对象。`fetchPost` 的普通回调只接收消息处理后保留的非负错误码，块信息接口的 `3` 仍须处理；`fetchSyncPost` 和 `fetchGet` 保留完整响应。动态 URL 保留存量签名；静态 POST 路径必须来自契约或存量路由，错误参数不能通过重载回退。拼接出开放范围的模板 URL 时使用显式 `string` 变量。
+- Request semantics: preserve body requirements, field optionality, and distinctions between an empty body, missing fields, `null`, empty strings, empty objects, and empty arrays
+- Parameter handling: preserve defaults, whitespace handling, numeric conversions, and supported historical input rules; do not implicitly widen or narrow accepted inputs
+- Response structure: preserve field names, types, nullability, and omission rules; distinguish `{}`, `[]`, and `null`, and fully declare success, prompt, and failure variants
+- Error behavior: preserve HTTP statuses, business error codes, messages, additional error payloads, and message display duration; do not reinterpret existing business failures as success
+- Permissions and lifecycle: preserve authentication, roles, read-only and publish-access checks, and encrypted-notebook admission, lease scope, and release timing; compatibility handling must not bypass authorization or authenticated decryption
 
-业务错误需要保留提示显示时长时使用 `FailureWithTimeout`。块查询迁移后通过 `holdContractBlockRequest` 保留显式笔记本及附带 ID 的租约检查；状态查询允许已删除 ID 的行为仍由对应入口明确指定。
+Endpoint-specific behavior is recorded jointly in contract definitions, compatibility decoding, and regression tests. Tests must cover actual HTTP serialization, boundary inputs, and permission scenarios rather than only checking whether types compile.
 
-## 新增与迁移
+`ignoretype` and `filterstrings` apply only to explicitly declared historical parameter compatibility. Generated request types describe canonical calls; compatibility decoding may accept and ignore a wider set of old inputs, with tests covering those exceptions. There is no global switch to fall back to old parsing after binding fails.
 
-1. 在契约包中定义传输类型与端点，并明确请求体、错误码、空值、默认值和历史输入兼容规则
-2. 用 `contractHandler` 接入业务入口，保持路由中间件顺序、授权和租约范围
-3. 已有接口迁移完成后，从 `legacy_routes.json` 删除对应记录；新接口不能加入该清单
-4. 更新实际响应、兼容输入和严格类型测试，运行生成器，再修正编译器指出的调用问题
-5. 同步 `petal` 的生成声明和相关公共声明；已公开接口同步更新接口文档
+Read-only middleware may still return a prompt object containing `closeTimeout`. Ordinary `fetchPost` callbacks receive only nonnegative codes retained after message processing; block-info code `3` still requires handling. `fetchSyncPost` and `fetchGet` preserve complete responses. Dynamic URLs retain existing signatures. Static POST paths must come from contracts or recorded legacy routes, and invalid parameters cannot fall back through another overload. Use an explicit `string` variable when constructing a template URL with an open-ended range.
 
-`legacy_routes.json` 记录尚未迁移的路由，包括非 JSON、动态路径和 `ANY` 注册。生成检查读取实际路由与处理函数声明，验证方法、路径、处理函数和契约适配器的对应关系。CI 对照合入前的清单阻止增加存量记录。
+Use `FailureWithTimeout` when a business error must preserve its message display duration. Contract-based block queries use `holdContractBlockRequest` to retain lease checks for explicit notebooks and accompanying IDs. Individual entry points still specify whether state queries permit deleted IDs.
 
-## 生成与验证
+## Endpoint maintenance
 
-在 `app/` 下运行：
+1. Define or update transport types and endpoints in the contract package, specifying request bodies, error codes, null values, defaults, and historical input compatibility
+2. Bind business entry points through `contractHandler`, preserving route middleware order, authorization, and lease scope
+3. Routes with type contracts must not also appear in `legacy_routes.json`; remove records for deleted endpoints, and never add new endpoints to the list
+4. Update actual-response, input-compatibility, and strict type tests; run generation and correct calls identified by the compiler
+5. Synchronize generated and related public declarations in `petal`; update API documentation for public endpoints
+
+Generation checks inspect actual route and handler declarations to verify methods, paths, handlers, and contract adapters. CI compares the legacy list with the pre-change list and prevents additional records. Do not bypass contract checks with `any`, type assertions, or changes to the legacy list.
+
+## Generation and verification
+
+Run from `app/`:
 
 ```text
 pnpm run api:generate
@@ -56,13 +58,13 @@ pnpm run lint
 pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts
 ```
 
-`--petal` 路径相对于生成器的工作目录 `kernel/`，示例对应同级仓库。CI 只检查本仓库产物，本地跨仓库同步须使用该参数核对插件声明。
+The `--petal` path is relative to the generator's working directory, `kernel/`; the example refers to a sibling repository. CI checks only this repository's artifacts. Local synchronization across repositories uses this option to verify plugin declarations.
 
-在 `kernel/` 下运行：
+Run from `kernel/`:
 
 ```text
 go test ./apicontract/...
 go test -tags "fts5 sqlcipher" ./api -run "TestAPIContract|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestContract.*NotebookResponseLease" -count=1
 ```
 
-`tsconfig.api.json` 单独启用严格检查并检查声明文件，覆盖参数错误、字段拼写、必填请求体、成功与失败分支、可空值和方法不匹配。主应用继续沿用现有配置，因此存量调用的严格空值检查并未全量开启。处理函数测试使用临时工作区和独立测试进程，不启动或重启运行中的内核。
+`tsconfig.api.json` separately enables strict checks and declaration-file checking for invalid parameters, misspelled fields, required bodies, success and failure branches, nullability, and method mismatches. The main application retains its existing configuration; do not assume strict null checks apply to every call. Handler tests use temporary workspaces and isolated test processes without starting or restarting the running kernel.

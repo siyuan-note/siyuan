@@ -1,4 +1,6 @@
-# SiYuan `.sy` File JSON Structure — AI Read/Write Guide
+# SiYuan `.sy` File JSON Structure — Read/write reference
+
+[中文](SY-FORMAT.zh-CN.md)
 
 > Canonical Spec baseline: `2` for ordinary documents, `3` for documents containing tabs, `4` for documents using table-cell rich text; compatible readers may upgrade older or missing versions.
 > Verified against samples: `20200825162036-4dx365o.sy` (formatting elements), `20200905090211-2vixtlf.sy` (block types).
@@ -6,7 +8,7 @@
 > This guide describes plaintext `.sy` JSON in an ordinary notebook, or the decrypted AST of an unlocked encrypted notebook. An encrypted notebook's on-disk `.sy` file is ciphertext and must not be edited as JSON.
 > Companion document: [`WORKSPACE.md`](./WORKSPACE.md) covers the overall on-disk layout of the workspace (how notebooks, parent/child documents, and assets are organized); this document focuses on the **internal** JSON structure of a `.sy` file.
 
-## 0. In one sentence
+## 0. Overview
 
 A plaintext `.sy` file is a Lute AST tree serialized to JSON. The root node is `NodeDocument`; the body is the recursively nested `Children` array. There is no separately maintained JSON Schema — the Lute `ast.Node` and `ListData` Go structs are the serialization source of truth. The tree contains the document AST and its IAL, while assets, AttributeView definitions, and rebuildable indexes live outside the tree.
 
@@ -218,7 +220,7 @@ NodeList                         NodeList
   ] }
 ```
 
-### 5.4 `ListData` fields in full (★ easiest to get wrong)
+### 5.4 `ListData` fields in full
 
 | Field | Type (code) | JSON form | Meaning |
 |---|---|---|---|
@@ -509,7 +511,7 @@ Samples:
 - Strikethrough **supports only double-tilde `~~x~~`**, not single-tilde `~x~` (`SetGFMStrikethrough1(false)`).
 - Backslash escape is **not** a `NodeTextMark` subtype: it maps to the separate `NodeBackslash` node and never appears as a `TextMarkType` value.
 
-### 6.3 Styled inline text (★ must be paired)
+### 6.3 Styled inline text: pairing rules
 
 A `NodeTextMark` carrying color/effects (with `Properties.style`) **must be immediately followed by a** `NodeKramdownSpanIAL`, and the two must share the exact same style text:
 
@@ -556,7 +558,7 @@ A `NodeTextMark` carrying color/effects (with `Properties.style`) **must be imme
 
 ---
 
-## 7. base64 encoding convention (★ must-read)
+## 7. base64 encoding convention
 
 | Field | Encoding | Example |
 |---|---|---|

@@ -30,7 +30,7 @@ Arrays, maps, and nested structs recursively validate request constraints. A `nu
 
 Notebook creation, renaming, removal, closing, icon updates, and sorting use typed contracts. Renaming, removal, and icon updates trim notebook IDs; closing preserves whitespace for ID validation. Empty names and icons remain available to business validation, and rename failures retain their message display duration.
 
-Encrypted notebook lifecycle endpoints use typed requests and responses while retaining password trimming, fractional-minute truncation, negative-minute clamping, administrative authorization, lease acquisition, and mount rollback. Key derivation, ciphertext formats, and recovery material remain model-layer responsibilities.
+Encrypted notebook lifecycle endpoints preserve passwords exactly, including leading, trailing, and all-whitespace strings. The `nonempty` string option rejects only an empty string without normalization; required password fields also reject omission, null, and non-string values. Backup import preserves multipart password text and retains its optional-field behavior, with authentication performed by the model. Fractional-minute truncation, negative-minute clamping, administrative authorization, lease acquisition, and mount rollback remain unchanged. Key derivation, ciphertext formats, and recovery material remain model-layer responsibilities.
 
 ## Compatibility requirements
 

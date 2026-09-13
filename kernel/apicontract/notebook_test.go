@@ -2,9 +2,62 @@ package apicontract
 
 import (
 	"encoding/json"
+	"mime/multipart"
 	"strings"
 	"testing"
 )
+
+func TestNotebookPasswordBytes(t *testing.T) {
+	for _, password := range []string{" secret ", "   ", "\tpassword\n", "\u00a0password\u3000"} {
+		encoded, _ := json.Marshal(password)
+		body := `{"notebook":"20260101000000-abcdefg","name":"Encrypted","password":` + string(encoded) + `}`
+		enabled, err := EnableEncryptedNotebooks.Decode(strings.NewReader(body))
+		if err != nil || enabled.Password != password {
+			t.Fatalf("enable changed password bytes: %v", err)
+		}
+		created, err := CreateEncryptedNotebook.Decode(strings.NewReader(body))
+		if err != nil || created.Password != password {
+			t.Fatalf("create changed password bytes: %v", err)
+		}
+		for _, endpoint := range []Endpoint[UnlockNotebookRequest, Null]{UnlockNotebook, UnlockAndOpenNotebook} {
+			unlocked, err := endpoint.Decode(strings.NewReader(body))
+			if err != nil || unlocked.Password != password {
+				t.Fatalf("%s changed password bytes: %v", endpoint.Definition().Path, err)
+			}
+		}
+		changed, err := ChangeMasterPassword.Decode(strings.NewReader(`{"oldPassword":` + string(encoded) + `,"newPassword":` + string(encoded) + `}`))
+		if err != nil || changed.OldPassword != password || changed.NewPassword != password {
+			t.Fatalf("password change normalized input: %v", err)
+		}
+		form := &multipart.Form{Value: map[string][]string{"password": {password}}, File: map[string][]*multipart.FileHeader{"file": {{Filename: "backup.json"}}}}
+		backup, err := ImportNotebookCryptoBackup.DecodeMultipart(form)
+		if err != nil || backup.Password != password {
+			t.Fatalf("backup import changed password bytes: %v", err)
+		}
+	}
+	for _, field := range []string{"oldPassword", "newPassword"} {
+		for _, invalid := range []string{"", `null`, `""`, `123`} {
+			body := map[string]json.RawMessage{"oldPassword": json.RawMessage(`"old"`), "newPassword": json.RawMessage(`"new"`)}
+			if invalid == "" {
+				delete(body, field)
+			} else {
+				body[field] = json.RawMessage(invalid)
+			}
+			data, _ := json.Marshal(body)
+			if _, err := ChangeMasterPassword.Decode(strings.NewReader(string(data))); err == nil {
+				t.Fatalf("invalid %s accepted: %s", field, data)
+			}
+		}
+	}
+	for _, values := range []map[string][]string{nil, {"password": {""}}} {
+		request, err := ImportNotebookCryptoBackup.DecodeMultipart(&multipart.Form{
+			Value: values, File: map[string][]*multipart.FileHeader{"file": {{Filename: "backup.json"}}},
+		})
+		if err != nil || request.Password != "" {
+			t.Fatalf("backup password authentication must remain model validation: %v", err)
+		}
+	}
+}
 
 func TestReorderNotebookCompatibility(t *testing.T) {
 	request, err := ReorderNotebooks.Decode(strings.NewReader(`{"SOURCEIDS":[null,"id"],"TARGETID":"target","POSITION":"before"}`))
@@ -34,10 +87,10 @@ func TestReorderNotebookCompatibility(t *testing.T) {
 
 func TestNotebookCryptoRequestCompatibility(t *testing.T) {
 	request, err := UnlockNotebook.Decode(strings.NewReader(`{"notebook":" 20260101000000-abcdefg ","password":" secret "}`))
-	if err != nil || request.Notebook != "20260101000000-abcdefg" || request.Password != "secret" {
-		t.Fatalf("notebook and password trimming changed: %v", err)
+	if err != nil || request.Notebook != "20260101000000-abcdefg" || request.Password != " secret " {
+		t.Fatalf("notebook normalization must preserve the original password: %v", err)
 	}
-	for _, body := range []string{`{}`, `{"password":null}`, `{"password":" "}`, `{"password":123}`} {
+	for _, body := range []string{`{}`, `{"password":null}`, `{"password":""}`, `{"password":123}`} {
 		if _, err := EnableEncryptedNotebooks.Decode(strings.NewReader(body)); err == nil {
 			t.Fatal("invalid password accepted")
 		}

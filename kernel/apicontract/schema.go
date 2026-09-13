@@ -484,7 +484,7 @@ func (b *schemaBuilder) fields(object *Schema, t reflect.Type, input bool) error
 				if field.Type.Kind() != reflect.Pointer || field.Type.Elem().Kind() != reflect.Struct {
 					return fmt.Errorf("legacyobject requires a struct pointer: %s.%s", t, name)
 				}
-			case option == "trim", option == "ignoretype", strings.HasPrefix(option, "enum="):
+			case option == "trim", option == "nonempty", option == "ignoretype", strings.HasPrefix(option, "enum="):
 				if field.Type.Kind() != reflect.String {
 					return fmt.Errorf("API option %s requires a string: %s.%s", option, t, name)
 				}

@@ -120,6 +120,9 @@ func decodeRequestFields(value reflect.Value, fields map[string]json.RawMessage)
 			}
 			value.Field(i).SetString(trimmed)
 		}
+		if has("nonempty") && value.Field(i).String() == "" {
+			return fmt.Errorf("Field [%s] must not be empty", name)
+		}
 		for _, option := range strings.Split(field.Tag.Get("api"), ",") {
 			if strings.HasPrefix(option, "enum=") {
 				if field.Type.Kind() != reflect.String {

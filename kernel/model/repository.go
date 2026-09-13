@@ -2982,8 +2982,20 @@ func newRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
 		return
 	}
 
-	ignoreLines := getSyncIgnoreLines()
-	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, Conf.System.ID, Conf.System.Name, Conf.System.OS, Conf.Repo.Key, ignoreLines, cloudRepo)
+	ignoreLines, err := getSyncIgnoreLines()
+	if err != nil {
+		return nil, err
+	}
+	dataDir := util.DataDir
+	ret, err = dejavu.NewRepoWithOptions(dejavu.Options{
+		DataPath: util.DataDir, RepoPath: util.RepoDir, HistoryPath: util.HistoryDir, TempPath: util.TempDir,
+		DeviceID: Conf.System.ID, DeviceName: Conf.System.Name, DeviceOS: Conf.System.OS,
+		AESKey: Conf.Repo.Key, IgnoreLines: ignoreLines, Cloud: cloudRepo,
+		IgnoreRulePath: syncIgnoreRulePath, HiddenDirectoryNames: []string{".siyuan"},
+		PathFilter: func(info os.FileInfo, absPath string) (bool, error) {
+			return syncPathFilter(dataDir, info, absPath)
+		},
+	})
 	if err != nil {
 		logging.LogErrorf("init data repo failed: %s", err)
 		return

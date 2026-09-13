@@ -140,7 +140,7 @@ func TestPathsAffectSyncMetadata(t *testing.T) {
 
 	metadataDir := filepath.Join(util.DataDir, ".siyuan")
 	writeSyncPathTestFile(t, filepath.Join(metadataDir, "data-crypto-backup.json"))
-	matcher := ignore.CompileIgnoreLines(getSyncIgnoreLines()...)
+	matcher := ignore.CompileIgnoreLines(mustSyncIgnoreLines(t)...)
 	if err := os.Remove(filepath.Join(metadataDir, "syncignore")); nil != err {
 		t.Fatal(err)
 	}
@@ -160,9 +160,8 @@ func TestSyncIgnoreLegacyConfReadFailure(t *testing.T) {
 		util.DataDir = oldDataDir
 	})
 	writeSyncPathTestFile(t, filepath.Join(util.DataDir, ".siyuan"))
-	matcher := ignore.CompileIgnoreLines(getSyncIgnoreLines()...)
-	if !matcher.MatchesPath("/.siyuan/conf.json") {
-		t.Fatal("legacy sync configuration must remain ignored when rules cannot be read")
+	if _, _, err := getSyncIgnoreRules(); err == nil {
+		t.Fatal("unreadable rules must prevent repository creation")
 	}
 }
 

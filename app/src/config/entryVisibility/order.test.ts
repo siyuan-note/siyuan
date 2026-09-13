@@ -14,6 +14,27 @@ test("entry order keeps custom order and inserts new entries by their default ne
     assert.deepEqual(mergeEntryOrder(["a", "new", "b", "c"], ["c", "a", "b"]), ["c", "a", "new", "b"]);
 });
 
+test("missing table and image actions merge into saved orders while preserving plugin slots", () => {
+    [
+        {path: "gutter.single.table", added: ["cancelMerged", "transposeTable"]},
+        {path: "inline.text.more", added: ["cancelMerged"]},
+        {path: "inline.image", added: ["openBy"]},
+        {path: "gutter.single.copy", added: ["copyMirror"]},
+    ].forEach(({path, added}) => {
+        const entries = getEntryCatalogChildren(path);
+        const defaults = entries.map(item => item.key);
+        const saved = defaults.filter(key => !added.includes(key));
+        saved.splice(2, 0, "plugin:example:item");
+        const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+        assert.equal(merged.indexOf("plugin:example:item"), saved.indexOf("plugin:example:item"));
+        assert.deepEqual(merged.filter(key => !added.includes(key) && key !== "plugin:example:item"),
+            saved.filter(key => key !== "plugin:example:item"));
+        added.forEach(key => assert.ok(merged.includes(key)));
+        const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+        assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
+    });
+});
+
 test("entry order inserts the code block Tab setting before the existing code options", () => {
     assert.deepEqual(mergeEntryOrder(
         ["md29", "md31", "md2", "md27", "saveCodeBlockAsFile"],

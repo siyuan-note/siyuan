@@ -193,17 +193,21 @@ const docTreeMultiple = () => {
         separator("separator_2"), openBy, exportEntry];
 };
 
-const gutterCopyChildren = (includeCopyAsPNG = false) => [
-    ...copyChildren(),
+const gutterCopyChildren = (single = false) => [
+    ...copyChildren().slice(0, 6),
+    ...(single ? [node("copyAVID", lang("copyAVID"))] : []),
+    ...copyChildren().slice(6),
+    node("copyText", lang("copyText")),
     node("copyRichText", lang("copyRichText")),
     node("copyPlainText", lang("copyPlainText")),
-    ...(includeCopyAsPNG ? [node("copyAsPNG", lang("copyAsPNG"))] : []),
-    node("copyText", lang("copyText")),
+    ...(single ? [node("copyAsPNG", lang("copyAsPNG"))] : []),
+    ...(single ? [node("copyMirror", lang("copyMirror"))] : []),
     node("copy", lang("copy")),
-    node("copyAVID", lang("copyAVID")),
     node("duplicate", lang("duplicateCopy")),
-    node("duplicateMirror", lang("duplicateMirror")),
-    node("duplicateCompletely", lang("duplicateCompletely")),
+    ...(single ? [
+        node("duplicateMirror", lang("duplicateMirror")),
+        node("duplicateCompletely", lang("duplicateCompletely")),
+    ] : []),
 ];
 
 const gutterTurnInto = (multi: boolean) => node("turnInto", lang("turnInto"), true, [
@@ -296,6 +300,7 @@ const gutterHeight = () => node("height", lang("height"), true, [
 ]);
 
 const gutterTable = () => node("table", lang("tableBlock"), true, [
+    node("cancelMerged", lang("cancelMerged")),
     node("useDefaultWidth", lang("useDefaultWidth")),
     node("distributeAllColWidths", lang("distributeAllColWidths")),
     node("useDefaultWidthForAllColumns", lang("useDefaultWidthForAllColumns")),
@@ -304,6 +309,7 @@ const gutterTable = () => node("table", lang("tableBlock"), true, [
     node("tableHeaderRow", lang("tableHeaderRow")),
     node("tableHeaderColumn", lang("tableHeaderColumn")),
     node("title", lang("title")),
+    node("transposeTable", lang("transposeTable")),
     separator("separator_1"),
     node("alignment", lang("alignment"), true, [
         node("alignLeft", lang("alignLeft")),
@@ -872,6 +878,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("deleteColumn", lang("delete-column")),
             separator("separator_3"),
             node("more", lang("more"), true, [
+                node("cancelMerged", lang("cancelMerged")),
                 node("useDefaultWidth", lang("useDefaultWidth")),
                 node("pinTableHead", lang("pinTableHead")),
                 node("unpinTableHead", lang("unpinTableHead")),
@@ -883,19 +890,11 @@ export const entryCatalog: IEntryCatalogSection[] = [
                 node("alignCenter", lang("alignCenter")),
                 node("alignRight", lang("alignRight")),
                 node("useDefaultAlign", lang("useDefaultAlign")),
-                separator("separator_insert"),
-                node("insertRowAbove", lang("insertRowAbove")),
-                node("insertRowBelow", lang("insertRowBelow")),
-                node("insertColumnLeft", lang("insertColumnLeft")),
-                node("insertColumnRight", lang("insertColumnRight")),
                 separator("separator_2"),
                 node("moveToUp", lang("moveToUp")),
                 node("moveToDown", lang("moveToDown")),
                 node("moveToLeft", lang("moveToLeft")),
                 node("moveToRight", lang("moveToRight")),
-                separator("separator_delete"),
-                node("deleteRow", lang("delete-row")),
-                node("deleteColumn", lang("delete-column")),
             ]),
         ],
     },
@@ -945,6 +944,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
                 node("default", lang("default")),
             ]),
             separator("separator_3"),
+            node("openBy", lang("openBy")),
             node("export", lang("export")),
             node("copyFile", lang("copyFile"), false),
             node("copyAsPNG", lang("copyAsPNG"), false),

@@ -298,6 +298,26 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
     if (blockIDs.length === 0) {
         return window.siyuan.menus.menu;
     }
+    if (!window.siyuan.config.readonly) {
+        const canPin = selectedItems.every(item => {
+            const notebook = item.getAttribute("data-notebook") || item.closest("ul[data-url]")?.getAttribute("data-url");
+            return notebook && !isEncryptedBox(notebook);
+        });
+        if (canPin) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "pinDoc",
+                icon: "iconPin",
+                label: window.siyuan.languages.pinDoc,
+                click: () => { updatePinnedDocs(blockIDs, "pin"); },
+            }).element);
+        }
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "unpinDoc",
+            icon: "iconUnpin",
+            label: window.siyuan.languages.unpinDoc,
+            click: () => { updatePinnedDocs(blockIDs, "unpin"); },
+        }).element);
+    }
     window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
     if (!window.siyuan.config.readonly && !isEncryptedBox(notebookId)) {
         const riffCardMenu = [{

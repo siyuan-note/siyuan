@@ -883,6 +883,16 @@ test("multiple document and notebook entries follow their document tree menus", 
     assert.ok(getEntryCatalogChildren("docTree.multi").some((item) => item.key === "delete"));
 });
 
+test("document multi-selection includes both pin actions before the existing separator", () => {
+    const keys = getEntryCatalogChildren("docTree.multi").map(item => item.key);
+    assert.deepEqual(keys.slice(keys.indexOf("delete"), keys.indexOf("separator_1") + 1),
+        ["delete", "pinDoc", "unpinDoc", "separator_1"]);
+    for (const key of ["pinDoc", "unpinDoc"]) {
+        assert.equal(getEntryCatalogNode(`docTree.multi.${key}`)?.simple, true);
+        assert.equal(getEntryCatalogDefaultVisibility(`docTree.multi.${key}`), true);
+    }
+});
+
 test("pinned area has no configurable visibility switch", () => {
     assert.equal(getEntryCatalogNode("documentPanel.pinnedDocs"), undefined);
     assert.equal(getEntryCatalogNode("docTree.panel.pinnedDocs"), undefined);

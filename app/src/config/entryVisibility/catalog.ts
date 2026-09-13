@@ -189,7 +189,7 @@ const docTreeDocument = () => {
 
 const docTreeMultiple = () => {
     const [copy, move, addToDatabase, remove, riffCard, openBy, exportEntry] = docTreeCommon(true);
-    return [copy, move, addToDatabase, remove, separator("separator_1"), riffCard,
+    return [copy, move, addToDatabase, remove, node("pinDoc", lang("pinDoc")), node("unpinDoc", lang("unpinDoc")), separator("separator_1"), riffCard,
         separator("separator_2"), openBy, exportEntry];
 };
 

@@ -75,11 +75,11 @@
   }
 
   &-magnifier {
-    background-color: #fff;
+    background-color: var(--b3-theme-background);
     background-repeat: no-repeat;
-    border: 2px solid #fff;
+    border: 2px solid var(--b3-border-color);
     border-radius: 50%;
-    box-shadow: 0 1px 5px rgba(0, 0, 0, .5);
+    box-shadow: var(--b3-dialog-shadow);
     box-sizing: border-box;
     display: none;
     left: 16px;
@@ -111,7 +111,8 @@
     & > .viewer-prev,
     & > .viewer-next {
       align-items: center;
-      background-color: rgba(0, 0, 0, .5);
+      background-color: var(--b3-tooltips-background);
+      color: var(--b3-tooltips-color);
       border-radius: 50%;
       cursor: pointer;
       display: flex;
@@ -122,18 +123,19 @@
       width: 40px;
 
       svg {
-        color: #fff;
+        color: inherit;
         height: 20px;
         width: 20px;
       }
 
       &:focus,
       &:hover {
-        background-color: rgba(0, 0, 0, .8);
+        background-color: var(--b3-theme-primary);
+        color: var(--b3-theme-on-primary);
       }
 
       &:focus {
-        box-shadow: 0 0 3px #fff;
+        box-shadow: 0 0 0 2px var(--b3-theme-primary-light);
         outline: 0;
       }
 

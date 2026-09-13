@@ -27,14 +27,21 @@ describe("mobile filter input", () => {
         const input = createClassTarget(["fn__none"]);
         const trigger = createClassTarget();
         let selected = false;
+        let focused = false;
         let scheduledCallback: () => void;
 
         showMobileFilterInput({
             ...input.target,
+            focus() {
+                assert.equal(input.classes.has("fn__none"), false);
+                focused = true;
+            },
             select() {
+                assert.equal(focused, true);
                 selected = true;
             },
         }, trigger.target, callback => {
+            assert.equal(focused, true);
             scheduledCallback = callback;
         });
 

@@ -92,14 +92,7 @@ export class PinnedDocs {
         }
         this.setCollapsed(localStorage.getItem("siyuan-pinned-docs-collapsed") === "true");
         this.element.addEventListener("click", event => this.click(event));
-        this.element.addEventListener("contextmenu", event => {
-            event.stopPropagation();
-            const row = (event.target as Element).closest<HTMLElement>("[data-pin-row]");
-            if (row) {
-                event.preventDefault();
-                this.menu(row, event.clientX, event.clientY);
-            }
-        });
+        this.element.addEventListener("contextmenu", event => this.contextMenu(event));
         this.element.addEventListener("dragstart", event => {
             const row = (event.target as Element).closest<HTMLElement>("[data-pin-row]");
             if (!row || row.dataset.unavailable === "true" || window.siyuan.config.readonly) {
@@ -275,7 +268,7 @@ export class PinnedDocs {
         row.dataset.type = "navigation-file";
         row.setAttribute(FILE_TREE_CHILDREN_SORT_MODE, doc.childrenSortMode?.toString() || "");
         row.dataset.unavailable = String(Boolean(doc.unavailable));
-        row.draggable = !doc.unavailable && !window.siyuan.config.readonly;
+        row.draggable = !this.mobile && !doc.unavailable && !window.siyuan.config.readonly;
         row.tabIndex = 0;
         const paddingLeft = (depth + 1) * (this.mobile ? 20 : 18);
         row.style.setProperty("--file-toggle-width", `${paddingLeft + 18}px`);
@@ -502,6 +495,17 @@ export class PinnedDocs {
         this.scheduleRefresh();
     }
 
+    private contextMenu(event: MouseEvent) {
+        event.stopPropagation();
+        const row = (event.target as Element).closest<HTMLElement>("[data-pin-row]");
+        if (row) {
+            event.preventDefault();
+            // 触摸长按由拖拽处理，避免弹出菜单中断手势。
+            if (this.touch || this.suppressClick) { return; }
+            this.menu(row, event.clientX, event.clientY);
+        }
+    }
+
     private cancelTouch() {
         this.clearDrop();
         if (this.touch) {
@@ -514,13 +518,14 @@ export class PinnedDocs {
     private bindTouch() {
         this.element.addEventListener("touchstart", event => {
             event.stopPropagation();
+            this.cancelTouch();
             const row = (event.target as Element).closest<HTMLElement>("[data-pin-row]");
             if (!row || row.dataset.unavailable === "true" || window.siyuan.config.readonly || event.touches.length !== 1) { return; }
-            this.cancelTouch();
             const touch = event.touches[0];
             const state = {id: row.dataset.nodeId, x: touch.clientX, y: touch.clientY, timer: 0, dragging: false, ghost: undefined as HTMLElement};
             this.touch = state;
             state.timer = window.setTimeout(() => {
+                if (this.touch !== state) { return; }
                 state.dragging = true;
                 state.ghost = row.cloneNode(true) as HTMLElement;
                 state.ghost.style.cssText = `position:fixed;pointer-events:none;z-index:9999;opacity:.7;left:${state.x}px;top:${state.y}px`;
@@ -531,6 +536,7 @@ export class PinnedDocs {
         this.element.addEventListener("touchmove", event => {
             event.stopPropagation();
             if (!this.touch) { return; }
+            if (event.touches.length !== 1) { this.cancelTouch(); return; }
             const touch = event.touches[0];
             if (!this.touch.dragging) {
                 if (Math.abs(touch.clientX - this.touch.x) + Math.abs(touch.clientY - this.touch.y) > 8) { this.cancelTouch(); }

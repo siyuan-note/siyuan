@@ -31,6 +31,8 @@ interface IPanelHarness {
     scheduleRefresh(changedID?: string): void;
     dropTarget?: {id: string, position: string};
     suppressClick?: boolean;
+    touch?: {dragging: boolean};
+    contextMenu(event: unknown): void;
 }
 
 const loadPanel = (fetchCode = 0) => {
@@ -138,6 +140,38 @@ test("pinned roots share one list and retain each document notebook without wrap
     assert.equal(children[2].dataset.notebook, "second");
     assert.equal(children[1].dataset.url, "first");
     assert.equal(children[3].dataset.url, "second");
+});
+
+test("touch long press suppresses the context menu before and during dragging", () => {
+    const {panel, calls} = loadPanel();
+    const row = {dataset: {nodeId: "document", notebook: "notebook", path: "/document.sy"}};
+    let prevented = 0;
+    const event = {stopPropagation: () => {}, preventDefault: () => prevented++,
+        target: {closest: () => row}, clientX: 10, clientY: 20};
+    for (const dragging of [false, true]) {
+        panel.touch = {dragging};
+        panel.contextMenu(event);
+    }
+    panel.touch = undefined;
+    panel.suppressClick = true;
+    panel.contextMenu(event);
+    assert.equal(calls.length, 0);
+    assert.equal(prevented, 3);
+    panel.suppressClick = false;
+    panel.contextMenu(event);
+    assert.equal(calls[0].kind, "menu");
+});
+
+test("mobile pinned rows use touch dragging without native HTML dragging", async () => {
+    const {panel} = loadPanel();
+    panel.expanded = new Set();
+    for (const mobile of [false, true]) {
+        panel.mobile = mobile;
+        const children: {draggable?: boolean}[] = [];
+        const parent = {append: (child: typeof children[number]) => children.push(child)};
+        await panel.appendDoc(parent, {id: "doc", notebook: "box", name: "Document", path: "/doc.sy", subFileCount: 0}, "doc", 0, 0);
+        assert.equal(children[0].draggable, !mobile);
+    }
 });
 
 test("pinned icons respect editing, expansion and readonly settings", () => {

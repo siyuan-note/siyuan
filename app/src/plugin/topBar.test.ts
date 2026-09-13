@@ -6,6 +6,100 @@ import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 import {getLegacyPluginTopBarEntryKey, getPluginTopBarEntryKey} from "./topBarKey";
 
+const buildPluginMenu = (counts: number[], settings: boolean[], mobile = false, readonly = false) => {
+    const items: IMenu[] = [];
+    const opened: number[] = [];
+    const clicked: string[] = [];
+    const unpinned: string[] = [];
+    const plugins = counts.map((count, index) => ({
+        name: `plugin${index}`,
+        displayName: `Plugin ${index}`,
+        setting: settings[index],
+        openSetting: () => opened.push(index),
+        topBarIcons: Array.from({length: count}, (_, button) => ({
+            id: `button${index}_${button}`,
+            textContent: `Button ${index}_${button}`,
+            getAttribute: () => `Button ${index}_${button}`,
+            querySelector: (): null => null,
+            dispatchEvent() { clicked.push(this.id); },
+            classList: {add() {}, remove() {}},
+        })),
+    }));
+    const addItem = (item: IMenu) => {
+        if (item.ignore) {
+            return;
+        }
+        items.push(item);
+        return {remove: () => items.splice(items.indexOf(item), 1)};
+    };
+    const dependencies = {
+        Menu: class {
+            addItem = addItem;
+            addSeparator(options: IMenu) { return addItem({...options, type: "separator"}); }
+            open() {}
+            fullscreen() {}
+        },
+        Constants: {LOCAL_PLUGINTOPUNPIN: "unpinned"},
+        isBazaarAvailable: () => true,
+        isMobile: () => mobile,
+        hasPluginSetting: (plugin: typeof plugins[number]) => plugin.setting,
+        setStorageVal() {},
+    };
+    const source = readFileSync(resolve(process.cwd(), "src/plugin/openTopBarMenu.ts"), "utf8");
+    const compiled = ts.transpileModule(source, {
+        compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},
+    }).outputText;
+    const exports: {openTopBarMenu?: typeof import("./openTopBarMenu").openTopBarMenu} = {};
+    runInNewContext(compiled, {
+        exports,
+        require: () => dependencies,
+        CustomEvent: class {},
+        document: {contains: () => true},
+        window: {siyuan: {languages: {}, config: {readonly}, storage: {unpinned}}},
+    });
+    const target = {getBoundingClientRect: () => ({width: 10, right: 10, bottom: 10, height: 10})};
+    exports.openTopBarMenu({plugins} as never, mobile ? undefined : target as never);
+    return {items, opened, clicked, unpinned};
+};
+
+test("plugin settings appear once after all top bar buttons", () => {
+    const {items, opened, clicked} = buildPluginMenu([0, 2, 1], [true, true, false]);
+    assert.deepEqual(items.map(item => item.id), [
+        "manage", "separator_1", "button1_0", "button1_1", "button2_0",
+        "separator_settings", "plugin0", "plugin1",
+    ]);
+    const button = items.find(item => item.id === "button1_0");
+    assert.equal(button.submenu, undefined);
+    button.click(undefined, undefined);
+    items.find(item => item.id === "plugin1").click(undefined, undefined);
+    assert.deepEqual(clicked, ["button1_0"]);
+    assert.deepEqual(opened, [1]);
+});
+
+test("plugin menu omits separators for missing groups and preserves empty state", () => {
+    for (const readonly of [false, true]) {
+        for (const [counts, settings] of [[[0], [true]], [[1], [false]], [[], []]] as [number[], boolean[]][]) {
+            const {items} = buildPluginMenu(counts, settings, false, readonly);
+            assert.equal(items.some(item => item.id === "separator_settings"), false);
+            assert.notEqual(items[0]?.type, "separator");
+            assert.notEqual(items.at(-1)?.type, "separator");
+        }
+    }
+    assert.deepEqual(buildPluginMenu([], [], true, true).items.map(item => item.id), ["emptyContent"]);
+});
+
+test("mobile plugin buttons retain pinning and execution separately from settings", () => {
+    const {items, opened, clicked, unpinned} = buildPluginMenu([1], [true], true);
+    const button = items.find(item => item.id === "button0_0");
+    assert.deepEqual(Array.from(button.submenu, item => item.id), ["unpin", "play"]);
+    button.submenu[0].click(undefined, undefined);
+    button.submenu[1].click(undefined, undefined);
+    items.find(item => item.id === "plugin0").click(undefined, undefined);
+    assert.deepEqual(unpinned, ["button0_0"]);
+    assert.deepEqual(clicked, ["button0_0"]);
+    assert.deepEqual(opened, [0]);
+});
+
 class TestElement {
     public attributes = new Map<string, string>();
     public className = "custom";

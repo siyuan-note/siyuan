@@ -314,7 +314,14 @@ export class MobileOutline extends Model {
                     if (selectItem.classList.contains("dragover")) {
                         parentID = selectItem.getAttribute("data-node-id");
                         if (selectItem.nextElementSibling && selectItem.nextElementSibling.tagName === "UL") {
-                            selectItem.nextElementSibling.insertAdjacentElement("afterbegin", item);
+                            const children = selectItem.nextElementSibling;
+                            const lastHeading = children.querySelector(":scope > li:last-of-type");
+                            previousID = lastHeading?.getAttribute("data-node-id");
+                            if (previousID === item.dataset.nodeId) {
+                                hasChange = false;
+                            } else {
+                                children.insertAdjacentElement("beforeend", item);
+                            }
                         } else {
                             selectItem.insertAdjacentHTML("afterend", `<ul>${item.outerHTML}</ul>`);
                             item.remove();

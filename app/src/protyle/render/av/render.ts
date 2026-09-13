@@ -604,7 +604,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 colId: item.getAttribute("data-col-id"),
             });
         });
-        const searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
+        const searchInputElement = e.querySelector('[data-type="av-search"]');
         const pageSizes: { [key: string]: string } = {};
         const virtualData: { [key: string]: IAVVirtualData } = {};
         e.querySelectorAll(".av__body").forEach((item: HTMLElement) => {

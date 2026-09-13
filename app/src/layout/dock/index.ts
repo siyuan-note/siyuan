@@ -30,6 +30,7 @@ import {
 import {getDockHotkey} from "./hotkey";
 import {resolveDockPanelVisibility} from "./panelVisibility";
 import {syncDockEntryOrders} from "../../config/entryVisibility/runtime";
+import {isWindow} from "../../util/functions";
 
 const TYPES = ["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink", "agentChat"];
 const DEFAULT_DOCK_SIZE = 232;
@@ -610,6 +611,13 @@ export class Dock {
         if (fullscreenElement && fullscreenElement.clientHeight > 0) {
             this.layout.element.setAttribute("data-temp", this.layout.element.style.transform);
             this.layout.element.style.transform = "none";
+            // 窗口控制按钮保持在全屏浮动面板上方。
+            if (window.siyuan.config.system.os !== "darwin" && !isWindow()) {
+                const windowControlsElement = document.getElementById("windowControls");
+                if (windowControlsElement) {
+                    windowControlsElement.style.zIndex = (++window.siyuan.zIndex).toString();
+                }
+            }
         }
     }
 

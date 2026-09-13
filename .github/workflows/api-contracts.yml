@@ -39,15 +39,23 @@ jobs:
       - name: Check application and strict contract types
         run: pnpm run typecheck
         working-directory: app
-      - name: Test request and response contracts
-        run: go test ./apicontract/...
+      - name: Test all kernel packages
+        run: go test -tags "fts5 sqlcipher" ./... -count=1
         working-directory: kernel
-      - name: Test actual API responses and compatibility
-        run: go test -tags "fts5 sqlcipher" ./api ./plugin -run "Test.*Contract|TestPluginService|TestGetDynamicIcon|TestInsertLocalAssets|TestSetFileAnnotation|TestDeferredAsset|TestExportBrowserHTML|TestCopyExport|TestRepoFileWireCompatibility|TestRPCWebSocketOriginCheck|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestHTTPProxyResponseSecurityHeaders|TestEventSourceProxyResponseSecurityHeaders|TestForwardProxy|TestConfigureForwardProxy|TestAttributeViewLayoutRejectsReadonlyKernel|TestAttributeViewEditorEndpointsRejectReader|TestMutateViewStateByRoleAndReadonly" -count=1
-        working-directory: kernel
-      - name: Test upload and authentication model compatibility
-        run: go test -tags "fts5 sqlcipher" ./model -run "TestMultipartUpload|TestInsertLocalAssets|TestRecordAssetUpload|TestReadRTFD|TestCopyRTFD|Test.*OIDC" -count=1
-        working-directory: kernel
-      - name: Test frontend transport and contract consumers
-        run: pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts src/util/contractFormData.test.ts src/config/systemConfig.test.ts src/util/keymapBindings.test.ts src/config/tabs/cloudUser.test.ts src/protyle/util/transactionContract.test.ts
+
+  frontend-tests:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Install repository pnpm version
+        run: node -e "require('node:child_process').execFileSync('npm.cmd', ['install', '--global', require('./app/package.json').packageManager], {stdio:'inherit', shell:true});"
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: app
+      - name: Test frontend, Electron and packaging scripts
+        run: pnpm test
         working-directory: app

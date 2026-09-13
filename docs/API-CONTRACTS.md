@@ -146,7 +146,7 @@ Run from `app/`:
 pnpm run api:generate --petal ../../petal
 pnpm run api:check --petal ../../petal
 pnpm run lint
-pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts src/util/contractFormData.test.ts src/config/systemConfig.test.ts src/util/keymapBindings.test.ts src/config/tabs/cloudUser.test.ts src/protyle/util/transactionContract.test.ts
+pnpm test
 ```
 
 The generation command updates both this repository and `petal`; a separate generation run without `--petal` is unnecessary. The `--petal` path is relative to the generator's working directory, `kernel/`; the example refers to a sibling repository. CI checks only this repository's artifacts. Local synchronization across repositories uses this option to verify plugin declarations.
@@ -154,11 +154,9 @@ The generation command updates both this repository and `petal`; a separate gene
 Run from `kernel/`:
 
 ```text
-go test ./apicontract/...
-go test -tags "fts5 sqlcipher" ./model -run "TestMultipartUpload|TestInsertLocalAssets|TestRecordAssetUpload|TestReadRTFD|TestCopyRTFD|Test.*OIDC" -count=1
-go test -tags "fts5 sqlcipher" ./api ./plugin -run "Test.*Contract|TestPluginService|TestGetDynamicIcon|TestInsertLocalAssets|TestSetFileAnnotation|TestDeferredAsset|TestExportBrowserHTML|TestCopyExport|TestRepoFileWireCompatibility|TestRPCWebSocketOriginCheck|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestHTTPProxyResponseSecurityHeaders|TestEventSourceProxyResponseSecurityHeaders|TestForwardProxy|TestConfigureForwardProxy|TestAttributeViewLayoutRejectsReadonlyKernel|TestAttributeViewEditorEndpointsRejectReader|TestMutateViewStateByRoleAndReadonly" -count=1
+go test -tags "fts5 sqlcipher" ./... -count=1
 ```
 
 `tsconfig.api.json` separately enables strict checks and declaration-file checking for invalid parameters, misspelled fields, required bodies, success and failure branches, nullability, and method mismatches. The main application retains its existing configuration; do not assume strict null checks apply to every call. Handler tests use temporary workspaces and isolated test processes without starting or restarting the running kernel.
 
-Name Go contract regression tests with `Contract` in the test name so the CI selector includes them. Existing protocol-specific suites have explicit selectors. When adding frontend contract consumers or model compatibility cases, update both the CI command and the commands above to include their regression coverage.
+CI runs all kernel packages on Linux and all frontend, Electron, and packaging-script tests on Windows. Frontend discovery is restricted to `src/**/*.test.ts`, `tests/**/*.test.js`, `electron/**/*.test.js`, and `scripts/**/*.test.js`, so packaged copies under `app/build` are excluded. Test concurrency is limited to four files to avoid exhausting Electron process resources. New regression tests in these locations are included automatically; update the test command and this document when adding a new test location or filename convention. Keep `Contract` in Go contract regression test names so they remain easy to run separately.

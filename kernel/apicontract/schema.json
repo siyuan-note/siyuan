@@ -42725,6 +42725,283 @@
       }
     },
     {
+      "method": "CONNECT",
+      "path": "/plugin/private/:name/*path",
+      "handler": "pluginPrivateWebServer",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "binary"
+              },
+              {
+                "$ref": "#/$defs/JSONValue"
+              }
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "pluginService",
+      "pluginService": {
+        "variants": [
+          {
+            "mode": "JSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "JSONP",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/javascript",
+              "application/json"
+            ],
+            "payload": "jsonp-or-json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "AsciiJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "IndentedJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "PureJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "SecureJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "secure-json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "XML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/xml"
+            ],
+            "payload": "xml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "YAML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/yaml"
+            ],
+            "payload": "yaml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "TOML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/toml"
+            ],
+            "payload": "toml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "ProtoBuf",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/x-protobuf"
+            ],
+            "payload": "protobuf",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "file",
+            "statusPolicy": "file",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "string",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "text/plain"
+            ],
+            "payload": "text",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "raw",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "redirect",
+            "statusPolicy": "redirect",
+            "mediaTypes": [
+              "text/html"
+            ],
+            "payload": "redirect",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "proxy",
+            "statusPolicy": "proxy",
+            "mediaTypes": [
+              "upstream"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "empty",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "optional"
+            ],
+            "payload": "none",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "websocket",
+            "statusPolicy": "websocket",
+            "mediaTypes": [
+              "upgrade-or-text"
+            ],
+            "payload": "frames",
+            "headersOverrideMedia": false
+          },
+          {
+            "mode": "sse",
+            "statusPolicy": "sse",
+            "mediaTypes": [
+              "text/event-stream"
+            ],
+            "payload": "events",
+            "headersOverrideMedia": false
+          },
+          {
+            "mode": "admission",
+            "statusPolicy": "admission",
+            "mediaTypes": [
+              "text/plain"
+            ],
+            "payload": "text",
+            "headersOverrideMedia": true
+          }
+        ],
+        "admissionStatuses": [
+          400,
+          404,
+          500,
+          503
+        ],
+        "webSocketFrames": [
+          "text",
+          "binary",
+          "close",
+          "ping",
+          "pong"
+        ],
+        "sseEventNames": "dynamic",
+        "sseData": "json-or-text",
+        "sseEvent": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "$ref": "#/$defs/JSONValue"
+            },
+            "event": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "retry": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "data"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    {
       "method": "DELETE",
       "path": "/api/network/echo",
       "handler": "echo",
@@ -42937,6 +43214,283 @@
         "kind": "http",
         "contentType": "application/octet-stream",
         "upstreamStatuses": true
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/plugin/private/:name/*path",
+      "handler": "pluginPrivateWebServer",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "binary"
+              },
+              {
+                "$ref": "#/$defs/JSONValue"
+              }
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "pluginService",
+      "pluginService": {
+        "variants": [
+          {
+            "mode": "JSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "JSONP",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/javascript",
+              "application/json"
+            ],
+            "payload": "jsonp-or-json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "AsciiJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "IndentedJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "PureJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "SecureJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "secure-json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "XML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/xml"
+            ],
+            "payload": "xml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "YAML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/yaml"
+            ],
+            "payload": "yaml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "TOML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/toml"
+            ],
+            "payload": "toml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "ProtoBuf",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/x-protobuf"
+            ],
+            "payload": "protobuf",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "file",
+            "statusPolicy": "file",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "string",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "text/plain"
+            ],
+            "payload": "text",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "raw",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "redirect",
+            "statusPolicy": "redirect",
+            "mediaTypes": [
+              "text/html"
+            ],
+            "payload": "redirect",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "proxy",
+            "statusPolicy": "proxy",
+            "mediaTypes": [
+              "upstream"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "empty",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "optional"
+            ],
+            "payload": "none",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "websocket",
+            "statusPolicy": "websocket",
+            "mediaTypes": [
+              "upgrade-or-text"
+            ],
+            "payload": "frames",
+            "headersOverrideMedia": false
+          },
+          {
+            "mode": "sse",
+            "statusPolicy": "sse",
+            "mediaTypes": [
+              "text/event-stream"
+            ],
+            "payload": "events",
+            "headersOverrideMedia": false
+          },
+          {
+            "mode": "admission",
+            "statusPolicy": "admission",
+            "mediaTypes": [
+              "text/plain"
+            ],
+            "payload": "text",
+            "headersOverrideMedia": true
+          }
+        ],
+        "admissionStatuses": [
+          400,
+          404,
+          500,
+          503
+        ],
+        "webSocketFrames": [
+          "text",
+          "binary",
+          "close",
+          "ping",
+          "pong"
+        ],
+        "sseEventNames": "dynamic",
+        "sseData": "json-or-text",
+        "sseEvent": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "$ref": "#/$defs/JSONValue"
+            },
+            "event": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "retry": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "data"
+          ],
+          "additionalProperties": false
+        }
       }
     },
     {
@@ -43704,6 +44258,283 @@
     },
     {
       "method": "GET",
+      "path": "/plugin/private/:name/*path",
+      "handler": "pluginPrivateWebServer",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "binary"
+              },
+              {
+                "$ref": "#/$defs/JSONValue"
+              }
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "pluginService",
+      "pluginService": {
+        "variants": [
+          {
+            "mode": "JSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "JSONP",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/javascript",
+              "application/json"
+            ],
+            "payload": "jsonp-or-json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "AsciiJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "IndentedJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "PureJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "SecureJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "secure-json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "XML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/xml"
+            ],
+            "payload": "xml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "YAML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/yaml"
+            ],
+            "payload": "yaml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "TOML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/toml"
+            ],
+            "payload": "toml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "ProtoBuf",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/x-protobuf"
+            ],
+            "payload": "protobuf",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "file",
+            "statusPolicy": "file",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "string",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "text/plain"
+            ],
+            "payload": "text",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "raw",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "redirect",
+            "statusPolicy": "redirect",
+            "mediaTypes": [
+              "text/html"
+            ],
+            "payload": "redirect",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "proxy",
+            "statusPolicy": "proxy",
+            "mediaTypes": [
+              "upstream"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "empty",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "optional"
+            ],
+            "payload": "none",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "websocket",
+            "statusPolicy": "websocket",
+            "mediaTypes": [
+              "upgrade-or-text"
+            ],
+            "payload": "frames",
+            "headersOverrideMedia": false
+          },
+          {
+            "mode": "sse",
+            "statusPolicy": "sse",
+            "mediaTypes": [
+              "text/event-stream"
+            ],
+            "payload": "events",
+            "headersOverrideMedia": false
+          },
+          {
+            "mode": "admission",
+            "statusPolicy": "admission",
+            "mediaTypes": [
+              "text/plain"
+            ],
+            "payload": "text",
+            "headersOverrideMedia": true
+          }
+        ],
+        "admissionStatuses": [
+          400,
+          404,
+          500,
+          503
+        ],
+        "webSocketFrames": [
+          "text",
+          "binary",
+          "close",
+          "ping",
+          "pong"
+        ],
+        "sseEventNames": "dynamic",
+        "sseData": "json-or-text",
+        "sseEvent": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "$ref": "#/$defs/JSONValue"
+            },
+            "event": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "retry": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "data"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    {
+      "method": "GET",
       "path": "/ws/network/proxy",
       "handler": "wsProxy",
       "body": "none",
@@ -44184,6 +45015,283 @@
       }
     },
     {
+      "method": "HEAD",
+      "path": "/plugin/private/:name/*path",
+      "handler": "pluginPrivateWebServer",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "binary"
+              },
+              {
+                "$ref": "#/$defs/JSONValue"
+              }
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "pluginService",
+      "pluginService": {
+        "variants": [
+          {
+            "mode": "JSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "JSONP",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/javascript",
+              "application/json"
+            ],
+            "payload": "jsonp-or-json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "AsciiJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "IndentedJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "PureJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "SecureJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "secure-json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "XML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/xml"
+            ],
+            "payload": "xml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "YAML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/yaml"
+            ],
+            "payload": "yaml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "TOML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/toml"
+            ],
+            "payload": "toml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "ProtoBuf",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/x-protobuf"
+            ],
+            "payload": "protobuf",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "file",
+            "statusPolicy": "file",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "string",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "text/plain"
+            ],
+            "payload": "text",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "raw",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "redirect",
+            "statusPolicy": "redirect",
+            "mediaTypes": [
+              "text/html"
+            ],
+            "payload": "redirect",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "proxy",
+            "statusPolicy": "proxy",
+            "mediaTypes": [
+              "upstream"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "empty",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "optional"
+            ],
+            "payload": "none",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "websocket",
+            "statusPolicy": "websocket",
+            "mediaTypes": [
+              "upgrade-or-text"
+            ],
+            "payload": "frames",
+            "headersOverrideMedia": false
+          },
+          {
+            "mode": "sse",
+            "statusPolicy": "sse",
+            "mediaTypes": [
+              "text/event-stream"
+            ],
+            "payload": "events",
+            "headersOverrideMedia": false
+          },
+          {
+            "mode": "admission",
+            "statusPolicy": "admission",
+            "mediaTypes": [
+              "text/plain"
+            ],
+            "payload": "text",
+            "headersOverrideMedia": true
+          }
+        ],
+        "admissionStatuses": [
+          400,
+          404,
+          500,
+          503
+        ],
+        "webSocketFrames": [
+          "text",
+          "binary",
+          "close",
+          "ping",
+          "pong"
+        ],
+        "sseEventNames": "dynamic",
+        "sseData": "json-or-text",
+        "sseEvent": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "$ref": "#/$defs/JSONValue"
+            },
+            "event": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "retry": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "data"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    {
       "method": "OPTIONS",
       "path": "/api/network/echo",
       "handler": "echo",
@@ -44399,6 +45507,283 @@
       }
     },
     {
+      "method": "OPTIONS",
+      "path": "/plugin/private/:name/*path",
+      "handler": "pluginPrivateWebServer",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "binary"
+              },
+              {
+                "$ref": "#/$defs/JSONValue"
+              }
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "pluginService",
+      "pluginService": {
+        "variants": [
+          {
+            "mode": "JSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "JSONP",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/javascript",
+              "application/json"
+            ],
+            "payload": "jsonp-or-json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "AsciiJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "IndentedJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "PureJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "SecureJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "secure-json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "XML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/xml"
+            ],
+            "payload": "xml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "YAML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/yaml"
+            ],
+            "payload": "yaml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "TOML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/toml"
+            ],
+            "payload": "toml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "ProtoBuf",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/x-protobuf"
+            ],
+            "payload": "protobuf",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "file",
+            "statusPolicy": "file",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "string",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "text/plain"
+            ],
+            "payload": "text",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "raw",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "redirect",
+            "statusPolicy": "redirect",
+            "mediaTypes": [
+              "text/html"
+            ],
+            "payload": "redirect",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "proxy",
+            "statusPolicy": "proxy",
+            "mediaTypes": [
+              "upstream"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "empty",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "optional"
+            ],
+            "payload": "none",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "websocket",
+            "statusPolicy": "websocket",
+            "mediaTypes": [
+              "upgrade-or-text"
+            ],
+            "payload": "frames",
+            "headersOverrideMedia": false
+          },
+          {
+            "mode": "sse",
+            "statusPolicy": "sse",
+            "mediaTypes": [
+              "text/event-stream"
+            ],
+            "payload": "events",
+            "headersOverrideMedia": false
+          },
+          {
+            "mode": "admission",
+            "statusPolicy": "admission",
+            "mediaTypes": [
+              "text/plain"
+            ],
+            "payload": "text",
+            "headersOverrideMedia": true
+          }
+        ],
+        "admissionStatuses": [
+          400,
+          404,
+          500,
+          503
+        ],
+        "webSocketFrames": [
+          "text",
+          "binary",
+          "close",
+          "ping",
+          "pong"
+        ],
+        "sseEventNames": "dynamic",
+        "sseData": "json-or-text",
+        "sseEvent": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "$ref": "#/$defs/JSONValue"
+            },
+            "event": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "retry": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "data"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    {
       "method": "PATCH",
       "path": "/api/network/echo",
       "handler": "echo",
@@ -44611,6 +45996,283 @@
         "kind": "http",
         "contentType": "application/octet-stream",
         "upstreamStatuses": true
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/plugin/private/:name/*path",
+      "handler": "pluginPrivateWebServer",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "binary"
+              },
+              {
+                "$ref": "#/$defs/JSONValue"
+              }
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "pluginService",
+      "pluginService": {
+        "variants": [
+          {
+            "mode": "JSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "JSONP",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/javascript",
+              "application/json"
+            ],
+            "payload": "jsonp-or-json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "AsciiJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "IndentedJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "PureJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "SecureJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "secure-json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "XML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/xml"
+            ],
+            "payload": "xml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "YAML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/yaml"
+            ],
+            "payload": "yaml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "TOML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/toml"
+            ],
+            "payload": "toml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "ProtoBuf",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/x-protobuf"
+            ],
+            "payload": "protobuf",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "file",
+            "statusPolicy": "file",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "string",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "text/plain"
+            ],
+            "payload": "text",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "raw",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "redirect",
+            "statusPolicy": "redirect",
+            "mediaTypes": [
+              "text/html"
+            ],
+            "payload": "redirect",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "proxy",
+            "statusPolicy": "proxy",
+            "mediaTypes": [
+              "upstream"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "empty",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "optional"
+            ],
+            "payload": "none",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "websocket",
+            "statusPolicy": "websocket",
+            "mediaTypes": [
+              "upgrade-or-text"
+            ],
+            "payload": "frames",
+            "headersOverrideMedia": false
+          },
+          {
+            "mode": "sse",
+            "statusPolicy": "sse",
+            "mediaTypes": [
+              "text/event-stream"
+            ],
+            "payload": "events",
+            "headersOverrideMedia": false
+          },
+          {
+            "mode": "admission",
+            "statusPolicy": "admission",
+            "mediaTypes": [
+              "text/plain"
+            ],
+            "payload": "text",
+            "headersOverrideMedia": true
+          }
+        ],
+        "admissionStatuses": [
+          400,
+          404,
+          500,
+          503
+        ],
+        "webSocketFrames": [
+          "text",
+          "binary",
+          "close",
+          "ping",
+          "pong"
+        ],
+        "sseEventNames": "dynamic",
+        "sseData": "json-or-text",
+        "sseEvent": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "$ref": "#/$defs/JSONValue"
+            },
+            "event": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "retry": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "data"
+          ],
+          "additionalProperties": false
+        }
       }
     },
     {
@@ -88724,6 +90386,283 @@
       }
     },
     {
+      "method": "POST",
+      "path": "/plugin/private/:name/*path",
+      "handler": "pluginPrivateWebServer",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "binary"
+              },
+              {
+                "$ref": "#/$defs/JSONValue"
+              }
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "pluginService",
+      "pluginService": {
+        "variants": [
+          {
+            "mode": "JSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "JSONP",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/javascript",
+              "application/json"
+            ],
+            "payload": "jsonp-or-json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "AsciiJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "IndentedJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "PureJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "SecureJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "secure-json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "XML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/xml"
+            ],
+            "payload": "xml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "YAML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/yaml"
+            ],
+            "payload": "yaml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "TOML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/toml"
+            ],
+            "payload": "toml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "ProtoBuf",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/x-protobuf"
+            ],
+            "payload": "protobuf",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "file",
+            "statusPolicy": "file",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "string",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "text/plain"
+            ],
+            "payload": "text",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "raw",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "redirect",
+            "statusPolicy": "redirect",
+            "mediaTypes": [
+              "text/html"
+            ],
+            "payload": "redirect",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "proxy",
+            "statusPolicy": "proxy",
+            "mediaTypes": [
+              "upstream"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "empty",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "optional"
+            ],
+            "payload": "none",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "websocket",
+            "statusPolicy": "websocket",
+            "mediaTypes": [
+              "upgrade-or-text"
+            ],
+            "payload": "frames",
+            "headersOverrideMedia": false
+          },
+          {
+            "mode": "sse",
+            "statusPolicy": "sse",
+            "mediaTypes": [
+              "text/event-stream"
+            ],
+            "payload": "events",
+            "headersOverrideMedia": false
+          },
+          {
+            "mode": "admission",
+            "statusPolicy": "admission",
+            "mediaTypes": [
+              "text/plain"
+            ],
+            "payload": "text",
+            "headersOverrideMedia": true
+          }
+        ],
+        "admissionStatuses": [
+          400,
+          404,
+          500,
+          503
+        ],
+        "webSocketFrames": [
+          "text",
+          "binary",
+          "close",
+          "ping",
+          "pong"
+        ],
+        "sseEventNames": "dynamic",
+        "sseData": "json-or-text",
+        "sseEvent": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "$ref": "#/$defs/JSONValue"
+            },
+            "event": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "retry": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "data"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    {
       "method": "PUT",
       "path": "/api/network/echo",
       "handler": "echo",
@@ -88939,6 +90878,283 @@
       }
     },
     {
+      "method": "PUT",
+      "path": "/plugin/private/:name/*path",
+      "handler": "pluginPrivateWebServer",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "binary"
+              },
+              {
+                "$ref": "#/$defs/JSONValue"
+              }
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "pluginService",
+      "pluginService": {
+        "variants": [
+          {
+            "mode": "JSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "JSONP",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/javascript",
+              "application/json"
+            ],
+            "payload": "jsonp-or-json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "AsciiJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "IndentedJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "PureJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "SecureJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "secure-json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "XML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/xml"
+            ],
+            "payload": "xml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "YAML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/yaml"
+            ],
+            "payload": "yaml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "TOML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/toml"
+            ],
+            "payload": "toml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "ProtoBuf",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/x-protobuf"
+            ],
+            "payload": "protobuf",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "file",
+            "statusPolicy": "file",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "string",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "text/plain"
+            ],
+            "payload": "text",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "raw",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "redirect",
+            "statusPolicy": "redirect",
+            "mediaTypes": [
+              "text/html"
+            ],
+            "payload": "redirect",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "proxy",
+            "statusPolicy": "proxy",
+            "mediaTypes": [
+              "upstream"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "empty",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "optional"
+            ],
+            "payload": "none",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "websocket",
+            "statusPolicy": "websocket",
+            "mediaTypes": [
+              "upgrade-or-text"
+            ],
+            "payload": "frames",
+            "headersOverrideMedia": false
+          },
+          {
+            "mode": "sse",
+            "statusPolicy": "sse",
+            "mediaTypes": [
+              "text/event-stream"
+            ],
+            "payload": "events",
+            "headersOverrideMedia": false
+          },
+          {
+            "mode": "admission",
+            "statusPolicy": "admission",
+            "mediaTypes": [
+              "text/plain"
+            ],
+            "payload": "text",
+            "headersOverrideMedia": true
+          }
+        ],
+        "admissionStatuses": [
+          400,
+          404,
+          500,
+          503
+        ],
+        "webSocketFrames": [
+          "text",
+          "binary",
+          "close",
+          "ping",
+          "pong"
+        ],
+        "sseEventNames": "dynamic",
+        "sseData": "json-or-text",
+        "sseEvent": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "$ref": "#/$defs/JSONValue"
+            },
+            "event": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "retry": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "data"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    {
       "method": "TRACE",
       "path": "/api/network/echo",
       "handler": "echo",
@@ -89151,6 +91367,283 @@
         "kind": "http",
         "contentType": "application/octet-stream",
         "upstreamStatuses": true
+      }
+    },
+    {
+      "method": "TRACE",
+      "path": "/plugin/private/:name/*path",
+      "handler": "pluginPrivateWebServer",
+      "body": "raw",
+      "request": {
+        "type": "string",
+        "format": "binary"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "binary"
+              },
+              {
+                "$ref": "#/$defs/JSONValue"
+              }
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "pluginService",
+      "pluginService": {
+        "variants": [
+          {
+            "mode": "JSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "JSONP",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/javascript",
+              "application/json"
+            ],
+            "payload": "jsonp-or-json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "AsciiJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "IndentedJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "PureJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "SecureJSON",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/json"
+            ],
+            "payload": "secure-json",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "XML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/xml"
+            ],
+            "payload": "xml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "YAML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/yaml"
+            ],
+            "payload": "yaml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "TOML",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/toml"
+            ],
+            "payload": "toml",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "ProtoBuf",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "application/x-protobuf"
+            ],
+            "payload": "protobuf",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "file",
+            "statusPolicy": "file",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "string",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "text/plain"
+            ],
+            "payload": "text",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "raw",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "dynamic"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "redirect",
+            "statusPolicy": "redirect",
+            "mediaTypes": [
+              "text/html"
+            ],
+            "payload": "redirect",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "proxy",
+            "statusPolicy": "proxy",
+            "mediaTypes": [
+              "upstream"
+            ],
+            "payload": "bytes",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "empty",
+            "statusPolicy": "plugin",
+            "mediaTypes": [
+              "optional"
+            ],
+            "payload": "none",
+            "headersOverrideMedia": true
+          },
+          {
+            "mode": "websocket",
+            "statusPolicy": "websocket",
+            "mediaTypes": [
+              "upgrade-or-text"
+            ],
+            "payload": "frames",
+            "headersOverrideMedia": false
+          },
+          {
+            "mode": "sse",
+            "statusPolicy": "sse",
+            "mediaTypes": [
+              "text/event-stream"
+            ],
+            "payload": "events",
+            "headersOverrideMedia": false
+          },
+          {
+            "mode": "admission",
+            "statusPolicy": "admission",
+            "mediaTypes": [
+              "text/plain"
+            ],
+            "payload": "text",
+            "headersOverrideMedia": true
+          }
+        ],
+        "admissionStatuses": [
+          400,
+          404,
+          500,
+          503
+        ],
+        "webSocketFrames": [
+          "text",
+          "binary",
+          "close",
+          "ping",
+          "pong"
+        ],
+        "sseEventNames": "dynamic",
+        "sseData": "json-or-text",
+        "sseEvent": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "$ref": "#/$defs/JSONValue"
+            },
+            "event": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "retry": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "data"
+          ],
+          "additionalProperties": false
+        }
       }
     }
   ]

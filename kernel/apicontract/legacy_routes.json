@@ -1,5 +1,4 @@
 [
-  {"method":"ANY","path":"/plugin/private/:name/*path","handler":"pluginPrivateWebServer"},
   {"method":"GET","path":"/api/icon/getDynamicIcon","handler":"getDynamicIcon"},
   {"method":"GET","path":"/api/system/bootProgressSSE","handler":"bootProgressSSE"},
   {"method":"GET","path":"/api/system/getBootAppearance","handler":"getBootAppearance"},

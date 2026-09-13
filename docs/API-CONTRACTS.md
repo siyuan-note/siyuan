@@ -24,6 +24,8 @@ Encrypted notebook lifecycle endpoints use typed requests and responses while re
 
 ## Compatibility requirements
 
+Plugin private services declare their existing serialization modes, raw files, redirects, proxy responses, SSE events, and WebSocket frames. Plugin-defined payloads remain protocol extension data; branch-specific validation distinguishes serialized formats from arbitrary bytes. Request bodies, explicit response headers, admission failures, and cancellation retain the plugin service lifecycle.
+
 Network contracts retain request bytes, multipart fields, headers, URL and TLS diagnostics, including complete certificate public-key structures and large integers. Forward proxy options preserve validation order, numeric truncation, response encodings, and protocol-defined JSON payloads. HTTP, EventSource, and WebSocket proxies retain upstream statuses and bytes, repeated-header behavior, security headers, stream cancellation, and connection cleanup. Echo wildcard paths bind their own adapter while sharing the same handler behavior.
 
 Attribute-view contracts declare table, gallery, and kanban results separately and retain missing base fields, cell patches, and null values. Known patch fields retain their supplied presence without filling omitted fields with zero values. Current, history, and snapshot rendering use their corresponding request types; callers handle error payloads before updating views. Row sorting, publish admission, encrypted-notebook leases, and fast JSON rendering preserve their existing behavior. Shared frontend and plugin declarations reflect the fields actually present in each view and cell.

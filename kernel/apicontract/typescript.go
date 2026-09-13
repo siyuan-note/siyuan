@@ -191,6 +191,10 @@ func (b *Bundle) TypeScript(legacy []Route) []byte {
 				protocol, _ := json.Marshal(proxy)
 				fmt.Fprintf(&output, "        proxy: %s;\n", protocol)
 			}
+			if service := endpoint.PluginService; service != nil {
+				protocol, _ := json.Marshal(service)
+				fmt.Fprintf(&output, "        pluginService: %s;\n", protocol)
+			}
 			output.WriteString("    };\n")
 		}
 		output.WriteString("}\n\n")
@@ -245,7 +249,7 @@ type APIPostEmptyResponse<C> = C extends {emptyResponseStatuses: infer S extends
     ? Exclude<S[number], 401 | 403 | 404> extends never ? never : "" : never;
 
 type APIPostTail<C extends APIContract> = [
-    cb?: (response: (C extends {output: "binary" | "proxy"} ? JSONValue : C extends {output: "directJSON"} ? APIDirectCallbackResponse<C["response"]> | (C extends {noContent: true} ? "" : never) : C extends {output: "sse"} ? string | APICallbackResponse<C["response"]> : APICallbackResponse<C["response"]>) | APIPostEmptyResponse<C>) => void,
+    cb?: (response: (C extends {output: "binary" | "proxy" | "pluginService"} ? JSONValue : C extends {output: "directJSON"} ? APIDirectCallbackResponse<C["response"]> | (C extends {noContent: true} ? "" : never) : C extends {output: "sse"} ? string | APICallbackResponse<C["response"]> : APICallbackResponse<C["response"]>) | APIPostEmptyResponse<C>) => void,
     headers?: Record<string, string>,
     failCallback?: (response: APIFetchFailure) => void,
     signal?: AbortSignal,
@@ -277,13 +281,13 @@ export type FetchSyncPost<Legacy = APILegacyResponse> = <Path extends string>(
         : Path extends APILegacyPOSTPath ? [data?: any, ...tail: APISyncTail]
         : string extends Path ? [data?: any, ...tail: APISyncTail] : never
 ) => Promise<Path extends keyof APIPOSTRoutes
-    ? APIPOSTRoutes[Path] extends {output: "binary" | "proxy"} ? JSONValue : APIPOSTRoutes[Path]["response"] | APITransportError
+    ? APIPOSTRoutes[Path] extends {output: "binary" | "proxy" | "pluginService"} ? JSONValue : APIPOSTRoutes[Path]["response"] | APITransportError
     : Legacy>;
 
 export type FetchGet<Legacy = APILegacyResponse | string> = <Path extends string>(
     url: Path,
     ...args: Path extends keyof APIGETRoutes
-        ? [cb: (response: APIGETRoutes[Path] extends {output: "binary" | "proxy"} ? JSONValue : APIGETRoutes[Path]["response"] | APIEmptyResponse<APIGETRoutes[Path]> | (APIGETRoutes[Path] extends {output: "websocket" | "sse"} ? string : never)) => void]
+        ? [cb: (response: APIGETRoutes[Path] extends {output: "binary" | "proxy" | "pluginService"} ? JSONValue : APIGETRoutes[Path]["response"] | APIEmptyResponse<APIGETRoutes[Path]> | (APIGETRoutes[Path] extends {output: "websocket" | "sse"} ? string : never)) => void]
         : Path extends keyof APIPOSTRoutes ? never
         : [cb: (response: Legacy) => void]
 ) => void;

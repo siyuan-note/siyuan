@@ -82,10 +82,4 @@ var pluginJsonRpcHttpByName = contractHandler(apicontract.PluginRPCHTTPByName, p
 var pluginJsonRpcWebSocket = contractHandler(apicontract.PluginRPCWebSocket, plugin.OpenRPCWebSocket)
 var pluginJsonRpcWebSocketByName = contractHandler(apicontract.PluginRPCWebSocketByName, plugin.OpenRPCWebSocket)
 
-// func pluginPublicWebServer(c *gin.Context) {
-// 	plugin.HandleHttpRequest(c, plugin.AccessScopePublic)
-// }
-
-func pluginPrivateWebServer(c *gin.Context) {
-	plugin.HandleHttpRequest(c, plugin.AccessScopePrivate)
-}
+var pluginPrivateWebServer = contractHandler(apicontract.PluginPrivateService, plugin.PreparePrivateService)

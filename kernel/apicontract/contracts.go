@@ -42,6 +42,7 @@ type Definition struct {
 	WebSocket               *WebSocketDefinition
 	SSE                     *SSEDefinition
 	Proxy                   *ProxyDefinition
+	PluginService           *PluginServiceDefinition
 	ContentVariants         []HTTPContentVariant
 	FastJSON                bool
 	EmptyResponseStatuses   []int
@@ -65,6 +66,7 @@ type ResponseOptions struct {
 	WebSocket               *WebSocketDefinition
 	SSE                     *SSEDefinition
 	Proxy                   *ProxyDefinition
+	PluginService           *PluginServiceDefinition
 	ContentVariants         []HTTPContentVariant
 	FastJSON                bool
 	EmptyResponseStatuses   []int
@@ -122,7 +124,7 @@ func define[Request, Data any](name, path string, body BodyMode, response Respon
 	d := Definition{Name: name, Path: path, Methods: methods, Body: body,
 		Request: reflect.TypeFor[Request](), Data: reflect.TypeFor[Data](),
 		ErrorCodes: append([]int{-1}, response.AdditionalCodes...), ErrorText: response.Text, DataNonNullable: response.NonNullable, DataOnError: response.DataOnError,
-		Output: response.Output, ErrorStatus: response.ErrorStatus, NoContent: response.NoContent, WebSocket: response.WebSocket, SSE: response.SSE, Proxy: response.Proxy,
+		Output: response.Output, ErrorStatus: response.ErrorStatus, NoContent: response.NoContent, WebSocket: response.WebSocket, SSE: response.SSE, Proxy: response.Proxy, PluginService: response.PluginService,
 		AdditionalErrorStatuses: append([]int(nil), response.AdditionalErrorStatuses...), ContentVariants: append([]HTTPContentVariant(nil), response.ContentVariants...), FastJSON: response.FastJSON,
 		EmptyResponseStatuses: append([]int(nil), response.EmptyResponseStatuses...)}
 	definitions = append(definitions, d)
@@ -942,3 +944,5 @@ var NetworkForwardProxy = define[NetworkForwardRequest, NetworkForwardData]("for
 var NetworkHTTPProxy = define[EmptyRequest, ProxyFailure]("httpProxy", "/api/network/proxy", RawBody, ProxyOptions(HTTPProxy), "ANY")
 var NetworkEventSourceProxy = define[EmptyRequest, ProxyFailure]("esProxy", "/es/network/proxy", NoBody, ProxyOptions(EventSourceProxy), "GET")
 var NetworkWebSocketProxy = define[EmptyRequest, ProxyFailure]("wsProxy", "/ws/network/proxy", NoBody, ProxyOptions(WebSocketProxy), "GET")
+
+var PluginPrivateService = define[EmptyRequest, PluginServiceContent]("pluginPrivateWebServer", "/plugin/private/:name/*path", RawBody, PluginServiceOptions(), "ANY")

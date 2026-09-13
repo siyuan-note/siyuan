@@ -33,6 +33,9 @@ func SuccessNoContent[Data any]() Response[Data] {
 
 // Status 只为显式声明的非 JSON 协议使用独立错误状态。
 func (e Endpoint[Request, Data]) Status(r Response[Data]) int {
+	if e.definition.Output == PluginServiceOutput {
+		return e.pluginServiceStatus(r)
+	}
 	if e.definition.Proxy != nil {
 		return e.proxyStatus(r)
 	}
@@ -139,20 +142,21 @@ func (Null) MarshalJSON() ([]byte, error) { return []byte("null"), nil }
 
 // Response 的载荷仅能通过有类型的成功构造函数或明确的错误构造函数设置。
 type Response[Data any] struct {
-	code             int
-	msg              string
-	data             any
-	binary           *BinaryContent
-	queryLimit       *SQLQueryLimit
-	directJSON       bool
-	noContent        bool
-	upgrade          func(http.ResponseWriter, *http.Request)
-	stream           func(http.ResponseWriter, *http.Request)
-	websocketFailure bool
-	httpStatus       int
-	afterWrite       func()
-	emptyStatus      int
-	redirect         *HTTPRedirect
+	pluginServiceMode PluginServiceMode
+	code              int
+	msg               string
+	data              any
+	binary            *BinaryContent
+	queryLimit        *SQLQueryLimit
+	directJSON        bool
+	noContent         bool
+	upgrade           func(http.ResponseWriter, *http.Request)
+	stream            func(http.ResponseWriter, *http.Request)
+	websocketFailure  bool
+	httpStatus        int
+	afterWrite        func()
+	emptyStatus       int
+	redirect          *HTTPRedirect
 }
 
 // WithAfterWrite 将通知保留到响应写入完成后执行。

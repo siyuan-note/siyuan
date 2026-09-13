@@ -27,21 +27,22 @@ type Schema struct {
 }
 
 type EndpointSchema struct {
-	Method                  string               `json:"method"`
-	Path                    string               `json:"path"`
-	Handler                 string               `json:"handler"`
-	Body                    BodyMode             `json:"body"`
-	Request                 *Schema              `json:"request"`
-	Response                *Schema              `json:"response"`
-	Output                  OutputMode           `json:"output,omitempty"`
-	ErrorStatus             int                  `json:"errorStatus,omitempty"`
-	NoContent               bool                 `json:"noContent,omitempty"`
-	WebSocket               *WebSocketSchema     `json:"websocket,omitempty"`
-	SSE                     *SSESchema           `json:"sse,omitempty"`
-	Proxy                   *ProxyDefinition     `json:"proxy,omitempty"`
-	ContentVariants         []HTTPContentVariant `json:"contentVariants,omitempty"`
-	EmptyResponseStatuses   []int                `json:"emptyResponseStatuses,omitempty"`
-	AdditionalErrorStatuses []int                `json:"additionalErrorStatuses,omitempty"`
+	Method                  string                   `json:"method"`
+	Path                    string                   `json:"path"`
+	Handler                 string                   `json:"handler"`
+	Body                    BodyMode                 `json:"body"`
+	Request                 *Schema                  `json:"request"`
+	Response                *Schema                  `json:"response"`
+	Output                  OutputMode               `json:"output,omitempty"`
+	ErrorStatus             int                      `json:"errorStatus,omitempty"`
+	NoContent               bool                     `json:"noContent,omitempty"`
+	WebSocket               *WebSocketSchema         `json:"websocket,omitempty"`
+	SSE                     *SSESchema               `json:"sse,omitempty"`
+	Proxy                   *ProxyDefinition         `json:"proxy,omitempty"`
+	PluginService           *PluginServiceDefinition `json:"pluginService,omitempty"`
+	ContentVariants         []HTTPContentVariant     `json:"contentVariants,omitempty"`
+	EmptyResponseStatuses   []int                    `json:"emptyResponseStatuses,omitempty"`
+	AdditionalErrorStatuses []int                    `json:"additionalErrorStatuses,omitempty"`
 }
 
 type WebSocketSchema struct {
@@ -90,6 +91,13 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if t == reflect.TypeFor[PluginServiceContent]() {
+		value, err := b.schema(reflect.TypeFor[JSONValue](), false)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{{Type: "string", Format: "binary"}, value}}, nil
+	}
 	if t == reflect.TypeFor[*NetworkEchoTLS]() || t == reflect.TypeFor[*NetworkEchoURL]() || t == reflect.TypeFor[*NetworkEchoCookies]() {
 		schema, err := networkEchoSchema(b, t.Elem())
 		if err != nil {
@@ -530,6 +538,9 @@ func BuildBundle() (*Bundle, error) {
 	b := &schemaBuilder{definitions: map[string]*Schema{}, owners: map[string]reflect.Type{}}
 	bundle := &Bundle{Dialect: "https://json-schema.org/draft/2020-12/schema", Definitions: b.definitions}
 	for _, definition := range Definitions() {
+		if err := validatePluginServiceDefinition(definition); err != nil {
+			return nil, err
+		}
 		if err := validateProxyDefinition(definition); err != nil {
 			return nil, err
 		}
@@ -549,7 +560,7 @@ func BuildBundle() (*Bundle, error) {
 				return nil, fmt.Errorf("invalid JSON error status: %s", definition.Name)
 			}
 		}
-		if definition.Output != "" && definition.Output != BinaryOutput && definition.Output != DirectJSONOutput && definition.Output != WebSocketOutput && definition.Output != SSEOutput && definition.Output != ProxyOutput {
+		if definition.Output != "" && definition.Output != BinaryOutput && definition.Output != DirectJSONOutput && definition.Output != WebSocketOutput && definition.Output != SSEOutput && definition.Output != ProxyOutput && definition.Output != PluginServiceOutput {
 			return nil, fmt.Errorf("unsupported response output: %s", definition.Name)
 		}
 		if definition.NoContent && definition.Output != DirectJSONOutput {
@@ -639,7 +650,7 @@ func BuildBundle() (*Bundle, error) {
 				return nil, err
 			}
 		}
-		if definition.Output == DirectJSONOutput || definition.Output == WebSocketOutput {
+		if definition.Output == DirectJSONOutput || definition.Output == WebSocketOutput || definition.Output == PluginServiceOutput {
 			success = data
 		}
 		if definition.Output == SSEOutput {
@@ -670,7 +681,7 @@ func BuildBundle() (*Bundle, error) {
 		for _, method := range ExpandMethods(definition.Methods) {
 			bundle.Endpoints = append(bundle.Endpoints, EndpointSchema{Method: method, Path: definition.Path, Handler: definition.Name,
 				Body: definition.Body, Request: request, Response: response, Output: definition.Output, ErrorStatus: definition.ErrorStatus, NoContent: definition.NoContent, WebSocket: websocket,
-				AdditionalErrorStatuses: definition.AdditionalErrorStatuses, SSE: sse, Proxy: definition.Proxy, ContentVariants: definition.ContentVariants, EmptyResponseStatuses: definition.EmptyResponseStatuses})
+				AdditionalErrorStatuses: definition.AdditionalErrorStatuses, SSE: sse, Proxy: definition.Proxy, PluginService: definition.PluginService, ContentVariants: definition.ContentVariants, EmptyResponseStatuses: definition.EmptyResponseStatuses})
 		}
 	}
 	sort.Slice(bundle.Endpoints, func(i, j int) bool {
@@ -700,7 +711,7 @@ func (b *Bundle) ValidateResponse(method, path string, payload []byte) error {
 	}
 	for _, endpoint := range b.Endpoints {
 		if endpoint.Method == method && endpoint.Path == path {
-			if endpoint.Output == BinaryOutput || endpoint.Output == WebSocketOutput || endpoint.Output == SSEOutput || endpoint.Output == ProxyOutput {
+			if endpoint.Output == BinaryOutput || endpoint.Output == WebSocketOutput || endpoint.Output == SSEOutput || endpoint.Output == ProxyOutput || endpoint.Output == PluginServiceOutput {
 				return fmt.Errorf("binary endpoint requires HTTP response validation")
 			}
 			return b.validate(endpoint.Response, value, "$")
@@ -714,6 +725,9 @@ func (b *Bundle) ValidateHTTPResponse(method, path string, status int, contentTy
 	for _, endpoint := range b.Endpoints {
 		if endpoint.Method != method || endpoint.Path != path {
 			continue
+		}
+		if endpoint.PluginService != nil {
+			return b.validatePluginServiceHTTPResponse(endpoint, status, contentType, payload)
 		}
 		if endpoint.Proxy != nil {
 			return b.validateProxyHTTPResponse(endpoint, status, contentType, payload)

@@ -473,3 +473,13 @@ fetchPost("/api/network/echo", {arbitrary: [1, true]}, response => {
 });
 const networkRawBody: APIPOSTRoutes["/api/network/proxy"]["request"] = new Blob(["raw"]);
 void networkRawBody;
+
+const pluginServiceRawBody: APIPOSTRoutes["/plugin/private/:name/*path"]["request"] = new Blob(["plugin data"]);
+void pluginServiceRawBody;
+fetchPost("/plugin/private/:name/*path", {extension: [true, null, 1]}, response => {
+    const pluginPayload: JSONValue = response;
+    void pluginPayload;
+    // @ts-expect-error 插件服务载荷由插件决定，不能直接当作固定内核信封。
+    const code: number = response.code;
+    void code;
+});

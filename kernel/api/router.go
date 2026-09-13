@@ -382,7 +382,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/asset/insertLocalAssets", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, insertLocalAssets)
 	ginServer.Handle("POST", "/api/asset/insertCover", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, insertCover)
 	ginServer.Handle("POST", "/api/asset/resolveAssetPath", model.CheckAuth, model.CheckAdminRole, resolveAssetPath)
-	ginServer.Handle("POST", "/api/asset/upload", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, model.Upload)
+	ginServer.Handle("POST", "/api/asset/upload", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, uploadAsset)
 	ginServer.Handle("POST", "/api/asset/setFileAnnotation", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setFileAnnotation)
 	ginServer.Handle("POST", "/api/asset/getFileAnnotation", model.CheckAuth, getFileAnnotation)
 	ginServer.Handle("POST", "/api/asset/getUnusedAssets", model.CheckAuth, model.CheckAdminRole, getUnusedAssets)

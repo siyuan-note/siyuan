@@ -124,6 +124,11 @@ func (e Endpoint[Request, Data]) WithHTTPStatus(response Response[Data], status 
 
 func Success[Data any](data Data) Response[Data] { return Response[Data]{data: data} }
 
+// SuccessWithMessage 保留成功响应中的提示，例如批量上传中部分文件未完成。
+func SuccessWithMessage[Data any](data Data, message string) Response[Data] {
+	return Response[Data]{data: data, msg: message}
+}
+
 func Failure[Data any](code int, msg string) Response[Data] {
 	return Response[Data]{code: code, msg: msg}
 }

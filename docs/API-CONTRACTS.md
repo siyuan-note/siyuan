@@ -24,6 +24,8 @@ Encrypted notebook lifecycle endpoints use typed requests and responses while re
 
 ## Compatibility requirements
 
+Asset contracts retain nullable result lists, per-file upload order and duplicate names, successful partial-upload messages, and local-insertion failure payloads. OCR columns remain string-valued. Annotation validation, published-file admission, encrypted reads and writes, deferred downloads, and upload target selection keep their existing behavior. The non-API upload entry uses the same typed model operation.
+
 Export contracts retain Markdown option defaults and numeric truncation, notebook-list filtering, ignored title-option types, optional HTML folders, and file-upload field selection. Error responses preserve message durations and empty-string resource payloads. Publish filtering, encrypted-notebook admission, response-held leases, and temporary export cleanup remain in the existing lifecycle.
 
 Repository contracts retain key encoding, snapshot metadata, numeric truncation and retention defaults, cloud pagination, and file access leases. Repository-file reads retain their media type and bytes; empty files retain the success envelope. Both file success and JSON failure use HTTP 200. For this explicitly declared shared status, `ValidateHTTPResponse` accepts raw file bytes and `ValidateErrorResponse` separately verifies known error payloads. No key material, encrypted file format, or snapshot recovery behavior changes.
@@ -92,6 +94,8 @@ Optional `*string` form fields preserve omission separately from an explicit emp
 
 Use `MultipartBody` for file uploads. Request structs declare string fields and `*multipart.FileHeader` fields using their wire names; file schemas use `type: string` and `format: binary`, generating `Blob` declarations. The adapter retains Gin multipart parsing and binds the first value for repeated fields. File contents remain available through `Open`, so handlers preserve their read and recovery logic. Unsupported field types and binding options fail generation.
 
+Fixed fields declared as `[]*multipart.FileHeader` receive all files in their original order and generate `Array<Blob>`. An optional absent file list remains nil. Text and single-file fields still select the first value. `SuccessWithMessage` retains nonempty messages on successful responses, including partial batch uploads.
+
 Frontend callers construct `ContractFormData` from typed fields before passing it to the existing fetch functions. The generated signatures require the endpoint's fields and distinguish file values from strings; raw `FormData` cannot satisfy a migrated upload contract. Optional fields are omitted and string values are not trimmed. Plugin callers can implement the generated `APIFormData<Request>` interface when constructing their forms.
 
 ## Endpoint maintenance
@@ -124,7 +128,8 @@ Run from `kernel/`:
 
 ```text
 go test ./apicontract/...
-go test -tags "fts5 sqlcipher" ./api ./plugin -run "TestAPIContract|TestBazaarContract|TestRepoContract|TestRepoFileWireCompatibility|TestRPC.*Contract|TestRPCWebSocketOriginCheck|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestContract.*NotebookResponseLease" -count=1
+go test -tags "fts5 sqlcipher" ./model -run "TestMultipartUpload|TestInsertLocalAssets|TestRecordAssetUpload|TestReadRTFD|TestCopyRTFD" -count=1
+go test -tags "fts5 sqlcipher" ./api ./plugin -run "TestAPIContract|TestAsset.*Contract|TestInsertLocalAssets|TestSetFileAnnotation|TestDeferredAsset|TestExportBrowserHTML|TestCopyExport|TestBazaarContract|TestRepoContract|TestRepoFileWireCompatibility|TestRPC.*Contract|TestRPCWebSocketOriginCheck|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestContract.*NotebookResponseLease" -count=1
 ```
 
 `tsconfig.api.json` separately enables strict checks and declaration-file checking for invalid parameters, misspelled fields, required bodies, success and failure branches, nullability, and method mismatches. The main application retains its existing configuration; do not assume strict null checks apply to every call. Handler tests use temporary workspaces and isolated test processes without starting or restarting the running kernel.

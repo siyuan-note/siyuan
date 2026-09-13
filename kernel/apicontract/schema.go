@@ -275,6 +275,12 @@ func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
 		}
 		return nullable(&Schema{Type: "string"}), nil
 	}
+	if t == reflect.TypeFor[[]*multipart.FileHeader]() {
+		if !input {
+			return nil, fmt.Errorf("uploaded files are request-only")
+		}
+		return &Schema{Type: "array", Items: &Schema{Type: "string", Format: "binary"}}, nil
+	}
 	if t == reflect.TypeFor[*multipart.FileHeader]() {
 		if !input {
 			return nil, fmt.Errorf("uploaded files are request-only")

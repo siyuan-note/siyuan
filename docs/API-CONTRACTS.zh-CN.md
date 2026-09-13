@@ -24,6 +24,8 @@
 
 ## 兼容要求
 
+附件契约保留结果列表的空值、逐文件上传顺序与重名文件、部分上传成功时的提示及本地插入失败载荷。OCR 列保持字符串值。标注校验、发布文件准入、加密读写、延迟下载和上传目标选择保持既有行为。非 API 上传入口复用同一个有类型的模型操作。
+
 导出契约保留 Markdown 选项默认值与数字截断、笔记本列表过滤、标题选项类型忽略规则、可省略的 HTML 目录字段及上传字段选择规则。错误响应保留消息显示时长与资源错误中的空字符串载荷。发布过滤、加密笔记本准入、覆盖响应阶段的租约及临时导出清理保持既有生命周期。
 
 仓库契约保留密钥编码、快照元数据、数值截断与保留期限默认值、云端分页及文件访问租约。仓库文件读取保留媒体类型和原始字节，空文件保留成功信封。文件成功与 JSON 失败均返回 HTTP 200。对于显式声明的共用状态，`ValidateHTTPResponse` 接受文件原始字节，`ValidateErrorResponse` 单独验证已知错误载荷。密钥材料、加密文件格式及快照恢复行为保持不变。
@@ -92,6 +94,8 @@ SQL 查询契约保留成功信封顶层的 `limit` 和 `truncated`。`SuccessSQ
 
 文件上传使用 `MultipartBody`。请求结构体以线协议字段名声明字符串和 `*multipart.FileHeader` 字段；文件 schema 使用 `type: string` 与 `format: binary`，生成 `Blob` 类型。适配器保留 Gin 的表单解析方式，重复字段取首值；文件内容继续通过 `Open` 读取，处理函数保留读取及恢复逻辑。未支持的字段类型和绑定选项会使生成失败。
 
+声明为 `[]*multipart.FileHeader` 的固定字段按原顺序接收全部文件，生成 `Array<Blob>`。可选文件列表缺省时保留 nil；文本与单文件字段仍取首值。`SuccessWithMessage` 保留成功响应中的非空提示，包括批量上传部分成功的情况。
+
 前端从类型化字段构造 `ContractFormData`，再交给现有请求函数。生成签名检查端点所需字段并区分文件与字符串，普通 `FormData` 不能满足已迁移上传接口的契约。可缺省字段不写入表单，字符串不裁剪空白。插件调用方构造表单时可实现生成的 `APIFormData<Request>` 接口。
 
 ## 接口维护流程
@@ -124,7 +128,8 @@ pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts
 
 ```text
 go test ./apicontract/...
-go test -tags "fts5 sqlcipher" ./api ./plugin -run "TestAPIContract|TestBazaarContract|TestRepoContract|TestRepoFileWireCompatibility|TestRPC.*Contract|TestRPCWebSocketOriginCheck|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestContract.*NotebookResponseLease" -count=1
+go test -tags "fts5 sqlcipher" ./model -run "TestMultipartUpload|TestInsertLocalAssets|TestRecordAssetUpload|TestReadRTFD|TestCopyRTFD" -count=1
+go test -tags "fts5 sqlcipher" ./api ./plugin -run "TestAPIContract|TestAsset.*Contract|TestInsertLocalAssets|TestSetFileAnnotation|TestDeferredAsset|TestExportBrowserHTML|TestCopyExport|TestBazaarContract|TestRepoContract|TestRepoFileWireCompatibility|TestRPC.*Contract|TestRPCWebSocketOriginCheck|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestContract.*NotebookResponseLease" -count=1
 ```
 
 `tsconfig.api.json` 单独启用严格检查并检查声明文件，覆盖参数错误、字段拼写、必填请求体、成功与失败分支、可空值和方法不匹配。主应用继续沿用现有配置，不假定全部调用都启用了严格空值检查。处理函数测试使用临时工作区和独立测试进程，不启动或重启运行中的内核。

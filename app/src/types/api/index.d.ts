@@ -10,11 +10,47 @@ export type AppendBlockRequestInput = { "data": string; "dataType": string; "par
 
 export type AppendHeadingChildrenRequestInput = { "childrenDOM": string; "id": string; };
 
+export type AssetAnnotationData = { "data": string; };
+
+export type AssetCloudUploadRequestInput = { "id": string; "ignorePushMsg"?: boolean | null; };
+
 export type AssetContent = { "content": string; "ext": string; "hSize": string; "id": string; "name": string; "path": string; "size": number; "updated": number; };
 
 export type AssetContentData = { "assetContent": AssetContent | null; };
 
 export type AssetContentRequestInput = { "id": string; "query": string; "queryMethod": number; };
+
+export type AssetDocumentAssetsRequestInput = { "id": string; "retainQueryStr"?: boolean | null; };
+
+export type AssetDocumentRequestInput = { "id": string; };
+
+export type AssetInsertCoverData = { "succFiles": Array<AssetUploadSuccess> | null; "succMap": Record<string, string> | null; };
+
+export type AssetOCRData = { "ocrJSON": Array<Record<string, string> | null> | null; "text": string; };
+
+export type AssetOCRTextRequestInput = { "path"?: string | null; };
+
+export type AssetPathData = { "path": string; };
+
+export type AssetPathRequestInput = { "path": string; };
+
+export type AssetPathsCloudUploadRequestInput = { "ignorePushMsg"?: boolean | null; "paths": Array<string>; };
+
+export type AssetPathsData = { "paths": Array<string> | null; };
+
+export type AssetRenameData = { "newPath": string; };
+
+export type AssetStatData = { "created": number; "downloaded"?: false; "hCreated": string; "hSize": string; "hUpdated": string; "size": number; "updated": number; };
+
+export type AssetTextData = { "text": string; };
+
+export type AssetUnusedItem = { "blockIDs"?: Array<string>; "item": string; "name": string; "path"?: string; };
+
+export type AssetUploadData = { "errFiles": Array<string> | null; "failedFiles": Array<AssetUploadFailure> | null; "succFiles": Array<AssetUploadSuccess> | null; "succMap": Record<string, string> | null; };
+
+export type AssetUploadFailure = { "error": string; "index": number; "name": string; };
+
+export type AssetUploadSuccess = { "index": number; "name": string; "path": string; };
 
 export type AttributeViewColorTheme = { "backgroundColor": string; "color": string; };
 
@@ -556,6 +592,10 @@ export type InlineStyles = { "av": InlineStyleAV | null; "builtin": InlineStyleB
 
 export type InsertBlockRequestInput = { "data": string; "dataType": string; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; };
 
+export type InsertCoverRequestInput = { "id": string; "name": string; };
+
+export type InsertLocalAssetsRequestInput = { "assetPaths": Array<string>; "fromHTMLPaste"?: boolean | null; "id"?: string | null; "isUpload"?: boolean | null; };
+
 export type InstallBazaarIconRequestInput = { "keyword"?: string | null; "packageName": string; "repoHash": string; "repoRef"?: string | null; "repoURL": string; };
 
 export type InstallBazaarPluginRequestInput = { "frontend": string; "keyword"?: string | null; "packageName": string; "repoHash": string; "repoRef"?: string | null; "repoURL": string; };
@@ -728,6 +768,8 @@ export type RemoveShorthandsRequestInput = { "ids": Array<string>; };
 
 export type RemoveTagRequestInput = { "label": string; };
 
+export type RenameAssetRequestInput = { "newName": string; "oldPath": string; };
+
 export type RenameBookmarkRequestInput = { "newBookmark": string; "oldBookmark": string; };
 
 export type RenameFileRequestInput = { "newPath": string; "path": string; };
@@ -891,6 +933,10 @@ export type SearchTemplateResult = { "content": string; "path": string; "relativ
 export type SearchWidgetData = { "k": string; "widgets": Array<SearchWidgetResult | null> | null; };
 
 export type SearchWidgetResult = { "content": string; "name": string; };
+
+export type SetAssetAnnotationRequestInput = { "data": string; "path": string; };
+
+export type SetAssetOCRTextRequestInput = { "path": string; "text": string; };
 
 export type SetBazaarPackageRatingRequestInput = { "packageName": string; "packageType": string; "rating": number; };
 
@@ -1056,6 +1102,8 @@ export type UpdateEmbedBlockRequestInput = { "content": string; "id": string; };
 
 export type UpdatePinnedDocsRequestInput = { "action": string; "after"?: boolean; "ids": Array<string>; "targetID"?: string; };
 
+export type UploadAssetRequestInput = { "assetsDirPath"?: string; "file[]"?: Array<Blob>; "id"?: string; };
+
 export type UploadCloudSnapshotRequestInput = { "id": string; "tag": string; };
 
 export type ViewStatePatchRequestInput = { "key": string; "removeKeys"?: Array<string> | null; "values"?: { [key: string]: JSONValue }; };
@@ -1169,26 +1217,6 @@ export type APILegacyPOSTPath =
     "/api/ai/testEmbeddingModel" |
     "/api/ai/testModel" |
     "/api/ai/testRerankModel" |
-    "/api/asset/fullReindexAssetContent" |
-    "/api/asset/getDocAssets" |
-    "/api/asset/getDocImageAssets" |
-    "/api/asset/getFileAnnotation" |
-    "/api/asset/getImageOCRText" |
-    "/api/asset/getMissingAssets" |
-    "/api/asset/getUnusedAssets" |
-    "/api/asset/insertCover" |
-    "/api/asset/insertLocalAssets" |
-    "/api/asset/ocr" |
-    "/api/asset/removeUnusedAsset" |
-    "/api/asset/removeUnusedAssets" |
-    "/api/asset/renameAsset" |
-    "/api/asset/resolveAssetPath" |
-    "/api/asset/setFileAnnotation" |
-    "/api/asset/setImageOCRText" |
-    "/api/asset/statAsset" |
-    "/api/asset/upload" |
-    "/api/asset/uploadCloud" |
-    "/api/asset/uploadCloudByAssetsPaths" |
     "/api/av/addAttributeViewBlocks" |
     "/api/av/addAttributeViewKey" |
     "/api/av/appendAttributeViewDetachedBlocksWithValues" |
@@ -1382,6 +1410,106 @@ export interface APIPOSTRoutes {
     };
     "/api/archive/zip": {
         request: ZipRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/fullReindexAssetContent": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/asset/getDocAssets": {
+        request: AssetDocumentAssetsRequestInput;
+        response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/getDocImageAssets": {
+        request: AssetDocumentRequestInput;
+        response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/getFileAnnotation": {
+        request: AssetPathRequestInput;
+        response: { "code": 0; "data": AssetAnnotationData; "msg": string; } | { "code": -1 | 1 | 403; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/getImageOCRText": {
+        request: AssetOCRTextRequestInput;
+        response: { "code": 0; "data": AssetTextData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/getMissingAssets": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<AssetUnusedItem | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/asset/getUnusedAssets": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<AssetUnusedItem | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/asset/insertCover": {
+        request: InsertCoverRequestInput;
+        response: { "code": 0; "data": AssetInsertCoverData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/insertLocalAssets": {
+        request: InsertLocalAssetsRequestInput;
+        response: { "code": 0; "data": AssetUploadData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "errFiles"?: never; "failedFiles"?: never; "succFiles"?: never; "succMap"?: never; }) | null | (AssetUploadData & { "closeTimeout"?: never; }); "msg": string; };
+        body: "json";
+    };
+    "/api/asset/ocr": {
+        request: AssetPathRequestInput;
+        response: { "code": 0; "data": AssetOCRData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/removeUnusedAsset": {
+        request: AssetPathRequestInput;
+        response: { "code": 0; "data": AssetPathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/removeUnusedAssets": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": AssetPathsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/asset/renameAsset": {
+        request: RenameAssetRequestInput;
+        response: { "code": 0; "data": AssetRenameData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/resolveAssetPath": {
+        request: AssetPathRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/setFileAnnotation": {
+        request: SetAssetAnnotationRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/setImageOCRText": {
+        request: SetAssetOCRTextRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/statAsset": {
+        request: AssetPathRequestInput;
+        response: { "code": 0; "data": AssetStatData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/upload": {
+        request: UploadAssetRequestInput;
+        response: { "code": 0; "data": AssetUploadData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+    };
+    "/api/asset/uploadCloud": {
+        request: AssetCloudUploadRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/uploadCloudByAssetsPaths": {
+        request: AssetPathsCloudUploadRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };

@@ -1361,7 +1361,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 click() {
                     fetchPost("/api/asset/ocr", {
                         path: imgElement.getAttribute("src"),
-                        force: true
                     });
                 }
             }],

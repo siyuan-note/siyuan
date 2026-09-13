@@ -6,6 +6,24 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
+fetchPost("/api/asset/upload", new ContractFormData({"file[]": [new Blob(), new Blob()], assetsDirPath: "assets"}), response => {
+    const uploaded: string | undefined = response.data.succMap?.["example.txt"];
+    void uploaded;
+});
+fetchPost("/api/asset/statAsset", {path: "assets/example.txt"}, response => {
+    if (response.code === 0) {
+        const downloaded: false | undefined = response.data.downloaded;
+        void downloaded;
+    }
+});
+fetchPost("/api/asset/getImageOCRText", {path: null});
+// @ts-expect-error 批量上传文件必须为二进制数组。
+fetchPost("/api/asset/upload", new ContractFormData({"file[]": ["example.txt"]}));
+// @ts-expect-error 附件地址必须为字符串。
+fetchPost("/api/asset/statAsset", {path: 123});
+// @ts-expect-error 本地附件插入必须提供路径数组。
+fetchPost("/api/asset/insertLocalAssets", {id: "document"});
+
 fetchPost("/api/export/exportHTML", {id: "document", pdf: false}, response => {
     const folder: string | undefined = response.data.folder;
     void folder;

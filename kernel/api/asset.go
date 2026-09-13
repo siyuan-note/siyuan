@@ -30,40 +30,31 @@ import (
 	"github.com/djherbis/times"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func statAsset(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var statAsset = contractHandler(apicontract.StatAsset, func(c *gin.Context, request apicontract.AssetPathRequest) apicontract.Response[apicontract.AssetStatData] {
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	path := arg["path"].(string)
+	path := request.Path
 	var p string
 	if strings.HasPrefix(path, "assets/") {
 		var err error
 		p, err = model.GetAssetAbsPathInBox(path, "")
 		if err != nil {
-			ret.Code = 1
-			return
+			return apicontract.Failure[apicontract.AssetStatData](1, "")
 		}
 
 	} else if localPath := util.FileURLToLocalPath(path); localPath != "" {
 		p = localPath
 	} else {
-		ret.Code = 1
-		return
+		return apicontract.Failure[apicontract.AssetStatData](1, "")
 	}
 
 	if !util.IsAbsPathInWorkspace(p) {
-		ret.Code = 1
-		return
+		return apicontract.Failure[apicontract.AssetStatData](1, "")
 	}
 
 	info, err := os.Stat(p)
@@ -71,107 +62,68 @@ func statAsset(c *gin.Context) {
 		if os.IsNotExist(err) {
 			files, readErr := model.DeferredSyncAssets()
 			if readErr != nil {
-				ret.Code = 1
-				ret.Msg = readErr.Error()
-				return
+				return apicontract.Failure[apicontract.AssetStatData](1, readErr.Error())
 			}
 			for _, file := range files {
 				if filepath.Clean(p) != filepath.Join(util.DataDir, filepath.FromSlash(strings.TrimPrefix(file.Path, "/"))) {
 					continue
 				}
 				updated := time.UnixMilli(file.Updated).Format("2006-01-02 15:04:05")
-				ret.Data = map[string]any{
-					"size": file.Size, "hSize": humanize.IBytesCustomCeil(uint64(file.Size), 2),
-					"created": file.Updated, "hCreated": updated, "updated": file.Updated, "hUpdated": updated,
-					"downloaded": false,
-				}
-				return
+				return apicontract.Success(apicontract.AssetStatData{Size: file.Size, HSize: humanize.IBytesCustomCeil(uint64(file.Size), 2), Created: file.Updated, HCreated: updated, Updated: file.Updated, HUpdated: updated, Downloaded: new(false)})
 			}
 		}
-		ret.Code = 1
-		return
+		return apicontract.Failure[apicontract.AssetStatData](1, "")
 	}
 
 	t, err := times.Stat(p)
 	if err != nil {
-		ret.Code = 1
-		return
+		return apicontract.Failure[apicontract.AssetStatData](1, "")
 	}
 
 	updated := t.ModTime().UnixMilli()
 	hUpdated := t.ModTime().Format("2006-01-02 15:04:05")
 	created := updated
 	hCreated := hUpdated
-	// Check birthtime before use
+	// 存在创建时间时优先使用创建时间
 	if t.HasBirthTime() {
 		created = t.BirthTime().UnixMilli()
 		hCreated = t.BirthTime().Format("2006-01-02 15:04:05")
 	}
 
-	ret.Data = map[string]any{
-		"size":     info.Size(),
-		"hSize":    humanize.IBytesCustomCeil(uint64(info.Size()), 2),
-		"created":  created,
-		"hCreated": hCreated,
-		"updated":  updated,
-		"hUpdated": hUpdated,
-	}
-}
+	return apicontract.Success(apicontract.AssetStatData{Size: info.Size(), HSize: humanize.IBytesCustomCeil(uint64(info.Size()), 2), Created: created, HCreated: hCreated, Updated: updated, HUpdated: hUpdated})
+})
 
-func fullReindexAssetContent(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var fullReindexAssetContent = contractHandler(apicontract.FullReindexAssetContent, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 
 	model.ReindexAssetContent()
-}
 
-func getImageOCRText(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	return apicontract.Success(apicontract.Null{})
+})
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var getImageOCRText = contractHandler(apicontract.GetImageOCRText, func(c *gin.Context, request apicontract.AssetOCRTextRequest) apicontract.Response[apicontract.AssetTextData] {
+
+	if request.Path == nil {
+		return apicontract.Success(apicontract.AssetTextData{Text: ""})
 	}
-
-	var path string
-	if nil == arg["path"] {
-		ret.Data = map[string]any{
-			"text": "",
-		}
-		return
-	}
-
-	path = arg["path"].(string)
+	path := *request.Path
 
 	// 加密笔记本的资源不参与全局 OCR（OCR 文本存在全局 data/assets/ocr-texts.json）
 	if absPath, absErr := model.GetAssetAbsPathInBox(path, ""); absErr == nil && model.IsEncryptedAssetPath(absPath) {
-		ret.Data = map[string]any{
-			"text": "",
-		}
-		return
+		return apicontract.Success(apicontract.AssetTextData{Text: ""})
+
 	}
 
-	ret.Data = map[string]any{
-		"text": util.GetAssetText(path),
-	}
-}
+	return apicontract.Success(apicontract.AssetTextData{Text: util.GetAssetText(path)})
+})
 
-func setImageOCRText(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var setImageOCRText = contractHandler(apicontract.SetImageOCRText, func(c *gin.Context, request apicontract.SetAssetOCRTextRequest) apicontract.Response[apicontract.Null] {
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	path := arg["path"].(string)
-	text := arg["text"].(string)
+	path := request.Path
+	text := request.Text
 
 	// 加密笔记本的资源不参与全局 OCR
 	if absPath, absErr := model.GetAssetAbsPathInBox(path, ""); absErr == nil && model.IsEncryptedAssetPath(absPath) {
-		return
+		return apicontract.Success(apicontract.Null{})
 	}
 	util.SetAssetText(path, text)
 
@@ -182,133 +134,81 @@ func setImageOCRText(c *gin.Context) {
 		sql.IndexNodeQueue(id)
 	}
 	util.NodeOCRQueue = nil
-}
 
-func ocr(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	return apicontract.Success(apicontract.Null{})
+})
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
+var ocr = contractHandler(apicontract.AssetOCR, func(c *gin.Context, request apicontract.AssetPathRequest) apicontract.Response[apicontract.AssetOCRData] {
 
-	path := arg["path"].(string)
+	path := request.Path
 
 	// 加密笔记本的资源不参与全局 OCR
 	absPath, err := model.GetAssetAbsPathInBox(path, "")
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.AssetOCRData](-1, err.Error())
 	}
 	if model.IsEncryptedAssetPath(absPath) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(380)
-		ret.Data = map[string]any{"closeTimeout": 3000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.AssetOCRData](-1, model.Conf.Language(380), 3000)
 	}
 	if err = model.EnsureAssetLocal(absPath); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.AssetOCRData](-1, err.Error())
 	}
 
 	ocrJSON, err := util.OcrAsset(path)
 	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.AssetOCRData](-1, err.Error(), 7000)
 	}
 
-	ret.Data = map[string]any{
-		"text":    util.GetOcrJsonText(ocrJSON),
-		"ocrJSON": ocrJSON,
-	}
-}
+	return apicontract.Success(apicontract.AssetOCRData{Text: util.GetOcrJsonText(ocrJSON), OCRJSON: ocrJSON})
+})
 
-func renameAsset(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var renameAsset = contractHandler(apicontract.RenameAsset, func(c *gin.Context, request apicontract.RenameAssetRequest) apicontract.Response[apicontract.AssetRenameData] {
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	oldPath := arg["oldPath"].(string)
-	newName := arg["newName"].(string)
+	oldPath := request.OldPath
+	newName := request.NewName
 	newPath, err := model.RenameAsset(oldPath, newName)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.AssetRenameData](-1, err.Error(), 5000)
 	}
-	ret.Data = map[string]any{
-		"newPath": newPath,
-	}
-}
+	return apicontract.Success(apicontract.AssetRenameData{NewPath: newPath})
+})
 
-func getDocImageAssets(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var getDocImageAssets = contractHandler(apicontract.GetDocImageAssets, func(c *gin.Context, request apicontract.AssetDocumentRequest) apicontract.Response[[]string] {
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	id := arg["id"].(string)
+	id := request.ID
 	assets, err := model.DocImageAssets(id)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[[]string](-1, err.Error())
 	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		if !model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, id) {
-			ret.Code = -1
-			ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
-			return
+			return apicontract.Failure[[]string](-1, fmt.Sprintf(model.Conf.Language(15), id))
 		}
 	}
-	ret.Data = assets
-}
+	return apicontract.Success(assets)
+})
 
-func getDocAssets(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var getDocAssets = contractHandler(apicontract.GetDocAssets, func(c *gin.Context, request apicontract.AssetDocumentAssetsRequest) apicontract.Response[[]string] {
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	id := arg["id"].(string)
+	id := request.ID
 	retainQueryStr := true
-	if nil != arg["retainQueryStr"] {
-		retainQueryStr = arg["retainQueryStr"].(bool)
+	if request.RetainQueryStr != nil {
+		retainQueryStr = *request.RetainQueryStr
 	}
 
 	assets, err := model.DocAssets(id, retainQueryStr)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[[]string](-1, err.Error())
 	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		if !model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, id) {
-			ret.Code = -1
-			ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
-			return
+			return apicontract.Failure[[]string](-1, fmt.Sprintf(model.Conf.Language(15), id))
 		}
 	}
-	ret.Data = assets
-}
+	return apicontract.Success(assets)
+})
 
 // fileAnno 是 PDF 文件标注 .sya 的校验结构，setFileAnnotation 通过它约束客户端提交的数据结构，避免任意字符串落盘
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-fqpw-c3pj-w8g9
@@ -324,145 +224,99 @@ type fileAnno struct {
 	IDs     []string `json:"ids"`
 }
 
-func setFileAnnotation(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var setFileAnnotation = contractHandler(apicontract.SetFileAnnotation, func(c *gin.Context, request apicontract.SetAssetAnnotationRequest) apicontract.Response[apicontract.Null] {
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	p := arg["path"].(string)
+	p := request.Path
 	p = strings.ReplaceAll(p, "%23", "#")
-	data := arg["data"].(string)
+	data := request.Data
 	writePath, _, err := resolveFileAnnotationAbsPath(p)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	boxID := model.ExtractBoxIDFromAssetsPath(writePath)
 	if err = holdEncryptedBoxRequest(c, boxID); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
 	if "{}" == data {
 		if err = filelock.Remove(writePath); err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return
+			return apicontract.Failure[apicontract.Null](-1, err.Error())
 		}
 	} else {
 		var annos map[string]fileAnno
 		if err = json.Unmarshal([]byte(data), &annos); err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return
+			return apicontract.Failure[apicontract.Null](-1, err.Error())
 		}
 		if annos == nil {
-			ret.Code = -1
-			ret.Msg = "invalid annotation"
-			return
+			return apicontract.Failure[apicontract.Null](-1, "invalid annotation")
 		}
 		normalized, err := json.Marshal(annos)
 		if err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return
+			return apicontract.Failure[apicontract.Null](-1, err.Error())
 		}
 		// 加密笔记本的 .sya 写盘前必须加密；加密笔记本未解锁时拒绝写入（fail-closed，避免明文落盘）
 		writeData := normalized
 		if boxID != "" && model.IsEncryptedBox(boxID) {
 			dek, dekErr := model.GetDEKIfUnlocked(boxID)
 			if dekErr != nil {
-				ret.Code = -1
-				ret.Msg = dekErr.Error()
-				return
+				return apicontract.Failure[apicontract.Null](-1, dekErr.Error())
 			}
 			diskName := filepath.Base(writePath)
 			enc, encErr := model.EncryptAsset(boxID, diskName, diskName, dek, writeData)
 			if encErr != nil {
-				ret.Code = -1
-				ret.Msg = encErr.Error()
-				return
+				return apicontract.Failure[apicontract.Null](-1, encErr.Error())
 			}
 			writeData = enc
 		}
 		if err = filelock.WriteFile(writePath, writeData); err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return
+			return apicontract.Failure[apicontract.Null](-1, err.Error())
 		}
 	}
 
 	model.IncSync()
-}
 
-func getFileAnnotation(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	return apicontract.Success(apicontract.Null{})
+})
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
+var getFileAnnotation = contractHandler(apicontract.GetFileAnnotation, func(c *gin.Context, request apicontract.AssetPathRequest) apicontract.Response[apicontract.AssetAnnotationData] {
 
-	p := arg["path"].(string)
+	p := request.Path
 	p = strings.ReplaceAll(p, "%23", "#")
 	readPath, assetAbsPath, err := resolveFileAnnotationAbsPath(p)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.AssetAnnotationData](-1, err.Error(), 5000)
 	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		if !model.CheckAbsPathAccessableByPublishAccess(c, assetAbsPath, publishAccess) {
-			ret.Code = http.StatusForbidden
-			ret.Msg = http.StatusText(http.StatusForbidden)
-			return
+			return apicontract.Failure[apicontract.AssetAnnotationData](http.StatusForbidden, http.StatusText(http.StatusForbidden))
 		}
 	}
 	if !filelock.IsExist(readPath) {
-		ret.Code = 1
-		return
+		return apicontract.Failure[apicontract.AssetAnnotationData](1, "")
 	}
 	boxID := model.ExtractBoxIDFromAssetsPath(readPath)
 	if err = holdEncryptedBoxRequest(c, boxID); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.AssetAnnotationData](-1, err.Error())
 	}
 
 	data, err := filelock.ReadFile(readPath)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.AssetAnnotationData](-1, err.Error())
 	}
 	// 加密笔记本的 .sya 读盘后必须解密；未解锁时拒绝返回（fail-closed，避免返回密文或误判）
 	if boxID != "" && model.IsEncryptedBox(boxID) {
 		dek, dekErr := model.GetDEKIfUnlocked(boxID)
 		if dekErr != nil {
-			ret.Code = -1
-			ret.Msg = dekErr.Error()
-			return
+			return apicontract.Failure[apicontract.AssetAnnotationData](-1, dekErr.Error())
 		}
 		plain, decErr := model.DecryptAsset(boxID, filepath.Base(readPath), dek, data)
 		if decErr != nil {
-			ret.Code = -1
-			ret.Msg = decErr.Error()
-			return
+			return apicontract.Failure[apicontract.AssetAnnotationData](-1, decErr.Error())
 		}
 		data = plain
 	}
-	ret.Data = map[string]any{
-		"data": string(data),
-	}
-}
+	return apicontract.Success(apicontract.AssetAnnotationData{Data: string(data)})
+})
 
 func resolveFileAnnotationAbsPath(assetRelPath string) (annotationAbsPath, assetAbsPath string, err error) {
 	// .sya 在 URL 末尾，例如 assets/a.pdf?box=<id>.sya
@@ -476,182 +330,102 @@ func resolveFileAnnotationAbsPath(assetRelPath string) (annotationAbsPath, asset
 	return
 }
 
-func removeUnusedAsset(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var removeUnusedAsset = contractHandler(apicontract.RemoveUnusedAsset, func(c *gin.Context, request apicontract.AssetPathRequest) apicontract.Response[apicontract.AssetPathData] {
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	p := arg["path"].(string)
+	p := request.Path
 	asset, err := model.RemoveUnusedAsset(p)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.AssetPathData](-1, err.Error())
 	}
-	ret.Data = map[string]any{
-		"path": asset,
-	}
-}
+	return apicontract.Success(apicontract.AssetPathData{Path: asset})
+})
 
-func removeUnusedAssets(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var removeUnusedAssets = contractHandler(apicontract.RemoveUnusedAssets, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.AssetPathsData] {
 
 	paths := model.RemoveUnusedAssets()
-	ret.Data = map[string]any{
-		"paths": paths,
-	}
-}
+	return apicontract.Success(apicontract.AssetPathsData{Paths: paths})
+})
 
-func getUnusedAssets(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var getUnusedAssets = contractHandler(apicontract.GetUnusedAssets, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.AssetUnusedItem] {
 
 	unusedAssets := model.UnusedAssets(true)
 	total := len(unusedAssets)
 
-	// List only 512 unreferenced assets https://github.com/siyuan-note/siyuan/issues/13075
+	// 最多返回 512 个未引用资源。
 	const maxUnusedAssets = 512
 	if total > maxUnusedAssets {
 		unusedAssets = unusedAssets[:maxUnusedAssets]
 		util.PushMsg(fmt.Sprintf(model.Conf.Language(251), total, maxUnusedAssets), 5000)
 	}
 
-	ret.Data = unusedAssets
-}
+	return apicontract.Success(assetUnusedItems(unusedAssets))
+})
 
-func getMissingAssets(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var getMissingAssets = contractHandler(apicontract.GetMissingAssets, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.AssetUnusedItem] {
 
 	missingAssets := model.MissingAssets()
-	ret.Data = missingAssets
-}
+	return apicontract.Success(assetUnusedItems(missingAssets))
+})
 
-func resolveAssetPath(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var resolveAssetPath = contractHandler(apicontract.ResolveAssetPath, func(c *gin.Context, request apicontract.AssetPathRequest) apicontract.Response[string] {
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	path := arg["path"].(string)
+	path := request.Path
 	p, err := model.GetAssetAbsPathInBox(path, "")
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 3000}
-		return
+		return apicontract.FailureWithTimeout[string](-1, err.Error(), 3000)
 	}
 	if model.IsEncryptedAssetPath(p) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(314)
-		ret.Data = map[string]any{"closeTimeout": 3000}
-		return
+		return apicontract.FailureWithTimeout[string](-1, model.Conf.Language(314), 3000)
 	}
 	if err = model.EnsureAssetPrefixLocal(p); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return
+		return apicontract.FailureWithTimeout[string](-1, err.Error(), 7000)
 	}
-	ret.Data = p
-	return
-}
+	return apicontract.Success(p)
+})
 
-func uploadCloud(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var uploadCloud = contractHandler(apicontract.AssetUploadCloud, func(c *gin.Context, request apicontract.AssetCloudUploadRequest) apicontract.Response[apicontract.Null] {
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
+	ignorePushMsg := request.IgnorePushMsg
+	id := request.ID
 
-	ignorePushMsg := false
-	if nil != arg["ignorePushMsg"] {
-		ignorePushMsg = arg["ignorePushMsg"].(bool)
-	}
-
-	id := arg["id"].(string)
 	count, err := model.UploadAssets2Cloud(id, ignorePushMsg)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 3000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 3000)
 	}
 
 	util.PushMsg(fmt.Sprintf(model.Conf.Language(41), count), 3000)
-}
 
-func uploadCloudByAssetsPaths(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	return apicontract.Success(apicontract.Null{})
+})
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
+var uploadCloudByAssetsPaths = contractHandler(apicontract.AssetUploadCloudByAssetsPaths, func(c *gin.Context, request apicontract.AssetPathsCloudUploadRequest) apicontract.Response[apicontract.Null] {
 
-	if nil == arg["paths"] {
-		ret.Code = -1
-		ret.Msg = "[paths] is required"
-		return
-	}
-
-	pathsArg := arg["paths"].([]any)
-	var assets []string
-	for _, pathArg := range pathsArg {
-		assets = append(assets, pathArg.(string))
-	}
-
-	ignorePushMsg := false
-	if nil != arg["ignorePushMsg"] {
-		ignorePushMsg = arg["ignorePushMsg"].(bool)
-	}
+	assets := append([]string(nil), request.Paths...)
+	ignorePushMsg := request.IgnorePushMsg
 
 	count, err := model.UploadAssets2CloudByAssetsPaths(assets, ignorePushMsg)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 3000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 3000)
 	}
 
 	if !ignorePushMsg {
 		util.PushMsg(fmt.Sprintf(model.Conf.Language(41), count), 3000)
 	}
-}
 
-func insertLocalAssets(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	return apicontract.Success(apicontract.Null{})
+})
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
+var insertLocalAssets = contractHandler(apicontract.InsertLocalAssets, func(c *gin.Context, request apicontract.InsertLocalAssetsRequest) apicontract.Response[apicontract.AssetUploadData] {
 
-	assetPathsArg := arg["assetPaths"].([]any)
-	var assetPaths []string
-	for _, pathArg := range assetPathsArg {
-		assetPaths = append(assetPaths, pathArg.(string))
-	}
+	assetPaths := append([]string(nil), request.AssetPaths...)
 	isUpload := true
-	isUploadArg := arg["isUpload"]
-	if nil != isUploadArg {
-		isUpload = isUploadArg.(bool)
+	if request.IsUpload != nil {
+		isUpload = *request.IsUpload
 	}
-	id, _ := arg["id"].(string)
-	fromHTMLPaste, _ := arg["fromHTMLPaste"].(bool)
-	var succMap map[string]any
+	id := request.ID
+	fromHTMLPaste := request.FromHTMLPaste
+
+	var succMap map[string]string
 	var succFiles []model.AssetUploadSuccess
 	var failedFiles []model.AssetUploadFailure
 	var err error
@@ -661,71 +435,85 @@ func insertLocalAssets(c *gin.Context) {
 		succMap, succFiles, failedFiles, err = model.InsertLocalAssets(id, assetPaths, isUpload)
 	}
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.AssetUploadData](-1, err.Error())
 	}
 	errFiles := make([]string, 0, len(failedFiles))
 	for _, failedFile := range failedFiles {
 		errFiles = append(errFiles, failedFile.Name)
 	}
-	ret.Data = map[string]any{
-		"errFiles":    errFiles,
-		"failedFiles": failedFiles,
-		"succFiles":   succFiles,
-		"succMap":     succMap,
+	data := assetUploadData(errFiles, failedFiles, succFiles, succMap)
+	if len(failedFiles) > 0 {
+		return apicontract.InsertLocalAssets.FailureWithData(-1, failedFiles[0].Error, data)
 	}
-	if 0 < len(failedFiles) {
-		ret.Code = -1
-		ret.Msg = failedFiles[0].Error
-	}
-}
+	return apicontract.Success(data)
+})
 
-func insertCover(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var insertCover = contractHandler(apicontract.InsertCover, func(c *gin.Context, request apicontract.InsertCoverRequest) apicontract.Response[apicontract.AssetInsertCoverData] {
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	name := arg["name"].(string)
+	name := request.Name
 	// 防止路径穿越：只允许文件名，不能含分隔符或 ..
 	name = filepath.Base(name)
 	if "" == name || "." == name || ".." == name {
-		ret.Code = -1
-		ret.Msg = "invalid name"
-		return
+		return apicontract.Failure[apicontract.AssetInsertCoverData](-1, "invalid name")
 	}
 
 	srcPath := filepath.Join(util.AppearancePath, "covers", name)
 	if gulu.File.IsDir(srcPath) {
-		ret.Code = -1
-		ret.Msg = "invalid cover"
-		return
+		return apicontract.Failure[apicontract.AssetInsertCoverData](-1, "invalid cover")
 	}
 	if _, statErr := os.Stat(srcPath); nil != statErr {
-		ret.Code = -1
-		ret.Msg = "cover not found"
-		return
+		return apicontract.Failure[apicontract.AssetInsertCoverData](-1, "cover not found")
 	}
 
-	id := arg["id"].(string)
+	id := request.ID
 	succMap, succFiles, failedFiles, err := model.InsertLocalAssets(id, []string{srcPath}, true)
 	if nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.AssetInsertCoverData](-1, err.Error())
 	}
 	if 0 < len(failedFiles) {
-		ret.Code = -1
-		ret.Msg = failedFiles[0].Error
-		return
+		return apicontract.Failure[apicontract.AssetInsertCoverData](-1, failedFiles[0].Error)
 	}
 
-	ret.Data = map[string]any{
-		"succFiles": succFiles,
-		"succMap":   succMap,
+	return apicontract.Success(apicontract.AssetInsertCoverData{SuccFiles: assetUploadSuccesses(succFiles), SuccMap: succMap})
+})
+
+var uploadAsset = contractHandler(apicontract.UploadAsset, func(c *gin.Context, request apicontract.UploadAssetRequest) apicontract.Response[apicontract.AssetUploadData] {
+	result, message, err := model.UploadAssets(model.AssetUploadRequest{ID: request.ID, AssetsDirPath: request.AssetsDirPath, Files: request.Files})
+	if err != nil {
+		return apicontract.Failure[apicontract.AssetUploadData](-1, err.Error())
 	}
+	return apicontract.SuccessWithMessage(assetUploadData(result.ErrFiles, result.FailedFiles, result.SuccFiles, result.SuccMap), message)
+})
+
+func assetUploadSuccesses(values []model.AssetUploadSuccess) []apicontract.AssetUploadSuccess {
+	if values == nil {
+		return nil
+	}
+	ret := make([]apicontract.AssetUploadSuccess, len(values))
+	for i, value := range values {
+		ret[i] = apicontract.AssetUploadSuccess(value)
+	}
+	return ret
+}
+func assetUploadData(errFiles []string, failures []model.AssetUploadFailure, successes []model.AssetUploadSuccess, successMap map[string]string) apicontract.AssetUploadData {
+	ret := apicontract.AssetUploadData{ErrFiles: errFiles, SuccFiles: assetUploadSuccesses(successes), SuccMap: successMap}
+	if failures != nil {
+		ret.FailedFiles = make([]apicontract.AssetUploadFailure, len(failures))
+		for i, value := range failures {
+			ret.FailedFiles[i] = apicontract.AssetUploadFailure(value)
+		}
+	}
+	return ret
+}
+func assetUnusedItems(values []*model.UnusedItem) []*apicontract.AssetUnusedItem {
+	if values == nil {
+		return nil
+	}
+	ret := make([]*apicontract.AssetUnusedItem, len(values))
+	for i, value := range values {
+		if value != nil {
+			ret[i] = &apicontract.AssetUnusedItem{Item: value.Item, Name: value.Name, Path: value.Path, BlockIDs: value.BlockIDs}
+		}
+	}
+	return ret
 }

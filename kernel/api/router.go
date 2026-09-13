@@ -618,7 +618,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/av/duplicateAttributeViewBlock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, duplicateAttributeViewBlock)
 	ginServer.Handle("POST", "/api/av/appendAttributeViewDetachedBlocksWithValues", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, appendAttributeViewDetachedBlocksWithValues)
 	ginServer.Handle("POST", "/api/av/getCurrentAttrViewImages", model.CheckAuth, getCurrentAttrViewImages)
-	ginServer.Handle("POST", "/api/av/changeAttrViewLayout", model.CheckAuth, model.CheckAdminRole, changeAttrViewLayout)
+	ginServer.Handle("POST", "/api/av/changeAttrViewLayout", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, changeAttrViewLayout)
 	ginServer.Handle("POST", "/api/av/setAttrViewGroup", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAttrViewGroup)
 	ginServer.Handle("POST", "/api/av/batchReplaceAttributeViewBlocks", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, batchReplaceAttributeViewBlocks)
 	ginServer.Handle("POST", "/api/av/getAttributeViewAddingBlockDefaultValues", model.CheckAuth, model.CheckAdminRole, getAttributeViewAddingBlockDefaultValues)

@@ -43,7 +43,7 @@ type databaseToolOutput struct {
 
 var DatabaseTool = &Tool{
 	Name:        "database",
-	Description: "Attribute view (database) operations. Every successful call returns {action, data}. Actions: create(parentID, name?, primaryKeyName?, layout=table, keys?, previousID?, nextID?), search(keyword), get(id), render(id, viewID?, query?, page=1, pageSize=50), keys(id), key_add(id, name, type, icon?, prev?), key_update(id, keyID, config), key_set_template(id, keyID, template), key_remove(id, keyID, removeRelationDest?), item_add(id, blockID?, content?, viewID?, groupID?, previousID?, detached?, ignoreDefaultFill?), item_remove(id, itemIDs), item_update(id, keyID, itemID, value), unused(), clean(id?). key_add appends to the current view when prev is omitted.",
+	Description: "Attribute view (database) operations. Every successful call returns {action, data}. Actions: create(parentID, name?, primaryKeyName?, layout=table, keys?, previousID?, nextID?), search(keyword), get(id), render(id, viewID?, query?, page=1, pageSize=50), keys(id), key_add(id, name, type, icon?, prev?), key_update(id, keyID, config), key_set_template(id, keyID, template), key_remove(id, keyID, removeRelationDest?), item_add(id, blockID?, content?, viewID?, groupID?, previousID?, detached?, ignoreDefaultFill?), item_remove(id, itemIDs), item_update(id, keyID, itemID, value), unused(), clean(id?). clean only removes unused databases returned by unused(); referenced databases are rejected. key_add appends to the current view when prev is omitted.",
 	EffectScope: EffectScopeLocal,
 	ActionEffects: map[string]ToolEffects{
 		"create":           {LocalWrite: true},
@@ -511,7 +511,9 @@ func databaseUnused(args map[string]any) (CallToolResult, error) {
 func databaseClean(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id != "" {
-		model.RemoveUnusedAttributeView(id)
+		if err := model.RemoveUnusedAttributeView(id); err != nil {
+			return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
+		}
 		return databaseSuccess("clean", map[string]any{"count": 1, "ids": []string{id}})
 	}
 	removed := model.RemoveUnusedAttributeViews()

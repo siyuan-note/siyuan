@@ -16,8 +16,8 @@ export interface IFileTreeSortRefreshTarget {
     path: string;
 }
 
-const parseSortMode = (value: string | null) => {
-    if (value === null || value.trim() === "") {
+const parseSortMode = (value: string | null | undefined) => {
+    if (typeof value !== "string" || value.trim() === "") {
         return;
     }
     const sortMode = Number(value);

@@ -1616,6 +1616,9 @@ export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFil
     if (liElement) {
         updateFileTreeItemIcon(liElement, unicode, isNotebookIcon ? "notebook" : undefined);
     }
+    document.querySelectorAll<HTMLElement>(`.file-tree__pins [data-pin-row][data-node-id="${id}"]`).forEach(row => {
+        updateFileTreeItemIcon(row, unicode);
+    });
 };
 
 export const getEmojiDesc = (emoji: IEmojiItem) => {

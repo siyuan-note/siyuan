@@ -139,6 +139,31 @@ func TestGzipMiddlewareServesPrecompressedStaticFile(t *testing.T) {
 	}
 }
 
+func TestGzipMiddlewareImages(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	for _, extension := range []string{"png", "gif", "jpeg", "jpg", "webp", "avif", "HEIC", "heif", "svg"} {
+		t.Run(extension, func(t *testing.T) {
+			engine := gin.New()
+			engine.Use(gzipMiddleware())
+			content := strings.Repeat("image data", 1024)
+			engine.GET("/image."+extension, func(c *gin.Context) {
+				c.String(http.StatusOK, "%s", content)
+			})
+			request := httptest.NewRequest(http.MethodGet, "/image."+extension+"?style=thumb", nil)
+			request.Header.Set("Accept-Encoding", "gzip")
+			recorder := httptest.NewRecorder()
+			engine.ServeHTTP(recorder, request)
+			if extension == "svg" {
+				if recorder.Header().Get("Content-Encoding") != "gzip" {
+					t.Fatal("SVG should remain compressible")
+				}
+			} else if recorder.Header().Get("Content-Encoding") != "" || recorder.Body.String() != content {
+				t.Fatal("precompressed image should be served unchanged")
+			}
+		})
+	}
+}
+
 func TestStaticFileNestedSymlinkEscape(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	root, outside := t.TempDir(), t.TempDir()

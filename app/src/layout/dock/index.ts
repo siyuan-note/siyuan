@@ -305,7 +305,7 @@ export class Dock {
                 documentSelf.onselectstart = null;
                 documentSelf.onselect = null;
                 this.setSize();
-                [...this.elements[0].querySelectorAll(".dock__item--active"), ...this.elements[0].querySelectorAll(".dock__item--active")].forEach(item => {
+                [...this.elements[0].querySelectorAll(".dock__item--active"), ...this.elements[1].querySelectorAll(".dock__item--active")].forEach(item => {
                     const customModel = this.data[item.getAttribute("data-type") as TDock];
                     if (customModel && customModel instanceof Custom && customModel.resize) {
                         customModel.resize();

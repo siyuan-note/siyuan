@@ -322,15 +322,15 @@
     display: none;
   }
 
-  &__body > .custom-attr__avbacklinks {
-    padding-left: 0;
-  }
-
 }
 
 .protyle-db-attr__body,
 .protyle-db-row__body {
   container-type: inline-size;
+
+  & > .custom-attr__avbacklinks {
+    padding-left: 0;
+  }
 
   & > [data-av-id] {
     display: grid;

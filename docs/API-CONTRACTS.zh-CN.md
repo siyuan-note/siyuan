@@ -54,6 +54,10 @@
 
 ## 文件上传请求
 
+`BinaryOutput` 通过 `BinaryContent` 和 `SuccessBinary` 声明原始文件响应。适配器保留字节和媒体类型，`ErrorStatus` 声明 JSON 失败响应使用的独立 HTTP 状态（`getFile` 使用 202）。schema 记录二进制成功响应和类型化 JSON 错误；`ValidateHTTPResponse` 先检查状态和媒体类型，再验证错误信封。生成的路由响应使用 `Blob`，现有 fetch 函数则使用 `JSONValue`，因为它们保留将文件内容解析为文本或 JSON 的行为。JSON 文件内容可以是任意 JSON，但结构化错误契约不因此放宽。
+
+`FormBody` 用于 `putFile` 等同时接受 URL 编码表单和多部分表单的接口。它保留 Gin `PostForm` 的解析行为，包括重复字段取首值，以及解析失败后已经取得的字段。条件必填和延迟校验仍由处理函数负责：创建目录不要求上传文件，修改时间在写入后校验。生成的调用类型与多部分上传使用相同的类型化表单接口。
+
 文件上传使用 `MultipartBody`。请求结构体以线协议字段名声明字符串和 `*multipart.FileHeader` 字段；文件 schema 使用 `type: string` 与 `format: binary`，生成 `Blob` 类型。适配器保留 Gin 的表单解析方式，重复字段取首值；文件内容继续通过 `Open` 读取，处理函数保留读取及恢复逻辑。未支持的字段类型和绑定选项会使生成失败。
 
 前端从类型化字段构造 `ContractFormData`，再交给现有请求函数。生成签名检查端点所需字段并区分文件与字符串，普通 `FormData` 不能满足已迁移上传接口的契约。可缺省字段不写入表单，字符串不裁剪空白。插件调用方构造表单时可实现生成的 `APIFormData<Request>` 接口。

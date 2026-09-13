@@ -1,10 +1,27 @@
-import type {APIPOSTRoutes, FetchGet, FetchPost, FetchSyncPost} from "../src/types/api";
+import type {APIPOSTRoutes, FetchGet, FetchPost, FetchSyncPost, JSONValue} from "../src/types/api";
 import {ContractFormData} from "../src/util/contractFormData";
 
 declare const fetchPost: FetchPost;
 declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
+
+fetchPost("/api/file/getFile", {path: "data/storage/plugin.json"}, response => {
+    const content: JSONValue = response;
+    // @ts-expect-error 文件内容可能是文本、数组或空值，不能直接按信封读取。
+    void response.data;
+    void content;
+});
+// @ts-expect-error 文件路径不可缺省。
+fetchPost("/api/file/getFile", {});
+// @ts-expect-error 文件路径必须为字符串。
+fetchPost("/api/file/getFile", {path: 1});
+fetchPost("/api/file/putFile", new ContractFormData({path: "temp/dir", isDir: "true"}));
+fetchPost("/api/file/putFile", new ContractFormData({path: "temp/file", file: new Blob()}));
+// @ts-expect-error 上传文件字段必须为二进制文件。
+fetchPost("/api/file/putFile", new ContractFormData({file: "file"}));
+// @ts-expect-error 表单布尔值以字符串传输。
+fetchPost("/api/file/putFile", new ContractFormData({isDir: true}));
 
 fetchSyncPost("/api/notebook/importNotebookCryptoBackup", new ContractFormData({file: new Blob(), password: "password"}));
 // @ts-expect-error 上传请求必须包含文件。

@@ -2,6 +2,7 @@ import {sendGlobalShortcut} from "../boot/globalEvent/globalShortcut";
 import type {App} from "../index";
 import {EventBus} from "./EventBus";
 import {fetchPost} from "../util/fetch";
+import {ContractFormData} from "../util/contractFormData";
 import {isMobile, isWindow} from "../util/functions";
 import {getAllEditor, getAllModels} from "../layout/getAll";
 /// #if !MOBILE
@@ -461,11 +462,12 @@ export class Plugin {
                 });
                 return;
             }
-            const formData = new FormData();
-            formData.append("path", pathString);
-            formData.append("file", file);
-            formData.append("isDir", "false");
-            formData.append("app", Constants.SIYUAN_APPID);
+            const formData = new ContractFormData({
+                path: pathString,
+                file,
+                isDir: "false",
+                app: Constants.SIYUAN_APPID,
+            });
             fetchPost("/api/file/putFile", formData, (response) => {
                 this.data[storageName] = data;
                 resolve(response);

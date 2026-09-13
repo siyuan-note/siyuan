@@ -135,8 +135,12 @@ func (b *Bundle) TypeScript(legacy []Route) []byte {
 			if endpoint.Method != method {
 				continue
 			}
-			fmt.Fprintf(&output, "    %s: {\n        request: %s;\n        response: %s;\n        body: %s;\n    };\n",
+			fmt.Fprintf(&output, "    %s: {\n        request: %s;\n        response: %s;\n        body: %s;\n",
 				quote(endpoint.Path), b.typeScript(endpoint.Request), b.typeScript(endpoint.Response), quote(string(endpoint.Body)))
+			if endpoint.Output != "" {
+				fmt.Fprintf(&output, "        output: %s;\n", quote(string(endpoint.Output)))
+			}
+			output.WriteString("    };\n")
 		}
 		output.WriteString("}\n\n")
 	}
@@ -171,7 +175,7 @@ type APIContract = {request: unknown; response: unknown; body: string};
 export interface APIFormData<Request> extends FormData {
     readonly apiRequest: Request;
 }
-type APIRequestArgs<C extends APIContract> = C["body"] extends "multipart"
+type APIRequestArgs<C extends APIContract> = C["body"] extends "multipart" | "form"
     ? [data: APIFormData<C["request"]>]
     : C["body"] extends "json" | "structJSON"
     ? [data: C["request"]]
@@ -182,7 +186,7 @@ export type APICallbackResponse<R> = R extends {code: infer C extends number}
     : never;
 
 type APIPostTail<C extends APIContract> = [
-    cb?: (response: APICallbackResponse<C["response"]>) => void,
+    cb?: (response: C extends {output: "binary"} ? JSONValue : APICallbackResponse<C["response"]>) => void,
     headers?: Record<string, string>,
     failCallback?: (response: APIFetchFailure) => void,
     signal?: AbortSignal,
@@ -213,7 +217,9 @@ export type FetchSyncPost<Legacy = APILegacyResponse> = <Path extends string>(
         ? [...APIRequestArgs<APIPOSTRoutes[Path]>, ...APISyncTail]
         : Path extends APILegacyPOSTPath ? [data?: any, ...tail: APISyncTail]
         : string extends Path ? [data?: any, ...tail: APISyncTail] : never
-) => Promise<Path extends keyof APIPOSTRoutes ? APIPOSTRoutes[Path]["response"] | APITransportError : Legacy>;
+) => Promise<Path extends keyof APIPOSTRoutes
+    ? APIPOSTRoutes[Path] extends {output: "binary"} ? JSONValue : APIPOSTRoutes[Path]["response"] | APITransportError
+    : Legacy>;
 
 export type FetchGet<Legacy = APILegacyResponse | string> = <Path extends string>(
     url: Path,

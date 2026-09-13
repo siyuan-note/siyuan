@@ -8,9 +8,14 @@ import (
 
 type BodyMode string
 
+type OutputMode string
+
+const BinaryOutput OutputMode = "binary"
+
 const (
 	JSONBody           BodyMode = "json"
 	MultipartBody      BodyMode = "multipart"
+	FormBody           BodyMode = "form"
 	StructJSONBody     BodyMode = "structJSON"
 	NoBody             BodyMode = "none"
 	LegacyOptionalBody BodyMode = "legacyOptional"
@@ -27,6 +32,8 @@ type Definition struct {
 	ErrorText       bool
 	DataNonNullable bool
 	DataOnError     bool
+	Output          OutputMode
+	ErrorStatus     int
 }
 
 type Endpoint[Request, Data any] struct {
@@ -40,6 +47,8 @@ type ResponseOptions struct {
 	Text            bool
 	NonNullable     bool
 	DataOnError     bool
+	Output          OutputMode
+	ErrorStatus     int
 }
 
 var definitions []Definition
@@ -92,7 +101,8 @@ var (
 func define[Request, Data any](name, path string, body BodyMode, response ResponseOptions, methods ...string) Endpoint[Request, Data] {
 	d := Definition{Name: name, Path: path, Methods: methods, Body: body,
 		Request: reflect.TypeFor[Request](), Data: reflect.TypeFor[Data](),
-		ErrorCodes: append([]int{-1}, response.AdditionalCodes...), ErrorText: response.Text, DataNonNullable: response.NonNullable, DataOnError: response.DataOnError}
+		ErrorCodes: append([]int{-1}, response.AdditionalCodes...), ErrorText: response.Text, DataNonNullable: response.NonNullable, DataOnError: response.DataOnError,
+		Output: response.Output, ErrorStatus: response.ErrorStatus}
 	definitions = append(definitions, d)
 	return Endpoint[Request, Data]{definition: d}
 }
@@ -449,7 +459,30 @@ var PrepareRichText = define[PrepareRichTextRequest, *RichClipboardPrepared]("pr
 var CleanupRichText = define[CleanupRichTextRequest, Null]("cleanupRichText", "/api/clipboard/cleanupRichText", JSONBody, ResponseOptions{}, "POST")
 
 var StartFreeTrial = define[EmptyRequest, Null]("startFreeTrial", "/api/account/startFreeTrial", NoBody, ResponseOptions{}, "POST")
+
 var UseActivationCode = define[ActivationCodeRequest, Null]("useActivationcode", "/api/account/useActivationcode", JSONBody, ResponseOptions{}, "POST")
+
 var CheckActivationCode = define[CheckActivationCodeRequest, Null]("checkActivationcode", "/api/account/checkActivationcode", JSONBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
+
 var DeactivateUser = define[EmptyRequest, Null]("deactivateUser", "/api/account/deactivate", NoBody, ResponseOptions{}, "POST")
+
 var AccountLogin = define[AccountLoginRequest, *AccountLoginData]("login", "/api/account/login", JSONBody, ResponseOptions{AdditionalCodes: []int{1, 10}, DataOnError: true}, "POST")
+
+var GetUniqueFilename = define[FilePathRequest, FilePathData]("getUniqueFilename", "/api/file/getUniqueFilename", JSONBody, ResponseOptions{AdditionalCodes: []int{-3}}, "POST")
+
+var ReadDirectory = define[ReadDirectoryRequest, []DirectoryEntry]("readDir", "/api/file/readDir", JSONBody, ResponseOptions{AdditionalCodes: []int{-3, 403, 404, 409, 500}, NonNullable: true}, "POST")
+
+var RenameFile = define[RenameFileRequest, Null]("renameFile", "/api/file/renameFile", JSONBody, ResponseOptions{AdditionalCodes: []int{-3, 403, 404, 409, 500}}, "POST")
+
+var RemoveFile = define[RemoveFileRequest, Null]("removeFile", "/api/file/removeFile", JSONBody, ResponseOptions{AdditionalCodes: []int{-3, 403, 404, 500}}, "POST")
+
+var GlobalCopyFiles = define[CopyFilesRequest, Null]("globalCopyFiles", "/api/file/globalCopyFiles", JSONBody, ResponseOptions{AdditionalCodes: []int{-2, -3, 403}}, "POST")
+
+var WorkspaceCopyFiles = define[CopyFilesRequest, Null]("workspaceCopyFiles", "/api/file/workspaceCopyFiles", JSONBody, ResponseOptions{AdditionalCodes: []int{-2, -3, 403}}, "POST")
+
+var CopyFile = define[CopyFileRequest, Null]("copyFile", "/api/file/copyFile", JSONBody, ResponseOptions{AdditionalCodes: []int{-2}}, "POST")
+
+var PutFile = define[PutFileRequest, Null]("putFile", "/api/file/putFile", FormBody, ResponseOptions{AdditionalCodes: []int{-3, 400, 403, 500}}, "POST")
+
+var GetFile = define[FilePathRequest, BinaryContent]("getFile", "/api/file/getFile", JSONBody,
+	ResponseOptions{Output: BinaryOutput, ErrorStatus: 202, AdditionalCodes: []int{-3, 403, 404, 409, 500, 503}}, "POST")

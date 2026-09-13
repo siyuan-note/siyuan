@@ -36,7 +36,7 @@ func validateMultipartRequest(t reflect.Type) error {
 
 // DecodeMultipart 保留表单重复字段取首值的行为，文件内容由业务入口按需读取。
 func (e Endpoint[Request, Data]) DecodeMultipart(form *multipart.Form) (request Request, err error) {
-	if e.definition.Body != MultipartBody {
+	if e.definition.Body != MultipartBody && e.definition.Body != FormBody {
 		return request, fmt.Errorf("endpoint does not accept multipart data")
 	}
 	if form == nil {

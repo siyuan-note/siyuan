@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"mime"
 	"mime/multipart"
 	"reflect"
 	"sort"
@@ -24,12 +25,14 @@ type Schema struct {
 }
 
 type EndpointSchema struct {
-	Method   string   `json:"method"`
-	Path     string   `json:"path"`
-	Handler  string   `json:"handler"`
-	Body     BodyMode `json:"body"`
-	Request  *Schema  `json:"request"`
-	Response *Schema  `json:"response"`
+	Method      string     `json:"method"`
+	Path        string     `json:"path"`
+	Handler     string     `json:"handler"`
+	Body        BodyMode   `json:"body"`
+	Request     *Schema    `json:"request"`
+	Response    *Schema    `json:"response"`
+	Output      OutputMode `json:"output,omitempty"`
+	ErrorStatus int        `json:"errorStatus,omitempty"`
 }
 
 type Bundle struct {
@@ -72,6 +75,12 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if t == reflect.TypeFor[BinaryContent]() {
+		if input {
+			return nil, fmt.Errorf("binary content can only appear in responses")
+		}
+		return &Schema{Type: "string", Format: "binary"}, nil
+	}
 	if t == reflect.TypeFor[MultipartFields]() {
 		if !input {
 			return nil, fmt.Errorf("multipart fields can only appear in requests")
@@ -311,10 +320,22 @@ func BuildBundle() (*Bundle, error) {
 	b := &schemaBuilder{definitions: map[string]*Schema{}, owners: map[string]reflect.Type{}}
 	bundle := &Bundle{Dialect: "https://json-schema.org/draft/2020-12/schema", Definitions: b.definitions}
 	for _, definition := range Definitions() {
+		if definition.Output != "" && definition.Output != BinaryOutput {
+			return nil, fmt.Errorf("unsupported response output: %s", definition.Name)
+		}
+		if (definition.Output == BinaryOutput) != (definition.Data == reflect.TypeFor[BinaryContent]()) {
+			return nil, fmt.Errorf("binary output requires BinaryContent: %s", definition.Name)
+		}
+		if definition.Output == BinaryOutput && (definition.DataOnError || definition.DataNonNullable) {
+			return nil, fmt.Errorf("binary output cannot use JSON data options: %s", definition.Name)
+		}
+		if definition.Output == BinaryOutput && (definition.ErrorStatus < 201 || definition.ErrorStatus > 599) {
+			return nil, fmt.Errorf("binary output requires a distinct error status: %s", definition.Name)
+		}
 		if definition.Request.Kind() != reflect.Struct {
 			return nil, fmt.Errorf("request contract must be a struct: %s", definition.Name)
 		}
-		if definition.Body == MultipartBody {
+		if definition.Body == MultipartBody || definition.Body == FormBody {
 			if err := validateMultipartRequest(definition.Request); err != nil {
 				return nil, err
 			}
@@ -331,6 +352,13 @@ func BuildBundle() (*Bundle, error) {
 			data = nonnullable(data)
 		}
 		success := object(map[string]*Schema{"code": {Type: "integer", Enum: []any{0}}, "msg": {Type: "string"}, "data": data}, "code", "msg", "data")
+		if definition.Output == BinaryOutput {
+			success = data
+			// fetch 按媒体类型将文件读作文本或 JSON，JSON 文件本身没有信封约束。
+			if _, err := b.schema(reflect.TypeFor[JSONValue](), false); err != nil {
+				return nil, err
+			}
+		}
 		var codes []any
 		for _, code := range definition.ErrorCodes {
 			codes = append(codes, code)
@@ -348,7 +376,8 @@ func BuildBundle() (*Bundle, error) {
 		failure.AdditionalProperties = true
 		response := &Schema{AnyOf: []*Schema{success, failure}}
 		for _, method := range definition.Methods {
-			bundle.Endpoints = append(bundle.Endpoints, EndpointSchema{method, definition.Path, definition.Name, definition.Body, request, response})
+			bundle.Endpoints = append(bundle.Endpoints, EndpointSchema{Method: method, Path: definition.Path, Handler: definition.Name,
+				Body: definition.Body, Request: request, Response: response, Output: definition.Output, ErrorStatus: definition.ErrorStatus})
 		}
 	}
 	sort.Slice(bundle.Endpoints, func(i, j int) bool {
@@ -364,8 +393,44 @@ func (b *Bundle) ValidateResponse(method, path string, payload []byte) error {
 	}
 	for _, endpoint := range b.Endpoints {
 		if endpoint.Method == method && endpoint.Path == path {
+			if endpoint.Output == BinaryOutput {
+				return fmt.Errorf("binary endpoint requires HTTP response validation")
+			}
 			return b.validate(endpoint.Response, value, "$")
 		}
+	}
+	return fmt.Errorf("unregistered API contract: %s %s", method, path)
+}
+
+// ValidateHTTPResponse 同时校验响应状态、媒体类型和对应的载荷，原始文件不尝试解析为 JSON。
+func (b *Bundle) ValidateHTTPResponse(method, path string, status int, contentType string, payload []byte) error {
+	for _, endpoint := range b.Endpoints {
+		if endpoint.Method != method || endpoint.Path != path {
+			continue
+		}
+		mediaType, _, err := mime.ParseMediaType(contentType)
+		if err != nil {
+			return fmt.Errorf("invalid response content type: %w", err)
+		}
+		if endpoint.Output == BinaryOutput && status == 200 {
+			return nil
+		}
+		expectedStatus := 200
+		response := endpoint.Response
+		if endpoint.Output == BinaryOutput {
+			if endpoint.ErrorStatus != 0 {
+				expectedStatus = endpoint.ErrorStatus
+			}
+			response = endpoint.Response.AnyOf[1]
+		}
+		if status != expectedStatus || mediaType != "application/json" {
+			return fmt.Errorf("unexpected response status or media type: %d %s", status, contentType)
+		}
+		var value any
+		if err := json.Unmarshal(payload, &value); err != nil {
+			return err
+		}
+		return b.validate(response, value, "$")
 	}
 	return fmt.Errorf("unregistered API contract: %s %s", method, path)
 }

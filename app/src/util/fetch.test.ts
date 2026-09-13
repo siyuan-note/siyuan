@@ -96,7 +96,7 @@ it("preserves raw file text and routes HTTP 202 file errors to the failure callb
     assert.deepEqual(received, failure);
 });
 
-it("preserves FormData request bodies for unmigrated upload endpoints", async () => {
+it("preserves FormData request bodies for upload endpoints", async () => {
     const body = new FormData();
     body.append("path", "file.txt");
     const {fetchPost} = loadFetchPost(async (_url, options) => {

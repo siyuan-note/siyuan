@@ -31,3 +31,17 @@ func TestMultipartRequestCompatibility(t *testing.T) {
 		t.Fatal("unsupported form field accepted")
 	}
 }
+
+func TestPutFileFormFields(t *testing.T) {
+	first := &multipart.FileHeader{Filename: "first.txt"}
+	request, err := PutFile.DecodeMultipart(&multipart.Form{
+		Value: map[string][]string{"path": {" temp/file ", "ignored"}, "isDir": {"invalid"}},
+		File:  map[string][]*multipart.FileHeader{"file": {first, {Filename: "ignored.txt"}}},
+	})
+	if err != nil || request.Path != " temp/file " || request.IsDir != "invalid" || request.File != first {
+		t.Fatalf("form fields must preserve first values without early validation: %+v, %v", request, err)
+	}
+	if _, err = PutFile.DecodeMultipart(&multipart.Form{}); err != nil {
+		t.Fatalf("conditional field validation belongs to the handler: %v", err)
+	}
+}

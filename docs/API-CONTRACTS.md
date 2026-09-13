@@ -54,6 +54,10 @@ Storage contracts keep arbitrary JSON limited to storage values; keys, recent do
 
 ## Multipart requests
 
+`BinaryOutput` declares raw file responses with `BinaryContent` and `SuccessBinary`. The adapter preserves bytes and media type, while `ErrorStatus` declares the distinct HTTP status for JSON failures (`getFile` uses 202). The schema records binary success and typed JSON errors; `ValidateHTTPResponse` checks the status and media type before validating an error envelope. Generated route responses expose `Blob`, while the existing fetch helpers expose `JSONValue` because they parse file contents as text or JSON according to their existing behavior. JSON file contents can contain arbitrary JSON; this does not relax the structured error contract.
+
+`FormBody` supports endpoints such as `putFile` that accept both URL-encoded and multipart forms. It preserves Gin `PostForm` parsing, including first-value selection and available fields after parsing errors. Conditional requirements and delayed validation remain in the handler: directory creation does not require a file, and modification-time validation occurs after writing. The generated caller type uses the same typed form interface as multipart uploads.
+
 Use `MultipartBody` for file uploads. Request structs declare string fields and `*multipart.FileHeader` fields using their wire names; file schemas use `type: string` and `format: binary`, generating `Blob` declarations. The adapter retains Gin multipart parsing and binds the first value for repeated fields. File contents remain available through `Open`, so handlers preserve their read and recovery logic. Unsupported field types and binding options fail generation.
 
 Frontend callers construct `ContractFormData` from typed fields before passing it to the existing fetch functions. The generated signatures require the endpoint's fields and distinguish file values from strings; raw `FormData` cannot satisfy a migrated upload contract. Optional fields are omitted and string values are not trimmed. Plugin callers can implement the generated `APIFormData<Request>` interface when constructing their forms.

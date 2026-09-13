@@ -132,6 +132,10 @@ export type CloudSync = { "cloudName": string; "hSize": string; "saveDir": strin
 
 export type ContentWordCountRequestInput = { "content": string; "reqId"?: JSONValue | null; };
 
+export type CopyFileRequestInput = { "dest": string; "src": string; };
+
+export type CopyFilesRequestInput = { "destDir": string; "srcs": Array<string>; };
+
 export type CopyStdMarkdownRequestInput = { "adjustHeadingLevel"?: boolean | null; "assetsDestSpace2Underscore"?: boolean | null; "fillCSSVar"?: boolean | null; "id": string; "imgTag"?: boolean | null; };
 
 export type CreateEncryptedNotebookRequestInput = { "name": string; "password": string; };
@@ -164,6 +168,8 @@ export type DailyNoteBlockRequestInput = { "data": string; "dataType": string; "
 
 export type DeleteBlockRequestInput = { "id": string; };
 
+export type DirectoryEntry = { "isDir": boolean; "isSymlink": boolean; "name": string; "updated": number; };
+
 export type DocAttrView = { "id": string; "name": string; };
 
 export type DocHeadingLevelData = { "counts": Array<number>; "title": string; "transaction": BlockTransaction | null; "withSubheadingCounts": Array<number>; };
@@ -189,6 +195,10 @@ export type EncryptedNotebookStatus = { "id": string; "name": string; "state": "
 export type EncryptedNotebookStatusData = { "boxes": Array<EncryptedNotebookStatus>; "count": number; "enabled": boolean; "hasHistoryDependency": boolean; "migrationBoxes": Array<string> | null; "migrationPending": boolean; "state": "Disabled" | "Enabled" | "RecoveryRequired"; };
 
 export type FileAnnotationRefRequestInput = { "id": string; "notebook"?: string | null; };
+
+export type FilePathData = { "path": string; };
+
+export type FilePathRequestInput = { "path": string; };
 
 export type FullBlockInfo = { "box": string; "path": string; "rootChildID": string; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
 
@@ -328,6 +338,10 @@ export type PrependBlockRequestInput = { "data": string; "dataType": string; "pa
 
 export type PublishedBlockInfo = { "publishAccessRequired": true; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
 
+export type PutFileRequestInput = { "app"?: string; "file"?: Blob; "isDir"?: string; "modTime"?: string; "path"?: string; };
+
+export type ReadDirectoryRequestInput = { "path": string; };
+
 export type RecentDoc = { "closedAt"?: number; "icon"?: string; "openAt"?: number; "rootID": string; "title"?: string; "viewedAt"?: number; };
 
 export type RecentDocUpdateRequestInput = { "rootID"?: string | null; };
@@ -350,11 +364,15 @@ export type RemoveBookmarkRequestInput = { "bookmark": string; };
 
 export type RemoveCriterionRequestInput = { "name": string; };
 
+export type RemoveFileRequestInput = { "app"?: string | null; "path": string; };
+
 export type RemoveShorthandsRequestInput = { "ids": Array<string>; };
 
 export type RemoveTagRequestInput = { "label": string; };
 
 export type RenameBookmarkRequestInput = { "newBookmark": string; "oldBookmark": string; };
+
+export type RenameFileRequestInput = { "newPath": string; "path": string; };
 
 export type RenameNotebookRequestInput = { "name": string; "notebook": string; };
 
@@ -682,15 +700,6 @@ export type APILegacyPOSTPath =
     "/api/export/preview" |
     "/api/export/processPDF" |
     "/api/extension/copy" |
-    "/api/file/copyFile" |
-    "/api/file/getFile" |
-    "/api/file/getUniqueFilename" |
-    "/api/file/globalCopyFiles" |
-    "/api/file/putFile" |
-    "/api/file/readDir" |
-    "/api/file/removeFile" |
-    "/api/file/renameFile" |
-    "/api/file/workspaceCopyFiles" |
     "/api/filetree/authFilePublishAccess" |
     "/api/filetree/changeSort" |
     "/api/filetree/createDailyNote" |
@@ -1376,6 +1385,52 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": PandocData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/file/copyFile": {
+        request: CopyFileRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -2; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/file/getFile": {
+        request: FilePathRequestInput;
+        response: Blob | { "code": -1 | -3 | 403 | 404 | 409 | 500 | 503; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        output: "binary";
+    };
+    "/api/file/getUniqueFilename": {
+        request: FilePathRequestInput;
+        response: { "code": 0; "data": FilePathData; "msg": string; } | { "code": -1 | -3; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/file/globalCopyFiles": {
+        request: CopyFilesRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -2 | -3 | 403; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/file/putFile": {
+        request: PutFileRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -3 | 400 | 403 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "form";
+    };
+    "/api/file/readDir": {
+        request: ReadDirectoryRequestInput;
+        response: { "code": 0; "data": Array<DirectoryEntry>; "msg": string; } | { "code": -1 | -3 | 403 | 404 | 409 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/file/removeFile": {
+        request: RemoveFileRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -3 | 403 | 404 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/file/renameFile": {
+        request: RenameFileRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -3 | 403 | 404 | 409 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/file/workspaceCopyFiles": {
+        request: CopyFilesRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -2 | -3 | 403; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/filetree/getPinnedDocs": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<PinnedDoc>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -1970,7 +2025,7 @@ type APIContract = {request: unknown; response: unknown; body: string};
 export interface APIFormData<Request> extends FormData {
     readonly apiRequest: Request;
 }
-type APIRequestArgs<C extends APIContract> = C["body"] extends "multipart"
+type APIRequestArgs<C extends APIContract> = C["body"] extends "multipart" | "form"
     ? [data: APIFormData<C["request"]>]
     : C["body"] extends "json" | "structJSON"
     ? [data: C["request"]]
@@ -1981,7 +2036,7 @@ export type APICallbackResponse<R> = R extends {code: infer C extends number}
     : never;
 
 type APIPostTail<C extends APIContract> = [
-    cb?: (response: APICallbackResponse<C["response"]>) => void,
+    cb?: (response: C extends {output: "binary"} ? JSONValue : APICallbackResponse<C["response"]>) => void,
     headers?: Record<string, string>,
     failCallback?: (response: APIFetchFailure) => void,
     signal?: AbortSignal,
@@ -2012,7 +2067,9 @@ export type FetchSyncPost<Legacy = APILegacyResponse> = <Path extends string>(
         ? [...APIRequestArgs<APIPOSTRoutes[Path]>, ...APISyncTail]
         : Path extends APILegacyPOSTPath ? [data?: any, ...tail: APISyncTail]
         : string extends Path ? [data?: any, ...tail: APISyncTail] : never
-) => Promise<Path extends keyof APIPOSTRoutes ? APIPOSTRoutes[Path]["response"] | APITransportError : Legacy>;
+) => Promise<Path extends keyof APIPOSTRoutes
+    ? APIPOSTRoutes[Path] extends {output: "binary"} ? JSONValue : APIPOSTRoutes[Path]["response"] | APITransportError
+    : Legacy>;
 
 export type FetchGet<Legacy = APILegacyResponse | string> = <Path extends string>(
     url: Path,

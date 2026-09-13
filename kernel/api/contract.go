@@ -3,7 +3,7 @@ package api
 import (
 	"encoding/base64"
 	"fmt"
-	"net/http"
+	"mime/multipart"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -41,16 +41,32 @@ func notebookConfContract(value *conf.BoxConf) *apicontract.NotebookConf {
 func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, Data],
 	handler func(*gin.Context, Request) apicontract.Response[Data], beforeDecode ...func(*gin.Context) *apicontract.Response[Data]) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		writeResponse := func(response apicontract.Response[Data]) {
+			status := endpoint.Status(response)
+			if content := response.Binary(); content != nil {
+				c.Data(status, content.ContentType, content.Bytes)
+				return
+			}
+			c.JSON(status, response)
+		}
 		// 保留在读取请求体前完成的角色判断或大小限制，提前响应也使用相同的载荷类型。
 		for _, before := range beforeDecode {
 			if response := before(c); response != nil {
-				c.JSON(http.StatusOK, response)
+				writeResponse(*response)
 				return
 			}
 		}
 		var request Request
 		var err error
-		if endpoint.Definition().Body == apicontract.MultipartBody {
+		if endpoint.Definition().Body == apicontract.FormBody {
+			// 保留 PostForm 对普通表单、重复字段和解析失败后已有字段的处理。
+			c.PostForm("")
+			form := &multipart.Form{Value: c.Request.PostForm}
+			if c.Request.MultipartForm != nil {
+				form.File = c.Request.MultipartForm.File
+			}
+			request, err = endpoint.DecodeMultipart(form)
+		} else if endpoint.Definition().Body == apicontract.MultipartBody {
 			form, parseErr := c.MultipartForm()
 			if parseErr != nil {
 				err = parseErr
@@ -61,10 +77,10 @@ func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, D
 			request, err = endpoint.Decode(c.Request.Body)
 		}
 		if err != nil {
-			c.JSON(http.StatusOK, endpoint.DecodeFailure(err))
+			writeResponse(endpoint.DecodeFailure(err))
 			return
 		}
-		c.JSON(http.StatusOK, handler(c, request))
+		writeResponse(handler(c, request))
 	}
 }
 

@@ -36,6 +36,15 @@ type ResponseOptions struct {
 var definitions []Definition
 
 var (
+	SetNotebookIcon    = define[SetNotebookIconRequest, Null]("setNotebookIcon", "/api/notebook/setNotebookIcon", JSONBody, ResponseOptions{}, "POST")
+	ChangeSortNotebook = define[ChangeSortNotebookRequest, Null]("changeSortNotebook", "/api/notebook/changeSortNotebook", JSONBody, ResponseOptions{}, "POST")
+	RenameNotebook     = define[RenameNotebookRequest, Null]("renameNotebook", "/api/notebook/renameNotebook", JSONBody, ResponseOptions{}, "POST")
+	RemoveNotebook     = define[NotebookIDRequest, Null]("removeNotebook", "/api/notebook/removeNotebook", JSONBody, ResponseOptions{}, "POST")
+	CreateNotebook     = define[CreateNotebookRequest, CreateNotebookData]("createNotebook", "/api/notebook/createNotebook", JSONBody, ResponseOptions{}, "POST")
+	CloseNotebook      = define[CloseNotebookRequest, Null]("closeNotebook", "/api/notebook/closeNotebook", JSONBody, ResponseOptions{}, "POST")
+)
+
+var (
 	GetPinnedDocs    = define[EmptyRequest, []PinnedDoc]("getPinnedDocs", "/api/filetree/getPinnedDocs", NoBody, ResponseOptions{NonNullable: true}, "POST")
 	UpdatePinnedDocs = define[UpdatePinnedDocsRequest, Null]("updatePinnedDocs", "/api/filetree/updatePinnedDocs", JSONBody, ResponseOptions{}, "POST")
 )

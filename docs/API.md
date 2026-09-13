@@ -224,6 +224,8 @@ View the API token in <kbd>Settings - Authentication - API token</kbd>. Use it i
   }
   ```
 
+The close endpoint validates the notebook ID without trimming whitespace. Typed request and response declarations are generated in `app/src/types/api/index.d.ts` and synchronized to `petal`.
+
 ### Rename a notebook
 
 * `/api/notebook/renameNotebook`

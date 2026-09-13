@@ -224,6 +224,8 @@ if (response.code === 0 && response.data) {
   }
   ```
 
+关闭接口校验笔记本 ID 时不会去除两端空白。请求与响应类型声明生成于 `app/src/types/api/index.d.ts`，并同步到 `petal`。
+
 ### 重命名笔记本
 
 * `/api/notebook/renameNotebook`

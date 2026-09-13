@@ -26,7 +26,15 @@ export type BlocksQueryRequestInput = { "id"?: string | null; "ids": Array<strin
 
 export type BootProgressData = { "details": string; "progress": number; };
 
+export type ChangeSortNotebookRequestInput = { "notebooks": Array<string>; };
+
 export type CheckSnapshotData = { "changed": boolean; };
+
+export type CloseNotebookRequestInput = { "notebook": string; };
+
+export type CreateNotebookData = { "notebook": Notebook | null; };
+
+export type CreateNotebookRequestInput = { "name": string; };
 
 export type CreateSnapshotData = { "created": boolean; "id": string; };
 
@@ -66,6 +74,8 @@ export type NetworkServeTLSRequestInput = { "networkServeTLS": boolean; };
 
 export type Notebook = { "closed": boolean; "dueFlashcardCount": number; "encrypted": boolean; "flashcardCount": number; "icon": string; "id": string; "name": string; "newFlashcardCount": number; "sort": number; "sortMode": number; "state"?: "Locked" | "Unlocking" | "Unlocked" | "Locking" | "Error"; "subFileCount": number; "unlocked": boolean; };
 
+export type NotebookIDRequestInput = { "notebook": string; };
+
 export type PinnedDoc = { "childrenSortMode": number | null; "icon": string; "id": string; "name": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
 
 export type PublishedBlockInfo = { "publishAccessRequired": true; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
@@ -75,6 +85,8 @@ export type RemoveBookmarkRequestInput = { "bookmark": string; };
 export type RemoveTagRequestInput = { "label": string; };
 
 export type RenameBookmarkRequestInput = { "newBookmark": string; "oldBookmark": string; };
+
+export type RenameNotebookRequestInput = { "name": string; "notebook": string; };
 
 export type RenameTagRequestInput = { "newLabel": string; "oldLabel": string; };
 
@@ -87,6 +99,8 @@ export type SearchTagData = { "k": string; "tags": Array<string>; };
 export type SearchTagRequestInput = { "k": string; };
 
 export type SetBlockAttrsRequestInput = { "attrs": Record<string, string | null>; "id": string; };
+
+export type SetNotebookIconRequestInput = { "icon": string; "notebook": string; };
 
 export type SetSnapshotMemoRequestInput = { "id": string; "memo": string; };
 
@@ -463,10 +477,7 @@ export type APILegacyPOSTPath =
     "/api/network/forwardProxy" |
     "/api/network/proxy" |
     "/api/notebook/changeMasterPassword" |
-    "/api/notebook/changeSortNotebook" |
-    "/api/notebook/closeNotebook" |
     "/api/notebook/createEncryptedNotebook" |
-    "/api/notebook/createNotebook" |
     "/api/notebook/disableEncryptedNotebooks" |
     "/api/notebook/enableEncryptedNotebooks" |
     "/api/notebook/exportNotebookCryptoBackup" |
@@ -476,12 +487,9 @@ export type APILegacyPOSTPath =
     "/api/notebook/importNotebookCryptoBackup" |
     "/api/notebook/lockNotebook" |
     "/api/notebook/openNotebook" |
-    "/api/notebook/removeNotebook" |
-    "/api/notebook/renameNotebook" |
     "/api/notebook/reorder" |
     "/api/notebook/setNotebookConf" |
     "/api/notebook/setNotebookCryptoAutoLock" |
-    "/api/notebook/setNotebookIcon" |
     "/api/notebook/touchEncryptedNotebooks" |
     "/api/notebook/unlockAndOpenNotebook" |
     "/api/notebook/unlockNotebook" |
@@ -821,10 +829,40 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": SearchHistoryData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/notebook/changeSortNotebook": {
+        request: ChangeSortNotebookRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/notebook/closeNotebook": {
+        request: CloseNotebookRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/notebook/createNotebook": {
+        request: CreateNotebookRequestInput;
+        response: { "code": 0; "data": CreateNotebookData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/notebook/lsNotebooks": {
         request: ListNotebooksRequestInput;
         response: { "code": 0; "data": ListNotebooksData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "legacyOptional";
+    };
+    "/api/notebook/removeNotebook": {
+        request: NotebookIDRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/notebook/renameNotebook": {
+        request: RenameNotebookRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/notebook/setNotebookIcon": {
+        request: SetNotebookIconRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
     };
     "/api/repo/checkSnapshot": {
         request: EmptyRequestInput;

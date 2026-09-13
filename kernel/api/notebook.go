@@ -72,56 +72,36 @@ func getNotebookInfo(c *gin.Context) {
 	}
 }
 
-func setNotebookIcon(c *gin.Context) {
+var setNotebookIcon = contractHandler(apicontract.SetNotebookIcon, func(c *gin.Context, request apicontract.SetNotebookIconRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	boxID, icon := request.Notebook, request.Icon
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var boxID, icon string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("notebook", &boxID, true, true),
-		util.BindJsonArg("icon", &icon, true, false),
-	) {
-		return
-	}
 	if util.InvalidIDPattern(boxID, ret) {
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	if err := holdEncryptedBoxRequest(c, boxID); err != nil {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(314)
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	model.SetBoxIcon(boxID, icon)
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func changeSortNotebook(c *gin.Context) {
+var changeSortNotebook = contractHandler(apicontract.ChangeSortNotebook, func(c *gin.Context, request apicontract.ChangeSortNotebookRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	ids := request.Notebooks
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	idsArg := arg["notebooks"].([]any)
-	var ids []string
-	for _, p := range idsArg {
-		ids = append(ids, p.(string))
-	}
 	for _, id := range ids {
 		if err := holdEncryptedBoxRequest(c, id); err != nil {
 			ret.Code = -1
 			ret.Msg = model.Conf.Language(314)
-			return
+			return contractFailure[apicontract.Null](ret)
 		}
 	}
 	model.ChangeBoxSort(ids)
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 func reorderNotebooks(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -149,36 +129,23 @@ func reorderNotebooks(c *gin.Context) {
 	}
 }
 
-func renameNotebook(c *gin.Context) {
+var renameNotebook = contractHandler(apicontract.RenameNotebook, func(c *gin.Context, request apicontract.RenameNotebookRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	notebook, name := request.Notebook, request.Name
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var notebook, name string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("notebook", &notebook, true, true),
-		util.BindJsonArg("name", &name, true, false),
-	) {
-		return
-	}
 	if util.InvalidIDPattern(notebook, ret) {
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(314)
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	err := model.RenameBox(notebook, name)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
 	}
 
 	evt := util.NewCmdResult("renamenotebook", 0, util.PushModeBroadcast)
@@ -187,37 +154,28 @@ func renameNotebook(c *gin.Context) {
 		"name": name,
 	}
 	util.PushEvent(evt)
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func removeNotebook(c *gin.Context) {
+var removeNotebook = contractHandler(apicontract.RemoveNotebook, func(c *gin.Context, request apicontract.NotebookIDRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	notebook := request.Notebook
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var notebook string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, true)) {
-		return
-	}
 	if util.InvalidIDPattern(notebook, ret) {
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	if util.ReadOnly && !model.IsUserGuide(notebook) {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(34)
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
 	}
 
 	err := model.RemoveBox(notebook)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	evt := util.NewCmdResult("removeBox", 0, util.PushModeBroadcast)
@@ -226,44 +184,32 @@ func removeNotebook(c *gin.Context) {
 	}
 	util.PushEvent(evt)
 	model.TriggerOnboardingIfEmpty()
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func createNotebook(c *gin.Context) {
+var createNotebook = contractHandler(apicontract.CreateNotebook, func(c *gin.Context, request apicontract.CreateNotebookRequest) apicontract.Response[apicontract.CreateNotebookData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	name := request.Name
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var name string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", &name, true, false)) {
-		return
-	}
 	id, err := model.CreateBox(name)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.CreateNotebookData](ret)
 	}
 
 	existed, err := model.Mount(id)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.CreateNotebookData](ret)
 	}
 
 	box := model.Conf.Box(id)
 	if nil == box {
 		ret.Code = -1
 		ret.Msg = "opened notebook [" + id + "] not found"
-		return
-	}
-
-	ret.Data = map[string]any{
-		"notebook": box,
+		return contractFailure[apicontract.CreateNotebookData](ret)
 	}
 
 	evt := util.NewCmdResult("createnotebook", 0, util.PushModeBroadcast)
@@ -272,7 +218,8 @@ func createNotebook(c *gin.Context) {
 		"existed": existed,
 	}
 	util.PushEvent(evt)
-}
+	return apicontract.Success(apicontract.CreateNotebookData{Notebook: notebookContract(box)})
+})
 
 func openNotebook(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -357,21 +304,16 @@ func openNotebook(c *gin.Context) {
 	}
 }
 
-func closeNotebook(c *gin.Context) {
+var closeNotebook = contractHandler(apicontract.CloseNotebook, func(c *gin.Context, request apicontract.CloseNotebookRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	notebook := request.Notebook
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	notebook := arg["notebook"].(string)
 	if util.InvalidIDPattern(notebook, ret) {
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	model.Unmount(notebook)
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 func getNotebookConf(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

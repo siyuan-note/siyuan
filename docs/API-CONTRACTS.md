@@ -18,6 +18,8 @@ Arrays, maps, and nested structs recursively validate request constraints. A `nu
 
 `Notebook` is an API payload. Business models map to it explicitly, and regression tests compare complete JSON across encryption states. Contract changes do not alter `.sy`, database, history, sync, or encryption formats.
 
+Notebook creation, renaming, removal, closing, icon updates, and sorting use typed contracts. Renaming, removal, and icon updates trim notebook IDs; closing preserves whitespace for ID validation. Empty names and icons remain available to business validation, and rename failures retain their message display duration.
+
 ## Compatibility requirements
 
 Contract maintenance must preserve existing observable API behavior. Changes to type definitions or handler structure alone must not change call semantics:

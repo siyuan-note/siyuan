@@ -17,6 +17,12 @@ func TestAPIContractBasicRequests(t *testing.T) {
 		handler    gin.HandlerFunc
 		code       int
 	}{
+		{"/api/notebook/createNotebook", `{}`, createNotebook, -1},
+		{"/api/notebook/setNotebookIcon", `{"notebook":"../escape","icon":""}`, setNotebookIcon, -1},
+		{"/api/notebook/renameNotebook", `{"notebook":"invalid","name":"name"}`, renameNotebook, -1},
+		{"/api/notebook/removeNotebook", `{"notebook":"invalid"}`, removeNotebook, -1},
+		{"/api/notebook/closeNotebook", `{"notebook":" 20260101000000-abcdefg "}`, closeNotebook, -1},
+		{"/api/notebook/changeSortNotebook", `{"notebooks":[null]}`, changeSortNotebook, -1},
 		{"/api/system/currentTime", "", currentTime, 0},
 		{"/api/system/bootProgress", "", bootProgress, 0},
 		{"/api/system/getWorkspaceInfo", "", getWorkspaceInfo, 0},

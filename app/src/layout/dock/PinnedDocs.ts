@@ -12,6 +12,7 @@ import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragov
 import {MenuItem} from "../../menus/Menu";
 import {newFileInTree} from "../../util/newFile";
 import {FILE_TREE_CHILDREN_SORT_MODE, FILE_TREE_EFFECTIVE_SORT_MODE} from "../../util/fileTreeSort";
+import {getConfiguredEntryVisibility, setEntryVisibilityValue} from "../../config/entryVisibility/runtime";
 
 interface IPinnedDoc {
     id: string;
@@ -47,6 +48,11 @@ export class PinnedDocs {
         this.element.innerHTML = `<button class="b3-list-item" type="button" data-pin-heading="true"><span class="b3-list-item__toggle"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span><span class="b3-list-item__text">${window.siyuan.languages.pinnedDocs}</span></button><div class="fn__flex-1" style="overflow:auto;min-height:0"><ul class="b3-list"></ul></div>`;
         this.list = this.element.lastElementChild.firstElementChild as HTMLElement;
         sourceTree.before(this.element);
+        this.applyVisibility();
+        window.addEventListener("siyuan-entry-visibility", () => {
+            this.applyVisibility();
+            this.scheduleRefresh();
+        }, {signal: this.sourceEvents.signal});
         try {
             this.expanded = new Set(JSON.parse(localStorage.getItem("siyuan-pinned-docs-expanded") || "[]"));
         } catch (e) {
@@ -134,6 +140,18 @@ export class PinnedDocs {
         this.sourceEvents.abort();
     }
 
+    public isVisible() {
+        return getConfiguredEntryVisibility("documentPanel.pinnedDocs");
+    }
+
+    public toggleVisibility() {
+        setEntryVisibilityValue("documentPanel.pinnedDocs", !this.isVisible());
+    }
+
+    private applyVisibility() {
+        this.element.classList.toggle("fn__none", !this.isVisible());
+    }
+
     public scheduleRefresh() {
         window.clearTimeout(this.refreshTimer);
         this.refreshTimer = window.setTimeout(() => this.refresh(), 150);
@@ -159,6 +177,7 @@ export class PinnedDocs {
         const selected = new Set(Array.from(this.list.querySelectorAll<HTMLElement>(".b3-list-item--focus"), row => row.dataset.pinRow));
         pinnedDocIDs.clear();
         response.data.forEach(doc => pinnedDocIDs.add(doc.id));
+        if (!this.isVisible()) { return; }
         const list = document.createElement("ul");
         for (const doc of response.data) {
             if (doc.unavailable) {

@@ -865,6 +865,7 @@ test("multiple document and notebook entries follow their document tree menus", 
         "rebuildDataIndex",
         "sort",
         "publishAccess",
+        "pinnedDocs",
     ]);
     assert.deepEqual(getEntryCatalogChildren("docTree.notebooks").map((item) => item.key), [
         "sort",
@@ -881,6 +882,17 @@ test("multiple document and notebook entries follow their document tree menus", 
         "exportMarkdown",
     ]);
     assert.ok(getEntryCatalogChildren("docTree.multi").some((item) => item.key === "delete"));
+});
+
+test("pinned area visibility is independent of dock visibility and menu ordering", () => {
+    assert.deepEqual(getEntryCatalogChildren("documentPanel").map(item => item.key), ["pinnedDocs"]);
+    assert.equal(getEntryCatalogNode("documentPanel.pinnedDocs")?.simple, true);
+    assert.equal(getEntryCatalogDefaultVisibility("documentPanel.pinnedDocs"), false);
+    assert.equal(getEntryCatalogCustomDefaultVisibility("documentPanel.pinnedDocs"), false);
+    assert.equal(getEntryCatalogDefaultVisibility("docTree.panel.pinnedDocs"), true);
+    assert.equal(isEntryOrderSortable("documentPanel"), false);
+    assert.equal(getEntryCatalogNode("docTree.panel.pinnedDocs")?.simple, true);
+    assert.equal(getEntryCatalogNode("dock.pinnedDocs"), undefined);
 });
 
 test("document tree configuration groups notebook scopes before document scopes", () => {

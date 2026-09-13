@@ -669,6 +669,14 @@ export const entryCatalog: IEntryCatalogSection[] = [
     statusBarCatalogSection,
     dockCatalogSection,
     {
+        key: "documentPanel",
+        label: lang("entryDocPanel"),
+        sortable: false,
+        children: [node("pinnedDocs", lang("pinnedDocs"), true, undefined, undefined, {
+            defaultVisible: () => false,
+        })],
+    },
+    {
         key: "docTree.panel",
         label: location(lang("entryDocPanel"), lang("more")),
         children: [
@@ -678,6 +686,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("rebuildDataIndex", lang("rebuildDataIndex")),
             node("sort", lang("sort"), true, sortChildren()),
             node("publishAccess", lang("publishAccess")),
+            node("pinnedDocs", lang("pinnedDocs")),
         ],
     },
     {

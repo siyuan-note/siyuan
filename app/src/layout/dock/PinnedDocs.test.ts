@@ -6,6 +6,10 @@ import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
 
 interface IPanelHarness {
+    element: unknown;
+    isVisible(): boolean;
+    toggleVisibility(): void;
+    applyVisibility(): void;
     loadChildren(row: unknown, children: unknown, generation: number): Promise<void>;
     drop(ids: string[], x: number, y: number): Promise<void>;
     click(event: unknown): void;
@@ -17,6 +21,7 @@ interface IPanelHarness {
 }
 
 const loadPanel = (fetchCode = 0) => {
+    let visible = true;
     const calls: {kind: string, args: unknown[]}[] = [];
     const record = (kind: string) => async (...args: unknown[]) => {
         calls.push({kind, args});
@@ -29,6 +34,18 @@ const loadPanel = (fetchCode = 0) => {
     runInNewContext(source, {
         exports,
         require: (name: string) => {
+            if (name.endsWith("/entryVisibility/runtime")) {
+                return {
+                    getConfiguredEntryVisibility: (path: string) => {
+                        assert.equal(path, "documentPanel.pinnedDocs");
+                        return visible;
+                    },
+                    setEntryVisibilityValue: (path: string, value: boolean) => {
+                        assert.equal(path, "documentPanel.pinnedDocs");
+                        visible = value;
+                    },
+                };
+            }
             if (name.endsWith("/pinnedDocs")) { return {updatePinnedDocs: record("pin")}; }
             if (name.endsWith("/fetch")) { return {fetchSyncPost: record("http")}; }
             if (name.endsWith("/fileTreeReorder")) { return {reorderSortedFileTree: record("reorder")}; }
@@ -90,4 +107,21 @@ test("notebook root expansion requests physical root while documents keep their 
     }
     assert.equal(JSON.stringify(calls[0].args[1]), JSON.stringify({notebook: "notebook", path: "/", maxListCount: 0}));
     assert.equal(JSON.stringify(calls[1].args[1]), JSON.stringify({notebook: "notebook", path: "/document.sy", maxListCount: 0}));
+});
+
+test("hiding and restoring the pinned area changes visibility without mutating pins", () => {
+    const {panel, calls} = loadPanel();
+    const states: boolean[] = [];
+    panel.element = {classList: {toggle: (name: string, hidden: boolean) => {
+        assert.equal(name, "fn__none");
+        states.push(hidden);
+    }}};
+    panel.applyVisibility();
+    panel.toggleVisibility();
+    assert.equal(panel.isVisible(), false);
+    panel.applyVisibility();
+    panel.toggleVisibility();
+    panel.applyVisibility();
+    assert.deepEqual(states, [false, true, false]);
+    assert.equal(calls.length, 0);
 });

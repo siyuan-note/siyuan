@@ -2245,6 +2245,14 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
                 }
             }).element);
         }
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "pinnedDocs",
+            icon: "iconPin",
+            label: window.siyuan.languages.pinnedDocs,
+            checked: this.pinnedDocs.isVisible(),
+            disabled: window.siyuan.config.readonly,
+            click: () => this.pinnedDocs.toggleVisibility(),
+        }).element);
         return window.siyuan.menus.menu;
     }
 

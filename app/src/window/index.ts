@@ -229,7 +229,7 @@ class App {
                     );
                     window.siyuan.menus = new Menus(this);
                     fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
-                        window.siyuan.user = userResponse.data;
+                        window.siyuan.user = userResponse.data && "userId" in userResponse.data ? userResponse.data : null;
                         await init(this);
                         setTitle("", true);
                         initMessage();

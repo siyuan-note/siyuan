@@ -4,7 +4,7 @@ export interface IBodyGradient {
     dark: {color: string; opacity: number};
 }
 
-export const normalizeBodyGradient = (value?: IBodyGradient): IBodyGradient => {
+export const normalizeBodyGradient = (value?: {mode?: string; light?: IBodyGradient["light"]; dark?: IBodyGradient["dark"]}): IBodyGradient => {
     const normalizeColor = (color?: IBodyGradient["light"]) => ({
         color: /^#[\da-f]{6}$/i.test(color?.color || "") ? color.color : "#9d12e2",
         opacity: typeof color?.opacity === "number" && Number.isFinite(color.opacity) ?

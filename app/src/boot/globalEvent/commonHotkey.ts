@@ -1,3 +1,4 @@
+import {keymapPayload} from "../../config/keymapPayload";
 import {mergeKeymapDefault} from "../../util/keymapBindings";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
@@ -151,7 +152,7 @@ export const correctHotkey = (app: App) => {
         });
         /// #endif
         fetchPost("/api/setting/setKeymap", {
-            data: window.siyuan.config.keymap
+            data: keymapPayload(window.siyuan.config.keymap)
         }, () => {
             /// #if !BROWSER
             sendGlobalShortcut(app);

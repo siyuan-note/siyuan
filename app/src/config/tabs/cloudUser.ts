@@ -17,14 +17,15 @@ export const setCloudUser = (user: TCloudUser | null, userName = "") => {
 
 export const resolveCloudUserRefresh = (
     code: number,
-    user: TCloudUser | null,
+    user: TCloudUser | {closeTimeout: number} | null,
     previousUserName: string,
 ): ICloudUserRefreshAction => {
+    const cloudUser = user && "userName" in user ? user : null;
     if (code === 0) {
-        return {apply: true, user, userName: ""};
+        return {apply: true, user: cloudUser, userName: ""};
     }
     if (code === 255) {
         return {apply: true, user: null, userName: previousUserName};
     }
-    return {apply: false, user, userName: ""};
+    return {apply: false, user: cloudUser, userName: ""};
 };

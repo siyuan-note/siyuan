@@ -20,7 +20,7 @@ export type TAssetOpenGesture = keyof Config.IAssetOpen;
 
 const ASSET_OPEN_GESTURES: TAssetOpenGesture[] = ["click", "ctrlClick", "altClick", "shiftClick"];
 
-export const normalizeAssetOpenConfig = (config?: Config.IAssetOpen): Config.IAssetOpen => ({
+export const normalizeAssetOpenConfig = (config?: {[key in keyof Config.IAssetOpen]?: string}): Config.IAssetOpen => ({
     click: normalizeAssetOpenAction(config?.click, DEFAULT_ASSET_OPEN.click),
     ctrlClick: normalizeAssetOpenAction(config?.ctrlClick, DEFAULT_ASSET_OPEN.ctrlClick),
     altClick: normalizeAssetOpenAction(config?.altClick, DEFAULT_ASSET_OPEN.altClick),
@@ -28,9 +28,9 @@ export const normalizeAssetOpenConfig = (config?: Config.IAssetOpen): Config.IAs
 });
 
 const normalizeAssetOpenAction = (
-    action: Config.TAssetOpenAction | undefined,
+    action: string | undefined,
     fallback: Config.TAssetOpenAction,
-) => ASSET_OPEN_ACTIONS.includes(action) ? action : fallback;
+) => ASSET_OPEN_ACTIONS.find(value => value === action) || fallback;
 
 export const resolveAssetOpenGesture = (options: {
     altKey?: boolean,

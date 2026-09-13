@@ -6,6 +6,31 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
+fetchPost("/api/setting/setEditor", {markdown: {inlineMath: null}, fontFamilies: null});
+fetchPost("/api/setting/setAI", {mcp: {servers: [{name: "server", env: {KEY: "value"}}]}});
+fetchPost("/api/setting/setKeymap", {data: {extension: {items: [null, false, 1, "text", {}]}}});
+fetchPost("/api/setting/setTheme", {theme: "theme", modes: [0, 1]});
+// @ts-expect-error 编辑器字号必须为数字。
+fetchPost("/api/setting/setEditor", {fontSize: "16"});
+// @ts-expect-error AI 配置只接受声明的字段。
+fetchPost("/api/setting/setAI", {mcp: {unknown: true}});
+// @ts-expect-error 环境变量值必须为字符串。
+fetchPost("/api/setting/setAI", {mcp: {servers: [{env: {KEY: false}}]}});
+// @ts-expect-error 主题模式的规范调用使用数字数组。
+fetchPost("/api/setting/setTheme", {theme: "theme", modes: [false]});
+fetchPost("/api/setting/login2faCloudUser", {token: "token", code: "123456"}, response => {
+    const outerCode: number = response.code;
+    if (response.data && "msg" in response.data) {
+        const cloudCode: number = response.data.code;
+        const message: string = response.data.msg;
+        const token: JSONValue = response.data.token;
+        // @ts-expect-error 云端扩展字段在使用前必须检查类型。
+        const tokenString: string = response.data.token;
+        void [cloudCode, message, token, tokenString];
+    }
+    void outerCode;
+});
+
 fetchPost("/api/filetree/getDoc", {id: "document", notebook: "box", querySubTypes: {heading: {h1: true}}}, response => {
     if (response.code === 0) {
         const content: string = response.data.content;

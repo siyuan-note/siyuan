@@ -1,3 +1,4 @@
+import {normalizeBodyGradient} from "../util/bodyGradient";
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
@@ -1447,7 +1448,7 @@ type="checkbox">
                 callback();
                 return;
             }
-            window.siyuan.config.appearance = response.data;
+            window.siyuan.config.appearance = {...response.data, lang: appearance.lang, bodyGradient: normalizeBodyGradient(response.data.bodyGradient)};
             callback();
         });
     },
@@ -1640,7 +1641,6 @@ type="checkbox">
                 fetchPost("/api/setting/setBazaar", {
                     ...window.siyuan.config.bazaar,
                     trust: true,
-                    app: Constants.SIYUAN_APPID,
                 }, (response) => {
                     window.siyuan.config.bazaar = response.data;
                     if (!bazaar._isMountCurrent(mount)) {

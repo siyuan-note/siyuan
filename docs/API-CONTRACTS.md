@@ -24,6 +24,8 @@ Encrypted notebook lifecycle endpoints use typed requests and responses while re
 
 ## Compatibility requirements
 
+Setting contracts retain partial configuration merging, existing defaults, case-insensitive struct fields, explicit null values, JSON number normalization, and parser error messages. Keyboard shortcuts and cloud authentication results declare their fixed fields while preserving their protocol-defined JSON extensions. Cloud-user admission still precedes body reads for non-administrators, and two-factor authentication keeps cloud error codes and extension fields. Frontend callers normalize persisted display settings at the same existing boundaries.
+
 Document-tree contracts retain conditional parameter validation, path and sorting semantics, omitted callbacks, pagination defaults, and document response variants. Publish authentication preserves HTTP 429 and `Retry-After` through explicitly declared additional error statuses. Publish and encrypted-notebook admission remain before deferred field validation, and document leases cover response serialization.
 
 Asset contracts retain nullable result lists, per-file upload order and duplicate names, successful partial-upload messages, and local-insertion failure payloads. OCR columns remain string-valued. Annotation validation, published-file admission, encrypted reads and writes, deferred downloads, and upload target selection keep their existing behavior. The non-API upload entry uses the same typed model operation.

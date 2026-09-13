@@ -326,7 +326,7 @@ export class App {
                     window.siyuan.menus = new Menus(this);
                     bootSync();
                     fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
-                        window.siyuan.user = userResponse.data;
+                        window.siyuan.user = userResponse.data && "userId" in userResponse.data ? userResponse.data : null;
                         await ensureOnboarding();
                         await setNoteBook();
                         await onGetConfig(response.data.start, this);

@@ -263,6 +263,16 @@ func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
 	if t == reflect.TypeFor[BlockOperationResult]() {
 		return &Schema{AnyOf: []*Schema{{Type: "null"}, {Type: "string"}, {Type: "array", Items: &Schema{Type: "string"}}}}, nil
 	}
+	if t == reflect.TypeFor[*CloudLogin2faData]() {
+		schema, err := b.cloudLogin2faDataSchema(input)
+		if err != nil {
+			return nil, err
+		}
+		return nullable(schema), nil
+	}
+	if t == reflect.TypeFor[CloudLogin2faData]() {
+		return b.cloudLogin2faDataSchema(input)
+	}
 	if t == reflect.TypeFor[JSONValue]() {
 		ref := &Schema{Ref: "#/$defs/JSONValue"}
 		b.definitions["JSONValue"] = &Schema{AnyOf: []*Schema{

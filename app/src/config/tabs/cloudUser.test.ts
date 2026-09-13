@@ -29,6 +29,14 @@ test("cloud user refresh preserves state after temporary failures", () => {
     });
 });
 
+test("message duration payloads do not replace the cloud user", () => {
+    assert.deepEqual(resolveCloudUserRefresh(1, {closeTimeout: 5000}, "alice"), {
+        apply: false,
+        user: null,
+        userName: "",
+    });
+});
+
 test("invalid cloud users are cleared and retain the previous login name", () => {
     assert.deepEqual(resolveCloudUserRefresh(255, null, "alice"), {
         apply: true,

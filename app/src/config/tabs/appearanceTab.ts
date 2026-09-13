@@ -1,3 +1,5 @@
+import {normalizeAssetOpenConfig} from "../../editor/assetOpen";
+import {normalizeBodyGradient} from "../../util/bodyGradient";
 /// #if !BROWSER
 import * as path from "path";
 import {useShell} from "../../util/pathName";
@@ -314,29 +316,36 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
     };
     const persistFonts = (fonts: IFontItem[]) => {
         const globalFont = configKey === "globalFontFamilies";
-        fetchPost(
-            globalFont ? "/api/setting/setAppearance" : "/api/setting/setEditor",
-            {
-                ...(globalFont ? window.siyuan.config.appearance : window.siyuan.config.editor),
-                [configKey]: fonts.map((font) => ({
-                    family: font.family,
-                    weight: font.weight,
-                    displayName: font.displayName,
-                })),
-            },
-            (response) => {
-                if (globalFont) {
-                    appearanceConfigApi.apply(response.data);
-                } else {
-                    editorConfigApi.apply(response.data);
-                }
-                const config = getFontConfig();
-                selectedFonts = getConfiguredFonts(config, configKey);
-                renderSelectedFonts();
-                refreshMountedFontConfigs(config, fontConfigElement);
-                refreshOpenMenu?.();
-            }
-        );
+        const configuredFonts = fonts.map((font) => ({
+            family: font.family,
+            weight: font.weight,
+            displayName: font.displayName,
+        }));
+        const refreshFonts = () => {
+            const config = getFontConfig();
+            selectedFonts = getConfiguredFonts(config, configKey);
+            renderSelectedFonts();
+            refreshMountedFontConfigs(config, fontConfigElement);
+            refreshOpenMenu?.();
+        };
+        if (globalFont) {
+            const appearance = {
+                ...window.siyuan.config.appearance,
+                globalFontFamilies: configuredFonts,
+            };
+            fetchPost("/api/setting/setAppearance", appearance, response => {
+                appearanceConfigApi.apply({...response.data, lang: appearance.lang, bodyGradient: normalizeBodyGradient(response.data.bodyGradient)});
+                refreshFonts();
+            });
+        } else {
+            fetchPost("/api/setting/setEditor", {
+                ...window.siyuan.config.editor,
+                [configKey]: configuredFonts,
+            }, response => {
+                editorConfigApi.apply({...response.data, assetOpen: normalizeAssetOpenConfig(response.data.assetOpen)});
+                refreshFonts();
+            });
+        }
     };
     bindSelectedFontList(selectedListElement, () => selectedFonts, persistFonts, (chip, index, event) => {
         openFontWeightMenu(chip, index, event);

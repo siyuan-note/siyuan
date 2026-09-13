@@ -12801,6 +12801,48 @@
       ],
       "additionalProperties": false
     },
+    "Login2faEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer"
+        },
+        "data": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "number"
+                },
+                "msg": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "code",
+                "msg"
+              ],
+              "additionalProperties": {
+                "$ref": "#/$defs/JSONValue"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "msg": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "data",
+        "msg"
+      ],
+      "additionalProperties": false
+    },
     "MarkdownHTMLRequestInput": {
       "type": "object",
       "properties": {
@@ -17590,6 +17632,358 @@
       ],
       "additionalProperties": false
     },
+    "SetAIRequestInput": {
+      "type": "object",
+      "properties": {
+        "agent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingAgentInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "editing": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingEditingInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "embedding": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingEmbeddingInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "imageGeneration": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingImageGenerationInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mcp": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingMCPInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "providers": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingProviderInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rerank": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingRerankInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SetAppearanceRequestInput": {
+      "type": "object",
+      "properties": {
+        "bodyGradient": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingBodyGradientInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "closeButtonBehavior": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "codeBlockThemeDark": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "codeBlockThemeLight": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "darkThemes": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingAppearanceThemeInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "entryVisibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingEntryVisibilityInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "globalFontFamilies": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingEditorFontInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hideStatusBar": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hideToolbar": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "icon": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "iconVer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "icons": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingAppearanceIconInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lang": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lightThemes": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingAppearanceThemeInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "modeOS": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notifications": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingNotificationsInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "statusBar": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingStatusBarInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "themeDark": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "themeJS": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "themeLight": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "themeVer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "SetAssetAnnotationRequestInput": {
       "type": "object",
       "properties": {
@@ -17642,6 +18036,32 @@
       ],
       "additionalProperties": false
     },
+    "SetBazaarRequestInput": {
+      "type": "object",
+      "properties": {
+        "petalDisabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "trust": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "SetBlockAttrsRequestInput": {
       "type": "object",
       "properties": {
@@ -17668,6 +18088,32 @@
       ],
       "additionalProperties": false
     },
+    "SetConfSnippetRequestInput": {
+      "type": "object",
+      "properties": {
+        "enabledCSS": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabledJS": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "SetCriterionRequestInput": {
       "type": "object",
       "properties": {
@@ -17685,6 +18131,1322 @@
       "required": [
         "criterion"
       ],
+      "additionalProperties": false
+    },
+    "SetEditorRequestInput": {
+      "type": "object",
+      "properties": {
+        "allowHTMLBLockScript": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "allowSVGScript": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "assetOpen": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingAssetOpenInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backlinkContainChildren": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backlinkExpandCount": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backlinkHideReference": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backlinkMentionExclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backlinkShowBottom": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backlinkSort": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backmentionExpandCount": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backmentionSort": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "blockRefDynamicAnchorTextMaxLen": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "checkBlockRef": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "codeFontFamilies": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingEditorFontInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "codeLigatures": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "codeLineWrap": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "codeSyntaxHighlightLineNum": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "codeTabSpaces": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cursorSurroundingLines": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "databaseAttrClickMode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "databaseAttrHideEmpty": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "databaseAttrShow": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "databaseAttrUseTabs": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "databaseAttrViewMode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "displayBookmarkIcon": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "displayNetImgMark": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dragHTMLFileToIframe": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dynamicLoadBlocks": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "embedBlockBreadcrumb": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "emoji": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "floatWindowDelay": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "floatWindowMode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fontFamilies": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingEditorFontInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fontFamily": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fontFamilyDisplay": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fontSize": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fontSizeScrollZoom": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fontWeight": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fullWidth": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "generateHistoryInterval": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hashTagSearch": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "headingEmbedMode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "headingNumber": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "headingNumberFormat": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "historyRetentionDays": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "justify": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "katexMacros": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keepLoadedContent": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "listItemDotNumberClickFocus": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "listLogicalOutdent": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "markdown": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingMarkdownInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "onlySearchForDoc": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pasteURLAutoConvert": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "plantUMLServePath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "readOnly": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rtl": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "spellcheck": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "spellcheckLanguages": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "virtualBlockRef": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "virtualBlockRefExclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "virtualBlockRefInclude": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SetEntryVisibilityRequestInput": {
+      "type": "object",
+      "properties": {
+        "active": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "profiles": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingEntryVisibilityProfileInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SetExportRequestInput": {
+      "type": "object",
+      "properties": {
+        "addTitle": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "blockEmbedMode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "blockRefMode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "blockRefTextLeft": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "blockRefTextRight": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "docxTemplate": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fileAnnotationRefMode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "imageWatermarkDesc": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "imageWatermarkStr": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "includeRelatedDocs": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "includeSubDocs": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inlineMemo": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "markdownYFM": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pandocBin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pandocParams": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "paragraphBeginningSpace": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pdfFooter": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pdfWatermarkDesc": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pdfWatermarkStr": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "removeAssetsID": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tagCloseMarker": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tagOpenMarker": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SetFiletreeRequestInput": {
+      "type": "object",
+      "properties": {
+        "allowCreateDeeper": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "alwaysSelectOpenedFile": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "boxDocEnabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "closeTabOnDoubleClick": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "closeTabsOnStart": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "createDocAtTop": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "docCreateSaveBox": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "docCreateSavePath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "docCreateTemplatePath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "docIconClickExpand": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "largeFileWarningSize": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "maxListCount": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "maxOpenTabCount": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "noSplitScreenWhenOpenTab": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "openFilesUseCurrentTab": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parentDocClickExpand": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "recentDocsMaxListCount": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "refCreateSaveBox": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "refCreateSavePath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "removeDocWithoutConfirm": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "shorthandSaveBox": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "shorthandSavePath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sort": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tabStartupMode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "useSVGDefaultIcon": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "useSingleLineSave": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SetFlashcardRequestInput": {
+      "type": "object",
+      "properties": {
+        "blockquote": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "callout": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "deck": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "heading": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "list": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mark": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "maximumInterval": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "newCardLimit": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "requestRetention": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reviewCardLimit": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reviewMode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "superBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "weights": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
       "additionalProperties": false
     },
     "SetGraphConfRequestInput": {
@@ -17849,6 +19611,42 @@
       ],
       "additionalProperties": false
     },
+    "SetPublishRequestInput": {
+      "type": "object",
+      "properties": {
+        "auth": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingBasicAuthInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enable": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "port": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "SetRepoIndexRetentionDaysRequestInput": {
       "type": "object",
       "properties": {
@@ -17886,6 +19684,408 @@
       "required": [
         "cardDues"
       ],
+      "additionalProperties": false
+    },
+    "SetSearchRequestInput": {
+      "type": "object",
+      "properties": {
+        "alias": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "audioBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backlinkMentionAlias": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backlinkMentionAnchor": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backlinkMentionDoc": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backlinkMentionKeywordsLimit": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backlinkMentionName": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "blockquote": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "callout": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "caseSensitive": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "codeBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "databaseBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "document": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "embedBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hanSensitive": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "heading": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "htmlBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ial": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "iframeBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "indexAssetPath": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "limit": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "list": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "listItem": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mathBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "memo": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "paragraph": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "superBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tabItem": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "table": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tabs": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "videoBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "virtualRefAlias": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "virtualRefAnchor": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "virtualRefDoc": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "virtualRefName": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "widgetBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SetSecretsRequestInput": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingSecretInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
       "additionalProperties": false
     },
     "SetSnapshotMemoRequestInput": {
@@ -17952,6 +20152,4345 @@
       },
       "required": [
         "webdav"
+      ],
+      "additionalProperties": false
+    },
+    "SetVariablesRequestInput": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingVariableInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingAI": {
+      "type": "object",
+      "properties": {
+        "agent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingAgent"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "editing": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingEditing"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "embedding": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingEmbedding"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "imageGeneration": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingImageGeneration"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mcp": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingMCP"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "providers": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingProvider"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rerank": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingRerank"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "agent",
+        "editing",
+        "embedding",
+        "imageGeneration",
+        "mcp",
+        "providers",
+        "rerank"
+      ],
+      "additionalProperties": false
+    },
+    "SettingAgent": {
+      "type": "object",
+      "properties": {
+        "approvalPolicy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingApprovalPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "capabilityPolicy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingCapabilityPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "confirmTimeout": {
+          "type": "integer"
+        },
+        "maxCompletionTokens": {
+          "type": "integer"
+        },
+        "maxRetries": {
+          "type": "integer"
+        },
+        "maxToolCallRounds": {
+          "type": "integer"
+        },
+        "modelId": {
+          "type": "string"
+        },
+        "sessionTimeout": {
+          "type": "integer"
+        },
+        "skills": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingAgentSkills"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "streamIdleTimeout": {
+          "type": "integer"
+        },
+        "temperature": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "approvalPolicy",
+        "capabilityPolicy",
+        "confirmTimeout",
+        "maxCompletionTokens",
+        "maxRetries",
+        "maxToolCallRounds",
+        "modelId",
+        "sessionTimeout",
+        "skills",
+        "streamIdleTimeout",
+        "temperature"
+      ],
+      "additionalProperties": false
+    },
+    "SettingAgentInput": {
+      "type": "object",
+      "properties": {
+        "approvalPolicy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingApprovalPolicyInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "capabilityPolicy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingCapabilityPolicyInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "confirmTimeout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "maxCompletionTokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "maxRetries": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "maxToolCallRounds": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "modelId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sessionTimeout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "skills": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingAgentSkillsInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "streamIdleTimeout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "temperature": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingAgentSkills": {
+      "type": "object",
+      "properties": {
+        "userEnabled": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "userEnabled"
+      ],
+      "additionalProperties": false
+    },
+    "SettingAgentSkillsInput": {
+      "type": "object",
+      "properties": {
+        "userEnabled": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingAppearance": {
+      "type": "object",
+      "properties": {
+        "bodyGradient": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingBodyGradient"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "closeButtonBehavior": {
+          "type": "integer"
+        },
+        "codeBlockThemeDark": {
+          "type": "string"
+        },
+        "codeBlockThemeLight": {
+          "type": "string"
+        },
+        "darkThemes": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingAppearanceTheme"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "entryVisibility": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingEntryVisibility"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "globalFontFamilies": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingEditorFont"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hideStatusBar": {
+          "type": "boolean"
+        },
+        "hideToolbar": {
+          "type": "boolean"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "iconVer": {
+          "type": "string"
+        },
+        "icons": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingAppearanceIcon"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lang": {
+          "type": "string"
+        },
+        "lightThemes": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingAppearanceTheme"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "type": "integer"
+        },
+        "modeOS": {
+          "type": "boolean"
+        },
+        "notifications": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingNotifications"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "statusBar": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingStatusBar"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "themeDark": {
+          "type": "string"
+        },
+        "themeJS": {
+          "type": "boolean"
+        },
+        "themeLight": {
+          "type": "string"
+        },
+        "themeVer": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "bodyGradient",
+        "closeButtonBehavior",
+        "codeBlockThemeDark",
+        "codeBlockThemeLight",
+        "darkThemes",
+        "entryVisibility",
+        "globalFontFamilies",
+        "hideStatusBar",
+        "hideToolbar",
+        "icon",
+        "iconVer",
+        "icons",
+        "lang",
+        "lightThemes",
+        "mode",
+        "modeOS",
+        "notifications",
+        "statusBar",
+        "themeDark",
+        "themeJS",
+        "themeLight",
+        "themeVer"
+      ],
+      "additionalProperties": false
+    },
+    "SettingAppearanceIcon": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "SettingAppearanceIconInput": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingAppearanceTheme": {
+      "type": "object",
+      "properties": {
+        "frontends": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "label": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "SettingAppearanceThemeInput": {
+      "type": "object",
+      "properties": {
+        "frontends": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingApprovalPolicy": {
+      "type": "object",
+      "properties": {
+        "default": {
+          "type": "string"
+        },
+        "overrides": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingCapabilityApproval"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "default",
+        "overrides"
+      ],
+      "additionalProperties": false
+    },
+    "SettingApprovalPolicyInput": {
+      "type": "object",
+      "properties": {
+        "default": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "overrides": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingCapabilityApprovalInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingAssetOpen": {
+      "type": "object",
+      "properties": {
+        "altClick": {
+          "type": "string"
+        },
+        "click": {
+          "type": "string"
+        },
+        "ctrlClick": {
+          "type": "string"
+        },
+        "shiftClick": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "altClick",
+        "click",
+        "ctrlClick",
+        "shiftClick"
+      ],
+      "additionalProperties": false
+    },
+    "SettingAssetOpenInput": {
+      "type": "object",
+      "properties": {
+        "altClick": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "click": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ctrlClick": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "shiftClick": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingBasicAuth": {
+      "type": "object",
+      "properties": {
+        "accounts": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingBasicAuthAccount"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enable": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "accounts",
+        "enable"
+      ],
+      "additionalProperties": false
+    },
+    "SettingBasicAuthAccount": {
+      "type": "object",
+      "properties": {
+        "memo": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "memo",
+        "password",
+        "username"
+      ],
+      "additionalProperties": false
+    },
+    "SettingBasicAuthAccountInput": {
+      "type": "object",
+      "properties": {
+        "memo": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "password": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "username": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingBasicAuthInput": {
+      "type": "object",
+      "properties": {
+        "accounts": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingBasicAuthAccountInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enable": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingBazaar": {
+      "type": "object",
+      "properties": {
+        "petalDisabled": {
+          "type": "boolean"
+        },
+        "trust": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "petalDisabled",
+        "trust"
+      ],
+      "additionalProperties": false
+    },
+    "SettingBodyGradient": {
+      "type": "object",
+      "properties": {
+        "dark": {
+          "$ref": "#/$defs/SettingBodyGradientColor"
+        },
+        "light": {
+          "$ref": "#/$defs/SettingBodyGradientColor"
+        },
+        "mode": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "dark",
+        "light",
+        "mode"
+      ],
+      "additionalProperties": false
+    },
+    "SettingBodyGradientColor": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "type": "string"
+        },
+        "opacity": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "color",
+        "opacity"
+      ],
+      "additionalProperties": false
+    },
+    "SettingBodyGradientColorInput": {
+      "type": "object",
+      "properties": {
+        "color": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "opacity": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingBodyGradientInput": {
+      "type": "object",
+      "properties": {
+        "dark": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingBodyGradientColorInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "light": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingBodyGradientColorInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingBootAppearance": {
+      "type": "object",
+      "properties": {
+        "appearance": {
+          "type": "string"
+        },
+        "backgroundColor": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "frontends": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "layers": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/SettingBootAppearanceLayer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "officialUI": {
+          "$ref": "#/$defs/SettingBootAppearanceOfficialUI"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "style": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "additionalProperties": false
+    },
+    "SettingBootAppearanceCurrent": {
+      "type": "object",
+      "properties": {
+        "appearance": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "appearance",
+        "provider"
+      ],
+      "additionalProperties": false
+    },
+    "SettingBootAppearanceLayer": {
+      "type": "object",
+      "properties": {
+        "fit": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "position": {
+          "type": "string"
+        },
+        "poster": {
+          "type": "string"
+        },
+        "src": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "src",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "SettingBootAppearanceOfficialUI": {
+      "type": "object",
+      "properties": {
+        "progressColor": {
+          "type": "string"
+        },
+        "showDetails": {
+          "type": "boolean"
+        },
+        "showLogo": {
+          "type": "boolean"
+        },
+        "textColor": {
+          "type": "string"
+        },
+        "trackColor": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "showDetails",
+        "showLogo"
+      ],
+      "additionalProperties": false
+    },
+    "SettingBootAppearanceRequestInput": {
+      "type": "object",
+      "properties": {
+        "appearance": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "provider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingBootAppearanceSelection": {
+      "type": "object",
+      "properties": {
+        "appearance": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "schemaVersion": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "appearance",
+        "provider",
+        "schemaVersion"
+      ],
+      "additionalProperties": false
+    },
+    "SettingBootAppearancesData": {
+      "type": "object",
+      "properties": {
+        "appearances": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingBootAppearance"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "current": {
+          "$ref": "#/$defs/SettingBootAppearanceCurrent"
+        }
+      },
+      "required": [
+        "appearances",
+        "current"
+      ],
+      "additionalProperties": false
+    },
+    "SettingCapabilityApproval": {
+      "type": "object",
+      "properties": {
+        "actions": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "default": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "actions",
+        "default"
+      ],
+      "additionalProperties": false
+    },
+    "SettingCapabilityApprovalInput": {
+      "type": "object",
+      "properties": {
+        "actions": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "default": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingCapabilityPolicy": {
+      "type": "object",
+      "properties": {
+        "default": {
+          "type": "string"
+        },
+        "overrides": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "default",
+        "overrides"
+      ],
+      "additionalProperties": false
+    },
+    "SettingCapabilityPolicyInput": {
+      "type": "object",
+      "properties": {
+        "default": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "overrides": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingCloudUserRequestInput": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingEditing": {
+      "type": "object",
+      "properties": {
+        "maxCompletionTokens": {
+          "type": "integer"
+        },
+        "maxHistoryMessages": {
+          "type": "integer"
+        },
+        "modelId": {
+          "type": "string"
+        },
+        "temperature": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "maxCompletionTokens",
+        "maxHistoryMessages",
+        "modelId",
+        "temperature"
+      ],
+      "additionalProperties": false
+    },
+    "SettingEditingInput": {
+      "type": "object",
+      "properties": {
+        "maxCompletionTokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "maxHistoryMessages": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "modelId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "temperature": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingEditor": {
+      "type": "object",
+      "properties": {
+        "allowHTMLBLockScript": {
+          "type": "boolean"
+        },
+        "allowSVGScript": {
+          "type": "boolean"
+        },
+        "assetOpen": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingAssetOpen"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backlinkContainChildren": {
+          "type": "boolean"
+        },
+        "backlinkExpandCount": {
+          "type": "integer"
+        },
+        "backlinkHideReference": {
+          "type": "boolean"
+        },
+        "backlinkMentionExclude": {
+          "type": "string"
+        },
+        "backlinkShowBottom": {
+          "type": "boolean"
+        },
+        "backlinkSort": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "backmentionExpandCount": {
+          "type": "integer"
+        },
+        "backmentionSort": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "blockRefDynamicAnchorTextMaxLen": {
+          "type": "integer"
+        },
+        "checkBlockRef": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "codeFontFamilies": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingEditorFont"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "codeLigatures": {
+          "type": "boolean"
+        },
+        "codeLineWrap": {
+          "type": "boolean"
+        },
+        "codeSyntaxHighlightLineNum": {
+          "type": "boolean"
+        },
+        "codeTabSpaces": {
+          "type": "integer"
+        },
+        "cursorSurroundingLines": {
+          "type": "integer"
+        },
+        "databaseAttrClickMode": {
+          "type": "integer"
+        },
+        "databaseAttrHideEmpty": {
+          "type": "boolean"
+        },
+        "databaseAttrShow": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "databaseAttrUseTabs": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "databaseAttrViewMode": {
+          "type": "integer"
+        },
+        "displayBookmarkIcon": {
+          "type": "boolean"
+        },
+        "displayNetImgMark": {
+          "type": "boolean"
+        },
+        "dragHTMLFileToIframe": {
+          "type": "boolean"
+        },
+        "dynamicLoadBlocks": {
+          "type": "integer"
+        },
+        "embedBlockBreadcrumb": {
+          "type": "boolean"
+        },
+        "emoji": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "floatWindowDelay": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "floatWindowMode": {
+          "type": "integer"
+        },
+        "fontFamilies": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingEditorFont"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fontFamily": {
+          "type": "string"
+        },
+        "fontFamilyDisplay": {
+          "type": "string"
+        },
+        "fontSize": {
+          "type": "integer"
+        },
+        "fontSizeScrollZoom": {
+          "type": "boolean"
+        },
+        "fontWeight": {
+          "type": "integer"
+        },
+        "fullWidth": {
+          "type": "boolean"
+        },
+        "generateHistoryInterval": {
+          "type": "integer"
+        },
+        "hashTagSearch": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "headingEmbedMode": {
+          "type": "integer"
+        },
+        "headingNumber": {
+          "type": "boolean"
+        },
+        "headingNumberFormat": {
+          "type": "string"
+        },
+        "historyRetentionDays": {
+          "type": "integer"
+        },
+        "justify": {
+          "type": "boolean"
+        },
+        "katexMacros": {
+          "type": "string"
+        },
+        "keepLoadedContent": {
+          "type": "boolean"
+        },
+        "listItemDotNumberClickFocus": {
+          "type": "boolean"
+        },
+        "listLogicalOutdent": {
+          "type": "boolean"
+        },
+        "markdown": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingMarkdown"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "onlySearchForDoc": {
+          "type": "boolean"
+        },
+        "pasteURLAutoConvert": {
+          "type": "boolean"
+        },
+        "plantUMLServePath": {
+          "type": "string"
+        },
+        "readOnly": {
+          "type": "boolean"
+        },
+        "rtl": {
+          "type": "boolean"
+        },
+        "spellcheck": {
+          "type": "boolean"
+        },
+        "spellcheckLanguages": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "virtualBlockRef": {
+          "type": "boolean"
+        },
+        "virtualBlockRefExclude": {
+          "type": "string"
+        },
+        "virtualBlockRefInclude": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "allowHTMLBLockScript",
+        "allowSVGScript",
+        "assetOpen",
+        "backlinkContainChildren",
+        "backlinkExpandCount",
+        "backlinkHideReference",
+        "backlinkMentionExclude",
+        "backlinkShowBottom",
+        "backlinkSort",
+        "backmentionExpandCount",
+        "backmentionSort",
+        "blockRefDynamicAnchorTextMaxLen",
+        "checkBlockRef",
+        "codeFontFamilies",
+        "codeLigatures",
+        "codeLineWrap",
+        "codeSyntaxHighlightLineNum",
+        "codeTabSpaces",
+        "cursorSurroundingLines",
+        "databaseAttrClickMode",
+        "databaseAttrHideEmpty",
+        "databaseAttrShow",
+        "databaseAttrUseTabs",
+        "databaseAttrViewMode",
+        "displayBookmarkIcon",
+        "displayNetImgMark",
+        "dragHTMLFileToIframe",
+        "dynamicLoadBlocks",
+        "embedBlockBreadcrumb",
+        "emoji",
+        "floatWindowDelay",
+        "floatWindowMode",
+        "fontFamilies",
+        "fontFamily",
+        "fontFamilyDisplay",
+        "fontSize",
+        "fontSizeScrollZoom",
+        "fontWeight",
+        "fullWidth",
+        "generateHistoryInterval",
+        "hashTagSearch",
+        "headingEmbedMode",
+        "headingNumber",
+        "headingNumberFormat",
+        "historyRetentionDays",
+        "justify",
+        "katexMacros",
+        "keepLoadedContent",
+        "listItemDotNumberClickFocus",
+        "listLogicalOutdent",
+        "markdown",
+        "onlySearchForDoc",
+        "pasteURLAutoConvert",
+        "plantUMLServePath",
+        "readOnly",
+        "rtl",
+        "spellcheck",
+        "spellcheckLanguages",
+        "virtualBlockRef",
+        "virtualBlockRefExclude",
+        "virtualBlockRefInclude"
+      ],
+      "additionalProperties": false
+    },
+    "SettingEditorFont": {
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string"
+        },
+        "family": {
+          "type": "string"
+        },
+        "weight": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "displayName",
+        "family",
+        "weight"
+      ],
+      "additionalProperties": false
+    },
+    "SettingEditorFontInput": {
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "family": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingEmbedding": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "type": "string"
+        },
+        "baseURL": {
+          "type": "string"
+        },
+        "dimensions": {
+          "type": "integer"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "apiKey",
+        "baseURL",
+        "dimensions",
+        "enabled",
+        "id",
+        "name",
+        "timeout"
+      ],
+      "additionalProperties": false
+    },
+    "SettingEmbeddingInput": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "baseURL": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dimensions": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timeout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingEmojiRequestInput": {
+      "type": "object",
+      "properties": {
+        "emoji": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "emoji"
+      ],
+      "additionalProperties": false
+    },
+    "SettingEntryVisibility": {
+      "type": "object",
+      "properties": {
+        "active": {
+          "type": "string"
+        },
+        "profiles": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingEntryVisibilityProfile"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "active",
+        "profiles",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "SettingEntryVisibilityInput": {
+      "type": "object",
+      "properties": {
+        "active": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "profiles": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingEntryVisibilityProfileInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingEntryVisibilityProfile": {
+      "type": "object",
+      "properties": {
+        "entries": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "boolean"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "orders": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "entries",
+        "id",
+        "name",
+        "orders"
+      ],
+      "additionalProperties": false
+    },
+    "SettingEntryVisibilityProfileInput": {
+      "type": "object",
+      "properties": {
+        "entries": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "boolean"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "orders": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingExport": {
+      "type": "object",
+      "properties": {
+        "addTitle": {
+          "type": "boolean"
+        },
+        "blockEmbedMode": {
+          "type": "integer"
+        },
+        "blockRefMode": {
+          "type": "integer"
+        },
+        "blockRefTextLeft": {
+          "type": "string"
+        },
+        "blockRefTextRight": {
+          "type": "string"
+        },
+        "docxTemplate": {
+          "type": "string"
+        },
+        "fileAnnotationRefMode": {
+          "type": "integer"
+        },
+        "imageWatermarkDesc": {
+          "type": "string"
+        },
+        "imageWatermarkStr": {
+          "type": "string"
+        },
+        "includeRelatedDocs": {
+          "type": "boolean"
+        },
+        "includeSubDocs": {
+          "type": "boolean"
+        },
+        "inlineMemo": {
+          "type": "boolean"
+        },
+        "markdownYFM": {
+          "type": "boolean"
+        },
+        "pandocBin": {
+          "type": "string"
+        },
+        "pandocParams": {
+          "type": "string"
+        },
+        "paragraphBeginningSpace": {
+          "type": "boolean"
+        },
+        "pdfFooter": {
+          "type": "string"
+        },
+        "pdfWatermarkDesc": {
+          "type": "string"
+        },
+        "pdfWatermarkStr": {
+          "type": "string"
+        },
+        "removeAssetsID": {
+          "type": "boolean"
+        },
+        "tagCloseMarker": {
+          "type": "string"
+        },
+        "tagOpenMarker": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "addTitle",
+        "blockEmbedMode",
+        "blockRefMode",
+        "blockRefTextLeft",
+        "blockRefTextRight",
+        "docxTemplate",
+        "fileAnnotationRefMode",
+        "imageWatermarkDesc",
+        "imageWatermarkStr",
+        "includeRelatedDocs",
+        "includeSubDocs",
+        "inlineMemo",
+        "markdownYFM",
+        "pandocBin",
+        "pandocParams",
+        "paragraphBeginningSpace",
+        "pdfFooter",
+        "pdfWatermarkDesc",
+        "pdfWatermarkStr",
+        "removeAssetsID",
+        "tagCloseMarker",
+        "tagOpenMarker"
+      ],
+      "additionalProperties": false
+    },
+    "SettingFileTree": {
+      "type": "object",
+      "properties": {
+        "allowCreateDeeper": {
+          "type": "boolean"
+        },
+        "alwaysSelectOpenedFile": {
+          "type": "boolean"
+        },
+        "boxDocEnabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "closeTabOnDoubleClick": {
+          "type": "boolean"
+        },
+        "closeTabsOnStart": {
+          "type": "boolean"
+        },
+        "createDocAtTop": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "docCreateSaveBox": {
+          "type": "string"
+        },
+        "docCreateSavePath": {
+          "type": "string"
+        },
+        "docCreateTemplatePath": {
+          "type": "string"
+        },
+        "docIconClickExpand": {
+          "type": "boolean"
+        },
+        "largeFileWarningSize": {
+          "type": "integer"
+        },
+        "maxListCount": {
+          "type": "integer"
+        },
+        "maxOpenTabCount": {
+          "type": "integer"
+        },
+        "noSplitScreenWhenOpenTab": {
+          "type": "boolean"
+        },
+        "openFilesUseCurrentTab": {
+          "type": "boolean"
+        },
+        "parentDocClickExpand": {
+          "type": "boolean"
+        },
+        "recentDocsMaxListCount": {
+          "type": "integer"
+        },
+        "refCreateSaveBox": {
+          "type": "string"
+        },
+        "refCreateSavePath": {
+          "type": "string"
+        },
+        "removeDocWithoutConfirm": {
+          "type": "boolean"
+        },
+        "shorthandSaveBox": {
+          "type": "string"
+        },
+        "shorthandSavePath": {
+          "type": "string"
+        },
+        "sort": {
+          "type": "integer"
+        },
+        "tabStartupMode": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "useSVGDefaultIcon": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "useSingleLineSave": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "allowCreateDeeper",
+        "alwaysSelectOpenedFile",
+        "boxDocEnabled",
+        "closeTabOnDoubleClick",
+        "closeTabsOnStart",
+        "createDocAtTop",
+        "docCreateSaveBox",
+        "docCreateSavePath",
+        "docCreateTemplatePath",
+        "docIconClickExpand",
+        "largeFileWarningSize",
+        "maxListCount",
+        "maxOpenTabCount",
+        "noSplitScreenWhenOpenTab",
+        "openFilesUseCurrentTab",
+        "parentDocClickExpand",
+        "recentDocsMaxListCount",
+        "refCreateSaveBox",
+        "refCreateSavePath",
+        "removeDocWithoutConfirm",
+        "shorthandSaveBox",
+        "shorthandSavePath",
+        "sort",
+        "tabStartupMode",
+        "useSVGDefaultIcon",
+        "useSingleLineSave"
+      ],
+      "additionalProperties": false
+    },
+    "SettingFlashcard": {
+      "type": "object",
+      "properties": {
+        "blockquote": {
+          "type": "boolean"
+        },
+        "callout": {
+          "type": "boolean"
+        },
+        "deck": {
+          "type": "boolean"
+        },
+        "heading": {
+          "type": "boolean"
+        },
+        "list": {
+          "type": "boolean"
+        },
+        "mark": {
+          "type": "boolean"
+        },
+        "maximumInterval": {
+          "type": "integer"
+        },
+        "newCardLimit": {
+          "type": "integer"
+        },
+        "requestRetention": {
+          "type": "number"
+        },
+        "reviewCardLimit": {
+          "type": "integer"
+        },
+        "reviewMode": {
+          "type": "integer"
+        },
+        "superBlock": {
+          "type": "boolean"
+        },
+        "weights": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "blockquote",
+        "callout",
+        "deck",
+        "heading",
+        "list",
+        "mark",
+        "maximumInterval",
+        "newCardLimit",
+        "requestRetention",
+        "reviewCardLimit",
+        "reviewMode",
+        "superBlock",
+        "weights"
+      ],
+      "additionalProperties": false
+    },
+    "SettingIconRequestInput": {
+      "type": "object",
+      "properties": {
+        "icon": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "icon"
+      ],
+      "additionalProperties": false
+    },
+    "SettingImageGeneration": {
+      "type": "object",
+      "properties": {
+        "modelId": {
+          "type": "string"
+        },
+        "outputFormat": {
+          "type": "string"
+        },
+        "quality": {
+          "type": "string"
+        },
+        "requestTimeout": {
+          "type": "integer"
+        },
+        "size": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "modelId",
+        "outputFormat",
+        "quality",
+        "requestTimeout",
+        "size"
+      ],
+      "additionalProperties": false
+    },
+    "SettingImageGenerationInput": {
+      "type": "object",
+      "properties": {
+        "modelId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "outputFormat": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "quality": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "requestTimeout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "size": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingKeymapRequestInput": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/JSONValue"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingLogin2faRequestInput": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "token"
+      ],
+      "additionalProperties": false
+    },
+    "SettingMCP": {
+      "type": "object",
+      "properties": {
+        "exposurePolicy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingCapabilityPolicy"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "servers": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/SettingMCPServer"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "exposurePolicy",
+        "servers"
+      ],
+      "additionalProperties": false
+    },
+    "SettingMCPInput": {
+      "type": "object",
+      "properties": {
+        "exposurePolicy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingCapabilityPolicyInput"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "servers": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/SettingMCPServerInput"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingMCPServer": {
+      "type": "object",
+      "properties": {
+        "args": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "command": {
+          "type": "string"
+        },
+        "disableStandaloneSSE": {
+          "type": "boolean"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "env": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "headers": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "inheritEnv": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer"
+        },
+        "trustToolAnnotations": {
+          "type": "boolean"
+        },
+        "type": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "args",
+        "command",
+        "disableStandaloneSSE",
+        "enabled",
+        "env",
+        "headers",
+        "id",
+        "inheritEnv",
+        "name",
+        "timeout",
+        "trustToolAnnotations",
+        "type",
+        "url"
+      ],
+      "additionalProperties": false
+    },
+    "SettingMCPServerInput": {
+      "type": "object",
+      "properties": {
+        "args": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "command": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "disableStandaloneSSE": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "env": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "headers": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inheritEnv": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timeout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "trustToolAnnotations": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingMarkdown": {
+      "type": "object",
+      "properties": {
+        "blockFullWidthTaskList": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "codeBlockMiddleDot": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inlineAsterisk": {
+          "type": "boolean"
+        },
+        "inlineFullWidthStrikethrough": {
+          "type": "boolean"
+        },
+        "inlineMark": {
+          "type": "boolean"
+        },
+        "inlineMath": {
+          "type": "boolean"
+        },
+        "inlineStrikethrough": {
+          "type": "boolean"
+        },
+        "inlineSub": {
+          "type": "boolean"
+        },
+        "inlineSup": {
+          "type": "boolean"
+        },
+        "inlineTag": {
+          "type": "boolean"
+        },
+        "inlineUnderscore": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "blockFullWidthTaskList",
+        "codeBlockMiddleDot",
+        "inlineAsterisk",
+        "inlineFullWidthStrikethrough",
+        "inlineMark",
+        "inlineMath",
+        "inlineStrikethrough",
+        "inlineSub",
+        "inlineSup",
+        "inlineTag",
+        "inlineUnderscore"
+      ],
+      "additionalProperties": false
+    },
+    "SettingMarkdownInput": {
+      "type": "object",
+      "properties": {
+        "blockFullWidthTaskList": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "codeBlockMiddleDot": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inlineAsterisk": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inlineFullWidthStrikethrough": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inlineMark": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inlineMath": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inlineStrikethrough": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inlineSub": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inlineSup": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inlineTag": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inlineUnderscore": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingModel": {
+      "type": "object",
+      "properties": {
+        "contextLength": {
+          "type": "integer"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "enabled",
+        "id",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "SettingModelInput": {
+      "type": "object",
+      "properties": {
+        "contextLength": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "displayName": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingNotifications": {
+      "type": "object",
+      "properties": {
+        "browserCompatibility": {
+          "type": "boolean"
+        },
+        "docTreeMaxList": {
+          "type": "boolean"
+        },
+        "formatPainterTip": {
+          "type": "boolean"
+        },
+        "selectAllIncompleteTip": {
+          "type": "boolean"
+        },
+        "selectAllTip": {
+          "type": "boolean"
+        },
+        "tagMaxList": {
+          "type": "boolean"
+        },
+        "workspaceNotSSD": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "browserCompatibility",
+        "docTreeMaxList",
+        "tagMaxList",
+        "workspaceNotSSD"
+      ],
+      "additionalProperties": false
+    },
+    "SettingNotificationsInput": {
+      "type": "object",
+      "properties": {
+        "browserCompatibility": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "docTreeMaxList": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "formatPainterTip": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selectAllIncompleteTip": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "selectAllTip": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tagMaxList": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "workspaceNotSSD": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingPetalDisabledData": {
+      "type": "object",
+      "properties": {
+        "dataChangePlugins": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "globalPetalChanged": {
+          "type": "boolean"
+        },
+        "globalPetalDisabled": {
+          "type": "boolean"
+        },
+        "globalPetalEnabled": {
+          "type": "boolean"
+        },
+        "globalPetalRevision": {
+          "type": "integer"
+        },
+        "reloadPlugins": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "uninstallPlugins": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unloadPlugins": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "dataChangePlugins",
+        "globalPetalChanged",
+        "globalPetalDisabled",
+        "globalPetalEnabled",
+        "globalPetalRevision",
+        "reloadPlugins",
+        "uninstallPlugins",
+        "unloadPlugins"
+      ],
+      "additionalProperties": false
+    },
+    "SettingPetalDisabledRequestInput": {
+      "type": "object",
+      "properties": {
+        "petalDisabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "petalDisabled"
+      ],
+      "additionalProperties": false
+    },
+    "SettingProvider": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "type": "string"
+        },
+        "baseURL": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "headers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "models": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingModel"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "protocol": {
+          "type": "string"
+        },
+        "requestTimeout": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "apiKey",
+        "baseURL",
+        "enabled",
+        "id",
+        "models",
+        "requestTimeout"
+      ],
+      "additionalProperties": false
+    },
+    "SettingProviderInput": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "baseURL": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "displayName": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "headers": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "models": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingModelInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "protocol": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "requestTimeout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingPublish": {
+      "type": "object",
+      "properties": {
+        "auth": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingBasicAuth"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enable": {
+          "type": "boolean"
+        },
+        "port": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "auth",
+        "enable",
+        "port"
+      ],
+      "additionalProperties": false
+    },
+    "SettingPublishData": {
+      "type": "object",
+      "properties": {
+        "port": {
+          "type": "integer"
+        },
+        "publish": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingPublish"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "port",
+        "publish"
+      ],
+      "additionalProperties": false
+    },
+    "SettingRerank": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "type": "string"
+        },
+        "candidateCount": {
+          "type": "integer"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "requestFormat": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "apiKey",
+        "candidateCount",
+        "enabled",
+        "endpoint",
+        "id",
+        "name",
+        "requestFormat",
+        "timeout"
+      ],
+      "additionalProperties": false
+    },
+    "SettingRerankInput": {
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "candidateCount": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "endpoint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "requestFormat": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timeout": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingSearch": {
+      "type": "object",
+      "properties": {
+        "alias": {
+          "type": "boolean"
+        },
+        "audioBlock": {
+          "type": "boolean"
+        },
+        "backlinkMentionAlias": {
+          "type": "boolean"
+        },
+        "backlinkMentionAnchor": {
+          "type": "boolean"
+        },
+        "backlinkMentionDoc": {
+          "type": "boolean"
+        },
+        "backlinkMentionKeywordsLimit": {
+          "type": "integer"
+        },
+        "backlinkMentionName": {
+          "type": "boolean"
+        },
+        "blockquote": {
+          "type": "boolean"
+        },
+        "callout": {
+          "type": "boolean"
+        },
+        "caseSensitive": {
+          "type": "boolean"
+        },
+        "codeBlock": {
+          "type": "boolean"
+        },
+        "databaseBlock": {
+          "type": "boolean"
+        },
+        "document": {
+          "type": "boolean"
+        },
+        "embedBlock": {
+          "type": "boolean"
+        },
+        "hanSensitive": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "heading": {
+          "type": "boolean"
+        },
+        "htmlBlock": {
+          "type": "boolean"
+        },
+        "ial": {
+          "type": "boolean"
+        },
+        "iframeBlock": {
+          "type": "boolean"
+        },
+        "indexAssetPath": {
+          "type": "boolean"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "list": {
+          "type": "boolean"
+        },
+        "listItem": {
+          "type": "boolean"
+        },
+        "mathBlock": {
+          "type": "boolean"
+        },
+        "memo": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "boolean"
+        },
+        "paragraph": {
+          "type": "boolean"
+        },
+        "superBlock": {
+          "type": "boolean"
+        },
+        "tabItem": {
+          "type": "boolean"
+        },
+        "table": {
+          "type": "boolean"
+        },
+        "tabs": {
+          "type": "boolean"
+        },
+        "videoBlock": {
+          "type": "boolean"
+        },
+        "virtualRefAlias": {
+          "type": "boolean"
+        },
+        "virtualRefAnchor": {
+          "type": "boolean"
+        },
+        "virtualRefDoc": {
+          "type": "boolean"
+        },
+        "virtualRefName": {
+          "type": "boolean"
+        },
+        "widgetBlock": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "alias",
+        "audioBlock",
+        "backlinkMentionAlias",
+        "backlinkMentionAnchor",
+        "backlinkMentionDoc",
+        "backlinkMentionKeywordsLimit",
+        "backlinkMentionName",
+        "blockquote",
+        "callout",
+        "caseSensitive",
+        "codeBlock",
+        "databaseBlock",
+        "document",
+        "embedBlock",
+        "hanSensitive",
+        "heading",
+        "htmlBlock",
+        "ial",
+        "iframeBlock",
+        "indexAssetPath",
+        "limit",
+        "list",
+        "listItem",
+        "mathBlock",
+        "memo",
+        "name",
+        "paragraph",
+        "superBlock",
+        "tabItem",
+        "table",
+        "tabs",
+        "videoBlock",
+        "virtualRefAlias",
+        "virtualRefAnchor",
+        "virtualRefDoc",
+        "virtualRefName",
+        "widgetBlock"
+      ],
+      "additionalProperties": false
+    },
+    "SettingSecret": {
+      "type": "object",
+      "properties": {
+        "allowedHosts": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "allowedHosts",
+        "name",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "SettingSecretInput": {
+      "type": "object",
+      "properties": {
+        "allowedHosts": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingSecrets": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingSecret"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "SettingSnpt": {
+      "type": "object",
+      "properties": {
+        "enabledCSS": {
+          "type": "boolean"
+        },
+        "enabledJS": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabledCSS",
+        "enabledJS"
+      ],
+      "additionalProperties": false
+    },
+    "SettingStatusBar": {
+      "type": "object",
+      "properties": {
+        "msgDataSyncDisabled": {
+          "type": "boolean"
+        },
+        "msgTaskAssetDatabaseIndexCommitDisabled": {
+          "type": "boolean"
+        },
+        "msgTaskDatabaseIndexCommitDisabled": {
+          "type": "boolean"
+        },
+        "msgTaskHistoryDatabaseIndexCommitDisabled": {
+          "type": "boolean"
+        },
+        "msgTaskHistoryGenerateFileDisabled": {
+          "type": "boolean"
+        },
+        "version": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "msgDataSyncDisabled",
+        "msgTaskAssetDatabaseIndexCommitDisabled",
+        "msgTaskDatabaseIndexCommitDisabled",
+        "msgTaskHistoryDatabaseIndexCommitDisabled",
+        "msgTaskHistoryGenerateFileDisabled",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "SettingStatusBarInput": {
+      "type": "object",
+      "properties": {
+        "msgDataSyncDisabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "msgTaskAssetDatabaseIndexCommitDisabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "msgTaskDatabaseIndexCommitDisabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "msgTaskHistoryDatabaseIndexCommitDisabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "msgTaskHistoryGenerateFileDisabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingThemeRequestInput": {
+      "type": "object",
+      "properties": {
+        "appearanceMode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "modes": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "theme": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingUser": {
+      "type": "object",
+      "properties": {
+        "userAvatarURL": {
+          "type": "string"
+        },
+        "userCreateTime": {
+          "type": "string"
+        },
+        "userHomeBImgURL": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "userIntro": {
+          "type": "string"
+        },
+        "userName": {
+          "type": "string"
+        },
+        "userNickname": {
+          "type": "string"
+        },
+        "userSiYuanAssetSize": {
+          "type": "number"
+        },
+        "userSiYuanOneTimePayStatus": {
+          "type": "number"
+        },
+        "userSiYuanPointExchangeRepoSize": {
+          "type": "number"
+        },
+        "userSiYuanProExpireTime": {
+          "type": "number"
+        },
+        "userSiYuanRepoSize": {
+          "type": "number"
+        },
+        "userSiYuanSubscriptionPlan": {
+          "type": "number"
+        },
+        "userSiYuanSubscriptionStatus": {
+          "type": "number"
+        },
+        "userSiYuanSubscriptionType": {
+          "type": "number"
+        },
+        "userTitles": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingUserTitle"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "userToken": {
+          "type": "string"
+        },
+        "userTokenExpireTime": {
+          "type": "string"
+        },
+        "userTrafficAPIGet": {
+          "type": "number"
+        },
+        "userTrafficAPIPut": {
+          "type": "number"
+        },
+        "userTrafficDownload": {
+          "type": "number"
+        },
+        "userTrafficTime": {
+          "type": "number"
+        },
+        "userTrafficUpload": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "userAvatarURL",
+        "userCreateTime",
+        "userHomeBImgURL",
+        "userId",
+        "userIntro",
+        "userName",
+        "userNickname",
+        "userSiYuanAssetSize",
+        "userSiYuanOneTimePayStatus",
+        "userSiYuanPointExchangeRepoSize",
+        "userSiYuanProExpireTime",
+        "userSiYuanRepoSize",
+        "userSiYuanSubscriptionPlan",
+        "userSiYuanSubscriptionStatus",
+        "userSiYuanSubscriptionType",
+        "userTitles",
+        "userToken",
+        "userTokenExpireTime",
+        "userTrafficAPIGet",
+        "userTrafficAPIPut",
+        "userTrafficDownload",
+        "userTrafficTime",
+        "userTrafficUpload"
+      ],
+      "additionalProperties": false
+    },
+    "SettingUserTitle": {
+      "type": "object",
+      "properties": {
+        "desc": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "desc",
+        "icon",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "SettingVariable": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "SettingVariableInput": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SettingVariables": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingVariable"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items"
       ],
       "additionalProperties": false
     },
@@ -49265,6 +55804,175 @@
     },
     {
       "method": "POST",
+      "path": "/api/setting/getBootAppearances",
+      "handler": "getBootAppearances",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SettingBootAppearancesData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/getCloudUser",
+      "handler": "getCloudUser",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SettingCloudUserRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingUser"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1,
+                  255
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "$ref": "#/$defs/SettingUser"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/setting/getPandocBin",
       "handler": "getPandocBin",
       "body": "none",
@@ -49284,6 +55992,212 @@
               },
               "data": {
                 "type": "string"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/getPublish",
+      "handler": "getPublish",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SettingPublishData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/login2faCloudUser",
+      "handler": "login2faCloudUser",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SettingLogin2faRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/Login2faEnvelope"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "directJSON"
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/logoutCloudUser",
+      "handler": "logoutCloudUser",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
               },
               "msg": {
                 "type": "string"
@@ -49415,6 +56329,491 @@
     },
     {
       "method": "POST",
+      "path": "/api/setting/setAI",
+      "handler": "setAI",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetAIRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingAI"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setAppearance",
+      "handler": "setAppearance",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetAppearanceRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingAppearance"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setBazaar",
+      "handler": "setBazaar",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetBazaarRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingBazaar"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setBazaarPetalDisabled",
+      "handler": "setBazaarPetalDisabled",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SettingPetalDisabledRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SettingPetalDisabledData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setBootAppearance",
+      "handler": "setBootAppearance",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SettingBootAppearanceRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingBootAppearanceSelection"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setEditor",
+      "handler": "setEditor",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetEditorRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingEditor"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/setting/setEditorReadOnly",
       "handler": "setEditorReadOnly",
       "body": "json",
@@ -49434,6 +56833,1037 @@
               },
               "data": {
                 "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setEmoji",
+      "handler": "setEmoji",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SettingEmojiRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setEntryVisibility",
+      "handler": "setEntryVisibility",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetEntryVisibilityRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingEntryVisibility"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setExport",
+      "handler": "setExport",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetExportRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingExport"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setFiletree",
+      "handler": "setFiletree",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetFiletreeRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingFileTree"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setFlashcard",
+      "handler": "setFlashcard",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetFlashcardRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingFlashcard"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setIcon",
+      "handler": "setIcon",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SettingIconRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setKeymap",
+      "handler": "setKeymap",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SettingKeymapRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setPublish",
+      "handler": "setPublish",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetPublishRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SettingPublishData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setSearch",
+      "handler": "setSearch",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetSearchRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingSearch"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setSecrets",
+      "handler": "setSecrets",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetSecretsRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingSecrets"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setSnippet",
+      "handler": "setConfSnippet",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetConfSnippetRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingSnpt"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setTheme",
+      "handler": "setTheme",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SettingThemeRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/setting/setVariables",
+      "handler": "setVariables",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SetVariablesRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingVariables"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "msg": {
                 "type": "string"

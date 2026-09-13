@@ -1,5 +1,11 @@
 // 此文件由内核契约生成，请运行 pnpm run api:generate 更新。
 
+export type AccountLoginData = { "needCaptcha": string | null; "token": string | null; "userName": string | null; };
+
+export type AccountLoginRequestInput = { "captcha": string; "cloudRegion": number; "userName": string; "userPassword": string; };
+
+export type ActivationCodeRequestInput = { "data": string; };
+
 export type AppendBlockRequestInput = { "data": string; "dataType": string; "parentID": string; };
 
 export type AppendHeadingChildrenRequestInput = { "childrenDOM": string; "id": string; };
@@ -97,6 +103,8 @@ export type BroadcastPublishResult = { "channel": BroadcastChannel; "code": numb
 export type ChangeMasterPasswordRequestInput = { "newPassword": string; "oldPassword": string; };
 
 export type ChangeSortNotebookRequestInput = { "notebooks": Array<string>; };
+
+export type CheckActivationCodeRequestInput = { "data": string; };
 
 export type CheckBlockRefRequestInput = { "deletedIDs"?: Array<string>; "exactIDs"?: Array<string>; "id"?: string | null; "ids"?: Array<string>; "notebook"?: string | null; "paths"?: Array<string>; "scope"?: string; };
 
@@ -507,11 +515,6 @@ export interface APIGETRoutes {
 }
 
 export type APILegacyPOSTPath =
-    "/api/account/checkActivationcode" |
-    "/api/account/deactivate" |
-    "/api/account/login" |
-    "/api/account/startFreeTrial" |
-    "/api/account/useActivationcode" |
     "/api/ai/agent/browserCapabilityResult" |
     "/api/ai/agent/chat" |
     "/api/ai/agent/confirm" |
@@ -923,6 +926,31 @@ export type APILegacyPOSTPath =
     "/plugin/private/:name/*path";
 
 export interface APIPOSTRoutes {
+    "/api/account/checkActivationcode": {
+        request: CheckActivationCodeRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | null; "msg": string; };
+        body: "json";
+    };
+    "/api/account/deactivate": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/account/login": {
+        request: AccountLoginRequestInput;
+        response: { "code": 0; "data": AccountLoginData | null; "msg": string; } | { "code": -1 | 1 | 10; "data": { "closeTimeout": number; } | null | AccountLoginData | null; "msg": string; };
+        body: "json";
+    };
+    "/api/account/startFreeTrial": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/account/useActivationcode": {
+        request: ActivationCodeRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/archive/unzip": {
         request: UnzipRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

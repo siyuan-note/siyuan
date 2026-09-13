@@ -447,3 +447,9 @@ var ReadClipboardFilePaths = define[EmptyRequest, []ClipboardFile]("readFilePath
 var WriteClipboardFilePath = define[ClipboardPathRequest, Null]("writeFilePath", "/api/clipboard/writeFilePath", JSONBody, ResponseOptions{}, "POST")
 var PrepareRichText = define[PrepareRichTextRequest, *RichClipboardPrepared]("prepareRichText", "/api/clipboard/prepareRichText", JSONBody, ResponseOptions{}, "POST")
 var CleanupRichText = define[CleanupRichTextRequest, Null]("cleanupRichText", "/api/clipboard/cleanupRichText", JSONBody, ResponseOptions{}, "POST")
+
+var StartFreeTrial = define[EmptyRequest, Null]("startFreeTrial", "/api/account/startFreeTrial", NoBody, ResponseOptions{}, "POST")
+var UseActivationCode = define[ActivationCodeRequest, Null]("useActivationcode", "/api/account/useActivationcode", JSONBody, ResponseOptions{}, "POST")
+var CheckActivationCode = define[CheckActivationCodeRequest, Null]("checkActivationcode", "/api/account/checkActivationcode", JSONBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
+var DeactivateUser = define[EmptyRequest, Null]("deactivateUser", "/api/account/deactivate", NoBody, ResponseOptions{}, "POST")
+var AccountLogin = define[AccountLoginRequest, *AccountLoginData]("login", "/api/account/login", JSONBody, ResponseOptions{AdditionalCodes: []int{1, 10}, DataOnError: true}, "POST")

@@ -1,5 +1,193 @@
 // 此文件由内核契约生成，请运行 pnpm run api:generate 更新。
 
+export type AIActionRequestInput = { "action": string; "ids": Array<string>; };
+
+export type AIAgentAttachment = { "detail"?: string; "documentId": string; "height"?: number; "mimeType"?: string; "path": string; "type": string; "width"?: number; };
+
+export type AIAgentAttachmentInput = { "detail"?: string | null; "documentId"?: string | null; "height"?: number | null; "mimeType"?: string | null; "path"?: string | null; "type"?: string | null; "width"?: number | null; };
+
+export type AIAgentChatRequestInput = { "blockHTML"?: string | null; "contentRevision"?: number | null; "editorContext"?: AIEditorContextInput | null; "frontendCapabilities"?: Array<AIFrontendCapabilityInput> | null; "language"?: string | null; "message"?: string | null; "model"?: string | null; "reasoningEffort"?: string | null; "references"?: Array<AIReferenceInput> | null; "regenerate"?: boolean | null; "sessionID"?: string | null; "userEntryID"?: string | null; };
+
+export type AIAgentGoogleToolCallProviderData = { "thoughtSignature"?: string; };
+
+export type AIAgentGoogleToolCallProviderDataInput = { "thoughtSignature"?: string | null; };
+
+export type AIAgentMessage = { "content": string; "editorContext"?: AIEditorContext; "entryID"?: string; "reasoningContent"?: string; "references"?: Array<AIReference>; "responseOutput"?: Array<JSONValue>; "responseOutputTokens"?: number; "role": string; "roundID"?: string; "toolCalls"?: Array<AIAgentToolCall>; };
+
+export type AIAgentMessageInput = { "content"?: string | null; "editorContext"?: AIEditorContextInput | null; "entryID"?: string | null; "reasoningContent"?: string | null; "references"?: Array<AIReferenceInput> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "role"?: string | null; "roundID"?: string | null; "toolCalls"?: Array<AIAgentToolCallInput> | null; };
+
+export type AIAgentToolCall = { "arguments": { [key: string]: JSONValue } | null; "argumentsJSON"?: string; "attachments"?: Array<AIAgentAttachment>; "id"?: string; "name": string; "providerData"?: AIAgentToolCallProviderData; "result"?: string; "state"?: string; };
+
+export type AIAgentToolCallInput = { "arguments"?: { [key: string]: JSONValue } | null; "argumentsJSON"?: string | null; "attachments"?: Array<AIAgentAttachmentInput> | null; "id"?: string | null; "name"?: string | null; "providerData"?: AIAgentToolCallProviderDataInput | null; "result"?: string | null; "state"?: string | null; };
+
+export type AIAgentToolCallProviderData = { "google"?: AIAgentGoogleToolCallProviderData; };
+
+export type AIAgentToolCallProviderDataInput = { "google"?: AIAgentGoogleToolCallProviderDataInput | null; };
+
+export type AIBrowserCapabilityResultRequestInput = { "callID"?: string | null; "isError"?: boolean | null; "result"?: string | null; "structuredContent"?: JSONValue | null; "structuredContentSet"?: boolean | null; };
+
+export type AICapabilityAction = { "effects"?: AIToolEffects; "name": string; };
+
+export type AICapabilityManifest = { "actions"?: Array<AICapabilityAction>; "agentOnly"?: boolean; "available": boolean; "description": string; "effects"?: AIToolEffects; "id": string; "name": string; "ownerId"?: string; "ownerName"?: string; "runtime": string; "source": string; "title"?: string; };
+
+export type AIConfirmRequestInput = { "always"?: boolean | null; "approved"?: boolean | null; "confirmID"?: string | null; };
+
+export type AIEditorAction = { "action": string; "id": string; "name": string; };
+
+export type AIEditorActionIDRequestInput = { "id": string; };
+
+export type AIEditorActionSaveRequestInput = { "action": string; "id"?: string | null; "name": string; };
+
+export type AIEditorChatRequestInput = { "action"?: string | null; "history"?: Array<AIEditorMessageInput> | null; "ids"?: Array<string> | null; "input"?: string | null; "taskID"?: string | null; };
+
+export type AIEditorContext = { "activeDocID"?: string; "activeDocTitle"?: string; "focusedBlockID"?: string; "notebookID"?: string; "selectedBlockIDs"?: Array<string>; "visibleBlockIDs"?: Array<string>; };
+
+export type AIEditorContextInput = { "activeDocID"?: string | null; "activeDocTitle"?: string | null; "focusedBlockID"?: string | null; "notebookID"?: string | null; "selectedBlockIDs"?: Array<string> | null; "visibleBlockIDs"?: Array<string> | null; };
+
+export type AIEditorMessageInput = { "content"?: string | null; "role"?: string | null; };
+
+export type AIEmbeddingStat = { "enabled": boolean; "failed": number; "ignoredByConfig": number; "ignoredByLen": number; "indexed": number; "pending": number; "total": number; };
+
+export type AIEmbeddingTestData = { "dimensions"?: number; "matched": boolean; "msg"?: string; };
+
+export type AIFrontendCapabilityInput = { "actionEffects"?: Record<string, AIToolEffectsInput> | null; "description"?: string | null; "effects"?: AIToolEffectsInput | null; "generation"?: number | null; "id"?: string | null; "inputSchema"?: { [key: string]: JSONValue } | null; "outputSchema"?: { [key: string]: JSONValue } | null; "ownerId"?: string | null; "ownerName"?: string | null; "source"?: string | null; "title"?: string | null; };
+
+export type AIMCPEnvironmentData = { "defaults": Array<string> | null; "names": Array<string> | null; };
+
+export type AIMCPIDRequestInput = { "id"?: string | null; };
+
+export type AIMCPStatus = { "authorizationURL"?: string; "authorized": boolean; "error"?: string; "id": string; "name": string; "status": string; "tools": number; };
+
+export type AIMessageRequestInput = { "msg": string; };
+
+export type AIModelRequestInput = { "model": string; "provider"?: string | null; "providerConfig"?: SettingProviderInput | null; };
+
+export type AIModelTestData = { "available": Array<string> | null; "matched": boolean; "msg"?: string; };
+
+export type AIModelsData = { "contextLengths": Record<string, number> | null; "models": Array<string> | null; "msg"?: string; };
+
+export type AIPermissionData = { "permissionMode": string; };
+
+export type AIPermissionRequestInput = { "permissionMode"?: string | null; "sessionID"?: string | null; };
+
+export type AIProviderRequestInput = { "provider"?: string | null; "providerConfig"?: SettingProviderInput | null; };
+
+export type AIQuestionRequestInput = { "answers"?: Array<string> | null; "questionID"?: string | null; };
+
+export type AIReference = { "id": string; "title": string; };
+
+export type AIReferenceInput = { "id"?: string | null; "title"?: string | null; };
+
+export type AIRerankTestData = { "matched": boolean; "msg"?: string; };
+
+export type AISSEBrowserCapabilityCall = { "arguments": { [key: string]: JSONValue } | null; "callID": string; "capabilityID": string; "generation": number; "name": string; };
+
+export type AISSEConfirm = { "arguments": { [key: string]: JSONValue } | null; "confirmID": string; "effects": AIToolEffects; "forced": boolean; "name": string; };
+
+export type AISSEFinish = { "finishReason": string; };
+
+export type AISSEMessage = { "message": string; };
+
+export type AISSEQuestion = { "arguments": { [key: string]: JSONValue } | null; "questionID": string; "roundID": string; };
+
+export type AISSERetry = { "attempt": number; "maxRetries": number; };
+
+export type AISSESnapshot = { "roundID": string; "snapshotID": string; };
+
+export type AISSEStart = { "taskID": string; };
+
+export type AISSEThinking = { "reasoning": string; "roundID": string; };
+
+export type AISSEToken = { "token": string; };
+
+export type AISSEToolCall = { "arguments": { [key: string]: JSONValue } | null; "callID": string; "name": string; "roundID": string; };
+
+export type AISSEToolResult = { "callID": string; "name": string; "result": string; "roundID": string; };
+
+export type AISSETurn = { "turnID": string; };
+
+export type AISSEUsage = { "cachedTokens": number; "completionTokens": number; "contextLimit": number; "lastPromptTokens": number; "promptTokens": number; "tokenBreakdown": Record<string, number> | null; };
+
+export type AISessionEntry = { "answers"?: Array<string>; "args"?: { [key: string]: JSONValue }; "blockHTML"?: string; "completionTokens"?: number; "confirmID"?: string; "content"?: string; "duration"?: number; "editorContext"?: AIEditorContext; "id"?: string; "name"?: string; "promptTokens"?: number; "questionID"?: string; "questions"?: Array<{ [key: string]: JSONValue } | null>; "reasoningContent"?: string; "references"?: Array<AIReference>; "responseOutput"?: Array<JSONValue>; "responseOutputTokens"?: number; "roundID"?: string; "snapshotID"?: string; "status"?: string; "steps"?: Array<AISessionEntryStep>; "timestamp"?: number; "toolCalls"?: Array<AIAgentToolCall>; "type": string; };
+
+export type AISessionEntryInput = { "answers"?: Array<string> | null; "args"?: { [key: string]: JSONValue } | null; "blockHTML"?: string | null; "completionTokens"?: number | null; "confirmID"?: string | null; "content"?: string | null; "duration"?: number | null; "editorContext"?: AIEditorContextInput | null; "id"?: string | null; "name"?: string | null; "promptTokens"?: number | null; "questionID"?: string | null; "questions"?: Array<{ [key: string]: JSONValue } | null> | null; "reasoningContent"?: string | null; "references"?: Array<AIReferenceInput> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "roundID"?: string | null; "snapshotID"?: string | null; "status"?: string | null; "steps"?: Array<AISessionEntryStepInput> | null; "timestamp"?: number | null; "toolCalls"?: Array<AIAgentToolCallInput> | null; "type"?: string | null; };
+
+export type AISessionEntryStep = { "content"?: string; "reasoning": string; "reasoningContent"?: string; "roundID"?: string; "toolCallIDs"?: Array<string>; "toolNames"?: Array<string>; };
+
+export type AISessionEntryStepInput = { "content"?: string | null; "reasoning"?: string | null; "reasoningContent"?: string | null; "roundID"?: string | null; "toolCallIDs"?: Array<string> | null; "toolNames"?: Array<string> | null; };
+
+export type AISessionExtensionAIAgentAttachment = ({ "detail"?: string | null; "documentId"?: string | null; "height"?: number | null; "mimeType"?: string | null; "path"?: string | null; "type"?: string | null; "width"?: number | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAIAgentAttachmentInput = ({ "detail"?: string | null; "documentId"?: string | null; "height"?: number | null; "mimeType"?: string | null; "path"?: string | null; "type"?: string | null; "width"?: number | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAIAgentGoogleToolCallProviderData = ({ "thoughtSignature"?: string | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAIAgentGoogleToolCallProviderDataInput = ({ "thoughtSignature"?: string | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAIAgentMessage = ({ "content"?: string | null; "editorContext"?: AISessionExtensionAIEditorContext | null; "entryID"?: string | null; "reasoningContent"?: string | null; "references"?: Array<AISessionExtensionAIReference> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "role"?: string | null; "roundID"?: string | null; "toolCalls"?: Array<AISessionExtensionAIAgentToolCall> | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAIAgentMessageInput = ({ "content"?: string | null; "editorContext"?: AISessionExtensionAIEditorContextInput | null; "entryID"?: string | null; "reasoningContent"?: string | null; "references"?: Array<AISessionExtensionAIReferenceInput> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "role"?: string | null; "roundID"?: string | null; "toolCalls"?: Array<AISessionExtensionAIAgentToolCallInput> | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAIAgentToolCall = ({ "arguments"?: { [key: string]: JSONValue } | null; "argumentsJSON"?: string | null; "attachments"?: Array<AISessionExtensionAIAgentAttachment> | null; "id"?: string | null; "name"?: string | null; "providerData"?: AISessionExtensionAIAgentToolCallProviderData | null; "result"?: string | null; "state"?: string | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAIAgentToolCallInput = ({ "arguments"?: { [key: string]: JSONValue } | null; "argumentsJSON"?: string | null; "attachments"?: Array<AISessionExtensionAIAgentAttachmentInput> | null; "id"?: string | null; "name"?: string | null; "providerData"?: AISessionExtensionAIAgentToolCallProviderDataInput | null; "result"?: string | null; "state"?: string | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAIAgentToolCallProviderData = ({ "google"?: AISessionExtensionAIAgentGoogleToolCallProviderData | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAIAgentToolCallProviderDataInput = ({ "google"?: AISessionExtensionAIAgentGoogleToolCallProviderDataInput | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAIEditorContext = ({ "activeDocID"?: string | null; "activeDocTitle"?: string | null; "focusedBlockID"?: string | null; "notebookID"?: string | null; "selectedBlockIDs"?: Array<string> | null; "visibleBlockIDs"?: Array<string> | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAIEditorContextInput = ({ "activeDocID"?: string | null; "activeDocTitle"?: string | null; "focusedBlockID"?: string | null; "notebookID"?: string | null; "selectedBlockIDs"?: Array<string> | null; "visibleBlockIDs"?: Array<string> | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAIReference = ({ "id"?: string | null; "title"?: string | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAIReferenceInput = ({ "id"?: string | null; "title"?: string | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAISessionEntry = ({ "answers"?: Array<string> | null; "args"?: { [key: string]: JSONValue } | null; "blockHTML"?: string | null; "completionTokens"?: number | null; "confirmID"?: string | null; "content"?: string | null; "duration"?: number | null; "editorContext"?: AISessionExtensionAIEditorContext | null; "id"?: string | null; "name"?: string | null; "promptTokens"?: number | null; "questionID"?: string | null; "questions"?: Array<{ [key: string]: JSONValue } | null> | null; "reasoningContent"?: string | null; "references"?: Array<AISessionExtensionAIReference> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "roundID"?: string | null; "snapshotID"?: string | null; "status"?: string | null; "steps"?: Array<AISessionExtensionAISessionEntryStep> | null; "timestamp"?: number | null; "toolCalls"?: Array<AISessionExtensionAIAgentToolCall> | null; "type"?: string | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAISessionEntryInput = ({ "answers"?: Array<string> | null; "args"?: { [key: string]: JSONValue } | null; "blockHTML"?: string | null; "completionTokens"?: number | null; "confirmID"?: string | null; "content"?: string | null; "duration"?: number | null; "editorContext"?: AISessionExtensionAIEditorContextInput | null; "id"?: string | null; "name"?: string | null; "promptTokens"?: number | null; "questionID"?: string | null; "questions"?: Array<{ [key: string]: JSONValue } | null> | null; "reasoningContent"?: string | null; "references"?: Array<AISessionExtensionAIReferenceInput> | null; "responseOutput"?: Array<JSONValue> | null; "responseOutputTokens"?: number | null; "roundID"?: string | null; "snapshotID"?: string | null; "status"?: string | null; "steps"?: Array<AISessionExtensionAISessionEntryStepInput> | null; "timestamp"?: number | null; "toolCalls"?: Array<AISessionExtensionAIAgentToolCallInput> | null; "type"?: string | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAISessionEntryStep = ({ "content"?: string | null; "reasoning"?: string | null; "reasoningContent"?: string | null; "roundID"?: string | null; "toolCallIDs"?: Array<string> | null; "toolNames"?: Array<string> | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAISessionEntryStepInput = ({ "content"?: string | null; "reasoning"?: string | null; "reasoningContent"?: string | null; "roundID"?: string | null; "toolCallIDs"?: Array<string> | null; "toolNames"?: Array<string> | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAISessionFields = ({ "agentRunning"?: boolean | null; "alwaysAllow"?: boolean | null; "commitTurnID"?: string | null; "completionTokens"?: number | null; "contextCachedTokens"?: number | null; "contextLimit"?: number | null; "contextTokenBreakdown"?: Record<string, number> | null; "contextTokens"?: number | null; "createdAt"?: number | null; "entries"?: Array<AISessionExtensionAISessionEntry> | null; "expectedRevision"?: number | null; "id": string; "lastCommittedTurnID"?: string | null; "messageHistory"?: Array<string> | null; "messages"?: Array<AISessionExtensionAIAgentMessage> | null; "model"?: string | null; "permissionMode"?: string | null; "promptTokens"?: number | null; "recoveryRevision"?: number | null; "recoveryState"?: string | null; "recoveryTurnID"?: string | null; "revision"?: number | null; "snapshots"?: Array<string> | null; "title"?: string | null; "titled"?: boolean | null; "totalDuration"?: number | null; "updatedAt"?: number | null; } & { [key: string]: JSONValue });
+
+export type AISessionExtensionAISessionFieldsInput = ({ "agentRunning"?: boolean | null; "alwaysAllow"?: boolean | null; "commitTurnID"?: string | null; "completionTokens"?: number | null; "contextCachedTokens"?: number | null; "contextLimit"?: number | null; "contextTokenBreakdown"?: Record<string, number> | null; "contextTokens"?: number | null; "createdAt"?: number | null; "entries"?: Array<AISessionExtensionAISessionEntryInput> | null; "expectedRevision"?: number | null; "id": string; "lastCommittedTurnID"?: string | null; "messageHistory"?: Array<string> | null; "messages"?: Array<AISessionExtensionAIAgentMessageInput> | null; "model"?: string | null; "permissionMode"?: string | null; "promptTokens"?: number | null; "recoveryRevision"?: number | null; "recoveryState"?: string | null; "recoveryTurnID"?: string | null; "revision"?: number | null; "snapshots"?: Array<string> | null; "title"?: string | null; "titled"?: boolean | null; "totalDuration"?: number | null; "updatedAt"?: number | null; } & { [key: string]: JSONValue });
+
+export type AISessionFields = { "agentRunning"?: boolean; "alwaysAllow"?: boolean; "commitTurnID"?: string; "completionTokens"?: number; "contextCachedTokens"?: number; "contextLimit"?: number; "contextTokenBreakdown"?: Record<string, number>; "contextTokens"?: number; "createdAt"?: number; "entries"?: Array<AISessionEntry>; "expectedRevision"?: number; "id": string; "lastCommittedTurnID"?: string; "messageHistory"?: Array<string>; "messages"?: Array<AIAgentMessage>; "model"?: string; "permissionMode"?: string; "promptTokens"?: number; "recoveryRevision"?: number; "recoveryState"?: string; "recoveryTurnID"?: string; "revision"?: number; "snapshots"?: Array<string>; "title"?: string; "titled"?: boolean; "totalDuration"?: number; "updatedAt"?: number; };
+
+export type AISessionFieldsInput = { "agentRunning"?: boolean | null; "alwaysAllow"?: boolean | null; "commitTurnID"?: string | null; "completionTokens"?: number | null; "contextCachedTokens"?: number | null; "contextLimit"?: number | null; "contextTokenBreakdown"?: Record<string, number> | null; "contextTokens"?: number | null; "createdAt"?: number | null; "entries"?: Array<AISessionEntryInput> | null; "expectedRevision"?: number | null; "id": string; "lastCommittedTurnID"?: string | null; "messageHistory"?: Array<string> | null; "messages"?: Array<AIAgentMessageInput> | null; "model"?: string | null; "permissionMode"?: string | null; "promptTokens"?: number | null; "recoveryRevision"?: number | null; "recoveryState"?: string | null; "recoveryTurnID"?: string | null; "revision"?: number | null; "snapshots"?: Array<string> | null; "title"?: string | null; "titled"?: boolean | null; "totalDuration"?: number | null; "updatedAt"?: number | null; };
+
+export type AISessionIDRequestInput = { "id"?: string | null; };
+
+export type AISessionIndex = { "agentRunning"?: boolean; "createdAt": number; "id": string; "title": string; "updatedAt": number; };
+
+export type AISessionList = { "page": number; "pageSize": number; "sessions": Array<AISessionIndex | null> | null; "total": number; };
+
+export type AISessionSaveData = { "revision": number; "session"?: AISessionExtensionAISessionFields; };
+
+export type AISessionsRequestInput = { "keyword"?: string | null; "page"?: number | null; "pageSize"?: number | null; };
+
+export type AISkillData = { "content": string; "name": string; };
+
+export type AISkillInfo = { "description": string; "name": string; };
+
+export type AISkillNameRequestInput = { "name"?: string | null; };
+
+export type AISkillRenameRequestInput = { "newName"?: string | null; "oldName"?: string | null; };
+
+export type AISkillSaveRequestInput = { "content"?: string | null; "name"?: string | null; };
+
+export type AITitleRequestInput = { "language"?: string | null; "message"?: string | null; "model"?: string | null; };
+
+export type AIToolEffects = { "dataEgress"?: boolean; "externalCost"?: boolean; "localRead"?: boolean; "localWrite"?: boolean; };
+
+export type AIToolEffectsInput = { "dataEgress"?: boolean | null; "externalCost"?: boolean | null; "localRead"?: boolean | null; "localWrite"?: boolean | null; };
+
+export type AIUserSkillInfo = { "description": string; "enabled": boolean; "id": string; "name": string; "shadowed": boolean; };
+
 export type AccountLoginData = { "needCaptcha": string | null; "token": string | null; "userName": string | null; };
 
 export type AccountLoginRequestInput = { "captcha": string; "cloudRegion": number; "userName": string; "userPassword": string; };
@@ -1415,7 +1603,6 @@ export type WorkspaceInfoData = { "siyuanVer": string; "workspaceDir": string; }
 export type ZipRequestInput = { "path": string; "zipPath": string; };
 
 export type APILegacyGETPath =
-    "/api/ai/mcp/oauth/callback/:flowID" |
     "/api/icon/getDynamicIcon" |
     "/api/network/echo" |
     "/api/network/echo/*path" |
@@ -1431,6 +1618,13 @@ export type APILegacyGETPath =
     "/ws/network/proxy";
 
 export interface APIGETRoutes {
+    "/api/ai/mcp/oauth/callback/:flowID": {
+        request: EmptyRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        output: "binary";
+        contentVariants: [{"status":200,"contentType":"text/html"},{"status":400,"contentType":"text/html"},{"status":403,"contentType":"text/plain"}];
+    };
     "/api/plugin": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<LoadedPlugin | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -1473,40 +1667,6 @@ export interface APIGETRoutes {
 }
 
 export type APILegacyPOSTPath =
-    "/api/ai/agent/browserCapabilityResult" |
-    "/api/ai/agent/chat" |
-    "/api/ai/agent/confirm" |
-    "/api/ai/agent/getSession" |
-    "/api/ai/agent/getSkill" |
-    "/api/ai/agent/lsSessions" |
-    "/api/ai/agent/lsSkills" |
-    "/api/ai/agent/lsUserSkills" |
-    "/api/ai/agent/question" |
-    "/api/ai/agent/removeSession" |
-    "/api/ai/agent/removeSkill" |
-    "/api/ai/agent/renameSkill" |
-    "/api/ai/agent/saveSession" |
-    "/api/ai/agent/saveSkill" |
-    "/api/ai/agent/setPermission" |
-    "/api/ai/agent/title" |
-    "/api/ai/chatGPT" |
-    "/api/ai/chatGPTWithAction" |
-    "/api/ai/editor/chat" |
-    "/api/ai/editor/lsActions" |
-    "/api/ai/editor/removeAction" |
-    "/api/ai/editor/saveAction" |
-    "/api/ai/embeddingStat" |
-    "/api/ai/listModels" |
-    "/api/ai/lsCapabilities" |
-    "/api/ai/mcpEnvironmentVariables" |
-    "/api/ai/mcpOAuthAuthorize" |
-    "/api/ai/mcpOAuthDisconnect" |
-    "/api/ai/mcpStatus" |
-    "/api/ai/reindexEmbedding" |
-    "/api/ai/retryFailedEmbedding" |
-    "/api/ai/testEmbeddingModel" |
-    "/api/ai/testModel" |
-    "/api/ai/testRerankModel" |
     "/api/av/addAttributeViewBlocks" |
     "/api/av/addAttributeViewKey" |
     "/api/av/appendAttributeViewDetachedBlocksWithValues" |
@@ -1631,6 +1791,187 @@ export interface APIPOSTRoutes {
         request: ActivationCodeRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+    };
+    "/api/ai/agent/browserCapabilityResult": {
+        request: AIBrowserCapabilityResultRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        additionalErrorStatuses: [409];
+    };
+    "/api/ai/agent/chat": {
+        request: AIAgentChatRequestInput;
+        response: string | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        output: "sse";
+        additionalErrorStatuses: [409];
+        sse: { events: { "browser_capability_call": AISSEBrowserCapabilityCall; "confirm": AISSEConfirm; "content": AISSEToken; "done": AISSETurn; "error": AISSEMessage; "interrupted": AISSEMessage; "permission": AIPermissionData; "question": AISSEQuestion; "reasoning": AISSEToken; "retry": AISSERetry; "snapshot": AISSESnapshot; "thinking": AISSEThinking; "tool_call": AISSEToolCall; "tool_result": AISSEToolResult; "turn": AISSETurn; "usage": AISSEUsage; }; };
+    };
+    "/api/ai/agent/confirm": {
+        request: AIConfirmRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        additionalErrorStatuses: [409];
+    };
+    "/api/ai/agent/getSession": {
+        request: AISessionIDRequestInput;
+        response: { "code": 0; "data": AISessionExtensionAISessionFields | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        additionalErrorStatuses: [500];
+    };
+    "/api/ai/agent/getSkill": {
+        request: AISkillNameRequestInput;
+        response: { "code": 0; "data": AISkillData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/ai/agent/lsSessions": {
+        request: AISessionsRequestInput;
+        response: { "code": 0; "data": AISessionList; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/ai/agent/lsSkills": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<AISkillInfo> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/ai/agent/lsUserSkills": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<AIUserSkillInfo> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/ai/agent/question": {
+        request: AIQuestionRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        additionalErrorStatuses: [409];
+    };
+    "/api/ai/agent/removeSession": {
+        request: AISessionIDRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        additionalErrorStatuses: [409,500];
+    };
+    "/api/ai/agent/removeSkill": {
+        request: AISkillNameRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/ai/agent/renameSkill": {
+        request: AISkillRenameRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/ai/agent/saveSession": {
+        request: AISessionExtensionAISessionFieldsInput;
+        response: { "code": 0; "data": AISessionSaveData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "revision"?: never; "session"?: never; }) | null | (AISessionSaveData & { "closeTimeout"?: never; }); "msg": string; };
+        body: "structJSON";
+        additionalErrorStatuses: [400,409,500];
+    };
+    "/api/ai/agent/saveSkill": {
+        request: AISkillSaveRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/ai/agent/setPermission": {
+        request: AIPermissionRequestInput;
+        response: { "code": 0; "data": AIPermissionData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/ai/agent/title": {
+        request: AITitleRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/ai/chatGPT": {
+        request: AIMessageRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ai/chatGPTWithAction": {
+        request: AIActionRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ai/editor/chat": {
+        request: AIEditorChatRequestInput;
+        response: string | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+        output: "sse";
+        sse: { events: { "content": AISSEToken; "done": AISSEFinish; "error": AISSEMessage; "reasoning": AISSEToken; "start": AISSEStart; "truncated": AISSEMessage; }; };
+    };
+    "/api/ai/editor/lsActions": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<AIEditorAction | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/ai/editor/removeAction": {
+        request: AIEditorActionIDRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ai/editor/saveAction": {
+        request: AIEditorActionSaveRequestInput;
+        response: { "code": 0; "data": AIEditorAction | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ai/embeddingStat": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": AIEmbeddingStat | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/ai/listModels": {
+        request: AIProviderRequestInput;
+        response: { "code": 0; "data": AIModelsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ai/lsCapabilities": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<AICapabilityManifest> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/ai/mcpEnvironmentVariables": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": AIMCPEnvironmentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/ai/mcpOAuthAuthorize": {
+        request: AIMCPIDRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ai/mcpOAuthDisconnect": {
+        request: AIMCPIDRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ai/mcpStatus": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<AIMCPStatus> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/ai/reindexEmbedding": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/ai/retryFailedEmbedding": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/ai/testEmbeddingModel": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": AIEmbeddingTestData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/ai/testModel": {
+        request: AIModelRequestInput;
+        response: { "code": 0; "data": AIModelTestData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/ai/testRerankModel": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": AIRerankTestData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
     };
     "/api/archive/unzip": {
         request: UnzipRequestInput;

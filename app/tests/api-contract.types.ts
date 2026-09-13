@@ -412,3 +412,23 @@ if (notebooks.code === 0) {
     // @ts-expect-error 成功码下的空数据也必须在严格模式下被检查。
     void notebooks.data.notebooks;
 }
+
+fetchPost("/api/ai/testModel", {model: "example", providerConfig: {baseURL: "https://example.invalid/v1", headers: {"X-Key": "value"}}}, (response) => {
+    if (response.code === 0) {
+        const matched: boolean = response.data.matched;
+        void matched;
+    }
+});
+fetchPost("/api/ai/agent/confirm", {confirmID: "id", approved: true, always: false});
+fetchPost("/api/ai/agent/browserCapabilityResult", {callID: "id", structuredContent: {future: [true, null, 1]}, structuredContentSet: true});
+// @ts-expect-error 模型名称必须是字符串
+fetchPost("/api/ai/testModel", {model: 1});
+// @ts-expect-error 确认结果必须是布尔值
+fetchPost("/api/ai/agent/confirm", {approved: "yes"});
+// @ts-expect-error 保存会话必须包含会话 ID
+fetchPost("/api/ai/agent/saveSession", {title: "missing ID"});
+const aiStreamContent: import("../src/types/api").APIPOSTRoutes["/api/ai/editor/chat"]["sse"]["events"]["content"] = {token: "text"};
+void aiStreamContent;
+// @ts-expect-error 流式内容必须是字符串
+const invalidAIStreamContent: import("../src/types/api").APIPOSTRoutes["/api/ai/editor/chat"]["sse"]["events"]["content"] = {token: 1};
+void invalidAIStreamContent;

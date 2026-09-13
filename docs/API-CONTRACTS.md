@@ -24,6 +24,8 @@ Encrypted notebook lifecycle endpoints use typed requests and responses while re
 
 ## Compatibility requirements
 
+AI contracts retain provider configuration, model discovery and matching, confirmation decisions, session extensions, and numeric and omission semantics. Editor and agent streams declare their actual SSE events; disconnection closes upstream requests, and stream lifetimes remain within the request. OAuth pages retain their media types, HTTP statuses, and security headers. Session permission notifications use `WithAfterWrite` to preserve response-before-broadcast ordering. Arbitrary JSON remains limited to protocol extension fields and tool results.
+
 Setting contracts retain partial configuration merging, existing defaults, case-insensitive struct fields, explicit null values, JSON number normalization, and parser error messages. Keyboard shortcuts and cloud authentication results declare their fixed fields while preserving their protocol-defined JSON extensions. Cloud-user admission still precedes body reads for non-administrators, and two-factor authentication keeps cloud error codes and extension fields. Frontend callers normalize persisted display settings at the same existing boundaries.
 
 Document-tree contracts retain conditional parameter validation, path and sorting semantics, omitted callbacks, pagination defaults, and document response variants. Publish authentication preserves HTTP 429 and `Retry-After` through explicitly declared additional error statuses. Publish and encrypted-notebook admission remain before deferred field validation, and document leases cover response serialization.

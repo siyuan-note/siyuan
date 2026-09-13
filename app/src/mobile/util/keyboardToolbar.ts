@@ -1544,7 +1544,8 @@ export const initKeyboardToolbar = () => {
                 hideKeyboardToolbarUtil(true);
                 restoreKeyboardToolbarRange(protyle, range);
             } else {
-                activeBlur();
+                // 用户主动收起键盘时跳过弹出保护锁。
+                activeBlur(true);
             }
             return;
         }

@@ -24,9 +24,9 @@ export const openStandaloneDatabaseItem = async (app: App, databaseBlockID: stri
     if (response.code !== 0) {
         return false;
     }
-    const tables: {avID: string, keyValues: {key: {type: string}, values: IAVCellValue[]}[]}[] = response.data || [];
+    const tables = response.data || [];
     const primary = tables.find(table => table.avID === avID)?.keyValues
-        .find(keyValue => keyValue.key.type === "block")?.values.find(value => value.blockID === itemID);
+        .find(keyValue => keyValue.key.type === "block")?.values?.find(value => value.blockID === itemID);
     if (!primary?.block) {
         showMessage(window.siyuan.languages.databaseItemNotFound);
         return false;

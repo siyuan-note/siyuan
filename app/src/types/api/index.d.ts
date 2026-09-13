@@ -188,11 +188,273 @@ export type AIToolEffectsInput = { "dataEgress"?: boolean | null; "externalCost"
 
 export type AIUserSkillInfo = { "description": string; "enabled": boolean; "id": string; "name": string; "shadowed": boolean; };
 
+export type AVArchiveRenderData = { "colorOrder": Array<string> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "defaultTemplateID": string; "id": string; "isMirror": boolean; "name": string; "newItemTemplates": Array<AVNewItemTemplate | null> | null; "usedCustomColorIndexes": Array<number> | null; "view": AVViewInstance; "viewID": string; "viewType": "table" | "gallery" | "kanban"; "views": Array<AVViewData | null> | null; };
+
+export type AVAttributeViewBacklink = { "avID": string; "avName": string; "blockIDs": Array<string> | null; "boundBlockID": string; "boxID": string; "databaseBlockID": string; "databasePath": string; "icon": string; "isDetached": boolean; "itemID": string; "relations": Array<AVAttributeViewBacklinkRelation | null> | null; "title": string; "valueID": string; };
+
+export type AVAttributeViewBacklinkRelation = { "keyID": string; "keyName": string; "targetAvID": string; "targetItemID": string; };
+
+export type AVAttributeViewBacklinks = { "items": Array<AVAttributeViewBacklink | null> | null; "total": number; };
+
+export type AVAttributeViewColor = { "dark": AVAttributeViewColorTheme; "light": AVAttributeViewColorTheme; };
+
+export type AVAttributeViewColorInput = { "dark"?: AVAttributeViewColorThemeInput | null; "light"?: AVAttributeViewColorThemeInput | null; };
+
+export type AVAttributeViewColorTheme = { "backgroundColor": string; "color": string; };
+
+export type AVAttributeViewColorThemeInput = { "backgroundColor"?: string | null; "color"?: string | null; };
+
+export type AVAttributeViewContextFilter = { "keyID": string; "spec": 1; };
+
+export type AVAttributeViewContextFilterField = { "icon": string; "id": string; "name": string; "targetAvID": string; };
+
+export type AVAttributeViewCustomColor = { "dark": AVAttributeViewColorTheme; "hidden"?: boolean; "index": number; "light": AVAttributeViewColorTheme; };
+
+export type AVAttributeViewData = { "cardCoverPositions"?: Record<string, Record<string, AVCardCoverPosition | null> | null>; "customColors": Array<AVAttributeViewCustomColor | null> | null; "defaultTemplateID"?: string; "id": string; "keyIDs": Array<string> | null; "keyValues": Array<AVKeyValues | null> | null; "name": string; "newItemTemplates"?: Array<AVNewItemTemplate | null>; "spec": number; "viewID": string; "views": Array<AVView | null> | null; };
+
+export type AVAttributeViewFieldView = { "hidden": boolean; "icon": string; "id": string; "name": string; "type": "table" | "gallery" | "kanban"; };
+
+export type AVAttributeViewGroupItemPosition = { "groupID": string; "previousID": string; };
+
+export type AVAttributeViewItemPosition = { "groups": Array<AVAttributeViewGroupItemPosition | null> | null; "previousID": string; "viewID": string; };
+
+export type AVAttributeViewRenderTarget = { "groupID"?: string; "index": number; "itemID": string; "offset": number; "pageSize": number; "status": "visible" | "filtered" | "itemNotFound" | "groupHidden"; };
+
+export type AVAttributeViewSearchTarget = { "avID": string; "boundBlockID": string; "databaseBlockID": string; "groupID"?: string; "isDetached": boolean; "itemID": string; "keywords": Array<string> | null; "matchedKeyID": string; "matchedValueID": string; "notebookID": string; "title": string; "valueID": string; "viewID"?: string; };
+
+export type AVAvSearchResult = { "avID": string; "avName": string; "blockID": string; "children"?: Array<AVAvSearchResult | null>; "hPath": string; "matched"?: boolean; "viewID": string; "viewLayout": "" | "table" | "gallery" | "kanban"; "viewName": string; };
+
+export type AVBlockAttributeViewKeys = { "avID": string; "avName": string; "blockIDs": Array<string> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "itemPositions": Array<AVAttributeViewItemPosition | null> | null; "keyValues": Array<AVKeyValues | null> | null; };
+
+export type AVBlockSourceInput = { "content"?: string | null; "id"?: string | null; "isDetached": boolean; "itemID"?: string | null; };
+
+export type AVCardCoverPosition = { "image": string; "x": number; "y": number; };
+
+export type AVCellUpdateInput = { "itemID"?: string | null; "keyID": string; "rowID"?: string | null; "value"?: AVValueInput | null; };
+
+export type AVContextFilterData = { "contextFilter": AVAttributeViewContextFilter | null; };
+
+export type AVCreateAttributeViewItemDocsResult = { "blockIDs": Array<string> | null; "itemIDs": Array<string> | null; "skippedItemIDs"?: Array<string>; "warnings"?: Array<string>; };
+
+export type AVCreateAttributeViewItemResult = { "blockID": string; "content": string; "isDetached": boolean; "itemID": string; "warnings"?: Array<string>; };
+
+export type AVCreateItemDocsResult = (AVCreateAttributeViewItemDocsResult & { "unavailableNotebook"?: never; }) | (AVUnavailableNotebook & { "blockIDs"?: never; "itemIDs"?: never; "skippedItemIDs"?: never; "warnings"?: never; });
+
+export type AVCreateItemResult = (AVCreateAttributeViewItemResult & { "unavailableNotebook"?: never; }) | (AVUnavailableNotebook & { "blockID"?: never; "content"?: never; "isDetached"?: never; "itemID"?: never; "warnings"?: never; });
+
+export type AVCreated = { "includeTime": boolean; };
+
+export type AVData = { "av": AVAttributeViewData | null; };
+
+export type AVDate = { "autoFillNow": boolean; "fillSpecificTime": boolean; };
+
+export type AVDuplicateData = { "avID": string; "blockID": string; };
+
+export type AVFieldCalc = { "operator": string; "result": AVValue | null; "template"?: string; };
+
+export type AVFieldViewsData = { "views": Array<AVAttributeViewFieldView | null> | null; };
+
+export type AVFilterSortData = { "filters": Array<AVViewFilter | null> | null; "sorts": Array<AVViewSort | null> | null; };
+
+export type AVGallery = { "cardAspectRatio": number; "cardAspectRatioValue": number; "cardCount": number; "cardLayout": number; "cardSize": number; "cardWidth": number; "cards": Array<AVGalleryCard | null> | null; "coverFrom": number; "coverFromAssetKeyID"?: string; "desc": string; "displayEmptyFields": boolean; "displayFieldName": boolean; "fields": Array<AVGalleryField | null> | null; "filters": Array<AVViewFilter | null> | null; "fitImage": boolean; "group": AVViewGroup | null; "groupCalc"?: AVGroupCalc; "groupFolded": boolean; "groupHidden": number; "groupKey"?: AVKey; "groupValue"?: AVValue; "groups"?: Array<AVViewInstance>; "hideAttrViewName": boolean; "icon": string; "id": string; "name": string; "pageSize": number; "showIcon": boolean; "sorts": Array<AVViewSort | null> | null; "wrapField": boolean; } | ({ "cardAspectRatio": number; "cardAspectRatioValue": number; "cardCount": number; "cardLayout": number; "cardSize": number; "cardWidth": number; "cards": Array<AVGalleryCard | null> | null; "coverFrom": number; "coverFromAssetKeyID"?: string; "displayEmptyFields": boolean; "displayFieldName": boolean; "fields": Array<AVGalleryField | null> | null; "fitImage": boolean; } & { "desc"?: never; "filters"?: never; "group"?: never; "groupCalc"?: never; "groupFolded"?: never; "groupHidden"?: never; "groupKey"?: never; "groupValue"?: never; "groups"?: never; "hideAttrViewName"?: never; "icon"?: never; "id"?: never; "name"?: never; "pageSize"?: never; "showIcon"?: never; "sorts"?: never; "wrapField"?: never; });
+
+export type AVGalleryCard = { "coverContent": string; "coverPosition"?: AVCardCoverPosition; "coverURL": string; "id": string; "values": Array<AVGalleryFieldValue | null> | null; };
+
+export type AVGalleryField = { "calc": AVFieldCalc | null; "created"?: AVCreated; "date"?: AVDate; "dateFormat"?: "" | "full" | "month-day-year" | "day-month-year" | "year-month-day"; "desc": string; "fullRow": boolean; "hidden": boolean; "icon": string; "id": string; "name": string; "numberFormat": string; "options"?: Array<AVSelectOption | null>; "relation"?: AVRelation; "renderTemplate"?: string; "rollup"?: AVRollup; "template": string; "type": "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVUpdated; "wrap": boolean; } | ({ "fullRow": boolean; } & { "calc"?: never; "created"?: never; "date"?: never; "dateFormat"?: never; "desc"?: never; "hidden"?: never; "icon"?: never; "id"?: never; "name"?: never; "numberFormat"?: never; "options"?: never; "relation"?: never; "renderTemplate"?: never; "rollup"?: never; "template"?: never; "type"?: never; "updated"?: never; "wrap"?: never; });
+
+export type AVGalleryFieldValue = { "id": string; "value": AVValue | null; "valueType": "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; } | (Record<string, never> & { "id"?: never; "value"?: never; "valueType"?: never; });
+
+export type AVGroupCalc = { "calc": AVFieldCalc | null; "field": string; };
+
+export type AVGroupPagingInput = { "page"?: number | null; "pageSize"?: number | null; };
+
+export type AVGroupRange = { "numEnd": number; "numStart": number; "numStep": number; };
+
+export type AVGroupRangeInput = { "numEnd"?: number | null; "numStart"?: number | null; "numStep"?: number | null; };
+
+export type AVIDData = { "id": string; };
+
+export type AVKanban = { "cardAspectRatio": number; "cardAspectRatioValue": number; "cardCount": number; "cardLayout": number; "cardSize": number; "cardWidth": number; "cards": Array<AVKanbanCard | null> | null; "coverFrom": number; "coverFromAssetKeyID"?: string; "desc": string; "displayEmptyFields": boolean; "displayFieldName": boolean; "fields": Array<AVKanbanField | null> | null; "fillColBackgroundColor": boolean; "filters": Array<AVViewFilter | null> | null; "fitImage": boolean; "group": AVViewGroup | null; "groupCalc"?: AVGroupCalc; "groupFolded": boolean; "groupHidden": number; "groupKey"?: AVKey; "groupValue"?: AVValue; "groups"?: Array<AVViewInstance>; "hideAttrViewName": boolean; "icon": string; "id": string; "name": string; "pageSize": number; "showIcon": boolean; "sorts": Array<AVViewSort | null> | null; "wrapField": boolean; } | ({ "cardAspectRatio": number; "cardAspectRatioValue": number; "cardCount": number; "cardLayout": number; "cardSize": number; "cardWidth": number; "cards": Array<AVKanbanCard | null> | null; "coverFrom": number; "coverFromAssetKeyID"?: string; "displayEmptyFields": boolean; "displayFieldName": boolean; "fields": Array<AVKanbanField | null> | null; "fillColBackgroundColor": boolean; "fitImage": boolean; } & { "desc"?: never; "filters"?: never; "group"?: never; "groupCalc"?: never; "groupFolded"?: never; "groupHidden"?: never; "groupKey"?: never; "groupValue"?: never; "groups"?: never; "hideAttrViewName"?: never; "icon"?: never; "id"?: never; "name"?: never; "pageSize"?: never; "showIcon"?: never; "sorts"?: never; "wrapField"?: never; });
+
+export type AVKanbanCard = { "coverContent": string; "coverPosition"?: AVCardCoverPosition; "coverURL": string; "id": string; "values": Array<AVKanbanFieldValue | null> | null; };
+
+export type AVKanbanField = { "calc": AVFieldCalc | null; "created"?: AVCreated; "date"?: AVDate; "dateFormat"?: "" | "full" | "month-day-year" | "day-month-year" | "year-month-day"; "desc": string; "fullRow": boolean; "hidden": boolean; "icon": string; "id": string; "name": string; "numberFormat": string; "options"?: Array<AVSelectOption | null>; "relation"?: AVRelation; "renderTemplate"?: string; "rollup"?: AVRollup; "template": string; "type": "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVUpdated; "wrap": boolean; } | ({ "fullRow": boolean; } & { "calc"?: never; "created"?: never; "date"?: never; "dateFormat"?: never; "desc"?: never; "hidden"?: never; "icon"?: never; "id"?: never; "name"?: never; "numberFormat"?: never; "options"?: never; "relation"?: never; "renderTemplate"?: never; "rollup"?: never; "template"?: never; "type"?: never; "updated"?: never; "wrap"?: never; });
+
+export type AVKanbanFieldValue = { "id": string; "value": AVValue | null; "valueType": "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; } | (Record<string, never> & { "id"?: never; "value"?: never; "valueType"?: never; });
+
+export type AVKey = { "created"?: AVCreated; "date"?: AVDate; "dateFormat"?: "" | "full" | "month-day-year" | "day-month-year" | "year-month-day"; "desc": string; "icon": string; "id": string; "name": string; "numberFormat": string; "options"?: Array<AVSelectOption | null>; "relation"?: AVRelation; "renderTemplate"?: string; "rollup"?: AVRollup; "template": string; "type": "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVUpdated; };
+
+export type AVKeyValues = { "key": AVKey | null; "values"?: Array<AVValue | null>; };
+
+export type AVKeysData = { "keys": Array<AVKey | null> | null; };
+
+export type AVLayoutGallery = { "cardAspectRatio": number; "cardAspectRatioValue": number; "cardIds": Array<string> | null; "cardLayout": number; "cardSize": number; "cardWidth": number; "coverFrom": number; "coverFromAssetKeyID"?: string; "displayEmptyFields": boolean; "displayFieldName": boolean; "fields": Array<AVViewGalleryCardField | null> | null; "filters"?: Array<AVViewFilter | null>; "fitImage": boolean; "id": string; "pageSize"?: number; "showIcon": boolean; "sorts"?: Array<AVViewSort | null>; "spec": number; "wrapField": boolean; } | ({ "cardAspectRatio": number; "cardAspectRatioValue": number; "cardIds": Array<string> | null; "cardLayout": number; "cardSize": number; "cardWidth": number; "coverFrom": number; "coverFromAssetKeyID"?: string; "displayEmptyFields": boolean; "displayFieldName": boolean; "fields": Array<AVViewGalleryCardField | null> | null; "fitImage": boolean; } & { "filters"?: never; "id"?: never; "pageSize"?: never; "showIcon"?: never; "sorts"?: never; "spec"?: never; "wrapField"?: never; });
+
+export type AVLayoutKanban = { "cardAspectRatio": number; "cardAspectRatioValue": number; "cardLayout": number; "cardSize": number; "cardWidth": number; "coverFrom": number; "coverFromAssetKeyID"?: string; "displayEmptyFields": boolean; "displayFieldName": boolean; "fields": Array<AVViewKanbanField | null> | null; "fillColBackgroundColor": boolean; "filters"?: Array<AVViewFilter | null>; "fitImage": boolean; "id": string; "pageSize"?: number; "showIcon": boolean; "sorts"?: Array<AVViewSort | null>; "spec": number; "wrapField": boolean; } | ({ "cardAspectRatio": number; "cardAspectRatioValue": number; "cardLayout": number; "cardSize": number; "cardWidth": number; "coverFrom": number; "coverFromAssetKeyID"?: string; "displayEmptyFields": boolean; "displayFieldName": boolean; "fields": Array<AVViewKanbanField | null> | null; "fillColBackgroundColor": boolean; "fitImage": boolean; } & { "filters"?: never; "id"?: never; "pageSize"?: never; "showIcon"?: never; "sorts"?: never; "spec"?: never; "wrapField"?: never; });
+
+export type AVLayoutTable = { "columns": Array<AVViewTableColumn | null> | null; "filters"?: Array<AVViewFilter | null>; "id": string; "pageSize"?: number; "rowIds": Array<string> | null; "showIcon": boolean; "sorts"?: Array<AVViewSort | null>; "spec": number; "wrapField": boolean; } | ({ "columns": Array<AVViewTableColumn | null> | null; "rowIds": Array<string> | null; } & { "filters"?: never; "id"?: never; "pageSize"?: never; "showIcon"?: never; "sorts"?: never; "spec"?: never; "wrapField"?: never; });
+
+export type AVNewItemFieldValue = { "mode": "static" | "currentTime"; "value"?: AVValue; };
+
+export type AVNewItemSaveLocation = { "boxID"?: string; "pathTemplate": string; };
+
+export type AVNewItemTemplate = { "contentTemplatePath"?: string; "fieldValues"?: Record<string, AVNewItemFieldValue | null>; "hideInFileTree"?: boolean; "icon"?: string; "id": string; "name": string; "primaryKeyTemplate"?: string; "saveLocation"?: AVNewItemSaveLocation; "targetType": "detached" | "document"; };
+
+export type AVPasteRowsData = { "inferableKeyIDs": Array<string> | null; "view": AVTable | null; };
+
+export type AVPathsData = { "paths": Array<string> | null; };
+
+export type AVPrimaryValuesData = { "blockIDs": Array<string> | null; "name": string; "rows": AVKeyValues | null; "total": number; };
+
+export type AVRelation = { "avID": string; "backKeyID": string; "candidateFilters"?: Array<AVViewFilter | null>; "isTwoWay": boolean; };
+
+export type AVRelationCandidatesData = { "blockIDs": Array<string> | null; "columns": Array<AVTableColumn | null> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "name": string; "notebookID": string; "rows": Array<AVTableRow | null> | null; "selectedRows": Array<AVTableRow | null> | null; "total": number; };
+
+export type AVRelativeDate = { "count": number; "direction": number; "unit": number; };
+
+export type AVRelativeDateInput = { "count"?: number | null; "direction"?: number | null; "unit"?: number | null; };
+
+export type AVRenderData = { "colorOrder": Array<string> | null; "contextFilter": AVAttributeViewContextFilter | null; "contextFilterFields": Array<AVAttributeViewContextFilterField | null> | null; "customColors": Array<AVAttributeViewCustomColor | null> | null; "defaultTemplateID": string; "id": string; "isMirror": boolean; "name": string; "newItemTemplates": Array<AVNewItemTemplate | null> | null; "target"?: AVAttributeViewRenderTarget; "usedCustomColorIndexes": Array<number> | null; "view": AVViewInstance; "viewID": string; "viewType": "table" | "gallery" | "kanban"; "views": Array<AVViewData | null> | null; };
+
+export type AVRenderResult = (AVRenderData & { "error"?: never; }) | (AVViewNotFound & { "colorOrder"?: never; "contextFilter"?: never; "contextFilterFields"?: never; "customColors"?: never; "defaultTemplateID"?: never; "id"?: never; "isMirror"?: never; "name"?: never; "newItemTemplates"?: never; "target"?: never; "usedCustomColorIndexes"?: never; "view"?: never; "viewID"?: never; "viewType"?: never; "views"?: never; });
+
+export type AVRollup = { "calc": AVRollupCalc | null; "filters"?: Array<AVViewFilter | null>; "keyID": string; "relationKeyID": string; };
+
+export type AVRollupCalc = { "operator": string; "result": AVValue | null; };
+
+export type AVRowOrder = { "groups": Record<string, Array<string> | null> | null; "itemIDs": Array<string> | null; "sorts": Array<AVViewSort | null> | null; };
+
+export type AVRowOrderChange = { "expected": AVRowOrder | null; "rowOrder": AVRowOrder | null; "validateGroup"?: string; };
+
+export type AVRowSortOperation = { "action": "sortAttrViewRow"; "avID": string; "backRelationKeyID": string; "blockID": string; "blockIDs": Array<string> | null; "context": Record<string, string> | null; "data": AVRowOrderChange | null; "deckID": string; "format": string; "groupID": string; "id": string; "ignoreDefaultFill": boolean; "isDetached": boolean; "isTwoWay": boolean; "keyID": string; "layout": string; "name": string; "nextID": string; "parentID": string; "previousID": string; "removeDest": boolean; "retData": null; "rootID": string; "rowID": string; "srcIDs": Array<string> | null; "srcs": null; "targetGroupID": string; "type": ""; "viewID": string; "viewIDs"?: Array<string>; };
+
+export type AVRowSortPreview = { "conflict": boolean; "doOperations": Array<AVRowSortOperation | null> | null; "undoOperations": Array<AVRowSortOperation | null> | null; };
+
+export type AVSearchData = { "results": Array<AVAvSearchResult | null> | null; };
+
+export type AVSelectOption = { "color": string; "desc": string; "name": string; "resolvedColor"?: AVAttributeViewColor; };
+
+export type AVTable = { "columns": Array<AVTableColumn | null> | null; "desc": string; "filters": Array<AVViewFilter | null> | null; "group": AVViewGroup | null; "groupCalc"?: AVGroupCalc; "groupFolded": boolean; "groupHidden": number; "groupKey"?: AVKey; "groupValue"?: AVValue; "groups"?: Array<AVViewInstance>; "hideAttrViewName": boolean; "icon": string; "id": string; "name": string; "pageSize": number; "rowCount": number; "rows": Array<AVTableRow | null> | null; "showIcon": boolean; "sorts": Array<AVViewSort | null> | null; "wrapField": boolean; } | ({ "columns": Array<AVTableColumn | null> | null; "rowCount": number; "rows": Array<AVTableRow | null> | null; } & { "desc"?: never; "filters"?: never; "group"?: never; "groupCalc"?: never; "groupFolded"?: never; "groupHidden"?: never; "groupKey"?: never; "groupValue"?: never; "groups"?: never; "hideAttrViewName"?: never; "icon"?: never; "id"?: never; "name"?: never; "pageSize"?: never; "showIcon"?: never; "sorts"?: never; "wrapField"?: never; });
+
+export type AVTableCell = { "bgColor": string; "color": string; "id": string; "value": AVValue | null; "valueType": "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; } | ({ "bgColor": string; "color": string; } & { "id"?: never; "value"?: never; "valueType"?: never; });
+
+export type AVTableColumn = { "align": "" | "left" | "center" | "right"; "calc": AVFieldCalc | null; "created"?: AVCreated; "date"?: AVDate; "dateFormat"?: "" | "full" | "month-day-year" | "day-month-year" | "year-month-day"; "desc": string; "hidden": boolean; "icon": string; "id": string; "name": string; "numberFormat": string; "options"?: Array<AVSelectOption | null>; "pin": boolean; "relation"?: AVRelation; "renderTemplate"?: string; "rollup"?: AVRollup; "template": string; "type": "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVUpdated; "width": string; "wrap": boolean; } | ({ "align": "" | "left" | "center" | "right"; "pin": boolean; "width": string; } & { "calc"?: never; "created"?: never; "date"?: never; "dateFormat"?: never; "desc"?: never; "hidden"?: never; "icon"?: never; "id"?: never; "name"?: never; "numberFormat"?: never; "options"?: never; "relation"?: never; "renderTemplate"?: never; "rollup"?: never; "template"?: never; "type"?: never; "updated"?: never; "wrap"?: never; });
+
+export type AVTableRow = { "cells": Array<AVTableCell | null> | null; "id": string; };
+
+export type AVUnavailableNotebook = { "unavailableNotebook": true; };
+
+export type AVUpdated = { "includeTime": boolean; };
+
+export type AVValue = { "block"?: AVValueBlock; "blockID"?: string; "checkbox"?: AVValueCheckbox; "created"?: AVValueCreated; "createdAt"?: number; "date"?: AVValueDate; "email"?: AVValueEmail; "id"?: string; "isDetached"?: boolean; "keyID"?: string; "mAsset"?: Array<AVValueAsset | null>; "mSelect"?: Array<AVValueSelect | null>; "number"?: AVValueNumber; "phone"?: AVValuePhone; "relation"?: AVValueRelation; "renderedContent"?: string; "rollup"?: AVValueRollup; "template"?: AVValueTemplate; "text"?: AVValueText; "type"?: "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVValueUpdated; "updatedAt"?: number; "url"?: AVValueURL; };
+
+export type AVValueAsset = { "content": string; "name": string; "type": "file" | "image"; };
+
+export type AVValueAssetInput = { "content"?: string | null; "name"?: string | null; "type"?: "file" | "image"; };
+
+export type AVValueBlock = { "content": string; "created"?: number; "icon"?: string; "id"?: string; "refSubtype"?: "s" | "d"; "updated"?: number; };
+
+export type AVValueBlockInput = { "content"?: string | null; "created"?: number | null; "icon"?: string | null; "id"?: string | null; "refSubtype"?: "s" | "d"; "updated"?: number | null; };
+
+export type AVValueCheckbox = { "checked": boolean; };
+
+export type AVValueCheckboxInput = { "checked"?: boolean | null; };
+
+export type AVValueCreated = { "content": number; "content2": number; "formattedContent": string; "isNotEmpty": boolean; "isNotEmpty2": boolean; };
+
+export type AVValueCreatedInput = { "content"?: number | null; "content2"?: number | null; "formattedContent"?: string | null; "isNotEmpty"?: boolean | null; "isNotEmpty2"?: boolean | null; };
+
+export type AVValueData = { "value": AVValue | null; };
+
+export type AVValueDate = { "content": number; "content2": number; "formattedContent": string; "hasEndDate": boolean; "isNotEmpty": boolean; "isNotEmpty2": boolean; "isNotTime": boolean; };
+
+export type AVValueDateInput = { "content"?: number | null; "content2"?: number | null; "formattedContent"?: string | null; "hasEndDate"?: boolean | null; "isNotEmpty"?: boolean | null; "isNotEmpty2"?: boolean | null; "isNotTime"?: boolean | null; };
+
+export type AVValueEmail = { "content": string; };
+
+export type AVValueEmailInput = { "content"?: string | null; };
+
+export type AVValueInput = { "block"?: AVValueBlockInput | null; "blockID"?: string | null; "checkbox"?: AVValueCheckboxInput | null; "created"?: AVValueCreatedInput | null; "createdAt"?: number | null; "date"?: AVValueDateInput | null; "email"?: AVValueEmailInput | null; "id"?: string | null; "isDetached"?: boolean | null; "keyID"?: string | null; "mAsset"?: Array<AVValueAssetInput | null> | null; "mSelect"?: Array<AVValueSelectInput | null> | null; "number"?: AVValueNumberInput | null; "phone"?: AVValuePhoneInput | null; "relation"?: AVValueRelationInput | null; "renderedContent"?: string | null; "rollup"?: AVValueRollupInput | null; "template"?: AVValueTemplateInput | null; "text"?: AVValueTextInput | null; "type"?: "block" | "text" | "number" | "date" | "select" | "mSelect" | "url" | "email" | "phone" | "mAsset" | "template" | "created" | "updated" | "checkbox" | "relation" | "rollup" | "lineNumber"; "updated"?: AVValueUpdatedInput | null; "updatedAt"?: number | null; "url"?: AVValueURLInput | null; };
+
+export type AVValueNumber = { "content": number; "format": string; "formattedContent": string; "isNotEmpty": boolean; };
+
+export type AVValueNumberInput = { "content"?: number | null; "format"?: string | null; "formattedContent"?: string | null; "isNotEmpty"?: boolean | null; };
+
+export type AVValuePhone = { "content": string; };
+
+export type AVValuePhoneInput = { "content"?: string | null; };
+
+export type AVValueRelation = { "blockIDs": Array<string> | null; "contents": Array<AVValue | null> | null; };
+
+export type AVValueRelationInput = { "blockIDs"?: Array<string> | null; "contents"?: Array<AVValueInput | null> | null; };
+
+export type AVValueRollup = { "contents": Array<AVValue | null> | null; };
+
+export type AVValueRollupInput = { "contents"?: Array<AVValueInput | null> | null; };
+
+export type AVValueSelect = { "color": string; "content": string; "resolvedColor"?: AVAttributeViewColor; };
+
+export type AVValueSelectInput = { "color"?: string | null; "content"?: string | null; "resolvedColor"?: AVAttributeViewColorInput | null; };
+
+export type AVValueTemplate = { "content": string; };
+
+export type AVValueTemplateInput = { "content"?: string | null; };
+
+export type AVValueText = { "content": string; "rich"?: AVValueTextRich; };
+
+export type AVValueTextInput = { "content"?: string | null; "rich"?: AVValueTextRichInput | null; };
+
+export type AVValueTextRich = { "content": string; "format": "kramdown"; "spec": 1; };
+
+export type AVValueTextRichInput = { "content"?: string | null; "format"?: "kramdown"; "spec"?: 1; };
+
+export type AVValueURL = { "content": string; };
+
+export type AVValueURLInput = { "content"?: string | null; };
+
+export type AVValueUpdated = { "content": number; "content2": number; "formattedContent": string; "isNotEmpty": boolean; "isNotEmpty2": boolean; };
+
+export type AVValueUpdatedInput = { "content"?: number | null; "content2"?: number | null; "formattedContent"?: string | null; "isNotEmpty"?: boolean | null; "isNotEmpty2"?: boolean | null; };
+
+export type AVValuesData = { "values": Record<string, AVValue | null> | null; };
+
+export type AVView = { "desc": string; "filters"?: Array<AVViewFilter | null>; "gallery"?: AVLayoutGallery; "group"?: AVViewGroup; "groupCalc"?: AVGroupCalc; "groupCreated": number; "groupFolded": boolean; "groupHidden": number; "groupItemIds": Array<string> | null; "groupKey"?: AVKey; "groupSort": number; "groupVal"?: AVValue; "groups"?: Array<AVView | null>; "hideAttrViewName": boolean; "icon": string; "id": string; "itemIds"?: Array<string>; "kanban"?: AVLayoutKanban; "name": string; "pageSize": number; "sorts"?: Array<AVViewSort | null>; "table"?: AVLayoutTable; "type": "table" | "gallery" | "kanban"; };
+
+export type AVViewData = { "desc": string; "hideAttrViewName": boolean; "icon": string; "id": string; "name": string; "pageSize": number; "type": "table" | "gallery" | "kanban"; };
+
+export type AVViewFilter = { "column": string; "combination"?: "and" | "or"; "dateEndpoint"?: "start" | "end"; "filters"?: Array<AVViewFilter | null>; "operator": "" | "=" | "!=" | "\u003e" | "\u003e=" | "\u003c" | "\u003c=" | "Contains" | "Does not contains" | "Contains any item" | "Does not contain any item" | "Is empty" | "Is not empty" | "Starts with" | "Ends with" | "Is between" | "Is true" | "Is false"; "quantifier"?: string; "relativeDate"?: AVRelativeDate; "relativeDate2"?: AVRelativeDate; "value": AVValue | null; "valueSource"?: "stored" | "rendered"; };
+
+export type AVViewFilterInput = { "column"?: string | null; "combination"?: "and" | "or"; "dateEndpoint"?: "start" | "end"; "filters"?: Array<AVViewFilterInput | null> | null; "operator"?: "" | "=" | "!=" | "\u003e" | "\u003e=" | "\u003c" | "\u003c=" | "Contains" | "Does not contains" | "Contains any item" | "Does not contain any item" | "Is empty" | "Is not empty" | "Starts with" | "Ends with" | "Is between" | "Is true" | "Is false"; "quantifier"?: string | null; "relativeDate"?: AVRelativeDateInput | null; "relativeDate2"?: AVRelativeDateInput | null; "value"?: AVValueInput | null; "valueSource"?: "stored" | "rendered"; };
+
+export type AVViewGalleryCardField = { "calc"?: AVFieldCalc; "desc"?: string; "fullRow": boolean; "hidden": boolean; "id": string; "wrap": boolean; } | ({ "fullRow": boolean; } & { "calc"?: never; "desc"?: never; "hidden"?: never; "id"?: never; "wrap"?: never; });
+
+export type AVViewGroup = { "field": string; "hideEmpty": boolean; "method": number; "order": number; "range"?: AVGroupRange; "valueSource"?: "stored" | "rendered"; };
+
+export type AVViewGroupInput = { "field"?: string | null; "hideEmpty"?: boolean | null; "method"?: number | null; "order"?: number | null; "range"?: AVGroupRangeInput | null; "valueSource"?: "stored" | "rendered"; };
+
+export type AVViewInstance = AVTable | AVGallery | AVKanban;
+
+export type AVViewKanbanField = { "calc"?: AVFieldCalc; "desc"?: string; "fullRow": boolean; "hidden": boolean; "id": string; "wrap": boolean; } | ({ "fullRow": boolean; } & { "calc"?: never; "desc"?: never; "hidden"?: never; "id"?: never; "wrap"?: never; });
+
+export type AVViewNotFound = { "error": "viewNotFound"; };
+
+export type AVViewSort = { "column": string; "dateEndpoint"?: "start" | "end"; "order": "" | "ASC" | "DESC"; "valueSource"?: "stored" | "rendered"; };
+
+export type AVViewSortInput = { "column"?: string | null; "dateEndpoint"?: "start" | "end"; "order"?: "" | "ASC" | "DESC"; "valueSource"?: "stored" | "rendered"; };
+
+export type AVViewTableColumn = { "align"?: "" | "left" | "center" | "right"; "calc"?: AVFieldCalc; "desc"?: string; "hidden": boolean; "id": string; "pin": boolean; "width": string; "wrap": boolean; } | ({ "align"?: "" | "left" | "center" | "right"; "calc"?: AVFieldCalc; "pin": boolean; "width": string; } & { "desc"?: never; "hidden"?: never; "id"?: never; "wrap"?: never; });
+
 export type AccountLoginData = { "needCaptcha": string | null; "token": string | null; "userName": string | null; };
 
 export type AccountLoginRequestInput = { "captcha": string; "cloudRegion": number; "userName": string; "userPassword": string; };
 
 export type ActivationCodeRequestInput = { "data": string; };
+
+export type AddAttributeViewBlocksRequestInput = { "avID": string; "blockID"?: string | null; "groupID"?: string | null; "ignoreDefaultFill"?: boolean | null; "previousID"?: string | null; "srcs": Array<AVBlockSourceInput>; "viewID"?: string | null; };
+
+export type AddAttributeViewKeyRequestInput = { "avID": string; "blockID"?: string | null; "keyID": string; "keyIcon": string; "keyName": string; "keyType": string; "previousKeyID": string; };
+
+export type AppendAttributeViewDetachedBlocksWithValuesRequestInput = { "avID": string; "blocksValues": Array<Array<AVValueInput | null> | null>; };
 
 export type AppendBlockRequestInput = { "data": string; "dataType": string; "parentID": string; };
 
@@ -277,6 +539,10 @@ export type BackmentionDocumentRequestInput = { "containChildren"?: boolean | nu
 export type BatchInsertBlockRequestInput = { "blocks": Array<BlockInsertInputInput>; };
 
 export type BatchParentBlockRequestInput = { "blocks": Array<PrependBlockRequestInput>; };
+
+export type BatchReplaceAttributeViewBlocksRequestInput = { "avID": string; "isDetached": boolean; "oldNew": Array<Record<string, string> | null>; };
+
+export type BatchSetAttributeViewBlockAttrsRequestInput = { "avID": string; "values": Array<AVCellUpdateInput>; };
 
 export type BatchSetBlockAttrsRequestInput = { "blockAttrs": Array<SetBlockAttrsRequestInput>; };
 
@@ -414,6 +680,8 @@ export type BroadcastPublishMessage = { "filename": string; "size": number; "typ
 
 export type BroadcastPublishResult = { "channel": BroadcastChannel; "code": number; "message": BroadcastPublishMessage; "msg": string; };
 
+export type ChangeAttrViewLayoutRequestInput = { "avID": string; "blockID": string; "layoutType": string; };
+
 export type ChangeMasterPasswordRequestInput = { "newPassword": string; "oldPassword": string; };
 
 export type ChangeSortNotebookRequestInput = { "notebooks": Array<string>; };
@@ -463,6 +731,12 @@ export type CopyFilesRequestInput = { "destDir": string; "srcs": Array<string>; 
 export type CopyStdMarkdownRequestInput = { "adjustHeadingLevel"?: boolean | null; "assetsDestSpace2Underscore"?: boolean | null; "fillCSSVar"?: boolean | null; "id": string; "imgTag"?: boolean | null; };
 
 export type CreateAssetHistoryRequestInput = { "path": string; };
+
+export type CreateAttributeViewItemDocsRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "itemIDs": Array<string> | null; "saveMode": string; "session"?: string | null; };
+
+export type CreateAttributeViewItemRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "groupID"?: string | null; "previousID"?: string | null; "session"?: string | null; "templateID"?: string | null; "viewID"?: string | null; };
+
+export type CreateAttributeViewItemWithMarkdownRequestInput = { "app"?: string | null; "avID": string; "blockID": string; "clippingHref"?: string | null; "groupID"?: string | null; "listDocTree"?: boolean | null; "markdown": string; "previousID"?: string | null; "session"?: string | null; "tags"?: string | null; "templateID": string; "title": string; "viewID"?: string | null; "withMath"?: boolean | null; };
 
 export type CreateDocHistoryRequestInput = { "id": string; };
 
@@ -531,6 +805,8 @@ export type DocsInfoRequestInput = { "av": boolean; "ids": Array<string>; "refCo
 export type DownloadCloudSnapshotRequestInput = { "id": string; "tag": string; };
 
 export type DownloadInstallPkgRequestInput = { "downloadInstallPkg": boolean; };
+
+export type DuplicateAttributeViewBlockRequestInput = { "avID": string; };
 
 export type EditorReadOnlyRequestInput = { "readonly": boolean; };
 
@@ -708,6 +984,38 @@ export type FullTextSearchBlockData = { "blocks": Array<SearchBlock | null> | nu
 
 export type FullTextSearchBlockRequestInput = { "groupBy"?: number | null; "method"?: number | null; "notebook"?: string | null; "orderBy"?: number | null; "page"?: number | null; "pageSize"?: number | null; "paths"?: Array<string> | null; "query"?: string | null; "searchHPath"?: boolean | null; "subTypes"?: SearchSubtypeFilterInput | null; "types"?: Record<string, boolean> | null; };
 
+export type GetAttributeViewAddingBlockDefaultValuesRequestInput = { "addingBlockID"?: string | null; "avID": string; "blockID"?: string | null; "groupID"?: string | null; "previousID"?: string | null; "viewID"?: string | null; };
+
+export type GetAttributeViewBacklinksRequestInput = { "avID"?: string | null; "id"?: string | null; "itemID"?: string | null; "valueID"?: string | null; };
+
+export type GetAttributeViewBoundBlockIDsByItemIDsRequestInput = { "avID": string; "itemIDs": Array<string>; };
+
+export type GetAttributeViewFieldViewsRequestInput = { "avID": string; "keyID": string; };
+
+export type GetAttributeViewFilterSortRequestInput = { "blockID": string; "id": string; };
+
+export type GetAttributeViewItemIDsByBoundIDsRequestInput = { "avID": string; "blockIDs": Array<string>; };
+
+export type GetAttributeViewItemStatusesRequestInput = { "blockID"?: string | null; "id": string; "itemIDs": Array<string>; "query"?: string | null; "viewID"?: string | null; };
+
+export type GetAttributeViewKeysByAvIDRequestInput = { "avID": string; };
+
+export type GetAttributeViewKeysByIDRequestInput = { "avID": string; "keyIDs": Array<string>; };
+
+export type GetAttributeViewKeysRequestInput = { "avID"?: string | null; "id"?: string | null; "itemID"?: string | null; "valueID"?: string | null; };
+
+export type GetAttributeViewPasteRowsRequestInput = { "avID": string; "blockID": string; "count": number; "groupID"?: string | null; "query"?: string | null; "startItemID": string; "viewID"?: string | null; };
+
+export type GetAttributeViewPrimaryKeyValuesRequestInput = { "blockIDs"?: Array<string> | null; "id": string; "keyword"?: string | null; "page"?: number | null; "pageSize"?: number | null; };
+
+export type GetAttributeViewRelationCandidatesRequestInput = { "avID"?: string | null; "id"?: string | null; "keyID"?: string | null; "keyword"?: string | null; "page"?: number | null; "pageSize"?: number | null; "selectedBlockIDs"?: Array<string> | null; };
+
+export type GetAttributeViewRequestInput = { "id": string; };
+
+export type GetAttributeViewRowSortRequestInput = { "avID"?: string | null; "blockID"?: string | null; "groupID"?: string | null; "itemIDs"?: Array<string> | null; "nextID"?: string | null; "previousID"?: string | null; "viewID"?: string | null; };
+
+export type GetAttributeViewSearchTargetRequestInput = { "id"?: string | null; "keywords"?: Array<string> | null; };
+
 export type GetBazaarIconRequestInput = { "keyword"?: string | null; };
 
 export type GetBazaarPackageREADMERequestInput = { "packageType": string; "repoHash": string; "repoURL": string; };
@@ -730,6 +1038,8 @@ export type GetBazaarWidgetRequestInput = { "keyword"?: string | null; };
 
 export type GetCloudRepoSnapshotsRequestInput = { "page": number; };
 
+export type GetCurrentAttrViewImagesRequestInput = { "blockID"?: string | null; "id": string; "query"?: string | null; "viewID"?: string | null; };
+
 export type GetEmbedBlockRequestInput = { "breadcrumb"?: boolean | null; "embedBlockID": string; "headingMode"?: number | null; "includeIDs": Array<string>; "notebook"?: string | null; };
 
 export type GetInstalledIconRequestInput = { "keyword"?: string | null; };
@@ -743,6 +1053,8 @@ export type GetInstalledTemplateRequestInput = { "keyword"?: string | null; };
 export type GetInstalledThemeRequestInput = { "frontend"?: string | null; "keyword"?: string | null; };
 
 export type GetInstalledWidgetRequestInput = { "keyword"?: string | null; };
+
+export type GetMirrorDatabaseBlocksRequestInput = { "avID": string; };
 
 export type GetRepoDocHistoryRequestInput = { "id": string; "page": number; };
 
@@ -1034,6 +1346,10 @@ export type RefTextQueryRequestInput = { "anchor": string; "notebook"?: string |
 
 export type RefreshBacklinkRequestInput = { "id": string; };
 
+export type RemoveAttributeViewBlocksRequestInput = { "avID": string; "srcIDs": Array<string>; };
+
+export type RemoveAttributeViewKeyRequestInput = { "avID": string; "keyID": string; "removeRelationDest"?: boolean | null; };
+
 export type RemoveBookmarkRequestInput = { "bookmark": string; };
 
 export type RemoveCloudRepoTagSnapshotRequestInput = { "tag": string; };
@@ -1048,6 +1364,8 @@ export type RemoveShorthandsRequestInput = { "ids": Array<string>; };
 
 export type RemoveTagRequestInput = { "label": string; };
 
+export type RemoveUnusedAttributeViewRequestInput = { "id": string; };
+
 export type RenameAssetRequestInput = { "newName": string; "oldPath": string; };
 
 export type RenameBookmarkRequestInput = { "newBookmark": string; "oldBookmark": string; };
@@ -1059,6 +1377,12 @@ export type RenameNotebookRequestInput = { "name": string; "notebook": string; }
 export type RenameRiffDeckRequestInput = { "deckID": string; "name": string; };
 
 export type RenameTagRequestInput = { "newLabel": string; "oldLabel": string; };
+
+export type RenderAttributeViewRequestInput = { "blockID"?: string | null; "createIfNotExist"?: boolean | null; "groupPaging"?: Record<string, AVGroupPagingInput | null> | null; "id": string; "ignoreRows"?: boolean | null; "initialLayout"?: string | null; "page"?: number | null; "pageSize"?: number | null; "query"?: string | null; "targetGroupID"?: string | null; "targetItemID"?: string | null; "viewID"?: string | null; };
+
+export type RenderHistoryAttributeViewRequestInput = { "blockID"?: string | null; "carrierViewID"?: string | null; "created": string; "groupPaging"?: Record<string, AVGroupPagingInput | null> | null; "id": string; "page"?: number | null; "pageSize"?: number | null; "query"?: string | null; "viewID"?: string | null; };
+
+export type RenderSnapshotAttributeViewRequestInput = { "blockID"?: string | null; "carrierViewID"?: string | null; "id": string; "snapshot": string; "viewID"?: string | null; };
 
 export type RenderSprigRequestInput = { "template": string; };
 
@@ -1162,6 +1486,12 @@ export type SearchAssetContentRequestInput = { "method"?: number | null; "orderB
 
 export type SearchAssetRequestInput = { "exts"?: Array<string> | null; "k": string; };
 
+export type SearchAttributeViewRelationKeyRequestInput = { "avID": string; "keyword": string; };
+
+export type SearchAttributeViewRequestInput = { "avID"?: string | null; "blockID"?: string | null; "excludes"?: Array<string> | null; "includeViewMatches"?: boolean | null; "keyword": string; };
+
+export type SearchAttributeViewRollupDestKeysRequestInput = { "avID": string; "keyword": string; };
+
 export type SearchBlock = { "alias": string; "box": string; "children": Array<SearchBlock | null> | null; "content": string; "count": number; "created": string; "defID": string; "defPath": string; "depth": number; "fcontent": string; "folded": boolean; "hPath": string; "ial": Record<string, string> | null; "id": string; "markdown": string; "memo": string; "name": string; "number"?: string; "parentID": string; "path": string; "refCount": number; "refText": string; "refs": Array<SearchBlock | null> | null; "riffCard": SearchBlockCard | null; "riffCardID": string; "rootID": string; "sort": number; "subType": string; "tag": string; "type": string; "updated": string; };
 
 export type SearchBlockCard = { "due": string; "lapses": number; "lastReview": string; "reps": number; "state": number; };
@@ -1222,6 +1552,16 @@ export type SetAssetAnnotationRequestInput = { "data": string; "path": string; }
 
 export type SetAssetOCRTextRequestInput = { "path": string; "text": string; };
 
+export type SetAttrViewContextFilterRequestInput = { "avID": string; "blockID": string; "keyID"?: string | null; };
+
+export type SetAttrViewFiltersRequestInput = { "avID": string; "blockID": string; "data": Array<AVViewFilterInput | null>; };
+
+export type SetAttrViewGroupRequestInput = { "avID": string; "blockID": string; "group": AVViewGroupInput; "ignoreRows"?: boolean | null; };
+
+export type SetAttrViewSortsRequestInput = { "avID": string; "blockID": string; "data": Array<AVViewSortInput | null>; };
+
+export type SetAttributeViewBlockAttrRequestInput = { "avID": string; "itemID"?: string | null; "keyID": string; "rowID"?: string | null; "value": AVValueInput; };
+
 export type SetBazaarPackageRatingRequestInput = { "packageName": string; "packageType": string; "rating": number; };
 
 export type SetBazaarRequestInput = { "petalDisabled"?: boolean | null; "trust"?: boolean | null; };
@@ -1231,6 +1571,8 @@ export type SetBlockAttrsRequestInput = { "attrs": Record<string, string | null>
 export type SetConfSnippetRequestInput = { "enabledCSS"?: boolean | null; "enabledJS"?: boolean | null; };
 
 export type SetCriterionRequestInput = { "criterion": CriterionInput | null; };
+
+export type SetDatabaseBlockViewRequestInput = { "avID": string; "id": string; "viewID": string; };
 
 export type SetEditorRequestInput = { "allowHTMLBLockScript"?: boolean | null; "allowSVGScript"?: boolean | null; "assetOpen"?: SettingAssetOpenInput | null; "backlinkContainChildren"?: boolean | null; "backlinkExpandCount"?: number | null; "backlinkHideReference"?: boolean | null; "backlinkMentionExclude"?: string | null; "backlinkShowBottom"?: boolean | null; "backlinkSort"?: number | null; "backmentionExpandCount"?: number | null; "backmentionSort"?: number | null; "blockRefDynamicAnchorTextMaxLen"?: number | null; "checkBlockRef"?: boolean | null; "codeFontFamilies"?: Array<SettingEditorFontInput | null> | null; "codeLigatures"?: boolean | null; "codeLineWrap"?: boolean | null; "codeSyntaxHighlightLineNum"?: boolean | null; "codeTabSpaces"?: number | null; "cursorSurroundingLines"?: number | null; "databaseAttrClickMode"?: number | null; "databaseAttrHideEmpty"?: boolean | null; "databaseAttrShow"?: boolean | null; "databaseAttrUseTabs"?: boolean | null; "databaseAttrViewMode"?: number | null; "displayBookmarkIcon"?: boolean | null; "displayNetImgMark"?: boolean | null; "dragHTMLFileToIframe"?: boolean | null; "dynamicLoadBlocks"?: number | null; "embedBlockBreadcrumb"?: boolean | null; "emoji"?: Array<string> | null; "floatWindowDelay"?: number | null; "floatWindowMode"?: number | null; "fontFamilies"?: Array<SettingEditorFontInput | null> | null; "fontFamily"?: string | null; "fontFamilyDisplay"?: string | null; "fontSize"?: number | null; "fontSizeScrollZoom"?: boolean | null; "fontWeight"?: number | null; "fullWidth"?: boolean | null; "generateHistoryInterval"?: number | null; "hashTagSearch"?: boolean | null; "headingEmbedMode"?: number | null; "headingNumber"?: boolean | null; "headingNumberFormat"?: string | null; "historyRetentionDays"?: number | null; "justify"?: boolean | null; "katexMacros"?: string | null; "keepLoadedContent"?: boolean | null; "listItemDotNumberClickFocus"?: boolean | null; "listLogicalOutdent"?: boolean | null; "markdown"?: SettingMarkdownInput | null; "onlySearchForDoc"?: boolean | null; "pasteURLAutoConvert"?: boolean | null; "plantUMLServePath"?: string | null; "readOnly"?: boolean | null; "rtl"?: boolean | null; "spellcheck"?: boolean | null; "spellcheckLanguages"?: Array<string> | null; "virtualBlockRef"?: boolean | null; "virtualBlockRefExclude"?: string | null; "virtualBlockRefInclude"?: string | null; };
 
@@ -1466,6 +1808,10 @@ export type SnippetInput = { "content": string; "disabledInPublish"?: boolean | 
 
 export type SnippetsData = { "snippets": Array<Snippet | null>; };
 
+export type SortAttributeViewKeyRequestInput = { "avID": string; "keyID": string; "previousKeyID": string; };
+
+export type SortAttributeViewViewKeyRequestInput = { "avID": string; "keyID": string; "previousKeyID": string; "viewID"?: string | null; };
+
 export type StorageKeyRequestInput = { "key": string; };
 
 export type StorageKeysRequestInput = { "keys": Array<string>; };
@@ -1667,53 +2013,6 @@ export interface APIGETRoutes {
 }
 
 export type APILegacyPOSTPath =
-    "/api/av/addAttributeViewBlocks" |
-    "/api/av/addAttributeViewKey" |
-    "/api/av/appendAttributeViewDetachedBlocksWithValues" |
-    "/api/av/batchReplaceAttributeViewBlocks" |
-    "/api/av/batchSetAttributeViewBlockAttrs" |
-    "/api/av/changeAttrViewLayout" |
-    "/api/av/createAttributeViewItem" |
-    "/api/av/createAttributeViewItemDocs" |
-    "/api/av/createAttributeViewItemWithMarkdown" |
-    "/api/av/duplicateAttributeViewBlock" |
-    "/api/av/getAttributeView" |
-    "/api/av/getAttributeViewAddingBlockDefaultValues" |
-    "/api/av/getAttributeViewBacklinks" |
-    "/api/av/getAttributeViewBoundBlockIDsByItemIDs" |
-    "/api/av/getAttributeViewFieldViews" |
-    "/api/av/getAttributeViewFilterSort" |
-    "/api/av/getAttributeViewItemIDsByBoundIDs" |
-    "/api/av/getAttributeViewItemStatuses" |
-    "/api/av/getAttributeViewKeys" |
-    "/api/av/getAttributeViewKeysByAvID" |
-    "/api/av/getAttributeViewKeysByID" |
-    "/api/av/getAttributeViewPasteRows" |
-    "/api/av/getAttributeViewPrimaryKeyValues" |
-    "/api/av/getAttributeViewRelationCandidates" |
-    "/api/av/getAttributeViewRowSort" |
-    "/api/av/getAttributeViewSearchTarget" |
-    "/api/av/getCurrentAttrViewImages" |
-    "/api/av/getMirrorDatabaseBlocks" |
-    "/api/av/getUnusedAttributeViews" |
-    "/api/av/removeAttributeViewBlocks" |
-    "/api/av/removeAttributeViewKey" |
-    "/api/av/removeUnusedAttributeView" |
-    "/api/av/removeUnusedAttributeViews" |
-    "/api/av/renderAttributeView" |
-    "/api/av/renderHistoryAttributeView" |
-    "/api/av/renderSnapshotAttributeView" |
-    "/api/av/searchAttributeView" |
-    "/api/av/searchAttributeViewRelationKey" |
-    "/api/av/searchAttributeViewRollupDestKeys" |
-    "/api/av/setAttrViewContextFilter" |
-    "/api/av/setAttrViewFilters" |
-    "/api/av/setAttrViewGroup" |
-    "/api/av/setAttrViewSorts" |
-    "/api/av/setAttributeViewBlockAttr" |
-    "/api/av/setDatabaseBlockView" |
-    "/api/av/sortAttributeViewKey" |
-    "/api/av/sortAttributeViewViewKey" |
     "/api/extension/copy" |
     "/api/network/echo" |
     "/api/network/echo/*path" |
@@ -2113,10 +2412,245 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/av/addAttributeViewBlocks": {
+        request: AddAttributeViewBlocksRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/addAttributeViewKey": {
+        request: AddAttributeViewKeyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/appendAttributeViewDetachedBlocksWithValues": {
+        request: AppendAttributeViewDetachedBlocksWithValuesRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/batchReplaceAttributeViewBlocks": {
+        request: BatchReplaceAttributeViewBlocksRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/batchSetAttributeViewBlockAttrs": {
+        request: BatchSetAttributeViewBlockAttrsRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/changeAttrViewLayout": {
+        request: ChangeAttrViewLayoutRequestInput;
+        response: { "code": 0; "data": AVRenderResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | AVRenderResult; "msg": string; };
+        body: "json";
+    };
+    "/api/av/createAttributeViewItem": {
+        request: CreateAttributeViewItemRequestInput;
+        response: { "code": 0; "data": AVCreateItemResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | AVCreateItemResult; "msg": string; };
+        body: "json";
+    };
+    "/api/av/createAttributeViewItemDocs": {
+        request: CreateAttributeViewItemDocsRequestInput;
+        response: { "code": 0; "data": AVCreateItemDocsResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | AVCreateItemDocsResult; "msg": string; };
+        body: "json";
+    };
+    "/api/av/createAttributeViewItemWithMarkdown": {
+        request: CreateAttributeViewItemWithMarkdownRequestInput;
+        response: { "code": 0; "data": AVCreateItemResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | AVCreateItemResult; "msg": string; };
+        body: "json";
+    };
+    "/api/av/duplicateAttributeViewBlock": {
+        request: DuplicateAttributeViewBlockRequestInput;
+        response: { "code": 0; "data": AVDuplicateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getAttributeView": {
+        request: GetAttributeViewRequestInput;
+        response: { "code": 0; "data": AVData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getAttributeViewAddingBlockDefaultValues": {
+        request: GetAttributeViewAddingBlockDefaultValuesRequestInput;
+        response: { "code": 0; "data": AVValuesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getAttributeViewBacklinks": {
+        request: GetAttributeViewBacklinksRequestInput;
+        response: { "code": 0; "data": AVAttributeViewBacklinks | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getAttributeViewBoundBlockIDsByItemIDs": {
+        request: GetAttributeViewBoundBlockIDsByItemIDsRequestInput;
+        response: { "code": 0; "data": Record<string, string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getAttributeViewFieldViews": {
+        request: GetAttributeViewFieldViewsRequestInput;
+        response: { "code": 0; "data": AVFieldViewsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getAttributeViewFilterSort": {
+        request: GetAttributeViewFilterSortRequestInput;
+        response: { "code": 0; "data": AVFilterSortData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getAttributeViewItemIDsByBoundIDs": {
+        request: GetAttributeViewItemIDsByBoundIDsRequestInput;
+        response: { "code": 0; "data": Record<string, string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getAttributeViewItemStatuses": {
+        request: GetAttributeViewItemStatusesRequestInput;
+        response: { "code": 0; "data": Record<string, string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getAttributeViewKeys": {
+        request: GetAttributeViewKeysRequestInput;
+        response: { "code": 0; "data": Array<AVBlockAttributeViewKeys | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getAttributeViewKeysByAvID": {
+        request: GetAttributeViewKeysByAvIDRequestInput;
+        response: { "code": 0; "data": Array<AVKey | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getAttributeViewKeysByID": {
+        request: GetAttributeViewKeysByIDRequestInput;
+        response: { "code": 0; "data": Array<AVKey | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getAttributeViewPasteRows": {
+        request: GetAttributeViewPasteRowsRequestInput;
+        response: { "code": 0; "data": AVPasteRowsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getAttributeViewPrimaryKeyValues": {
+        request: GetAttributeViewPrimaryKeyValuesRequestInput;
+        response: { "code": 0; "data": AVPrimaryValuesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getAttributeViewRelationCandidates": {
+        request: GetAttributeViewRelationCandidatesRequestInput;
+        response: { "code": 0; "data": AVRelationCandidatesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getAttributeViewRowSort": {
+        request: GetAttributeViewRowSortRequestInput;
+        response: { "code": 0; "data": AVRowSortPreview; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/av/getAttributeViewSearchTarget": {
+        request: GetAttributeViewSearchTargetRequestInput;
+        response: { "code": 0; "data": AVAttributeViewSearchTarget | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getCurrentAttrViewImages": {
+        request: GetCurrentAttrViewImagesRequestInput;
+        response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getMirrorDatabaseBlocks": {
+        request: GetMirrorDatabaseBlocksRequestInput;
+        response: { "code": 0; "data": RefDefsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/getUnusedAttributeViews": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<AssetUnusedItem | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/av/removeAttributeViewBlocks": {
+        request: RemoveAttributeViewBlocksRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/removeAttributeViewKey": {
+        request: RemoveAttributeViewKeyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/removeUnusedAttributeView": {
+        request: RemoveUnusedAttributeViewRequestInput;
+        response: { "code": 0; "data": AVIDData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/removeUnusedAttributeViews": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": AVPathsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/av/renderAttributeView": {
+        request: RenderAttributeViewRequestInput;
+        response: { "code": 0; "data": AVRenderResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | AVRenderResult; "msg": string; };
+        body: "json";
+    };
+    "/api/av/renderHistoryAttributeView": {
+        request: RenderHistoryAttributeViewRequestInput;
+        response: { "code": 0; "data": AVArchiveRenderData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/renderSnapshotAttributeView": {
+        request: RenderSnapshotAttributeViewRequestInput;
+        response: { "code": 0; "data": AVArchiveRenderData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/searchAttributeView": {
+        request: SearchAttributeViewRequestInput;
+        response: { "code": 0; "data": AVSearchData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/av/searchAttributeViewNonRelationKey": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+    };
+    "/api/av/searchAttributeViewRelationKey": {
+        request: SearchAttributeViewRelationKeyRequestInput;
+        response: { "code": 0; "data": AVKeysData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/searchAttributeViewRollupDestKeys": {
+        request: SearchAttributeViewRollupDestKeysRequestInput;
+        response: { "code": 0; "data": AVKeysData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/setAttrViewContextFilter": {
+        request: SetAttrViewContextFilterRequestInput;
+        response: { "code": 0; "data": AVContextFilterData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/setAttrViewFilters": {
+        request: SetAttrViewFiltersRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/setAttrViewGroup": {
+        request: SetAttrViewGroupRequestInput;
+        response: { "code": 0; "data": AVRenderResult; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | AVRenderResult; "msg": string; };
+        body: "json";
+    };
+    "/api/av/setAttrViewSorts": {
+        request: SetAttrViewSortsRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/setAttributeViewBlockAttr": {
+        request: SetAttributeViewBlockAttrRequestInput;
+        response: { "code": 0; "data": AVValueData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/setDatabaseBlockView": {
+        request: SetDatabaseBlockViewRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/sortAttributeViewKey": {
+        request: SortAttributeViewKeyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/av/sortAttributeViewViewKey": {
+        request: SortAttributeViewViewKeyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
     };
     "/api/bazaar/batchUpdatePackage": {
         request: BatchUpdatePackageRequestInput;

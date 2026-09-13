@@ -88,6 +88,9 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if schema, err := avPayloadSchema(b, t, input); schema != nil || err != nil {
+		return schema, err
+	}
 	if t == reflect.TypeFor[*AISession]() {
 		schema, err := aiSessionPayloadSchema(b, input)
 		if err != nil {

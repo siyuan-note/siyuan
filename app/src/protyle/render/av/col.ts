@@ -1,3 +1,4 @@
+import {isAVRenderData} from "./renderData";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost, fetchSyncPost} from "../../../util/fetch";
@@ -1373,6 +1374,9 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         id: avID,
                         blockID,
                     }, (response) => {
+                        if (!isAVRenderData(response.data)) {
+                            return;
+                        }
                         duplicateCol({
                             blockElement,
                             viewID,
@@ -1391,11 +1395,17 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             async click() {
                 if (type === "relation") {
                     const response = await fetchSyncPost("/api/av/getAttributeView", {id: avID});
+                    if (response.code !== 0) {
+                        return;
+                    }
                     const colData = response.data.av.keyValues.find((item: {
                         key: { id: string }
                     }) => item.key.id === colId);
                     if (colData.key.relation?.isTwoWay) {
                         const relResponse = await fetchSyncPost("/api/av/getAttributeView", {id: colData.key.relation.avID});
+                        if (relResponse.code !== 0) {
+                            return;
+                        }
                         const dialog = new Dialog({
                             title: window.siyuan.languages.removeColConfirm,
                             content: `<div class="b3-dialog__content">

@@ -432,3 +432,20 @@ void aiStreamContent;
 // @ts-expect-error 流式内容必须是字符串
 const invalidAIStreamContent: import("../src/types/api").APIPOSTRoutes["/api/ai/editor/chat"]["sse"]["events"]["content"] = {token: 1};
 void invalidAIStreamContent;
+
+// AV 契约的合法调用和固定结构拒绝用例，合并到共享类型检查文件。
+fetchPost("/api/av/setAttributeViewBlockAttr", {avID: "av", keyID: "key", itemID: "item", value: {text: {}}});
+fetchPost("/api/av/setAttributeViewBlockAttr", {avID: "av", keyID: "key", itemID: "item", value: {text: null}});
+fetchPost("/api/av/setAttrViewGroup", {avID: "av", blockID: "block", group: {field: "key", method: 0}});
+fetchPost("/api/av/batchSetAttributeViewBlockAttrs", {avID: "av", values: [{keyID: "key", itemID: "item", value: {checkbox: {checked: false}}}]});
+fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {id: "av", page: 2.5, pageSize: -1, blockIDs: ["block"]});
+// @ts-expect-error 单元格文本内容不能是数字。
+fetchPost("/api/av/setAttributeViewBlockAttr", {avID: "av", keyID: "key", value: {text: {content: 1}}});
+// @ts-expect-error 批量修改必须包含字段 ID。
+fetchPost("/api/av/batchSetAttributeViewBlockAttrs", {avID: "av", values: [{itemID: "item", value: {}}]});
+// @ts-expect-error 分页参数必须是数字。
+fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {id: "av", page: "2"});
+// @ts-expect-error 快照渲染必须指定快照 ID。
+fetchPost("/api/av/renderSnapshotAttributeView", {id: "av"});
+// @ts-expect-error 条目 ID 数组只接受字符串。
+fetchPost("/api/av/createAttributeViewItemDocs", {avID: "av", blockID: "block", saveMode: "subDoc", itemIDs: [1]});

@@ -1323,23 +1323,23 @@ interface IAVNewItemTemplate {
 }
 
 interface IAVView {
-    name: string;
-    desc: string;
-    id: string;
-    type: TAVView;
-    icon: string;
-    hideAttrViewName: boolean;
-    pageSize: number;
-    showIcon: boolean;
-    wrapField: boolean;
+    name?: string;
+    desc?: string;
+    id?: string;
+    type?: TAVView;
+    icon?: string;
+    hideAttrViewName?: boolean;
+    pageSize?: number;
+    showIcon?: boolean;
+    wrapField?: boolean;
     groupHidden?: number,  // 0：显示，1：空白隐藏，2：手动隐藏
     groupFolded?: boolean,
-    filters: IAVFilter[],
-    sorts: IAVSort[],
-    groups: IAVView[]
-    group: IAVGroup
-    groupKey: IAVColumn
-    groupValue: IAVCellValue
+    filters?: IAVFilter[],
+    sorts?: IAVSort[],
+    groups?: IAVView[]
+    group?: IAVGroup
+    groupKey?: IAVColumn
+    groupValue?: IAVCellValue
 }
 
 interface IAVFieldView {
@@ -1376,7 +1376,7 @@ interface IAVGallery extends IAVView {
     displayEmptyFields: boolean;
     fitImage: boolean;
     cards: IAVGalleryItem[],
-    desc: string
+    desc?: string
     fields: IAVColumn[]
     cardCount: number,
 }
@@ -1393,7 +1393,7 @@ interface IAVKanban extends IAVView {
     displayEmptyFields: boolean;
     fitImage: boolean;
     cards: IAVGalleryItem[],
-    desc: string
+    desc?: string
     fields: IAVColumn[]
     cardCount: number,
     fillColBackgroundColor: boolean
@@ -1402,7 +1402,7 @@ interface IAVKanban extends IAVView {
 interface IAVFilter {
     column?: string,                                  // 叶子节点：字段（列）ID
     valueSource?: "stored" | "rendered",             // 叶子节点：值来源，默认为存储值
-    operator?: TAVFilterOperator,                     // 叶子节点：操作符
+    operator?: TAVFilterOperator | "",                     // 叶子节点：操作符
     quantifier?: string,                              // 叶子节点：量词
     value?: IAVCellValue,                             // 叶子节点：过滤值
     relativeDate?: IAVRelativeDate,                   // 叶子节点：相对时间
@@ -1434,27 +1434,27 @@ interface IAVGroup {
 interface IAVSort {
     column: string,
     valueSource?: "stored" | "rendered",             // 值来源，默认为存储值
-    order: "ASC" | "DESC",
+    order: "ASC" | "DESC" | "",
     dateEndpoint?: "start" | "end"
 }
 
 interface IAVColumn {
-    width: string,
-    align: TAVAlign,
-    icon: string,
-    id: string,
-    name: string,
-    desc: string,
-    wrap: boolean,
-    pin: boolean,
-    hidden: boolean,
+    width?: string,
+    align?: TAVAlign,
+    icon?: string,
+    id?: string,
+    name?: string,
+    desc?: string,
+    wrap?: boolean,
+    pin?: boolean,
+    hidden?: boolean,
     fullRow?: boolean,
-    type: TAVCol,
-    numberFormat: string,
+    type?: TAVCol,
+    numberFormat?: string,
     dateFormat?: TAVDateFormat,
-    template: string,
+    template?: string,
     renderTemplate?: string,
-    calc: IAVCalc,
+    calc?: IAVCalc,
     updated?: {
         includeTime: boolean
     }
@@ -1496,18 +1496,18 @@ interface IAVCardCoverPosition {
 }
 
 interface IAVCell {
-    id: string,
-    color: string,
-    bgColor: string,
-    value: IAVCellValue,
-    valueType: TAVCol,
+    id?: string,
+    color?: string,
+    bgColor?: string,
+    value?: IAVCellValue,
+    valueType?: TAVCol,
 }
 
 interface IAVCellValue {
     keyID?: string,
     id?: string,
     blockID?: string // 为 row id
-    type: TAVCol,
+    type?: TAVCol,
     renderedContent?: string,
     isDetached?: boolean,
     text?: {

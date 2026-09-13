@@ -1,3 +1,4 @@
+import {isAVRenderData} from "./renderData";
 import {fetchSyncPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {Constants} from "../../../constants";
@@ -661,28 +662,34 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         const created = protyle.options.history?.created;
         const snapshot = protyle.options.history?.snapshot;
         const locateParams = getAVLocateParams(e, !created && !snapshot);
-        const historical = !!created || !!snapshot;
         let data: IAV;
         if (!avData) {
-            const response = await fetchSyncPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
+            const common = {
                 id: e.getAttribute("data-av-id"),
-                created,
-                snapshot,
+                blockID: e.getAttribute("data-node-id"),
+                viewID: locateParams?.viewID || "",
+            };
+            const paging = {
                 pageSize: avPageSize.unGroupPageSize,
                 groupPaging: avPageSize.groupPageSize,
-                viewID: locateParams?.viewID || "",
-                ...(historical ? {carrierViewID: e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || ""} : {}),
                 query: resetData.query.trim(),
-                blockID: e.getAttribute("data-node-id"),
+            };
+            const carrierViewID = e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "";
+            const response = await (created ? fetchSyncPost("/api/av/renderHistoryAttributeView", {
+                ...common, ...paging, created, carrierViewID,
+            }, undefined, false) : snapshot ? fetchSyncPost("/api/av/renderSnapshotAttributeView", {
+                ...common, snapshot, carrierViewID,
+            }, undefined, false) : fetchSyncPost("/api/av/renderAttributeView", {
+                ...common, ...paging,
                 initialLayout: e.getAttribute("data-av-type"),
                 createIfNotExist: !protyle.block.action?.includes(Constants.CB_GET_AV_NO_CREATE),
                 targetItemID: locateParams?.targetItemID || "",
                 targetGroupID: locateParams?.targetGroupID || "",
-            }, undefined, false);
+            }, undefined, false));
             if (!isCurrentAVRender(e, renderToken)) {
                 continue;
             }
-            if (response.code !== 0) {
+            if (response.code !== 0 || !isAVRenderData(response.data)) {
                 failAVRender(e, response);
                 continue;
             }

@@ -1987,12 +1987,16 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "set-layout") {
-                    data = await updateLayout({
+                    const updatedData = await updateLayout({
                         target,
                         protyle: options.protyle,
                         nodeElement: options.blockElement,
                         data
                     });
+                    if (!updatedData) {
+                        break;
+                    }
+                    data = updatedData;
                     fields = getFieldsByData(data);
                     event.preventDefault();
                     event.stopPropagation();

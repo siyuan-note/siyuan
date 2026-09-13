@@ -470,7 +470,7 @@ export const prepareFilterColumns = async (data: IAV) => {
         let request = avRequests.get(targetAVID);
         if (!request) {
             request = fetchSyncPost("/api/av/getAttributeView", {id: targetAVID}).then((response) => {
-                return (response.data?.av?.keyValues || []).map((item: { key: IAVColumn }) => item.key);
+                return response.code === 0 ? (response.data?.av?.keyValues || []).map(item => item.key) : [];
             }).catch(() => []);
             avRequests.set(targetAVID, request);
         }
@@ -513,7 +513,7 @@ export const prepareFilterColumns = async (data: IAV) => {
                 id: targetAVID,
                 blockIDs: Array.from(blockIDs),
             });
-            cacheRelationFilterValues(targetAVID, response.data?.rows?.values || []);
+            cacheRelationFilterValues(targetAVID, response.code === 0 ? response.data?.rows?.values || [] : []);
         } catch (e) {
             // 候选显示名加载失败不应阻止筛选面板打开，控件会保留行 ID 并允许重新搜索。
         }

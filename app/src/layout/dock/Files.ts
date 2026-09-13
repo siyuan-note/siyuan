@@ -34,6 +34,7 @@ import {
 } from "../../protyle/util/hasClosest";
 import type {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {emitToPlugins} from "../../plugin/EventBusCore";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
@@ -2196,9 +2197,13 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
             click: () => {
                 if (!this.element.getAttribute("disabled")) {
                     this.element.setAttribute("disabled", "disabled");
-                    refreshFileTree(() => {
+                    confirmDialog(window.siyuan.languages.rebuildDataIndex, window.siyuan.languages.rebuildDataIndexTip, () => {
+                        refreshFileTree(() => {
+                            this.element.removeAttribute("disabled");
+                            this.init(false);
+                        });
+                    }, () => {
                         this.element.removeAttribute("disabled");
-                        this.init(false);
                     });
                 }
             }

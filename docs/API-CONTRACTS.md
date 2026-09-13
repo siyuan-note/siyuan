@@ -24,6 +24,8 @@ Encrypted notebook lifecycle endpoints use typed requests and responses while re
 
 ## Compatibility requirements
 
+SQL query contracts retain `limit` and `truncated` at the success envelope's top level. `SuccessSQL` attaches this metadata while failures omit it. Row names come from the query; each value is a JSON scalar, preserving integer digits and Base64 serialization of binary values. Statement trimming, optional mode handling, single-statement and read-only checks, and code `1` query errors remain unchanged.
+
 Contract maintenance must preserve existing observable API behavior. Changes to type definitions or handler structure alone must not change call semantics:
 
 - Request semantics: preserve body requirements, field optionality, and distinctions between an empty body, missing fields, `null`, empty strings, empty objects, and empty arrays

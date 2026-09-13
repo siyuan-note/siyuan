@@ -486,3 +486,5 @@ var PutFile = define[PutFileRequest, Null]("putFile", "/api/file/putFile", FormB
 
 var GetFile = define[FilePathRequest, BinaryContent]("getFile", "/api/file/getFile", JSONBody,
 	ResponseOptions{Output: BinaryOutput, ErrorStatus: 202, AdditionalCodes: []int{-3, 403, 404, 409, 500, 503}}, "POST")
+
+var QuerySQL = define[SQLQueryRequest, SQLRows]("SQL", "/api/query/sql", JSONBody, ResponseOptions{AdditionalCodes: []int{1}, NonNullable: true}, "POST")

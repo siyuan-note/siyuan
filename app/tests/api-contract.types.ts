@@ -6,6 +6,19 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
+fetchPost("/api/query/sql", {stmt: "SELECT 1", mode: "readonly"}, response => {
+    if (response.code === 0) {
+        const limit: number = response.limit;
+        const truncated: boolean = response.truncated;
+        const value: string | number | boolean | null | undefined = response.data[0]?.n;
+        void [limit, truncated, value];
+    }
+});
+// @ts-expect-error 查询语句不可缺省。
+fetchPost("/api/query/sql", {});
+// @ts-expect-error 查询模式必须为字符串或空值。
+fetchPost("/api/query/sql", {stmt: "SELECT 1", mode: true});
+
 fetchPost("/api/file/getFile", {path: "data/storage/plugin.json"}, response => {
     const content: JSONValue = response;
     // @ts-expect-error 文件内容可能是文本、数组或空值，不能直接按信封读取。

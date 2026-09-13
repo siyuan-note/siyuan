@@ -58,10 +58,11 @@ func (Null) MarshalJSON() ([]byte, error) { return []byte("null"), nil }
 
 // Response 的载荷仅能通过有类型的成功构造函数或明确的错误构造函数设置。
 type Response[Data any] struct {
-	code   int
-	msg    string
-	data   any
-	binary *BinaryContent
+	code       int
+	msg        string
+	data       any
+	binary     *BinaryContent
+	queryLimit *SQLQueryLimit
 }
 
 func Success[Data any](data Data) Response[Data] { return Response[Data]{data: data} }
@@ -89,5 +90,6 @@ func (r Response[Data]) MarshalJSON() ([]byte, error) {
 		Code int    `json:"code"`
 		Msg  string `json:"msg"`
 		Data any    `json:"data"`
-	}{r.code, r.msg, r.data})
+		*SQLQueryLimit
+	}{r.code, r.msg, r.data, r.queryLimit})
 }

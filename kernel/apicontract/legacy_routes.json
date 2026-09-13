@@ -254,7 +254,6 @@
   {"method":"POST","path":"/api/plugin/listLoadedPlugins","handler":"listLoadedPlugins"},
   {"method":"POST","path":"/api/plugin/rpc","handler":"pluginJsonRpcHttp"},
   {"method":"POST","path":"/api/plugin/rpc/:name","handler":"pluginJsonRpcHttp"},
-  {"method":"POST","path":"/api/query/sql","handler":"SQL"},
   {"method":"POST","path":"/api/ref/getBacklink2","handler":"getBacklink2"},
   {"method":"POST","path":"/api/ref/getBacklinkDoc","handler":"getBacklinkDoc"},
   {"method":"POST","path":"/api/ref/getBackmentionDoc","handler":"getBackmentionDoc"},

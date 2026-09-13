@@ -75,6 +75,9 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if t == reflect.TypeFor[SQLValue]() {
+		return &Schema{AnyOf: []*Schema{{Type: "null"}, {Type: "string"}, {Type: "number"}, {Type: "boolean"}}}, nil
+	}
 	if t == reflect.TypeFor[BinaryContent]() {
 		if input {
 			return nil, fmt.Errorf("binary content can only appear in responses")
@@ -352,6 +355,11 @@ func BuildBundle() (*Bundle, error) {
 			data = nonnullable(data)
 		}
 		success := object(map[string]*Schema{"code": {Type: "integer", Enum: []any{0}}, "msg": {Type: "string"}, "data": data}, "code", "msg", "data")
+		if definition.Data == reflect.TypeFor[SQLRows]() {
+			success.Properties["limit"] = &Schema{Type: "integer"}
+			success.Properties["truncated"] = &Schema{Type: "boolean"}
+			success.Required = append(success.Required, "limit", "truncated")
+		}
 		if definition.Output == BinaryOutput {
 			success = data
 			// fetch 按媒体类型将文件读作文本或 JSON，JSON 文件本身没有信封约束。

@@ -2665,7 +2665,13 @@
         "superBlock": {
           "type": "boolean"
         },
+        "tabItem": {
+          "type": "boolean"
+        },
         "table": {
+          "type": "boolean"
+        },
+        "tabs": {
           "type": "boolean"
         },
         "videoBlock": {
@@ -2691,7 +2697,9 @@
         "mathBlock",
         "paragraph",
         "superBlock",
+        "tabItem",
         "table",
+        "tabs",
         "videoBlock",
         "widgetBlock"
       ],
@@ -2850,7 +2858,27 @@
             }
           ]
         },
+        "tabItem": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "table": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tabs": {
           "anyOf": [
             {
               "type": "boolean"
@@ -6265,6 +6293,28 @@
       "required": [
         "index",
         "path"
+      ],
+      "additionalProperties": false
+    },
+    "SQLQueryRequestInput": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stmt": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "stmt"
       ],
       "additionalProperties": false
     },
@@ -19751,6 +19801,116 @@
                 "type": "integer",
                 "enum": [
                   -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/query/sql",
+      "handler": "SQL",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SQLQueryRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "limit": {
+                "type": "integer"
+              },
+              "msg": {
+                "type": "string"
+              },
+              "truncated": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data",
+              "limit",
+              "truncated"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
                 ]
               },
               "data": {

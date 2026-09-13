@@ -36,6 +36,8 @@ type CriterionTypes struct {
 	IFrameBlock   bool `json:"iframeBlock" api:"optional,nullable"`
 	WidgetBlock   bool `json:"widgetBlock" api:"optional,nullable"`
 	Callout       bool `json:"callout" api:"optional,nullable"`
+	Tabs          bool `json:"tabs" api:"optional,nullable"`
+	TabItem       bool `json:"tabItem" api:"optional,nullable"`
 }
 
 type CriterionReplaceTypes struct {

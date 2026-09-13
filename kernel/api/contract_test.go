@@ -158,6 +158,7 @@ func TestAPIContractHandlers(t *testing.T) {
 		return response
 	}
 	admin := model.RoleAdministrator
+	testSQLContractQueries(t)
 	blockQueries := []struct {
 		path    string
 		handler gin.HandlerFunc

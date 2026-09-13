@@ -51,7 +51,7 @@ export const resolveAssetOpenGesture = (options: {
 };
 
 export const resolveAssetOpenAction = (
-    config: Config.IAssetOpen | undefined,
+    config: {[key in keyof Config.IAssetOpen]?: string} | undefined,
     options: {
         altKey?: boolean,
         shiftKey?: boolean,
@@ -86,7 +86,7 @@ export const resolveAvailableAssetOpenAction = (
 };
 
 export const getAssetOpenGestures = (
-    config: Config.IAssetOpen | undefined,
+    config: {[key in keyof Config.IAssetOpen]?: string} | undefined,
     action: Config.TAssetOpenAction,
     options: {
         previewable: boolean,

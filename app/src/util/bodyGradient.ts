@@ -17,7 +17,7 @@ export const normalizeBodyGradient = (value?: {mode?: string; light?: IBodyGradi
     };
 };
 
-export const getBodyGradientImage = (value: IBodyGradient | undefined, theme: "light" | "dark"): string => {
+export const getBodyGradientImage = (value: Parameters<typeof normalizeBodyGradient>[0], theme: "light" | "dark"): string => {
     const config = normalizeBodyGradient(value);
     if (config.mode === "auto") {
         return "";

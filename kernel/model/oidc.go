@@ -21,9 +21,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model/oidc_provider"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -96,36 +96,31 @@ type oidcPollInput struct {
 	PollToken string `json:"pollToken"`
 }
 
-func OIDCValidateStart(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+func OIDCValidateStart(c *gin.Context, request apicontract.SystemOIDCRequest) (ret apicontract.Response[apicontract.SystemOIDCStartData]) {
+	ret = apicontract.Success(apicontract.SystemOIDCStartData{})
 
-	config := conf.NewOIDC()
-	if err := c.ShouldBindJSON(config); err != nil {
-		ret.Code = -1
-		ret.Msg = oidcLanguage(369, "Invalid OIDC configuration")
+	config := SystemOIDCConfig(request.SystemOIDC)
+	if err := request.ParseError(); err != nil {
+		ret = apicontract.Failure[apicontract.SystemOIDCStartData](-1, oidcLanguage(369, "Invalid OIDC configuration"))
 		return
 	}
 	config.Normalize()
 	mobileValidation := util.IsMobileContainer()
 	if mobileValidation && config.Provider == conf.OIDCProviderGoogle {
-		ret.Code = -1
-		ret.Msg = oidcLanguage(368, "This OIDC provider does not support the SiYuan mobile callback URI")
+		ret = apicontract.Failure[apicontract.SystemOIDCStartData](-1, oidcLanguage(368, "This OIDC provider does not support the SiYuan mobile callback URI"))
 		logging.LogErrorf("validate mobile OIDC candidate configuration failed [ip=%s]: Google does not support the fixed SiYuan mobile OIDC callback URI", c.ClientIP())
 		return
 	}
 	requireRemoteAuthentication := util.ContainerDocker == util.Container || !IsLocalRequest(c)
 	if err := ValidateOIDCConfigurationChange(c.Request.Context(), config, requireRemoteAuthentication,
 		Conf.AccessAuthCode != "", util.SiYuanAccessAuthCodeBypass); err != nil {
-		ret.Code = -1
-		ret.Msg = oidcLanguage(369, "Invalid OIDC configuration")
+		ret = apicontract.Failure[apicontract.SystemOIDCStartData](-1, oidcLanguage(369, "Invalid OIDC configuration"))
 		logging.LogErrorf("validate OIDC candidate configuration failed [ip=%s]: %s", c.ClientIP(), err)
 		return
 	}
 	redirectURL, err := oidcValidationRedirectURL(c, config, mobileValidation)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = oidcLanguage(369, "Invalid OIDC configuration")
+		ret = apicontract.Failure[apicontract.SystemOIDCStartData](-1, oidcLanguage(369, "Invalid OIDC configuration"))
 		logging.LogErrorf("resolve OIDC validation redirect URL failed: %s", err)
 		return
 	}
@@ -133,8 +128,7 @@ func OIDCValidateStart(c *gin.Context) {
 	defer cancel()
 	provider, err := oidc_provider.New(providerContext, config, redirectURL)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = oidcLanguage(369, "Invalid OIDC configuration")
+		ret = apicontract.Failure[apicontract.SystemOIDCStartData](-1, oidcLanguage(369, "Invalid OIDC configuration"))
 		logging.LogErrorf("create OIDC validation provider failed: %s", err)
 		return
 	}
@@ -143,66 +137,49 @@ func OIDCValidateStart(c *gin.Context) {
 	workspaceSession := util.GetWorkspaceSession(session)
 	if workspaceSession.OIDCBinding == "" {
 		if workspaceSession.OIDCBinding, err = secureRandomToken(32); err != nil {
-			ret.Code = -1
-			ret.Msg = oidcUserMessage()
+			ret = apicontract.Failure[apicontract.SystemOIDCStartData](-1, oidcUserMessage())
 			return
 		}
 	}
 	transaction, err := newOIDCTransaction(&oidcStartInput{Flow: oidcFlowValidate}, workspaceSession.OIDCBinding,
 		c.ClientIP(), redirectURL)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
+		ret = apicontract.Failure[apicontract.SystemOIDCStartData](-1, oidcUserMessage())
 		return
 	}
 	transaction.Config = config
 	transaction.Provider = provider
 	transaction.MobileValidation = mobileValidation
 	if err = session.Save(c); err != nil {
-		ret.Code = -1
-		ret.Msg = Conf.Language(258)
+		ret = apicontract.Failure[apicontract.SystemOIDCStartData](-1, Conf.Language(258))
 		return
 	}
 	if err = storeOIDCTransaction(transaction); err != nil {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
+		ret = apicontract.Failure[apicontract.SystemOIDCStartData](-1, oidcUserMessage())
 		logging.LogWarnf("store OIDC validation transaction failed [ip=%s]: %s", c.ClientIP(), err)
 		return
 	}
-	ret.Data = map[string]any{
-		"authURL":   provider.AuthURL(transaction.State, transaction.Nonce, transaction.CodeVerifier),
-		"pollToken": transaction.PollToken,
-		"expiresIn": int(oidcTransactionTimeout.Seconds()),
-	}
+	ret = apicontract.Success(apicontract.SystemOIDCStartData{AuthURL: provider.AuthURL(transaction.State, transaction.Nonce, transaction.CodeVerifier), PollToken: transaction.PollToken, ExpiresIn: int(oidcTransactionTimeout.Seconds())})
+	return
 }
 
-func OIDCStart(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+func OIDCStart(c *gin.Context, request apicontract.SystemOIDCStartRequest) (ret apicontract.Response[apicontract.SystemOIDCStartData]) {
+	ret = apicontract.Success(apicontract.SystemOIDCStartData{})
 
-	if err := validateOIDCConfiguration(); err != nil {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
-		logging.LogErrorf("invalid OIDC login configuration: %s", err)
-		return
-	}
-	input := &oidcStartInput{}
-	if err := c.ShouldBindJSON(input); err != nil {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
+	input := &oidcStartInput{Flow: request.Flow, To: request.To, RememberMe: request.RememberMe}
+	if err := request.ParseError(); err != nil {
+		ret = apicontract.Failure[apicontract.SystemOIDCStartData](-1, oidcUserMessage())
 		return
 	}
 	if input.Flow == "" {
 		input.Flow = oidcFlowWeb
 	}
 	if input.Flow != oidcFlowWeb && input.Flow != oidcFlowDesktop && input.Flow != oidcFlowMobile {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
+		ret = apicontract.Failure[apicontract.SystemOIDCStartData](-1, oidcUserMessage())
 		return
 	}
 	if input.Flow == oidcFlowMobile && Conf.GetOIDC().Provider == conf.OIDCProviderGoogle {
-		ret.Code = -1
-		ret.Msg = oidcLanguage(368, "This OIDC provider does not support the SiYuan mobile callback URI")
+		ret = apicontract.Failure[apicontract.SystemOIDCStartData](-1, oidcLanguage(368, "This OIDC provider does not support the SiYuan mobile callback URI"))
 		logging.LogWarn("Google does not support the fixed SiYuan mobile OIDC callback URI")
 		return
 	}
@@ -213,267 +190,236 @@ func OIDCStart(c *gin.Context) {
 		var err error
 		workspaceSession.OIDCBinding, err = secureRandomToken(32)
 		if err != nil {
-			ret.Code = -1
-			ret.Msg = oidcUserMessage()
+			ret = apicontract.Failure[apicontract.SystemOIDCStartData](-1, oidcUserMessage())
 			logging.LogErrorf("create OIDC login binding failed: %s", err)
 			return
 		}
 	}
 	redirectURL, err := effectiveOIDCRedirectURL(c, input.Flow)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
+		ret = apicontract.Failure[apicontract.SystemOIDCStartData](-1, oidcUserMessage())
 		logging.LogErrorf("resolve OIDC redirect URL failed: %s", err)
 		return
 	}
 	transaction, err := newOIDCTransaction(input, workspaceSession.OIDCBinding, c.ClientIP(), redirectURL)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
+		ret = apicontract.Failure[apicontract.SystemOIDCStartData](-1, oidcUserMessage())
 		logging.LogErrorf("create OIDC login transaction failed: %s", err)
 		return
 	}
 	provider, err := getOIDCProvider(c.Request.Context(), redirectURL)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
+		ret = apicontract.Failure[apicontract.SystemOIDCStartData](-1, oidcUserMessage())
 		logging.LogErrorf("create OIDC provider failed: %s", err)
 		return
 	}
 	if err = session.Save(c); err != nil {
-		ret.Code = -1
-		ret.Msg = Conf.Language(258)
+		ret = apicontract.Failure[apicontract.SystemOIDCStartData](-1, Conf.Language(258))
 		return
 	}
 	if err = storeOIDCTransaction(transaction); err != nil {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
+		ret = apicontract.Failure[apicontract.SystemOIDCStartData](-1, oidcUserMessage())
 		logging.LogWarnf("store OIDC login transaction failed [ip=%s]: %s", c.ClientIP(), err)
 		return
 	}
 	authURL := provider.AuthURL(transaction.State, transaction.Nonce, transaction.CodeVerifier)
-	ret.Data = map[string]any{"authURL": authURL, "expiresIn": int(oidcTransactionTimeout.Seconds())}
+	data := apicontract.SystemOIDCStartData{AuthURL: authURL, ExpiresIn: int(oidcTransactionTimeout.Seconds())}
 	if input.Flow == oidcFlowDesktop {
-		ret.Data.(map[string]any)["pollToken"] = transaction.PollToken
+		data.PollToken = transaction.PollToken
 	}
+	return apicontract.Success(data)
 }
 
-func OIDCCallback(c *gin.Context) {
-	state := c.Query("state")
+func OIDCCallback(c *gin.Context, request apicontract.SystemOIDCCallbackRequest) apicontract.Response[apicontract.BinaryContent] {
+	request.State = c.Query("state")
+	request.Code = c.Query("code")
+	request.Error = c.Query("error")
+	state := request.State
 	workspaceSession := util.GetWorkspaceSession(util.GetSession(c))
 	transaction, repeated, err := claimOIDCTransaction(c.Request.Context(), state, workspaceSession.OIDCBinding, true)
 	if err != nil {
 		logging.LogWarnf("claim OIDC callback transaction failed: %s", err)
-		writeOIDCCallbackPage(c, false, oidcUserMessage())
-		return
+		return writeOIDCCallbackPage(c, false, oidcUserMessage())
 	}
 	if repeated {
-		respondRepeatedOIDCCallback(c, transaction)
-		return
+		return respondRepeatedOIDCCallback(c, transaction)
 	}
 	if transaction.Flow == oidcFlowMobile || (transaction.Flow == oidcFlowValidate && transaction.MobileValidation) {
 		completeOIDCTransaction(transaction.State, false, oidcUserMessage())
-		writeOIDCCallbackPage(c, false, oidcUserMessage())
-		return
+		return writeOIDCCallbackPage(c, false, oidcUserMessage())
 	}
 	if transaction.Flow == oidcFlowWeb {
 		if workspaceSession.OIDCBinding == "" || workspaceSession.OIDCBinding != transaction.Binding {
 			logging.LogWarn("OIDC login binding does not match")
 			completeOIDCTransaction(transaction.State, false, oidcUserMessage())
-			writeOIDCCallbackPage(c, false, oidcUserMessage())
-			return
+			return writeOIDCCallbackPage(c, false, oidcUserMessage())
 		}
 	}
-	if providerError := c.Query("error"); providerError != "" {
+	if providerError := request.Error; providerError != "" {
 		logging.LogWarnf("OIDC provider rejected the login: %s", providerError)
 		message := oidcUserMessage()
 		completeOIDCTransaction(transaction.State, false, message)
-		writeOIDCCallbackPage(c, false, message)
-		return
+		return writeOIDCCallbackPage(c, false, message)
 	}
-	if err = finishOIDCExchange(c, transaction, c.Query("code")); err != nil {
+	if err = finishOIDCExchange(c, transaction, request.Code); err != nil {
 		logging.LogErrorf("finish OIDC authorization code exchange failed: %s", err)
 		completeOIDCTransaction(transaction.State, false, oidcUserMessage())
-		writeOIDCCallbackPage(c, false, oidcUserMessage())
-		return
+		return writeOIDCCallbackPage(c, false, oidcUserMessage())
 	}
 	if transaction.Flow == oidcFlowValidate {
 		completeOIDCTransaction(transaction.State, true, "")
-		writeOIDCCallbackPage(c, true, oidcLanguage(367, "You can close this window and return to SiYuan"))
-		return
+		return writeOIDCCallbackPage(c, true, oidcLanguage(367, "You can close this window and return to SiYuan"))
 	}
 	if transaction.Flow == oidcFlowDesktop {
 		completeOIDCTransaction(transaction.State, true, "")
-		writeOIDCCallbackPage(c, true, oidcLanguage(367, "You can close this window and return to SiYuan"))
-		return
+		return writeOIDCCallbackPage(c, true, oidcLanguage(367, "You can close this window and return to SiYuan"))
 	}
 	if err = authenticateOIDCSession(c, transaction.RememberMe); err != nil {
 		completeOIDCTransaction(transaction.State, false, oidcUserMessage())
-		writeOIDCCallbackPage(c, false, oidcUserMessage())
-		return
+		return writeOIDCCallbackPage(c, false, oidcUserMessage())
 	}
 	completeOIDCTransaction(transaction.State, true, "")
-	c.Redirect(http.StatusFound, safeOIDCRedirectTarget(transaction.To))
+	return apicontract.RedirectHTTPContent(http.StatusFound, safeOIDCRedirectTarget(transaction.To))
 }
 
-func OIDCMobileCallback(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-	input := &oidcMobileCallbackInput{}
-	if err := c.ShouldBindJSON(input); err != nil {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
+func OIDCMobileCallback(c *gin.Context, request apicontract.SystemOIDCMobileRequest) (ret apicontract.Response[apicontract.SystemOIDCMobileData]) {
+	ret = apicontract.Success(apicontract.SystemOIDCMobileData{})
+	input := request
+	if err := request.ParseError(); err != nil {
+		ret = apicontract.Failure[apicontract.SystemOIDCMobileData](-1, oidcUserMessage())
 		return
 	}
 	callbackURL, err := url.Parse(input.CallbackURL)
 	if err != nil || callbackURL.Scheme != "siyuan" || callbackURL.Host != "" || callbackURL.Path != "/oidc-callback" {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
+		ret = apicontract.Failure[apicontract.SystemOIDCMobileData](-1, oidcUserMessage())
 		return
 	}
 	workspaceSession := util.GetWorkspaceSession(util.GetSession(c))
 	transaction, repeated, err := claimOIDCTransaction(c.Request.Context(), callbackURL.Query().Get("state"),
 		workspaceSession.OIDCBinding, false)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
+		ret = apicontract.Failure[apicontract.SystemOIDCMobileData](-1, oidcUserMessage())
 		logging.LogWarnf("claim mobile OIDC callback transaction failed: %s", err)
 		return
 	}
 	if repeated {
 		if transaction.Flow == oidcFlowValidate && transaction.MobileValidation && transaction.Success {
-			ret.Data = map[string]any{"validation": true}
+			ret = apicontract.Success(apicontract.SystemOIDCMobileData{Validation: true})
 			return
 		}
 		if transaction.Flow != oidcFlowMobile || !transaction.Success {
-			ret.Code = -1
-			ret.Msg = oidcUserMessage()
+			ret = apicontract.Failure[apicontract.SystemOIDCMobileData](-1, oidcUserMessage())
 			return
 		}
 		if err = authenticateOIDCSession(c, transaction.RememberMe); err != nil {
-			ret.Code = -1
-			ret.Msg = oidcUserMessage()
+			ret = apicontract.Failure[apicontract.SystemOIDCMobileData](-1, oidcUserMessage())
 			return
 		}
-		ret.Data = map[string]any{"to": safeOIDCRedirectTarget(transaction.To)}
+		ret = apicontract.Success(apicontract.SystemOIDCMobileData{To: safeOIDCRedirectTarget(transaction.To)})
 		return
 	}
 	if transaction.Flow != oidcFlowMobile && !(transaction.Flow == oidcFlowValidate && transaction.MobileValidation) {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
-		completeOIDCTransaction(transaction.State, false, ret.Msg)
+		ret = apicontract.Failure[apicontract.SystemOIDCMobileData](-1, oidcUserMessage())
+		completeOIDCTransaction(transaction.State, false, oidcUserMessage())
 		return
 	}
 	if providerError := callbackURL.Query().Get("error"); providerError != "" {
 		logging.LogWarnf("OIDC provider rejected the mobile login: %s", providerError)
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
-		completeOIDCTransaction(transaction.State, false, ret.Msg)
+		ret = apicontract.Failure[apicontract.SystemOIDCMobileData](-1, oidcUserMessage())
+		completeOIDCTransaction(transaction.State, false, oidcUserMessage())
 		return
 	}
 	if err = finishOIDCExchange(c, transaction, callbackURL.Query().Get("code")); err != nil {
 		logging.LogErrorf("finish mobile OIDC authorization code exchange failed: %s", err)
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
-		completeOIDCTransaction(transaction.State, false, ret.Msg)
+		ret = apicontract.Failure[apicontract.SystemOIDCMobileData](-1, oidcUserMessage())
+		completeOIDCTransaction(transaction.State, false, oidcUserMessage())
 		return
 	}
 	if transaction.Flow == oidcFlowValidate {
 		completeOIDCTransaction(transaction.State, true, "")
-		ret.Data = map[string]any{"validation": true}
+		ret = apicontract.Success(apicontract.SystemOIDCMobileData{Validation: true})
 		return
 	}
 	if err = authenticateOIDCSession(c, transaction.RememberMe); err != nil {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
-		completeOIDCTransaction(transaction.State, false, ret.Msg)
+		ret = apicontract.Failure[apicontract.SystemOIDCMobileData](-1, oidcUserMessage())
+		completeOIDCTransaction(transaction.State, false, oidcUserMessage())
 		return
 	}
 	completeOIDCTransaction(transaction.State, true, "")
-	ret.Data = map[string]any{"to": safeOIDCRedirectTarget(transaction.To)}
+	ret = apicontract.Success(apicontract.SystemOIDCMobileData{To: safeOIDCRedirectTarget(transaction.To)})
+	return
 }
 
-func OIDCPoll(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-	input := &oidcPollInput{}
-	if err := c.ShouldBindJSON(input); err != nil || input.PollToken == "" {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
+func OIDCPoll(c *gin.Context, request apicontract.SystemOIDCPollRequest) (ret apicontract.Response[apicontract.SystemOIDCPollData]) {
+	ret = apicontract.Success(apicontract.SystemOIDCPollData{})
+	input := request
+	if err := request.ParseError(); err != nil || input.PollToken == "" {
+		ret = apicontract.Failure[apicontract.SystemOIDCPollData](-1, oidcUserMessage())
 		return
 	}
 	workspaceSession := util.GetWorkspaceSession(util.GetSession(c))
 	transaction, found := pollOIDCTransaction(input.PollToken, workspaceSession.OIDCBinding)
 	if !found || transaction.Flow != oidcFlowDesktop {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
+		ret = apicontract.Failure[apicontract.SystemOIDCPollData](-1, oidcUserMessage())
 		return
 	}
 	if !transaction.Completed {
-		ret.Data = map[string]any{"status": "pending"}
+		ret = apicontract.Success(apicontract.SystemOIDCPollData{Status: "pending"})
 		return
 	}
 	if !transaction.Success {
-		ret.Code = -1
-		ret.Msg = transaction.Message
+		ret = apicontract.Failure[apicontract.SystemOIDCPollData](-1, transaction.Message)
 		return
 	}
 	if err := authenticateOIDCSession(c, transaction.RememberMe); err != nil {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
+		ret = apicontract.Failure[apicontract.SystemOIDCPollData](-1, oidcUserMessage())
 		return
 	}
-	ret.Data = map[string]any{"status": "completed", "to": safeOIDCRedirectTarget(transaction.To)}
+	ret = apicontract.Success(apicontract.SystemOIDCPollData{Status: "completed", To: safeOIDCRedirectTarget(transaction.To)})
+	return
 }
 
-func OIDCValidatePoll(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-	input := &oidcPollInput{}
-	if err := c.ShouldBindJSON(input); err != nil || input.PollToken == "" {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
+func OIDCValidatePoll(c *gin.Context, request apicontract.SystemOIDCPollRequest) (ret apicontract.Response[apicontract.SystemOIDCValidatePollData]) {
+	ret = apicontract.Success(apicontract.SystemOIDCValidatePollData{})
+	input := request
+	if err := request.ParseError(); err != nil || input.PollToken == "" {
+		ret = apicontract.Failure[apicontract.SystemOIDCValidatePollData](-1, oidcUserMessage())
 		return
 	}
 	workspaceSession := util.GetWorkspaceSession(util.GetSession(c))
 	transaction, found := pollOIDCTransaction(input.PollToken, workspaceSession.OIDCBinding)
 	if !found || transaction.Flow != oidcFlowValidate {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
+		ret = apicontract.Failure[apicontract.SystemOIDCValidatePollData](-1, oidcUserMessage())
 		return
 	}
 	if !transaction.Completed {
-		ret.Data = map[string]any{"status": "pending"}
+		ret = apicontract.Success(apicontract.SystemOIDCValidatePollData{Status: "pending"})
 		return
 	}
 	if !transaction.Success {
-		ret.Code = -1
-		ret.Msg = transaction.Message
+		ret = apicontract.Failure[apicontract.SystemOIDCValidatePollData](-1, transaction.Message)
 		return
 	}
-	ret.Data = map[string]any{"status": "completed"}
+	ret = apicontract.Success(apicontract.SystemOIDCValidatePollData{Status: "completed"})
+	return
 }
 
-func OIDCValidateActivate(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-	input := &oidcPollInput{}
-	if err := c.ShouldBindJSON(input); err != nil || input.PollToken == "" {
-		ret.Code = -1
-		ret.Msg = oidcLanguage(369, "Invalid OIDC configuration")
+func OIDCValidateActivate(c *gin.Context, request apicontract.SystemOIDCPollRequest) (ret apicontract.Response[apicontract.SystemOIDCActivateData]) {
+	ret = apicontract.Success(apicontract.SystemOIDCActivateData{})
+	input := request
+	if err := request.ParseError(); err != nil || input.PollToken == "" {
+		ret = apicontract.Failure[apicontract.SystemOIDCActivateData](-1, oidcLanguage(369, "Invalid OIDC configuration"))
 		return
 	}
 	workspaceSession := util.GetWorkspaceSession(util.GetSession(c))
 	activated, err := activateOIDCValidation(input.PollToken, workspaceSession.OIDCBinding)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = oidcLanguage(369, "Invalid OIDC configuration")
+		ret = apicontract.Failure[apicontract.SystemOIDCActivateData](-1, oidcLanguage(369, "Invalid OIDC configuration"))
 		logging.LogErrorf("activate validated OIDC configuration failed: %s", err)
 		return
 	}
 	if err = authenticateOIDCSession(c, false); err != nil {
-		ret.Code = -1
-		ret.Msg = oidcUserMessage()
+		ret = apicontract.Failure[apicontract.SystemOIDCActivateData](-1, oidcUserMessage())
 		return
 	}
 	if activated {
@@ -481,27 +427,25 @@ func OIDCValidateActivate(c *gin.Context) {
 	}
 	masked, err := GetMaskedConf()
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = oidcLanguage(369, "Invalid OIDC configuration")
+		ret = apicontract.Failure[apicontract.SystemOIDCActivateData](-1, oidcLanguage(369, "Invalid OIDC configuration"))
 		return
 	}
-	ret.Data = map[string]any{"status": "completed", "config": masked.OIDC}
+	ret = apicontract.Success(apicontract.SystemOIDCActivateData{Status: "completed", Config: SystemOIDCPayload(masked.OIDC)})
+	return
 }
 
-func OIDCValidateCancel(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-	input := &oidcPollInput{}
-	if err := c.ShouldBindJSON(input); err != nil || input.PollToken == "" {
-		ret.Code = -1
-		ret.Msg = oidcLanguage(369, "Invalid OIDC configuration")
+func OIDCValidateCancel(c *gin.Context, request apicontract.SystemOIDCPollRequest) (ret apicontract.Response[apicontract.Null]) {
+	ret = apicontract.Success(apicontract.Null{})
+	input := request
+	if err := request.ParseError(); err != nil || input.PollToken == "" {
+		ret = apicontract.Failure[apicontract.Null](-1, oidcLanguage(369, "Invalid OIDC configuration"))
 		return
 	}
 	workspaceSession := util.GetWorkspaceSession(util.GetSession(c))
 	if !cancelOIDCValidation(input.PollToken, workspaceSession.OIDCBinding) {
-		ret.Code = -1
-		ret.Msg = oidcLanguage(369, "Invalid OIDC configuration")
+		ret = apicontract.Failure[apicontract.Null](-1, oidcLanguage(369, "Invalid OIDC configuration"))
 	}
+	return
 }
 
 func validateOIDCConfiguration() error {
@@ -869,24 +813,20 @@ func deleteOIDCTransactionLocked(state string) {
 	delete(oidcTransactions.byState, state)
 }
 
-func respondRepeatedOIDCCallback(c *gin.Context, transaction *oidcTransaction) {
+func respondRepeatedOIDCCallback(c *gin.Context, transaction *oidcTransaction) apicontract.Response[apicontract.BinaryContent] {
 	if !transaction.Success {
-		writeOIDCCallbackPage(c, false, oidcUserMessage())
-		return
+		return writeOIDCCallbackPage(c, false, oidcUserMessage())
 	}
 	if transaction.Flow == oidcFlowDesktop || transaction.Flow == oidcFlowValidate {
-		writeOIDCCallbackPage(c, true, oidcLanguage(367, "You can close this window and return to SiYuan"))
-		return
+		return writeOIDCCallbackPage(c, true, oidcLanguage(367, "You can close this window and return to SiYuan"))
 	}
 	if transaction.Flow != oidcFlowWeb {
-		writeOIDCCallbackPage(c, false, oidcUserMessage())
-		return
+		return writeOIDCCallbackPage(c, false, oidcUserMessage())
 	}
 	if err := authenticateOIDCSession(c, transaction.RememberMe); err != nil {
-		writeOIDCCallbackPage(c, false, oidcUserMessage())
-		return
+		return writeOIDCCallbackPage(c, false, oidcUserMessage())
 	}
-	c.Redirect(http.StatusFound, safeOIDCRedirectTarget(transaction.To))
+	return apicontract.RedirectHTTPContent(http.StatusFound, safeOIDCRedirectTarget(transaction.To))
 }
 
 func cleanupOIDCTransactionsLocked() {
@@ -1028,7 +968,7 @@ func safeOIDCRedirectTarget(target string) string {
 	return target
 }
 
-func writeOIDCCallbackPage(c *gin.Context, success bool, message string) {
+func writeOIDCCallbackPage(c *gin.Context, success bool, message string) apicontract.Response[apicontract.BinaryContent] {
 	title := oidcUserMessage()
 	if success {
 		title = oidcLanguage(366, "OIDC login completed")
@@ -1041,5 +981,14 @@ func writeOIDCCallbackPage(c *gin.Context, success bool, message string) {
 	if Conf != nil {
 		lang = util.LangToBCP47(Conf.Lang)
 	}
-	c.Data(http.StatusOK, "text/html; charset=utf-8", util.RenderOAuthCallbackPage(lang, title, message, success))
+	return apicontract.SuccessHTTPContent(http.StatusOK, "text/html; charset=utf-8", util.RenderOAuthCallbackPage(lang, title, message, success))
+}
+
+func OIDCStartPreflight(c *gin.Context) *apicontract.Response[apicontract.SystemOIDCStartData] {
+	if err := validateOIDCConfiguration(); err != nil {
+		logging.LogErrorf("invalid OIDC login configuration: %s", err)
+		response := apicontract.Failure[apicontract.SystemOIDCStartData](-1, oidcUserMessage())
+		return &response
+	}
+	return nil
 }

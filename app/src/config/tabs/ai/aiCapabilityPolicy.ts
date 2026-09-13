@@ -2,20 +2,20 @@ export type AgentApprovalDecision = "risk" | "allow" | "confirm";
 export type AgentActionApprovalDecision = "" | AgentApprovalDecision;
 
 export interface IAgentApprovalPolicy {
-    default: "risk" | "allow";
+    default: string;
     overrides: Record<string, {
-        default: AgentActionApprovalDecision;
-        actions: Record<string, AgentApprovalDecision>;
+        default: string;
+        actions: Record<string, string>;
     }>;
 }
 
-export const resolveCapabilityApproval = (policy: IAgentApprovalPolicy, id: string, action = ""): AgentApprovalDecision => {
+export const resolveCapabilityApproval = (policy: IAgentApprovalPolicy, id: string, action = ""): string => {
     const override = policy.overrides[id];
     return override?.actions[action] || override?.default || policy.default;
 };
 
 export const getCapabilityActionApproval = (policy: IAgentApprovalPolicy, id: string, action: string):
-    AgentActionApprovalDecision => policy.overrides[id]?.actions[action] || "";
+    string => policy.overrides[id]?.actions[action] || "";
 
 export const updateCapabilityApproval = (policy: IAgentApprovalPolicy, id: string,
                                          decision: AgentApprovalDecision): IAgentApprovalPolicy => {

@@ -12,7 +12,7 @@ export const getDockKeymap = (dock: Config.IUILayoutDockTab) => {
 };
 
 interface IDockKeymap {
-    general: Config.IKeys;
+    general?: Config.IKeys;
     plugin?: Config.IKeymapPlugin;
 }
 

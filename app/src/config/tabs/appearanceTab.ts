@@ -15,6 +15,7 @@ import {getFrontend, isBrowser, isMobile, objEquals} from "../../util/functions"
 import {exitSiYuan} from "../../dialog/processSystem";
 import {isInMobileApp} from "../../protyle/util/compatibility";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {ContractFormData} from "../../util/contractFormData";
 import {openLink} from "../../editor/openLink";
 import {openSnippets} from "../util/snippets";
 import {getHostCapabilities} from "../../util/hostCapabilities";
@@ -504,10 +505,12 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                         showMessage(window.siyuan.languages.fontFileTip, 6000, "error");
                         return;
                     }
-                    const formData = new FormData();
-                    formData.append("file", file);
+                    const formData = new ContractFormData({file});
                     fetchPost("/api/system/importCustomFont", formData, (response) => {
-                        const font = response.data as ICustomFont;
+                        if (response.code !== 0) {
+                            return;
+                        }
+                        const font = response.data;
                         invalidateCustomFonts();
                         registerCustomFont(font);
                         persistFonts([...selectedFonts.filter((item) => item.family !== font.family), font]);
@@ -529,6 +532,9 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                                 "${x}", `<b>${escapeHtml(itemEl.dataset.name)}</b>`),
                             () => {
                                 fetchPost("/api/system/removeCustomFont", {id}, (response) => {
+                                    if (response.code !== 0) {
+                                        return;
+                                    }
                                     unregisterCustomFont(id);
                                     invalidateCustomFonts();
                                     if (response.data.appearance) {

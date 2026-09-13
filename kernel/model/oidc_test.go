@@ -439,9 +439,11 @@ func TestWriteOIDCCallbackPageUsesSharedOAuthStyle(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	context, _ := gin.CreateTestContext(recorder)
 
-	writeOIDCCallbackPage(context, false, "登录失败<script>")
-
-	page := recorder.Body.String()
+	response := writeOIDCCallbackPage(context, false, "登录失败<script>")
+	if response.Binary() == nil {
+		t.Fatal("OIDC callback page has no HTTP content")
+	}
+	page := string(response.Binary().Bytes)
 	for _, expected := range []string{`lang="zh-CN"`, `class="brand">SiYuan</div>`, `class="mark mark--error"`, "登录失败&lt;script&gt;"} {
 		if !strings.Contains(page, expected) {
 			t.Fatalf("OIDC callback page does not contain %q: %s", expected, page)

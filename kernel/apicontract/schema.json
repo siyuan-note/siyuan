@@ -41524,6 +41524,2208 @@
       },
       "additionalProperties": false
     },
+    "SystemAPI": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "token"
+      ],
+      "additionalProperties": false
+    },
+    "SystemAPITokenRequestInput": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "token"
+      ],
+      "additionalProperties": false
+    },
+    "SystemAccessAuthCodeRequestInput": {
+      "type": "object",
+      "properties": {
+        "accessAuthCode": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "accessAuthCode"
+      ],
+      "additionalProperties": false
+    },
+    "SystemAppConf": {
+      "type": "object",
+      "properties": {
+        "accessAuthCode": {
+          "type": "string"
+        },
+        "ai": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingAI"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "api": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemAPI"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "appearance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingAppearance"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "bazaar": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingBazaar"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cloudRegion": {
+          "type": "integer"
+        },
+        "cookieKey": {
+          "type": "string"
+        },
+        "dataIndexState": {
+          "type": "integer"
+        },
+        "editor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingEditor"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "export": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingExport"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fileTree": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingFileTree"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "flashcard": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingFlashcard"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "graph": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemGraph"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "keymap": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/JSONValue"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lang": {
+          "type": "string"
+        },
+        "langs": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SystemLang"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "logLevel": {
+          "type": "string"
+        },
+        "mcpOAuth": {
+          "type": "string"
+        },
+        "notebookCrypto": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemNotebookCrypto"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "oidc": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemOIDC"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "onboarding": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemOnboarding"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "publish": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingPublish"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "readonly": {
+          "type": "boolean"
+        },
+        "repo": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemRepo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "search": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingSearch"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "secrets": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingSecrets"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "serverAddrs": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "showChangelog": {
+          "type": "boolean"
+        },
+        "snippet": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingSnpt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stat": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemStat"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sync": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemSync"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "system": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemSystem"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tag": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemTag"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "uiLayout": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/JSONValue"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "userData": {
+          "type": "string"
+        },
+        "variables": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingVariables"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "accessAuthCode",
+        "ai",
+        "api",
+        "appearance",
+        "bazaar",
+        "cloudRegion",
+        "cookieKey",
+        "dataIndexState",
+        "editor",
+        "export",
+        "fileTree",
+        "flashcard",
+        "graph",
+        "keymap",
+        "lang",
+        "langs",
+        "logLevel",
+        "mcpOAuth",
+        "notebookCrypto",
+        "oidc",
+        "onboarding",
+        "publish",
+        "readonly",
+        "repo",
+        "search",
+        "secrets",
+        "serverAddrs",
+        "showChangelog",
+        "snippet",
+        "stat",
+        "sync",
+        "system",
+        "tag",
+        "uiLayout",
+        "userData",
+        "variables"
+      ],
+      "additionalProperties": false
+    },
+    "SystemAppearanceData": {
+      "type": "object",
+      "properties": {
+        "appearance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingAppearance"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "appearance"
+      ],
+      "additionalProperties": false
+    },
+    "SystemAppearanceModeRequestInput": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "mode"
+      ],
+      "additionalProperties": false
+    },
+    "SystemArgon2Params": {
+      "type": "object",
+      "properties": {
+        "iterations": {
+          "type": "integer"
+        },
+        "keyLength": {
+          "type": "integer"
+        },
+        "memory": {
+          "type": "integer"
+        },
+        "parallelism": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "iterations",
+        "keyLength",
+        "memory",
+        "parallelism"
+      ],
+      "additionalProperties": false
+    },
+    "SystemChangelogData": {
+      "type": "object",
+      "properties": {
+        "html": {
+          "type": "string"
+        },
+        "show": {
+          "type": "boolean"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "html",
+        "show",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "SystemChangelogRequestInput": {
+      "type": "object",
+      "properties": {
+        "force": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SystemCheckUpdateRequestInput": {
+      "type": "object",
+      "properties": {
+        "showMsg": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "showMsg"
+      ],
+      "additionalProperties": false
+    },
+    "SystemConfData": {
+      "type": "object",
+      "properties": {
+        "conf": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemAppConf"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "isPublish": {
+          "type": "boolean"
+        },
+        "start": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "conf",
+        "isPublish",
+        "start"
+      ],
+      "additionalProperties": false
+    },
+    "SystemCustomEmojiRequestInput": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "format": "binary"
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SystemCustomFont": {
+      "type": "object",
+      "properties": {
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "family": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "spacing": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "weight": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "displayName",
+        "family",
+        "id",
+        "url",
+        "weight"
+      ],
+      "additionalProperties": false
+    },
+    "SystemD3": {
+      "type": "object",
+      "properties": {
+        "arrow": {
+          "type": "boolean"
+        },
+        "centerStrength": {
+          "type": "number"
+        },
+        "collideRadius": {
+          "type": "number"
+        },
+        "collideStrength": {
+          "type": "number"
+        },
+        "lineOpacity": {
+          "type": "number"
+        },
+        "linkDistance": {
+          "type": "integer"
+        },
+        "linkWidth": {
+          "type": "number"
+        },
+        "nodeSize": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "arrow",
+        "centerStrength",
+        "collideRadius",
+        "collideStrength",
+        "lineOpacity",
+        "linkDistance",
+        "linkWidth",
+        "nodeSize"
+      ],
+      "additionalProperties": false
+    },
+    "SystemEmoji": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "description_ja_jp": {
+          "type": "string"
+        },
+        "description_zh_cn": {
+          "type": "string"
+        },
+        "keywords": {
+          "type": "string"
+        },
+        "unicode": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "description",
+        "description_ja_jp",
+        "description_zh_cn",
+        "keywords",
+        "unicode"
+      ],
+      "additionalProperties": false
+    },
+    "SystemEmojiGroup": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "items": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SystemEmoji"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "title_ja_jp": {
+          "type": "string"
+        },
+        "title_zh_cn": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "items",
+        "title",
+        "title_ja_jp",
+        "title_zh_cn"
+      ],
+      "additionalProperties": false
+    },
+    "SystemExitData": {
+      "type": "object",
+      "properties": {
+        "closeTimeout": {
+          "type": "integer"
+        },
+        "installPkgPath": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "closeTimeout"
+      ],
+      "additionalProperties": false
+    },
+    "SystemExitRequestInput": {
+      "type": "object",
+      "properties": {
+        "execInstallPkg": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "force": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "setCurrentWorkspace": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SystemExportConfData": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "zip"
+      ],
+      "additionalProperties": false
+    },
+    "SystemFont": {
+      "type": "object",
+      "properties": {
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "family": {
+          "type": "string"
+        },
+        "spacing": {
+          "type": "string"
+        },
+        "weight": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "displayName",
+        "family",
+        "weight"
+      ],
+      "additionalProperties": false
+    },
+    "SystemGlobalGraph": {
+      "type": "object",
+      "properties": {
+        "d3": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemD3"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dailyNote": {
+          "type": "boolean"
+        },
+        "minRefs": {
+          "type": "integer"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemTypeFilter"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "d3",
+        "dailyNote",
+        "minRefs",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "SystemGraph": {
+      "type": "object",
+      "properties": {
+        "global": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemGlobalGraph"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "local": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemLocalGraph"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "maxBlocks": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "global",
+        "local",
+        "maxBlocks"
+      ],
+      "additionalProperties": false
+    },
+    "SystemImportConfRequestInput": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "SystemImportFileRequestInput": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string",
+          "format": "binary"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SystemLANSync": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "maxConcurrentReqs": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "enabled",
+        "maxConcurrentReqs"
+      ],
+      "additionalProperties": false
+    },
+    "SystemLang": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "SystemLocal": {
+      "type": "object",
+      "properties": {
+        "concurrentReqs": {
+          "type": "integer"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "concurrentReqs",
+        "endpoint",
+        "timeout"
+      ],
+      "additionalProperties": false
+    },
+    "SystemLocalGraph": {
+      "type": "object",
+      "properties": {
+        "d3": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemD3"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dailyNote": {
+          "type": "boolean"
+        },
+        "type": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemTypeFilter"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "d3",
+        "dailyNote",
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "SystemLoginAuthRequestInput": {
+      "type": "object",
+      "properties": {
+        "authCode": {
+          "type": "string"
+        },
+        "captcha": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rememberMe": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "authCode"
+      ],
+      "additionalProperties": false
+    },
+    "SystemMessageData": {
+      "type": "object",
+      "properties": {
+        "msg": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "msg"
+      ],
+      "additionalProperties": false
+    },
+    "SystemNetworkProxy": {
+      "type": "object",
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "string"
+        },
+        "scheme": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "host",
+        "port",
+        "scheme"
+      ],
+      "additionalProperties": false
+    },
+    "SystemNotebookCrypto": {
+      "type": "object",
+      "properties": {
+        "autoLockMinutes": {
+          "type": "integer"
+        },
+        "backupID": {
+          "type": "string"
+        },
+        "checksum": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "integer"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "historyKEKs": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "kdfParams": {
+          "$ref": "#/$defs/SystemArgon2Params"
+        },
+        "kekMAC": {
+          "type": "string"
+        },
+        "kekVerifier": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "masterSalt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "spec": {
+          "type": "integer"
+        },
+        "verifierNonce": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "autoLockMinutes",
+        "enabled",
+        "kdfParams",
+        "kekVerifier",
+        "masterSalt",
+        "spec",
+        "verifierNonce"
+      ],
+      "additionalProperties": false
+    },
+    "SystemOIDC": {
+      "type": "object",
+      "properties": {
+        "allowAll": {
+          "type": "boolean"
+        },
+        "claimRules": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SystemOIDCClaimRule"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "clientID": {
+          "type": "string"
+        },
+        "clientSecret": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "issuerURL": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "redirectURL": {
+          "type": "string"
+        },
+        "scopes": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "allowAll",
+        "claimRules",
+        "clientID",
+        "clientSecret",
+        "enabled",
+        "issuerURL",
+        "provider",
+        "redirectURL",
+        "scopes"
+      ],
+      "additionalProperties": false
+    },
+    "SystemOIDCActivateData": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemOIDC"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "completed"
+          ]
+        }
+      },
+      "required": [
+        "config",
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "SystemOIDCCallbackRequestInput": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SystemOIDCClaimRule": {
+      "type": "object",
+      "properties": {
+        "claim": {
+          "type": "string"
+        },
+        "operator": {
+          "type": "string"
+        },
+        "values": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "claim",
+        "operator",
+        "values"
+      ],
+      "additionalProperties": false
+    },
+    "SystemOIDCClaimRuleInput": {
+      "type": "object",
+      "properties": {
+        "claim": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "values": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SystemOIDCCompletedData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "completed"
+          ]
+        },
+        "to": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "SystemOIDCMobileData": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SystemOIDCMobileValidationData"
+        },
+        {
+          "$ref": "#/$defs/SystemOIDCMobileRedirectData"
+        }
+      ]
+    },
+    "SystemOIDCMobileRedirectData": {
+      "type": "object",
+      "properties": {
+        "to": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "to"
+      ],
+      "additionalProperties": false
+    },
+    "SystemOIDCMobileRequestInput": {
+      "type": "object",
+      "properties": {
+        "callbackURL": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SystemOIDCMobileValidationData": {
+      "type": "object",
+      "properties": {
+        "validation": {
+          "type": "boolean",
+          "enum": [
+            true
+          ]
+        }
+      },
+      "required": [
+        "validation"
+      ],
+      "additionalProperties": false
+    },
+    "SystemOIDCPendingData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending"
+          ]
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "SystemOIDCPollData": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SystemOIDCPendingData"
+        },
+        {
+          "$ref": "#/$defs/SystemOIDCCompletedData"
+        }
+      ]
+    },
+    "SystemOIDCPollRequestInput": {
+      "type": "object",
+      "properties": {
+        "pollToken": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SystemOIDCRequestInput": {
+      "type": "object",
+      "properties": {
+        "allowAll": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "claimRules": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SystemOIDCClaimRuleInput"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "clientID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "clientSecret": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "issuerURL": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "provider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "redirectURL": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scopes": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SystemOIDCStartData": {
+      "type": "object",
+      "properties": {
+        "authURL": {
+          "type": "string"
+        },
+        "expiresIn": {
+          "type": "integer"
+        },
+        "pollToken": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "authURL",
+        "expiresIn"
+      ],
+      "additionalProperties": false
+    },
+    "SystemOIDCStartRequestInput": {
+      "type": "object",
+      "properties": {
+        "flow": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rememberMe": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "to": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SystemOIDCValidatePollData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "completed"
+          ]
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "additionalProperties": false
+    },
+    "SystemOnboarding": {
+      "type": "object",
+      "properties": {
+        "dismissed": {
+          "type": "boolean"
+        },
+        "documentID": {
+          "type": "string"
+        },
+        "newUser": {
+          "type": "boolean"
+        },
+        "notebookID": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "dismissed",
+        "documentID",
+        "newUser",
+        "notebookID",
+        "state"
+      ],
+      "additionalProperties": false
+    },
+    "SystemPathData": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "SystemPathRequestInput": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "SystemRemoveCustomFontData": {
+      "type": "object",
+      "properties": {
+        "appearance": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingAppearance"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "editor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SettingEditor"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "font": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemCustomFont"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "appearance",
+        "editor",
+        "font"
+      ],
+      "additionalProperties": false
+    },
+    "SystemRemoveCustomFontRequestInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SystemRepo": {
+      "type": "object",
+      "properties": {
+        "indexRetentionDays": {
+          "type": "integer"
+        },
+        "key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "retentionIndexesDaily": {
+          "type": "integer"
+        },
+        "syncIndexTiming": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "indexRetentionDays",
+        "key",
+        "retentionIndexesDaily",
+        "syncIndexTiming"
+      ],
+      "additionalProperties": false
+    },
+    "SystemS3": {
+      "type": "object",
+      "properties": {
+        "accessKey": {
+          "type": "string"
+        },
+        "bucket": {
+          "type": "string"
+        },
+        "concurrentReqs": {
+          "type": "integer"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "pathStyle": {
+          "type": "boolean"
+        },
+        "region": {
+          "type": "string"
+        },
+        "secretKey": {
+          "type": "string"
+        },
+        "skipTlsVerify": {
+          "type": "boolean"
+        },
+        "timeout": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "accessKey",
+        "bucket",
+        "concurrentReqs",
+        "endpoint",
+        "pathStyle",
+        "region",
+        "secretKey",
+        "skipTlsVerify",
+        "timeout"
+      ],
+      "additionalProperties": false
+    },
+    "SystemStat": {
+      "type": "object",
+      "properties": {
+        "assetsSize": {
+          "type": "integer"
+        },
+        "blockCount": {
+          "type": "integer"
+        },
+        "cAssetsSize": {
+          "type": "integer"
+        },
+        "cBlockCount": {
+          "type": "integer"
+        },
+        "cDataSize": {
+          "type": "integer"
+        },
+        "cTreeCount": {
+          "type": "integer"
+        },
+        "dataSize": {
+          "type": "integer"
+        },
+        "treeCount": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "assetsSize",
+        "blockCount",
+        "cAssetsSize",
+        "cBlockCount",
+        "cDataSize",
+        "cTreeCount",
+        "dataSize",
+        "treeCount"
+      ],
+      "additionalProperties": false
+    },
+    "SystemSync": {
+      "type": "object",
+      "properties": {
+        "assetDownloadMode": {
+          "type": "integer"
+        },
+        "cloudName": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "generateConflictDoc": {
+          "type": "boolean"
+        },
+        "interval": {
+          "type": "integer"
+        },
+        "lan": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemLANSync"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "local": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemLocal"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "mode": {
+          "type": "integer"
+        },
+        "perception": {
+          "type": "boolean"
+        },
+        "provider": {
+          "type": "integer"
+        },
+        "s3": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemS3"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "stat": {
+          "type": "string"
+        },
+        "synced": {
+          "type": "integer"
+        },
+        "webdav": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemWebDAV"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "assetDownloadMode",
+        "cloudName",
+        "enabled",
+        "generateConflictDoc",
+        "interval",
+        "lan",
+        "local",
+        "mode",
+        "perception",
+        "provider",
+        "s3",
+        "stat",
+        "synced",
+        "webdav"
+      ],
+      "additionalProperties": false
+    },
+    "SystemSystem": {
+      "type": "object",
+      "properties": {
+        "appDir": {
+          "type": "string"
+        },
+        "autoLaunch2": {
+          "type": "integer"
+        },
+        "confDir": {
+          "type": "string"
+        },
+        "container": {
+          "type": "string"
+        },
+        "dataDir": {
+          "type": "string"
+        },
+        "disabledFeatures": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "downloadInstallPkg": {
+          "type": "boolean"
+        },
+        "homeDir": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "isMicrosoftStore": {
+          "type": "boolean"
+        },
+        "kernelVersion": {
+          "type": "string"
+        },
+        "lockScreenMode": {
+          "type": "integer"
+        },
+        "microsoftDefenderExcluded": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "networkProxy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SystemNetworkProxy"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "networkServe": {
+          "type": "boolean"
+        },
+        "networkServeTLS": {
+          "type": "boolean"
+        },
+        "os": {
+          "type": "string"
+        },
+        "osPlatform": {
+          "type": "string"
+        },
+        "safeMode": {
+          "type": "boolean"
+        },
+        "updateChannel": {
+          "type": "string"
+        },
+        "workspaceDir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "appDir",
+        "autoLaunch2",
+        "confDir",
+        "container",
+        "dataDir",
+        "disabledFeatures",
+        "downloadInstallPkg",
+        "homeDir",
+        "id",
+        "isMicrosoftStore",
+        "kernelVersion",
+        "lockScreenMode",
+        "microsoftDefenderExcluded",
+        "name",
+        "networkProxy",
+        "networkServe",
+        "networkServeTLS",
+        "os",
+        "osPlatform",
+        "safeMode",
+        "workspaceDir"
+      ],
+      "additionalProperties": false
+    },
+    "SystemTag": {
+      "type": "object",
+      "properties": {
+        "sort": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sort"
+      ],
+      "additionalProperties": false
+    },
+    "SystemTypeFilter": {
+      "type": "object",
+      "properties": {
+        "blockquote": {
+          "type": "boolean"
+        },
+        "callout": {
+          "type": "boolean"
+        },
+        "code": {
+          "type": "boolean"
+        },
+        "heading": {
+          "type": "boolean"
+        },
+        "list": {
+          "type": "boolean"
+        },
+        "listItem": {
+          "type": "boolean"
+        },
+        "math": {
+          "type": "boolean"
+        },
+        "paragraph": {
+          "type": "boolean"
+        },
+        "super": {
+          "type": "boolean"
+        },
+        "table": {
+          "type": "boolean"
+        },
+        "tag": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "blockquote",
+        "callout",
+        "code",
+        "heading",
+        "list",
+        "listItem",
+        "math",
+        "paragraph",
+        "super",
+        "table",
+        "tag"
+      ],
+      "additionalProperties": false
+    },
+    "SystemUILayoutRequestInput": {
+      "type": "object",
+      "properties": {
+        "layout": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/JSONValue"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SystemUIProcessRequestInput": {
+      "type": "object",
+      "properties": {
+        "pid": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "SystemWebDAV": {
+      "type": "object",
+      "properties": {
+        "concurrentReqs": {
+          "type": "integer"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "skipTlsVerify": {
+          "type": "boolean"
+        },
+        "timeout": {
+          "type": "integer"
+        },
+        "username": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "concurrentReqs",
+        "endpoint",
+        "password",
+        "skipTlsVerify",
+        "timeout",
+        "username"
+      ],
+      "additionalProperties": false
+    },
+    "SystemWorkspace": {
+      "type": "object",
+      "properties": {
+        "closed": {
+          "type": "boolean"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "closed",
+        "path"
+      ],
+      "additionalProperties": false
+    },
+    "SystemWorkspaceCheckData": {
+      "type": "object",
+      "properties": {
+        "isWorkspace": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "isWorkspace"
+      ],
+      "additionalProperties": false
+    },
+    "SystemZipData": {
+      "type": "object",
+      "properties": {
+        "zip": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "zip"
+      ],
+      "additionalProperties": false
+    },
     "TagData": {
       "type": "object",
       "properties": {
@@ -44228,6 +46430,289 @@
           }
         ]
       }
+    },
+    {
+      "method": "GET",
+      "path": "/api/system/bootProgressSSE",
+      "handler": "bootProgressSSE",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "sse",
+      "sse": {
+        "events": {
+          "": {
+            "$ref": "#/$defs/BootProgressData"
+          }
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/system/getBootAppearance",
+      "handler": "getBootAppearance",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SettingBootAppearance"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "emptyResponseStatuses": [
+        403
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/system/getCaptcha",
+      "handler": "getCaptcha",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 200,
+      "contentVariants": [
+        {
+          "status": 200,
+          "contentType": "image/png"
+        }
+      ],
+      "emptyResponseStatuses": [
+        500
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/system/oidc/callback",
+      "handler": "oidcCallback",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/SystemOIDCCallbackRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "binary"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "output": "binary",
+      "errorStatus": 200,
+      "contentVariants": [
+        {
+          "status": 200,
+          "contentType": "text/html"
+        },
+        {
+          "status": 302,
+          "contentType": "text/html"
+        }
+      ]
     },
     {
       "method": "GET",
@@ -88129,6 +90614,83 @@
     },
     {
       "method": "POST",
+      "path": "/api/system/addCustomEmoji",
+      "handler": "addCustomEmoji",
+      "body": "form",
+      "request": {
+        "$ref": "#/$defs/SystemCustomEmojiRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemPathData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  400,
+                  413
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/system/addMicrosoftDefenderExclusion",
       "handler": "addMicrosoftDefenderExclusion",
       "body": "none",
@@ -88279,11 +90841,236 @@
     },
     {
       "method": "POST",
+      "path": "/api/system/checkUpdate",
+      "handler": "checkUpdate",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SystemCheckUpdateRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/checkWorkspaceDir",
+      "handler": "checkWorkspaceDir",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SystemPathRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemWorkspaceCheckData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/system/clearTempFiles",
       "handler": "clearTempFiles",
       "body": "none",
       "request": {
         "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/createWorkspaceDir",
+      "handler": "createWorkspaceDir",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SystemPathRequestInput"
       },
       "response": {
         "anyOf": [
@@ -88429,6 +91216,969 @@
     },
     {
       "method": "POST",
+      "path": "/api/system/dismissOnboarding",
+      "handler": "dismissOnboarding",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SystemOnboarding"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/ensureOnboarding",
+      "handler": "ensureOnboarding",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SystemOnboarding"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/exit",
+      "handler": "exit",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SystemExitRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemExitData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1,
+                  2
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/SystemExitData"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/exportConf",
+      "handler": "exportConf",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemExportConfData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/exportLog",
+      "handler": "exportLog",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemZipData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/exportTLSCABundle",
+      "handler": "exportTLSCABundle",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemPathData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/exportTLSCACert",
+      "handler": "exportTLSCACert",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemPathData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/getChangelog",
+      "handler": "getChangelog",
+      "body": "legacyOptional",
+      "request": {
+        "$ref": "#/$defs/SystemChangelogRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemChangelogData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/getConf",
+      "handler": "getConf",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemConfData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/getCustomFonts",
+      "handler": "getCustomFonts",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/SystemCustomFont"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/getEmojiConf",
+      "handler": "getEmojiConf",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/SystemEmojiGroup"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/getMobileWorkspaces",
+      "handler": "getMobileWorkspaces",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/system/getNetwork",
       "handler": "getNetwork",
       "body": "none",
@@ -88448,6 +92198,98 @@
               },
               "data": {
                 "$ref": "#/$defs/NetworkData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/getSysFonts",
+      "handler": "getSysFonts",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/SystemFont"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               "msg": {
                 "type": "string"
@@ -88579,6 +92421,98 @@
     },
     {
       "method": "POST",
+      "path": "/api/system/getWorkspaces",
+      "handler": "getWorkspaces",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/$defs/SystemWorkspace"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/system/ignoreAddMicrosoftDefenderExclusion",
       "handler": "ignoreAddMicrosoftDefenderExclusion",
       "body": "none",
@@ -88598,6 +92532,917 @@
               },
               "data": {
                 "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/importConf",
+      "handler": "importConf",
+      "body": "multipart",
+      "request": {
+        "$ref": "#/$defs/SystemImportConfRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/importCustomFont",
+      "handler": "importCustomFont",
+      "body": "multipart",
+      "request": {
+        "$ref": "#/$defs/SystemImportFileRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SystemCustomFont"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  400,
+                  413
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/importTLSCABundle",
+      "handler": "importTLSCABundle",
+      "body": "multipart",
+      "request": {
+        "$ref": "#/$defs/SystemImportFileRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemMessageData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/loginAuth",
+      "handler": "loginAuth",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SystemLoginAuthRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/logoutAuth",
+      "handler": "logoutAuth",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/oidc/mobileCallback",
+      "handler": "oidcMobileCallback",
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/SystemOIDCMobileRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemOIDCMobileData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/oidc/poll",
+      "handler": "oidcPoll",
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/SystemOIDCPollRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemOIDCPollData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/oidc/start",
+      "handler": "oidcStart",
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/SystemOIDCStartRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemOIDCStartData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/oidc/validate",
+      "handler": "oidcValidateStart",
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/SystemOIDCRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemOIDCStartData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/oidc/validateActivate",
+      "handler": "oidcValidateActivate",
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/SystemOIDCPollRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemOIDCActivateData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/oidc/validateCancel",
+      "handler": "oidcValidateCancel",
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/SystemOIDCPollRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/oidc/validatePoll",
+      "handler": "oidcValidatePoll",
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/SystemOIDCPollRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemOIDCValidatePollData"
               },
               "msg": {
                 "type": "string"
@@ -88748,6 +93593,458 @@
               },
               "data": {
                 "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/removeCustomFont",
+      "handler": "removeCustomFont",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SystemRemoveCustomFontRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemRemoveCustomFontData"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  400,
+                  404
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/removeWorkspaceDir",
+      "handler": "removeWorkspaceDir",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SystemPathRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/removeWorkspaceDirPhysically",
+      "handler": "removeWorkspaceDirPhysically",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SystemPathRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/setAPIToken",
+      "handler": "setAPIToken",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SystemAPITokenRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/setAccessAuthCode",
+      "handler": "setAccessAuthCode",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SystemAccessAuthCodeRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/setAppearanceMode",
+      "handler": "setAppearanceMode",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SystemAppearanceModeRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/SystemAppearanceData"
               },
               "msg": {
                 "type": "string"
@@ -89254,6 +94551,163 @@
     },
     {
       "method": "POST",
+      "path": "/api/system/setOIDC",
+      "handler": "setOIDC",
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/SystemOIDCRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SystemOIDC"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/setUILayout",
+      "handler": "setUILayout",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SystemUILayoutRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/system/setUpdateChannel",
       "handler": "setUpdateChannel",
       "body": "json",
@@ -89326,6 +94780,159 @@
           }
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/setWorkspaceDir",
+      "handler": "setWorkspaceDir",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/SystemPathRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/system/uiproc",
+      "handler": "addUIProcess",
+      "body": "none",
+      "request": {
+        "$ref": "#/$defs/SystemUIProcessRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      },
+      "emptyResponseStatuses": [
+        200
+      ]
     },
     {
       "method": "POST",

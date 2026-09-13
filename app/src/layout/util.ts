@@ -198,10 +198,11 @@ export const saveLayout = () => {
             sessionStorage.setItem("layout", JSON.stringify(layoutJSON));
         } else {
             if (!window.siyuan.config.readonly) {
-                fetchPost("/api/system/setUILayout", {
+                const request = {
                     layout: layoutJSON,
                     errorExit: false    // 后台不接受该参数，用于请求发生错误时退出程序
-                });
+                };
+                fetchPost("/api/system/setUILayout", request);
             }
         }
     }
@@ -251,10 +252,11 @@ export const exportLayout = async (options: {
     if (window.siyuan.config.readonly) {
         options.cb();
     } else {
-        fetchPost("/api/system/setUILayout", {
+        const request = {
             layout: layoutJSON,
             errorExit: options.errorExit    // 后台不接受该参数，用于请求发生错误时退出程序
-        }, () => {
+        };
+        fetchPost("/api/system/setUILayout", request, () => {
             options.cb();
         });
     }
@@ -361,14 +363,14 @@ const removedTabs: Tab[] = [];
 
 export const JSONToCenter = (
     app: App,
-    json: Config.TUILayoutItem,
+    json: Config.TPersistedUILayoutItem,
     layout?: Layout | Wnd | Tab | Model,
 ) => {
     let child: Layout | Wnd | Tab | Model;
     if (json.instance === "Layout") {
         // TabA 向右分屏后向下分屏，依次关闭右侧、上侧分屏无法移除 layout 嵌套，故在此解决 https://github.com/siyuan-note/siyuan/issues/12196
-        while (json.children.length === 1 && json.children[0].instance === "Layout" &&
-        json.children[0].type === "normal" && json.children[0].children.length === 1) {
+        while (Array.isArray(json.children) && json.children.length === 1 && json.children[0].instance === "Layout" &&
+        json.children[0].type === "normal" && Array.isArray(json.children[0].children) && json.children[0].children.length === 1) {
             json.children = json.children[0].children;
         }
         if (!layout) {

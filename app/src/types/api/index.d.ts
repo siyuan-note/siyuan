@@ -1928,6 +1928,140 @@ export type SyncWebDAVData = { "webdav": SyncWebDAV | null; };
 
 export type SyncWebDAVInput = { "concurrentReqs"?: number | null; "endpoint"?: string | null; "password"?: string | null; "skipTlsVerify"?: boolean | null; "timeout"?: number | null; "username"?: string | null; };
 
+export type SystemAPI = { "token": string; };
+
+export type SystemAPITokenRequestInput = { "token": string; };
+
+export type SystemAccessAuthCodeRequestInput = { "accessAuthCode": string; };
+
+export type SystemAppConf = { "accessAuthCode": string; "ai": SettingAI | null; "api": SystemAPI | null; "appearance": SettingAppearance | null; "bazaar": SettingBazaar | null; "cloudRegion": number; "cookieKey": string; "dataIndexState": number; "editor": SettingEditor | null; "export": SettingExport | null; "fileTree": SettingFileTree | null; "flashcard": SettingFlashcard | null; "graph": SystemGraph | null; "keymap": { [key: string]: JSONValue } | null; "lang": string; "langs": Array<SystemLang | null> | null; "logLevel": string; "mcpOAuth": string; "notebookCrypto": SystemNotebookCrypto | null; "oidc": SystemOIDC | null; "onboarding": SystemOnboarding | null; "publish": SettingPublish | null; "readonly": boolean; "repo": SystemRepo | null; "search": SettingSearch | null; "secrets": SettingSecrets | null; "serverAddrs": Array<string> | null; "showChangelog": boolean; "snippet": SettingSnpt | null; "stat": SystemStat | null; "sync": SystemSync | null; "system": SystemSystem | null; "tag": SystemTag | null; "uiLayout": { [key: string]: JSONValue } | null; "userData": string; "variables": SettingVariables | null; };
+
+export type SystemAppearanceData = { "appearance": SettingAppearance | null; };
+
+export type SystemAppearanceModeRequestInput = { "mode": number; };
+
+export type SystemArgon2Params = { "iterations": number; "keyLength": number; "memory": number; "parallelism": number; };
+
+export type SystemChangelogData = { "html": string; "show": boolean; "version": string; };
+
+export type SystemChangelogRequestInput = { "force"?: boolean | null; };
+
+export type SystemCheckUpdateRequestInput = { "showMsg": boolean; };
+
+export type SystemConfData = { "conf": SystemAppConf | null; "isPublish": boolean; "start": boolean; };
+
+export type SystemCustomEmojiRequestInput = { "file"?: Blob; "name"?: string; "url"?: string; };
+
+export type SystemCustomFont = { "aliases"?: Array<string>; "displayName": string; "family": string; "id": string; "spacing"?: string; "url": string; "weight": number; };
+
+export type SystemD3 = { "arrow": boolean; "centerStrength": number; "collideRadius": number; "collideStrength": number; "lineOpacity": number; "linkDistance": number; "linkWidth": number; "nodeSize": number; };
+
+export type SystemEmoji = { "description": string; "description_ja_jp": string; "description_zh_cn": string; "keywords": string; "unicode": string; };
+
+export type SystemEmojiGroup = { "id": string; "items": Array<SystemEmoji | null> | null; "title": string; "title_ja_jp": string; "title_zh_cn": string; };
+
+export type SystemExitData = { "closeTimeout": number; "installPkgPath"?: string; };
+
+export type SystemExitRequestInput = { "execInstallPkg"?: number | null; "force"?: boolean | null; "setCurrentWorkspace"?: boolean | null; };
+
+export type SystemExportConfData = { "name": string; "zip": string; };
+
+export type SystemFont = { "aliases"?: Array<string>; "displayName": string; "family": string; "spacing"?: string; "weight": number; };
+
+export type SystemGlobalGraph = { "d3": SystemD3 | null; "dailyNote": boolean; "minRefs": number; "type": SystemTypeFilter | null; };
+
+export type SystemGraph = { "global": SystemGlobalGraph | null; "local": SystemLocalGraph | null; "maxBlocks": number; };
+
+export type SystemImportConfRequestInput = { "file"?: Array<Blob>; };
+
+export type SystemImportFileRequestInput = { "file"?: Blob; };
+
+export type SystemLANSync = { "enabled": boolean; "maxConcurrentReqs": number; };
+
+export type SystemLang = { "label": string; "name": string; };
+
+export type SystemLocal = { "concurrentReqs": number; "endpoint": string; "timeout": number; };
+
+export type SystemLocalGraph = { "d3": SystemD3 | null; "dailyNote": boolean; "type": SystemTypeFilter | null; };
+
+export type SystemLoginAuthRequestInput = { "authCode": string; "captcha"?: string | null; "rememberMe"?: boolean | null; };
+
+export type SystemMessageData = { "msg": string; };
+
+export type SystemNetworkProxy = { "host": string; "port": string; "scheme": string; };
+
+export type SystemNotebookCrypto = { "autoLockMinutes": number; "backupID"?: string; "checksum"?: string; "createdAt"?: number; "enabled": boolean; "historyKEKs"?: Array<string | null>; "kdfParams": SystemArgon2Params; "kekMAC"?: string; "kekVerifier": string | null; "masterSalt": string | null; "spec": number; "verifierNonce": string | null; };
+
+export type SystemOIDC = { "allowAll": boolean; "claimRules": Array<SystemOIDCClaimRule | null> | null; "clientID": string; "clientSecret": string; "enabled": boolean; "issuerURL": string; "provider": string; "redirectURL": string; "scopes": Array<string> | null; };
+
+export type SystemOIDCActivateData = { "config": SystemOIDC | null; "status": "completed"; };
+
+export type SystemOIDCCallbackRequestInput = { "code"?: string | null; "error"?: string | null; "state"?: string | null; };
+
+export type SystemOIDCClaimRule = { "claim": string; "operator": string; "values": Array<string> | null; };
+
+export type SystemOIDCClaimRuleInput = { "claim"?: string | null; "operator"?: string | null; "values"?: Array<string> | null; };
+
+export type SystemOIDCCompletedData = { "status": "completed"; "to": string; };
+
+export type SystemOIDCMobileData = (SystemOIDCMobileValidationData & { "to"?: never; }) | (SystemOIDCMobileRedirectData & { "validation"?: never; });
+
+export type SystemOIDCMobileRedirectData = { "to": string; };
+
+export type SystemOIDCMobileRequestInput = { "callbackURL"?: string | null; };
+
+export type SystemOIDCMobileValidationData = { "validation": true; };
+
+export type SystemOIDCPendingData = { "status": "pending"; };
+
+export type SystemOIDCPollData = (SystemOIDCPendingData & { "to"?: never; }) | SystemOIDCCompletedData;
+
+export type SystemOIDCPollRequestInput = { "pollToken"?: string | null; };
+
+export type SystemOIDCRequestInput = { "allowAll"?: boolean | null; "claimRules"?: Array<SystemOIDCClaimRuleInput | null> | null; "clientID"?: string | null; "clientSecret"?: string | null; "enabled"?: boolean | null; "issuerURL"?: string | null; "provider"?: string | null; "redirectURL"?: string | null; "scopes"?: Array<string> | null; };
+
+export type SystemOIDCStartData = { "authURL": string; "expiresIn": number; "pollToken"?: string; };
+
+export type SystemOIDCStartRequestInput = { "flow"?: string | null; "rememberMe"?: boolean | null; "to"?: string | null; };
+
+export type SystemOIDCValidatePollData = { "status": "pending" | "completed"; };
+
+export type SystemOnboarding = { "dismissed": boolean; "documentID": string; "newUser": boolean; "notebookID": string; "state": string; };
+
+export type SystemPathData = { "path": string; };
+
+export type SystemPathRequestInput = { "path": string; };
+
+export type SystemRemoveCustomFontData = { "appearance": SettingAppearance | null; "editor": SettingEditor | null; "font": SystemCustomFont | null; };
+
+export type SystemRemoveCustomFontRequestInput = { "id"?: string | null; };
+
+export type SystemRepo = { "indexRetentionDays": number; "key": string | null; "retentionIndexesDaily": number; "syncIndexTiming": number; };
+
+export type SystemS3 = { "accessKey": string; "bucket": string; "concurrentReqs": number; "endpoint": string; "pathStyle": boolean; "region": string; "secretKey": string; "skipTlsVerify": boolean; "timeout": number; };
+
+export type SystemStat = { "assetsSize": number; "blockCount": number; "cAssetsSize": number; "cBlockCount": number; "cDataSize": number; "cTreeCount": number; "dataSize": number; "treeCount": number; };
+
+export type SystemSync = { "assetDownloadMode": number; "cloudName": string; "enabled": boolean; "generateConflictDoc": boolean; "interval": number; "lan": SystemLANSync | null; "local": SystemLocal | null; "mode": number; "perception": boolean; "provider": number; "s3": SystemS3 | null; "stat": string; "synced": number; "webdav": SystemWebDAV | null; };
+
+export type SystemSystem = { "appDir": string; "autoLaunch2": number; "confDir": string; "container": string; "dataDir": string; "disabledFeatures": Array<string> | null; "downloadInstallPkg": boolean; "homeDir": string; "id": string; "isMicrosoftStore": boolean; "kernelVersion": string; "lockScreenMode": number; "microsoftDefenderExcluded": boolean; "name": string; "networkProxy": SystemNetworkProxy | null; "networkServe": boolean; "networkServeTLS": boolean; "os": string; "osPlatform": string; "safeMode": boolean; "updateChannel"?: string; "workspaceDir": string; };
+
+export type SystemTag = { "sort": number; };
+
+export type SystemTypeFilter = { "blockquote": boolean; "callout": boolean; "code": boolean; "heading": boolean; "list": boolean; "listItem": boolean; "math": boolean; "paragraph": boolean; "super": boolean; "table": boolean; "tag": boolean; };
+
+export type SystemUILayoutRequestInput = { "layout"?: { [key: string]: JSONValue } | null; };
+
+export type SystemUIProcessRequestInput = { "pid"?: string | null; };
+
+export type SystemWebDAV = { "concurrentReqs": number; "endpoint": string; "password": string; "skipTlsVerify": boolean; "timeout": number; "username": string; };
+
+export type SystemWorkspace = { "closed": boolean; "path": string; };
+
+export type SystemWorkspaceCheckData = { "isWorkspace": boolean; };
+
+export type SystemZipData = { "zip": string; };
+
 export type TagData = { "children": Array<TagData | null> | null; "count": number; "depth": number; "label": string; "name": string; "type": string; };
 
 export type TagSnapshotRequestInput = { "id": string; "name": string; };
@@ -2009,10 +2143,6 @@ export type WorkspaceInfoData = { "siyuanVer": string; "workspaceDir": string; }
 export type ZipRequestInput = { "path": string; "zipPath": string; };
 
 export type APILegacyGETPath =
-    "/api/system/bootProgressSSE" |
-    "/api/system/getBootAppearance" |
-    "/api/system/getCaptcha" |
-    "/api/system/oidc/callback" |
     "/es/broadcast/subscribe" |
     "/ws/broadcast";
 
@@ -2069,6 +2199,34 @@ export interface APIGETRoutes {
         response: { "code": 0; "data": BootProgressData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
+    "/api/system/bootProgressSSE": {
+        request: EmptyRequestInput;
+        response: string | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        output: "sse";
+        sse: { events: { "": BootProgressData; }; };
+    };
+    "/api/system/getBootAppearance": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SettingBootAppearance | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        emptyResponseStatuses: [403];
+    };
+    "/api/system/getCaptcha": {
+        request: EmptyRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        output: "binary";
+        emptyResponseStatuses: [500];
+        contentVariants: [{"status":200,"contentType":"image/png"}];
+    };
+    "/api/system/oidc/callback": {
+        request: SystemOIDCCallbackRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        output: "binary";
+        contentVariants: [{"status":200,"contentType":"text/html"},{"status":302,"contentType":"text/html"}];
+    };
     "/api/system/version": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2112,46 +2270,6 @@ export interface APIGETRoutes {
 }
 
 export type APILegacyPOSTPath =
-    "/api/system/addCustomEmoji" |
-    "/api/system/checkUpdate" |
-    "/api/system/checkWorkspaceDir" |
-    "/api/system/createWorkspaceDir" |
-    "/api/system/dismissOnboarding" |
-    "/api/system/ensureOnboarding" |
-    "/api/system/exit" |
-    "/api/system/exportConf" |
-    "/api/system/exportLog" |
-    "/api/system/exportTLSCABundle" |
-    "/api/system/exportTLSCACert" |
-    "/api/system/getChangelog" |
-    "/api/system/getConf" |
-    "/api/system/getCustomFonts" |
-    "/api/system/getEmojiConf" |
-    "/api/system/getMobileWorkspaces" |
-    "/api/system/getSysFonts" |
-    "/api/system/getWorkspaces" |
-    "/api/system/importConf" |
-    "/api/system/importCustomFont" |
-    "/api/system/importTLSCABundle" |
-    "/api/system/loginAuth" |
-    "/api/system/logoutAuth" |
-    "/api/system/oidc/mobileCallback" |
-    "/api/system/oidc/poll" |
-    "/api/system/oidc/start" |
-    "/api/system/oidc/validate" |
-    "/api/system/oidc/validateActivate" |
-    "/api/system/oidc/validateCancel" |
-    "/api/system/oidc/validatePoll" |
-    "/api/system/removeCustomFont" |
-    "/api/system/removeWorkspaceDir" |
-    "/api/system/removeWorkspaceDirPhysically" |
-    "/api/system/setAPIToken" |
-    "/api/system/setAccessAuthCode" |
-    "/api/system/setAppearanceMode" |
-    "/api/system/setOIDC" |
-    "/api/system/setUILayout" |
-    "/api/system/setWorkspaceDir" |
-    "/api/system/uiproc" |
     "/api/transactions" |
     "/api/transactions/clearHistory" |
     "/api/transactions/redo" |
@@ -4845,6 +4963,11 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": SyncWebDAVData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/system/addCustomEmoji": {
+        request: SystemCustomEmojiRequestInput;
+        response: { "code": 0; "data": SystemPathData; "msg": string; } | { "code": -1 | 400 | 413; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "form";
+    };
     "/api/system/addMicrosoftDefenderExclusion": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -4855,14 +4978,89 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": BootProgressData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
+    "/api/system/checkUpdate": {
+        request: SystemCheckUpdateRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/system/checkWorkspaceDir": {
+        request: SystemPathRequestInput;
+        response: { "code": 0; "data": SystemWorkspaceCheckData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/system/clearTempFiles": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
+    "/api/system/createWorkspaceDir": {
+        request: SystemPathRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/system/currentTime": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": number; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/dismissOnboarding": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SystemOnboarding | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/ensureOnboarding": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SystemOnboarding | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/exit": {
+        request: SystemExitRequestInput;
+        response: { "code": 0; "data": SystemExitData; "msg": string; } | { "code": -1 | 1 | 2; "data": ({ "closeTimeout": number; } & { "installPkgPath"?: never; }) | null | SystemExitData; "msg": string; };
+        body: "json";
+    };
+    "/api/system/exportConf": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SystemExportConfData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/exportLog": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SystemZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/exportTLSCABundle": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SystemPathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/exportTLSCACert": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SystemPathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/getChangelog": {
+        request: SystemChangelogRequestInput;
+        response: { "code": 0; "data": SystemChangelogData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "legacyOptional";
+    };
+    "/api/system/getConf": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SystemConfData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/getCustomFonts": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<SystemCustomFont | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/getEmojiConf": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<SystemEmojiGroup | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/getMobileWorkspaces": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
     "/api/system/getNetwork": {
@@ -4870,15 +5068,85 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": NetworkData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
+    "/api/system/getSysFonts": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<SystemFont | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
     "/api/system/getWorkspaceInfo": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": WorkspaceInfoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/getWorkspaces": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<SystemWorkspace | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
     "/api/system/ignoreAddMicrosoftDefenderExclusion": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+    };
+    "/api/system/importConf": {
+        request: SystemImportConfRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+    };
+    "/api/system/importCustomFont": {
+        request: SystemImportFileRequestInput;
+        response: { "code": 0; "data": SystemCustomFont | null; "msg": string; } | { "code": -1 | 400 | 413; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+    };
+    "/api/system/importTLSCABundle": {
+        request: SystemImportFileRequestInput;
+        response: { "code": 0; "data": SystemMessageData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+    };
+    "/api/system/loginAuth": {
+        request: SystemLoginAuthRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/system/logoutAuth": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/system/oidc/mobileCallback": {
+        request: SystemOIDCMobileRequestInput;
+        response: { "code": 0; "data": SystemOIDCMobileData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/system/oidc/poll": {
+        request: SystemOIDCPollRequestInput;
+        response: { "code": 0; "data": SystemOIDCPollData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/system/oidc/start": {
+        request: SystemOIDCStartRequestInput;
+        response: { "code": 0; "data": SystemOIDCStartData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/system/oidc/validate": {
+        request: SystemOIDCRequestInput;
+        response: { "code": 0; "data": SystemOIDCStartData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/system/oidc/validateActivate": {
+        request: SystemOIDCPollRequestInput;
+        response: { "code": 0; "data": SystemOIDCActivateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/system/oidc/validateCancel": {
+        request: SystemOIDCPollRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/system/oidc/validatePoll": {
+        request: SystemOIDCPollRequestInput;
+        response: { "code": 0; "data": SystemOIDCValidatePollData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
     };
     "/api/system/rebuildDataIndex": {
         request: EmptyRequestInput;
@@ -4889,6 +5157,36 @@ export interface APIPOSTRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+    };
+    "/api/system/removeCustomFont": {
+        request: SystemRemoveCustomFontRequestInput;
+        response: { "code": 0; "data": SystemRemoveCustomFontData; "msg": string; } | { "code": -1 | 400 | 404; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/system/removeWorkspaceDir": {
+        request: SystemPathRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/system/removeWorkspaceDirPhysically": {
+        request: SystemPathRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/system/setAPIToken": {
+        request: SystemAPITokenRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/system/setAccessAuthCode": {
+        request: SystemAccessAuthCodeRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/system/setAppearanceMode": {
+        request: SystemAppearanceModeRequestInput;
+        response: { "code": 0; "data": SystemAppearanceData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
     };
     "/api/system/setAutoLaunch": {
         request: AutoLaunchRequestInput;
@@ -4920,10 +5218,31 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/system/setOIDC": {
+        request: SystemOIDCRequestInput;
+        response: { "code": 0; "data": SystemOIDC | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/system/setUILayout": {
+        request: SystemUILayoutRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/system/setUpdateChannel": {
         request: UpdateChannelRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+    };
+    "/api/system/setWorkspaceDir": {
+        request: SystemPathRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/system/uiproc": {
+        request: SystemUIProcessRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+        emptyResponseStatuses: [200];
     };
     "/api/system/vacuumDataIndex": {
         request: EmptyRequestInput;

@@ -1,4 +1,5 @@
 import {Constants} from "./constants";
+import {systemConfig} from "./config/systemConfig";
 import {openStandaloneDatabaseItemByURI} from "./protyle/render/av/openStandaloneDatabaseItem";
 /// #if BROWSER
 import "./util/iosWindowControls";
@@ -308,7 +309,7 @@ export class App {
         fetchPost("/api/system/getConf", {}, async (response) => {
             await addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
-            window.siyuan.config = response.data.conf;
+            window.siyuan.config = systemConfig(response.data.conf, () => structuredClone(Constants.SIYUAN_EMPTY_LAYOUT));
             await loadDesktopHostConnection();
             ensureUILayout();
             window.siyuan.isPublish = response.data.isPublish;

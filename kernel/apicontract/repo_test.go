@@ -33,3 +33,33 @@ func TestSnapshotContracts(t *testing.T) {
 		}
 	}
 }
+
+func TestRepoRemainingResponseContracts(t *testing.T) {
+	bundle, err := BuildBundle()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, test := range []struct {
+		path string
+		body string
+	}{
+		{"getRepoSnapshots", `{"code":0,"msg":"","data":{"snapshots":[],"pageCount":0,"totalCount":0}}`},
+		{"getRepoTagSnapshots", `{"code":0,"msg":"","data":{"snapshots":null}}`},
+		{"getCloudRepoSnapshots", `{"code":0,"msg":"","data":{"snapshots":[null],"pageCount":1,"totalCount":1}}`},
+		{"diffRepoSnapshots", `{"code":0,"msg":"","data":{"addsLeft":[],"updatesLeft":null,"updatesRight":[],"removesRight":[],"left":{"id":"left","created":1},"right":{"id":"right","created":2}}}`},
+		{"initRepoKey", `{"code":0,"msg":"","data":{"key":"AAECAw=="}}`},
+		{"importRepoKey", `{"code":-1,"msg":"invalid key","data":{"closeTimeout":5000}}`},
+		{"purgeRepo", `{"code":-1,"msg":"failed","data":{"closeTimeout":5000}}`},
+		{"tagSnapshot", `{"code":-1,"msg":"failed","data":{"closeTimeout":5000}}`},
+	} {
+		if err := bundle.ValidateResponse("POST", "/api/repo/"+test.path, []byte(test.body)); err != nil {
+			t.Errorf("%s: %v", test.path, err)
+		}
+	}
+	if err := bundle.ValidateErrorResponse("POST", "/api/repo/getRepoFile", []byte(`{"code":-1,"msg":"locked","data":null}`)); err != nil {
+		t.Fatal(err)
+	}
+	if err := bundle.ValidateErrorResponse("POST", "/api/repo/getRepoFile", []byte(`{"code":-1,"msg":"locked","data":{"unexpected":1}}`)); err == nil {
+		t.Fatal("undeclared repository error payload accepted")
+	}
+}

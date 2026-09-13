@@ -1,6 +1,7 @@
 import {Dialog} from "../dialog";
 import {openInputDialog} from "../dialog/inputDialog";
 import {fetchPost} from "../util/fetch";
+import {fetchDueCards} from "./fetchDueCards";
 import {isMobile} from "../util/functions";
 import {Protyle} from "../protyle";
 import {Constants} from "../constants";
@@ -217,7 +218,7 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                 updateReadonly: true,
                 data: response,
                 protyle,
-                action: response.data.rootID === response.data.id ? [] : [Constants.CB_GET_ALL],
+                action: response.code === 0 && response.data.rootID === response.data.id ? [] : [Constants.CB_GET_ALL],
                 afterCB: () => {
                     if (!isCurrentFlashcardLoad(revealState, generation) ||
                         protyle.element.classList.contains("fn__none")) {
@@ -314,12 +315,7 @@ export const bindCardEvent = async (options: {
     const fetchNewRound = () => {
         const currentCardType = filterElement.getAttribute("data-cardtype");
         const docId = filterElement.getAttribute("data-id");
-        fetchPost(currentCardType === "all" ? "/api/riff/getRiffDueCards" :
-            (currentCardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
-            rootID: docId,
-            deckID: docId,
-            notebook: docId,
-        }, async (treeCards) => {
+        fetchDueCards(currentCardType, docId, undefined, async (treeCards) => {
             index = 0;
             options.cardsData = treeCards.data;
             for (let i = 0; i < options.app.plugins.length; i++) {
@@ -766,13 +762,7 @@ export const bindCardEvent = async (options: {
                 index++;
                 if (index > options.cardsData.cards.length - 1) {
                     const currentCardType = filterElement.getAttribute("data-cardtype");
-                    fetchPost(currentCardType === "all" ? "/api/riff/getRiffDueCards" :
-                        (currentCardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
-                        rootID: docId,
-                        deckID: docId,
-                        notebook: docId,
-                        reviewedCards: options.cardsData.cards
-                    }, async (result) => {
+                    fetchDueCards(currentCardType, docId, options.cardsData.cards, async (result) => {
                         emitEvent(options.cardsData.cards[index - 1], type);
                         index = 0;
                         options.cardsData = result.data;

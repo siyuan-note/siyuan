@@ -24,6 +24,24 @@
 
 ## 兼容要求
 
+文档树契约保留条件参数校验、路径与排序语义、回调省略规则、分页默认值及文档响应变体。发布认证通过显式声明的额外错误状态保留 HTTP 429 和 `Retry-After`。发布及加密笔记本准入仍先于延迟字段校验，文档租约覆盖响应序列化阶段。
+
+附件契约保留结果列表的空值、逐文件上传顺序与重名文件、部分上传成功时的提示及本地插入失败载荷。OCR 列保持字符串值。标注校验、发布文件准入、加密读写、延迟下载和上传目标选择保持既有行为。非 API 上传入口复用同一个有类型的模型操作。
+
+导出契约保留 Markdown 选项默认值与数字截断、笔记本列表过滤、标题选项类型忽略规则、可省略的 HTML 目录字段及上传字段选择规则。错误响应保留消息显示时长与资源错误中的空字符串载荷。发布过滤、加密笔记本准入、覆盖响应阶段的租约及临时导出清理保持既有生命周期。
+
+仓库契约保留密钥编码、快照元数据、数值截断与保留期限默认值、云端分页及文件访问租约。仓库文件读取保留媒体类型和原始字节，空文件保留成功信封。文件成功与 JSON 失败均返回 HTTP 200。对于显式声明的共用状态，`ValidateHTTPResponse` 接受文件原始字节，`ValidateErrorResponse` 单独验证已知错误载荷。密钥材料、加密文件格式及快照恢复行为保持不变。
+
+闪卡契约保留数值截断、分页默认值、可选的已复习卡片列表、块结果的空值以及非空牌组列表。笔记本和文档准入仍先于延迟的分页错误。卡片与牌组修改保留模型层校验及持久化行为，加密笔记本限制保持不变。
+
+同步契约保留数值截断、手动模式下的条件方向校验、配置字段匹配与 JSON 数字归一化，以及消息显示时长。同步配置导入要求恰好一个文件，并保留加密包内容与恢复路径。鉴权及只读检查仍先于请求体解码，同步和笔记本加密继续由模型层处理。
+
+集市契约保留必填字段的校验顺序、空白处理、主题模式联动、评分可用性和限流载荷，以及本地包上传错误。包和外观响应声明完整嵌套结构，包括固定五项的评分分布。上传请求保留首文件选择及覆盖参数解析。安装、卸载、鉴权和发布限制仍由既有业务处理函数及中间件执行。
+
+插件信息查询保留路径参数、查询参数和 JSON 请求体中名称的优先级，包括空白及业务错误码 1 至 4。命中 URL 参数时不解析请求体，列表查询忽略请求体。插件列表与 RPC 方法列表保留数组及数组元素的空值语义。HTTP JSON-RPC 使用独立契约描述单次与批量请求、成功与错误回复，以及纯通知请求的 HTTP 204 响应。插件准入先于请求体读取，批量错误保留原有顺序，任意 JSON 仅用于 RPC 参数、返回值和错误详情。RPC WebSocket 路由声明 HTTP 101 升级、HTTP 404 插件准入错误、HTTP 400 文本拒绝，以及独立的入站调用和出站回复或通知。Origin 授权与连接清理保留在既有升级生命周期中。插件 HTTP 服务仍需单独迁移。
+
+搜索契约保留分页默认值与小数截断、路径校验与去重、历史子类型筛选的忽略规则，以及空值与空数组的区别。引用搜索区分仅回传请求标识和完整块结果，保留笔记本准入先于延迟参数校验的顺序。SQL 搜索权限、发布过滤、加密笔记本租约、取消请求的响应和只读嵌入块更新的空操作保持原有顺序。桌面端与移动端调用使用生成的请求类型。
+
 历史契约保留路径去空白、可选高亮默认值、历史类型的小数截断，以及空值与空数组的区别。版本对比先检查两个引用对象，再检查对象字段，并按排序后的笔记本 ID 获取租约。内容读取及文档、资源和数据库回滚保留历史路径租约检查，笔记本回滚沿用模型层的恢复行为。
 
 导入契约保留压缩包清理、首个上传文件选择、Markdown 路径空白，以及暂存令牌去空白和有效期。思源自动导入声明文档、令牌、笔记本和笔记本集合结果，挂载失败时保留文档载荷。Obsidian 任务取消失败时保留任务快照。笔记本挂载、加密导入处理和创建通知仍由既有业务操作负责。
@@ -64,7 +82,15 @@ SQL 查询契约保留成功信封顶层的 `limit` 和 `truncated`。`SuccessSQ
 
 存储契约仅在存储值中允许任意 JSON，键、最近文档、搜索条件、行内样式和属性视图调色板均使用结构化类型。最近文档写入接口保留只读角色在解析请求体前直接返回成功的行为。`contractHandler` 可选的类型化 `beforeDecode` 回调用于保留这一执行顺序，允许在解码前返回响应；路由检查仍要求显式绑定端点。行内样式版本 1 的更新保留已有内置配置，版本 2 和调色板请求保留结构体解码的兼容行为。
 
+`DirectJSONOutput` 保留直接返回 JSON 对象或数组的独立协议，不添加内核信封，此类载荷使用 `SuccessDirectJSON` 返回。支持通知空响应的端点显式声明 `NoContent` 并返回 `SuccessNoContent`；HTTP 校验要求状态码为 204 且响应体为空。鉴权和只读错误仍保留内核错误信封。生成声明记录直接输出模式及可选的空响应支持。
+
+`WebSocketOutput` 通过 `WebSocketOptions` 声明入站和出站消息类型及插件准入失败状态。`UpgradeWebSocket` 在 `contractHandler` 的响应阶段将写入器交给连接生命周期；`RejectWebSocket` 序列化声明的拒绝载荷。生成的路由元数据包含双向消息模式，`ValidateWebSocketMessage` 单独校验连接内消息，避免与握手响应或中间件信封混淆。握手校验检查 HTTP 状态和响应体，网络回归验证升级头、Origin 拒绝、消息交互和取消后的连接关闭。
+
 ## 文件上传请求
+
+SSE 接口通过 `SSEOptions` 和 `SSEEvent` 声明各事件名称及载荷。`StreamSSE` 在请求上下文内执行原有流生命周期，取消与清理仍在该生命周期内完成。HTTP 校验区分 `text/event-stream` 与声明过的流建立前 JSON 错误，`ValidateSSEEvent` 单独校验各事件的 JSON 载荷。生成声明包含事件类型；缓冲式 fetch 辅助函数仍将完整流作为文本返回。
+
+页面响应通过 `HTTPContentOptions` 声明允许的 HTTP 状态与媒体类型组合，通过 `SuccessHTTPContent` 保留原始字节，复用既有二进制传输并单独处理 JSON 中间件错误。`FastJSON` 为指定的大体量响应保留快速 JSON 编码，不改变有类型载荷及响应信封；编码失败时仍回退到标准编码器。
 
 可选的 `*string` 表单字段区分未传字段与显式空字符串，并使用 `nonnullable`，因为表单文本不能包含 JSON 空值。导入处理器据此保留默认值和延后校验的行为。上传进度在解析表单前启动，解析失败时先清理进度再返回；类型绑定复用 Gin 缓存的表单。
 
@@ -73,6 +99,8 @@ SQL 查询契约保留成功信封顶层的 `limit` 和 `truncated`。`SuccessSQ
 `FormBody` 用于 `putFile` 等同时接受 URL 编码表单和多部分表单的接口。它保留 Gin `PostForm` 的解析行为，包括重复字段取首值，以及解析失败后已经取得的字段。条件必填和延迟校验仍由处理函数负责：创建目录不要求上传文件，修改时间在写入后校验。生成的调用类型与多部分上传使用相同的类型化表单接口。
 
 文件上传使用 `MultipartBody`。请求结构体以线协议字段名声明字符串和 `*multipart.FileHeader` 字段；文件 schema 使用 `type: string` 与 `format: binary`，生成 `Blob` 类型。适配器保留 Gin 的表单解析方式，重复字段取首值；文件内容继续通过 `Open` 读取，处理函数保留读取及恢复逻辑。未支持的字段类型和绑定选项会使生成失败。
+
+声明为 `[]*multipart.FileHeader` 的固定字段按原顺序接收全部文件，生成 `Array<Blob>`。可选文件列表缺省时保留 nil；文本与单文件字段仍取首值。`SuccessWithMessage` 保留成功响应中的非空提示，包括批量上传部分成功的情况。
 
 前端从类型化字段构造 `ContractFormData`，再交给现有请求函数。生成签名检查端点所需字段并区分文件与字符串，普通 `FormData` 不能满足已迁移上传接口的契约。可缺省字段不写入表单，字符串不裁剪空白。插件调用方构造表单时可实现生成的 `APIFormData<Request>` 接口。
 
@@ -106,7 +134,8 @@ pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts
 
 ```text
 go test ./apicontract/...
-go test -tags "fts5 sqlcipher" ./api -run "TestAPIContract|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestContract.*NotebookResponseLease" -count=1
+go test -tags "fts5 sqlcipher" ./model -run "TestMultipartUpload|TestInsertLocalAssets|TestRecordAssetUpload|TestReadRTFD|TestCopyRTFD" -count=1
+go test -tags "fts5 sqlcipher" ./api ./plugin -run "TestAPIContract|TestAsset.*Contract|TestInsertLocalAssets|TestSetFileAnnotation|TestDeferredAsset|TestExportBrowserHTML|TestCopyExport|TestBazaarContract|TestRepoContract|TestRepoFileWireCompatibility|TestRPC.*Contract|TestRPCWebSocketOriginCheck|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestContract.*NotebookResponseLease" -count=1
 ```
 
 `tsconfig.api.json` 单独启用严格检查并检查声明文件，覆盖参数错误、字段拼写、必填请求体、成功与失败分支、可空值和方法不匹配。主应用继续沿用现有配置，不假定全部调用都启用了严格空值检查。处理函数测试使用临时工作区和独立测试进程，不启动或重启运行中的内核。

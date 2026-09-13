@@ -1,7 +1,7 @@
 import {Tab} from "../layout/Tab";
 import {Custom} from "../layout/dock/Custom";
 import {bindCardEvent, genCardHTML} from "./openCard";
-import {fetchPost} from "../util/fetch";
+import {fetchDueCards} from "./fetchDueCards";
 import {Protyle} from "../protyle";
 import {setPanelFocus} from "../layout/util";
 import type {App} from "../index";
@@ -52,12 +52,7 @@ export const newCardModel = (options: {
                 delete options.data.cardsData;
                 delete options.data.index;
             } else {
-                fetchPost(this.data.cardType === "all" ? "/api/riff/getRiffDueCards" :
-                    (this.data.cardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
-                    rootID: this.data.id,
-                    deckID: this.data.id,
-                    notebook: this.data.id,
-                }, async (response) => {
+                fetchDueCards(this.data.cardType, this.data.id, undefined, async (response) => {
                     let cardsData = response.data;
                     for (let i = 0; i < options.app.plugins.length; i++) {
                         cardsData = await options.app.plugins[i].updateCards(cardsData);
@@ -93,12 +88,7 @@ export const newCardModel = (options: {
             }
         },
         update() {
-            fetchPost(this.data.cardType === "all" ? "/api/riff/getRiffDueCards" :
-                (this.data.cardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
-                rootID: this.data.id,
-                deckID: this.data.id,
-                notebook: this.data.id,
-            }, async (response) => {
+            fetchDueCards(this.data.cardType, this.data.id, undefined, async (response) => {
                 let cardsData = response.data;
                 for (let i = 0; i < options.app.plugins.length; i++) {
                     cardsData = await options.app.plugins[i].updateCards(cardsData);

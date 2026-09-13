@@ -38,15 +38,13 @@ func (b *Bundle) typeScript(schema *Schema) string {
 		// 联合成员缺少的字段标记为可选 never，保留精确的属性存在性和判别能力。
 		allProperties := map[string]bool{}
 		objects := make([]*Schema, len(schema.AnyOf))
-		allObjects := true
 		for i, option := range schema.AnyOf {
 			target := option
 			if option.Ref != "" {
 				target = b.Definitions[strings.TrimPrefix(option.Ref, "#/$defs/")]
 			}
 			if target == nil || target.Type != "object" {
-				allObjects = false
-				break
+				continue
 			}
 			objects[i] = target
 			for key := range target.Properties {
@@ -55,7 +53,7 @@ func (b *Bundle) typeScript(schema *Schema) string {
 		}
 		for i, option := range schema.AnyOf {
 			variant := b.typeScript(option)
-			if allObjects {
+			if objects[i] != nil {
 				var absent []string
 				for _, key := range sortedKeys(allProperties) {
 					if _, exists := objects[i].Properties[key]; !exists {
@@ -76,15 +74,31 @@ func (b *Bundle) typeScript(schema *Schema) string {
 	case "null", "string", "boolean":
 		return schema.Type
 	case "array":
+		if schema.MaxItems != nil && schema.MinItems == *schema.MaxItems {
+			items := make([]string, schema.MinItems)
+			for i := range items {
+				items[i] = b.typeScript(schema.Items)
+			}
+			return "[" + strings.Join(items, ", ") + "]"
+		}
+		if schema.MinItems == 1 {
+			item := b.typeScript(schema.Items)
+			return "[" + item + ", ...Array<" + item + ">]"
+		}
 		return "Array<" + b.typeScript(schema.Items) + ">"
 	case "object":
+		var indexSignature string
 		if additional, ok := schema.AdditionalProperties.(*Schema); ok {
 			if additional.Ref == "#/$defs/JSONValue" {
-				return "{ [key: string]: JSONValue }"
+				indexSignature = "{ [key: string]: JSONValue }"
+			} else {
+				indexSignature = "Record<string, " + b.typeScript(additional) + ">"
 			}
-			return "Record<string, " + b.typeScript(additional) + ">"
 		}
 		if len(schema.Properties) == 0 {
+			if indexSignature != "" {
+				return indexSignature
+			}
 			return "Record<string, never>"
 		}
 		required := map[string]bool{}
@@ -99,7 +113,11 @@ func (b *Bundle) typeScript(schema *Schema) string {
 			}
 			fields = append(fields, quote(key)+optional+": "+b.typeScript(schema.Properties[key])+";")
 		}
-		return "{ " + strings.Join(fields, " ") + " }"
+		object := "{ " + strings.Join(fields, " ") + " }"
+		if indexSignature != "" {
+			return "(" + object + " & " + indexSignature + ")"
+		}
+		return object
 	default:
 		panic("unsupported TypeScript schema: " + schema.Type)
 	}
@@ -139,6 +157,27 @@ func (b *Bundle) TypeScript(legacy []Route) []byte {
 				quote(endpoint.Path), b.typeScript(endpoint.Request), b.typeScript(endpoint.Response), quote(string(endpoint.Body)))
 			if endpoint.Output != "" {
 				fmt.Fprintf(&output, "        output: %s;\n", quote(string(endpoint.Output)))
+			}
+			if endpoint.NoContent {
+				output.WriteString("        noContent: true;\n")
+			}
+			if len(endpoint.AdditionalErrorStatuses) > 0 {
+				statuses, _ := json.Marshal(endpoint.AdditionalErrorStatuses)
+				fmt.Fprintf(&output, "        additionalErrorStatuses: %s;\n", statuses)
+			}
+			if len(endpoint.ContentVariants) > 0 {
+				variants, _ := json.Marshal(endpoint.ContentVariants)
+				fmt.Fprintf(&output, "        contentVariants: %s;\n", variants)
+			}
+			if ws := endpoint.WebSocket; ws != nil {
+				fmt.Fprintf(&output, "        websocket: { incoming: %s; outgoing: %s; failureStatus: %d; };\n", b.typeScript(ws.Incoming), b.typeScript(ws.Outgoing), ws.FailureStatus)
+			}
+			if sse := endpoint.SSE; sse != nil {
+				output.WriteString("        sse: { events: { ")
+				for _, name := range sortedKeys(sse.Events) {
+					fmt.Fprintf(&output, "%s: %s; ", quote(name), b.typeScript(sse.Events[name]))
+				}
+				output.WriteString("}; };\n")
 			}
 			output.WriteString("    };\n")
 		}
@@ -185,8 +224,10 @@ export type APICallbackResponse<R> = R extends {code: infer C extends number}
     ? NonNegative<C> extends never ? never : R & {code: NonNegative<C>}
     : never;
 
+type APIDirectCallbackResponse<R> = R extends {code: number} ? APICallbackResponse<R> : R;
+
 type APIPostTail<C extends APIContract> = [
-    cb?: (response: C extends {output: "binary"} ? JSONValue : APICallbackResponse<C["response"]>) => void,
+    cb?: (response: C extends {output: "binary"} ? JSONValue : C extends {output: "directJSON"} ? APIDirectCallbackResponse<C["response"]> | (C extends {noContent: true} ? "" : never) : C extends {output: "sse"} ? string | APICallbackResponse<C["response"]> : APICallbackResponse<C["response"]>) => void,
     headers?: Record<string, string>,
     failCallback?: (response: APIFetchFailure) => void,
     signal?: AbortSignal,
@@ -224,7 +265,7 @@ export type FetchSyncPost<Legacy = APILegacyResponse> = <Path extends string>(
 export type FetchGet<Legacy = APILegacyResponse | string> = <Path extends string>(
     url: Path,
     ...args: Path extends keyof APIGETRoutes
-        ? [cb: (response: APIGETRoutes[Path]["response"]) => void]
+        ? [cb: (response: APIGETRoutes[Path]["response"] | (APIGETRoutes[Path] extends {output: "websocket"} ? string : never)) => void]
         : Path extends keyof APIPOSTRoutes ? never
         : [cb: (response: Legacy) => void]
 ) => void;

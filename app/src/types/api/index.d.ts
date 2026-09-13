@@ -10,6 +10,48 @@ export type AppendBlockRequestInput = { "data": string; "dataType": string; "par
 
 export type AppendHeadingChildrenRequestInput = { "childrenDOM": string; "id": string; };
 
+export type AssetAnnotationData = { "data": string; };
+
+export type AssetCloudUploadRequestInput = { "id": string; "ignorePushMsg"?: boolean | null; };
+
+export type AssetContent = { "content": string; "ext": string; "hSize": string; "id": string; "name": string; "path": string; "size": number; "updated": number; };
+
+export type AssetContentData = { "assetContent": AssetContent | null; };
+
+export type AssetContentRequestInput = { "id": string; "query": string; "queryMethod": number; };
+
+export type AssetDocumentAssetsRequestInput = { "id": string; "retainQueryStr"?: boolean | null; };
+
+export type AssetDocumentRequestInput = { "id": string; };
+
+export type AssetInsertCoverData = { "succFiles": Array<AssetUploadSuccess> | null; "succMap": Record<string, string> | null; };
+
+export type AssetOCRData = { "ocrJSON": Array<Record<string, string> | null> | null; "text": string; };
+
+export type AssetOCRTextRequestInput = { "path"?: string | null; };
+
+export type AssetPathData = { "path": string; };
+
+export type AssetPathRequestInput = { "path": string; };
+
+export type AssetPathsCloudUploadRequestInput = { "ignorePushMsg"?: boolean | null; "paths": Array<string>; };
+
+export type AssetPathsData = { "paths": Array<string> | null; };
+
+export type AssetRenameData = { "newPath": string; };
+
+export type AssetStatData = { "created": number; "downloaded"?: false; "hCreated": string; "hSize": string; "hUpdated": string; "size": number; "updated": number; };
+
+export type AssetTextData = { "text": string; };
+
+export type AssetUnusedItem = { "blockIDs"?: Array<string>; "item": string; "name": string; "path"?: string; };
+
+export type AssetUploadData = { "errFiles": Array<string> | null; "failedFiles": Array<AssetUploadFailure> | null; "succFiles": Array<AssetUploadSuccess> | null; "succMap": Record<string, string> | null; };
+
+export type AssetUploadFailure = { "error": string; "index": number; "name": string; };
+
+export type AssetUploadSuccess = { "index": number; "name": string; "path": string; };
+
 export type AttributeViewColorTheme = { "backgroundColor": string; "color": string; };
 
 export type AttributeViewColorThemeInput = { "backgroundColor"?: string | null; "color"?: string | null; };
@@ -53,6 +95,66 @@ export type BatchSetBlockAttrsRequestInput = { "blockAttrs": Array<SetBlockAttrs
 export type BatchTaskListMarkerRequestInput = { "items": Array<TaskListMarkerRequestInput>; };
 
 export type BatchUpdateBlockRequestInput = { "blocks": Array<UpdateBlockRequestInput>; };
+
+export type BatchUpdatePackageRequestInput = { "frontend": string; };
+
+export type BazaarAppearance = { "bodyGradient": BazaarBodyGradient | null; "closeButtonBehavior": number; "codeBlockThemeDark": string; "codeBlockThemeLight": string; "darkThemes": Array<BazaarAppearanceTheme | null> | null; "entryVisibility": BazaarEntryVisibility | null; "globalFontFamilies": Array<BazaarEditorFont | null> | null; "hideStatusBar": boolean; "hideToolbar": boolean; "icon": string; "iconVer": string; "icons": Array<BazaarAppearanceIcon | null> | null; "lang": string; "lightThemes": Array<BazaarAppearanceTheme | null> | null; "mode": number; "modeOS": boolean; "notifications": BazaarNotifications | null; "statusBar": BazaarStatusBar | null; "themeDark": string; "themeJS": boolean; "themeLight": string; "themeVer": string; };
+
+export type BazaarAppearanceIcon = { "label": string; "name": string; };
+
+export type BazaarAppearancePackagesData = { "appearance": BazaarAppearance | null; "packages": Array<BazaarPackage | null> | null; };
+
+export type BazaarAppearanceTheme = { "frontends"?: Array<string>; "label": string; "name": string; };
+
+export type BazaarBodyGradient = { "dark": BazaarBodyGradientColor; "light": BazaarBodyGradientColor; "mode": string; };
+
+export type BazaarBodyGradientColor = { "color": string; "opacity": number; };
+
+export type BazaarEditorFont = { "displayName": string; "family": string; "weight": number; };
+
+export type BazaarEntryVisibility = { "active": string; "profiles": Array<BazaarEntryVisibilityProfile | null> | null; "version": number; };
+
+export type BazaarEntryVisibilityProfile = { "entries": Record<string, boolean> | null; "id": string; "name": string; "orders": Record<string, Array<string> | null> | null; };
+
+export type BazaarFunding = { "custom": Array<string> | null; "github": string; "links"?: Array<BazaarFundingLink>; "openCollective": string; "patreon": string; };
+
+export type BazaarFundingLink = { "label": string; "url": string; };
+
+export type BazaarLocalInstallData = { "minAppVersion"?: string; "packageName": string; "packageType": string; "updated": boolean; };
+
+export type BazaarLocalInstallError = { "minAppVersion": string; "packageName": string; "packageType": string; "reason": "install-failed" | "package-exists" | "package-incompatible"; };
+
+export type BazaarLocalInstallResult = (BazaarLocalInstallData & { "reason"?: never; }) | (BazaarLocalInstallError & { "updated"?: never; });
+
+export type BazaarNotifications = { "browserCompatibility": boolean; "docTreeMaxList": boolean; "formatPainterTip"?: boolean; "selectAllIncompleteTip"?: boolean; "selectAllTip"?: boolean; "tagMaxList": boolean; "workspaceNotSSD": boolean; };
+
+export type BazaarPackage = { "alternatives"?: Array<string>; "author": string; "backends": Array<string> | null; "bazaarIncompatible"?: boolean; "bootAppearances"?: Array<string>; "current": boolean; "deprecated"?: boolean; "deprecatedReason"?: Record<string, string>; "description": Record<string, string> | null; "disabledInPublish": boolean; "disallowInstall": boolean; "disallowUpdate": boolean; "displayName": Record<string, string> | null; "downloads": number; "enabled"?: boolean; "frontends": Array<string> | null; "funding": BazaarFunding | null; "hInstallDate": string; "hInstallSize": string; "hSize": string; "hUpdated": string; "hasStorageData"?: boolean; "icon"?: string; "iconURL": string; "installSize": number; "installTime": number; "installed": boolean; "installedIncompatible"?: boolean; "invalidReason"?: "missing-manifest" | "invalid-manifest" | "name-mismatch"; "kernels": Array<string> | null; "keywords": Array<string> | null; "minAppVersion": string; "modes"?: Array<string> | null; "name": string; "openIssues": number; "outdated": boolean; "preferredDeprecatedReason"?: string; "preferredDesc": string; "preferredFunding": string; "preferredName": string; "preferredReadme": string; "preview"?: string; "previewURL": string; "rating"?: BazaarPackageRating; "ratingAvailable": boolean; "readme": Record<string, string> | null; "repoHash": string; "repoRef"?: string; "repoURL": string; "size": number; "stars": number; "updateRequiredMinAppVer"?: string; "updateTime": number; "updated": string; "url": string; "userDisabledInPublish"?: boolean; "version": string; };
+
+export type BazaarPackageDetail = { "available": BazaarPackage | null; "installed": BazaarPackage | null; };
+
+export type BazaarPackageRating = { "average": number; "count": number; "distribution": [number, number, number, number, number]; };
+
+export type BazaarPackageSizeData = { "hInstallSize": string; "installSize": number; };
+
+export type BazaarPackagesData = { "packages": Array<BazaarPackage | null> | null; };
+
+export type BazaarREADMEData = { "html": string; };
+
+export type BazaarRatingData = { "rating"?: BazaarPackageRating; "ratingAvailable": boolean; "userRating": number; };
+
+export type BazaarRatingError = { "errorCode": "bazaarRatingRateLimited" | "bazaarPackagePending"; };
+
+export type BazaarRatingResult = (BazaarRatingData & { "errorCode"?: never; }) | (BazaarRatingError & { "rating"?: never; "ratingAvailable"?: never; "userRating"?: never; });
+
+export type BazaarRatingsData = { "eligiblePackageNames": Array<string> | null; "ratings": Record<string, BazaarPackageRating | null> | null; };
+
+export type BazaarStatusBar = { "msgDataSyncDisabled": boolean; "msgTaskAssetDatabaseIndexCommitDisabled": boolean; "msgTaskDatabaseIndexCommitDisabled": boolean; "msgTaskHistoryDatabaseIndexCommitDisabled": boolean; "msgTaskHistoryGenerateFileDisabled": boolean; "version": number; };
+
+export type BazaarUpdatedData = { "icons": Array<BazaarPackageDetail | null> | null; "plugins": Array<BazaarPackageDetail | null> | null; "templates": Array<BazaarPackageDetail | null> | null; "themes": Array<BazaarPackageDetail | null> | null; "widgets": Array<BazaarPackageDetail | null> | null; };
+
+export type BazaarUserRatingsData = { "eligiblePackageNames": Array<string> | null; "userRatings": Record<string, number> | null; };
+
+export type BazaarUserRatingsResult = (BazaarUserRatingsData & { "errorCode"?: never; }) | (BazaarRatingError & { "eligiblePackageNames"?: never; "userRatings"?: never; });
 
 export type BlockBreadcrumbChildren = { "hasMore": boolean; "items": Array<BlockPath | null> | null; };
 
@@ -136,6 +238,8 @@ export type CheckBlocksExistRequestInput = { "id"?: string | null; "ids": Array<
 
 export type CheckSnapshotData = { "changed": boolean; };
 
+export type CheckoutRepoRequestInput = { "id": string; "sessionID"?: string | null; };
+
 export type ChildBlock = { "content"?: string; "id": string; "markdown"?: string; "subType"?: string; "type": string; };
 
 export type CleanupRichTextRequestInput = { "batch": string; "groups": Array<string>; };
@@ -154,9 +258,15 @@ export type CloudSpaceData = { "backup": CloudBackup | null; "hAssetSize": strin
 
 export type CloudSync = { "cloudName": string; "hSize": string; "saveDir": string; "size": number; "updated": string; };
 
+export type CloudSyncDir = { "cloudName": string; "hSize": string; "saveDir": string; "size": number; "updated": string; };
+
+export type CloudSyncDirsData = { "checkedSyncDir": string; "hSize": string; "syncDirs": Array<CloudSyncDir | null> | null; };
+
 export type ContentWordCountRequestInput = { "content": string; "reqId"?: JSONValue | null; };
 
 export type ContinueImportSYRequestInput = { "notebook": string; "token": string; };
+
+export type CopyExportFileRequestInput = { "dest": string; "srcPath": string; };
 
 export type CopyFileRequestInput = { "dest": string; "src": string; };
 
@@ -173,6 +283,8 @@ export type CreateEncryptedNotebookRequestInput = { "name": string; "password": 
 export type CreateNotebookData = { "notebook": Notebook | null; };
 
 export type CreateNotebookRequestInput = { "name": string; };
+
+export type CreateRiffDeckRequestInput = { "name": string; };
 
 export type CreateSnapshotData = { "created": boolean; "id": string; };
 
@@ -200,6 +312,8 @@ export type DeleteBlockRequestInput = { "id": string; };
 
 export type DiffDocVersionsRequestInput = { "left": DocVersionRefInput; "right": DocVersionRefInput; };
 
+export type DiffRepoSnapshotsRequestInput = { "left": string; "right": string; };
+
 export type DirectoryEntry = { "isDir": boolean; "isSymlink": boolean; "name": string; "updated": number; };
 
 export type DocAttrView = { "id": string; "name": string; };
@@ -226,9 +340,15 @@ export type DocVersionRefInput = { "id"?: string | null; "path"?: string | null;
 
 export type DocsInfoRequestInput = { "av": boolean; "ids": Array<string>; "refCount": boolean; };
 
+export type DownloadCloudSnapshotRequestInput = { "id": string; "tag": string; };
+
 export type DownloadInstallPkgRequestInput = { "downloadInstallPkg": boolean; };
 
 export type EditorReadOnlyRequestInput = { "readonly": boolean; };
+
+export type EmbedBlock = { "allowChildOperation": boolean; "block": SearchBlock | null; "blockPaths": Array<BlockPath | null> | null; };
+
+export type EmbedBlocksData = { "blocks": Array<EmbedBlock | null> | null; };
 
 export type EmbedStat = { "complete": boolean; "cycleCount": number; "depthLimitCount": number; "failedQueryCount": number; "failedResultCount": number; "jsEmbedCount": number; "queryEmbedCount": number; "resultCount": number; "truncatedQueryCount": number; };
 
@@ -238,17 +358,215 @@ export type EncryptedNotebookStatus = { "id": string; "name": string; "state": "
 
 export type EncryptedNotebookStatusData = { "boxes": Array<EncryptedNotebookStatus>; "count": number; "enabled": boolean; "hasHistoryDependency": boolean; "migrationBoxes": Array<string> | null; "migrationPending": boolean; "state": "Disabled" | "Enabled" | "RecoveryRequired"; };
 
+export type ExportAsFileRequestInput = { "file": Blob; "type": string; };
+
+export type ExportAttributeViewRequestInput = { "blockID": string; "id": string; };
+
+export type ExportBrowserHTMLRequestInput = { "folder": string; "html": string; "name": string; };
+
+export type ExportDocumentsMarkdownRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "ids": Array<string>; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
+
+export type ExportDocxRequestInput = { "id": string; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; "removeAssets": boolean; "savePath": string; };
+
+export type ExportFileData = { "file": string; };
+
+export type ExportFolderRequestInput = { "folder": string; };
+
+export type ExportHTMLData = { "content": string; "folder"?: string; "id": string; "name": string; };
+
+export type ExportHTMLRequestInput = { "addTitle"?: boolean | null; "customTitle"?: string | null; "id": string; "keepFold"?: boolean | null; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; "pdf": boolean; "savePath"?: string | null; };
+
+export type ExportIDRequestInput = { "id": string; };
+
+export type ExportIDsRequestInput = { "ids": Array<string>; };
+
+export type ExportMarkdownContentData = { "content": string; "hPath": string; };
+
+export type ExportMarkdownContentRequestInput = { "addTitle"?: boolean | null; "adjustHeadingLevel"?: boolean | null; "embedMode"?: number | null; "fillCSSVar"?: boolean | null; "id": string; "imgTag"?: boolean | null; "refMode"?: number | null; "yfm"?: boolean | null; };
+
+export type ExportMarkdownHTMLRequestInput = { "id": string; "savePath"?: string | null; };
+
+export type ExportMarkdownRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "id": string; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
+
+export type ExportNameData = { "name": string; };
+
+export type ExportNamedZipData = { "name": string; "zip": string; };
+
+export type ExportNotebookMarkdownRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "notebook": string; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
+
+export type ExportNotebooksMarkdownRequestInput = { "addTitle"?: boolean | null; "blockEmbedMode"?: number | null; "blockRefMode"?: number | null; "blockRefTextLeft"?: string | null; "blockRefTextRight"?: string | null; "fileAnnotationRefMode"?: number | null; "includeRelatedDocs"?: boolean | null; "includeSubDocs"?: boolean | null; "inlineMemo"?: boolean | null; "markdownYFM"?: boolean | null; "notebooks"?: Array<string> | null; "removeAssetsID"?: boolean | null; "tagCloseMarker"?: string | null; "tagOpenMarker"?: string | null; };
+
+export type ExportNotebooksRequestInput = { "notebooks"?: Array<string> | null; };
+
+export type ExportPathData = { "path": string; };
+
+export type ExportPreviewData = { "fillCSSVar": boolean; "html": string; };
+
+export type ExportPreviewHTMLData = { "attrs": Record<string, string> | null; "content": string; "id": string; "name": string; "type": string; };
+
+export type ExportPreviewHTMLRequestInput = { "addTitle"?: boolean | null; "customTitle"?: string | null; "id": string; "image"?: boolean | null; "keepFold"?: boolean | null; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; };
+
+export type ExportRepoFileRequestInput = { "id": string; };
+
+export type ExportResourcesRequestInput = { "name"?: string | null; "paths"?: Array<string> | null; };
+
+export type ExportTempContentRequestInput = { "content": string; "id"?: string | null; };
+
+export type ExportURLData = { "url": string; };
+
+export type ExportZipData = { "zip": string; };
+
 export type FileAnnotationRefRequestInput = { "id": string; "notebook"?: string | null; };
 
 export type FilePathData = { "path": string; };
 
 export type FilePathRequestInput = { "path": string; };
 
+export type FileTreeAuthPublishRequestInput = { "id": string; "password": string; };
+
+export type FileTreeChangeSortRequestInput = { "notebook": string; "paths": Array<string>; };
+
+export type FileTreeCreateData = { "id": string; };
+
+export type FileTreeCreateMarkdownRequestInput = { "clippingHref"?: string | null; "docCreateTemplatePath"?: string | null; "id"?: string | null; "listDocTree"?: boolean | null; "markdown": string; "notebook": string; "parentID"?: string | null; "path": string; "sortPosition"?: string | null; "sortTargetID"?: string | null; "tags"?: string | null; "titleEmpty"?: boolean; "withMath"?: boolean | null; };
+
+export type FileTreeCreateRequestInput = { "docCreateTemplatePath"?: string | null; "listDocTree"?: boolean | null; "md": string; "notebook": string; "path": string; "sortPosition"?: string | null; "sortTargetID"?: string | null; "sorts"?: Array<string> | null; "title": string; };
+
+export type FileTreeCreateSavePathData = { "box": string; "docCreateTemplatePath": string; "path": string; };
+
+export type FileTreeDailyNoteRequestInput = { "app"?: string | null; "notebook": string; };
+
+export type FileTreeDocFile = { "children"?: Array<FileTreeDocFile | null>; "id": string; };
+
+export type FileTreeDocHeadingData = { "srcTreeBox": string; "srcTreePath": string; };
+
+export type FileTreeDocHeadingRequestInput = { "after": boolean; "srcID": string; "targetID": string; };
+
+export type FileTreeDocPathData = { "notebook": string; "path": string; };
+
+export type FileTreeDocTreeData = { "tree": Array<FileTreeDocFile | null> | null; };
+
+export type FileTreeDuplicateData = { "hPath": string; "id": string; "notebook": string; "path": string; };
+
+export type FileTreeFile = { "alias": string; "bookmark": string; "childrenSortMode": number | null; "count": number; "ctime": number; "dueFlashcardCount": number; "flashcardCount": number; "hCtime": string; "hMtime": string; "hSize": string; "icon": string; "id": string; "memo": string; "mtime": number; "name": string; "name1": string; "newFlashcardCount": number; "path": string; "size": number; "sort": number; "subFileCount": number; "titleEmpty"?: boolean; };
+
+export type FileTreeGetDocData = { "blockCount": number; "box": string; "content": string; "docInfo"?: DocInfo; "eof": boolean; "headingNumbers": Record<string, string> | null; "id": string; "isBacklinkExpand": boolean; "isSyncing": boolean; "keywords": Array<string> | null; "mode": number; "parent2ID": string; "parentID": string; "path": string; "publishAccessRequired": boolean; "reqId": JSONValue; "rootID": string; "scroll": boolean; "type": string; };
+
+export type FileTreeGetDocRequestInput = { "endID"?: string | null; "highlight"?: boolean | null; "id": string; "includeDocInfo"?: boolean | null; "index"?: number | null; "isBacklink"?: boolean | null; "mode"?: number | null; "notebook"?: string | null; "originalRefBlockIDs"?: Record<string, string> | null; "query"?: string | null; "queryMethod"?: number | null; "querySubTypes"?: SearchSubtypeFilterInput | null; "queryTypes"?: Record<string, boolean> | null; "reqId"?: JSONValue | null; "size"?: number | null; "startID"?: string | null; };
+
+export type FileTreeHeadingDocRequestInput = { "previousPath"?: string | null; "srcHeadingID": string; "targetNoteBook": string; "targetPath"?: string | null; "toTop"?: boolean | null; };
+
+export type FileTreeIDRequestInput = { "id": string; };
+
+export type FileTreeListData = { "box": string; "effectiveSortMode": number; "files": Array<FileTreeFile | null> | null; "path": string; };
+
+export type FileTreeListItemDocRequestInput = { "previousPath"?: string | null; "srcListItemID": string; "targetNoteBook": string; "targetPath"?: string | null; "toTop"?: boolean | null; };
+
+export type FileTreeListRequestInput = { "app"?: string | null; "flashcard"?: boolean | null; "ignoreMaxListHint"?: boolean | null; "maxListCount"?: number | null; "notebook": string; "path": string; "showHidden"?: boolean | null; "sort"?: number | null; };
+
+export type FileTreeMoveIDsRequestInput = { "callback"?: JSONValue | null; "fromIDs": Array<string>; "toID": string; };
+
+export type FileTreeMoveRequestInput = { "callback"?: JSONValue | null; "fromPaths": Array<string>; "toNotebook": string; "toPath": string; };
+
+export type FileTreeNotebookRequestInput = { "notebook": string; };
+
+export type FileTreeOptionalIDRequestInput = { "id"?: string | null; };
+
+export type FileTreeOptionalPathRequestInput = { "notebook"?: string | null; "path"?: string | null; };
+
+export type FileTreePathRequestInput = { "notebook": string; "path": string; };
+
+export type FileTreePathsRequestInput = { "paths": Array<string>; };
+
+export type FileTreePublishData = { "publishAccess": Array<FileTreePublishItem | null> | null; };
+
+export type FileTreePublishIDsRequestInput = { "ids": Array<string>; };
+
+export type FileTreePublishItem = { "disable": boolean; "id": string; "password": string; "visible": boolean; };
+
+export type FileTreeRenameIDRequestInput = { "id"?: string | null; "title": string; };
+
+export type FileTreeRenameRequestInput = { "notebook": string; "path": string; "title": string; };
+
+export type FileTreeReorderData = { "changed": boolean; "conflict"?: boolean; "notebook"?: string; "parentPath"?: string; };
+
+export type FileTreeReorderRequestInput = { "position"?: string | null; "preview"?: boolean | null; "removeSorts"?: boolean | null; "respectSort"?: boolean | null; "sourceIDs"?: Array<string> | null; "targetID"?: string | null; };
+
+export type FileTreeSavePathData = { "box": string; "path": string; };
+
+export type FileTreeSearchDoc = { "alias"?: string; "box": string; "boxIcon": string; "dueFlashcardCount"?: string; "flashcardCount"?: string; "hPath": string; "name"?: string; "newFlashcardCount"?: string; "path": string; };
+
+export type FileTreeSearchRequestInput = { "excludeIDs"?: Array<string> | null; "flashcard"?: boolean | null; "k": string; };
+
+export type FileTreeSetPublishRequestInput = { "disable": boolean; "id": string; "password": string; "visible": boolean; };
+
+export type FileTreeSetSortData = { "docIDs": Array<string> | null; "notebookIDs": Array<string> | null; };
+
+export type FileTreeSetSortRequestInput = { "docSorts"?: Array<FileTreeSortItemInput | null> | null; "notebookSorts"?: Array<FileTreeSortItemInput | null> | null; };
+
+export type FileTreeSortItemInput = { "id"?: string | null; "sort"?: number | null; };
+
+export type FileTreeSortModeData = { "box": string; "effectiveSortMode": number; "id": string; "path": string; "sortMode": number | null; };
+
+export type FileTreeSortModeRequestInput = { "id"?: string | null; "sortMode": number | null; };
+
+export type FileTreeTrimIDRequestInput = { "id": string; };
+
+export type FindReplaceRequestInput = { "groupBy"?: number | null; "ids": Array<string>; "k": string; "method"?: number | null; "orderBy"?: number | null; "page"?: number | null; "pageSize"?: number | null; "paths"?: Array<string> | null; "query"?: string | null; "r": string; "replaceTypes"?: Record<string, boolean> | null; "subTypes"?: SearchSubtypeFilterInput | null; "types"?: Record<string, boolean> | null; };
+
 export type FullBlockInfo = { "box": string; "path": string; "rootChildID": string; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
+
+export type FullTextSearchBlockData = { "blocks": Array<SearchBlock | null> | null; "docMode": boolean; "matchedBlockCount": number; "matchedRootCount": number; "pageCount": number; };
+
+export type FullTextSearchBlockRequestInput = { "groupBy"?: number | null; "method"?: number | null; "notebook"?: string | null; "orderBy"?: number | null; "page"?: number | null; "pageSize"?: number | null; "paths"?: Array<string> | null; "query"?: string | null; "searchHPath"?: boolean | null; "subTypes"?: SearchSubtypeFilterInput | null; "types"?: Record<string, boolean> | null; };
+
+export type GetBazaarIconRequestInput = { "keyword"?: string | null; };
+
+export type GetBazaarPackageREADMERequestInput = { "packageType": string; "repoHash": string; "repoURL": string; };
+
+export type GetBazaarPackageRatingRequestInput = { "packageName": string; "packageType": string; };
+
+export type GetBazaarPackageRatingsRequestInput = { "packageNames": Array<string>; "packageType": string; };
+
+export type GetBazaarPackageRequestInput = { "frontend"?: string | null; "packageName": string; "packageType": string; };
+
+export type GetBazaarPackageUserRatingsRequestInput = { "packageNames": Array<string>; "packageType": string; };
+
+export type GetBazaarPluginRequestInput = { "frontend": string; "keyword"?: string | null; };
+
+export type GetBazaarTemplateRequestInput = { "keyword"?: string | null; };
+
+export type GetBazaarThemeRequestInput = { "frontend"?: string | null; "keyword"?: string | null; };
+
+export type GetBazaarWidgetRequestInput = { "keyword"?: string | null; };
+
+export type GetCloudRepoSnapshotsRequestInput = { "page": number; };
+
+export type GetEmbedBlockRequestInput = { "breadcrumb"?: boolean | null; "embedBlockID": string; "headingMode"?: number | null; "includeIDs": Array<string>; "notebook"?: string | null; };
+
+export type GetInstalledIconRequestInput = { "keyword"?: string | null; };
+
+export type GetInstalledPackageSizeRequestInput = { "packageName": string; "packageType": string; };
+
+export type GetInstalledPluginRequestInput = { "frontend": string; "keyword"?: string | null; };
+
+export type GetInstalledTemplateRequestInput = { "keyword"?: string | null; };
+
+export type GetInstalledThemeRequestInput = { "frontend"?: string | null; "keyword"?: string | null; };
+
+export type GetInstalledWidgetRequestInput = { "keyword"?: string | null; };
+
+export type GetRepoDocHistoryRequestInput = { "id": string; "page": number; };
+
+export type GetRepoFileRequestInput = { "id": string; };
+
+export type GetRepoSnapshotsRequestInput = { "page": number; };
 
 export type GetSnippetRequestInput = { "enabled": number; "keyword"?: string | null; "type": string; };
 
 export type GetTagRequestInput = { "app"?: string | null; "ignoreMaxListHint"?: boolean | null; "sort"?: number | null; };
+
+export type GetUpdatedPackageRequestInput = { "frontend": string; };
 
 export type GlobalGraphConf = { "d3": GraphD3 | null; "dailyNote": boolean; "minRefs": number; "type": GraphTypeFilter | null; };
 
@@ -314,6 +632,8 @@ export type ImportMarkdownRequestInput = { "localPath": string; "notebook": stri
 
 export type ImportNotebookCryptoBackupRequestInput = { "file": Blob; "password"?: string; };
 
+export type ImportRepoKeyRequestInput = { "key": string; };
+
 export type ImportSYRequestInput = { "file"?: Blob; "notebook"?: string; "toPath"?: string; };
 
 export type ImportTokenRequestInput = { "token": string; };
@@ -323,6 +643,8 @@ export type ImportZipMarkdownRequestInput = { "file"?: Blob; "notebook"?: string
 export type ImportedNotebook = { "notebook": Notebook | null; };
 
 export type ImportedNotebooks = { "notebooks": Array<Notebook | null> | null; };
+
+export type InitRepoKeyFromPassphraseRequestInput = { "pass": string; };
 
 export type InlineStyle = { "dark": InlineStyleTheme | null; "hidden"?: boolean; "id": string; "light": InlineStyleTheme | null; "name": string; };
 
@@ -360,6 +682,22 @@ export type InlineStyles = { "av": InlineStyleAV | null; "builtin": InlineStyleB
 
 export type InsertBlockRequestInput = { "data": string; "dataType": string; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; };
 
+export type InsertCoverRequestInput = { "id": string; "name": string; };
+
+export type InsertLocalAssetsRequestInput = { "assetPaths": Array<string>; "fromHTMLPaste"?: boolean | null; "id"?: string | null; "isUpload"?: boolean | null; };
+
+export type InstallBazaarIconRequestInput = { "keyword"?: string | null; "packageName": string; "repoHash": string; "repoRef"?: string | null; "repoURL": string; };
+
+export type InstallBazaarPluginRequestInput = { "frontend": string; "keyword"?: string | null; "packageName": string; "repoHash": string; "repoRef"?: string | null; "repoURL": string; };
+
+export type InstallBazaarTemplateRequestInput = { "keyword"?: string | null; "packageName": string; "repoHash": string; "repoRef"?: string | null; "repoURL": string; };
+
+export type InstallBazaarThemeRequestInput = { "frontend"?: string | null; "keyword"?: string | null; "mode"?: number; "modeOS"?: boolean; "packageName": string; "repoHash": string; "repoRef"?: string | null; "repoURL": string; };
+
+export type InstallBazaarWidgetRequestInput = { "keyword"?: string | null; "packageName": string; "repoHash": string; "repoRef"?: string | null; "repoURL": string; };
+
+export type InstallLocalBazaarPackageRequestInput = { "file"?: Blob; "frontend"?: string; "overwrite"?: string; };
+
 export type JSONValue = null | boolean | number | string | Array<JSONValue> | { [key: string]: JSONValue };
 
 export type KernelPetal = { "existed": boolean; "incompatible": boolean; "js": string; };
@@ -369,6 +707,10 @@ export type ListNotebooksData = { "boxDocEnabled": boolean; "notebooks": Array<N
 export type ListNotebooksRequestInput = { "flashcard"?: boolean | null; };
 
 export type LoadPetalsRequestInput = { "frontend": string; };
+
+export type LoadedPlugin = { "methods": Array<PluginRPCMethod | null> | null; "name": string; "state": string; "stateCode": number; };
+
+export type LoadedPluginRequestInput = { "name": string; };
 
 export type LocalGraphConf = { "d3": GraphD3 | null; "dailyNote": boolean; "type": GraphTypeFilter | null; };
 
@@ -438,6 +780,8 @@ export type ObsidianVaultTask = { "analysis"?: ObsidianVaultAnalysis; "detail"?:
 
 export type OpenNotebookRequestInput = { "app"?: string | null; "notebook": string; };
 
+export type OpenRepoSnapshotFileRequestInput = { "id": string; };
+
 export type OrderedListStartData = { "found": boolean; "start": number; };
 
 export type OutlineRequestInput = { "id"?: string | null; "notebook"?: string | null; "preview"?: boolean | null; };
@@ -450,13 +794,29 @@ export type PandocData = { "path": string; };
 
 export type PandocRequestInput = { "args": Array<string>; "dir"?: string | null; };
 
+export type PerformSyncRequestInput = { "mobileSwitch"?: boolean | null; "upload"?: boolean; };
+
 export type Petal = { "css": string; "disabledInPublish": boolean; "disallowInstall": boolean; "displayName": string; "enabled": boolean; "i18n": { [key: string]: JSONValue } | null; "incompatible": boolean; "js": string; "kernel": KernelPetal; "name": string; "userDisabledInPublish": boolean; "version": string; };
 
 export type PinnedDoc = { "childrenSortMode": number | null; "icon": string; "id": string; "name": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
 
+export type PluginRPCError = { "code": number; "data"?: JSONValue; "message": string; };
+
+export type PluginRPCFailure = { "error": PluginRPCError | null; "id": string | number | null; "jsonrpc": "2.0"; };
+
+export type PluginRPCMethod = { "descriptions": Array<string> | null; "name": string; };
+
+export type PluginRPCNotification = { "jsonrpc": "2.0"; "method": string; "params"?: JSONValue; };
+
+export type PluginRPCRequestFieldsInput = { "id"?: string | number | null; "jsonrpc": "2.0"; "method": string; "params"?: Array<JSONValue> | { [key: string]: JSONValue } | null; };
+
+export type PluginRPCSuccess = { "id": string | number | null; "jsonrpc": "2.0"; "result": JSONValue; };
+
 export type PrepareRichTextRequestInput = { "assets": Array<RichClipboardAssetInput>; };
 
 export type PrependBlockRequestInput = { "data": string; "dataType": string; "parentID": string; };
+
+export type ProcessPDFRequestInput = { "id": string; "merge"?: boolean | null; "mergeContentHeadingMode"?: string | null; "mergeDocHeadingMode"?: string | null; "path": string; "removeAssets": boolean; "watermark": boolean; };
 
 export type PublishedBlockInfo = { "publishAccessRequired": true; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
 
@@ -486,19 +846,27 @@ export type RefreshBacklinkRequestInput = { "id": string; };
 
 export type RemoveBookmarkRequestInput = { "bookmark": string; };
 
+export type RemoveCloudRepoTagSnapshotRequestInput = { "tag": string; };
+
 export type RemoveCriterionRequestInput = { "name": string; };
 
 export type RemoveFileRequestInput = { "app"?: string | null; "path": string; };
 
+export type RemoveRepoTagSnapshotRequestInput = { "tag": string; };
+
 export type RemoveShorthandsRequestInput = { "ids": Array<string>; };
 
 export type RemoveTagRequestInput = { "label": string; };
+
+export type RenameAssetRequestInput = { "newName": string; "oldPath": string; };
 
 export type RenameBookmarkRequestInput = { "newBookmark": string; "oldBookmark": string; };
 
 export type RenameFileRequestInput = { "newPath": string; "path": string; };
 
 export type RenameNotebookRequestInput = { "name": string; "notebook": string; };
+
+export type RenameRiffDeckRequestInput = { "deckID": string; "name": string; };
 
 export type RenameTagRequestInput = { "newLabel": string; "oldLabel": string; };
 
@@ -512,9 +880,47 @@ export type ReorderData = { "changed": boolean; "notebook"?: string; "parentPath
 
 export type ReorderNotebooksRequestInput = { "position"?: string | null; "sourceIDs"?: Array<string> | null; "targetID"?: string | null; };
 
+export type RepoCloudSnapshotsData = { "pageCount": number; "snapshots": Array<RepoLog | null> | null; "totalCount": number; };
+
+export type RepoCloudTagsData = { "snapshots": Array<RepoLog | null> | null; };
+
+export type RepoDiffData = { "addsLeft": Array<RepoDiffFile | null> | null; "left": RepoDiffIndex | null; "removesRight": Array<RepoDiffFile | null> | null; "right": RepoDiffIndex | null; "updatesLeft": Array<RepoDiffFile | null> | null; "updatesRight": Array<RepoDiffFile | null> | null; };
+
+export type RepoDiffFile = { "fileID": string; "hPath"?: string; "hSize": string; "indexID": string; "path": string; "title": string; "updated": number; };
+
+export type RepoDiffIndex = { "created": number; "id": string; };
+
+export type RepoDocHistory = { "fileID": string; "hSize": string; "indexID": string; "title": string; "updated": number; };
+
+export type RepoDocHistoryData = { "files": Array<RepoDocHistory | null> | null; "pageCount": number; "totalCount": number; };
+
+export type RepoExportData = { "path": string; };
+
+export type RepoFile = { "chunks": Array<string> | null; "id": string; "path": string; "size": number; "updated": number; };
+
+export type RepoKeyData = { "key": string; };
+
+export type RepoLog = { "count": number; "created": number; "files": Array<RepoFile | null> | null; "hCreated": string; "hSize": string; "hTagUpdated": string; "id": string; "memo": string; "size": number; "systemID": string; "systemName": string; "systemOS": string; "tag": string; };
+
+export type RepoOpenFileData = { "content": string; "displayInText": boolean; "title": string; "updated": number; };
+
+export type RepoSearchData = { "files": Array<RepoDiffFile | null> | null; "pageCount": number; "totalCount": number; };
+
+export type RepoSnapshot = { "count": number; "created": number; "files": Array<RepoFile | null> | null; "hCreated": string; "hSize": string; "hTagUpdated": string; "id": string; "memo": string; "requiresDownload": boolean; "size": number; "systemID": string; "systemName": string; "systemOS": string; "tag": string; "typesCount": Array<RepoTypeCount | null> | null; };
+
+export type RepoSnapshotsData = { "pageCount": number; "snapshots": Array<RepoSnapshot | null> | null; "totalCount": number; };
+
+export type RepoTagsData = { "snapshots": Array<RepoSnapshot | null> | null; };
+
+export type RepoTypeCount = { "count": number; "type": string; };
+
 export type ResetGraphData = { "conf": GlobalGraphConf; };
 
 export type ResetLocalGraphData = { "conf": LocalGraphConf; };
+
+export type ResetRiffCardsRequestInput = { "blockIDs"?: Array<string> | null; "deckID": string; "id": string; "type": string; };
+
+export type ReviewRiffCardRequestInput = { "cardID": string; "deckID": string; "rating": number; "reviewedCards"?: Array<RiffReviewedCardInput> | null; };
 
 export type RichClipboardAssetInput = { "box"?: string; "index": number; "path": string; };
 
@@ -522,27 +928,107 @@ export type RichClipboardPrepared = { "assets": Array<RichClipboardPreparedAsset
 
 export type RichClipboardPreparedAsset = { "index": number; "path": string; };
 
+export type RiffBlockIDsRequestInput = { "blockIDs": Array<string>; };
+
+export type RiffBlocksData = { "blocks": Array<SearchBlock | null> | null; };
+
+export type RiffCardDueInput = { "due": string; "id": string; };
+
+export type RiffCardRequestInput = { "cardID": string; "deckID": string; };
+
+export type RiffCardsData = { "blocks": Array<SearchBlock | null> | null; "pageCount": number; "total": number; };
+
+export type RiffCardsRequestInput = { "id": string; "page": number; "pageSize"?: number | null; };
+
+export type RiffDeck = { "created": string; "id": string; "name": string; "size": number; "updated": string; };
+
+export type RiffDeckCardsRequestInput = { "blockIDs": Array<string>; "deckID": string; };
+
+export type RiffDeckRequestInput = { "deckID": string; };
+
+export type RiffDueCard = { "blockID": string; "cardID": string; "deckID": string; "lapses": number; "lastReview": number; "nextDues": Record<string, string> | null; "reps": number; "state": number; };
+
+export type RiffDueCardsData = { "cards": Array<RiffDueCard | null> | null; "unreviewedCount": number; "unreviewedNewCardCount": number; "unreviewedOldCardCount": number; };
+
+export type RiffDueCardsRequestInput = { "deckID": string; "reviewedCards"?: Array<RiffReviewedCardInput> | null; };
+
+export type RiffNotebookDueCardsRequestInput = { "notebook": string; "reviewedCards"?: Array<RiffReviewedCardInput> | null; };
+
+export type RiffReviewedCardInput = { "cardID": string; };
+
+export type RiffTreeDueCardsRequestInput = { "reviewedCards"?: Array<RiffReviewedCardInput> | null; "rootID": string; };
+
+export type RollbackRepoSnapshotFileRequestInput = { "id": string; };
+
 export type SQLQueryRequestInput = { "mode"?: string | null; "stmt": string; };
 
 export type SaveTemplateRequestInput = { "databaseMode"?: string; "directory"?: string; "id": string; "name": string; "overwrite": boolean; };
+
+export type SearchAsset = { "hName": string; "path": string; "updated": number; };
+
+export type SearchAssetContentData = { "assetContents": Array<AssetContent | null> | null; "matchedAssetCount": number; "pageCount": number; };
+
+export type SearchAssetContentRequestInput = { "method"?: number | null; "orderBy"?: number | null; "page"?: number | null; "pageSize"?: number | null; "query"?: string | null; "types"?: Record<string, boolean> | null; };
+
+export type SearchAssetRequestInput = { "exts"?: Array<string> | null; "k": string; };
 
 export type SearchBlock = { "alias": string; "box": string; "children": Array<SearchBlock | null> | null; "content": string; "count": number; "created": string; "defID": string; "defPath": string; "depth": number; "fcontent": string; "folded": boolean; "hPath": string; "ial": Record<string, string> | null; "id": string; "markdown": string; "memo": string; "name": string; "number"?: string; "parentID": string; "path": string; "refCount": number; "refText": string; "refs": Array<SearchBlock | null> | null; "riffCard": SearchBlockCard | null; "riffCardID": string; "rootID": string; "sort": number; "subType": string; "tag": string; "type": string; "updated": string; };
 
 export type SearchBlockCard = { "due": string; "lapses": number; "lastReview": string; "reps": number; "state": number; };
 
+export type SearchBlockRequestInput = { "groupBy"?: number | null; "method"?: number | null; "orderBy"?: number | null; "page"?: number | null; "pageSize"?: number | null; "paths"?: Array<string> | null; "query"?: string | null; "subTypes"?: SearchSubtypeFilterInput | null; "types"?: Record<string, boolean> | null; };
+
+export type SearchBlocksData = { "blocks": Array<SearchBlock | null> | null; "matchedBlockCount": number; "matchedRootCount": number; "pageCount": number; };
+
+export type SearchEmbedBlockRequestInput = { "breadcrumb"?: boolean | null; "embedBlockID": string; "excludeIDs": Array<string | null>; "headingMode"?: number | null; "notebook"?: string | null; "stmt": string; };
+
+export type SearchHeadingFilterInput = { "h1"?: boolean | null; "h2"?: boolean | null; "h3"?: boolean | null; "h4"?: boolean | null; "h5"?: boolean | null; "h6"?: boolean | null; };
+
 export type SearchHistoryData = { "histories": Array<string> | null; "pageCount": number; "totalCount": number; };
 
 export type SearchHistoryRequestInput = { "notebook"?: string | null; "op"?: string | null; "page"?: number | null; "query"?: string | null; "type"?: number | null; };
 
+export type SearchKeywordRequestInput = { "k": string; };
+
+export type SearchListFilterInput = { "o"?: boolean | null; "t"?: boolean | null; "u"?: boolean | null; };
+
+export type SearchPageRequestInput = { "page"?: number | null; "pageSize"?: number | null; };
+
 export type SearchPath = { "blocks"?: Array<SearchBlock | null>; "box": string; "children"?: Array<SearchPath | null>; "count": number; "created": string; "depth": number; "folded": boolean; "hPath": string; "id": string; "name": string; "nodeType": string; "number"?: string; "subType": string; "type": string; "updated": string; };
+
+export type SearchPathRequestInput = { "path": string; };
+
+export type SearchRefBlockRequestInput = { "beforeLen"?: number; "id"?: string | null; "isDatabase"?: boolean | null; "isSquareBrackets"?: boolean | null; "k"?: string; "notebook"?: string | null; "reqId"?: JSONValue | null; "rootID"?: string; };
+
+export type SearchRefCorrelation = { "reqId": JSONValue; };
+
+export type SearchRefResult = { "blocks": Array<SearchBlock | null> | null; "k": string; "newDoc": boolean; "reqId": JSONValue; };
+
+export type SearchRepoFileRequestInput = { "keyword": string; "page": number; };
 
 export type SearchSubTypes = { "heading": Record<string, boolean> | null; "list": Record<string, boolean> | null; "listItem": Record<string, boolean> | null; };
 
 export type SearchSubTypesInput = { "heading"?: Record<string, boolean> | null; "list"?: Record<string, boolean> | null; "listItem"?: Record<string, boolean> | null; };
 
+export type SearchSubtypeFilterInput = { "heading"?: SearchHeadingFilterInput | null; "list"?: SearchListFilterInput | null; "listItem"?: SearchListFilterInput | null; };
+
 export type SearchTagData = { "k": string; "tags": Array<string>; };
 
 export type SearchTagRequestInput = { "k": string; };
+
+export type SearchTemplateData = { "k": string; "templates": Array<SearchTemplateResult | null> | null; };
+
+export type SearchTemplateResult = { "content": string; "path": string; "relativePath": string; };
+
+export type SearchWidgetData = { "k": string; "widgets": Array<SearchWidgetResult | null> | null; };
+
+export type SearchWidgetResult = { "content": string; "name": string; };
+
+export type SetAssetAnnotationRequestInput = { "data": string; "path": string; };
+
+export type SetAssetOCRTextRequestInput = { "path": string; "text": string; };
+
+export type SetBazaarPackageRatingRequestInput = { "packageName": string; "packageType": string; "rating": number; };
 
 export type SetBlockAttrsRequestInput = { "attrs": Record<string, string | null>; "id": string; };
 
@@ -560,9 +1046,21 @@ export type SetPetalEnabledRequestInput = { "app"?: string | null; "enabled": bo
 
 export type SetPetalPublishEnabledRequestInput = { "enabled": boolean; "packageName": string; };
 
+export type SetRepoIndexRetentionDaysRequestInput = { "days": number; };
+
+export type SetRetentionIndexesDailyRequestInput = { "indexes": number; };
+
+export type SetRiffCardsDueRequestInput = { "cardDues": Array<RiffCardDueInput>; };
+
 export type SetSnapshotMemoRequestInput = { "id": string; "memo": string; };
 
 export type SetSnippetRequestInput = { "snippets": Array<SnippetInput>; };
+
+export type SetSyncLocalRequestInput = { "local": SyncLocalInput; };
+
+export type SetSyncS3RequestInput = { "s3": SyncS3Input; };
+
+export type SetSyncWebDAVRequestInput = { "webdav": SyncWebDAVInput; };
 
 export type Shorthand = { "hCreated": string; "oId": string; "shorthandContent": string; "shorthandDesc": string; "shorthandFrom": number; "shorthandMd": string; "shorthandTitle": string; "shorthandURL": string; };
 
@@ -594,7 +1092,51 @@ export type StorageSetRequestInput = { "app"?: string | null; "key": string; "va
 
 export type SwapBlockRefRequestInput = { "defID": string; "includeChildren": boolean; "refID": string; };
 
+export type SyncAssetDownloadModeData = { "assetDownloadMode": number; };
+
+export type SyncEnabledRequestInput = { "enabled": boolean; };
+
+export type SyncInfoData = { "kernel": string; "kernels": Array<SyncOnlineKernel | null> | null; "stat": string; "synced": number; };
+
+export type SyncIntervalRequestInput = { "interval": number; };
+
+export type SyncLANRequestInput = { "enabled": boolean; "maxConcurrentReqs"?: number | null; };
+
+export type SyncLANStatus = { "active": boolean; "connectedPeers": number; "discoveredPeers": number; "enabled": boolean; "maxConcurrentReqs": number; };
+
+export type SyncLocal = { "concurrentReqs": number; "endpoint": string; "timeout": number; };
+
+export type SyncLocalData = { "local": SyncLocal | null; };
+
+export type SyncLocalInput = { "concurrentReqs"?: number | null; "endpoint"?: string | null; "timeout"?: number | null; };
+
+export type SyncModeRequestInput = { "mode": number; };
+
+export type SyncNameRequestInput = { "name": string; };
+
+export type SyncOnlineKernel = { "hostname": string; "id": string; "os": string; "ver": string; };
+
+export type SyncProviderExportData = { "name": string; "zip": string; };
+
+export type SyncProviderImportRequestInput = { "file"?: Blob; };
+
+export type SyncProviderRequestInput = { "provider": number; };
+
+export type SyncS3 = { "accessKey": string; "bucket": string; "concurrentReqs": number; "endpoint": string; "pathStyle": boolean; "region": string; "secretKey": string; "skipTlsVerify": boolean; "timeout": number; };
+
+export type SyncS3Data = { "s3": SyncS3 | null; };
+
+export type SyncS3Input = { "accessKey"?: string | null; "bucket"?: string | null; "concurrentReqs"?: number | null; "endpoint"?: string | null; "pathStyle"?: boolean | null; "region"?: string | null; "secretKey"?: string | null; "skipTlsVerify"?: boolean | null; "timeout"?: number | null; };
+
+export type SyncWebDAV = { "concurrentReqs": number; "endpoint": string; "password": string; "skipTlsVerify": boolean; "timeout": number; "username": string; };
+
+export type SyncWebDAVData = { "webdav": SyncWebDAV | null; };
+
+export type SyncWebDAVInput = { "concurrentReqs"?: number | null; "endpoint"?: string | null; "password"?: string | null; "skipTlsVerify"?: boolean | null; "timeout"?: number | null; "username"?: string | null; };
+
 export type TagData = { "children": Array<TagData | null> | null; "count": number; "depth": number; "label": string; "name": string; "type": string; };
+
+export type TagSnapshotRequestInput = { "id": string; "name": string; };
 
 export type TailChildBlocksRequestInput = { "id": string; "ids"?: Array<string> | null; "n"?: number | null; "notebook"?: string | null; };
 
@@ -626,15 +1168,33 @@ export type TrimmedIDRequestInput = { "id": string; };
 
 export type UnfoldedParentData = { "parentID": string; };
 
+export type UninstallBazaarIconRequestInput = { "keyword"?: string | null; "packageName": string; };
+
+export type UninstallBazaarPluginRequestInput = { "frontend"?: string | null; "keyword"?: string | null; "packageName": string; };
+
+export type UninstallBazaarTemplateRequestInput = { "keyword"?: string | null; "packageName": string; };
+
+export type UninstallBazaarThemeRequestInput = { "frontend"?: string | null; "keyword"?: string | null; "packageName": string; };
+
+export type UninstallBazaarWidgetRequestInput = { "keyword"?: string | null; "packageName": string; };
+
 export type UnlockNotebookRequestInput = { "notebook": string; "password": string; };
 
 export type UnzipRequestInput = { "path": string; "zipPath": string; };
+
+export type UpdateBazaarPackageRequestInput = { "frontend": string; "keyword"?: string | null; "packageName": string; "packageType": string; };
 
 export type UpdateBlockRequestInput = { "data": string; "dataType": string; "id": string; "lockType"?: boolean | null; };
 
 export type UpdateChannelRequestInput = { "updateChannel": string; };
 
+export type UpdateEmbedBlockRequestInput = { "content": string; "id": string; };
+
 export type UpdatePinnedDocsRequestInput = { "action": string; "after"?: boolean; "ids": Array<string>; "targetID"?: string; };
+
+export type UploadAssetRequestInput = { "assetsDirPath"?: string; "file[]"?: Array<Blob>; "id"?: string; };
+
+export type UploadCloudSnapshotRequestInput = { "id": string; "tag": string; };
 
 export type ViewStatePatchRequestInput = { "key": string; "removeKeys"?: Array<string> | null; "values"?: { [key: string]: JSONValue }; };
 
@@ -660,9 +1220,6 @@ export type APILegacyGETPath =
     "/api/network/echo" |
     "/api/network/echo/*path" |
     "/api/network/proxy" |
-    "/api/plugin" |
-    "/api/plugin/rpc" |
-    "/api/plugin/rpc/:name" |
     "/api/system/bootProgressSSE" |
     "/api/system/getBootAppearance" |
     "/api/system/getCaptcha" |
@@ -671,11 +1228,24 @@ export type APILegacyGETPath =
     "/es/network/proxy" |
     "/plugin/private/:name/*path" |
     "/ws/broadcast" |
-    "/ws/network/proxy" |
-    "/ws/plugin/rpc" |
-    "/ws/plugin/rpc/:name";
+    "/ws/network/proxy";
 
 export interface APIGETRoutes {
+    "/api/plugin": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<LoadedPlugin | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/plugin/rpc": {
+        request: LoadedPluginRequestInput;
+        response: { "code": 0; "data": LoadedPlugin | null; "msg": string; } | { "code": -1 | 1 | 2 | 3 | 4; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/plugin/rpc/:name": {
+        request: LoadedPluginRequestInput;
+        response: { "code": 0; "data": LoadedPlugin | null; "msg": string; } | { "code": -1 | 1 | 2 | 3 | 4; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/system/bootProgress": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": BootProgressData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -685,6 +1255,20 @@ export interface APIGETRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+    };
+    "/ws/plugin/rpc": {
+        request: EmptyRequestInput;
+        response: (PluginRPCFailure & { "code"?: never; "data"?: never; "msg"?: never; }) | ({ "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; } & { "error"?: never; "id"?: never; "jsonrpc"?: never; });
+        body: "none";
+        output: "websocket";
+        websocket: { incoming: PluginRPCRequestFieldsInput | [PluginRPCRequestFieldsInput, ...Array<PluginRPCRequestFieldsInput>]; outgoing: (PluginRPCSuccess & { "error"?: never; "method"?: never; "params"?: never; }) | (PluginRPCFailure & { "method"?: never; "params"?: never; "result"?: never; }) | [(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; }), ...Array<(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; })>] | (PluginRPCNotification & { "error"?: never; "id"?: never; "result"?: never; }); failureStatus: 404; };
+    };
+    "/ws/plugin/rpc/:name": {
+        request: EmptyRequestInput;
+        response: (PluginRPCFailure & { "code"?: never; "data"?: never; "msg"?: never; }) | ({ "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; } & { "error"?: never; "id"?: never; "jsonrpc"?: never; });
+        body: "none";
+        output: "websocket";
+        websocket: { incoming: PluginRPCRequestFieldsInput | [PluginRPCRequestFieldsInput, ...Array<PluginRPCRequestFieldsInput>]; outgoing: (PluginRPCSuccess & { "error"?: never; "method"?: never; "params"?: never; }) | (PluginRPCFailure & { "method"?: never; "params"?: never; "result"?: never; }) | [(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; }), ...Array<(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; })>] | (PluginRPCNotification & { "error"?: never; "id"?: never; "result"?: never; }); failureStatus: 404; };
     };
 }
 
@@ -723,26 +1307,6 @@ export type APILegacyPOSTPath =
     "/api/ai/testEmbeddingModel" |
     "/api/ai/testModel" |
     "/api/ai/testRerankModel" |
-    "/api/asset/fullReindexAssetContent" |
-    "/api/asset/getDocAssets" |
-    "/api/asset/getDocImageAssets" |
-    "/api/asset/getFileAnnotation" |
-    "/api/asset/getImageOCRText" |
-    "/api/asset/getMissingAssets" |
-    "/api/asset/getUnusedAssets" |
-    "/api/asset/insertCover" |
-    "/api/asset/insertLocalAssets" |
-    "/api/asset/ocr" |
-    "/api/asset/removeUnusedAsset" |
-    "/api/asset/removeUnusedAssets" |
-    "/api/asset/renameAsset" |
-    "/api/asset/resolveAssetPath" |
-    "/api/asset/setFileAnnotation" |
-    "/api/asset/setImageOCRText" |
-    "/api/asset/statAsset" |
-    "/api/asset/upload" |
-    "/api/asset/uploadCloud" |
-    "/api/asset/uploadCloudByAssetsPaths" |
     "/api/av/addAttributeViewBlocks" |
     "/api/av/addAttributeViewKey" |
     "/api/av/appendAttributeViewDetachedBlocksWithValues" |
@@ -790,174 +1354,11 @@ export type APILegacyPOSTPath =
     "/api/av/setDatabaseBlockView" |
     "/api/av/sortAttributeViewKey" |
     "/api/av/sortAttributeViewViewKey" |
-    "/api/bazaar/batchUpdatePackage" |
-    "/api/bazaar/getBazaarIcon" |
-    "/api/bazaar/getBazaarPackage" |
-    "/api/bazaar/getBazaarPackageREADME" |
-    "/api/bazaar/getBazaarPackageRating" |
-    "/api/bazaar/getBazaarPackageRatings" |
-    "/api/bazaar/getBazaarPackageUserRatings" |
-    "/api/bazaar/getBazaarPlugin" |
-    "/api/bazaar/getBazaarTemplate" |
-    "/api/bazaar/getBazaarTheme" |
-    "/api/bazaar/getBazaarWidget" |
-    "/api/bazaar/getInstalledIcon" |
-    "/api/bazaar/getInstalledPackageSize" |
-    "/api/bazaar/getInstalledPlugin" |
-    "/api/bazaar/getInstalledTemplate" |
-    "/api/bazaar/getInstalledTheme" |
-    "/api/bazaar/getInstalledWidget" |
-    "/api/bazaar/getUpdatedPackage" |
-    "/api/bazaar/installBazaarIcon" |
-    "/api/bazaar/installBazaarPlugin" |
-    "/api/bazaar/installBazaarTemplate" |
-    "/api/bazaar/installBazaarTheme" |
-    "/api/bazaar/installBazaarWidget" |
-    "/api/bazaar/installLocalBazaarPackage" |
-    "/api/bazaar/setBazaarPackageRating" |
-    "/api/bazaar/uninstallBazaarIcon" |
-    "/api/bazaar/uninstallBazaarPlugin" |
-    "/api/bazaar/uninstallBazaarTemplate" |
-    "/api/bazaar/uninstallBazaarTheme" |
-    "/api/bazaar/uninstallBazaarWidget" |
-    "/api/bazaar/updateBazaarPackage" |
-    "/api/export/copyExportFile" |
-    "/api/export/export2Liandi" |
-    "/api/export/exportAsFile" |
-    "/api/export/exportAsciiDoc" |
-    "/api/export/exportAttributeView" |
-    "/api/export/exportBrowserHTML" |
-    "/api/export/exportCodeBlock" |
-    "/api/export/exportData" |
-    "/api/export/exportDataInFolder" |
-    "/api/export/exportDocx" |
-    "/api/export/exportEPUB" |
-    "/api/export/exportHTML" |
-    "/api/export/exportMd" |
-    "/api/export/exportMdContent" |
-    "/api/export/exportMdHTML" |
-    "/api/export/exportMds" |
-    "/api/export/exportMediaWiki" |
-    "/api/export/exportNotebookMd" |
-    "/api/export/exportNotebookSY" |
-    "/api/export/exportNotebooksMd" |
-    "/api/export/exportNotebooksSY" |
-    "/api/export/exportODT" |
-    "/api/export/exportOPML" |
-    "/api/export/exportOrgMode" |
-    "/api/export/exportPreviewHTML" |
-    "/api/export/exportRTF" |
-    "/api/export/exportReStructuredText" |
-    "/api/export/exportResources" |
-    "/api/export/exportSY" |
-    "/api/export/exportSYs" |
-    "/api/export/exportTempContent" |
-    "/api/export/exportTextile" |
-    "/api/export/preview" |
-    "/api/export/processPDF" |
     "/api/extension/copy" |
-    "/api/filetree/authFilePublishAccess" |
-    "/api/filetree/changeSort" |
-    "/api/filetree/createDailyNote" |
-    "/api/filetree/createDoc" |
-    "/api/filetree/createDocWithMd" |
-    "/api/filetree/doc2Heading" |
-    "/api/filetree/duplicateDoc" |
-    "/api/filetree/getDoc" |
-    "/api/filetree/getDocCreateSavePath" |
-    "/api/filetree/getFullHPathByID" |
-    "/api/filetree/getHPathByID" |
-    "/api/filetree/getHPathByPath" |
-    "/api/filetree/getHPathsByPaths" |
-    "/api/filetree/getIDsByHPath" |
-    "/api/filetree/getPathByID" |
-    "/api/filetree/getPublishAccess" |
-    "/api/filetree/getRefCreateSavePath" |
-    "/api/filetree/getShorthandSavePath" |
-    "/api/filetree/heading2Doc" |
-    "/api/filetree/li2Doc" |
-    "/api/filetree/listDocTree" |
-    "/api/filetree/listDocsByPath" |
-    "/api/filetree/moveDocs" |
-    "/api/filetree/moveDocsByID" |
-    "/api/filetree/moveLocalShorthands" |
-    "/api/filetree/removeDoc" |
-    "/api/filetree/removeDocByID" |
-    "/api/filetree/removeDocs" |
-    "/api/filetree/removeIndexes" |
-    "/api/filetree/renameDoc" |
-    "/api/filetree/renameDocByID" |
-    "/api/filetree/reorderDocs" |
-    "/api/filetree/searchDocs" |
-    "/api/filetree/setDocSortMode" |
-    "/api/filetree/setPublishAccess" |
-    "/api/filetree/setSort" |
-    "/api/filetree/upsertIndexes" |
     "/api/network/echo" |
     "/api/network/echo/*path" |
     "/api/network/forwardProxy" |
     "/api/network/proxy" |
-    "/api/plugin/getLoadedPlugin" |
-    "/api/plugin/listLoadedPlugins" |
-    "/api/plugin/rpc" |
-    "/api/plugin/rpc/:name" |
-    "/api/repo/checkoutRepo" |
-    "/api/repo/diffRepoSnapshots" |
-    "/api/repo/downloadCloudSnapshot" |
-    "/api/repo/exportRepoFile" |
-    "/api/repo/getCloudRepoSnapshots" |
-    "/api/repo/getCloudRepoTagSnapshots" |
-    "/api/repo/getRepoDocHistory" |
-    "/api/repo/getRepoFile" |
-    "/api/repo/getRepoSnapshots" |
-    "/api/repo/getRepoTagSnapshots" |
-    "/api/repo/importRepoKey" |
-    "/api/repo/initRepoKey" |
-    "/api/repo/initRepoKeyFromPassphrase" |
-    "/api/repo/openRepoSnapshotFile" |
-    "/api/repo/purgeCloudRepo" |
-    "/api/repo/purgeRepo" |
-    "/api/repo/removeCloudRepoTagSnapshot" |
-    "/api/repo/removeRepoTagSnapshot" |
-    "/api/repo/resetRepo" |
-    "/api/repo/rollbackRepoSnapshotFile" |
-    "/api/repo/searchRepoFile" |
-    "/api/repo/setRepoIndexRetentionDays" |
-    "/api/repo/setRetentionIndexesDaily" |
-    "/api/repo/tagSnapshot" |
-    "/api/repo/uploadCloudSnapshot" |
-    "/api/riff/addRiffCards" |
-    "/api/riff/batchSetRiffCardsDueTime" |
-    "/api/riff/createRiffDeck" |
-    "/api/riff/getNotebookRiffCards" |
-    "/api/riff/getNotebookRiffDueCards" |
-    "/api/riff/getRiffCards" |
-    "/api/riff/getRiffCardsByBlockIDs" |
-    "/api/riff/getRiffDecks" |
-    "/api/riff/getRiffDueCards" |
-    "/api/riff/getTreeRiffCards" |
-    "/api/riff/getTreeRiffDueCards" |
-    "/api/riff/removeRiffCards" |
-    "/api/riff/removeRiffDeck" |
-    "/api/riff/renameRiffDeck" |
-    "/api/riff/resetRiffCards" |
-    "/api/riff/reviewRiffCard" |
-    "/api/riff/skipReviewRiffCard" |
-    "/api/search/findReplace" |
-    "/api/search/fullTextSearchAssetContent" |
-    "/api/search/fullTextSearchBlock" |
-    "/api/search/getAssetContent" |
-    "/api/search/getAssetContentByPath" |
-    "/api/search/getEmbedBlock" |
-    "/api/search/listInvalidBlockRefs" |
-    "/api/search/removeTemplate" |
-    "/api/search/searchAsset" |
-    "/api/search/searchEmbedBlock" |
-    "/api/search/searchRefBlock" |
-    "/api/search/searchTemplate" |
-    "/api/search/searchWidget" |
-    "/api/search/semanticSearchBlock" |
-    "/api/search/updateEmbedBlock" |
     "/api/setting/getBootAppearances" |
     "/api/setting/getCloudUser" |
     "/api/setting/getPublish" |
@@ -982,30 +1383,6 @@ export type APILegacyPOSTPath =
     "/api/setting/setSnippet" |
     "/api/setting/setTheme" |
     "/api/setting/setVariables" |
-    "/api/sync/createCloudSyncDir" |
-    "/api/sync/exportSyncProviderS3" |
-    "/api/sync/exportSyncProviderWebDAV" |
-    "/api/sync/getBootSync" |
-    "/api/sync/getSyncInfo" |
-    "/api/sync/getSyncLANStatus" |
-    "/api/sync/importSyncProviderS3" |
-    "/api/sync/importSyncProviderWebDAV" |
-    "/api/sync/listCloudSyncDir" |
-    "/api/sync/performBootSync" |
-    "/api/sync/performSync" |
-    "/api/sync/removeCloudSyncDir" |
-    "/api/sync/setCloudSyncDir" |
-    "/api/sync/setSyncAssetDownloadMode" |
-    "/api/sync/setSyncEnable" |
-    "/api/sync/setSyncGenerateConflictDoc" |
-    "/api/sync/setSyncInterval" |
-    "/api/sync/setSyncLAN" |
-    "/api/sync/setSyncMode" |
-    "/api/sync/setSyncPerception" |
-    "/api/sync/setSyncProvider" |
-    "/api/sync/setSyncProviderLocal" |
-    "/api/sync/setSyncProviderS3" |
-    "/api/sync/setSyncProviderWebDAV" |
     "/api/system/addCustomEmoji" |
     "/api/system/checkUpdate" |
     "/api/system/checkWorkspaceDir" |
@@ -1089,6 +1466,106 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/asset/fullReindexAssetContent": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/asset/getDocAssets": {
+        request: AssetDocumentAssetsRequestInput;
+        response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/getDocImageAssets": {
+        request: AssetDocumentRequestInput;
+        response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/getFileAnnotation": {
+        request: AssetPathRequestInput;
+        response: { "code": 0; "data": AssetAnnotationData; "msg": string; } | { "code": -1 | 1 | 403; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/getImageOCRText": {
+        request: AssetOCRTextRequestInput;
+        response: { "code": 0; "data": AssetTextData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/getMissingAssets": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<AssetUnusedItem | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/asset/getUnusedAssets": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<AssetUnusedItem | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/asset/insertCover": {
+        request: InsertCoverRequestInput;
+        response: { "code": 0; "data": AssetInsertCoverData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/insertLocalAssets": {
+        request: InsertLocalAssetsRequestInput;
+        response: { "code": 0; "data": AssetUploadData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "errFiles"?: never; "failedFiles"?: never; "succFiles"?: never; "succMap"?: never; }) | null | (AssetUploadData & { "closeTimeout"?: never; }); "msg": string; };
+        body: "json";
+    };
+    "/api/asset/ocr": {
+        request: AssetPathRequestInput;
+        response: { "code": 0; "data": AssetOCRData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/removeUnusedAsset": {
+        request: AssetPathRequestInput;
+        response: { "code": 0; "data": AssetPathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/removeUnusedAssets": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": AssetPathsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/asset/renameAsset": {
+        request: RenameAssetRequestInput;
+        response: { "code": 0; "data": AssetRenameData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/resolveAssetPath": {
+        request: AssetPathRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/setFileAnnotation": {
+        request: SetAssetAnnotationRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/setImageOCRText": {
+        request: SetAssetOCRTextRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/statAsset": {
+        request: AssetPathRequestInput;
+        response: { "code": 0; "data": AssetStatData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/upload": {
+        request: UploadAssetRequestInput;
+        response: { "code": 0; "data": AssetUploadData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+    };
+    "/api/asset/uploadCloud": {
+        request: AssetCloudUploadRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/asset/uploadCloudByAssetsPaths": {
+        request: AssetPathsCloudUploadRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/attr/batchGetBlockAttrs": {
         request: BlockIDsRequestInput;
         response: { "code": 0; "data": Record<string, Record<string, string> | null>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -1123,6 +1600,161 @@ export interface APIPOSTRoutes {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+    };
+    "/api/bazaar/batchUpdatePackage": {
+        request: BatchUpdatePackageRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarIcon": {
+        request: GetBazaarIconRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarPackage": {
+        request: GetBazaarPackageRequestInput;
+        response: { "code": 0; "data": BazaarPackageDetail; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarPackageREADME": {
+        request: GetBazaarPackageREADMERequestInput;
+        response: { "code": 0; "data": BazaarREADMEData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarPackageRating": {
+        request: GetBazaarPackageRatingRequestInput;
+        response: { "code": 0; "data": BazaarRatingResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | BazaarRatingResult; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarPackageRatings": {
+        request: GetBazaarPackageRatingsRequestInput;
+        response: { "code": 0; "data": BazaarRatingsData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarPackageUserRatings": {
+        request: GetBazaarPackageUserRatingsRequestInput;
+        response: { "code": 0; "data": BazaarUserRatingsResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | BazaarUserRatingsResult; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarPlugin": {
+        request: GetBazaarPluginRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarTemplate": {
+        request: GetBazaarTemplateRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarTheme": {
+        request: GetBazaarThemeRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getBazaarWidget": {
+        request: GetBazaarWidgetRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getInstalledIcon": {
+        request: GetInstalledIconRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getInstalledPackageSize": {
+        request: GetInstalledPackageSizeRequestInput;
+        response: { "code": 0; "data": BazaarPackageSizeData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getInstalledPlugin": {
+        request: GetInstalledPluginRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getInstalledTemplate": {
+        request: GetInstalledTemplateRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getInstalledTheme": {
+        request: GetInstalledThemeRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getInstalledWidget": {
+        request: GetInstalledWidgetRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/getUpdatedPackage": {
+        request: GetUpdatedPackageRequestInput;
+        response: { "code": 0; "data": BazaarUpdatedData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/installBazaarIcon": {
+        request: InstallBazaarIconRequestInput;
+        response: { "code": 0; "data": BazaarAppearancePackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/installBazaarPlugin": {
+        request: InstallBazaarPluginRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/installBazaarTemplate": {
+        request: InstallBazaarTemplateRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/installBazaarTheme": {
+        request: InstallBazaarThemeRequestInput;
+        response: { "code": 0; "data": BazaarAppearancePackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/installBazaarWidget": {
+        request: InstallBazaarWidgetRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/installLocalBazaarPackage": {
+        request: InstallLocalBazaarPackageRequestInput;
+        response: { "code": 0; "data": BazaarLocalInstallResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | BazaarLocalInstallResult; "msg": string; };
+        body: "multipart";
+    };
+    "/api/bazaar/setBazaarPackageRating": {
+        request: SetBazaarPackageRatingRequestInput;
+        response: { "code": 0; "data": BazaarRatingResult; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | BazaarRatingResult; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/uninstallBazaarIcon": {
+        request: UninstallBazaarIconRequestInput;
+        response: { "code": 0; "data": BazaarAppearancePackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/uninstallBazaarPlugin": {
+        request: UninstallBazaarPluginRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/uninstallBazaarTemplate": {
+        request: UninstallBazaarTemplateRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/uninstallBazaarTheme": {
+        request: UninstallBazaarThemeRequestInput;
+        response: { "code": 0; "data": BazaarAppearancePackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/uninstallBazaarWidget": {
+        request: UninstallBazaarWidgetRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/bazaar/updateBazaarPackage": {
+        request: UpdateBazaarPackageRequestInput;
+        response: { "code": 0; "data": BazaarPackagesData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
     };
     "/api/block/appendBlock": {
         request: AppendBlockRequestInput;
@@ -1504,6 +2136,176 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": PandocData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/export/copyExportFile": {
+        request: CopyExportFileRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -2; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/export2Liandi": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportAsFile": {
+        request: ExportAsFileRequestInput;
+        response: { "code": 0; "data": ExportFileData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "multipart";
+    };
+    "/api/export/exportAsciiDoc": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportAttributeView": {
+        request: ExportAttributeViewRequestInput;
+        response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportBrowserHTML": {
+        request: ExportBrowserHTMLRequestInput;
+        response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportCodeBlock": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportPathData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportData": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/export/exportDataInFolder": {
+        request: ExportFolderRequestInput;
+        response: { "code": 0; "data": ExportNameData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportDocx": {
+        request: ExportDocxRequestInput;
+        response: { "code": 0; "data": ExportPathData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportEPUB": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportHTML": {
+        request: ExportHTMLRequestInput;
+        response: { "code": 0; "data": ExportHTMLData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportMd": {
+        request: ExportMarkdownRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportMdContent": {
+        request: ExportMarkdownContentRequestInput;
+        response: { "code": 0; "data": ExportMarkdownContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportMdHTML": {
+        request: ExportMarkdownHTMLRequestInput;
+        response: { "code": 0; "data": ExportHTMLData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportMds": {
+        request: ExportDocumentsMarkdownRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportMediaWiki": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportNotebookMd": {
+        request: ExportNotebookMarkdownRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportNotebookSY": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportNotebooksMd": {
+        request: ExportNotebooksMarkdownRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportNotebooksSY": {
+        request: ExportNotebooksRequestInput;
+        response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportODT": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportOPML": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportOrgMode": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportPreviewHTML": {
+        request: ExportPreviewHTMLRequestInput;
+        response: { "code": 0; "data": ExportPreviewHTMLData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportRTF": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportReStructuredText": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportResources": {
+        request: ExportResourcesRequestInput;
+        response: { "code": 0; "data": ExportPathData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | string; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportSY": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportSYs": {
+        request: ExportIDsRequestInput;
+        response: { "code": 0; "data": ExportZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportTempContent": {
+        request: ExportTempContentRequestInput;
+        response: { "code": 0; "data": ExportURLData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/exportTextile": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportNamedZipData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/preview": {
+        request: ExportIDRequestInput;
+        response: { "code": 0; "data": ExportPreviewData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/export/processPDF": {
+        request: ProcessPDFRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/file/copyFile": {
         request: CopyFileRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -2; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -1550,13 +2352,199 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | -2 | -3 | 403; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/filetree/authFilePublishAccess": {
+        request: FileTreeAuthPublishRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        additionalErrorStatuses: [429];
+    };
+    "/api/filetree/changeSort": {
+        request: FileTreeChangeSortRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/createDailyNote": {
+        request: FileTreeDailyNoteRequestInput;
+        response: { "code": 0; "data": FileTreeCreateData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/createDoc": {
+        request: FileTreeCreateRequestInput;
+        response: { "code": 0; "data": FileTreeCreateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/createDocWithMd": {
+        request: FileTreeCreateMarkdownRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/doc2Heading": {
+        request: FileTreeDocHeadingRequestInput;
+        response: { "code": 0; "data": FileTreeDocHeadingData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/duplicateDoc": {
+        request: FileTreeIDRequestInput;
+        response: { "code": 0; "data": FileTreeDuplicateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getDoc": {
+        request: FileTreeGetDocRequestInput;
+        response: { "code": 0; "data": FileTreeGetDocData; "msg": string; } | { "code": -1 | 1 | 3; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getDocCreateSavePath": {
+        request: FileTreeNotebookRequestInput;
+        response: { "code": 0; "data": FileTreeCreateSavePathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getFullHPathByID": {
+        request: FileTreeOptionalIDRequestInput;
+        response: { "code": 0; "data": string | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getHPathByID": {
+        request: FileTreeIDRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getHPathByPath": {
+        request: FileTreePathRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getHPathsByPaths": {
+        request: FileTreePathsRequestInput;
+        response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getIDsByHPath": {
+        request: FileTreeOptionalPathRequestInput;
+        response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getPathByID": {
+        request: FileTreeTrimIDRequestInput;
+        response: { "code": 0; "data": FileTreeDocPathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/filetree/getPinnedDocs": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": Array<PinnedDoc>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
+    "/api/filetree/getPublishAccess": {
+        request: FileTreePublishIDsRequestInput;
+        response: { "code": 0; "data": FileTreePublishData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getRefCreateSavePath": {
+        request: FileTreeNotebookRequestInput;
+        response: { "code": 0; "data": FileTreeSavePathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/getShorthandSavePath": {
+        request: FileTreeNotebookRequestInput;
+        response: { "code": 0; "data": FileTreeSavePathData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/heading2Doc": {
+        request: FileTreeHeadingDocRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/li2Doc": {
+        request: FileTreeListItemDocRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/listDocTree": {
+        request: FileTreePathRequestInput;
+        response: { "code": 0; "data": FileTreeDocTreeData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/listDocsByPath": {
+        request: FileTreeListRequestInput;
+        response: { "code": 0; "data": FileTreeListData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/moveDocs": {
+        request: FileTreeMoveRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/moveDocsByID": {
+        request: FileTreeMoveIDsRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/moveLocalShorthands": {
+        request: FileTreeNotebookRequestInput;
+        response: { "code": 0; "data": Array<string> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/removeDoc": {
+        request: FileTreePathRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/removeDocByID": {
+        request: FileTreeTrimIDRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/removeDocs": {
+        request: FileTreePathsRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/removeIndexes": {
+        request: FileTreePathsRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/renameDoc": {
+        request: FileTreeRenameRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/renameDocByID": {
+        request: FileTreeRenameIDRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/reorderDocs": {
+        request: FileTreeReorderRequestInput;
+        response: { "code": 0; "data": FileTreeReorderData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | FileTreeReorderData | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/filetree/searchDocs": {
+        request: FileTreeSearchRequestInput;
+        response: { "code": 0; "data": Array<FileTreeSearchDoc | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/setDocSortMode": {
+        request: FileTreeSortModeRequestInput;
+        response: { "code": 0; "data": FileTreeSortModeData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | FileTreeSortModeData | null; "msg": string; };
+        body: "structJSON";
+    };
+    "/api/filetree/setPublishAccess": {
+        request: FileTreeSetPublishRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/setSort": {
+        request: FileTreeSetSortRequestInput;
+        response: { "code": 0; "data": FileTreeSetSortData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | FileTreeSetSortData | null; "msg": string; };
+        body: "structJSON";
+    };
     "/api/filetree/updatePinnedDocs": {
         request: UpdatePinnedDocsRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/filetree/upsertIndexes": {
+        request: FileTreePathsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
@@ -1762,7 +2750,7 @@ export interface APIPOSTRoutes {
     };
     "/api/lute/wpsPresentation2BlockDOM": {
         request: WPSPresentationRequestInput;
-        response: { "code": 0; "data": WPSPresentationData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | WPSPresentationData; "msg": string; };
+        response: { "code": 0; "data": WPSPresentationData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "converted"?: never; "dom"?: never; }) | null | (WPSPresentationData & { "closeTimeout"?: never; }); "msg": string; };
         body: "json";
     };
     "/api/notebook/changeMasterPassword": {
@@ -1920,6 +2908,30 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": Petal | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/plugin/getLoadedPlugin": {
+        request: LoadedPluginRequestInput;
+        response: { "code": 0; "data": LoadedPlugin | null; "msg": string; } | { "code": -1 | 1 | 2 | 3 | 4; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/plugin/listLoadedPlugins": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<LoadedPlugin | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/plugin/rpc": {
+        request: PluginRPCRequestFieldsInput | [PluginRPCRequestFieldsInput, ...Array<PluginRPCRequestFieldsInput>];
+        response: (PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; }) | [(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; }), ...Array<(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; })>] | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        output: "directJSON";
+        noContent: true;
+    };
+    "/api/plugin/rpc/:name": {
+        request: PluginRPCRequestFieldsInput | [PluginRPCRequestFieldsInput, ...Array<PluginRPCRequestFieldsInput>];
+        response: (PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; }) | [(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; }), ...Array<(PluginRPCSuccess & { "error"?: never; }) | (PluginRPCFailure & { "result"?: never; })>] | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        output: "directJSON";
+        noContent: true;
+    };
     "/api/query/sql": {
         request: SQLQueryRequestInput;
         response: { "code": 0; "data": Array<Record<string, null | string | number | boolean> | null>; "limit": number; "msg": string; "truncated": boolean; } | ({ "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; } & { "limit"?: never; "truncated"?: never; });
@@ -1927,7 +2939,7 @@ export interface APIPOSTRoutes {
     };
     "/api/ref/getBacklink2": {
         request: BacklinkListRequestInput;
-        response: { "code": 0; "data": BacklinkList | BacklinkRefDefs | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | BacklinkList | BacklinkRefDefs | null; "msg": string; };
+        response: { "code": 0; "data": (BacklinkList & { "refDefs"?: never; }) | (BacklinkRefDefs & { "backlinks"?: never; "backmentions"?: never; "box"?: never; "k"?: never; "linkRefsCount"?: never; "mentionsCount"?: never; "mk"?: never; "revision"?: never; "unchanged"?: never; }) | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null | (BacklinkList & { "refDefs"?: never; }) | (BacklinkRefDefs & { "backlinks"?: never; "backmentions"?: never; "box"?: never; "k"?: never; "linkRefsCount"?: never; "mentionsCount"?: never; "mk"?: never; "revision"?: never; "unchanged"?: never; }) | null; "msg": string; };
         body: "json";
     };
     "/api/ref/getBacklinkDoc": {
@@ -1950,9 +2962,125 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": CheckSnapshotData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
+    "/api/repo/checkoutRepo": {
+        request: CheckoutRepoRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/repo/createSnapshot": {
         request: CreateSnapshotRequestInput;
         response: { "code": 0; "data": CreateSnapshotData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/diffRepoSnapshots": {
+        request: DiffRepoSnapshotsRequestInput;
+        response: { "code": 0; "data": RepoDiffData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/downloadCloudSnapshot": {
+        request: DownloadCloudSnapshotRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/exportRepoFile": {
+        request: ExportRepoFileRequestInput;
+        response: { "code": 0; "data": RepoExportData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/getCloudRepoSnapshots": {
+        request: GetCloudRepoSnapshotsRequestInput;
+        response: { "code": 0; "data": RepoCloudSnapshotsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/getCloudRepoTagSnapshots": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": RepoCloudTagsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/repo/getRepoDocHistory": {
+        request: GetRepoDocHistoryRequestInput;
+        response: { "code": 0; "data": RepoDocHistoryData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/getRepoFile": {
+        request: GetRepoFileRequestInput;
+        response: Blob | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+        output: "binary";
+    };
+    "/api/repo/getRepoSnapshots": {
+        request: GetRepoSnapshotsRequestInput;
+        response: { "code": 0; "data": RepoSnapshotsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/getRepoTagSnapshots": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": RepoTagsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/repo/importRepoKey": {
+        request: ImportRepoKeyRequestInput;
+        response: { "code": 0; "data": RepoKeyData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/initRepoKey": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": RepoKeyData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/repo/initRepoKeyFromPassphrase": {
+        request: InitRepoKeyFromPassphraseRequestInput;
+        response: { "code": 0; "data": RepoKeyData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/openRepoSnapshotFile": {
+        request: OpenRepoSnapshotFileRequestInput;
+        response: { "code": 0; "data": RepoOpenFileData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/purgeCloudRepo": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/repo/purgeRepo": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/repo/removeCloudRepoTagSnapshot": {
+        request: RemoveCloudRepoTagSnapshotRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/removeRepoTagSnapshot": {
+        request: RemoveRepoTagSnapshotRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/resetRepo": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/repo/rollbackRepoSnapshotFile": {
+        request: RollbackRepoSnapshotFileRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/searchRepoFile": {
+        request: SearchRepoFileRequestInput;
+        response: { "code": 0; "data": RepoSearchData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/setRepoIndexRetentionDays": {
+        request: SetRepoIndexRetentionDaysRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/setRetentionIndexesDaily": {
+        request: SetRetentionIndexesDailyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/repo/setSnapshotMemo": {
@@ -1960,9 +3088,179 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/repo/tagSnapshot": {
+        request: TagSnapshotRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/repo/uploadCloudSnapshot": {
+        request: UploadCloudSnapshotRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/addRiffCards": {
+        request: RiffDeckCardsRequestInput;
+        response: { "code": 0; "data": RiffDeck | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/batchSetRiffCardsDueTime": {
+        request: SetRiffCardsDueRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/createRiffDeck": {
+        request: CreateRiffDeckRequestInput;
+        response: { "code": 0; "data": RiffDeck | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/getNotebookRiffCards": {
+        request: RiffCardsRequestInput;
+        response: { "code": 0; "data": RiffCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/getNotebookRiffDueCards": {
+        request: RiffNotebookDueCardsRequestInput;
+        response: { "code": 0; "data": RiffDueCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/getRiffCards": {
+        request: RiffCardsRequestInput;
+        response: { "code": 0; "data": RiffCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/getRiffCardsByBlockIDs": {
+        request: RiffBlockIDsRequestInput;
+        response: { "code": 0; "data": RiffBlocksData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/getRiffDecks": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<RiffDeck | null>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/riff/getRiffDueCards": {
+        request: RiffDueCardsRequestInput;
+        response: { "code": 0; "data": RiffDueCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/getTreeRiffCards": {
+        request: RiffCardsRequestInput;
+        response: { "code": 0; "data": RiffCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/getTreeRiffDueCards": {
+        request: RiffTreeDueCardsRequestInput;
+        response: { "code": 0; "data": RiffDueCardsData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/removeRiffCards": {
+        request: RiffDeckCardsRequestInput;
+        response: { "code": 0; "data": RiffDeck | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/removeRiffDeck": {
+        request: RiffDeckRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/renameRiffDeck": {
+        request: RenameRiffDeckRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/resetRiffCards": {
+        request: ResetRiffCardsRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/reviewRiffCard": {
+        request: ReviewRiffCardRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/riff/skipReviewRiffCard": {
+        request: RiffCardRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/findReplace": {
+        request: FindReplaceRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/fullTextSearchAssetContent": {
+        request: SearchAssetContentRequestInput;
+        response: { "code": 0; "data": SearchAssetContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/fullTextSearchBlock": {
+        request: FullTextSearchBlockRequestInput;
+        response: { "code": 0; "data": FullTextSearchBlockData | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/getAssetContent": {
+        request: AssetContentRequestInput;
+        response: { "code": 0; "data": AssetContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/getAssetContentByPath": {
+        request: SearchPathRequestInput;
+        response: { "code": 0; "data": AssetContentData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/getEmbedBlock": {
+        request: GetEmbedBlockRequestInput;
+        response: { "code": 0; "data": EmbedBlocksData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/listInvalidBlockRefs": {
+        request: SearchPageRequestInput;
+        response: { "code": 0; "data": SearchBlocksData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/removeTemplate": {
+        request: SearchPathRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/searchAsset": {
+        request: SearchAssetRequestInput;
+        response: { "code": 0; "data": Array<SearchAsset | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/searchEmbedBlock": {
+        request: SearchEmbedBlockRequestInput;
+        response: { "code": 0; "data": EmbedBlocksData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/searchRefBlock": {
+        request: SearchRefBlockRequestInput;
+        response: { "code": 0; "data": SearchRefResult | (SearchRefCorrelation & { "blocks"?: never; "k"?: never; "newDoc"?: never; }); "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null | SearchRefResult | (SearchRefCorrelation & { "blocks"?: never; "k"?: never; "newDoc"?: never; }); "msg": string; };
+        body: "json";
+    };
     "/api/search/searchTag": {
         request: SearchTagRequestInput;
         response: { "code": 0; "data": SearchTagData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/searchTemplate": {
+        request: SearchKeywordRequestInput;
+        response: { "code": 0; "data": SearchTemplateData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/searchWidget": {
+        request: SearchKeywordRequestInput;
+        response: { "code": 0; "data": SearchWidgetData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/semanticSearchBlock": {
+        request: SearchBlockRequestInput;
+        response: { "code": 0; "data": SearchBlocksData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/search/updateEmbedBlock": {
+        request: UpdateEmbedBlockRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/setting/addVirtualBlockRefExclude": {
@@ -2135,6 +3433,126 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/sync/createCloudSyncDir": {
+        request: SyncNameRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/exportSyncProviderS3": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SyncProviderExportData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/sync/exportSyncProviderWebDAV": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SyncProviderExportData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/sync/getBootSync": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/sync/getSyncInfo": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SyncInfoData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/sync/getSyncLANStatus": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": SyncLANStatus; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/sync/importSyncProviderS3": {
+        request: SyncProviderImportRequestInput;
+        response: { "code": 0; "data": SyncS3Data; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "s3"?: never; }) | null | (SyncS3Data & { "closeTimeout"?: never; }); "msg": string; };
+        body: "multipart";
+    };
+    "/api/sync/importSyncProviderWebDAV": {
+        request: SyncProviderImportRequestInput;
+        response: { "code": 0; "data": SyncWebDAVData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "webdav"?: never; }) | null | (SyncWebDAVData & { "closeTimeout"?: never; }); "msg": string; };
+        body: "multipart";
+    };
+    "/api/sync/listCloudSyncDir": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": CloudSyncDirsData; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/sync/performBootSync": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/sync/performSync": {
+        request: PerformSyncRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/removeCloudSyncDir": {
+        request: SyncNameRequestInput;
+        response: { "code": 0; "data": string; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setCloudSyncDir": {
+        request: SyncNameRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncAssetDownloadMode": {
+        request: SyncModeRequestInput;
+        response: { "code": 0; "data": SyncAssetDownloadModeData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncEnable": {
+        request: SyncEnabledRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncGenerateConflictDoc": {
+        request: SyncEnabledRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncInterval": {
+        request: SyncIntervalRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncLAN": {
+        request: SyncLANRequestInput;
+        response: { "code": 0; "data": SyncLANStatus; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncMode": {
+        request: SyncModeRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncPerception": {
+        request: SyncEnabledRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncProvider": {
+        request: SyncProviderRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncProviderLocal": {
+        request: SetSyncLocalRequestInput;
+        response: { "code": 0; "data": SyncLocalData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncProviderS3": {
+        request: SetSyncS3RequestInput;
+        response: { "code": 0; "data": SyncS3Data; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/sync/setSyncProviderWebDAV": {
+        request: SetSyncWebDAVRequestInput;
+        response: { "code": 0; "data": SyncWebDAVData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/system/addMicrosoftDefenderExclusion": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
@@ -2252,7 +3670,7 @@ export interface APIPOSTRoutes {
     };
     "/api/template/manage": {
         request: TemplateFileRequestInput;
-        response: { "code": 0; "data": Array<TemplateFileEntry> | TemplateFileSource | TemplateFileRevision | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": Array<TemplateFileEntry> | TemplateFileSource | (TemplateFileRevision & { "content"?: never; "path"?: never; }) | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "structJSON";
     };
     "/api/template/render": {
@@ -2339,8 +3757,10 @@ export type APICallbackResponse<R> = R extends {code: infer C extends number}
     ? NonNegative<C> extends never ? never : R & {code: NonNegative<C>}
     : never;
 
+type APIDirectCallbackResponse<R> = R extends {code: number} ? APICallbackResponse<R> : R;
+
 type APIPostTail<C extends APIContract> = [
-    cb?: (response: C extends {output: "binary"} ? JSONValue : APICallbackResponse<C["response"]>) => void,
+    cb?: (response: C extends {output: "binary"} ? JSONValue : C extends {output: "directJSON"} ? APIDirectCallbackResponse<C["response"]> | (C extends {noContent: true} ? "" : never) : C extends {output: "sse"} ? string | APICallbackResponse<C["response"]> : APICallbackResponse<C["response"]>) => void,
     headers?: Record<string, string>,
     failCallback?: (response: APIFetchFailure) => void,
     signal?: AbortSignal,
@@ -2378,7 +3798,7 @@ export type FetchSyncPost<Legacy = APILegacyResponse> = <Path extends string>(
 export type FetchGet<Legacy = APILegacyResponse | string> = <Path extends string>(
     url: Path,
     ...args: Path extends keyof APIGETRoutes
-        ? [cb: (response: APIGETRoutes[Path]["response"]) => void]
+        ? [cb: (response: APIGETRoutes[Path]["response"] | (APIGETRoutes[Path] extends {output: "websocket"} ? string : never)) => void]
         : Path extends keyof APIPOSTRoutes ? never
         : [cb: (response: Legacy) => void]
 ) => void;

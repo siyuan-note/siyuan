@@ -1,10 +1,213 @@
-import type {APIPOSTRoutes, FetchGet, FetchPost, FetchSyncPost, JSONValue} from "../src/types/api";
+import type {APIGETRoutes, APIPOSTRoutes, FetchGet, FetchPost, FetchSyncPost, JSONValue} from "../src/types/api";
 import {ContractFormData} from "../src/util/contractFormData";
 
 declare const fetchPost: FetchPost;
 declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
+
+fetchPost("/api/filetree/getDoc", {id: "document", notebook: "box", querySubTypes: {heading: {h1: true}}}, response => {
+    if (response.code === 0) {
+        const content: string = response.data.content;
+        const required: boolean = response.data.publishAccessRequired;
+        void [content, required];
+    } else {
+        const prompt: 1 | 3 = response.code;
+        void prompt;
+    }
+});
+fetchPost("/api/filetree/getFullHPathByID", {}, response => {
+    const path: string | null = response.data;
+    void path;
+});
+fetchPost("/api/filetree/setDocSortMode", {id: "document", sortMode: null});
+fetchPost("/api/filetree/moveDocs", {fromPaths: [], toPath: "/", toNotebook: "box", callback: {request: 1}});
+// @ts-expect-error 文档读取必须提供 ID。
+fetchPost("/api/filetree/getDoc", {});
+// @ts-expect-error 文档加载数量必须为数值。
+fetchPost("/api/filetree/getDoc", {id: "document", size: "10"});
+// @ts-expect-error 文档排序方式必须为整数或 null。
+fetchPost("/api/filetree/setDocSortMode", {id: "document", sortMode: "1"});
+// @ts-expect-error 文档排序方式字段不能省略。
+fetchPost("/api/filetree/setDocSortMode", {id: "document"});
+// @ts-expect-error 文档创建字段不能拼错。
+fetchPost("/api/filetree/createDocWithMd", {notebook: "box", path: "/Doc", markDown: "text"});
+// @ts-expect-error 发布配置必须提供完整字段。
+fetchPost("/api/filetree/setPublishAccess", {id: "document", visible: true});
+
+fetchPost("/api/asset/upload", new ContractFormData({"file[]": [new Blob(), new Blob()], assetsDirPath: "assets"}), response => {
+    const uploaded: string | undefined = response.data.succMap?.["example.txt"];
+    void uploaded;
+});
+fetchPost("/api/asset/statAsset", {path: "assets/example.txt"}, response => {
+    if (response.code === 0) {
+        const downloaded: false | undefined = response.data.downloaded;
+        void downloaded;
+    }
+});
+fetchPost("/api/asset/getImageOCRText", {path: null});
+// @ts-expect-error 批量上传文件必须为二进制数组。
+fetchPost("/api/asset/upload", new ContractFormData({"file[]": ["example.txt"]}));
+// @ts-expect-error 附件地址必须为字符串。
+fetchPost("/api/asset/statAsset", {path: 123});
+// @ts-expect-error 本地附件插入必须提供路径数组。
+fetchPost("/api/asset/insertLocalAssets", {id: "document"});
+
+fetchPost("/api/export/exportHTML", {id: "document", pdf: false}, response => {
+    const folder: string | undefined = response.data.folder;
+    void folder;
+});
+fetchPost("/api/export/exportMd", {id: "document", blockRefMode: 1.5, addTitle: null}, response => {
+    const zip: string = response.data.zip;
+    void zip;
+});
+fetchPost("/api/export/exportCodeBlock", {id: "block"}, response => {
+    if (response.code === 0) {
+        const path: string = response.data.path;
+        void path;
+    }
+});
+fetchPost("/api/export/exportAsFile", new ContractFormData({file: new Blob(), type: "text/plain"}));
+// @ts-expect-error HTML 导出必须显式指定 PDF 模式。
+fetchPost("/api/export/exportHTML", {id: "document"});
+// @ts-expect-error Markdown 导出模式必须为数字。
+fetchPost("/api/export/exportMd", {id: "document", blockRefMode: "1"});
+// @ts-expect-error 文件上传必须包含 MIME 类型。
+fetchPost("/api/export/exportAsFile", new ContractFormData({file: new Blob()}));
+// @ts-expect-error 导出请求不能包含拼错的参数。
+fetchPost("/api/export/exportHTML", {id: "document", pdf: false, savepath: ""});
+
+fetchPost("/api/repo/getRepoSnapshots", {page: 1}, response => {
+    const snapshots = response.data.snapshots;
+    void snapshots;
+});
+fetchPost("/api/repo/getRepoFile", {id: "file"}, response => {
+    const content: JSONValue = response;
+    void content;
+});
+// @ts-expect-error 仓库保留时间必须为数值。
+fetchPost("/api/repo/setRepoIndexRetentionDays", {days: "180"});
+// @ts-expect-error 导入仓库密钥需要密钥字段。
+fetchPost("/api/repo/importRepoKey", {});
+
+fetchPost("/api/riff/getRiffDecks", {}, response => {
+    const decks: Array<{id: string; name: string} | null> = response.data;
+    void decks;
+});
+fetchPost("/api/riff/resetRiffCards", {type: "deck", id: "deck", deckID: "deck", blockIDs: null});
+fetchPost("/api/riff/getRiffDueCards", {deckID: "deck"}, response => {
+    const due: string | undefined = response.data.cards?.[0]?.nextDues?.["1"];
+    void due;
+});
+// @ts-expect-error 复习卡片时必须提供评分。
+fetchPost("/api/riff/reviewRiffCard", {deckID: "deck", cardID: "card"});
+// @ts-expect-error 复习评分必须为数值。
+fetchPost("/api/riff/reviewRiffCard", {deckID: "deck", cardID: "card", rating: "1"});
+
+fetchPost("/api/sync/setSyncLAN", {enabled: true, maxConcurrentReqs: 2.5}, response => {
+    const peers: number = response.data.connectedPeers;
+    void peers;
+});
+fetchPost("/api/sync/setSyncProviderS3", {s3: {endpoint: "https://example.invalid", pathStyle: true}});
+// @ts-expect-error 同步开关只接受布尔值。
+fetchPost("/api/sync/setSyncEnable", {enabled: "true"});
+// @ts-expect-error 同步配置中的超时不是字符串。
+fetchPost("/api/sync/setSyncProviderS3", {s3: {timeout: "30"}});
+fetchPost("/api/sync/importSyncProviderWebDAV", new ContractFormData({file: new Blob()}));
+
+fetchPost("/api/bazaar/getBazaarPackageRating", {packageType: "plugin", packageName: "example"}, response => {
+    if (response.data && "rating" in response.data && response.data.rating) {
+        const distribution: [number, number, number, number, number] = response.data.rating.distribution;
+        void distribution;
+    }
+});
+// @ts-expect-error 集市评分参数必须为数值。
+fetchPost("/api/bazaar/setBazaarPackageRating", {packageType: "plugin", packageName: "example", rating: "5"});
+// @ts-expect-error 集市包名列表只能包含字符串。
+fetchPost("/api/bazaar/getBazaarPackageRatings", {packageType: "plugin", packageNames: [1]});
+fetchPost("/api/bazaar/installLocalBazaarPackage", new ContractFormData({file: new Blob(), overwrite: "true"}));
+
+type RPCWebSocket = APIGETRoutes["/ws/plugin/rpc"]["websocket"];
+const rpcCall: RPCWebSocket["incoming"] = {jsonrpc: "2.0", method: "call", id: 1};
+const rpcNotice: RPCWebSocket["outgoing"] = {jsonrpc: "2.0", method: "event", params: null};
+// @ts-expect-error 批量调用不能为空。
+const rpcEmptyBatch: RPCWebSocket["incoming"] = [];
+// @ts-expect-error 出站通知不能携带调用 ID。
+const rpcInvalidNotice: RPCWebSocket["outgoing"] = {jsonrpc: "2.0", method: "event", id: 1};
+// @ts-expect-error HTTP 中间件信封不是连接内的消息。
+const rpcInvalidFrame: RPCWebSocket["outgoing"] = {code: -1, msg: "denied", data: null};
+void [rpcCall, rpcNotice, rpcEmptyBatch, rpcInvalidNotice, rpcInvalidFrame];
+
+fetchPost("/api/plugin/rpc", {jsonrpc: "2.0", method: "notify"}, response => {
+    const empty: "" | object = response;
+    // @ts-expect-error 纯通知请求的回调可能为空字符串。
+    const objectOnly: object = response;
+    void [empty, objectOnly];
+});
+fetchGet("/ws/plugin/rpc", response => {
+    if (typeof response === "string") {
+        const rejection: string = response;
+        void rejection;
+    }
+    // @ts-expect-error 普通 GET 可能收到拒绝升级的文本。
+    const objectOnly: object = response;
+    void objectOnly;
+});
+
+fetchPost("/api/plugin/rpc", {jsonrpc: "2.0", method: "call", params: {key: [1, true]}, id: 1}, response => {
+    if (response !== "" && !Array.isArray(response) && "jsonrpc" in response) {
+        const version: "2.0" = response.jsonrpc;
+        const id: string | number | null = response.id;
+        void [version, id];
+    }
+});
+fetchPost("/api/plugin/rpc/:name", [{jsonrpc: "2.0", method: "notify"}, {jsonrpc: "2.0", method: "call", id: null}]);
+// @ts-expect-error RPC 请求需要协议版本。
+fetchPost("/api/plugin/rpc", {method: "call"});
+// @ts-expect-error RPC 关联标识不接受布尔值。
+fetchPost("/api/plugin/rpc", {jsonrpc: "2.0", method: "call", id: true});
+// @ts-expect-error RPC 参数应为数组或对象。
+fetchPost("/api/plugin/rpc", {jsonrpc: "2.0", method: "call", params: "text"});
+
+fetchPost("/api/plugin/getLoadedPlugin", {name: "plugin"}, response => {
+    if (response.code === 0 && response.data) {
+        const state: number = response.data.stateCode;
+        const descriptions: string[] | null | undefined = response.data.methods?.[0]?.descriptions;
+        void [state, descriptions];
+    }
+    // @ts-expect-error 插件查询的非零业务码不携带插件信息。
+    const state: number = response.data.stateCode;
+    void state;
+});
+// @ts-expect-error 插件名称必须为字符串。
+fetchPost("/api/plugin/getLoadedPlugin", {name: 1});
+fetchPost("/api/plugin/listLoadedPlugins", undefined, response => {
+    const name: string | undefined = response.data?.[0]?.name;
+    void name;
+});
+
+fetchPost("/api/search/fullTextSearchBlock", {query: "text", subTypes: {heading: {h1: true}}}, response => {
+    if (response.data) {
+        const count: number = response.data.matchedBlockCount;
+        const docMode: boolean = response.data.docMode;
+        void [count, docMode];
+    }
+});
+fetchPost("/api/search/searchRefBlock", {reqId: [1]}, response => {
+    const reqId: JSONValue = response.data.reqId;
+    // @ts-expect-error 仅回传请求标识的结果没有块数组。
+    const blocks: unknown[] = response.data.blocks;
+    void [reqId, blocks];
+});
+fetchPost("/api/search/searchEmbedBlock", {embedBlockID: "id", stmt: "select * from blocks", excludeIDs: [null, "id"]});
+// @ts-expect-error 普通嵌入查询不接受空值块 ID。
+fetchPost("/api/search/getEmbedBlock", {embedBlockID: "id", includeIDs: [null]});
+// @ts-expect-error 子类型筛选使用布尔值。
+fetchPost("/api/search/fullTextSearchBlock", {subTypes: {heading: {h1: "true"}}});
+// @ts-expect-error 替换操作必须提供待替换文本。
+fetchPost("/api/search/findReplace", {k: "text", ids: []});
+// @ts-expect-error 搜索分页参数使用数字。
+fetchPost("/api/search/fullTextSearchAssetContent", {page: "1"});
 
 fetchPost("/api/query/sql", {stmt: "SELECT 1", mode: "readonly"}, response => {
     if (response.code === 0) {

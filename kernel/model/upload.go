@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"os"
 	"path"
 	"path/filepath"
@@ -107,7 +108,7 @@ type AssetUploadFailure struct {
 	Error string `json:"error"`
 }
 
-func recordAssetUploadSuccess(succMap map[string]any, succFiles *[]AssetUploadSuccess, index int, name, assetPath string) {
+func recordAssetUploadSuccess(succMap map[string]string, succFiles *[]AssetUploadSuccess, index int, name, assetPath string) {
 	succMap[name] = assetPath
 	*succFiles = append(*succFiles, AssetUploadSuccess{Index: index, Name: name, Path: assetPath})
 }
@@ -159,19 +160,19 @@ func copyRTFDEntries(entries []os.DirEntry, srcDir, destDir string, copyFile fun
 	return nil
 }
 
-func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMap map[string]any,
+func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMap map[string]string,
 	succFiles []AssetUploadSuccess, failedFiles []AssetUploadFailure, err error) {
 	return insertLocalAssets(id, assetAbsPaths, isUpload, false)
 }
 
-func InsertHTMLLocalAssets(id string, assetAbsPaths []string) (succMap map[string]any,
+func InsertHTMLLocalAssets(id string, assetAbsPaths []string) (succMap map[string]string,
 	succFiles []AssetUploadSuccess, failedFiles []AssetUploadFailure, err error) {
 	return insertLocalAssets(id, assetAbsPaths, true, true)
 }
 
-func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTMLPath bool) (succMap map[string]any,
+func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTMLPath bool) (succMap map[string]string,
 	succFiles []AssetUploadSuccess, failedFiles []AssetUploadFailure, err error) {
-	succMap = map[string]any{}
+	succMap = map[string]string{}
 	succFiles = make([]AssetUploadSuccess, 0, len(assetAbsPaths))
 	failedFiles = make([]AssetUploadFailure, 0)
 
@@ -302,7 +303,6 @@ func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTML
 func Upload(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(200, ret)
-
 	form, err := c.MultipartForm()
 	if err != nil {
 		logging.LogErrorf("insert asset failed: %s", err)
@@ -310,10 +310,43 @@ func Upload(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	request := AssetUploadRequest{Files: form.File["file[]"]}
+	if values := form.Value["id"]; values != nil {
+		request.ID = &values[0]
+	}
+	if values := form.Value["assetsDirPath"]; values != nil {
+		request.AssetsDirPath = &values[0]
+	}
+	result, message, err := UploadAssets(request)
+	ret.Msg = message
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = result
+}
+
+// AssetUploadRequest 保留目标字段的缺省状态，并按输入顺序接收全部文件。
+type AssetUploadRequest struct {
+	ID            *string
+	AssetsDirPath *string
+	Files         []*multipart.FileHeader
+}
+type AssetUploadResult struct {
+	ErrFiles    []string             `json:"errFiles"`
+	FailedFiles []AssetUploadFailure `json:"failedFiles"`
+	SuccFiles   []AssetUploadSuccess `json:"succFiles"`
+	SuccMap     map[string]string    `json:"succMap"`
+}
+
+// UploadAssets 将附件写入目标资源目录，保留逐文件结果、加密写入和首条失败提示。
+func UploadAssets(request AssetUploadRequest) (result *AssetUploadResult, message string, err error) {
+
 	assetsDirPath := filepath.Join(util.DataDir, "assets")
 	var uploadBoxID string // 记录上传目标 boxID，供 writeAssetFile 判断是否需加密
-	if nil != form.Value["id"] {
-		id := form.Value["id"][0]
+	if request.ID != nil {
+		id := *request.ID
 		bt := treenode.GetBlockTree(id)
 		if nil == bt {
 			// 全局 blocktree 找不到时，遍历已打开的加密笔记本查找
@@ -325,8 +358,7 @@ func Upload(c *gin.Context) {
 			}
 		}
 		if nil == bt {
-			ret.Code = -1
-			ret.Msg = Conf.Language(71)
+			err = errors.New(Conf.Language(71))
 			return
 		}
 		uploadBoxID = bt.BoxID
@@ -335,12 +367,11 @@ func Upload(c *gin.Context) {
 	}
 
 	relAssetsDirPath := "assets"
-	if nil != form.Value["assetsDirPath"] {
-		relAssetsDirPath = form.Value["assetsDirPath"][0]
+	if request.AssetsDirPath != nil {
+		relAssetsDirPath = *request.AssetsDirPath
 		assetsDirPath = filepath.Join(util.DataDir, relAssetsDirPath)
 		if !util.IsAbsPathInWorkspace(assetsDirPath) {
-			ret.Code = -1
-			ret.Msg = "Path [" + assetsDirPath + "] is not in workspace"
+			err = errors.New("Path [" + assetsDirPath + "] is not in workspace")
 			return
 		}
 		// assetsDirPath 可能指向加密 box（调用方未传 id），反查 boxID 让文件名脱敏和内容加密生效
@@ -356,22 +387,20 @@ func Upload(c *gin.Context) {
 	}
 	if !gulu.File.IsExist(assetsDirPath) {
 		if err = os.MkdirAll(assetsDirPath, 0755); err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
 			return
 		}
 	}
 
 	var errFiles []string
-	succMap := map[string]any{}
-	files := form.File["file[]"]
+	succMap := map[string]string{}
+	files := request.Files
 	succFiles := make([]AssetUploadSuccess, 0, len(files))
 	failedFiles := make([]AssetUploadFailure, 0)
 	recordFailure := func(index int, inputName, errorName string, uploadErr error) {
 		errFiles = append(errFiles, errorName)
 		recordAssetUploadFailure(&failedFiles, index, inputName, uploadErr)
-		if ret.Msg == "" {
-			ret.Msg = uploadErr.Error()
+		if message == "" {
+			message = uploadErr.Error()
 		}
 	}
 
@@ -535,14 +564,11 @@ func Upload(c *gin.Context) {
 		}
 	}
 
-	ret.Data = map[string]any{
-		"errFiles":    errFiles,
-		"failedFiles": failedFiles,
-		"succFiles":   succFiles,
-		"succMap":     succMap,
-	}
+	result = &AssetUploadResult{ErrFiles: errFiles, FailedFiles: failedFiles, SuccFiles: succFiles, SuccMap: succMap}
 
 	IncSync()
+
+	return result, message, nil
 }
 
 func getAssetsDir(boxLocalPath, docDirLocalPath string) (assets string) {

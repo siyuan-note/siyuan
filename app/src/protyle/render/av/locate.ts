@@ -10,21 +10,8 @@ import {getAVLocateViewChange} from "./locateView";
 import {applyAVColorPalette, getAVCustomColors} from "./color";
 import {getBacklinkScrollElement, revealBacklinkReference, scrollBacklinkTarget} from "./backlinkScroll";
 
-export interface IAVLocateRequest {
-    itemID: string;
-    keyID?: string;
-    defIDs?: string[];
-    scroll?: boolean;
-    groupID?: string;
-    viewID?: string;
-    select?: boolean;
-    highlight?: boolean;
-    persistView?: boolean;
-    previousViewID?: string;
-    messageShown?: boolean;
-}
-
-const locateRequests = new WeakMap<HTMLElement, IAVLocateRequest>();
+import {IAVLocateRequest, locateRequests, retainAVLocate} from "./locateState";
+export type {IAVLocateRequest} from "./locateState";
 const locateQueueTimeout = 30000;
 const locateRenderSize = 200;
 const queuedLocateRequests = new Map<string, {
@@ -230,7 +217,7 @@ const clearAVLocateRequest = (blockElement: HTMLElement, request: IAVLocateReque
 
 export const getAVLocateParams = (blockElement: HTMLElement, enabled = true) => {
     const request = getAVLocateRequest(blockElement);
-    if (!enabled) {
+    if (!enabled || (request?.located && request.viewID !== blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW))) {
         if (request) {
             clearAVLocateRequest(blockElement, request);
         }
@@ -297,7 +284,7 @@ export const prepareAVLocate = (blockElement: HTMLElement, data: IAV, resetData:
         return;
     }
     if (data.target.status !== "visible") {
-        if (!request.messageShown) {
+        if (!request.located && !request.messageShown) {
             request.messageShown = true;
             if (data.target.status === "filtered" || data.target.status === "groupHidden") {
                 showMessage(window.siyuan.languages.databaseItemFiltered);
@@ -369,6 +356,10 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
         bodyElement.classList.remove("fn__none");
         bodyElement.previousElementSibling?.querySelector("[data-type=\"av-group-fold\"] svg")?.classList.add("av__group-arrow--open");
     }
+    if (request.located) {
+        request.groupID = data.target.groupID;
+        return;
+    }
     let targetElement: HTMLElement;
     if (data.viewType === "table") {
         const rowElement = bodyElement?.querySelector(`.av__row[data-id="${request.itemID}"]`) as HTMLElement;
@@ -434,5 +425,10 @@ export const finishAVLocate = (blockElement: HTMLElement, protyle: IProtyle, dat
     if (request.highlight) {
         highlightLocatedItem(blockElement, protyle, data.viewType, groupQuery, request.itemID);
     }
-    clearAVLocateRequest(blockElement, request);
+    const group = data.view.groups?.find(item => item.id === data.target.groupID);
+    if (group?.groupFolded && data.viewType !== "kanban") {
+        retainAVLocate(protyle.wysiwyg.element, request, data.viewID, data.target.groupID);
+    } else {
+        clearAVLocateRequest(blockElement, request);
+    }
 };

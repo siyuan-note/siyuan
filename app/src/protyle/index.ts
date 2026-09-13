@@ -1,3 +1,4 @@
+import type {FileTreeGetDocRequestInput} from "../types/api";
 import {Constants} from "../constants";
 import {Hint} from "./hint";
 import {getLute} from "./render/setLute";
@@ -281,7 +282,7 @@ export class Protyle {
                         case "li2doc":
                             if (this.protyle.block.rootID === data.data.srcRootBlockID) {
                                 if (this.protyle.block.showAll && data.cmd === "heading2doc" && !this.protyle.options.backlinkData) {
-                                    const getDocParam: IObject = {
+                                    const getDocParam: FileTreeGetDocRequestInput = {
                                         id: this.protyle.block.rootID,
                                         size: window.siyuan.config.editor.dynamicLoadBlocks,
                                     };
@@ -539,7 +540,7 @@ export class Protyle {
     }
 
     private getDoc(mergedOptions: IProtyleOptions) {
-        const getDocParam: Record<string, any> = {
+        const getDocParam: FileTreeGetDocRequestInput = {
             id: mergedOptions.blockId,
             includeDocInfo: true,
             isBacklink: mergedOptions.action.includes(Constants.CB_GET_BACKLINK),

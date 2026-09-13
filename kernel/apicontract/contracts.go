@@ -12,6 +12,10 @@ type OutputMode string
 
 const BinaryOutput OutputMode = "binary"
 
+const DirectJSONOutput OutputMode = "directJSON"
+
+const WebSocketOutput OutputMode = "websocket"
+
 const (
 	JSONBody           BodyMode = "json"
 	MultipartBody      BodyMode = "multipart"
@@ -22,18 +26,24 @@ const (
 )
 
 type Definition struct {
-	Name            string
-	Path            string
-	Methods         []string
-	Body            BodyMode
-	Request         reflect.Type
-	Data            reflect.Type
-	ErrorCodes      []int
-	ErrorText       bool
-	DataNonNullable bool
-	DataOnError     bool
-	Output          OutputMode
-	ErrorStatus     int
+	Name                    string
+	Path                    string
+	Methods                 []string
+	Body                    BodyMode
+	Request                 reflect.Type
+	Data                    reflect.Type
+	ErrorCodes              []int
+	ErrorText               bool
+	DataNonNullable         bool
+	DataOnError             bool
+	Output                  OutputMode
+	ErrorStatus             int
+	NoContent               bool
+	WebSocket               *WebSocketDefinition
+	SSE                     *SSEDefinition
+	ContentVariants         []HTTPContentVariant
+	FastJSON                bool
+	AdditionalErrorStatuses []int
 }
 
 type Endpoint[Request, Data any] struct {
@@ -43,12 +53,18 @@ type Endpoint[Request, Data any] struct {
 }
 
 type ResponseOptions struct {
-	AdditionalCodes []int
-	Text            bool
-	NonNullable     bool
-	DataOnError     bool
-	Output          OutputMode
-	ErrorStatus     int
+	AdditionalCodes         []int
+	Text                    bool
+	NonNullable             bool
+	DataOnError             bool
+	Output                  OutputMode
+	ErrorStatus             int
+	NoContent               bool
+	WebSocket               *WebSocketDefinition
+	SSE                     *SSEDefinition
+	ContentVariants         []HTTPContentVariant
+	FastJSON                bool
+	AdditionalErrorStatuses []int
 }
 
 var definitions []Definition
@@ -102,7 +118,8 @@ func define[Request, Data any](name, path string, body BodyMode, response Respon
 	d := Definition{Name: name, Path: path, Methods: methods, Body: body,
 		Request: reflect.TypeFor[Request](), Data: reflect.TypeFor[Data](),
 		ErrorCodes: append([]int{-1}, response.AdditionalCodes...), ErrorText: response.Text, DataNonNullable: response.NonNullable, DataOnError: response.DataOnError,
-		Output: response.Output, ErrorStatus: response.ErrorStatus}
+		Output: response.Output, ErrorStatus: response.ErrorStatus, NoContent: response.NoContent, WebSocket: response.WebSocket, SSE: response.SSE,
+		AdditionalErrorStatuses: append([]int(nil), response.AdditionalErrorStatuses...), ContentVariants: append([]HTTPContentVariant(nil), response.ContentVariants...), FastJSON: response.FastJSON}
 	definitions = append(definitions, d)
 	return Endpoint[Request, Data]{definition: d}
 }
@@ -490,42 +507,316 @@ var GetFile = define[FilePathRequest, BinaryContent]("getFile", "/api/file/getFi
 var QuerySQL = define[SQLQueryRequest, SQLRows]("SQL", "/api/query/sql", JSONBody, ResponseOptions{AdditionalCodes: []int{1}, NonNullable: true}, "POST")
 
 var RenderSprig = define[RenderSprigRequest, string]("renderSprig", "/api/template/renderSprig", JSONBody, ResponseOptions{}, "POST")
+
 var GetDocSaveAsTemplateInfo = define[TemplateDocumentRequest, TemplateDocumentInfo]("getDocSaveAsTemplateInfo", "/api/template/getDocSaveAsTemplateInfo", JSONBody, ResponseOptions{}, "POST")
+
 var DocSaveAsTemplate = define[SaveTemplateRequest, Null]("docSaveAsTemplate", "/api/template/docSaveAsTemplate", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
 var RenderTemplate = define[RenderTemplateRequest, RenderTemplateData]("renderTemplate", "/api/template/render", JSONBody, ResponseOptions{}, "POST")
+
 var ManageTemplateFiles = define[TemplateFileRequest, TemplateManagementData]("manageTemplateFiles", "/api/template/manage", StructJSONBody, ResponseOptions{}, "POST")
 
 var ResetGraph = define[EmptyRequest, ResetGraphData]("resetGraph", "/api/graph/resetGraph", NoBody, ResponseOptions{}, "POST")
+
 var ResetLocalGraph = define[EmptyRequest, ResetLocalGraphData]("resetLocalGraph", "/api/graph/resetLocalGraph", NoBody, ResponseOptions{}, "POST")
+
 var SetGraphConf = define[SetGraphConfRequest, GraphConfigurationData]("setGraphConf", "/api/graph/setGraphConf", JSONBody, ResponseOptions{}, "POST")
+
 var GetGraph = define[GlobalGraphRequest, GlobalGraphData]("getGraph", "/api/graph/getGraph", JSONBody, ResponseOptions{DataOnError: true}, "POST")
+
 var GetLocalGraph = define[LocalGraphRequest, LocalGraphData]("getLocalGraph", "/api/graph/getLocalGraph", JSONBody, ResponseOptions{DataOnError: true}, "POST")
 
 var RefreshBacklink = define[RefreshBacklinkRequest, Null]("refreshBacklink", "/api/ref/refreshBacklink", JSONBody, ResponseOptions{}, "POST")
+
 var GetBackmentionDoc = define[BackmentionDocumentRequest, BacklinkContextData]("getBackmentionDoc", "/api/ref/getBackmentionDoc", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
 var GetBacklinkDoc = define[BacklinkDocumentRequest, BacklinkContextData]("getBacklinkDoc", "/api/ref/getBacklinkDoc", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
 var GetBacklink2 = define[BacklinkListRequest, BacklinkListData]("getBacklink2", "/api/ref/getBacklink2", JSONBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
 
 var ContinueImportSY = define[ContinueImportSYRequest, ImportDocumentData]("continueImportSY", "/api/import/continueImportSY", JSONBody, ResponseOptions{}, "POST")
+
 var CancelImportSY = define[ImportTokenRequest, Null]("cancelImportSY", "/api/import/cancelImportSY", JSONBody, ResponseOptions{}, "POST")
+
 var StartObsidianVaultAnalysis = define[ObsidianAnalysisRequest, *ObsidianVaultTask]("startObsidianVaultAnalysis", "/api/import/startObsidianVaultAnalysis", JSONBody, ResponseOptions{}, "POST")
+
 var GetObsidianVaultTask = define[ObsidianTaskRequest, *ObsidianVaultTask]("getObsidianVaultTask", "/api/import/getObsidianVaultTask", JSONBody, ResponseOptions{}, "POST")
+
 var StartObsidianVaultImport = define[ObsidianImportRequest, *ObsidianVaultTask]("startObsidianVaultImport", "/api/import/startObsidianVaultImport", JSONBody, ResponseOptions{}, "POST")
+
 var CancelObsidianVaultTask = define[ObsidianTaskRequest, *ObsidianVaultTask]("cancelObsidianVaultTask", "/api/import/cancelObsidianVaultTask", JSONBody, ResponseOptions{DataOnError: true}, "POST")
+
 var ImportStdMd = define[ImportMarkdownRequest, Null]("importStdMd", "/api/import/importStdMd", JSONBody, ResponseOptions{}, "POST")
+
 var ImportData = define[ImportDataRequest, Null]("importData", "/api/import/importData", MultipartBody, ResponseOptions{}, "POST")
+
 var ImportZipMd = define[ImportZipMarkdownRequest, Null]("importZipMd", "/api/import/importZipMd", MultipartBody, ResponseOptions{}, "POST")
+
 var ImportSY = define[ImportSYRequest, Null]("importSY", "/api/import/importSY", MultipartBody, ResponseOptions{}, "POST")
+
 var ImportSYNotebook = define[ImportDataRequest, ImportNotebookData]("importSYNotebook", "/api/import/importSYNotebook", MultipartBody, ResponseOptions{}, "POST")
+
 var ImportSYAuto = define[ImportSYRequest, ImportAutoData]("importSYAuto", "/api/import/importSYAuto", MultipartBody, ResponseOptions{DataOnError: true}, "POST")
 
 var GetHistoryItems = define[HistoryItemsRequest, HistoryItemsData]("getHistoryItems", "/api/history/getHistoryItems", JSONBody, ResponseOptions{}, "POST")
+
 var GetNotebookHistory = define[EmptyRequest, NotebookHistoryData]("getNotebookHistory", "/api/history/getNotebookHistory", NoBody, ResponseOptions{}, "POST")
+
 var GetDocHistoryContent = define[DocHistoryContentRequest, DocHistoryContentData]("getDocHistoryContent", "/api/history/getDocHistoryContent", JSONBody, ResponseOptions{}, "POST")
+
 var CreateDocHistory = define[CreateDocHistoryRequest, Null]("createDocHistory", "/api/history/createDocHistory", JSONBody, ResponseOptions{}, "POST")
+
 var CreateAssetHistory = define[CreateAssetHistoryRequest, Null]("createAssetHistory", "/api/history/createAssetHistory", JSONBody, ResponseOptions{}, "POST")
+
 var RollbackDocHistory = define[HistoryPathRequest, Null]("rollbackDocHistory", "/api/history/rollbackDocHistory", JSONBody, ResponseOptions{}, "POST")
+
 var RollbackAssetsHistory = define[HistoryPathRequest, Null]("rollbackAssetsHistory", "/api/history/rollbackAssetsHistory", JSONBody, ResponseOptions{}, "POST")
+
 var RollbackNotebookHistory = define[HistoryPathRequest, Null]("rollbackNotebookHistory", "/api/history/rollbackNotebookHistory", JSONBody, ResponseOptions{}, "POST")
+
 var RollbackAttributeViewHistory = define[HistoryPathRequest, Null]("rollbackAttributeViewHistory", "/api/history/rollbackAttributeViewHistory", JSONBody, ResponseOptions{}, "POST")
+
 var DiffDocVersions = define[DiffDocVersionsRequest, *DocVersionDiffResult]("diffDocVersions", "/api/history/diffDocVersions", JSONBody, ResponseOptions{}, "POST")
+
+var SearchAssetByName = define[SearchAssetRequest, []*SearchAsset]("searchAsset", "/api/search/searchAsset", JSONBody, ResponseOptions{}, "POST")
+
+var SearchWidget = define[SearchKeywordRequest, SearchWidgetData]("searchWidget", "/api/search/searchWidget", JSONBody, ResponseOptions{}, "POST")
+
+var SearchTemplate = define[SearchKeywordRequest, SearchTemplateData]("searchTemplate", "/api/search/searchTemplate", JSONBody, ResponseOptions{}, "POST")
+
+var RemoveSearchTemplate = define[SearchPathRequest, Null]("removeTemplate", "/api/search/removeTemplate", JSONBody, ResponseOptions{}, "POST")
+
+var GetAssetContent = define[AssetContentRequest, AssetContentData]("getAssetContent", "/api/search/getAssetContent", JSONBody, ResponseOptions{}, "POST")
+
+var GetAssetContentByPath = define[SearchPathRequest, AssetContentData]("getAssetContentByPath", "/api/search/getAssetContentByPath", JSONBody, ResponseOptions{}, "POST")
+
+var ListInvalidBlockRefs = define[SearchPageRequest, SearchBlocksData]("listInvalidBlockRefs", "/api/search/listInvalidBlockRefs", JSONBody, ResponseOptions{}, "POST")
+
+var UpdateEmbedBlock = define[UpdateEmbedBlockRequest, Null]("updateEmbedBlock", "/api/search/updateEmbedBlock", JSONBody, ResponseOptions{}, "POST")
+
+var FullTextSearchAssetContent = define[SearchAssetContentRequest, SearchAssetContentData]("fullTextSearchAssetContent", "/api/search/fullTextSearchAssetContent", JSONBody, ResponseOptions{}, "POST")
+
+var GetEmbedBlock = define[GetEmbedBlockRequest, EmbedBlocksData]("getEmbedBlock", "/api/search/getEmbedBlock", JSONBody, ResponseOptions{}, "POST")
+
+var SearchEmbedBlock = define[SearchEmbedBlockRequest, EmbedBlocksData]("searchEmbedBlock", "/api/search/searchEmbedBlock", JSONBody, ResponseOptions{}, "POST")
+
+var FindReplace = define[FindReplaceRequest, Null]("findReplace", "/api/search/findReplace", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+var SemanticSearchBlock = define[SearchBlockRequest, SearchBlocksData]("semanticSearchBlock", "/api/search/semanticSearchBlock", JSONBody, ResponseOptions{}, "POST")
+
+var FullTextSearchBlock = define[FullTextSearchBlockRequest, *FullTextSearchBlockData]("fullTextSearchBlock", "/api/search/fullTextSearchBlock", JSONBody, ResponseOptions{}, "POST")
+
+var SearchRefBlock = define[SearchRefBlockRequest, SearchRefData]("searchRefBlock", "/api/search/searchRefBlock", JSONBody, ResponseOptions{DataOnError: true}, "POST")
+
+var ListLoadedPlugins = define[EmptyRequest, []*LoadedPlugin]("listLoadedPlugins", "/api/plugin/listLoadedPlugins", NoBody, ResponseOptions{}, "POST")
+
+var ListLoadedPluginsGET = define[EmptyRequest, []*LoadedPlugin]("listLoadedPluginsGET", "/api/plugin", NoBody, ResponseOptions{}, "GET")
+
+var GetLoadedPlugin = define[LoadedPluginRequest, *LoadedPlugin]("getLoadedPlugin", "/api/plugin/getLoadedPlugin", JSONBody, ResponseOptions{AdditionalCodes: []int{1, 2, 3, 4}}, "POST")
+
+var GetLoadedPluginRPC = define[LoadedPluginRequest, *LoadedPlugin]("getLoadedPluginRPC", "/api/plugin/rpc", JSONBody, ResponseOptions{AdditionalCodes: []int{1, 2, 3, 4}}, "GET")
+
+var GetLoadedPluginRPCByName = define[LoadedPluginRequest, *LoadedPlugin]("getLoadedPluginRPCByName", "/api/plugin/rpc/:name", JSONBody, ResponseOptions{AdditionalCodes: []int{1, 2, 3, 4}}, "GET")
+
+var PluginRPCHTTP = define[PluginRPCBatchRequest, PluginRPCResponse]("pluginJsonRpcHttp", "/api/plugin/rpc", JSONBody, ResponseOptions{Output: DirectJSONOutput, NoContent: true}, "POST")
+
+var PluginRPCHTTPByName = define[PluginRPCBatchRequest, PluginRPCResponse]("pluginJsonRpcHttpByName", "/api/plugin/rpc/:name", JSONBody, ResponseOptions{Output: DirectJSONOutput, NoContent: true}, "POST")
+
+var PluginRPCWebSocket = define[EmptyRequest, PluginRPCFailure]("pluginJsonRpcWebSocket", "/ws/plugin/rpc", NoBody, WebSocketOptions[PluginRPCBatchRequest, PluginRPCMessage](404), "GET")
+
+var PluginRPCWebSocketByName = define[EmptyRequest, PluginRPCFailure]("pluginJsonRpcWebSocketByName", "/ws/plugin/rpc/:name", NoBody, WebSocketOptions[PluginRPCBatchRequest, PluginRPCMessage](404), "GET")
+
+var InstallLocalBazaarPackage = define[InstallLocalBazaarPackageRequest, BazaarLocalInstallResult]("installLocalBazaarPackage", "/api/bazaar/installLocalBazaarPackage", MultipartBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
+var BatchUpdatePackage = define[BatchUpdatePackageRequest, Null]("batchUpdatePackage", "/api/bazaar/batchUpdatePackage", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetUpdatedPackage = define[GetUpdatedPackageRequest, BazaarUpdatedData]("getUpdatedPackage", "/api/bazaar/getUpdatedPackage", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var UpdateBazaarPackage = define[UpdateBazaarPackageRequest, BazaarPackagesData]("updateBazaarPackage", "/api/bazaar/updateBazaarPackage", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetInstalledPackageSize = define[GetInstalledPackageSizeRequest, BazaarPackageSizeData]("getInstalledPackageSize", "/api/bazaar/getInstalledPackageSize", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetBazaarPackage = define[GetBazaarPackageRequest, BazaarPackageDetail]("getBazaarPackage", "/api/bazaar/getBazaarPackage", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetBazaarPackageRatings = define[GetBazaarPackageRatingsRequest, BazaarRatingsData]("getBazaarPackageRatings", "/api/bazaar/getBazaarPackageRatings", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetBazaarPackageUserRatings = define[GetBazaarPackageUserRatingsRequest, BazaarUserRatingsResult]("getBazaarPackageUserRatings", "/api/bazaar/getBazaarPackageUserRatings", JSONBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
+var GetBazaarPackageRating = define[GetBazaarPackageRatingRequest, BazaarRatingResult]("getBazaarPackageRating", "/api/bazaar/getBazaarPackageRating", JSONBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
+var SetBazaarPackageRating = define[SetBazaarPackageRatingRequest, BazaarRatingResult]("setBazaarPackageRating", "/api/bazaar/setBazaarPackageRating", JSONBody, ResponseOptions{AdditionalCodes: []int{1}, DataOnError: true}, "POST")
+var GetBazaarPackageREADME = define[GetBazaarPackageREADMERequest, BazaarREADMEData]("getBazaarPackageREADME", "/api/bazaar/getBazaarPackageREADME", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetBazaarPlugin = define[GetBazaarPluginRequest, BazaarPackagesData]("getBazaarPlugin", "/api/bazaar/getBazaarPlugin", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetInstalledPlugin = define[GetInstalledPluginRequest, BazaarPackagesData]("getInstalledPlugin", "/api/bazaar/getInstalledPlugin", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var InstallBazaarPlugin = define[InstallBazaarPluginRequest, BazaarPackagesData]("installBazaarPlugin", "/api/bazaar/installBazaarPlugin", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var UninstallBazaarPlugin = define[UninstallBazaarPluginRequest, BazaarPackagesData]("uninstallBazaarPlugin", "/api/bazaar/uninstallBazaarPlugin", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetBazaarWidget = define[GetBazaarWidgetRequest, BazaarPackagesData]("getBazaarWidget", "/api/bazaar/getBazaarWidget", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetInstalledWidget = define[GetInstalledWidgetRequest, BazaarPackagesData]("getInstalledWidget", "/api/bazaar/getInstalledWidget", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var InstallBazaarWidget = define[InstallBazaarWidgetRequest, BazaarPackagesData]("installBazaarWidget", "/api/bazaar/installBazaarWidget", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var UninstallBazaarWidget = define[UninstallBazaarWidgetRequest, BazaarPackagesData]("uninstallBazaarWidget", "/api/bazaar/uninstallBazaarWidget", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetBazaarIcon = define[GetBazaarIconRequest, BazaarPackagesData]("getBazaarIcon", "/api/bazaar/getBazaarIcon", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetInstalledIcon = define[GetInstalledIconRequest, BazaarPackagesData]("getInstalledIcon", "/api/bazaar/getInstalledIcon", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var InstallBazaarIcon = define[InstallBazaarIconRequest, BazaarAppearancePackagesData]("installBazaarIcon", "/api/bazaar/installBazaarIcon", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var UninstallBazaarIcon = define[UninstallBazaarIconRequest, BazaarAppearancePackagesData]("uninstallBazaarIcon", "/api/bazaar/uninstallBazaarIcon", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetBazaarTemplate = define[GetBazaarTemplateRequest, BazaarPackagesData]("getBazaarTemplate", "/api/bazaar/getBazaarTemplate", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetInstalledTemplate = define[GetInstalledTemplateRequest, BazaarPackagesData]("getInstalledTemplate", "/api/bazaar/getInstalledTemplate", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var InstallBazaarTemplate = define[InstallBazaarTemplateRequest, BazaarPackagesData]("installBazaarTemplate", "/api/bazaar/installBazaarTemplate", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var UninstallBazaarTemplate = define[UninstallBazaarTemplateRequest, BazaarPackagesData]("uninstallBazaarTemplate", "/api/bazaar/uninstallBazaarTemplate", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetBazaarTheme = define[GetBazaarThemeRequest, BazaarPackagesData]("getBazaarTheme", "/api/bazaar/getBazaarTheme", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetInstalledTheme = define[GetInstalledThemeRequest, BazaarPackagesData]("getInstalledTheme", "/api/bazaar/getInstalledTheme", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var InstallBazaarTheme = define[InstallBazaarThemeRequest, BazaarAppearancePackagesData]("installBazaarTheme", "/api/bazaar/installBazaarTheme", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var UninstallBazaarTheme = define[UninstallBazaarThemeRequest, BazaarAppearancePackagesData]("uninstallBazaarTheme", "/api/bazaar/uninstallBazaarTheme", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+
+var SetSyncEnable = define[SyncEnabledRequest, Null]("setSyncEnable", "/api/sync/setSyncEnable", JSONBody, ResponseOptions{}, "POST")
+var SetSyncInterval = define[SyncIntervalRequest, Null]("setSyncInterval", "/api/sync/setSyncInterval", JSONBody, ResponseOptions{}, "POST")
+var SetSyncPerception = define[SyncEnabledRequest, Null]("setSyncPerception", "/api/sync/setSyncPerception", JSONBody, ResponseOptions{}, "POST")
+var SetSyncLAN = define[SyncLANRequest, SyncLANStatus]("setSyncLAN", "/api/sync/setSyncLAN", JSONBody, ResponseOptions{}, "POST")
+var GetSyncLANStatus = define[EmptyRequest, SyncLANStatus]("getSyncLANStatus", "/api/sync/getSyncLANStatus", NoBody, ResponseOptions{}, "POST")
+var SetSyncGenerateConflictDoc = define[SyncEnabledRequest, Null]("setSyncGenerateConflictDoc", "/api/sync/setSyncGenerateConflictDoc", JSONBody, ResponseOptions{}, "POST")
+var SetSyncMode = define[SyncModeRequest, Null]("setSyncMode", "/api/sync/setSyncMode", JSONBody, ResponseOptions{}, "POST")
+var SetSyncProvider = define[SyncProviderRequest, Null]("setSyncProvider", "/api/sync/setSyncProvider", JSONBody, ResponseOptions{}, "POST")
+var SetSyncProviderS3 = define[SetSyncS3Request, SyncS3Data]("setSyncProviderS3", "/api/sync/setSyncProviderS3", JSONBody, ResponseOptions{}, "POST")
+var SetSyncProviderWebDAV = define[SetSyncWebDAVRequest, SyncWebDAVData]("setSyncProviderWebDAV", "/api/sync/setSyncProviderWebDAV", JSONBody, ResponseOptions{}, "POST")
+var SetSyncProviderLocal = define[SetSyncLocalRequest, SyncLocalData]("setSyncProviderLocal", "/api/sync/setSyncProviderLocal", JSONBody, ResponseOptions{}, "POST")
+var SetCloudSyncDir = define[SyncNameRequest, Null]("setCloudSyncDir", "/api/sync/setCloudSyncDir", JSONBody, ResponseOptions{}, "POST")
+var SetSyncAssetDownloadMode = define[SyncModeRequest, SyncAssetDownloadModeData]("setSyncAssetDownloadMode", "/api/sync/setSyncAssetDownloadMode", JSONBody, ResponseOptions{}, "POST")
+var CreateCloudSyncDir = define[SyncNameRequest, Null]("createCloudSyncDir", "/api/sync/createCloudSyncDir", JSONBody, ResponseOptions{}, "POST")
+var RemoveCloudSyncDir = define[SyncNameRequest, string]("removeCloudSyncDir", "/api/sync/removeCloudSyncDir", JSONBody, ResponseOptions{}, "POST")
+var ListCloudSyncDir = define[EmptyRequest, CloudSyncDirsData]("listCloudSyncDir", "/api/sync/listCloudSyncDir", NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var PerformSync = define[PerformSyncRequest, Null]("performSync", "/api/sync/performSync", JSONBody, ResponseOptions{}, "POST")
+var PerformBootSync = define[EmptyRequest, Null]("performBootSync", "/api/sync/performBootSync", NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetBootSync = define[EmptyRequest, Null]("getBootSync", "/api/sync/getBootSync", NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var GetSyncInfo = define[EmptyRequest, SyncInfoData]("getSyncInfo", "/api/sync/getSyncInfo", NoBody, ResponseOptions{}, "POST")
+var ExportSyncProviderS3 = define[EmptyRequest, SyncProviderExportData]("exportSyncProviderS3", "/api/sync/exportSyncProviderS3", NoBody, ResponseOptions{}, "POST")
+var ImportSyncProviderS3 = define[SyncProviderImportRequest, SyncS3Data]("importSyncProviderS3", "/api/sync/importSyncProviderS3", MultipartBody, ResponseOptions{DataOnError: true}, "POST")
+var ExportSyncProviderWebDAV = define[EmptyRequest, SyncProviderExportData]("exportSyncProviderWebDAV", "/api/sync/exportSyncProviderWebDAV", NoBody, ResponseOptions{}, "POST")
+var ImportSyncProviderWebDAV = define[SyncProviderImportRequest, SyncWebDAVData]("importSyncProviderWebDAV", "/api/sync/importSyncProviderWebDAV", MultipartBody, ResponseOptions{DataOnError: true}, "POST")
+
+var GetRiffCardsByBlockIDs = define[RiffBlockIDsRequest, RiffBlocksData]("getRiffCardsByBlockIDs", "/api/riff/getRiffCardsByBlockIDs", JSONBody, ResponseOptions{}, "POST")
+var BatchSetRiffCardsDueTime = define[SetRiffCardsDueRequest, Null]("batchSetRiffCardsDueTime", "/api/riff/batchSetRiffCardsDueTime", JSONBody, ResponseOptions{}, "POST")
+var ResetRiffCards = define[ResetRiffCardsRequest, Null]("resetRiffCards", "/api/riff/resetRiffCards", JSONBody, ResponseOptions{}, "POST")
+var GetNotebookRiffCards = define[RiffCardsRequest, RiffCardsData]("getNotebookRiffCards", "/api/riff/getNotebookRiffCards", JSONBody, ResponseOptions{}, "POST")
+var GetTreeRiffCards = define[RiffCardsRequest, RiffCardsData]("getTreeRiffCards", "/api/riff/getTreeRiffCards", JSONBody, ResponseOptions{}, "POST")
+var GetRiffCards = define[RiffCardsRequest, RiffCardsData]("getRiffCards", "/api/riff/getRiffCards", JSONBody, ResponseOptions{}, "POST")
+var ReviewRiffCard = define[ReviewRiffCardRequest, Null]("reviewRiffCard", "/api/riff/reviewRiffCard", JSONBody, ResponseOptions{}, "POST")
+var SkipReviewRiffCard = define[RiffCardRequest, Null]("skipReviewRiffCard", "/api/riff/skipReviewRiffCard", JSONBody, ResponseOptions{}, "POST")
+var GetNotebookRiffDueCards = define[RiffNotebookDueCardsRequest, RiffDueCardsData]("getNotebookRiffDueCards", "/api/riff/getNotebookRiffDueCards", JSONBody, ResponseOptions{}, "POST")
+var GetTreeRiffDueCards = define[RiffTreeDueCardsRequest, RiffDueCardsData]("getTreeRiffDueCards", "/api/riff/getTreeRiffDueCards", JSONBody, ResponseOptions{}, "POST")
+var GetRiffDueCards = define[RiffDueCardsRequest, RiffDueCardsData]("getRiffDueCards", "/api/riff/getRiffDueCards", JSONBody, ResponseOptions{}, "POST")
+var RemoveRiffCards = define[RiffDeckCardsRequest, *RiffDeck]("removeRiffCards", "/api/riff/removeRiffCards", JSONBody, ResponseOptions{}, "POST")
+var AddRiffCards = define[RiffDeckCardsRequest, *RiffDeck]("addRiffCards", "/api/riff/addRiffCards", JSONBody, ResponseOptions{}, "POST")
+var RenameRiffDeck = define[RenameRiffDeckRequest, Null]("renameRiffDeck", "/api/riff/renameRiffDeck", JSONBody, ResponseOptions{}, "POST")
+var RemoveRiffDeck = define[RiffDeckRequest, Null]("removeRiffDeck", "/api/riff/removeRiffDeck", JSONBody, ResponseOptions{}, "POST")
+var CreateRiffDeck = define[CreateRiffDeckRequest, *RiffDeck]("createRiffDeck", "/api/riff/createRiffDeck", JSONBody, ResponseOptions{}, "POST")
+var GetRiffDecks = define[EmptyRequest, []*RiffDeck]("getRiffDecks", "/api/riff/getRiffDecks", NoBody, ResponseOptions{NonNullable: true}, "POST")
+
+var SetRepoIndexRetentionDays = define[SetRepoIndexRetentionDaysRequest, Null]("setRepoIndexRetentionDays", "/api/repo/setRepoIndexRetentionDays", JSONBody, ResponseOptions{}, "POST")
+var SetRetentionIndexesDaily = define[SetRetentionIndexesDailyRequest, Null]("setRetentionIndexesDaily", "/api/repo/setRetentionIndexesDaily", JSONBody, ResponseOptions{}, "POST")
+var GetRepoFile = define[GetRepoFileRequest, BinaryContent]("getRepoFile", "/api/repo/getRepoFile", JSONBody, ResponseOptions{Output: BinaryOutput, ErrorStatus: 200}, "POST")
+var RollbackRepoSnapshotFile = define[RollbackRepoSnapshotFileRequest, Null]("rollbackRepoSnapshotFile", "/api/repo/rollbackRepoSnapshotFile", JSONBody, ResponseOptions{}, "POST")
+var OpenRepoSnapshotFile = define[OpenRepoSnapshotFileRequest, RepoOpenFileData]("openRepoSnapshotFile", "/api/repo/openRepoSnapshotFile", JSONBody, ResponseOptions{}, "POST")
+var DiffRepoSnapshots = define[DiffRepoSnapshotsRequest, RepoDiffData]("diffRepoSnapshots", "/api/repo/diffRepoSnapshots", JSONBody, ResponseOptions{}, "POST")
+var CheckoutRepo = define[CheckoutRepoRequest, Null]("checkoutRepo", "/api/repo/checkoutRepo", JSONBody, ResponseOptions{}, "POST")
+var DownloadCloudSnapshot = define[DownloadCloudSnapshotRequest, Null]("downloadCloudSnapshot", "/api/repo/downloadCloudSnapshot", JSONBody, ResponseOptions{}, "POST")
+var UploadCloudSnapshot = define[UploadCloudSnapshotRequest, Null]("uploadCloudSnapshot", "/api/repo/uploadCloudSnapshot", JSONBody, ResponseOptions{}, "POST")
+var GetRepoSnapshots = define[GetRepoSnapshotsRequest, RepoSnapshotsData]("getRepoSnapshots", "/api/repo/getRepoSnapshots", JSONBody, ResponseOptions{}, "POST")
+var SearchRepoFile = define[SearchRepoFileRequest, RepoSearchData]("searchRepoFile", "/api/repo/searchRepoFile", JSONBody, ResponseOptions{}, "POST")
+var GetRepoDocHistory = define[GetRepoDocHistoryRequest, RepoDocHistoryData]("getRepoDocHistory", "/api/repo/getRepoDocHistory", JSONBody, ResponseOptions{}, "POST")
+var ExportRepoFile = define[ExportRepoFileRequest, RepoExportData]("exportRepoFile", "/api/repo/exportRepoFile", JSONBody, ResponseOptions{}, "POST")
+var GetCloudRepoSnapshots = define[GetCloudRepoSnapshotsRequest, RepoCloudSnapshotsData]("getCloudRepoSnapshots", "/api/repo/getCloudRepoSnapshots", JSONBody, ResponseOptions{}, "POST")
+var GetCloudRepoTagSnapshots = define[EmptyRequest, RepoCloudTagsData]("getCloudRepoTagSnapshots", "/api/repo/getCloudRepoTagSnapshots", NoBody, ResponseOptions{}, "POST")
+var RemoveCloudRepoTagSnapshot = define[RemoveCloudRepoTagSnapshotRequest, Null]("removeCloudRepoTagSnapshot", "/api/repo/removeCloudRepoTagSnapshot", JSONBody, ResponseOptions{}, "POST")
+var GetRepoTagSnapshots = define[EmptyRequest, RepoTagsData]("getRepoTagSnapshots", "/api/repo/getRepoTagSnapshots", NoBody, ResponseOptions{}, "POST")
+var RemoveRepoTagSnapshot = define[RemoveRepoTagSnapshotRequest, Null]("removeRepoTagSnapshot", "/api/repo/removeRepoTagSnapshot", JSONBody, ResponseOptions{}, "POST")
+var TagSnapshot = define[TagSnapshotRequest, Null]("tagSnapshot", "/api/repo/tagSnapshot", JSONBody, ResponseOptions{}, "POST")
+var ImportRepoKey = define[ImportRepoKeyRequest, RepoKeyData]("importRepoKey", "/api/repo/importRepoKey", JSONBody, ResponseOptions{}, "POST")
+var InitRepoKeyFromPassphrase = define[InitRepoKeyFromPassphraseRequest, RepoKeyData]("initRepoKeyFromPassphrase", "/api/repo/initRepoKeyFromPassphrase", JSONBody, ResponseOptions{}, "POST")
+var InitRepoKey = define[EmptyRequest, RepoKeyData]("initRepoKey", "/api/repo/initRepoKey", NoBody, ResponseOptions{}, "POST")
+var ResetRepo = define[EmptyRequest, Null]("resetRepo", "/api/repo/resetRepo", NoBody, ResponseOptions{}, "POST")
+var PurgeRepo = define[EmptyRequest, Null]("purgeRepo", "/api/repo/purgeRepo", NoBody, ResponseOptions{}, "POST")
+var PurgeCloudRepo = define[EmptyRequest, Null]("purgeCloudRepo", "/api/repo/purgeCloudRepo", NoBody, ResponseOptions{}, "POST")
+
+var MoveLocalShorthands = define[FileTreeNotebookRequest, []string]("moveLocalShorthands", "/api/filetree/moveLocalShorthands", JSONBody, ResponseOptions{}, "POST")
+var ListDocTree = define[FileTreePathRequest, FileTreeDocTreeData]("listDocTree", "/api/filetree/listDocTree", JSONBody, ResponseOptions{}, "POST")
+var UpsertIndexes = define[FileTreePathsRequest, Null]("upsertIndexes", "/api/filetree/upsertIndexes", JSONBody, ResponseOptions{}, "POST")
+var RemoveIndexes = define[FileTreePathsRequest, Null]("removeIndexes", "/api/filetree/removeIndexes", JSONBody, ResponseOptions{}, "POST")
+var Doc2Heading = define[FileTreeDocHeadingRequest, FileTreeDocHeadingData]("doc2Heading", "/api/filetree/doc2Heading", JSONBody, ResponseOptions{}, "POST")
+var Heading2Doc = define[FileTreeHeadingDocRequest, Null]("heading2Doc", "/api/filetree/heading2Doc", JSONBody, ResponseOptions{}, "POST")
+var Li2Doc = define[FileTreeListItemDocRequest, Null]("li2Doc", "/api/filetree/li2Doc", JSONBody, ResponseOptions{}, "POST")
+var GetHPathByPath = define[FileTreePathRequest, string]("getHPathByPath", "/api/filetree/getHPathByPath", JSONBody, ResponseOptions{}, "POST")
+var GetHPathsByPaths = define[FileTreePathsRequest, []string]("getHPathsByPaths", "/api/filetree/getHPathsByPaths", JSONBody, ResponseOptions{}, "POST")
+var GetHPathByID = define[FileTreeIDRequest, string]("getHPathByID", "/api/filetree/getHPathByID", JSONBody, ResponseOptions{}, "POST")
+var GetPathByID = define[FileTreeTrimIDRequest, FileTreeDocPathData]("getPathByID", "/api/filetree/getPathByID", JSONBody, ResponseOptions{}, "POST")
+var GetFullHPathByID = define[FileTreeOptionalIDRequest, *string]("getFullHPathByID", "/api/filetree/getFullHPathByID", JSONBody, ResponseOptions{}, "POST")
+var GetIDsByHPath = define[FileTreeOptionalPathRequest, []string]("getIDsByHPath", "/api/filetree/getIDsByHPath", JSONBody, ResponseOptions{}, "POST")
+var MoveDocs = define[FileTreeMoveRequest, Null]("moveDocs", "/api/filetree/moveDocs", JSONBody, ResponseOptions{}, "POST")
+var MoveDocsByID = define[FileTreeMoveIDsRequest, Null]("moveDocsByID", "/api/filetree/moveDocsByID", JSONBody, ResponseOptions{}, "POST")
+var RemoveDoc = define[FileTreePathRequest, Null]("removeDoc", "/api/filetree/removeDoc", JSONBody, ResponseOptions{}, "POST")
+var RemoveDocByID = define[FileTreeTrimIDRequest, Null]("removeDocByID", "/api/filetree/removeDocByID", JSONBody, ResponseOptions{}, "POST")
+var RemoveDocs = define[FileTreePathsRequest, Null]("removeDocs", "/api/filetree/removeDocs", JSONBody, ResponseOptions{}, "POST")
+var RenameDoc = define[FileTreeRenameRequest, Null]("renameDoc", "/api/filetree/renameDoc", JSONBody, ResponseOptions{}, "POST")
+var RenameDocByID = define[FileTreeRenameIDRequest, Null]("renameDocByID", "/api/filetree/renameDocByID", JSONBody, ResponseOptions{}, "POST")
+var DuplicateDoc = define[FileTreeIDRequest, FileTreeDuplicateData]("duplicateDoc", "/api/filetree/duplicateDoc", JSONBody, ResponseOptions{}, "POST")
+var CreateDoc = define[FileTreeCreateRequest, FileTreeCreateData]("createDoc", "/api/filetree/createDoc", JSONBody, ResponseOptions{}, "POST")
+var CreateDailyNote = define[FileTreeDailyNoteRequest, FileTreeCreateData]("createDailyNote", "/api/filetree/createDailyNote", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var CreateDocWithMd = define[FileTreeCreateMarkdownRequest, string]("createDocWithMd", "/api/filetree/createDocWithMd", JSONBody, ResponseOptions{}, "POST")
+var GetDocCreateSavePath = define[FileTreeNotebookRequest, FileTreeCreateSavePathData]("getDocCreateSavePath", "/api/filetree/getDocCreateSavePath", JSONBody, ResponseOptions{}, "POST")
+var GetRefCreateSavePath = define[FileTreeNotebookRequest, FileTreeSavePathData]("getRefCreateSavePath", "/api/filetree/getRefCreateSavePath", JSONBody, ResponseOptions{}, "POST")
+var GetShorthandSavePath = define[FileTreeNotebookRequest, FileTreeSavePathData]("getShorthandSavePath", "/api/filetree/getShorthandSavePath", JSONBody, ResponseOptions{}, "POST")
+var ChangeSort = define[FileTreeChangeSortRequest, Null]("changeSort", "/api/filetree/changeSort", JSONBody, ResponseOptions{}, "POST")
+var ReorderDocs = define[FileTreeReorderRequest, *FileTreeReorderData]("reorderDocs", "/api/filetree/reorderDocs", StructJSONBody, ResponseOptions{DataOnError: true}, "POST")
+var SetSort = define[FileTreeSetSortRequest, *FileTreeSetSortData]("setSort", "/api/filetree/setSort", StructJSONBody, ResponseOptions{DataOnError: true}, "POST")
+var SetDocSortMode = define[FileTreeSortModeRequest, *FileTreeSortModeData]("setDocSortMode", "/api/filetree/setDocSortMode", StructJSONBody, ResponseOptions{DataOnError: true}, "POST")
+var SearchDocs = define[FileTreeSearchRequest, []*FileTreeSearchDoc]("searchDocs", "/api/filetree/searchDocs", JSONBody, ResponseOptions{}, "POST")
+var ListDocsByPath = define[FileTreeListRequest, FileTreeListData]("listDocsByPath", "/api/filetree/listDocsByPath", JSONBody, ResponseOptions{}, "POST")
+var GetDoc = define[FileTreeGetDocRequest, FileTreeGetDocData]("getDoc", "/api/filetree/getDoc", JSONBody, ResponseOptions{AdditionalCodes: []int{1, 3}}, "POST")
+var SetPublishAccess = define[FileTreeSetPublishRequest, Null]("setPublishAccess", "/api/filetree/setPublishAccess", JSONBody, ResponseOptions{}, "POST")
+var GetPublishAccess = define[FileTreePublishIDsRequest, FileTreePublishData]("getPublishAccess", "/api/filetree/getPublishAccess", JSONBody, ResponseOptions{}, "POST")
+var AuthFilePublishAccess = define[FileTreeAuthPublishRequest, Null]("authFilePublishAccess", "/api/filetree/authFilePublishAccess", JSONBody, ResponseOptions{AdditionalErrorStatuses: []int{429}}, "POST")
+
+var ExportCodeBlock = define[ExportIDRequest, ExportPathData]("exportCodeBlock", "/api/export/exportCodeBlock", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var ExportAttributeView = define[ExportAttributeViewRequest, ExportZipData]("exportAttributeView", "/api/export/exportAttributeView", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var Export2Liandi = define[ExportIDRequest, Null]("export2Liandi", "/api/export/export2Liandi", JSONBody, ResponseOptions{}, "POST")
+var ExportDataInFolder = define[ExportFolderRequest, ExportNameData]("exportDataInFolder", "/api/export/exportDataInFolder", JSONBody, ResponseOptions{}, "POST")
+var ExportData = define[EmptyRequest, ExportZipData]("exportData", "/api/export/exportData", NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var ExportResources = define[ExportResourcesRequest, ExportPathData]("exportResources", "/api/export/exportResources", JSONBody, ResponseOptions{AdditionalCodes: []int{1}, Text: true}, "POST")
+var ExportNotebookMd = define[ExportNotebookMarkdownRequest, ExportNamedZipData]("exportNotebookMd", "/api/export/exportNotebookMd", JSONBody, ResponseOptions{}, "POST")
+var ExportNotebooksMd = define[ExportNotebooksMarkdownRequest, ExportNamedZipData]("exportNotebooksMd", "/api/export/exportNotebooksMd", JSONBody, ResponseOptions{}, "POST")
+var ExportMds = define[ExportDocumentsMarkdownRequest, ExportNamedZipData]("exportMds", "/api/export/exportMds", JSONBody, ResponseOptions{}, "POST")
+var ExportMd = define[ExportMarkdownRequest, ExportNamedZipData]("exportMd", "/api/export/exportMd", JSONBody, ResponseOptions{}, "POST")
+var ExportNotebookSY = define[ExportIDRequest, ExportZipData]("exportNotebookSY", "/api/export/exportNotebookSY", JSONBody, ResponseOptions{}, "POST")
+var ExportNotebooksSY = define[ExportNotebooksRequest, ExportZipData]("exportNotebooksSY", "/api/export/exportNotebooksSY", JSONBody, ResponseOptions{}, "POST")
+var ExportSYs = define[ExportIDsRequest, ExportZipData]("exportSYs", "/api/export/exportSYs", JSONBody, ResponseOptions{}, "POST")
+var ExportSY = define[ExportIDRequest, ExportZipData]("exportSY", "/api/export/exportSY", JSONBody, ResponseOptions{}, "POST")
+var ExportMdContent = define[ExportMarkdownContentRequest, ExportMarkdownContentData]("exportMdContent", "/api/export/exportMdContent", JSONBody, ResponseOptions{}, "POST")
+var ExportDocx = define[ExportDocxRequest, ExportPathData]("exportDocx", "/api/export/exportDocx", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var ExportMdHTML = define[ExportMarkdownHTMLRequest, ExportHTMLData]("exportMdHTML", "/api/export/exportMdHTML", JSONBody, ResponseOptions{}, "POST")
+var ExportTempContent = define[ExportTempContentRequest, ExportURLData]("exportTempContent", "/api/export/exportTempContent", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var ExportBrowserHTML = define[ExportBrowserHTMLRequest, ExportZipData]("exportBrowserHTML", "/api/export/exportBrowserHTML", JSONBody, ResponseOptions{}, "POST")
+var ExportPreviewHTML = define[ExportPreviewHTMLRequest, ExportPreviewHTMLData]("exportPreviewHTML", "/api/export/exportPreviewHTML", JSONBody, ResponseOptions{}, "POST")
+var ExportHTML = define[ExportHTMLRequest, ExportHTMLData]("exportHTML", "/api/export/exportHTML", JSONBody, ResponseOptions{}, "POST")
+var ProcessPDF = define[ProcessPDFRequest, Null]("processPDF", "/api/export/processPDF", JSONBody, ResponseOptions{}, "POST")
+var ExportPreview = define[ExportIDRequest, ExportPreviewData]("exportPreview", "/api/export/preview", JSONBody, ResponseOptions{}, "POST")
+var ExportAsFile = define[ExportAsFileRequest, ExportFileData]("exportAsFile", "/api/export/exportAsFile", MultipartBody, ResponseOptions{}, "POST")
+var CopyExportFile = define[CopyExportFileRequest, Null]("copyExportFile", "/api/export/copyExportFile", JSONBody, ResponseOptions{AdditionalCodes: []int{-2}}, "POST")
+var ExportEPUB = define[ExportIDRequest, ExportNamedZipData]("exportEPUB", "/api/export/exportEPUB", JSONBody, ResponseOptions{}, "POST")
+var ExportRTF = define[ExportIDRequest, ExportNamedZipData]("exportRTF", "/api/export/exportRTF", JSONBody, ResponseOptions{}, "POST")
+var ExportODT = define[ExportIDRequest, ExportNamedZipData]("exportODT", "/api/export/exportODT", JSONBody, ResponseOptions{}, "POST")
+var ExportMediaWiki = define[ExportIDRequest, ExportNamedZipData]("exportMediaWiki", "/api/export/exportMediaWiki", JSONBody, ResponseOptions{}, "POST")
+var ExportOrgMode = define[ExportIDRequest, ExportNamedZipData]("exportOrgMode", "/api/export/exportOrgMode", JSONBody, ResponseOptions{}, "POST")
+var ExportOPML = define[ExportIDRequest, ExportNamedZipData]("exportOPML", "/api/export/exportOPML", JSONBody, ResponseOptions{}, "POST")
+var ExportTextile = define[ExportIDRequest, ExportNamedZipData]("exportTextile", "/api/export/exportTextile", JSONBody, ResponseOptions{}, "POST")
+var ExportAsciiDoc = define[ExportIDRequest, ExportNamedZipData]("exportAsciiDoc", "/api/export/exportAsciiDoc", JSONBody, ResponseOptions{}, "POST")
+var ExportReStructuredText = define[ExportIDRequest, ExportNamedZipData]("exportReStructuredText", "/api/export/exportReStructuredText", JSONBody, ResponseOptions{}, "POST")
+
+var StatAsset = define[AssetPathRequest, AssetStatData]("statAsset", "/api/asset/statAsset", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var FullReindexAssetContent = define[EmptyRequest, Null]("fullReindexAssetContent", "/api/asset/fullReindexAssetContent", NoBody, ResponseOptions{}, "POST")
+var GetImageOCRText = define[AssetOCRTextRequest, AssetTextData]("getImageOCRText", "/api/asset/getImageOCRText", JSONBody, ResponseOptions{}, "POST")
+var SetImageOCRText = define[SetAssetOCRTextRequest, Null]("setImageOCRText", "/api/asset/setImageOCRText", JSONBody, ResponseOptions{}, "POST")
+var AssetOCR = define[AssetPathRequest, AssetOCRData]("ocr", "/api/asset/ocr", JSONBody, ResponseOptions{}, "POST")
+var RenameAsset = define[RenameAssetRequest, AssetRenameData]("renameAsset", "/api/asset/renameAsset", JSONBody, ResponseOptions{}, "POST")
+var GetDocImageAssets = define[AssetDocumentRequest, []string]("getDocImageAssets", "/api/asset/getDocImageAssets", JSONBody, ResponseOptions{}, "POST")
+var GetDocAssets = define[AssetDocumentAssetsRequest, []string]("getDocAssets", "/api/asset/getDocAssets", JSONBody, ResponseOptions{}, "POST")
+var SetFileAnnotation = define[SetAssetAnnotationRequest, Null]("setFileAnnotation", "/api/asset/setFileAnnotation", JSONBody, ResponseOptions{}, "POST")
+var GetFileAnnotation = define[AssetPathRequest, AssetAnnotationData]("getFileAnnotation", "/api/asset/getFileAnnotation", JSONBody, ResponseOptions{AdditionalCodes: []int{1, 403}}, "POST")
+var RemoveUnusedAsset = define[AssetPathRequest, AssetPathData]("removeUnusedAsset", "/api/asset/removeUnusedAsset", JSONBody, ResponseOptions{}, "POST")
+var RemoveUnusedAssets = define[EmptyRequest, AssetPathsData]("removeUnusedAssets", "/api/asset/removeUnusedAssets", NoBody, ResponseOptions{}, "POST")
+var GetUnusedAssets = define[EmptyRequest, []*AssetUnusedItem]("getUnusedAssets", "/api/asset/getUnusedAssets", NoBody, ResponseOptions{}, "POST")
+var GetMissingAssets = define[EmptyRequest, []*AssetUnusedItem]("getMissingAssets", "/api/asset/getMissingAssets", NoBody, ResponseOptions{}, "POST")
+var ResolveAssetPath = define[AssetPathRequest, string]("resolveAssetPath", "/api/asset/resolveAssetPath", JSONBody, ResponseOptions{}, "POST")
+var AssetUploadCloud = define[AssetCloudUploadRequest, Null]("uploadCloud", "/api/asset/uploadCloud", JSONBody, ResponseOptions{}, "POST")
+var AssetUploadCloudByAssetsPaths = define[AssetPathsCloudUploadRequest, Null]("uploadCloudByAssetsPaths", "/api/asset/uploadCloudByAssetsPaths", JSONBody, ResponseOptions{}, "POST")
+var InsertLocalAssets = define[InsertLocalAssetsRequest, AssetUploadData]("insertLocalAssets", "/api/asset/insertLocalAssets", JSONBody, ResponseOptions{DataOnError: true}, "POST")
+var InsertCover = define[InsertCoverRequest, AssetInsertCoverData]("insertCover", "/api/asset/insertCover", JSONBody, ResponseOptions{}, "POST")
+var UploadAsset = define[UploadAssetRequest, AssetUploadData]("uploadAsset", "/api/asset/upload", MultipartBody, ResponseOptions{}, "POST")

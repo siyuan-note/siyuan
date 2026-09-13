@@ -30,6 +30,7 @@ import {
 import {getDockHotkey} from "./hotkey";
 import {resolveDockPanelVisibility} from "./panelVisibility";
 import {syncDockEntryOrders} from "../../config/entryVisibility/runtime";
+import {isWindow} from "../../util/functions";
 
 const TYPES = ["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink", "agentChat"];
 const DEFAULT_DOCK_SIZE = 232;
@@ -304,7 +305,7 @@ export class Dock {
                 documentSelf.onselectstart = null;
                 documentSelf.onselect = null;
                 this.setSize();
-                [...this.elements[0].querySelectorAll(".dock__item--active"), ...this.elements[0].querySelectorAll(".dock__item--active")].forEach(item => {
+                [...this.elements[0].querySelectorAll(".dock__item--active"), ...this.elements[1].querySelectorAll(".dock__item--active")].forEach(item => {
                     const customModel = this.data[item.getAttribute("data-type") as TDock];
                     if (customModel && customModel instanceof Custom && customModel.resize) {
                         customModel.resize();
@@ -490,12 +491,16 @@ export class Dock {
             this.hideDock(true, preferredSize);
         } else {
             this.layout.element.style.transform = "";
+            this.layout.element.removeAttribute("data-temp");
             this.layout.element.style.zIndex = "";
             if (hasActive && this.panelVisible) {
                 this.resizeElement.classList.remove("fn__none");
             }
         }
         this.layout.element.classList.toggle("layout--float", this.isFloating());
+        if (this.isFloating() && this.layout.element.querySelector(".fullscreen")) {
+            this.showDock(true);
+        }
         if (!hasActive && !this.isFloating()) {
             this.layout.element.style[this.position === "Bottom" ? "height" : "width"] = "0px";
         }
@@ -600,6 +605,19 @@ export class Dock {
             this.layout.element.style.transform = `translateY(-${document.getElementById("status").offsetHeight}px)`;
             this.layout.element.style.left = this.elements[0].clientWidth + "px";
             this.layout.element.style.right = this.elements[1].clientWidth + "px";
+        }
+        // 全屏面板以窗口定位，浮动位移保留到退出全屏时恢复。
+        const fullscreenElement = this.layout.element.querySelector(".fullscreen");
+        if (fullscreenElement && fullscreenElement.clientHeight > 0) {
+            this.layout.element.setAttribute("data-temp", this.layout.element.style.transform);
+            this.layout.element.style.transform = "none";
+            // 窗口控制按钮保持在全屏浮动面板上方。
+            if (window.siyuan.config.system.os !== "darwin" && !isWindow()) {
+                const windowControlsElement = document.getElementById("windowControls");
+                if (windowControlsElement) {
+                    windowControlsElement.style.zIndex = (++window.siyuan.zIndex).toString();
+                }
+            }
         }
     }
 

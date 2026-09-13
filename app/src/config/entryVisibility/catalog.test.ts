@@ -798,11 +798,53 @@ test("super block column insertion actions follow block insertion actions", () =
 });
 
 test("table block width actions keep current-column and whole-table scopes together", () => {
-    assert.deepEqual(getEntryCatalogChildren("gutter.single.table").slice(0, 3).map((item) => item.key), [
+    assert.deepEqual(getEntryCatalogChildren("gutter.single.table").slice(1, 4).map((item) => item.key), [
         "useDefaultWidth",
         "distributeAllColWidths",
         "useDefaultWidthForAllColumns",
     ]);
+});
+
+test("table catalog follows the menu arrays and conditional declarations", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/menus/protyle.ts"), "utf8");
+    const table = source.slice(source.indexOf("export const tableMenu ="));
+    const pushedIDs = (array: string) => Array.from(table.matchAll(
+        new RegExp(`${array}\\.push\\(\\{\\s*id: ("[^" ]+"|isPinHead \\? "unpinTableHead" : "pinTableHead")`, "g"),
+    )).flatMap(match => match[1].startsWith("isPinHead")
+        ? ["pinTableHead", "unpinTableHead"] : [JSON.parse(match[1])]);
+    const other = pushedIDs("otherMenus");
+    const moves = pushedIDs("other2Menus");
+    const inserts = pushedIDs("insertMenus");
+    const removes = pushedIDs("removeMenus");
+    assert.deepEqual(getEntryCatalogChildren("gutter.single.table").map(item => item.key), [
+        ...other, "separator_insert", ...inserts, ...moves, "separator_delete", ...removes,
+    ]);
+    const alignment = table.slice(table.indexOf("const alignmentMenus"), table.indexOf("if (alignWholeTable)", table.indexOf("const alignmentMenus")));
+    const alignmentIDs = Array.from(alignment.matchAll(/id: "([^"]+)"/g), match => match[1]);
+    assert.deepEqual(getEntryCatalogChildren("inline.text.more").map(item => item.key), [
+        ...other.filter(id => !["distributeAllColWidths", "useDefaultWidthForAllColumns", "transposeTable", "alignment"].includes(id)),
+        ...alignmentIDs, ...moves,
+    ]);
+    [...inserts, ...removes].forEach(id => assert.ok(getEntryCatalogNode(`inline.text.${id}`)));
+    assert.match(source, /submenu: tableMenus\.otherMenus\.concat\(tableMenus\.other2Menus\)/);
+});
+
+test("conditional copy and image actions have configuration entries in menu order", () => {
+    const common = ["copyBlockRef", "copyBlockEmbed", "copyProtocol", "copyProtocolInMd", "copyWebURL", "copyHPath"];
+    assert.deepEqual(getEntryCatalogChildren("gutter.multi.copy").map(item => item.key), [
+        ...common, "copyID", "copyText", "copyRichText", "copyPlainText", "copy", "duplicate",
+    ]);
+    assert.deepEqual(getEntryCatalogChildren("gutter.single.copy").map(item => item.key), [
+        ...common, "copyAVID", "copyID", "copyText", "copyRichText", "copyPlainText", "copyAsPNG",
+        "copyMirror", "copy", "duplicate", "duplicateMirror", "duplicateCompletely",
+    ]);
+    const image = getEntryCatalogChildren("inline.image").map(item => item.key);
+    assert.deepEqual(image.slice(image.indexOf("separator_3")), ["separator_3", "openBy", "export", "copyFile", "copyAsPNG"]);
+    ["gutter.single.table.cancelMerged", "gutter.single.table.transposeTable", "inline.text.more.cancelMerged",
+        "gutter.single.copy.copyMirror", "inline.image.openBy"].forEach(path => {
+        assert.equal(getEntryCatalogNode(path).type, "entry");
+        assert.equal(getEntryCatalogNode(path).simple, true);
+    });
 });
 
 test("code block actions follow the code block menu order", () => {

@@ -1,4 +1,6 @@
 import {closePanel} from "../util/closePanel";
+import {buildSearchRequest} from "../../search/config";
+import type {APICallbackResponse, APIPOSTRoutes} from "../../types/api";
 import {getCurrentEditor, openMobileFileById} from "../editor";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
@@ -61,10 +63,10 @@ const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAl
         k: config.method === 0 || config.method === 1 ? getKeyByLiElement(currentLiElement) : (document.querySelector("#toolbarSearch") as HTMLInputElement).value,
         r: replaceInputElement.value,
         ids: isAll ? [] : [currentId],
-        types: config.types,
+        types: {...config.types},
         subTypes: config.subTypes,
         method: config.method,
-        replaceTypes: config.replaceTypes,
+        replaceTypes: {...config.replaceTypes},
         paths: config.idPath || [],
         groupBy: config.group,
         orderBy: config.sort,
@@ -315,17 +317,7 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
                 previousElement.setAttribute("disabled", "disabled");
             }
             const endpoint = requestConfig.method === 4 ? "/api/search/semanticSearchBlock" : "/api/search/fullTextSearchBlock";
-            const searchParam: Record<string, any> = {
-                query: requestConfig.query,
-                method: requestConfig.method,
-                types: requestConfig.types,
-                subTypes: requestConfig.subTypes,
-                paths: requestConfig.idPath || [],
-                groupBy: requestConfig.group,
-                orderBy: requestConfig.sort,
-                page: requestConfig.page,
-                pageSize: 32,
-            };
+            const searchParam = buildSearchRequest(requestConfig);
             // 限定在单个加密 box 内搜索时带 notebook，让内核走加密 db；跨 box 或全局搜索走原函数
             const idPaths = requestConfig.idPath || [];
             if (idPaths.length > 0) {
@@ -338,7 +330,7 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
                 method: requestConfig.method,
                 version,
                 run(signal: AbortSignal, isCurrent: () => boolean) {
-                    return fetchPost(endpoint, searchParam, (response) => {
+                    return fetchPost(endpoint, searchParam, (response: APICallbackResponse<APIPOSTRoutes[typeof endpoint]["response"]>) => {
                         if (!isCurrent()) {
                             return;
                         }

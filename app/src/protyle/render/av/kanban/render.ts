@@ -92,7 +92,7 @@ export const renderKanban = async (options: {
     data?: IAV,
 }) => {
     const renderToken = beginAVRender(options.blockElement);
-    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement;
+    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]');
     const editIds: IIds[] = [];
     options.blockElement.querySelectorAll(".av__gallery-fields--edit").forEach(item => {
         editIds.push({
@@ -125,7 +125,7 @@ export const renderKanban = async (options: {
     });
     const resetData = {
         isSearching: searchInputElement && document.activeElement === searchInputElement,
-        query: searchInputElement?.value || "",
+        query: searchInputElement?.textContent || "",
         alignSelf: options.blockElement.style.alignSelf,
         oldOffset: options.protyle.contentElement.scrollTop,
         editIds,

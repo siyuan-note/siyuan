@@ -1,3 +1,4 @@
+import type {FileTreeGetDocRequestInput} from "../../types/api";
 import type {BlockBreadcrumbRequestInput, BlockQueryRequestInput, TreeStatRequestInput} from "../../types/api";
 import {getIconByType} from "../../editor/getIcon";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
@@ -193,7 +194,7 @@ ${padHTML}
                     if (target.classList.contains("block__icon--active")) {
                         zoomOut({protyle, id: protyle.options.blockId});
                     } else {
-                        const getDocParam: IObject = {
+                        const getDocParam: FileTreeGetDocRequestInput = {
                             id: protyle.options.blockId,
                             mode: 3,
                             size: window.siyuan.config.editor.dynamicLoadBlocks,

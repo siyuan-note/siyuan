@@ -1390,7 +1390,9 @@ export class MobileFiles extends Model {
                     path: item.path,
                     app: Constants.SIYUAN_APPID,
                 });
-                newLiElement = await this.selectItem(response.data.box, filePath, response.data, setStorage, isSetCurrent);
+                if (response.code === 0) {
+                    newLiElement = await this.selectItem(response.data.box, filePath, response.data, setStorage, isSetCurrent);
+                }
             }
         }
         if (isSetCurrent) {
@@ -1511,7 +1513,9 @@ export class MobileFiles extends Model {
                 path: currentPath,
                 app: Constants.SIYUAN_APPID,
             });
-            liElement = await this.onLsSelect(response.data, filePath, setStorage, isSetCurrent);
+            if (response.code === 0) {
+                liElement = await this.onLsSelect(response.data, filePath, setStorage, isSetCurrent);
+            }
         }
         this.refreshPublishAccessSwitch();
         return liElement;

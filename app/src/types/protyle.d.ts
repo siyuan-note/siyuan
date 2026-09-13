@@ -505,7 +505,7 @@ interface IProtyleOptions {
     blockId?: string
     rootId?: string
     notebookId?: string
-    originalRefBlockIDs?: IObject
+    originalRefBlockIDs?: Record<string, string>
     key?: string
     defIds?: string[]
     render?: {

@@ -1057,9 +1057,9 @@ interface IFile {
     hMtime: string;
     hCtime: string;
     hSize: string;
-    dueFlashcardCount?: string;
-    newFlashcardCount?: string;
-    flashcardCount?: string;
+    dueFlashcardCount?: number;
+    newFlashcardCount?: number;
+    flashcardCount?: number;
     id: string;
     count: number;
     subFileCount: number;

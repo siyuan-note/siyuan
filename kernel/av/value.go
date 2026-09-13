@@ -2215,15 +2215,7 @@ func NewFormattedValueNumber(content float64, format NumberFormat) (ret *ValueNu
 		Content:          content,
 		IsNotEmpty:       true,
 		Format:           format,
-		FormattedContent: fmt.Sprintf("%f", content),
-	}
-
-	ret.FormattedContent = formatNumber(content, format)
-
-	switch format {
-	case NumberFormatNone:
-		s := fmt.Sprintf("%.5f", content)
-		ret.FormattedContent = strings.TrimRight(strings.TrimRight(s, "0"), ".")
+		FormattedContent: formatNumber(content, format),
 	}
 	return
 }
@@ -3174,7 +3166,7 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 			}
 		}
 		if 0 < len(r.Contents) {
-			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countChecked*100/len(r.Contents)), NumberFormatNone)}}
+			r.Contents = []*Value{{Type: KeyTypeNumber, Number: newRollupCheckboxPercent(countChecked, len(r.Contents))}}
 		}
 	case CalcOperatorPercentUnchecked:
 		countUnchecked := 0
@@ -3186,9 +3178,17 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 			}
 		}
 		if 0 < len(r.Contents) {
-			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countUnchecked*100/len(r.Contents)), NumberFormatNone)}}
+			r.Contents = []*Value{{Type: KeyTypeNumber, Number: newRollupCheckboxPercent(countUnchecked, len(r.Contents))}}
 		}
 	}
+}
+
+func newRollupCheckboxPercent(count, total int) *ValueNumber {
+	ratio := float64(count) / float64(total)
+	// 保留筛选、模板和列底部统计使用的百分数数值，仅将显示文本格式化为百分比。
+	number := NewFormattedValueNumber(ratio*100, NumberFormatNone)
+	number.FormattedContent = formatNumber(ratio, NumberFormatPercent)
+	return number
 }
 
 func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType, keyDateIsTime bool) (ret *Value) {

@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"net/http"
 	"os"
 	"path"
 	"strings"
@@ -29,6 +30,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/emersion/go-ical"
+	"github.com/emersion/go-webdav"
 	"github.com/emersion/go-webdav/caldav"
 	"github.com/siyuan-note/logging"
 )
@@ -330,6 +332,8 @@ func (c *Calendars) DeleteCalendar(calendarPath string) (err error) {
 	// delete map item
 	if value, loaded := c.calendars.LoadAndDelete(calendarPath); loaded {
 		calendar = value.(*Calendar)
+	} else {
+		return webdav.NewHTTPError(http.StatusNotFound, ErrorCalDavCalendarNotFound)
 	}
 
 	// delete list item
@@ -340,7 +344,7 @@ func (c *Calendars) DeleteCalendar(calendarPath string) (err error) {
 		}
 	}
 
-	// remove address book directory
+	// 删除日历目录
 	if err = os.RemoveAll(calendar.DirectoryPath); err != nil {
 		logging.LogErrorf("remove directory [%s] failed: %s", calendar.DirectoryPath, err)
 		return

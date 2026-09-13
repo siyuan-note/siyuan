@@ -2391,7 +2391,9 @@ export class Gutter {
                     click() {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportCodeBlock", {id}, (response) => {
-                            saveExportFile(response.data.path, msgId);
+                            if (response.code === 0) {
+                                saveExportFile(response.data.path, msgId);
+                            }
                         });
                     }
                 }] : [])]
@@ -2466,7 +2468,9 @@ export class Gutter {
                             id: nodeElement.getAttribute("data-av-id"),
                             blockID: id,
                         }, response => {
-                            saveExportFile(response.data.zip);
+                            if (response.code === 0) {
+                                saveExportFile(response.data.zip);
+                            }
                         });
                     }
                 });

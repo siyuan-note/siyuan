@@ -1,3 +1,4 @@
+import type {FileTreeGetDocRequestInput} from "../../types/api";
 import {cleanupDragIndicators, createListDragTarget} from "./listDragTarget";
 import {focusBlock, focusByRange, getRangeByPoint} from "./selection";
 import {
@@ -2153,7 +2154,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
 
-                    const getDocParam: IObject = {
+                    const getDocParam: FileTreeGetDocRequestInput = {
                         id: protyle.block.id,
                         size: window.siyuan.config.editor.dynamicLoadBlocks,
                     };

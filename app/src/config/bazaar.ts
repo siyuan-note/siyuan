@@ -1,5 +1,7 @@
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
+import {ContractFormData} from "../util/contractFormData";
+import type {APIPOSTRoutes} from "../types/api";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {highlightRender} from "../protyle/render/highlightRender";
 import {Constants} from "../constants";
@@ -33,6 +35,7 @@ import {BAZAAR_README_SANITIZE_OPTIONS} from "./bazaarReadmeSanitize";
 import {
     BAZAAR_PACKAGE_CONFIG,
     BAZAAR_PACKAGE_TYPES,
+    isBazaarPackageType,
 } from "./bazaar/packageConfig";
 import {genBazaarPackagePanelHTML} from "./bazaar/html";
 import {bindBazaarEvents} from "./bazaar/events";
@@ -439,7 +442,7 @@ export const bazaar = {
                 callback(bazaar._getPackageDetail(bazaarType, packageName) || {});
                 return;
             }
-            const detail = response.data as IBazaarPackageDetail;
+            const detail = response.data;
             bazaar._setPackageDetail(bazaarType, packageName, detail);
             callback(detail);
         });
@@ -1513,25 +1516,20 @@ type="checkbox">
             return;
         }
         bazaar._setLocalPackageUploading(true, mount);
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("frontend", getFrontend());
-        formData.append("overwrite", overwrite.toString());
+        const formData = new ContractFormData<APIPOSTRoutes["/api/bazaar/installLocalBazaarPackage"]["request"]>({
+            file,
+            frontend: getFrontend(),
+            overwrite: overwrite.toString(),
+        });
         fetchPost("/api/bazaar/installLocalBazaarPackage", formData, (response) => {
-            const data = response.data as {
-                reason?: string;
-                packageType?: TBazaarType;
-                packageName?: string;
-                minAppVersion?: string;
-                updated?: boolean;
-            };
+            const data = response.data;
             if (response.code !== 0) {
-                if (data?.reason === "package-exists" && data.packageName) {
+                if (data && "reason" in data && data.reason === "package-exists" && data.packageName) {
                     confirmDialog("⚠️ " + window.siyuan.languages.update,
                         window.siyuan.languages.confirmOverwriteLocalBazaarPackage.replace("${name}", escapeHtml(data.packageName)), () => {
                             bazaar._installLocalPackage(file, app, mount, true);
                         });
-                } else if (data?.reason === "package-incompatible") {
+                } else if (data && "reason" in data && data.reason === "package-incompatible") {
                     showMessage(data.minAppVersion ?
                         window.siyuan.languages.bazaarNeedVersion.replace("${x}", data.minAppVersion) :
                         window.siyuan.languages.incompatible);
@@ -1540,7 +1538,7 @@ type="checkbox">
                 }
                 return;
             }
-            if (!data?.packageType || !data.packageName) {
+            if (!data || !("updated" in data) || !isBazaarPackageType(data.packageType) || !data.packageName) {
                 showMessage(window.siyuan.languages.uploadError);
                 return;
             }

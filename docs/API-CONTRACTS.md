@@ -24,6 +24,24 @@ Encrypted notebook lifecycle endpoints use typed requests and responses while re
 
 ## Compatibility requirements
 
+Document-tree contracts retain conditional parameter validation, path and sorting semantics, omitted callbacks, pagination defaults, and document response variants. Publish authentication preserves HTTP 429 and `Retry-After` through explicitly declared additional error statuses. Publish and encrypted-notebook admission remain before deferred field validation, and document leases cover response serialization.
+
+Asset contracts retain nullable result lists, per-file upload order and duplicate names, successful partial-upload messages, and local-insertion failure payloads. OCR columns remain string-valued. Annotation validation, published-file admission, encrypted reads and writes, deferred downloads, and upload target selection keep their existing behavior. The non-API upload entry uses the same typed model operation.
+
+Export contracts retain Markdown option defaults and numeric truncation, notebook-list filtering, ignored title-option types, optional HTML folders, and file-upload field selection. Error responses preserve message durations and empty-string resource payloads. Publish filtering, encrypted-notebook admission, response-held leases, and temporary export cleanup remain in the existing lifecycle.
+
+Repository contracts retain key encoding, snapshot metadata, numeric truncation and retention defaults, cloud pagination, and file access leases. Repository-file reads retain their media type and bytes; empty files retain the success envelope. Both file success and JSON failure use HTTP 200. For this explicitly declared shared status, `ValidateHTTPResponse` accepts raw file bytes and `ValidateErrorResponse` separately verifies known error payloads. No key material, encrypted file format, or snapshot recovery behavior changes.
+
+Flashcard contracts retain numeric truncation, pagination defaults, optional reviewed-card lists, nullable block results, and non-null deck lists. Notebook and document admission still occurs before deferred pagination errors. Card and deck mutations keep their model-layer validation and persistence behavior; encrypted notebook restrictions remain unchanged.
+
+Sync contracts retain numeric truncation, conditional direction validation in manual mode, configuration field matching and JSON numeric normalization, and message display durations. Provider imports require exactly one file and preserve encrypted package contents and recovery paths. Authorization and read-only checks still precede body decoding; synchronization and notebook encryption remain in the model layer.
+
+Marketplace contracts retain required-field ordering, whitespace handling, theme mode dependencies, rating availability and rate-limit payloads, and local-package upload errors. Package and appearance responses declare their complete nested structures, including the fixed five-element rating distribution. Upload requests keep first-file selection and overwrite parsing. Installation, removal, authentication, and publish restrictions remain in the existing business handlers and middleware.
+
+Plugin information queries retain path, query-string, and JSON-body name precedence, including whitespace and business error codes 1 through 4. URL parameters bypass body decoding, and list queries ignore the body. Plugin and RPC-method lists retain nullable arrays and entries. HTTP JSON-RPC has a separate contract for single and batch requests, success and error replies, and notification-only HTTP 204 responses. Plugin admission occurs before body reads, batch errors retain their order, and arbitrary JSON is limited to RPC parameters, results, and error details. RPC WebSocket routes declare HTTP 101 upgrades, HTTP 404 plugin admission errors, HTTP 400 text rejections, and separate incoming calls and outgoing replies or notifications. Origin authorization and connection cleanup remain in the existing upgrade lifecycle. Plugin HTTP services remain a separate protocol migration.
+
+Search contracts retain pagination defaults and numeric truncation, path validation and deduplication, ignored historical subtype filters, and null versus empty arrays. Reference search distinguishes correlation-only responses from block results and retains notebook admission before deferred parameter validation. SQL search authorization, publish filtering, encrypted notebook leases, cancellation responses, and read-only embed-update no-ops remain in their original order. Desktop and mobile callers share generated request types.
+
 History contracts retain path trimming, optional highlight defaults, fractional history-type truncation, and null versus empty result arrays. Version comparison checks both reference objects before their fields and acquires notebook leases in sorted order. Content reads and document, asset, and attribute-view rollbacks retain their history-path lease checks; notebook rollback keeps its existing model-level recovery behavior.
 
 Import contracts preserve archive cleanup, first-upload selection, untrimmed Markdown paths, and staged-token trimming and lifetime. Automatic SiYuan imports declare document, token, notebook, and notebook-collection results; mount failures retain the document payload. Obsidian task cancellation retains its task snapshot on failure. Notebook mounting, encrypted import handling, and creation notifications remain in the existing business operations.
@@ -64,7 +82,15 @@ All `/api/block/` routes use contracts. Heading-level queries retain batch-ID pr
 
 Storage contracts keep arbitrary JSON limited to storage values; keys, recent documents, search criteria, inline styles, and attribute-view palettes have structured types. Recent-document mutations retain their read-only no-op before parsing the body. An optional typed `beforeDecode` callback on `contractHandler` preserves this ordering and may return a response before decoding; route checks still require an explicit endpoint binding. Inline-style version 1 updates preserve existing built-in configuration, while version 2 and palette requests retain their struct-decoding compatibility.
 
+`DirectJSONOutput` preserves protocols that return their own JSON objects or arrays without the kernel envelope. Use `SuccessDirectJSON` for these payloads. Endpoints that also support empty notification responses explicitly declare `NoContent` and return `SuccessNoContent`; HTTP validation requires status 204 and an empty body. Authentication and read-only failures retain the kernel error envelope. Generated declarations record the direct output mode and optional empty-response support.
+
 ## Multipart requests
+
+SSE endpoints declare each event name and payload with `SSEOptions` and `SSEEvent`. `StreamSSE` executes the existing stream lifecycle within the request; cancellation and cleanup remain inside that lifecycle. HTTP validation distinguishes `text/event-stream` from the declared pre-stream JSON failures, while `ValidateSSEEvent` checks each JSON event payload separately. Generated metadata exposes the event types; buffered fetch helpers still return the complete stream as text.
+
+Page responses use `HTTPContentOptions` to declare permitted HTTP status and media-type pairs and `SuccessHTTPContent` to preserve their bytes. This uses the existing binary transport and keeps JSON middleware errors separate. `FastJSON` preserves selected large responses' accelerated JSON encoder without changing their typed payloads or response envelope; encoding failures retain the standard encoder fallback.
+
+`WebSocketOutput` uses `WebSocketOptions` to declare incoming and outgoing message types and the plugin admission failure status. `UpgradeWebSocket` hands the response writer to the connection lifecycle from `contractHandler`; `RejectWebSocket` serializes the declared rejection payload. Generated route metadata includes both message schemas, and `ValidateWebSocketMessage` validates frames separately from handshake responses and middleware envelopes. Handshake validation checks HTTP status and body; network regression tests verify upgrade headers, Origin rejection, message exchange, and cancellation.
 
 Optional `*string` form fields preserve omission separately from an explicit empty string; use `nonnullable` because multipart text fields cannot contain JSON null. Import handlers use this distinction for defaults and delayed field validation. Upload progress starts before multipart parsing, and parse failures clear it before responding; Gin's cached form is reused for typed binding.
 
@@ -73,6 +99,8 @@ Optional `*string` form fields preserve omission separately from an explicit emp
 `FormBody` supports endpoints such as `putFile` that accept both URL-encoded and multipart forms. It preserves Gin `PostForm` parsing, including first-value selection and available fields after parsing errors. Conditional requirements and delayed validation remain in the handler: directory creation does not require a file, and modification-time validation occurs after writing. The generated caller type uses the same typed form interface as multipart uploads.
 
 Use `MultipartBody` for file uploads. Request structs declare string fields and `*multipart.FileHeader` fields using their wire names; file schemas use `type: string` and `format: binary`, generating `Blob` declarations. The adapter retains Gin multipart parsing and binds the first value for repeated fields. File contents remain available through `Open`, so handlers preserve their read and recovery logic. Unsupported field types and binding options fail generation.
+
+Fixed fields declared as `[]*multipart.FileHeader` receive all files in their original order and generate `Array<Blob>`. An optional absent file list remains nil. Text and single-file fields still select the first value. `SuccessWithMessage` retains nonempty messages on successful responses, including partial batch uploads.
 
 Frontend callers construct `ContractFormData` from typed fields before passing it to the existing fetch functions. The generated signatures require the endpoint's fields and distinguish file values from strings; raw `FormData` cannot satisfy a migrated upload contract. Optional fields are omitted and string values are not trimmed. Plugin callers can implement the generated `APIFormData<Request>` interface when constructing their forms.
 
@@ -106,7 +134,8 @@ Run from `kernel/`:
 
 ```text
 go test ./apicontract/...
-go test -tags "fts5 sqlcipher" ./api -run "TestAPIContract|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestContract.*NotebookResponseLease" -count=1
+go test -tags "fts5 sqlcipher" ./model -run "TestMultipartUpload|TestInsertLocalAssets|TestRecordAssetUpload|TestReadRTFD|TestCopyRTFD" -count=1
+go test -tags "fts5 sqlcipher" ./api ./plugin -run "TestAPIContract|TestAsset.*Contract|TestInsertLocalAssets|TestSetFileAnnotation|TestDeferredAsset|TestExportBrowserHTML|TestCopyExport|TestBazaarContract|TestRepoContract|TestRepoFileWireCompatibility|TestRPC.*Contract|TestRPCWebSocketOriginCheck|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestContract.*NotebookResponseLease" -count=1
 ```
 
 `tsconfig.api.json` separately enables strict checks and declaration-file checking for invalid parameters, misspelled fields, required bodies, success and failure branches, nullability, and method mismatches. The main application retains its existing configuration; do not assume strict null checks apply to every call. Handler tests use temporary workspaces and isolated test processes without starting or restarting the running kernel.

@@ -691,7 +691,7 @@ export class Plugin {
         x?: number,
         y?: number,
         targetElement?: HTMLElement,
-        originalRefBlockIDs?: IObject,
+        originalRefBlockIDs?: Record<string, string>,
         isBacklink: boolean,
     }) => {
         if (isPluginDisposed(this)) {

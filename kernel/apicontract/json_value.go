@@ -1,9 +1,20 @@
 package apicontract
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // JSONValue 仅用于协议明确允许任意 JSON 的透传字段，零值表示 null。
 type JSONValue struct{ raw json.RawMessage }
+
+// EncodedJSONValue 保留业务层已编码的任意 JSON 值，包括整型结果的完整数字精度。
+func EncodedJSONValue(data []byte) (JSONValue, error) {
+	if !json.Valid(data) {
+		return JSONValue{}, fmt.Errorf("invalid encoded JSON value")
+	}
+	return JSONValue{raw: append(json.RawMessage(nil), data...)}, nil
+}
 
 func (v JSONValue) StringValue() (value string, ok bool) {
 	if len(v.raw) == 0 || v.raw[0] != '"' {

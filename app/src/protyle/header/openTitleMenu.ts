@@ -218,7 +218,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                 accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
                 click: () => {
                     fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
-                        openCardByData(protyle.app, response.data, "doc", protyle.block.rootID, response.data.name);
+                        openCardByData(protyle.app, response.data, "doc", protyle.block.rootID);
                     });
                 }
             }, {
@@ -274,16 +274,20 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
             async click() {
                 const searchPath = isBoxDoc ? "" : getDisplayName(protyle.path, false, true);
                 /// #if MOBILE
-                const pathResponse = isBoxDoc ? undefined : await fetchSyncPost("/api/filetree/getHPathByPath", {
+                let hPath = getNotebookName(protyle.notebookId);
+                if (!isBoxDoc) {
+                    const pathResponse = await fetchSyncPost("/api/filetree/getHPathByPath", {
                         notebook: protyle.notebookId,
                         path: searchPath + ".sy"
                     });
-                if (!isBoxDoc && (pathResponse?.code !== 0 || typeof pathResponse?.data !== "string")) {
-                    return;
+                    if (pathResponse.code !== 0) {
+                        return;
+                    }
+                    hPath = pathPosix().join(hPath, pathResponse.data);
                 }
                 popSearch(protyle.app, {
                     hasReplace: false,
-                    hPath: isBoxDoc ? getNotebookName(protyle.notebookId) : pathPosix().join(getNotebookName(protyle.notebookId), pathResponse.data),
+                    hPath,
                     idPath: [isBoxDoc ? protyle.notebookId : pathPosix().join(protyle.notebookId, searchPath)],
                     page: 1,
                 });

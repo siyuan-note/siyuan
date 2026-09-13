@@ -350,7 +350,15 @@ func SetSyncLAN(enabled bool, maxConcurrentReqs int) {
 	refreshLANSyncManager()
 }
 
-func GetSyncLANStatus() map[string]interface{} {
+type SyncLANStatus struct {
+	Enabled           bool `json:"enabled"`
+	Active            bool `json:"active"`
+	DiscoveredPeers   int  `json:"discoveredPeers"`
+	ConnectedPeers    int  `json:"connectedPeers"`
+	MaxConcurrentReqs int  `json:"maxConcurrentReqs"`
+}
+
+func GetSyncLANStatus() SyncLANStatus {
 	lanSyncManagerMu.RLock()
 	manager := lanSyncManager
 	lanSyncManagerMu.RUnlock()
@@ -370,11 +378,11 @@ func GetSyncLANStatus() map[string]interface{} {
 		enabled = Conf.Sync.LAN.Enabled
 		maxConcurrentReqs = Conf.Sync.LAN.MaxConcurrentReqs
 	}
-	return map[string]interface{}{
-		"enabled":           enabled,
-		"active":            nil != manager,
-		"discoveredPeers":   discoveredCount,
-		"connectedPeers":    connectedCount,
-		"maxConcurrentReqs": maxConcurrentReqs,
+	return SyncLANStatus{
+		Enabled:           enabled,
+		Active:            nil != manager,
+		DiscoveredPeers:   discoveredCount,
+		ConnectedPeers:    connectedCount,
+		MaxConcurrentReqs: maxConcurrentReqs,
 	}
 }

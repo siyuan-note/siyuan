@@ -820,15 +820,11 @@ export class Files extends Model {
                     }
                     const toDocOptions: {
                         targetNoteBook: string;
-                        pushMode: number;
                         toTop?: boolean;
-                        srcHeadingID?: string;
-                        srcListItemID?: string;
                         targetPath?: string;
                         previousPath?: string;
                     } = {
                         targetNoteBook: toURL,
-                        pushMode: 0,
                     };
                     if (newElement.classList.contains("dragover")) {
                         toDocOptions.targetPath = toPath;
@@ -845,11 +841,9 @@ export class Files extends Model {
                         }
                     }
                     if (gutterTypes[0] === "nodeheading") {
-                        toDocOptions.srcHeadingID = gutterTypes[2].split(",")[0];
-                        fetchPost("/api/filetree/heading2Doc", toDocOptions);
+                        fetchPost("/api/filetree/heading2Doc", {...toDocOptions, srcHeadingID: gutterTypes[2].split(",")[0]});
                     } else {
-                        toDocOptions.srcListItemID = gutterTypes[2].split(",")[0];
-                        fetchPost("/api/filetree/li2Doc", toDocOptions);
+                        fetchPost("/api/filetree/li2Doc", {...toDocOptions, srcListItemID: gutterTypes[2].split(",")[0]});
                     }
                 }
                 newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
@@ -1923,7 +1917,9 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
                     path: item.path,
                     app: Constants.SIYUAN_APPID,
                 });
-                newLiElement = await this.selectItem(response.data.box, filePath, response.data, setStorage, isSetCurrent);
+                if (response.code === 0) {
+                    newLiElement = await this.selectItem(response.data.box, filePath, response.data, setStorage, isSetCurrent);
+                }
             }
         }
         if (isSetCurrent) {
@@ -2043,7 +2039,9 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
                 path: currentPath,
                 app: Constants.SIYUAN_APPID,
             });
-            liElement = await this.onLsSelect(response.data, filePath, setStorage, isSetCurrent);
+            if (response.code === 0) {
+                liElement = await this.onLsSelect(response.data, filePath, setStorage, isSetCurrent);
+            }
         }
         this.refreshPublishAccessSwitch();
         return liElement;

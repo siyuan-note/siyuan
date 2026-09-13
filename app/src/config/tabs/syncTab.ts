@@ -10,7 +10,7 @@ import {writeText} from "../../protyle/util/compatibility";
 import {bindSyncCloudListEvent, renderSyncCloudList, setKey} from "../../sync/syncGuide";
 import {genConfigItemMainHtml, genConfigItemName} from "../render/fragments";
 import {getLANSyncSearchAvailability, getSyncProviderConfigKeywords} from "./syncUi";
-import {mountLANSyncStatus, mountSyncAssetDownloadMode, patchSyncConfig} from "./syncRuntime";
+import {mountLANSyncStatus, mountSyncAssetDownloadMode} from "./syncRuntime";
 import {openHistory} from "../../history/history";
 
 const registerSyncGroup = (tab: SettingTabBuilder) => {
@@ -25,7 +25,6 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
             {value: 3, label: "WebDAV"},
             ...(["std", "docker"].includes(window.siyuan.config.system.container) ? [{value: 4, label: window.siyuan.languages.localFileSystem}] : []),
         ],
-        save: (value) => patchSyncConfig("sync.provider", value),
     });
     group.slot({
         key: "syncProviderConfig",
@@ -40,12 +39,10 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
     group.switch("sync.enabled", {
         title: window.siyuan.languages.cloudSync,
         desc: window.siyuan.languages.openSyncTip2,
-        save: (value) => patchSyncConfig("sync.enabled", value),
     });
     group.switch("sync.generateConflictDoc", {
         title: window.siyuan.languages.generateConflictDoc,
         desc: window.siyuan.languages.generateConflictDocTip,
-        save: (value) => patchSyncConfig("sync.generateConflictDoc", value),
     });
     group.select("sync.mode", {
         title: window.siyuan.languages.syncMode,
@@ -55,7 +52,6 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
             {value: 2, label: window.siyuan.languages.syncMode2},
             {value: 3, label: window.siyuan.languages.syncMode3},
         ],
-        save: (value) => patchSyncConfig("sync.mode", value),
     });
     group.select("sync.assetDownloadMode", {
         title: window.siyuan.languages.syncAssetDownloadMode,
@@ -64,7 +60,6 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
             {value: 0, label: window.siyuan.languages.syncAssetDownloadAll},
             {value: 1, label: window.siyuan.languages.syncAssetDownloadOnDemand},
         ],
-        save: (value) => patchSyncConfig("sync.assetDownloadMode", value),
         afterMount: mountSyncAssetDownloadMode,
     });
     group.number("sync.interval", {
@@ -73,17 +68,14 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
         min: 30,
         max: 43200,
         unit: window.siyuan.languages.second,
-        save: (value) => patchSyncConfig("sync.interval", value),
     });
     group.switch("sync.perception", {
         title: window.siyuan.languages.syncPerception,
         desc: window.siyuan.languages.syncPerceptionTip,
-        save: (value) => patchSyncConfig("sync.perception", value),
     });
     group.switch("sync.lan.enabled", {
         title: window.siyuan.languages.lanSync,
         desc: `${window.siyuan.languages.lanSyncTip}<div data-type="lanSyncStatus"></div>`,
-        save: (value) => patchSyncConfig("sync.lan.enabled", value),
         afterMount: mountLANSyncStatus,
         searchAvailability: getLANSyncSearchAvailability,
     });

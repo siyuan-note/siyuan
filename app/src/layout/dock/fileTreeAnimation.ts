@@ -1,5 +1,35 @@
 const FILE_TREE_ANIMATION_DURATION = 200;
 const FILE_TREE_ANIMATION_EASING = "cubic-bezier(0, 0, .2, 1)";
+const visibilityAnimations = new WeakMap<HTMLElement, Animation>();
+
+// 保留置顶列表节点，通过高度过渡切换可见性，快速反向操作时取消上一次动画。
+export const setFileTreeVisibility = (element: HTMLElement, visible: boolean, animate = false) => {
+    const previous = visibilityAnimations.get(element);
+    const startHeight = previous ? element.getBoundingClientRect().height : visible ? 0 : element.getBoundingClientRect().height;
+    visibilityAnimations.delete(element);
+    previous?.cancel();
+    element.style.removeProperty("overflow");
+    if (!animate) {
+        element.classList.toggle("fn__none", !visible);
+        return;
+    }
+    element.classList.remove("fn__none");
+    const endHeight = visible ? element.getBoundingClientRect().height : 0;
+    element.style.overflow = "clip";
+    const animation = element.animate([
+        {height: `${startHeight}px`, maxHeight: `${startHeight}px`},
+        {height: `${endHeight}px`, maxHeight: `${endHeight}px`},
+    ], getAnimationOptions());
+    visibilityAnimations.set(element, animation);
+    const finish = () => {
+        if (visibilityAnimations.get(element) !== animation) { return; }
+        visibilityAnimations.delete(element);
+        element.classList.toggle("fn__none", !visible);
+        animation.cancel();
+        element.style.removeProperty("overflow");
+    };
+    animation.finished.then(finish, finish);
+};
 const animatingElements = new WeakMap<HTMLElement, {
     animation: Animation,
     type: "expand" | "collapse",

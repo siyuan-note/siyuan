@@ -1,3 +1,4 @@
+import type {FileTreeGetDocRequestInput} from "../types/api";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -1058,7 +1059,7 @@ export const zoomOut = (options: {
             pushBack();
         }
     }
-    const getDocParam: IObject = {
+    const getDocParam: FileTreeGetDocRequestInput = {
         id: options.id,
         size: options.id === options.protyle.block.rootID ? window.siyuan.config.editor.dynamicLoadBlocks : Constants.SIZE_GET_MAX,
     };
@@ -1123,7 +1124,7 @@ export const zoomOut = (options: {
                     focusBlock(showElement, undefined, true, true);
                 }
             } else if (!options.focusId) {
-                const getDocParam: IObject = {
+                const getDocParam: FileTreeGetDocRequestInput = {
                     id: options.protyle.block.rootID,
                     size: window.siyuan.config.editor.dynamicLoadBlocks,
                 };
@@ -1142,7 +1143,7 @@ export const zoomOut = (options: {
                 });
                 return;
             } else if (options.id === options.protyle.block.rootID) { // 聚焦返回后，该块是动态加载的，但是没加载出来
-                const getDocParam: IObject = {
+                const getDocParam: FileTreeGetDocRequestInput = {
                     id: options.focusId,
                     mode: 3,
                     size: window.siyuan.config.editor.dynamicLoadBlocks,
@@ -1361,7 +1362,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 click() {
                     fetchPost("/api/asset/ocr", {
                         path: imgElement.getAttribute("src"),
-                        force: true
                     });
                 }
             }],

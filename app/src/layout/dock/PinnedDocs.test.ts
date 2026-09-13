@@ -4,6 +4,7 @@ import {readFileSync} from "node:fs";
 import {join} from "node:path";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
+import {getPinnedDropPosition} from "../../util/pinnedDocsDrop";
 
 interface IPanelHarness {
     element: unknown;
@@ -20,13 +21,13 @@ interface IPanelHarness {
     names: Map<string, string>;
     appendDoc(...args: unknown[]): Promise<void>;
     loadChildren(row: unknown, children: unknown, generation: number): Promise<void>;
-    drop(ids: string[], x: number, y: number): Promise<void>;
+    drop(ids: string[], x: number, y: number, allowSource?: boolean): Promise<void>;
     click(event: unknown): void;
     menu(row: unknown, x: number, y: number): void;
     toggle(row: unknown): void;
     open(id: string, notebook: string): void;
     mobile?: boolean;
-    previewDrop(): void;
+    previewDrop(x: number, y: number, allowSource?: boolean): boolean | void;
     clearDrop(): void;
     scheduleRefresh(changedID?: string): void;
     dropTarget?: {id: string, position: string};
@@ -36,6 +37,7 @@ interface IPanelHarness {
 }
 
 const loadPanel = (fetchCode = 0) => {
+    const hitTest = {target: null as unknown};
     const storage = new Map<string, string>();
     const docs: {id: string, notebook: string, name: string}[] = [];
     const childData = {effectiveSortMode: 6, files: [] as {id: string, name: string, icon?: string}[]};
@@ -53,13 +55,16 @@ const loadPanel = (fetchCode = 0) => {
         exports,
         localStorage: {setItem: (key: string, value: string) => storage.set(key, value)},
         window: {siyuan: {config, notebooks: [], languages: {}}},
-        document: {activeElement: null, createElement: (tagName: string) => ({
+        document: {activeElement: null, elementFromPoint: () => hitTest.target, createElement: (tagName: string) => ({
             tagName, style: {setProperty: () => {}},
             setAttribute: () => {}, addEventListener: () => {},
             dataset: {}, children: [] as unknown[],
             append(child: unknown) { this.children.push(child); },
         })},
         require: (name: string) => {
+            if (name.endsWith("/fileTreeAnimation")) { return {setFileTreeVisibility: (element: HTMLElement, visible: boolean) => element.classList.toggle("fn__none", !visible)}; }
+            if (name.endsWith("/pinnedDocsDrop")) { return {getPinnedDropPosition}; }
+            if (name.endsWith("/dragover")) { return {dragOverScroll: () => {}}; }
             if (name.endsWith("/compatibility")) { return {isOnlyMeta: (event: MouseEvent) => Boolean(event.ctrlKey)}; }
             if (name.endsWith("/fileTreeIcon")) { return {getFileTreeIconHTML: () => ""}; }
             if (name.endsWith("/escape")) { return {escapeHtml: (value: string) => value}; }
@@ -81,7 +86,7 @@ const loadPanel = (fetchCode = 0) => {
     panel.scheduleRefresh = () => {};
     panel.list = {querySelectorAll: (): unknown[] => []};
     panel.sourceTree = {querySelectorAll: (): unknown[] => []};
-    return {panel, calls, config, docs, storage, childData};
+    return {panel, calls, config, docs, storage, childData, hitTest};
 };
 
 test("collapse clears descendant expansion and persists the closed section", async () => {
@@ -198,7 +203,7 @@ test("pinned icons respect editing, expansion and readonly settings", () => {
 
 test("root drops create an entry without invoking source movement", async () => {
     const {panel, calls} = loadPanel();
-    panel.previewDrop = () => { panel.dropTarget = {id: "parent", position: "pin-before"}; };
+    panel.previewDrop = () => { panel.dropTarget = {id: "parent", position: "pin-before"}; return true; };
     await panel.drop(["child"], 0, 0);
     assert.deepEqual(calls, [{kind: "pin", args: [["child"], "pin", "parent", false]}]);
 });
@@ -214,6 +219,45 @@ test("child ordering uses the existing conflict confirmation and inside drops mo
     assert.equal(calls[0].kind, "http");
     assert.equal(calls[0].args[0], "/api/filetree/moveDocsByID");
     assert.equal(JSON.stringify(calls[0].args[1]), JSON.stringify({fromIDs: ["child"], toID: "parent"}));
+});
+
+test("dropping on a notebook resolves its outer list ID with or without root documents", async () => {
+    const {panel, calls, hitTest} = loadPanel();
+    const highlights: string[] = [];
+    const row = {dataset: {type: "navigation-root", nodeId: ""},
+        closest: (selector: string) => selector === "ul[data-url]" ? {dataset: {url: "notebook"}} : null,
+        getBoundingClientRect: () => ({top: 0, height: 30}), classList: {add: (name: string) => highlights.push(name)}};
+    hitTest.target = {closest: () => row};
+    panel.sourceTree = {contains: () => true, getBoundingClientRect: () => ({})};
+    panel.element = {contains: () => false};
+    for (const id of ["", "notebook"]) {
+        row.dataset.nodeId = id;
+        await panel.drop(["document"], 10, 15, true);
+    }
+    assert.deepEqual(highlights, ["dragover", "dragover"]);
+    assert.equal(calls.length, 2);
+    calls.forEach(call => {
+        assert.equal(call.args[0], "/api/filetree/moveDocsByID");
+        assert.equal(JSON.stringify(call.args[1]), JSON.stringify({fromIDs: ["document"], toID: "notebook"}));
+    });
+});
+
+test("pinned heading highlights the whole row while root reorder keeps insertion lines", () => {
+    const {panel, hitTest} = loadPanel();
+    const highlights: string[] = [];
+    panel.sourceTree = {contains: () => false};
+    panel.element = {contains: () => true};
+    panel.list = {getBoundingClientRect: () => ({})};
+    panel.heading = {classList: {add: (name: string) => highlights.push(name)}};
+    hitTest.target = {closest: (selector: string) => selector === "[data-pin-heading]" ? {} : null};
+    panel.previewDrop(10, 0);
+    assert.deepEqual(highlights, ["dragover"]);
+    assert.equal(panel.dropTarget.id, "");
+    const row = {dataset: {pinRoot: "true", nodeId: "document"},
+        getBoundingClientRect: () => ({top: 0, height: 30}), classList: {add: (name: string) => highlights.push(name)}};
+    hitTest.target = {closest: () => row};
+    panel.previewDrop(10, 1);
+    assert.equal(highlights[1], "dragover__top");
 });
 
 test("invalid drop targets and self moves do not mutate source documents", async () => {

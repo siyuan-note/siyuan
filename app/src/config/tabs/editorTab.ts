@@ -90,22 +90,18 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
     ].filter((item) => getHostCapabilities().localFileSystem || !["app", "folder"].includes(item.value));
     const assetOpenControls = [
         {
-            key: "click",
             label: window.siyuan.languages.assetOpenClick,
             control: controlSelect("editor.assetOpen.click", {options: assetOpenOptions}),
         },
         {
-            key: "ctrlClick",
             label: window.siyuan.languages.assetOpenCtrlClick,
             control: controlSelect("editor.assetOpen.ctrlClick", {options: assetOpenOptions}),
         },
         {
-            key: "altClick",
             label: window.siyuan.languages.assetOpenAltClick,
             control: controlSelect("editor.assetOpen.altClick", {options: assetOpenOptions}),
         },
         {
-            key: "shiftClick",
             label: window.siyuan.languages.assetOpenShiftClick,
             control: controlSelect("editor.assetOpen.shiftClick", {options: assetOpenOptions}),
         },
@@ -128,7 +124,6 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
         ] as StackLine[]),
         controls: assetOpenControls.map((item) => ({
             control: item.control,
-            save: (value) => editorConfigApi.patch(`assetOpen.${item.key}`, value),
         })),
     });
     /// #endif

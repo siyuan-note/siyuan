@@ -77,6 +77,10 @@ func TestContractDocInfoNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, true, false)
 }
 
+func TestContractGetDocNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, true, false)
+}
+
 func TestContractTreeStatNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, false, false)
 }
@@ -216,6 +220,7 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	engine.POST("/api/block/getRefIDs", getRefIDs)
 	engine.POST("/api/block/checkBlockRef", checkBlockRef)
 	engine.POST("/api/block/getDocInfo", getDocInfo)
+	engine.POST("/api/filetree/getDoc", getDoc)
 	engine.POST("/api/block/getTreeStat", getTreeStat)
 	engine.POST("/api/block/getBlockBreadcrumb", getBlockBreadcrumb)
 	engine.POST("/api/block/getBlockBreadcrumbChildren", getBlockBreadcrumbChildren)
@@ -258,6 +263,8 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 		args["scope"] = "notebook"
 	case "TestContractDocInfoNotebookResponseLease":
 		endpoint, typedQuery = "/api/block/getDocInfo", true
+	case "TestContractGetDocNotebookResponseLease":
+		endpoint, typedQuery = "/api/filetree/getDoc", true
 	case "TestContractTreeStatNotebookResponseLease":
 		endpoint, typedQuery = "/api/block/getTreeStat", true
 		args["includeEmbed"] = true
@@ -300,7 +307,7 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	case <-time.After(5 * time.Second):
 		t.Fatal("response never reached writer")
 	}
-	if !typedQuery && strings.Count(string(body), "REVIEW-SECRET-CONTENT") != count {
+	if (!typedQuery || t.Name() == "TestContractGetDocNotebookResponseLease") && strings.Count(string(body), "REVIEW-SECRET-CONTENT") != count {
 		releaseWriter.Do(func() { close(writer.proceed) })
 		<-responseDone
 		t.Fatalf("fixture did not produce plaintext: %s", body)

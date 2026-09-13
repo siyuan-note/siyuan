@@ -41,7 +41,7 @@ export class BlockPanel {
     public editors: Protyle[] = [];
     private observerResize: ResizeObserver;
     private observerLoad: IntersectionObserver;
-    private originalRefBlockIDs: IObject;
+    private originalRefBlockIDs: Record<string, string>;
     private editorResizeCleanup?: () => void;
     private refDefElements = new Map<IRefDefs, HTMLElement>();
     private refDefEditors = new Map<IRefDefs, Protyle>();
@@ -54,7 +54,7 @@ export class BlockPanel {
         targetElement?: HTMLElement,
         refDefs: IRefDefs[]
         isBacklink: boolean,
-        originalRefBlockIDs?: IObject,  // isBacklink 为 true 时有效
+        originalRefBlockIDs?: Record<string, string>,  // isBacklink 为 true 时有效
         x?: number,
         y?: number,
     }) {

@@ -945,6 +945,10 @@ func bootSyncRepoWithDNSRetry() (err error) {
 }
 
 func getSyncIgnoreLines() (ret []string) {
+	// 忽略旧版同步配置，读取用户规则失败时仍需保留此规则。
+	defer func() {
+		ret = append(ret, "/.siyuan/conf.json")
+	}()
 	ignore := filepath.Join(util.DataDir, ".siyuan", "syncignore")
 	err := os.MkdirAll(filepath.Dir(ignore), 0755)
 	if err != nil {

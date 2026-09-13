@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	ignore "github.com/sabhiram/go-gitignore"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -96,6 +97,72 @@ func TestPathsAffectSync(t *testing.T) {
 		if PathsAffectSync(ignored) {
 			t.Fatalf("repository ignored path should not affect sync: %s", ignored)
 		}
+	}
+}
+
+func TestPathsAffectSyncMetadata(t *testing.T) {
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = oldDataDir
+	})
+
+	for _, tc := range []struct {
+		path string
+		want bool
+	}{
+		{".siyuan/searchignore", true},
+		{".siyuan/embeddingignore", true},
+		{".siyuan/indexignore", true},
+		{".siyuan/refsearchignore", true},
+		{".siyuan/data-crypto-backup.json", true},
+		{".siyuan/conf.json", false},
+		{".siyuan/.hidden/file.json", false},
+		{".hidden/.siyuan/file.json", false},
+		{"notebook/.siyuan/conf.json", true},
+		{".siyuan/recovery.tmp", false},
+		{"storage/view-state-corrupted-20260913000000.json", false},
+	} {
+		t.Run(tc.path, func(t *testing.T) {
+			path := filepath.Join(util.DataDir, filepath.FromSlash(tc.path))
+			writeSyncPathTestFile(t, path)
+			if got := PathsAffectSync(path); got != tc.want {
+				t.Fatalf("existing path: got %v, want %v", got, tc.want)
+			}
+			if err := os.Remove(path); nil != err {
+				t.Fatal(err)
+			}
+			if got := PathsAffectSync(path); got != tc.want {
+				t.Fatalf("removed path: got %v, want %v", got, tc.want)
+			}
+		})
+	}
+
+	metadataDir := filepath.Join(util.DataDir, ".siyuan")
+	writeSyncPathTestFile(t, filepath.Join(metadataDir, "data-crypto-backup.json"))
+	matcher := ignore.CompileIgnoreLines(getSyncIgnoreLines()...)
+	if err := os.Remove(filepath.Join(metadataDir, "syncignore")); nil != err {
+		t.Fatal(err)
+	}
+	if !pathAffectsSync(util.DataDir, metadataDir, matcher) {
+		t.Fatal("metadata directory without syncignore should affect sync")
+	}
+	matcher = ignore.CompileIgnoreLines("/.siyuan/data-crypto-backup.json")
+	if pathAffectsSync(util.DataDir, metadataDir, matcher) {
+		t.Fatal("ignored metadata should not affect sync")
+	}
+}
+
+func TestSyncIgnoreLegacyConfReadFailure(t *testing.T) {
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = oldDataDir
+	})
+	writeSyncPathTestFile(t, filepath.Join(util.DataDir, ".siyuan"))
+	matcher := ignore.CompileIgnoreLines(getSyncIgnoreLines()...)
+	if !matcher.MatchesPath("/.siyuan/conf.json") {
+		t.Fatal("legacy sync configuration must remain ignored when rules cannot be read")
 	}
 }
 

@@ -61,13 +61,12 @@ func IncSyncIfNeeded(absPaths ...string) {
 }
 
 func pathAffectsSync(dataDir, absPath string, matcher *ignore.GitIgnore) bool {
-	absPath = util.ResolveLongestExistingParent(absPath)
 	relPath, ok := dataRelativePath(dataDir, absPath)
 	if !ok {
 		return false
 	}
 
-	// 修改同步忽略规则会改变仓库内容，规则文件本身虽然不参与同步也需要重新计划同步。
+	// 修改同步忽略规则会改变仓库内容，即使规则排除了规则文件本身也需要重新计划同步。
 	if "/.siyuan/syncignore" == relPath {
 		return true
 	}
@@ -150,7 +149,7 @@ func syncPathHasSkippedDir(relPath string, includeLast bool) bool {
 		parts = parts[:len(parts)-1]
 	}
 	for _, part := range parts {
-		if strings.HasPrefix(part, ".") || "filesys_status_check" == part {
+		if (strings.HasPrefix(part, ".") && ".siyuan" != part) || "filesys_status_check" == part {
 			return true
 		}
 	}

@@ -700,7 +700,19 @@ const configIsSame = (config: Config.IUILayoutTabSearchConfig, config2: Config.I
 export const initCriteriaMenu = (element: HTMLElement, data: Config.IUILayoutTabSearchConfig[], config: Config.IUILayoutTabSearchConfig) => {
     fetchPost("/api/storage/getCriteria", {}, (response) => {
         let html = "";
-        response.data.forEach((item: Config.IUILayoutTabSearchConfig) => {
+        response.data?.forEach((criterion) => {
+            if (!criterion) {
+                return;
+            }
+            const defaults = getDefaultSubType();
+            const item: Config.IUILayoutTabSearchConfig = {
+                ...criterion,
+                subTypes: {
+                    heading: {...defaults.heading, ...criterion.subTypes?.heading},
+                    list: {...defaults.list, ...criterion.subTypes?.list},
+                    listItem: {...defaults.listItem, ...criterion.subTypes?.listItem},
+                },
+            };
             data.push(item);
             let isSame = false;
             if (configIsSame(item, config)) {

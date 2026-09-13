@@ -813,9 +813,10 @@ export const getLocalStorage = (cb: () => void) => {
             Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS, Constants.LOCAL_IMAGES,
             Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS, Constants.LOCAL_MOVE_PATH, Constants.LOCAL_RECENT_DOCS,
             Constants.LOCAL_CLOSED_TABS].forEach((key) => {
-            if (typeof response.data[key] === "string") {
+            const value = response.data[key];
+            if (typeof value === "string") {
                 try {
-                    const parseData = JSON.parse(response.data[key]);
+                    const parseData = JSON.parse(value);
                     if (typeof parseData === "number") {
                         // https://github.com/siyuan-note/siyuan/issues/8852 Object.assign 会导致 number to Number
                         window.siyuan.storage[key] = parseData;

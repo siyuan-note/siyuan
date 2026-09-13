@@ -39,8 +39,15 @@ func notebookConfContract(value *conf.BoxConf) *apicontract.NotebookConf {
 
 // contractHandler 将请求绑定和响应类型与注册契约关联，业务入口继续使用现有中间件。
 func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, Data],
-	handler func(*gin.Context, Request) apicontract.Response[Data]) gin.HandlerFunc {
+	handler func(*gin.Context, Request) apicontract.Response[Data], beforeDecode ...func(*gin.Context) *apicontract.Response[Data]) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// 保留在读取请求体前完成的角色判断或大小限制，提前响应也使用相同的载荷类型。
+		for _, before := range beforeDecode {
+			if response := before(c); response != nil {
+				c.JSON(http.StatusOK, response)
+				return
+			}
+		}
 		var request Request
 		var err error
 		if endpoint.Definition().Body == apicontract.MultipartBody {

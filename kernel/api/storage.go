@@ -17,7 +17,8 @@
 package api
 
 import (
-	"net/http"
+	"encoding/json"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -26,68 +27,44 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func getLocalStorage(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var getLocalStorage = contractHandler(apicontract.GetLocalStorage, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[map[string]apicontract.JSONValue] {
 
 	data := model.GetLocalStorage()
 	if model.IsReadOnlyRoleContext(c) {
 		data = model.FilterLocalStorageByPublishAccess(data)
 	}
-	ret.Data = data
-}
+	return storageContract(data)
+})
 
-func getLocalStorageVal(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var getLocalStorageVal = contractHandler(apicontract.GetLocalStorageVal, func(c *gin.Context, request apicontract.StorageKeyRequest) apicontract.Response[apicontract.JSONValue] {
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var key string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("key", &key, true, true)) {
-		return
-	}
-
+	key := request.Key
 	data := model.GetLocalStorage()
 	if model.IsReadOnlyRoleContext(c) {
 		data = model.FilterLocalStorageByPublishAccess(data)
 	}
-	ret.Data = data[key]
-}
-
-func getLocalStorageVals(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+	serialized, err := json.Marshal(data[key])
+	if err != nil {
+		return apicontract.Failure[apicontract.JSONValue](-1, err.Error())
 	}
-
-	var keysArg []any
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keys", &keysArg, true, true)) {
-		return
+	var value apicontract.JSONValue
+	if err = json.Unmarshal(serialized, &value); err != nil {
+		return apicontract.Failure[apicontract.JSONValue](-1, err.Error())
 	}
+	return apicontract.Success(value)
+})
 
-	var keys []string
-	for _, key := range keysArg {
-		ks, elemOk := key.(string)
-		if !elemOk {
-			ret.Code = -1
-			ret.Msg = "Field [keys]: each element should be of type [String]"
-			return
+var getLocalStorageVals = contractHandler(apicontract.GetLocalStorageVals, func(c *gin.Context, request apicontract.StorageKeysRequest) apicontract.Response[map[string]apicontract.JSONValue] {
+
+	keys := request.Keys
+	if len(keys) == 0 {
+		return apicontract.Failure[map[string]apicontract.JSONValue](-1, "Field [keys] must not be empty")
+	}
+	for _, key := range keys {
+		if key == "" {
+			return apicontract.Failure[map[string]apicontract.JSONValue](-1, "Field [keys]: each element must not be empty")
 		}
-		if ks == "" {
-			ret.Code = -1
-			ret.Msg = "Field [keys]: each element must not be empty"
-			return
-		}
-		keys = append(keys, ks)
 	}
-
 	data := model.GetLocalStorage()
 	if model.IsReadOnlyRoleContext(c) {
 		data = model.FilterLocalStorageByPublishAccess(data)
@@ -96,523 +73,329 @@ func getLocalStorageVals(c *gin.Context) {
 	for _, k := range keys {
 		out[k] = data[k]
 	}
-	ret.Data = out
-}
+	return storageContract(out)
+})
 
-func setLocalStorageVal(c *gin.Context) {
+var setLocalStorageVal = contractHandler(apicontract.SetLocalStorageVal, func(c *gin.Context, request apicontract.StorageSetRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+	key, app := request.Key, request.App
+	input, err := storageModelValues(map[string]apicontract.JSONValue{key: request.Val})
+	if err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-
-	var key string
-	var app string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("key", &key, true, true),
-		util.BindJsonArg("app", &app, false, false),
-	) {
-		return
-	}
-	val := arg["val"]
-
+	val := input[key]
 	setKeyVals, err := model.SetLocalStorageVals(map[string]any{key: val})
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	evt := util.NewCmdResult("setLocalStorageVal", 0, util.PushModeBroadcastMainExcludeSelfApp)
 	evt.AppId = app
 	evt.Data = map[string]any{"key": key, "val": setKeyVals[key]}
 	util.PushEvent(evt)
-}
 
-func setLocalStorageVals(c *gin.Context) {
+	return apicontract.Success(apicontract.Null{})
+})
+
+var setLocalStorageVals = contractHandler(apicontract.SetLocalStorageVals, func(c *gin.Context, request apicontract.StorageSetKeysRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+	app := request.App
+	if len(request.KeyVals) == 0 {
+		return apicontract.Failure[apicontract.Null](-1, "Field [keyVals] must not be empty")
 	}
-
-	var keyVals map[string]any
-	var app string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("keyVals", &keyVals, true, true),
-		util.BindJsonArg("app", &app, false, false),
-	) {
-		return
+	keyVals, err := storageModelValues(request.KeyVals)
+	if err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-
 	setKeyVals, err := model.SetLocalStorageVals(keyVals)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	evtSet := util.NewCmdResult("setLocalStorageVals", 0, util.PushModeBroadcastMainExcludeSelfApp)
 	evtSet.AppId = app
 	evtSet.Data = map[string]any{"keyVals": setKeyVals}
 	util.PushEvent(evtSet)
-}
 
-func removeLocalStorageVal(c *gin.Context) {
+	return apicontract.Success(apicontract.Null{})
+})
+
+var removeLocalStorageVal = contractHandler(apicontract.RemoveLocalStorageVal, func(c *gin.Context, request apicontract.StorageRemoveRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var key string
-	var app string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("key", &key, true, true),
-		util.BindJsonArg("app", &app, false, false),
-	) {
-		return
-	}
-
+	key, app := request.Key, request.App
 	err := model.RemoveLocalStorageVals([]string{key})
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	evt := util.NewCmdResult("removeLocalStorageVal", 0, util.PushModeBroadcastMainExcludeSelfApp)
 	evt.AppId = app
 	evt.Data = map[string]any{"key": key}
 	util.PushEvent(evt)
-}
 
-func removeLocalStorageVals(c *gin.Context) {
+	return apicontract.Success(apicontract.Null{})
+})
+
+var removeLocalStorageVals = contractHandler(apicontract.RemoveLocalStorageVals, func(c *gin.Context, request apicontract.StorageRemoveKeysRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+	keys := request.Keys
+	if len(keys) == 0 {
+		return apicontract.Failure[apicontract.Null](-1, "Field [keys] must not be empty")
 	}
-
-	var keysArg []any
-	var app string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("keys", &keysArg, true, true),
-		util.BindJsonArg("app", &app, false, false),
-	) {
-		return
-	}
-
-	var keys []string
-	for _, key := range keysArg {
-		ks, elemOk := key.(string)
-		if !elemOk {
-			ret.Code = -1
-			ret.Msg = "Field [keys]: each element should be of type [String]"
-			return
+	for _, key := range keys {
+		if key == "" {
+			return apicontract.Failure[apicontract.Null](-1, "Field [keys]: each element must not be empty")
 		}
-		if ks == "" {
-			ret.Code = -1
-			ret.Msg = "Field [keys]: each element must not be empty"
-			return
-		}
-		keys = append(keys, ks)
 	}
-
+	app := request.App
 	err := model.RemoveLocalStorageVals(keys)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	evt := util.NewCmdResult("removeLocalStorageVals", 0, util.PushModeBroadcastMainExcludeSelfApp)
 	evt.AppId = app
 	evt.Data = map[string]any{"keys": keys}
 	util.PushEvent(evt)
-}
 
-func getCriteria(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+	return apicontract.Success(apicontract.Null{})
+})
+
+var getCriteria = contractHandler(apicontract.GetCriteria, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[[]*apicontract.Criterion] {
 
 	data := model.GetCriteria()
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		data = model.FilterCriteriaByPublishAccess(c, publishAccess, data)
 	}
-	ret.Data = data
-}
+	return apicontract.Success(criterionContracts(data))
+})
 
-func setCriterion(c *gin.Context) {
+var setCriterion = contractHandler(apicontract.SetCriterion, func(c *gin.Context, request apicontract.SetCriterionRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+	if request.Criterion == nil {
+		return apicontract.Failure[apicontract.Null](-1, "Field [criterion] is required")
 	}
-
-	var criterionRaw any
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("criterion", &criterionRaw, true, false)) {
-		return
-	}
-
-	param, err := gulu.JSON.MarshalJSON(criterionRaw)
+	criterion := criterionModel(*request.Criterion)
+	err := model.SetCriterion(criterion)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
-	criterion := &model.Criterion{}
-	if err = gulu.JSON.UnmarshalJSON(param, criterion); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	return apicontract.Success(apicontract.Null{})
+})
 
-	err = model.SetCriterion(criterion)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-}
-
-func removeCriterion(c *gin.Context) {
+var removeCriterion = contractHandler(apicontract.RemoveCriterion, func(c *gin.Context, request apicontract.RemoveCriterionRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var name string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", &name, true, true)) {
-		return
-	}
-
+	name := request.Name
 	err := model.RemoveCriterion(name)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
-}
 
-func getRecentDocs(c *gin.Context) {
+	return apicontract.Success(apicontract.Null{})
+})
+
+var getRecentDocs = contractHandler(apicontract.GetRecentDocs, func(c *gin.Context, request apicontract.RecentDocsRequest) apicontract.Response[[]*apicontract.RecentDoc] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	var sortBy string
-	arg := map[string]any{}
-	// 兼容旧版接口，不能直接使用 util.JsonArg()
-	if err := c.ShouldBindJSON(&arg); err == nil {
-		if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("sortBy", &sortBy, false, false)) {
-			return
-		}
-	}
-
+	sortBy := request.SortBy
 	data, err := model.GetRecentDocs(sortBy)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[[]*apicontract.RecentDoc](ret)
 	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		data = model.FilterRecentDocsByPublishAccess(c, publishAccess, data)
 	}
-	ret.Data = data
-}
+	return apicontract.Success(recentDocContracts(data))
+})
 
-func updateRecentDocOpenTime(c *gin.Context) {
+var updateRecentDocOpenTime = contractHandler(apicontract.UpdateRecentDocOpenTime, func(c *gin.Context, request apicontract.RecentDocUpdateRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	if model.IsReadOnlyRoleContext(c) {
-		return
-	}
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var rootID string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, false, false)) {
-		return
-	}
+	rootID := request.RootID
 	if "" == rootID {
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	err := model.UpdateRecentDocOpenTime(rootID)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
-}
 
-func updateRecentDocViewTime(c *gin.Context) {
+	return apicontract.Success(apicontract.Null{})
+}, skipReadonlyStorageMutation)
+
+var updateRecentDocViewTime = contractHandler(apicontract.UpdateRecentDocViewTime, func(c *gin.Context, request apicontract.RecentDocUpdateRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	if model.IsReadOnlyRoleContext(c) {
-		return
-	}
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var rootID string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, false, false)) {
-		return
-	}
+	rootID := request.RootID
 	if "" == rootID {
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	err := model.UpdateRecentDocViewTime(rootID)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
-}
 
-func updateRecentDocCloseTime(c *gin.Context) {
+	return apicontract.Success(apicontract.Null{})
+}, skipReadonlyStorageMutation)
+
+var updateRecentDocCloseTime = contractHandler(apicontract.UpdateRecentDocCloseTime, func(c *gin.Context, request apicontract.RecentDocUpdateRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	if model.IsReadOnlyRoleContext(c) {
-		return
-	}
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var rootID string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, false, false)) {
-		return
-	}
+	rootID := request.RootID
 	if "" == rootID {
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	err := model.UpdateRecentDocCloseTime(rootID)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
-}
 
-func batchUpdateRecentDocCloseTime(c *gin.Context) {
+	return apicontract.Success(apicontract.Null{})
+}, skipReadonlyStorageMutation)
+
+var batchUpdateRecentDocCloseTime = contractHandler(apicontract.BatchUpdateRecentDocCloseTime, func(c *gin.Context, request apicontract.RecentDocsUpdateRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	if model.IsReadOnlyRoleContext(c) {
-		return
-	}
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var rootIDsArg []any
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootIDs", &rootIDsArg, false, false)) {
-		return
-	}
-
-	var rootIDs []string
-	for _, id := range rootIDsArg {
-		str, elemOk := id.(string)
-		if !elemOk {
-			continue
-		}
-		if "" == str {
-			continue
-		}
-		rootIDs = append(rootIDs, str)
-	}
+	rootIDs := request.RootIDs
 	if 0 == len(rootIDs) {
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	err := model.BatchUpdateRecentDocCloseTime(rootIDs)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
-}
 
-func getOutlineStorage(c *gin.Context) {
+	return apicontract.Success(apicontract.Null{})
+}, skipReadonlyStorageMutation)
+
+var getOutlineStorage = contractHandler(apicontract.GetOutlineStorage, func(c *gin.Context, request apicontract.OutlineStorageRequest) apicontract.Response[map[string]apicontract.JSONValue] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var docID string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("docID", &docID, true, true)) {
-		return
-	}
+	docID := request.DocID
 
 	data, err := model.GetOutlineStorage(docID)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[map[string]apicontract.JSONValue](ret)
 	}
-	ret.Data = data
-}
+	return storageContract(data)
+})
 
-func setOutlineStorage(c *gin.Context) {
+var setOutlineStorage = contractHandler(apicontract.SetOutlineStorage, func(c *gin.Context, request apicontract.OutlineStorageSetRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+	docID := request.DocID
+	val, err := storageModelValues(request.Val)
+	if err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-
-	var docID string
-	var val map[string]any
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("docID", &docID, true, true),
-		util.BindJsonArg("val", &val, true, false),
-	) {
-		return
-	}
-
-	err := model.SetOutlineStorage(docID, val)
+	err = model.SetOutlineStorage(docID, val)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
-}
 
-func removeOutlineStorage(c *gin.Context) {
+	return apicontract.Success(apicontract.Null{})
+})
+
+var removeOutlineStorage = contractHandler(apicontract.RemoveOutlineStorage, func(c *gin.Context, request apicontract.OutlineStorageRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var docID string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("docID", &docID, true, true)) {
-		return
-	}
+	docID := request.DocID
 
 	err := model.RemoveOutlineStorage(docID)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
-}
 
-func getViewState(c *gin.Context) {
+	return apicontract.Success(apicontract.Null{})
+})
+
+var getViewState = contractHandler(apicontract.GetViewState, func(c *gin.Context, request apicontract.StorageKeyRequest) apicontract.Response[map[string]apicontract.JSONValue] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var key string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("key", &key, true, true)) {
-		return
-	}
+	key := request.Key
 	data, err := model.GetViewState(key)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[map[string]apicontract.JSONValue](ret)
 	}
-	ret.Data = data
-}
+	return storageContract(data)
+})
 
-func patchViewState(c *gin.Context) {
+var patchViewState = contractHandler(apicontract.PatchViewState, func(c *gin.Context, request apicontract.ViewStatePatchRequest) apicontract.Response[map[string]apicontract.JSONValue] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var key string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("key", &key, true, true)) {
-		return
-	}
-	values := map[string]any{}
-	if value, exists := arg["values"]; exists {
-		var valid bool
-		values, valid = value.(map[string]any)
-		if !valid {
-			ret.Code = -1
-			ret.Msg = "Field [values]: should be of type [Object]"
-			return
+	key, removeKeys := request.Key, request.RemoveKeys
+	for _, key := range removeKeys {
+		if strings.TrimSpace(key) == "" {
+			return apicontract.Failure[map[string]apicontract.JSONValue](-1, "Field [removeKeys]: each element should be a non-empty String")
 		}
 	}
-	removeKeys, valid := parseViewStateRemoveKeys(arg["removeKeys"])
-	if !valid {
-		ret.Code = -1
-		ret.Msg = "Field [removeKeys]: each element should be a non-empty String"
-		return
+	values, err := storageModelValues(request.Values)
+	if err != nil {
+		return apicontract.Failure[map[string]apicontract.JSONValue](-1, err.Error())
 	}
 	data, err := model.PatchViewState(key, values, removeKeys)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[map[string]apicontract.JSONValue](ret)
 	}
-	ret.Data = data
-}
+	return storageContract(data)
+})
 
-func removeViewState(c *gin.Context) {
+var removeViewState = contractHandler(apicontract.RemoveViewState, func(c *gin.Context, request apicontract.StorageKeyRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var key string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("key", &key, true, true)) {
-		return
-	}
+	key := request.Key
 	if err := model.RemoveViewState(key); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 	}
-}
+
+	return contractFailure[apicontract.Null](ret)
+})
 
 func parseViewStateRemoveKeys(value any) (ret []string, valid bool) {
 	if nil == value {

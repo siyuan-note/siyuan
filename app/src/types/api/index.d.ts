@@ -4,6 +4,14 @@ export type AppendBlockRequestInput = { "data": string; "dataType": string; "par
 
 export type AppendHeadingChildrenRequestInput = { "childrenDOM": string; "id": string; };
 
+export type AttributeViewColorTheme = { "backgroundColor": string; "color": string; };
+
+export type AttributeViewColorThemeInput = { "backgroundColor"?: string | null; "color"?: string | null; };
+
+export type AttributeViewCustomColor = { "dark": AttributeViewColorTheme; "hidden"?: boolean; "index": number; "light": AttributeViewColorTheme; };
+
+export type AttributeViewCustomColorInput = { "dark"?: AttributeViewColorThemeInput | null; "hidden"?: boolean | null; "index"?: number | null; "light"?: AttributeViewColorThemeInput | null; };
+
 export type AutoLaunchRequestInput = { "autoLaunch": number; };
 
 export type BatchInsertBlockRequestInput = { "blocks": Array<BlockInsertInputInput>; };
@@ -96,6 +104,18 @@ export type CreateSnapshotData = { "created": boolean; "id": string; };
 
 export type CreateSnapshotRequestInput = { "memo"?: string; };
 
+export type Criterion = { "group": number; "hPath": string; "hasReplace": boolean; "idPath": Array<string> | null; "k": string; "method": number; "name": string; "r": string; "replaceTypes": CriterionReplaceTypes | null; "sort": number; "subTypes": SearchSubTypes; "types": CriterionTypes | null; };
+
+export type CriterionInput = { "group"?: number | null; "hPath"?: string | null; "hasReplace"?: boolean | null; "idPath"?: Array<string> | null; "k"?: string | null; "method"?: number | null; "name"?: string | null; "r"?: string | null; "replaceTypes"?: CriterionReplaceTypesInput | null; "sort"?: number | null; "subTypes"?: SearchSubTypesInput | null; "types"?: CriterionTypesInput | null; };
+
+export type CriterionReplaceTypes = { "aHref": boolean; "aText": boolean; "aTitle": boolean; "blockRef": boolean; "code": boolean; "codeBlock": boolean; "docTitle": boolean; "em": boolean; "fileAnnotationRef": boolean; "htmlBlock": boolean; "imgSrc": boolean; "imgText": boolean; "imgTitle": boolean; "inlineMath": boolean; "inlineMemo": boolean; "kbd": boolean; "mark": boolean; "mathBlock": boolean; "s": boolean; "strong": boolean; "sub": boolean; "sup": boolean; "tag": boolean; "text": boolean; "u": boolean; };
+
+export type CriterionReplaceTypesInput = { "aHref"?: boolean | null; "aText"?: boolean | null; "aTitle"?: boolean | null; "blockRef"?: boolean | null; "code"?: boolean | null; "codeBlock"?: boolean | null; "docTitle"?: boolean | null; "em"?: boolean | null; "fileAnnotationRef"?: boolean | null; "htmlBlock"?: boolean | null; "imgSrc"?: boolean | null; "imgText"?: boolean | null; "imgTitle"?: boolean | null; "inlineMath"?: boolean | null; "inlineMemo"?: boolean | null; "kbd"?: boolean | null; "mark"?: boolean | null; "mathBlock"?: boolean | null; "s"?: boolean | null; "strong"?: boolean | null; "sub"?: boolean | null; "sup"?: boolean | null; "tag"?: boolean | null; "text"?: boolean | null; "u"?: boolean | null; };
+
+export type CriterionTypes = { "audioBlock": boolean; "blockquote": boolean; "callout": boolean; "codeBlock": boolean; "databaseBlock": boolean; "document": boolean; "embedBlock": boolean; "heading": boolean; "htmlBlock": boolean; "iframeBlock": boolean; "list": boolean; "listItem": boolean; "mathBlock": boolean; "paragraph": boolean; "superBlock": boolean; "table": boolean; "videoBlock": boolean; "widgetBlock": boolean; };
+
+export type CriterionTypesInput = { "audioBlock"?: boolean | null; "blockquote"?: boolean | null; "callout"?: boolean | null; "codeBlock"?: boolean | null; "databaseBlock"?: boolean | null; "document"?: boolean | null; "embedBlock"?: boolean | null; "heading"?: boolean | null; "htmlBlock"?: boolean | null; "iframeBlock"?: boolean | null; "list"?: boolean | null; "listItem"?: boolean | null; "mathBlock"?: boolean | null; "paragraph"?: boolean | null; "superBlock"?: boolean | null; "table"?: boolean | null; "videoBlock"?: boolean | null; "widgetBlock"?: boolean | null; };
+
 export type DOMTextRequestInput = { "dom": string; };
 
 export type DailyNoteBlockRequestInput = { "data": string; "dataType": string; "notebook": string; };
@@ -141,6 +161,40 @@ export type HeadingFoldRequestInput = { "id": string; "scope": string; };
 export type HeadingLevelRequestInput = { "id"?: string; "ids"?: Array<string>; "level": number; };
 
 export type ImportNotebookCryptoBackupRequestInput = { "file": Blob; "password"?: string; };
+
+export type InlineStyle = { "dark": InlineStyleTheme | null; "hidden"?: boolean; "id": string; "light": InlineStyleTheme | null; "name": string; };
+
+export type InlineStyleAV = { "colors": Array<AttributeViewCustomColor | null> | null; "order": Array<string> | null; };
+
+export type InlineStyleAVInput = { "colors"?: Array<AttributeViewCustomColorInput | null> | null; "order"?: Array<string> | null; };
+
+export type InlineStyleBuiltin = { "colors": Array<InlineStyleBuiltinColor | null> | null; "hidden": InlineStyleBuiltinHidden | null; "styles": Array<InlineStyleBuiltinStyle | null> | null; };
+
+export type InlineStyleBuiltinColor = { "dark": InlineStyleTheme | null; "index": number; "light": InlineStyleTheme | null; };
+
+export type InlineStyleBuiltinColorInput = { "dark"?: InlineStyleThemeInput | null; "index"?: number | null; "light"?: InlineStyleThemeInput | null; };
+
+export type InlineStyleBuiltinHidden = { "av": Array<number> | null; "backgroundColor": Array<number> | null; "color": Array<number> | null; "style1": Array<string> | null; };
+
+export type InlineStyleBuiltinHiddenInput = { "av"?: Array<number> | null; "backgroundColor"?: Array<number> | null; "color"?: Array<number> | null; "style1"?: Array<string> | null; };
+
+export type InlineStyleBuiltinInput = { "colors"?: Array<InlineStyleBuiltinColorInput | null> | null; "hidden"?: InlineStyleBuiltinHiddenInput | null; "styles"?: Array<InlineStyleBuiltinStyleInput | null> | null; };
+
+export type InlineStyleBuiltinStyle = { "dark": InlineStyleTheme | null; "id": string; "light": InlineStyleTheme | null; };
+
+export type InlineStyleBuiltinStyleInput = { "dark"?: InlineStyleThemeInput | null; "id"?: string | null; "light"?: InlineStyleThemeInput | null; };
+
+export type InlineStyleInput = { "dark"?: InlineStyleThemeInput | null; "hidden"?: boolean | null; "id"?: string | null; "light"?: InlineStyleThemeInput | null; "name"?: string | null; };
+
+export type InlineStyleOrder = { "backgroundColor": Array<string> | null; "color": Array<string> | null; "style1": Array<string> | null; };
+
+export type InlineStyleOrderInput = { "backgroundColor"?: Array<string> | null; "color"?: Array<string> | null; "style1"?: Array<string> | null; };
+
+export type InlineStyleTheme = { "backgroundColor"?: string; "color"?: string; };
+
+export type InlineStyleThemeInput = { "backgroundColor"?: string | null; "color"?: string | null; };
+
+export type InlineStyles = { "av": InlineStyleAV | null; "builtin": InlineStyleBuiltin | null; "order": InlineStyleOrder | null; "styles": Array<InlineStyle | null> | null; "version": number; };
 
 export type InsertBlockRequestInput = { "data": string; "dataType": string; "nextID"?: string | null; "parentID"?: string | null; "previousID"?: string | null; };
 
@@ -198,11 +252,23 @@ export type OpenNotebookRequestInput = { "app"?: string | null; "notebook": stri
 
 export type OrderedListStartData = { "found": boolean; "start": number; };
 
+export type OutlineStorageRequestInput = { "docID": string; };
+
+export type OutlineStorageSetRequestInput = { "docID": string; "val": { [key: string]: JSONValue }; };
+
 export type PinnedDoc = { "childrenSortMode": number | null; "icon": string; "id": string; "name": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
 
 export type PrependBlockRequestInput = { "data": string; "dataType": string; "parentID": string; };
 
 export type PublishedBlockInfo = { "publishAccessRequired": true; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
+
+export type RecentDoc = { "closedAt"?: number; "icon"?: string; "openAt"?: number; "rootID": string; "title"?: string; "viewedAt"?: number; };
+
+export type RecentDocUpdateRequestInput = { "rootID"?: string | null; };
+
+export type RecentDocsRequestInput = { "sortBy"?: string | null; };
+
+export type RecentDocsUpdateRequestInput = { "rootIDs"?: Array<string> | null; };
 
 export type RefDefs = { "defIDs": Array<string> | null; "refID": string; };
 
@@ -215,6 +281,8 @@ export type RefIDsRequestInput = { "id"?: string | null; "ids"?: Array<string> |
 export type RefTextQueryRequestInput = { "anchor": string; "notebook"?: string | null; };
 
 export type RemoveBookmarkRequestInput = { "bookmark": string; };
+
+export type RemoveCriterionRequestInput = { "name": string; };
 
 export type RemoveTagRequestInput = { "label": string; };
 
@@ -236,11 +304,19 @@ export type SearchHistoryData = { "histories": Array<string> | null; "pageCount"
 
 export type SearchHistoryRequestInput = { "notebook"?: string | null; "op"?: string | null; "page"?: number | null; "query"?: string | null; "type"?: number | null; };
 
+export type SearchSubTypes = { "heading": Record<string, boolean> | null; "list": Record<string, boolean> | null; "listItem": Record<string, boolean> | null; };
+
+export type SearchSubTypesInput = { "heading"?: Record<string, boolean> | null; "list"?: Record<string, boolean> | null; "listItem"?: Record<string, boolean> | null; };
+
 export type SearchTagData = { "k": string; "tags": Array<string>; };
 
 export type SearchTagRequestInput = { "k": string; };
 
 export type SetBlockAttrsRequestInput = { "attrs": Record<string, string | null>; "id": string; };
+
+export type SetCriterionRequestInput = { "criterion": CriterionInput | null; };
+
+export type SetInlineStylesRequestInput = { "app"?: string | null; "av"?: InlineStyleAVInput | null; "builtin"?: InlineStyleBuiltinInput | null; "order"?: InlineStyleOrderInput | null; "styles": Array<InlineStyleInput | null>; "version": number; };
 
 export type SetNotebookConfRequestInput = { "conf"?: NotebookConfPatchInput | null; "notebook": string; };
 
@@ -255,6 +331,18 @@ export type Snippet = { "content": string; "disabledInPublish": boolean; "enable
 export type SnippetInput = { "content": string; "disabledInPublish"?: boolean | null; "enabled": boolean; "id": string; "name": string; "type": string; };
 
 export type SnippetsData = { "snippets": Array<Snippet | null>; };
+
+export type StorageKeyRequestInput = { "key": string; };
+
+export type StorageKeysRequestInput = { "keys": Array<string>; };
+
+export type StorageRemoveKeysRequestInput = { "app"?: string | null; "keys": Array<string>; };
+
+export type StorageRemoveRequestInput = { "app"?: string | null; "key": string; };
+
+export type StorageSetKeysRequestInput = { "app"?: string | null; "keyVals": { [key: string]: JSONValue }; };
+
+export type StorageSetRequestInput = { "app"?: string | null; "key": string; "val"?: JSONValue | null; };
 
 export type SwapBlockRefRequestInput = { "defID": string; "includeChildren": boolean; "refID": string; };
 
@@ -284,9 +372,15 @@ export type UpdateChannelRequestInput = { "updateChannel": string; };
 
 export type UpdatePinnedDocsRequestInput = { "action": string; "after"?: boolean; "ids": Array<string>; "targetID"?: string; };
 
+export type ViewStatePatchRequestInput = { "key": string; "removeKeys"?: Array<string> | null; "values"?: { [key: string]: JSONValue }; };
+
 export type VirtualBlockRefRequestInput = { "keywords": Array<string>; };
 
 export type WordCountData = { "reqId": JSONValue; "stat": BlockStat | null; };
+
+export type WorkspaceAVBuiltinColorUpdateInput = { "customized"?: boolean | null; "dark"?: InlineStyleThemeInput | null; "hidden"?: boolean | null; "index"?: number | null; "light"?: InlineStyleThemeInput | null; };
+
+export type WorkspaceAVPaletteRequestInput = { "app"?: string | null; "builtinColors"?: Array<WorkspaceAVBuiltinColorUpdateInput | null> | null; "colors": Array<AttributeViewCustomColorInput | null>; "order": Array<string>; };
 
 export type WorkspaceInfoData = { "siyuanVer": string; "workspaceDir": string; };
 
@@ -690,30 +784,6 @@ export type APILegacyPOSTPath =
     "/api/setting/setSnippet" |
     "/api/setting/setTheme" |
     "/api/setting/setVariables" |
-    "/api/storage/batchUpdateRecentDocCloseTime" |
-    "/api/storage/getCriteria" |
-    "/api/storage/getInlineStyles" |
-    "/api/storage/getLocalStorage" |
-    "/api/storage/getLocalStorageVal" |
-    "/api/storage/getLocalStorageVals" |
-    "/api/storage/getOutlineStorage" |
-    "/api/storage/getRecentDocs" |
-    "/api/storage/getViewState" |
-    "/api/storage/patchViewState" |
-    "/api/storage/removeCriterion" |
-    "/api/storage/removeLocalStorageVal" |
-    "/api/storage/removeLocalStorageVals" |
-    "/api/storage/removeOutlineStorage" |
-    "/api/storage/removeViewState" |
-    "/api/storage/setCriterion" |
-    "/api/storage/setInlineStyles" |
-    "/api/storage/setLocalStorageVal" |
-    "/api/storage/setLocalStorageVals" |
-    "/api/storage/setOutlineStorage" |
-    "/api/storage/setWorkspaceAVPalette" |
-    "/api/storage/updateRecentDocCloseTime" |
-    "/api/storage/updateRecentDocOpenTime" |
-    "/api/storage/updateRecentDocViewTime" |
     "/api/sync/createCloudSyncDir" |
     "/api/sync/exportSyncProviderS3" |
     "/api/sync/exportSyncProviderWebDAV" |
@@ -1396,10 +1466,130 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
     };
+    "/api/storage/batchUpdateRecentDocCloseTime": {
+        request: RecentDocsUpdateRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/storage/getCriteria": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": Array<Criterion | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/storage/getInlineStyles": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": InlineStyles | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/storage/getLocalStorage": {
+        request: EmptyRequestInput;
+        response: { "code": 0; "data": { [key: string]: JSONValue } | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "none";
+    };
+    "/api/storage/getLocalStorageVal": {
+        request: StorageKeyRequestInput;
+        response: { "code": 0; "data": JSONValue; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/storage/getLocalStorageVals": {
+        request: StorageKeysRequestInput;
+        response: { "code": 0; "data": { [key: string]: JSONValue } | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/storage/getOutlineStorage": {
+        request: OutlineStorageRequestInput;
+        response: { "code": 0; "data": { [key: string]: JSONValue } | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/storage/getRecentDocs": {
+        request: RecentDocsRequestInput;
+        response: { "code": 0; "data": Array<RecentDoc | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "legacyOptional";
+    };
+    "/api/storage/getViewState": {
+        request: StorageKeyRequestInput;
+        response: { "code": 0; "data": { [key: string]: JSONValue } | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/storage/patchViewState": {
+        request: ViewStatePatchRequestInput;
+        response: { "code": 0; "data": { [key: string]: JSONValue } | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/storage/removeCriterion": {
+        request: RemoveCriterionRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/storage/removeLocalStorageVal": {
+        request: StorageRemoveRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/storage/removeLocalStorageVals": {
+        request: StorageRemoveKeysRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/storage/removeOutlineStorage": {
+        request: OutlineStorageRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/storage/removeViewState": {
+        request: StorageKeyRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/storage/setCriterion": {
+        request: SetCriterionRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/storage/setInlineStyles": {
+        request: SetInlineStylesRequestInput;
+        response: { "code": 0; "data": InlineStyles | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/storage/setLocalStorage": {
         request: EmptyRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "none";
+    };
+    "/api/storage/setLocalStorageVal": {
+        request: StorageSetRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/storage/setLocalStorageVals": {
+        request: StorageSetKeysRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/storage/setOutlineStorage": {
+        request: OutlineStorageSetRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/storage/setWorkspaceAVPalette": {
+        request: WorkspaceAVPaletteRequestInput;
+        response: { "code": 0; "data": InlineStyles | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/storage/updateRecentDocCloseTime": {
+        request: RecentDocUpdateRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/storage/updateRecentDocOpenTime": {
+        request: RecentDocUpdateRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/storage/updateRecentDocViewTime": {
+        request: RecentDocUpdateRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
     };
     "/api/system/addMicrosoftDefenderExclusion": {
         request: EmptyRequestInput;

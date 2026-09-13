@@ -354,3 +354,6 @@ var GetHeadingLevelTransaction = define[HeadingLevelRequest, *BlockTransaction](
 var GetDocHeadingLevelTransaction = define[DocHeadingLevelRequest, *DocHeadingLevelData]("getDocHeadingLevelTransaction", "/api/block/getDocHeadingLevelTransaction", StructJSONBody, ResponseOptions{}, "POST")
 
 var GetRecentUpdatedBlocks = define[EmptyRequest, []*SearchBlock]("getRecentUpdatedBlocks", "/api/block/getRecentUpdatedBlocks", NoBody, ResponseOptions{}, "POST")
+
+var Zip = define[ZipRequest, Null]("zip", "/api/archive/zip", JSONBody, ResponseOptions{}, "POST")
+var Unzip = define[UnzipRequest, Null]("unzip", "/api/archive/unzip", JSONBody, ResponseOptions{}, "POST")

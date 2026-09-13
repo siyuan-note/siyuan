@@ -3872,6 +3872,22 @@
       ],
       "additionalProperties": false
     },
+    "UnzipRequestInput": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "zipPath": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "zipPath"
+      ],
+      "additionalProperties": false
+    },
     "UpdateBlockRequestInput": {
       "type": "object",
       "properties": {
@@ -3992,6 +4008,22 @@
         "workspaceDir"
       ],
       "additionalProperties": false
+    },
+    "ZipRequestInput": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "zipPath": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "zipPath"
+      ],
+      "additionalProperties": false
     }
   },
   "endpoints": [
@@ -4091,6 +4123,156 @@
               },
               "data": {
                 "type": "string"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/archive/unzip",
+      "handler": "unzip",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/UnzipRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/archive/zip",
+      "handler": "zip",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/ZipRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
               },
               "msg": {
                 "type": "string"

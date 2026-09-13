@@ -256,6 +256,8 @@ export type UnfoldedParentData = { "parentID": string; };
 
 export type UnlockNotebookRequestInput = { "notebook": string; "password": string; };
 
+export type UnzipRequestInput = { "path": string; "zipPath": string; };
+
 export type UpdateBlockRequestInput = { "data": string; "dataType": string; "id": string; "lockType"?: boolean | null; };
 
 export type UpdateChannelRequestInput = { "updateChannel": string; };
@@ -267,6 +269,8 @@ export type VirtualBlockRefRequestInput = { "keywords": Array<string>; };
 export type WordCountData = { "reqId": JSONValue; "stat": BlockStat | null; };
 
 export type WorkspaceInfoData = { "siyuanVer": string; "workspaceDir": string; };
+
+export type ZipRequestInput = { "path": string; "zipPath": string; };
 
 export type APILegacyGETPath =
     "/api/ai/mcp/oauth/callback/:flowID" |
@@ -342,8 +346,6 @@ export type APILegacyPOSTPath =
     "/api/ai/testEmbeddingModel" |
     "/api/ai/testModel" |
     "/api/ai/testRerankModel" |
-    "/api/archive/unzip" |
-    "/api/archive/zip" |
     "/api/asset/fullReindexAssetContent" |
     "/api/asset/getDocAssets" |
     "/api/asset/getDocImageAssets" |
@@ -790,6 +792,16 @@ export type APILegacyPOSTPath =
     "/plugin/private/:name/*path";
 
 export interface APIPOSTRoutes {
+    "/api/archive/unzip": {
+        request: UnzipRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/archive/zip": {
+        request: ZipRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/attr/batchGetBlockAttrs": {
         request: BlockIDsRequestInput;
         response: { "code": 0; "data": Record<string, Record<string, string> | null>; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };

@@ -19,9 +19,9 @@ package api
 import (
 	archivezip "archive/zip"
 	"fmt"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"io"
 	"io/fs"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -83,50 +83,39 @@ func resolveArchivePath(path string) (string, error) {
 	return filepath.Join(resolved, rel), nil
 }
 
-func zip(c *gin.Context) {
+var zip = contractHandler(apicontract.Zip, func(c *gin.Context, request apicontract.ZipRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
+	entryPath, zipFilePath := request.Path, request.ZipPath
 
-	var entryPath, zipFilePath string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("path", &entryPath, true, true),      // 相对于工作空间的路径（待打包目录或文件）
-		util.BindJsonArg("zipPath", &zipFilePath, true, true), // 相对于工作空间的路径（生成的 zip）
-	) {
-		return
-	}
 	entryAbsPath, err := util.GetAbsPathInWorkspace(entryPath)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	if err = rejectEncryptedArchivePath(entryAbsPath); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	zipAbsFilePath, err := util.GetAbsPathInWorkspace(zipFilePath)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	if err = rejectEncryptedArchivePath(zipAbsFilePath); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	// 在创建归档前检查全部源条目，避免通过父目录打包加密笔记本。
 	resolvedEntryPath, err := resolveArchivePath(entryAbsPath)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	if err = filepath.WalkDir(resolvedEntryPath, func(path string, _ fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -136,26 +125,26 @@ func zip(c *gin.Context) {
 	}); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	resolvedZipPath, err := resolveArchivePath(zipAbsFilePath)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	if err = rejectEncryptedArchivePath(resolvedZipPath); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	zipFile, err := gulu.Zip.Create(resolvedZipPath)
 	if err != nil {
 		logging.LogErrorf("create zip [%s] failed: %s", zipAbsFilePath, err)
 		ret.Code = -1
 		ret.Msg = "create zip file failed" + errMsgSeeKernelLog
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	base := filepath.Base(entryAbsPath)
@@ -168,69 +157,62 @@ func zip(c *gin.Context) {
 		logging.LogErrorf("zip add entry [%s] failed: %s", entryAbsPath, err)
 		ret.Code = -1
 		ret.Msg = "zip failed" + errMsgSeeKernelLog
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	if err = zipFile.Close(); err != nil {
 		logging.LogErrorf("close zip [%s] failed: %s", zipAbsFilePath, err)
 		ret.Code = -1
 		ret.Msg = "close zip file failed" + errMsgSeeKernelLog
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
-}
 
-func unzip(c *gin.Context) {
+	return apicontract.Success(apicontract.Null{})
+})
+
+var unzip = contractHandler(apicontract.Unzip, func(c *gin.Context, request apicontract.UnzipRequest) apicontract.Response[apicontract.Null] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
+	entryPath, zipFilePath := request.Path, request.ZipPath
 
-	var zipFilePath, entryPath string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("zipPath", &zipFilePath, true, true), // 相对于工作空间的路径
-		util.BindJsonArg("path", &entryPath, true, false),     // 相对于工作空间的路径（解压目标目录）
-	) {
-		return
-	}
 	zipAbsFilePath, err := util.GetAbsPathInWorkspace(zipFilePath)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	if err = rejectEncryptedArchivePath(zipAbsFilePath); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	entryAbsPath, err := util.GetAbsPathInWorkspace(entryPath)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 	if err = rejectEncryptedArchivePath(entryAbsPath); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	if !gulu.File.IsExist(zipAbsFilePath) {
 		ret.Code = -1
 		ret.Msg = "zip file does not exist"
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
 
 	if err := unzipWorkspaceArchive(zipAbsFilePath, entryAbsPath); err != nil {
 		logging.LogErrorf("unzip [%s] -> [%s] failed: %s", zipAbsFilePath, entryAbsPath, err)
 		ret.Code = -1
 		ret.Msg = "unzip failed" + errMsgSeeKernelLog
-		return
+		return contractFailure[apicontract.Null](ret)
 	}
-}
+
+	return apicontract.Success(apicontract.Null{})
+})
 
 // unzipWorkspaceArchive 先校验全部条目，阻止已知非法路径导致部分写入，再从同一个归档句柄解压。
 func unzipWorkspaceArchive(zipPath, destination string) error {

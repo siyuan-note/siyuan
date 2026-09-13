@@ -57,8 +57,6 @@
   {"method":"POST","path":"/api/ai/testEmbeddingModel","handler":"testEmbeddingModel"},
   {"method":"POST","path":"/api/ai/testModel","handler":"testModel"},
   {"method":"POST","path":"/api/ai/testRerankModel","handler":"testRerankModel"},
-  {"method":"POST","path":"/api/archive/unzip","handler":"unzip"},
-  {"method":"POST","path":"/api/archive/zip","handler":"zip"},
   {"method":"POST","path":"/api/asset/fullReindexAssetContent","handler":"fullReindexAssetContent"},
   {"method":"POST","path":"/api/asset/getDocAssets","handler":"getDocAssets"},
   {"method":"POST","path":"/api/asset/getDocImageAssets","handler":"getDocImageAssets"},

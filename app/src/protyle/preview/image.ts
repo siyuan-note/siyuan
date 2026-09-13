@@ -23,7 +23,7 @@ const getCopyFileMenu = (src: string) => {
 };
 
 export const previewImages = (srcList: string[], currentSrc?: string, onHidden?: () => void) => {
-    addScript(`${Constants.PROTYLE_CDN}/js/viewerjs/viewer.js?v=1.11.8`, "protyleViewerScript").then(() => {
+    addScript(`${Constants.PROTYLE_CDN}/js/viewerjs/viewer.js?v=1.14.0`, "protyleViewerScript").then(() => {
         const imagesElement = document.createElement("ul");
         let html = "";
         let initialViewIndex = -1;
@@ -55,29 +55,37 @@ export const previewImages = (srcList: string[], currentSrc?: string, onHidden?:
                 return `${name} [${imageData.naturalWidth} × ${imageData.naturalHeight}]`;
             }],
             button: false,
+            magnifier: true,
+            navigation: true,
             transition: false,
             ready: () => {
+                viewer.toolbar.querySelector(".viewer-play").classList.remove("viewer-large");
                 const copyElement = viewer.toolbar.querySelector(".viewer-copy");
                 copyElement.innerHTML = '<svg><use xlink:href="#iconImage"></use></svg>';
                 const copyFileElement = viewer.toolbar.querySelector(".viewer-copy-file");
                 copyFileElement.innerHTML = '<svg><use xlink:href="#iconFile"></use></svg>';
                 copyFileElement.classList.add("fn__none");
                 const languages = window.siyuan.languages;
+                ["prev", "next"].forEach((action) => {
+                    const button = viewer.viewer.querySelector(`.viewer-navigation > .viewer-${action}`);
+                    button.innerHTML = action === "prev" ? '<svg><use xlink:href="#iconLeft"></use></svg>' :
+                        '<svg><use xlink:href="#iconRight"></use></svg>';
+                    button.classList.add("ariaLabel");
+                    button.setAttribute("aria-label", action === "prev" ? languages.previous : languages.next);
+                    button.setAttribute("data-position", action === "prev" ? "east" : "west");
+                });
                 const labels: Record<string, string> = {
                     "zoom-in": languages.zoomIn,
                     "zoom-out": languages.zoomOut,
                     "one-to-one": languages.pageScaleActual,
                     reset: languages.reset,
-                    prev: languages.previous,
                     play: languages.imageViewerPlay,
-                    next: languages.next,
                     "rotate-left": languages.rotateCcw,
                     "rotate-right": languages.rotateCw,
                     "flip-horizontal": languages.imageFlipHorizontal,
                     "flip-vertical": languages.imageFlipVertical,
                     copy: languages.copyAsPNG,
                     "copy-file": languages.copyFile,
-                    close: languages.close,
                 };
                 Object.entries(labels).forEach(([action, label]) => {
                     const button = viewer.toolbar.querySelector(`.viewer-${action}`);
@@ -97,14 +105,14 @@ export const previewImages = (srcList: string[], currentSrc?: string, onHidden?:
                 zoomIn: true,
                 zoomOut: true,
                 oneToOne: true,
-                reset: true,
-                prev: true,
+                prev: false,
                 play: true,
-                next: true,
+                next: false,
                 rotateLeft: true,
                 rotateRight: true,
                 flipHorizontal: true,
                 flipVertical: true,
+                reset: true,
                 copy: () => {
                     if (viewer.viewed && viewer.image) {
                         copyPNGByLink(viewer.image.src);
@@ -115,7 +123,6 @@ export const previewImages = (srcList: string[], currentSrc?: string, onHidden?:
                         getCopyFileMenu(viewer.image.src)?.click();
                     }
                 },
-                close,
             },
         });
         window.siyuan.viewer = viewer;

@@ -35,6 +35,18 @@ func TestAssetRelinkContract(t *testing.T) {
 		{"findAssetReferences", `{"path":"assets/contract-relink.png"}`, findAssetReferences, false},
 		{"findAssetReferences", `{}`, findAssetReferences, true},
 		{"findAssetReferences", `{"path":null}`, findAssetReferences, true},
+		{"findAssetReferences", `{"paths":["assets/contract-relink.png","../outside"]}`, findAssetReferences, false},
+		{"findAssetReferences", `{"paths":[]}`, findAssetReferences, true},
+		{"findAssetReferences", `{"paths":null}`, findAssetReferences, true},
+		{"findAssetReferences", `{"paths":[null]}`, findAssetReferences, true},
+		{"findAssetReferences", `{"paths":["assets/contract-relink.png"],"path":"assets/contract-relink.png"}`, findAssetReferences, true},
+		{"relinkAsset", `{"mappings":[{"oldPath":"assets/contract-relink.png","newPath":"assets/contract-relink.webp"},{"oldPath":"assets/absent.png","newPath":"assets/absent.webp"}]}`, relinkAsset, false},
+		{"relinkAsset", `{"mappings":[{"oldPath":"assets/absent.png","newPath":"assets/absent.webp"}]}`, relinkAsset, true},
+		{"relinkAsset", `{"mappings":[]}`, relinkAsset, true},
+		{"relinkAsset", `{"mappings":null}`, relinkAsset, true},
+		{"relinkAsset", `{"mappings":[null]}`, relinkAsset, true},
+		{"relinkAsset", `{"mappings":[{"oldPath":"assets/contract-relink.png"}]}`, relinkAsset, true},
+		{"relinkAsset", `{"mappings":[],"oldPath":"assets/contract-relink.png"}`, relinkAsset, true},
 		{"relinkAsset", `{"oldPath":"assets/contract-relink.png","newPath":"assets/contract-relink.webp","dryRun":true}`, relinkAsset, false},
 		{"relinkAsset", `{"oldPath":"assets/contract-relink.png","newPath":"assets/contract-relink.webp"}`, relinkAsset, false},
 		{"relinkAsset", `{"oldPath":"assets/contract-relink.png","newPath":"assets/contract-relink.webp","dryRun":"true"}`, relinkAsset, true},
@@ -60,6 +72,11 @@ func TestAssetRelinkContract(t *testing.T) {
 			}
 			if !test.failure && (response.Data == nil || response.Data.References == nil || response.Data.SkippedNotebooks == nil) {
 				t.Fatal("success arrays must not be null")
+			}
+			if !test.failure && (strings.Contains(test.body, `"paths"`) || strings.Contains(test.body, `"mappings"`)) {
+				if len(response.Data.Items) != 2 || !response.Data.Items[0].OK || response.Data.Items[1].OK || response.Data.Items[1].Reason == "" {
+					t.Fatalf("partial batch result: %+v", response.Data)
+				}
 			}
 		})
 	}

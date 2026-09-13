@@ -1,16 +1,33 @@
 package apicontract
 
 type FindAssetReferencesRequest struct {
-	Path string `json:"path"`
+	Path  *string  `json:"path" api:"optional,nonnullable"`
+	Paths []string `json:"paths" api:"optional"`
 }
 
 type RelinkAssetRequest struct {
+	OldPath  *string              `json:"oldPath" api:"optional,nonnullable"`
+	NewPath  *string              `json:"newPath" api:"optional,nonnullable"`
+	Mappings []AssetRelinkMapping `json:"mappings" api:"optional"`
+	DryRun   bool                 `json:"dryRun" api:"optional"`
+}
+
+type AssetRelinkMapping struct {
 	OldPath string `json:"oldPath"`
 	NewPath string `json:"newPath"`
-	DryRun  bool   `json:"dryRun" api:"optional"`
+}
+
+type AssetRelinkItemResult struct {
+	OldPath    string           `json:"oldPath"`
+	NewPath    string           `json:"newPath"`
+	OK         bool             `json:"ok"`
+	Reason     string           `json:"reason"`
+	References []AssetReference `json:"references"`
+	Updated    int              `json:"updated"`
 }
 
 type AssetReference struct {
+	OldPath     string `json:"oldPath,omitempty"`
 	Type        string `json:"type"`
 	Notebook    string `json:"notebook"`
 	RootID      string `json:"rootID"`
@@ -25,9 +42,10 @@ type AssetReference struct {
 }
 
 type AssetReferencesData struct {
-	References       []AssetReference `json:"references"`
-	SkippedNotebooks []string         `json:"skippedNotebooks"`
-	DryRun           bool             `json:"dryRun"`
-	HistoryPath      string           `json:"historyPath"`
-	Updated          int              `json:"updated"`
+	Items            []AssetRelinkItemResult `json:"items,omitempty"`
+	References       []AssetReference        `json:"references"`
+	SkippedNotebooks []string                `json:"skippedNotebooks"`
+	DryRun           bool                    `json:"dryRun"`
+	HistoryPath      string                  `json:"historyPath"`
+	Updated          int                     `json:"updated"`
 }

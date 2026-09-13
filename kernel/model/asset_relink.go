@@ -6,6 +6,7 @@ package model
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -19,30 +20,44 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/ClarkThan/ahocorasick"
 	"github.com/siyuan-note/dataparser"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
-	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type assetRelinkFile struct {
-	path   string
-	before []byte
-	tree   *parse.Tree
-	view   *av.AttributeView
-	after  []byte
+	path       string
+	before     []byte
+	tree       *parse.Tree
+	view       *av.AttributeView
+	after      []byte
+	items      map[*assetRelinkItem]bool
+	backupOnly bool
+	conflict   bool
 }
 
 type assetRelinkPlan struct {
 	*assetRelinker
-	files []*assetRelinkFile
-	trees []*parse.Tree
-	ocr   bool
+	files           []*assetRelinkFile
+	trees           []*parse.Tree
+	items           []*assetRelinkItem
+	ocrPlan         *util.AssetTextRelinkPlan
+	ctx             context.Context
+	batch           bool
+	lookup          bool
+	inventory       map[string]assetRelinkStamp
+	parsedDocuments int
+	parsedViews     int
+	progress        func(string)
+	saving          bool
+	matcher         *ahocorasick.Matcher
+	itemByPath      map[string]*assetRelinkItem
 }
 
 func newAssetRelinker(oldPath, newPath string) (*assetRelinker, error) {
@@ -82,37 +97,14 @@ func RelinkAsset(oldPath, newPath string, dryRun bool) (apicontract.AssetReferen
 }
 
 func runAssetRelink(oldPath, newPath string, dryRun bool) (apicontract.AssetReferencesData, error) {
-	r, err := newAssetRelinker(oldPath, newPath)
-	r.result.DryRun = dryRun
-	if err != nil {
-		return r.result, err
-	}
-	// 与同步及编辑事务串行，扫描直接读取持久化源，预演不修复或写入文档。
-	syncLock.Lock()
-	defer syncLock.Unlock()
-	FlushTxQueue()
-	flushLock.Lock()
-	defer flushLock.Unlock()
-	p := &assetRelinkPlan{assetRelinker: r}
-	if err = p.scan(); err != nil {
-		return r.result, err
-	}
-	if dryRun || newPath == "" || r.oldPath == r.newPath {
-		return r.result, nil
-	}
-	for _, reference := range r.result.References {
-		if !reference.Relinkable {
-			return r.result, fmt.Errorf("asset relink blocked: %s (%s)", reference.Reason, reference.Path)
-		}
-	}
-	if len(p.files) == 0 && !p.ocr {
-		return r.result, nil
-	}
-	err = p.apply()
-	return r.result, err
+	return runAssetRelinks(context.Background(), []apicontract.AssetRelinkMapping{{OldPath: oldPath, NewPath: newPath}}, dryRun, newPath == "", false)
 }
 
 func (p *assetRelinkPlan) scan() error {
+	p.initialize()
+	if err := p.observe(util.DataDir); err != nil {
+		return err
+	}
 	entries, err := os.ReadDir(util.DataDir)
 	if err != nil {
 		return err
@@ -122,6 +114,9 @@ func (p *assetRelinkPlan) scan() error {
 	luteEngine := util.NewLute()
 	titles := map[string]string{}
 	for _, entry := range entries {
+		if err := p.checkContext(); err != nil {
+			return err
+		}
 		boxID := entry.Name()
 		if !entry.IsDir() || !ast.IsNodeIDPattern(boxID) {
 			continue
@@ -135,10 +130,16 @@ func (p *assetRelinkPlan) scan() error {
 			if walkErr != nil {
 				return walkErr
 			}
+			if err := p.checkContext(); err != nil {
+				return err
+			}
 			if entry.Type()&os.ModeSymlink != 0 {
 				return fmt.Errorf("symbolic links in notebook are not supported: %s", absPath)
 			}
 			if entry.IsDir() {
+				if err := p.observe(absPath); err != nil {
+					return err
+				}
 				if entry.Name() == "assets" {
 					assetRoots = append(assetRoots, absPath)
 					return filepath.SkipDir
@@ -151,6 +152,10 @@ func (p *assetRelinkPlan) scan() error {
 			if !strings.HasSuffix(entry.Name(), ".sy") {
 				return nil
 			}
+			if err := p.observe(absPath); err != nil {
+				return err
+			}
+			p.reportProgress(absPath)
 			data, readErr := filelock.ReadFile(absPath)
 			if readErr != nil {
 				return readErr
@@ -161,6 +166,23 @@ func (p *assetRelinkPlan) scan() error {
 			if readErr = treenode.CheckSpecJSON(data); readErr != nil {
 				return readErr
 			}
+			if !json.Valid(data) {
+				return fmt.Errorf("invalid document JSON: %s", absPath)
+			}
+			var header struct {
+				ID         string `json:"ID"`
+				Properties struct {
+					Title string `json:"title"`
+				} `json:"Properties"`
+			}
+			if readErr = json.Unmarshal(data, &header); readErr != nil {
+				return readErr
+			}
+			titles[header.ID] = header.Properties.Title
+			if !p.mayContainReferences(data) && !bytes.Contains(data, []byte("NodeAttributeView")) {
+				return nil
+			}
+			p.parsedDocuments++
 			tree, readErr := dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 			if readErr != nil || tree == nil || tree.Root == nil {
 				return fmt.Errorf("cannot parse document %s: %v", absPath, readErr)
@@ -180,7 +202,7 @@ func (p *assetRelinkPlan) scan() error {
 			p.tree(tree, apicontract.AssetReference{Notebook: boxID, RootID: tree.Root.ID, Path: tree.Path})
 			retain := false
 			if len(p.result.References) > before {
-				p.files = append(p.files, &assetRelinkFile{path: absPath, before: data, tree: tree})
+				p.files = append(p.files, &assetRelinkFile{path: absPath, before: data, tree: tree, items: p.referenceItems(before)})
 				retain = true
 			}
 			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -207,31 +229,11 @@ func (p *assetRelinkPlan) scan() error {
 		}
 		tree.HPath = "/" + strings.Join(parts, "/")
 	}
-	oldAbs, err := resolveRelinkAsset(assetRoots, p.oldPath, false)
-	if err != nil {
-		return err
-	}
-	newAbs := ""
-	if p.newPath != "" {
-		if newAbs, err = resolveRelinkAsset(assetRoots, p.newPath, true); err != nil {
-			return err
-		}
-	}
 	if err = p.scanViews(); err != nil {
 		return err
 	}
-	if err = p.scanAnnotation(oldAbs, newAbs); err != nil {
-		return err
-	}
-	if exists, ocrErr := util.CopyAssetTextForRelink(p.oldPath, p.newPath, "", true); exists || ocrErr != nil {
-		ref := apicontract.AssetReference{Type: "ocr", Path: "assets/ocr-texts.json", Reference: p.oldPath, Replacement: p.newPath, Relinkable: ocrErr == nil}
-		if ocrErr != nil {
-			ref.Reason = ocrErr.Error()
-		}
-		p.result.References = append(p.result.References, ref)
-		p.ocr = exists && ocrErr == nil && p.newPath != ""
-	}
-	return nil
+	p.finishPreflight()
+	return p.scanMetadata(assetRoots)
 }
 
 // resolveRelinkAsset 拒绝同名资源歧义，避免把不同目录下的文件视为同一个资源。
@@ -276,16 +278,26 @@ func resolveRelinkAsset(roots []string, assetPath string, required bool) (string
 
 func (p *assetRelinkPlan) scanViews() error {
 	dir := filepath.Join(util.DataDir, "storage", "av")
+	if err := p.observe(dir); err != nil {
+		return err
+	}
 	entries, err := os.ReadDir(dir)
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
 	for _, entry := range entries {
+		if err := p.checkContext(); err != nil {
+			return err
+		}
 		id := strings.TrimSuffix(entry.Name(), ".json")
 		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".json") || !ast.IsNodeIDPattern(id) {
 			continue
 		}
 		abs := filepath.Join(dir, entry.Name())
+		if err = p.observe(abs); err != nil {
+			return err
+		}
+		p.reportProgress(abs)
 		if entry.Type()&os.ModeSymlink != 0 {
 			return fmt.Errorf("symbolic attribute view is not supported: %s", id)
 		}
@@ -299,6 +311,13 @@ func (p *assetRelinkPlan) scanViews() error {
 		if util.IsCiphertext(data) {
 			return fmt.Errorf("encrypted attribute view in global storage: %s", id)
 		}
+		if !json.Valid(data) {
+			return fmt.Errorf("invalid attribute view JSON: %s", id)
+		}
+		if !p.mayContainReferences(data) {
+			continue
+		}
+		p.parsedViews++
 		cache.RemoveAVData(id)
 		view, err := av.ParseAttributeViewByPath(abs)
 		if err != nil || view == nil || view.ID != id {
@@ -309,7 +328,7 @@ func (p *assetRelinkPlan) scanViews() error {
 			return err
 		}
 		if len(p.result.References) > before {
-			p.files = append(p.files, &assetRelinkFile{path: abs, before: data, view: view})
+			p.files = append(p.files, &assetRelinkFile{path: abs, before: data, view: view, items: p.referenceItems(before)})
 			owners := []apicontract.AssetReference{}
 			for _, tree := range p.trees {
 				ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -355,13 +374,21 @@ func (p *assetRelinkPlan) scanViews() error {
 func (p *assetRelinkPlan) scanAnnotation(oldAbs, newAbs string) error {
 	if oldAbs == "" {
 		for i := range p.result.References {
-			if p.result.References[i].Type == "annotation" {
+			if p.result.References[i].Type == "annotation" && p.result.References[i].OldPath == p.oldPath {
 				p.result.References[i].Relinkable, p.result.References[i].Reason = false, "annotation_source_missing"
 			}
 		}
 		return nil
 	}
 	source := oldAbs + ".sya"
+	if err := p.observe(source); err != nil {
+		return err
+	}
+	if newAbs != "" {
+		if err := p.observe(newAbs + ".sya"); err != nil {
+			return err
+		}
+	}
 	if _, statErr := os.Stat(source); statErr == nil {
 		if err := validateRelinkStoragePath(source); err != nil {
 			return err
@@ -370,7 +397,7 @@ func (p *assetRelinkPlan) scanAnnotation(oldAbs, newAbs string) error {
 	data, err := filelock.ReadFile(source)
 	if os.IsNotExist(err) {
 		for i := range p.result.References {
-			if p.result.References[i].Type == "annotation" {
+			if p.result.References[i].Type == "annotation" && p.result.References[i].OldPath == p.oldPath {
 				p.result.References[i].Relinkable, p.result.References[i].Reason = false, "annotation_file_missing"
 			}
 		}
@@ -382,8 +409,7 @@ func (p *assetRelinkPlan) scanAnnotation(oldAbs, newAbs string) error {
 	if !json.Valid(data) || util.IsCiphertext(data) {
 		return errors.New("invalid annotation file")
 	}
-	p.files = append(p.files, &assetRelinkFile{path: source, before: data})
-	ref := apicontract.AssetReference{Type: "annotation-file", Path: p.oldPath + ".sya", Reference: p.oldPath, Relinkable: true}
+	ref := apicontract.AssetReference{OldPath: p.oldPath, Type: "annotation-file", Path: p.oldPath + ".sya", Reference: p.oldPath, Relinkable: true}
 	if p.newPath != "" {
 		ref.Replacement = p.newPath
 		if !strings.EqualFold(filepath.Ext(p.newPath), ".pdf") {
@@ -395,107 +421,12 @@ func (p *assetRelinkPlan) scanAnnotation(oldAbs, newAbs string) error {
 		} else if !os.IsNotExist(readErr) {
 			return readErr
 		} else {
-			p.files = append(p.files, &assetRelinkFile{path: newAbs + ".sya", after: data})
+			items := p.itemsForPath(p.oldPath)
+			p.files = append(p.files, &assetRelinkFile{path: source, before: data, backupOnly: true, items: items})
+			p.files = append(p.files, &assetRelinkFile{path: newAbs + ".sya", after: data, items: items})
 		}
 	}
 	p.result.References = append(p.result.References, ref)
-	return nil
-}
-
-func (p *assetRelinkPlan) apply() (err error) {
-	// 所有源文件先备份成功，再写入任何引用；错误响应保留历史目录，支持中断后恢复。
-	historyDir, err := newAssetRelinkHistoryDir()
-	if err != nil {
-		return err
-	}
-	p.result.HistoryPath = filepath.ToSlash(historyDir)
-	for _, file := range p.files {
-		current, readErr := filelock.ReadFile(file.path)
-		if file.before == nil {
-			if !os.IsNotExist(readErr) {
-				return fmt.Errorf("annotation target changed during scan: %s", file.path)
-			}
-			continue
-		}
-		if readErr != nil || !bytes.Equal(current, file.before) {
-			return fmt.Errorf("source changed during scan: %s", file.path)
-		}
-		rel, relErr := filepath.Rel(util.DataDir, file.path)
-		if relErr != nil || strings.HasPrefix(rel, "..") {
-			return errors.New("invalid history source path")
-		}
-		dest := filepath.Join(historyDir, rel)
-		if err = os.MkdirAll(filepath.Dir(dest), 0755); err != nil {
-			return err
-		}
-		if err = gulu.File.WriteFileSafer(dest, file.before, 0644); err != nil {
-			return err
-		}
-	}
-	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
-	changedViews := map[string]bool{}
-	reload := map[string]bool{}
-	defer func() {
-		for _, tree := range p.trees {
-			viewChanged := false
-			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if entering && n.Type == ast.NodeAttributeView && changedViews[n.AttributeViewID] {
-					reload[tree.Root.ID] = true
-					viewChanged = true
-				}
-				return ast.WalkContinue
-			})
-			if viewChanged {
-				if current, loadErr := filesys.LoadTree(tree.Box, tree.Path, util.NewLute()); loadErr == nil {
-					sql.UpsertTreeQueue(current)
-				} else {
-					err = errors.Join(err, loadErr)
-				}
-			}
-		}
-		sql.FlushQueue()
-		for id := range reload {
-			ReloadProtyle(id)
-		}
-		if p.result.Updated > 0 {
-			IncSync()
-		}
-	}()
-	// 先创建标注附属文件，使后续文档引用在部分失败时仍可解析。
-	for _, file := range p.files {
-		if file.before != nil {
-			continue
-		}
-		if err = util.WriteFileIfUnchanged(file.path, nil, file.after); err != nil {
-			return err
-		}
-		p.result.Updated++
-	}
-	if p.ocr {
-		if _, err = util.CopyAssetTextForRelink(p.oldPath, p.newPath, historyDir, false); err != nil {
-			return err
-		}
-		p.result.Updated++
-	}
-	for _, file := range p.files {
-		if file.tree != nil {
-			var size uint64
-			if size, err = filesys.WriteTreeIfUnchanged(file.tree, file.before); err != nil {
-				return err
-			}
-			sql.UpsertTreeQueue(file.tree)
-			refreshDocInfoWithSize(file.tree, size)
-			reload[file.tree.Root.ID] = true
-		} else if file.view != nil {
-			if err = av.SaveAttributeViewIfUnchanged(file.view, file.before); err != nil {
-				return err
-			}
-			changedViews[file.view.ID] = true
-		} else {
-			continue
-		}
-		p.result.Updated++
-	}
 	return nil
 }
 

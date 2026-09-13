@@ -23,9 +23,14 @@ import (
 )
 
 type assetRelinker struct {
-	oldPath string
-	newPath string
-	result  apicontract.AssetReferencesData
+	oldPath     string
+	newPath     string
+	result      apicontract.AssetReferencesData
+	routes      map[string]*assetRelinker
+	collectOnly bool
+	recordless  bool
+	disabled    bool
+	changes     int
 }
 
 // relinkPath 按 URL 路径解码一次，查询参数和片段不参与资源文件名匹配。
@@ -55,9 +60,17 @@ func (r *assetRelinker) reference(raw, kind string, location apicontract.AssetRe
 		}
 	}
 	p, err := relinkPath(link)
-	if err != nil || p != r.oldPath {
+	if err != nil {
 		return raw
 	}
+	rule := r
+	if r.routes != nil {
+		rule = r.routes[p]
+	}
+	if rule == nil || p != rule.oldPath || (rule.disabled && !r.collectOnly) {
+		return raw
+	}
+	location.OldPath = rule.oldPath
 	location.Type, location.Reference, location.Relinkable = kind, raw, true
 	u, _ := url.Parse(link)
 	query, queryErr := url.ParseQuery(html.UnescapeString(u.RawQuery))
@@ -69,16 +82,16 @@ func (r *assetRelinker) reference(raw, kind string, location apicontract.AssetRe
 			location.Relinkable, location.Reason = false, "encrypted_or_invalid_notebook"
 		}
 	}
-	if annotationID != "" && r.newPath != "" && !strings.EqualFold(path.Ext(r.newPath), ".pdf") {
+	if annotationID != "" && rule.newPath != "" && !strings.EqualFold(path.Ext(rule.newPath), ".pdf") {
 		location.Relinkable, location.Reason = false, "annotation_requires_pdf"
 	}
 	ret := raw
-	if r.newPath != "" && location.Relinkable {
+	if rule.newPath != "" && location.Relinkable {
 		end := strings.IndexAny(raw, "?#")
 		if end < 0 {
 			end = len(raw)
 		}
-		ret = (&url.URL{Path: r.newPath}).EscapedPath()
+		ret = (&url.URL{Path: rule.newPath}).EscapedPath()
 		if strings.HasPrefix(raw, "/") {
 			ret = "/" + ret
 		}
@@ -88,7 +101,15 @@ func (r *assetRelinker) reference(raw, kind string, location apicontract.AssetRe
 		ret += raw[end:]
 		location.Replacement = ret
 	}
-	r.result.References = append(r.result.References, location)
+	if !r.recordless {
+		r.result.References = append(r.result.References, location)
+	}
+	if r.collectOnly || rule.oldPath == rule.newPath {
+		return raw
+	}
+	if ret != raw {
+		r.changes++
+	}
 	return ret
 }
 
@@ -98,7 +119,7 @@ var relinkHTMLAttrPattern = regexp.MustCompile("([^\\s=<>/]+)(\\s*=\\s*)(\"[^\"]
 
 func (r *assetRelinker) list(raw, kind string, location apicontract.AssetReference) string {
 	// 完整路径优先，兼容文件名中的空格和逗号；多值列表仅替换各独立 URL。
-	if p, err := relinkPath(raw); err == nil && p == r.oldPath {
+	if p, err := relinkPath(raw); err == nil && (p == r.oldPath || r.routes[p] != nil) {
 		return r.reference(raw, kind, location)
 	}
 	return relinkAssetListPattern.ReplaceAllStringFunc(raw, func(value string) string {
@@ -230,9 +251,9 @@ func (r *assetRelinker) attributeView(view *av.AttributeView, location apicontra
 		if tree, err = av.ParseValueTextRich(value.Text.Rich); err != nil || tree == nil {
 			return
 		}
-		before := len(r.result.References)
+		before := r.changes
 		r.tree(tree, loc)
-		if len(r.result.References) != before && r.newPath != "" {
+		if r.changes != before {
 			if value.Text.Rich.Content, err = av.RenderValueTextRich(tree); err == nil {
 				err = value.Text.NormalizeRichContent()
 			}

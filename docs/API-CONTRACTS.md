@@ -140,6 +140,8 @@ Dynamic multipart endpoints use `MultipartFields` to retain every text value and
 
 ## Generation and verification
 
+Asset-reference query and replacement contracts preserve scalar requests and also accept batches. Batch results retain input order and report each mapping's status, reason, references, and changed-file count; the top-level count includes each shared file once. Empty batches, duplicate sources, and chained or cyclic mappings are rejected. Independent mappings may succeed when another mapping fails; a shared-file write failure belongs to every affected mapping. Scans allow editing and validate the workspace snapshot before saving; cancellation and unchanged retries preserve source data. `TestAssetRelink` regressions cover scalar compatibility, batch validation, shared document/database/OCR persistence, history, and concurrent edits and are included in the full kernel command below.
+
 Run from `app/`:
 
 ```text

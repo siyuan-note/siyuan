@@ -13179,6 +13179,9 @@
         "notebook": {
           "type": "string"
         },
+        "oldPath": {
+          "type": "string"
+        },
         "path": {
           "type": "string"
         },
@@ -13228,6 +13231,12 @@
         "historyPath": {
           "type": "string"
         },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AssetRelinkItemResult"
+          }
+        },
         "references": {
           "anyOf": [
             {
@@ -13264,6 +13273,64 @@
         "references",
         "skippedNotebooks",
         "updated"
+      ],
+      "additionalProperties": false
+    },
+    "AssetRelinkItemResult": {
+      "type": "object",
+      "properties": {
+        "newPath": {
+          "type": "string"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "oldPath": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "references": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/AssetReference"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "updated": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "newPath",
+        "ok",
+        "oldPath",
+        "reason",
+        "references",
+        "updated"
+      ],
+      "additionalProperties": false
+    },
+    "AssetRelinkMappingInput": {
+      "type": "object",
+      "properties": {
+        "newPath": {
+          "type": "string"
+        },
+        "oldPath": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "newPath",
+        "oldPath"
       ],
       "additionalProperties": false
     },
@@ -23992,11 +24059,14 @@
       "properties": {
         "path": {
           "type": "string"
+        },
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
-      "required": [
-        "path"
-      ],
       "additionalProperties": false
     },
     "FindReplaceRequestInput": {
@@ -32269,6 +32339,12 @@
         "dryRun": {
           "type": "boolean"
         },
+        "mappings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AssetRelinkMappingInput"
+          }
+        },
         "newPath": {
           "type": "string"
         },
@@ -32276,10 +32352,6 @@
           "type": "string"
         }
       },
-      "required": [
-        "newPath",
-        "oldPath"
-      ],
       "additionalProperties": false
     },
     "RemoveAttributeViewBlocksRequestInput": {
@@ -110863,6 +110935,9 @@
                   },
                   {
                     "type": "null"
+                  },
+                  {
+                    "$ref": "#/$defs/AssetReferencesData"
                   }
                 ]
               },

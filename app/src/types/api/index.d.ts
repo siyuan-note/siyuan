@@ -508,9 +508,13 @@ export type AssetPathsCloudUploadRequestInput = { "ignorePushMsg"?: boolean | nu
 
 export type AssetPathsData = { "paths": Array<string> | null; };
 
-export type AssetReference = { "avID": string; "blockID": string; "notebook": string; "path": string; "reason": string; "reference": string; "relinkable": boolean; "replacement": string; "rootID": string; "type": string; "valueID": string; };
+export type AssetReference = { "avID": string; "blockID": string; "notebook": string; "oldPath"?: string; "path": string; "reason": string; "reference": string; "relinkable": boolean; "replacement": string; "rootID": string; "type": string; "valueID": string; };
 
-export type AssetReferencesData = { "dryRun": boolean; "historyPath": string; "references": Array<AssetReference> | null; "skippedNotebooks": Array<string> | null; "updated": number; };
+export type AssetReferencesData = { "dryRun": boolean; "historyPath": string; "items"?: Array<AssetRelinkItemResult>; "references": Array<AssetReference> | null; "skippedNotebooks": Array<string> | null; "updated": number; };
+
+export type AssetRelinkItemResult = { "newPath": string; "ok": boolean; "oldPath": string; "reason": string; "references": Array<AssetReference> | null; "updated": number; };
+
+export type AssetRelinkMappingInput = { "newPath": string; "oldPath": string; };
 
 export type AssetRenameData = { "newPath": string; };
 
@@ -1006,7 +1010,7 @@ export type FileTreeSortModeRequestInput = { "id"?: string | null; "sortMode": n
 
 export type FileTreeTrimIDRequestInput = { "id": string; };
 
-export type FindAssetReferencesRequestInput = { "path": string; };
+export type FindAssetReferencesRequestInput = { "path"?: string; "paths"?: Array<string>; };
 
 export type FindReplaceRequestInput = { "groupBy"?: number | null; "ids": Array<string>; "k": string; "method"?: number | null; "orderBy"?: number | null; "page"?: number | null; "pageSize"?: number | null; "paths"?: Array<string> | null; "query"?: string | null; "r": string; "replaceTypes"?: Record<string, boolean> | null; "subTypes"?: SearchSubtypeFilterInput | null; "types"?: Record<string, boolean> | null; };
 
@@ -1436,7 +1440,7 @@ export type RefTextQueryRequestInput = { "anchor": string; "notebook"?: string |
 
 export type RefreshBacklinkRequestInput = { "id": string; };
 
-export type RelinkAssetRequestInput = { "dryRun"?: boolean; "newPath": string; "oldPath": string; };
+export type RelinkAssetRequestInput = { "dryRun"?: boolean; "mappings"?: Array<AssetRelinkMappingInput>; "newPath"?: string; "oldPath"?: string; };
 
 export type RemoveAttributeViewBlocksRequestInput = { "avID": string; "srcIDs": Array<string>; };
 
@@ -2590,7 +2594,7 @@ export interface APIPOSTRoutes {
     };
     "/api/asset/findAssetReferences": {
         request: FindAssetReferencesRequestInput;
-        response: { "code": 0; "data": AssetReferencesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        response: { "code": 0; "data": AssetReferencesData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "dryRun"?: never; "historyPath"?: never; "items"?: never; "references"?: never; "skippedNotebooks"?: never; "updated"?: never; }) | null | (AssetReferencesData & { "closeTimeout"?: never; }); "msg": string; };
         body: "json";
     };
     "/api/asset/fullReindexAssetContent": {
@@ -2645,7 +2649,7 @@ export interface APIPOSTRoutes {
     };
     "/api/asset/relinkAsset": {
         request: RelinkAssetRequestInput;
-        response: { "code": 0; "data": AssetReferencesData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "dryRun"?: never; "historyPath"?: never; "references"?: never; "skippedNotebooks"?: never; "updated"?: never; }) | null | (AssetReferencesData & { "closeTimeout"?: never; }); "msg": string; };
+        response: { "code": 0; "data": AssetReferencesData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "dryRun"?: never; "historyPath"?: never; "items"?: never; "references"?: never; "skippedNotebooks"?: never; "updated"?: never; }) | null | (AssetReferencesData & { "closeTimeout"?: never; }); "msg": string; };
         body: "json";
     };
     "/api/asset/removeUnusedAsset": {

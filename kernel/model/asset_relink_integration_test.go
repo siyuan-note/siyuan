@@ -4,6 +4,7 @@ package model
 
 import (
 	"bytes"
+	"context"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -11,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -125,5 +127,104 @@ func TestAssetRelinkPersistenceAndHistory(t *testing.T) {
 	}
 	if data, _ := os.ReadFile(filepath.Join(util.DataDir, "assets/b.pdf.sya")); !strings.Contains(string(data), "annotation") {
 		t.Fatal("annotation metadata was not copied")
+	}
+	// 两组有效映射共享文档、数据库和 OCR，失败项保留原引用。
+	writeAssetRelinkTestFile(t, "assets/c.png", []byte("second source"))
+	writeAssetRelinkTestFile(t, "assets/d.webp", []byte("second target"))
+	util.SetAssetText("assets/c.png", "second OCR")
+	loaded, err = filesys.LoadTree(tree.Box, tree.Path, util.NewLute())
+	if err != nil {
+		t.Fatal(err)
+	}
+	paragraph := treenode.NewParagraph("20260914020007-relink7")
+	for _, path := range []string{"assets/c.png", "assets/blocked.png"} {
+		paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkAHref: path, TextMarkTextContent: "link"})
+	}
+	loaded.Root.AppendChild(paragraph)
+	if _, err = filesys.WriteTree(loaded); err != nil {
+		t.Fatal(err)
+	}
+	view, err = av.ParseAttributeView(viewID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	value := view.KeyValues[len(view.KeyValues)-1].Values[0]
+	value.MAsset = append(value.MAsset, &av.ValueAsset{Type: av.AssetTypeImage, Content: "assets/c.png"})
+	if err = av.SaveAttributeView(view); err != nil {
+		t.Fatal(err)
+	}
+	for _, source := range sources {
+		before[source], _ = os.ReadFile(filepath.Join(util.DataDir, source))
+	}
+	mappings := []apicontract.AssetRelinkMapping{
+		{OldPath: "assets/a.png", NewPath: "assets/b.webp"},
+		{OldPath: "assets/c.png", NewPath: "assets/d.webp"},
+		{OldPath: "assets/blocked.png", NewPath: "assets/missing.webp"},
+	}
+	plan, err := newAssetRelinkPlan(context.Background(), mappings, false, false, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = plan.run(); err != nil {
+		t.Fatal(err)
+	}
+	batch, err := plan.response(nil)
+	if err != nil || batch.Updated != 3 || len(batch.Items) != 3 || !batch.Items[0].OK || !batch.Items[1].OK || batch.Items[2].OK || batch.Items[2].Updated != 0 {
+		t.Fatalf("batch apply: %+v %v", batch, err)
+	}
+	if plan.parsedDocuments != 1 || plan.parsedViews != 1 || batch.Items[0].Updated != 2 || batch.Items[1].Updated != 3 {
+		t.Fatalf("shared work was duplicated: documents=%d views=%d items=%+v", plan.parsedDocuments, plan.parsedViews, batch.Items)
+	}
+	for _, source := range sources {
+		history, readErr := os.ReadFile(filepath.Join(batch.HistoryPath, source))
+		if readErr != nil || !bytes.Equal(history, before[source]) {
+			t.Fatalf("batch history contains intermediate state: %s %v", source, readErr)
+		}
+		data, _ := os.ReadFile(filepath.Join(util.DataDir, source))
+		if !bytes.Contains(data, []byte("assets/b.webp")) || !bytes.Contains(data, []byte("assets/d.webp")) {
+			t.Fatalf("missing batch replacement: %s", source)
+		}
+	}
+	document, _ := os.ReadFile(filepath.Join(util.DataDir, sources[0]))
+	if !bytes.Contains(document, []byte("assets/blocked.png")) || util.GetAssetText("assets/d.webp") != "second OCR" {
+		t.Fatal("failed mapping or OCR was not preserved")
+	}
+	retry, err := RelinkAssets(context.Background(), mappings, false)
+	if err != nil || retry.Updated != 0 || retry.HistoryPath != "" {
+		t.Fatalf("no-op retry created history: %+v %v", retry, err)
+	}
+	// 共享文件写入冲突归属全部相关映射，独立文件仍可完成。
+	writeAssetRelinkTestFile(t, "assets/e.png", []byte("independent source"))
+	writeAssetRelinkTestFile(t, "assets/f.webp", []byte("independent target"))
+	independent := treenode.NewTree(tree.Box, "/20260914020008-relink8.sy", "/Independent", "Independent")
+	paragraph = treenode.NewParagraph("20260914020009-relink9")
+	paragraph.AppendChild(&ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkAHref: "assets/e.png", TextMarkTextContent: "link"})
+	independent.Root.AppendChild(paragraph)
+	if _, err = filesys.WriteTree(independent); err != nil {
+		t.Fatal(err)
+	}
+	conflicted, _ := newAssetRelinkPlan(context.Background(), []apicontract.AssetRelinkMapping{
+		{OldPath: "assets/b.webp", NewPath: "assets/a.png"},
+		{OldPath: "assets/d.webp", NewPath: "assets/c.png"},
+		{OldPath: "assets/e.png", NewPath: "assets/f.webp"},
+	}, false, false, true)
+	sharedPath := filepath.Join(util.DataDir, sources[0])
+	conflicted.progress = func(path string) {
+		if conflicted.saving && path == sharedPath {
+			if err := os.WriteFile(path, append(append([]byte{}, document...), '\n'), 0644); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	if err = conflicted.run(); err != nil {
+		t.Fatal(err)
+	}
+	partial, err := conflicted.response(nil)
+	if err != nil || partial.Items[0].OK || partial.Items[1].OK || !partial.Items[2].OK || partial.Updated != 1 {
+		t.Fatalf("shared write failure attribution: %+v %v", partial, err)
+	}
+	current, _ := os.ReadFile(sharedPath)
+	if !bytes.Equal(current, append(append([]byte{}, document...), '\n')) {
+		t.Fatal("concurrent document edit was overwritten")
 	}
 }

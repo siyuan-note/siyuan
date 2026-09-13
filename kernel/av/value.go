@@ -2215,15 +2215,7 @@ func NewFormattedValueNumber(content float64, format NumberFormat) (ret *ValueNu
 		Content:          content,
 		IsNotEmpty:       true,
 		Format:           format,
-		FormattedContent: fmt.Sprintf("%f", content),
-	}
-
-	ret.FormattedContent = formatNumber(content, format)
-
-	switch format {
-	case NumberFormatNone:
-		s := fmt.Sprintf("%.5f", content)
-		ret.FormattedContent = strings.TrimRight(strings.TrimRight(s, "0"), ".")
+		FormattedContent: formatNumber(content, format),
 	}
 	return
 }

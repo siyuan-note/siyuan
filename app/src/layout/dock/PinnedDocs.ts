@@ -534,8 +534,10 @@ export class PinnedDocs {
             state.timer = window.setTimeout(() => {
                 if (this.touch !== state) { return; }
                 state.dragging = true;
-                state.ghost = row.cloneNode(true) as HTMLElement;
-                state.ghost.style.cssText = `position:fixed;pointer-events:none;z-index:9999;opacity:.7;left:${state.x}px;top:${state.y}px`;
+                state.ghost = document.createElement("ul");
+                state.ghost.className = "b3-list b3-list--background";
+                state.ghost.append(row.cloneNode(true));
+                state.ghost.style.cssText = `background-color:var(--b3-theme-surface);width:100%;touch-action:none;pointer-events:none;margin-left:-50%;margin-top:20px;z-index:${window.siyuan.zIndex};position:fixed;left:${state.x}px;top:${state.y}px`;
                 document.body.append(state.ghost);
                 this.suppressClick = true;
             }, Constants.TIMEOUT_LONGPRESS);

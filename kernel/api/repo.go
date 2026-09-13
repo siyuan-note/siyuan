@@ -27,6 +27,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -557,26 +558,28 @@ func removeRepoTagSnapshot(c *gin.Context) {
 	}
 }
 
-func createSnapshot(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var createSnapshot = contractHandler(apicontract.CreateSnapshot, func(c *gin.Context, request apicontract.CreateSnapshotRequest) apicontract.Response[apicontract.CreateSnapshotData] {
+	id, created, err := model.CreateRepoSnapshot(request.Memo)
+	if err != nil {
+		return apicontract.Failure[apicontract.CreateSnapshotData](-1, fmt.Sprintf(model.Conf.Language(140), err))
+	}
+	return apicontract.Success(apicontract.CreateSnapshotData{ID: id, Created: created})
+})
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var checkSnapshot = contractHandler(apicontract.CheckSnapshot, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.CheckSnapshotData] {
+	changed, err := model.CheckRepoSnapshot()
+	if err != nil {
+		return apicontract.Failure[apicontract.CheckSnapshotData](-1, err.Error())
 	}
+	return apicontract.Success(apicontract.CheckSnapshotData{Changed: changed})
+})
 
-	var memo string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("memo", &memo, true, false)) {
-		return
+var setSnapshotMemo = contractHandler(apicontract.SetSnapshotMemo, func(c *gin.Context, request apicontract.SetSnapshotMemoRequest) apicontract.Response[apicontract.Null] {
+	if err := model.SetRepoSnapshotMemo(request.ID, request.Memo); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-	if _, err := model.IndexRepo(memo); err != nil {
-		ret.Code = -1
-		ret.Msg = fmt.Sprintf(model.Conf.Language(140), err)
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
-	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 func tagSnapshot(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

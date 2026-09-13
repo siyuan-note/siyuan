@@ -16,6 +16,11 @@
 	"flashcardSourceHistory": "卡源配置历史",
 	"flashcardSourceHistoryTip": "恢复卡源配置和块引用并保留复习进度；题面和答案请从关联文档历史恢复",
 	"flashcardSourceRestoreConfirm": "恢复此版本的卡源配置？同一卡源生成的所有卡片都会受到影响，复习进度保持不变",
+	"pinnedDocs": "置顶",
+	"pinDoc": "置顶",
+	"unpinDoc": "取消置顶",
+	"editSnapshotMemo": "修改快照备注",
+	"snapshotMemoLocalTip": "仅修改本地快照的备注",
 	"mobileBarsAutoHide": "滚动时自动隐藏顶部和底部栏",
 	"mobileBarsAutoHideTip": "向下滚动时隐藏顶部标题栏、面包屑和底部导航栏，向上滚动时恢复显示",
 	"bodyGradient": "背景渐变",
@@ -1675,7 +1680,7 @@
 	"cloudTagSnapshot": "云端标记的快照",
 	"cloudBackupTip": "请到 [数据历史 - 数据快照] 中进行操作",
 	"snapshotMemo": "快照备注",
-	"snapshotMemoTip": "请输入快照备注",
+	"snapshotMemoTip": "可不填写，默认备注为 Create manually",
 	"tagSnapshot": "标记快照",
 	"tagSnapshotUpload": "标记快照并上传",
 	"tagSnapshotTip": "请勿包含符号 \\ / : * ? &quot; &#039; &lt; &gt; |",
@@ -2040,7 +2045,6 @@
 	"heading5": "五级标题",
 	"heading6": "六级标题",
 	"unorderedList": "无序列表",
-	"searchSubTypeListTip": "列表子类型（有序/无序/任务）同样适用于列表项",
 	"outlineExpandLevel": "展开层级",
 	"expandAll": "全部展开",
 	"outlineKeepCurrentExpand": "保持当前标题展开",
@@ -2897,6 +2901,7 @@
 		"392": "加密笔记本的内容不参与全局索引，无法显示关系图",
 		"393": "加密笔记本不支持该操作",
 		"394": "加密笔记本不支持发布，无法配置发布权限",
-		"395": "批量导出不支持加密笔记本，请先解锁后逐个导出，或改为导出普通笔记本"
+		"395": "批量导出不支持加密笔记本，请先解锁后逐个导出，或改为导出普通笔记本",
+		"396": "加密笔记本不支持置顶文档"
 	}
 }

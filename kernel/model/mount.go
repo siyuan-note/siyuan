@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -355,6 +356,7 @@ func RemoveBox(boxID string) (err error) {
 	if err = removeBoxDir(localPath); err != nil {
 		return
 	}
+	maintainPinnedDocs(nil, boxID, "")
 	// 目录删除成功后再清理，避免删除失败时提前移除数据库条目。
 	flushDeletedAttributeViewBlocks(deletedAttrViewBlockIDs)
 	// 加密笔记本删除时清理其独立加密 db 文件（含 WAL/SHM），避免残留
@@ -573,18 +575,15 @@ func mountBox(boxID string) (alreadyMount bool, err error) {
 	return false, nil
 }
 
+var userGuideIDs = []string{"20210808180117-6v0mkxr", "20210808180117-czj9bvb", "20211226090932-5lcq56f", "20240530133126-axarxgx"}
+
 func IsUserGuide(boxID string) bool {
-	return "20210808180117-czj9bvb" == boxID || "20210808180117-6v0mkxr" == boxID || "20211226090932-5lcq56f" == boxID || "20240530133126-axarxgx" == boxID
+	return slices.Contains(userGuideIDs, boxID)
 }
 
 func getUserGuideAVJSONFiles(boxID string) (ret []string, err error) {
 	guideAVDirPath := filepath.Join(util.WorkingDir, "guide", boxID, "storage", "av")
-	if !filelock.IsExist(guideAVDirPath) {
-		logging.LogErrorf("guide av dir [%s] not exist", guideAVDirPath)
-		return
-	}
-
-	avEntries, err := os.ReadDir(guideAVDirPath)
+	avEntries, err := readUserGuideDirectory(guideAVDirPath)
 	if nil != err {
 		logging.LogErrorf("read guide av dir [%s] failed: %s", guideAVDirPath, err)
 		return
@@ -600,9 +599,9 @@ func getUserGuideAVJSONFiles(boxID string) (ret []string, err error) {
 	return
 }
 
-func getAllUserGuideAVJSONFiles() (ret []string) {
+func getAllUserGuideAVJSONFiles() (ret []string, err error) {
 	guideDirPath := filepath.Join(util.WorkingDir, "guide")
-	guideEntries, err := os.ReadDir(guideDirPath)
+	guideEntries, err := readUserGuideDirectory(guideDirPath)
 	if nil != err {
 		return
 	}
@@ -615,9 +614,23 @@ func getAllUserGuideAVJSONFiles() (ret []string) {
 
 		avFiles, err := getUserGuideAVJSONFiles(boxID)
 		if nil != err {
-			continue
+			return nil, err
 		}
 		ret = append(ret, avFiles...)
 	}
 	return
+}
+
+func readUserGuideDirectory(dir string) ([]os.DirEntry, error) {
+	info, err := os.Stat(dir)
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	if !info.IsDir() {
+		return nil, fmt.Errorf("user guide path is not a directory: %s", dir)
+	}
+	return os.ReadDir(dir)
 }

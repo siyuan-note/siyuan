@@ -5,6 +5,7 @@
 * [Flashcard source history](FLASHCARD-HISTORY-API.md)
 * [Specification](#Specification)
     * [Parameters and return values](#Parameters-and-return-values)
+    * [TypeScript contracts](#TypeScript-contracts)
     * [Behavior semantics](#Behavior-semantics)
     * [Authentication](#Authentication)
 * [Notebooks](#Notebooks)
@@ -118,6 +119,21 @@
     * `code`: non-zero for exceptions
     * `msg`: an empty string under normal circumstances, an error text will be returned under abnormal conditions
     * `data`: may be `{}`, `[]` or `NULL`, depending on the interface
+
+### TypeScript contracts
+
+The plugin `fetchPost`, `fetchSyncPost`, and `fetchGet` declarations infer request and response types for migrated API paths from generated kernel contracts. Coverage is expanding and includes system utilities, batch block attributes, tag and bookmark operations, selected block queries, notebook listing, history search, and snapshot operations. Existing untyped endpoints and dynamic URLs remain supported. Check the response code before reading successful data from asynchronous calls, and handle nullable fields explicitly.
+
+```typescript
+import {fetchSyncPost} from "siyuan";
+
+const response = await fetchSyncPost("/api/attr/getBlockAttrs", {id: blockID});
+if (response.code === 0 && response.data) {
+    const value = response.data["custom-value"];
+}
+```
+
+See the [generated route declarations](../app/src/types/api/index.d.ts) for exact coverage and the [contract maintenance guide](API-CONTRACTS.md) for generation and compatibility rules. Type declarations do not perform runtime JSON validation.
 
 ### Behavior semantics
 
@@ -2805,7 +2821,7 @@ Saved search criteria use the following fields:
 * `k`: Search keyword
 * `r`: Replacement keyword
 * `types`: Block type flags. Supported keys are `mathBlock`, `table`, `blockquote`, `superBlock`, `paragraph`, `document`, `heading`, `list`, `listItem`, `codeBlock`, `htmlBlock`, `embedBlock`, `databaseBlock`, `audioBlock`, `videoBlock`, `iframeBlock`, `widgetBlock`, and `callout`
-* `subTypes`: Block subtype flags. `h1` through `h6` select heading levels; `o`, `u`, and `t` select ordered, unordered, and task lists
+* `subTypes`: Independent subtype groups: `heading` accepts `h1` through `h6`; `list` and `listItem` each accept `o` (ordered), `u` (unordered), and `t` (task). A missing or empty group, or a group with all flags `false`, leaves that parent type unrestricted by subtype. The parent must still be enabled in `types`. Unknown top-level keys, including the former flat `h1`–`h6` and `o`/`u`/`t` flags, are ignored without error; saved subtype selections in that format must be selected and saved again
 * `replaceTypes`: Replacement type flags. Supported keys are `text`, `imgText`, `imgTitle`, `imgSrc`, `aText`, `aTitle`, `aHref`, `code`, `em`, `strong`, `inlineMath`, `inlineMemo`, `blockRef`, `fileAnnotationRef`, `kbd`, `mark`, `s`, `sub`, `sup`, `tag`, `u`, `docTitle`, `codeBlock`, `mathBlock`, and `htmlBlock`
 
 Boolean flags omitted from `types`, `subTypes`, or `replaceTypes` are treated as `false`.
@@ -2839,10 +2855,15 @@ Creates a criterion or completely replaces the existing criterion with the same 
       "r": "",
       "types": {
         "document": true,
-        "paragraph": true
+        "paragraph": true,
+        "heading": true,
+        "list": true,
+        "listItem": true
       },
       "subTypes": {
-        "h1": true
+        "heading": {"h1": true},
+        "list": {"o": true},
+        "listItem": {"t": true}
       },
       "replaceTypes": {
         "text": true

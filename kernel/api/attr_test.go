@@ -156,6 +156,9 @@ func postBlockAttrs(t *testing.T, role model.Role, path, body string, handler gi
 	request := httptest.NewRequest(http.MethodPost, path, strings.NewReader(body))
 	request.Header.Set("Content-Type", "application/json")
 	engine.ServeHTTP(recorder, request)
+	if path == "/api/attr/getBlockAttrs" {
+		requireAPIContract(t, http.MethodPost, path, recorder)
+	}
 
 	response := &blockAttrsResponse{}
 	if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {

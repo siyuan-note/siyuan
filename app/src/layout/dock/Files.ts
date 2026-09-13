@@ -16,6 +16,7 @@ import {
     openPublishAccessDialog
 } from "../../protyle/util/publishAccess";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {restoreFileTreePaths} from "../../util/fileTreeRestore";
 import {openEmojiPanel} from "../../emoji";
 import {
     getFileTreeDefaultIconAttr,
@@ -74,6 +75,7 @@ import {
 import {clearDocumentTabMovePreview} from "../tabDrag";
 import {reorderSortedFileTree} from "../../util/fileTreeReorder";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {PinnedDocs} from "./PinnedDocs";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -81,6 +83,7 @@ export class Files extends Model {
     public closeElement: HTMLElement;
     public lastSelectedElement: Element = null;
     private actionsElement: HTMLElement;
+    private pinnedDocs: PinnedDocs;
     private reloadNotebookInfoTimeout: number;
     private docSortModeRefreshTimeout: number;
     private docSortModeChanges = new Map<string, IDocSortModeChanged>();
@@ -122,6 +125,9 @@ export class Files extends Model {
         this.actionsElement = options.tab.panelElement.firstElementChild as HTMLElement;
         this.element = this.actionsElement.nextElementSibling as HTMLElement;
         this.closeElement = options.tab.panelElement.lastElementChild as HTMLElement;
+        this.pinnedDocs = new PinnedDocs(options.app, this.element, (id) => {
+            openFileById({app: options.app, id, action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]});
+        });
         this.closeElement.addEventListener("click", (event) => {
             setPanelFocus(this.element.parentElement);
             let target = event.target as HTMLElement;
@@ -1164,6 +1170,7 @@ export class Files extends Model {
     }
 
     private handleMsgCallback(data: IWebSocketData) {
+        if (data) { this.pinnedDocs?.scheduleRefresh(); }
         if (data) {
             switch (data.cmd) {
                 case "reloadDocInfo":
@@ -1463,6 +1470,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
     }
 
     public init(init = true) {
+        this.pinnedDocs?.scheduleRefresh();
         let html = "";
         let closeHtml = "";
         let closeCounter = 0;
@@ -1484,11 +1492,30 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         } else {
             this.closeElement.classList.add("fn__none");
         }
-        window.siyuan.storage[Constants.LOCAL_FILESPATHS].forEach(async (item: IFilesPath) => {
-            for (const openPath of item.openPaths) {
-                await this.selectItem(item.notebookId, openPath, undefined, false, false);
+        const firstNotebook = this.element.firstElementChild;
+        void restoreFileTreePaths(window.siyuan.storage[Constants.LOCAL_FILESPATHS], async (notebookId, path) => {
+            if (this.element.firstElementChild !== firstNotebook) {
+                return;
             }
-            this.element.scrollTop = scrollTop;
+            const liElement = this.element.querySelector(`ul[data-url="${notebookId}"] li[data-path="${path}"]`);
+            if (!liElement || liElement.querySelector(".b3-list-item__arrow--open")) {
+                return;
+            }
+            const response = await fetchSyncPost("/api/filetree/listDocsByPath", {
+                notebook: notebookId,
+                path,
+                app: Constants.SIYUAN_APPID,
+            });
+            if (response.code !== 0 || !response.data || !this.element.contains(liElement) ||
+                liElement.querySelector(".b3-list-item__arrow--open")) {
+                return;
+            }
+            await this.onLsSelect(response.data, path, false, false);
+        }).then(() => {
+            if (this.element.firstElementChild === firstNotebook) {
+                this.refreshPublishAccessSwitch();
+                this.element.scrollTop = scrollTop;
+            }
         });
         this.refreshPublishAccessSwitch();
         if (!init) {
@@ -1655,6 +1682,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
     }
 
     public onDocSortModeChanged(data: IDocSortModeChanged) {
+        this.pinnedDocs?.scheduleRefresh();
         updateFileTreeSortMode(data, this.element);
         this.docSortModeChanges.set(`${data.scope}:${data.box}:${data.id}:${data.path}`, data);
         window.clearTimeout(this.docSortModeRefreshTimeout);
@@ -2117,6 +2145,10 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
 </li>`;
     }
 
+    public destroy() {
+        this.pinnedDocs.destroy();
+    }
+
     private initMoreMenu() {
         window.siyuan.menus.menu.remove();
         window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_DOC_TREE_PANEL_MORE);
@@ -2213,6 +2245,14 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
                 }
             }).element);
         }
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "pinnedDocs",
+            icon: "iconPin",
+            label: window.siyuan.languages.pinnedDocs,
+            checked: this.pinnedDocs.isVisible(),
+            disabled: window.siyuan.config.readonly,
+            click: () => this.pinnedDocs.toggleVisibility(),
+        }).element);
         return window.siyuan.menus.menu;
     }
 

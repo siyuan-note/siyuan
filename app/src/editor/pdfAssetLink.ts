@@ -3,7 +3,19 @@ export interface IPdfAssetLink {
     pdfParams?: number | string;
 }
 
-const PDF_ANNOTATION_PATH = /^(assets\/.+\.pdf)\/(\d{14}-\w{7})$/i;
+const PDF_ANNOTATION_PATH = /^(assets\/(?:[^/]+\/)*[^/]+\.[pP][dD][fF])\/(\d{14}-[a-z0-9]{7})$/;
+
+export const getPdfAnnotationReference = (text: string): string | undefined => {
+    const match = /^<<(.+?)(?: "(?:[^"\\]|\\.)*")?>>$/.exec(text);
+    if (!match || /[<>"\r\n\\]/.test(match[1])) {
+        return undefined;
+    }
+    const path = match[1].split(/[?#]/, 1)[0];
+    if (!PDF_ANNOTATION_PATH.test(path) || path.split("/").some(part => !part || part === "." || part === "..")) {
+        return undefined;
+    }
+    return match[1];
+};
 
 const decodeQueryComponent = (value: string) => {
     try {
@@ -14,11 +26,11 @@ const decodeQueryComponent = (value: string) => {
 };
 
 export const appendPdfAnnotationId = (linkAddress: string, annotationId: string) => {
-    const queryIndex = linkAddress.indexOf("?");
-    if (queryIndex < 0) {
+    const suffixIndex = linkAddress.search(/[?#]/);
+    if (suffixIndex < 0) {
         return `${linkAddress}/${annotationId}`;
     }
-    return `${linkAddress.substring(0, queryIndex)}/${annotationId}${linkAddress.substring(queryIndex)}`;
+    return `${linkAddress.substring(0, suffixIndex)}/${annotationId}${linkAddress.substring(suffixIndex)}`;
 };
 
 export const resolvePdfAssetLink = (linkAddress: string): IPdfAssetLink => {

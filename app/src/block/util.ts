@@ -79,6 +79,9 @@ export const getCancelSBOperations = async (nodeElement: Element, options: {
                 id,
                 notebook: options.notebookID,
             });
+            if (idData.code !== 0) {
+                throw new Error(idData.msg);
+            }
             previousId = idData.data.previous;
             parentID = idData.data.parent;
         } else {

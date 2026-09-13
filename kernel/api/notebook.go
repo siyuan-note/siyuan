@@ -26,6 +26,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -495,19 +496,10 @@ func setNotebookConf(c *gin.Context) {
 	ret.Data = boxConf
 }
 
-func lsNotebooks(c *gin.Context) {
+var lsNotebooks = contractHandler(apicontract.ListNotebooks, func(c *gin.Context, request apicontract.ListNotebooksRequest) apicontract.Response[*apicontract.ListNotebooksData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	flashcard := false
-
-	// 兼容旧版接口，不能直接使用 util.JsonArg()
-	arg := map[string]any{}
-	if err := c.ShouldBindJSON(&arg); err == nil {
-		if arg["flashcard"] != nil {
-			flashcard = arg["flashcard"].(bool)
-		}
-	}
+	flashcard := request.Flashcard
 
 	var notebooks []*model.Box
 	var publishAccess model.PublishAccess
@@ -522,13 +514,13 @@ func lsNotebooks(c *gin.Context) {
 			if err := holdEncryptedBoxRequest(c, boxID); err != nil {
 				ret.Code = -1
 				ret.Msg = model.Conf.Language(314)
-				return
+				return contractFailure[*apicontract.ListNotebooksData](ret)
 			}
 		}
 		var err error
 		notebooks, err = model.ListNotebooks()
 		if err != nil {
-			return
+			return apicontract.Success[*apicontract.ListNotebooksData](nil)
 		}
 		if isReadOnlyRole {
 			publishAccess = model.GetPublishAccess()
@@ -557,11 +549,15 @@ func lsNotebooks(c *gin.Context) {
 		sortNotebooksBySubFileCount(notebooks, model.Conf.FileTree.Sort)
 	}
 
-	ret.Data = map[string]any{
-		"notebooks":     notebooks,
-		"boxDocEnabled": boxDocEnabled,
+	var values []*apicontract.Notebook
+	if notebooks != nil {
+		values = make([]*apicontract.Notebook, 0, len(notebooks))
+		for _, notebook := range notebooks {
+			values = append(values, notebookContract(notebook))
+		}
 	}
-}
+	return apicontract.Success(&apicontract.ListNotebooksData{Notebooks: values, BoxDocEnabled: boxDocEnabled})
+})
 
 func sortNotebooksBySubFileCount(notebooks []*model.Box, sortMode int) {
 	switch sortMode {

@@ -546,14 +546,10 @@ func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnno
 				refs = append(refs, ref)
 			}
 		} else if treenode.IsFileAnnotationRef(n) {
-			pathID := n.TextMarkFileAnnotationRefID
-			idx := strings.LastIndex(pathID, "/")
-			if -1 == idx {
+			filePath, annotationID := util.SplitFileAnnotationRef(n.TextMarkFileAnnotationRefID)
+			if "" == annotationID {
 				return ast.WalkContinue
 			}
-
-			filePath := pathID[:idx]
-			annotationID := pathID[idx+1:]
 
 			anchor := n.TextMarkTextContent
 			text := filePath

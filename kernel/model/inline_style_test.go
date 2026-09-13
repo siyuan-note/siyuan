@@ -659,7 +659,7 @@ func TestInlineStylesRepoPath(t *testing.T) {
 			t.Fatalf("unexpected inline styles repository path match: %s", filePath)
 		}
 	}
-	if ignore.CompileIgnoreLines(getSyncIgnoreLines()...).MatchesPath(inlineStylesRepoPath) {
+	if ignore.CompileIgnoreLines(mustSyncIgnoreLines(t)...).MatchesPath(inlineStylesRepoPath) {
 		t.Fatal("inline styles file is ignored by data synchronization")
 	}
 }

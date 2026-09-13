@@ -23,6 +23,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -249,25 +250,15 @@ func searchAsset(c *gin.Context) {
 	return
 }
 
-func searchTag(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var searchTag = contractHandler(apicontract.SearchTag, func(c *gin.Context, request apicontract.SearchTagRequest) apicontract.Response[apicontract.SearchTagData] {
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	k := arg["k"].(string)
+	k := request.K
 	tags := model.SearchTags(k)
 	if 1 > len(tags) {
 		tags = []string{}
 	}
-	ret.Data = map[string]any{
-		"tags": tags,
-		"k":    k,
-	}
-}
+	return apicontract.Success(apicontract.SearchTagData{Tags: tags, K: k})
+})
 
 func searchWidget(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -675,13 +666,7 @@ func parseSearchBlockArgs(arg map[string]any) (page, pageSize int, query string,
 		}
 	}
 
-	if nil != arg["subTypes"] {
-		subTypesArg := arg["subTypes"].(map[string]any)
-		subTypes = map[string]bool{}
-		for t, b := range subTypesArg {
-			subTypes[t] = b.(bool)
-		}
-	}
+	subTypes = parseSearchSubTypes(arg["subTypes"])
 
 	// method：0：关键字，1：查询语法，2：SQL，3：正则表达式
 	methodArg := arg["method"]

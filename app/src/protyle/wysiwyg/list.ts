@@ -21,7 +21,6 @@ import {
 } from "./listContext";
 import {fetchSyncPost} from "../../util/fetch";
 import {openInputDialog} from "../../dialog/inputDialog";
-import {isMobile} from "../../util/functions";
 import {showMessage} from "../../dialog/message";
 import {activateTrackedRangeInsertion, type ITrackedRangeInsertion} from "../util/trackedRange";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
@@ -113,7 +112,6 @@ export const openOrderedListStartDialog = (protyle: IProtyle, listElement: HTMLE
         min: "0",
         max: String(maxStart),
         step: "1",
-        width: isMobile() ? "92vw" : "360px",
         destroyCallback() {
             if (range?.startContainer?.isConnected) {
                 focusByRange(range);

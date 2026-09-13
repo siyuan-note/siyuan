@@ -16,6 +16,11 @@
 	"flashcardSourceHistory": "Historial de configuración de la fuente de tarjetas",
 	"flashcardSourceHistoryTip": "Restaura la configuración y las referencias a bloques conservando el progreso de repaso; recupera preguntas y respuestas desde el historial del documento vinculado",
 	"flashcardSourceRestoreConfirm": "¿Restaurar esta configuración? Afectará a todas las tarjetas de esta fuente; el progreso de repaso no cambiará",
+	"pinnedDocs": "Fijados",
+	"pinDoc": "Fijar",
+	"unpinDoc": "Desfijar",
+	"editSnapshotMemo": "Editar nota de la instantánea",
+	"snapshotMemoLocalTip": "Solo cambia la nota de la instantánea local",
 	"mobileBarsAutoHide": "Ocultar automáticamente las barras superior e inferior al desplazarse",
 	"mobileBarsAutoHideTip": "Desplázate hacia abajo para ocultar la barra de título, la ruta de navegación y la barra inferior; hacia arriba para mostrarlas",
 	"bodyGradient": "Degradado de fondo",
@@ -1675,7 +1680,7 @@
 	"cloudTagSnapshot": "Instantánea de etiquetas en la nube",
 	"cloudBackupTip": "Vaya a [Historial de datos - Instantánea de datos] para operar",
 	"snapshotMemo": "Memo de Instantánea",
-	"snapshotMemoTip": "Ingrese la nota instantánea",
+	"snapshotMemoTip": "Opcional; valor predeterminado: Create manually",
 	"tagSnapshot": "Instantánea de la etiqueta",
 	"tagSnapshotUpload": "Etiquetar instantánea y cargar",
 	"tagSnapshotTip": "No incluir símbolos \\ / : * ? &quot; &#039; &lt; &gt; |",
@@ -2040,7 +2045,6 @@
 	"heading5": "Encabezado 5",
 	"heading6": "Encabezado 6",
 	"unorderedList": "Lista no ordenada",
-	"searchSubTypeListTip": "Los subtipos de lista (Ordenada/No ordenada/Tarea) también se aplican a los elementos de lista",
 	"outlineExpandLevel": "Nivel de expansión",
 	"expandAll": "Expandir todo",
 	"outlineKeepCurrentExpand": "Mantener la expansión actual",
@@ -2897,6 +2901,7 @@
 		"392": "El contenido de los cuadernos cifrados no forma parte del índice global, por lo que el gráfico de relaciones no está disponible",
 		"393": "Los cuadernos cifrados no admiten esta operación",
 		"394": "Los cuadernos cifrados no admiten publicación, no se pueden configurar permisos de publicación",
-		"395": "La exportación por lotes no admite cuadernos cifrados; desbloquéalos y expórtalos uno por uno, o exporta cuadernos normales"
+		"395": "La exportación por lotes no admite cuadernos cifrados; desbloquéalos y expórtalos uno por uno, o exporta cuadernos normales",
+		"396": "Los cuadernos cifrados no permiten fijar documentos"
 	}
 }

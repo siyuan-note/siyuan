@@ -21,6 +21,54 @@ import {openDocHistory} from "./doc";
 
 let historyEditor: Protyle;
 const repoHistoryEditors = new WeakMap<Element, Protyle>();
+const snapshotMemos = new WeakMap<Element, Map<string, string>>();
+
+const openSnapshotMemo = (repoElement: Element, id?: string, memo = "") => {
+    const dialog = new Dialog({
+        title: id ? window.siyuan.languages.editSnapshotMemo : window.siyuan.languages.snapshotMemo,
+        content: `<div class="b3-dialog__content">
+    ${id ? `<div class="ft__secondary">${window.siyuan.languages.snapshotMemoLocalTip}</div><div class="fn__hr"></div>` : ""}
+    <textarea class="b3-text-field fn__block" placeholder="${escapeAttr(window.siyuan.languages.snapshotMemoTip)}"></textarea>
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+        width: isMobile() ? "92vw" : "520px",
+    });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_SNAPSHOTMEMO);
+    const textarea = dialog.element.querySelector("textarea");
+    textarea.value = memo;
+    textarea.focus();
+    const buttons = dialog.element.querySelectorAll("button");
+    dialog.bindInput(textarea, () => buttons[1].click());
+    buttons[0].addEventListener("click", () => dialog.destroy());
+    buttons[1].addEventListener("click", async () => {
+        if (buttons[1].disabled) {
+            return;
+        }
+        buttons[1].disabled = true;
+        textarea.readOnly = true;
+        try {
+            if (id) {
+                await fetchPost("/api/repo/setSnapshotMemo", {id, memo: textarea.value}, () => {
+                    dialog.destroy();
+                    renderRepo(repoElement, parseInt(repoElement.getAttribute("data-page")) || 1);
+                });
+            } else {
+                await fetchPost("/api/repo/createSnapshot", {memo: textarea.value}, (response) => {
+                    if (response.data.created) {
+                        dialog.destroy();
+                        renderRepo(repoElement, 1);
+                    }
+                });
+            }
+        } finally {
+            buttons[1].disabled = false;
+            textarea.readOnly = false;
+        }
+    });
+};
 
 const renderDoc = (element: HTMLElement, currentPage: number) => {
     const previousElement = element.querySelector('[data-type="docprevious"]');
@@ -96,12 +144,13 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         const pageElement = nextElement.nextElementSibling.nextElementSibling;
         pageElement.textContent = `${window.siyuan.languages.pageCountAndHistoryCount.replace("${x}", response.data.pageCount).replace("${y}", response.data.totalCount || 1)}`;
         pageElement.classList.remove("fn__none");
-        if (response.data.histories.length === 0) {
+        const histories = response.data.histories || [];
+        if (histories.length === 0) {
             listElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
             return;
         }
         let logsHTML = "";
-        response.data.histories.forEach((item: string) => {
+        histories.forEach((item: string) => {
             logsHTML += `<li class="b3-list-item" data-type="toggle" data-created="${item}">
     <span class="b3-list-item__toggle b3-list-item__toggle--hl"><svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg></span>
     <span style="padding-left: 4px" class="b3-list-item__text">${dayjs(parseInt(item) * 1000).format("YYYY-MM-DD HH:mm:ss")}</span>
@@ -204,6 +253,11 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
 <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>`;
     }
     /// #endif
+    if (["getRepoTagSnapshots", "getRepoSnapshots"].includes(type) && !window.siyuan.config.readonly) {
+        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="editSnapshotMemo" aria-label="${window.siyuan.languages.editSnapshotMemo}"><svg><use xlink:href="#iconEdit"></use></svg></span>` + actionHTML;
+    }
+    const memos = new Map<string, string>();
+    snapshotMemos.set(element, memos);
     let repoHTML = "";
     const isPhone = isMobile();
     const selectId: { id: string, time: string }[] = ["getRepoTagSnapshots", "getRepoSnapshots"].includes(type) ?
@@ -221,6 +275,7 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
         requiresDownload?: boolean,
         typesCount: { type: string, count: number }[]
     }) => {
+        memos.set(item.id, item.memo);
         let statHTML = "";
         if (item.typesCount) {
             statHTML = `<div class="b3-list-item__meta${isPhone ? " fn__none" : ""}">
@@ -237,7 +292,7 @@ ${window.siyuan.languages.fileCount} ${item.count}<span class="fn__space"></span
     <span class="fn__space"></span>
     ${item.systemOS}${(item.systemName && item.systemOS) ? "/" : ""}${item.systemName}
     <span class="fn__space"></span>
-    <span class="b3-chip b3-chip--secondary b3-chip--small${item.tag ? "" : " fn__none"}">${item.tag}</span>
+    <span class="b3-chip b3-chip--secondary b3-chip--small${item.tag ? "" : " fn__none"}">${escapeHtml(item.tag)}</span>
 </div>
 ${item.requiresDownload && ["getRepoTagSnapshots", "getRepoSnapshots"].includes(type) ?
     `<div class="ft__smaller ft__error" style="white-space:normal">${escapeHtml(window.siyuan.languages.syncAssetSnapshotIncomplete)}</div>` : ""}
@@ -249,10 +304,10 @@ ${item.requiresDownload && ["getRepoTagSnapshots", "getRepoSnapshots"].includes(
 ${statHTML}`;
         const hasSelected = selectId.find(subItem => subItem.id === item.id);
         /// #if MOBILE
-        repoHTML += `<li class="b3-list-item${hasSelected ? " b3-list-item--focus" : ""}" data-type="repoitem" data-id="${item.id}" data-tag="${item.tag}">
+        repoHTML += `<li class="b3-list-item${hasSelected ? " b3-list-item--focus" : ""}" data-type="repoitem" data-id="${item.id}" data-tag="${escapeAttr(escapeHtml(item.tag))}">
 <div class="fn__flex-1">
     ${infoHTML}
-    <div class="fn__flex" style="height: 26px" data-type="repoitem"" data-id="${item.id}" data-tag="${item.tag}">
+    <div class="fn__flex" style="height: 26px" data-type="repoitem"" data-id="${item.id}" data-tag="${escapeAttr(escapeHtml(item.tag))}">
         ${actionHTML}
         <span class="b3-list-item__action" data-type="more">
             <svg><use xlink:href="#iconMore"></use></svg>
@@ -264,7 +319,7 @@ ${statHTML}`;
 </div>
 </li>`;
         /// #else
-        repoHTML += `<li class="b3-list-item b3-list-item--hide-action${hasSelected ? " b3-list-item--focus" : ""}" data-type="repoitem" data-id="${item.id}" data-tag="${item.tag}">
+        repoHTML += `<li class="b3-list-item b3-list-item--hide-action${hasSelected ? " b3-list-item--focus" : ""}" data-type="repoitem" data-id="${item.id}" data-tag="${escapeAttr(escapeHtml(item.tag))}">
 <div class="fn__flex-1">${infoHTML}</div>
 ${actionHTML}
 </li>`;
@@ -377,7 +432,8 @@ const renderRepo = (element: Element, currentPage: number) => {
             previousElement.setAttribute("disabled", "disabled");
         }
         nextElement.setAttribute("disabled", "disabled");
-        fetchPost(`/api/repo/${selectValue}`, {page: currentPage}, (response) => {
+        const snapshotURL: string = `/api/repo/${selectValue}`;
+        fetchPost(snapshotURL, {page: currentPage}, (response) => {
             selectElement.disabled = false;
             if (currentPage < response.data.pageCount) {
                 nextElement.removeAttribute("disabled");
@@ -710,7 +766,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     event.preventDefault();
                     break;
                 }
-                let name;
+                let name: string;
                 let time;
                 if (dataType === "notebook") {
                     name = target.previousElementSibling.previousElementSibling.textContent.trim();
@@ -723,7 +779,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     time = dayjs(parseInt(liElement.getAttribute("data-created")) * 1000).format("YYYY-MM-DD HH:mm:ss");
                 }
                 confirmDialog("⚠️ " + window.siyuan.languages.rollback,
-                    window.siyuan.languages.rollbackConfirm.replace("${name}", name).replace("${time}", time),
+                    window.siyuan.languages.rollbackConfirm.replace("${name}", () => escapeHtml(name)).replace("${time}", time),
                     () => {
                         if (dataType === "assets") {
                             fetchPost("/api/history/rollbackAssetsHistory", {
@@ -943,40 +999,27 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.stopPropagation();
                 event.preventDefault();
                 break;
+            } else if (type === "editSnapshotMemo" && !window.siyuan.config.readonly) {
+                const id = target.closest("[data-id]").getAttribute("data-id");
+                openSnapshotMemo(repoElement, id, snapshotMemos.get(repoElement)?.get(id) || "");
+                event.stopPropagation();
+                event.preventDefault();
+                break;
             } else if (type === "genRepo") {
-                const genRepoDialog = new Dialog({
-                    title: window.siyuan.languages.snapshotMemo,
-                    content: `<div class="b3-dialog__content">
-    <textarea class="b3-text-field fn__block" placeholder="${window.siyuan.languages.snapshotMemoTip}"></textarea>
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-                    width: isMobile() ? "92vw" : "520px",
-                });
-                genRepoDialog.element.setAttribute("data-key", Constants.DIALOG_SNAPSHOTMEMO);
-                const textareaElement = genRepoDialog.element.querySelector("textarea");
-                textareaElement.focus();
-                const btnsElement = genRepoDialog.element.querySelectorAll(".b3-button");
-                genRepoDialog.bindInput(textareaElement, () => {
-                    (btnsElement[1] as HTMLButtonElement).click();
-                });
-                btnsElement[0].addEventListener("click", () => {
-                    genRepoDialog.destroy();
-                });
-                btnsElement[1].addEventListener("click", () => {
-                    fetchPost("/api/repo/createSnapshot", {memo: textareaElement.value}, () => {
-                        renderRepo(repoElement, 1);
-                    });
-                    genRepoDialog.destroy();
-                });
+                if (!window.siyuan.config.readonly && !target.hasAttribute("disabled")) {
+                    target.setAttribute("disabled", "disabled");
+                    fetchPost("/api/repo/checkSnapshot", {}, (response) => {
+                        if (response.data.changed && repoElement.isConnected) {
+                            openSnapshotMemo(repoElement);
+                        }
+                    }).finally(() => target.removeAttribute("disabled"));
+                }
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (type === "removeRepoTagSnapshot" || type === "removeCloudRepoTagSnapshot") {
                 const tag = target.parentElement.getAttribute("data-tag");
-                confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <i>${tag}</i>?`, () => {
+                confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(tag)}</b> ?`, () => {
                     fetchPost("/api/repo/" + type, {tag}, () => {
                         renderRepo(repoElement, 1);
                     });

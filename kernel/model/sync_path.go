@@ -22,13 +22,16 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/88250/gulu"
 	ignore "github.com/sabhiram/go-gitignore"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // PathsAffectSync 判断指定路径的变更是否会影响数据同步仓库。
 func PathsAffectSync(absPaths ...string) bool {
+	return pathsAffectSync(false, absPaths...)
+}
+
+func pathsAffectSync(invalidate bool, absPaths ...string) bool {
 	if 0 == len(absPaths) {
 		return false
 	}
@@ -43,8 +46,14 @@ func PathsAffectSync(absPaths ...string) bool {
 	if 0 == len(dataPaths) {
 		return false
 	}
+	if invalidate {
+		invalidateResolvedSyncIgnoreRules(dataDir, dataPaths...)
+	}
 
-	matcher := ignore.CompileIgnoreLines(getSyncIgnoreLines()...)
+	_, matcher, err := getSyncIgnoreRules()
+	if err != nil {
+		return true
+	}
 	for _, absPath := range dataPaths {
 		if pathAffectsSync(dataDir, absPath, matcher) {
 			return true
@@ -55,26 +64,25 @@ func PathsAffectSync(absPaths ...string) bool {
 
 // IncSyncIfNeeded 在指定路径的变更会影响数据同步仓库时重新计划同步。
 func IncSyncIfNeeded(absPaths ...string) {
-	if PathsAffectSync(absPaths...) {
+	if pathsAffectSync(true, absPaths...) {
 		IncSync()
 	}
 }
 
 func pathAffectsSync(dataDir, absPath string, matcher *ignore.GitIgnore) bool {
-	absPath = util.ResolveLongestExistingParent(absPath)
 	relPath, ok := dataRelativePath(dataDir, absPath)
 	if !ok {
 		return false
 	}
 
-	// 修改同步忽略规则会改变仓库内容，规则文件本身虽然不参与同步也需要重新计划同步。
+	// 修改同步忽略规则会改变仓库内容，即使规则排除了规则文件本身也需要重新计划同步。
 	if "/.siyuan/syncignore" == relPath {
 		return true
 	}
 
 	info, err := os.Stat(absPath)
 	if nil != err || !info.IsDir() {
-		return syncFilePathIncluded(absPath, relPath, info, matcher)
+		return syncFilePathIncluded(dataDir, absPath, relPath, info, matcher)
 	}
 
 	syncIgnorePath := filepath.Join(dataDir, ".siyuan", "syncignore")
@@ -83,7 +91,10 @@ func pathAffectsSync(dataDir, absPath string, matcher *ignore.GitIgnore) bool {
 			return true
 		}
 	}
-	if syncPathHasSkippedDir(relPath, true) {
+	if syncPathHasSkippedDir(dataDir, relPath, true) {
+		return false
+	}
+	if _, filterErr := syncPathFilter(dataDir, info, absPath); filterErr != nil {
 		return false
 	}
 	affects := false
@@ -97,8 +108,15 @@ func pathAffectsSync(dataDir, absPath string, matcher *ignore.GitIgnore) bool {
 			return nil
 		}
 		if entry.IsDir() {
-			if path != absPath && syncPathHasSkippedDir(rel, true) {
+			if path != absPath && syncPathHasSkippedDir(dataDir, rel, true) {
 				return filepath.SkipDir
+			}
+			info, infoErr := entry.Info()
+			if infoErr != nil {
+				return infoErr
+			}
+			if _, filterErr := syncPathFilter(dataDir, info, path); filterErr != nil {
+				return filterErr
 			}
 			return nil
 		}
@@ -107,7 +125,7 @@ func pathAffectsSync(dataDir, absPath string, matcher *ignore.GitIgnore) bool {
 			affects = true
 			return fs.SkipAll
 		}
-		if syncFilePathIncluded(path, rel, entryInfo, matcher) {
+		if syncFilePathIncluded(dataDir, path, rel, entryInfo, matcher) {
 			affects = true
 			return fs.SkipAll
 		}
@@ -127,30 +145,28 @@ func dataRelativePath(dataDir, absPath string) (string, bool) {
 	return "/" + filepath.ToSlash(relPath), true
 }
 
-func syncFilePathIncluded(absPath, relPath string, info os.FileInfo, matcher *ignore.GitIgnore) bool {
-	if syncPathHasSkippedDir(relPath, false) {
+func syncFilePathIncluded(dataDir, absPath, relPath string, info os.FileInfo, matcher *ignore.GitIgnore) bool {
+	if syncPathHasSkippedDir(dataDir, relPath, false) {
 		return false
 	}
-	name := filepath.Base(absPath)
-	if strings.HasPrefix(name, ".") || strings.HasSuffix(name, ".tmp") {
-		return false
-	}
-	if "/storage/local.json" == relPath || "/storage/recent-doc.json" == relPath || "/storage/ref-used.json" == relPath {
-		return false
-	}
-	if nil != info && (!info.Mode().IsRegular() || gulu.File.IsHidden(absPath)) {
+	if ignored, err := syncPathFilter(dataDir, info, absPath); ignored || err != nil {
 		return false
 	}
 	return !matcher.MatchesPath(relPath)
 }
 
-func syncPathHasSkippedDir(relPath string, includeLast bool) bool {
+func syncPathHasSkippedDir(dataDir, relPath string, includeLast bool) bool {
 	parts := strings.Split(strings.TrimPrefix(filepath.ToSlash(relPath), "/"), "/")
 	if !includeLast && 0 < len(parts) {
 		parts = parts[:len(parts)-1]
 	}
+	absPath := dataDir
 	for _, part := range parts {
-		if strings.HasPrefix(part, ".") || "filesys_status_check" == part {
+		if part == "" {
+			continue
+		}
+		absPath = filepath.Join(absPath, part)
+		if _, err := syncPathFilter(dataDir, syncMissingDirectory{name: part}, absPath); err != nil {
 			return true
 		}
 	}

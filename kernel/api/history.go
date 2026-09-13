@@ -24,50 +24,23 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func searchHistory(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var notebook, query, op string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("notebook", &notebook, false, false),
-		util.BindJsonArg("query", &query, false, false),
-		util.BindJsonArg("op", &op, false, false),
-	) {
-		return
-	}
+var searchHistory = contractHandler(apicontract.SearchHistory, func(c *gin.Context, request apicontract.SearchHistoryRequest) apicontract.Response[apicontract.SearchHistoryData] {
 	typ := model.HistoryTypeDoc
-	if nil != arg["type"] {
-		typeVal, ok := util.ParseJsonArg[float64]("type", arg, ret, true, false)
-		if !ok {
-			return
-		}
-		typ = int(typeVal)
+	if request.Type != nil {
+		typ = int(*request.Type)
 	}
 	page := 1
-	if nil != arg["page"] {
-		pageVal, ok := util.ParseJsonArg[float64]("page", arg, ret, true, false)
-		if !ok {
-			return
-		}
-		page = int(pageVal)
+	if request.Page != nil {
+		page = int(*request.Page)
 	}
-	histories, pageCount, totalCount := model.FullTextSearchHistory(query, notebook, op, typ, page)
-	ret.Data = map[string]any{
-		"histories":  histories,
-		"pageCount":  pageCount,
-		"totalCount": totalCount,
-	}
-}
+	histories, pageCount, totalCount := model.FullTextSearchHistory(request.Query, request.Notebook, request.Op, typ, page)
+	return apicontract.Success(apicontract.SearchHistoryData{Histories: histories, PageCount: pageCount, TotalCount: totalCount})
+})
 
 func getHistoryItems(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -101,12 +74,10 @@ func getHistoryItems(c *gin.Context) {
 	}
 }
 
-func reindexHistory(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
+var reindexHistory = contractHandler(apicontract.ReindexHistory, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 	model.ReindexHistory()
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
 func getNotebookHistory(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -124,20 +95,15 @@ func getNotebookHistory(c *gin.Context) {
 	}
 }
 
-func clearWorkspaceHistory(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	msgId := util.PushMsg(model.Conf.Language(100), 1000*60*15)
+var clearWorkspaceHistory = contractHandler(apicontract.ClearWorkspaceHistory, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
+	msgID := util.PushMsg(model.Conf.Language(100), 1000*60*15)
 	time.Sleep(3 * time.Second)
-	err := model.ClearWorkspaceHistory()
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+	if err := model.ClearWorkspaceHistory(); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-	util.PushUpdateMsg(msgId, model.Conf.Language(99), 1000*5)
-}
+	util.PushUpdateMsg(msgID, model.Conf.Language(99), 1000*5)
+	return apicontract.Success(apicontract.Null{})
+})
 
 func getDocHistoryContent(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

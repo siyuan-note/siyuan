@@ -660,9 +660,9 @@ interface INotebook {
     icon: string;
     sort: number;
     subFileCount: number;
-    dueFlashcardCount?: string;
-    newFlashcardCount?: string;
-    flashcardCount?: string;
+    dueFlashcardCount?: number;
+    newFlashcardCount?: number;
+    flashcardCount?: number;
     sortMode: number;
     encrypted?: boolean;
     unlocked?: boolean;
@@ -1076,12 +1076,12 @@ interface IFileTreeList {
 }
 
 interface IBlockTree {
-    box: string,
+    box?: string,
     revision?: string,
     number?: string,
-    nodeType: string,
-    hPath: string,
-    subType: string,
+    nodeType?: string,
+    hPath?: string,
+    subType?: string,
     name: string,
     type: string,
     depth: number,

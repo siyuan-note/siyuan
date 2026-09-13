@@ -31,7 +31,7 @@ export const renderRepoFileList = (files: IRepoFile[], element: Element, showPat
     let html = "";
     files.forEach((item) => {
         if (showCompare) {
-            html += `<li class="b3-list-item b3-list-item--hide-action" data-type="searchFileItem" data-id="${item.fileID}" data-snapshot="${item.indexID}" data-created="${item.updated}" data-title="${escapeAttr(item.title)}">
+            html += `<li class="b3-list-item b3-list-item--hide-action" data-type="searchFileItem" data-id="${item.fileID}" data-snapshot="${item.indexID}" data-created="${item.updated}" data-title="${escapeAttr(escapeHtml(item.title))}">
     <span class="b3-list-item__text">${dayjs(item.updated).format("YYYY-MM-DD HH:mm:ss")}</span>
     <span class="fn__space"></span>
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
@@ -100,7 +100,7 @@ export const rollbackRepoFile = (element: Element) => {
     const name = element.getAttribute("data-title") || element.querySelector(".b3-list-item__text").textContent.trim();
     const time = dayjs(parseInt(element.getAttribute("data-created"))).format("YYYY-MM-DD HH:mm:ss");
     confirmDialog("⚠️ " + window.siyuan.languages.rollback,
-        window.siyuan.languages.rollbackConfirm.replace("${name}", name).replace("${time}", time),
+        window.siyuan.languages.rollbackConfirm.replace("${name}", () => escapeHtml(name)).replace("${time}", time),
         () => {
             fetchPost("/api/repo/rollbackRepoSnapshotFile", {
                 id: element.getAttribute("data-id")

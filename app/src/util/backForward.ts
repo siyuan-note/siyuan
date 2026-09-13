@@ -25,7 +25,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
     let blockElement: HTMLElement;
     if (!document.contains(stack.protyle.element)) {
         const response = await fetchSyncPost("/api/block/checkBlockExist", {id: stack.protyle.block.rootID});
-        if (!response.data) {
+        if (response.code !== 0 || !response.data) {
             // 页签删除
             return false;
         }
@@ -40,13 +40,16 @@ const focusStack = async (app: App, stack: IBackStack) => {
             wnd = getWndByLayout(window.siyuan.layout.centerLayout);
         }
         if (wnd) {
-            const blockInfoParam: IObject = {id: stack.id};
+            const blockInfoParam: {id: string; notebook?: string} = {id: stack.id};
             if (isEncryptedBox(stack.protyle.notebookId)) {
                 blockInfoParam.notebook = stack.protyle.notebookId;
             }
             const info = await fetchSyncPost("/api/block/getBlockInfo", blockInfoParam);
             if (info.code === 3) {
                 showMessage(info.msg);
+                return;
+            }
+            if (info.code !== 0) {
                 return;
             }
             const tab = new Tab({
@@ -167,7 +170,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
     }
     if (stack.protyle.element.parentElement) {
         const response = await fetchSyncPost("/api/block/checkBlockExist", {id: stack.id});
-        if (!response.data) {
+        if (response.code !== 0 || !response.data) {
             // 块被删除
             if (getSelection().rangeCount > 0) {
                 focusByRange(getSelection().getRangeAt(0));

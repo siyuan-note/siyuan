@@ -6,9 +6,61 @@
 		"id": "20201222100222-q47d64s",
 		"title": "Type filtering",
 		"type": "doc",
-		"updated": "20251219205842"
+		"updated": "20260913020024"
 	},
 	"Children": [
+		{
+			"ID": "20260913020024-b527599",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260913020024-b527599",
+				"updated": "20260913020024"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Search type filters"
+				}
+			]
+		},
+		{
+			"ID": "20260913020024-jcrzyhk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260913020024-jcrzyhk",
+				"updated": "20260913020024"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In the search dialog, open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Search type"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "  and expand Heading, List block, or List item block to select heading levels or ordered, unordered, and task subtypes independently. For example, select only Ordered under List item block to find ordered list items."
+				}
+			]
+		},
+		{
+			"ID": "20260913020024-t1ymzbn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260913020024-t1ymzbn",
+				"updated": "20260913020024"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Selecting a parent selects all its subtypes; clearing it clears the group. Selecting any subtype enables its parent, and clearing the last subtype disables the parent. An enabled parent with no subtype restriction appears with all its subtypes selected."
+				}
+			]
+		},
 		{
 			"ID": "20210210104024-efd1ar6",
 			"Type": "NodeHeading",

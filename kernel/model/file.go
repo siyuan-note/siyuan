@@ -2124,6 +2124,11 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree, err 
 		return
 	}
 	logging.LogInfof("removed doc [%s%s]", box.ID, p)
+	removedPins := map[string]bool{}
+	for rootID := range removedRootPaths {
+		removedPins[rootID] = true
+	}
+	maintainPinnedDocs(removedPins, "", "")
 
 	box.removeSort(removeIDs)
 	if "/" != dir {
@@ -2565,6 +2570,11 @@ func moveSorts(rootID, fromBox, toBox string) {
 
 	fromRootSorts := map[string]int{}
 	ids := treenode.RootChildIDs(rootID)
+	movedPins := map[string]bool{rootID: true}
+	for _, id := range ids {
+		movedPins[id] = true
+	}
+	maintainPinnedDocs(movedPins, "", toBox)
 	fromConfPath := filepath.Join(util.DataDir, fromBox, ".siyuan", "sort.json")
 	fromFullSortIDs, err := readSortConfMap(fromConfPath)
 	if err != nil {

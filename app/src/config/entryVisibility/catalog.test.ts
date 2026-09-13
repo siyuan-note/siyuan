@@ -865,6 +865,7 @@ test("multiple document and notebook entries follow their document tree menus", 
         "rebuildDataIndex",
         "sort",
         "publishAccess",
+        "pinnedDocs",
     ]);
     assert.deepEqual(getEntryCatalogChildren("docTree.notebooks").map((item) => item.key), [
         "sort",
@@ -881,6 +882,17 @@ test("multiple document and notebook entries follow their document tree menus", 
         "exportMarkdown",
     ]);
     assert.ok(getEntryCatalogChildren("docTree.multi").some((item) => item.key === "delete"));
+});
+
+test("pinned area visibility is independent of dock visibility and menu ordering", () => {
+    assert.deepEqual(getEntryCatalogChildren("documentPanel").map(item => item.key), ["pinnedDocs"]);
+    assert.equal(getEntryCatalogNode("documentPanel.pinnedDocs")?.simple, true);
+    assert.equal(getEntryCatalogDefaultVisibility("documentPanel.pinnedDocs"), false);
+    assert.equal(getEntryCatalogCustomDefaultVisibility("documentPanel.pinnedDocs"), false);
+    assert.equal(getEntryCatalogDefaultVisibility("docTree.panel.pinnedDocs"), true);
+    assert.equal(isEntryOrderSortable("documentPanel"), false);
+    assert.equal(getEntryCatalogNode("docTree.panel.pinnedDocs")?.simple, true);
+    assert.equal(getEntryCatalogNode("dock.pinnedDocs"), undefined);
 });
 
 test("document tree configuration groups notebook scopes before document scopes", () => {
@@ -980,6 +992,15 @@ test("configuration labels distinguish block scopes and size controls", () => {
     }
 });
 
+test("document tree pin entries follow attributes and precede sorting", () => {
+    const keys = getEntryCatalogChildren("docTree.document").map(item => item.key);
+    assert.deepEqual(keys.slice(keys.indexOf("attr"), keys.indexOf("sort") + 1), ["attr", "pinDoc", "unpinDoc", "sort"]);
+    for (const key of ["pinDoc", "unpinDoc"]) {
+        assert.equal(getEntryCatalogNode(`docTree.document.${key}`)?.simple, true);
+        assert.equal(getEntryCatalogNode(`docTree.document.${key}`)?.type, "entry");
+    }
+});
+
 test("document tree creation entries match menu order and remain available in the Simple profile", () => {
     const entries = getEntryCatalogChildren("docTree.document");
     const creationKeys = ["newDocAbove", "newDocBelow", "newSiblingDoc"];
@@ -1004,8 +1025,10 @@ test("document tree creation entries match menu order and remain available in th
 test("document tree sort menus follow their scope inheritance options", () => {
     const documentEntries = getEntryCatalogChildren("docTree.document");
     const attrIndex = documentEntries.findIndex((item) => item.key === "attr");
-    assert.deepEqual(documentEntries.slice(attrIndex, attrIndex + 3).map((item) => item.key), [
+    assert.deepEqual(documentEntries.slice(attrIndex, attrIndex + 5).map((item) => item.key), [
         "attr",
+        "pinDoc",
+        "unpinDoc",
         "sort",
         "riffCard",
     ]);

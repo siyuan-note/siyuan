@@ -1065,7 +1065,7 @@ func statTypesByPath(files []*entity.File) (ret []*TypeCount) {
 	if 10 < len(ret) {
 		otherCount := 0
 		for _, tc := range ret[10:] {
-			tc.Count += otherCount
+			otherCount += tc.Count
 		}
 		other := &TypeCount{
 			Type:  "Other",
@@ -1741,17 +1741,25 @@ func TagSnapshot(id, name string) (err error) {
 }
 
 func IndexRepo(memo string) (id string, err error) {
+	id, _, err = CreateRepoSnapshot(memo)
+	return
+}
+
+func normalizeSnapshotMemo(memo string) string {
+	memo = strings.TrimSpace(gulu.Str.RemoveInvisible(memo))
+	if memo == "" {
+		return "Create manually"
+	}
+	return memo
+}
+
+func CreateRepoSnapshot(memo string) (id string, created bool, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
 	}
 
-	memo = gulu.Str.RemoveInvisible(memo)
-	memo = strings.TrimSpace(memo)
-	if "" == memo {
-		err = errors.New(Conf.Language(142))
-		return
-	}
+	memo = normalizeSnapshotMemo(memo)
 	FlushTxQueue()
 	assetDownloadSourceMu.RLock()
 	defer assetDownloadSourceMu.RUnlock()
@@ -1771,10 +1779,10 @@ func IndexRepo(memo string) (id string, err error) {
 	}
 
 	util.PushEndlessProgress(Conf.Language(143))
+	defer util.PushClearProgress()
 
 	start := time.Now()
-	latest, _ := repo.Latest()
-	index, err := repo.Index(memo, true, map[string]any{
+	index, created, err := repo.IndexWithResult(memo, true, map[string]any{
 		eventbus.CtxPushMsg:             eventbus.CtxPushMsgToStatusBarAndProgress,
 		dejavu.CtxAssetDownloadsAllowed: checkAssetDownloadAccess() == nil,
 	})
@@ -1785,7 +1793,7 @@ func IndexRepo(memo string) (id string, err error) {
 	id = index.ID
 	elapsed := time.Since(start)
 
-	if nil == latest || latest.ID != index.ID {
+	if created {
 		msg := fmt.Sprintf(Conf.Language(147), elapsed.Seconds())
 		util.PushStatusBar(msg)
 		util.PushMsg(msg, 5000)
@@ -1794,8 +1802,39 @@ func IndexRepo(memo string) (id string, err error) {
 		util.PushStatusBar(msg)
 		util.PushMsg(msg, 5000)
 	}
-	util.PushClearProgress()
 	return
+}
+
+func CheckRepoSnapshot() (changed bool, err error) {
+	if len(Conf.Repo.Key) == 0 {
+		return false, errors.New(Conf.Language(26))
+	}
+	FlushTxQueue()
+	assetDownloadSourceMu.RLock()
+	defer assetDownloadSourceMu.RUnlock()
+	repo, err := newRepositoryWithAssetSourceLocked()
+	if err != nil {
+		return false, err
+	}
+	start := time.Now()
+	changed, err = repo.CheckSnapshot()
+	if err == nil && !changed {
+		util.PushMsg(fmt.Sprintf(Conf.Language(148), time.Since(start).Seconds()), 5000)
+	}
+	return
+}
+
+func SetRepoSnapshotMemo(id, memo string) error {
+	if len(Conf.Repo.Key) == 0 {
+		return errors.New(Conf.Language(26))
+	}
+	assetDownloadSourceMu.RLock()
+	defer assetDownloadSourceMu.RUnlock()
+	repo, err := newRepositoryWithAssetSourceLocked()
+	if err != nil {
+		return err
+	}
+	return repo.SetSnapshotMemo(id, normalizeSnapshotMemo(memo))
 }
 
 var syncingFiles = sync.Map{}
@@ -2419,6 +2458,9 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	removedBoxConfs, removedBoxCryptoBackups := map[string]bool{}, map[string]bool{}
 	for _, file := range mergeResult.Upserts {
 		upserts = append(upserts, file.Path)
+		if file.Path == "/storage/pinned-docs.json" {
+			needReloadFiletree = true
+		}
 		if strings.HasPrefix(file.Path, "/storage/riff/") {
 			needReloadFlashcard = true
 		}
@@ -2492,6 +2534,9 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	unloadPluginSet, uninstallPluginSet := hashset.New(), hashset.New()
 	for _, file := range mergeResult.Removes {
 		removes = append(removes, file.Path)
+		if file.Path == "/storage/pinned-docs.json" {
+			needReloadFiletree = true
+		}
 		if strings.HasPrefix(file.Path, "/storage/riff/") {
 			needReloadFlashcard = true
 		}
@@ -2944,9 +2989,20 @@ func newRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
 		return
 	}
 
-	ignoreLines := getSyncIgnoreLines()
-	ignoreLines = append(ignoreLines, "/.siyuan/conf.json") // 忽略旧版同步配置
-	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, Conf.System.ID, Conf.System.Name, Conf.System.OS, Conf.Repo.Key, ignoreLines, cloudRepo)
+	ignoreLines, err := getSyncIgnoreLines()
+	if err != nil {
+		return nil, err
+	}
+	dataDir := util.DataDir
+	ret, err = dejavu.NewRepoWithOptions(dejavu.Options{
+		DataPath: util.DataDir, RepoPath: util.RepoDir, HistoryPath: util.HistoryDir, TempPath: util.TempDir,
+		DeviceID: Conf.System.ID, DeviceName: Conf.System.Name, DeviceOS: Conf.System.OS,
+		AESKey: Conf.Repo.Key, IgnoreLines: ignoreLines, Cloud: cloudRepo,
+		IgnoreRulePath: syncIgnoreRulePath, HiddenDirectoryNames: []string{".siyuan"},
+		PathFilter: func(info os.FileInfo, absPath string) (bool, error) {
+			return syncPathFilter(dataDir, info, absPath)
+		},
+	})
 	if err != nil {
 		logging.LogErrorf("init data repo failed: %s", err)
 		return
@@ -3188,7 +3244,7 @@ func subscribeRepoEvents() {
 }
 
 func buildCloudConf() (ret *cloud.Conf, err error) {
-	if !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
+	if conf.ProviderS3 != Conf.Sync.Provider && !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
 		logging.LogWarnf("invalid cloud repo name, rename it to [main]")
 		Conf.Sync.CloudName = "main"
 		Conf.Save()

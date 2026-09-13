@@ -16,6 +16,11 @@
 	"flashcardSourceHistory": "Konfigurationsverlauf der Kartenquelle",
 	"flashcardSourceHistoryTip": "Quelleneinstellungen und Blockreferenzen wiederherstellen und den Lernfortschritt behalten; Fragen und Antworten über den Verlauf des verknüpften Dokuments wiederherstellen",
 	"flashcardSourceRestoreConfirm": "Diese Quellkonfiguration wiederherstellen? Alle Karten dieser Quelle sind betroffen; der Lernfortschritt bleibt unverändert",
+	"pinnedDocs": "Angeheftet",
+	"pinDoc": "Anheften",
+	"unpinDoc": "Loslösen",
+	"editSnapshotMemo": "Snapshot-Notiz bearbeiten",
+	"snapshotMemoLocalTip": "Ändert nur die Notiz des lokalen Snapshots",
 	"mobileBarsAutoHide": "Obere und untere Leiste beim Scrollen automatisch ausblenden",
 	"mobileBarsAutoHideTip": "Beim Scrollen nach unten werden die obere Titelleiste, die Brotkrumennavigation und die untere Navigationsleiste ausgeblendet, beim Scrollen nach oben wieder angezeigt",
 	"bodyGradient": "Hintergrundverlauf",
@@ -1675,7 +1680,7 @@
 	"cloudTagSnapshot": "Cloud-Tag-Snapshot",
 	"cloudBackupTip": "Bitte gehen Sie zu [Datenhistorie - Datensnapshot], um zu operieren",
 	"snapshotMemo": "Snapshot-Notiz",
-	"snapshotMemoTip": "Bitte geben Sie die Snapshot-Notiz ein",
+	"snapshotMemoTip": "Optional; Standard: Create manually",
 	"tagSnapshot": "Tag-Snapshot",
 	"tagSnapshotUpload": "Tag-Snapshot hochladen",
 	"tagSnapshotTip": "Schließen Sie keine Symbole \\ / : * ? &quot; &#039; &lt; &gt; | ein.",
@@ -2040,7 +2045,6 @@
 	"heading5": "Überschrift 5",
 	"heading6": "Überschrift 6",
 	"unorderedList": "Ungeordnete Liste",
-	"searchSubTypeListTip": "Listen-Untertypen (Geordnet/Ungeordnet/Aufgabe) gelten auch für Listenelemente",
 	"outlineExpandLevel": "Expansionsebene",
 	"expandAll": "Alle erweitern",
 	"outlineKeepCurrentExpand": "Aktuelle Erweiterung beibehalten",
@@ -2897,6 +2901,7 @@
 		"392": "Inhalte verschlüsselter Notizbücher sind nicht Teil des globalen Index, daher ist die Beziehungsgrafik nicht verfügbar",
 		"393": "Verschlüsselte Notizbücher unterstützen diesen Vorgang nicht",
 		"394": "Verschlüsselte Notizbücher unterstützen keine Veröffentlichung, Veröffentlichungsrechte können nicht konfiguriert werden",
-		"395": "Der Stapelentexport unterstützt keine verschlüsselten Notizbücher, bitte entsperren Sie sie und exportieren Sie sie einzeln oder exportieren Sie normale Notizbücher"
+		"395": "Der Stapelentexport unterstützt keine verschlüsselten Notizbücher, bitte entsperren Sie sie und exportieren Sie sie einzeln oder exportieren Sie normale Notizbücher",
+		"396": "Verschlüsselte Notizbücher unterstützen das Anheften von Dokumenten nicht"
 	}
 }

@@ -16,6 +16,11 @@
 	"flashcardSourceHistory": "Card source configuration history",
 	"flashcardSourceHistoryTip": "Restore source settings and block references while keeping review progress; restore questions and answers from the linked document history",
 	"flashcardSourceRestoreConfirm": "Restore this source configuration? All cards from this source are affected; review progress stays unchanged",
+	"pinnedDocs": "Pinned",
+	"pinDoc": "Pin",
+	"unpinDoc": "Unpin",
+	"editSnapshotMemo": "Edit snapshot memo",
+	"snapshotMemoLocalTip": "Changes only the local snapshot memo",
 	"mobileBarsAutoHide": "Auto-hide top and bottom bars while scrolling",
 	"mobileBarsAutoHideTip": "Scroll down to hide the top title bar, breadcrumbs, and bottom navigation bar; scroll up to show them",
 	"bodyGradient": "Background gradient",
@@ -1675,7 +1680,7 @@
 	"cloudTagSnapshot": "Cloud tag snapshot",
 	"cloudBackupTip": "Please go to [Data History - Data Snapshot] to operate",
 	"snapshotMemo": "Snapshot Memo",
-	"snapshotMemoTip": "Please enter the snapshot memo",
+	"snapshotMemoTip": "Optional; default: Create manually",
 	"tagSnapshot": "Tag Snapshot",
 	"tagSnapshotUpload": "Tag snapshot and upload",
 	"tagSnapshotTip": "Do not include symbols \\ / : * ? &quot; &#039; &lt; &gt; |",
@@ -2040,7 +2045,6 @@
 	"heading5": "Heading 5",
 	"heading6": "Heading 6",
 	"unorderedList": "Unordered List",
-	"searchSubTypeListTip": "List subtypes (Ordered/Unordered/Task) also apply to list items",
 	"outlineExpandLevel": "Expand level",
 	"expandAll": "Expand all",
 	"outlineKeepCurrentExpand": "Keep current expand",
@@ -2897,6 +2901,7 @@
 		"392": "Content of encrypted notebooks is not part of the global index, so the graph view is unavailable",
 		"393": "Encrypted notebooks do not support this operation",
 		"394": "Encrypted notebooks do not support publishing, publish access cannot be configured",
-		"395": "Batch export does not support encrypted notebooks, please unlock and export them one by one, or export regular notebooks instead"
+		"395": "Batch export does not support encrypted notebooks, please unlock and export them one by one, or export regular notebooks instead",
+		"396": "Encrypted notebooks do not support pinning documents"
 	}
 }

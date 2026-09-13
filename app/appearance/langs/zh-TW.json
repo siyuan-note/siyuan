@@ -16,6 +16,11 @@
 	"flashcardSourceHistory": "卡源設定歷史",
 	"flashcardSourceHistoryTip": "還原卡源設定和區塊引用並保留複習進度；題目和答案請從關聯文件歷史還原",
 	"flashcardSourceRestoreConfirm": "還原此版本的卡源設定？同一卡源產生的所有卡片都會受到影響，複習進度保持不變",
+	"pinnedDocs": "置頂",
+	"pinDoc": "置頂",
+	"unpinDoc": "取消置頂",
+	"editSnapshotMemo": "修改快照備註",
+	"snapshotMemoLocalTip": "僅修改本機快照的備註",
 	"mobileBarsAutoHide": "捲動時自動隱藏頂部和底部列",
 	"mobileBarsAutoHideTip": "向下捲動時隱藏頂部標題列、麵包屑和底部導覽列，向上捲動時恢復顯示",
 	"bodyGradient": "背景漸層",
@@ -1675,7 +1680,7 @@
 	"cloudTagSnapshot": "雲端標記的快照",
 	"cloudBackupTip": "請到 [資料歷史 - 資料快照] 中進行操作",
 	"snapshotMemo": "快照備註",
-	"snapshotMemoTip": "請輸入快照備註",
+	"snapshotMemoTip": "可不填寫，預設備註為 Create manually",
 	"tagSnapshot": "標記快照",
 	"tagSnapshotUpload": "標記快照並上傳",
 	"tagSnapshotTip": "請勿包含符號 \\ / : * ? &quot; &#039; &lt; &gt; |",
@@ -2040,7 +2045,6 @@
 	"heading5": "五級標題",
 	"heading6": "六級標題",
 	"unorderedList": "無序列表",
-	"searchSubTypeListTip": "列表子類型（有序/無序/任務）同樣適用於列表項",
 	"outlineExpandLevel": "展開層級",
 	"expandAll": "全部展開",
 	"outlineKeepCurrentExpand": "保持當前標題展開",
@@ -2897,6 +2901,7 @@
 		"392": "加密筆記本的內容不參與全域索引，無法顯示關係圖",
 		"393": "加密筆記本不支援該操作",
 		"394": "加密筆記本不支援發布，無法設定發布權限",
-		"395": "批次匯出不支援加密筆記本，請先解鎖後逐個匯出，或改為匯出一般筆記本"
+		"395": "批次匯出不支援加密筆記本，請先解鎖後逐個匯出，或改為匯出一般筆記本",
+		"396": "加密筆記本不支援置頂文件"
 	}
 }

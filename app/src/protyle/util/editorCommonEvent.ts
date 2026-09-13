@@ -177,7 +177,7 @@ const getDragSourceParentID = async (protyle: IProtyle, element: Element) => {
         id: element.getAttribute("data-node-id"),
         notebook: dragSourceElement?.getAttribute(DRAG_SOURCE_NOTEBOOK_ID) || "",
     });
-    return response?.data?.rootID || "";
+    return response.code === 0 ? response.data.rootID : "";
 };
 
 const cancelDetachedSourceSB = async (nodeElement: Element, excludedChildIDs: Set<string>) => {
@@ -187,10 +187,13 @@ const cancelDetachedSourceSB = async (nodeElement: Element, excludedChildIDs: Se
         id: nodeElement.getAttribute("data-node-id"),
         notebook: notebookID,
     });
+    if (relevantIDs.code !== 0) {
+        throw new Error(relevantIDs.msg);
+    }
     const operationData = await getCancelSBOperations(nodeElement, {
         notebookID,
-        previousID: relevantIDs?.data?.previousID,
-        parentID: relevantIDs?.data?.parentID || sourceElement?.getAttribute(DRAG_SOURCE_ROOT_ID) || "",
+        previousID: relevantIDs.data.previousID,
+        parentID: relevantIDs.data.parentID || sourceElement?.getAttribute(DRAG_SOURCE_ROOT_ID) || "",
         fallbackParentID: sourceElement?.getAttribute(DRAG_SOURCE_ROOT_ID) || "",
         excludedChildIDs,
     });

@@ -22,9 +22,9 @@ export const openTopBarMenu = (app: App, target?: Element) => {
         ignore: !isBazaarAvailable() || window.siyuan.config.readonly,
     });
     let hasPlugin = false;
+    const settingItems: IMenu[] = [];
     app.plugins.forEach((plugin) => {
         const hasSetting = hasPluginSetting(plugin);
-        let hasTopBar = false;
         for (let i = 0; i < plugin.topBarIcons.length; i++) {
             const item = plugin.topBarIcons[i];
             if (!document.contains(item)) {
@@ -53,16 +53,6 @@ export const openTopBarMenu = (app: App, target?: Element) => {
                         setStorageVal(Constants.LOCAL_PLUGINTOPUNPIN,
                             window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN]);
                     }
-                });
-            }
-            if (hasSetting) {
-                submenu.push({
-                    id: "config",
-                    icon: "iconSettings",
-                    label: window.siyuan.languages.config,
-                    click() {
-                        plugin.openSetting();
-                    },
                 });
             }
             const itemLabel = target ? item.getAttribute("aria-label") : item.textContent.trim();
@@ -98,11 +88,9 @@ export const openTopBarMenu = (app: App, target?: Element) => {
             }
             menu.addItem(menuOption);
             hasPlugin = true;
-            hasTopBar = true;
         }
-        if (!hasTopBar && hasSetting) {
-            hasPlugin = true;
-            menu.addItem({
+        if (hasSetting) {
+            settingItems.push({
                 id: plugin.name,
                 icon: "iconSettings",
                 label: plugin.displayName,
@@ -112,6 +100,13 @@ export const openTopBarMenu = (app: App, target?: Element) => {
             });
         }
     });
+    if (settingItems.length > 0) {
+        if (hasPlugin) {
+            menu.addSeparator({id: "separator_settings"});
+        }
+        settingItems.forEach((item) => menu.addItem(item));
+        hasPlugin = true;
+    }
     if (!hasPlugin) {
         manageSeparatorElement?.remove();
         if (!manageElement && !target) {

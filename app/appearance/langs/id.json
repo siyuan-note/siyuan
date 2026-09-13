@@ -16,6 +16,11 @@
 	"flashcardSourceHistory": "Riwayat konfigurasi sumber kartu",
 	"flashcardSourceHistoryTip": "Pulihkan pengaturan sumber dan referensi blok dengan mempertahankan kemajuan ulasan; pulihkan pertanyaan dan jawaban dari riwayat dokumen terkait",
 	"flashcardSourceRestoreConfirm": "Pulihkan konfigurasi sumber ini? Semua kartu dari sumber ini akan terpengaruh; kemajuan ulasan tetap sama",
+	"pinnedDocs": "Disematkan",
+	"pinDoc": "Sematkan",
+	"unpinDoc": "Lepaskan",
+	"editSnapshotMemo": "Edit catatan snapshot",
+	"snapshotMemoLocalTip": "Hanya mengubah catatan snapshot lokal",
 	"mobileBarsAutoHide": "Sembunyikan bilah atas dan bawah otomatis saat menggulir",
 	"mobileBarsAutoHideTip": "Gulir ke bawah untuk menyembunyikan bilah judul atas, jejak navigasi, dan bilah navigasi bawah; gulir ke atas untuk menampilkannya",
 	"bodyGradient": "Gradien latar belakang",
@@ -1675,7 +1680,7 @@
 	"cloudTagSnapshot": "Snapshot tag cloud",
 	"cloudBackupTip": "Silakan buka [Riwayat Data - Snapshot Data] untuk mengoperasikan",
 	"snapshotMemo": "Memo Snapshot",
-	"snapshotMemoTip": "Harap masukkan memo snapshot",
+	"snapshotMemoTip": "Opsional; default: Create manually",
 	"tagSnapshot": "Snapshot Tag",
 	"tagSnapshotUpload": "Tag snapshot dan unggah",
 	"tagSnapshotTip": "Jangan sertakan simbol \\ / : * ? &quot; &#039; &lt; &gt; |",
@@ -2040,7 +2045,6 @@
 	"heading5": "Judul 5",
 	"heading6": "Judul 6",
 	"unorderedList": "Daftar Tidak Berurutan",
-	"searchSubTypeListTip": "Subtipe daftar (Berurutan/Tidak Berurutan/Tugas) juga berlaku untuk item daftar",
 	"outlineExpandLevel": "Tingkat perluasan",
 	"expandAll": "Perluas semua",
 	"outlineKeepCurrentExpand": "Pertahankan perluasan saat ini",
@@ -2897,6 +2901,7 @@
 		"392": "Konten buku catatan terenkripsi tidak termasuk indeks global, sehingga graf hubungan tidak tersedia",
 		"393": "Buku catatan terenkripsi tidak mendukung operasi ini",
 		"394": "Buku catatan terenkripsi tidak mendukung publikasi, izin publikasi tidak dapat dikonfigurasi",
-		"395": "Ekspor massal tidak mendukung buku catatan terenkripsi, buka kuncinya lalu ekspor satu per satu, atau ekspor buku catatan biasa"
+		"395": "Ekspor massal tidak mendukung buku catatan terenkripsi, buka kuncinya lalu ekspor satu per satu, atau ekspor buku catatan biasa",
+		"396": "Buku catatan terenkripsi tidak mendukung penyematan dokumen"
 	}
 }

@@ -16,6 +16,11 @@
 	"flashcardSourceHistory": "História nastavení zdroja kariet",
 	"flashcardSourceHistoryTip": "Obnovte nastavenia zdroja a odkazy na bloky so zachovaním pokroku opakovania; otázky a odpovede obnovte z histórie prepojeného dokumentu",
 	"flashcardSourceRestoreConfirm": "Obnoviť tieto nastavenia zdroja? Ovplyvní to všetky karty z tohto zdroja; pokrok opakovania zostane nezmenený",
+	"pinnedDocs": "Pripnuté",
+	"pinDoc": "Pripnúť",
+	"unpinDoc": "Odopnúť",
+	"editSnapshotMemo": "Upraviť poznámku snímky",
+	"snapshotMemoLocalTip": "Zmení iba poznámku lokálnej snímky",
 	"mobileBarsAutoHide": "Automaticky skrývať hornú a dolnú lištu pri posúvaní",
 	"mobileBarsAutoHideTip": "Posunutím nadol skryjete hornú lištu názvu, navigačnú cestu a dolnú navigačnú lištu; posunutím nahor ich zobrazíte",
 	"bodyGradient": "Prechod pozadia",
@@ -1675,7 +1680,7 @@
 	"cloudTagSnapshot": "Cloudová snímka tagu",
 	"cloudBackupTip": "Operujte v [História dát - Snímka dát]",
 	"snapshotMemo": "Poznámka k snímke",
-	"snapshotMemoTip": "Zadajte popis k snímke",
+	"snapshotMemoTip": "Voliteľné; predvolené: Create manually",
 	"tagSnapshot": "Snímka tagu",
 	"tagSnapshotUpload": "Snímka tagu a nahranie",
 	"tagSnapshotTip": "Nepoužívajte nepovolené znaky \\ / : * ? \" < > |",
@@ -2040,7 +2045,6 @@
 	"heading5": "Nadpis 5",
 	"heading6": "Nadpis 6",
 	"unorderedList": "Neusporiadaný zoznam",
-	"searchSubTypeListTip": "Podtypy zoznamov (Usporiadaný/Neusporiadaný/Úloha) sa vzťahujú aj na položky zoznamu",
 	"outlineExpandLevel": "Úroveň rozbalenia",
 	"expandAll": "Rozbaliť všetko",
 	"outlineKeepCurrentExpand": "Ponechať aktuálne rozbalenie",
@@ -2897,6 +2901,7 @@
 		"392": "Obsah šifrovaných zápisníkov nie je súčasťou globálneho indexu, preto nie je dostupný graf vzťahov",
 		"393": "Šifrované zápisníky túto operáciu nepodporujú",
 		"394": "Šifrované zápisníky nepodporujú publikovanie, práva na publikovanie nie je možné nastaviť",
-		"395": "Hromadný export nepodporuje šifrované zápisníky, odomknite ich a exportujte po jednom alebo exportujte bežné zápisníky"
+		"395": "Hromadný export nepodporuje šifrované zápisníky, odomknite ich a exportujte po jednom alebo exportujte bežné zápisníky",
+		"396": "Šifrované zápisníky nepodporujú pripínanie dokumentov"
 	}
 }

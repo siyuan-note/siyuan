@@ -55,6 +55,9 @@ export const openNewWindowById = async (id: string | string[], options: windowOp
             showMessage(response.msg);
             return;
         }
+        if (response.code !== 0) {
+            return;
+        }
         json.push({
             title: response.data.rootTitle,
             docIcon: response.data.rootIcon,

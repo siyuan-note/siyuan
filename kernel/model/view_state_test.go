@@ -377,7 +377,7 @@ func TestViewStateIsIgnoredBySync(t *testing.T) {
 		util.DataDir = oldDataDir
 	})
 
-	ignoreLines := getSyncIgnoreLines()
+	ignoreLines := mustSyncIgnoreLines(t)
 	lines := map[string]bool{}
 	for _, line := range ignoreLines {
 		lines[line] = true

@@ -38,7 +38,9 @@ func QueryRefIDsByAnnotationID(annotationID string) (refIDs []string) {
 
 func QueryRefIDsByAnnotationIDInBox(annotationID, boxID string) (refIDs []string) {
 	refIDs = []string{}
-	rows, err := queryForBox(boxID, "SELECT block_id FROM file_annotation_refs WHERE annotation_id = ?", annotationID)
+	// 兼容已持久化的带查询参数或片段的标注索引，新建索引只保存纯标注 ID。
+	rows, err := queryForBox(boxID, "SELECT block_id FROM file_annotation_refs WHERE annotation_id = ? "+
+		"OR substr(annotation_id, 1, ?) IN (?, ?)", annotationID, len(annotationID)+1, annotationID+"?", annotationID+"#")
 	if err != nil {
 		logging.LogErrorf("sql query failed: %s", err)
 		return

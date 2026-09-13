@@ -152,7 +152,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
     }
 
     const targetNotebookId = notebookId || window.siyuan.mobile.editor?.protyle?.notebookId;
-    const blockInfoParam: IObject = {id};
+    const blockInfoParam: {id: string; notebook?: string} = {id};
     if (isEncryptedBox(targetNotebookId)) {
         blockInfoParam.notebook = targetNotebookId;
     }

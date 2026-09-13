@@ -160,6 +160,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/notebook/touchEncryptedNotebooks", model.CheckAuth, model.CheckAdminRole, touchEncryptedNotebooks)
 
 	ginServer.Handle("POST", "/api/filetree/searchDocs", model.CheckAuth, searchDocs)
+	ginServer.Handle("POST", "/api/filetree/getPinnedDocs", model.CheckAuth, model.CheckAdminRole, getPinnedDocs)
+	ginServer.Handle("POST", "/api/filetree/updatePinnedDocs", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, updatePinnedDocs)
 	ginServer.Handle("POST", "/api/filetree/listDocsByPath", model.CheckAuth, listDocsByPath)
 	ginServer.Handle("POST", "/api/filetree/getDoc", model.CheckAuth, getDoc)
 	ginServer.Handle("POST", "/api/filetree/getDocCreateSavePath", model.CheckAuth, getDocCreateSavePath)
@@ -534,6 +536,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/repo/purgeCloudRepo", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, purgeCloudRepo)
 	ginServer.Handle("POST", "/api/repo/importRepoKey", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, importRepoKey)
 	ginServer.Handle("POST", "/api/repo/createSnapshot", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createSnapshot)
+	ginServer.Handle("POST", "/api/repo/checkSnapshot", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, checkSnapshot)
+	ginServer.Handle("POST", "/api/repo/setSnapshotMemo", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setSnapshotMemo)
 	ginServer.Handle("POST", "/api/repo/tagSnapshot", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, tagSnapshot)
 	ginServer.Handle("POST", "/api/repo/checkoutRepo", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, checkoutRepo)
 	ginServer.Handle("POST", "/api/repo/getRepoSnapshots", model.CheckAuth, model.CheckAdminRole, getRepoSnapshots)

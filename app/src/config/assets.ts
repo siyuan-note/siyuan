@@ -269,7 +269,7 @@ const assets = {
                     break;
                 } else if (type === "clear") {
                     const liElement = target.parentElement;
-                    confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.delete} <b>${liElement.querySelector(".b3-list-item__text").textContent}</b>`, () => {
+                    confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.delete} <b>${escapeHtml(liElement.querySelector(".b3-list-item__text").textContent)}</b>`, () => {
                         if (liElement.getAttribute("data-tab-type") === "unRefAV") {
                             const id = liElement.getAttribute("data-item");
                             fetchPost("/api/av/removeUnusedAttributeView", {

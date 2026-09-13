@@ -85,6 +85,9 @@ export const openFileById = async (options: {
         showMessage(response.msg);
         return;
     }
+    if (response.code !== 0) {
+        return;
+    }
     const zoomIn = options.zoomIn === true && options.id !== response.data.rootID;
 
     return openFile({

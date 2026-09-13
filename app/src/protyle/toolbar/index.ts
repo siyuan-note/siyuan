@@ -1861,6 +1861,16 @@ export class Toolbar {
                     } else if (renderElement.parentElement) {
                         if (focusBeforeRender) {
                             this.range.setStartBefore(renderElement);
+                        } else if (types.includes("inline-math")) {
+                            // 在公式外的文本节点中恢复光标，为输入法提供可编辑的组合输入位置。
+                            let textNode = renderElement.nextSibling as Text;
+                            if (!textNode || textNode.nodeType !== Node.TEXT_NODE) {
+                                textNode = document.createTextNode(Constants.ZWSP);
+                                renderElement.after(textNode);
+                            } else if (!textNode.data.startsWith(Constants.ZWSP)) {
+                                textNode.insertData(0, Constants.ZWSP);
+                            }
+                            this.range.setStart(textNode, 1);
                         } else {
                             this.range.setStartAfter(renderElement);
                         }

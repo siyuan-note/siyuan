@@ -4436,7 +4436,20 @@ const readAppCrashInfo = () => {
 
 // 安全模式选择后内核启动成功，删除本次恢复所使用的崩溃信息。
 const clearAppCrashInfo = () => {
+    // 诊断副本不参与启动判断，恢复成功后仍可导出最近一次崩溃记录。
+    const archiveDir = path.join(confDir, "crash-history");
     [appCrashMarkerPath, appCrashLogPath].forEach((filePath) => {
+        try {
+            fs.mkdirSync(archiveDir, {recursive: true});
+            const archivePath = path.join(archiveDir, path.basename(filePath));
+            if (fs.existsSync(filePath)) {
+                fs.copyFileSync(filePath, archivePath);
+            } else {
+                fs.rmSync(archivePath, {force: true});
+            }
+        } catch (e) {
+            writeLog("archive crash info failed: " + e);
+        }
         try {
             fs.unlinkSync(filePath);
         } catch (e) {

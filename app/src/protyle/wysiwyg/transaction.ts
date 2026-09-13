@@ -2023,6 +2023,9 @@ export const turnListsRecursively = async (options: {
                 id: nodeElement.getAttribute("data-node-id"),
                 notebook: options.protyle.notebookId,
             });
+            if (response.code !== 0) {
+                throw new Error(response.msg);
+            }
             previousId = response.data.previousID;
         }
         return {
@@ -2174,6 +2177,9 @@ export const turnsOneInto = async (options: {
             id: options.id,
             notebook: options.protyle.notebookId,
         });
+        if (response.code !== 0) {
+            throw new Error(response.msg);
+        }
         previousId = response.data.previousID;
     }
     const parentId = getEmbedChildOperationParentID(options.nodeElement) ||

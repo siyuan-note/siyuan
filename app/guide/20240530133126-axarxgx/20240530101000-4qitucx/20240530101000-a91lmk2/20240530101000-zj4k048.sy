@@ -7,9 +7,61 @@
 		"id": "20240530101000-zj4k048",
 		"title": "種類によるフィルタリング",
 		"type": "doc",
-		"updated": "20251219205712"
+		"updated": "20260913020007"
 	},
 	"Children": [
+		{
+			"ID": "20260913020007-7v9i5ab",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260913020007-7v9i5ab",
+				"updated": "20260913020007"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "検索タイプの絞り込み"
+				}
+			]
+		},
+		{
+			"ID": "20260913020007-nufhmfu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260913020007-nufhmfu",
+				"updated": "20260913020007"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "検索ダイアログで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "検索フィルタ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を開き、見出し、リストブロック、リスト項目ブロックを展開すると、見出しレベルや順序付き・順序なし・タスクのサブタイプを個別に選択できます。リストブロックとリスト項目ブロックの選択は互いに影響しません。例えば、リスト項目ブロックの順序付きだけを選ぶと、順序付きリスト項目を検索できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260913020007-hwomekv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260913020007-hwomekv",
+				"updated": "20260913020007"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "親タイプを選ぶとグループ内の全サブタイプが選択され、親タイプを解除するとグループ全体が解除されます。サブタイプを一つ選ぶと親タイプが有効になり、最後のサブタイプを解除すると親タイプも解除されます。サブタイプを制限していない有効な親タイプは、ダイアログでは全選択として表示されます。"
+				}
+			]
+		},
 		{
 			"ID": "20240530101000-jcxgbjo",
 			"Type": "NodeHeading",

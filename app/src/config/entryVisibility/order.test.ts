@@ -28,6 +28,31 @@ test("entry order inserts document sorting after attributes in existing profiles
     ), ["search", "rename", "attr", "sort", "riffCard"]);
 });
 
+test("pin entries merge into document menus without moving existing plugin slots", () => {
+    const entries = getEntryCatalogChildren("docTree.document");
+    const defaults = entries.map(item => item.key);
+    const saved = defaults.filter(key => !["pinDoc", "unpinDoc"].includes(key));
+    saved.splice(1, 0, "plugin:example:item");
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+    assert.deepEqual(merged.filter(key => !["pinDoc", "unpinDoc"].includes(key)), saved);
+    assert.deepEqual(merged.slice(merged.indexOf("attr"), merged.indexOf("sort") + 1), ["attr", "pinDoc", "unpinDoc", "sort"]);
+    const separators = new Set(entries.filter(item => item.type === "separator").map(item => item.key));
+    assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, separators), merged);
+});
+
+test("pinned area switch merges into panel menus while preserving plugin slots", () => {
+    const entries = getEntryCatalogChildren("docTree.panel");
+    const defaults = entries.map(item => item.key);
+    const saved = defaults.filter(key => key !== "pinnedDocs");
+    saved.splice(1, 0, "plugin:example:item");
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+    assert.deepEqual(merged.filter(key => key !== "pinnedDocs" && key !== "plugin:example:item"),
+        saved.filter(key => key !== "plugin:example:item"));
+    assert.equal(merged[1], "plugin:example:item");
+    assert.equal(merged[merged.length - 1], "pinnedDocs");
+    assert.deepEqual(resolveEntryOrder([...defaults, "plugin:example:item"], merged, new Set<string>()), merged);
+});
+
 test("entry order ignores unknown and duplicate keys", () => {
     assert.deepEqual(mergeEntryOrder(["a", "b", "c"], ["missing", "c", "c", "a"]), ["c", "a", "b"]);
 });

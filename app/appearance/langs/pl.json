@@ -16,6 +16,11 @@
 	"flashcardSourceHistory": "Historia konfiguracji źródła fiszek",
 	"flashcardSourceHistoryTip": "Przywróć ustawienia źródła i odwołania do bloków, zachowując postęp powtórek; pytania i odpowiedzi przywróć z historii powiązanego dokumentu",
 	"flashcardSourceRestoreConfirm": "Przywrócić tę konfigurację źródła? Zmiana obejmie wszystkie fiszki z tego źródła; postęp powtórek pozostanie bez zmian",
+	"pinnedDocs": "Przypięte",
+	"pinDoc": "Przypnij",
+	"unpinDoc": "Odepnij",
+	"editSnapshotMemo": "Edytuj notatkę migawki",
+	"snapshotMemoLocalTip": "Zmienia tylko notatkę lokalnej migawki",
 	"mobileBarsAutoHide": "Automatycznie ukrywaj górny i dolny pasek podczas przewijania",
 	"mobileBarsAutoHideTip": "Przewiń w dół, aby ukryć górny pasek tytułu, ścieżkę nawigacji i dolny pasek nawigacji; przewiń w górę, aby je pokazać",
 	"bodyGradient": "Gradient tła",
@@ -1675,7 +1680,7 @@
 	"cloudTagSnapshot": "Zrzut danych w chmurze tagu",
 	"cloudBackupTip": "Proszę przejść do [Historia danych - Zrzut danych], aby działać",
 	"snapshotMemo": "Notatka zrzutu",
-	"snapshotMemoTip": "Proszę wpisać notatkę zrzutu",
+	"snapshotMemoTip": "Opcjonalnie; domyślnie: Create manually",
 	"tagSnapshot": "Zrzut tagu",
 	"tagSnapshotUpload": "Zrzut tagu i przesyłanie",
 	"tagSnapshotTip": "Nie wliczaj symboli \\ / : * ? &quot; &#039; &lt; &gt; |",
@@ -2040,7 +2045,6 @@
 	"heading5": "Nagłówek 5",
 	"heading6": "Nagłówek 6",
 	"unorderedList": "Lista nieuporządkowana",
-	"searchSubTypeListTip": "Podtypy list (Uporządkowana/Nieuporządkowana/Zadanie) dotyczą również elementów listy",
 	"outlineExpandLevel": "Poziom rozwinięcia",
 	"expandAll": "Rozwiń wszystko",
 	"outlineKeepCurrentExpand": "Utrzymuj bieżący tytuł rozwinięty",
@@ -2897,6 +2901,7 @@
 		"392": "Treść zaszyfrowanych notatników nie jest częścią indeksu globalnego, dlatego graf relacji jest niedostępny",
 		"393": "Zaszyfrowane notatniki nie obsługują tej operacji",
 		"394": "Zaszyfrowane notatniki nie obsługują publikowania, nie można skonfigurować uprawnień publikowania",
-		"395": "Eksport zbiorczy nie obsługuje zaszyfrowanych notatników, odblokuj je i wyeksportuj pojedynczo albo wyeksportuj zwykłe notatniki"
+		"395": "Eksport zbiorczy nie obsługuje zaszyfrowanych notatników, odblokuj je i wyeksportuj pojedynczo albo wyeksportuj zwykłe notatniki",
+		"396": "Zaszyfrowane notatniki nie obsługują przypinania dokumentów"
 	}
 }

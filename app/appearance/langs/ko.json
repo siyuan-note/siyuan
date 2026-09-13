@@ -16,6 +16,11 @@
 	"flashcardSourceHistory": "카드 소스 설정 기록",
 	"flashcardSourceHistoryTip": "복습 진행 상황을 유지하면서 소스 설정과 블록 참조를 복원합니다. 질문과 답변은 연결된 문서 기록에서 복원하세요",
 	"flashcardSourceRestoreConfirm": "이 소스 설정을 복원하시겠습니까? 이 소스의 모든 카드에 영향을 주지만 복습 진행 상황은 유지됩니다",
+	"pinnedDocs": "고정됨",
+	"pinDoc": "고정",
+	"unpinDoc": "고정 해제",
+	"editSnapshotMemo": "스냅샷 메모 편집",
+	"snapshotMemoLocalTip": "로컬 스냅샷 메모만 변경합니다",
 	"mobileBarsAutoHide": "스크롤 시 상단 및 하단 표시줄 자동 숨기기",
 	"mobileBarsAutoHideTip": "아래로 스크롤하면 상단 제목 표시줄, 탐색 경로 및 하단 탐색 모음이 숨겨지고 위로 스크롤하면 다시 표시됩니다",
 	"bodyGradient": "배경 그라데이션",
@@ -1675,7 +1680,7 @@
 	"cloudTagSnapshot": "클라우드 태그 스냅샷",
 	"cloudBackupTip": "조작하려면 [데이터 히스토리 - 데이터 스냅샷]으로 이동하세요",
 	"snapshotMemo": "스냅샷 메모",
-	"snapshotMemoTip": "스냅샷 메모를 입력하세요",
+	"snapshotMemoTip": "선택 사항; 기본값: Create manually",
 	"tagSnapshot": "태그 스냅샷",
 	"tagSnapshotUpload": "태그 스냅샷 및 업로드",
 	"tagSnapshotTip": "\\ / : * ? &quot; &#039; &lt; &gt; | 기호를 포함하지 마세요",
@@ -2040,7 +2045,6 @@
 	"heading5": "제목 5",
 	"heading6": "제목 6",
 	"unorderedList": "순서 없는 목록",
-	"searchSubTypeListTip": "목록 하위 유형(순서/순서 없음/작업)은 목록 항목에도 적용됩니다",
 	"outlineExpandLevel": "펼치기 레벨",
 	"expandAll": "모두 펼치기",
 	"outlineKeepCurrentExpand": "현재 펼침 상태 유지",
@@ -2897,6 +2901,7 @@
 		"392": "암호화된 노트북의 내용은 전역 색인에 포함되지 않으므로 관계 그래프를 표시할 수 없습니다",
 		"393": "암호화된 노트북에서는 지원되지 않습니다",
 		"394": "암호화된 노트북은 게시를 지원하지 않으므로 게시 권한을 설정할 수 없습니다",
-		"395": "일괄 내보내기는 암호화된 노트북을 지원하지 않습니다. 잠금을 해제한 뒤 하나씩 내보내거나 일반 노트북을 내보내세요"
+		"395": "일괄 내보내기는 암호화된 노트북을 지원하지 않습니다. 잠금을 해제한 뒤 하나씩 내보내거나 일반 노트북을 내보내세요",
+		"396": "암호화된 노트북은 문서 고정을 지원하지 않습니다"
 	}
 }

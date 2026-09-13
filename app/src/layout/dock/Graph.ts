@@ -1,3 +1,4 @@
+import {bindPanelSearch} from "./panelSearch";
 import {Tab} from "../Tab";
 import {getInstanceById, setPanelFocus} from "../util";
 import {getDockByType} from "../tabUtil";
@@ -264,6 +265,8 @@ export class Graph extends Model {
         this.graphElement = this.element.querySelector(".graph__svg");
         this.ensureGraphEngine();
         this.inputElement = this.element.querySelector("input");
+        const showSearch = bindPanelSearch(this.inputElement,
+            this.element.querySelector('[data-type="search"]'), () => this.scheduleGraphSearch());
         this.panelElement = this.element.querySelector(".graph__panel") as HTMLElement;
         this.element.addEventListener("click", (event) => {
             if (this.type === "local") {
@@ -297,8 +300,7 @@ export class Graph extends Model {
                             this.panelElement.style.right = "0";
                         }
                     } else if (dataType === "search") {
-                        target.previousElementSibling.classList.remove("fn__none");
-                        (target.previousElementSibling as HTMLInputElement).select();
+                        showSearch();
                     } else if (dataType === "refresh") {
                         this.searchGraph({refresh: true});
                     } else if (dataType === "fullscreen") {
@@ -316,7 +318,9 @@ export class Graph extends Model {
                     }
                     break;
                 } else if (target.classList.contains("graph__svg")) {
-                    this.element.querySelectorAll(".block__icon.block__icon--active").forEach(item => {
+                    // 图谱阻止了指针按下的默认行为，需要主动让搜索框失焦。
+                    this.inputElement.blur();
+                    this.element.querySelectorAll('.block__icon[data-type="menu"].block__icon--active').forEach(item => {
                         item.classList.remove("block__icon--active");
                     });
                     this.panelElement.style.right = "";
@@ -324,19 +328,6 @@ export class Graph extends Model {
                 }
                 target = target.parentElement;
             }
-        });
-        this.inputElement.addEventListener("compositionend", () => {
-            this.scheduleGraphSearch();
-        });
-        this.inputElement.addEventListener("blur", (event: InputEvent) => {
-            const inputElement = event.target as HTMLInputElement;
-            inputElement.classList.add("fn__none");
-        });
-        this.inputElement.addEventListener("input", (event: InputEvent) => {
-            if (event.isComposing) {
-                return;
-            }
-            this.scheduleGraphSearch();
         });
         this.element.querySelectorAll(".b3-slider").forEach((item: HTMLInputElement) => {
             item.addEventListener("input", () => {
@@ -419,6 +410,9 @@ export class Graph extends Model {
             window.siyuan.config.graph.local = conf as IGraphCommon & { dailyNote: boolean };
         }
         this.inputElement.value = "";
+        const searchElement = this.element.querySelector('[data-type="search"]');
+        searchElement.classList.remove("block__icon--active");
+        searchElement.setAttribute("aria-label", window.siyuan.languages.search);
         this.panelElement.querySelector("[data-type='nodeSize']").setAttribute("aria-label", conf.d3.nodeSize.toString());
         this.panelElement.querySelector("[data-type='centerStrength']").setAttribute("aria-label", conf.d3.centerStrength.toString());
         this.panelElement.querySelector("[data-type='collideRadius']").setAttribute("aria-label", conf.d3.collideRadius.toString());

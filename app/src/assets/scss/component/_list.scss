@@ -1,6 +1,19 @@
 @use "../util/mixin";
 @use "../util/function";
 
+.file-tree__pins {
+  --file-toggle-width: 0px;
+  padding-bottom: 2px;
+
+  &.b3-list--background .b3-list-item.dragover__top::after {
+    top: 0;
+  }
+
+  &.b3-list--background .b3-list-item.dragover__bottom::after {
+    bottom: 0;
+  }
+}
+
 .b3-list {
   --file-toggle-width: 0px;
 

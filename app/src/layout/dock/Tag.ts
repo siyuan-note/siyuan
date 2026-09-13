@@ -1,4 +1,5 @@
 import {Tab} from "../Tab";
+import {bindPanelSearch} from "./panelSearch";
 import {Model} from "../Model";
 import {Tree} from "../../util/Tree";
 import {setPanelFocus} from "../util";
@@ -59,24 +60,8 @@ export class Tag extends Model {
 </div>
 <div class="fn__flex-1" style="margin-bottom: 8px"></div>`;
         const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
-        inputElement.addEventListener("blur", () => {
-            inputElement.classList.add("fn__none");
-            const filterIconElement = inputElement.nextElementSibling as HTMLElement;
-            const value = inputElement.value;
-            if (value.trim()) {
-                filterIconElement.classList.add("block__icon--active");
-                filterIconElement.setAttribute("aria-label", window.siyuan.languages.search + " " + value);
-            } else {
-                filterIconElement.classList.remove("block__icon--active");
-                filterIconElement.setAttribute("aria-label", window.siyuan.languages.search);
-            }
-        });
-        inputElement.addEventListener("input", (event: InputEvent) => {
-            if (!event.isComposing) {
-                this.filter();
-            }
-        });
-        inputElement.addEventListener("compositionend", () => this.filter());
+        const showSearch = bindPanelSearch(inputElement,
+            this.element.querySelector('[data-type="search"]') as HTMLElement, () => this.filter());
 
         this.tree = new Tree({
             element: this.element.lastElementChild as HTMLElement,
@@ -178,8 +163,7 @@ export class Tag extends Model {
                             this.update();
                             break;
                         case "search":
-                            inputElement.classList.remove("fn__none");
-                            inputElement.select();
+                            showSearch();
                             break;
                     }
                 }

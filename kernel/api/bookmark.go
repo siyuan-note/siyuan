@@ -21,8 +21,8 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func getBookmark(c *gin.Context) {
@@ -45,47 +45,16 @@ func getBookmark(c *gin.Context) {
 	ret.Data = bookmarks
 }
 
-func removeBookmark(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var removeBookmark = contractHandler(apicontract.RemoveBookmark, func(c *gin.Context, request apicontract.RemoveBookmarkRequest) apicontract.Response[apicontract.Null] {
+	if err := model.RemoveBookmark(request.Bookmark); err != nil {
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 5000)
+	}
+	return apicontract.Success(apicontract.Null{})
+})
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var renameBookmark = contractHandler(apicontract.RenameBookmark, func(c *gin.Context, request apicontract.RenameBookmarkRequest) apicontract.Response[apicontract.Null] {
+	if err := model.RenameBookmark(request.OldBookmark, request.NewBookmark); err != nil {
+		return apicontract.FailureWithTimeout[apicontract.Null](-1, err.Error(), 5000)
 	}
-
-	var bookmark string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("bookmark", &bookmark, true, false)) {
-		return
-	}
-	if err := model.RemoveBookmark(bookmark); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
-	}
-}
-
-func renameBookmark(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var oldBookmark, newBookmark string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("oldBookmark", &oldBookmark, true, false),
-		util.BindJsonArg("newBookmark", &newBookmark, true, false),
-	) {
-		return
-	}
-	if err := model.RenameBookmark(oldBookmark, newBookmark); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
-	}
-}
+	return apicontract.Success(apicontract.Null{})
+})

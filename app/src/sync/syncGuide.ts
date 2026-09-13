@@ -41,8 +41,11 @@ export const addCloudName = (cloudListElement: Element) => {
     dialog.element.setAttribute("data-key", Constants.DIALOG_SYNCADDCLOUDDIR);
 };
 
-export const bindSyncCloudListEvent = (cloudListElement: Element, cb?: () => void) => {
+export const bindSyncCloudListEvent = (cloudListElement: Element, cb?: (ready: boolean) => void) => {
     cloudListElement.addEventListener("click", (event) => {
+        if (window.siyuan.config.sync.provider === 2) {
+            return;
+        }
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(cloudListElement)) {
             const type = target.getAttribute("data-type");
@@ -77,13 +80,21 @@ export const bindSyncCloudListEvent = (cloudListElement: Element, cb?: () => voi
     });
 };
 
-export const renderSyncCloudList = (cloudListElement: Element, reload = false, cb?: () => void) => {
-    if (!reload && cloudListElement.firstElementChild.tagName !== "IMG") {
+export const renderSyncCloudList = (cloudListElement: Element, reload = false, cb?: (ready: boolean) => void) => {
+    if (!reload && cloudListElement.firstElementChild && cloudListElement.firstElementChild.tagName !== "IMG") {
         return;
     }
+    const provider = window.siyuan.config.sync.provider;
+    const canSelect = provider !== 2;
+    const canManage = provider === 0 || provider === 4;
+    cb?.(false);
     cloudListElement.innerHTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">';
     fetchPost("/api/sync/listCloudSyncDir", {}, (response) => {
+        if (provider !== window.siyuan.config.sync.provider) {
+            return;
+        }
         let syncListHTML: string;
+        let ready = false;
         if (response.code === 1) {
             syncListHTML = `<ul>
     <li class="b3-list--empty ft__error">
@@ -94,18 +105,24 @@ export const renderSyncCloudList = (cloudListElement: Element, reload = false, c
     </li>
 </ul>`;
         } else {
-            const syncListParts: string[] = ['<div class="fn__hr"></div><ul class="b3-list b3-list--background" style="overflow: auto;">'];
+            const syncListParts: string[] = [`<div class="fn__hr"></div><ul class="b3-list${canSelect ? " b3-list--background" : ""}" style="overflow: auto;">`];
+            if (response.data.syncDirs.length === 0) {
+                syncListParts.push(`<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`);
+            }
             response.data.syncDirs.forEach((item: { hSize: string, cloudName: string, updated: string }) => {
+                const checked = item.cloudName === response.data.checkedSyncDir;
+                ready = ready || !canSelect || checked;
+                const rowAttributes = canSelect ? ` data-type="selectCloud" data-name="${item.cloudName}"` : " style=\"cursor: default;\"";
+                const radioHTML = canSelect ? `<input type="radio" name="cloudName"${checked ? " checked" : ""}/><span class="fn__space"></span>` : "";
                 /// #if MOBILE
-                syncListParts.push(`<li data-type="selectCloud" data-name="${item.cloudName}" class="b3-list-item b3-list-item--two">
+                syncListParts.push(`<li${rowAttributes} class="b3-list-item b3-list-item--two">
     <div class="b3-list-item__first" data-name="${item.cloudName}">
-        <input type="radio" name="cloudName"${item.cloudName === response.data.checkedSyncDir ? " checked" : ""}/>
-        <span class="fn__space"></span>
+        ${radioHTML}
         <span>${item.cloudName}</span>
         <span class="fn__flex-1 fn__space"></span>
-        <span data-type="removeCloud" class="b3-list-item__action">
+        ${canManage ? `<span data-type="removeCloud" class="b3-list-item__action">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
-        </span>
+        </span>` : ""}
     </div>
     <div class="b3-list-item__meta fn__flex">
         <span class="fn__space"></span>
@@ -117,21 +134,20 @@ export const renderSyncCloudList = (cloudListElement: Element, reload = false, c
     </div>
 </li>`);
                 /// #else
-                syncListParts.push(`<li data-type="selectCloud" data-name="${item.cloudName}" class="b3-list-item b3-list-item--narrow b3-list-item--hide-action">
-<input type="radio" name="cloudName"${item.cloudName === response.data.checkedSyncDir ? " checked" : ""}/>
-<span class="fn__space"></span>
+                syncListParts.push(`<li${rowAttributes} class="b3-list-item b3-list-item--narrow b3-list-item--hide-action">
+${radioHTML}
 <span>${item.cloudName}</span>
 <span class="fn__space"></span>
 <span class="ft__on-surface">${item.hSize}</span>
 <span class="b3-list-item__meta">${item.updated}</span>
 <span class="fn__flex-1 fn__space"></span>
-<span data-type="removeCloud" class="b3-tooltips b3-tooltips__w b3-list-item__action${(window.siyuan.config.sync.provider === 2 || window.siyuan.config.sync.provider === 3) ? " fn__none":""}" aria-label="${window.siyuan.languages.delete}">
+${canManage ? `<span data-type="removeCloud" class="b3-tooltips b3-tooltips__w b3-list-item__action" aria-label="${window.siyuan.languages.delete}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>
-</span></li>`);
+</span>` : ""}</li>`);
                 /// #endif
             });
             syncListParts.push("</ul>");
-            if (![2, 3].includes(window.siyuan.config.sync.provider)) {
+            if (canManage) {
                 syncListParts.push(`<div class="fn__hr"></div>
 <div class="fn__flex">
     <button class="b3-button b3-button--outline" data-type="addCloud"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addAttr}</button>
@@ -141,7 +157,7 @@ export const renderSyncCloudList = (cloudListElement: Element, reload = false, c
             syncListHTML = syncListParts.join("");
         }
         cloudListElement.innerHTML = syncListHTML;
-        cb?.();
+        cb?.(ready);
     });
 };
 
@@ -250,8 +266,8 @@ const setSync = (key?: string, dialog?: Dialog) => {
         dialog.element.setAttribute("data-key", Constants.DIALOG_SYNCCHOOSEDIR);
         const contentElement = dialog.element.querySelector(".b3-dialog__content").lastElementChild;
         const btnElement = dialog.element.querySelector(".b3-button") as HTMLButtonElement;
-        const updateOpenSyncBtn = () => {
-            btnElement.disabled = !contentElement.querySelector("input[checked]");
+        const updateOpenSyncBtn = (ready: boolean) => {
+            btnElement.disabled = !ready;
         };
         bindSyncCloudListEvent(contentElement, updateOpenSyncBtn);
         renderSyncCloudList(contentElement, false, updateOpenSyncBtn);

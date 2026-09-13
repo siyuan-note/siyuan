@@ -229,7 +229,7 @@ func SyncDataBeforeEnableEncryptedNotebook() error {
 	if !Conf.Sync.Enabled {
 		return nil
 	}
-	if !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
+	if conf.ProviderS3 != Conf.Sync.Provider && !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
 		return errors.New(Conf.Language(123))
 	}
 	if !checkSync(false, false, true) {
@@ -359,7 +359,7 @@ func checkSync(boot, exit, byHand bool) bool {
 		return false
 	}
 
-	if !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
+	if conf.ProviderS3 != Conf.Sync.Provider && !cloud.IsValidCloudDirName(Conf.Sync.CloudName) {
 		if byHand {
 			util.PushMsg(Conf.Language(123), 5000)
 		}
@@ -508,6 +508,9 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 func SetCloudSyncDir(name string) error {
 	release := lockAssetSourceChange()
 	defer release()
+	if conf.ProviderS3 == Conf.Sync.Provider {
+		return errors.New(Conf.Language(131))
+	}
 	if !cloud.IsValidCloudDirName(name) {
 		return errors.New(Conf.Language(37))
 	}
@@ -789,7 +792,7 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 		err = errors.New(formatRepoErrorMsg(err))
 		return
 	}
-	if 1 > len(dirs) {
+	if 1 > len(dirs) && conf.ProviderS3 != Conf.Sync.Provider {
 		dirs = append(dirs, &cloud.Repo{
 			Name:    "main",
 			Size:    0,
@@ -813,10 +816,6 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 	hSize = "-"
 	if conf.ProviderSiYuan == Conf.Sync.Provider {
 		hSize = humanize.BytesCustomCeil(uint64(size), 2)
-	}
-	if conf.ProviderS3 == Conf.Sync.Provider {
-		Conf.Sync.CloudName = syncDirs[0].CloudName
-		Conf.Save()
 	}
 	return
 }
@@ -945,19 +944,26 @@ func bootSyncRepoWithDNSRetry() (err error) {
 	return
 }
 
-func getSyncIgnoreLines() (ret []string) {
+func loadSyncIgnoreLines() (ret []string, err error) {
+	// 忽略旧版同步配置，读取用户规则失败时仍需保留此规则。
+	defer func() {
+		ret = append(ret, "/.siyuan/conf.json")
+	}()
 	ignore := filepath.Join(util.DataDir, ".siyuan", "syncignore")
-	err := os.MkdirAll(filepath.Dir(ignore), 0755)
+	err = os.MkdirAll(filepath.Dir(ignore), 0755)
 	if err != nil {
 		return
 	}
-	if !gulu.File.IsExist(ignore) {
-		if err = gulu.File.WriteFileSafer(ignore, nil, 0644); err != nil {
-			logging.LogErrorf("create syncignore [%s] failed: %s", ignore, err)
-			return
+	data, err := os.ReadFile(ignore)
+	if os.IsNotExist(err) {
+		var file *os.File
+		file, err = os.OpenFile(ignore, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0644)
+		if err == nil {
+			err = file.Close()
+		} else if os.IsExist(err) {
+			data, err = os.ReadFile(ignore)
 		}
 	}
-	data, err := os.ReadFile(ignore)
 	if err != nil {
 		logging.LogErrorf("read syncignore [%s] failed: %s", ignore, err)
 		return
@@ -967,15 +973,18 @@ func getSyncIgnoreLines() (ret []string) {
 	ret = strings.Split(dataStr, "\n")
 
 	// 忽略用户指南
-	ret = append(ret, "20210808180117-6v0mkxr/**/*")
-	ret = append(ret, "20210808180117-czj9bvb/**/*")
-	ret = append(ret, "20211226090932-5lcq56f/**/*")
-	ret = append(ret, "20240530133126-axarxgx/**/*")
+	for _, id := range userGuideIDs {
+		ret = append(ret, id+"/**/*")
+	}
 	// 视图状态仅在当前设备使用，不参与数据同步。
 	ret = append(ret, "/storage/view-state.json")
 	ret = append(ret, "/storage/view-state-corrupted-*.json")
 	// 忽略用户指南的数据库 JSON 文件
-	for _, avName := range getAllUserGuideAVJSONFiles() {
+	avNames, err := getAllUserGuideAVJSONFiles()
+	if err != nil {
+		return nil, err
+	}
+	for _, avName := range avNames {
 		ret = append(ret, "/storage/av/"+avName)
 	}
 

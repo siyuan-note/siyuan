@@ -69,6 +69,14 @@ func TestGetBlockInfoNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, false, false)
 }
 
+func TestContractSiblingNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, false, false)
+}
+
+func TestContractBatchIndexesNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, false, true)
+}
+
 func runNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	t.Helper()
 	if os.Getenv("SIYUAN_TEST_NOTEBOOK_RESPONSE_LEASE") == t.Name() {
@@ -147,6 +155,8 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	engine.POST("/api/block/getBlockKramdown", getBlockKramdown)
 	engine.POST("/api/block/getBlockKramdowns", getBlockKramdowns)
 	engine.POST("/api/block/getBlockInfo", getBlockInfo)
+	engine.POST("/api/block/getBlockSiblingID", getBlockSiblingID)
+	engine.POST("/api/block/getBlocksIndexes", getBlocksIndexes)
 	writer := &blockedBlockResponseWriter{ResponseRecorder: httptest.NewRecorder(), ready: make(chan []byte, 1), proceed: make(chan struct{})}
 	var releaseWriter sync.Once
 	defer releaseWriter.Do(func() { close(writer.proceed) })
@@ -163,6 +173,13 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 		args["ids"] = boxIDs
 		endpoint += "s"
 	}
+	typedQuery := false
+	switch t.Name() {
+	case "TestContractSiblingNotebookResponseLease":
+		endpoint, typedQuery = "/api/block/getBlockSiblingID", true
+	case "TestContractBatchIndexesNotebookResponseLease":
+		endpoint, typedQuery = "/api/block/getBlocksIndexes", true
+	}
 	requestBody, err := json.Marshal(args)
 	if err != nil {
 		t.Fatal(err)
@@ -177,7 +194,7 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	case <-time.After(5 * time.Second):
 		t.Fatal("response never reached writer")
 	}
-	if strings.Count(string(body), "REVIEW-SECRET-CONTENT") != count {
+	if !typedQuery && strings.Count(string(body), "REVIEW-SECRET-CONTENT") != count {
 		releaseWriter.Do(func() { close(writer.proceed) })
 		<-responseDone
 		t.Fatalf("fixture did not produce plaintext: %s", body)
@@ -194,6 +211,15 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	}
 	releaseWriter.Do(func() { close(writer.proceed) })
 	<-responseDone
+	if typedQuery {
+		requireAPIContract(t, http.MethodPost, endpoint, writer.ResponseRecorder)
+		var response struct {
+			Code int `json:"code"`
+		}
+		if err := json.Unmarshal(body, &response); err != nil || response.Code != 0 {
+			t.Fatalf("typed query failed: %s, %v", body, err)
+		}
+	}
 	remaining := len(boxIDs)
 	if lockedBeforeResponse {
 		remaining--

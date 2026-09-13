@@ -1,3 +1,4 @@
+import {bindPanelSearch} from "../../layout/dock/panelSearch";
 import {Tree} from "../../util/Tree";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
@@ -35,22 +36,10 @@ export class MobileBookmarks {
 <div class="fn__flex-1 bookmarkList"></div>
 <img style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 30vw;box-sizing: border-box;" src="/stage/loading-pure.svg">`;
         const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
-        inputElement.addEventListener("blur", () => {
-            inputElement.classList.add("fn__none");
-            const filterIconElement = inputElement.nextElementSibling as HTMLElement;
-            const value = inputElement.value;
-            if (value.trim()) {
-                filterIconElement.classList.add("toolbar__icon--active");
-            } else {
-                filterIconElement.classList.remove("toolbar__icon--active");
-            }
-        });
-        inputElement.addEventListener("input", (event: InputEvent) => {
-            if (!event.isComposing) {
-                this.filter();
-            }
-        });
-        inputElement.addEventListener("compositionend", () => this.filter());
+        bindPanelSearch(inputElement,
+            this.element.querySelector('[data-type="search"]'), () => this.filter(), {
+                activeClass: "toolbar__icon--active", updateLabel: false,
+            });
 
         this.tree = new Tree({
             element: this.element.querySelector(".bookmarkList") as HTMLElement,

@@ -5,6 +5,7 @@
 * [卡源配置历史](FLASHCARD-HISTORY-API.md)
 * [规范](#规范)
     * [参数和返回值](#参数和返回值)
+    * [TypeScript 类型契约](#typescript-类型契约)
     * [行为语义](#行为语义)
     * [鉴权](#鉴权)
 * [笔记本](#笔记本)
@@ -118,6 +119,21 @@
     * `code`：非 0 为异常情况
     * `msg`：正常情况下是空字符串，异常情况下会返回错误文案
     * `data`：可能为 `{}`、`[]` 或者 `NULL`，根据不同接口而不同
+
+### TypeScript 类型契约
+
+插件的 `fetchPost`、`fetchSyncPost` 和 `fetchGet` 声明会根据已迁移的接口路径，从内核生成的契约推导请求与响应类型。覆盖范围持续扩展，包含系统基础接口、块属性批量读写、标签及书签操作、部分块查询、笔记本列表、历史搜索和快照操作。存量未迁移接口及动态 URL 继续支持。读取异步返回值中的成功数据前须检查响应码，并显式处理可空字段。
+
+```typescript
+import {fetchSyncPost} from "siyuan";
+
+const response = await fetchSyncPost("/api/attr/getBlockAttrs", {id: blockID});
+if (response.code === 0 && response.data) {
+    const value = response.data["custom-value"];
+}
+```
+
+准确覆盖范围见[生成的路由声明](../app/src/types/api/index.d.ts)，生成与兼容规则见[契约维护说明](API-CONTRACTS.md)。类型声明本身不执行运行时 JSON 校验。
 
 ### 行为语义
 
@@ -2760,7 +2776,7 @@
 * `k`：搜索关键字
 * `r`：替换关键字
 * `types`：块类型开关，支持 `mathBlock`、`table`、`blockquote`、`superBlock`、`paragraph`、`document`、`heading`、`list`、`listItem`、`codeBlock`、`htmlBlock`、`embedBlock`、`databaseBlock`、`audioBlock`、`videoBlock`、`iframeBlock`、`widgetBlock` 和 `callout`
-* `subTypes`：块子类型开关，`h1` 至 `h6` 表示标题级别，`o`、`u` 和 `t` 分别表示有序列表、无序列表和任务列表
+* `subTypes`：独立的子类型分组，`heading` 使用 `h1` 至 `h6`，`list` 和 `listItem` 分别使用 `o`（有序）、`u`（无序）和 `t`（任务）。分组缺省、为空或所有开关为 `false` 时，不限制该父类型的子类型；父类型仍须在 `types` 中启用。未知顶层键（包括旧扁平格式的 `h1` 至 `h6` 和 `o`、`u`、`t`）会被忽略且不报错，旧格式中保存的子类型选择需要重新选择并保存
 * `replaceTypes`：替换类型开关，支持 `text`、`imgText`、`imgTitle`、`imgSrc`、`aText`、`aTitle`、`aHref`、`code`、`em`、`strong`、`inlineMath`、`inlineMemo`、`blockRef`、`fileAnnotationRef`、`kbd`、`mark`、`s`、`sub`、`sup`、`tag`、`u`、`docTitle`、`codeBlock`、`mathBlock` 和 `htmlBlock`
 
 `types`、`subTypes` 或 `replaceTypes` 中省略的布尔开关按 `false` 处理。
@@ -2794,10 +2810,15 @@
       "r": "",
       "types": {
         "document": true,
-        "paragraph": true
+        "paragraph": true,
+        "heading": true,
+        "list": true,
+        "listItem": true
       },
       "subTypes": {
-        "h1": true
+        "heading": {"h1": true},
+        "list": {"o": true},
+        "listItem": {"t": true}
       },
       "replaceTypes": {
         "text": true

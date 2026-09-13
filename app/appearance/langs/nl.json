@@ -16,6 +16,11 @@
 	"flashcardSourceHistory": "Configuratiegeschiedenis van kaartbron",
 	"flashcardSourceHistoryTip": "Herstel broninstellingen en blokverwijzingen met behoud van de leervoortgang; herstel vragen en antwoorden via de geschiedenis van het gekoppelde document",
 	"flashcardSourceRestoreConfirm": "Deze bronconfiguratie herstellen? Dit heeft gevolgen voor alle kaarten van deze bron; de leervoortgang blijft behouden",
+	"pinnedDocs": "Vastgemaakt",
+	"pinDoc": "Vastmaken",
+	"unpinDoc": "Losmaken",
+	"editSnapshotMemo": "Snapshotnotitie bewerken",
+	"snapshotMemoLocalTip": "Wijzigt alleen de notitie van de lokale snapshot",
 	"mobileBarsAutoHide": "Bovenste en onderste balk automatisch verbergen bij scrollen",
 	"mobileBarsAutoHideTip": "Scroll omlaag om de bovenste titelbalk, het kruimelpad en de onderste navigatiebalk te verbergen; scroll omhoog om ze te tonen",
 	"bodyGradient": "Achtergrondverloop",
@@ -1675,7 +1680,7 @@
 	"cloudTagSnapshot": "Cloud tag-momentopname",
 	"cloudBackupTip": "Ga naar [Gegevensgeschiedenis - Gegevensmomentopname] om te beheren",
 	"snapshotMemo": "Momentopname memo",
-	"snapshotMemoTip": "Voer een memo voor de momentopname in",
+	"snapshotMemoTip": "Optioneel; standaard: Create manually",
 	"tagSnapshot": "Tag momentopname",
 	"tagSnapshotUpload": "Taggen en uploaden",
 	"tagSnapshotTip": "Gebruik geen symbolen \\ / : * ? &quot; &#039; &lt; &gt; |",
@@ -2040,7 +2045,6 @@
 	"heading5": "Kop 5",
 	"heading6": "Kop 6",
 	"unorderedList": "Ongeordende Lijst",
-	"searchSubTypeListTip": "Lijstsubtypen (Geordend/Ongeordend/Taak) zijn ook van toepassing op lijstitems",
 	"outlineExpandLevel": "Uitklapniveau",
 	"expandAll": "Alles uitklappen",
 	"outlineKeepCurrentExpand": "Huidig behouden",
@@ -2897,6 +2901,7 @@
 		"392": "Inhoud van versleutelde notitieboeken maakt geen deel uit van de globale index, daarom is de relatietekening niet beschikbaar",
 		"393": "Versleutelde notitieboeken ondersteunen deze bewerking niet",
 		"394": "Versleutelde notitieboeken ondersteunen geen publicatie, publicatierechten kunnen niet worden ingesteld",
-		"395": "Batch-export ondersteunt geen versleutelde notitieboeken, ontgrendel ze en exporteer ze een voor een, of exporteer gewone notitieboeken"
+		"395": "Batch-export ondersteunt geen versleutelde notitieboeken, ontgrendel ze en exporteer ze een voor een, of exporteer gewone notitieboeken",
+		"396": "Versleutelde notitieboeken ondersteunen het vastzetten van documenten niet"
 	}
 }

@@ -16,6 +16,11 @@
 	"flashcardSourceHistory": "Historique de configuration de la source des cartes",
 	"flashcardSourceHistoryTip": "Restaurez les paramètres et les références de blocs en conservant la progression des révisions ; restaurez les questions et réponses depuis l’historique du document lié",
 	"flashcardSourceRestoreConfirm": "Restaurer cette configuration ? Toutes les cartes de cette source seront concernées ; la progression des révisions restera inchangée",
+	"pinnedDocs": "Épinglés",
+	"pinDoc": "Épingler",
+	"unpinDoc": "Détacher",
+	"editSnapshotMemo": "Modifier la note de l’instantané",
+	"snapshotMemoLocalTip": "Modifie uniquement la note de l’instantané local",
 	"mobileBarsAutoHide": "Masquer automatiquement les barres supérieure et inférieure pendant le défilement",
 	"mobileBarsAutoHideTip": "Faites défiler vers le bas pour masquer la barre de titre, le fil d’Ariane et la barre de navigation inférieure, et vers le haut pour les afficher",
 	"bodyGradient": "Dégradé de fond",
@@ -1675,7 +1680,7 @@
 	"cloudTagSnapshot": "Instantané de balise cloud",
 	"cloudBackupTip": "Veuillez accéder à [Historique des données - Instantané des données] pour opérer",
 	"snapshotMemo": "Mémo d'instantané",
-	"snapshotMemoTip": "Veuillez entrer le mémo instantané",
+	"snapshotMemoTip": "Facultatif ; valeur par défaut : Create manually",
 	"tagSnapshot": "Instantané de balise",
 	"tagSnapshotUpload": "Tag instantané et téléchargement",
 	"tagSnapshotTip": "Ne pas inclure les symboles \\ / : * ? &quot; &#039; &lt; &gt; |",
@@ -2040,7 +2045,6 @@
 	"heading5": "Titre 5",
 	"heading6": "Titre 6",
 	"unorderedList": "Liste non ordonnée",
-	"searchSubTypeListTip": "Les sous-types de liste (Ordonnée/Non ordonnée/Tâche) s'appliquent aussi aux éléments de liste",
 	"outlineExpandLevel": "Niveau d'expansion",
 	"expandAll": "Tout développer",
 	"outlineKeepCurrentExpand": "Maintenir le titre actuel développé",
@@ -2897,6 +2901,7 @@
 		"392": "Le contenu des carnets chiffrés ne fait pas partie de l’index global, le graphique des relations n’est donc pas disponible",
 		"393": "Les cahiers chiffrés ne prennent pas en charge cette opération",
 		"394": "Les carnets chiffrés ne prennent pas en charge la publication, les droits de publication ne peuvent pas être configurés",
-		"395": "L’exportation par lots ne prend pas en charge les carnets chiffrés ; déverrouillez-les et exportez-les un par un, ou exportez des carnets ordinaires"
+		"395": "L’exportation par lots ne prend pas en charge les carnets chiffrés ; déverrouillez-les et exportez-les un par un, ou exportez des carnets ordinaires",
+		"396": "Les carnets chiffrés ne permettent pas d’épingler des documents"
 	}
 }

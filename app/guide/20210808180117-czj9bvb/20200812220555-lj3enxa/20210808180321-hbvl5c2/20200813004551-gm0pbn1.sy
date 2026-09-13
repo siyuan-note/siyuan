@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260910080119"
+		"updated": "20260913160005"
 	},
 	"Children": [
 		{
@@ -16236,7 +16236,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619001156-26volkp",
-				"updated": "20260811122156"
+				"updated": "20260913160005"
 			},
 			"Children": [
 				{
@@ -16256,7 +16256,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20220619001217-e9cwukj",
-				"updated": "20260811122156"
+				"updated": "20260913160005"
 			},
 			"Children": [
 				{
@@ -16454,25 +16454,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "需要先使用 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "点击"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ 选中首个文档"
+									"Data": "以最近点击的文档为起点选择可见范围，点击父文档名称或图标展开时也会更新起点；连续按住 Shift 点击可扩展或缩小选区，起点保持不变；起点失效时使用可见的已选文档，没有可用起点时仅选中本次点击的文档"
 								}
 							]
 						}

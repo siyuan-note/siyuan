@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260910080119"
+		"updated": "20260913160005"
 	},
 	"Children": [
 		{
@@ -16266,7 +16266,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002223-zliquo3",
-				"updated": "20260811122156"
+				"updated": "20260913160005"
 			},
 			"Children": [
 				{
@@ -16286,7 +16286,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20220619002223-xwob5s8",
-				"updated": "20260811122156"
+				"updated": "20260913160005"
 			},
 			"Children": [
 				{
@@ -16492,25 +16492,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "需要先使用 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "點擊"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ 選取首個文件"
+									"Data": "以最近點擊的文檔為起點選取可見範圍，點擊父文檔名稱或圖示展開時也會更新起點；連續按住 Shift 點擊可擴展或縮小選取範圍，起點保持不變；起點失效時使用可見的已選文檔，沒有可用起點時僅選取本次點擊的文檔"
 								}
 							]
 						}

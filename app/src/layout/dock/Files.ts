@@ -77,6 +77,7 @@ import {clearDocumentTabMovePreview} from "../tabDrag";
 import {reorderSortedFileTree} from "../../util/fileTreeReorder";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {PinnedDocs} from "./PinnedDocs";
+import {selectFileTreeRange} from "./fileTreeSelection";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -259,7 +260,7 @@ export class Files extends Model {
             if (ulElement) {
                 const notebookId = ulElement.getAttribute("data-url");
                 while (target && !target.isEqualNode(this.element)) {
-                    if (isNotCtrl(event) && target.classList.contains("b3-list-item__icon") && window.siyuan.config.system.container !== "ios") {
+                    if (isNotCtrl(event) && !event.shiftKey && target.classList.contains("b3-list-item__icon") && window.siyuan.config.system.container !== "ios") {
                         event.preventDefault();
                         event.stopPropagation();
                         const liElement = target.parentElement;
@@ -268,6 +269,8 @@ export class Files extends Model {
                         const isBoxDoc = isNotebook && liElement.getAttribute("data-node-id");
                         if ((isFile || isNotebook) && window.siyuan.config.fileTree.docIconClickExpand) {
                             if (Number(liElement.getAttribute("data-count")) > 0) {
+                                this.lastSelectedElement = liElement;
+                                this.setCurrent(liElement, false);
                                 this.toggleLeaf(liElement, notebookId);
                                 break;
                             } else if (isFile || isBoxDoc) {
@@ -367,6 +370,8 @@ export class Files extends Model {
                             (target.parentElement.getAttribute("data-type") === "navigation-root" && target.parentElement.getAttribute("data-node-id"))) &&
                         window.siyuan.config.fileTree.parentDocClickExpand &&
                         Number(target.parentElement.getAttribute("data-count")) > 0) {
+                        this.lastSelectedElement = target.parentElement;
+                        this.setCurrent(target.parentElement, false);
                         this.toggleLeaf(target.parentElement, notebookId);
                         event.preventDefault();
                         event.stopPropagation();
@@ -377,35 +382,7 @@ export class Files extends Model {
                             target.classList.toggle("b3-list-item--focus");
                             this.lastSelectedElement = target;
                         } else if (event.shiftKey && !event.altKey && isNotCtrl(event)) {
-                            // Shift+click 多选文档
-                            if (!document.contains(this.lastSelectedElement)) {
-                                this.lastSelectedElement = null;
-                            }
-                            if (!this.lastSelectedElement) {
-                                this.lastSelectedElement = this.element.querySelector(".b3-list-item--focus");
-                            }
-                            if (!this.lastSelectedElement) {
-                                this.lastSelectedElement = target.parentElement.firstElementChild;
-                            }
-                            this.element.querySelectorAll(".b3-list-item--focus").forEach(item => {
-                                item.classList.remove("b3-list-item--focus");
-                            });
-
-                            // 获取所有文档项
-                            const allFiles = Array.from(this.element.querySelectorAll("li.b3-list-item"));
-
-                            // 获取起始和结束索引
-                            const startIndex = allFiles.indexOf(this.lastSelectedElement);
-                            const endIndex = allFiles.indexOf(target);
-
-                            // 确定选择范围
-                            const start = Math.min(startIndex, endIndex);
-                            const end = Math.max(startIndex, endIndex);
-
-                            // 添加新选择
-                            for (let i = start; i <= end; i++) {
-                                (allFiles[i] as HTMLElement).classList.add("b3-list-item--focus");
-                            }
+                            this.lastSelectedElement = selectFileTreeRange(this.element, this.lastSelectedElement, target);
                         } else {
                             this.lastSelectedElement = target;
                             this.setCurrent(target, false);

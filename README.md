@@ -316,7 +316,7 @@ kubectl -n siyuan get secret siyuan-siyuan-auth -o go-template='{{index .data "a
 kubectl -n siyuan port-forward service/siyuan-siyuan 6806:6806
 ```
 
-Open <http://localhost:6806> and enter the generated access code. Treat the displayed code as a password; it is distinct from the API token. The names above assume the default chart values and release name `siyuan`.
+Open <http://localhost:6806> and enter the generated lock screen password. Keep this password secure; it is distinct from the API token. The names above assume the default chart values and release name `siyuan`.
 
 For remote access, use a dedicated HTTPS hostname and an Ingress controller that proxies WebSockets on `/ws`, without URL rewriting. Configure `ingress` and allow the controller's namespace through `networkPolicy.ingressFrom`; the default policy allows same-namespace ingress and DNS egress only. Add explicit egress rules for cloud sync or other external services. See the [chart guide and production example](https://helmforge.dev/docs/charts/siyuan) for TLS, existing Secrets, and storage configuration.
 

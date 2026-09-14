@@ -310,7 +310,7 @@ kubectl -n siyuan get secret siyuan-siyuan-auth -o go-template='{{index .data "a
 kubectl -n siyuan port-forward service/siyuan-siyuan 6806:6806
 ```
 
-<http://localhost:6806> を開き、生成されたアクセス認証コードを入力します。表示されたコードはパスワードとして保護してください。API トークンとは異なる認証情報です。上記のリソース名は、チャートのデフォルト設定とリリース名 `siyuan` を前提としています。
+<http://localhost:6806> を開き、生成されたロック画面パスワードを入力します。このパスワードは安全に保管してください。API トークンとは異なる認証情報です。上記のリソース名は、チャートのデフォルト設定とリリース名 `siyuan` を前提としています。
 
 リモートアクセスには、専用の HTTPS ホスト名と、`/ws` の WebSocket 接続を中継できる Ingress コントローラーを使用し、URL の書き換えは行わないでください。`ingress` を設定し、`networkPolicy.ingressFrom` でコントローラーの名前空間からの通信を許可します。デフォルトのポリシーでは、同じ名前空間からの受信と DNS への送信のみが許可されます。クラウド同期などの外部サービスには、明示的な送信ルールが必要です。TLS、既存の Secret、ストレージの設定は、[チャートガイドと本番環境の設定例](https://helmforge.dev/docs/charts/siyuan)を参照してください。
 

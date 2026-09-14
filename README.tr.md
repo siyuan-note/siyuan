@@ -311,7 +311,7 @@ kubectl -n siyuan get secret siyuan-siyuan-auth -o go-template='{{index .data "a
 kubectl -n siyuan port-forward service/siyuan-siyuan 6806:6806
 ```
 
-<http://localhost:6806> adresini aç ve oluşturulan erişim kodunu gir. Ekranda gösterilen kodu parola gibi koru; bu kod API token'ından farklıdır. Yukarıdaki kaynak adları, varsayılan chart ayarlarını ve `siyuan` sürüm adını temel alır.
+<http://localhost:6806> adresini aç ve oluşturulan ekran kilidi şifresini gir. Bu şifreyi güvenle sakla; API token'ından farklıdır. Yukarıdaki kaynak adları, varsayılan chart ayarlarını ve `siyuan` sürüm adını temel alır.
 
 Uzaktan erişim için özel bir HTTPS alan adı ve `/ws` yolundaki WebSocket bağlantılarını iletebilen bir Ingress denetleyicisi kullan; URL yeniden yazımı yapma. `ingress` ayarlarını yapılandır ve `networkPolicy.ingressFrom` üzerinden denetleyicinin ad alanından gelen trafiğe izin ver. Varsayılan politika yalnızca aynı ad alanından gelen trafiğe ve DNS çıkışına izin verir. Bulut eşitleme gibi harici hizmetler için açık çıkış kuralları ekle. TLS, mevcut Secret kaynakları ve depolama ayarları için [chart kılavuzuna ve üretim örneğine](https://helmforge.dev/docs/charts/siyuan) bak.
 

@@ -1,4 +1,5 @@
 import {BlockPanel} from "./Panel";
+import {isAbove} from "../util/zIndex";
 import {hasClosestByAttribute, hasClosestByClassName,} from "../protyle/util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideTooltip, showTooltip} from "../dialog/tooltip";
@@ -417,7 +418,7 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
     if (avPanelElement) {
         // 浮窗上点击 av 操作，浮窗不能消失
         const blockPanel = window.siyuan.blockPanels.find((item) => {
-            if (item.element.style.zIndex < avPanelElement.style.zIndex) {
+            if (isAbove(avPanelElement, item.element)) {
                 return true;
             }
         });
@@ -429,7 +430,7 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
         const menuElement = hasClosestByClassName(target, "b3-menu");
         if (menuElement && menuElement.getAttribute("data-name") !== Constants.MENU_DOC_TREE_MORE) {
             const blockPanel = window.siyuan.blockPanels.find((item) => {
-                if (item.element.style.zIndex < menuElement.style.zIndex) {
+                if (isAbove(menuElement, item.element)) {
                     return true;
                 }
             });

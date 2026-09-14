@@ -15,17 +15,18 @@ import {getHostCapabilities} from "../util/hostCapabilities";
 import {isBrowser, isMobile} from "../util/functions";
 import type {TemplateFileRequestInput} from "../types/api";
 
-export const loadTemplateDirectories = async (select: HTMLSelectElement) => {
+export const loadTemplateDirectories = async (select: HTMLSelectElement, initialDirectory?: string) => {
     const response = await fetchSyncPost("/api/template/manage", {action: "list"});
     if (response.code !== 0 || !Array.isArray(response.data) || !select.isConnected) {
-        return;
+        return false;
     }
-    const value = select.value;
+    const value = initialDirectory ?? select.value;
     select.replaceChildren(new Option("/", ""));
     response.data.filter(entry => entry.isDir).forEach(entry => {
         select.add(new Option(entry.path, entry.path));
     });
     select.value = Array.from(select.options).some(option => option.value === value) ? value : "";
+    return true;
 };
 
 export const openTemplateManager = (contextID = "", onClose?: () => void, initialPath = "") => {

@@ -1,4 +1,137 @@
 .history {
+  &__snapshots {
+    min-width: 0;
+    min-height: 0;
+
+    &.fn__block {
+      display: flex;
+    }
+
+    &--managing {
+      [data-type="repoitem"] .b3-list-item__action,
+      [data-type="compare"],
+      .history__snapshot-pane > .history__action {
+        display: none;
+      }
+    }
+
+    &--narrow {
+      .history__snapshot-sources {
+        display: flex;
+      }
+
+      &[data-source="local"] [data-repo-source="cloud"],
+      &[data-source="cloud"] [data-repo-source="local"] {
+        display: none;
+      }
+
+      [data-role="selection"] {
+        flex-basis: 100%;
+      }
+    }
+
+    &--search:not(&--narrow) [data-repo-source="cloud"] {
+      display: none;
+    }
+  }
+
+  &__snapshot {
+    &-toolbar,
+    &-sources {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 8px;
+      border-bottom: 1px solid var(--b3-border-color);
+
+      [aria-pressed="true"] {
+        background-color: var(--b3-theme-primary-lightest);
+        color: var(--b3-theme-primary);
+      }
+    }
+
+    &-sources {
+      display: none;
+    }
+
+    &-heading,
+    &-message {
+      background-color: var(--b3-theme-surface);
+    }
+
+    &-heading {
+      min-height: 45px;
+      box-sizing: border-box;
+    }
+
+    &-message {
+      padding: 8px;
+      flex-shrink: 0;
+      overflow-wrap: anywhere;
+    }
+
+    &-columns {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      min-width: 0;
+    }
+
+    &-pane {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+
+      & + & {
+        border-left: 1px solid var(--b3-border-color);
+      }
+
+      .history__panel {
+        min-height: 0;
+        min-width: 0;
+      }
+
+      > .history__action .block__icons {
+        flex-wrap: wrap;
+      }
+
+      [data-type="repoList"] {
+        overflow: auto;
+        min-width: 0;
+      }
+
+      li[data-type="repoitem"] {
+        flex-wrap: wrap;
+
+        > .fn__flex-1 {
+          min-width: 0;
+          white-space: normal;
+          overflow-wrap: anywhere;
+        }
+
+        .b3-list-item__meta {
+          white-space: normal;
+          overflow-wrap: anywhere;
+        }
+
+        &.history__snapshot--selected,
+        &.history__snapshot--selected:hover {
+          background-color: var(--b3-theme-primary-lightest);
+        }
+      }
+    }
+
+    &-check {
+      flex-shrink: 0;
+      margin-right: 8px;
+      accent-color: var(--b3-theme-primary);
+      width: 16px;
+      height: 16px;
+    }
+  }
+
   &__action {
     overflow: auto;
     border-bottom: 1px solid var(--b3-border-color);

@@ -1,3 +1,4 @@
+import {isAVRenderData} from "./renderData";
 import {transaction} from "../../wysiwyg/transaction";
 import {Constants} from "../../../constants";
 import {fetchSyncPost} from "../../../util/fetch";
@@ -416,6 +417,10 @@ export const updateLayout = async (options: {
         avID: options.nodeElement.getAttribute("data-av-id"),
         layoutType: options.target.getAttribute("data-view-type")
     });
+    if (response.code !== 0 || !isAVRenderData(response.data)) {
+        options.target.removeAttribute("data-load");
+        return;
+    }
     const menuElement = document.querySelector(".av__panel").lastElementChild as HTMLElement;
     menuElement.innerHTML = getLayoutHTML(response.data);
     // 切换布局类型后菜单高度变化（如表格→看板），需重新定位避免底部溢出视窗

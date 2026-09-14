@@ -441,10 +441,10 @@ const bindAccountAuthForm = (
         login2Btn.disabled = false;
     };
 
-    const completeLogin = (response: IWebSocketData) => {
+    const completeLogin = (loginToken?: string) => {
         if (mode === "login") {
             return fetchPost("/api/setting/getCloudUser", {
-                token: response.data.token,
+                token: loginToken,
             }, (userResponse) => {
                 const action = resolveCloudUserRefresh(userResponse.code, userResponse.data, userNameInput.value.trim());
                 if (action.apply) {
@@ -498,7 +498,7 @@ const bindAccountAuthForm = (
                 return;
             }
             completing = true;
-            completeLogin(loginResponse).finally(finishSubmitting);
+            completeLogin(loginResponse.data && "token" in loginResponse.data ? loginResponse.data.token : undefined).finally(finishSubmitting);
         }).finally(() => {
             if (!completing) {
                 finishSubmitting();
@@ -522,7 +522,9 @@ const bindAccountAuthForm = (
                 return;
             }
             completing = true;
-            completeLogin(faResponse).finally(finishSubmitting);
+            const loginToken = faResponse.data && "token" in faResponse.data && typeof faResponse.data.token === "string" ?
+                faResponse.data.token : undefined;
+            completeLogin(loginToken).finally(finishSubmitting);
         }).finally(() => {
             if (!completing) {
                 finishSubmitting();

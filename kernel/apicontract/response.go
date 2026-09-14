@@ -33,6 +33,25 @@ func SuccessNoContent[Data any]() Response[Data] {
 
 // Status 只为显式声明的非 JSON 协议使用独立错误状态。
 func (e Endpoint[Request, Data]) Status(r Response[Data]) int {
+	if e.definition.Output == PluginServiceOutput {
+		return e.pluginServiceStatus(r)
+	}
+	if e.definition.Proxy != nil {
+		return e.proxyStatus(r)
+	}
+	if r.emptyStatus != 0 {
+		if !slices.Contains(e.definition.EmptyResponseStatuses, r.emptyStatus) {
+			panic("endpoint does not declare this empty response status")
+		}
+		return r.emptyStatus
+	}
+	if r.redirect != nil {
+		status := r.redirect.Status
+		if e.definition.Output != BinaryOutput || (status != 301 && status != 302 && status != 303 && status != 307 && status != 308) || !matchesContentVariant(e.definition.ContentVariants, status, "text/html") {
+			panic("endpoint does not declare this redirect response")
+		}
+		return status
+	}
 	if r.httpStatus != 0 {
 		if (e.definition.Output != "" && e.definition.Output != SSEOutput) || r.code == 0 || !slices.Contains(e.definition.AdditionalErrorStatuses, r.httpStatus) {
 			panic("endpoint does not declare this JSON error status")
@@ -42,6 +61,9 @@ func (e Endpoint[Request, Data]) Status(r Response[Data]) int {
 	if r.upgrade != nil || r.websocketFailure {
 		if e.definition.Output != WebSocketOutput || e.definition.WebSocket == nil {
 			panic("endpoint does not declare WebSocket output")
+		}
+		if r.websocketFailure && e.definition.WebSocket.Raw != nil {
+			panic("raw WebSocket errors must be written by the upgrader")
 		}
 		if r.upgrade != nil {
 			return 101
@@ -123,18 +145,21 @@ func (Null) MarshalJSON() ([]byte, error) { return []byte("null"), nil }
 
 // Response 的载荷仅能通过有类型的成功构造函数或明确的错误构造函数设置。
 type Response[Data any] struct {
-	code             int
-	msg              string
-	data             any
-	binary           *BinaryContent
-	queryLimit       *SQLQueryLimit
-	directJSON       bool
-	noContent        bool
-	upgrade          func(http.ResponseWriter, *http.Request)
-	stream           func(http.ResponseWriter, *http.Request)
-	websocketFailure bool
-	httpStatus       int
-	afterWrite       func()
+	pluginServiceMode PluginServiceMode
+	code              int
+	msg               string
+	data              any
+	binary            *BinaryContent
+	queryLimit        *SQLQueryLimit
+	directJSON        bool
+	noContent         bool
+	upgrade           func(http.ResponseWriter, *http.Request)
+	stream            func(http.ResponseWriter, *http.Request)
+	websocketFailure  bool
+	httpStatus        int
+	afterWrite        func()
+	emptyStatus       int
+	redirect          *HTTPRedirect
 }
 
 // WithAfterWrite 将通知保留到响应写入完成后执行。
@@ -183,6 +208,9 @@ func (r Response[Data]) MarshalJSON() ([]byte, error) {
 
 // MarshalWith 使用指定编码器序列化相同的有类型载荷，供大体量 JSON 响应保留快速编码路径。
 func (r Response[Data]) MarshalWith(marshal func(any) ([]byte, error)) ([]byte, error) {
+	if r.Empty() || r.redirect != nil {
+		return nil, fmt.Errorf("raw HTTP response cannot be encoded as JSON")
+	}
 	if r.stream != nil {
 		return nil, fmt.Errorf("SSE stream cannot be encoded as JSON")
 	}

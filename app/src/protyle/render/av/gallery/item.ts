@@ -89,7 +89,7 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
                         popCellElement = cellItem;
                     }
                     if (updateIds.includes(cellItem.dataset.fieldId)) {
-                        const cellValue = response.data.values[cellItem.dataset.fieldId];
+                        const cellValue: IAVCellValue = response.data.values[cellItem.dataset.fieldId];
                         if (cellValue.type === "checkbox" && cellItem.parentElement.querySelector(".av__gallery-tip")) {
                             cellValue.checkbox.content = cellItem.getAttribute("aria-label").split('<div class="ft__on-surface">')[0];
                         }

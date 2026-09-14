@@ -18,7 +18,6 @@ package api
 
 import (
 	"fmt"
-	"net/http"
 	"reflect"
 	"strings"
 	"sync"
@@ -53,35 +52,28 @@ var setEditorReadOnly = contractHandler(apicontract.SetEditorReadOnly, func(c *g
 	return apicontract.Success(apicontract.Null{})
 })
 
-func setConfSnippet(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var setConfSnippet = contractHandler(apicontract.SetConfSnippet, func(c *gin.Context, request apicontract.SetConfSnippetRequest) (ret apicontract.Response[*apicontract.SettingSnpt]) {
+	if err := request.ConfigError(); err != nil {
+		return apicontract.Failure[*apicontract.SettingSnpt](-1, err.Error())
 	}
+	ret = apicontract.Success((*apicontract.SettingSnpt)(nil))
 
-	param, err := gulu.JSON.MarshalJSON(arg)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	param := request.ConfigJSON()
+	var err error
 
 	snippet := &conf.Snpt{}
 	if err = gulu.JSON.UnmarshalJSON(param, snippet); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[*apicontract.SettingSnpt](-1, err.Error())
 		return
 	}
 
 	model.Conf.Snippet = snippet
 	model.Conf.Save()
 
-	ret.Data = snippet
+	ret = apicontract.Success(settingSnptPayload(snippet))
 	model.PushReloadSnippet(snippet)
-}
+	return
+})
 
 var addVirtualBlockRefExclude = contractHandler(apicontract.AddVirtualBlockRefExclude, func(c *gin.Context, request apicontract.VirtualBlockRefRequest) apicontract.Response[apicontract.Null] {
 	model.AddVirtualBlockRefExclude(request.Keywords)
@@ -101,27 +93,18 @@ var refreshVirtualBlockRef = contractHandler(apicontract.RefreshVirtualBlockRef,
 	return apicontract.Success(apicontract.Null{})
 })
 
-func setBazaar(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var setBazaar = contractHandler(apicontract.SetBazaar, func(c *gin.Context, request apicontract.SetBazaarRequest) (ret apicontract.Response[*apicontract.SettingBazaar]) {
+	if err := request.ConfigError(); err != nil {
+		return apicontract.Failure[*apicontract.SettingBazaar](-1, err.Error())
 	}
-	delete(arg, "app")
+	ret = apicontract.Success((*apicontract.SettingBazaar)(nil))
 
-	param, err := gulu.JSON.MarshalJSON(arg)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	param := request.ConfigJSON()
+	var err error
 
 	bazaar := &conf.Bazaar{}
 	if err = gulu.JSON.UnmarshalJSON(param, bazaar); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[*apicontract.SettingBazaar](-1, err.Error())
 		return
 	}
 
@@ -142,27 +125,14 @@ func setBazaar(c *gin.Context) {
 		model.PushReloadAllEnabledPlugins(newPetalsEnabled, bazaar.PetalDisabled, bazaarPetalStateRevision, true)
 	}
 
-	ret.Data = bazaar
-}
+	ret = apicontract.Success(settingBazaarPayload(bazaar))
+	return
+})
 
-func setBazaarPetalDisabled(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-	petalDisabled, ok := arg["petalDisabled"].(bool)
-	if !ok {
-		ret.Code = -1
-		ret.Msg = "invalid petalDisabled"
-		return
-	}
-
+var setBazaarPetalDisabled = contractHandler(apicontract.SetBazaarPetalDisabled, func(c *gin.Context, request apicontract.SettingPetalDisabledRequest) apicontract.Response[apicontract.SettingPetalDisabledData] {
+	petalDisabled := request.PetalDisabled
 	bazaarPetalStateMu.Lock()
 	defer bazaarPetalStateMu.Unlock()
-
 	petalsEnabled := model.IsPetalsEnabled()
 	changed := model.Conf.Bazaar.PetalDisabled != petalDisabled
 	model.Conf.Bazaar.PetalDisabled = petalDisabled
@@ -175,8 +145,17 @@ func setBazaarPetalDisabled(c *gin.Context) {
 	if changed {
 		bazaarPetalStateRevision++
 	}
-	ret.Data = model.PushReloadAllEnabledPlugins(newPetalsEnabled, petalDisabled, bazaarPetalStateRevision, changed)
-}
+	payload := model.PushReloadAllEnabledPlugins(newPetalsEnabled, petalDisabled, bazaarPetalStateRevision, changed)
+	encoded, err := gulu.JSON.MarshalJSON(payload)
+	if err != nil {
+		return apicontract.Failure[apicontract.SettingPetalDisabledData](-1, err.Error())
+	}
+	var data apicontract.SettingPetalDisabledData
+	if err = gulu.JSON.UnmarshalJSON(encoded, &data); err != nil {
+		return apicontract.Failure[apicontract.SettingPetalDisabledData](-1, err.Error())
+	}
+	return apicontract.Success(data)
+})
 
 func setKernelPluginsEnabled(enabled bool) {
 	if enabled {
@@ -190,40 +169,30 @@ func setKernelPluginsEnabled(enabled bool) {
 	}
 }
 
-func setAI(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var setAI = contractHandler(apicontract.SetAI, func(c *gin.Context, request apicontract.SetAIRequest) (ret apicontract.Response[*apicontract.SettingAI]) {
+	if err := request.ConfigError(); err != nil {
+		return apicontract.Failure[*apicontract.SettingAI](-1, err.Error())
 	}
+	ret = apicontract.Success((*apicontract.SettingAI)(nil))
 
-	param, err := gulu.JSON.MarshalJSON(arg)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	param := request.ConfigJSON()
+	var err error
 
 	ai := &conf.AI{}
 	if err = gulu.JSON.UnmarshalJSON(param, ai); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[*apicontract.SettingAI](-1, err.Error())
 		return
 	}
 	if ai.MCP != nil {
 		for _, server := range ai.MCP.Servers {
 			if err = mcpclient.ValidateMCPServerEnvironment(server); err != nil {
-				ret.Code = -1
-				ret.Msg = "invalid MCP server environment: " + err.Error()
+				ret = apicontract.Failure[*apicontract.SettingAI](-1, "invalid MCP server environment: "+err.Error())
 				return
 			}
 		}
 	}
 	if err = validateAIProviderHeaders(ai); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[*apicontract.SettingAI](-1, err.Error())
 		return
 	}
 
@@ -271,8 +240,9 @@ func setAI(c *gin.Context) {
 		}
 	}
 
-	ret.Data = model.Conf.AI
-}
+	ret = apicontract.Success(settingAIPayload(model.Conf.AI))
+	return
+})
 
 func preserveMCPServerIDs(oldServers, newServers []conf.MCPServer) {
 	oldIDsByName := make(map[string]string, len(oldServers))
@@ -286,26 +256,18 @@ func preserveMCPServerIDs(oldServers, newServers []conf.MCPServer) {
 	}
 }
 
-func setSecrets(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var setSecrets = contractHandler(apicontract.SetSecrets, func(c *gin.Context, request apicontract.SetSecretsRequest) (ret apicontract.Response[*apicontract.SettingSecrets]) {
+	if err := request.ConfigError(); err != nil {
+		return apicontract.Failure[*apicontract.SettingSecrets](-1, err.Error())
 	}
+	ret = apicontract.Success((*apicontract.SettingSecrets)(nil))
 
-	param, err := gulu.JSON.MarshalJSON(arg)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	param := request.ConfigJSON()
+	var err error
 
 	secrets := &conf.Secrets{}
 	if err = gulu.JSON.UnmarshalJSON(param, secrets); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[*apicontract.SettingSecrets](-1, err.Error())
 		return
 	}
 
@@ -313,29 +275,22 @@ func setSecrets(c *gin.Context) {
 	model.Conf.Save()
 	reconnectStdioMCPWithEnvironment()
 
-	ret.Data = model.Conf.Secrets
-}
+	ret = apicontract.Success(settingSecretsPayload(model.Conf.Secrets))
+	return
+})
 
-func setVariables(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var setVariables = contractHandler(apicontract.SetVariables, func(c *gin.Context, request apicontract.SetVariablesRequest) (ret apicontract.Response[*apicontract.SettingVariables]) {
+	if err := request.ConfigError(); err != nil {
+		return apicontract.Failure[*apicontract.SettingVariables](-1, err.Error())
 	}
+	ret = apicontract.Success((*apicontract.SettingVariables)(nil))
 
-	param, err := gulu.JSON.MarshalJSON(arg)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	param := request.ConfigJSON()
+	var err error
 
 	variables := &conf.Variables{}
 	if err = gulu.JSON.UnmarshalJSON(param, variables); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[*apicontract.SettingVariables](-1, err.Error())
 		return
 	}
 
@@ -343,8 +298,9 @@ func setVariables(c *gin.Context) {
 	model.Conf.Save()
 	reconnectStdioMCPWithEnvironment()
 
-	ret.Data = model.Conf.Variables
-}
+	ret = apicontract.Success(settingVariablesPayload(model.Conf.Variables))
+	return
+})
 
 func reconnectStdioMCPWithEnvironment() {
 	if model.Conf.AI == nil || model.Conf.AI.MCP == nil {
@@ -366,26 +322,18 @@ func stdioMCPServerIDsWithEnvironment(servers []conf.MCPServer) []string {
 	return serverIDs
 }
 
-func setFlashcard(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var setFlashcard = contractHandler(apicontract.SetFlashcard, func(c *gin.Context, request apicontract.SetFlashcardRequest) (ret apicontract.Response[*apicontract.SettingFlashcard]) {
+	if err := request.ConfigError(); err != nil {
+		return apicontract.Failure[*apicontract.SettingFlashcard](-1, err.Error())
 	}
+	ret = apicontract.Success((*apicontract.SettingFlashcard)(nil))
 
-	param, err := gulu.JSON.MarshalJSON(arg)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	param := request.ConfigJSON()
+	var err error
 
 	flashcard := &conf.Flashcard{}
 	if err = gulu.JSON.UnmarshalJSON(param, flashcard); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[*apicontract.SettingFlashcard](-1, err.Error())
 		return
 	}
 
@@ -400,38 +348,31 @@ func setFlashcard(c *gin.Context) {
 	model.Conf.Flashcard = flashcard
 	model.Conf.Save()
 
-	ret.Data = flashcard
-}
+	ret = apicontract.Success(settingFlashcardPayload(flashcard))
+	return
+})
 
-func setEditor(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var setEditor = contractHandler(apicontract.SetEditor, func(c *gin.Context, request apicontract.SetEditorRequest) (ret apicontract.Response[*apicontract.SettingEditor]) {
+	if err := request.ConfigError(); err != nil {
+		return apicontract.Failure[*apicontract.SettingEditor](-1, err.Error())
 	}
+	ret = apicontract.Success((*apicontract.SettingEditor)(nil))
 
-	param, err := gulu.JSON.MarshalJSON(arg)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	param := request.ConfigJSON()
+	var err error
 
 	oldGenerateHistoryInterval := model.Conf.Editor.GenerateHistoryInterval
 
 	editor := conf.NewEditor()
 	if err = gulu.JSON.UnmarshalJSON(param, editor); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[*apicontract.SettingEditor](-1, err.Error())
 		return
 	}
-	if _, ok = arg["fontFamilies"]; !ok && editor.FontFamily == model.Conf.Editor.FontFamily &&
+	if !request.HasField("fontFamilies") && editor.FontFamily == model.Conf.Editor.FontFamily &&
 		editor.FontWeight == model.Conf.Editor.FontWeight {
 		editor.FontFamilies = model.Conf.Editor.FontFamilies
 	}
-	if _, ok = arg["codeFontFamilies"]; !ok {
+	if !request.HasField("codeFontFamilies") {
 		editor.CodeFontFamilies = model.Conf.Editor.CodeFontFamilies
 	}
 	editor.NormalizeFontFamilies()
@@ -485,30 +426,22 @@ func setEditor(c *gin.Context) {
 
 	util.MarkdownSettings = model.Conf.Editor.Markdown
 
-	ret.Data = model.Conf.Editor
-}
+	ret = apicontract.Success(settingEditorPayload(model.Conf.Editor))
+	return
+})
 
-func setExport(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var setExport = contractHandler(apicontract.SetExport, func(c *gin.Context, request apicontract.SetExportRequest) (ret apicontract.Response[*apicontract.SettingExport]) {
+	if err := request.ConfigError(); err != nil {
+		return apicontract.FailureWithTimeout[*apicontract.SettingExport](-1, err.Error(), 5000)
 	}
+	ret = apicontract.Success((*apicontract.SettingExport)(nil))
 
-	param, err := gulu.JSON.MarshalJSON(arg)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	param := request.ConfigJSON()
+	var err error
 
 	export := &conf.Export{}
 	if err = gulu.JSON.UnmarshalJSON(param, export); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 5000}
+		ret = apicontract.FailureWithTimeout[*apicontract.SettingExport](-1, err.Error(), 5000)
 		return
 	}
 
@@ -526,8 +459,9 @@ func setExport(c *gin.Context) {
 		util.InitPandoc(export.PandocBin)
 	}
 
-	ret.Data = model.Conf.Export
-}
+	ret = apicontract.Success(settingExportPayload(model.Conf.Export))
+	return
+})
 
 var getPandocBin = contractHandler(apicontract.GetPandocBin, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[string] {
 	pandocRuntime := util.GetPandocRuntime()
@@ -541,29 +475,21 @@ var getPandocBin = contractHandler(apicontract.GetPandocBin, func(c *gin.Context
 	return apicontract.Success(pandocRuntime.BinPath)
 })
 
-func setFiletree(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var setFiletree = contractHandler(apicontract.SetFiletree, func(c *gin.Context, request apicontract.SetFiletreeRequest) (ret apicontract.Response[*apicontract.SettingFileTree]) {
+	if err := request.ConfigError(); err != nil {
+		return apicontract.Failure[*apicontract.SettingFileTree](-1, err.Error())
 	}
+	ret = apicontract.Success((*apicontract.SettingFileTree)(nil))
 
 	oldSortMode := model.Conf.FileTree.Sort
-	param, err := gulu.JSON.MarshalJSON(arg)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	param := request.ConfigJSON()
+	var err error
 
 	fileTree := conf.NewFileTree()
 	fileTree.BoxDocEnabled = nil
 	fileTree.UseSVGDefaultIcon = nil
 	if err = gulu.JSON.UnmarshalJSON(param, fileTree); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[*apicontract.SettingFileTree](-1, err.Error())
 		return
 	}
 	if nil == fileTree.BoxDocEnabled {
@@ -630,29 +556,22 @@ func setFiletree(c *gin.Context) {
 	util.UseSingleLineSave = model.Conf.FileTree.UseSingleLineSave
 	util.LargeFileWarningSize = model.Conf.FileTree.LargeFileWarningSize
 
-	ret.Data = model.Conf.FileTree
-}
+	ret = apicontract.Success(settingFileTreePayload(model.Conf.FileTree))
+	return
+})
 
-func setSearch(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var setSearch = contractHandler(apicontract.SetSearch, func(c *gin.Context, request apicontract.SetSearchRequest) (ret apicontract.Response[*apicontract.SettingSearch]) {
+	if err := request.ConfigError(); err != nil {
+		return apicontract.Failure[*apicontract.SettingSearch](-1, err.Error())
 	}
+	ret = apicontract.Success((*apicontract.SettingSearch)(nil))
 
-	param, err := gulu.JSON.MarshalJSON(arg)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	param := request.ConfigJSON()
+	var err error
 
 	s := &conf.Search{}
 	if err = gulu.JSON.UnmarshalJSON(param, s); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[*apicontract.SettingSearch](-1, err.Error())
 		return
 	}
 
@@ -694,66 +613,46 @@ func setSearch(c *gin.Context) {
 		oldVirtualRefDoc != s.VirtualRefDoc {
 		model.ResetVirtualBlockRefCache()
 	}
-	ret.Data = s
-}
+	ret = apicontract.Success(settingSearchPayload(s))
+	return
+})
 
-func setKeymap(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	param, err := gulu.JSON.MarshalJSON(arg["data"])
+var setKeymap = contractHandler(apicontract.SetKeymap, func(c *gin.Context, request apicontract.SettingKeymapRequest) apicontract.Response[apicontract.Null] {
+	param, err := gulu.JSON.MarshalJSON(request.Data)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-
 	keymap := &conf.Keymap{}
 	if err = gulu.JSON.UnmarshalJSON(param, keymap); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-
 	model.Conf.Keymap = keymap
 	model.Conf.Save()
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func setAppearance(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var setAppearance = contractHandler(apicontract.SetAppearance, func(c *gin.Context, request apicontract.SetAppearanceRequest) (ret apicontract.Response[*apicontract.SettingAppearance]) {
+	if err := request.ConfigError(); err != nil {
+		return apicontract.Failure[*apicontract.SettingAppearance](-1, err.Error())
 	}
+	ret = apicontract.Success((*apicontract.SettingAppearance)(nil))
 
-	param, err := gulu.JSON.MarshalJSON(arg)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	param := request.ConfigJSON()
+	var err error
 
 	appearance := &conf.Appearance{}
 	if err = gulu.JSON.UnmarshalJSON(param, appearance); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[*apicontract.SettingAppearance](-1, err.Error())
 		return
 	}
 
 	if nil == appearance.EntryVisibility {
 		appearance.EntryVisibility = model.Conf.Appearance.EntryVisibility
 	}
-	if _, exists := arg["bodyGradient"]; !exists {
+	if !request.HasField("bodyGradient") {
 		appearance.BodyGradient = model.Conf.Appearance.BodyGradient
 	}
-	if _, exists := arg["globalFontFamilies"]; !exists {
+	if !request.HasField("globalFontFamilies") {
 		appearance.GlobalFontFamilies = model.Conf.Appearance.GlobalFontFamilies
 	}
 	appearance.NormalizeGlobalFontFamilies()
@@ -771,181 +670,97 @@ func setAppearance(c *gin.Context) {
 	model.InitAppearance()
 	model.WatchThemes()
 
-	ret.Data = model.Conf.Appearance
+	ret = apicontract.Success(settingAppearancePayload(model.Conf.Appearance))
 	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
-}
+	return
+})
 
-func getBootAppearances(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
+var getBootAppearances = contractHandler(apicontract.GetBootAppearances, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.SettingBootAppearancesData] {
 	appearances := model.GetBootAppearances()
 	selection := model.GetBootAppearanceSelection()
-	current := map[string]string{"provider": "", "appearance": ""}
+	current := apicontract.SettingBootAppearanceCurrent{}
 	if !util.SafeMode {
 		for _, appearance := range appearances {
 			if appearance.Provider == selection.Provider && appearance.Appearance == selection.Appearance {
-				current["provider"] = selection.Provider
-				current["appearance"] = selection.Appearance
+				current.Provider, current.Appearance = selection.Provider, selection.Appearance
 				break
 			}
 		}
 	}
-	ret.Data = map[string]any{
-		"appearances": appearances,
-		"current":     current,
+	var items []*apicontract.SettingBootAppearance
+	if appearances != nil {
+		items = make([]*apicontract.SettingBootAppearance, len(appearances))
+		for i, item := range appearances {
+			items[i] = settingBootAppearancePayload(item)
+		}
 	}
-}
+	return apicontract.Success(apicontract.SettingBootAppearancesData{Appearances: items, Current: current})
+})
 
-func setBootAppearance(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-	var provider, appearance string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("provider", &provider, false, false),
-		util.BindJsonArg("appearance", &appearance, false, false),
-	) {
-		return
-	}
-	selection, err := model.SetBootAppearance(provider, appearance)
+var setBootAppearance = contractHandler(apicontract.SetBootAppearance, func(c *gin.Context, request apicontract.SettingBootAppearanceRequest) apicontract.Response[*apicontract.SettingBootAppearanceSelection] {
+	selection, err := model.SetBootAppearance(request.Provider, request.Appearance)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[*apicontract.SettingBootAppearanceSelection](-1, err.Error())
 	}
-	ret.Data = selection
-}
+	return apicontract.Success(settingBootAppearanceSelectionPayload(&selection))
+})
 
-func setEntryVisibility(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var setEntryVisibility = contractHandler(apicontract.SetEntryVisibility, func(c *gin.Context, request apicontract.SetEntryVisibilityRequest) (ret apicontract.Response[*apicontract.SettingEntryVisibility]) {
+	if err := request.ConfigError(); err != nil {
+		return apicontract.Failure[*apicontract.SettingEntryVisibility](-1, err.Error())
+	}
+	ret = apicontract.Success((*apicontract.SettingEntryVisibility)(nil))
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-	param, err := gulu.JSON.MarshalJSON(arg)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	param := request.ConfigJSON()
+	var err error
 	entryVisibility := &conf.EntryVisibility{}
 	if err = gulu.JSON.UnmarshalJSON(param, entryVisibility); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[*apicontract.SettingEntryVisibility](-1, err.Error())
 		return
 	}
 	entryVisibility = conf.NormalizeEntryVisibility(entryVisibility, conf.EntryVisibilityProfileFull)
 	model.Conf.Appearance.EntryVisibility = entryVisibility
 	model.Conf.Save()
-	ret.Data = entryVisibility
+	ret = apicontract.Success(settingEntryVisibilityPayload(entryVisibility))
 	util.BroadcastByType("main", "setEntryVisibility", 0, "", entryVisibility)
-}
+	return
+})
 
-func setIcon(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var setIcon = contractHandler(apicontract.SetIcon, func(c *gin.Context, request apicontract.SettingIconRequest) apicontract.Response[apicontract.Null] {
+	if err := model.SetIcon(request.Icon); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-
-	var icon string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("icon", &icon, true, true),
-	) {
-		return
-	}
-
-	if err := model.SetIcon(icon); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
 	model.InitAppearance()
 	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func setTheme(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var theme, appearanceMode string
-	var modesRaw []any
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("theme", &theme, false, false),
-		util.BindJsonArg("modes", &modesRaw, false, false),
-		util.BindJsonArg("appearanceMode", &appearanceMode, false, false),
-	) {
-		return
-	}
-
-	theme, appearanceMode = strings.TrimSpace(theme), strings.TrimSpace(appearanceMode)
+var setTheme = contractHandler(apicontract.SetTheme, func(c *gin.Context, request apicontract.SettingThemeRequest) apicontract.Response[apicontract.Null] {
 	modes := make([]int, 0, 2)
-	if theme != "" {
-		for _, m := range modesRaw {
-			mf, ok := m.(float64)
-			if !ok {
-				break
-			}
-			mi := int(mf)
-			if mi != 0 && mi != 1 {
-				break
-			}
-			modes = append(modes, mi)
-		}
-		if len(modes) == 0 {
-			ret.Code = -1
-			ret.Msg = "[modes] is required ([0] for light, [1] for dark, [0,1] for both)"
-			return
-		}
+	for _, value := range request.Modes {
+		modes = append(modes, int(value))
 	}
-	// 没有 theme 时静默忽略 modes
-
-	if err := model.SetTheme(theme, modes, appearanceMode); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+	if err := model.SetTheme(request.Theme, modes, request.AppearanceMode); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-
 	model.InitAppearance()
 	model.WatchThemes()
 	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func setPublish(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var setPublish = contractHandler(apicontract.SetPublish, func(c *gin.Context, request apicontract.SetPublishRequest) (ret apicontract.Response[apicontract.SettingPublishData]) {
+	if err := request.ConfigError(); err != nil {
+		return apicontract.Failure[apicontract.SettingPublishData](-1, err.Error())
 	}
+	ret = apicontract.Success(apicontract.SettingPublishData{})
 
-	param, err := gulu.JSON.MarshalJSON(arg)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	param := request.ConfigJSON()
+	var err error
 
 	publish := &conf.Publish{}
 	if err = gulu.JSON.UnmarshalJSON(param, publish); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SettingPublishData](-1, err.Error())
 		return
 	}
 
@@ -965,19 +780,16 @@ func setPublish(c *gin.Context) {
 		usernames := map[string]bool{}
 		for _, account := range publish.Auth.Accounts {
 			if nil == account || "" == account.Username {
-				ret.Code = -1
-				ret.Msg = model.Conf.Language(361)
+				ret = apicontract.Failure[apicontract.SettingPublishData](-1, model.Conf.Language(361))
 				return
 			}
 			if usernames[account.Username] {
-				ret.Code = -1
-				ret.Msg = model.Conf.Language(362)
+				ret = apicontract.Failure[apicontract.SettingPublishData](-1, model.Conf.Language(362))
 				return
 			}
 			usernames[account.Username] = true
 			if 8 > len(account.Password) {
-				ret.Code = -1
-				ret.Msg = model.Conf.Language(363)
+				ret = apicontract.Failure[apicontract.SettingPublishData](-1, model.Conf.Language(363))
 				return
 			}
 		}
@@ -988,110 +800,64 @@ func setPublish(c *gin.Context) {
 
 	port, err := proxy.InitPublishService()
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SettingPublishData](-1, err.Error())
 		return
 	}
 
-	ret.Data = map[string]any{
-		"port":    port,
-		"publish": model.Conf.Publish,
-	}
+	ret = apicontract.Success(apicontract.SettingPublishData{Port: port, Publish: settingPublishPayload(model.Conf.Publish)})
 
 	util.BroadcastByType("main", "setPublish", 0, "", model.Conf.Publish)
-}
+	return
+})
 
-func getPublish(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	if port, err := proxy.InitPublishService(); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-	} else {
-		ret.Data = map[string]any{
-			"port":    port,
-			"publish": model.Conf.Publish,
-		}
+var getPublish = contractHandler(apicontract.GetPublish, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.SettingPublishData] {
+	port, err := proxy.InitPublishService()
+	if err != nil {
+		return apicontract.Failure[apicontract.SettingPublishData](-1, err.Error())
 	}
-}
+	return apicontract.Success(apicontract.SettingPublishData{Port: port, Publish: settingPublishPayload(model.Conf.Publish)})
+})
 
-func getCloudUser(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	if !model.IsAdminRoleContext(c) {
-		return
-	}
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	t := arg["token"]
-	var token string
-	if nil != t {
-		token = t.(string)
-	}
-	user, err := model.RefreshUser(token)
-	ret.Data = user
-	if nil == err {
-		return
+var getCloudUser = contractHandler(apicontract.GetCloudUser, func(c *gin.Context, request apicontract.SettingCloudUserRequest) apicontract.Response[*apicontract.SettingUser] {
+	user, err := model.RefreshUser(request.Token)
+	data := settingUserPayload(user)
+	if err == nil {
+		return apicontract.Success(data)
 	}
 	if model.IsInvalidUserRefresh(err) {
-		ret.Code = 255
-		ret.Msg = model.Conf.Language(19)
-		ret.Data = nil
-		return
+		return apicontract.GetCloudUser.FailureWithData(255, model.Conf.Language(19), nil)
 	}
 	if model.IsCloudAssetSourceChange(err) {
-		ret.Code = 1
-		ret.Msg = err.Error()
-		return
+		return apicontract.GetCloudUser.FailureWithData(1, err.Error(), data)
 	}
-	ret.Code = 1
-	ret.Msg = model.Conf.Language(18)
-}
+	return apicontract.GetCloudUser.FailureWithData(1, model.Conf.Language(18), data)
+}, func(c *gin.Context) *apicontract.Response[*apicontract.SettingUser] {
+	if model.IsAdminRoleContext(c) {
+		return nil
+	}
+	ret := apicontract.Success((*apicontract.SettingUser)(nil))
+	return &ret
+})
 
-func logoutCloudUser(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
+var logoutCloudUser = contractHandler(apicontract.LogoutCloudUser, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
 	model.LogoutUser()
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func login2faCloudUser(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var login2faCloudUser = contractHandler(apicontract.Login2faCloudUser, func(c *gin.Context, request apicontract.SettingLogin2faRequest) apicontract.Response[apicontract.Login2faEnvelope] {
+	result := model.Login2fa(request.Token, request.Code)
+	encoded, err := gulu.JSON.MarshalJSON(result)
+	if err != nil {
+		return apicontract.Failure[apicontract.Login2faEnvelope](-1, err.Error())
 	}
-
-	token := arg["token"].(string)
-	code := arg["code"].(string)
-	loginResult := model.Login2fa(token, code)
-	ret.Code = loginResult.Code
-	ret.Msg = loginResult.Msg
-	ret.Data = loginResult.Data
-}
-
-func setEmoji(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+	var envelope apicontract.Login2faEnvelope
+	if err = gulu.JSON.UnmarshalJSON(encoded, &envelope); err != nil {
+		return apicontract.Failure[apicontract.Login2faEnvelope](-1, err.Error())
 	}
+	return apicontract.SuccessDirectJSON(envelope)
+})
 
-	argEmoji := arg["emoji"].([]any)
-	emoji := make([]string, 0, len(argEmoji))
-	for _, ae := range argEmoji {
-		emoji = append(emoji, ae.(string))
-	}
-
-	model.Conf.Editor.Emoji = util.FilterRecentIconValues(emoji)
-}
+var setEmoji = contractHandler(apicontract.SetEmoji, func(c *gin.Context, request apicontract.SettingEmojiRequest) apicontract.Response[apicontract.Null] {
+	model.Conf.Editor.Emoji = util.FilterRecentIconValues(request.Emoji)
+	return apicontract.Success(apicontract.Null{})
+})

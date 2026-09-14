@@ -25,52 +25,36 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/textproto"
 	"net/url"
 	"strings"
 	"time"
 
-	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 const maxForwardProxyResponseSize int64 = 32 * 1024 * 1024
 
-type File struct {
-	Filename string
-	Header   textproto.MIMEHeader
-	Size     int64
-	Content  string
-}
+var echo = contractHandler(apicontract.NetworkEcho, echoContract)
+var echoPath = contractHandler(apicontract.NetworkEchoPath, echoContract)
 
-type MultipartForm struct {
-	Value map[string][]string
-	File  map[string][]File
-}
-
-func echo(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	var (
-		password      string
-		multipartForm *MultipartForm
-		rawData       any
-	)
+func echoContract(c *gin.Context, _ apicontract.EmptyRequest) apicontract.Response[apicontract.NetworkEchoData] {
+	var multipartForm *apicontract.NetworkEchoMultipart
+	var rawData *string
 
 	if form, err := c.MultipartForm(); err != nil || nil == form {
 		multipartForm = nil
 	} else {
-		multipartForm = &MultipartForm{
+		multipartForm = &apicontract.NetworkEchoMultipart{
 			Value: form.Value,
-			File:  map[string][]File{},
+			File:  map[string][]apicontract.NetworkEchoFile{},
 		}
 		for k, handlers := range form.File {
-			files := make([]File, len(handlers))
+			files := make([]apicontract.NetworkEchoFile, len(handlers))
 			multipartForm.File[k] = files
 			for i, handler := range handlers {
 				files[i].Filename = handler.Filename
@@ -91,7 +75,8 @@ func echo(c *gin.Context) {
 	}
 
 	if data, err := c.GetRawData(); err == nil {
-		rawData = base64.StdEncoding.EncodeToString(data)
+		encoded := base64.StdEncoding.EncodeToString(data)
+		rawData = &encoded
 	} else {
 		logging.LogWarnf("echo get raw data error: %s", err.Error())
 		rawData = nil
@@ -99,183 +84,168 @@ func echo(c *gin.Context) {
 
 	username, password, ok := c.Request.BasicAuth()
 
-	ret.Data = map[string]any{
-		"Context": map[string]any{
-			"Params":       c.Params,
-			"HandlerNames": c.HandlerNames(),
-			"FullPath":     c.FullPath(),
-			"ClientIP":     c.ClientIP(),
-			"RemoteIP":     c.RemoteIP(),
-			"ContentType":  c.ContentType(),
-			"IsWebsocket":  c.IsWebsocket(),
-			"RawData":      rawData,
-		},
-		"Request": map[string]any{
-			"Method":           c.Request.Method,
-			"URL":              c.Request.URL,
-			"Proto":            c.Request.Proto,
-			"ProtoMajor":       c.Request.ProtoMajor,
-			"ProtoMinor":       c.Request.ProtoMinor,
-			"Header":           c.Request.Header,
-			"ContentLength":    c.Request.ContentLength,
-			"TransferEncoding": c.Request.TransferEncoding,
-			"Close":            c.Request.Close,
-			"Host":             c.Request.Host,
-			"Form":             c.Request.Form,
-			"PostForm":         c.Request.PostForm,
-			"MultipartForm":    multipartForm,
-			"Trailer":          c.Request.Trailer,
-			"RemoteAddr":       c.Request.RemoteAddr,
-			"TLS":              c.Request.TLS,
-			"UserAgent":        c.Request.UserAgent(),
-			"Cookies":          c.Request.Cookies(),
-			"Referer":          c.Request.Referer(),
-		},
-		"URL": map[string]any{
-			"EscapedPath":     c.Request.URL.EscapedPath(),
-			"EscapedFragment": c.Request.URL.EscapedFragment(),
-			"String":          c.Request.URL.String(),
-			"Redacted":        c.Request.URL.Redacted(),
-			"IsAbs":           c.Request.URL.IsAbs(),
-			"Query":           c.Request.URL.Query(),
-			"RequestURI":      c.Request.URL.RequestURI(),
-			"Hostname":        c.Request.URL.Hostname(),
-			"Port":            c.Request.URL.Port(),
-		},
-		"User": map[string]any{
-			"Exists":   ok,
-			"Username": username,
-			"Password": password,
-		},
+	var params []apicontract.NetworkEchoParam
+	if c.Params != nil {
+		params = make([]apicontract.NetworkEchoParam, len(c.Params))
+		for i, param := range c.Params {
+			params[i] = apicontract.NetworkEchoParam{Key: param.Key, Value: param.Value}
+		}
 	}
+	return apicontract.Success(apicontract.NetworkEchoData{
+		Context: apicontract.NetworkEchoContext{
+			Params:       params,
+			HandlerNames: c.HandlerNames(),
+			FullPath:     c.FullPath(),
+			ClientIP:     c.ClientIP(),
+			RemoteIP:     c.RemoteIP(),
+			ContentType:  c.ContentType(),
+			IsWebsocket:  c.IsWebsocket(),
+			RawData:      rawData,
+		},
+		Request: apicontract.NetworkEchoRequest{
+			Method:           c.Request.Method,
+			URL:              apicontract.EchoURL(c.Request.URL),
+			Proto:            c.Request.Proto,
+			ProtoMajor:       c.Request.ProtoMajor,
+			ProtoMinor:       c.Request.ProtoMinor,
+			Header:           c.Request.Header,
+			ContentLength:    c.Request.ContentLength,
+			TransferEncoding: c.Request.TransferEncoding,
+			Close:            c.Request.Close,
+			Host:             c.Request.Host,
+			Form:             c.Request.Form,
+			PostForm:         c.Request.PostForm,
+			MultipartForm:    multipartForm,
+			Trailer:          c.Request.Trailer,
+			RemoteAddr:       c.Request.RemoteAddr,
+			TLS:              apicontract.EchoTLS(c.Request.TLS),
+			UserAgent:        c.Request.UserAgent(),
+			Cookies:          apicontract.EchoCookies(c.Request.Cookies()),
+			Referer:          c.Request.Referer(),
+		},
+		URL: apicontract.NetworkEchoURLInfo{
+			EscapedPath:     c.Request.URL.EscapedPath(),
+			EscapedFragment: c.Request.URL.EscapedFragment(),
+			String:          c.Request.URL.String(),
+			Redacted:        c.Request.URL.Redacted(),
+			IsAbs:           c.Request.URL.IsAbs(),
+			Query:           c.Request.URL.Query(),
+			RequestURI:      c.Request.URL.RequestURI(),
+			Hostname:        c.Request.URL.Hostname(),
+			Port:            c.Request.URL.Port(),
+		},
+		User: apicontract.NetworkEchoUser{
+			Exists:   ok,
+			Username: username,
+			Password: password,
+		},
+	})
 }
 
-func forwardProxy(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var destURL string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("url", &destURL, true, true)) {
-		return
-	}
+var forwardProxy = contractHandler(apicontract.NetworkForwardProxy, func(c *gin.Context, input apicontract.NetworkForwardRequest) apicontract.Response[apicontract.NetworkForwardData] {
+	destURL := input.URL
 	u, e := url.ParseRequestURI(destURL)
 	if nil != e {
-		ret.Code = 1
-		ret.Msg = "invalid [url]"
-		return
+		return apicontract.Failure[apicontract.NetworkForwardData](1, "invalid [url]")
 	}
 
 	if u.Scheme != "http" && u.Scheme != "https" {
-		ret.Code = 2
-		ret.Msg = "only http/https is allowed"
-		return
+		return apicontract.Failure[apicontract.NetworkForwardData](2, "only http/https is allowed")
 	}
 
+	options, err := input.Options()
+	if err != nil {
+		return apicontract.NetworkForwardProxy.DecodeFailure(err)
+	}
 	method := "POST"
-	if methodArg := arg["method"]; nil != methodArg {
-		method = strings.ToUpper(methodArg.(string))
+	if methodArg := options.Method; nil != methodArg {
+		method = strings.ToUpper(*methodArg)
 	}
 	timeout := 7000
-	if timeoutArg := arg["timeout"]; nil != timeoutArg {
-		timeout = int(timeoutArg.(float64))
+	if timeoutArg := options.Timeout; nil != timeoutArg {
+		timeout = int(*timeoutArg)
 		if 1 > timeout {
 			timeout = 7000
 		}
 	}
 
 	client := getSafeClient(time.Duration(timeout) * time.Millisecond)
-	responseEncoding := configureForwardProxyClient(client, maxForwardProxyResponseSize, arg["responseEncoding"])
-	if redirectArg, ok := arg["redirect"].(bool); ok && !redirectArg {
+	responseEncoding := configureForwardProxyClient(client, maxForwardProxyResponseSize, options.ResponseEncoding)
+	if options.Redirect != nil && !*options.Redirect {
 		client.SetRedirectPolicy(req.NoRedirectPolicy())
 	}
 	request := client.R()
-	if headers, ok := arg["headers"].([]any); ok {
-		for _, pair := range headers {
-			if m, ok := pair.(map[string]any); ok {
-				for k, v := range m {
-					request.SetHeader(k, fmt.Sprintf("%v", v))
-				}
-			}
+	for _, pair := range options.Headers {
+		for key, value := range pair {
+			request.SetHeader(key, fmt.Sprint(networkJSONPayload(value)))
 		}
 	}
 
 	contentType := "application/json"
-	if contentTypeArg := arg["contentType"]; nil != contentTypeArg {
-		contentType = contentTypeArg.(string)
+	if contentTypeArg := options.ContentType; nil != contentTypeArg {
+		contentType = *contentTypeArg
 	}
 	request.SetHeader("Content-Type", contentType)
 
 	payloadEncoding := "json"
-	if payloadEncodingArg := arg["payloadEncoding"]; nil != payloadEncodingArg {
-		payloadEncoding = payloadEncodingArg.(string)
+	if payloadEncodingArg := options.PayloadEncoding; nil != payloadEncodingArg {
+		payloadEncoding = *payloadEncodingArg
 	}
 
+	payloadText, payloadIsText := options.Payload.StringValue()
+	switch payloadEncoding {
+	case "base64", "base64-std", "base64-url", "base32", "base32-std", "base32-hex", "hex":
+		if !payloadIsText {
+			return apicontract.Failure[apicontract.NetworkForwardData](-1, "[payload] must be a string")
+		}
+	}
 	switch payloadEncoding {
 	case "base64":
 		fallthrough
 	case "base64-std":
-		if payload, err := base64.StdEncoding.DecodeString(arg["payload"].(string)); err != nil {
-			ret.Code = 3
-			ret.Msg = "decode base64-std payload failed: " + err.Error()
-			return
+		if payload, err := base64.StdEncoding.DecodeString(payloadText); err != nil {
+			return apicontract.Failure[apicontract.NetworkForwardData](3, "decode base64-std payload failed: "+err.Error())
 		} else {
 			request.SetBody(payload)
 		}
 	case "base64-url":
-		if payload, err := base64.URLEncoding.DecodeString(arg["payload"].(string)); err != nil {
-			ret.Code = 4
-			ret.Msg = "decode base64-url payload failed: " + err.Error()
-			return
+		if payload, err := base64.URLEncoding.DecodeString(payloadText); err != nil {
+			return apicontract.Failure[apicontract.NetworkForwardData](4, "decode base64-url payload failed: "+err.Error())
 		} else {
 			request.SetBody(payload)
 		}
 	case "base32":
 		fallthrough
 	case "base32-std":
-		if payload, err := base32.StdEncoding.DecodeString(arg["payload"].(string)); err != nil {
-			ret.Code = 5
-			ret.Msg = "decode base32-std payload failed: " + err.Error()
-			return
+		if payload, err := base32.StdEncoding.DecodeString(payloadText); err != nil {
+			return apicontract.Failure[apicontract.NetworkForwardData](5, "decode base32-std payload failed: "+err.Error())
 		} else {
 			request.SetBody(payload)
 		}
 	case "base32-hex":
-		if payload, err := base32.HexEncoding.DecodeString(arg["payload"].(string)); err != nil {
-			ret.Code = 6
-			ret.Msg = "decode base32-hex payload failed: " + err.Error()
-			return
+		if payload, err := base32.HexEncoding.DecodeString(payloadText); err != nil {
+			return apicontract.Failure[apicontract.NetworkForwardData](6, "decode base32-hex payload failed: "+err.Error())
 		} else {
 			request.SetBody(payload)
 		}
 	case "hex":
-		if payload, err := hex.DecodeString(arg["payload"].(string)); err != nil {
-			ret.Code = 7
-			ret.Msg = "decode hex payload failed: " + err.Error()
-			return
+		if payload, err := hex.DecodeString(payloadText); err != nil {
+			return apicontract.Failure[apicontract.NetworkForwardData](7, "decode hex payload failed: "+err.Error())
 		} else {
 			request.SetBody(payload)
 		}
 	case "text":
 	default:
-		request.SetBody(arg["payload"])
+		request.SetBody(networkJSONPayload(options.Payload))
 	}
 
 	started := time.Now()
 	resp, bodyData, err := sendForwardProxyRequest(request, method, destURL)
 	if errors.Is(err, req.ErrResponseBodyTooLarge) {
-		ret.Code = 10
-		ret.Msg = fmt.Sprintf("response body too large: limit is %d bytes", maxForwardProxyResponseSize)
-		return
+		return apicontract.Failure[apicontract.NetworkForwardData](10, fmt.Sprintf("response body too large: limit is %d bytes", maxForwardProxyResponseSize))
 	}
 	if err != nil {
-		ret.Code = 8
-		ret.Msg = "forward request failed: " + err.Error()
-		return
+		return apicontract.Failure[apicontract.NetworkForwardData](8, "forward request failed: "+err.Error())
 	}
 
 	elapsed := time.Since(started)
@@ -303,26 +273,20 @@ func forwardProxy(c *gin.Context) {
 		body = string(bodyData)
 	}
 
-	data := map[string]any{
-		"url":          destURL,
-		"status":       resp.StatusCode,
-		"contentType":  resp.GetHeader("content-type"),
-		"body":         body,
-		"bodyEncoding": responseEncoding,
-		"headers":      resp.Header,
-		"elapsed":      elapsed.Milliseconds(),
-	}
-	ret.Data = data
+	return apicontract.Success(apicontract.NetworkForwardData{URL: destURL, Status: resp.StatusCode, ContentType: resp.GetHeader("content-type"), Body: body, BodyEncoding: responseEncoding, Headers: resp.Header, Elapsed: elapsed.Milliseconds()})
+})
 
-	//shortBody := ""
-	//if 64 > len(body) {
-	//	shortBody = body
-	//} else {
-	//	shortBody = body[:64]
-	//}
-	//
-	//logging.LogInfof("elapsed [%.1fs], length [%d], request [url=%s, headers=%s, content-type=%s, body=%s], status [%d], body [%s]",
-	//	elapsed.Seconds(), len(bodyData), data["url"], headers, contentType, arg["payload"], data["status"], shortBody)
+// 任意 JSON 载荷按代理客户端的字符串、标量与复合值规则传输。
+func networkJSONPayload(value apicontract.JSONValue) any {
+	encoded, err := value.MarshalJSON()
+	if err != nil {
+		panic(err)
+	}
+	var payload any
+	if err := json.Unmarshal(encoded, &payload); err != nil {
+		panic(err)
+	}
+	return payload
 }
 
 func configureForwardProxyClient(client *req.Client, maxResponseSize int64, value any) string {
@@ -449,16 +413,14 @@ func secureProxyResponseHeaders(w gin.ResponseWriter, contentType string, attach
 //
 // The request method and body are taken from the incoming request.
 // Target response headers are forwarded with a "Siyuan-Proxy-" prefix.
-func httpProxy(c *gin.Context) {
+var httpProxy = contractHandler(apicontract.NetworkHTTPProxy, func(c *gin.Context, _ apicontract.EmptyRequest) apicontract.Response[apicontract.ProxyFailure] {
 	targetURL, targetHeaders, timeout, err := parseForwardProxyParams(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": err.Error()})
-		return
+		return apicontract.RejectProxy(http.StatusBadRequest, err.Error())
 	}
 
 	if targetURL.Scheme != "http" && targetURL.Scheme != "https" {
-		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": "only http/https is allowed"})
-		return
+		return apicontract.RejectProxy(http.StatusBadRequest, "only http/https is allowed")
 	}
 
 	transport := &http.Transport{
@@ -468,8 +430,7 @@ func httpProxy(c *gin.Context) {
 
 	proxyReq, reqErr := http.NewRequestWithContext(c.Request.Context(), c.Request.Method, targetURL.String(), c.Request.Body)
 	if reqErr != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": "create request failed: " + reqErr.Error()})
-		return
+		return apicontract.RejectProxy(http.StatusBadRequest, "create request failed: "+reqErr.Error())
 	}
 
 	proxyReq.ContentLength = c.Request.ContentLength
@@ -487,18 +448,19 @@ func httpProxy(c *gin.Context) {
 
 	resp, respErr := httpClient.Do(proxyReq)
 	if respErr != nil {
-		c.JSON(http.StatusBadGateway, gin.H{"code": -1, "msg": "connect target failed: " + respErr.Error()})
-		return
+		return apicontract.RejectProxy(http.StatusBadGateway, "connect target failed: "+respErr.Error())
 	}
-	defer resp.Body.Close()
+	return apicontract.StreamProxy(resp.StatusCode, func(_ http.ResponseWriter, _ *http.Request) {
+		defer resp.Body.Close()
 
-	secureProxyResponseHeaders(c.Writer, "application/octet-stream", true)
-	forwardResponseHeaders(c.Writer.Header(), resp.Header)
-	c.Writer.WriteHeader(resp.StatusCode)
-	if _, err := io.Copy(c.Writer, resp.Body); err != nil {
-		logging.LogWarnf("http proxy copy response failed: %s", err.Error())
-	}
-}
+		secureProxyResponseHeaders(c.Writer, "application/octet-stream", true)
+		forwardResponseHeaders(c.Writer.Header(), resp.Header)
+		c.Writer.WriteHeader(resp.StatusCode)
+		if _, err := io.Copy(c.Writer, resp.Body); err != nil {
+			logging.LogWarnf("http proxy copy response failed: %s", err.Error())
+		}
+	})
+})
 
 // wsProxy proxies a WebSocket connection to a remote WebSocket endpoint.
 //
@@ -507,16 +469,14 @@ func httpProxy(c *gin.Context) {
 //   - h: RawURLEncoding base64 of JSON map[string][]string forwarded as handshake headers
 //
 // Target response headers are forwarded with a "Siyuan-Proxy-" prefix.
-func wsProxy(c *gin.Context) {
+var wsProxy = contractHandler(apicontract.NetworkWebSocketProxy, func(c *gin.Context, _ apicontract.EmptyRequest) apicontract.Response[apicontract.ProxyFailure] {
 	targetURL, targetHeaders, timeout, err := parseForwardProxyParams(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": err.Error()})
-		return
+		return apicontract.RejectProxy(http.StatusBadRequest, err.Error())
 	}
 
 	if targetURL.Scheme != "ws" && targetURL.Scheme != "wss" {
-		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": "only ws/wss is allowed"})
-		return
+		return apicontract.RejectProxy(http.StatusBadRequest, "only ws/wss is allowed")
 	}
 
 	wsDialer := &websocket.Dialer{
@@ -526,75 +486,76 @@ func wsProxy(c *gin.Context) {
 
 	targetConn, targetResp, dialErr := wsDialer.DialContext(c.Request.Context(), targetURL.String(), *targetHeaders)
 	if dialErr != nil {
-		c.JSON(http.StatusBadGateway, gin.H{"code": -1, "msg": "dial target failed: " + dialErr.Error()})
-		return
+		return apicontract.RejectProxy(http.StatusBadGateway, "dial target failed: "+dialErr.Error())
 	}
-	defer targetConn.Close()
+	return apicontract.StreamProxy(http.StatusSwitchingProtocols, func(_ http.ResponseWriter, _ *http.Request) {
+		defer targetConn.Close()
 
-	upgradeHeaders := http.Header{}
-	if targetResp != nil {
-		forwardResponseHeaders(upgradeHeaders, targetResp.Header)
-	}
-	upgrader := websocket.Upgrader{
-		// 校验 Origin，防止跨站 WebSocket 劫持（CSWSH） https://github.com/siyuan-note/siyuan/security/advisories/GHSA-3cc2-h3v6-rqpq
-		CheckOrigin: func(r *http.Request) bool {
-			return util.IsSessionOriginAllowedRequest(r)
-		},
-	}
-	clientConn, upgradeErr := upgrader.Upgrade(c.Writer, c.Request, upgradeHeaders)
-	if upgradeErr != nil {
-		logging.LogErrorf("ws forward proxy upgrade failed: %s", upgradeErr.Error())
-		return
-	}
-	defer clientConn.Close()
+		upgradeHeaders := http.Header{}
+		if targetResp != nil {
+			forwardResponseHeaders(upgradeHeaders, targetResp.Header)
+		}
+		upgrader := websocket.Upgrader{
+			// 校验 Origin，防止跨站 WebSocket 劫持（CSWSH） https://github.com/siyuan-note/siyuan/security/advisories/GHSA-3cc2-h3v6-rqpq
+			CheckOrigin: func(r *http.Request) bool {
+				return util.IsSessionOriginAllowedRequest(r)
+			},
+		}
+		clientConn, upgradeErr := upgrader.Upgrade(c.Writer, c.Request, upgradeHeaders)
+		if upgradeErr != nil {
+			logging.LogErrorf("ws forward proxy upgrade failed: %s", upgradeErr.Error())
+			return
+		}
+		defer clientConn.Close()
 
-	errChan := make(chan error, 2)
-	go func() {
-		for {
-			msgType, msg, readErr := targetConn.ReadMessage()
-			if readErr != nil {
-				if closeError, ok := readErr.(*websocket.CloseError); ok {
-					clientConn.WriteMessage(
-						websocket.CloseMessage,
-						websocket.FormatCloseMessage(
-							closeError.Code,
-							closeError.Text,
-						),
-					)
+		errChan := make(chan error, 2)
+		go func() {
+			for {
+				msgType, msg, readErr := targetConn.ReadMessage()
+				if readErr != nil {
+					if closeError, ok := readErr.(*websocket.CloseError); ok {
+						clientConn.WriteMessage(
+							websocket.CloseMessage,
+							websocket.FormatCloseMessage(
+								closeError.Code,
+								closeError.Text,
+							),
+						)
+					}
+					errChan <- readErr
+					return
 				}
-				errChan <- readErr
-				return
-			}
-			if writeErr := clientConn.WriteMessage(msgType, msg); writeErr != nil {
-				errChan <- writeErr
-				return
-			}
-		}
-	}()
-	go func() {
-		for {
-			msgType, msg, readErr := clientConn.ReadMessage()
-			if readErr != nil {
-				if closeError, ok := readErr.(*websocket.CloseError); ok {
-					targetConn.WriteMessage(
-						websocket.CloseMessage,
-						websocket.FormatCloseMessage(
-							closeError.Code,
-							closeError.Text,
-						),
-					)
+				if writeErr := clientConn.WriteMessage(msgType, msg); writeErr != nil {
+					errChan <- writeErr
+					return
 				}
-				errChan <- readErr
-				return
 			}
-			if writeErr := targetConn.WriteMessage(msgType, msg); writeErr != nil {
-				errChan <- writeErr
-				return
+		}()
+		go func() {
+			for {
+				msgType, msg, readErr := clientConn.ReadMessage()
+				if readErr != nil {
+					if closeError, ok := readErr.(*websocket.CloseError); ok {
+						targetConn.WriteMessage(
+							websocket.CloseMessage,
+							websocket.FormatCloseMessage(
+								closeError.Code,
+								closeError.Text,
+							),
+						)
+					}
+					errChan <- readErr
+					return
+				}
+				if writeErr := targetConn.WriteMessage(msgType, msg); writeErr != nil {
+					errChan <- writeErr
+					return
+				}
 			}
-		}
-	}()
-	<-errChan
-}
+		}()
+		<-errChan
+	})
+})
 
 // esProxy proxies an EventSource (SSE) stream from a remote HTTP endpoint.
 //
@@ -603,16 +564,14 @@ func wsProxy(c *gin.Context) {
 //   - h: RawURLEncoding base64 of JSON map[string][]string forwarded as request headers
 //
 // Target response headers are forwarded with a "Siyuan-Proxy-" prefix.
-func esProxy(c *gin.Context) {
+var esProxy = contractHandler(apicontract.NetworkEventSourceProxy, func(c *gin.Context, _ apicontract.EmptyRequest) apicontract.Response[apicontract.ProxyFailure] {
 	targetURL, targetHeaders, timeout, err := parseForwardProxyParams(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": err.Error()})
-		return
+		return apicontract.RejectProxy(http.StatusBadRequest, err.Error())
 	}
 
 	if targetURL.Scheme != "http" && targetURL.Scheme != "https" {
-		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": "only http/https is allowed"})
-		return
+		return apicontract.RejectProxy(http.StatusBadRequest, "only http/https is allowed")
 	}
 
 	transport := &http.Transport{
@@ -622,8 +581,7 @@ func esProxy(c *gin.Context) {
 
 	proxyReq, reqErr := http.NewRequestWithContext(c.Request.Context(), http.MethodGet, targetURL.String(), nil)
 	if reqErr != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": "create request failed: " + reqErr.Error()})
-		return
+		return apicontract.RejectProxy(http.StatusBadRequest, "create request failed: "+reqErr.Error())
 	}
 	for k, vs := range *targetHeaders {
 		for _, v := range vs {
@@ -636,26 +594,27 @@ func esProxy(c *gin.Context) {
 
 	resp, respErr := httpClient.Do(proxyReq)
 	if respErr != nil {
-		c.JSON(http.StatusBadGateway, gin.H{"code": -1, "msg": "connect target failed: " + respErr.Error()})
-		return
+		return apicontract.RejectProxy(http.StatusBadGateway, "connect target failed: "+respErr.Error())
 	}
-	defer resp.Body.Close()
+	return apicontract.StreamProxy(resp.StatusCode, func(_ http.ResponseWriter, _ *http.Request) {
+		defer resp.Body.Close()
 
-	secureProxyResponseHeaders(c.Writer, "text/event-stream; charset=utf-8", false)
-	forwardResponseHeaders(c.Writer.Header(), resp.Header)
-	c.Writer.WriteHeader(resp.StatusCode)
+		secureProxyResponseHeaders(c.Writer, "text/event-stream; charset=utf-8", false)
+		forwardResponseHeaders(c.Writer.Header(), resp.Header)
+		c.Writer.WriteHeader(resp.StatusCode)
 
-	buf := make([]byte, 4096)
-	for {
-		n, readErr := resp.Body.Read(buf)
-		if n > 0 {
-			if _, writeErr := c.Writer.Write(buf[:n]); writeErr != nil {
+		buf := make([]byte, 4096)
+		for {
+			n, readErr := resp.Body.Read(buf)
+			if n > 0 {
+				if _, writeErr := c.Writer.Write(buf[:n]); writeErr != nil {
+					return
+				}
+				c.Writer.Flush()
+			}
+			if readErr != nil {
 				return
 			}
-			c.Writer.Flush()
 		}
-		if readErr != nil {
-			return
-		}
-	}
-}
+	})
+})

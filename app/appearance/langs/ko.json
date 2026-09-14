@@ -1,5 +1,13 @@
 {
 	"mobileFileTreeMultiSelectTip": "문서나 노트북을 탭하여 선택하거나 선택 해제하세요",
+	"repoBatchDelete": "선택한 태그 삭제",
+	"repoBatchDone": "관리 완료",
+	"repoBatchClear": "선택 해제",
+	"repoBatchSelection": "로컬 ${x}개 선택 · 클라우드 ${y}개 선택",
+	"repoTaggedSnapshots": "태그가 지정된 스냅샷",
+	"repoBatchManage": "일괄 관리",
+	"repoRemoveTagsTip": "선택한 태그만 제거합니다. 스냅샷 데이터는 즉시 삭제되지 않으며 저장소도 자동으로 정리되지 않습니다.",
+	"repoBatchResult": "${x}개 제거됨. 실패 또는 확인되지 않은 항목: ${y}개. 다시 시도할 수 있도록 선택 상태가 유지됩니다.",
 	"enterMasterPassword": "마스터 비밀번호를 입력하세요",
 	"orderedListItemBlock": "순서 있는 목록 항목 블록",
 	"unorderedListItemBlock": "순서 없는 목록 항목 블록",

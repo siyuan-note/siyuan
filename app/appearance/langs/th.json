@@ -1,5 +1,13 @@
 {
 	"mobileFileTreeMultiSelectTip": "แตะเอกสารหรือสมุดบันทึกเพื่อเลือกหรือยกเลิกการเลือก",
+	"repoBatchDelete": "ลบแท็กที่เลือก",
+	"repoBatchDone": "เสร็จสิ้น",
+	"repoBatchClear": "ยกเลิกการเลือก",
+	"repoBatchSelection": "เลือกในเครื่อง ${x} รายการ · บนคลาวด์ ${y} รายการ",
+	"repoTaggedSnapshots": "สแนปช็อตที่ติดแท็ก",
+	"repoBatchManage": "จัดการหลายรายการ",
+	"repoRemoveTagsTip": "จะลบเฉพาะแท็กที่เลือกเท่านั้น ข้อมูลสแนปช็อตจะไม่ถูกลบทันที และจะไม่ล้างคลังข้อมูลโดยอัตโนมัติ",
+	"repoBatchResult": "ลบแล้ว: ${x} รายการ ล้มเหลวหรือยังยืนยันไม่ได้: ${y} รายการ โดยยังคงเลือกไว้เพื่อลองอีกครั้ง",
 	"enterMasterPassword": "กรุณาป้อนรหัสผ่านหลัก",
 	"orderedListItemBlock": "บล็อกหน่วยรายการเรียงลำดับ",
 	"unorderedListItemBlock": "บล็อกหน่วยรายการไม่เรียงลำดับ",

@@ -52,16 +52,28 @@ import (
 	"github.com/xrash/smetrics"
 )
 
-func RemoveUnusedAttributeView(id string) {
-	// 防御性校验：ID 必须是合法的节点 ID 格式，防止通过路径穿越读取或删除任意文件
+func ValidateUnusedAttributeView(id string) error {
 	if !ast.IsNodeIDPattern(id) {
+		return fmt.Errorf("invalid attribute view ID: %s", id)
+	}
+	for _, item := range UnusedAttributeViews(false) {
+		if item.Item == id {
+			return nil
+		}
+	}
+	return fmt.Errorf("attribute view is not unused: %s", id)
+}
+
+func RemoveUnusedAttributeView(id string) (err error) {
+	// 防御性校验：ID 必须是合法的节点 ID 格式，防止通过路径穿越读取或删除任意文件
+	if err = ValidateUnusedAttributeView(id); err != nil {
 		return
 	}
 
 	base := filepath.Join(util.DataDir, "storage", "av")
 	absPath := filepath.Join(base, id+".json")
 	if !filelock.IsExist(absPath) {
-		return
+		return fmt.Errorf("attribute view not found: %s", id)
 	}
 
 	historyDir, err := getHistoryDir(HistoryOpClean)
@@ -4175,6 +4187,16 @@ func GetCurrentAttributeViewImages(c *gin.Context, avID, blockID, viewID, query 
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
 	}
+
+	// 发布读者只能读取发布可访问数据库中的图片。逐行过滤会把游离行视为可访问，缺少数据库级门禁时会泄漏未授权
+	// 数据库游离行的图片资源路径，因此这里与 renderAttributeView 保持一致，在提取资源前做顶层访问校验。
+	if IsReadOnlyRoleContext(c) {
+		if !CheckAttributeViewBlockAccessableByPublishAccess(c, GetPublishAccess(), avID, blockID) {
+			err = av.ErrAttributeViewNotFound
+			return
+		}
+	}
+
 	var view *av.View
 
 	view, err = resolveAttributeViewView(attrView, viewID, "", blockID)
@@ -4193,6 +4215,7 @@ func GetCurrentAttributeViewImages(c *gin.Context, avID, blockID, viewID, query 
 	av.FilterWithContext(table, attrView, rollupFurtherCollections, cachedAttrViews, filterContext)
 	av.Sort(table, attrView)
 	if IsReadOnlyRoleContext(c) {
+		// 顶层门禁已通过，这里再按行剔除绑定在不可发布文档中的行值
 		table = FilterViewByPublishAccess(c, GetPublishAccess(), table).(*av.Table)
 	}
 

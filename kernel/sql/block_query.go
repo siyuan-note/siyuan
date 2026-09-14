@@ -709,6 +709,20 @@ func queryRawStmtArgs(stmt string, args []any, limit int) (ret []map[string]any,
 	return
 }
 
+// checkRawBlockQueryStmt 校验原始块查询语句为单条只读查询，未通过时记录告警并返回 false。
+// 所有把完整 SQL 交给 db.Query 的块查询出口都必须先调用本函数，保证没有调用方能绕过校验。
+func checkRawBlockQueryStmt(stmt, boxID string) bool {
+	if err := CheckReadonlyBlockQueryStatement(stmt, boxID); nil != err {
+		// 空脚本和 JS 嵌入块（//!js）本来就不是 SQL，由前端负责执行，校验不通过属正常情况
+		trimmed := strings.TrimSpace(stmt)
+		if "" != trimmed && !strings.HasPrefix(trimmed, "//!js") {
+			logging.LogWarnf("sql query [%s] rejected as non-readonly: %s", stmt, err)
+		}
+		return false
+	}
+	return true
+}
+
 func SelectBlocksRawStmtNoParse(stmt string, limit int) (ret []*Block) {
 	return selectBlocksRawStmt(stmt, limit)
 }
@@ -716,6 +730,10 @@ func SelectBlocksRawStmtNoParse(stmt string, limit int) (ret []*Block) {
 // SelectBlocksRawStmtArgs 与 selectBlocksRawStmt 行为一致，但通过绑定参数执行，
 // 绕开 sqlparser 解析（vitess 会把 "?" 改写为 ":vN" 导致占位失效），用于含用户可控参数的搜索语句。
 func SelectBlocksRawStmtArgs(stmt string, args []any, limit int) (ret []*Block) {
+	if !checkRawBlockQueryStmt(stmt, "") {
+		return
+	}
+
 	rows, err := query(stmt, args...)
 	if err != nil {
 		if strings.Contains(err.Error(), "syntax error") {
@@ -747,13 +765,14 @@ func SelectBlocksRawStmtArgs(stmt string, args []any, limit int) (ret []*Block) 
 type queryRowsFunc func(string, ...any) (*sql.Rows, error)
 
 func SelectBlocksRawStmt(stmt string, page, limit int) (ret []*Block) {
-	return selectBlocksRawStmtWithQuery(stmt, page, limit, query)
+	return selectBlocksRawStmtWithQuery(stmt, page, limit, "", query)
 }
 
-func selectBlocksRawStmtWithQuery(stmt string, page, limit int, queryFn queryRowsFunc) (ret []*Block) {
+func selectBlocksRawStmtWithQuery(stmt string, page, limit int, boxID string, queryFn queryRowsFunc) (ret []*Block) {
 	parsedStmt, err := sqlparser.Parse(stmt)
 	if err != nil {
-		return selectBlocksRawStmtNoParseWithQuery(stmt, limit, queryFn)
+		// 解析失败时按原样执行，因此只读校验必须在执行前完成，不能依赖下面的语句类型分派
+		return selectBlocksRawStmtNoParseWithQuery(stmt, limit, boxID, queryFn)
 	}
 
 	switch parsedStmt.(type) {
@@ -829,6 +848,9 @@ func selectBlocksRawStmtWithQuery(stmt string, page, limit int, queryFn queryRow
 	stmt = strings.ReplaceAll(stmt, "\\\"", "\"")
 	stmt = strings.ReplaceAll(stmt, "\\\\*", "\\*")
 	stmt = strings.ReplaceAll(stmt, "from dual", "")
+	if !checkRawBlockQueryStmt(stmt, boxID) {
+		return
+	}
 	rows, err := queryFn(stmt)
 	if err != nil {
 		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
@@ -954,10 +976,14 @@ func SelectBlocksRegexArgs(stmt string, exp *regexp.Regexp, name, alias, memo, i
 }
 
 func selectBlocksRawStmt(stmt string, limit int) (ret []*Block) {
-	return selectBlocksRawStmtNoParseWithQuery(stmt, limit, query)
+	return selectBlocksRawStmtNoParseWithQuery(stmt, limit, "", query)
 }
 
-func selectBlocksRawStmtNoParseWithQuery(stmt string, limit int, queryFn queryRowsFunc) (ret []*Block) {
+func selectBlocksRawStmtNoParseWithQuery(stmt string, limit int, boxID string, queryFn queryRowsFunc) (ret []*Block) {
+	if !checkRawBlockQueryStmt(stmt, boxID) {
+		return
+	}
+
 	rows, err := queryFn(stmt)
 	if err != nil {
 		if strings.Contains(err.Error(), "syntax error") {

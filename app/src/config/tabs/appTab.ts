@@ -333,8 +333,7 @@ const registerAppDataGroup = (tab: SettingTabBuilder) => {
         afterMount: (root) => {
             root.querySelector("#importConf")?.addEventListener("change", (event: Event) => {
                 const target = event.target as HTMLInputElement;
-                const formData = new FormData();
-                formData.append("file", target.files[0]);
+                const formData = new ContractFormData({file: [target.files[0]]});
                 fetchPost("/api/system/importConf", formData, (response) => {
                     if (response.code !== 0) {
                         showMessage(response.msg);

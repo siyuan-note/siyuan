@@ -1,5 +1,13 @@
 {
 	"mobileFileTreeMultiSelectTip": "Tik op documenten of notitieboeken om ze te selecteren of te deselecteren",
+	"repoBatchDelete": "Geselecteerde markeringen verwijderen",
+	"repoBatchDone": "Gereed",
+	"repoBatchClear": "Selectie wissen",
+	"repoBatchSelection": "Lokaal geselecteerd: ${x} · Cloud geselecteerd: ${y}",
+	"repoTaggedSnapshots": "Gemarkeerde momentopnamen",
+	"repoBatchManage": "Groepsbeheer",
+	"repoRemoveTagsTip": "Alleen de geselecteerde markeringen worden verwijderd. De gegevens van momentopnamen worden niet direct verwijderd en de gegevensopslag wordt niet automatisch opgeruimd.",
+	"repoBatchResult": "Verwijderd: ${x}. Mislukt of niet bevestigd: ${y}; deze items blijven geselecteerd om opnieuw te proberen.",
 	"enterMasterPassword": "Voer het hoofdwachtwoord in",
 	"orderedListItemBlock": "Geordend lijstitemblok",
 	"unorderedListItemBlock": "Ongeordend lijstitemblok",

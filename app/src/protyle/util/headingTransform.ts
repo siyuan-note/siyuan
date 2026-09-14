@@ -1,5 +1,6 @@
 export const getHeadingLevelUpdateOperations = (operations: IOperation[], excludedIDs = new Set<string>()) => {
-    return operations.filter(operation => operation.action === "update" && !excludedIDs.has(operation.id));
+    return operations.filter((operation): operation is Extract<IOperation, {action: "update"}> =>
+        operation.action === "update" && !excludedIDs.has(operation.id));
 };
 
 export const applyHeadingLevelUpdates = (protyle: IProtyle, operations: IOperation[], render: (element: HTMLElement) => unknown) => {

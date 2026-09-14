@@ -6,7 +6,7 @@
 		"id": "20200828105441-r76vmu5",
 		"title": "内核参数",
 		"type": "doc",
-		"updated": "20260718113226"
+		"updated": "20260914011526"
 	},
 	"Children": [
 		{
@@ -292,7 +292,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220517143906-h2p1a5m",
-				"updated": "20260302173621"
+				"updated": "20260914011526"
 			},
 			"Children": [
 				{
@@ -317,7 +317,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220517143906-cd8h1g8",
-				"updated": "20260718113226"
+				"updated": "20260914011526"
 			},
 			"Children": [
 				{
@@ -481,6 +481,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
 					"TextMarkTextContent": "sk"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "sr"
 				},
 				{
 					"Type": "NodeText",

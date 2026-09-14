@@ -1,5 +1,13 @@
 {
 	"mobileFileTreeMultiSelectTip": "اضغط على المستندات أو دفاتر الملاحظات لتحديدها أو إلغاء تحديدها",
+	"repoBatchDelete": "حذف الوسوم المحددة",
+	"repoBatchDone": "تم",
+	"repoBatchClear": "إلغاء التحديد",
+	"repoBatchSelection": "المحدد محليًا: ${x} · في السحابة: ${y}",
+	"repoTaggedSnapshots": "اللقطات الموسومة",
+	"repoBatchManage": "إدارة جماعية",
+	"repoRemoveTagsTip": "ستُزال الوسوم المحددة فقط. لن تُحذف بيانات اللقطات فورًا ولن يُنظَّف المستودع تلقائيًا.",
+	"repoBatchResult": "تمت إزالة ${x}. فشلت إزالة ${y} أو لم يتم التحقق منها؛ تبقى هذه العناصر محددة لإعادة المحاولة.",
 	"enterMasterPassword": "يرجى إدخال كلمة المرور الرئيسية",
 	"orderedListItemBlock": "كتلة عنصر قائمة مرقمة",
 	"unorderedListItemBlock": "كتلة عنصر قائمة غير مرتبة",

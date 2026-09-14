@@ -6,7 +6,8 @@ const os = require("node:os");
 const sources = () => {
     const ts = require("typescript");
     const modules = {};
-    for (const name of ["protyle/wysiwyg/backlinkReference", "protyle/wysiwyg/renderBacklink", "protyle/util/clear"]) {
+    for (const name of ["protyle/wysiwyg/backlinkReference", "protyle/wysiwyg/renderBacklink", "protyle/util/clear",
+        "protyle/render/av/backlinkReuse", "util/escape", "asset/html"]) {
         modules[name] = ts.transpileModule(readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"), {
             compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2021},
         }).outputText;
@@ -30,6 +31,7 @@ const runCases = async ({modules, css, lute: luteSource}) => {
     const cache = {};
     const noop = () => {};
     const stubs = {
+        "protyle/wysiwyg/backlinkTypeFold": {setBacklinkTypeFoldExpandHandler: noop, updateBacklinkTypeFolds: noop},
         "protyle/ui/initUI": {removeLoading: noop},
         "protyle/util/processCode": {processRender: noop},
         "protyle/render/highlightRender": {highlightRender: noop},

@@ -2196,7 +2196,10 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
                     if (response.code !== 0) {
                         return;
                     }
-                    window.siyuan.config.fileTree = response.data;
+                    window.siyuan.config.fileTree = {
+                        ...response.data,
+                        tabStartupMode: response.data.tabStartupMode === 1 ? 1 : response.data.tabStartupMode === 2 ? 2 : 0,
+                    };
                     this.onDocSortModeChanged({
                         scope: "global",
                         box: "",

@@ -1,7 +1,9 @@
+import type {JSONValue} from "../types/api";
+
 export interface IShortcutBindings {
-    version: 1;
-    keys: string[];
-    defaults?: string[];
+    version?: JSONValue;
+    keys?: JSONValue;
+    defaults?: JSONValue;
     priority?: Record<string, number>;
 }
 
@@ -18,11 +20,11 @@ export const normalizeShortcutKey = (key: string, mac: boolean) => {
 
 export const getDefaultKeymapBindings = (item: IShortcutKeymap): string[] =>
     item.bindings?.version === 1 && Array.isArray(item.bindings.defaults) ?
-        [...new Set(item.bindings.defaults.filter(key => typeof key === "string" && key.length > 0))] :
+        [...new Set(item.bindings.defaults.filter((key): key is string => typeof key === "string" && key.length > 0))] :
         item.default ? [item.default] : [];
 
 export interface IShortcutKeymap {
-    custom: string;
+    custom?: string;
     default?: string;
     bindings?: IShortcutBindings;
 }
@@ -35,7 +37,7 @@ export const getKeymapBindings = (item?: IShortcutKeymap): string[] => {
         if (item.bindings.version !== 1 || !Array.isArray(item.bindings.keys)) {
             return [];
         }
-        return [...new Set(item.bindings.keys.filter(key => typeof key === "string" && key.length > 0))];
+        return [...new Set(item.bindings.keys.filter((key): key is string => typeof key === "string" && key.length > 0))];
     }
     return typeof item.custom === "string" && item.custom ? [item.custom] : [];
 };

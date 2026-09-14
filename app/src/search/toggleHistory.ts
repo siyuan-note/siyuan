@@ -13,7 +13,7 @@ import {inputEvent} from "./util";
 
 export const toggleReplaceHistory = (replaceInputElement: HTMLInputElement) => {
     const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
-    if (!list.replaceKeys || list.replaceKeys.length === 0 || (list.length === 1 && list[0] === replaceInputElement.value)) {
+    if (!list.replaceKeys || list.replaceKeys.length === 0 || (list.replaceKeys.length === 1 && list.replaceKeys[0] === replaceInputElement.value)) {
         return;
     }
     const menu = new Menu(Constants.MENU_SEARCH_REPLACE_HISTORY);

@@ -81,7 +81,7 @@ func TestAPIContractRouterCoverage(t *testing.T) {
 		}
 	}
 	for _, definition := range apicontract.Definitions() {
-		for _, method := range definition.Methods {
+		for _, method := range apicontract.ExpandMethods(definition.Methods) {
 			expected[method+" "+definition.Path] = true
 		}
 	}

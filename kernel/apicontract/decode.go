@@ -12,7 +12,7 @@ import (
 
 // Decode 按精确的 JSON 字段名绑定请求，缺失、null 和兼容转换由字段声明控制。
 func (e Endpoint[Request, Data]) Decode(reader io.Reader) (request Request, err error) {
-	if e.definition.Body == NoBody {
+	if e.definition.Body == NoBody || e.definition.Body == RawBody {
 		return
 	}
 	if reader == nil {
@@ -119,6 +119,9 @@ func decodeRequestFields(value reflect.Value, fields map[string]json.RawMessage)
 				return fmt.Errorf("Field [%s] must not be empty", name)
 			}
 			value.Field(i).SetString(trimmed)
+		}
+		if has("nonempty") && value.Field(i).String() == "" {
+			return fmt.Errorf("Field [%s] must not be empty", name)
 		}
 		for _, option := range strings.Split(field.Tag.Get("api"), ",") {
 			if strings.HasPrefix(option, "enum=") {

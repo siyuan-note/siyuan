@@ -6,7 +6,7 @@
 		"id": "20210615213222-vs5tzbd",
 		"title": "Data history",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260914102430"
 	},
 	"Children": [
 		{
@@ -1102,7 +1102,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615120602-drz9hwc",
-				"updated": "20260803171606"
+				"updated": "20260914102430"
 			},
 			"Children": [
 				{
@@ -1498,7 +1498,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120602-nzrp6gt",
-				"updated": "20230422102109"
+				"updated": "20260914101605"
 			},
 			"Children": [
 				{
@@ -1512,12 +1512,305 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120602-13h2vpv",
-				"updated": "20220615120602"
+				"updated": "20260914101605"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "After creating a data snapshot, you can see the snapshot time list on the left, and click different snapshots to browse their notes."
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Data History"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Data snapshot"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", wide windows show local and cloud lists side by side, with separate pagination. In narrow windows and on mobile, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Local snapshot"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cloud snapshot"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to switch between them. Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Data snapshot"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Tagged snapshots"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " at the top to switch snapshot categories. Each entry shows its creation time, memo, and tag for comparison."
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-ihg861m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914101605-ihg861m",
+				"updated": "20260914101605"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Local snapshots support searching by file name; searching makes room for the file list and preview. Outside batch management, you can still select two local snapshots to compare them and use individual actions such as tagging, uploading, downloading, and rolling back."
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-wf8t6ol",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260914101605-wf8t6ol",
+				"updated": "20260914102430"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Batch manage tagged snapshots"
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-xg5sqge",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20260914101605-xg5sqge",
+				"updated": "20260914101605"
+			},
+			"Children": [
+				{
+					"ID": "20260914101605-d2qjgki",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20260914101605-d2qjgki",
+						"updated": "20260914101605"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-hvhwkmb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-hvhwkmb",
+								"updated": "20260914101605"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Switch to "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Tagged snapshots"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " and click "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Batch manage"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to show checkboxes"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914101605-xjtvp83",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20260914101605-xjtvp83",
+						"updated": "20260914101605"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-i4bzcea",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-i4bzcea",
+								"updated": "20260914101605"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Select the local and cloud tags to remove; "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Select all"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " selects only the tags in that pane’s current list, and the bottom bar shows the selected count for each source"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914101605-mal6g06",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20260914101605-mal6g06",
+						"updated": "20260914101605"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-qmkphsk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-qmkphsk",
+								"updated": "20260914101605"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Click "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Delete selected tags"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", review the names and counts for both sources, and confirm; only explicitly selected tags are removed, without automatically removing same-named tags from the other source"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914101605-rij64em",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20260914101605-rij64em",
+						"updated": "20260914101605"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-5d6ebmk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-5d6ebmk",
+								"updated": "20260914101605"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Review the result; failed or unverified items remain selected so you can click "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Delete selected tags"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " again to retry. Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Clear selection"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to clear the selection or "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Done"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to leave batch management"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-mzvd2cc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914101605-mzvd2cc",
+				"updated": "20260914102430"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Removing tags does not immediately delete snapshot data or automatically purge the repository. You can purge the local data repository separately to reclaim space; manual cloud cleanup is available only for S3, WebDAV, and local filesystem sync storage."
 				}
 			]
 		},
@@ -1556,7 +1849,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120602-nhnnujh",
-				"updated": "20260803163440"
+				"updated": "20260914102430"
 			},
 			"Children": [
 				{
@@ -1571,7 +1864,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230422101614-mdijztr",
-				"updated": "20260803163440"
+				"updated": "20260914102430"
 			},
 			"Children": [
 				{
@@ -1583,7 +1876,7 @@
 					},
 					"Properties": {
 						"id": "20230422101614-5lwp8u3",
-						"updated": "20260803163440"
+						"updated": "20260914101605"
 					},
 					"Children": [
 						{
@@ -1591,30 +1884,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230422101614-5kvwhn7",
-								"updated": "20260803163440"
+								"updated": "20260914101605"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​ "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Settings"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Account & Sync"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": "Click "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1623,7 +1898,52 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ will delete all unreferenced snapshots and related data objects. \"Referenced snapshots\" refer to snapshots pointed to under repo/refs/:"
+									"Data": " in the local pane of "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Data History"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Data snapshot"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", or use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Account & Sync"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Data repo purge"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", and confirm to delete all unreferenced local snapshots and related data objects. Referenced snapshots are those pointed to by references under repo/refs/:"
 								}
 							]
 						},
@@ -1709,6 +2029,43 @@
 											]
 										}
 									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914101605-an302a6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260914101605-an302a6",
+						"updated": "20260914102430"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-eu91n0k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-eu91n0k",
+								"updated": "20260914102430"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When using S3, WebDAV, or a local filesystem as sync storage, use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Purge cloud storage"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " in the cloud pane to remove only unreferenced cloud snapshots and related data objects; pause synchronization on other devices beforehand and keep the network connection stable; this action is unavailable for SiYuan’s official cloud, so its cleanup button is hidden"
 								}
 							]
 						}

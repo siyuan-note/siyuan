@@ -5,6 +5,8 @@ import {showMessage} from "../../dialog/message";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {getUndoFocusTarget} from "../util/selectionFocus";
+import {isKnownTransactionOperation} from "../util/transactionContract";
+import type {APIPOSTRoutes} from "../../types/api";
 /// #if !MOBILE
 import {getActiveTab} from "../../layout/tabUtil";
 /// #endif
@@ -227,8 +229,8 @@ const fetchUndoOperation = async (path: "/api/transactions/undo" | "/api/transac
     app: string;
     session: string;
 }) => {
-    let response: IWebSocketData | undefined;
-    await fetchPost(path, data, (fetchResponse) => {
+    let response: APIPOSTRoutes["/api/transactions/undo"]["response"] | undefined;
+    await fetchPost(path, data, (fetchResponse: APIPOSTRoutes["/api/transactions/undo"]["response"]) => {
         response = fetchResponse;
     });
     return response;
@@ -291,17 +293,17 @@ export const requestUndo = async (protyle: IProtyle, rootID?: string) => {
             session: protyle.id,
         });
         const data = response?.data;
-        if (!data) {
+        if (!data || "closeTimeout" in data) {
             return;
         }
-        if (data.failed) {
+        if ("failed" in data) {
             // 撤销执行失败：kernel 已 Unpop 栈，镜像不动，提示用户
             if (data.msg) {
                 showMessage(data.msg);
             }
             return;
         }
-        if (!data.undoOperations || data.undoOperations.length === 0) {
+        if (!("undoOperations" in data) || !data.undoOperations || data.undoOperations.length === 0) {
             // 栈空或无可撤销
             markMirror(rootID, {canUndo: !!data.canUndo, canRedo: !!data.canRedo});
             refreshUndoButtons(protyle, rootID);
@@ -317,9 +319,9 @@ export const requestUndo = async (protyle: IProtyle, rootID?: string) => {
             // 广播会到达当前窗口（/undo 对跨文档用 PushModeBroadcast），触发 onTransaction 刷新 DOM
         } else {
             // 单文档撤销：发起窗口本地乐观应用 doOperations（kernel 实际执行的操作，如 insert 恢复块）
-            protyle.undo.renderLocal(protyle, data.doOperations);
+            protyle.undo.renderLocal(protyle, data.doOperations?.filter(isKnownTransactionOperation));
             refreshUndoButtons(protyle, rootID);
-            const focusBlockId = data.doOperations?.find((op: IOperation) => op.id)?.id;
+            const focusBlockId = data.doOperations?.find(op => op?.id)?.id;
             focusRootIDs(mutatedRootIDs, focusBlockId);
         }
     } finally {
@@ -354,17 +356,17 @@ export const requestRedo = async (protyle: IProtyle, rootID?: string) => {
             session: protyle.id,
         });
         const data = response?.data;
-        if (!data) {
+        if (!data || "closeTimeout" in data) {
             return;
         }
-        if (data.failed) {
+        if ("failed" in data) {
             // 重做执行失败：kernel 已回滚栈，镜像不动，提示用户
             if (data.msg) {
                 showMessage(data.msg);
             }
             return;
         }
-        if (!data.doOperations || data.doOperations.length === 0) {
+        if (!("doOperations" in data) || !data.doOperations || data.doOperations.length === 0) {
             markMirror(rootID, {canUndo: !!data.canUndo, canRedo: !!data.canRedo});
             refreshUndoButtons(protyle, rootID);
             return;
@@ -375,9 +377,9 @@ export const requestRedo = async (protyle: IProtyle, rootID?: string) => {
             // 跨文档重做：锚点分散在多个文档，靠 kernel 广播（含发起方）刷新
             refreshUndoButtons(protyle, rootID);
         } else {
-            protyle.undo.renderLocal(protyle, data.doOperations);
+            protyle.undo.renderLocal(protyle, data.doOperations.filter(isKnownTransactionOperation));
             refreshUndoButtons(protyle, rootID);
-            const focusBlockId = data.doOperations?.find((op: IOperation) => op.id)?.id;
+            const focusBlockId = data.doOperations?.find(op => op?.id)?.id;
             focusRootIDs(mutatedRootIDs, focusBlockId);
         }
     } finally {

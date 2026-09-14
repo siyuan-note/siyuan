@@ -25,7 +25,7 @@ import {getDockByType} from "../layout/tabUtil";
 import {exitSiYuan, lockScreen} from "../dialog/processSystem";
 import {showMessage} from "../dialog/message";
 import {getFileTreeIconHTML} from "../emoji/fileTreeIcon";
-import {Dock} from "../layout/dock";
+import {togglePinDock} from "./dockLayout";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {viewCards} from "../card/viewCards";
 import {Dialog} from "../dialog";
@@ -126,20 +126,6 @@ const editLayout = (layoutName?: string) => {
         },
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_SAVEWORKSPACE);
-};
-
-const togglePinDock = (id: "switchLeftDock" | "switchRightDock" | "switchBottomDock", dock: Dock, pinIcon: string, unpinIcon: string) => {
-    const isFloating = dock.isFloating();
-    return {
-        id,
-        label: `${isFloating ? window.siyuan.languages.switchToFixedLayout : window.siyuan.languages.switchToFloatingLayout}`,
-        icon: `${isFloating ? pinIcon : unpinIcon}`,
-        accelerator: window.siyuan.config.keymap.general[id].custom,
-        current: isFloating,
-        click() {
-            dock.togglePin();
-        }
-    };
 };
 
 const getApplicationZoomSubMenu = () => {

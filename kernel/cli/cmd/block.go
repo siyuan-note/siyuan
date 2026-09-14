@@ -379,12 +379,14 @@ var blockDeleteCmd = &cobra.Command{
 			return fmt.Errorf("--id is required")
 		}
 
+		bt := treenode.GetBlockTree(id)
+		if bt == nil {
+			return fmt.Errorf("block not found: %s", id)
+		}
 		if dryRun {
 			fmt.Printf("[dry-run] Would delete block %s\n", id)
 			return nil
 		}
-
-		bt := treenode.GetBlockTree(id)
 
 		transactions := []*model.Transaction{{
 			DoOperations: []*model.Operation{{

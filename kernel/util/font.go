@@ -97,6 +97,7 @@ var microsoftFontLanguageIDs = map[string][]sfnt.PlatformLanguageID{
 	"pt-BR": {0x0416},
 	"ru":    {0x0419},
 	"sk":    {0x041b},
+	"sr":    {0x081a, 0x241a},
 	"th":    {0x041e},
 	"tr":    {0x041f},
 	"uk":    {0x0422},
@@ -107,7 +108,7 @@ var microsoftFontLanguageIDs = map[string][]sfnt.PlatformLanguageID{
 var macFontLanguageIDs = map[string]sfnt.PlatformLanguageID{
 	"ar": 12, "de": 2, "en": 0, "es": 6, "fr": 1, "he": 10, "hi": 21, "id": 81,
 	"it": 3, "ja": 11, "ko": 23, "nl": 4, "pl": 25, "pt-BR": 8, "ru": 32, "sk": 39,
-	"th": 22, "tr": 17, "uk": 45, "zh-CN": 33, "zh-TW": 19,
+	"sr": 42, "th": 22, "tr": 17, "uk": 45, "zh-CN": 33, "zh-TW": 19,
 }
 
 func loadFonts() (ret []*Font) {

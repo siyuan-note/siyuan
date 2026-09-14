@@ -320,6 +320,42 @@ func TestSecureAssetContentHeadersRejectsInvalidHTMLIFrameRequests(t *testing.T)
 	}
 }
 
+func TestSecureAssetContentHeadersIgnoresHostMIME(t *testing.T) {
+	for _, tc := range []struct {
+		ext, hostType, wantType string
+		unsafe                  bool
+	}{
+		{".jpg", "application/jpg", "image/jpeg", false},
+		{".png", "text/html", "image/png", false},
+		{".html", "text/plain", "", true},
+		{".svg", "image/png", "", true},
+		{".js", "image/jpeg", "", true},
+	} {
+		t.Run(tc.ext, func(t *testing.T) {
+			original := mime.TypeByExtension(tc.ext)
+			if err := mime.AddExtensionType(tc.ext, tc.hostType); err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() {
+				if err := mime.AddExtensionType(tc.ext, original); err != nil {
+					t.Fatal(err)
+				}
+			})
+			recorder := httptest.NewRecorder()
+			context, _ := gin.CreateTestContext(recorder)
+			name := "test" + strings.ToUpper(tc.ext)
+			context.Request = httptest.NewRequest(http.MethodGet, "/assets/"+name, nil)
+			secureAssetContentHeaders(context, name, name)
+			if got := strings.HasPrefix(recorder.Header().Get("Content-Disposition"), "attachment"); got != tc.unsafe {
+				t.Fatalf("attachment = %v, want %v", got, tc.unsafe)
+			}
+			if got := recorder.Header().Get("Content-Type"); got != tc.wantType {
+				t.Fatalf("Content-Type = %q, want %q", got, tc.wantType)
+			}
+		})
+	}
+}
+
 func TestSecureAssetContentHeadersAllowsInlineSafeAssets(t *testing.T) {
 	// 图片、音视频、PDF 等安全类型保持内联渲染，但仍需 nosniff
 	cases := []string{"test.png", "test.jpg", "test.webp", "test.mp4", "test.mp3", "test.pdf", "test.txt"}
@@ -349,9 +385,6 @@ func TestSecureAssetContentHeadersForcesAttachmentOnUnknownExtension(t *testing.
 	assetPath := filepath.Join(t.TempDir(), "payload.xyz")
 	if err := os.WriteFile(assetPath, []byte("<script>alert(1)</script>"), 0644); err != nil {
 		t.Fatalf("write test asset failed: %v", err)
-	}
-	if mime.TypeByExtension(".xyz") != "" {
-		t.Fatalf("test precondition failed: .xyz unexpectedly has a MIME type")
 	}
 	secureAssetContentHeaders(context, assetPath, assetPath)
 	if !strings.HasPrefix(recorder.Header().Get("Content-Disposition"), "attachment") {

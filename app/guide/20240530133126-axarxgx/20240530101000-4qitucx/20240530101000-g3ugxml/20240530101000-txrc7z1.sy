@@ -7,7 +7,7 @@
 		"id": "20240530101000-txrc7z1",
 		"title": "データ履歴",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260914102430"
 	},
 	"Children": [
 		{
@@ -1173,7 +1173,7 @@
 			"Properties": {
 				"ID": "20240530101000-b78egg3",
 				"id": "20240530101000-sy5cmkg",
-				"updated": "20260803163243"
+				"updated": "20260914102430"
 			},
 			"Children": [
 				{
@@ -1626,7 +1626,7 @@
 			"Properties": {
 				"ID": "20240530101000-yn8i3sj",
 				"id": "20240530101000-bhs49zm",
-				"updated": "20240530101000"
+				"updated": "20260914101605"
 			},
 			"Children": [
 				{
@@ -1641,12 +1641,293 @@
 			"Properties": {
 				"ID": "20240530101000-vrpczsk",
 				"id": "20240530101000-j43nth8",
-				"updated": "20240530101000"
+				"updated": "20260914101605"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "履歴"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "データスナップショット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " では、幅の広いウィンドウにローカルとクラウドの一覧が左右に表示され、それぞれ個別にページを切り替えられます。幅の狭いウィンドウやモバイルでは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ローカルスナップショット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "クラウドスナップショット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で表示を切り替えます。上部の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "データスナップショット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "タグ付きスナップショット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で種類を切り替えられます。各項目には作成日時、メモ、タグが表示されます。"
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-gwkgtpj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914101605-gwkgtpj",
+				"updated": "20260914101605"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "データスナップショットの作成が完了するとスナップショット一覧に表示され、異なるスナップショットをクリックすることで変更点を比較できます。"
+					"Data": "ローカルスナップショットはファイル名で検索できます。検索中はファイル一覧とプレビューの表示領域が確保されます。一括管理中でなければ、ローカルのスナップショットを 2 つ選択して比較したり、各項目のタグ付け、アップロード、ダウンロード、ロールバックなどの操作を利用したりできます。"
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-9l0hxqv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260914101605-9l0hxqv",
+				"updated": "20260914102430"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タグ付きスナップショットの一括管理"
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-ks5qp80",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20260914101605-ks5qp80",
+				"updated": "20260914101605"
+			},
+			"Children": [
+				{
+					"ID": "20260914101605-67khd7m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20260914101605-67khd7m",
+						"updated": "20260914101605"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-vxxgt5s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-vxxgt5s",
+								"updated": "20260914101605"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "タグ付きスナップショット"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " に切り替えて "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "一括管理"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " をクリックすると、チェックボックスが表示されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914101605-dcof0xi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20260914101605-dcof0xi",
+						"updated": "20260914101605"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-c6njrmc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-c6njrmc",
+								"updated": "20260914101605"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "削除するローカルとクラウドのタグを選択します。各欄の "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "すべて選択"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " はその欄の現在の一覧だけを選択し、下部にはそれぞれの選択数が表示されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914101605-lgitpso",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20260914101605-lgitpso",
+						"updated": "20260914101605"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-hmc1zc8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-hmc1zc8",
+								"updated": "20260914101605"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "選択したタグを削除"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " をクリックし、ローカルとクラウドのタグ名と件数を確認して確定します。明示的に選択したタグだけが削除され、もう一方の同名タグは自動的には削除されません"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914101605-frw218a",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20260914101605-frw218a",
+						"updated": "20260914101605"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-6qkmvg3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-6qkmvg3",
+								"updated": "20260914101605"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "結果を確認してください。失敗した項目や結果を確認できなかった項目は選択されたままなので、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "選択したタグを削除"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " で再試行できます。"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "選択を解除"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " は選択を解除し、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "管理を終了"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " は一括管理を終了します"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-vpeopah",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914101605-vpeopah",
+				"updated": "20260914102430"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タグを削除してもスナップショットのデータはすぐには削除されず、リポジトリのクリーンアップも自動では実行されません。容量を解放するにはローカルのデータリポジトリを別途クリーンアップできます。クラウドの手動クリーンアップは、S3、WebDAV、ローカルファイルシステムの同期ストレージでのみ利用できます。"
 				}
 			]
 		},
@@ -1688,7 +1969,7 @@
 			"Properties": {
 				"ID": "20240530101000-aprvh1j",
 				"id": "20240530101000-s265xty",
-				"updated": "20260803163243"
+				"updated": "20260914102430"
 			},
 			"Children": [
 				{
@@ -1704,7 +1985,7 @@
 			"Properties": {
 				"ID": "20240530101000-vbtv1hd",
 				"id": "20240530101000-bbjxq5g",
-				"updated": "20260803163243"
+				"updated": "20260914102430"
 			},
 			"Children": [
 				{
@@ -1717,7 +1998,7 @@
 					"Properties": {
 						"ID": "20240530101000-mjgjc3f",
 						"id": "20240530101000-vs81otl",
-						"updated": "20260803163243"
+						"updated": "20260914101605"
 					},
 					"Children": [
 						{
@@ -1726,30 +2007,26 @@
 							"Properties": {
 								"ID": "20240530101000-a89jrx4",
 								"id": "20240530101000-gxszmrm",
-								"updated": "20260803163243"
+								"updated": "20260914101605"
 							},
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "履歴"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "​ "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設定"
+									"TextMarkTextContent": "データスナップショット"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "情報"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " のローカル欄で "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1758,25 +2035,34 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ を実行すると、参照されていないスナップショットと関連するデータオブジェクトがすべて消去されます。なお、"
+									"Data": " をクリックするか、"
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "latest"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ と "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "tags/*"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アカウントと同期"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ フォルダはクリーンアップの対象外です:"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "データリポジトリのクリーンアップ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を開いて確定すると、ローカルの参照されていないスナップショットと関連するデータオブジェクトがすべて削除されます。参照されているスナップショットとは、repo/refs/ 配下の参照が指すものです："
 								}
 							]
 						},
@@ -1867,6 +2153,43 @@
 											]
 										}
 									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914101605-v28phut",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260914101605-v28phut",
+						"updated": "20260914102430"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-iflvng3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-iflvng3",
+								"updated": "20260914102430"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同期ストレージに S3、WebDAV、またはローカルファイルシステムを使用する場合、クラウド欄の "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "クラウドストレージを消去"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " は、クラウドの参照されていないスナップショットと関連するデータオブジェクトだけを削除します。実行前にほかのデバイスの同期を一時停止し、安定したネットワーク接続を確保してください。SiYuan 公式クラウドはこの手動クリーンアップに対応していないため、ボタンは表示されません"
 								}
 							]
 						}

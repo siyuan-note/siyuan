@@ -1,5 +1,13 @@
 {
 	"mobileFileTreeMultiSelectTip": "Touchez les documents ou les carnets pour les sélectionner ou les désélectionner",
+	"repoBatchDelete": "Supprimer les étiquettes sélectionnées",
+	"repoBatchDone": "Terminé",
+	"repoBatchClear": "Désélectionner",
+	"repoBatchSelection": "Sélection locale : ${x} · Sélection cloud : ${y}",
+	"repoTaggedSnapshots": "Instantanés marqués",
+	"repoBatchManage": "Gestion par lot",
+	"repoRemoveTagsTip": "Seules les étiquettes sélectionnées seront supprimées. Les données des instantanés ne sont pas supprimées immédiatement et le dépôt n’est pas nettoyé automatiquement.",
+	"repoBatchResult": "Supprimés : ${x}. Échecs ou résultats non vérifiés : ${y} ; ces éléments restent sélectionnés pour réessayer.",
 	"enterMasterPassword": "Veuillez saisir le mot de passe principal",
 	"orderedListItemBlock": "Bloc d’élément de liste ordonnée",
 	"unorderedListItemBlock": "Bloc d’élément de liste non ordonnée",

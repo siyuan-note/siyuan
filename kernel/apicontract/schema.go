@@ -3,7 +3,6 @@ package apicontract
 import (
 	"encoding/json"
 	"fmt"
-	"math"
 	"mime"
 	"mime/multipart"
 	"reflect"
@@ -18,6 +17,7 @@ type Schema struct {
 	Format               string             `json:"format,omitempty"`
 	Enum                 []any              `json:"enum,omitempty"`
 	AnyOf                []*Schema          `json:"anyOf,omitempty"`
+	Not                  *Schema            `json:"not,omitempty"`
 	Properties           map[string]*Schema `json:"properties,omitempty"`
 	Required             []string           `json:"required,omitempty"`
 	Items                *Schema            `json:"items,omitempty"`
@@ -27,25 +27,29 @@ type Schema struct {
 }
 
 type EndpointSchema struct {
-	Method                  string               `json:"method"`
-	Path                    string               `json:"path"`
-	Handler                 string               `json:"handler"`
-	Body                    BodyMode             `json:"body"`
-	Request                 *Schema              `json:"request"`
-	Response                *Schema              `json:"response"`
-	Output                  OutputMode           `json:"output,omitempty"`
-	ErrorStatus             int                  `json:"errorStatus,omitempty"`
-	NoContent               bool                 `json:"noContent,omitempty"`
-	WebSocket               *WebSocketSchema     `json:"websocket,omitempty"`
-	SSE                     *SSESchema           `json:"sse,omitempty"`
-	ContentVariants         []HTTPContentVariant `json:"contentVariants,omitempty"`
-	AdditionalErrorStatuses []int                `json:"additionalErrorStatuses,omitempty"`
+	Method                  string                   `json:"method"`
+	Path                    string                   `json:"path"`
+	Handler                 string                   `json:"handler"`
+	Body                    BodyMode                 `json:"body"`
+	Request                 *Schema                  `json:"request"`
+	Response                *Schema                  `json:"response"`
+	Output                  OutputMode               `json:"output,omitempty"`
+	ErrorStatus             int                      `json:"errorStatus,omitempty"`
+	NoContent               bool                     `json:"noContent,omitempty"`
+	WebSocket               *WebSocketSchema         `json:"websocket,omitempty"`
+	SSE                     *SSESchema               `json:"sse,omitempty"`
+	Proxy                   *ProxyDefinition         `json:"proxy,omitempty"`
+	PluginService           *PluginServiceDefinition `json:"pluginService,omitempty"`
+	ContentVariants         []HTTPContentVariant     `json:"contentVariants,omitempty"`
+	EmptyResponseStatuses   []int                    `json:"emptyResponseStatuses,omitempty"`
+	AdditionalErrorStatuses []int                    `json:"additionalErrorStatuses,omitempty"`
 }
 
 type WebSocketSchema struct {
-	Incoming      *Schema `json:"incoming"`
-	Outgoing      *Schema `json:"outgoing"`
-	FailureStatus int     `json:"failureStatus"`
+	Incoming      *Schema                 `json:"incoming"`
+	Outgoing      *Schema                 `json:"outgoing"`
+	FailureStatus int                     `json:"failureStatus"`
+	Raw           *RawWebSocketDefinition `json:"raw,omitempty"`
 }
 
 type Bundle struct {
@@ -88,7 +92,49 @@ func nonnullable(schema *Schema) *Schema {
 }
 
 func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
+	if schema, err := transactionPayloadSchema(b, t, input); schema != nil || err != nil {
+		return schema, err
+	}
+	if schema, err := systemVariantSchema(b, t, input); schema != nil || err != nil {
+		return schema, err
+	}
+	if t == reflect.TypeFor[ExtensionCopyRequest]() {
+		if !input {
+			return nil, fmt.Errorf("extension upload fields can only appear in requests")
+		}
+		return extensionCopyRequestSchema(), nil
+	}
+	if t == reflect.TypeFor[PluginServiceContent]() {
+		value, err := b.schema(reflect.TypeFor[JSONValue](), false)
+		if err != nil {
+			return nil, err
+		}
+		return &Schema{AnyOf: []*Schema{{Type: "string", Format: "binary"}, value}}, nil
+	}
+	if t == reflect.TypeFor[*NetworkEchoTLS]() || t == reflect.TypeFor[*NetworkEchoURL]() || t == reflect.TypeFor[*NetworkEchoCookies]() {
+		schema, err := networkEchoSchema(b, t.Elem())
+		if err != nil {
+			return nil, err
+		}
+		return nullable(schema), nil
+	}
+	if t == reflect.TypeFor[NetworkEchoTLS]() || t == reflect.TypeFor[NetworkEchoURL]() || t == reflect.TypeFor[NetworkEchoCookies]() {
+		return networkEchoSchema(b, t)
+	}
+	if t == reflect.TypeFor[*AISession]() {
+		schema, err := aiSessionPayloadSchema(b, input)
+		if err != nil {
+			return nil, err
+		}
+		return nullable(schema), nil
+	}
+	if t == reflect.TypeFor[AISession]() {
+		return aiSessionPayloadSchema(b, input)
+	}
 	if schema, err := bazaarPayloadSchema(b, t, input); schema != nil || err != nil {
+		return schema, err
+	}
+	if schema, err := avPayloadSchema(b, t, input); schema != nil || err != nil {
 		return schema, err
 	}
 	if t == reflect.TypeFor[PluginRPCMessage]() {
@@ -263,6 +309,16 @@ func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
 	if t == reflect.TypeFor[BlockOperationResult]() {
 		return &Schema{AnyOf: []*Schema{{Type: "null"}, {Type: "string"}, {Type: "array", Items: &Schema{Type: "string"}}}}, nil
 	}
+	if t == reflect.TypeFor[*CloudLogin2faData]() {
+		schema, err := b.cloudLogin2faDataSchema(input)
+		if err != nil {
+			return nil, err
+		}
+		return nullable(schema), nil
+	}
+	if t == reflect.TypeFor[CloudLogin2faData]() {
+		return b.cloudLogin2faDataSchema(input)
+	}
 	if t == reflect.TypeFor[JSONValue]() {
 		ref := &Schema{Ref: "#/$defs/JSONValue"}
 		b.definitions["JSONValue"] = &Schema{AnyOf: []*Schema{
@@ -428,7 +484,7 @@ func (b *schemaBuilder) fields(object *Schema, t reflect.Type, input bool) error
 				if field.Type.Kind() != reflect.Pointer || field.Type.Elem().Kind() != reflect.Struct {
 					return fmt.Errorf("legacyobject requires a struct pointer: %s.%s", t, name)
 				}
-			case option == "trim", option == "ignoretype", strings.HasPrefix(option, "enum="):
+			case option == "trim", option == "nonempty", option == "ignoretype", strings.HasPrefix(option, "enum="):
 				if field.Type.Kind() != reflect.String {
 					return fmt.Errorf("API option %s requires a string: %s.%s", option, t, name)
 				}
@@ -495,6 +551,17 @@ func BuildBundle() (*Bundle, error) {
 	b := &schemaBuilder{definitions: map[string]*Schema{}, owners: map[string]reflect.Type{}}
 	bundle := &Bundle{Dialect: "https://json-schema.org/draft/2020-12/schema", Definitions: b.definitions}
 	for _, definition := range Definitions() {
+		if err := validatePluginServiceDefinition(definition); err != nil {
+			return nil, err
+		}
+		if err := validateProxyDefinition(definition); err != nil {
+			return nil, err
+		}
+		for _, status := range definition.EmptyResponseStatuses {
+			if status < 200 || status > 599 {
+				return nil, fmt.Errorf("invalid empty response status: %s", definition.Name)
+			}
+		}
 		if definition.FastJSON && definition.Output != "" {
 			return nil, fmt.Errorf("fast JSON requires envelope output: %s", definition.Name)
 		}
@@ -506,7 +573,7 @@ func BuildBundle() (*Bundle, error) {
 				return nil, fmt.Errorf("invalid JSON error status: %s", definition.Name)
 			}
 		}
-		if definition.Output != "" && definition.Output != BinaryOutput && definition.Output != DirectJSONOutput && definition.Output != WebSocketOutput && definition.Output != SSEOutput {
+		if definition.Output != "" && definition.Output != BinaryOutput && definition.Output != DirectJSONOutput && definition.Output != WebSocketOutput && definition.Output != SSEOutput && definition.Output != ProxyOutput && definition.Output != PluginServiceOutput {
 			return nil, fmt.Errorf("unsupported response output: %s", definition.Name)
 		}
 		if definition.NoContent && definition.Output != DirectJSONOutput {
@@ -531,7 +598,7 @@ func BuildBundle() (*Bundle, error) {
 			return nil, fmt.Errorf("WebSocket output requires message declarations: %s", definition.Name)
 		}
 		if ws := definition.WebSocket; ws != nil {
-			if definition.Body != NoBody || definition.DataOnError || definition.ErrorStatus != 0 || ws.FailureStatus < 400 || ws.FailureStatus > 599 {
+			if definition.Body != NoBody || definition.DataOnError || definition.ErrorStatus != 0 || ws.Raw == nil && (ws.FailureStatus < 400 || ws.FailureStatus > 599) {
 				return nil, fmt.Errorf("invalid WebSocket response options: %s", definition.Name)
 			}
 			for _, method := range definition.Methods {
@@ -539,15 +606,26 @@ func BuildBundle() (*Bundle, error) {
 					return nil, fmt.Errorf("WebSocket upgrade requires GET: %s", definition.Name)
 				}
 			}
-			incoming, err := b.schema(ws.Incoming, true)
-			if err != nil {
-				return nil, err
+			if ws.Raw != nil {
+				if definition.Data != reflect.TypeFor[Null]() {
+					return nil, fmt.Errorf("raw WebSocket output requires Null data: %s", definition.Name)
+				}
+				var err error
+				websocket, err = rawWebSocketSchema(ws)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				incoming, err := b.schema(ws.Incoming, true)
+				if err != nil {
+					return nil, err
+				}
+				outgoing, err := b.schema(ws.Outgoing, false)
+				if err != nil {
+					return nil, err
+				}
+				websocket = &WebSocketSchema{Incoming: incoming, Outgoing: outgoing, FailureStatus: ws.FailureStatus}
 			}
-			outgoing, err := b.schema(ws.Outgoing, false)
-			if err != nil {
-				return nil, err
-			}
-			websocket = &WebSocketSchema{Incoming: incoming, Outgoing: outgoing, FailureStatus: ws.FailureStatus}
 		}
 		if definition.Output == DirectJSONOutput && (definition.DataOnError || definition.ErrorStatus != 0) {
 			return nil, fmt.Errorf("direct JSON output cannot use envelope data or error status options: %s", definition.Name)
@@ -573,6 +651,9 @@ func BuildBundle() (*Bundle, error) {
 		if err != nil {
 			return nil, err
 		}
+		if definition.Body == RawBody {
+			request = &Schema{Type: "string", Format: "binary"}
+		}
 		data, err := b.schema(definition.Data, false)
 		if err != nil {
 			return nil, err
@@ -593,11 +674,17 @@ func BuildBundle() (*Bundle, error) {
 				return nil, err
 			}
 		}
-		if definition.Output == DirectJSONOutput || definition.Output == WebSocketOutput {
+		if definition.Output == DirectJSONOutput || definition.Output == WebSocketOutput || definition.Output == PluginServiceOutput {
 			success = data
 		}
 		if definition.Output == SSEOutput {
 			success = &Schema{Type: "string"}
+		}
+		if definition.Output == ProxyOutput {
+			success = &Schema{Type: "string", Format: "binary"}
+			if _, err := b.schema(reflect.TypeFor[JSONValue](), false); err != nil {
+				return nil, err
+			}
 		}
 		var codes []any
 		for _, code := range definition.ErrorCodes {
@@ -615,10 +702,10 @@ func BuildBundle() (*Bundle, error) {
 		// 中间件可能使用带命令元数据的统一信封，保留这些额外的顶层字段。
 		failure.AdditionalProperties = true
 		response := &Schema{AnyOf: []*Schema{success, failure}}
-		for _, method := range definition.Methods {
+		for _, method := range ExpandMethods(definition.Methods) {
 			bundle.Endpoints = append(bundle.Endpoints, EndpointSchema{Method: method, Path: definition.Path, Handler: definition.Name,
 				Body: definition.Body, Request: request, Response: response, Output: definition.Output, ErrorStatus: definition.ErrorStatus, NoContent: definition.NoContent, WebSocket: websocket,
-				AdditionalErrorStatuses: definition.AdditionalErrorStatuses, SSE: sse, ContentVariants: definition.ContentVariants})
+				AdditionalErrorStatuses: definition.AdditionalErrorStatuses, SSE: sse, Proxy: definition.Proxy, PluginService: definition.PluginService, ContentVariants: definition.ContentVariants, EmptyResponseStatuses: definition.EmptyResponseStatuses})
 		}
 	}
 	sort.Slice(bundle.Endpoints, func(i, j int) bool {
@@ -630,7 +717,7 @@ func BuildBundle() (*Bundle, error) {
 // ValidateErrorResponse 在原始文件与错误共用 HTTP 状态时，单独验证已知的错误分支。
 func (b *Bundle) ValidateErrorResponse(method, path string, payload []byte) error {
 	var value any
-	if err := json.Unmarshal(payload, &value); err != nil {
+	if err := decodeSchemaJSON(payload, &value); err != nil {
 		return err
 	}
 	for _, endpoint := range b.Endpoints {
@@ -643,12 +730,12 @@ func (b *Bundle) ValidateErrorResponse(method, path string, payload []byte) erro
 
 func (b *Bundle) ValidateResponse(method, path string, payload []byte) error {
 	var value any
-	if err := json.Unmarshal(payload, &value); err != nil {
+	if err := decodeSchemaJSON(payload, &value); err != nil {
 		return err
 	}
 	for _, endpoint := range b.Endpoints {
 		if endpoint.Method == method && endpoint.Path == path {
-			if endpoint.Output == BinaryOutput || endpoint.Output == WebSocketOutput || endpoint.Output == SSEOutput {
+			if endpoint.Output == BinaryOutput || endpoint.Output == WebSocketOutput || endpoint.Output == SSEOutput || endpoint.Output == ProxyOutput || endpoint.Output == PluginServiceOutput {
 				return fmt.Errorf("binary endpoint requires HTTP response validation")
 			}
 			return b.validate(endpoint.Response, value, "$")
@@ -663,11 +750,27 @@ func (b *Bundle) ValidateHTTPResponse(method, path string, status int, contentTy
 		if endpoint.Method != method || endpoint.Path != path {
 			continue
 		}
+		if endpoint.PluginService != nil {
+			return b.validatePluginServiceHTTPResponse(endpoint, status, contentType, payload)
+		}
+		if endpoint.Proxy != nil {
+			return b.validateProxyHTTPResponse(endpoint, status, contentType, payload)
+		}
+		for _, emptyStatus := range endpoint.EmptyResponseStatuses {
+			if status == emptyStatus && len(payload) == 0 {
+				return nil
+			}
+		}
 		if endpoint.NoContent && status == 204 {
 			if len(payload) != 0 {
 				return fmt.Errorf("empty response must not contain a body")
 			}
 			return nil
+		}
+		if endpoint.WebSocket != nil {
+			if handled, err := validateRawWebSocketHTTP(endpoint.WebSocket, status, contentType, payload); handled {
+				return err
+			}
 		}
 		if endpoint.WebSocket != nil && status == 101 {
 			if len(payload) != 0 {
@@ -718,7 +821,7 @@ func (b *Bundle) ValidateHTTPResponse(method, path string, status int, contentTy
 			return fmt.Errorf("unexpected response status or media type: %d %s", status, contentType)
 		}
 		var value any
-		if err := json.Unmarshal(payload, &value); err != nil {
+		if err := decodeSchemaJSON(payload, &value); err != nil {
 			return err
 		}
 		return b.validate(response, value, "$")
@@ -727,12 +830,13 @@ func (b *Bundle) ValidateHTTPResponse(method, path string, status int, contentTy
 }
 
 func (b *Bundle) validate(schema *Schema, value any, path string) error {
+	if schema.Not != nil && b.validate(schema.Not, value, path) == nil {
+		return fmt.Errorf("%s matches an excluded value", path)
+	}
 	if len(schema.Enum) > 0 {
 		matched := false
-		actual, _ := json.Marshal(value)
 		for _, option := range schema.Enum {
-			expected, _ := json.Marshal(option)
-			if string(actual) == string(expected) {
+			if equalSchemaValue(value, option) {
 				matched = true
 				break
 			}
@@ -758,6 +862,8 @@ func (b *Bundle) validate(schema *Schema, value any, path string) error {
 	}
 	valid := false
 	switch schema.Type {
+	case "":
+		valid = true
 	case "null":
 		valid = value == nil
 	case "string":
@@ -765,8 +871,7 @@ func (b *Bundle) validate(schema *Schema, value any, path string) error {
 	case "boolean":
 		_, valid = value.(bool)
 	case "number", "integer":
-		number, ok := value.(float64)
-		valid = ok && (schema.Type != "integer" || math.Trunc(number) == number)
+		valid = validSchemaNumber(value, schema.Type == "integer")
 	case "array":
 		array, ok := value.([]any)
 		valid = ok

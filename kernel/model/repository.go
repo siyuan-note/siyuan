@@ -1320,14 +1320,14 @@ func CheckoutRepo(id string) {
 	task.AppendTask(task.RepoCheckout, checkoutRepo, id)
 }
 
-func CheckoutRepoDirect(id string) {
-	checkoutRepo(id)
+func CheckoutRepoDirect(id string) error {
+	return checkoutRepo(id)
 }
 
-func checkoutRepo(id string) {
-	var err error
+func checkoutRepo(id string) (err error) {
 	if 1 > len(Conf.Repo.Key) {
-		util.PushErrMsg(Conf.Language(26), 7000)
+		err = errors.New(Conf.Language(26))
+		util.PushErrMsg(err.Error(), 7000)
 		return
 	}
 	FlushTxQueue()

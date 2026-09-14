@@ -1,3 +1,4 @@
+import {isAVRenderData} from "./renderData";
 import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {openMenuPanel} from "./openMenuPanel";
@@ -682,6 +683,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 id: blockElement.dataset.avId,
                 blockID: blockElement.dataset.nodeId,
             }, (response) => {
+                if (!isAVRenderData(response.data)) {
+                    return;
+                }
                 getFieldsByData(response.data).find((item: IAVColumn) => {
                     if (item.id === getColId(cellElements[0], viewType)) {
                         inputElement.value = item.template;
@@ -1036,6 +1040,9 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
         let column = source.selectedCell?.column || columns?.find(columnItem => columnItem.id === colId);
         if (type === "date" && !column) {
             const response = await fetchSyncPost("/api/av/getAttributeViewKeysByID", {avID, keyIDs: [colId]});
+            if (response.code !== 0) {
+                return;
+            }
             column = response.data?.[0];
         }
         let cellValue: IAVCellValue;

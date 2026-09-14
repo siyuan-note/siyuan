@@ -53,12 +53,24 @@ test("blank menu lists configurable entries in runtime order", () => {
         const {runtime} = createRuntime({reverseOrder: true});
         const items = buildEntryVisibilityMenuItems(TOP_BAR_ROOT_PATH, runtime);
         const ids = items.map((item) => item.id);
-        assert.equal(ids[0], "topBar.barExit");
+        assert.equal(ids[0], "topBar.barMode");
+        assert.ok(!ids.includes("topBar.barExit"));
         assert.ok(ids.includes("topBar.barSync"));
         assert.ok(ids.includes("topBar.toolbarVIP"));
         assert.ok(ids.includes("topBar.toolbarTitle"));
         assert.ok(!ids.includes("topBar.drag"));
         items.forEach((item) => assert.equal(item.iconHTML, ""));
+    });
+});
+
+test("exit entry is configurable only in the native tablet top bar", () => {
+    withWindow(() => {
+        const {runtime} = createRuntime();
+        assert.equal(buildEntryVisibilityToggleItem("topBar.barExit", runtime), undefined);
+        runtime.isInMobileApp = true;
+        assert.ok(buildEntryVisibilityMenuItems(TOP_BAR_ROOT_PATH, runtime)
+            .some((item) => item.id === "topBar.barExit"));
+        assert.ok(buildEntryVisibilityToggleItem("topBar.barExit", runtime));
     });
 });
 

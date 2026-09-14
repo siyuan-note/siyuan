@@ -1,3 +1,4 @@
+import type {AIModelTestData} from "../../../types/api";
 import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../../render/fragments";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {showMessage} from "../../../dialog/message";
@@ -341,7 +342,7 @@ const openAvailableModelMenu = (modelInput: HTMLInputElement, models: string[]) 
     menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
 };
 
-const showTestResult = (data: Record<string, unknown>) => {
+const showTestResult = (data: AIModelTestData) => {
     if (data.matched) {
         showMessage(window.siyuan.languages.testConnectionSuccess, undefined, "info");
         return;
@@ -650,7 +651,10 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             if (!view.isConnected) {
                 return;
             }
-            const data = response.data || {};
+            if (response.code !== 0) {
+                return;
+            }
+            const data = response.data;
             const responseModels: unknown[] = Array.isArray(data.models) ? data.models : [];
             const models = responseModels
                 .filter((name): name is string => typeof name === "string" && name.trim() !== "")
@@ -853,8 +857,8 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             button.disabled = true;
             label.textContent = window.siyuan.languages.testConnectionTesting;
             fetchPost("/api/ai/testModel", {providerConfig: draft, model: model.name.trim()}, (response) => {
-                if (view.isConnected) {
-                    showTestResult(response.data || {});
+                if (view.isConnected && response.code === 0) {
+                    showTestResult(response.data);
                 }
             }).finally(() => {
                 if (view.isConnected) {

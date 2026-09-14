@@ -16,19 +16,31 @@
     }
   }
 
+  // 缓动取「收尾不减速」的曲线：ease-out 会把「宽度不足两倍圆角、半径被浏览器压缩」的尾声摊到约 40% 时长里，形状变化可见
+  $dock-transition: 80ms cubic-bezier(.1, .4, .7, .75) 0ms;
+
   &__dockl,
   &__dockr,
   &__dockb {
-    transition: var(--b3-width-transition), height .2s cubic-bezier(0, 0, .2, 1) 0ms, margin .2s cubic-bezier(0, 0, .2, 1) 0ms;
     flex-shrink: 0;
     background-color: var(--b3-theme-background);
     border-radius: var(--b3-border-radius-b);
     overflow: hidden;
   }
 
-  &--closing:not(.layout--float) {
-    // 面板完全收起后再移除间距，避免动画末尾的圆角贴合
-    transition: var(--b3-width-transition), height .2s cubic-bezier(0, 0, .2, 1) 0ms, margin 0s linear .2s;
+  // 左右停靠栏只过渡本侧的占位间距：其高度由容器决定，而顶栏隐藏时 margin-top 会在 0 与 42px 间切换，
+  // 过渡整个 margin 会把面板顶部下移、高度压小
+  &__dockl {
+    transition: width $dock-transition, margin-right $dock-transition;
+  }
+
+  &__dockr {
+    transition: width $dock-transition, margin-left $dock-transition;
+  }
+
+  // 底部停靠栏的展开收起依赖高度，占位间距为 margin-top
+  &__dockb {
+    transition: width $dock-transition, height $dock-transition, margin-top $dock-transition;
   }
 
   &--no-transition {

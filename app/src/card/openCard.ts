@@ -78,7 +78,7 @@ export const genCardHTML = (options: {
     <span class="fn__flex-1 fn__flex-center toolbar__text">${window.siyuan.languages.riffCard}</span>
     <div data-type="count" class="${options.cardsData.cards.length === 0 ? "fn__none" : "fn__flex"}">${genCardCount(options.cardsData)}</span></div>
     <svg class="toolbar__icon" data-id="${options.id || ""}" data-cardtype="${options.cardType}" data-type="filter"><use xlink:href="#iconFilter"></use></svg>
-    <svg class="toolbar__icon" data-type="more"><use xlink:href="#iconMore"></use></svg>
+    <svg class="toolbar__icon${options.cardsData.cards.length === 0 ? " fn__none" : ""}" data-type="more"><use xlink:href="#iconMore"></use></svg>
     <svg class="toolbar__icon" data-type="close"><use xlink:href="#iconCloseRound"></use></svg>
 </div>`;
     /// #else
@@ -96,7 +96,7 @@ export const genCardHTML = (options: {
         <div data-type="fullscreen" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show" aria-label="${window.siyuan.languages.fullscreen}">
             <svg><use xlink:href="#iconFullscreen"></use></svg>
         </div>
-        <div class="fn__space${options.cardsData.cards.length === 0 ? " fn__none" : ""}"></div>
+        <div data-type="more-space" class="fn__space${options.cardsData.cards.length === 0 ? " fn__none" : ""}"></div>
         <div data-type="more" class="${options.cardsData.cards.length === 0 ? "fn__none " : ""}b3-tooltips b3-tooltips__sw block__icon block__icon--show" aria-label="${window.siyuan.languages.more}">
             <svg><use xlink:href="#iconMore"></use></svg>
         </div>
@@ -896,6 +896,9 @@ const nextCard = (options: {
     options.editor.protyle.element.nextElementSibling.classList.add("fn__none");
     options.countElement.innerHTML = genCardCount(options.cardsData, options.index);
     options.countElement.classList.remove("fn__none");
+    options.countElement.parentElement.querySelectorAll('[data-type="more"], [data-type="more-space"]').forEach(element => {
+        element.classList.remove("fn__none");
+    });
     if (options.index === 0) {
         options.actionElements[0].firstElementChild.setAttribute("disabled", "disabled");
         options.actionElements[1].querySelector(".b3-button").setAttribute("disabled", "disabled");
@@ -916,9 +919,9 @@ const allDone = (countElement: Element, editor: Protyle, actionElements: NodeLis
     emptyElement.classList.remove("fn__none");
     actionElements[0].classList.add("fn__none");
     actionElements[1].classList.add("fn__none");
-    const moreElement = countElement.parentElement.querySelector('[data-type="more"]');
-    moreElement.classList.add("fn__none");
-    moreElement.previousElementSibling.classList.add("fn__none");
+    countElement.parentElement.querySelectorAll('[data-type="more"], [data-type="more-space"]').forEach(element => {
+        element.classList.add("fn__none");
+    });
 };
 
 const newRound = (countElement: Element, editor: Protyle, actionElements: NodeListOf<Element>, unreviewedCount: number) => {

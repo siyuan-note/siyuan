@@ -6,7 +6,7 @@
 		"id": "20220708102441-u6wopo9",
 		"title": "資料備份",
 		"type": "doc",
-		"updated": "20260614145114"
+		"updated": "20260914101605"
 	},
 	"Children": [
 		{
@@ -55,7 +55,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220708102537-lsmjxx1",
-				"updated": "20220708102537"
+				"updated": "20260914101605"
 			},
 			"Children": [
 				{
@@ -72,7 +72,7 @@
 			},
 			"Properties": {
 				"id": "20220708102537-lutxvpc",
-				"updated": "20220708103006"
+				"updated": "20260914101605"
 			},
 			"Children": [
 				{
@@ -123,7 +123,7 @@
 					},
 					"Properties": {
 						"id": "20220708102537-bj7rau1",
-						"updated": "20220708102821"
+						"updated": "20260914101605"
 					},
 					"Children": [
 						{
@@ -131,7 +131,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220708102537-371bx14",
-								"updated": "20220708102821"
+								"updated": "20260914101605"
 							},
 							"Children": [
 								{
@@ -154,12 +154,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 分頁，選擇需要備份的快照點擊 "
+									"Data": "，在本地欄找到需要備份的快照，點擊該項目的 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "標記快照"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 並填寫標記"
 								}
 							]
 						}
@@ -176,7 +180,7 @@
 					},
 					"Properties": {
 						"id": "20220708102537-ak8i8tk",
-						"updated": "20220708102537"
+						"updated": "20260914101605"
 					},
 					"Children": [
 						{
@@ -184,21 +188,21 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220708102537-g1yyxhr",
-								"updated": "20220708102537"
+								"updated": "20260914101605"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "篩選下拉列表中選擇 "
+									"Data": "切換到頂部的 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "本地標記的快照"
+									"TextMarkTextContent": "標記快照"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，選擇需要上傳的快照點擊 "
+									"Data": "，在本地欄找到需要上傳的標記快照，點擊 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -220,7 +224,7 @@
 					},
 					"Properties": {
 						"id": "20220708102537-0brwezi",
-						"updated": "20220708102950"
+						"updated": "20260914101605"
 					},
 					"Children": [
 						{
@@ -228,21 +232,30 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220708102537-4xk5q47",
-								"updated": "20220708102950"
+								"updated": "20260914101605"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "上傳完成以後，篩選下拉列表中選擇 "
+									"Data": "上傳完成後，在雲端欄查看備份的標記快照；窄視窗和行動端透過 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "雲端標記的快照"
+									"TextMarkTextContent": "本地快照"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 可以看到剛剛備份到雲端的快照"
+									"Data": "、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "雲端快照"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 切換兩端清單"
 								}
 							]
 						}
@@ -288,6 +301,31 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-f18jtxf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914101605-f18jtxf",
+				"updated": "20260914101605"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "需要刪除部分備份標記時，請參閱 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260914101605-jp3prni",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "批次管理標記快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},

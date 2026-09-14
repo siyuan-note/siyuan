@@ -27,7 +27,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
@@ -35,21 +34,19 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func extensionCopy(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(200, ret)
-
-	form, _ := c.MultipartForm()
-	dom := form.Value["dom"][0]
+var extensionCopy = contractHandler(apicontract.ExtensionCopy, func(c *gin.Context, request apicontract.ExtensionCopyRequest) apicontract.Response[*apicontract.ExtensionCopyData] {
+	code := 0
+	dom := request.DOM
 	assets := filepath.Join(util.DataDir, "assets")
 	targetBoxID := ""
 	encryptedBoxID := ""
-	if notebookVal := form.Value["notebook"]; 0 < len(notebookVal) {
-		nb := notebookVal[0]
+	if request.Notebook != nil {
+		nb := *request.Notebook
 		if ast.IsNodeIDPattern(nb) {
 			targetBoxID = nb
 			assets = model.GetImportAssetsDir(targetBoxID, "")
@@ -59,25 +56,22 @@ func extensionCopy(c *gin.Context) {
 		}
 	}
 	if err := holdEncryptedBoxRequest(c, encryptedBoxID); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[*apicontract.ExtensionCopyData](-1, err.Error())
 	}
 
 	if err := os.MkdirAll(assets, 0755); err != nil {
 		logging.LogErrorf("create assets folder [%s] failed: %s", assets, err)
-		ret.Msg = err.Error()
-		return
+		return apicontract.SuccessWithMessage((*apicontract.ExtensionCopyData)(nil), err.Error())
 	}
 
 	clippingSym := false
 	symArticleHref := ""
-	hasHref := nil != form.Value["href"]
-	isPartClip := nil != form.Value["clipType"] && form.Value["clipType"][0] == "part"
+	hasHref := request.Href != nil
+	isPartClip := request.ClipType != nil && *request.ClipType == "part"
 	if hasHref && !isPartClip {
 		// 剪藏链滴帖子时直接使用 Markdown 接口的返回
 		// https://ld246.com/article/raw/1724850322251
-		symArticleHref = form.Value["href"][0]
+		symArticleHref = *request.Href
 
 		var baseURL, originalPrefix string
 		if strings.HasPrefix(symArticleHref, "https://ld246.com/article/") {
@@ -100,7 +94,7 @@ func extensionCopy(c *gin.Context) {
 	}
 
 	uploaded := map[string]string{}
-	for originalName, file := range form.File {
+	for originalName, file := range request.Files {
 		// 链滴/流云整页剪藏走服务端原始 Markdown，扩展上传的 DOM 资源地址与原始 Markdown 中的地址必然不一致，
 		// 上传的文件无法被匹配引用；该路径下由内核按“下载资源”开关统一下载本地化，因此跳过扩展上传的文件
 		if clippingSym {
@@ -143,15 +137,13 @@ func extensionCopy(c *gin.Context) {
 
 		f, err := file[0].Open()
 		if err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
+			code = -1
 			break
 		}
 
 		data, err := io.ReadAll(f)
 		if err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
+			code = -1
 			break
 		}
 
@@ -172,8 +164,7 @@ func extensionCopy(c *gin.Context) {
 		// 统一通过 storeAssetForBox 写入，加密 box 自动脱敏 + 加密落盘 + 追加 ?box=
 		storedName, storeErr := model.StoreAssetForBox(targetBoxID, assets, fName, data)
 		if storeErr != nil {
-			ret.Code = -1
-			ret.Msg = storeErr.Error()
+			code = -1
 			break
 		}
 
@@ -196,9 +187,7 @@ func extensionCopy(c *gin.Context) {
 		} else {
 			bodyData, readErr := io.ReadAll(resp.Body)
 			if nil != readErr {
-				ret.Code = -1
-				ret.Msg = "read response body failed: " + readErr.Error()
-				return
+				return apicontract.Failure[*apicontract.ExtensionCopyData](-1, "read response body failed: "+readErr.Error())
 			}
 
 			md = string(bodyData)
@@ -231,7 +220,7 @@ func extensionCopy(c *gin.Context) {
 
 			// 链滴/流云整页剪藏时扩展上传的 DOM 资源地址与服务端原始 Markdown 中的地址不一致，
 			// 扩展上传的文件无法匹配；当用户开启“下载资源”时由内核直接下载原始 Markdown 中的网络资源到本地
-			if assetsOn := len(form.Value["assets"]) > 0 && "true" == form.Value["assets"][0]; assetsOn {
+			if assetsOn := request.Assets != nil && *request.Assets == "true"; assetsOn {
 				model.DownloadNetAssets2LocalAssets(tree, false, symArticleHref, assets)
 			}
 
@@ -306,9 +295,10 @@ func extensionCopy(c *gin.Context) {
 	parse.NestedInlines2FlattedSpansHybrid(tree, false)
 
 	md, _ = lute.FormatNodeSync(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
-	ret.Data = map[string]any{
-		"md":       md,
-		"withMath": withMath,
+	data := &apicontract.ExtensionCopyData{Markdown: md, WithMath: withMath}
+	message := model.Conf.Language(72)
+	if code != 0 {
+		return apicontract.ExtensionCopy.FailureWithData(code, message, data)
 	}
-	ret.Msg = model.Conf.Language(72)
-}
+	return apicontract.SuccessWithMessage(data, message)
+})

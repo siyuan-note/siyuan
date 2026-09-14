@@ -1,3 +1,4 @@
+import {isAVRenderData} from "./renderData";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost, fetchSyncPost} from "../../../util/fetch";
@@ -798,16 +799,16 @@ export const setFreezeColumn = (protyle: IProtyle, blockElement: Element, freeze
     if (freezeColId === oldFreezeColId) {
         return;
     }
-    const operation = {
-        action: "setAttrViewColPin" as TOperation,
+    const operation: Extract<IOperation, {action: "setAttrViewColPin"}> = {
+        action: "setAttrViewColPin",
         id: freezeColId || oldFreezeColId,
         avID: blockElement.getAttribute("data-av-id"),
         data: !!freezeColId,
         blockID: blockElement.getAttribute("data-node-id"),
         viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
     };
-    const undoOperation = {
-        action: "setAttrViewColPin" as TOperation,
+    const undoOperation: Extract<IOperation, {action: "setAttrViewColPin"}> = {
+        action: "setAttrViewColPin",
         id: oldFreezeColId || freezeColId,
         avID: operation.avID,
         data: !!oldFreezeColId,
@@ -833,8 +834,8 @@ const setAVColumnWidths = (protyle: IProtyle, blockElement: HTMLElement, widths:
     if (Object.keys(newWidths).length === 0) {
         return;
     }
-    const operation = {
-        action: "setAttrViewColsWidth" as TOperation,
+    const operation: Extract<IOperation, {action: "setAttrViewColsWidth"}> = {
+        action: "setAttrViewColsWidth",
         avID: blockElement.dataset.avId,
         blockID: blockElement.dataset.nodeId,
         viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
@@ -1373,6 +1374,9 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         id: avID,
                         blockID,
                     }, (response) => {
+                        if (!isAVRenderData(response.data)) {
+                            return;
+                        }
                         duplicateCol({
                             blockElement,
                             viewID,
@@ -1391,11 +1395,17 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             async click() {
                 if (type === "relation") {
                     const response = await fetchSyncPost("/api/av/getAttributeView", {id: avID});
+                    if (response.code !== 0) {
+                        return;
+                    }
                     const colData = response.data.av.keyValues.find((item: {
                         key: { id: string }
                     }) => item.key.id === colId);
                     if (colData.key.relation?.isTwoWay) {
                         const relResponse = await fetchSyncPost("/api/av/getAttributeView", {id: colData.key.relation.avID});
+                        if (relResponse.code !== 0) {
+                            return;
+                        }
                         const dialog = new Dialog({
                             title: window.siyuan.languages.removeColConfirm,
                             content: `<div class="b3-dialog__content">

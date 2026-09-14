@@ -1,5 +1,6 @@
 import {getRandom, isMobile} from "../util/functions";
 import {fetchPost} from "../util/fetch";
+import {ContractFormData} from "../util/contractFormData";
 import {Constants} from "../constants";
 /// #if !MOBILE
 import {Files} from "../layout/dock/Files";
@@ -1225,15 +1226,13 @@ export const openEmojiPanel = (
             return;
         }
 
-        const formData = new FormData();
-        formData.append("name", customIconNameElement.value);
-        if (networkURL) {
-            formData.append("url", networkURL);
-        } else {
-            formData.append("file", customIconFile);
-        }
+        const formData = new ContractFormData({
+            name: customIconNameElement.value,
+            url: networkURL || undefined,
+            file: networkURL ? undefined : customIconFile,
+        });
         fetchPost("/api/system/addCustomEmoji", formData, (response) => {
-            if (typeof response?.data?.path !== "string") {
+            if (response.code !== 0 || typeof response.data?.path !== "string") {
                 showMessage(window.siyuan.languages.kernelFault8);
                 return;
             }

@@ -89,7 +89,7 @@ type EncryptedNotebookStatusData struct {
 }
 
 type NotebookPasswordRequest struct {
-	Password string `json:"password" api:"trim"`
+	Password string `json:"password" api:"nonempty"`
 }
 
 type CreateEncryptedNotebookRequest struct {
@@ -103,8 +103,8 @@ type UnlockNotebookRequest struct {
 }
 
 type ChangeMasterPasswordRequest struct {
-	OldPassword string `json:"oldPassword" api:"trim"`
-	NewPassword string `json:"newPassword" api:"trim"`
+	OldPassword string `json:"oldPassword" api:"nonempty"`
+	NewPassword string `json:"newPassword" api:"nonempty"`
 }
 
 type NotebookCryptoAutoLockRequest struct {

@@ -161,7 +161,11 @@ export const exportImage = (id: string, copyOnly = false) => {
         const msgId = showMessage(window.siyuan.languages.exporting, 0);
         const containerElement = exportDialog.element.querySelector(".b3-dialog__container") as HTMLElement;
         const oldHeight = containerElement.style.height;
+        const oldMaxHeight = containerElement.style.maxHeight;
+        const oldWidth = containerElement.style.width;
+        // 导出时让内容完整展开，避免移动端对话框的最大高度限制截断长图。
         containerElement.style.height = "";
+        containerElement.style.maxHeight = "none";
         /// #if MOBILE
         containerElement.style.width = "100vw";
         /// #endif
@@ -208,6 +212,8 @@ export const exportImage = (id: string, copyOnly = false) => {
             outputting = false;
             if (document.body.contains(exportDialog.element)) {
                 containerElement.style.height = oldHeight;
+                containerElement.style.maxHeight = oldMaxHeight;
+                containerElement.style.width = oldWidth;
                 contentElement.style.overflow = oldOverflow;
                 setActionDisabled(false);
             }

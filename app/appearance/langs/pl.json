@@ -1,5 +1,13 @@
 {
 	"mobileFileTreeMultiSelectTip": "Dotknij dokumentów lub notatników, aby je zaznaczyć lub odznaczyć",
+	"repoBatchDelete": "Usuń wybrane oznaczenia",
+	"repoBatchDone": "Gotowe",
+	"repoBatchClear": "Wyczyść zaznaczenie",
+	"repoBatchSelection": "Wybrano lokalnie: ${x} · W chmurze: ${y}",
+	"repoTaggedSnapshots": "Oznaczone migawki",
+	"repoBatchManage": "Zarządzanie zbiorcze",
+	"repoRemoveTagsTip": "Usunięte zostaną tylko wybrane oznaczenia. Dane migawek nie są usuwane od razu, a repozytorium nie jest automatycznie czyszczone.",
+	"repoBatchResult": "Usunięto: ${x}. Błędy lub niepotwierdzone wyniki: ${y}; te elementy pozostają zaznaczone do ponowienia.",
 	"enterMasterPassword": "Wprowadź hasło główne",
 	"orderedListItemBlock": "Blok elementu listy uporządkowanej",
 	"unorderedListItemBlock": "Blok elementu listy nieuporządkowanej",

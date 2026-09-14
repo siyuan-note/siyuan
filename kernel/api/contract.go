@@ -55,8 +55,12 @@ func contractHandler[Request, Data any](endpoint apicontract.Endpoint[Request, D
 				stream(c.Writer, c.Request)
 				return
 			}
-			if status == 204 {
+			if status == 204 || response.Empty() {
 				c.Status(status)
+				return
+			}
+			if redirect := response.Redirect(); redirect != nil {
+				c.Redirect(status, redirect.Location)
 				return
 			}
 			if content := response.Binary(); content != nil {

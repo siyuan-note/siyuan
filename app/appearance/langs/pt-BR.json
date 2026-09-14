@@ -1,5 +1,13 @@
 {
 	"mobileFileTreeMultiSelectTip": "Toque nos documentos ou cadernos para selecioná-los ou desmarcá-los",
+	"repoBatchDelete": "Excluir marcações selecionadas",
+	"repoBatchDone": "Concluir",
+	"repoBatchClear": "Limpar seleção",
+	"repoBatchSelection": "Selecionados localmente: ${x} · Na nuvem: ${y}",
+	"repoTaggedSnapshots": "Snapshots marcados",
+	"repoBatchManage": "Gerenciar em lote",
+	"repoRemoveTagsTip": "Somente as marcações selecionadas serão removidas. Os dados dos snapshots não são excluídos imediatamente e o repositório não é limpo automaticamente.",
+	"repoBatchResult": "Removidos: ${x}. Falhas ou não verificados: ${y}; esses itens continuam selecionados para tentar novamente.",
 	"enterMasterPassword": "Digite a senha mestra",
 	"orderedListItemBlock": "Bloco de item de lista ordenada",
 	"unorderedListItemBlock": "Bloco de item de lista não ordenada",

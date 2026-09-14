@@ -4,11 +4,21 @@
 
 ## Scope
 
-This document defines type declarations, compatibility requirements, generated artifacts, and verification for kernel HTTP APIs. Endpoint definitions are maintained in `kernel/apicontract/contracts.go`. `kernel/apicontract/legacy_routes.json` records routes that use existing handling, including non-JSON responses, dynamic paths, and `ANY` registrations. New endpoints must define type contracts and must not be added to the legacy list.
+This document defines type declarations, compatibility requirements, generated artifacts, and verification for kernel HTTP APIs. Transport types and endpoint definitions are maintained in the module files under `kernel/apicontract/`; `contracts.go` collects the endpoint registry. The migration is complete and `kernel/apicontract/legacy_routes.json` is empty. New endpoints must define type contracts and must not be added to the legacy list.
+
+## Endpoint maintenance
+
+1. Define or update transport types and endpoints in the contract package, specifying request bodies, error codes, null values, defaults, and historical input compatibility
+2. Bind business entry points through `contractHandler`, preserving route middleware order, authorization, and lease scope
+3. Keep `legacy_routes.json` empty; when deleting an endpoint, remove both its route registration and contract definition
+4. Update actual-response, input-compatibility, and strict type tests; run generation and correct calls identified by the compiler
+5. Synchronize generated and related public declarations in `petal`; update API documentation for public endpoints
+
+Generation checks inspect actual route and handler declarations to verify methods, paths, handlers, and contract adapters. CI compares the legacy list with the pre-change list and prevents additional records. Do not bypass contract checks with `any`, type assertions, or changes to the legacy list.
 
 ## Contracts and implementation
 
-`kernel/apicontract/contracts.go` defines requests, responses, and endpoints. The contract package is independent of kernel startup, databases, and persistence models, so the generator runs independently. API entry points bind endpoints through `contractHandler`; Go generic signatures constrain request parameters and successful return values. Constructors set response payloads rather than assigning directly to generic `ret.Data`. Existing helpers continue to validate business rules, and `contractFailure` preserves their error codes, messages, and supported error payloads.
+Module files under `kernel/apicontract/` define requests, responses, and endpoints; `contracts.go` collects them in the endpoint registry. The contract package is independent of kernel startup, databases, and persistence models, so the generator runs independently. API entry points bind endpoints through `contractHandler`; Go generic signatures constrain request parameters and successful return values. Constructors set response payloads rather than assigning directly to generic `ret.Data`. Existing helpers continue to validate business rules, and `contractFailure` preserves their error codes, messages, and supported error payloads.
 
 The generator produces `app/src/types/api/index.d.ts` and `kernel/apicontract/schema.json` from the same Go types. The schema contains shared `$defs` and each endpoint's request and response schemas. Tests validate actual HTTP responses against those same schemas. Type declarations do not validate JSON at runtime; handler tests in CI validate serialized results.
 
@@ -20,9 +30,27 @@ Arrays, maps, and nested structs recursively validate request constraints. A `nu
 
 Notebook creation, renaming, removal, closing, icon updates, and sorting use typed contracts. Renaming, removal, and icon updates trim notebook IDs; closing preserves whitespace for ID validation. Empty names and icons remain available to business validation, and rename failures retain their message display duration.
 
-Encrypted notebook lifecycle endpoints use typed requests and responses while retaining password trimming, fractional-minute truncation, negative-minute clamping, administrative authorization, lease acquisition, and mount rollback. Key derivation, ciphertext formats, and recovery material remain model-layer responsibilities.
+Encrypted notebook lifecycle endpoints preserve passwords exactly, including leading, trailing, and all-whitespace strings. The `nonempty` string option rejects only an empty string without normalization; required password fields also reject omission, null, and non-string values. Backup import preserves multipart password text and retains its optional-field behavior, with authentication performed by the model. Fractional-minute truncation, negative-minute clamping, administrative authorization, lease acquisition, and mount rollback remain unchanged. Key derivation, ciphertext formats, and recovery material remain model-layer responsibilities.
 
 ## Compatibility requirements
+
+At migration completion on September 14, 2026, all 629 method/path registrations in `kernel/api/router.go` were contracted and the legacy list was empty. At that baseline, four `ANY` registrations expanded to 661 concrete method/path pairs in generated metadata. Use the generator and route coverage checks for current counts as endpoints are added. Static resources, the main application WebSocket, and other transport services registered by `kernel/server/serve.go` are outside this API route inventory.
+
+System contracts retain complete configuration, workspace management, uploads, authentication, OIDC response variants, boot streams, and empty or binary responses. Persisted layout and shortcut values are narrowed where the frontend consumes them, preserving existing default repair, obsolete-key cleanup, and binding filtering. Configuration export, import, and shutdown keep their existing lifecycle and encryption behavior.
+
+Transaction contracts discriminate all 97 known operation actions and exclude those names from the explicit unknown-action compatibility branch. The frontend uses the same finite operation union. Private raw input preserves historical fields, ignored values, asynchronous model errors, and echoed payloads; schema declarations do not move model validation into HTTP admission. Undo, redo, heading operations, response leases, and transaction persistence formats retain their existing behavior.
+
+Extension clipping retains first-value multipart handling, dynamically named uploaded files, partial results, original messages, and encrypted-notebook admission. Dynamic icons retain SVG bytes, security and cache headers, and empty failure responses. Broadcast streams declare raw SSE bytes with dynamic event names, IDs, and retry values, and raw WebSocket frames with their upgrade errors; payloads are not converted to JSON or Base64, and channel cleanup retains its original scope.
+
+Plugin private services declare their existing serialization modes, raw files, redirects, proxy responses, SSE events, and WebSocket frames. Plugin-defined payloads remain protocol extension data; branch-specific validation distinguishes serialized formats from arbitrary bytes. Request bodies, explicit response headers, admission failures, and cancellation retain the plugin service lifecycle.
+
+Network contracts retain request bytes, multipart fields, headers, URL and TLS diagnostics, including complete certificate public-key structures and large integers. Forward proxy options preserve validation order, numeric truncation, response encodings, and protocol-defined JSON payloads. HTTP, EventSource, and WebSocket proxies retain upstream statuses and bytes, repeated-header behavior, security headers, stream cancellation, and connection cleanup. Echo wildcard paths bind their own adapter while sharing the same handler behavior.
+
+Attribute-view contracts declare table, gallery, and kanban results separately and retain missing base fields, cell patches, and null values. Known patch fields retain their supplied presence without filling omitted fields with zero values. Current, history, and snapshot rendering use their corresponding request types; callers handle error payloads before updating views. Row sorting, publish admission, encrypted-notebook leases, and fast JSON rendering preserve their existing behavior. Shared frontend and plugin declarations reflect the fields actually present in each view and cell.
+
+AI contracts retain provider configuration, model discovery and matching, confirmation decisions, session extensions, and numeric and omission semantics. Editor and agent streams declare their actual SSE events; disconnection closes upstream requests, and stream lifetimes remain within the request. OAuth pages retain their media types, HTTP statuses, and security headers. Session permission notifications use `WithAfterWrite` to preserve response-before-broadcast ordering. Arbitrary JSON remains limited to protocol extension fields and tool results.
+
+Setting contracts retain partial configuration merging, existing defaults, case-insensitive struct fields, explicit null values, JSON number normalization, and parser error messages. Keyboard shortcuts and cloud authentication results declare their fixed fields while preserving their protocol-defined JSON extensions. Cloud-user admission still precedes body reads for non-administrators, and two-factor authentication keeps cloud error codes and extension fields. Frontend callers normalize persisted display settings at the same existing boundaries.
 
 Document-tree contracts retain conditional parameter validation, path and sorting semantics, omitted callbacks, pagination defaults, and document response variants. Publish authentication preserves HTTP 429 and `Retry-After` through explicitly declared additional error statuses. Publish and encrypted-notebook admission remain before deferred field validation, and document leases cover response serialization.
 
@@ -38,7 +66,7 @@ Sync contracts retain numeric truncation, conditional direction validation in ma
 
 Marketplace contracts retain required-field ordering, whitespace handling, theme mode dependencies, rating availability and rate-limit payloads, and local-package upload errors. Package and appearance responses declare their complete nested structures, including the fixed five-element rating distribution. Upload requests keep first-file selection and overwrite parsing. Installation, removal, authentication, and publish restrictions remain in the existing business handlers and middleware.
 
-Plugin information queries retain path, query-string, and JSON-body name precedence, including whitespace and business error codes 1 through 4. URL parameters bypass body decoding, and list queries ignore the body. Plugin and RPC-method lists retain nullable arrays and entries. HTTP JSON-RPC has a separate contract for single and batch requests, success and error replies, and notification-only HTTP 204 responses. Plugin admission occurs before body reads, batch errors retain their order, and arbitrary JSON is limited to RPC parameters, results, and error details. RPC WebSocket routes declare HTTP 101 upgrades, HTTP 404 plugin admission errors, HTTP 400 text rejections, and separate incoming calls and outgoing replies or notifications. Origin authorization and connection cleanup remain in the existing upgrade lifecycle. Plugin HTTP services remain a separate protocol migration.
+Plugin information queries retain path, query-string, and JSON-body name precedence, including whitespace and business error codes 1 through 4. URL parameters bypass body decoding, and list queries ignore the body. Plugin and RPC-method lists retain nullable arrays and entries. HTTP JSON-RPC has a separate contract for single and batch requests, success and error replies, and notification-only HTTP 204 responses. Plugin admission occurs before body reads, batch errors retain their order, and arbitrary JSON is limited to RPC parameters, results, and error details. RPC WebSocket routes declare HTTP 101 upgrades, HTTP 404 plugin admission errors, HTTP 400 text rejections, and separate incoming calls and outgoing replies or notifications. Origin authorization and connection cleanup remain in the existing upgrade lifecycle.
 
 Search contracts retain pagination defaults and numeric truncation, path validation and deduplication, ignored historical subtype filters, and null versus empty arrays. Reference search distinguishes correlation-only responses from block results and retains notebook admission before deferred parameter validation. SQL search authorization, publish filtering, encrypted notebook leases, cancellation responses, and read-only embed-update no-ops remain in their original order. Desktop and mobile callers share generated request types.
 
@@ -66,17 +94,17 @@ Endpoint-specific behavior is recorded jointly in contract definitions, compatib
 
 `ignoretype` and `filterstrings` apply only to explicitly declared historical parameter compatibility. Generated request types describe canonical calls; compatibility decoding may accept and ignore a wider set of old inputs, with tests covering those exceptions. There is no global switch to fall back to old parsing after binding fails.
 
-Read-only middleware may still return a prompt object containing `closeTimeout`. Ordinary `fetchPost` callbacks receive only nonnegative codes retained after message processing; block-info code `3` still requires handling. `fetchSyncPost` and `fetchGet` preserve complete responses. Dynamic URLs retain existing signatures. Static POST paths must come from contracts or recorded legacy routes, and invalid parameters cannot fall back through another overload. Use an explicit `string` variable when constructing a template URL with an open-ended range.
+Read-only middleware may still return a prompt object containing `closeTimeout`. Ordinary `fetchPost` callbacks receive only nonnegative codes retained after message processing; block-info code `3` still requires handling. `fetchSyncPost` and `fetchGet` preserve complete responses. Dynamic URLs retain existing signatures. Static POST paths must come from contracts, and invalid parameters cannot fall back through another overload. Use an explicit `string` variable when constructing a template URL with an open-ended range.
 
 Use `FailureWithTimeout` when a business error must preserve its message display duration. Contract-based block queries use `holdContractBlockRequest` to retain lease checks for explicit notebooks and accompanying IDs. Individual entry points still specify whether state queries permit deleted IDs.
 
-`StructJSONBody` is reserved for endpoints that already use Go JSON struct binding. It preserves case-insensitive field matching, null handling, and parser errors; required business fields are validated by the handler. It must not be used to relax a migrated endpoint's request rules. Endpoints that return their result payload on failure explicitly set `DataOnError` and use the endpoint's typed `FailureWithData` method.
+`StructJSONBody` is reserved for endpoints that already use Go JSON struct binding. It preserves case-insensitive field matching, null handling, and parser errors; required business fields are validated by the handler. It must not be used to relax an existing endpoint's request rules. Endpoints that return their result payload on failure explicitly set `DataOnError` and use the endpoint's typed `FailureWithData` method.
 
 Notebook configuration updates use a typed partial object. The `legacyobject` field option preserves the existing JSON round-trip's numeric normalization and case-insensitive struct binding; optional pointer fields leave existing values unchanged when omitted or null. Encryption fields are decoded for input compatibility but never applied by the configuration patch. `Base64Bytes` explicitly models historical byte-slice inputs as Base64 strings or byte arrays.
 
 `JSONValue` is reserved for fields whose wire protocol explicitly accepts arbitrary JSON, such as an echoed correlation ID. Its schema is a recursive union of null, booleans, numbers, strings, arrays, and objects; it does not stand in for a structured request or response. Word-count results retain their fixed statistics fields independently of the correlation value.
 
-Heading transaction queries return `BlockTransaction` with typed operations and preserve empty, null, and undo-operation payloads. `BlockOperationResult` declares the finite union of text, block ID arrays, and null. Conversion from the model's polymorphic fields rejects unsupported types; attribute-view operations require their own payload contracts. The editor's operation type also accepts the empty column-type field returned by non-attribute-view operations.
+Heading transaction queries return `BlockTransaction` with typed operations and preserve empty, null, and undo-operation payloads. `BlockOperationResult` declares the finite union of text, block ID arrays, and null. Conversion from the model's polymorphic fields rejects unsupported types; attribute-view operation payloads use their action-specific contracts. The editor's operation type also accepts the empty column-type field returned by non-attribute-view operations.
 
 All `/api/block/` routes use contracts. Heading-level queries retain batch-ID precedence, deduplication, fractional-level truncation, document struct binding, and message display durations. Document conversion results include the six heading counts and typed transactions. Reference checks validate only the fields used by the selected scope, preserve ignored fields and notebook trimming rules, and retain boolean error payloads, publish filtering, and notebook leases through response serialization. These exceptional input rules use private, endpoint-specific typed decoders; ordinary endpoints continue to use field declarations. Recent-update results use a recursive `SearchBlock` payload, including nullable references, children, and card metadata.
 
@@ -84,9 +112,13 @@ Storage contracts keep arbitrary JSON limited to storage values; keys, recent do
 
 `DirectJSONOutput` preserves protocols that return their own JSON objects or arrays without the kernel envelope. Use `SuccessDirectJSON` for these payloads. Endpoints that also support empty notification responses explicitly declare `NoContent` and return `SuccessNoContent`; HTTP validation requires status 204 and an empty body. Authentication and read-only failures retain the kernel error envelope. Generated declarations record the direct output mode and optional empty-response support.
 
-## Multipart requests
+## File and streaming protocols
 
-SSE endpoints declare each event name and payload with `SSEOptions` and `SSEEvent`. `StreamSSE` executes the existing stream lifecycle within the request; cancellation and cleanup remain inside that lifecycle. HTTP validation distinguishes `text/event-stream` from the declared pre-stream JSON failures, while `ValidateSSEEvent` checks each JSON event payload separately. Generated metadata exposes the event types; buffered fetch helpers still return the complete stream as text.
+`RawSSEOptions` and `RawWebSocketOptions` declare byte-oriented broadcast protocols. Use `ValidateRawSSEEvent` and `ValidateRawWebSocketFrame` to check their event and frame metadata independently; JSON event and RPC message declarations retain their existing validation. Raw WebSocket failures are written by the upgrader rather than `RejectWebSocket`.
+
+JSON SSE endpoints declare each event name and payload with `SSEOptions` and `SSEEvent`. `StreamSSE` executes the existing stream lifecycle within the request; cancellation and cleanup remain inside that lifecycle. HTTP validation distinguishes `text/event-stream` from the declared pre-stream JSON failures, while `ValidateSSEEvent` checks each JSON event payload separately. Generated metadata exposes the event types. `fetchPost` and `fetchGet` buffer streams as text; `fetchSyncPost` continues to parse JSON and is not a stream reader.
+
+Endpoints with an empty HTTP response list its permitted statuses in `EmptyResponseStatuses` and return `EmptyHTTPResponse`; other responses retain their own declared shapes. `RedirectHTTPContent` preserves the standard redirect status, Location header, and escaped HTML body. `RawBody` leaves the original request stream unread for protocol handlers. `ProxyOptions` distinguishes HTTP bytes, EventSource bytes, and WebSocket frames, preserving upstream statuses instead of treating them as kernel business codes. Proxy admission errors and middleware envelopes are validated separately. `ANY` registrations remain one coverage record and expand to the router's nine HTTP methods in generated metadata. Response validation preserves JSON number precision, including certificate integers outside the floating-point range; it does not change request numeric conversion.
 
 Page responses use `HTTPContentOptions` to declare permitted HTTP status and media-type pairs and `SuccessHTTPContent` to preserve their bytes. This uses the existing binary transport and keeps JSON middleware errors separate. `FastJSON` preserves selected large responses' accelerated JSON encoder without changing their typed payloads or response envelope; encoding failures retain the standard encoder fallback.
 
@@ -102,40 +134,35 @@ Use `MultipartBody` for file uploads. Request structs declare string fields and 
 
 Fixed fields declared as `[]*multipart.FileHeader` receive all files in their original order and generate `Array<Blob>`. An optional absent file list remains nil. Text and single-file fields still select the first value. `SuccessWithMessage` retains nonempty messages on successful responses, including partial batch uploads.
 
-Frontend callers construct `ContractFormData` from typed fields before passing it to the existing fetch functions. The generated signatures require the endpoint's fields and distinguish file values from strings; raw `FormData` cannot satisfy a migrated upload contract. Optional fields are omitted and string values are not trimmed. Plugin callers can implement the generated `APIFormData<Request>` interface when constructing their forms.
-
-## Endpoint maintenance
+Frontend callers construct `ContractFormData` from typed fields before passing it to the existing fetch functions. The generated signatures require the endpoint's fields and distinguish file values from strings; raw `FormData` cannot satisfy an upload contract. Optional fields are omitted and string values are not trimmed. Plugin callers can implement the generated `APIFormData<Request>` interface when constructing their forms.
 
 Dynamic multipart endpoints use `MultipartFields` to retain every text value and file under each field name. Its request schema maps field names to arrays of text or binary values; `ContractFormData` appends each array item as a repeated form field. This is distinct from fixed-field uploads, which continue to bind the first value. Broadcast publication preserves text-before-file processing and its per-message error results. Endpoint-specific `DecodeFailure` handling preserves existing parsing error codes and payloads.
 
-1. Define or update transport types and endpoints in the contract package, specifying request bodies, error codes, null values, defaults, and historical input compatibility
-2. Bind business entry points through `contractHandler`, preserving route middleware order, authorization, and lease scope
-3. Routes with type contracts must not also appear in `legacy_routes.json`; remove records for deleted endpoints, and never add new endpoints to the list
-4. Update actual-response, input-compatibility, and strict type tests; run generation and correct calls identified by the compiler
-5. Synchronize generated and related public declarations in `petal`; update API documentation for public endpoints
-
-Generation checks inspect actual route and handler declarations to verify methods, paths, handlers, and contract adapters. CI compares the legacy list with the pre-change list and prevents additional records. Do not bypass contract checks with `any`, type assertions, or changes to the legacy list.
-
 ## Generation and verification
+
+Asset-reference scans report missing attribute-view definitions and invalid definition IDs in the optional `unavailableAttributeViews` list without blocking queries, previews, or replacement. Each entry identifies the notebook ID/name, document ID/path/human-readable path, block ID, view ID, and reason. Existing unreadable or corrupt definitions remain errors. Missing-file snapshots are revalidated before writing so a definition restored during scanning cannot be silently omitted. Attribute-view definitions are not deferred assets under the current download-path policy; the regression suite checks this assumption. The unavailable-definition regressions run through the model and actual HTTP contracts, including closed notebooks and shared definitions.
+
+Asset-reference query and replacement contracts preserve scalar requests and also accept batches. Batch results retain input order and report each mapping's status, reason, references, and changed-file count; the top-level count includes each shared file once. Empty batches, duplicate sources, and chained or cyclic mappings are rejected. Independent mappings may succeed when another mapping fails; a shared-file write failure belongs to every affected mapping. Scans allow editing and validate the workspace snapshot before saving; cancellation and unchanged retries preserve source data. `TestAssetRelink` regressions cover scalar compatibility, batch validation, shared document/database/OCR persistence, history, and concurrent edits and are included in the full kernel command below.
 
 Run from `app/`:
 
 ```text
-pnpm run api:generate
 pnpm run api:generate --petal ../../petal
 pnpm run api:check --petal ../../petal
 pnpm run lint
-pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts
+pnpm test
 ```
 
-The `--petal` path is relative to the generator's working directory, `kernel/`; the example refers to a sibling repository. CI checks only this repository's artifacts. Local synchronization across repositories uses this option to verify plugin declarations.
+The generation command updates both this repository and `petal`; a separate generation run without `--petal` is unnecessary. The `--petal` path is relative to the generator's working directory, `kernel/`; the example refers to a sibling repository. CI checks only this repository's artifacts. Local synchronization across repositories uses this option to verify plugin declarations.
 
 Run from `kernel/`:
 
 ```text
-go test ./apicontract/...
-go test -tags "fts5 sqlcipher" ./model -run "TestMultipartUpload|TestInsertLocalAssets|TestRecordAssetUpload|TestReadRTFD|TestCopyRTFD" -count=1
-go test -tags "fts5 sqlcipher" ./api ./plugin -run "TestAPIContract|TestAsset.*Contract|TestInsertLocalAssets|TestSetFileAnnotation|TestDeferredAsset|TestExportBrowserHTML|TestCopyExport|TestBazaarContract|TestRepoContract|TestRepoFileWireCompatibility|TestRPC.*Contract|TestRPCWebSocketOriginCheck|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestContract.*NotebookResponseLease" -count=1
+go test -tags "fts5 sqlcipher" ./... -count=1
 ```
 
 `tsconfig.api.json` separately enables strict checks and declaration-file checking for invalid parameters, misspelled fields, required bodies, success and failure branches, nullability, and method mismatches. The main application retains its existing configuration; do not assume strict null checks apply to every call. Handler tests use temporary workspaces and isolated test processes without starting or restarting the running kernel.
+
+Import and static-file fixtures use `internal/testutil.PublicDataDir` to create and clean up explicitly validated non-sensitive directories independently of `TMPDIR` and `GOTMPDIR`. The helper tries the user home, current directory, and filesystem root, and reports a fixture setup failure if none is safe and writable. CI also reruns the affected path tests with `/tmp` as `TMPDIR` and a separate `GOTMPDIR` to cover environment overrides.
+
+CI runs all kernel packages on Linux and all frontend, Electron, and packaging-script tests on Windows. Frontend discovery is restricted to `src/**/*.test.ts`, `tests/**/*.test.js`, `electron/**/*.test.js`, and `scripts/**/*.test.js`, so packaged copies under `app/build` are excluded. Test files run serially to avoid Electron process startup contention. New regression tests in these locations are included automatically; update the test command and this document when adding a new test location or filename convention. Keep `Contract` in Go contract regression test names so they remain easy to run separately.

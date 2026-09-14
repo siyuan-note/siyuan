@@ -6,6 +6,7 @@ import {
 } from "./catalog";
 
 export interface IEntryVisibilityMenuRuntime {
+    isInMobileApp?: boolean;
     getEntryOrder: (parentPath: string) => string[];
     isEntryVisible: (path: string) => boolean;
     setEntryVisibilityValue: (path: string, visible: boolean) => void;
@@ -26,6 +27,7 @@ const getConfigurableEntries = (parentPath: string, runtime: IEntryVisibilityMen
 export const buildEntryVisibilityMenuItems = (parentPath: string, runtime: IEntryVisibilityMenuRuntime,
                                                 filter?: (key: string) => boolean): IMenu[] => {
     return getConfigurableEntries(parentPath, runtime)
+        .filter((item) => parentPath !== "topBar" || item.key !== "barExit" || runtime.isInMobileApp)
         .filter((item) => !filter || filter(item.key))
         .map((item) => {
             const path = `${parentPath}.${item.key}`;
@@ -45,7 +47,7 @@ export const buildEntryVisibilityMenuItems = (parentPath: string, runtime: IEntr
 
 export const buildEntryVisibilityToggleItem = (path: string, runtime: IEntryVisibilityMenuRuntime): IMenu | undefined => {
     const node = getEntryCatalogNode(path);
-    if (!node || !isEntryCatalogNodeConfigurable(node)) {
+    if (!node || !isEntryCatalogNodeConfigurable(node) || (path === "topBar.barExit" && !runtime.isInMobileApp)) {
         return undefined;
     }
     const visible = runtime.isEntryVisible(path);

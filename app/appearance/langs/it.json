@@ -1,5 +1,13 @@
 {
 	"mobileFileTreeMultiSelectTip": "Tocca i documenti o i quaderni per selezionarli o deselezionarli",
+	"repoBatchDelete": "Elimina i contrassegni selezionati",
+	"repoBatchDone": "Fine",
+	"repoBatchClear": "Deseleziona",
+	"repoBatchSelection": "Selezionati in locale: ${x} · Nel cloud: ${y}",
+	"repoTaggedSnapshots": "Istantanee contrassegnate",
+	"repoBatchManage": "Gestione in blocco",
+	"repoRemoveTagsTip": "Verranno rimossi solo i contrassegni selezionati. I dati delle istantanee non vengono eliminati subito e il repository non viene pulito automaticamente.",
+	"repoBatchResult": "Rimossi: ${x}. Non riusciti o non verificati: ${y}; questi elementi restano selezionati per riprovare.",
 	"enterMasterPassword": "Inserisci la password principale",
 	"orderedListItemBlock": "Blocco elemento di elenco ordinato",
 	"unorderedListItemBlock": "Blocco elemento di elenco non ordinato",

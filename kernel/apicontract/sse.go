@@ -23,9 +23,13 @@ func SSEEvent[Payload any](name string) SSEEventDefinition {
 	return SSEEventDefinition{name: name, payload: reflect.TypeFor[Payload]()}
 }
 
-type SSEDefinition struct{ Events []SSEEventDefinition }
+type SSEDefinition struct {
+	Events []SSEEventDefinition
+	Raw    *RawSSEDefinition
+}
 type SSESchema struct {
-	Events map[string]*Schema `json:"events"`
+	Events map[string]*Schema `json:"events,omitempty"`
+	Raw    *RawSSEDefinition  `json:"raw,omitempty"`
 }
 
 func SSEOptions(events ...SSEEventDefinition) ResponseOptions {
@@ -43,6 +47,9 @@ func StreamSSE[Data any](serve func(http.ResponseWriter, *http.Request)) Respons
 func (r Response[Data]) Stream() func(http.ResponseWriter, *http.Request) { return r.stream }
 
 func (b *schemaBuilder) sseSchema(definition *SSEDefinition) (*SSESchema, error) {
+	if definition != nil && definition.Raw != nil {
+		return rawSSESchema(definition)
+	}
 	if definition == nil || len(definition.Events) == 0 {
 		return nil, fmt.Errorf("SSE output requires event declarations")
 	}
@@ -68,6 +75,9 @@ func (b *Bundle) ValidateSSEEvent(method, path, name string, payload []byte) err
 		}
 		if endpoint.SSE == nil {
 			return fmt.Errorf("endpoint does not declare SSE events")
+		}
+		if endpoint.SSE.Raw != nil {
+			return b.ValidateRawSSEEvent(method, path, name, "", 0, payload)
 		}
 		schema, exists := endpoint.SSE.Events[name]
 		if !exists {

@@ -44,7 +44,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func SyncDataDownload() {
+func SyncDataDownload() (err error) {
+	err = errors.New("sync download did not complete")
 	defer logging.Recover()
 
 	if !checkSync(false, false, true) {
@@ -54,7 +55,7 @@ func SyncDataDownload() {
 	scope := lanSyncScope()
 	latestID := getSyncCloudLatestID()
 	if "" != latestID {
-		_, _ = syncRemoteRequests.do(scope, latestID, func() error {
+		_, err = syncRemoteRequests.do(scope, latestID, func() error {
 			lockSync()
 			defer unlockSync()
 			if syncRemoteRequests.isCompleted(scope, latestID) {
@@ -74,9 +75,10 @@ func SyncDataDownload() {
 		return
 	}
 	defer unlock()
-	if err := syncDataDownloadLocked(); nil == err {
+	if err = syncDataDownloadLocked(); nil == err {
 		completeCurrentSyncRemoteRequest(scope)
 	}
+	return
 }
 
 func syncDataDownloadLocked() (err error) {
@@ -135,7 +137,8 @@ func completeCurrentSyncRemoteRequest(scope string) {
 	syncRemoteRequests.complete(scope, latest.ID)
 }
 
-func SyncDataUpload() {
+func SyncDataUpload() (err error) {
+	err = errors.New("sync upload did not complete")
 	defer logging.Recover()
 
 	if !checkSync(false, false, true) {
@@ -152,7 +155,7 @@ func SyncDataUpload() {
 	now := util.CurrentTimeMillis()
 	Conf.Sync.Synced = now
 
-	err := syncRepoUploadWithDNSRetry()
+	err = syncRepoUploadWithDNSRetry()
 	code := 1
 	if err != nil {
 		code = 2

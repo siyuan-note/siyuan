@@ -6,7 +6,7 @@
 		"id": "20211226122358-hctqcn5",
 		"title": "Kernel 參數",
 		"type": "doc",
-		"updated": "20260718113226"
+		"updated": "20260914011526"
 	},
 	"Children": [
 		{
@@ -292,7 +292,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220517144220-400hbxb",
-				"updated": "20260302173650"
+				"updated": "20260914011526"
 			},
 			"Children": [
 				{
@@ -317,7 +317,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220517144220-5dryt3i",
-				"updated": "20260718113226"
+				"updated": "20260914011526"
 			},
 			"Children": [
 				{
@@ -481,6 +481,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
 					"TextMarkTextContent": "sk"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "sr"
 				},
 				{
 					"Type": "NodeText",

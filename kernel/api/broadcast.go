@@ -357,7 +357,13 @@ type ChannelInfo struct {
 // @example
 //
 //	"ws://localhost:6806/ws/broadcast?channel=test"
-func broadcast(c *gin.Context) {
+var broadcast = contractHandler(apicontract.BroadcastWebSocket, func(c *gin.Context, _ apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
+	return apicontract.UpgradeWebSocket[apicontract.Null](func(http.ResponseWriter, *http.Request) {
+		serveBroadcastWebSocket(c)
+	})
+})
+
+func serveBroadcastWebSocket(c *gin.Context) {
 	var (
 		channel          = c.Query("channel")
 		broadcastChannel *BroadcastChannel
@@ -512,7 +518,13 @@ func PruneBroadcastChannels() []string {
 // @example
 //
 //	"http://localhost:6806/es/broadcast/subscribe?retry=1000&channel=test1&channel=test2"
-func broadcastSubscribe(c *gin.Context) {
+var broadcastSubscribe = contractHandler(apicontract.BroadcastSubscribe, func(c *gin.Context, _ apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
+	return apicontract.StreamSSE[apicontract.Null](func(http.ResponseWriter, *http.Request) {
+		serveBroadcastSubscribe(c)
+	})
+})
+
+func serveBroadcastSubscribe(c *gin.Context) {
 	// REF: https://github.com/gin-gonic/examples/blob/master/server-sent-event/main.go
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")

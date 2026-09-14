@@ -132,7 +132,7 @@ export class Menus {
                 } else if (target.classList.contains("dock") || target.classList.contains("dock__items") ||
                     target.classList.contains("dock__item--space")) {
                     hideTooltip();
-                    initDockMenu(undefined, target.closest(".dock") || undefined).popup({
+                    initDockMenu(undefined, target).popup({
                         x: event.clientX,
                         y: event.clientY
                     });

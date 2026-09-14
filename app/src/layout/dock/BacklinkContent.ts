@@ -1,3 +1,4 @@
+import {normalizeAssetOpenConfig} from "../../editor/assetOpen";
 import {bindPanelSearch} from "./panelSearch";
 import type {Tab} from "../Tab";
 import {Model} from "../Model";
@@ -777,7 +778,7 @@ export class BacklinkContent extends Model {
                 window.siyuan.config.editor.backmentionSort = sortValue;
             }
             fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
-                window.siyuan.config.editor = response.data;
+                window.siyuan.config.editor = {...response.data, assetOpen: normalizeAssetOpenConfig(response.data.assetOpen)};
             });
             this.searchBacklinks();
         };

@@ -41,8 +41,11 @@ type Definition struct {
 	NoContent               bool
 	WebSocket               *WebSocketDefinition
 	SSE                     *SSEDefinition
+	Proxy                   *ProxyDefinition
+	PluginService           *PluginServiceDefinition
 	ContentVariants         []HTTPContentVariant
 	FastJSON                bool
+	EmptyResponseStatuses   []int
 	AdditionalErrorStatuses []int
 }
 
@@ -62,8 +65,11 @@ type ResponseOptions struct {
 	NoContent               bool
 	WebSocket               *WebSocketDefinition
 	SSE                     *SSEDefinition
+	Proxy                   *ProxyDefinition
+	PluginService           *PluginServiceDefinition
 	ContentVariants         []HTTPContentVariant
 	FastJSON                bool
+	EmptyResponseStatuses   []int
 	AdditionalErrorStatuses []int
 }
 
@@ -118,8 +124,9 @@ func define[Request, Data any](name, path string, body BodyMode, response Respon
 	d := Definition{Name: name, Path: path, Methods: methods, Body: body,
 		Request: reflect.TypeFor[Request](), Data: reflect.TypeFor[Data](),
 		ErrorCodes: append([]int{-1}, response.AdditionalCodes...), ErrorText: response.Text, DataNonNullable: response.NonNullable, DataOnError: response.DataOnError,
-		Output: response.Output, ErrorStatus: response.ErrorStatus, NoContent: response.NoContent, WebSocket: response.WebSocket, SSE: response.SSE,
-		AdditionalErrorStatuses: append([]int(nil), response.AdditionalErrorStatuses...), ContentVariants: append([]HTTPContentVariant(nil), response.ContentVariants...), FastJSON: response.FastJSON}
+		Output: response.Output, ErrorStatus: response.ErrorStatus, NoContent: response.NoContent, WebSocket: response.WebSocket, SSE: response.SSE, Proxy: response.Proxy, PluginService: response.PluginService,
+		AdditionalErrorStatuses: append([]int(nil), response.AdditionalErrorStatuses...), ContentVariants: append([]HTTPContentVariant(nil), response.ContentVariants...), FastJSON: response.FastJSON,
+		EmptyResponseStatuses: append([]int(nil), response.EmptyResponseStatuses...)}
 	definitions = append(definitions, d)
 	return Endpoint[Request, Data]{definition: d}
 }
@@ -806,6 +813,8 @@ var GetImageOCRText = define[AssetOCRTextRequest, AssetTextData]("getImageOCRTex
 var SetImageOCRText = define[SetAssetOCRTextRequest, Null]("setImageOCRText", "/api/asset/setImageOCRText", JSONBody, ResponseOptions{}, "POST")
 var AssetOCR = define[AssetPathRequest, AssetOCRData]("ocr", "/api/asset/ocr", JSONBody, ResponseOptions{}, "POST")
 var RenameAsset = define[RenameAssetRequest, AssetRenameData]("renameAsset", "/api/asset/renameAsset", JSONBody, ResponseOptions{}, "POST")
+var FindAssetReferences = define[FindAssetReferencesRequest, AssetReferencesData]("findAssetReferences", "/api/asset/findAssetReferences", JSONBody, ResponseOptions{DataOnError: true}, "POST")
+var RelinkAsset = define[RelinkAssetRequest, AssetReferencesData]("relinkAsset", "/api/asset/relinkAsset", JSONBody, ResponseOptions{DataOnError: true}, "POST")
 var GetDocImageAssets = define[AssetDocumentRequest, []string]("getDocImageAssets", "/api/asset/getDocImageAssets", JSONBody, ResponseOptions{}, "POST")
 var GetDocAssets = define[AssetDocumentAssetsRequest, []string]("getDocAssets", "/api/asset/getDocAssets", JSONBody, ResponseOptions{}, "POST")
 var SetFileAnnotation = define[SetAssetAnnotationRequest, Null]("setFileAnnotation", "/api/asset/setFileAnnotation", JSONBody, ResponseOptions{}, "POST")
@@ -820,3 +829,180 @@ var AssetUploadCloudByAssetsPaths = define[AssetPathsCloudUploadRequest, Null]("
 var InsertLocalAssets = define[InsertLocalAssetsRequest, AssetUploadData]("insertLocalAssets", "/api/asset/insertLocalAssets", JSONBody, ResponseOptions{DataOnError: true}, "POST")
 var InsertCover = define[InsertCoverRequest, AssetInsertCoverData]("insertCover", "/api/asset/insertCover", JSONBody, ResponseOptions{}, "POST")
 var UploadAsset = define[UploadAssetRequest, AssetUploadData]("uploadAsset", "/api/asset/upload", MultipartBody, ResponseOptions{}, "POST")
+
+var SetConfSnippet = define[SetConfSnippetRequest, *SettingSnpt]("setConfSnippet", "/api/setting/setSnippet", JSONBody, ResponseOptions{}, "POST")
+var SetBazaar = define[SetBazaarRequest, *SettingBazaar]("setBazaar", "/api/setting/setBazaar", JSONBody, ResponseOptions{}, "POST")
+var SetAI = define[SetAIRequest, *SettingAI]("setAI", "/api/setting/setAI", JSONBody, ResponseOptions{}, "POST")
+var SetSecrets = define[SetSecretsRequest, *SettingSecrets]("setSecrets", "/api/setting/setSecrets", JSONBody, ResponseOptions{}, "POST")
+var SetVariables = define[SetVariablesRequest, *SettingVariables]("setVariables", "/api/setting/setVariables", JSONBody, ResponseOptions{}, "POST")
+var SetFlashcard = define[SetFlashcardRequest, *SettingFlashcard]("setFlashcard", "/api/setting/setFlashcard", JSONBody, ResponseOptions{}, "POST")
+var SetEditor = define[SetEditorRequest, *SettingEditor]("setEditor", "/api/setting/setEditor", JSONBody, ResponseOptions{}, "POST")
+var SetExport = define[SetExportRequest, *SettingExport]("setExport", "/api/setting/setExport", JSONBody, ResponseOptions{}, "POST")
+var SetFiletree = define[SetFiletreeRequest, *SettingFileTree]("setFiletree", "/api/setting/setFiletree", JSONBody, ResponseOptions{}, "POST")
+var SetSearch = define[SetSearchRequest, *SettingSearch]("setSearch", "/api/setting/setSearch", JSONBody, ResponseOptions{}, "POST")
+var SetAppearance = define[SetAppearanceRequest, *SettingAppearance]("setAppearance", "/api/setting/setAppearance", JSONBody, ResponseOptions{}, "POST")
+var SetEntryVisibility = define[SetEntryVisibilityRequest, *SettingEntryVisibility]("setEntryVisibility", "/api/setting/setEntryVisibility", JSONBody, ResponseOptions{}, "POST")
+var SetPublish = define[SetPublishRequest, SettingPublishData]("setPublish", "/api/setting/setPublish", JSONBody, ResponseOptions{}, "POST")
+var GetBootAppearances = define[EmptyRequest, SettingBootAppearancesData]("getBootAppearances", "/api/setting/getBootAppearances", NoBody, ResponseOptions{}, "POST")
+var SetBootAppearance = define[SettingBootAppearanceRequest, *SettingBootAppearanceSelection]("setBootAppearance", "/api/setting/setBootAppearance", JSONBody, ResponseOptions{}, "POST")
+var SetBazaarPetalDisabled = define[SettingPetalDisabledRequest, SettingPetalDisabledData]("setBazaarPetalDisabled", "/api/setting/setBazaarPetalDisabled", JSONBody, ResponseOptions{}, "POST")
+var SetKeymap = define[SettingKeymapRequest, Null]("setKeymap", "/api/setting/setKeymap", JSONBody, ResponseOptions{}, "POST")
+var SetTheme = define[SettingThemeRequest, Null]("setTheme", "/api/setting/setTheme", JSONBody, ResponseOptions{}, "POST")
+var SetIcon = define[SettingIconRequest, Null]("setIcon", "/api/setting/setIcon", JSONBody, ResponseOptions{}, "POST")
+var GetPublish = define[EmptyRequest, SettingPublishData]("getPublish", "/api/setting/getPublish", NoBody, ResponseOptions{}, "POST")
+var GetCloudUser = define[SettingCloudUserRequest, *SettingUser]("getCloudUser", "/api/setting/getCloudUser", JSONBody, ResponseOptions{AdditionalCodes: []int{1, 255}, DataOnError: true}, "POST")
+var LogoutCloudUser = define[EmptyRequest, Null]("logoutCloudUser", "/api/setting/logoutCloudUser", NoBody, ResponseOptions{}, "POST")
+var Login2faCloudUser = define[SettingLogin2faRequest, Login2faEnvelope]("login2faCloudUser", "/api/setting/login2faCloudUser", JSONBody, ResponseOptions{Output: DirectJSONOutput}, "POST")
+var SetEmoji = define[SettingEmojiRequest, Null]("setEmoji", "/api/setting/setEmoji", JSONBody, ResponseOptions{}, "POST")
+
+var RemoveUnusedAttributeView = define[RemoveUnusedAttributeViewRequest, AVIDData]("removeUnusedAttributeView", "/api/av/removeUnusedAttributeView", JSONBody, ResponseOptions{}, "POST")
+var RemoveUnusedAttributeViews = define[EmptyRequest, AVPathsData]("removeUnusedAttributeViews", "/api/av/removeUnusedAttributeViews", NoBody, ResponseOptions{}, "POST")
+var GetUnusedAttributeViews = define[EmptyRequest, []*AssetUnusedItem]("getUnusedAttributeViews", "/api/av/getUnusedAttributeViews", NoBody, ResponseOptions{}, "POST")
+var GetAttributeViewItemIDsByBoundIDs = define[GetAttributeViewItemIDsByBoundIDsRequest, map[string]string]("getAttributeViewItemIDsByBoundIDs", "/api/av/getAttributeViewItemIDsByBoundIDs", JSONBody, ResponseOptions{}, "POST")
+var GetAttributeViewBoundBlockIDsByItemIDs = define[GetAttributeViewBoundBlockIDsByItemIDsRequest, map[string]string]("getAttributeViewBoundBlockIDsByItemIDs", "/api/av/getAttributeViewBoundBlockIDsByItemIDs", JSONBody, ResponseOptions{}, "POST")
+var GetAttributeViewItemStatuses = define[GetAttributeViewItemStatusesRequest, map[string]string]("getAttributeViewItemStatuses", "/api/av/getAttributeViewItemStatuses", JSONBody, ResponseOptions{}, "POST")
+var GetAttributeViewAddingBlockDefaultValues = define[GetAttributeViewAddingBlockDefaultValuesRequest, AVValuesData]("getAttributeViewAddingBlockDefaultValues", "/api/av/getAttributeViewAddingBlockDefaultValues", JSONBody, ResponseOptions{}, "POST")
+var BatchReplaceAttributeViewBlocks = define[BatchReplaceAttributeViewBlocksRequest, Null]("batchReplaceAttributeViewBlocks", "/api/av/batchReplaceAttributeViewBlocks", JSONBody, ResponseOptions{}, "POST")
+var SetAttrViewGroup = define[SetAttrViewGroupRequest, AVRenderResult]("setAttrViewGroup", "/api/av/setAttrViewGroup", JSONBody, ResponseOptions{DataOnError: true}, "POST")
+var SetAttrViewFilters = define[SetAttrViewFiltersRequest, Null]("setAttrViewFilters", "/api/av/setAttrViewFilters", JSONBody, ResponseOptions{}, "POST")
+var SetAttrViewContextFilter = define[SetAttrViewContextFilterRequest, AVContextFilterData]("setAttrViewContextFilter", "/api/av/setAttrViewContextFilter", JSONBody, ResponseOptions{}, "POST")
+var SetAttrViewSorts = define[SetAttrViewSortsRequest, Null]("setAttrViewSorts", "/api/av/setAttrViewSorts", JSONBody, ResponseOptions{}, "POST")
+var ChangeAttrViewLayout = define[ChangeAttrViewLayoutRequest, AVRenderResult]("changeAttrViewLayout", "/api/av/changeAttrViewLayout", JSONBody, ResponseOptions{DataOnError: true}, "POST")
+var DuplicateAttributeViewBlock = define[DuplicateAttributeViewBlockRequest, AVDuplicateData]("duplicateAttributeViewBlock", "/api/av/duplicateAttributeViewBlock", JSONBody, ResponseOptions{}, "POST")
+var GetAttributeViewKeysByAvID = define[GetAttributeViewKeysByAvIDRequest, []*AVKey]("getAttributeViewKeysByAvID", "/api/av/getAttributeViewKeysByAvID", JSONBody, ResponseOptions{}, "POST")
+var GetAttributeViewKeysByID = define[GetAttributeViewKeysByIDRequest, []*AVKey]("getAttributeViewKeysByID", "/api/av/getAttributeViewKeysByID", JSONBody, ResponseOptions{}, "POST")
+var GetMirrorDatabaseBlocks = define[GetMirrorDatabaseBlocksRequest, RefDefsData]("getMirrorDatabaseBlocks", "/api/av/getMirrorDatabaseBlocks", JSONBody, ResponseOptions{}, "POST")
+var SetDatabaseBlockView = define[SetDatabaseBlockViewRequest, Null]("setDatabaseBlockView", "/api/av/setDatabaseBlockView", JSONBody, ResponseOptions{}, "POST")
+var GetAttributeViewPrimaryKeyValues = define[GetAttributeViewPrimaryKeyValuesRequest, AVPrimaryValuesData]("getAttributeViewPrimaryKeyValues", "/api/av/getAttributeViewPrimaryKeyValues", JSONBody, ResponseOptions{}, "POST")
+var GetAttributeViewRelationCandidates = define[GetAttributeViewRelationCandidatesRequest, AVRelationCandidatesData]("getAttributeViewRelationCandidates", "/api/av/getAttributeViewRelationCandidates", JSONBody, ResponseOptions{}, "POST")
+var AppendAttributeViewDetachedBlocksWithValues = define[AppendAttributeViewDetachedBlocksWithValuesRequest, Null]("appendAttributeViewDetachedBlocksWithValues", "/api/av/appendAttributeViewDetachedBlocksWithValues", JSONBody, ResponseOptions{}, "POST")
+var AddAttributeViewBlocks = define[AddAttributeViewBlocksRequest, Null]("addAttributeViewBlocks", "/api/av/addAttributeViewBlocks", JSONBody, ResponseOptions{}, "POST")
+var RemoveAttributeViewBlocks = define[RemoveAttributeViewBlocksRequest, Null]("removeAttributeViewBlocks", "/api/av/removeAttributeViewBlocks", JSONBody, ResponseOptions{}, "POST")
+var AddAttributeViewKey = define[AddAttributeViewKeyRequest, Null]("addAttributeViewKey", "/api/av/addAttributeViewKey", JSONBody, ResponseOptions{}, "POST")
+var RemoveAttributeViewKey = define[RemoveAttributeViewKeyRequest, Null]("removeAttributeViewKey", "/api/av/removeAttributeViewKey", JSONBody, ResponseOptions{}, "POST")
+var SortAttributeViewViewKey = define[SortAttributeViewViewKeyRequest, Null]("sortAttributeViewViewKey", "/api/av/sortAttributeViewViewKey", JSONBody, ResponseOptions{}, "POST")
+var SortAttributeViewKey = define[SortAttributeViewKeyRequest, Null]("sortAttributeViewKey", "/api/av/sortAttributeViewKey", JSONBody, ResponseOptions{}, "POST")
+var GetAttributeViewFilterSort = define[GetAttributeViewFilterSortRequest, AVFilterSortData]("getAttributeViewFilterSort", "/api/av/getAttributeViewFilterSort", JSONBody, ResponseOptions{}, "POST")
+var SearchAttributeViewRollupDestKeys = define[SearchAttributeViewRollupDestKeysRequest, AVKeysData]("searchAttributeViewRollupDestKeys", "/api/av/searchAttributeViewRollupDestKeys", JSONBody, ResponseOptions{}, "POST")
+var SearchAttributeViewRelationKey = define[SearchAttributeViewRelationKeyRequest, AVKeysData]("searchAttributeViewRelationKey", "/api/av/searchAttributeViewRelationKey", JSONBody, ResponseOptions{}, "POST")
+var GetAttributeView = define[GetAttributeViewRequest, AVData]("getAttributeView", "/api/av/getAttributeView", JSONBody, ResponseOptions{}, "POST")
+var GetAttributeViewPasteRows = define[GetAttributeViewPasteRowsRequest, AVPasteRowsData]("getAttributeViewPasteRows", "/api/av/getAttributeViewPasteRows", JSONBody, ResponseOptions{}, "POST")
+var GetAttributeViewFieldViews = define[GetAttributeViewFieldViewsRequest, AVFieldViewsData]("getAttributeViewFieldViews", "/api/av/getAttributeViewFieldViews", JSONBody, ResponseOptions{}, "POST")
+var CreateAttributeViewItem = define[CreateAttributeViewItemRequest, AVCreateItemResult]("createAttributeViewItem", "/api/av/createAttributeViewItem", JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
+var CreateAttributeViewItemWithMarkdown = define[CreateAttributeViewItemWithMarkdownRequest, AVCreateItemResult]("createAttributeViewItemWithMarkdown", "/api/av/createAttributeViewItemWithMarkdown", JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
+var CreateAttributeViewItemDocs = define[CreateAttributeViewItemDocsRequest, AVCreateItemDocsResult]("createAttributeViewItemDocs", "/api/av/createAttributeViewItemDocs", JSONBody, ResponseOptions{DataOnError: true, AdditionalCodes: []int{1}}, "POST")
+var SearchAttributeView = define[SearchAttributeViewRequest, AVSearchData]("searchAttributeView", "/api/av/searchAttributeView", JSONBody, ResponseOptions{}, "POST")
+var RenderSnapshotAttributeView = define[RenderSnapshotAttributeViewRequest, AVArchiveRenderData]("renderSnapshotAttributeView", "/api/av/renderSnapshotAttributeView", JSONBody, ResponseOptions{}, "POST")
+var RenderHistoryAttributeView = define[RenderHistoryAttributeViewRequest, AVArchiveRenderData]("renderHistoryAttributeView", "/api/av/renderHistoryAttributeView", JSONBody, ResponseOptions{}, "POST")
+var RenderAttributeView = define[RenderAttributeViewRequest, AVRenderResult]("renderAttributeView", "/api/av/renderAttributeView", JSONBody, ResponseOptions{DataOnError: true, FastJSON: true}, "POST")
+var GetCurrentAttrViewImages = define[GetCurrentAttrViewImagesRequest, []string]("getCurrentAttrViewImages", "/api/av/getCurrentAttrViewImages", JSONBody, ResponseOptions{}, "POST")
+var GetAttributeViewKeys = define[GetAttributeViewKeysRequest, []*AVBlockAttributeViewKeys]("getAttributeViewKeys", "/api/av/getAttributeViewKeys", JSONBody, ResponseOptions{}, "POST")
+var GetAttributeViewSearchTarget = define[GetAttributeViewSearchTargetRequest, *AVAttributeViewSearchTarget]("getAttributeViewSearchTarget", "/api/av/getAttributeViewSearchTarget", JSONBody, ResponseOptions{}, "POST")
+var GetAttributeViewBacklinks = define[GetAttributeViewBacklinksRequest, *AVAttributeViewBacklinks]("getAttributeViewBacklinks", "/api/av/getAttributeViewBacklinks", JSONBody, ResponseOptions{}, "POST")
+var SetAttributeViewBlockAttr = define[SetAttributeViewBlockAttrRequest, AVValueData]("setAttributeViewBlockAttr", "/api/av/setAttributeViewBlockAttr", JSONBody, ResponseOptions{}, "POST")
+var BatchSetAttributeViewBlockAttrs = define[BatchSetAttributeViewBlockAttrsRequest, Null]("batchSetAttributeViewBlockAttrs", "/api/av/batchSetAttributeViewBlockAttrs", JSONBody, ResponseOptions{}, "POST")
+var GetAttributeViewRowSort = define[GetAttributeViewRowSortRequest, AVRowSortPreview]("getAttributeViewRowSort", "/api/av/getAttributeViewRowSort", StructJSONBody, ResponseOptions{}, "POST")
+
+var AIChatGPT = define[AIMessageRequest, string]("chatGPT", "/api/ai/chatGPT", JSONBody, ResponseOptions{}, "POST")
+var AIChatGPTWithAction = define[AIActionRequest, string]("chatGPTWithAction", "/api/ai/chatGPTWithAction", JSONBody, ResponseOptions{}, "POST")
+var AIListEditorActions = define[EmptyRequest, []*AIEditorAction]("lsAIEditorActions", "/api/ai/editor/lsActions", NoBody, ResponseOptions{}, "POST")
+var AISaveEditorAction = define[AIEditorActionSaveRequest, *AIEditorAction]("saveAIEditorAction", "/api/ai/editor/saveAction", JSONBody, ResponseOptions{}, "POST")
+var AIRemoveEditorAction = define[AIEditorActionIDRequest, Null]("removeAIEditorAction", "/api/ai/editor/removeAction", JSONBody, ResponseOptions{}, "POST")
+var AITestModel = define[AIModelRequest, AIModelTestData]("testModel", "/api/ai/testModel", JSONBody, ResponseOptions{}, "POST")
+var AITestEmbeddingModel = define[EmptyRequest, AIEmbeddingTestData]("testEmbeddingModel", "/api/ai/testEmbeddingModel", NoBody, ResponseOptions{}, "POST")
+var AITestRerankModel = define[EmptyRequest, AIRerankTestData]("testRerankModel", "/api/ai/testRerankModel", NoBody, ResponseOptions{}, "POST")
+var AIListModels = define[AIProviderRequest, AIModelsData]("listModels", "/api/ai/listModels", JSONBody, ResponseOptions{}, "POST")
+var AIGetEmbeddingStat = define[EmptyRequest, *AIEmbeddingStat]("embeddingStat", "/api/ai/embeddingStat", NoBody, ResponseOptions{}, "POST")
+var AIGetMCPStatus = define[EmptyRequest, []AIMCPStatus]("mcpStatus", "/api/ai/mcpStatus", NoBody, ResponseOptions{}, "POST")
+var AIGetMCPEnvironment = define[EmptyRequest, AIMCPEnvironmentData]("mcpEnvironmentVariables", "/api/ai/mcpEnvironmentVariables", NoBody, ResponseOptions{}, "POST")
+var AIMCPOAuthAuthorize = define[AIMCPIDRequest, Null]("mcpOAuthAuthorize", "/api/ai/mcpOAuthAuthorize", JSONBody, ResponseOptions{}, "POST")
+var AIMCPOAuthDisconnect = define[AIMCPIDRequest, Null]("mcpOAuthDisconnect", "/api/ai/mcpOAuthDisconnect", JSONBody, ResponseOptions{}, "POST")
+var AIReindexEmbedding = define[EmptyRequest, Null]("reindexEmbedding", "/api/ai/reindexEmbedding", NoBody, ResponseOptions{}, "POST")
+var AIRetryFailedEmbedding = define[EmptyRequest, Null]("retryFailedEmbedding", "/api/ai/retryFailedEmbedding", NoBody, ResponseOptions{}, "POST")
+var AIAgentConfirm = define[AIConfirmRequest, Null]("agentChatConfirm", "/api/ai/agent/confirm", StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409}}, "POST")
+var AIAgentSetPermission = define[AIPermissionRequest, AIPermissionData]("setAgentSessionPermission", "/api/ai/agent/setPermission", StructJSONBody, ResponseOptions{}, "POST")
+var AIAgentQuestion = define[AIQuestionRequest, Null]("agentChatQuestion", "/api/ai/agent/question", StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409}}, "POST")
+var AIAgentBrowserCapabilityResult = define[AIBrowserCapabilityResultRequest, Null]("agentChatBrowserCapabilityResult", "/api/ai/agent/browserCapabilityResult", StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409}}, "POST")
+var AIListCapabilities = define[EmptyRequest, []AICapabilityManifest]("lsCapabilities", "/api/ai/lsCapabilities", NoBody, ResponseOptions{}, "POST")
+var AIAgentTitle = define[AITitleRequest, string]("agentChatTitle", "/api/ai/agent/title", StructJSONBody, ResponseOptions{}, "POST")
+var AIListSessions = define[AISessionsRequest, AISessionList]("lsSessions", "/api/ai/agent/lsSessions", StructJSONBody, ResponseOptions{}, "POST")
+var AIRemoveSession = define[AISessionIDRequest, Null]("removeSession", "/api/ai/agent/removeSession", StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{409, 500}}, "POST")
+var AIListSkills = define[EmptyRequest, []AISkillInfo]("lsSkills", "/api/ai/agent/lsSkills", NoBody, ResponseOptions{}, "POST")
+var AIListUserSkills = define[EmptyRequest, []AIUserSkillInfo]("lsUserSkills", "/api/ai/agent/lsUserSkills", NoBody, ResponseOptions{}, "POST")
+var AIGetSkill = define[AISkillNameRequest, AISkillData]("getSkill", "/api/ai/agent/getSkill", StructJSONBody, ResponseOptions{}, "POST")
+var AISaveSkill = define[AISkillSaveRequest, Null]("saveSkill", "/api/ai/agent/saveSkill", StructJSONBody, ResponseOptions{}, "POST")
+var AIRemoveSkill = define[AISkillNameRequest, Null]("removeSkill", "/api/ai/agent/removeSkill", StructJSONBody, ResponseOptions{}, "POST")
+var AIRenameSkill = define[AISkillRenameRequest, Null]("renameSkill", "/api/ai/agent/renameSkill", StructJSONBody, ResponseOptions{}, "POST")
+
+var AIEditorChat = define[AIEditorChatRequest, Null]("aiEditorChat", "/api/ai/editor/chat", StructJSONBody, aiEditorSSEOptions(), "POST")
+var AIAgentChat = define[AIAgentChatRequest, Null]("agentChat", "/api/ai/agent/chat", StructJSONBody, aiAgentSSEOptions(), "POST")
+var AIMCPOAuthCallback = define[EmptyRequest, BinaryContent]("mcpOAuthCallback", "/api/ai/mcp/oauth/callback/:flowID", NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}, HTTPContentVariant{Status: 400, ContentType: "text/html"}, HTTPContentVariant{Status: 403, ContentType: "text/plain"}), "GET")
+var AIGetSession = define[AISessionIDRequest, *AISession]("getSession", "/api/ai/agent/getSession", StructJSONBody, ResponseOptions{AdditionalErrorStatuses: []int{500}}, "POST")
+var AISaveSession = define[AISession, AISessionSaveData]("saveSession", "/api/ai/agent/saveSession", StructJSONBody, ResponseOptions{DataOnError: true, AdditionalErrorStatuses: []int{400, 409, 500}}, "POST")
+
+var NetworkEcho = define[EmptyRequest, NetworkEchoData]("echo", "/api/network/echo", RawBody, ResponseOptions{}, "ANY")
+var NetworkEchoPath = define[EmptyRequest, NetworkEchoData]("echoPath", "/api/network/echo/*path", RawBody, ResponseOptions{}, "ANY")
+var NetworkForwardProxy = define[NetworkForwardRequest, NetworkForwardData]("forwardProxy", "/api/network/forwardProxy", JSONBody, ResponseOptions{AdditionalCodes: []int{1, 2, 3, 4, 5, 6, 7, 8, 10}}, "POST")
+var NetworkHTTPProxy = define[EmptyRequest, ProxyFailure]("httpProxy", "/api/network/proxy", RawBody, ProxyOptions(HTTPProxy), "ANY")
+var NetworkEventSourceProxy = define[EmptyRequest, ProxyFailure]("esProxy", "/es/network/proxy", NoBody, ProxyOptions(EventSourceProxy), "GET")
+var NetworkWebSocketProxy = define[EmptyRequest, ProxyFailure]("wsProxy", "/ws/network/proxy", NoBody, ProxyOptions(WebSocketProxy), "GET")
+
+var PluginPrivateService = define[EmptyRequest, PluginServiceContent]("pluginPrivateWebServer", "/plugin/private/:name/*path", RawBody, PluginServiceOptions(), "ANY")
+
+var GetDynamicIcon = define[DynamicIconRequest, BinaryContent]("getDynamicIcon", "/api/icon/getDynamicIcon", NoBody, ResponseOptions{Output: BinaryOutput, ErrorStatus: 200, ContentVariants: []HTTPContentVariant{{Status: 200, ContentType: "image/svg+xml"}}, EmptyResponseStatuses: []int{500}}, "GET")
+
+var ExtensionCopy = define[ExtensionCopyRequest, *ExtensionCopyData]("extensionCopy", "/api/extension/copy", MultipartBody, ResponseOptions{DataOnError: true}, "POST")
+
+var SystemBootProgressSSE = define[EmptyRequest, Null]("bootProgressSSE", "/api/system/bootProgressSSE", NoBody, SSEOptions(SSEEvent[BootProgressData]("")), "GET")
+var SystemGetBootAppearance = define[EmptyRequest, *SettingBootAppearance]("getBootAppearance", "/api/system/getBootAppearance", NoBody, ResponseOptions{EmptyResponseStatuses: []int{403}}, "GET")
+var SystemGetCaptcha = define[EmptyRequest, BinaryContent]("getCaptcha", "/api/system/getCaptcha", NoBody, ResponseOptions{Output: BinaryOutput, ErrorStatus: 200, ContentVariants: []HTTPContentVariant{{Status: 200, ContentType: "image/png"}}, EmptyResponseStatuses: []int{500}}, "GET")
+var SystemOIDCCallback = define[SystemOIDCCallbackRequest, BinaryContent]("oidcCallback", "/api/system/oidc/callback", NoBody, HTTPContentOptions(HTTPContentVariant{Status: 200, ContentType: "text/html"}, HTTPContentVariant{Status: 302, ContentType: "text/html"}), "GET")
+var SystemAddCustomEmoji = define[SystemCustomEmojiRequest, SystemPathData]("addCustomEmoji", "/api/system/addCustomEmoji", FormBody, ResponseOptions{AdditionalCodes: []int{400, 413}}, "POST")
+var SystemCheckUpdate = define[SystemCheckUpdateRequest, Null]("checkUpdate", "/api/system/checkUpdate", JSONBody, ResponseOptions{}, "POST")
+var SystemCheckWorkspaceDir = define[SystemPathRequest, SystemWorkspaceCheckData]("checkWorkspaceDir", "/api/system/checkWorkspaceDir", JSONBody, ResponseOptions{}, "POST")
+var SystemCreateWorkspaceDir = define[SystemPathRequest, Null]("createWorkspaceDir", "/api/system/createWorkspaceDir", JSONBody, ResponseOptions{}, "POST")
+var SystemDismissOnboarding = define[EmptyRequest, *SystemOnboarding]("dismissOnboarding", "/api/system/dismissOnboarding", NoBody, ResponseOptions{}, "POST")
+var SystemEnsureOnboarding = define[EmptyRequest, *SystemOnboarding]("ensureOnboarding", "/api/system/ensureOnboarding", NoBody, ResponseOptions{}, "POST")
+var SystemExit = define[SystemExitRequest, SystemExitData]("exit", "/api/system/exit", JSONBody, ResponseOptions{AdditionalCodes: []int{1, 2}, DataOnError: true}, "POST")
+var SystemExportConf = define[EmptyRequest, SystemExportConfData]("exportConf", "/api/system/exportConf", NoBody, ResponseOptions{}, "POST")
+var SystemExportLog = define[EmptyRequest, SystemZipData]("exportLog", "/api/system/exportLog", NoBody, ResponseOptions{}, "POST")
+var SystemExportTLSCABundle = define[EmptyRequest, SystemPathData]("exportTLSCABundle", "/api/system/exportTLSCABundle", NoBody, ResponseOptions{}, "POST")
+var SystemExportTLSCACert = define[EmptyRequest, SystemPathData]("exportTLSCACert", "/api/system/exportTLSCACert", NoBody, ResponseOptions{}, "POST")
+var SystemGetChangelog = define[SystemChangelogRequest, SystemChangelogData]("getChangelog", "/api/system/getChangelog", LegacyOptionalBody, ResponseOptions{}, "POST")
+var SystemGetConf = define[EmptyRequest, SystemConfData]("getConf", "/api/system/getConf", NoBody, ResponseOptions{}, "POST")
+var SystemGetCustomFonts = define[EmptyRequest, []*SystemCustomFont]("getCustomFonts", "/api/system/getCustomFonts", NoBody, ResponseOptions{}, "POST")
+var SystemGetEmojiConf = define[EmptyRequest, []*SystemEmojiGroup]("getEmojiConf", "/api/system/getEmojiConf", NoBody, ResponseOptions{}, "POST")
+var SystemGetMobileWorkspaces = define[EmptyRequest, []string]("getMobileWorkspaces", "/api/system/getMobileWorkspaces", NoBody, ResponseOptions{}, "POST")
+var SystemGetSysFonts = define[EmptyRequest, []*SystemFont]("getSysFonts", "/api/system/getSysFonts", NoBody, ResponseOptions{}, "POST")
+var SystemGetWorkspaces = define[EmptyRequest, []*SystemWorkspace]("getWorkspaces", "/api/system/getWorkspaces", NoBody, ResponseOptions{}, "POST")
+var SystemImportConf = define[SystemImportConfRequest, Null]("importConf", "/api/system/importConf", MultipartBody, ResponseOptions{}, "POST")
+var SystemImportCustomFont = define[SystemImportFileRequest, *SystemCustomFont]("importCustomFont", "/api/system/importCustomFont", MultipartBody, ResponseOptions{AdditionalCodes: []int{400, 413}}, "POST")
+var SystemImportTLSCABundle = define[SystemImportFileRequest, SystemMessageData]("importTLSCABundle", "/api/system/importTLSCABundle", MultipartBody, ResponseOptions{}, "POST")
+var SystemLoginAuth = define[SystemLoginAuthRequest, Null]("loginAuth", "/api/system/loginAuth", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var SystemLogoutAuth = define[EmptyRequest, Null]("logoutAuth", "/api/system/logoutAuth", NoBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")
+var SystemOIDCMobileCallback = define[SystemOIDCMobileRequest, SystemOIDCMobileData]("oidcMobileCallback", "/api/system/oidc/mobileCallback", StructJSONBody, ResponseOptions{}, "POST")
+var SystemOIDCPoll = define[SystemOIDCPollRequest, SystemOIDCPollData]("oidcPoll", "/api/system/oidc/poll", StructJSONBody, ResponseOptions{}, "POST")
+var SystemOIDCStart = define[SystemOIDCStartRequest, SystemOIDCStartData]("oidcStart", "/api/system/oidc/start", StructJSONBody, ResponseOptions{}, "POST")
+var SystemOIDCValidateStart = define[SystemOIDCRequest, SystemOIDCStartData]("oidcValidateStart", "/api/system/oidc/validate", StructJSONBody, ResponseOptions{}, "POST")
+var SystemOIDCValidateActivate = define[SystemOIDCPollRequest, SystemOIDCActivateData]("oidcValidateActivate", "/api/system/oidc/validateActivate", StructJSONBody, ResponseOptions{}, "POST")
+var SystemOIDCValidateCancel = define[SystemOIDCPollRequest, Null]("oidcValidateCancel", "/api/system/oidc/validateCancel", StructJSONBody, ResponseOptions{}, "POST")
+var SystemOIDCValidatePoll = define[SystemOIDCPollRequest, SystemOIDCValidatePollData]("oidcValidatePoll", "/api/system/oidc/validatePoll", StructJSONBody, ResponseOptions{}, "POST")
+var SystemRemoveCustomFont = define[SystemRemoveCustomFontRequest, SystemRemoveCustomFontData]("removeCustomFont", "/api/system/removeCustomFont", JSONBody, ResponseOptions{AdditionalCodes: []int{400, 404}}, "POST")
+var SystemRemoveWorkspaceDir = define[SystemPathRequest, Null]("removeWorkspaceDir", "/api/system/removeWorkspaceDir", JSONBody, ResponseOptions{}, "POST")
+var SystemRemoveWorkspaceDirPhysically = define[SystemPathRequest, Null]("removeWorkspaceDirPhysically", "/api/system/removeWorkspaceDirPhysically", JSONBody, ResponseOptions{}, "POST")
+var SystemSetAPIToken = define[SystemAPITokenRequest, Null]("setAPIToken", "/api/system/setAPIToken", JSONBody, ResponseOptions{}, "POST")
+var SystemSetAccessAuthCode = define[SystemAccessAuthCodeRequest, Null]("setAccessAuthCode", "/api/system/setAccessAuthCode", JSONBody, ResponseOptions{}, "POST")
+var SystemSetAppearanceMode = define[SystemAppearanceModeRequest, SystemAppearanceData]("setAppearanceMode", "/api/system/setAppearanceMode", JSONBody, ResponseOptions{}, "POST")
+var SystemSetOIDC = define[SystemOIDCRequest, *SystemOIDC]("setOIDC", "/api/system/setOIDC", StructJSONBody, ResponseOptions{}, "POST")
+var SystemSetUILayout = define[SystemUILayoutRequest, Null]("setUILayout", "/api/system/setUILayout", JSONBody, ResponseOptions{}, "POST")
+var SystemSetWorkspaceDir = define[SystemPathRequest, Null]("setWorkspaceDir", "/api/system/setWorkspaceDir", JSONBody, ResponseOptions{}, "POST")
+var SystemAddUIProcess = define[SystemUIProcessRequest, Null]("addUIProcess", "/api/system/uiproc", NoBody, ResponseOptions{EmptyResponseStatuses: []int{200}}, "POST")
+
+var PerformTransactions = define[PerformTransactionsRequest, []*Transaction]("performTransactions", "/api/transactions", JSONBody, ResponseOptions{}, "POST")
+var UndoState = define[TransactionUndoStateRequest, TransactionUndoState]("undoState", "/api/transactions/undoState", JSONBody, ResponseOptions{}, "POST")
+var PerformUndo = define[TransactionHistoryRequest, TransactionHistoryResult]("performUndo", "/api/transactions/undo", JSONBody, ResponseOptions{}, "POST")
+var PerformRedo = define[TransactionHistoryRequest, TransactionHistoryResult]("performRedo", "/api/transactions/redo", JSONBody, ResponseOptions{}, "POST")
+var ClearHistory = define[TransactionClearHistoryRequest, Null]("clearHistory", "/api/transactions/clearHistory", JSONBody, ResponseOptions{}, "POST")
+
+var BroadcastWebSocket = define[EmptyRequest, Null]("broadcast", "/ws/broadcast", NoBody, RawWebSocketOptions(), "GET")
+var BroadcastSubscribe = define[EmptyRequest, Null]("broadcastSubscribe", "/es/broadcast/subscribe", NoBody, RawSSEOptions(), "GET")

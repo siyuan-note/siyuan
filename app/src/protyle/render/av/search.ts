@@ -6,7 +6,7 @@ import {activeBlur} from "../../../mobile/util/keyboardToolbar";
 /// #endif
 
 const collapseAvSearch = (searchInputElement: HTMLElement, viewsElement: HTMLElement) => {
-    viewsElement.classList.remove("av__views--show");
+    viewsElement.classList.remove("av__views--show", "av__views--search");
     searchInputElement.style.width = "0";
     searchInputElement.style.paddingLeft = "0";
     searchInputElement.style.marginRight = "0";
@@ -39,9 +39,9 @@ export const bindAvSearch = (options: {
             return;
         }
         if (searchInputElement.textContent || document.activeElement === searchInputElement) {
-            viewsElement.classList.add("av__views--show");
+            viewsElement.classList.add("av__views--show", "av__views--search");
         } else {
-            viewsElement.classList.remove("av__views--show");
+            viewsElement.classList.remove("av__views--show", "av__views--search");
         }
         options.onChange();
     };

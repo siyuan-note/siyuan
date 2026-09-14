@@ -52,7 +52,7 @@ interface IAVAttributeTableData {
             id: string;
             type: TAVCol;
         };
-        values: IAVCellValue[];
+        values?: IAVCellValue[];
     }[];
 }
 
@@ -134,36 +134,10 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
         }
         let html = "";
         const tables = Array.isArray(response.data) ? response.data : [];
-        tables.forEach((table: {
-            keyValues: {
-                key: {
-                    type: TAVCol,
-                    name: string,
-                    desc: string,
-                    icon: string,
-                    id: string,
-                    dateFormat?: TAVDateFormat,
-                    renderTemplate?: string,
-                    options?: {
-                        name: string,
-                        color: string
-                    }[]
-                },
-                values: {
-                    keyID: string,
-                    id: string,
-                    blockID: string,
-                    isDetached?: boolean,
-                    type: TAVCol & IAVCellValue
-                }[]
-            }[],
-            blockIDs: string[],
-            avID: string
-            avName: string
-        }) => {
+        tables.forEach((table) => {
             // 条目 ID 仅用于读取行数据，编辑菜单和更新时间使用真实数据库载体块。
             const blockID = row ? row.databaseBlockID : id;
-            const primaryValue = table.keyValues.find(item => item.key.type === "block")?.values[0] || table.keyValues[0]?.values[0];
+            const primaryValue = table.keyValues.find(item => item.key.type === "block")?.values?.[0] || table.keyValues[0]?.values?.[0];
             let innerHTML = `<div class="custom-attr__avheader">
     <div class="block__logo block__logo--icon popover__block" style="max-width:calc(100% - 40px)" data-id='${JSON.stringify(table.blockIDs)}'>
         <svg class="block__logoicon"><use xlink:href="#iconDatabase"></use></svg>
@@ -175,7 +149,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             table.keyValues?.forEach(item => {
                 const value = Object.assign(
                     createEmptyAVValue(item.key.id, item.key.type, primaryValue?.blockID),
-                    item.values[0] || {}
+                    item.values?.[0] || {}
                 );
                 innerHTML += genAVAttributeRowHTML({
                     nodeID: id,

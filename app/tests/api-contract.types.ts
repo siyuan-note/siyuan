@@ -6,6 +6,31 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
+fetchPost("/api/setting/setEditor", {markdown: {inlineMath: null}, fontFamilies: null});
+fetchPost("/api/setting/setAI", {mcp: {servers: [{name: "server", env: {KEY: "value"}}]}});
+fetchPost("/api/setting/setKeymap", {data: {extension: {items: [null, false, 1, "text", {}]}}});
+fetchPost("/api/setting/setTheme", {theme: "theme", modes: [0, 1]});
+// @ts-expect-error 编辑器字号必须为数字。
+fetchPost("/api/setting/setEditor", {fontSize: "16"});
+// @ts-expect-error AI 配置只接受声明的字段。
+fetchPost("/api/setting/setAI", {mcp: {unknown: true}});
+// @ts-expect-error 环境变量值必须为字符串。
+fetchPost("/api/setting/setAI", {mcp: {servers: [{env: {KEY: false}}]}});
+// @ts-expect-error 主题模式的规范调用使用数字数组。
+fetchPost("/api/setting/setTheme", {theme: "theme", modes: [false]});
+fetchPost("/api/setting/login2faCloudUser", {token: "token", code: "123456"}, response => {
+    const outerCode: number = response.code;
+    if (response.data && "msg" in response.data) {
+        const cloudCode: number = response.data.code;
+        const message: string = response.data.msg;
+        const token: JSONValue = response.data.token;
+        // @ts-expect-error 云端扩展字段在使用前必须检查类型。
+        const tokenString: string = response.data.token;
+        void [cloudCode, message, token, tokenString];
+    }
+    void outerCode;
+});
+
 fetchPost("/api/filetree/getDoc", {id: "document", notebook: "box", querySubTypes: {heading: {h1: true}}}, response => {
     if (response.code === 0) {
         const content: string = response.data.content;
@@ -387,3 +412,154 @@ if (notebooks.code === 0) {
     // @ts-expect-error 成功码下的空数据也必须在严格模式下被检查。
     void notebooks.data.notebooks;
 }
+
+fetchPost("/api/ai/testModel", {model: "example", providerConfig: {baseURL: "https://example.invalid/v1", headers: {"X-Key": "value"}}}, (response) => {
+    if (response.code === 0) {
+        const matched: boolean = response.data.matched;
+        void matched;
+    }
+});
+fetchPost("/api/ai/agent/confirm", {confirmID: "id", approved: true, always: false});
+fetchPost("/api/ai/agent/browserCapabilityResult", {callID: "id", structuredContent: {future: [true, null, 1]}, structuredContentSet: true});
+// @ts-expect-error 模型名称必须是字符串
+fetchPost("/api/ai/testModel", {model: 1});
+// @ts-expect-error 确认结果必须是布尔值
+fetchPost("/api/ai/agent/confirm", {approved: "yes"});
+// @ts-expect-error 保存会话必须包含会话 ID
+fetchPost("/api/ai/agent/saveSession", {title: "missing ID"});
+const aiStreamContent: import("../src/types/api").APIPOSTRoutes["/api/ai/editor/chat"]["sse"]["events"]["content"] = {token: "text"};
+void aiStreamContent;
+// @ts-expect-error 流式内容必须是字符串
+const invalidAIStreamContent: import("../src/types/api").APIPOSTRoutes["/api/ai/editor/chat"]["sse"]["events"]["content"] = {token: 1};
+void invalidAIStreamContent;
+
+// AV 契约的合法调用和固定结构拒绝用例，合并到共享类型检查文件。
+fetchPost("/api/av/setAttributeViewBlockAttr", {avID: "av", keyID: "key", itemID: "item", value: {text: {}}});
+fetchPost("/api/av/setAttributeViewBlockAttr", {avID: "av", keyID: "key", itemID: "item", value: {text: null}});
+fetchPost("/api/av/setAttrViewGroup", {avID: "av", blockID: "block", group: {field: "key", method: 0}});
+fetchPost("/api/av/batchSetAttributeViewBlockAttrs", {avID: "av", values: [{keyID: "key", itemID: "item", value: {checkbox: {checked: false}}}]});
+fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {id: "av", page: 2.5, pageSize: -1, blockIDs: ["block"]});
+// @ts-expect-error 单元格文本内容不能是数字。
+fetchPost("/api/av/setAttributeViewBlockAttr", {avID: "av", keyID: "key", value: {text: {content: 1}}});
+// @ts-expect-error 批量修改必须包含字段 ID。
+fetchPost("/api/av/batchSetAttributeViewBlockAttrs", {avID: "av", values: [{itemID: "item", value: {}}]});
+// @ts-expect-error 分页参数必须是数字。
+fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {id: "av", page: "2"});
+// @ts-expect-error 快照渲染必须指定快照 ID。
+fetchPost("/api/av/renderSnapshotAttributeView", {id: "av"});
+// @ts-expect-error 条目 ID 数组只接受字符串。
+fetchPost("/api/av/createAttributeViewItemDocs", {avID: "av", blockID: "block", saveMode: "subDoc", itemIDs: [1]});
+
+fetchPost("/api/network/forwardProxy", {url: "https://example.com", payload: {nested: [null, true, 1]}, headers: [{"X-Value": [1, true]}]}, response => {
+    if (response.code === 0) {
+        const upstreamStatus: number = response.data.status;
+        const body: string = response.data.body;
+        void [upstreamStatus, body];
+    }
+});
+// @ts-expect-error 转发目标地址不可缺失。
+fetchPost("/api/network/forwardProxy", {payload: "body"});
+// @ts-expect-error 超时参数必须是数字。
+fetchPost("/api/network/forwardProxy", {url: "https://example.com", timeout: "1000"});
+fetchPost("/api/network/echo", {arbitrary: [1, true]}, response => {
+    if (response.code === 0) {
+        const raw: string | null = response.data.Context.RawData;
+        const version: number | undefined = response.data.Request.TLS?.Version;
+        void [raw, version];
+        // @ts-expect-error 回显字段具有确定的结构。
+        const invalid: string = response.data.Request.ContentLength;
+        void invalid;
+    }
+});
+const networkRawBody: APIPOSTRoutes["/api/network/proxy"]["request"] = new Blob(["raw"]);
+void networkRawBody;
+
+const pluginServiceRawBody: APIPOSTRoutes["/plugin/private/:name/*path"]["request"] = new Blob(["plugin data"]);
+void pluginServiceRawBody;
+fetchPost("/plugin/private/:name/*path", {extension: [true, null, 1]}, response => {
+    const pluginPayload: JSONValue = response;
+    void pluginPayload;
+    // @ts-expect-error 插件服务载荷由插件决定，不能直接当作固定内核信封。
+    const code: number = response.code;
+    void code;
+});
+
+fetchPost("/api/system/exit", {execInstallPkg: 2.9, setCurrentWorkspace: null});
+fetchPost("/api/system/setOIDC", {enabled: false, scopes: null, claimRules: [{claim: "group", values: null}]});
+fetchPost("/api/system/setUILayout", {layout: {extension: [null, false, 1]}});
+fetchPost("/api/system/importConf", new ContractFormData({file: [new Blob(["config"])]}));
+// @ts-expect-error 配置导入使用文件列表。
+fetchPost("/api/system/importConf", new ContractFormData({file: new Blob(["config"])}));
+// @ts-expect-error 系统请求的数值标志不能使用字符串。
+fetchPost("/api/system/exit", {execInstallPkg: "2"});
+fetchPost("/api/system/getConf", {}, response => {
+    if (response.code === 0 && response.data.conf) {
+        const enabled: boolean | undefined = response.data.conf.notebookCrypto?.enabled;
+        const layout: JSONValue | undefined = response.data.conf.uiLayout?.layout;
+        void enabled;
+        void layout;
+        // @ts-expect-error 配置声明不包含未定义字段。
+        const unmodeled = response.data.conf.unmodeled;
+        void unmodeled;
+    }
+});
+fetchPost("/api/system/oidc/poll", {pollToken: "token"}, response => {
+    if (response.code === 0 && response.data.status === "completed") {
+        const to: string = response.data.to;
+        void to;
+    }
+});
+fetchPost("/api/system/oidc/mobileCallback", {callbackURL: "siyuan:/oidc-callback"}, response => {
+    if (response.code === 0) {
+        if (response.data.validation === true) {
+            const validated: true = response.data.validation;
+            void validated;
+        } else {
+            const to: string = response.data.to;
+            void to;
+        }
+    }
+});
+
+const transactionContractRequest: APIPOSTRoutes["/api/transactions"]["request"] = {
+    reqId: 1,
+    transactions: [{doOperations: [{action: "setAttrViewPageSize", data: 50}, {action: "updateAttrViewCell", data: {text: null}}]}],
+};
+void transactionContractRequest;
+
+const invalidTransactionContractRequest: APIPOSTRoutes["/api/transactions"]["request"] = {
+    reqId: 1,
+    transactions: [{doOperations: [
+        // @ts-expect-error 已知数值操作不能借用未知操作的兼容分支传入字符串。
+        {action: "setAttrViewPageSize", data: "50"},
+    ]}],
+};
+void invalidTransactionContractRequest;
+
+const invalidUnknownTransactionRequest: APIPOSTRoutes["/api/transactions"]["request"] = {
+    reqId: 1,
+    transactions: [{doOperations: [
+        // @ts-expect-error 未注册操作必须使用显式的兼容操作类型。
+        {action: "unregistered-plugin-operation", data: {plugin: true}},
+    ]}],
+};
+void invalidUnknownTransactionRequest;
+
+const broadcastFrame: APIGETRoutes["/ws/broadcast"]["websocket"]["outgoing"] = new Blob([new Uint8Array([0, 255])]);
+const broadcastDataEncoding: APIGETRoutes["/es/broadcast/subscribe"]["sse"]["raw"]["dataEncoding"] = "raw";
+void [broadcastFrame, broadcastDataEncoding];
+// @ts-expect-error 广播原始帧不能当作 JSON 对象。
+const invalidBroadcastFrame: APIGETRoutes["/ws/broadcast"]["websocket"]["outgoing"] = {message: "text"};
+void invalidBroadcastFrame;
+
+fetchPost("/api/extension/copy", new ContractFormData({dom: "<p>clip</p>", "https://example.com/image.png": new Blob(["image"])}), response => {
+    if (response.code === 0 && response.data) {
+        const markdown: string = response.data.md;
+        const withMath: boolean = response.data.withMath;
+        void [markdown, withMath];
+    }
+});
+// @ts-expect-error 剪藏请求必须携带 DOM 文本。
+fetchPost("/api/extension/copy", new ContractFormData({notebook: "notebook"}));
+const iconOutput: APIGETRoutes["/api/icon/getDynamicIcon"]["output"] = "binary";
+void iconOutput;

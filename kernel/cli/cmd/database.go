@@ -210,10 +210,15 @@ var databaseCleanCmd = &cobra.Command{
 		avID, _ := cmd.Flags().GetString("av")
 		if avID != "" {
 			if dryRun {
+				if err := model.ValidateUnusedAttributeView(avID); err != nil {
+					return err
+				}
 				fmt.Printf("[dry-run] Would clean unused database %s\n", avID)
 				return nil
 			}
-			model.RemoveUnusedAttributeView(avID)
+			if err := model.RemoveUnusedAttributeView(avID); err != nil {
+				return err
+			}
 			fmt.Println(avID)
 			return nil
 		}

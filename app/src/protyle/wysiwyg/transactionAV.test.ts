@@ -4,6 +4,7 @@ import {test} from "node:test";
 import {runInNewContext} from "node:vm";
 import {ModuleKind, ScriptTarget, transpileModule} from "typescript";
 import {queueTransaction, queueTransactionBatch, waitForPendingTransactions} from "../util/transactionQueue";
+import {getEditorTransaction} from "../util/transactionContract";
 
 const compiled = transpileModule(readFileSync("src/protyle/wysiwyg/transaction.ts", "utf8"), {
     compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -18,6 +19,7 @@ const fixture = () => {
     let finish: (success: boolean) => void;
     const exports: any = {};
     const dependencies = {
+        getEditorTransaction,
         Constants: {},
         queueTransaction,
         queueTransactionBatch,

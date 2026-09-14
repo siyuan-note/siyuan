@@ -81,6 +81,46 @@ func TestAttributeViewEditorEndpointsRejectReader(t *testing.T) {
 	}
 }
 
+func TestAttributeViewLayoutRejectsReadonlyKernel(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	previousConf, previousReadonly := model.Conf, util.ReadOnly
+	model.Conf = &model.AppConf{Lang: "en"}
+	util.ReadOnly = true
+	t.Cleanup(func() {
+		model.Conf, util.ReadOnly = previousConf, previousReadonly
+	})
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) {
+		c.Set(model.RoleContextKey, model.RoleAdministrator)
+		c.Next()
+	})
+	ServeAPI(engine)
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, "/api/av/changeAttrViewLayout", strings.NewReader(`{}`)))
+	var response struct {
+		Code int `json:"code"`
+		Data struct {
+			CloseTimeout int `json:"closeTimeout"`
+		} `json:"data"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+		t.Fatal(err)
+	}
+	if response.Code != -1 || response.Data.CloseTimeout != 5000 {
+		t.Fatalf("readonly request reached layout handler: %s", recorder.Body.String())
+	}
+	for _, endpoint := range []string{"updateRecentDocOpenTime", "updateRecentDocViewTime", "updateRecentDocCloseTime", "batchUpdateRecentDocCloseTime"} {
+		recorder = httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, "/api/storage/"+endpoint, strings.NewReader(`invalid`)))
+		var result struct {
+			Code int `json:"code"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil || result.Code != 0 {
+			t.Fatalf("readonly storage mutation was not skipped: %s (%v)", recorder.Body.String(), err)
+		}
+	}
+}
+
 func TestGetAttributeViewKeysByIDRespectsPublishAccess(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 

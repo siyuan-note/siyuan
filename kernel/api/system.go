@@ -19,7 +19,6 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"image"
 	"io"
@@ -93,20 +92,13 @@ var getNetwork = contractHandler(apicontract.GetNetwork, func(c *gin.Context, re
 	return apicontract.Success(apicontract.NetworkData{Proxy: proxy})
 })
 
-func getChangelog(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var getChangelog = contractHandler(apicontract.SystemGetChangelog, func(c *gin.Context, request apicontract.SystemChangelogRequest) (ret apicontract.Response[apicontract.SystemChangelogData]) {
+	ret = apicontract.Success(apicontract.SystemChangelogData{})
 
-	force := false
-	arg := map[string]any{}
-	if err := c.ShouldBindJSON(&arg); err == nil {
-		if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("force", &force, false, false)) {
-			return
-		}
-	}
+	force := request.Force
 
-	data := map[string]any{"show": false, "html": "", "version": ""}
-	ret.Data = data
+	data := apicontract.SystemChangelogData{}
+	ret = apicontract.Success(data)
 
 	changelogsDir := filepath.Join(util.WorkingDir, "changelogs")
 	if !gulu.File.IsDir(changelogsDir) {
@@ -147,11 +139,12 @@ func getChangelog(c *gin.Context) {
 	htmlContent := luteEngine.MarkdownStr("", string(contentData))
 	htmlContent = util.LinkTarget(htmlContent, "")
 
-	data["show"] = true
-	data["html"] = htmlContent
-	data["version"] = changelogVer
-	ret.Data = data
-}
+	data.Show = true
+	data.HTML = htmlContent
+	data.Version = changelogVer
+	ret = apicontract.Success(data)
+	return
+})
 
 func getChangelogPath(changelogsDir, ver string) string {
 	verDir := filepath.Join(changelogsDir, "v"+ver)
@@ -189,48 +182,45 @@ func getLatestChangelog(changelogsDir, currentVer string) (ver, path string) {
 	return
 }
 
-func getEmojiConf(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var getEmojiConf = contractHandler(apicontract.SystemGetEmojiConf, func(c *gin.Context, request apicontract.EmptyRequest) (ret apicontract.Response[[]*apicontract.SystemEmojiGroup]) {
+	ret = apicontract.Success(([]*apicontract.SystemEmojiGroup)(nil))
 
 	builtConfPath := filepath.Join(util.AppearancePath, "emojis", "conf.json")
 	data, err := os.ReadFile(builtConfPath)
 	if err != nil {
 		logging.LogErrorf("read emojis conf.json failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[[]*apicontract.SystemEmojiGroup](-1, err.Error())
 		return
 	}
 
-	var conf []map[string]any
+	var conf []*apicontract.SystemEmojiGroup
 	if err = gulu.JSON.UnmarshalJSON(data, &conf); err != nil {
 		logging.LogErrorf("unmarshal emojis conf.json failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[[]*apicontract.SystemEmojiGroup](-1, err.Error())
 		return
 	}
 
 	customConfDir := filepath.Join(util.DataDir, "emojis")
-	custom := map[string]any{
-		"id":          "custom",
-		"title":       "Custom",
-		"title_zh_cn": "自定义",
-		"title_ja_jp": "カスタム",
+	custom := &apicontract.SystemEmojiGroup{
+		ID:        "custom",
+		Title:     "Custom",
+		TitleZhCN: "自定义",
+		TitleJaJP: "カスタム",
 	}
-	items := []map[string]any{}
-	custom["items"] = items
+	items := []*apicontract.SystemEmoji{}
+	custom.Items = items
 	if gulu.File.IsDir(customConfDir) {
 		model.ClearCustomEmojis()
 		readCustomEmojis(customConfDir, "", &items)
 	}
-	custom["items"] = items
-	conf = append([]map[string]any{custom}, conf...)
+	custom.Items = items
+	conf = append([]*apicontract.SystemEmojiGroup{custom}, conf...)
 
-	ret.Data = conf
+	ret = apicontract.Success(conf)
 	return
-}
+})
 
-func readCustomEmojis(rootDir, relativeDir string, items *[]map[string]any) {
+func readCustomEmojis(rootDir, relativeDir string, items *[]*apicontract.SystemEmoji) {
 	dir := filepath.Join(rootDir, filepath.FromSlash(relativeDir))
 	customEmojis, err := os.ReadDir(dir)
 	if err != nil {
@@ -265,15 +255,15 @@ func readCustomEmojis(rootDir, relativeDir string, items *[]map[string]any) {
 	}
 }
 
-func appendCustomEmoji(name string, items *[]map[string]any) {
+func appendCustomEmoji(name string, items *[]*apicontract.SystemEmoji) {
 	ext := filepath.Ext(name)
 	nameWithoutExt := strings.TrimSuffix(name, ext)
-	emoji := map[string]any{
-		"unicode":           name,
-		"description":       nameWithoutExt,
-		"description_zh_cn": nameWithoutExt,
-		"description_ja_jp": nameWithoutExt,
-		"keywords":          nameWithoutExt,
+	emoji := &apicontract.SystemEmoji{
+		Unicode:         name,
+		Description:     nameWithoutExt,
+		DescriptionZhCN: nameWithoutExt,
+		DescriptionJaJP: nameWithoutExt,
+		Keywords:        nameWithoutExt,
 	}
 	*items = append(*items, emoji)
 
@@ -283,57 +273,51 @@ func appendCustomEmoji(name string, items *[]map[string]any) {
 
 const maxCustomEmojiSize = 10 * 1024 * 1024
 
-func addCustomEmoji(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var addCustomEmoji = contractHandler(apicontract.SystemAddCustomEmoji, func(c *gin.Context, request apicontract.SystemCustomEmojiRequest) (ret apicontract.Response[apicontract.SystemPathData]) {
+	ret = apicontract.Success(apicontract.SystemPathData{})
 
-	data, err := readCustomEmojiData(c)
+	data, err := readCustomEmojiData(request)
 	if err != nil {
-		ret.Code = http.StatusBadRequest
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemPathData](http.StatusBadRequest, err.Error())
 		return
 	}
 	if len(data) > maxCustomEmojiSize {
-		ret.Code = http.StatusRequestEntityTooLarge
-		ret.Msg = "custom emoji file is too large"
+		ret = apicontract.Failure[apicontract.SystemPathData](http.StatusRequestEntityTooLarge, "custom emoji file is too large")
 		return
 	}
 
 	data, ext, err := normalizeCustomEmojiData(data)
 	if err != nil {
-		ret.Code = http.StatusBadRequest
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemPathData](http.StatusBadRequest, err.Error())
 		return
 	}
-	relativePath, err := normalizeCustomEmojiPath(c.PostForm("name"), ext)
+	relativePath, err := normalizeCustomEmojiPath(request.Name, ext)
 	if err != nil {
-		ret.Code = http.StatusBadRequest
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemPathData](http.StatusBadRequest, err.Error())
 		return
 	}
 
 	emojisDir := filepath.Join(util.DataDir, "emojis")
 	emojiPath := util.GetUniqueFilename(filepath.Join(emojisDir, filepath.FromSlash(relativePath)))
 	if err = os.MkdirAll(filepath.Dir(emojiPath), 0755); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemPathData](-1, err.Error())
 		return
 	}
 	if err = filelock.WriteFile(emojiPath, data); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemPathData](-1, err.Error())
 		return
 	}
 
 	model.IncSync()
 	relativePath, _ = filepath.Rel(emojisDir, emojiPath)
 	relativePath = filepath.ToSlash(relativePath)
-	ret.Data = map[string]any{"path": relativePath}
-}
+	ret = apicontract.Success(apicontract.SystemPathData{Path: relativePath})
+	return
+})
 
-func readCustomEmojiData(c *gin.Context) ([]byte, error) {
-	fileHeader, fileErr := c.FormFile("file")
-	if fileErr == nil {
+func readCustomEmojiData(request apicontract.SystemCustomEmojiRequest) ([]byte, error) {
+	fileHeader := request.File
+	if fileHeader != nil {
 		file, err := fileHeader.Open()
 		if err != nil {
 			return nil, err
@@ -342,7 +326,7 @@ func readCustomEmojiData(c *gin.Context) ([]byte, error) {
 		return io.ReadAll(io.LimitReader(file, maxCustomEmojiSize+1))
 	}
 
-	rawURL := strings.TrimSpace(c.PostForm("url"))
+	rawURL := strings.TrimSpace(request.URL)
 	if rawURL == "" {
 		return nil, fmt.Errorf("field [file] or [url] must not be empty")
 	}
@@ -435,32 +419,24 @@ func normalizeCustomEmojiPath(name, ext string) (string, error) {
 	return strings.Join(parts, "/"), nil
 }
 
-func checkUpdate(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var checkUpdate = contractHandler(apicontract.SystemCheckUpdate, func(c *gin.Context, request apicontract.SystemCheckUpdateRequest) (ret apicontract.Response[apicontract.Null]) {
+	ret = apicontract.Success(apicontract.Null{})
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	showMsg := arg["showMsg"].(bool)
+	showMsg := request.ShowMsg
 	model.CheckUpdate(showMsg)
-}
+	return
+})
 
-func exportLog(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var exportLog = contractHandler(apicontract.SystemExportLog, func(c *gin.Context, request apicontract.EmptyRequest) (ret apicontract.Response[apicontract.SystemZipData]) {
+	ret = apicontract.Success(apicontract.SystemZipData{})
 
 	zipPath := model.ExportSystemLog()
-	ret.Data = map[string]any{
-		"zip": zipPath,
-	}
-}
+	ret = apicontract.Success(apicontract.SystemZipData{Zip: zipPath})
+	return
+})
 
-func exportConf(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var exportConf = contractHandler(apicontract.SystemExportConf, func(c *gin.Context, request apicontract.EmptyRequest) (ret apicontract.Response[apicontract.SystemExportConfData]) {
+	ret = apicontract.Success(apicontract.SystemExportConfData{})
 
 	logging.LogInfof("exporting conf...")
 
@@ -468,23 +444,20 @@ func exportConf(c *gin.Context) {
 	tmpDir := filepath.Join(util.TempDir, "export")
 	if err := os.MkdirAll(tmpDir, 0755); err != nil {
 		logging.LogErrorf("export conf failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemExportConfData](-1, err.Error())
 		return
 	}
 
 	data, err := gulu.JSON.MarshalJSON(model.Conf)
 	if err != nil {
 		logging.LogErrorf("export conf failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemExportConfData](-1, err.Error())
 		return
 	}
 	clonedConf := &model.AppConf{}
 	if err = gulu.JSON.UnmarshalJSON(data, clonedConf); err != nil {
 		logging.LogErrorf("export conf failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemExportConfData](-1, err.Error())
 		return
 	}
 
@@ -566,68 +539,51 @@ func exportConf(c *gin.Context) {
 	data, err = gulu.JSON.MarshalIndentJSON(clonedConf, "", "  ")
 	if err != nil {
 		logging.LogErrorf("export conf failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemExportConfData](-1, err.Error())
 		return
 	}
 
 	tmp := filepath.Join(tmpDir, name)
 	if err = os.WriteFile(tmp, data, 0644); err != nil {
 		logging.LogErrorf("export conf failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemExportConfData](-1, err.Error())
 		return
 	}
 
 	zipFile, err := gulu.Zip.Create(tmp + ".zip")
 	if err != nil {
 		logging.LogErrorf("export conf failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemExportConfData](-1, err.Error())
 		return
 	}
 
 	if err = zipFile.AddEntry(name, tmp); err != nil {
 		logging.LogErrorf("export conf failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemExportConfData](-1, err.Error())
 		return
 	}
 
 	if err = zipFile.Close(); err != nil {
 		logging.LogErrorf("export conf failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemExportConfData](-1, err.Error())
 		return
 	}
 
 	logging.LogInfof("exported conf")
 
 	zipPath := "/export/" + name + ".zip"
-	ret.Data = map[string]any{
-		"name": name,
-		"zip":  zipPath,
-	}
-}
+	ret = apicontract.Success(apicontract.SystemExportConfData{Name: name, Zip: zipPath})
+	return
+})
 
-func importConf(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(200, ret)
+var importConf = contractHandler(apicontract.SystemImportConf, func(c *gin.Context, request apicontract.SystemImportConfRequest) (ret apicontract.Response[apicontract.Null]) {
+	ret = apicontract.Success(apicontract.Null{})
 
 	logging.LogInfof("importing conf...")
 
-	form, err := c.MultipartForm()
-	if err != nil {
-		logging.LogErrorf("read upload file failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
-	files := form.File["file"]
+	files := request.File
 	if 1 != len(files) {
-		ret.Code = -1
-		ret.Msg = "invalid upload file"
+		ret = apicontract.Failure[apicontract.Null](-1, "invalid upload file")
 		return
 	}
 
@@ -635,8 +591,7 @@ func importConf(c *gin.Context) {
 	fh, err := f.Open()
 	if err != nil {
 		logging.LogErrorf("read upload file failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.Null](-1, err.Error())
 		return
 	}
 
@@ -644,31 +599,27 @@ func importConf(c *gin.Context) {
 	fh.Close()
 	if err != nil {
 		logging.LogErrorf("read upload file failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.Null](-1, err.Error())
 		return
 	}
 
 	importDir := filepath.Join(util.TempDir, "import")
 	if err = os.MkdirAll(importDir, 0755); err != nil {
 		logging.LogErrorf("import conf failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.Null](-1, err.Error())
 		return
 	}
 
 	writePath := filepath.Join(importDir, f.Filename)
 	if !gulu.File.IsSubPath(importDir, writePath) {
 		logging.LogErrorf("import path [%s] is not sub path of import dir [%s]", writePath, importDir)
-		ret.Code = -1
-		ret.Msg = "import path is not sub path of import dir"
+		ret = apicontract.Failure[apicontract.Null](-1, "import path is not sub path of import dir")
 		return
 	}
 
 	if err = os.WriteFile(writePath, data, 0644); err != nil {
 		logging.LogErrorf("import conf failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.Null](-1, err.Error())
 		return
 	}
 
@@ -677,35 +628,30 @@ func importConf(c *gin.Context) {
 	if strings.HasSuffix(strings.ToLower(writePath), ".zip") {
 		if err = gulu.Zip.Unzip(writePath, tmpDir); err != nil {
 			logging.LogErrorf("import conf failed: %s", err)
-			ret.Code = -1
-			ret.Msg = err.Error()
+			ret = apicontract.Failure[apicontract.Null](-1, err.Error())
 			return
 		}
 	} else if strings.HasSuffix(strings.ToLower(writePath), ".json") {
 		if err = gulu.File.CopyFile(writePath, filepath.Join(tmpDir, f.Filename)); err != nil {
 			logging.LogErrorf("import conf failed: %s", err)
-			ret.Code = -1
-			ret.Msg = err.Error()
+			ret = apicontract.Failure[apicontract.Null](-1, err.Error())
 		}
 	} else {
 		logging.LogErrorf("invalid conf package")
-		ret.Code = -1
-		ret.Msg = "invalid conf package"
+		ret = apicontract.Failure[apicontract.Null](-1, "invalid conf package")
 		return
 	}
 
 	entries, err := os.ReadDir(tmpDir)
 	if err != nil {
 		logging.LogErrorf("import conf failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.Null](-1, err.Error())
 		return
 	}
 
 	if 1 != len(entries) {
 		logging.LogErrorf("invalid conf package")
-		ret.Code = -1
-		ret.Msg = "invalid conf package"
+		ret = apicontract.Failure[apicontract.Null](-1, "invalid conf package")
 		return
 	}
 
@@ -713,22 +659,19 @@ func importConf(c *gin.Context) {
 	data, err = os.ReadFile(writePath)
 	if err != nil {
 		logging.LogErrorf("import conf failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.Null](-1, err.Error())
 		return
 	}
 
 	importedConf := model.NewAppConf()
 	if err = gulu.JSON.UnmarshalJSON(data, importedConf); err != nil {
 		logging.LogErrorf("import conf failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.Null](-1, err.Error())
 		return
 	}
 	preserveImportedAISecrets(importedConf.AI, model.Conf.AI)
 	if err = validateAIProviderHeaders(importedConf.AI); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.Null](-1, err.Error())
 		return
 	}
 	if nil != importedConf.System && nil != model.Conf.System {
@@ -753,7 +696,8 @@ func importConf(c *gin.Context) {
 	model.Conf.Save()
 
 	logging.LogInfof("imported conf")
-}
+	return
+})
 
 func preserveImportedAISecrets(imported, current *conf.AI) {
 	if imported == nil || current == nil {
@@ -795,14 +739,12 @@ func preserveImportedAISecrets(imported, current *conf.AI) {
 	}
 }
 
-func getConf(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var getConf = contractHandler(apicontract.SystemGetConf, func(c *gin.Context, request apicontract.EmptyRequest) (ret apicontract.Response[apicontract.SystemConfData]) {
+	ret = apicontract.Success(apicontract.SystemConfData{})
 
 	maskedConf, err := model.GetMaskedConf()
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = "get conf failed: " + err.Error()
+		ret = apicontract.Failure[apicontract.SystemConfData](-1, "get conf failed: "+err.Error())
 		return
 	}
 
@@ -837,21 +779,20 @@ func getConf(c *gin.Context) {
 		maskedConf.System.HomeDir = ""
 	}
 
-	ret.Data = map[string]any{
-		"conf":      maskedConf,
-		"start":     !util.IsUILoaded,
-		"isPublish": isPublish,
+	config, err := systemConfPayload(maskedConf)
+	if err != nil {
+		return apicontract.Failure[apicontract.SystemConfData](-1, "get conf failed: "+err.Error())
 	}
-}
+	ret = apicontract.Success(apicontract.SystemConfData{Conf: config, Start: !util.IsUILoaded, IsPublish: isPublish})
+	return
+})
 
-func ensureOnboarding(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var ensureOnboarding = contractHandler(apicontract.SystemEnsureOnboarding, func(c *gin.Context, request apicontract.EmptyRequest) (ret apicontract.Response[*apicontract.SystemOnboarding]) {
+	ret = apicontract.Success((*apicontract.SystemOnboarding)(nil))
 
 	onboarding, notebookCreated, err := model.EnsureOnboarding()
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[*apicontract.SystemOnboarding](-1, err.Error())
 		return
 	}
 	if notebookCreated {
@@ -862,86 +803,61 @@ func ensureOnboarding(c *gin.Context) {
 			util.PushEvent(evt)
 		}
 	}
-	ret.Data = onboarding
-}
+	ret = apicontract.Success(systemOnboardingPayload(onboarding))
+	return
+})
 
-func dismissOnboarding(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-	ret.Data = model.DismissOnboarding()
-}
+var dismissOnboarding = contractHandler(apicontract.SystemDismissOnboarding, func(c *gin.Context, request apicontract.EmptyRequest) (ret apicontract.Response[*apicontract.SystemOnboarding]) {
+	ret = apicontract.Success((*apicontract.SystemOnboarding)(nil))
+	ret = apicontract.Success(systemOnboardingPayload(model.DismissOnboarding()))
+	return
+})
 
-func setUILayout(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	if util.ReadOnly {
-		return
+var setUILayout = contractHandler(apicontract.SystemSetUILayout, func(c *gin.Context, request apicontract.SystemUILayoutRequest) (ret apicontract.Response[apicontract.Null]) {
+	if err := request.LayoutError(); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
+	ret = apicontract.Success(apicontract.Null{})
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	param, err := gulu.JSON.MarshalJSON(arg["layout"])
+	param, err := gulu.JSON.MarshalJSON(request.Layout)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.Null](-1, err.Error())
 		return
 	}
 
 	uiLayout := &conf.UILayout{}
 	if err = gulu.JSON.UnmarshalJSON(param, uiLayout); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.Null](-1, err.Error())
 		return
 	}
 
 	model.Conf.SetUILayout(uiLayout)
 	model.Conf.Save()
-}
+	return
+}, systemUILayoutPreflight)
 
-func setAPIToken(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var setAPIToken = contractHandler(apicontract.SystemSetAPIToken, func(c *gin.Context, request apicontract.SystemAPITokenRequest) (ret apicontract.Response[apicontract.Null]) {
+	ret = apicontract.Success(apicontract.Null{})
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	token := arg["token"].(string)
+	token := request.Token
 	token = util.RemoveInvalid(token)
 	token = strings.TrimSpace(token)
 
 	// 仅校验新设置的 token，清空（禁用 API token 鉴权）不做长度限制 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-m6w6-p7pc-fpg2
 	if 0 < len(token) && 8 > len(token) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(356)
+		ret = apicontract.Failure[apicontract.Null](-1, model.Conf.Language(356))
 		return
 	}
 
 	model.Conf.Api.Token = token
 	model.Conf.Save()
-}
+	return
+})
 
-func setAccessAuthCode(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var setAccessAuthCode = contractHandler(apicontract.SystemSetAccessAuthCode, func(c *gin.Context, request apicontract.SystemAccessAuthCodeRequest) (ret apicontract.Response[apicontract.Null]) {
+	ret = apicontract.Success(apicontract.Null{})
 
-	if util.ContainerDocker == util.Container {
-		ret.Code = -1
-		ret.Msg = "access auth code cannot be set in Docker container"
-		return
-	}
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	aac := arg["accessAuthCode"].(string)
+	aac := request.AccessAuthCode
 	masked := model.MaskedAccessAuthCode == aac
 	if masked {
 		aac = model.Conf.AccessAuthCode
@@ -953,15 +869,13 @@ func setAccessAuthCode(c *gin.Context) {
 	aac = strings.TrimSpace(aac)
 
 	if 0 < originalLen && 0 == len(aac) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(287)
+		ret = apicontract.Failure[apicontract.Null](-1, model.Conf.Language(287))
 		return
 	}
 
 	// 仅校验新设置的密码，掩码回填的已有密码和清空（禁用锁屏）不做长度限制，避免用户被锁定 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-w3xh-mmmh-r54v
 	if !masked && 0 < len(aac) && 8 > len(aac) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(355)
+		ret = apicontract.Failure[apicontract.Null](-1, model.Conf.Language(355))
 		return
 	}
 	if aac == "" {
@@ -974,8 +888,7 @@ func setAccessAuthCode(c *gin.Context) {
 				util.SiYuanAccessAuthCodeBypass)
 		}
 		if err != nil {
-			ret.Code = -1
-			ret.Msg = model.Conf.Language(369)
+			ret = apicontract.Failure[apicontract.Null](-1, model.Conf.Language(369))
 			logging.LogWarnf("reject clearing the last usable access authentication method [ip=%s]: %s", c.ClientIP(), err)
 			return
 		}
@@ -993,16 +906,14 @@ func setAccessAuthCode(c *gin.Context) {
 		util.ReloadUI()
 	}()
 	return
-}
+}, systemAccessAuthPreflight)
 
-func setOIDC(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var setOIDC = contractHandler(apicontract.SystemSetOIDC, func(c *gin.Context, request apicontract.SystemOIDCRequest) (ret apicontract.Response[*apicontract.SystemOIDC]) {
+	ret = apicontract.Success((*apicontract.SystemOIDC)(nil))
 
-	config := conf.NewOIDC()
-	if err := c.ShouldBindJSON(config); err != nil {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(369)
+	config := model.SystemOIDCConfig(request.SystemOIDC)
+	if err := request.ParseError(); err != nil {
+		ret = apicontract.Failure[*apicontract.SystemOIDC](-1, model.Conf.Language(369))
 		logging.LogWarnf("bind OIDC configuration failed [ip=%s]: %s", c.ClientIP(), err)
 		return
 	}
@@ -1011,31 +922,29 @@ func setOIDC(c *gin.Context) {
 	requireRemoteAuthentication := util.ContainerDocker == util.Container || !model.IsLocalRequest(c)
 	if err := model.ValidateOIDCConfigurationChange(c.Request.Context(), config, requireRemoteAuthentication,
 		model.Conf.AccessAuthCode != "", util.SiYuanAccessAuthCodeBypass); err != nil {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(369)
+		ret = apicontract.Failure[*apicontract.SystemOIDC](-1, model.Conf.Language(369))
 		logging.LogErrorf("validate OIDC configuration change failed [ip=%s]: %s", c.ClientIP(), err)
 		return
 	}
 	configurationChanged := !reflect.DeepEqual(currentConfig, config)
 	if configurationChanged && config.Enabled {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(369)
+		ret = apicontract.Failure[*apicontract.SystemOIDC](-1, model.Conf.Language(369))
 		logging.LogWarnf("reject unverified OIDC configuration change [ip=%s]", c.ClientIP())
 		return
 	}
 	model.Conf.SetOIDC(config)
 	masked, err := model.GetMaskedConf()
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(369)
+		ret = apicontract.Failure[*apicontract.SystemOIDC](-1, model.Conf.Language(369))
 		logging.LogErrorf("get masked configuration after setting OIDC failed: %s", err)
 		return
 	}
-	ret.Data = masked.OIDC
+	ret = apicontract.Success(model.SystemOIDCPayload(masked.OIDC))
 	if configurationChanged {
 		util.CloseOIDCSessions()
 	}
-}
+	return
+})
 
 var setFollowSystemLockScreen = contractHandler(apicontract.SetFollowSystemLockScreen, func(c *gin.Context, request apicontract.LockScreenRequest) apicontract.Response[apicontract.Null] {
 	model.Conf.System.LockScreenMode = int(request.LockScreenMode)
@@ -1043,56 +952,43 @@ var setFollowSystemLockScreen = contractHandler(apicontract.SetFollowSystemLockS
 	return apicontract.Success(apicontract.Null{})
 })
 
-func getSysFonts(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var getSysFonts = contractHandler(apicontract.SystemGetSysFonts, func(c *gin.Context, request apicontract.EmptyRequest) (ret apicontract.Response[[]*apicontract.SystemFont]) {
+	ret = apicontract.Success(([]*apicontract.SystemFont)(nil))
 
 	fonts := util.LoadSysFonts()
-	ret.Data = fonts
-}
+	ret = apicontract.Success(systemFontsPayload(fonts))
+	return
+})
 
-func getCustomFonts(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var getCustomFonts = contractHandler(apicontract.SystemGetCustomFonts, func(c *gin.Context, request apicontract.EmptyRequest) (ret apicontract.Response[[]*apicontract.SystemCustomFont]) {
+	ret = apicontract.Success(([]*apicontract.SystemCustomFont)(nil))
 
-	ret.Data = util.LoadCustomFonts()
-}
+	ret = apicontract.Success(systemCustomFontsPayload(util.LoadCustomFonts()))
+	return
+})
 
-func importCustomFont(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var importCustomFont = contractHandler(apicontract.SystemImportCustomFont, func(c *gin.Context, request apicontract.SystemImportFileRequest) (ret apicontract.Response[*apicontract.SystemCustomFont]) {
+	ret = apicontract.Success((*apicontract.SystemCustomFont)(nil))
 
-	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, util.MaxCustomFontSize+1024*1024)
-	fileHeader, err := c.FormFile("file")
-	if err != nil {
-		var maxBytesError *http.MaxBytesError
-		if errors.As(err, &maxBytesError) {
-			ret.Code = http.StatusRequestEntityTooLarge
-			ret.Msg = "font file is too large"
-		} else {
-			ret.Code = http.StatusBadRequest
-			ret.Msg = "Field [file] must not be empty"
-		}
-		return
+	fileHeader := request.File
+	if fileHeader == nil {
+		return apicontract.Failure[*apicontract.SystemCustomFont](400, "Field [file] must not be empty")
 	}
 	if util.MaxCustomFontSize < fileHeader.Size {
-		ret.Code = http.StatusRequestEntityTooLarge
-		ret.Msg = "font file is too large"
+		ret = apicontract.Failure[*apicontract.SystemCustomFont](http.StatusRequestEntityTooLarge, "font file is too large")
 		return
 	}
 
 	file, err := fileHeader.Open()
 	if err != nil {
-		ret.Code = http.StatusBadRequest
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[*apicontract.SystemCustomFont](http.StatusBadRequest, err.Error())
 		return
 	}
 	defer file.Close()
 
 	tempFile, err := util.CreateCustomFontTemp()
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[*apicontract.SystemCustomFont](-1, err.Error())
 		return
 	}
 	tempPath := tempFile.Name()
@@ -1101,47 +997,38 @@ func importCustomFont(c *gin.Context) {
 	written, copyErr := io.Copy(tempFile, io.LimitReader(file, util.MaxCustomFontSize+1))
 	closeErr := tempFile.Close()
 	if copyErr != nil {
-		ret.Code = http.StatusBadRequest
-		ret.Msg = copyErr.Error()
+		ret = apicontract.Failure[*apicontract.SystemCustomFont](http.StatusBadRequest, copyErr.Error())
 		return
 	}
 	if closeErr != nil {
-		ret.Code = -1
-		ret.Msg = closeErr.Error()
+		ret = apicontract.Failure[*apicontract.SystemCustomFont](-1, closeErr.Error())
 		return
 	}
 	if util.MaxCustomFontSize < written {
-		ret.Code = http.StatusRequestEntityTooLarge
-		ret.Msg = "font file is too large"
+		ret = apicontract.Failure[*apicontract.SystemCustomFont](http.StatusRequestEntityTooLarge, "font file is too large")
 		return
 	}
 
 	font, _, err := util.InstallCustomFont(tempPath)
 	if err != nil {
-		ret.Code = http.StatusBadRequest
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[*apicontract.SystemCustomFont](http.StatusBadRequest, err.Error())
 		return
 	}
-	ret.Data = font
-}
+	ret = apicontract.Success(systemCustomFontPayload(font))
+	return
+}, systemImportFontPreflight)
 
-func removeCustomFont(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var removeCustomFont = contractHandler(apicontract.SystemRemoveCustomFont, func(c *gin.Context, request apicontract.SystemRemoveCustomFontRequest) (ret apicontract.Response[apicontract.SystemRemoveCustomFontData]) {
+	ret = apicontract.Success(apicontract.SystemRemoveCustomFontData{})
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-	id, _ := arg["id"].(string)
+	id := request.ID
 	font, err := util.RemoveCustomFont(id)
 	if err != nil {
+		code := http.StatusBadRequest
 		if os.IsNotExist(err) {
-			ret.Code = http.StatusNotFound
-		} else {
-			ret.Code = http.StatusBadRequest
+			code = http.StatusNotFound
 		}
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemRemoveCustomFontData](code, err.Error())
 		return
 	}
 
@@ -1185,12 +1072,9 @@ func removeCustomFont(c *gin.Context) {
 	if nil != appearance {
 		util.BroadcastByType("main", "setAppearance", 0, "", appearance)
 	}
-	ret.Data = map[string]any{
-		"font":       font,
-		"editor":     editor,
-		"appearance": appearance,
-	}
-}
+	ret = apicontract.Success(apicontract.SystemRemoveCustomFontData{Font: systemCustomFontPayload(font), Editor: settingEditorPayload(editor), Appearance: settingAppearancePayload(appearance)})
+	return
+})
 
 var version = contractHandler(apicontract.Version, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[string] {
 	return apicontract.Success(util.Ver)
@@ -1205,65 +1089,61 @@ var bootProgress = contractHandler(apicontract.BootProgress, func(c *gin.Context
 	return apicontract.Success(apicontract.BootProgressData{Progress: progress, Details: details})
 })
 
-func getBootAppearance(c *gin.Context) {
+var getBootAppearance = contractHandler(apicontract.SystemGetBootAppearance, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[*apicontract.SettingBootAppearance] {
 	if !model.IsLocalRequest(c) {
-		c.Status(http.StatusForbidden)
-		return
+		return apicontract.EmptyHTTPResponse[*apicontract.SettingBootAppearance](http.StatusForbidden)
 	}
 	c.Header("Cache-Control", "no-store")
-	ret := gulu.Ret.NewResult()
-	ret.Data = model.GetBootAppearance()
-	c.JSON(http.StatusOK, ret)
-}
+	return apicontract.Success(settingBootAppearancePayload(model.GetBootAppearance()))
+})
 
 // bootProgressSSE 以 Server-Sent Events 推送启动进度，仅在进度发生变化时写一帧。
-func bootProgressSSE(c *gin.Context) {
-	c.Header("Content-Type", "text/event-stream")
-	c.Header("Cache-Control", "no-cache")
-	c.Header("Connection", "keep-alive")
-	c.Writer.Flush()
+var bootProgressSSE = contractHandler(apicontract.SystemBootProgressSSE, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
+	return apicontract.StreamSSE[apicontract.Null](func(_ http.ResponseWriter, _ *http.Request) {
+		c.Header("Content-Type", "text/event-stream")
+		c.Header("Cache-Control", "no-cache")
+		c.Header("Connection", "keep-alive")
+		c.Writer.Flush()
 
-	flusher, ok := c.Writer.(http.Flusher)
-	if !ok {
-		return
-	}
+		flusher := c.Writer
 
-	// 连接后立即推送当前进度，避免等待第一个 tick
-	progress, details := util.GetBootProgressDetails()
-	lastProgress, lastDetails := progress, details
-	if err := writeBootProgressSSE(c, flusher, progress, details); err != nil {
-		return
-	}
-	if 100 <= progress {
-		return
-	}
-
-	ticker := time.NewTicker(100 * time.Millisecond)
-	defer ticker.Stop()
-	ctx := c.Request.Context()
-	for {
-		select {
-		case <-ctx.Done():
-			// 客户端断开连接
+		// 连接后立即推送当前进度，避免等待第一个 tick
+		progress, details := util.GetBootProgressDetails()
+		lastProgress, lastDetails := progress, details
+		if err := writeBootProgressSSE(c, flusher, progress, details); err != nil {
 			return
-		case <-ticker.C:
-			progress, details = util.GetBootProgressDetails()
-			if progress == lastProgress && details == lastDetails {
-				continue
-			}
-			lastProgress, lastDetails = progress, details
-			if err := writeBootProgressSSE(c, flusher, progress, details); err != nil {
+		}
+		if 100 <= progress {
+			return
+		}
+
+		ticker := time.NewTicker(100 * time.Millisecond)
+		defer ticker.Stop()
+		ctx := c.Request.Context()
+		for {
+			select {
+			case <-ctx.Done():
+				// 客户端断开连接
 				return
-			}
-			if 100 <= progress {
-				return
+			case <-ticker.C:
+				progress, details = util.GetBootProgressDetails()
+				if progress == lastProgress && details == lastDetails {
+					continue
+				}
+				lastProgress, lastDetails = progress, details
+				if err := writeBootProgressSSE(c, flusher, progress, details); err != nil {
+					return
+				}
+				if 100 <= progress {
+					return
+				}
 			}
 		}
-	}
-}
+	})
+})
 
 func writeBootProgressSSE(c *gin.Context, flusher http.Flusher, progress int32, details string) error {
-	data, err := json.Marshal(map[string]any{"progress": progress, "details": details})
+	data, err := json.Marshal(apicontract.BootProgressData{Progress: progress, Details: details})
 	if err != nil {
 		return err
 	}
@@ -1274,25 +1154,18 @@ func writeBootProgressSSE(c *gin.Context, flusher http.Flusher, progress int32, 
 	return nil
 }
 
-func setAppearanceMode(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var setAppearanceMode = contractHandler(apicontract.SystemSetAppearanceMode, func(c *gin.Context, request apicontract.SystemAppearanceModeRequest) (ret apicontract.Response[apicontract.SystemAppearanceData]) {
+	ret = apicontract.Success(apicontract.SystemAppearanceData{})
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	mode := int(arg["mode"].(float64))
+	mode := int(request.Mode)
 	model.Conf.Appearance.Mode = mode
 	model.LoadThemes()
 	model.WatchThemes()
 	model.Conf.Save()
 
-	ret.Data = map[string]any{
-		"appearance": model.Conf.Appearance,
-	}
-}
+	ret = apicontract.Success(apicontract.SystemAppearanceData{Appearance: settingAppearancePayload(model.Conf.Appearance)})
+	return
+})
 
 var setNetworkServe = contractHandler(apicontract.SetNetworkServe, func(c *gin.Context, request apicontract.NetworkServeRequest) apicontract.Response[apicontract.Null] {
 	model.Conf.System.NetworkServe = request.NetworkServe
@@ -1310,116 +1183,97 @@ var setNetworkServeTLS = contractHandler(apicontract.SetNetworkServeTLS, func(c 
 	return apicontract.Success(apicontract.Null{})
 })
 
-func exportTLSCACert(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var exportTLSCACert = contractHandler(apicontract.SystemExportTLSCACert, func(c *gin.Context, request apicontract.EmptyRequest) (ret apicontract.Response[apicontract.SystemPathData]) {
+	ret = apicontract.Success(apicontract.SystemPathData{})
 
 	caCertPath := filepath.Join(util.ConfDir, util.TLSCACertFilename)
 	if !gulu.File.IsExist(caCertPath) {
-		ret.Code = -1
-		ret.Msg = "CA certificate not found"
+		ret = apicontract.Failure[apicontract.SystemPathData](-1, "CA certificate not found")
 		return
 	}
 
 	tmpDir := filepath.Join(util.TempDir, "export")
 	if err := os.MkdirAll(tmpDir, 0755); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemPathData](-1, err.Error())
 		return
 	}
 
 	exportPath := filepath.Join(tmpDir, util.TLSCACertFilename)
 	if err := gulu.File.CopyFile(caCertPath, exportPath); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemPathData](-1, err.Error())
 		return
 	}
 
-	ret.Data = map[string]any{
-		"path": "/export/" + util.TLSCACertFilename,
-	}
-}
+	ret = apicontract.Success(apicontract.SystemPathData{Path: "/export/" + util.TLSCACertFilename})
+	return
+})
 
-func exportTLSCABundle(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var exportTLSCABundle = contractHandler(apicontract.SystemExportTLSCABundle, func(c *gin.Context, request apicontract.EmptyRequest) (ret apicontract.Response[apicontract.SystemPathData]) {
+	ret = apicontract.Success(apicontract.SystemPathData{})
 
 	caCertPath := filepath.Join(util.ConfDir, util.TLSCACertFilename)
 	caKeyPath := filepath.Join(util.ConfDir, util.TLSCAKeyFilename)
 
 	if !gulu.File.IsExist(caCertPath) || !gulu.File.IsExist(caKeyPath) {
-		ret.Code = -1
-		ret.Msg = "CA certificate not found, please enable TLS first"
+		ret = apicontract.Failure[apicontract.SystemPathData](-1, "CA certificate not found, please enable TLS first")
 		return
 	}
 
 	tmpDir := filepath.Join(util.TempDir, "export", "ca-bundle")
 	os.RemoveAll(tmpDir)
 	if err := os.MkdirAll(tmpDir, 0755); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemPathData](-1, err.Error())
 		return
 	}
 	defer os.RemoveAll(tmpDir)
 
 	if err := gulu.File.CopyFile(caCertPath, filepath.Join(tmpDir, util.TLSCACertFilename)); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemPathData](-1, err.Error())
 		return
 	}
 	if err := gulu.File.CopyFile(caKeyPath, filepath.Join(tmpDir, util.TLSCAKeyFilename)); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemPathData](-1, err.Error())
 		return
 	}
 
 	zipPath := filepath.Join(util.TempDir, "export", "ca-bundle.zip")
 	zipFile, err := gulu.Zip.Create(zipPath)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemPathData](-1, err.Error())
 		return
 	}
 
 	if err := zipFile.AddDirectory("", tmpDir); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemPathData](-1, err.Error())
 		return
 	}
 
 	if err := zipFile.Close(); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemPathData](-1, err.Error())
 		return
 	}
 
-	ret.Data = map[string]any{
-		"path": "/export/ca-bundle.zip",
-	}
-}
+	ret = apicontract.Success(apicontract.SystemPathData{Path: "/export/ca-bundle.zip"})
+	return
+})
 
-func importTLSCABundle(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var importTLSCABundle = contractHandler(apicontract.SystemImportTLSCABundle, func(c *gin.Context, request apicontract.SystemImportFileRequest) (ret apicontract.Response[apicontract.SystemMessageData]) {
+	ret = apicontract.Success(apicontract.SystemMessageData{})
 
-	file, err := c.FormFile("file")
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = "[file] is required: " + err.Error()
-		return
+	file := request.File
+	if file == nil {
+		return apicontract.Failure[apicontract.SystemMessageData](-1, "[file] is required: "+http.ErrMissingFile.Error())
 	}
 
 	tmpDir := filepath.Join(util.TempDir, "import")
 	if err := os.MkdirAll(tmpDir, 0755); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemMessageData](-1, err.Error())
 		return
 	}
 
 	tmpZipPath := filepath.Join(tmpDir, "ca-bundle.zip")
 	if err := c.SaveUploadedFile(file, tmpZipPath); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemMessageData](-1, err.Error())
 		return
 	}
 	defer os.Remove(tmpZipPath)
@@ -1427,8 +1281,7 @@ func importTLSCABundle(c *gin.Context) {
 	extractDir := filepath.Join(tmpDir, "ca-bundle")
 	os.RemoveAll(extractDir)
 	if err := gulu.Zip.Unzip(tmpZipPath, extractDir); err != nil {
-		ret.Code = -1
-		ret.Msg = "failed to extract zip file: " + err.Error()
+		ret = apicontract.Failure[apicontract.SystemMessageData](-1, "failed to extract zip file: "+err.Error())
 		return
 	}
 	defer os.RemoveAll(extractDir)
@@ -1436,29 +1289,25 @@ func importTLSCABundle(c *gin.Context) {
 	caCertPath := filepath.Join(extractDir, util.TLSCACertFilename)
 	caCertPEM, err := os.ReadFile(caCertPath)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = "ca.crt not found in zip file"
+		ret = apicontract.Failure[apicontract.SystemMessageData](-1, "ca.crt not found in zip file")
 		return
 	}
 
 	caKeyPath := filepath.Join(extractDir, util.TLSCAKeyFilename)
 	caKeyPEM, err := os.ReadFile(caKeyPath)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = "ca.key not found in zip file"
+		ret = apicontract.Failure[apicontract.SystemMessageData](-1, "ca.key not found in zip file")
 		return
 	}
 
 	if err := util.ImportCABundle(string(caCertPEM), string(caKeyPEM)); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
+		ret = apicontract.Failure[apicontract.SystemMessageData](-1, err.Error())
 		return
 	}
 
-	ret.Data = map[string]any{
-		"msg": "CA bundle imported successfully. Please restart to apply changes.",
-	}
-}
+	ret = apicontract.Success(apicontract.SystemMessageData{Msg: "CA bundle imported successfully. Please restart to apply changes."})
+	return
+})
 
 var setAutoLaunch = contractHandler(apicontract.SetAutoLaunch, func(c *gin.Context, request apicontract.AutoLaunchRequest) apicontract.Response[apicontract.Null] {
 	model.Conf.System.AutoLaunch2 = int(request.AutoLaunch)
@@ -1488,61 +1337,40 @@ var setNetworkProxy = contractHandler(apicontract.SetNetworkProxy, func(c *gin.C
 	return apicontract.Success(apicontract.Null{})
 })
 
-func addUIProcess(c *gin.Context) {
-	pid := c.Query("pid")
-	pidInt, err := strconv.Atoi(pid)
+var addUIProcess = contractHandler(apicontract.SystemAddUIProcess, func(c *gin.Context, request apicontract.SystemUIProcessRequest) apicontract.Response[apicontract.Null] {
+	request.PID = c.Query("pid")
+	pidInt, err := strconv.Atoi(request.PID)
 	if err != nil || 0 >= pidInt {
-		return
+		return apicontract.EmptyHTTPResponse[apicontract.Null](http.StatusOK)
 	}
 
 	// 限制注册表中的 UI 进程数，防止无界增长导致内存耗尽
 	if util.UIProcessCount() >= util.MaxUIProcessCount {
-		return
+		return apicontract.EmptyHTTPResponse[apicontract.Null](http.StatusOK)
 	}
 	util.UIProcessIDs.Store(strconv.Itoa(pidInt), true)
-}
+	return apicontract.EmptyHTTPResponse[apicontract.Null](http.StatusOK)
+})
 
-func exit(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var exit = contractHandler(apicontract.SystemExit, exitSystem)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
+var closeSystem = model.Close
 
-	forceArg := arg["force"]
-	var force bool
-	if nil != forceArg {
-		force = forceArg.(bool)
-	}
-
-	execInstallPkgArg := arg["execInstallPkg"] // 0：默认检查新版本，1：不返回安装包，2：返回安装包路径并退出
-	execInstallPkg := 0
-	if nil != execInstallPkgArg {
-		execInstallPkg = int(execInstallPkgArg.(float64))
-	}
-
-	setCurrentWorkspaceArg := arg["setCurrentWorkspace"]
+func exitSystem(c *gin.Context, request apicontract.SystemExitRequest) apicontract.Response[apicontract.SystemExitData] {
 	setCurrentWorkspace := true
-	if nil != setCurrentWorkspaceArg {
-		setCurrentWorkspace = setCurrentWorkspaceArg.(bool)
+	if request.SetCurrentWorkspace != nil {
+		setCurrentWorkspace = *request.SetCurrentWorkspace
 	}
-
-	exitCode, installPkgPath := model.Close(force, setCurrentWorkspace, execInstallPkg)
-	ret.Code = exitCode
-	data := map[string]any{"closeTimeout": 0}
-	if "" != installPkgPath {
-		data["installPkgPath"] = installPkgPath
-	}
-	ret.Data = data
+	exitCode, installPkgPath := closeSystem(request.Force, setCurrentWorkspace, int(request.ExecInstallPkg))
+	data := apicontract.SystemExitData{CloseTimeout: 0, InstallPkgPath: installPkgPath}
 	switch exitCode {
 	case 0:
 		// Close 返回后同步和 defer 清理均已完成，此时再通知移动端宿主退出。
 		util.BroadcastByType("main", "exit", 0, "", nil)
 	case 1: // 同步执行失败
-		ret.Msg = model.Conf.Language(96) + "<div class=\"fn__space\"></div><button class=\"b3-button b3-button--white\">" + model.Conf.Language(97) + "</button>"
+		return apicontract.SystemExit.FailureWithData(1, model.Conf.Language(96)+"<div class=\"fn__space\"></div><button class=\"b3-button b3-button--white\">"+model.Conf.Language(97)+"</button>", data)
 	case 2: // 提示新安装包
-		ret.Msg = model.Conf.Language(61)
+		return apicontract.SystemExit.FailureWithData(2, model.Conf.Language(61), data)
 	}
+	return apicontract.Success(data)
 }

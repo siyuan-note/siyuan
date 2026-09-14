@@ -93,8 +93,8 @@ export const commandPanel = (app: App) => {
         /// #endif
     };
     let dialog: {element: HTMLElement, destroy: () => void};
+    menu.remove();
     if (isMobile()) {
-        menu.remove();
         const element = document.createElement("div");
         element.innerHTML = content;
         element.className = "fn__flex-column fn__flex-1";

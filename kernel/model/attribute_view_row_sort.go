@@ -33,6 +33,10 @@ type attributeViewRowOrderChange struct {
 	ValidateGroup *string                `json:"validateGroup,omitempty"`
 }
 
+// AttributeViewRowOrder 和 AttributeViewRowOrderChange 用于传输层逐字段转换行排序预览。
+type AttributeViewRowOrder = attributeViewRowOrder
+type AttributeViewRowOrderChange = attributeViewRowOrderChange
+
 type AttributeViewRowSortPreview struct {
 	Conflict       bool         `json:"conflict"`
 	DoOperations   []*Operation `json:"doOperations"`

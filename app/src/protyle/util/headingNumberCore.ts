@@ -261,7 +261,7 @@ export const operationsMayChangeOutline = (operations: IOperation[] | null = [],
         if (operationChangesHeadingNumberSetting(operation)) {
             return true;
         }
-        if (["append", "delete", "move", "moveOutlineHeading"].includes(operation.action)) {
+        if (["append", "delete", "move", "moveOutlineHeading", "swapBlockRef"].includes(operation.action)) {
             return true;
         }
         if (operation.action === "update" && operation.id && headingIDs.has(operation.id)) {
@@ -283,7 +283,7 @@ export const operationsMayChangeHeadingNumbers = (
         if (operationChangesHeadingNumberSetting(operation)) {
             return true;
         }
-        if (["append", "delete", "move", "moveOutlineHeading"].includes(operation.action)) {
+        if (["append", "delete", "move", "moveOutlineHeading", "swapBlockRef"].includes(operation.action)) {
             return true;
         }
         if (operation.action === "update") {

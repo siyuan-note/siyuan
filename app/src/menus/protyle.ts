@@ -625,12 +625,13 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                     iconHTML: "",
                     label: originalToEmbed ? window.siyuan.languages.originalToEmbed : window.siyuan.languages.originalToRef,
                     click() {
-                        fetchPost("/api/block/swapBlockRef", {
-                            refID: id,
-                            defID: refBlockId,
-                            includeChildren: false,
-                            originalToEmbed
-                        });
+                        protyle.wysiwyg.flushPendingInput();
+                        transaction(protyle, [{
+                            action: "swapBlockRef",
+                            id,
+                            blockID: refBlockId,
+                            data: {includeChildren: false, originalToEmbed}
+                        }], []);
                     }
                 }))
             });
@@ -643,12 +644,13 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                     iconHTML: "",
                     label: originalToEmbed ? window.siyuan.languages.originalToEmbed : window.siyuan.languages.originalToRef,
                     click() {
-                        fetchPost("/api/block/swapBlockRef", {
-                            refID: id,
-                            defID: refBlockId,
-                            includeChildren: true,
-                            originalToEmbed
-                        });
+                        protyle.wysiwyg.flushPendingInput();
+                        transaction(protyle, [{
+                            action: "swapBlockRef",
+                            id,
+                            blockID: refBlockId,
+                            data: {includeChildren: true, originalToEmbed}
+                        }], []);
                     }
                 }))
             });

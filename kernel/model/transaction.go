@@ -271,6 +271,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doDelete(op)
 			case "move":
 				ret = tx.doMove(op)
+			case "swapBlockRef":
+				ret = tx.doSwapBlockRef(op)
 			case "moveOutlineHeading":
 				ret = tx.doMoveOutlineHeading(op)
 			case "append":
@@ -2390,6 +2392,8 @@ type Operation struct {
 	DeckID                string      `json:"deckID"` // 用于添加/删除闪卡
 	Tree                  *parse.Tree `json:"-"`      // 仅用于内核事务重放，不发送到前端
 	templateDocTreeRootID string
+	blockSwapState        *blockSwapState
+	blockSwapUndo         bool
 
 	LockType bool `json:"-"` // 外部块更新是否禁止改变主类型
 
@@ -2553,6 +2557,7 @@ type Transaction struct {
 	templateDocTreeRootSnapshot  *parse.Tree
 	removeCreatedDoc             func(*Box, string, *lute.Lute) (*parse.Tree, error)
 	writeTransactionTree         func(*parse.Tree) error
+	blockSwapOriginalTrees       []*parse.Tree
 
 	fromAPI  bool // 是否来自 /api/transactions HTTP 入口（用于撤销日志捕获判别）
 	isReplay bool // 是否为 undo/redo 重放构造的事务（重放不再进入撤销日志）
@@ -2678,6 +2683,13 @@ func (tx *Transaction) commit() (err error) {
 		nil != tx.templateDocTreeRootSnapshot
 	committed := false
 	defer func() {
+		if !committed {
+			for _, tree := range tx.blockSwapOriginalTrees {
+				if restoreErr := restoreCreatedDocTreeSnapshot(tree); restoreErr != nil {
+					err = errors.Join(err, restoreErr)
+				}
+			}
+		}
 		if compensationRequired && !committed {
 			if compensationErr := tx.compensateCreatedDocCommit(attemptedRemovedDocs); nil != compensationErr {
 				err = errors.Join(err, compensationErr)
@@ -2817,6 +2829,7 @@ func (tx *Transaction) commit() (err error) {
 	committed = true
 	// 已提交且 trees 稳定后记录到全局撤销日志（rollback 不记录）
 	GlobalUndoLog.Record(tx)
+	tx.blockSwapOriginalTrees = nil
 	tx.templateDocTreeRootSnapshot = nil
 	tx.attemptedTemplateCreatedDocs = nil
 	tx.writeTransactionTree = nil
@@ -2829,6 +2842,11 @@ func (tx *Transaction) commit() (err error) {
 }
 
 func (tx *Transaction) rollback() {
+	for _, tree := range tx.blockSwapOriginalTrees {
+		treenode.RemoveBlockTreesByRootID(tree.Box, tree.ID)
+		treenode.UpsertBlockTree(tree)
+	}
+	tx.blockSwapOriginalTrees = nil
 	for _, tree := range tx.restoredTemplateCreatedDocs {
 		if nil != tree {
 			treenode.RemoveBlockTreesByRootID(tree.Box, tree.ID)

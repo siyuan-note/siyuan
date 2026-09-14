@@ -2,6 +2,11 @@ package apicontract
 
 import "encoding/json"
 
+type TransactionBlockSwap struct {
+	IncludeChildren bool `json:"includeChildren"`
+	OriginalToEmbed bool `json:"originalToEmbed"`
+}
+
 type TransactionSourceFields struct {
 	ID         *string `json:"id,omitempty" api:"optional"`
 	ItemID     *string `json:"itemID,omitempty" api:"optional"`

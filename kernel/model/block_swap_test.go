@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
@@ -14,8 +15,8 @@ func TestSwapBlockRefNodes(t *testing.T) {
 			for _, embed := range []bool{false, true} {
 				for _, kind := range []string{"paragraph", "heading", "list", "refList", "bothLists"} {
 					t.Run(fmt.Sprintf("%s/same=%t/children=%t/embed=%t", kind, sameTree, includeChildren, embed), func(t *testing.T) {
-						refRoot := &ast.Node{Type: ast.NodeDocument}
-						defRoot := &ast.Node{Type: ast.NodeDocument}
+						refRoot := &ast.Node{Type: ast.NodeDocument, ID: ast.NewNodeID()}
+						defRoot := &ast.Node{Type: ast.NodeDocument, ID: ast.NewNodeID()}
 						if sameTree {
 							defRoot = refRoot
 						}
@@ -27,8 +28,10 @@ func TestSwapBlockRefNodes(t *testing.T) {
 						refRoot.AppendChild(ref)
 						defRoot.AppendChild(def)
 						wrap := func(n *ast.Node) *ast.Node {
-							list := &ast.Node{Type: ast.NodeList, ListData: &ast.ListData{Typ: 0}}
-							li := &ast.Node{Type: ast.NodeListItem, ListData: &ast.ListData{Typ: 0}}
+							list := &ast.Node{Type: ast.NodeList, ID: ast.NewNodeID(), ListData: &ast.ListData{Typ: 0}}
+							li := &ast.Node{Type: ast.NodeListItem, ID: ast.NewNodeID(), ListData: &ast.ListData{Typ: 0}}
+							list.SetIALAttr("id", list.ID)
+							li.SetIALAttr("id", li.ID)
 							n.InsertBefore(list)
 							list.AppendChild(li)
 							li.AppendChild(n)
@@ -60,6 +63,11 @@ func TestSwapBlockRefNodes(t *testing.T) {
 							defTop = def.Parent
 						}
 						defTop.InsertBefore(defBefore)
+						trees := []*parse.Tree{{ID: refRoot.ID, Root: refRoot}}
+						if !sameTree {
+							trees = append(trees, &parse.Tree{ID: defRoot.ID, Root: defRoot})
+						}
+						before := captureBlockSwapFragments(trees)
 						swapBlockRefNodes(ref, def, def.ID, includeChildren, embed)
 						contains := func(parent, node *ast.Node) bool {
 							for n := node; n != nil; n = n.Parent {
@@ -108,9 +116,41 @@ func TestSwapBlockRefNodes(t *testing.T) {
 								t.Fatal("list children moved incorrectly")
 							}
 						}
+						after := captureBlockSwapFragments(trees)
+						state := newBlockSwapState(before, after)
+						treeMap := map[string]*parse.Tree{}
+						for _, tree := range trees {
+							treeMap[tree.ID] = tree
+						}
+						for cycle := 0; cycle < 2; cycle++ {
+							if err := restoreBlockSwapFragments(state.after, state.before, treeMap); err != nil {
+								t.Fatalf("undo: %v", err)
+							}
+							assertBlockSwapFragments(t, before, captureBlockSwapFragments(trees))
+							if err := restoreBlockSwapFragments(state.before, state.after, treeMap); err != nil {
+								t.Fatalf("redo: %v", err)
+							}
+							assertBlockSwapFragments(t, after, captureBlockSwapFragments(trees))
+						}
 					})
 				}
 			}
+		}
+	}
+}
+
+func assertBlockSwapFragments(t *testing.T, expected, actual []blockSwapFragment) {
+	t.Helper()
+	if len(expected) != len(actual) {
+		t.Fatalf("fragment count: got %d, want %d", len(actual), len(expected))
+	}
+	for i, want := range expected {
+		got := actual[i]
+		if want.rootID != got.rootID || want.node.ID != got.node.ID || want.previousID != got.previousID ||
+			blockSwapFingerprint(want.node) != blockSwapFingerprint(got.node) {
+			t.Fatalf("fragment %d did not round trip: root %s/%s id %s/%s previous %s/%s\nwant %s\ngot %s", i,
+				want.rootID, got.rootID, want.node.ID, got.node.ID, want.previousID, got.previousID,
+				blockSwapFingerprint(want.node), blockSwapFingerprint(got.node))
 		}
 	}
 }

@@ -269,20 +269,24 @@ func SelectBlocksRawStmtInBox(stmt string, page, limit int, boxID string) (ret [
 	queryFn := func(stmt string, args ...any) (*sql.Rows, error) {
 		return queryForBox(boxID, stmt, args...)
 	}
-	return selectBlocksRawStmtWithQuery(stmt, page, limit, queryFn)
+	return selectBlocksRawStmtWithQuery(stmt, page, limit, boxID, queryFn)
 }
 
 func SelectBlocksRawStmtInBoxContext(ctx context.Context, stmt string, page, limit int, boxID string) (ret []*Block, err error) {
 	queryFn := func(stmt string, args ...any) (*sql.Rows, error) {
 		return queryForBoxContext(ctx, boxID, stmt, args...)
 	}
-	ret = selectBlocksRawStmtWithQuery(stmt, page, limit, queryFn)
+	ret = selectBlocksRawStmtWithQuery(stmt, page, limit, boxID, queryFn)
 	err = ctx.Err()
 	return
 }
 
 // SelectBlocksRawStmtBoundedInBoxContext 执行原始块查询，并无条件限制返回行数。
 func SelectBlocksRawStmtBoundedInBoxContext(ctx context.Context, stmt string, limit int, boxID string) (ret []*Block, truncated bool, err error) {
+	if !checkRawBlockQueryStmt(stmt, boxID) {
+		return
+	}
+
 	rows, err := queryForBoxContext(ctx, boxID, stmt)
 	if nil != err {
 		return nil, false, err
@@ -348,6 +352,10 @@ func QueryNoLimitArgsInBox(stmt, boxID string, args ...any) (ret []map[string]an
 // SelectBlocksRawStmtArgsInBox 在指定 box 的 db 里执行参数化原始 SQL 查询 blocks。
 // 与 SelectBlocksRawStmtArgs 对应，绕开 sqlparser 对 "?" 占位的改写。
 func SelectBlocksRawStmtArgsInBox(stmt string, args []any, limit int, boxID string) (ret []*Block) {
+	if !checkRawBlockQueryStmt(stmt, boxID) {
+		return
+	}
+
 	rows, err := queryForBox(boxID, stmt, args...)
 	if err != nil {
 		if strings.Contains(err.Error(), "syntax error") {
@@ -651,6 +659,10 @@ func QueryRefIDsByDefIDInBox(defID string, containChildren bool, boxID string) (
 
 // SelectBlocksRawStmtNoParseInBox 与 SelectBlocksRawStmtNoParse 一致，但按 boxID 路由。
 func SelectBlocksRawStmtNoParseInBox(stmt string, limit int, boxID string) (ret []*Block) {
+	if !checkRawBlockQueryStmt(stmt, boxID) {
+		return
+	}
+
 	rows, err := queryForBox(boxID, stmt)
 	if err != nil {
 		if strings.Contains(err.Error(), "syntax error") {

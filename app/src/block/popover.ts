@@ -575,7 +575,7 @@ export const showPopover = async (app: App, showRef = false) => {
         return;
     }
     let refDefs: IRefDefs[] = [];
-    let originalRefBlockIDs: IObject;
+    let originalRefBlockIDs: Record<string, string>;
     const notebookId = getPopoverNotebookId();
     const dataId = popoverTargetElement.getAttribute("data-id");
     if (dataId) {
@@ -585,6 +585,9 @@ export const showPopover = async (app: App, showRef = false) => {
                 id: dataId,
                 notebook: notebookId
             });
+            if (postResponse.code !== 0) {
+                return;
+            }
             refDefs = postResponse.data.refDefs;
             originalRefBlockIDs = postResponse.data.originalRefBlockIDs;
         } else {
@@ -601,6 +604,9 @@ export const showPopover = async (app: App, showRef = false) => {
             anchor: popoverTargetElement.textContent,
             notebook: notebookId
         });
+        if (postResponse.code !== 0) {
+            return;
+        }
         refDefs = postResponse.data.refDefs;
     } else if (popoverTargetElement.getAttribute("data-type")?.split(" ").includes("a")) {
         // 以思源协议开头的链接

@@ -1,3 +1,4 @@
+import {openInputDialog} from "../../dialog/inputDialog";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {
     focusBlock,
@@ -16,8 +17,6 @@ import {insertEmptyBlock} from "../../block/util";
 import {removeBlock} from "../wysiwyg/remove";
 import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
-import {Dialog} from "../../dialog";
-import {isMobile} from "../../util/functions";
 import {
     getProjectedTableHeadRowCount,
     getTableHeadRowCount,
@@ -769,16 +768,12 @@ export const updateTableTitle = (protyle: IProtyle, nodeElement: Element) => {
     }
     const captionElement = nodeElement.querySelector("caption");
     window.siyuan.menus.menu.remove();
-    const dialog = new Dialog({
+    const html = nodeElement.outerHTML;
+    openInputDialog({
         title: window.siyuan.languages.table,
-        width: isMobile() ? "92vw" : "520px",
-        content: `<div class="b3-dialog__content">
-    <label>
-        <div>${window.siyuan.languages.title}</div>
-        <div class="fn__hr"></div>
-        <input class="b3-text-field fn__block">
-    </label>
-    <div class="fn__hr--b"></div>
+        label: window.siyuan.languages.title,
+        value: captionElement?.textContent || "",
+        extraContent: `<div class="fn__hr--b"></div>
     <label>
         <div>${window.siyuan.languages.position}</div>
         <div class="fn__hr"></div>
@@ -786,46 +781,28 @@ export const updateTableTitle = (protyle: IProtyle, nodeElement: Element) => {
             <option value="top">${window.siyuan.languages.up}</option>
             <option value="bottom" ${captionElement?.style.captionSide === "bottom" ? "selected" : ""}>${window.siyuan.languages.down}</option>
         </select>
-    </label>
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>
-<div>`,
-    });
-    const html = nodeElement.outerHTML;
-    const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
-    const btnsElement = dialog.element.querySelectorAll(".b3-button");
-    dialog.bindInput(inputElement, () => {
-        (btnsElement[1] as HTMLButtonElement).click();
-    });
-    btnsElement[0].addEventListener("click", () => {
-        dialog.destroy();
-    });
-    btnsElement[1].addEventListener("click", () => {
-        const title = inputElement.value.trim();
-        const location = (dialog.element.querySelector("select") as HTMLSelectElement).value;
-        if (title) {
-            const html = `<caption contenteditable="false" ${location === "bottom" ? 'style="caption-side: bottom;"' : ""}>${Lute.EscapeHTMLStr(title)}</caption>`;
-            if (captionElement) {
-                captionElement.outerHTML = html;
+    </label>`,
+        onConfirm: (value, dialog) => {
+            const title = value.trim();
+            const location = (dialog.element.querySelector("select") as HTMLSelectElement).value;
+            if (title) {
+                const html = `<caption contenteditable="false" ${location === "bottom" ? 'style="caption-side: bottom;"' : ""}>${Lute.EscapeHTMLStr(title)}</caption>`;
+                if (captionElement) {
+                    captionElement.outerHTML = html;
+                } else {
+                    nodeElement.querySelector("table").insertAdjacentHTML("afterbegin", html);
+                }
+                nodeElement.setAttribute("caption", Lute.EscapeHTMLStr(html));
             } else {
-                nodeElement.querySelector("table").insertAdjacentHTML("afterbegin", html);
+                if (captionElement) {
+                    captionElement.remove();
+                }
+                nodeElement.removeAttribute("caption");
             }
-            nodeElement.setAttribute("caption", Lute.EscapeHTMLStr(html));
-        } else {
-            if (captionElement) {
-                captionElement.remove();
-            }
-            nodeElement.removeAttribute("caption");
-        }
-        updateTransaction(protyle, nodeElement, html);
-        dialog.destroy();
+            updateTransaction(protyle, nodeElement, html);
+            dialog.destroy();
+        },
     });
-    inputElement.value = captionElement?.textContent || "";
-    inputElement.focus();
-    inputElement.select();
 };
 
 export interface ITableCellInfo {

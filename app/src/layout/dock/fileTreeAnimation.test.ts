@@ -5,6 +5,7 @@ import {
     collapseFileTree,
     expandFileTree,
     isFileTreeCollapsing,
+    setFileTreeVisibility,
     toggleFileTree
 } from "./fileTreeAnimation";
 
@@ -112,6 +113,31 @@ const createTreeElements = (expanded = true) => {
 };
 
 describe("fileTreeAnimation", () => {
+    it("retains pinned lists and cancels stale collapse when expanding again", async () => {
+        const animations = [createAnimation(), createAnimation()];
+        let hidden = false;
+        let index = 0;
+        const frames: Keyframe[][] = [];
+        const element = {
+            style: {overflow: "", removeProperty() { this.overflow = ""; }},
+            classList: {remove() { hidden = false; }, toggle(_name: string, value: boolean) { hidden = value; }},
+            getBoundingClientRect: () => ({height: 80}),
+            animate(value: Keyframe[]) { frames.push(value); return animations[index++].animation; },
+        } as unknown as HTMLElement;
+        setFileTreeVisibility(element, false, true);
+        assert.equal(hidden, false);
+        setFileTreeVisibility(element, true, true);
+        assert.equal(animations[0].isCanceled(), true);
+        await Promise.resolve();
+        assert.equal(hidden, false);
+        animations[1].finish();
+        await Promise.resolve();
+        assert.equal(hidden, false);
+        assert.equal(element.style.overflow, "");
+        assert.deepEqual(frames[0], [{height: "80px", maxHeight: "80px"}, {height: "0px", maxHeight: "0px"}]);
+        setFileTreeVisibility(element, false);
+        assert.equal(hidden, true);
+    });
     it("expands to the actual content height and restores animation styles", async () => {
         const tree = createTreeElements();
         let finished = false;

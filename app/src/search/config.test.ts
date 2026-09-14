@@ -1,6 +1,7 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    buildSearchRequest,
     cloneSearchConfig,
     getSearchPathID,
     getGlobalSearchPath,
@@ -24,6 +25,62 @@ import {
     syncSearchConfig,
     syncSearchConfigHPath,
 } from "./config";
+
+describe("search request configuration", () => {
+    it("disables hierarchical path matches only while replacing", () => {
+        const config: Config.IUILayoutTabSearchConfig = {query: "ancestor", method: 0};
+
+        assert.equal(buildSearchRequest(config).searchHPath, true);
+        config.hasReplace = true;
+        assert.equal(buildSearchRequest(config).searchHPath, false);
+        config.hasReplace = false;
+        assert.equal(buildSearchRequest(config).searchHPath, true);
+    });
+
+    it("preserves filters and pagination when replacing", () => {
+        const config: Config.IUILayoutTabSearchConfig = {
+            query: "ancestor",
+            method: 0,
+            types: {
+                document: true,
+                audioBlock: false,
+                videoBlock: false,
+                iframeBlock: false,
+                widgetBlock: false,
+                heading: false,
+                list: false,
+                listItem: false,
+                codeBlock: false,
+                htmlBlock: false,
+                mathBlock: false,
+                table: false,
+                blockquote: false,
+                callout: false,
+                tabs: false,
+                tabItem: false,
+                superBlock: false,
+                paragraph: false,
+                embedBlock: false,
+                databaseBlock: false,
+            },
+            idPath: ["notebook/document"],
+            group: 1,
+            sort: 2,
+            page: 3,
+        };
+        const search = buildSearchRequest(config);
+        assert.deepEqual(buildSearchRequest({...config, hasReplace: true}), {...search, searchHPath: false});
+        assert.equal(search.query, "ancestor");
+        assert.deepEqual(search.paths, config.idPath);
+        assert.deepEqual(search.types, config.types);
+        assert.equal(search.groupBy, 1);
+        assert.equal(search.orderBy, 2);
+        assert.equal(search.page, 3);
+        assert.equal(search.pageSize, 32);
+        assert.equal(buildSearchRequest({}).page, 1);
+        assert.deepEqual(buildSearchRequest({}).paths, []);
+    });
+});
 
 describe("search configuration scope", () => {
     const criterionA: Config.IUILayoutTabSearchConfig = {

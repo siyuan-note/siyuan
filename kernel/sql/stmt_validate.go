@@ -172,6 +172,18 @@ func CheckAssetContentReadonlyStatement(stmt string) error {
 	return checkReadonlyStatement(stmt, assetContentDB)
 }
 
+// CheckReadonlyBlockQueryStatement 校验原始块查询语句为「单条 + 只读」，boxID 为空或普通笔记本时
+// 在全局库上校验，加密笔记本在其独立加密库上校验。
+//
+// 嵌入块脚本、模板查询和导出路径的 SQL 都来自文档内容，属于不可信输入，执行前必须经过本校验。
+// 见 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-67p9-hm94-xwf3
+func CheckReadonlyBlockQueryStatement(stmt, boxID string) error {
+	if err := CheckSingleStatement(stmt); nil != err {
+		return err
+	}
+	return CheckReadonlyStatementInBox(stmt, boxID)
+}
+
 // CheckReadonlyStatementInBox 在指定笔记本对应的数据库连接上检查 SQL 是否只读。
 func CheckReadonlyStatementInBox(stmt, boxID string) error {
 	targetDB := db

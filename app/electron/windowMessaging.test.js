@@ -91,7 +91,7 @@ test("未登记内核目标的窗口既不能发送也不能接收", () => {
 });
 
 test("主进程 handler 按发送方与内核目标接线到 dispatchWindowMessage", () => {
-    const source = fs.readFileSync(path.join(__dirname, "main.js"), "utf8");
+    const source = fs.readFileSync(path.join(__dirname, "main.js"), "utf8").replace(/\r\n/g, "\n");
     const marker = "ipcMain.on(\"siyuan-send-windows\", (event, data) => {";
     const markerOffset = source.indexOf(marker);
     assert.notEqual(markerOffset, -1);

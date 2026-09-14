@@ -1,4 +1,6 @@
+import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
+import {openInputDialog} from "../dialog/inputDialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {Constants} from "../constants";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -6,7 +8,7 @@ import {renderAssetsPreview} from "../asset/renderAssets";
 import {Protyle} from "../protyle";
 import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import * as dayjs from "dayjs";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {isMobile} from "../util/functions";
 import {showDiff} from "./diff";
@@ -18,56 +20,60 @@ import {resizeSide} from "./resizeSide";
 import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRender";
 import {renderRepoFile, renderRepoFileList, rollbackRepoFile, saveRepoFile} from "./repoFile";
 import {openDocHistory} from "./doc";
+import {getRepoSnapshotType, initRepoPanel, updateRepoSelection} from "./repoPanel";
 
 let historyEditor: Protyle;
+const repoPanelCleanup = new WeakMap<Element, () => void>();
+const repoRequests = new WeakMap<Element, number>();
 const repoHistoryEditors = new WeakMap<Element, Protyle>();
 const snapshotMemos = new WeakMap<Element, Map<string, string>>();
 
+const destroyRepoPanel = (root: Element) => {
+    repoPanelCleanup.get(root)?.();
+    root.querySelectorAll("[data-repo-source]").forEach(pane => {
+        repoRequests.set(pane, (repoRequests.get(pane) || 0) + 1);
+        repoHistoryEditors.get(pane)?.destroy();
+        repoHistoryEditors.delete(pane);
+    });
+};
+
 const openSnapshotMemo = (repoElement: Element, id?: string, memo = "") => {
-    const dialog = new Dialog({
+    const dialog = openInputDialog({
         title: id ? window.siyuan.languages.editSnapshotMemo : window.siyuan.languages.snapshotMemo,
-        content: `<div class="b3-dialog__content">
-    ${id ? `<div class="ft__secondary">${window.siyuan.languages.snapshotMemoLocalTip}</div><div class="fn__hr"></div>` : ""}
-    <textarea class="b3-text-field fn__block" placeholder="${escapeAttr(window.siyuan.languages.snapshotMemoTip)}"></textarea>
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
-        width: isMobile() ? "92vw" : "520px",
+        value: memo,
+        multiline: true,
+        resize: "vertical",
+        placeholder: window.siyuan.languages.snapshotMemoTip,
+        description: id ? window.siyuan.languages.snapshotMemoLocalTip : undefined,
+        onConfirm: async (value, dialog) => {
+            const textarea = dialog.element.querySelector("textarea");
+            const button = dialog.element.querySelector<HTMLButtonElement>(".b3-button--text");
+            if (button.disabled) {
+                return;
+            }
+            button.disabled = true;
+            textarea.readOnly = true;
+            try {
+                if (id) {
+                    await fetchPost("/api/repo/setSnapshotMemo", {id, memo: value}, () => {
+                        dialog.destroy();
+                        renderRepo(repoElement, parseInt(repoElement.getAttribute("data-page")) || 1);
+                    });
+                } else {
+                    await fetchPost("/api/repo/createSnapshot", {memo: value}, (response) => {
+                        if (response.data.created) {
+                            dialog.destroy();
+                            renderRepo(repoElement, 1);
+                        }
+                    });
+                }
+            } finally {
+                button.disabled = false;
+                textarea.readOnly = false;
+            }
+        },
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_SNAPSHOTMEMO);
-    const textarea = dialog.element.querySelector("textarea");
-    textarea.value = memo;
-    textarea.focus();
-    const buttons = dialog.element.querySelectorAll("button");
-    dialog.bindInput(textarea, () => buttons[1].click());
-    buttons[0].addEventListener("click", () => dialog.destroy());
-    buttons[1].addEventListener("click", async () => {
-        if (buttons[1].disabled) {
-            return;
-        }
-        buttons[1].disabled = true;
-        textarea.readOnly = true;
-        try {
-            if (id) {
-                await fetchPost("/api/repo/setSnapshotMemo", {id, memo: textarea.value}, () => {
-                    dialog.destroy();
-                    renderRepo(repoElement, parseInt(repoElement.getAttribute("data-page")) || 1);
-                });
-            } else {
-                await fetchPost("/api/repo/createSnapshot", {memo: textarea.value}, (response) => {
-                    if (response.data.created) {
-                        dialog.destroy();
-                        renderRepo(repoElement, 1);
-                    }
-                });
-            }
-        } finally {
-            buttons[1].disabled = false;
-            textarea.readOnly = false;
-        }
-    });
 };
 
 const renderDoc = (element: HTMLElement, currentPage: number) => {
@@ -163,6 +169,7 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
 const renderRepoItem = (response: IWebSocketData, element: Element, type: string) => {
     if (response.data.snapshots.length === 0) {
         element.querySelector('[data-type="repoList"]').innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+        updateRepoSelection(element);
         return;
     }
     let actionHTML = "";
@@ -304,10 +311,10 @@ ${item.requiresDownload && ["getRepoTagSnapshots", "getRepoSnapshots"].includes(
 ${statHTML}`;
         const hasSelected = selectId.find(subItem => subItem.id === item.id);
         /// #if MOBILE
-        repoHTML += `<li class="b3-list-item${hasSelected ? " b3-list-item--focus" : ""}" data-type="repoitem" data-id="${item.id}" data-tag="${escapeAttr(escapeHtml(item.tag))}">
+        repoHTML += `<li class="b3-list-item${hasSelected ? " b3-list-item--focus" : ""}" data-type="repoitem" data-id="${item.id}" data-tag="${escapeAttr(escapeHtml(item.tag || ""))}">
 <div class="fn__flex-1">
     ${infoHTML}
-    <div class="fn__flex" style="height: 26px" data-type="repoitem"" data-id="${item.id}" data-tag="${escapeAttr(escapeHtml(item.tag))}">
+    <div class="fn__flex" style="height: 26px" data-type="repoitem" data-id="${item.id}" data-tag="${escapeAttr(escapeHtml(item.tag || ""))}">
         ${actionHTML}
         <span class="b3-list-item__action" data-type="more">
             <svg><use xlink:href="#iconMore"></use></svg>
@@ -319,13 +326,14 @@ ${statHTML}`;
 </div>
 </li>`;
         /// #else
-        repoHTML += `<li class="b3-list-item b3-list-item--hide-action${hasSelected ? " b3-list-item--focus" : ""}" data-type="repoitem" data-id="${item.id}" data-tag="${escapeAttr(escapeHtml(item.tag))}">
+        repoHTML += `<li class="b3-list-item b3-list-item--hide-action${hasSelected ? " b3-list-item--focus" : ""}" data-type="repoitem" data-id="${item.id}" data-tag="${escapeAttr(escapeHtml(item.tag || ""))}">
 <div class="fn__flex-1">${infoHTML}</div>
 ${actionHTML}
 </li>`;
         /// #endif
     });
     element.querySelector('[data-type="repoList"]').innerHTML = `${repoHTML}`;
+    updateRepoSelection(element);
 };
 
 const clearRepoPreview = (element: Element) => {
@@ -343,6 +351,9 @@ const setRepoSearchLayout = (element: Element, enabled: boolean) => {
     const resizeElement = element.querySelector(".history__resize");
     const previewElement = element.querySelector('[data-type="repoPreview"]');
     clearRepoPreview(element);
+    if (element.getAttribute("data-repo-source") === "local") {
+        element.closest(".history__snapshots")?.classList.toggle("history__snapshots--search", enabled);
+    }
     if (enabled) {
         listElement.classList.remove("fn__flex-1");
         listElement.classList.add("history__side");
@@ -364,87 +375,78 @@ const renderRepoSearchResult = (response: IWebSocketData, element: Element) => {
     renderRepoFileList(response.data.files, element.querySelector('[data-type="repoList"]'), true);
 };
 
-const renderRepo = (element: Element, currentPage: number) => {
-    const selectElement = element.querySelector(".b3-select") as HTMLSelectElement;
-    const selectValue = selectElement.value;
-    const searchInputElement = element.querySelector("input") as HTMLInputElement;
+const renderRepo = async (element: Element, currentPage: number) => {
+    if (element.classList.contains("history__snapshots")) {
+        element.setAttribute("data-init", "true");
+        await Promise.all(Array.from(element.querySelectorAll("[data-repo-source]")).map(pane => renderRepo(pane, currentPage)));
+        return;
+    }
+    const request = (repoRequests.get(element) || 0) + 1;
+    repoRequests.set(element, request);
+    const selectValue = getRepoSnapshotType(element);
+    const searchInputElement = element.querySelector<HTMLInputElement>(".b3-text-field");
     const keyword = searchInputElement.value.trim();
-
-    selectElement.disabled = true;
-    setRepoSearchLayout(element, Boolean(keyword && selectValue === "getRepoSnapshots"));
-    element.querySelector('[data-type="repoList"]').innerHTML = '<li style="position: relative;height: 100%;"><div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div></li>';
+    const searching = Boolean(keyword && selectValue === "getRepoSnapshots");
+    const tagged = selectValue === "getRepoTagSnapshots" || selectValue === "getCloudRepoTagSnapshots";
+    const listElement = element.querySelector('[data-type="repoList"]');
     const pageBtn = element.querySelector('button[data-type="jumpRepoPage"]');
-    pageBtn.textContent = `${currentPage}`;
-
     const previousElement = element.querySelector('[data-type="previous"]');
     const nextElement = element.querySelector('[data-type="next"]');
     const pageElement = nextElement.nextElementSibling.nextElementSibling;
-    element.setAttribute("data-init", "true");
-
-    if (selectValue === "getRepoSnapshots") {
-        searchInputElement.parentElement.classList.remove("fn__none");
-    } else {
-        searchInputElement.parentElement.classList.add("fn__none");
-    }
-    if (keyword && selectValue === "getRepoSnapshots") {
-        const searchBtnElement = searchInputElement.nextElementSibling as HTMLButtonElement;
-        searchBtnElement.disabled = true;
-        previousElement.classList.remove("fn__none");
-        nextElement.classList.remove("fn__none");
-        pageBtn.classList.remove("fn__none");
-        element.setAttribute("data-page", currentPage.toString());
-        if (currentPage > 1) {
-            previousElement.removeAttribute("disabled");
+    const searchButton = searchInputElement.nextElementSibling as HTMLButtonElement;
+    setRepoSearchLayout(element, searching);
+    listElement.innerHTML = '<li class="b3-list--empty"><div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div></li>';
+    updateRepoSelection(element);
+    element.setAttribute("data-page", String(currentPage));
+    pageBtn.textContent = String(currentPage);
+    searchInputElement.parentElement.classList.toggle("fn__none", selectValue !== "getRepoSnapshots");
+    searchButton.disabled = true;
+    [previousElement, nextElement, pageBtn].forEach(button => {
+        button.classList.toggle("fn__none", tagged);
+        button.setAttribute("disabled", "disabled");
+    });
+    pageElement.classList.add("fn__none");
+    let response: IWebSocketData;
+    try {
+        if (searching) {
+            response = await fetchSyncPost("/api/repo/searchRepoFile", {keyword, page: currentPage}, undefined, false);
+        } else if (tagged) {
+            response = await fetchSyncPost(`/api/repo/${selectValue}`, {}, undefined, false);
         } else {
-            previousElement.setAttribute("disabled", "disabled");
+            response = await fetchSyncPost(`/api/repo/${selectValue}`, {page: currentPage}, undefined, false);
         }
-        nextElement.setAttribute("disabled", "disabled");
-        fetchPost("/api/repo/searchRepoFile", {keyword, page: currentPage}, (response) => {
-            searchBtnElement.disabled = false;
-            selectElement.disabled = false;
-            if (currentPage < response.data.pageCount) {
-                nextElement.removeAttribute("disabled");
-            } else {
-                nextElement.setAttribute("disabled", "disabled");
-            }
-            pageBtn.setAttribute("data-totalpage", (response.data.pageCount || 1).toString());
-            pageElement.textContent = `${window.siyuan.languages.pageCountAndSnapshotCount.replace("${x}", response.data.pageCount).replace("${y}", response.data.totalCount || 1)}`;
-            pageElement.classList.remove("fn__none");
+        if (repoRequests.get(element) !== request || !element.isConnected) {
+            return;
+        }
+        if (response.code !== 0) {
+            throw new Error(response.msg);
+        }
+        if (searching) {
             renderRepoSearchResult(response, element);
-        });
-    } else if (selectValue === "getRepoTagSnapshots" || selectValue === "getCloudRepoTagSnapshots") {
-        fetchPost(`/api/repo/${selectValue}`, {}, (response) => {
-            renderRepoItem(response, element, selectValue);
-            selectElement.disabled = false;
-        });
-        previousElement.classList.add("fn__none");
-        nextElement.classList.add("fn__none");
-        pageElement.classList.add("fn__none");
-        pageBtn.classList.add("fn__none");
-    } else {
-        previousElement.classList.remove("fn__none");
-        nextElement.classList.remove("fn__none");
-        pageBtn.classList.remove("fn__none");
-        element.setAttribute("data-page", currentPage.toString());
-        if (currentPage > 1) {
-            previousElement.removeAttribute("disabled");
         } else {
-            previousElement.setAttribute("disabled", "disabled");
+            renderRepoItem(response, element, selectValue);
         }
-        nextElement.setAttribute("disabled", "disabled");
-        const snapshotURL: string = `/api/repo/${selectValue}`;
-        fetchPost(snapshotURL, {page: currentPage}, (response) => {
-            selectElement.disabled = false;
+        if (!tagged) {
+            if (currentPage > 1) {
+                previousElement.removeAttribute("disabled");
+            }
             if (currentPage < response.data.pageCount) {
                 nextElement.removeAttribute("disabled");
-            } else {
-                nextElement.setAttribute("disabled", "disabled");
             }
-            pageBtn.setAttribute("data-totalpage", (response.data.pageCount || 1).toString());
-            pageElement.textContent = `${window.siyuan.languages.pageCountAndSnapshotCount.replace("${x}", response.data.pageCount).replace("${y}", response.data.totalCount || 1)}`;
+            pageBtn.removeAttribute("disabled");
+            pageBtn.setAttribute("data-totalpage", String(response.data.pageCount || 1));
+            pageElement.textContent = window.siyuan.languages.pageCountAndSnapshotCount.replace("${x}", response.data.pageCount || 1).replace("${y}", response.data.totalCount || 0);
             pageElement.classList.remove("fn__none");
-            renderRepoItem(response, element, selectValue);
-        });
+        }
+    } catch (error) {
+        if (repoRequests.get(element) === request && element.isConnected) {
+            listElement.innerHTML = `<li class="b3-list--empty">${escapeHtml(String(error))}<br><button class="b3-button b3-button--outline" data-type="retryRepo">${window.siyuan.languages.retry}</button></li>`;
+            updateRepoSelection(element);
+        }
+    } finally {
+        if (repoRequests.get(element) === request) {
+            searchButton.disabled = false;
+        }
     }
 };
 
@@ -583,13 +585,6 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
                        <button class="b3-button b3-button--text" style="position: absolute;right: 0;top: 0;">${window.siyuan.languages.search}</button>
                     </div>
                     <span class="fn__space"></span>
-                    <select class="b3-select ${isMobile() ? "fn__size96" : "fn__size200"}">
-                        <option value="getRepoSnapshots">${window.siyuan.languages.localSnapshot}</option>
-                        <option value="getRepoTagSnapshots">${window.siyuan.languages.localTagSnapshot}</option>
-                        <option value="getCloudRepoSnapshots">${window.siyuan.languages.cloudSnapshot}</option>
-                        <option value="getCloudRepoTagSnapshots">${window.siyuan.languages.cloudTagSnapshot}</option>
-                    </select>
-                    <span class="fn__space"></span>
                     <button class="b3-button b3-button--outline" disabled data-type="compare">${window.siyuan.languages.compare}</button>
                     <span class="fn__space"></span>
                     <button class="b3-button b3-button--outline" data-type="genRepo">
@@ -612,6 +607,7 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
 </div>`;
 
     if (isMobile()) {
+        let mobileRepoRoot: Element;
         openModel({
             html: contentHTML,
             icon: "iconHistory",
@@ -619,10 +615,16 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
             bindEvent(element) {
                 element.firstElementChild.setAttribute("style", "background-color:var(--b3-theme-background);height:100%");
                 bindEvent(app, element.firstElementChild);
+                mobileRepoRoot = element.querySelector(".history__snapshots");
                 if (tab !== "doc") {
                     element.firstElementChild.querySelector(`.layout-tab-bar [data-type="${tab}"]`)?.dispatchEvent(new MouseEvent("click", {bubbles: true}));
                 }
-            }
+            },
+            destroyCallback() {
+                if (mobileRepoRoot) {
+                    destroyRepoPanel(mobileRepoRoot);
+                }
+            },
         });
     } else {
         const dialog = new Dialog({
@@ -633,8 +635,7 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
             destroyCallback() {
                 historyEditor = undefined;
                 const repoElement = dialog.element.querySelector('#historyContainer [data-type="repo"]');
-                repoHistoryEditors.get(repoElement)?.destroy();
-                repoHistoryEditors.delete(repoElement);
+                destroyRepoPanel(repoElement);
             }
         });
         dialog.element.setAttribute("data-key", Constants.DIALOG_HISTORY);
@@ -686,7 +687,9 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
         typewriterMode: false,
     });
     disabledProtyle(historyEditor.protyle);
-    const repoElement = element.querySelector('#historyContainer [data-type="repo"]');
+    const repoRoot = element.querySelector<HTMLElement>('#historyContainer [data-type="repo"]');
+    repoPanelCleanup.set(repoRoot, initRepoPanel(repoRoot, renderRepo));
+    const repoElement = repoRoot.querySelector('[data-repo-source="local"]');
     const historyElement = element.querySelector('#historyContainer [data-type="doc"]');
     const previewRepoFile = (itemElement: Element) => {
         const previewElement = repoElement.querySelector('[data-type="repoPreviewPanel"]');
@@ -702,15 +705,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
         itemElement.parentElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
         itemElement.classList.add("b3-list-item--focus");
     };
-    const repoSelectElement = repoElement.querySelector(".b3-select") as HTMLSelectElement;
-    const searchFileElement = repoElement.querySelector(".b3-text-field") as HTMLInputElement;
-    repoSelectElement.addEventListener("change", () => {
-        searchFileElement.value = "";
-        renderRepo(repoElement, 1);
-        const btnElement = element.querySelector(".b3-button[data-type='compare']");
-        btnElement.setAttribute("disabled", "disabled");
-        btnElement.removeAttribute("data-ids");
-    });
+    const searchFileElement = repoElement.querySelector<HTMLInputElement>(".b3-text-field");
     searchFileElement.nextElementSibling.addEventListener("click", () => {
         renderRepo(repoElement, 1);
     });
@@ -722,6 +717,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
     });
     element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
+        const repoElement = target.closest("[data-repo-source]") || repoRoot.querySelector('[data-repo-source="local"]');
         while (target && !target.isEqualNode(element)) {
             const type = target.getAttribute("data-type");
             if (target.classList.contains("item")) {
@@ -907,8 +903,8 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.preventDefault();
                 break;
             } else if (target.classList.contains("b3-list-item") && type === "repoitem" &&
-                ["getRepoSnapshots", "getRepoTagSnapshots"].includes(repoSelectElement.value)) {
-                const btnElement = element.querySelector(".b3-button[data-type='compare']");
+                ["getRepoSnapshots", "getRepoTagSnapshots"].includes(getRepoSnapshotType(repoElement))) {
+                const btnElement = repoElement.querySelector(".b3-button[data-type='compare']");
                 const idJSON = JSON.parse(btnElement.getAttribute("data-ids") || "[]");
                 const id = target.getAttribute("data-id");
                 if (target.classList.contains("b3-list-item--focus")) {
@@ -1031,6 +1027,9 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 fetchPost("/api/repo/uploadCloudSnapshot", {
                     tag: target.parentElement.getAttribute("data-tag"),
                     id: target.parentElement.getAttribute("data-id")
+                }, () => {
+                    const cloudPane = repoRoot.querySelector('[data-repo-source="cloud"]');
+                    renderRepo(cloudPane, parseInt(cloudPane.getAttribute("data-page")) || 1);
                 });
                 event.stopPropagation();
                 event.preventDefault();
@@ -1039,6 +1038,9 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 fetchPost("/api/repo/downloadCloudSnapshot", {
                     tag: target.parentElement.getAttribute("data-tag"),
                     id: target.parentElement.getAttribute("data-id")
+                }, () => {
+                    const localPane = repoRoot.querySelector('[data-repo-source="local"]');
+                    renderRepo(localPane, parseInt(localPane.getAttribute("data-page")) || 1);
                 });
                 event.stopPropagation();
                 event.preventDefault();
@@ -1060,50 +1062,45 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.preventDefault();
                 break;
             } else if (type === "genTag") {
-                const genTagDialog = new Dialog({
+                const genTagDialog = openInputDialog({
                     title: window.siyuan.languages.tagSnapshot,
-                    content: `<div class="b3-dialog__content">
-    <input class="b3-text-field fn__block" value="${dayjs().format("YYYYMMDDHHmmss")}" placeholder="${window.siyuan.languages.tagSnapshotTip}">
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.tagSnapshot}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.tagSnapshotUpload}</button>
-</div>`,
-                    width: isMobile() ? "92vw" : "520px",
-                });
-                genTagDialog.element.setAttribute("data-key", Constants.DIALOG_SNAPSHOTTAG);
-                const inputElement = genTagDialog.element.querySelector(".b3-text-field") as HTMLInputElement;
-                inputElement.select();
-                const btnsElement = genTagDialog.element.querySelectorAll(".b3-button");
-                btnsElement[0].addEventListener("click", () => {
-                    genTagDialog.destroy();
-                });
-                btnsElement[2].addEventListener("click", () => {
-                    fetchPost("/api/repo/tagSnapshot", {
-                        id: target.parentElement.getAttribute("data-id"),
-                        name: inputElement.value
-                    }, () => {
-                        fetchPost("/api/repo/uploadCloudSnapshot", {
-                            tag: inputElement.value,
-                            id: target.parentElement.getAttribute("data-id")
+                    value: dayjs().format("YYYYMMDDHHmmss"),
+                    placeholder: window.siyuan.languages.tagSnapshotTip,
+                    confirmText: window.siyuan.languages.tagSnapshot,
+                    actions: [{
+                        text: window.siyuan.languages.tagSnapshotUpload,
+                        position: "afterConfirm",
+                        onClick: (value, genTagDialog) => {
+                            fetchPost("/api/repo/tagSnapshot", {
+                                id: target.parentElement.getAttribute("data-id"),
+                                name: value
+                            }, () => {
+                                fetchPost("/api/repo/uploadCloudSnapshot", {
+                                    tag: value,
+                                    id: target.parentElement.getAttribute("data-id")
+                                }, () => {
+                                    renderRepo(repoRoot, 1);
+                                });
+                            });
+                            genTagDialog.destroy();
+                        },
+                    }],
+                    onConfirm: (value, genTagDialog) => {
+                        fetchPost("/api/repo/tagSnapshot", {
+                            id: target.parentElement.getAttribute("data-id"),
+                            name: value
                         }, () => {
                             renderRepo(repoElement, 1);
                         });
-                    });
-                    genTagDialog.destroy();
+                        genTagDialog.destroy();
+                    },
                 });
-                btnsElement[1].addEventListener("click", () => {
-                    fetchPost("/api/repo/tagSnapshot", {
-                        id: target.parentElement.getAttribute("data-id"),
-                        name: inputElement.value
-                    }, () => {
-                        renderRepo(repoElement, 1);
-                    });
-                    genTagDialog.destroy();
-                });
+                genTagDialog.element.setAttribute("data-key", Constants.DIALOG_SNAPSHOTTAG);
                 event.stopPropagation();
                 event.preventDefault();
+                break;
+            } else if (type === "retryRepo") {
+                renderRepo(repoElement, parseInt(repoElement.getAttribute("data-page")) || 1);
                 break;
             } else if ((type === "previous" || type === "next") && target.getAttribute("disabled") !== "disabled") {
                 const currentPage = parseInt(repoElement.getAttribute("data-page"));
@@ -1116,38 +1113,46 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
 
                 if (totalPage > 1) {
-                    confirmDialog(
-                        window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
-                        `<input class="b3-text-field fn__block" type="number" min="1" max="${totalPage}" value="${currentPage}">`,
-                        (confirmD) => {
-                            const inputElement = confirmD.element.querySelector(".b3-text-field") as HTMLInputElement;
-                            if (inputElement.value === "") {
+                    openInputDialog({
+                        title: window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
+                        value: String(currentPage),
+                        type: "number",
+                        min: "1",
+                        max: String(totalPage),
+                        onConfirm: (value, dialog) => {
+                            if (!Number.isFinite(parseInt(value))) {
+                                showMessage(window.siyuan.languages.jumpToPage.replace("${x}", totalPage));
                                 return;
                             }
-                            let page = parseInt(inputElement.value);
+                            let page = parseInt(value);
                             page = Math.max(1, Math.min(page, totalPage));
                             renderRepo(repoElement, page);
-                        }
-                    );
+                            dialog.destroy();
+                        },
+                    });
                 }
             } else if (type === "jumpHistoryPage") {
                 const currentPage = parseInt(historyElement.getAttribute("data-page"));
                 const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
 
                 if (totalPage > 1) {
-                    confirmDialog(
-                        window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
-                        `<input class="b3-text-field fn__block" type="number" min="1" max="${totalPage}" value="${currentPage}">`,
-                        (confirmD) => {
-                            const inputElement = confirmD.element.querySelector(".b3-text-field") as HTMLInputElement;
-                            if (inputElement.value === "") {
+                    openInputDialog({
+                        title: window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
+                        value: String(currentPage),
+                        type: "number",
+                        min: "1",
+                        max: String(totalPage),
+                        onConfirm: (value, dialog) => {
+                            if (!Number.isFinite(parseInt(value))) {
+                                showMessage(window.siyuan.languages.jumpToPage.replace("${x}", totalPage));
                                 return;
                             }
-                            let page = parseInt(inputElement.value);
+                            let page = parseInt(value);
                             page = Math.max(1, Math.min(page, totalPage));
                             renderDoc(firstPanelElement, page);
-                        }
-                    );
+                            dialog.destroy();
+                        },
+                    });
                 }
             } else if ((type === "docprevious" || type === "docnext") && target.getAttribute("disabled") !== "disabled") {
                 const currentPage = parseInt(firstPanelElement.getAttribute("data-page"));

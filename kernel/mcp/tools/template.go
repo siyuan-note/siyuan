@@ -18,7 +18,6 @@ package tools
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -106,11 +105,7 @@ func resolveTemplatePath(p string) (string, error) {
 
 func templateGet(args map[string]any) (CallToolResult, error) {
 	p, _ := args["path"].(string)
-	abs, err := resolveTemplatePath(p)
-	if err != nil {
-		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
-	}
-	data, err := os.ReadFile(abs)
+	data, err := model.ReadTemplateFile(p)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "read template failed: " + err.Error()}}, IsError: true}, nil
 	}

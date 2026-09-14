@@ -17,87 +17,49 @@
 package api
 
 import (
-	"net/http"
+	"encoding/json"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func startFreeTrial(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
+var startFreeTrial = contractHandler(apicontract.StartFreeTrial, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
+	if err := model.StartFreeTrial(); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
+	return apicontract.Success(apicontract.Null{})
+})
+var useActivationcode = contractHandler(apicontract.UseActivationCode, func(c *gin.Context, request apicontract.ActivationCodeRequest) apicontract.Response[apicontract.Null] {
+	if err := model.UseActivationcode(request.Data); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
+	return apicontract.Success(apicontract.Null{})
+})
+var checkActivationcode = contractHandler(apicontract.CheckActivationCode, func(c *gin.Context, request apicontract.CheckActivationCodeRequest) apicontract.Response[apicontract.Null] {
+	code, msg := model.CheckActivationcode(request.Data)
+	return apicontract.CheckActivationCode.FailureWithData(code, msg, apicontract.Null{})
+})
+var deactivateUser = contractHandler(apicontract.DeactivateUser, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[apicontract.Null] {
+	if err := model.DeactivateUser(); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
+	}
+	return apicontract.Success(apicontract.Null{})
+})
+var login = contractHandler(apicontract.AccountLogin, func(c *gin.Context, request apicontract.AccountLoginRequest) apicontract.Response[*apicontract.AccountLoginData] {
+	result := model.Login(request.UserName, request.UserPassword, request.Captcha, int(request.CloudRegion))
+	return accountLoginResponse(result)
+})
 
-	err := model.StartFreeTrial()
+func accountLoginResponse(result *gulu.Result) apicontract.Response[*apicontract.AccountLoginData] {
+	raw, err := json.Marshal(result.Data)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[*apicontract.AccountLoginData](-1, err.Error())
 	}
-}
-
-func useActivationcode(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+	var data *apicontract.AccountLoginData
+	if err = json.Unmarshal(raw, &data); err != nil {
+		return apicontract.Failure[*apicontract.AccountLoginData](-1, err.Error())
 	}
-
-	var code string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("data", &code, true, true)) {
-		return
-	}
-	err := model.UseActivationcode(code)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-}
-
-func checkActivationcode(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var code string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("data", &code, true, false)) {
-		return
-	}
-	ret.Code, ret.Msg = model.CheckActivationcode(code)
-}
-
-func deactivateUser(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	err := model.DeactivateUser()
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-}
-
-func login(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		c.JSON(http.StatusOK, ret)
-		return
-	}
-
-	name := arg["userName"].(string)
-	password := arg["userPassword"].(string)
-	captcha := arg["captcha"].(string)
-	cloudRegion := int(arg["cloudRegion"].(float64))
-	ret = model.Login(name, password, captcha, cloudRegion)
-	c.JSON(http.StatusOK, ret)
+	return apicontract.AccountLogin.FailureWithData(result.Code, result.Msg, data)
 }

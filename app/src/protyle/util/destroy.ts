@@ -8,11 +8,13 @@ import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {unregisterCustomBlockRoot} from "../../plugin/customBlockRender";
 import {destroyTrackedRanges} from "./trackedRange";
 import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
+import {invalidateFocusFoldRequests} from "./focusFold";
 
 export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
         return;
     }
+    invalidateFocusFoldRequests(protyle);
     destroyTrackedRanges(protyle);
     cancelAssetUploads(protyle);
     unmountBreadcrumbButtons(protyle);

@@ -2,6 +2,7 @@ import {sendGlobalShortcut} from "../boot/globalEvent/globalShortcut";
 import type {App} from "../index";
 import {EventBus} from "./EventBus";
 import {fetchPost} from "../util/fetch";
+import {ContractFormData} from "../util/contractFormData";
 import {isMobile, isWindow} from "../util/functions";
 import {getAllEditor, getAllModels} from "../layout/getAll";
 /// #if !MOBILE
@@ -61,7 +62,7 @@ const refreshPluginToolbars = () => {
 
 export class Plugin {
     private app: App;
-    public i18n: Record<string, string>;
+    public i18n: Record<string, import("../types/api").JSONValue>;
     public eventBus: EventBus;
     public kernel: Kernel;
     public data: any = {};
@@ -108,7 +109,7 @@ export class Plugin {
         app: App,
         name: string,
         displayName: string,
-        i18n: Record<string, string>
+        i18n: Record<string, import("../types/api").JSONValue>
     }) {
         this.app = options.app;
         this.i18n = options.i18n;
@@ -469,11 +470,12 @@ export class Plugin {
                 });
                 return;
             }
-            const formData = new FormData();
-            formData.append("path", pathString);
-            formData.append("file", file);
-            formData.append("isDir", "false");
-            formData.append("app", Constants.SIYUAN_APPID);
+            const formData = new ContractFormData({
+                path: pathString,
+                file,
+                isDir: "false",
+                app: Constants.SIYUAN_APPID,
+            });
             fetchPost("/api/file/putFile", formData, (response) => {
                 this.data[storageName] = data;
                 resolve(response);
@@ -697,7 +699,7 @@ export class Plugin {
         x?: number,
         y?: number,
         targetElement?: HTMLElement,
-        originalRefBlockIDs?: IObject,
+        originalRefBlockIDs?: Record<string, string>,
         isBacklink: boolean,
     }) => {
         if (isPluginDisposed(this)) {

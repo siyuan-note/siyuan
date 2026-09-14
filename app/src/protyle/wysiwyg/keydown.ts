@@ -1,3 +1,4 @@
+import type {BlockQueryRequestInput} from "../../types/api";
 import {hideElements} from "../ui/hideElements";
 import {isTabTextBoundary} from "./tabsBoundary";
 import {isNotCtrl, isOnlyMeta, updateHotkeyTip, writeText} from "../util/compatibility";
@@ -1754,7 +1755,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.general.rename, event) && !protyle.disabled) {
             if (selectText === "") {
-                const docInfoParam: IObject = {
+                const docInfoParam: BlockQueryRequestInput = {
                     id: protyle.block.rootID
                 };
                 if (isEncryptedBox(protyle.notebookId)) {

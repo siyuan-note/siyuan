@@ -29,7 +29,9 @@ test("font entries merge into old profiles while preserving plugin slots and hid
     saved.splice(saved.indexOf("strong"), 0, "plugin:unloaded:action");
     const merged = mergeEntryOrderPreservingUnknown(defaults, saved, undefined, separators);
     assert.ok(merged.includes("plugin:unloaded:action"));
-    assert.deepEqual(merged.filter(key => !["font-family", "font-size"].includes(key)), saved);
+    assert.equal(merged.indexOf("plugin:unloaded:action"), saved.indexOf("plugin:unloaded:action"));
+    assert.deepEqual(merged.filter(key => !["font-family", "font-size", "plugin:unloaded:action"].includes(key)),
+        saved.filter(key => key !== "plugin:unloaded:action"));
     const items = defaults.map(key => ({key, separator: separators.has(key)}));
     const result = resolve(items, {order: merged, hidden: ["text", "font-family"]});
     assert.equal(result.visible.some(item => item.key === "text" || item.key === "font-family"), false);

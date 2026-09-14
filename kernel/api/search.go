@@ -18,7 +18,6 @@ package api
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -29,31 +28,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func listInvalidBlockRefs(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	page := 1
-	if nil != arg["page"] {
-		page = int(arg["page"].(float64))
-	}
-	if 0 >= page {
-		page = 1
-	}
-
-	pageSize := 32
-	if nil != arg["pageSize"] {
-		pageSize = int(arg["pageSize"].(float64))
-	}
-	if 0 >= pageSize {
-		pageSize = 32
-	}
-
+var listInvalidBlockRefs = contractHandler(apicontract.ListInvalidBlockRefs, func(c *gin.Context, request apicontract.SearchPageRequest) apicontract.Response[apicontract.SearchBlocksData] {
+	page, pageSize := request.Pagination()
 	var blocks []*model.Block
 	var matchedBlockCount, matchedRootCount, pageCount int
 	if model.IsReadOnlyRoleContext(c) {
@@ -69,82 +45,41 @@ func listInvalidBlockRefs(c *gin.Context) {
 	} else {
 		blocks, matchedBlockCount, matchedRootCount, pageCount = model.ListInvalidBlockRefs(page, pageSize, nil, nil)
 	}
-	ret.Data = map[string]any{
-		"blocks":            blocks,
-		"matchedBlockCount": matchedBlockCount,
-		"matchedRootCount":  matchedRootCount,
-		"pageCount":         pageCount,
-	}
-}
-
-func getAssetContent(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	id := arg["id"].(string)
-	query := arg["query"].(string)
-	queryMethod := int(arg["queryMethod"].(float64))
-	assetContent := model.GetAssetContent(id, query, queryMethod)
+	return apicontract.Success(apicontract.SearchBlocksData{Blocks: searchBlockContracts(blocks), MatchedBlockCount: matchedBlockCount, MatchedRootCount: matchedRootCount, PageCount: pageCount})
+})
+var getAssetContent = contractHandler(apicontract.GetAssetContent, func(c *gin.Context, request apicontract.AssetContentRequest) apicontract.Response[apicontract.AssetContentData] {
+	assetContent := model.GetAssetContent(request.ID, request.Query, int(request.QueryMethod))
 	if model.IsReadOnlyRoleContext(c) && assetContent != nil {
 		publishAccess := model.GetPublishAccess()
-		filteredAssetContents := model.FilterAssetContentByPublishAccess(c, publishAccess, []*model.AssetContent{assetContent})
-		if len(filteredAssetContents) > 0 {
-			assetContent = filteredAssetContents[0]
+		filtered := model.FilterAssetContentByPublishAccess(c, publishAccess, []*model.AssetContent{assetContent})
+		if len(filtered) > 0 {
+			assetContent = filtered[0]
 		} else {
 			assetContent = nil
 		}
 	}
-	ret.Data = map[string]any{
-		"assetContent": assetContent,
-	}
-	return
-}
+	return apicontract.Success(apicontract.AssetContentData{AssetContent: (*apicontract.AssetContent)(assetContent)})
+})
 
-func getAssetContentByPath(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	path := arg["path"].(string)
-	assetContent := model.GetAssetContentByPath(path)
+var getAssetContentByPath = contractHandler(apicontract.GetAssetContentByPath, func(c *gin.Context, request apicontract.SearchPathRequest) apicontract.Response[apicontract.AssetContentData] {
+	assetContent := model.GetAssetContentByPath(request.Path)
 	if model.IsReadOnlyRoleContext(c) && assetContent != nil {
 		publishAccess := model.GetPublishAccess()
-		filteredAssetContents := model.FilterAssetContentByPublishAccess(c, publishAccess, []*model.AssetContent{assetContent})
-		if len(filteredAssetContents) > 0 {
-			assetContent = filteredAssetContents[0]
+		filtered := model.FilterAssetContentByPublishAccess(c, publishAccess, []*model.AssetContent{assetContent})
+		if len(filtered) > 0 {
+			assetContent = filtered[0]
 		} else {
 			assetContent = nil
 		}
 	}
-	ret.Data = map[string]any{
-		"assetContent": assetContent,
-	}
-	return
-}
+	return apicontract.Success(apicontract.AssetContentData{AssetContent: (*apicontract.AssetContent)(assetContent)})
+})
 
-func fullTextSearchAssetContent(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	page, pageSize, query, types, method, orderBy := parseSearchAssetContentArgs(arg)
+var fullTextSearchAssetContent = contractHandler(apicontract.FullTextSearchAssetContent, func(c *gin.Context, request apicontract.SearchAssetContentRequest) apicontract.Response[apicontract.SearchAssetContentData] {
+	page, pageSize := request.Pagination()
+	query, types, method, orderBy := request.Query, request.Types, int(request.Method), int(request.OrderBy)
 	if method == 2 && !model.IsAdminRoleContext(c) {
-		ret.Code = -1
-		ret.Msg = "SQL search requires administrator privileges"
-		return
+		return apicontract.Failure[apicontract.SearchAssetContentData](-1, "SQL search requires administrator privileges")
 	}
 
 	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
@@ -155,9 +90,7 @@ func fullTextSearchAssetContent(c *gin.Context) {
 	}
 	assetContents, matchedAssetCount, pageCount, err := model.FullTextSearchAssetContent(query, types, method, orderBy, searchPage, searchPageSize)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.SearchAssetContentData](-1, err.Error())
 	}
 	if isReadOnlyRole {
 		publishAccess := model.GetPublishAccess()
@@ -172,83 +105,54 @@ func fullTextSearchAssetContent(c *gin.Context) {
 			assetContents = assetContents[from:to]
 		}
 	}
-	ret.Data = map[string]any{
-		"assetContents":     assetContents,
-		"matchedAssetCount": matchedAssetCount,
-		"pageCount":         pageCount,
-	}
-}
-
-func findReplace(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	_, _, _, paths, boxes, types, subTypes, method, _, _ := parseSearchBlockArgs(arg)
-
-	k := arg["k"].(string)
-	r := arg["r"].(string)
-	idsArg := arg["ids"].([]any)
-	var ids []string
-	for _, id := range idsArg {
-		ids = append(ids, id.(string))
-	}
-
-	replaceTypes := map[string]bool{}
-	// text, imgText, imgTitle, imgSrc, aText, aTitle, aHref, code, em, strong, inlineMath, inlineMemo, blockRef, fileAnnotationRef kbd, mark, s, sub, sup, tag, u
-	// docTitle, codeBlock, mathBlock, htmlBlock
-	if nil != arg["replaceTypes"] {
-		replaceTypesArg := arg["replaceTypes"].(map[string]any)
-		for t, b := range replaceTypesArg {
-			replaceTypes[t] = b.(bool)
+	var result []*apicontract.AssetContent
+	if assetContents != nil {
+		result = make([]*apicontract.AssetContent, len(assetContents))
+		for i, value := range assetContents {
+			result[i] = (*apicontract.AssetContent)(value)
 		}
+	}
+	return apicontract.Success(apicontract.SearchAssetContentData{AssetContents: result, MatchedAssetCount: matchedAssetCount, PageCount: pageCount})
+})
+
+var findReplace = contractHandler(apicontract.FindReplace, func(c *gin.Context, request apicontract.FindReplaceRequest) apicontract.Response[apicontract.Null] {
+	_, _, _, paths, boxes, types, subTypes, method, _, _ := parseSearchBlockRequest(request.SearchBlockRequest)
+
+	k, r := request.K, request.R
+	ids := append([]string(nil), request.IDs...)
+	replaceTypes := request.ReplaceTypes
+	if replaceTypes == nil {
+		replaceTypes = map[string]bool{}
 	}
 
 	boxID := ""
 	if 1 == len(boxes) && model.IsEncryptedBox(boxes[0]) {
 		boxID = boxes[0]
 		if err := holdEncryptedBoxRequest(c, boxID); err != nil {
-			ret.Code = 1
-			ret.Msg = err.Error()
-			return
+			return apicontract.Failure[apicontract.Null](1, err.Error())
 		}
 	}
 
 	err := model.FindReplaceInBox(k, r, replaceTypes, ids, paths, boxes, types, subTypes, method, boxID)
 	if err != nil {
-		ret.Code = 1
-		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
+		return apicontract.FailureWithTimeout[apicontract.Null](1, err.Error(), 5000)
 	}
-	return
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func searchAsset(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	k := arg["k"].(string)
-
+var searchAsset = contractHandler(apicontract.SearchAssetByName, func(c *gin.Context, request apicontract.SearchAssetRequest) apicontract.Response[[]*apicontract.SearchAsset] {
 	var exts []string
-	if extsArg := arg["exts"]; nil != extsArg {
-		for _, ext := range extsArg.([]any) {
-			exts = append(exts, ext.(string))
+	exts = append(exts, request.Exts...)
+	assets := model.SearchAssetsByName(request.K, exts)
+	var result []*apicontract.SearchAsset
+	if assets != nil {
+		result = make([]*apicontract.SearchAsset, len(assets))
+		for i, asset := range assets {
+			result[i] = (*apicontract.SearchAsset)(asset)
 		}
 	}
-
-	ret.Data = model.SearchAssetsByName(k, exts)
-	return
-}
+	return apicontract.Success(result)
+})
 
 var searchTag = contractHandler(apicontract.SearchTag, func(c *gin.Context, request apicontract.SearchTagRequest) apicontract.Response[apicontract.SearchTagData] {
 
@@ -260,97 +164,50 @@ var searchTag = contractHandler(apicontract.SearchTag, func(c *gin.Context, requ
 	return apicontract.Success(apicontract.SearchTagData{Tags: tags, K: k})
 })
 
-func searchWidget(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var searchWidget = contractHandler(apicontract.SearchWidget, func(c *gin.Context, request apicontract.SearchKeywordRequest) apicontract.Response[apicontract.SearchWidgetData] {
+	values := model.SearchWidget(request.K)
+	var result []*apicontract.SearchWidgetResult
+	if values != nil {
+		result = make([]*apicontract.SearchWidgetResult, len(values))
+		for i, value := range values {
+			result[i] = (*apicontract.SearchWidgetResult)(value)
+		}
 	}
+	return apicontract.Success(apicontract.SearchWidgetData{Widgets: result, K: request.K})
+})
 
-	keyword := arg["k"].(string)
-	widgets := model.SearchWidget(keyword)
-	ret.Data = map[string]any{
-		"widgets": widgets,
-		"k":       keyword,
+var removeTemplate = contractHandler(apicontract.RemoveSearchTemplate, func(c *gin.Context, request apicontract.SearchPathRequest) apicontract.Response[apicontract.Null] {
+	if err := model.RemoveTemplate(request.Path); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func removeTemplate(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
+var searchTemplate = contractHandler(apicontract.SearchTemplate, func(c *gin.Context, request apicontract.SearchKeywordRequest) apicontract.Response[apicontract.SearchTemplateData] {
+	values := model.SearchTemplate(request.K)
+	var result []*apicontract.SearchTemplateResult
+	if values != nil {
+		result = make([]*apicontract.SearchTemplateResult, len(values))
+		for i, value := range values {
+			result[i] = (*apicontract.SearchTemplateResult)(value)
+		}
 	}
+	return apicontract.Success(apicontract.SearchTemplateData{Templates: result, K: request.K})
+})
 
-	path := arg["path"].(string)
-	err := model.RemoveTemplate(path)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-}
-
-func searchTemplate(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	keyword := arg["k"].(string)
-	templates := model.SearchTemplate(keyword)
-	ret.Data = map[string]any{
-		"templates": templates,
-		"k":         keyword,
-	}
-}
-
-func getEmbedBlock(c *gin.Context) {
-	// Query embed block supports executing JavaScript https://github.com/siyuan-note/siyuan/issues/9648
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	embedBlockID := arg["embedBlockID"].(string)
-	includeIDsArg := arg["includeIDs"].([]any)
-	var includeIDs []string
-	for _, includeID := range includeIDsArg {
-		includeIDs = append(includeIDs, includeID.(string))
-	}
-	headingMode := 0 // 0：显示标题与下方的块，1：仅显示标题，2：仅显示标题下方的块
-	headingModeArg := arg["headingMode"]
-	if nil != headingModeArg {
-		headingMode = int(headingModeArg.(float64))
-	}
-	breadcrumb := false
-	breadcrumbArg := arg["breadcrumb"]
-	if nil != breadcrumbArg {
-		breadcrumb = breadcrumbArg.(bool)
-	}
+var getEmbedBlock = contractHandler(apicontract.GetEmbedBlock, func(c *gin.Context, request apicontract.GetEmbedBlockRequest) apicontract.Response[apicontract.EmbedBlocksData] {
+	embedBlockID, headingMode, breadcrumb := request.EmbedBlockID, int(request.HeadingMode), request.Breadcrumb
+	includeIDs := append([]string(nil), request.IncludeIDs...)
 	notebook := ""
-	if notebookArg, ok := arg["notebook"].(string); ok && model.IsEncryptedBox(notebookArg) {
-		notebook = notebookArg
+	if model.IsEncryptedBox(request.Notebook) {
+		notebook = request.Notebook
 	}
-
 	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
 	var blocks []*model.EmbedBlock
 	if isReadOnlyRole {
 		publishAccess := model.GetPublishAccess()
 		if !model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, embedBlockID) {
-			ret.Code = -1
-			ret.Msg = fmt.Sprintf(model.Conf.Language(15), embedBlockID)
-			return
+			return apicontract.Failure[apicontract.EmbedBlocksData](-1, fmt.Sprintf(model.Conf.Language(15), embedBlockID))
 		}
 		blocks = model.GetEmbedBlockForPublish(embedBlockID, includeIDs, headingMode, breadcrumb)
 		blocks = model.FilterEmbedBlocksByPublishAccess(c, publishAccess, blocks)
@@ -361,93 +218,50 @@ func getEmbedBlock(c *gin.Context) {
 			blocks = model.GetEmbedBlockInBox(embedBlockID, includeIDs, headingMode, breadcrumb, notebook)
 		}
 	}
-	ret.Data = map[string]any{
-		"blocks": blocks,
+	return apicontract.Success(apicontract.EmbedBlocksData{Blocks: embedBlockContracts(blocks)})
+})
+
+var updateEmbedBlock = contractHandler(apicontract.UpdateEmbedBlock, func(c *gin.Context, request apicontract.UpdateEmbedBlockRequest) apicontract.Response[apicontract.Null] {
+	if err := model.UpdateEmbedBlock(request.ID, request.Content); err != nil {
+		return apicontract.Failure[apicontract.Null](-1, err.Error())
 	}
-}
-
-func updateEmbedBlock(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
+	return apicontract.Success(apicontract.Null{})
+}, func(c *gin.Context) *apicontract.Response[apicontract.Null] {
 	if model.IsReadOnlyRoleContext(c) {
-		return
+		response := apicontract.Success(apicontract.Null{})
+		return &response
 	}
+	return nil
+})
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	id := arg["id"].(string)
-	content := arg["content"].(string)
-
-	err := model.UpdateEmbedBlock(id, content)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-}
-
-func searchEmbedBlock(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	embedBlockID := arg["embedBlockID"].(string)
-	stmt := arg["stmt"].(string)
-	boxID, _ := arg["notebook"].(string)
-	excludeIDsArg := arg["excludeIDs"].([]any)
+var searchEmbedBlock = contractHandler(apicontract.SearchEmbedBlock, func(c *gin.Context, request apicontract.SearchEmbedBlockRequest) apicontract.Response[apicontract.EmbedBlocksData] {
+	embedBlockID, headingMode, breadcrumb := request.EmbedBlockID, int(request.HeadingMode), request.Breadcrumb
+	stmt, boxID := request.Stmt, request.Notebook
 	var excludeIDs []string
-	for _, excludeID := range excludeIDsArg {
-		if nil == excludeID {
-			continue
+	for _, id := range request.ExcludeIDs {
+		if id != nil {
+			excludeIDs = append(excludeIDs, *id)
 		}
-		excludeIDs = append(excludeIDs, excludeID.(string))
 	}
-	headingMode := 0 // 0：显示标题与下方的块，1：仅显示标题，2：仅显示标题下方的块
-	headingModeArg := arg["headingMode"]
-	if nil != headingModeArg {
-		headingMode = int(headingModeArg.(float64))
-	}
-	breadcrumb := false
-	breadcrumbArg := arg["breadcrumb"]
-	if nil != breadcrumbArg {
-		breadcrumb = breadcrumbArg.(bool)
-	}
-
 	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
 	var publishAccess model.PublishAccess
 	if isReadOnlyRole {
 		publishAccess = model.GetPublishAccess()
 		if !model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, embedBlockID) {
-			ret.Code = -1
-			ret.Msg = fmt.Sprintf(model.Conf.Language(15), embedBlockID)
-			return
+			return apicontract.Failure[apicontract.EmbedBlocksData](-1, fmt.Sprintf(model.Conf.Language(15), embedBlockID))
 		}
 		var err error
 		stmt, boxID, err = model.GetQueryEmbedStatement(embedBlockID)
 		if nil != err {
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return
+			return apicontract.Failure[apicontract.EmbedBlocksData](-1, err.Error())
 		}
 	}
 
 	if err := sql.CheckSingleStatement(stmt); nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.EmbedBlocksData](-1, err.Error())
 	}
 	if err := sql.CheckReadonlyStatementInBox(stmt, boxID); nil != err {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.EmbedBlocksData](-1, err.Error())
 	}
 
 	var blocks []*model.EmbedBlock
@@ -457,56 +271,31 @@ func searchEmbedBlock(c *gin.Context) {
 	} else {
 		blocks = model.SearchEmbedBlockInBox(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb, boxID)
 	}
-	ret.Data = map[string]any{
-		"blocks": blocks,
+	return apicontract.Success(apicontract.EmbedBlocksData{Blocks: embedBlockContracts(blocks)})
+})
+
+var searchRefBlock = contractHandler(apicontract.SearchRefBlock, func(c *gin.Context, request apicontract.SearchRefBlockRequest) apicontract.Response[apicontract.SearchRefData] {
+	echo := apicontract.SearchRefEcho(request.ReqID)
+	if request.ID == nil {
+		return apicontract.Success(echo)
 	}
-}
-
-func searchRefBlock(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	reqId := arg["reqId"]
-	ret.Data = map[string]any{"reqId": reqId}
-	if nil == arg["id"] {
-		return
-	}
-
-	notebook, _ := arg["notebook"].(string)
+	notebook := request.Notebook
 	if isEncryptedNotebookDeniedForPublish(c, notebook) {
-		ret.Data = map[string]any{
-			"blocks": []*model.Block{},
-			"newDoc": false,
-			"k":      util.EscapeHTML(arg["k"].(string)),
-			"reqId":  reqId,
+		keyword, err := request.Keyword()
+		if err != nil {
+			return apicontract.SearchRefBlock.FailureWithData(-1, err.Error(), echo)
 		}
-		return
+		return apicontract.Success(apicontract.SearchRefBlocks(apicontract.SearchRefResult{SearchRefCorrelation: apicontract.SearchRefCorrelation{ReqID: request.ReqID}, Blocks: []*apicontract.SearchBlock{}, K: util.EscapeHTML(keyword)}))
 	}
 	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.SearchRefBlock.FailureWithData(-1, err.Error(), echo)
 	}
-
-	isSquareBrackets := false
-	if isSquareBracketsArg := arg["isSquareBrackets"]; nil != isSquareBracketsArg {
-		isSquareBrackets = isSquareBracketsArg.(bool)
+	params, err := request.Parameters()
+	if err != nil {
+		return apicontract.SearchRefBlock.FailureWithData(-1, err.Error(), echo)
 	}
-
-	isDatabase := false
-	if isDatabaseArg := arg["isDatabase"]; nil != isDatabaseArg {
-		isDatabase = isDatabaseArg.(bool)
-	}
-
-	rootID := arg["rootID"].(string)
-	id := arg["id"].(string)
-	keyword := arg["k"].(string)
-	beforeLen := int(arg["beforeLen"].(float64))
+	rootID, id, keyword, beforeLen := params.RootID, params.ID, params.K, int(params.BeforeLen)
+	isSquareBrackets, isDatabase := params.IsSquareBrackets, params.IsDatabase
 	// 加密笔记本内的块引搜索走 InBox 版（只搜该 box 自己的加密 db，阻止跨加密边界引用）
 	var blocks []*model.Block
 	var newDoc bool
@@ -519,127 +308,69 @@ func searchRefBlock(c *gin.Context) {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
 	}
-	ret.Data = map[string]any{
-		"blocks": blocks,
-		"newDoc": newDoc,
-		"k":      util.EscapeHTML(keyword),
-		"reqId":  arg["reqId"],
-	}
-}
+	return apicontract.Success(apicontract.SearchRefBlocks(apicontract.SearchRefResult{SearchRefCorrelation: apicontract.SearchRefCorrelation{ReqID: request.ReqID}, Blocks: searchBlockContracts(blocks), NewDoc: newDoc, K: util.EscapeHTML(keyword)}))
+})
 
-func fullTextSearchBlock(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	page, pageSize, query, paths, boxes, types, subTypes, method, orderBy, groupBy := parseSearchBlockArgs(arg)
+var fullTextSearchBlock = contractHandler(apicontract.FullTextSearchBlock, func(c *gin.Context, request apicontract.FullTextSearchBlockRequest) apicontract.Response[*apicontract.FullTextSearchBlockData] {
+	page, pageSize, query, paths, boxes, types, subTypes, method, orderBy, groupBy := parseSearchBlockRequest(request.SearchBlockRequest)
 
 	// SQL mode requires admin privileges, consistent with /api/query/sql
 	if method == 2 && !model.IsAdminRoleContext(c) {
-		ret.Code = -1
-		ret.Msg = "SQL search requires administrator privileges"
-		return
+		return apicontract.Failure[*apicontract.FullTextSearchBlockData](-1, "SQL search requires administrator privileges")
 	}
 
 	// SQL mode is blocked in read-only mode, consistent with /api/query/sql
 	if method == 2 && util.ReadOnly {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(34)
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return
+		return apicontract.FailureWithTimeout[*apicontract.FullTextSearchBlockData](-1, model.Conf.Language(34), 5000)
 	}
 
-	notebook, _ := arg["notebook"].(string)
+	notebook := request.Notebook
 	if isEncryptedNotebookDeniedForPublish(c, notebook) {
-		ret.Data = map[string]any{
-			"blocks":            []*model.Block{},
-			"matchedBlockCount": 0,
-			"matchedRootCount":  0,
-			"pageCount":         0,
-			"docMode":           false,
-		}
-		return
+		return apicontract.Success(&apicontract.FullTextSearchBlockData{SearchBlocksData: apicontract.SearchBlocksData{Blocks: []*apicontract.SearchBlock{}}})
 	}
 
 	var blocks []*model.Block
 	var matchedBlockCount, matchedRootCount, pageCount int
 	var docMode bool
 	searchHPath := true
-	if value, ok := arg["searchHPath"].(bool); ok {
-		searchHPath = value
+	if request.SearchHPath != nil {
+		searchHPath = *request.SearchHPath
 	}
 	// 加密笔记本的全文搜索走 InBox 版（查加密 content db + blocks_fts）
 	var excludeBoxIDs, excludeDocIDs []string
 	if model.IsReadOnlyRoleContext(c) {
 		denyAll, deniedBoxIDs, deniedDocIDs := model.GetPublishAccessSearchExclusion(c)
 		if denyAll {
-			ret.Data = map[string]any{
-				"blocks":            []*model.Block{},
-				"matchedBlockCount": 0,
-				"matchedRootCount":  0,
-				"pageCount":         0,
-				"docMode":           false,
-			}
-			return
+			return apicontract.Success(&apicontract.FullTextSearchBlockData{SearchBlocksData: apicontract.SearchBlocksData{Blocks: []*apicontract.SearchBlock{}}})
 		}
 		excludeBoxIDs, excludeDocIDs = deniedBoxIDs, deniedDocIDs
 	}
 	if notebook != "" && model.IsEncryptedBox(notebook) {
 		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return
+			return apicontract.Failure[*apicontract.FullTextSearchBlockData](-1, err.Error())
 		}
 		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlockInBoxWithHPathContext(c.Request.Context(), query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, notebook, searchHPath, excludeBoxIDs, excludeDocIDs)
 	} else {
 		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlockInBoxWithHPathContext(c.Request.Context(), query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, "", searchHPath, excludeBoxIDs, excludeDocIDs)
 	}
 	if c.Request.Context().Err() != nil {
-		return
+		return apicontract.Success[*apicontract.FullTextSearchBlockData](nil)
 	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
 	}
-	ret.Data = map[string]any{
-		"blocks":            blocks,
-		"matchedBlockCount": matchedBlockCount,
-		"matchedRootCount":  matchedRootCount,
-		"pageCount":         pageCount,
-		"docMode":           docMode,
-	}
-}
+	return apicontract.Success(&apicontract.FullTextSearchBlockData{SearchBlocksData: apicontract.SearchBlocksData{Blocks: searchBlockContracts(blocks), MatchedBlockCount: matchedBlockCount, MatchedRootCount: matchedRootCount, PageCount: pageCount}, DocMode: docMode})
+})
 
-func parseSearchBlockArgs(arg map[string]any) (page, pageSize int, query string, paths, boxes []string, types, subTypes map[string]bool, method, orderBy, groupBy int) {
-	page = 1
-	if nil != arg["page"] {
-		page = int(arg["page"].(float64))
-	}
-	if 0 >= page {
-		page = 1
-	}
-
-	pageSize = 32
-	if nil != arg["pageSize"] {
-		pageSize = int(arg["pageSize"].(float64))
-	}
-	if 0 >= pageSize {
-		pageSize = 32
-	}
-
-	queryArg := arg["query"]
-	if nil != queryArg {
-		query = queryArg.(string)
-	}
-
-	pathsArg := arg["paths"]
+func parseSearchBlockRequest(request apicontract.SearchBlockRequest) (page, pageSize int, query string, paths, boxes []string, types, subTypes map[string]bool, method, orderBy, groupBy int) {
+	page, pageSize = request.Pagination()
+	query, types, subTypes = request.Query, request.Types, request.SubTypes.Selected()
+	method, orderBy, groupBy = int(request.Method), int(request.OrderBy), int(request.GroupBy)
+	pathsArg := request.Paths
 	if nil != pathsArg {
-		for _, p := range pathsArg.([]any) {
-			path := p.(string)
+		for _, p := range pathsArg {
+			path := p
 			box := strings.TrimSpace(strings.Split(path, "/")[0])
 			path = strings.TrimSpace(strings.TrimPrefix(path, box))
 			// 入口校验：拒绝带 SQL 元字符的非法笔记本 ID 与文档路径，阻止 SQL 注入。
@@ -658,102 +389,17 @@ func parseSearchBlockArgs(arg map[string]any) (page, pageSize int, query string,
 		boxes = gulu.Str.RemoveDuplicatedElem(boxes)
 	}
 
-	if nil != arg["types"] {
-		typesArg := arg["types"].(map[string]any)
-		types = map[string]bool{}
-		for t, b := range typesArg {
-			types[t] = b.(bool)
-		}
-	}
-
-	subTypes = parseSearchSubTypes(arg["subTypes"])
-
-	// method：0：关键字，1：查询语法，2：SQL，3：正则表达式
-	methodArg := arg["method"]
-	if nil != methodArg {
-		method = int(methodArg.(float64))
-	}
-
-	// orderBy：0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时），6：按相关度升序，7：按相关度降序
-	orderByArg := arg["orderBy"]
-	if nil != orderByArg {
-		orderBy = int(orderByArg.(float64))
-	}
-
-	// groupBy： 0：不分组，1：按文档分组
-	groupByArg := arg["groupBy"]
-	if nil != groupByArg {
-		groupBy = int(groupByArg.(float64))
-	}
 	return
 }
 
-func parseSearchAssetContentArgs(arg map[string]any) (page, pageSize int, query string, types map[string]bool, method, orderBy int) {
-	page = 1
-	if nil != arg["page"] {
-		page = int(arg["page"].(float64))
-	}
-	if 0 >= page {
-		page = 1
-	}
-
-	pageSize = 32
-	if nil != arg["pageSize"] {
-		pageSize = int(arg["pageSize"].(float64))
-	}
-	if 0 >= pageSize {
-		pageSize = 32
-	}
-
-	queryArg := arg["query"]
-	if nil != queryArg {
-		query = queryArg.(string)
-	}
-
-	if nil != arg["types"] {
-		typesArg := arg["types"].(map[string]any)
-		types = map[string]bool{}
-		for t, b := range typesArg {
-			types[t] = b.(bool)
-		}
-	}
-
-	// method：0：关键字，1：查询语法，2：SQL，3：正则表达式
-	methodArg := arg["method"]
-	if nil != methodArg {
-		method = int(methodArg.(float64))
-	}
-
-	// orderBy：0：按相关度降序，1：按相关度升序，2：按更新时间升序，3：按更新时间降序
-	orderByArg := arg["orderBy"]
-	if nil != orderByArg {
-		orderBy = int(orderByArg.(float64))
-	}
-	return
-}
-
-func semanticSearchBlock(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	page, pageSize, query, paths, boxes, types, subTypes, _, _, _ := parseSearchBlockArgs(arg)
+var semanticSearchBlock = contractHandler(apicontract.SemanticSearchBlock, func(c *gin.Context, request apicontract.SearchBlockRequest) apicontract.Response[apicontract.SearchBlocksData] {
+	page, pageSize, query, paths, boxes, types, subTypes, _, _, _ := parseSearchBlockRequest(request)
 
 	var excludeBoxIDs, excludeDocIDs []string
 	if model.IsReadOnlyRoleContext(c) {
 		denyAll, deniedBoxIDs, deniedDocIDs := model.GetPublishAccessSearchExclusion(c)
 		if denyAll {
-			ret.Data = map[string]any{
-				"blocks":            []*model.Block{},
-				"matchedBlockCount": 0,
-				"matchedRootCount":  0,
-				"pageCount":         0,
-			}
-			return
+			return apicontract.Success(apicontract.SearchBlocksData{Blocks: []*apicontract.SearchBlock{}})
 		}
 		excludeBoxIDs, excludeDocIDs = deniedBoxIDs, deniedDocIDs
 	}
@@ -763,10 +409,18 @@ func semanticSearchBlock(c *gin.Context) {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
 	}
-	ret.Data = map[string]any{
-		"blocks":            blocks,
-		"matchedBlockCount": matchedBlockCount,
-		"matchedRootCount":  matchedRootCount,
-		"pageCount":         pageCount,
+	return apicontract.Success(apicontract.SearchBlocksData{Blocks: searchBlockContracts(blocks), MatchedBlockCount: matchedBlockCount, MatchedRootCount: matchedRootCount, PageCount: pageCount})
+})
+
+func embedBlockContracts(values []*model.EmbedBlock) []*apicontract.EmbedBlock {
+	if values == nil {
+		return nil
 	}
+	result := make([]*apicontract.EmbedBlock, len(values))
+	for i, value := range values {
+		if value != nil {
+			result[i] = &apicontract.EmbedBlock{Block: searchBlockContracts([]*model.Block{value.Block})[0], BlockPaths: blockPathContracts(value.BlockPaths), AllowChildOperation: value.AllowChildOperation}
+		}
+	}
+	return result
 }

@@ -798,11 +798,53 @@ test("super block column insertion actions follow block insertion actions", () =
 });
 
 test("table block width actions keep current-column and whole-table scopes together", () => {
-    assert.deepEqual(getEntryCatalogChildren("gutter.single.table").slice(0, 3).map((item) => item.key), [
+    assert.deepEqual(getEntryCatalogChildren("gutter.single.table").slice(1, 4).map((item) => item.key), [
         "useDefaultWidth",
         "distributeAllColWidths",
         "useDefaultWidthForAllColumns",
     ]);
+});
+
+test("table catalog follows the menu arrays and conditional declarations", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/menus/protyle.ts"), "utf8");
+    const table = source.slice(source.indexOf("export const tableMenu ="));
+    const pushedIDs = (array: string) => Array.from(table.matchAll(
+        new RegExp(`${array}\\.push\\(\\{\\s*id: ("[^" ]+"|isPinHead \\? "unpinTableHead" : "pinTableHead")`, "g"),
+    )).flatMap(match => match[1].startsWith("isPinHead")
+        ? ["pinTableHead", "unpinTableHead"] : [JSON.parse(match[1])]);
+    const other = pushedIDs("otherMenus");
+    const moves = pushedIDs("other2Menus");
+    const inserts = pushedIDs("insertMenus");
+    const removes = pushedIDs("removeMenus");
+    assert.deepEqual(getEntryCatalogChildren("gutter.single.table").map(item => item.key), [
+        ...other, "separator_insert", ...inserts, ...moves, "separator_delete", ...removes,
+    ]);
+    const alignment = table.slice(table.indexOf("const alignmentMenus"), table.indexOf("if (alignWholeTable)", table.indexOf("const alignmentMenus")));
+    const alignmentIDs = Array.from(alignment.matchAll(/id: "([^"]+)"/g), match => match[1]);
+    assert.deepEqual(getEntryCatalogChildren("inline.text.more").map(item => item.key), [
+        ...other.filter(id => !["distributeAllColWidths", "useDefaultWidthForAllColumns", "transposeTable", "alignment"].includes(id)),
+        ...alignmentIDs, ...moves,
+    ]);
+    [...inserts, ...removes].forEach(id => assert.ok(getEntryCatalogNode(`inline.text.${id}`)));
+    assert.match(source, /submenu: tableMenus\.otherMenus\.concat\(tableMenus\.other2Menus\)/);
+});
+
+test("conditional copy and image actions have configuration entries in menu order", () => {
+    const common = ["copyBlockRef", "copyBlockEmbed", "copyProtocol", "copyProtocolInMd", "copyWebURL", "copyHPath"];
+    assert.deepEqual(getEntryCatalogChildren("gutter.multi.copy").map(item => item.key), [
+        ...common, "copyID", "copyText", "copyRichText", "copyPlainText", "copy", "duplicate",
+    ]);
+    assert.deepEqual(getEntryCatalogChildren("gutter.single.copy").map(item => item.key), [
+        ...common, "copyAVID", "copyID", "copyText", "copyRichText", "copyPlainText", "copyAsPNG",
+        "copyMirror", "copy", "duplicate", "duplicateMirror", "duplicateCompletely",
+    ]);
+    const image = getEntryCatalogChildren("inline.image").map(item => item.key);
+    assert.deepEqual(image.slice(image.indexOf("separator_3")), ["separator_3", "openBy", "export", "copyFile", "copyAsPNG"]);
+    ["gutter.single.table.cancelMerged", "gutter.single.table.transposeTable", "inline.text.more.cancelMerged",
+        "gutter.single.copy.copyMirror", "inline.image.openBy"].forEach(path => {
+        assert.equal(getEntryCatalogNode(path).type, "entry");
+        assert.equal(getEntryCatalogNode(path).simple, true);
+    });
 });
 
 test("code block actions follow the code block menu order", () => {
@@ -865,7 +907,6 @@ test("multiple document and notebook entries follow their document tree menus", 
         "rebuildDataIndex",
         "sort",
         "publishAccess",
-        "pinnedDocs",
     ]);
     assert.deepEqual(getEntryCatalogChildren("docTree.notebooks").map((item) => item.key), [
         "sort",
@@ -884,14 +925,19 @@ test("multiple document and notebook entries follow their document tree menus", 
     assert.ok(getEntryCatalogChildren("docTree.multi").some((item) => item.key === "delete"));
 });
 
-test("pinned area visibility is independent of dock visibility and menu ordering", () => {
-    assert.deepEqual(getEntryCatalogChildren("documentPanel").map(item => item.key), ["pinnedDocs"]);
-    assert.equal(getEntryCatalogNode("documentPanel.pinnedDocs")?.simple, true);
-    assert.equal(getEntryCatalogDefaultVisibility("documentPanel.pinnedDocs"), false);
-    assert.equal(getEntryCatalogCustomDefaultVisibility("documentPanel.pinnedDocs"), false);
-    assert.equal(getEntryCatalogDefaultVisibility("docTree.panel.pinnedDocs"), true);
-    assert.equal(isEntryOrderSortable("documentPanel"), false);
-    assert.equal(getEntryCatalogNode("docTree.panel.pinnedDocs")?.simple, true);
+test("document multi-selection includes both pin actions before the existing separator", () => {
+    const keys = getEntryCatalogChildren("docTree.multi").map(item => item.key);
+    assert.deepEqual(keys.slice(keys.indexOf("delete"), keys.indexOf("separator_1") + 1),
+        ["delete", "pinDoc", "unpinDoc", "separator_1"]);
+    for (const key of ["pinDoc", "unpinDoc"]) {
+        assert.equal(getEntryCatalogNode(`docTree.multi.${key}`)?.simple, true);
+        assert.equal(getEntryCatalogDefaultVisibility(`docTree.multi.${key}`), true);
+    }
+});
+
+test("pinned area has no configurable visibility switch", () => {
+    assert.equal(getEntryCatalogNode("documentPanel.pinnedDocs"), undefined);
+    assert.equal(getEntryCatalogNode("docTree.panel.pinnedDocs"), undefined);
     assert.equal(getEntryCatalogNode("dock.pinnedDocs"), undefined);
 });
 
@@ -963,6 +1009,9 @@ test("configuration labels distinguish block scopes and size controls", () => {
                     entryDock: "Dock",
                     height: "Height",
                     entryDocumentStatistics: "Document statistics",
+                    tableBlock: "Table block",
+                    databaseBlock: "Database block",
+                    htmlBlock: "HTML block",
                 },
             },
         },
@@ -983,12 +1032,27 @@ test("configuration labels distinguish block scopes and size controls", () => {
         assert.equal(getEntryCatalogNode("inline.image.height.heightInput")?.label(), "Pixel height");
         assert.equal(getEntryCatalogNode("inline.image.height.heightDrag")?.label(), "Percentage height");
         assert.equal(getEntryCatalogNode("document.more.docInfo")?.label(), "Document statistics");
+        assert.equal(getEntryCatalogNode("gutter.single.table")?.label(), "Table block");
+        assert.equal(getEntryCatalogNode("gutter.single.database")?.label(), "Database block");
+        assert.equal(getEntryCatalogNode("gutter.single.html")?.label(), "HTML block");
+        assert.equal(getEntryCatalogNode("gutter.single.turnInto.table")?.label(), "Table block");
+        assert.equal(getEntryCatalogNode("gutter.multi.turnInto.table")?.label(), "Table block");
     } finally {
         if (windowDescriptor) {
             Object.defineProperty(globalThis, "window", windowDescriptor);
         } else {
             Reflect.deleteProperty(globalThis, "window");
         }
+    }
+});
+
+test("notebook pin entries follow settings and precede sorting", () => {
+    const keys = getEntryCatalogChildren("docTree.notebook").map(item => item.key);
+    assert.deepEqual(keys.slice(keys.indexOf("config"), keys.indexOf("sort") + 1),
+        ["config", "pinDoc", "unpinDoc", "sort"]);
+    for (const key of ["pinDoc", "unpinDoc"]) {
+        assert.equal(getEntryCatalogNode(`docTree.notebook.${key}`)?.simple, true);
+        assert.equal(getEntryCatalogNode(`docTree.notebook.${key}`)?.type, "entry");
     }
 });
 

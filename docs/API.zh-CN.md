@@ -225,6 +225,8 @@ if (response.code === 0 && response.data) {
   }
   ```
 
+关闭接口校验笔记本 ID 时不会去除两端空白。请求与响应类型声明生成于 `app/src/types/api/index.d.ts`，并同步到 `petal`。
+
 ### 重命名笔记本
 
 * `/api/notebook/renameNotebook`
@@ -1333,11 +1335,15 @@ if (response.code === 0 && response.data) {
   ```json
   {
     "id": "20220724223548-j6g0o87",
-    "path": "F:\\SiYuan\\data\\templates\\foo.md"
+    "path": "F:\\SiYuan\\data\\templates\\foo.md",
+    "mode": "editorInsert"
   }
   ```
+
     * `id`：调用渲染所在的文档 ID
     * `path`：模板文件绝对路径
+    * `mode`：可选渲染模式。目前仅支持 `"preview"` 和 `"editorInsert"`。预览模式生成文档树计划但不写入文件；编辑器插入模式生成可在确认后通过对应编辑器事务应用的计划
+    * 省略 `mode` 时，仍支持旧的布尔参数 `preview`：`preview: true` 等价于 `mode: "preview"`；否则模板按普通内容渲染，并禁用 `createDocTree`
 * 返回值
 
   ```json
@@ -1346,10 +1352,41 @@ if (response.code === 0 && response.data) {
     "msg": "",
     "data": {
       "content": "<div data-node-id=\"20220729234848-dlgsah7\" data-node-index=\"1\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20220729234840\"><div contenteditable=\"true\" spellcheck=\"false\">foo</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>",
-      "path": "F:\\SiYuan\\data\\templates\\foo.md"
+      "path": "F:\\SiYuan\\data\\templates\\foo.md",
+      "docTreePlan": {
+        "id": "template-plan-token",
+        "count": 2,
+        "nodes": [
+          {
+            "id": "20260830150000-abc1234",
+            "title": "Materials",
+            "parentID": "20220724223548-j6g0o87",
+            "hPath": "/Parent/Materials",
+            "depth": 1
+          },
+          {
+            "id": "20260830150001-def5678",
+            "title": "Review",
+            "parentID": "20260830150000-abc1234",
+            "hPath": "/Parent/Materials/Review",
+            "depth": 2
+          }
+        ]
+      }
     }
   }
   ```
+
+    * `docTreePlan`：模板通过 `createDocTree` 声明子文档树时返回
+        * `id`：预览模式下为空，且不会写入文件。编辑器插入模式下为短期有效的一次性计划令牌；确认后，将其作为对应事务对象的顶层 `templateDocTreePlanID` 字段提交
+        * `count`：计划中的子文档总数
+        * `nodes`：计划文档的静态描述
+            * `id`：计划文档 ID
+            * `title`：计划文档标题
+            * `parentID`：计划父文档 ID
+            * `hPath`：计划文档的人类可读路径
+            * `depth`：相对于模板插入所在文档的深度
+        * 单个计划最多包含 128 个文档，声明的子文档树最多为 16 层。最终文件树的绝对深度仍受是否允许创建 7 层以上子文档的设置约束
 
 ### 将文档保存为模板
 
@@ -2775,7 +2812,7 @@ if (response.code === 0 && response.data) {
 * `idPath`：搜索范围路径数组
 * `k`：搜索关键字
 * `r`：替换关键字
-* `types`：块类型开关，支持 `mathBlock`、`table`、`blockquote`、`superBlock`、`paragraph`、`document`、`heading`、`list`、`listItem`、`codeBlock`、`htmlBlock`、`embedBlock`、`databaseBlock`、`audioBlock`、`videoBlock`、`iframeBlock`、`widgetBlock` 和 `callout`
+* `types`：块类型开关，支持 `mathBlock`、`table`、`blockquote`、`superBlock`、`paragraph`、`document`、`heading`、`list`、`listItem`、`codeBlock`、`htmlBlock`、`embedBlock`、`databaseBlock`、`audioBlock`、`videoBlock`、`iframeBlock`、`widgetBlock`、`callout`、`tabs` 和 `tabItem`
 * `subTypes`：独立的子类型分组，`heading` 使用 `h1` 至 `h6`，`list` 和 `listItem` 分别使用 `o`（有序）、`u`（无序）和 `t`（任务）。分组缺省、为空或所有开关为 `false` 时，不限制该父类型的子类型；父类型仍须在 `types` 中启用。未知顶层键（包括旧扁平格式的 `h1` 至 `h6` 和 `o`、`u`、`t`）会被忽略且不报错，旧格式中保存的子类型选择需要重新选择并保存
 * `replaceTypes`：替换类型开关，支持 `text`、`imgText`、`imgTitle`、`imgSrc`、`aText`、`aTitle`、`aHref`、`code`、`em`、`strong`、`inlineMath`、`inlineMemo`、`blockRef`、`fileAnnotationRef`、`kbd`、`mark`、`s`、`sub`、`sup`、`tag`、`u`、`docTitle`、`codeBlock`、`mathBlock` 和 `htmlBlock`
 

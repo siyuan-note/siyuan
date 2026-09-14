@@ -1,6 +1,7 @@
 import {Dialog} from "../dialog";
 import {openInputDialog} from "../dialog/inputDialog";
 import {fetchPost} from "../util/fetch";
+import {fetchDueCards} from "./fetchDueCards";
 import {isMobile} from "../util/functions";
 import {Protyle} from "../protyle";
 import {Constants} from "../constants";
@@ -80,7 +81,7 @@ export const genCardHTML = (options: {
     <span class="fn__flex-1 fn__flex-center toolbar__text">${window.siyuan.languages.riffCard}</span>
     <div data-type="count" class="${options.cardsData.cards.length === 0 ? "fn__none" : "fn__flex"}">${genCardCount(options.cardsData)}</span></div>
     <svg class="toolbar__icon" data-id="${options.id || ""}" data-cardtype="${options.cardType}" data-type="filter"><use xlink:href="#iconFilter"></use></svg>
-    <svg class="toolbar__icon" data-type="more"><use xlink:href="#iconMore"></use></svg>
+    <svg class="toolbar__icon${options.cardsData.cards.length === 0 ? " fn__none" : ""}" data-type="more"><use xlink:href="#iconMore"></use></svg>
     <svg class="toolbar__icon" data-type="close"><use xlink:href="#iconCloseRound"></use></svg>
 </div>`;
     /// #else
@@ -98,7 +99,7 @@ export const genCardHTML = (options: {
         <div data-type="fullscreen" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show" aria-label="${window.siyuan.languages.fullscreen}">
             <svg><use xlink:href="#iconFullscreen"></use></svg>
         </div>
-        <div class="fn__space${options.cardsData.cards.length === 0 ? " fn__none" : ""}"></div>
+        <div data-type="more-space" class="fn__space${options.cardsData.cards.length === 0 ? " fn__none" : ""}"></div>
         <div data-type="more" class="${options.cardsData.cards.length === 0 ? "fn__none " : ""}b3-tooltips b3-tooltips__sw block__icon block__icon--show" aria-label="${window.siyuan.languages.more}">
             <svg><use xlink:href="#iconMore"></use></svg>
         </div>
@@ -221,7 +222,7 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                 updateReadonly: true,
                 data: response,
                 protyle,
-                action: response.data.rootID === response.data.id ? [] : [Constants.CB_GET_ALL],
+                action: response.code === 0 && response.data.rootID === response.data.id ? [] : [Constants.CB_GET_ALL],
                 afterCB: () => {
                     if (!isCurrentFlashcardLoad(revealState, generation) ||
                         protyle.element.classList.contains("fn__none")) {
@@ -319,12 +320,7 @@ export const bindCardEvent = async (options: {
     const fetchNewRound = () => {
         const currentCardType = filterElement.getAttribute("data-cardtype");
         const docId = filterElement.getAttribute("data-id");
-        fetchPost(currentCardType === "all" ? "/api/riff/getRiffDueCards" :
-            (currentCardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
-            rootID: docId,
-            deckID: docId,
-            notebook: docId,
-        }, async (treeCards) => {
+        fetchDueCards(currentCardType, docId, undefined, async (treeCards) => {
             index = 0;
             options.cardsData = treeCards.data;
             for (let i = 0; i < options.app.plugins.length; i++) {
@@ -761,13 +757,7 @@ export const bindCardEvent = async (options: {
                 index++;
                 if (index > options.cardsData.cards.length - 1) {
                     const currentCardType = filterElement.getAttribute("data-cardtype");
-                    fetchPost(currentCardType === "all" ? "/api/riff/getRiffDueCards" :
-                        (currentCardType === "doc" ? "/api/riff/getTreeRiffDueCards" : "/api/riff/getNotebookRiffDueCards"), {
-                        rootID: docId,
-                        deckID: docId,
-                        notebook: docId,
-                        reviewedCards: options.cardsData.cards
-                    }, async (result) => {
+                    fetchDueCards(currentCardType, docId, options.cardsData.cards, async (result) => {
                         emitEvent(options.cardsData.cards[index - 1], type);
                         index = 0;
                         options.cardsData = result.data;
@@ -842,10 +832,7 @@ export const openCardByScope = (app: App, cardType: "doc" | "notebook", id: stri
     }
     fetchPost("/api/flashcard/getMigrationStatus", {}, (statusResponse) => {
         if (statusResponse.data.state === "Legacy") {
-            const endpoint = cardType === "doc" ? "/api/riff/getTreeRiffDueCards" :
-                "/api/riff/getNotebookRiffDueCards";
-            const request = cardType === "doc" ? {rootID: id} : {notebook: id};
-            fetchPost(endpoint, request, (cardsResponse) => {
+            fetchDueCards(cardType, id, undefined, (cardsResponse) => {
                 openCardByData(app, cardsResponse.data, cardType, id, title);
             });
             return;
@@ -934,6 +921,9 @@ const nextCard = (options: {
     options.editor.protyle.element.nextElementSibling.classList.add("fn__none");
     options.countElement.innerHTML = genCardCount(options.cardsData, options.index);
     options.countElement.classList.remove("fn__none");
+    options.countElement.parentElement.querySelectorAll('[data-type="more"], [data-type="more-space"]').forEach(element => {
+        element.classList.remove("fn__none");
+    });
     if (options.index === 0) {
         options.actionElements[0].firstElementChild.setAttribute("disabled", "disabled");
         options.actionElements[1].querySelector(".b3-button").setAttribute("disabled", "disabled");
@@ -958,9 +948,9 @@ const allDone = (countElement: Element, editor: Protyle, actionElements: NodeLis
     emptyElement.classList.remove("fn__none");
     actionElements[0].classList.add("fn__none");
     actionElements[1].classList.add("fn__none");
-    const moreElement = countElement.parentElement.querySelector('[data-type="more"]');
-    moreElement.classList.add("fn__none");
-    moreElement.previousElementSibling.classList.add("fn__none");
+    countElement.parentElement.querySelectorAll('[data-type="more"], [data-type="more-space"]').forEach(element => {
+        element.classList.add("fn__none");
+    });
 };
 
 const newRound = (countElement: Element, editor: Protyle, actionElements: NodeListOf<Element>, unreviewedCount: number) => {

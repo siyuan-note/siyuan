@@ -6,7 +6,7 @@
 		"id": "20210615211733-v6rzowm",
 		"title": "数据历史",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260914102430"
 	},
 	"Children": [
 		{
@@ -1086,7 +1086,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615112531-5yos96d",
-				"updated": "20260803163440"
+				"updated": "20260914102430"
 			},
 			"Children": [
 				{
@@ -1488,7 +1488,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615114301-099icf4",
-				"updated": "20220615114632"
+				"updated": "20260914101605"
 			},
 			"Children": [
 				{
@@ -1502,12 +1502,305 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615114706-5wy741l",
-				"updated": "20220615115247"
+				"updated": "20260914101605"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "创建完数据快照后可以在左侧看到快照时间列表，点击不同快照以后可以浏览其备注。"
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "数据历史"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "数据快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中，宽窗口并排显示本地和云端列表，两栏分别分页；窄窗口和移动端通过 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "本地快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "云端快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 切换显示。顶部的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "数据快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "标记快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 用于切换快照类别。列表显示快照的创建时间、备注和标记，便于对照。"
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-18n2jmp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914101605-18n2jmp",
+				"updated": "20260914101605"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "本地快照支持按文件名搜索，搜索时会为文件列表和预览留出空间。未进入批量管理时，仍可选择两个本地快照进行比较，并使用各条目的标记、上传、下载和回滚等操作。"
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-oj55v9o",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260914101605-oj55v9o",
+				"updated": "20260914102430"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "批量管理标记快照"
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-2kciwtf",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20260914101605-2kciwtf",
+				"updated": "20260914101605"
+			},
+			"Children": [
+				{
+					"ID": "20260914101605-pp06byr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20260914101605-pp06byr",
+						"updated": "20260914101605"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-bfq23q8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-bfq23q8",
+								"updated": "20260914101605"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "切换到 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "标记快照"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，点击 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "批量管理"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 显示复选框"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914101605-2x5qw4j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20260914101605-2x5qw4j",
+						"updated": "20260914101605"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-dofbxyc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-dofbxyc",
+								"updated": "20260914101605"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "勾选需要删除的本地和云端标记；各栏的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "全选"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 只选择该栏当前列表中的标记，底部显示两端分别选中的数量"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914101605-eb2bmzo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20260914101605-eb2bmzo",
+						"updated": "20260914101605"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-tbvv9wt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-tbvv9wt",
+								"updated": "20260914101605"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "点击 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "删除所选标记"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，核对本地和云端的标记名称及数量后确认；只删除明确勾选的标记，不会自动删除另一端的同名标记"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914101605-iov86px",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20260914101605-iov86px",
+						"updated": "20260914101605"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-yvl4rz4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-yvl4rz4",
+								"updated": "20260914101605"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "操作后查看结果，失败或未能确认的项目仍保留选中，可再次点击 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "删除所选标记"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 重试；"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "取消选择"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 清空选择，"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "完成管理"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 退出批量管理"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-xj18m3f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914101605-xj18m3f",
+				"updated": "20260914102430"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "删除标记不会立即删除快照数据，也不会自动清理数据仓库。如需释放空间，可另行清理本地数据仓库；云端手动清理仅适用于 S3、WebDAV 和本地文件系统同步存储。"
 				}
 			]
 		},
@@ -1546,7 +1839,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615115126-z62p36j",
-				"updated": "20260803163440"
+				"updated": "20260914102430"
 			},
 			"Children": [
 				{
@@ -1561,7 +1854,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220615115758-ajl5l83",
-				"updated": "20260803163440"
+				"updated": "20260914102430"
 			},
 			"Children": [
 				{
@@ -1573,7 +1866,7 @@
 					},
 					"Properties": {
 						"id": "20230422101107-ihb3kxp",
-						"updated": "20260803163440"
+						"updated": "20260914101605"
 					},
 					"Children": [
 						{
@@ -1581,30 +1874,30 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230422101107-zxq6qh2",
-								"updated": "20260803163440"
+								"updated": "20260914101605"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​ "
+									"Data": "在 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "设置"
+									"TextMarkTextContent": "数据历史"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "账号与同步"
+									"TextMarkTextContent": "数据快照"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " 的本地栏点击 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1613,7 +1906,34 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 将删除所有未引用的快照和相关数据对象。“引用的快照”指的是 repo/refs/ 下指向的快照："
+									"Data": "，或从 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "账号与同步"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "数据仓库清理"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 执行本地清理，确认后会删除所有未引用的快照和相关数据对象。“引用的快照”指的是 repo/refs/ 下指向的快照："
 								}
 							]
 						},
@@ -1699,6 +2019,43 @@
 											]
 										}
 									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914101605-lsjt1pd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260914101605-lsjt1pd",
+						"updated": "20260914102430"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-9cgd3h9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-9cgd3h9",
+								"updated": "20260914102430"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 S3、WebDAV 或本地文件系统作为同步存储时，云端栏的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "清理云端存储"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 仅清理云端未引用的快照和相关数据对象；执行前请确保其他设备已经暂停同步，并保持网络稳定；思源官方云端不支持此手动清理操作，因此不显示该入口"
 								}
 							]
 						}

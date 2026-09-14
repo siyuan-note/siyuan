@@ -19,6 +19,36 @@ describe("genNumberInputHtml", () => {
 });
 
 describe("genStackHtml", () => {
+    it("escapes textarea closing tags and literal character references", () => {
+        if (typeof Lute === "undefined") {
+            require("../../../stage/protyle/js/lute/lute.min.js");
+        }
+        const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
+        Object.defineProperty(globalThis, "window", {
+            configurable: true,
+            value: {siyuan: {config: {editor: {spellcheck: false}}}},
+        });
+        try {
+            const html = genStackHtml([{
+                left: {
+                    kind: "textBlock", id: "macros", mode: "textarea",
+                    readConfig: () => "</textarea><img src=x>\n&amp; &#60; &lt;",
+                    readValue: (el) => (el as HTMLTextAreaElement).value,
+                },
+            }]);
+
+            assert.match(html, />&lt;\/textarea&gt;&lt;img src=x&gt;\n&amp;amp; &amp;#60; &amp;lt;<\/textarea>/);
+            assert.equal((html.match(/<\/textarea>/g) || []).length, 1);
+            assert.doesNotMatch(html, /<img/);
+        } finally {
+            if (originalWindow) {
+                Object.defineProperty(globalThis, "window", originalWindow);
+            } else {
+                Reflect.deleteProperty(globalThis, "window");
+            }
+        }
+    });
+
     it("renders descriptions with controls using the primary text color", () => {
         const html = genStackHtml([{
             left: {kind: "desc", text: "Setting name"},

@@ -88,8 +88,9 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
     menuElement.addEventListener("touchstart", (event) => {
         reset();
         const target = event.target as HTMLElement;
+        // 可排序条目的触摸由拖拽桥接处理，避免向下排序时同时拖动整个面板。
         if (event.touches.length !== 1 ||
-            target.closest('input, textarea, select, [contenteditable="true"], .av__select-dropdown') ||
+            target.closest('input, textarea, select, [contenteditable="true"], .av__select-dropdown, [draggable="true"]') ||
             menuElement.querySelector(".av__select-dropdown")) {
             return;
         }

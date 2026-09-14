@@ -153,6 +153,9 @@ export const exportMarkdownZip = async(options: IExportMdOptions) => {
     if (options.id) {
         // 查询文档是否有子文档、引用及绑定的数据库，无则隐藏对应配置项 #17031
         const docInfo = await fetchSyncPost("/api/block/getDocInfo", {id: options.id});
+        if (docInfo.code !== 0) {
+            return;
+        }
         const data = docInfo.data;
         showSubDocs = 0 < data.subFileCount;
         showRelatedDocs = 0 < (data.refCount || 0) || 0 < (data.attrViews?.length || 0);

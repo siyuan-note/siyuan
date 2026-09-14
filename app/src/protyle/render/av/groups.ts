@@ -57,6 +57,9 @@ export const setGroupMethod = async (options: {
         group: data,
         ignoreRows: true,
     });
+    if (response.code !== 0) {
+        return;
+    }
     options.data.view = mergeGroupResponseView(options.data.view, response.data);
     options.menuElement.innerHTML = getGroupsHTML(getFieldsByData(options.data), options.data.view);
     bindGroupsEvent({
@@ -184,7 +187,9 @@ export const bindGroupsNumber = (options: {
             group: options.data.view.group,
             ignoreRows: true,
         });
-        options.data.view = mergeGroupResponseView(options.data.view, response.data);
+        if (response.code === 0) {
+            options.data.view = mergeGroupResponseView(options.data.view, response.data);
+        }
     };
 };
 
@@ -296,7 +301,9 @@ export const bindGroupsEvent = (options: {
             group: options.data.view.group,
             ignoreRows: true,
         });
-        options.data.view = mergeGroupResponseView(options.data.view, response.data);
+        if (response.code === 0) {
+            options.data.view = mergeGroupResponseView(options.data.view, response.data);
+        }
         options.menuElement.innerHTML = getGroupsHTML(getFieldsByData(options.data), options.data.view);
         bindGroupsEvent({
             protyle: options.protyle,
@@ -370,7 +377,9 @@ export const goGroupsDate = (options: {
                     group: options.data.view.group,
                     ignoreRows: true,
                 });
-                options.data.view = mergeGroupResponseView(options.data.view, response.data);
+                if (response.code === 0) {
+                    options.data.view = mergeGroupResponseView(options.data.view, response.data);
+                }
                 options.menuElement.innerHTML = getGroupsHTML(getFieldsByData(options.data), options.data.view);
                 bindGroupsEvent({
                     protyle: options.protyle,
@@ -422,7 +431,9 @@ export const goGroupsSort = (options: {
                     group: options.data.view.group,
                     ignoreRows: true,
                 });
-                options.data.view = mergeGroupResponseView(options.data.view, response.data);
+                if (response.code === 0) {
+                    options.data.view = mergeGroupResponseView(options.data.view, response.data);
+                }
                 options.menuElement.innerHTML = getGroupsHTML(getFieldsByData(options.data), options.data.view);
                 bindGroupsEvent({
                     protyle: options.protyle,

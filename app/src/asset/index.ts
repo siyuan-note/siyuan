@@ -67,7 +67,7 @@ export class Asset extends Model {
             if (this.pdfLoadState.isDestroyed) {
                 return;
             }
-            if (response.code !== 1) {
+            if (response.code === 0) {
                 const config = JSON.parse(response.data.data);
                 if (config[this.pdfId]) {
                     this.pdfPage = config[this.pdfId].page ? config[this.pdfId].page + 1 : config[this.pdfId].pages[0].index + 1;

@@ -211,10 +211,10 @@ test("remote document CSP only permits hashed packaged inline scripts", () => {
     assert.equal(policy.includes("style()"), false);
 });
 
-test("remote document CSP covers the packaged app, window, and authorization pages", () => {
+test("remote document CSP covers the app templates and authorization page", () => {
     const documentPaths = [
-        path.join(__dirname, "../stage/build/app/index.html"),
-        path.join(__dirname, "../stage/build/app/window.html"),
+        path.join(__dirname, "../src/assets/template/app/index.tpl"),
+        path.join(__dirname, "../src/assets/template/app/window.tpl"),
         path.join(__dirname, "remote-auth.html"),
     ];
     documentPaths.forEach((documentPath) => {

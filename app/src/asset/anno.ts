@@ -1170,7 +1170,7 @@ const getConfig = (pdf: any) => {
         path: urlPath,
     }, (response) => {
         let config = {};
-        if (response.code !== 1) {
+        if (response.code === 0) {
             try {
                 config = JSON.parse(response.data.data);
             } catch (e) {

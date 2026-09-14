@@ -37,7 +37,7 @@ const setSyncAssetDownloadMode = async (mode: Config.ISync["assetDownloadMode"])
     }, 300);
     try {
         const response = await fetchSyncPost("/api/sync/setSyncAssetDownloadMode", {mode});
-        if (response.code === 0) {
+        if (response.code === 0 && (response.data.assetDownloadMode === 0 || response.data.assetDownloadMode === 1)) {
             window.siyuan.config.sync.assetDownloadMode = response.data.assetDownloadMode;
         }
     } catch (error) {

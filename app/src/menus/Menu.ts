@@ -11,6 +11,7 @@ import {electronUndo} from "../protyle/undo";
 import {escapeAttr} from "../util/escape";
 import {setMenuInputCurrent} from "./menuKeyboard";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
+import {activeBlur} from "../mobile/util/keyboardToolbar";
 /// #if !MOBILE
 import {applyMenuEntryVisibility} from "../config/entryVisibility/runtime";
 /// #endif
@@ -40,6 +41,7 @@ export class Menu {
     private suppressSheetClick = false;
     private targetPositionFrame: number | undefined;
     private cancelSheetOpen: (() => void) | undefined;
+    private restoreKeyboard: (() => void) | undefined;
 
     private updateTargetPosition = () => {
         if (typeof this.targetPositionFrame === "number") {
@@ -73,7 +75,7 @@ export class Menu {
                 const name = this.element.getAttribute("data-name");
                 if ((name === Constants.MENU_BLOCK_SINGLE || name === Constants.MENU_BLOCK_MULTI) &&
                     !(event.target as Element).closest("input, textarea, select, [contenteditable=\"true\"]")) {
-                    // 保留编辑器选区和键盘，同时允许菜单输入框正常获取焦点。
+                    // 保留编辑器选区，同时允许菜单输入框正常获取焦点。
                     event.preventDefault();
                 }
             };
@@ -300,7 +302,7 @@ export class Menu {
         this.finishSheetTouch();
     };
 
-    private closeSheet() {
+    public closeSheet() {
         this.cancelSheetOpen?.();
         this.cancelSheetOpen = undefined;
         if (!this.element.classList.contains("b3-menu--sheet")) {
@@ -314,6 +316,10 @@ export class Menu {
         this.element.style.transform = "translateY(100%)";
         this.hideFullscreenScrim();
         fullscreenCloseTimeout = window.setTimeout(() => this.removeImmediately(), Constants.TIMEOUT_DBLCLICK);
+        const restoreKeyboard = this.restoreKeyboard;
+        this.restoreKeyboard = undefined;
+        // 在关闭手势中恢复焦点，使浏览器端也能响应用户操作弹出软键盘。
+        restoreKeyboard?.();
     }
 
     private updateSheetTitle() {
@@ -448,6 +454,10 @@ export class Menu {
                 }
                 return;
             }
+            if (isMobile()) {
+                this.closeSheet();
+                return;
+            }
         }
         this.removeImmediately();
     }
@@ -469,6 +479,8 @@ export class Menu {
     }
 
     private removeImmediately() {
+        // 菜单动作和菜单替换只清理状态，避免跳转或弹窗后抢回编辑焦点。
+        this.restoreKeyboard = undefined;
         this.cancelSheetOpen?.();
         this.cancelSheetOpen = undefined;
         const menuName = this.element.getAttribute("data-name");
@@ -606,7 +618,7 @@ export class Menu {
         }
     }
 
-    public fullscreen(position: "bottom" | "all" = "all") {
+    public fullscreen(position: "bottom" | "all" = "all", restoreKeyboard?: () => void) {
         this.cancelSheetOpen?.();
         this.cancelSheetOpen = undefined;
         applyMenuConfig(this.element);
@@ -637,6 +649,10 @@ export class Menu {
             this.element.lastElementChild.scrollTop = 0;
             return;
         }
+        // 先结束编辑焦点，避免工具栏保留的焦点阻止输入法收起，再跳过键盘弹出保护锁。
+        this.restoreKeyboard = restoreKeyboard;
+        (document.activeElement as HTMLElement)?.blur();
+        activeBlur(true);
         clearTimeout(fullscreenCloseTimeout);
         this.element.querySelectorAll(":scope > .b3-menu__items, .b3-menu__submenu > .b3-menu__items")
             .forEach(updateMenuItemGroupClasses);

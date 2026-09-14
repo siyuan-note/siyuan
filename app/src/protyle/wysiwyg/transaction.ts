@@ -1,4 +1,5 @@
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {getEditorTransaction} from "../util/transactionContract";
 import {
     focusBlock,
     focusByWbr,
@@ -140,7 +141,7 @@ const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     }
 };
 
-const syncFoldAndStyleAttrs = (element: Element, operation: IOperation) => {
+const syncFoldAndStyleAttrs = (element: Element, operation: Extract<IOperation, {action: "setAttrs"}>) => {
     const attrs = JSON.parse(operation.data);
     const hasFold = Object.prototype.hasOwnProperty.call(attrs, "fold");
     const hasStyle = Object.prototype.hasOwnProperty.call(attrs, "style");
@@ -614,11 +615,17 @@ const promiseTransaction = (options: {
         },
     };
     const submitTransactions = (items: typeof queuedTransaction[]) => fetchPost("/api/transactions", {
+        reqId: Date.now(),
         session: protyle.id,
         app: Constants.SIYUAN_APPID,
         transactions: items.map(item => item.transaction),
     }, (response) => {
-        items.forEach((item, index) => item.callback(response.data[index]));
+        items.forEach((item, index) => {
+            const result = response.data?.[index];
+            if (result) {
+                item.callback(getEditorTransaction(result));
+            }
+        });
     });
     // 仅批量提交无回调的普通块更新，结构事务需要保持逐笔提交语义。
     const batchable = !options.callback && !options.templateDocTreePlanID && options.doOperations.length === 1 &&
@@ -700,7 +707,7 @@ const deleteBlock = (updateElements: Element[], id: string, protyle: IProtyle, i
     refreshSbs(...sbParents);
 };
 
-const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IOperation, isUndo: boolean) => {
+const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: Extract<IOperation, {action: "update"}>, isUndo: boolean) => {
     const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : null;
     updateElements.forEach(item => {
         // 前序局部回放可能已替换包含该块的祖先，跳过失效引用。
@@ -848,7 +855,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                     removeFoldHeading(item);
                 }
             });
-            if (operation.retData) {
+            if (Array.isArray(operation.retData)) {
                 operation.retData.forEach((item: string) => {
                     let embedElement: HTMLElement | false;
                     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${item}"]`)).find(itemElement => {
@@ -1973,6 +1980,7 @@ const unfoldListHeadings = async (protyle: IProtyle, nodeElements: Element[]) =>
         }
         foldedHeading.removeAttribute("fold");
         const response = await fetchSyncPost("/api/transactions", {
+            reqId: Date.now(),
             session: protyle.id,
             app: Constants.SIYUAN_APPID,
             transactions: [{
@@ -1986,7 +1994,12 @@ const unfoldListHeadings = async (protyle: IProtyle, nodeElements: Element[]) =>
                 }],
             }]
         });
-        foldedHeading.insertAdjacentHTML("afterend", normalizeHTMLAssetIFrameBlockDOM(response.data[0].doOperations[0].retData));
+        if (response.code === 0 && Array.isArray(response.data)) {
+            const operation = response.data[0]?.doOperations?.[0];
+            if (operation?.action === "unfoldHeading" && typeof operation.retData === "string") {
+                foldedHeading.insertAdjacentHTML("afterend", normalizeHTMLAssetIFrameBlockDOM(operation.retData));
+            }
+        }
         foldOperations.push({
             action: "foldHeading",
             id: itemId
@@ -2111,6 +2124,7 @@ export const turnListsRecursively = async (options: {
                 transaction(options.protyle, doFoldOperations, undoFoldOperations);
             } else {
                 await fetchSyncPost("/api/transactions", {
+                    reqId: Date.now(),
                     session: options.protyle.id,
                     app: Constants.SIYUAN_APPID,
                     transactions: [{
@@ -2194,6 +2208,9 @@ export const turnsOneInto = async (options: {
                 id: options.id,
                 notebook: options.protyle.notebookId,
             });
+            if (response.code !== 0) {
+                return;
+            }
             if (!source.isConnected || source.outerHTML !== snapshot) {
                 return;
             }
@@ -2294,7 +2311,8 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
     cleanBlockSelectionModeOperations(undoOperations);
     doOperations.forEach(operation => {
         if (operation.action === "update" && typeof operation.data === "string") {
-            undoOperations?.filter(undo => undo.action === "update" && undo.id === operation.id && typeof undo.data === "string")
+            undoOperations?.filter((undo): undo is Extract<IOperation, {action: "update"}> =>
+                undo.action === "update" && undo.id === operation.id && typeof undo.data === "string")
                 .forEach(undo => undo.data = retainTableCellRichMetadata(undo.data, operation.data));
         }
     });
@@ -2303,6 +2321,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
     if (!protyle) {
         // 文档树中点开属性->数据库后的变更操作 & 文档树添加到数据库
         fetchPost("/api/transactions", {
+            reqId: Date.now(),
             session: Constants.SIYUAN_APPID,
             app: Constants.SIYUAN_APPID,
             transactions: [{

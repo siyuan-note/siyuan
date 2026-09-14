@@ -10,7 +10,8 @@ const sources = () => {
     for (const name of ["layout/dock/BacklinkContent", "layout/dock/backlinkRefresh",
         "layout/dock/backlinkReadingAnchor", "layout/dock/backlinkSourceFilter", "mobile/util/secondaryEditors",
         "mobile/util/backlinkPanels", "mobile/util/openBacklinks", "mobile/util/bindBottomSheetDrag", "mobile/util/bindBottomSheetDialog", "protyle/util/transactionQueue",
-        "util/escape", "dialog/index"]) {
+        "util/escape", "dialog/index", "layout/dock/panelSearch", "protyle/wysiwyg/backlinkTypeFold",
+        "layout/dock/backlinkMentionCache", "layout/dock/bottomBacklinkScroll"]) {
         modules[name] = ts.transpileModule(preprocess(
             readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"),
             {MOBILE: true, BROWSER: true}, false, true), {
@@ -27,6 +28,9 @@ const runCases = async (sources) => {
     const requests = [];
     const tick = () => new Promise(resolve => setTimeout(resolve, 10));
     const stubs = {
+        "editor/assetOpen": {normalizeAssetOpenConfig: value => value},
+        "layout/dock/backlinkRefFilterMenu": {loadBacklinkRefFilterMenu: noop},
+        "protyle/render/av/editorSession": {hasAVEditorSession: () => false},
         "layout/Model": {Model: class {constructor({app}) {this.app = app;} connect() {throw Error("mobile panel opened a desktop socket");}}},
         "util/Tree": {Tree: class {
             constructor(options) {this.element = options.element; this.options = options;}
@@ -44,7 +48,7 @@ const runCases = async (sources) => {
         }},
         "mobile/editor": {openMobileFileById: noop},
         "util/fetch": {fetchPost: (url, data, callback) => new Promise(resolve => {
-            requests.push({url, data, reply: response => {callback?.({data: response}); resolve();}});
+            requests.push({url, data, reply: response => {callback?.({code: 0, data: response}); resolve();}});
         })},
         "constants": {Constants: {TIMEOUT_LOAD: 0, TIMEOUT_OPENDIALOG: 0, TIMEOUT_DBLCLICK: 0}},
         "protyle/util/compatibility": {updateHotkeyAfterTip: () => "", isNotCtrl: () => true},

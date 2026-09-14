@@ -1,4 +1,5 @@
 import {Constants} from "../constants";
+import {systemConfig} from "../config/systemConfig";
 import {Menus} from "../menus";
 import {Model} from "../layout/Model";
 import "../assets/scss/base.scss";
@@ -212,7 +213,7 @@ class App {
         fetchPost("/api/system/getConf", {}, async (response) => {
             await addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
-            window.siyuan.config = response.data.conf;
+            window.siyuan.config = systemConfig(response.data.conf, () => structuredClone(Constants.SIYUAN_EMPTY_LAYOUT));
             await loadDesktopHostConnection();
             ensureUILayout();
             setBodyHighlight();
@@ -229,7 +230,7 @@ class App {
                     );
                     window.siyuan.menus = new Menus(this);
                     fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
-                        window.siyuan.user = userResponse.data;
+                        window.siyuan.user = userResponse.data && "userId" in userResponse.data ? userResponse.data : null;
                         await init(this);
                         setTitle("", true);
                         initMessage();

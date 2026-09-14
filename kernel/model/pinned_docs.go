@@ -129,6 +129,9 @@ func GetPinnedDocs() (ret []PinnedDoc, err error) {
 		if ial == nil {
 			return nil, fmt.Errorf("cannot read pinned document [%s]", ref.ID)
 		}
+		if ref.ID != boxID && ial[DocHiddenAttr] == "true" {
+			continue
+		}
 		file := box.docFromFileInfo(info, ial)
 		if file == nil {
 			return nil, fmt.Errorf("cannot read pinned document [%s]", ref.ID)
@@ -138,17 +141,12 @@ func GetPinnedDocs() (ret []PinnedDoc, err error) {
 		if file.TitleEmpty {
 			doc.Name = Conf.Language(16)
 		}
-		childrenPath := strings.TrimSuffix(bt.Path, ".sy")
 		if ref.ID == boxID {
-			childrenPath = "/"
-		}
-		entries, readErr := os.ReadDir(filepath.Join(util.DataDir, boxID, childrenPath))
-		if readErr != nil && !os.IsNotExist(readErr) {
-			return nil, readErr
-		}
-		for _, entry := range entries {
-			if !entry.IsDir() && entry.Name() != ref.ID+".sy" && strings.HasSuffix(entry.Name(), ".sy") && ast.IsNodeIDPattern(strings.TrimSuffix(entry.Name(), ".sy")) {
-				doc.SubFileCount++
+			doc.SubFileCount = BoxDocSubFileCount(boxID)
+		} else {
+			doc.SubFileCount, err = visibleDocCount(boxID, strings.TrimSuffix(bt.Path, ".sy"), box.docIAL, nil)
+			if err != nil {
+				return nil, err
 			}
 		}
 		ret = append(ret, doc)
@@ -193,6 +191,13 @@ func UpdatePinnedDocs(ids []string, action, targetID string, after bool) error {
 		box := Conf.Box(bt.BoxID)
 		if box == nil || box.Stat(bt.Path) == nil {
 			return fmt.Errorf("document [%s] is unavailable", id)
+		}
+		ial := box.docIAL(bt.Path)
+		if ial == nil {
+			return fmt.Errorf("cannot read pinned document [%s]", id)
+		}
+		if id != bt.BoxID && ial[DocHiddenAttr] == "true" {
+			return fmt.Errorf("document [%s] cannot be pinned", id)
 		}
 		refs = append(refs, pinnedDocRef{ID: id, Notebook: bt.BoxID})
 	}

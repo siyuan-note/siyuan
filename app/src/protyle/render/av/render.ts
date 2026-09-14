@@ -1,3 +1,4 @@
+import {isAVRenderData} from "./renderData";
 import {fetchSyncPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {Constants} from "../../../constants";
@@ -130,7 +131,14 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
         defaultTemplate.primaryKeyTemplate || Object.keys(defaultTemplate.fieldValues || {}).length) ? defaultTemplate.id : "";
     const editingState = getAVHeaderEditingState(editable, includeEditingControls);
     return `<div class="av__header" data-default-template-id="${defaultTemplateID}" data-current-view-id="${escapeAttr(data.viewID)}" data-view-count="${data.views.length}" data-view-ids="${data.views.map((view) => view.id).join(",")}" data-view-pages="${escapeAttr(serializeAVViewPageSizes(data.views))}">
-        <div class="fn__flex av__views${showSearch ? " av__views--show" : ""}">
+        <div class="fn__flex av__views${isMobile() ? " av__views--mobile" : ""}${showSearch ? " av__views--show av__views--search" : ""}">
+            ${isMobile() ? `<button data-type="av-switcher" class="block__icon block__icon--show av__mobile-view" aria-label="${escapeAriaLabel(window.siyuan.languages.allViews)}">
+                <span class="fn__ellipsis">${escapeHtml(viewData?.name || data.name || "")}</span>
+                <svg><use xlink:href="#iconDown"></use></svg>
+            </button>
+            <button data-type="av-search-close" class="block__icon block__icon--show av__search-close" aria-label="${window.siyuan.languages.close}">
+                <svg><use xlink:href="#iconClose"></use></svg>
+            </button>` : ""}
             <div class="av__selection-toolbar">
                 <span class="av__selection-count"></span>
                 ${editingState.selectionHTML}
@@ -161,7 +169,7 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
             <button data-type="av-search-icon" aria-label="${window.siyuan.languages.search}" data-position="8south" class="ariaLabel block__icon">
                 <svg><use xlink:href="#iconSearch"></use></svg>
             </button>
-            <div style="position: relative" class="fn__flex">
+            <div style="position: relative" class="fn__flex av__search">
                 <div contenteditable="plaintext-only" style="${showSearch ? "width:128px" : "width:0;padding-left: 0;padding-right: 0;"}" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.searchPlaceholder}"></div>
             </div>
             <div class="fn__space"></div>
@@ -604,7 +612,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 colId: item.getAttribute("data-col-id"),
             });
         });
-        const searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
+        const searchInputElement = e.querySelector('[data-type="av-search"]');
         const pageSizes: { [key: string]: string } = {};
         const virtualData: { [key: string]: IAVVirtualData } = {};
         e.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
@@ -661,28 +669,34 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         const created = protyle.options.history?.created;
         const snapshot = protyle.options.history?.snapshot;
         const locateParams = getAVLocateParams(e, !created && !snapshot);
-        const historical = !!created || !!snapshot;
         let data: IAV;
         if (!avData) {
-            const response = await fetchSyncPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
+            const common = {
                 id: e.getAttribute("data-av-id"),
-                created,
-                snapshot,
+                blockID: e.getAttribute("data-node-id"),
+                viewID: locateParams?.viewID || "",
+            };
+            const paging = {
                 pageSize: avPageSize.unGroupPageSize,
                 groupPaging: avPageSize.groupPageSize,
-                viewID: locateParams?.viewID || "",
-                ...(historical ? {carrierViewID: e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || ""} : {}),
                 query: resetData.query.trim(),
-                blockID: e.getAttribute("data-node-id"),
+            };
+            const carrierViewID = e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "";
+            const response = await (created ? fetchSyncPost("/api/av/renderHistoryAttributeView", {
+                ...common, ...paging, created, carrierViewID,
+            }, undefined, false) : snapshot ? fetchSyncPost("/api/av/renderSnapshotAttributeView", {
+                ...common, snapshot, carrierViewID,
+            }, undefined, false) : fetchSyncPost("/api/av/renderAttributeView", {
+                ...common, ...paging,
                 initialLayout: e.getAttribute("data-av-type"),
                 createIfNotExist: !protyle.block.action?.includes(Constants.CB_GET_AV_NO_CREATE),
                 targetItemID: locateParams?.targetItemID || "",
                 targetGroupID: locateParams?.targetGroupID || "",
-            }, undefined, false);
+            }, undefined, false));
             if (!isCurrentAVRender(e, renderToken)) {
                 continue;
             }
-            if (response.code !== 0) {
+            if (response.code !== 0 || !isAVRenderData(response.data)) {
                 failAVRender(e, response);
                 continue;
             }
@@ -1065,8 +1079,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     // 只能 setTimeout，以前方案快速输入后最后一次修改会被忽略；必须为每一个 protyle 单独设置，否则有多个 protyle 时，其余无法被执行
     clearTimeout(refreshTimeouts[protyle.id]);
     refreshTimeouts[protyle.id] = window.setTimeout(() => {
-        // 修改表格名 avID 传入到 id 上了 https://github.com/siyuan-note/siyuan/issues/12724
-        const avID = operation.action === "setAttrViewName" ? operation.id : operation.avID;
+        const avID = operation.avID;
         const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] .custom-attr > [data-av-id="${avID}"]`) as HTMLElement;
         if (attrElement) {
             // 更新属性面板

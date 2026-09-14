@@ -1320,14 +1320,14 @@ func CheckoutRepo(id string) {
 	task.AppendTask(task.RepoCheckout, checkoutRepo, id)
 }
 
-func CheckoutRepoDirect(id string) {
-	checkoutRepo(id)
+func CheckoutRepoDirect(id string) error {
+	return checkoutRepo(id)
 }
 
-func checkoutRepo(id string) {
-	var err error
+func checkoutRepo(id string) (err error) {
 	if 1 > len(Conf.Repo.Key) {
-		util.PushErrMsg(Conf.Language(26), 7000)
+		err = errors.New(Conf.Language(26))
+		util.PushErrMsg(err.Error(), 7000)
 		return
 	}
 	FlushTxQueue()
@@ -1746,7 +1746,12 @@ func IndexRepo(memo string) (id string, err error) {
 }
 
 func normalizeSnapshotMemo(memo string) string {
-	memo = strings.TrimSpace(gulu.Str.RemoveInvisible(memo))
+	// 按行清理不可见字符，保留多行备注的换行。
+	lines := strings.Split(strings.ReplaceAll(memo, "\r\n", "\n"), "\n")
+	for i, line := range lines {
+		lines[i] = gulu.Str.RemoveInvisible(line)
+	}
+	memo = strings.TrimSpace(strings.Join(lines, "\n"))
 	if memo == "" {
 		return "Create manually"
 	}

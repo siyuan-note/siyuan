@@ -53,7 +53,7 @@ const closeMobileDatabaseRow = () => {
     }
 };
 
-const openMobileDatabaseRow = (protyle: IProtyle, data: IDatabaseRowOpenData, title: string) => {
+const openMobileDatabaseRow = (protyle: Pick<IProtyle, "app">, data: IDatabaseRowOpenData, title: string) => {
     closeMobileDatabaseRow();
     const context: { ghostProtyle?: Protyle } = {};
     let unregisterRefresh: () => void;
@@ -72,7 +72,6 @@ const openMobileDatabaseRow = (protyle: IProtyle, data: IDatabaseRowOpenData, ti
         },
     });
     const rowElement = dialog.element.querySelector<HTMLElement>(".protyle-db-row");
-    rowElement.dataset.protyleId = protyle.id;
     rowElement.querySelector(".protyle-db-row__title span").textContent = title;
     const render = (contextProtyle: IProtyle) => {
         const previousBodyElement = rowElement.querySelector<HTMLElement>(".protyle-db-row__body");
@@ -164,12 +163,13 @@ const getDatabaseRowPreviewTab = (blockID: string) => {
 };
 /// #endif
 
-export const openDatabaseRowByData = async (protyle: IProtyle, data: IDatabaseRowOpenData, options?: {
+export const openDatabaseRowByData = async (protyle: Pick<IProtyle, "app">, data: IDatabaseRowOpenData, options?: {
     position?: string,
     keepAVPanel?: boolean,
+    standalone?: boolean,
 }) => {
     const title = data.title || window.siyuan.languages.untitled;
-    const openStandalone = data.isDetached || !window.siyuan.config.editor.databaseAttrShow;
+    const openStandalone = options?.standalone || data.isDetached || !window.siyuan.config.editor.databaseAttrShow;
     /// #if MOBILE
     if (openStandalone) {
         openMobileDatabaseRow(protyle, data, title);

@@ -44,7 +44,11 @@ func IsReadOnlyRole(role Role) bool {
 	})
 }
 
+// GetGinContextRole 返回请求角色，无上下文或无角色时按最受限的匿名访问者处理。
 func GetGinContextRole(c *gin.Context) Role {
+	if nil == c {
+		return RoleVisitor
+	}
 	if role, exists := c.Get(RoleContextKey); exists {
 		return role.(Role)
 	}

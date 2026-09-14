@@ -233,7 +233,7 @@ export const getLocalFiles = async () => {
         }
     } else {
         const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
-        if (xmlString.data.length > 0) {
+        if (xmlString.code === 0 && Array.isArray(xmlString.data) && xmlString.data.length > 0) {
             localFiles = xmlString.data;
         }
     }
@@ -534,6 +534,10 @@ export const isIPhone = () => {
     return navigator.userAgent.indexOf("iPhone") > -1;
 };
 
+export const isAndroid = () => {
+    return /Android/i.test(navigator.userAgent);
+};
+
 export const isIOSDevice = () => {
     return isIOSPlatform(navigator);
 };
@@ -813,9 +817,10 @@ export const getLocalStorage = (cb: () => void) => {
             Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS, Constants.LOCAL_IMAGES,
             Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS, Constants.LOCAL_MOVE_PATH, Constants.LOCAL_RECENT_DOCS,
             Constants.LOCAL_CLOSED_TABS].forEach((key) => {
-            if (typeof response.data[key] === "string") {
+            const value = response.data[key];
+            if (typeof value === "string") {
                 try {
-                    const parseData = JSON.parse(response.data[key]);
+                    const parseData = JSON.parse(value);
                     if (typeof parseData === "number") {
                         // https://github.com/siyuan-note/siyuan/issues/8852 Object.assign 会导致 number to Number
                         window.siyuan.storage[key] = parseData;

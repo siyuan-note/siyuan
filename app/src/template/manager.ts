@@ -13,15 +13,16 @@ import {openBy} from "../editor/util";
 import {replaceFileName} from "../editor/rename";
 import {getHostCapabilities} from "../util/hostCapabilities";
 import {isBrowser, isMobile} from "../util/functions";
+import type {TemplateFileRequestInput} from "../types/api";
 
 export const loadTemplateDirectories = async (select: HTMLSelectElement) => {
     const response = await fetchSyncPost("/api/template/manage", {action: "list"});
-    if (response.code !== 0 || !select.isConnected) {
+    if (response.code !== 0 || !Array.isArray(response.data) || !select.isConnected) {
         return;
     }
     const value = select.value;
     select.replaceChildren(new Option("/", ""));
-    (response.data as TemplateEntry[]).filter(entry => entry.isDir).forEach(entry => {
+    response.data.filter(entry => entry.isDir).forEach(entry => {
         select.add(new Option(entry.path, entry.path));
     });
     select.value = Array.from(select.options).some(option => option.value === value) ? value : "";
@@ -147,7 +148,7 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
             update();
         }
     };
-    const api = async (data: Record<string, unknown>) => {
+    const api = async (data: TemplateFileRequestInput) => {
         const response = await fetchSyncPost("/api/template/manage", data);
         return response.code === 0 ? response : undefined;
     };
@@ -235,7 +236,7 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
         let absolutePath = "";
         if (entry) {
             const response = await api({action: "read", path: entry.path});
-            if (!response) {
+            if (!response?.data || Array.isArray(response.data) || !("content" in response.data)) {
                 return;
             }
             revision = response.data.revision;
@@ -263,7 +264,7 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
     };
     const reload = async (path = selected?.path, reveal = false) => {
         const response = await api({action: "list"});
-        if (!response) {
+        if (!response || !Array.isArray(response.data)) {
             return;
         }
         entries = response.data;
@@ -397,14 +398,14 @@ ${!isBrowser() && !isMobile() && getHostCapabilities().localFileSystem ? button(
             void run(async () => {
                 const content = useCRLF ? source.value.replace(/\n/g, "\r\n") : source.value;
                 const response = await api({action: "write", path: editing.path, content, revision: editingRevision});
-                if (response) {
+                if (response?.data && !Array.isArray(response.data)) {
                     saved = source.value;
                     editingRevision = response.data.revision;
                     if (selected?.path === editing.path) {
                         revision = editingRevision;
                     } else if (selected?.isDir && editing.path.startsWith(selected.path + "/")) {
                         const directory = await api({action: "read", path: selected.path});
-                        if (directory) {
+                        if (directory?.data && !Array.isArray(directory.data)) {
                             revision = directory.data.revision;
                         }
                     }

@@ -17,183 +17,135 @@
 package api
 
 import (
-	"net/http"
+	"encoding/json"
 	"path/filepath"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func renderSprig(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	template := arg["template"].(string)
-	content, err := model.RenderGoTemplate(template)
+var renderSprig = contractHandler(apicontract.RenderSprig, func(c *gin.Context, request apicontract.RenderSprigRequest) apicontract.Response[string] {
+	content, err := model.RenderGoTemplate(request.Template)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = util.EscapeHTML(err.Error())
-		return
+		return apicontract.Failure[string](-1, util.EscapeHTML(err.Error()))
 	}
-	ret.Data = content
-}
+	return apicontract.Success(content)
+})
 
-func docSaveAsTemplate(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	id := arg["id"].(string)
-	name := arg["name"].(string)
-	overwrite := arg["overwrite"].(bool)
-	databaseMode := model.TemplateDatabaseModeCopy
-	if value, exists := arg["databaseMode"]; exists {
-		if mode, ok := value.(string); ok {
-			databaseMode = model.TemplateDatabaseMode(mode)
-		} else {
-			databaseMode = model.TemplateDatabaseMode("invalid")
-		}
-	}
-	var directory string
-	if value, exists := arg["directory"]; exists {
-		var valid bool
-		directory, valid = value.(string)
-		if !valid {
-			ret.Code = -1
-			ret.Msg = "Invalid template directory"
-			return
-		}
-	}
-	code, err := model.DocSaveAsTemplateInDirectoryAndRemember(id, name, directory, overwrite, databaseMode)
+var docSaveAsTemplate = contractHandler(apicontract.DocSaveAsTemplate, func(c *gin.Context, request apicontract.SaveTemplateRequest) apicontract.Response[apicontract.Null] {
+	code, err := model.DocSaveAsTemplateInDirectoryAndRemember(request.ID, request.Name, request.Directory, request.Overwrite, model.TemplateDatabaseMode(request.DatabaseMode))
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = util.EscapeHTML(err.Error())
-		return
+		return apicontract.Failure[apicontract.Null](-1, util.EscapeHTML(err.Error()))
 	}
-	ret.Code = code
-}
+	if code != 0 {
+		return apicontract.Failure[apicontract.Null](code, "")
+	}
+	return apicontract.Success(apicontract.Null{})
+})
 
-func getDocSaveAsTemplateInfo(c *gin.Context) {
+var getDocSaveAsTemplateInfo = contractHandler(apicontract.GetDocSaveAsTemplateInfo, func(c *gin.Context, request apicontract.TemplateDocumentRequest) apicontract.Response[apicontract.TemplateDocumentInfo] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	id := arg["id"].(string)
+	id := request.ID
 	if util.InvalidIDPattern(id, ret) {
-		return
+		return contractFailure[apicontract.TemplateDocumentInfo](ret)
 	}
 	info, err := model.GetDocSaveAsTemplateInfo(id)
 	if nil != err {
-		ret.Code = -1
-		ret.Msg = util.EscapeHTML(err.Error())
-		return
+		return apicontract.Failure[apicontract.TemplateDocumentInfo](-1, util.EscapeHTML(err.Error()))
 	}
-	ret.Data = info
-}
+	return apicontract.Success(apicontract.TemplateDocumentInfo{Name: info.Name, Directory: info.Directory, HasDatabase: info.HasDatabase})
+})
 
-func renderTemplate(c *gin.Context) {
+var renderTemplate = contractHandler(apicontract.RenderTemplate, func(c *gin.Context, request apicontract.RenderTemplateRequest) apicontract.Response[apicontract.RenderTemplateData] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	p := arg["path"].(string)
-	id := arg["id"].(string)
+	p, id := request.Path, request.ID
 	if util.InvalidIDPattern(id, ret) {
-		return
+		return contractFailure[apicontract.RenderTemplateData](ret)
 	}
 
 	if !util.IsAbsPathInWorkspace(p) {
 		ret.Code = -1
 		ret.Msg = "Path [" + p + "] is not in workspace"
-		return
+		return contractFailure[apicontract.RenderTemplateData](ret)
 	}
 
 	// 模板路径必须限定在 <data>/templates/ 目录内，防止通过工作空间内任意路径读取敏感文件（如 conf/conf.json）
 	if !isPathInTemplatesDir(p) {
 		ret.Code = -1
 		ret.Msg = "Path [" + p + "] is not in templates directory"
-		return
+		return contractFailure[apicontract.RenderTemplateData](ret)
 	}
 
-	mode := model.TemplateRenderModeContent
-	if modeArg := arg["mode"]; nil != modeArg {
-		modeString, isString := modeArg.(string)
-		if !isString || (string(model.TemplateRenderModePreview) != modeString &&
-			string(model.TemplateRenderModeEditorInsert) != modeString) {
-			ret.Code = -1
-			ret.Msg = "Unsupported template render mode"
-			return
-		}
-		mode = model.TemplateRenderMode(modeString)
-	} else if previewArg := arg["preview"]; nil != previewArg && previewArg.(bool) {
-		mode = model.TemplateRenderModePreview
+	modeValue, modeErr := request.RenderMode()
+	if modeErr != nil {
+		return apicontract.Failure[apicontract.RenderTemplateData](-1, modeErr.Error())
 	}
+	mode := model.TemplateRenderMode(modeValue)
 
 	var content string
 	var docTreePlan *model.TemplateDocTreePlanSummary
 	var err error
-	if source, exists := arg["content"]; exists {
-		text, ok := source.(string)
-		if !ok || mode != model.TemplateRenderModePreview {
-			ret.Code = -1
-			ret.Msg = "Source content is only supported for template preview"
-			return
-		}
-		_, content, docTreePlan, err = model.PreviewTemplateSource(p, id, text)
+	source, sourceErr := request.PreviewSource(modeValue)
+	if sourceErr != nil {
+		return apicontract.Failure[apicontract.RenderTemplateData](-1, sourceErr.Error())
+	}
+	if source != nil {
+		_, content, docTreePlan, err = model.PreviewTemplateSource(p, id, *source)
 	} else {
 		_, content, docTreePlan, err = model.RenderTemplateWithMode(p, id, mode)
 	}
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = util.EscapeHTML(err.Error())
-		return
+		return contractFailure[apicontract.RenderTemplateData](ret)
 	}
 
-	data := map[string]any{
-		"path":    p,
-		"content": content,
+	data := apicontract.RenderTemplateData{Path: p, Content: content}
+	if docTreePlan != nil {
+		plan := &apicontract.TemplatePlan{ID: docTreePlan.ID, Count: docTreePlan.Count}
+		if docTreePlan.Nodes != nil {
+			plan.Nodes = make([]*apicontract.TemplatePlanNode, len(docTreePlan.Nodes))
+		}
+		for i, node := range docTreePlan.Nodes {
+			if node != nil {
+				plan.Nodes[i] = &apicontract.TemplatePlanNode{ID: node.ID, Title: node.Title, ParentID: node.ParentID, HPath: node.HPath, Depth: node.Depth}
+			}
+		}
+		data.DocTreePlan = plan
 	}
-	if nil != docTreePlan {
-		data["docTreePlan"] = docTreePlan
-	}
-	ret.Data = data
-}
+	return apicontract.Success(data)
+})
 
-func manageTemplateFiles(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-	var request model.TemplateFileRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		ret.Code = -1
-		ret.Msg = "Invalid template request"
-		return
-	}
-	data, err := model.ManageTemplateFiles(request)
+var manageTemplateFiles = contractHandler(apicontract.ManageTemplateFiles, func(c *gin.Context, request apicontract.TemplateFileRequest) apicontract.Response[apicontract.TemplateManagementData] {
+	data, err := model.ManageTemplateFiles(model.TemplateFileRequest{Action: request.Action, Path: request.Path, Target: request.Target, Content: request.Content, Revision: request.Revision})
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = util.EscapeHTML(err.Error())
-		return
+		return apicontract.Failure[apicontract.TemplateManagementData](-1, util.EscapeHTML(err.Error()))
 	}
-	ret.Data = data
+	encoded, err := json.Marshal(data)
+	if err != nil {
+		return apicontract.Failure[apicontract.TemplateManagementData](-1, err.Error())
+	}
+	var result apicontract.TemplateManagementData
+	switch request.Action {
+	case "list":
+		var entries []apicontract.TemplateFileEntry
+		err = json.Unmarshal(encoded, &entries)
+		result = apicontract.TemplateEntries(entries)
+	case "read":
+		var source apicontract.TemplateFileSource
+		err = json.Unmarshal(encoded, &source)
+		result = apicontract.TemplateSource(source)
+	case "write":
+		var revision apicontract.TemplateFileRevision
+		err = json.Unmarshal(encoded, &revision)
+		result = apicontract.TemplateRevision(revision)
+	}
+	if err != nil {
+		return apicontract.Failure[apicontract.TemplateManagementData](-1, err.Error())
+	}
 	if request.Action != "list" && request.Action != "read" {
 		changed := []string{filepath.Join(util.DataDir, "templates", filepath.FromSlash(request.Path))}
 		if request.Action == "move" {
@@ -201,7 +153,8 @@ func manageTemplateFiles(c *gin.Context) {
 		}
 		model.IncSyncIfNeeded(changed...)
 	}
-}
+	return apicontract.Success(result)
+})
 
 // isPathInTemplatesDir 校验绝对路径是否位于 <data>/templates/ 目录内，解析符号链接后再次校验，
 // 防止通过符号链接指向模板目录外的敏感文件

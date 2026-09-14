@@ -1,30 +1,44 @@
-# 模板管理
+# Template manager
 
-在编辑器的模板选择面板中点击模板条目的「模板管理」按钮，打开管理窗口并自动选中该模板；也可以从文档的「导出 - 模板」窗口进入。桌面端和浏览器端还可以从左上角主菜单直接打开模板管理，模板列表为空时也能使用。桌面、浏览器和移动端共用同一管理窗口；没有打开文档时仍可管理模板，选择预览上下文后才能预览。连接本地内核的桌面端在管理窗口提供「打开文件位置」，未选中项目时打开模板根目录。
+[中文](TEMPLATE-MANAGER.zh-CN.md)
 
-左侧以可折叠的文件夹树列出 `data/templates` 中的目录和 Markdown 文件，目录优先排列。搜索框匹配模板名称或完整路径，搜索结果自动展开父目录，清空搜索后恢复原来的展开状态。点击目录名称选中目录并展开或收起子项，右侧编辑内容和预览保持不变；选中目录后，新建模板或文件夹默认放入该目录，保存和预览仍作用于右侧正在编辑的模板。重命名只修改名称并保留父目录，跨目录移动使用目录选择器；已有目标不会被覆盖。新建、重命名和移动成功后清空搜索并展开目标的父目录。重命名或移动不会自动改写其他模板、笔记本配置或文档中引用的模板路径，需要相应调整。
+## Feature scope
 
-包含 `template.json` 的模板包目录不支持重命名或移动，以保留包身份和集市更新能力；包内模板仍可编辑。访问已有文件时保留原始文件名，不因单引号等合法字符而拒绝访问。
+The template manager browses, edits, and organizes templates under `data/templates`, and previews template content using a selected document as context.
 
-右侧使用纯文本框编辑源码。保存前会核对读取时的文件版本；如果同步或另一个窗口已经修改了文件，会拒绝覆盖，需要保留当前编辑内容并刷新后处理。切换文件、刷新或关闭窗口时，有未保存的修改会要求确认放弃。已有 Windows 换行的模板保存时继续使用 Windows 换行。
+## User interaction
 
-删除会直接移除选中的文件或整个目录及其内容，不再写入独立垃圾箱，此操作无法撤销。模板没有接入文件历史，不能依赖文件历史恢复。旧版本已经保留在 `data/templates/.trash/` 中的内容不会自动清理，该隐藏目录仍不出现在模板搜索和管理列表中。
+Open the manager from a template entry's Template manager button in the editor's template picker to select that template automatically, or from a document's Export - Template dialog. Desktop and browser clients also provide an entry in the top-left main menu, available even when the template list is empty. Desktop, browser, and mobile clients share the same manager. Templates can be managed without an open document; preview requires selecting a context. On desktop clients connected to a local kernel, Open file location opens the selected item's location, or the template root when nothing is selected.
 
-## 预览
+### File management
 
-点击「预览模板」执行当前文本框中的内容，无须先保存或插入文档。默认使用打开窗口时的文档或块作为上下文；「预览上下文」直接显示当前选择的名称、用途说明和文档选择控件，可以搜索并选择其他文档。此处搜索的是上下文文档，不是左侧模板列表。预览使用所选文档的标题、ID 等信息运行模板，不会修改该文档；标题、ID、路径和 SQL 查询等结果取决于所选上下文及当前数据。
+The left pane displays a collapsible tree of directories and Markdown files under `data/templates`, with directories first. Search matches template names or full paths and expands parent directories of matches. Clearing search restores the previous expansion state. Clicking a directory selects it and toggles its children without changing the editor or preview. New templates and folders default to the selected directory, while Save and Preview still apply to the template being edited. Rename changes only the name and retains the parent directory; moving across directories uses a directory picker. Existing targets are not overwritten. Successful creation, rename, or move clears search and expands the target parent. Rename and move do not rewrite template paths referenced by other templates, notebook configuration, or documents; those references require corresponding updates.
 
-预览使用现有只读渲染模式，不保存当前源码，也不提交文档树创建计划。预览区域使用编辑器的主题背景色，随明暗主题切换，不固定为白色。数据库预览仍使用表格展示，不能等同于实际插入后的全部交互效果。
+Template package directories containing `template.json` cannot be renamed or moved, preserving package identity and marketplace updates. Templates inside a package remain editable. Existing files retain their original names and are not rejected because of valid characters such as single quotes.
 
-使用 `createDocTree` 的模板会在预览区显示将创建的文档名称、层级和数量，即使模板没有正文，也能查看创建计划。
+### Editing and saving
 
-## 导出与文档属性
+The right pane edits source in a plain text field. Saving checks the file version recorded when reading. If sync or another window changed the file, the manager rejects the overwrite; retain current edits and refresh before resolving the conflict. Switching files, refreshing, or closing asks for confirmation before discarding unsaved changes. Templates with Windows line endings retain them when saved.
 
-导出窗口可以选择已有模板子目录。需要新目录时，可以先打开模板管理创建目录，关闭管理窗口后目录列表会刷新。成功导出后会在源文档中记住模板名称和存放目录，再次导出该文档或其中的标题子树时自动恢复；目录不存在时回退到模板根目录。重名但未确认覆盖、导出失败或取消导出时不会更新记忆。内部记忆属性不会写入导出的模板。
+Deletion directly removes the selected file or directory and all its contents without writing to a separate trash folder. This cannot be undone. Templates do not participate in file history, so file history cannot restore them. Existing content under `data/templates/.trash/` is not automatically cleaned up, and that hidden directory remains absent from template search and management lists.
 
-只有实际导出范围中包含数据库块时，导出窗口才显示数据库副本选项。文档其他标题范围、子文档或查询嵌入结果中的数据库不计入当前导出范围。
+### Preview
 
-文档顶层的独立 `template` 或 `siyuan-template` 代码块可以声明文档属性，例如：
+Preview template runs the current editor content without saving it or inserting it into a document. The default context is the document or block used to open the manager. Preview context shows the selected name, an explanation of its purpose, and a document picker that can search for another context document. This search selects the context document, not templates in the left pane. Rendering uses the selected document's title, ID, and other information without modifying that document. Title, ID, path, and SQL results depend on the selected context and current data.
+
+Preview uses existing read-only rendering. It neither saves source nor commits a document-tree creation plan. The preview background follows the editor theme in light and dark modes rather than using a fixed white background. Database previews use tables and do not reproduce every interaction available after insertion.
+
+Templates using `createDocTree` display the planned document names, hierarchy, and count in the preview, including templates with no body.
+
+## Data and storage
+
+### Export memory and document attributes
+
+The export dialog can select an existing template subdirectory. To create one, open the template manager; closing it refreshes the directory list. After a successful export, the source document remembers the template name and directory. Exporting that document or a heading subtree again restores them. A missing directory falls back to the template root. An unconfirmed name collision, failure, or cancellation does not update this memory. Internal memory attributes are omitted from exported templates.
+
+The database-copy option appears only when the actual export range contains a database block. Databases in other heading ranges, child documents, or query-embed results do not count as part of that range.
+
+A standalone top-level `template` or `siyuan-template` code block can declare document attributes:
 
 ````markdown
 ```template
@@ -32,18 +46,28 @@
 ```
 ````
 
-这种代码块的属性仍在原来的模板位置求值，完成渲染后再合并到文档根节点，因此可以引用跨代码块的条件分支、循环和模板定义中的局部变量。实际执行的显式声明优先，未执行的分支不会覆盖源文档属性；文档 ID 仍由导出流程维护，更新时间不导出。包含其他正文、条件语句或嵌套在容器中的属性代码块继续按普通模板内容导出，不进行属性提取。
+These attributes are evaluated at their original template position and merged into the document root after rendering. They can therefore use local variables from conditional branches, loops, and template definitions spanning code blocks. Explicit declarations that actually execute take precedence; unexecuted branches do not override source attributes. The export flow continues to maintain document IDs, and update timestamps are not exported. Attribute blocks containing other body content or conditional statements, or nested in containers, remain ordinary template content without attribute extraction.
 
-新导出的独立属性声明使用语言标记为 `siyuan-template-doc-attrs-v1` 的代码块保存原始求值位置；渲染器在解析模板结果时合并属性并移除该代码块。已有直接在文件末尾声明文档属性的模板继续受支持，无须转换文件。
+New exports preserve the original evaluation position of standalone attribute declarations in a code block marked `siyuan-template-doc-attrs-v1`. The renderer merges attributes and removes that block when parsing template results. Existing templates that declare document attributes directly at the end of the file remain supported without conversion.
 
-## 接口
+## Implementation and interfaces
 
-`POST /api/template/manage` 需要管理员权限，且只读模式不可用。`action` 支持 `list`、`read`、`write`、`mkdir`、`move` 和 `remove`。`path` 和 `target` 使用模板目录内的相对路径；写入、移动、删除已有项目需要提供读取时返回的 `revision`。新文件的 `revision` 为空，扩展名必须为 `.md`。
+`POST /api/template/manage` requires administrator privileges and is unavailable in read-only mode. Supported `action` values are `list`, `read`, `write`, `mkdir`, `move`, and `remove`. `path` and `target` are relative to the template directory. Writing, moving, or deleting an existing item requires the `revision` returned when it was read. A new file uses an empty `revision` and must have a `.md` extension.
 
-界面的重命名复用现有文件名处理，将名称中的半角斜杠 `/` 自动转换为全角斜杠 `／`，再校验名称并与原父目录组合后调用 `move`，不会将名称解释为路径；反斜杠、冒号及 `.`、`..` 等非法名称仍被拒绝。新建模板和文件夹的存放路径保留 `/` 作为目录分隔符，不进行上述名称转换。`remove` 在完成路径边界、符号链接和版本校验后直接删除项目，目录递归删除；成功时 `data` 为 `null`，不再返回 `recoveryPath`。删除不生成模板文件历史，也不会清理已有的隐藏恢复目录。
+UI renaming reuses existing filename handling: ASCII slash `/` becomes full-width slash `／`, then the name is validated and combined with its original parent before calling `move`. The name is not interpreted as a path. Backslashes, colons, `.`, `..`, and other invalid names are rejected. New-template and new-folder paths retain `/` as the directory separator and do not apply this name conversion. `remove` validates path boundaries, symbolic links, and revisions before deleting, recursively for directories. Success returns `data: null` without a `recoveryPath`. Deletion creates no template file history and does not clean up existing hidden recovery directories.
 
-`POST /api/template/render` 在 `mode: "preview"` 下支持可选的 `content`，用于预览未保存的源码；`path` 仍指向实际模板文件，用于解析同包子模板。其他渲染模式不接受 `content`。
+`POST /api/template/render` accepts optional `content` in `mode: "preview"` to preview unsaved source. `path` still identifies the actual template file for resolving subtemplates in the same package. Other rendering modes reject `content`.
 
-`POST /api/template/docSaveAsTemplate` 支持可选的 `directory` 相对目录，省略时继续保存到模板根目录。
+`POST /api/template/docSaveAsTemplate` accepts an optional relative `directory`; omission retains the template-root default.
 
-`POST /api/template/getDocSaveAsTemplateInfo` 接收文档或块 `id`，返回该文档记忆的模板名称、相对目录，以及实际导出范围中是否包含数据库。应用界面的模板导出成功后，`docSaveAsTemplate` 会更新所属文档的名称和目录记忆。
+`POST /api/template/getDocSaveAsTemplateInfo` takes a document or block `id` and returns the document's remembered template name and relative directory, plus whether the actual export range contains a database. A successful template export from the UI updates the owning document's name and directory memory through `docSaveAsTemplate`.
+
+## Compatibility and recovery
+
+Existing templates retain their original filenames, Windows line endings, and support for document attributes declared directly at the end of the file. New standalone attribute exports use `siyuan-template-doc-attrs-v1` to preserve evaluation position. Moving and renaming do not migrate external template references; callers must update those paths.
+
+File-version conflicts preserve current editor content and reject overwrites. Deletion creates no file history and cannot be undone through the manager. Existing `data/templates/.trash/` content remains and is not automatically cleaned up.
+
+## Verification
+
+Verify file-tree ordering, expansion state after search, target directories for creation and moves, valid filename access, package-directory protection, version conflicts, and unsaved-change confirmation. Preview checks cover unsaved source, context changes, read-only rendering, document-tree plans, and theme changes. Export checks cover directory fallback, memory updates only after success, database-range detection, attribute evaluation position, and old-template compatibility. Deletion checks cover path boundaries, symbolic links, revisions, and preservation of existing hidden recovery directories.

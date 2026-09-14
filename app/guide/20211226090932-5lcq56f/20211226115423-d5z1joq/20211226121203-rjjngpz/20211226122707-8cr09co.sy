@@ -6,7 +6,7 @@
 		"id": "20211226122707-8cr09co",
 		"title": "資料歷史",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260914102430"
 	},
 	"Children": [
 		{
@@ -1078,7 +1078,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220615120134-cdqs2gt",
-				"updated": "20260803163402"
+				"updated": "20260914102430"
 			},
 			"Children": [
 				{
@@ -1474,7 +1474,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120134-kbof9pl",
-				"updated": "20220615120134"
+				"updated": "20260914101605"
 			},
 			"Children": [
 				{
@@ -1488,12 +1488,305 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220615120134-9c01krz",
-				"updated": "20220615120134"
+				"updated": "20260914101605"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "建立完資料快照後可以在左側看到快照時間列表，點擊不同快照以後可以瀏覽其備註。"
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資料歷史"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資料快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中，寬視窗並排顯示本地和雲端清單，兩欄分別分頁；窄視窗和行動端透過 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "本地快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "雲端快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 切換顯示。頂部的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資料快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "標記快照"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 用於切換快照類別。清單顯示快照的建立時間、備註和標記，方便對照。"
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-nsequjs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914101605-nsequjs",
+				"updated": "20260914101605"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "本地快照支援依檔名搜尋，搜尋時會為檔案清單和預覽保留空間。未進入批次管理時，仍可選取兩個本地快照進行比較，並使用各項目的標記、上傳、下載和回復等操作。"
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-jp3prni",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260914101605-jp3prni",
+				"updated": "20260914102430"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "批次管理標記快照"
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-mlq0e5q",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20260914101605-mlq0e5q",
+				"updated": "20260914101605"
+			},
+			"Children": [
+				{
+					"ID": "20260914101605-jgxfy03",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20260914101605-jgxfy03",
+						"updated": "20260914101605"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-tzdifbu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-tzdifbu",
+								"updated": "20260914101605"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "切換到 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "標記快照"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，點擊 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "批次管理"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 顯示覈取方塊"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914101605-9xozcmm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20260914101605-9xozcmm",
+						"updated": "20260914101605"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-6o35kdg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-6o35kdg",
+								"updated": "20260914101605"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "勾選需要刪除的本地和雲端標記；各欄的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "全選"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 只選取該欄目前清單中的標記，底部顯示兩端分別選取的數量"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914101605-pwxyajk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20260914101605-pwxyajk",
+						"updated": "20260914101605"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-u2xkplj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-u2xkplj",
+								"updated": "20260914101605"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "點擊 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "刪除所選標記"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，核對本地和雲端的標記名稱及數量後確認；只刪除明確勾選的標記，不會自動刪除另一端的同名標記"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914101605-4tqcsko",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20260914101605-4tqcsko",
+						"updated": "20260914101605"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-dsqnv0d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-dsqnv0d",
+								"updated": "20260914101605"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "操作後查看結果，失敗或未能確認的項目仍保留選取，可再次點擊 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "刪除所選標記"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 重試；"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "取消選取"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 清空選取，"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "完成管理"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 退出批次管理"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-sibwgix",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914101605-sibwgix",
+				"updated": "20260914102430"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "刪除標記不會立即刪除快照資料，也不會自動清理資料倉庫。如需釋放空間，可另行清理本地資料倉庫；雲端手動清理僅適用於 S3、WebDAV 和本地檔案系統同步儲存。"
 				}
 			]
 		},
@@ -1532,7 +1825,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120134-5vxnykd",
-				"updated": "20260803163402"
+				"updated": "20260914102430"
 			},
 			"Children": [
 				{
@@ -1547,7 +1840,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230422102151-dz30xx1",
-				"updated": "20260803163402"
+				"updated": "20260914102430"
 			},
 			"Children": [
 				{
@@ -1559,7 +1852,7 @@
 					},
 					"Properties": {
 						"id": "20230422102151-cvrozwk",
-						"updated": "20260803163402"
+						"updated": "20260914101605"
 					},
 					"Children": [
 						{
@@ -1567,30 +1860,30 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230422102151-21jkic1",
-								"updated": "20260803163402"
+								"updated": "20260914101605"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​ "
+									"Data": "在 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "設定"
+									"TextMarkTextContent": "資料歷史"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "帳號與同步"
+									"TextMarkTextContent": "資料快照"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " 的本地欄點擊 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1599,7 +1892,34 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 將刪除所有未引用的快照和相關資料對象。“引用的快照”指的是 repo/refs/ 下指向的快照："
+									"Data": "，或從 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "帳號與同步"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "資料倉庫清理"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 執行本地清理，確認後會刪除所有未引用的快照和相關資料物件。「引用的快照」指的是 repo/refs/ 下指向的快照："
 								}
 							]
 						},
@@ -1667,6 +1987,43 @@
 											]
 										}
 									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914101605-bh2qord",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260914101605-bh2qord",
+						"updated": "20260914102430"
+					},
+					"Children": [
+						{
+							"ID": "20260914101605-7pwe4mh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914101605-7pwe4mh",
+								"updated": "20260914102430"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用 S3、WebDAV 或本地檔案系統作為同步儲存時，雲端欄的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "清理雲端儲存"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 僅清理雲端未引用的快照和相關資料物件；執行前請確保其他裝置已經暫停同步，並保持網路穩定；思源官方雲端不支援此手動清理操作，因此不顯示該入口"
 								}
 							]
 						}

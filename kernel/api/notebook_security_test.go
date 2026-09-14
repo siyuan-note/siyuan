@@ -160,6 +160,7 @@ func TestGetNotebookInfoHidesInvisibleNotebookFromReader(t *testing.T) {
 			)
 			request.Header.Set("Content-Type", "application/json")
 			engine.ServeHTTP(recorder, request)
+			requireAPIContract(t, http.MethodPost, "/api/notebook/getNotebookInfo", recorder)
 
 			response := &struct {
 				Code int    `json:"code"`
@@ -296,6 +297,7 @@ func TestGetNotebookConfHidesEncryptedNotebookFromReader(t *testing.T) {
 					Conf *conf.BoxConf `json:"conf"`
 				} `json:"data"`
 			}{}
+			requireAPIContract(t, http.MethodPost, "/api/notebook/getNotebookConf", recorder)
 			if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
 				t.Fatalf("unmarshal response failed: %v", err)
 			}
@@ -370,6 +372,7 @@ func TestGetEncryptedNotebookStatusAuthorization(t *testing.T) {
 				t.Fatalf("%s request returned status %d: %s", test.name, recorder.Code, recorder.Body.String())
 			}
 			if test.role == model.RoleAdministrator {
+				requireAPIContract(t, http.MethodPost, "/api/notebook/getEncryptedNotebookStatus", recorder)
 				response := &struct {
 					Code int `json:"code"`
 				}{}

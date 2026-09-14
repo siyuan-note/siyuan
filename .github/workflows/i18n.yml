@@ -1,0 +1,22 @@
+name: Language validation
+
+on:
+  pull_request:
+  push:
+    branches: [dev, master]
+
+permissions:
+  contents: read
+
+jobs:
+  languages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - name: Test language validation
+        run: python -m unittest discover -s scripts -p "test_check_lang_keys.py"
+      - name: Check language keys and kernel placeholders
+        run: python scripts/check-lang-keys.py

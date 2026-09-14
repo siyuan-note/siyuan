@@ -79,15 +79,10 @@ export const mountEmbeddingStatsBlock = (root: HTMLElement) => {
 
     const render = () => {
         fetchPost("/api/ai/embeddingStat", {}, (response) => {
-            const stat = response.data as {
-                total: number,
-                indexed: number,
-                pending: number,
-                failed: number,
-                ignoredByLen: number,
-                ignoredByConfig: number,
-                enabled: boolean,
-            };
+            if (response.code !== 0) {
+                return;
+            }
+            const stat = response.data;
             if (!stat) {
                 return;
             }
@@ -227,7 +222,10 @@ export const mountEmbeddingTestBtn = (root: HTMLElement) => {
         };
         fetchPost("/api/ai/testEmbeddingModel", {}, (response) => {
             restoreBtn();
-            const data = response.data || {};
+            if (response.code !== 0) {
+                return;
+            }
+            const data = response.data;
             if (data.matched) {
                 const dims = data.dimensions;
                 showMessage(
@@ -274,7 +272,10 @@ export const mountRerankTestBtn = (root: HTMLElement) => {
         };
         fetchPost("/api/ai/testRerankModel", {}, (response) => {
             restoreBtn();
-            const data = response.data || {};
+            if (response.code !== 0) {
+                return;
+            }
+            const data = response.data;
             if (data.matched) {
                 showMessage(window.siyuan.languages.testConnectionSuccess, undefined, "info");
                 return;
@@ -397,15 +398,10 @@ export const mountMcpServersBlock = (root: HTMLElement) => {
     // 轮询 MCP 连接状态，刷新每个 server 名称旁的状态圆点颜色、tooltip，以及标题右侧的汇总。
     const renderMcpStatus = () => {
         fetchPost("/api/ai/mcpStatus", {}, (response) => {
-            const items = response.data as Array<{
-                id: string;
-                name: string;
-                status: string;
-                tools: number;
-                error?: string;
-                authorizationURL?: string;
-                authorized: boolean;
-            }>;
+            if (response.code !== 0) {
+                return;
+            }
+            const items = response.data;
             if (!items) {
                 return;
             }
@@ -632,7 +628,10 @@ interface MCPEnvironmentVariablesData {
 
 const openMcpServerDialog = (root: HTMLElement, serverName: string | null) => {
     fetchPost("/api/ai/mcpEnvironmentVariables", {}, (response) => {
-        const data = response.data as MCPEnvironmentVariablesData;
+        if (response.code !== 0) {
+            return;
+        }
+        const data = response.data;
         openMcpServerDialogWithEnvironment(root, serverName, {
             names: Array.isArray(data?.names) ? data.names : [],
             defaults: Array.isArray(data?.defaults) ? data.defaults : [],

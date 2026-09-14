@@ -79,6 +79,13 @@ it("keeps asynchronous error responses and the process option", async () => {
     assert.equal(processed, 1);
 });
 
+it("preserves notification-only RPC responses as empty callback text", async () => {
+    const {fetchPost} = loadFetchPost(async () => new Response(null, {status: 204}));
+    let received: unknown;
+    await fetchPost("/api/plugin/rpc", {jsonrpc: "2.0", method: "notify"}, (response: unknown) => received = response);
+    assert.equal(received, "");
+});
+
 it("preserves raw file text and routes HTTP 202 file errors to the failure callback", async () => {
     const text = "file content";
     const raw = loadFetchPost(async () => new Response(text, {headers: {"Content-Type": "text/plain"}}));
@@ -96,7 +103,7 @@ it("preserves raw file text and routes HTTP 202 file errors to the failure callb
     assert.deepEqual(received, failure);
 });
 
-it("preserves FormData request bodies for unmigrated upload endpoints", async () => {
+it("preserves FormData request bodies for upload endpoints", async () => {
     const body = new FormData();
     body.append("path", "file.txt");
     const {fetchPost} = loadFetchPost(async (_url, options) => {

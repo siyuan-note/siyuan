@@ -71,6 +71,8 @@ import {
 } from "../../protyle/toolbar/fontFamilyMenu";
 import {notifyMobileKeyboardChange} from "./mobileKeyboardChange";
 import {getEditorFocusRange, restoreEditorFocusRange} from "../../protyle/util/editorFocus";
+import {captureMenuKeyboard} from "./menuKeyboard";
+import {isMobile} from "../../util/functions";
 import {createFontSizePicker} from "../../protyle/toolbar/fontControls";
 import {applyMobileToolbarEntries} from "./toolbarEntries";
 import {getEntryOrder, isEntryVisible} from "../../config/entryVisibility/runtime";
@@ -869,6 +871,32 @@ const restoreKeyboardToolbarRange = (protyle: IProtyle | undefined, range?: Rang
     }
 };
 
+export const bindMobileMenuKeyboard = (element: HTMLElement, selector: string, getProtyle: () => IProtyle) => {
+    let restoreKeyboard: (() => void) | undefined;
+    if (isMobile()) {
+        // 在按钮默认行为改变焦点之前保存状态，异步菜单请求使用本次操作独立的恢复回调。
+        element.addEventListener("pointerdown", event => {
+            restoreKeyboard = undefined;
+            if (!(event.target as Element).closest(selector)) {
+                return;
+            }
+            const protyle = getProtyle();
+            const toolbarElement = document.getElementById("keyboardToolbar");
+            restoreKeyboard = captureMenuKeyboard({
+                protyle,
+                keyboardOpen: Boolean(toolbarElement && !toolbarElement.classList.contains("fn__none") && !showUtil),
+                isCurrent: () => getCurrentEditor()?.protyle === protyle,
+                restore: range => restoreKeyboardToolbarRange(protyle, range),
+            });
+        }, true);
+    }
+    return () => {
+        const restore = restoreKeyboard;
+        restoreKeyboard = undefined;
+        return restore;
+    };
+};
+
 const renderKeyboardToolbar = () => {
     if (renderKeyboardToolbarFrame !== undefined) {
         return;
@@ -1224,6 +1252,11 @@ export const activeBlur = (force = false) => {
 
 export const initKeyboardToolbar = () => {
     let composing = false;
+    window.addEventListener("siyuan-mobile-keyboard-hiding", () => {
+        // 键盘退场前先隐藏工具栏，焦点和选区由原生端在动画结束后清理。
+        preventKeyboardToolbarRender();
+        hideKeyboardToolbar();
+    });
     document.addEventListener("focusin", () => {
         if (["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName) &&
             !document.getElementById("keyboardToolbar").contains(document.activeElement)) {
@@ -1412,6 +1445,8 @@ export const initKeyboardToolbar = () => {
     let startY = 0;
     let startX = 0;
     let moved = false;
+    const takeMenuKeyboard = bindMobileMenuKeyboard(toolbarElement, 'button[data-type="block"]',
+        () => getCurrentEditor()?.protyle);
     toolbarElement.addEventListener("touchstart", e => {
         startY = e.touches[0].clientY;
         startX = e.touches[0].clientX;
@@ -1431,6 +1466,7 @@ export const initKeyboardToolbar = () => {
         }
     });
     toolbarElement.addEventListener(isInAndroid() || isInHarmony() ? "touchend" : "click", async (event) => {
+        const restoreMenuKeyboard = takeMenuKeyboard();
         if (moved) {
             return;
         }
@@ -1544,7 +1580,10 @@ export const initKeyboardToolbar = () => {
                 hideKeyboardToolbarUtil(true);
                 restoreKeyboardToolbarRange(protyle, range);
             } else {
-                activeBlur();
+                // 主动收起前先结束编辑焦点，避免 WebView 在触摸结束后重新唤起输入法。
+                (document.activeElement as HTMLElement)?.blur();
+                // 用户主动收起键盘时跳过弹出保护锁。
+                activeBlur(true);
             }
             return;
         }
@@ -1713,7 +1752,7 @@ export const initKeyboardToolbar = () => {
             keyboardPanelClosing = false;
             hideKeyboardToolbarUtil();
             protyle.gutter.renderMenu(protyle, nodeElement);
-            window.siyuan.menus.menu.fullscreen();
+            window.siyuan.menus.menu.fullscreen("all", restoreMenuKeyboard);
             return;
         } else if (type === "outdent") {
             if (nodeElement.classList.contains("code-block")) {

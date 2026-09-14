@@ -30,7 +30,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconTable"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            ${window.siyuan.languages.table}
+            ${window.siyuan.languages.tableBlock}
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="table" type="checkbox"${config.types.table ? " checked" : ""}>
@@ -79,7 +79,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconHTML5"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            HTML
+            ${window.siyuan.languages.htmlBlock}
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="htmlBlock" type="checkbox"${config.types.htmlBlock ? " checked" : ""}>
@@ -88,7 +88,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconDatabase"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            ${window.siyuan.languages.database}
+            ${window.siyuan.languages.databaseBlock}
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="databaseBlock" type="checkbox"${config.types.databaseBlock ? " checked" : ""}>
@@ -106,7 +106,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconVideo"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            ${window.siyuan.languages.video}
+            ${window.siyuan.languages.videoBlock}
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="videoBlock" type="checkbox"${config.types.videoBlock ? " checked" : ""}>
@@ -115,7 +115,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconRecord"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            ${window.siyuan.languages.audio}
+            ${window.siyuan.languages.audioBlock}
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="audioBlock" type="checkbox"${config.types.audioBlock ? " checked" : ""}>
@@ -124,7 +124,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconGlobe"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            IFrame
+            ${window.siyuan.languages.iframeBlock}
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="iframeBlock" type="checkbox"${config.types.iframeBlock ? " checked" : ""}>
@@ -133,7 +133,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconBoth"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            ${window.siyuan.languages.widget}
+            ${window.siyuan.languages.widgetBlock}
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="widgetBlock" type="checkbox"${config.types.widgetBlock ? " checked" : ""}>
@@ -182,7 +182,9 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
     <div class="fn__none" style="padding-left: 20px">
         ${(["o", "u", "t"] as const).map((subtype) => `
         <label class="fn__flex b3-label">
-            <div class="fn__flex-1 fn__flex-center">${window.siyuan.languages[{o: "ordered-list", u: "unorderedList", t: "check"}[subtype]]}</div>
+            <div class="fn__flex-1 fn__flex-center">${window.siyuan.languages[(group === "listItem" ?
+                {o: "orderedListItemBlock", u: "unorderedListItemBlock", t: "taskListItemBlock"} :
+                {o: "ordered-list", u: "unorderedList", t: "check"})[subtype]]}</div>
             <span class="fn__space"></span>
             <input class="b3-switch fn__flex-center" data-group="${group}" data-subtype="${subtype}" type="checkbox"${config.subTypes?.[group]?.[subtype] ? " checked" : ""}>
         </label>`).join("")}<div></div>
@@ -191,7 +193,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconFile"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            ${window.siyuan.languages.doc}
+            ${window.siyuan.languages.documentBlock}
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="document" type="checkbox"${config.types.document ? " checked" : ""}>
@@ -698,7 +700,19 @@ const configIsSame = (config: Config.IUILayoutTabSearchConfig, config2: Config.I
 export const initCriteriaMenu = (element: HTMLElement, data: Config.IUILayoutTabSearchConfig[], config: Config.IUILayoutTabSearchConfig) => {
     fetchPost("/api/storage/getCriteria", {}, (response) => {
         let html = "";
-        response.data.forEach((item: Config.IUILayoutTabSearchConfig) => {
+        response.data?.forEach((criterion) => {
+            if (!criterion) {
+                return;
+            }
+            const defaults = getDefaultSubType();
+            const item: Config.IUILayoutTabSearchConfig = {
+                ...criterion,
+                subTypes: {
+                    heading: {...defaults.heading, ...criterion.subTypes?.heading},
+                    list: {...defaults.list, ...criterion.subTypes?.list},
+                    listItem: {...defaults.listItem, ...criterion.subTypes?.listItem},
+                },
+            };
             data.push(item);
             let isSame = false;
             if (configIsSame(item, config)) {

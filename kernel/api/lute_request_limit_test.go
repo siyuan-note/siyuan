@@ -57,6 +57,7 @@ func TestHTML2BlockDOMPreflightOmitsConvertedDOM(t *testing.T) {
 	context.Request.Header.Set("Content-Type", "application/json")
 
 	html2BlockDOM(context)
+	requireAPIContract(t, "POST", "/api/lute/html2BlockDOM", recorder)
 
 	response := struct {
 		Code int            `json:"code"`

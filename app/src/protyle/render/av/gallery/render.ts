@@ -1,3 +1,4 @@
+import {isAVRenderData} from "../renderData";
 import {hasClosestBlock, hasClosestByClassName} from "../../../util/hasClosest";
 import {Constants} from "../../../../constants";
 import {fetchSyncPost} from "../../../../util/fetch";
@@ -269,25 +270,31 @@ export const renderGallery = async (options: {
     if (!data) {
         const avPageSize = getPageSize(options.blockElement);
         const locateParams = getAVLocateParams(options.blockElement, !created && !snapshot);
-        const historical = !!created || !!snapshot;
-        const response = await fetchSyncPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
+        const common = {
             id: options.blockElement.getAttribute("data-av-id"),
-            created,
-            snapshot,
+            blockID: options.blockElement.getAttribute("data-node-id"),
+            viewID: locateParams?.viewID || "",
+        };
+        const paging = {
             pageSize: avPageSize.unGroupPageSize,
             groupPaging: avPageSize.groupPageSize,
-            viewID: locateParams?.viewID || "",
-            ...(historical ? {carrierViewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || ""} : {}),
             query: resetData.query.trim(),
-            blockID: options.blockElement.getAttribute("data-node-id"),
+        };
+        const carrierViewID = options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "";
+        const response = await (created ? fetchSyncPost("/api/av/renderHistoryAttributeView", {
+            ...common, ...paging, created, carrierViewID,
+        }, undefined, false) : snapshot ? fetchSyncPost("/api/av/renderSnapshotAttributeView", {
+            ...common, snapshot, carrierViewID,
+        }, undefined, false) : fetchSyncPost("/api/av/renderAttributeView", {
+            ...common, ...paging,
             initialLayout: options.blockElement.getAttribute("data-av-type"),
             targetItemID: locateParams?.targetItemID || "",
             targetGroupID: locateParams?.targetGroupID || "",
-        }, undefined, false);
+        }, undefined, false));
         if (!isCurrentAVRender(options.blockElement, renderToken)) {
             return;
         }
-        if (response.code !== 0) {
+        if (response.code !== 0 || !isAVRenderData(response.data)) {
             failAVRender(options.blockElement, response);
             return;
         }

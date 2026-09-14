@@ -1,5 +1,7 @@
 import {addScript, addScriptSync} from "../protyle/util/addScript";
 import {Constants} from "../constants";
+import {systemConfig} from "../config/systemConfig";
+import {openStandaloneDatabaseItemByURI} from "../protyle/render/av/openStandaloneDatabaseItem";
 import {onMessage} from "./util/onMessage";
 import {genUUID} from "../util/genID";
 import {
@@ -184,7 +186,7 @@ class App {
         fetchPost("/api/system/getConf", {}, async (confResponse) => {
             await addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
-            window.siyuan.config = confResponse.data.conf;
+            window.siyuan.config = systemConfig(confResponse.data.conf);
             window.siyuan.isPublish = confResponse.data.isPublish;
             document.body.classList.toggle("body--android", Boolean(isInAndroid()));
             correctHotkey(siyuanApp);
@@ -217,7 +219,7 @@ class App {
                         document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-visual, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
                     }
                     fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
-                        window.siyuan.user = userResponse.data;
+                        window.siyuan.user = userResponse.data && "userId" in userResponse.data ? userResponse.data : null;
                         await ensureOnboarding();
                         fetchPost("/api/system/getEmojiConf", {}, async emojiResponse => {
                             window.siyuan.emojis = emojiResponse.data as IEmoji[];
@@ -310,6 +312,9 @@ window.hideKeyboardToolbar = hideKeyboardToolbarByApp;
 window.openFileByURL = (openURL) => {
     const blockInfo = parseSiYuanUriInfo(openURL);
     if (blockInfo != null) {
+        if (openStandaloneDatabaseItemByURI(siyuanApp, blockInfo)) {
+            return true;
+        }
         if (blockInfo.avItemID) {
             queueAVLocateRequest(blockInfo.id, {
                 itemID: blockInfo.avItemID,

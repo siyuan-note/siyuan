@@ -6,6 +6,7 @@ interface IMobileFilterClassTarget {
 }
 
 interface IMobileFilterInput extends IMobileFilterClassTarget {
+    focus(): void;
     select(): void;
 }
 
@@ -19,6 +20,7 @@ export const showMobileFilterInput = (
     // Android WebView 在按压元素因输入框显示而移位时会残留背景，当前点击结束后再恢复按压样式
     triggerElement.classList.add(MOBILE_FILTER_TRIGGER_DEACTIVATE_CLASS);
     inputElement.classList.remove("fn__none");
+    inputElement.focus();
     inputElement.select();
     scheduleFrame(() => triggerElement.classList.remove(MOBILE_FILTER_TRIGGER_DEACTIVATE_CLASS));
 };

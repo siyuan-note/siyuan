@@ -8,15 +8,18 @@
 
 package api
 
-import "testing"
+import (
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
+	"testing"
+)
 
 func TestResolveAIProviderDraft(t *testing.T) {
-	provider, err := resolveAIProvider(map[string]any{
-		"providerConfig": map[string]any{
-			"baseURL":        " http://127.0.0.1:8080/v1 ",
-			"apiKey":         " key ",
-			"headers":        map[string]string{"X-Api-Key": "header-key"},
-			"requestTimeout": 700,
+	provider, err := resolveAIProvider(apicontract.AIProviderRequest{
+		ProviderConfig: &apicontract.SettingProvider{
+			BaseURL:        " http://127.0.0.1:8080/v1 ",
+			APIKey:         " key ",
+			Headers:        map[string]string{"X-Api-Key": "header-key"},
+			RequestTimeout: 700,
 		},
 	})
 	if err != nil {
@@ -40,7 +43,7 @@ func TestResolveAIProviderDraft(t *testing.T) {
 }
 
 func TestResolveAIProviderDraftRequiresBaseURL(t *testing.T) {
-	if _, err := resolveAIProvider(map[string]any{"providerConfig": map[string]any{}}); err == nil {
+	if _, err := resolveAIProvider(apicontract.AIProviderRequest{ProviderConfig: &apicontract.SettingProvider{}}); err == nil {
 		t.Fatal("empty draft provider should be rejected")
 	}
 }

@@ -6,7 +6,7 @@
 		"id": "20200924100717-yzwzn64",
 		"title": "Kernel parameter",
 		"type": "doc",
-		"updated": "20260718113226"
+		"updated": "20260914011526"
 	},
 	"Children": [
 		{
@@ -212,7 +212,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220517144139-qeoe1f3",
-				"updated": "20260302173748"
+				"updated": "20260914011526"
 			},
 			"Children": [
 				{
@@ -227,7 +227,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220517144139-7q5hnts",
-				"updated": "20260718113226"
+				"updated": "20260914011526"
 			},
 			"Children": [
 				{
@@ -391,6 +391,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
 					"TextMarkTextContent": "sk"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "sr"
 				},
 				{
 					"Type": "NodeText",

@@ -441,10 +441,10 @@ const bindAccountAuthForm = (
         login2Btn.disabled = false;
     };
 
-    const completeLogin = (response: IWebSocketData) => {
+    const completeLogin = (loginToken?: string) => {
         if (mode === "login") {
             return fetchPost("/api/setting/getCloudUser", {
-                token: response.data.token,
+                token: loginToken,
             }, (userResponse) => {
                 const action = resolveCloudUserRefresh(userResponse.code, userResponse.data, userNameInput.value.trim());
                 if (action.apply) {
@@ -477,7 +477,7 @@ const bindAccountAuthForm = (
         }, (loginResponse) => {
             if (loginResponse.code === 1) {
                 showMessage(loginResponse.msg);
-                needCaptcha = loginResponse.data.needCaptcha;
+                needCaptcha = loginResponse.data && "needCaptcha" in loginResponse.data ? loginResponse.data.needCaptcha || "" : "";
                 if (needCaptcha) {
                     // 验证码
                     captchaInput.value = "";
@@ -487,6 +487,9 @@ const bindAccountAuthForm = (
                 return;
             }
             if (loginResponse.code === 10) {
+                if (!loginResponse.data || !("token" in loginResponse.data) || !loginResponse.data.token) {
+                    return;
+                }
                 // 两步验证
                 authFormRoot.querySelector("#form1")?.classList.add("fn__none");
                 authFormRoot.querySelector("#form2")?.classList.remove("fn__none");
@@ -495,7 +498,7 @@ const bindAccountAuthForm = (
                 return;
             }
             completing = true;
-            completeLogin(loginResponse).finally(finishSubmitting);
+            completeLogin(loginResponse.data && "token" in loginResponse.data ? loginResponse.data.token : undefined).finally(finishSubmitting);
         }).finally(() => {
             if (!completing) {
                 finishSubmitting();
@@ -519,7 +522,9 @@ const bindAccountAuthForm = (
                 return;
             }
             completing = true;
-            completeLogin(faResponse).finally(finishSubmitting);
+            const loginToken = faResponse.data && "token" in faResponse.data && typeof faResponse.data.token === "string" ?
+                faResponse.data.token : undefined;
+            completeLogin(loginToken).finally(finishSubmitting);
         }).finally(() => {
             if (!completing) {
                 finishSubmitting();

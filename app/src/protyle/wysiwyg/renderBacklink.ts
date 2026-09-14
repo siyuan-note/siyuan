@@ -1,3 +1,4 @@
+import type {FileTreeGetDocRequestInput} from "../../types/api";
 import {getIconByType} from "../../editor/getIcon";
 import {removeLoading} from "../ui/initUI";
 import {fetchPost} from "../../util/fetch";
@@ -224,7 +225,7 @@ const setBacklinkFold = (html: string, expand: boolean) => {
 };
 
 export const loadBreadcrumb = (protyle: IProtyle, element: HTMLElement) => {
-    const getDocParam: IObject = {
+    const getDocParam: FileTreeGetDocRequestInput = {
         id: element.getAttribute("data-id"),
         size: Constants.SIZE_GET_MAX,
     };
@@ -232,6 +233,9 @@ export const loadBreadcrumb = (protyle: IProtyle, element: HTMLElement) => {
         getDocParam.notebook = protyle.notebookId;
     }
     fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
+        if (getResponse.code !== 0) {
+            return;
+        }
         element.parentElement.querySelector(".protyle-breadcrumb__item--active").classList.remove("protyle-breadcrumb__item--active");
         element.classList.add("protyle-breadcrumb__item--active");
         let nextElement = element.parentElement.nextElementSibling;

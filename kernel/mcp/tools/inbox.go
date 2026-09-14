@@ -39,7 +39,7 @@ var InboxTool = &Tool{
 			"page":         {Type: "integer", Description: "Page number for list (1-based, default 1)"},
 			"id":           {Type: "string", Description: "Shorthand ID (for get)"},
 			"ids":          {Type: "string", Description: "Comma-separated shorthand IDs (for convert), e.g. \"1700000000000,1700000000001\""},
-			"notebook":     {Type: "string", Description: "Target notebook ID (for convert)"},
+			"notebook":     {Type: "string", Description: "Target non-encrypted notebook ID (for convert)"},
 			"path":         {Type: "string", Description: "Target hPath in the notebook for the new documents (default \"/\", the notebook root). Parent path must already exist."},
 			"remove_after": {Type: "boolean", Description: "Whether to delete the cloud shorthand after a successful conversion (default true)"},
 		},
@@ -148,6 +148,9 @@ func inboxConvert(args map[string]any) (CallToolResult, error) {
 	if notebook == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook is required"}}, IsError: true}, nil
 	}
+	if model.IsEncryptedBox(notebook) {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "inbox conversion requires a non-encrypted notebook"}}, IsError: true}, nil
+	}
 
 	ids := parseShorthandIDs(args["ids"])
 	if len(ids) == 0 {
@@ -205,7 +208,7 @@ func inboxConvert(args map[string]any) (CallToolResult, error) {
 
 		docID := ast.NewNodeID()
 		docPath := strings.TrimRight(parentPath, "/") + "/" + docID + ".sy"
-		tree, err := model.CreateDocByMd(notebook, docPath, title, md, nil, nil)
+		tree, err := model.CreateDocByMdSync(notebook, docPath, title, md, nil, nil)
 		if err != nil {
 			sb.WriteString(fmt.Sprintf("- [%s] %s -> FAILED: %s\n", id, title, err.Error()))
 			failed++

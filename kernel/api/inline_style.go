@@ -17,7 +17,7 @@
 package api
 
 import (
-	"net/http"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -25,118 +25,63 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func getInlineStyles(c *gin.Context) {
+var getInlineStyles = contractHandler(apicontract.GetInlineStyles, func(c *gin.Context, request apicontract.EmptyRequest) apicontract.Response[*apicontract.InlineStyles] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
 	styles, err := model.GetInlineStyles()
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[*apicontract.InlineStyles](ret)
 	}
-	ret.Data = styles
-}
+	return apicontract.Success(inlineStylesContract(styles))
+})
 
-func setInlineStyles(c *gin.Context) {
+var setInlineStyles = contractHandler(apicontract.SetInlineStyles, func(c *gin.Context, request apicontract.SetInlineStylesRequest) apicontract.Response[*apicontract.InlineStyles] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-	var stylesArg []any
-	var version float64
-	var app string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("version", &version, true, false),
-		util.BindJsonArg("styles", &stylesArg, true, false),
-		util.BindJsonArg("app", &app, false, false),
-	) {
-		return
-	}
-	if version != 1 && version != model.InlineStylesVersion {
-		ret.Code = -1
-		ret.Msg = "unsupported inline styles version"
-		return
-	}
-
+	app := request.App
+	input := inlineStylesModel(&apicontract.InlineStyles{Version: int(request.Version), Styles: request.Styles, Builtin: request.Builtin, Order: request.Order, AV: request.AV})
 	var saved *model.InlineStyles
 	var changed bool
 	var err error
-	if version == 1 {
-		var data []byte
-		if data, err = gulu.JSON.MarshalJSON(stylesArg); err == nil {
-			styles := []*model.InlineStyle{}
-			if err = gulu.JSON.UnmarshalJSON(data, &styles); err == nil {
-				saved, changed, err = model.SetInlineStyles(styles)
-			}
-		}
+	if request.Version == 1 {
+		saved, changed, err = model.SetInlineStyles(input.Styles)
 	} else {
-		var data []byte
-		if data, err = gulu.JSON.MarshalJSON(arg); err == nil {
-			styles := &model.InlineStyles{}
-			if err = gulu.JSON.UnmarshalJSON(data, styles); err == nil {
-				saved, changed, err = model.SetInlineStylesData(styles)
-			}
-		}
+		saved, changed, err = model.SetInlineStylesData(input)
 	}
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[*apicontract.InlineStyles](ret)
 	}
-	ret.Data = saved
 	if changed {
 		evt := util.NewCmdResult("reloadInlineStyles", 0, util.PushModeBroadcastMainExcludeSelfApp)
 		evt.AppId = app
 		util.PushEvent(evt)
 		util.ReloadPublishServiceSessions()
 	}
-}
 
-func setWorkspaceAVPalette(c *gin.Context) {
+	return apicontract.Success(inlineStylesContract(saved))
+})
+
+var setWorkspaceAVPalette = contractHandler(apicontract.SetWorkspaceAVPalette, func(c *gin.Context, request apicontract.WorkspaceAVPaletteRequest) apicontract.Response[*apicontract.InlineStyles] {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-	var app string
-	var colors, order, builtinColors []any
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("colors", &colors, true, false),
-		util.BindJsonArg("order", &order, true, false),
-		util.BindJsonArg("builtinColors", &builtinColors, false, false),
-		util.BindJsonArg("app", &app, false, false),
-	) {
-		return
-	}
-	data, err := gulu.JSON.MarshalJSON(arg)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	update := &model.WorkspaceAVPaletteUpdate{}
-	if err = gulu.JSON.UnmarshalJSON(data, update); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	app := request.App
+	update := workspaceAVPaletteUpdateModel(&apicontract.WorkspaceAVPaletteUpdate{Colors: request.Colors, Order: request.Order, BuiltinColors: request.BuiltinColors})
 	saved, changed, err := model.SetWorkspaceAVPalette(update)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
+		return contractFailure[*apicontract.InlineStyles](ret)
 	}
-	ret.Data = saved
 	if changed {
 		evt := util.NewCmdResult("reloadInlineStyles", 0, util.PushModeBroadcastMainExcludeSelfApp)
 		evt.AppId = app
 		util.PushEvent(evt)
 		util.ReloadPublishServiceSessions()
 	}
-}
+
+	return apicontract.Success(inlineStylesContract(saved))
+})

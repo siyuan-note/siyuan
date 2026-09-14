@@ -16,12 +16,13 @@ import {getFrontend} from "../../util/functions";
 import {isEncryptedBox} from "../../util/pathName";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {getLastExportPath, setLastExportPath} from "./path";
+import type {APICallbackResponse, APIPOSTRoutes} from "../../types/api";
 
 const getPluginStyle = async () => {
     const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
     let css = "";
     // 为加快启动速度，不进行 await
-    response.data.forEach((item: IPluginData) => {
+    (response.code === 0 && Array.isArray(response.data) ? response.data : []).forEach(item => {
         css += item.css || "";
     });
     return css;
@@ -42,29 +43,22 @@ export const saveExport = (option: IExportOptions) => {
         const startExport = () => {
         const msgId = showMessage(window.siyuan.languages.exporting, -1);
         // 浏览器环境：先调用 API 生成资源文件，再在前端生成完整的 HTML
-        const url = option.type === "htmlmd" ? "/api/export/exportMdHTML" : "/api/export/exportHTML";
-        fetchPost(url, {
-            id: option.id,
-            pdf: false,
-            removeAssets: false,
-            merge: true,
-            savePath: ""
-        }, async exportResponse => {
+        const onExportHTML = async (exportResponse: APICallbackResponse<APIPOSTRoutes["/api/export/exportHTML"]["response"]>) => {
             const html = await onExport(exportResponse, undefined, "", option);
             fetchPost("/api/export/exportBrowserHTML", {
                 folder: exportResponse.data.folder,
                 html: html,
                 name: exportResponse.data.name
             }, zipResponse => {
-                if (zipResponse.code === -1) {
-                    hideMessage(msgId);
-                    showMessage(window.siyuan.languages._kernel[14].replace("%s", zipResponse.msg), 0, "error");
-                    return;
-                }
                 // 与导出 .sy.zip/markdown.zip/图片一致，统一走 saveExportFile，以便移动端原生 App 调用 JSAndroid.saveExportFile 等接口保存到本地
                 saveExportFile(zipResponse.data.zip, msgId);
             });
-        });
+        };
+        if (option.type === "htmlmd") {
+            fetchPost("/api/export/exportMdHTML", {id: option.id, savePath: ""}, onExportHTML);
+        } else {
+            fetchPost("/api/export/exportHTML", {id: option.id, pdf: false, merge: true, savePath: ""}, onExportHTML);
+        }
         };
         fetchPost("/api/block/getBlockInfo", {id: option.id}, (response) => {
             if (response.code === 0 && isEncryptedBox(response.data.box)) {
@@ -964,8 +958,10 @@ ${getIconScript(servePath)}
 </script>
 ${getSnippetJS()}
 </body></html>`;
-	    fetchPost("/api/export/exportTempContent", {content: html, id}, (response) => {
-        ipcRenderer.send(Constants.SIYUAN_EXPORT_NEWWINDOW, response.data.url);
+    fetchPost("/api/export/exportTempContent", {content: html, id}, (response) => {
+        if (response.code === 0) {
+            ipcRenderer.send(Constants.SIYUAN_EXPORT_NEWWINDOW, response.data.url);
+        }
     });
 };
 

@@ -33,6 +33,7 @@ export const bindPanelSearch = (inputElement: HTMLInputElement, searchElement: E
     // 由面板在处理焦点后调用，保持搜索输入框的聚焦顺序。
     return () => {
         inputElement.classList.remove("fn__none");
+        inputElement.focus();
         inputElement.select();
     };
 };

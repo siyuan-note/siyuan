@@ -234,7 +234,7 @@ const genSnippet = (options: ISnippet) => {
 };
 
 const setSnippetPost = (dialog: Dialog, snippets: ISnippet[], removeIds: string[]) => {
-    fetchPost("/api/snippet/setSnippet", {snippets}, () => {
+    fetchPost("/api/snippet/setSnippet", {snippets: snippets.map(item => ({...item, id: item.id || ""}))}, () => {
         let cssChanged = false;
         removeIds.forEach(item => {
             const rmElement = document.querySelector(item);

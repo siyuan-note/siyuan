@@ -172,15 +172,17 @@ export const openOutline = async (options: {
     if (!wnd) {
         wnd = getWndByLayout(window.siyuan.layout.centerLayout);
     }
-    const newWnd = wnd.split("lr", false);
-
     if (!options.title) {
         const response = await fetchSyncPost("/api/block/getDocInfo", {
             id: options.rootId,
             notebook: isEncryptedBox(options.notebookId) ? options.notebookId : undefined,
         });
+        if (response.code !== 0) {
+            return;
+        }
         options.title = getDocDisplayName(response.data.name, response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
     }
+    const newWnd = wnd.split("lr", false);
     newWnd.element.style.width = "200px";
     newWnd.element.classList.remove("fn__flex-1");
     fixWndFlex1(newWnd.parent);

@@ -1,3 +1,4 @@
+import type {FileTreeGetDocRequestInput} from "../../types/api";
 import {Constants} from "../../constants";
 import {onGet} from "../util/onGet";
 import {fetchPost} from "../../util/fetch";
@@ -118,9 +119,9 @@ export class Scroll {
         this.parentElement.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
             if (hasClosestByClassName(target, "protyle-scroll__up")) {
-                goHome(protyle);
+                goHome(protyle, false);
             } else if (hasClosestByClassName(target, "protyle-scroll__down")) {
-                goEnd(protyle);
+                goEnd(protyle, false);
             } else if (target.classList.contains("b3-slider")) {
                 this.setIndex(protyle);
             }
@@ -156,7 +157,7 @@ export class Scroll {
         this.dynamicLoadAbortController = abortController;
         this.dynamicLoadFinish = options?.onFinish;
         protyle.wysiwyg.element.setAttribute("data-top", protyle.contentElement.scrollTop.toString());
-        const getDocParam: IObject = {
+        const getDocParam: FileTreeGetDocRequestInput = {
             id: anchorID,
             mode,
             size: options?.size || window.siyuan.config.editor.dynamicLoadBlocks,
@@ -280,7 +281,7 @@ export class Scroll {
         this.cancelIndexRequest();
         protyle.wysiwyg.element.setAttribute("data-top", protyle.contentElement.scrollTop.toString());
         protyle.contentElement.style.overflow = "hidden";
-        const getDocParam: IObject = {
+        const getDocParam: FileTreeGetDocRequestInput = {
             index: parseInt(this.inputElement.value),
             id: protyle.block.parentID,
             mode: 0,

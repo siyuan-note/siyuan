@@ -785,6 +785,14 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
+        } else if (type === "av-search-close") {
+            const searchElement = blockElement.querySelector<HTMLElement>('[data-type="av-search"]');
+            searchElement.textContent = "";
+            searchElement.blur();
+            searchElement.dispatchEvent(new Event("input", {bubbles: true}));
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
         } else if (type === "av-search-icon") {
             const searchElement = blockElement.querySelector('div[data-type="av-search"]') as HTMLInputElement;
             searchElement.style.width = "128px";
@@ -792,7 +800,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             searchElement.style.marginRight = "1em";
             const viewsElement = hasClosestByClassName(searchElement, "av__views");
             if (viewsElement) {
-                viewsElement.classList.add("av__views--show");
+                viewsElement.classList.add("av__views--show", "av__views--search");
             }
             if (window.JSAndroid && window.JSAndroid.showKeyboard || window.JSHarmony && window.JSHarmony.showKeyboard) {
                 callMobileAppShowKeyboard();

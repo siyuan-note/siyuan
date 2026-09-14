@@ -158,6 +158,8 @@ type CriterionTypes struct {
 	IFrameBlock   bool `json:"iframeBlock"`
 	WidgetBlock   bool `json:"widgetBlock"`
 	Callout       bool `json:"callout"`
+	Tabs          bool `json:"tabs"`
+	TabItem       bool `json:"tabItem"`
 }
 
 type CriterionReplaceTypes struct {

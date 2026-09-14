@@ -6,7 +6,7 @@
 		"id": "20220708103401-mgydrfg",
 		"title": "Data backup",
 		"type": "doc",
-		"updated": "20260614145014"
+		"updated": "20260914101605"
 	},
 	"Children": [
 		{
@@ -55,7 +55,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220708103921-qto3e6p",
-				"updated": "20220708103921"
+				"updated": "20260914101605"
 			},
 			"Children": [
 				{
@@ -72,7 +72,7 @@
 			},
 			"Properties": {
 				"id": "20220708103921-cdo52rq",
-				"updated": "20220708104612"
+				"updated": "20260914101605"
 			},
 			"Children": [
 				{
@@ -127,7 +127,7 @@
 					},
 					"Properties": {
 						"id": "20220708103921-zjs6xun",
-						"updated": "20220708104321"
+						"updated": "20260914101605"
 					},
 					"Children": [
 						{
@@ -135,12 +135,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220708103921-utd4r4b",
-								"updated": "20220708104321"
+								"updated": "20260914101605"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Open the "
+									"Data": "Open "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -158,12 +158,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " tab, select the snapshot to be backed up and click "
+									"Data": ", find the snapshot to back up in the local pane, click its "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Tag Snapshot"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " action, and enter a tag"
 								}
 							]
 						}
@@ -180,7 +184,7 @@
 					},
 					"Properties": {
 						"id": "20220708103921-8683oue",
-						"updated": "20220708104416"
+						"updated": "20260914101605"
 					},
 					"Children": [
 						{
@@ -188,21 +192,21 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220708103921-mqrg0q3",
-								"updated": "20220708104416"
+								"updated": "20260914101605"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select "
+									"Data": "Switch to "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Locally tag snapshot"
+									"TextMarkTextContent": "Tagged snapshots"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " in the filter drop-down list, select the snapshot to upload and click "
+									"Data": " at the top, find the tagged snapshot in the local pane, and click "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -224,7 +228,7 @@
 					},
 					"Properties": {
 						"id": "20220708103921-mcdvar5",
-						"updated": "20220708104422"
+						"updated": "20260914101605"
 					},
 					"Children": [
 						{
@@ -232,21 +236,30 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220708103921-t0fi1cl",
-								"updated": "20220708104422"
+								"updated": "20260914101605"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "After the upload is complete, select "
+									"Data": "After uploading, view the backed-up tagged snapshot in the cloud pane; in narrow windows and on mobile, use "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Cloud tag snapshot"
+									"TextMarkTextContent": "Local snapshot"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " from the filter drop-down list to see the snapshots just backed up to the cloud"
+									"Data": " and "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Cloud snapshot"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to switch between the lists"
 								}
 							]
 						}
@@ -288,6 +301,31 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-zfw5c4s",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914101605-zfw5c4s",
+				"updated": "20260914101605"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To remove selected backup tags, see "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260914101605-wf8t6ol",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Batch manage tagged snapshots"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		},

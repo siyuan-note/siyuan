@@ -1,3 +1,4 @@
+import type {FileTreeGetDocRequestInput} from "../types/api";
 import {isPhablet} from "../protyle/util/compatibility";
 import {Tab} from "../layout/Tab";
 import {Editor} from "./index";
@@ -441,7 +442,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
         revealTabsForTarget(nodeElement);
     }
     if ((!nodeElement || nodeElement?.clientHeight === 0) && options.id !== options.rootID) {
-        const getDocParam: IObject = {
+        const getDocParam: FileTreeGetDocRequestInput = {
             id: options.id,
             mode: (options.action && options.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
@@ -754,7 +755,7 @@ export const updateOutline = (models: IModels, protyle: IProtyle, reload = false
                 item.isPreview = !protyle.preview.element.classList.contains("fn__none");
                 item.update(response, blockId, protyle?.notebookId || "");
                 if (protyle) {
-                    item.updateDocTitle(protyle.background.ial, response.data?.length || 0);
+                    item.updateDocTitle(protyle.background.ial, Array.isArray(response.data) ? response.data.length : 0);
                     if (getSelection().rangeCount > 0) {
                         const startContainer = getSelection().getRangeAt(0).startContainer;
                         if (protyle.wysiwyg.element.contains(startContainer)) {

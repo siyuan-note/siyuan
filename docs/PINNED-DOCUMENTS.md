@@ -1,46 +1,60 @@
-# 文档树面板置顶区
+# Pinned documents in the document panel
 
-对应议题：https://github.com/siyuan-note/siyuan/issues/19401
+[中文](PINNED-DOCUMENTS.zh-CN.md)
 
-## 设计评审
+Related issue: https://github.com/siyuan-note/siyuan/issues/19401
 
-置顶区位于文档树面板顶部，以置顶文档为根展示真实子文档。根入口的顺序独立于文档层级和源文档排序；展开后的子文档直接使用源文档数据。桌面端和移动端共享置顶区实现，区域可折叠并限制最大高度，内部独立滚动。
+## Feature scope
 
-置顶区域默认隐藏，可通过文档面板 - 更多 - 置顶开启，界面显隐配置中的文档面板分组也可调整该开关，包括移动端。用户主动置顶文档成功后自动开启置顶区域并保存开关状态；置顶失败、取消置顶或同步收到置顶数据时不改变该开关。隐藏时不占用布局空间，不取消任何置顶，也不重置顺序或展开状态；重新显示后刷新源文档数据。区域显隐使用独立配置标识 `documentPanel.pinnedDocs`，与侧栏图标显隐及菜单项显隐分别保存，保留用户明确保存的显隐选择。
+The pinned section appears at the top of the document panel and uses pinned documents as roots for their actual child documents. Root entry order is independent of document hierarchy and source-document sorting. Expanded children use source-document data directly. Desktop and mobile clients share the implementation. The section can collapse, has a maximum height, and scrolls independently.
 
-| 操作 | 行为 |
+## User interaction
+
+The section appears when it contains pinned documents and hides automatically when empty, on both desktop and mobile. Pin the first document through its context menu; once the section is visible, documents can also be added by dragging. Unpinning the last document hides the section. Incoming synchronized pin data updates visibility in the same way. There is no separate visibility switch, and previously saved visibility settings no longer affect the section. Collapsing the section preserves its entries and their order.
+
+| Operation | Behavior |
 |---|---|
-| 菜单置顶 | 新入口放在最顶部；已置顶时同一菜单项切换为取消置顶 |
-| 根层插入线拖放 | 创建或调整置顶入口，源文档位置不变 |
-| 子文档之间插入线拖放 | 调整真实文档顺序，沿用现有排序冲突确认 |
-| 拖放到文档行中部 | 移入真实文档，沿用现有移动校验 |
-| 取消父文档置顶 | 只移除该根入口，单独置顶的子文档保留 |
-| 重命名或移动 | 所有入口重新读取源文档，跨笔记本移动维护笔记本标识 |
-| 关闭普通笔记本 | 保留不可用入口，允许取消置顶；当前会话保留已读取的标题，无法读取标题时显示文档 ID |
-| 删除文档或笔记本 | 清理相关入口；读取列表时也过滤不存在的源文档 |
-| 加密笔记本 | 不显示置顶操作，服务端拒绝新增，也不返回已有异常入口 |
+| Pin from a menu | Insert the entry at the top; the same menu item becomes Unpin for an already pinned document |
+| Notebook More menu | When notebook root documents are enabled, offer Pin or Unpin for an ordinary notebook's root document; expand the pinned entry to browse its visible top-level documents |
+| Multiple selected documents | Offer both Pin and Unpin regardless of existing pin status; hide Pin if any selected document belongs to an encrypted notebook |
+| Context menu or More on a pinned document | Open the document menu, including Unpin and Rename |
+| Click a document icon | On desktop, open the icon picker or follow the configured icon expansion behavior; mobile expands or opens the document |
+| Drop on a root insertion line | Create or reorder a pinned entry without moving the source document |
+| Drop between child documents | Reorder actual documents, using the existing sort-conflict confirmation |
+| Drop in the middle of a document row | Move into the actual document, using existing move validation |
+| Unpin a parent document | Remove only that root entry; independently pinned children remain |
+| Collapse the document panel | Collapse the pinned section and clear its descendant expansion state; keep the pinned entries and their order |
+| Rename or move | Reload the source document for every entry; cross-notebook moves maintain the notebook identifier |
+| Close an ordinary notebook | Retain unavailable entries and allow unpinning; keep titles already read in the current session, or show the document ID when the title is unavailable |
+| Hide a document | Omit the entry but preserve its stored position; restore it when unhidden, and reject new pins while hidden. Unhide it before unpinning through the pinned section. The notebook root document's internal hidden attribute is exempt. Hidden children do not count toward the expansion arrow |
+| Delete a document or notebook | Remove related entries; list reads also filter missing source documents |
+| Encrypted notebook | Hide the pin operation; the server rejects additions and filters any existing invalid entries |
 
-根层的拖放提示使用插入线，行中部使用文档高亮，明确区分创建入口和移动源文档。移动到自身或后代的校验交由已有文档移动接口执行。子文档列表按照源文档的有效排序加载；置顶操作不写入 `sort.json`，不改变排序继承。
+Root drops show an insertion line, while row-center drops highlight the document, distinguishing entry creation from source-document moves. Existing document-move APIs validate moves into the source itself or its descendants. Child lists use the source document's effective sort mode. Pinning does not write `sort.json` or change sort inheritance.
 
-## 持久化与同步
+## Data and storage
 
-`data/storage/pinned-docs.json` 使用版本 1 格式：`{"version":1,"docs":[{"id":"文档 ID","notebook":"笔记本 ID"}]}`。数组顺序即根层顺序，仅保存标识，不缓存文档内容。文件进入现有数据同步和快照流程，服从工作区同步忽略规则；仅此文件发生同步变更时也刷新文档树面板。跨设备同时编辑沿用现有同步文件冲突处理机制。
+`data/storage/pinned-docs.json` uses version 1: `{"version":1,"docs":[{"id":"document ID","notebook":"notebook ID"}]}`. Array order determines root order. Only identifiers are stored; document content is not cached. The file participates in existing data sync and snapshots and follows workspace sync ignore rules. A sync change to this file alone also refreshes the document tree panel. Concurrent edits across devices use existing file-sync conflict handling.
 
-同一内核内的更新由互斥锁串行处理，接口接受相对位置操作，避免客户端提交整份旧列表覆盖其他窗口新增的入口。未知版本、错误结构或损坏文件返回错误并保留原文件。现有文档、加密、历史和备份格式均无变更。
+A mutex serializes updates within one kernel. APIs accept relative-position operations so a stale full list from one window cannot overwrite entries added in another.
 
-区域折叠和子树展开状态保存在本设备的浏览器存储中，不写入同步文件。不同置顶根下的同一子文档具有独立展开状态。
+Section collapse and subtree expansion are stored in this device's browser storage rather than the synchronized file. The same child document under different pinned roots has independent expansion state.
 
-## HTTP 接口
+## Implementation and interfaces
 
-两个接口均使用 POST，要求认证和管理员角色；写接口还检查只读状态。接口成功时 `code` 为 `0`，业务或参数错误为 `-1`。类型契约位于 `kernel/apicontract/`，生成声明同步到插件声明仓库。
+Both endpoints use POST and require authentication and the administrator role. The write endpoint also checks read-only state. Success uses `code: 0`; business and parameter errors use `-1`. Type contracts reside in `kernel/apicontract/`, and generated declarations are synchronized to the plugin declaration repository.
 
-| 接口 | 请求 | 成功数据 |
+| Endpoint | Request | Success data |
 |---|---|---|
-| `/api/filetree/getPinnedDocs` | 无需请求体 | 数组，每项包含 `id`、`notebook`、`name`、`path`、`icon`、`subFileCount`、`unavailable`、`childrenSortMode` |
-| `/api/filetree/updatePinnedDocs` | `ids: string[]`、`action: "pin"或"unpin"`，可选 `targetID: string`、`after: boolean` | `null` |
+| `/api/filetree/getPinnedDocs` | No request body required | Array of entries with `id`, `notebook`, `name`, `path`, `icon`, `subFileCount`, `unavailable`, and `childrenSortMode` |
+| `/api/filetree/updatePinnedDocs` | `ids: string[]`, `action: "pin" or "unpin"`; optional `targetID: string` and `after: boolean` | `null` |
 
-未指定目标时，置顶操作放到最顶部；指定目标时插入其前面，`after: true` 则插入其后面。取消置顶忽略位置参数。批量请求先校验所有源文档，失败时不写入部分结果。置顶区子树继续通过现有文档列表、移动和排序接口操作，不新增文档副本。
+Without a target, pinning inserts at the top. With a target, it inserts before that entry, or after it when `after: true`. Unpinning ignores position parameters. Batch requests validate every source document before writing and produce no partial result on failure. Pinned subtrees continue to use existing document-list, move, and sort APIs without creating document copies.
 
-## 验证范围
+## Compatibility and recovery
 
-回归覆盖入口去重和顺序、源排序不变、无效批量请求不产生部分更新、未知版本和损坏数据保留、关闭笔记本入口保留、加密笔记本拒绝和过滤、引用维护、同步路径纳入、根层与子树拖放分类、菜单目录及旧配置顺序迁移。接口测试使用真实处理函数检查响应契约，并执行已有接口兼容和路由覆盖测试。
+Unknown versions, invalid structures, and damaged files return errors and preserve the original file. Existing document, encryption, history, and backup formats remain unchanged.
+
+## Verification
+
+Regression coverage includes deduplication and ordering, unchanged source sorting, invalid batches without partial updates, preservation of unknown or damaged data, closed-notebook entries, rejection and filtering of encrypted notebooks, reference maintenance, sync-path inclusion, root versus subtree drop classification, menu catalogs, and order migration for existing configuration. API tests exercise actual handlers against response contracts and run existing API compatibility and route-coverage tests.

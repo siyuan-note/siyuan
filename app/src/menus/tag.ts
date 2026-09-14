@@ -8,6 +8,9 @@ import {Tag} from "../layout/dock/Tag";
 import {Constants} from "../constants";
 
 export const openTagMenu = (element: HTMLElement, event: MouseEvent, labelName: string) => {
+    if (window.siyuan.config.readonly) {
+        return;
+    }
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
         window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_TAG) {
         window.siyuan.menus.menu.remove();

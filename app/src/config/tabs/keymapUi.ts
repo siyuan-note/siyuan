@@ -1,3 +1,4 @@
+import {keymapPayload} from "../keymapPayload";
 import {isMac, updateHotkeyTip} from "../../protyle/util/compatibility";
 import {matchHotKey} from "../../protyle/util/hotKey";
 import {Constants} from "../../constants";
@@ -66,7 +67,7 @@ const bindKeymapToolbar = (root: HTMLElement) => {
             keymapSaveQueue = keymapSaveQueue.then(async () => {
                 try {
                     const data = JSON.parse(JSON.stringify(Constants.SIYUAN_KEYMAP));
-                    const response = await fetchSyncPost("/api/setting/setKeymap", {data});
+                    const response = await fetchSyncPost("/api/setting/setKeymap", {data: keymapPayload(data)});
                     if (response.code !== 0) {
                         throw new Error(response.msg);
                     }
@@ -297,7 +298,7 @@ const buildKeymapPluginCommandHtml = (item: Plugin) => {
     const html: string[] = [];
     for (const command of item.commands) {
         html.push(genKeymapRowHtml(
-            command.langText || (item.i18n ? item.i18n[command.langKey] : "") || command.langKey,
+            String(command.langText || (item.i18n ? item.i18n[command.langKey] : "") || command.langKey),
             pluginKeyPrefix + command.langKey,
             ensurePluginKeymap(item.name, command.langKey, command.hotkey),
         ));
@@ -726,7 +727,7 @@ const saveKeymapRow = (root: HTMLElement, row: HTMLElement, keys: string[], chan
     const revision = ++keymapRevision;
     keymapSaveQueue = keymapSaveQueue.then(async () => {
         try {
-            const response = await fetchSyncPost("/api/setting/setKeymap", {data});
+            const response = await fetchSyncPost("/api/setting/setKeymap", {data: keymapPayload(data)});
             if (response.code !== 0) {
                 throw new Error(response.msg);
             }

@@ -48,12 +48,8 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number, o
                 }
             }
         }
-        let breadcrumb: boolean | string = item.getAttribute("breadcrumb");
-        if (breadcrumb) {
-            breadcrumb = breadcrumb === "true";
-        } else {
-            breadcrumb = window.siyuan.config.editor.embedBlockBreadcrumb;
-        }
+        const breadcrumbAttribute = item.getAttribute("breadcrumb");
+        const breadcrumb = breadcrumbAttribute ? breadcrumbAttribute === "true" : window.siyuan.config.editor.embedBlockBreadcrumb;
 
         if (content.startsWith("//!js")) {
             // 安全模式下禁用 JS 查询嵌入块，与代码片段（CSS/JS snippet）的处理保持一致

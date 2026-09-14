@@ -1,7 +1,10 @@
+import {openInputDialog} from "../dialog/inputDialog";
 import {Dialog} from "../dialog";
 import {Constants} from "../constants";
 import {escapeHtml} from "../util/escape";
 import {fetchPost} from "../util/fetch";
+import {ContractFormData} from "../util/contractFormData";
+import type {APICallbackResponse, APIPOSTRoutes} from "../types/api";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {showMessage} from "../dialog/message";
 import {importObsidianVault} from "./importObsidian";
@@ -32,30 +35,21 @@ const getImportButton = (type: string, accept: string) => `<button class="b3-but
 </button>`;
 
 const openRepoKeyImport = (onComplete?: () => void) => {
-    const dialog = new Dialog({
+    const dialog = openInputDialog({
         title: `🔑 ${window.siyuan.languages.key}`,
-        content: `<div class="b3-dialog__content">
-    <input type="text" spellcheck="false" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.keyPlaceholder}">
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
+        value: "",
+        placeholder: window.siyuan.languages.keyPlaceholder,
         width: "520px",
+        onConfirm: (value, dialog) => {
+            fetchPost("/api/repo/importRepoKey", {key: value}, (response) => {
+                window.siyuan.config.repo.key = response.data.key;
+                dialog.destroy();
+                showMessage(window.siyuan.languages.imported);
+                onComplete?.();
+            });
+        },
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_PASSWORD);
-    const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
-    const buttons = dialog.element.querySelectorAll(".b3-button");
-    inputElement.focus();
-    buttons[0].addEventListener("click", () => dialog.destroy());
-    buttons[1].addEventListener("click", () => {
-        fetchPost("/api/repo/importRepoKey", {key: inputElement.value}, (response) => {
-            window.siyuan.config.repo.key = response.data.key;
-            dialog.destroy();
-            showMessage(window.siyuan.languages.imported);
-            onComplete?.();
-        });
-    });
 };
 
 const exportData = async () => {
@@ -281,8 +275,8 @@ export const openDataMigration = (options: IDataMigrationOptions = {}) => {
         bindFileInput(provider, (file, input) => {
             input.value = "";
             const isS3 = provider === "s3";
-            postFile(isS3 ? "/api/sync/importSyncProviderS3" : "/api/sync/importSyncProviderWebDAV", file, {}, (response) => {
-                if (isS3) {
+            fetchPost(isS3 ? "/api/sync/importSyncProviderS3" : "/api/sync/importSyncProviderWebDAV", new ContractFormData({file}), (response: APICallbackResponse<APIPOSTRoutes["/api/sync/importSyncProviderS3" | "/api/sync/importSyncProviderWebDAV"]["response"]>) => {
+                if ("s3" in response.data) {
                     window.siyuan.config.sync.s3 = response.data.s3;
                 } else {
                     window.siyuan.config.sync.webdav = response.data.webdav;

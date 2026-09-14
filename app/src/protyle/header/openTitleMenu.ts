@@ -1,3 +1,4 @@
+import type {BlockQueryRequestInput} from "../../types/api";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, exportMd, movePathToMenu, openFileAttr, openFileWechatNotify,} from "../../menus/commonMenuItem";
@@ -30,15 +31,20 @@ import {buildBlockDOMClipboardRichData} from "../util/blockDOMClipboard";
 import {buildWebClipboardHTML} from "../util/clipboardData";
 import {exportImage} from "../export/util";
 import {getHostCapabilities} from "../../util/hostCapabilities";
+import {isMobile} from "../../util/functions";
 
-export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: string) => {
+export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: string, restoreKeyboard?: () => void) => {
     hideTooltip();
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
         window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_TITLE) {
-        window.siyuan.menus.menu.remove();
+        if (isMobile()) {
+            window.siyuan.menus.menu.closeSheet();
+        } else {
+            window.siyuan.menus.menu.remove();
+        }
         return;
     }
-    const docInfoParam: IObject = {
+    const docInfoParam: BlockQueryRequestInput = {
         id: protyle.block.rootID
     };
     if (isEncryptedBox(protyle.notebookId)) {
@@ -81,6 +87,9 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                     })
                 ]);
 
+                if (responseHTML.code !== 0 || responseText.code !== 0) {
+                    return;
+                }
                 const {textHTML, textSiyuan} = buildBlockDOMClipboardRichData(protyle.lute, responseHTML.data.dom);
                 const result = await writeClipboardData({
                     textPlain: responseText.data.content,
@@ -262,16 +271,20 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
             async click() {
                 const searchPath = isBoxDoc ? "" : getDisplayName(protyle.path, false, true);
                 /// #if MOBILE
-                const pathResponse = isBoxDoc ? undefined : await fetchSyncPost("/api/filetree/getHPathByPath", {
+                let hPath = getNotebookName(protyle.notebookId);
+                if (!isBoxDoc) {
+                    const pathResponse = await fetchSyncPost("/api/filetree/getHPathByPath", {
                         notebook: protyle.notebookId,
                         path: searchPath + ".sy"
                     });
-                if (!isBoxDoc && (pathResponse?.code !== 0 || typeof pathResponse?.data !== "string")) {
-                    return;
+                    if (pathResponse.code !== 0) {
+                        return;
+                    }
+                    hPath = pathPosix().join(hPath, pathResponse.data);
                 }
                 popSearch(protyle.app, {
                     hasReplace: false,
-                    hPath: isBoxDoc ? getNotebookName(protyle.notebookId) : pathPosix().join(getNotebookName(protyle.notebookId), pathResponse.data),
+                    hPath,
                     idPath: [isBoxDoc ? protyle.notebookId : pathPosix().join(protyle.notebookId, searchPath)],
                     page: 1,
                 });
@@ -363,7 +376,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
             label: `${window.siyuan.languages.modifiedAt} ${dayjs(response.data.ial.updated).format("YYYY-MM-DD HH:mm:ss")}<br>${window.siyuan.languages.createdAt} ${dayjs(response.data.ial.id.substr(0, 14)).format("YYYY-MM-DD HH:mm:ss")}`
         }).element);
         /// #if MOBILE
-        window.siyuan.menus.menu.fullscreen();
+        window.siyuan.menus.menu.fullscreen("all", restoreKeyboard);
         /// #else
         window.siyuan.menus.menu.popup(position);
         /// #endif

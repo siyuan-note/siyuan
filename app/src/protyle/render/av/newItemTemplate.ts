@@ -907,11 +907,11 @@ export const createAttributeViewItem = (options: {
         app: options.protyle.app.appId,
         session: options.protyle.id,
     }, response => {
-        if (response.code === 1 && response.data?.unavailableNotebook) {
+        if (response.code === 1 && response.data && "unavailableNotebook" in response.data && response.data.unavailableNotebook) {
             showMessage(window.siyuan.languages.newItemTemplateUnavailableNotebookTip, 6000, "error");
             return;
         }
-        const warnings = (response.data?.warnings || []) as string[];
+        const warnings = response.data && "warnings" in response.data ? response.data.warnings || [] : [];
         if (warnings.length) {
             showMessage(warnings.map(item => escapeHtml(item)).join("<br>"));
         }
@@ -938,11 +938,11 @@ export const createAttributeViewItemDocs = (options: {
         app: options.protyle.app.appId,
         session: options.protyle.id,
     }, response => {
-        if (response.code === 1 && response.data?.unavailableNotebook) {
+        if (response.code === 1 && response.data && "unavailableNotebook" in response.data && response.data.unavailableNotebook) {
             showMessage(window.siyuan.languages.newItemTemplateUnavailableNotebookTip, 6000, "error");
             return;
         }
-        const warnings = (response.data?.warnings || []) as string[];
+        const warnings = response.data && "warnings" in response.data ? response.data.warnings || [] : [];
         if (warnings.length) {
             showMessage(warnings.map(item => escapeHtml(item)).join("<br>"));
         }

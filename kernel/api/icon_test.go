@@ -50,6 +50,7 @@ func TestGetDynamicIconSetsSecurityHeaders(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/api/icon/getDynamicIcon?type=8&content=%3Cscript%3Ealert(1)%3C%2Fscript%3E", nil)
 	context.Request = request
 	getDynamicIcon(context)
+	requireAPIContract(t, http.MethodGet, "/api/icon/getDynamicIcon", recorder)
 
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("unexpected status code %d", recorder.Code)

@@ -4,7 +4,7 @@ import type {ICommandContextSnapshot, ICommandDefinition, TCommandSource} from "
 interface IPluginCommandOwner {
     name: string;
     displayName: string;
-    i18n: Record<string, string>;
+    i18n: Record<string, import("../types/api").JSONValue>;
 }
 
 interface IPluginCommandRegistration {

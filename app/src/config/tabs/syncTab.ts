@@ -1,3 +1,4 @@
+import {openInputDialog} from "../../dialog/inputDialog";
 import type {SettingTabBuilder} from "../setting/builder";
 import {registerAccountGroup} from "./accountUi";
 import {Constants} from "../../constants";
@@ -7,10 +8,9 @@ import {showMessage} from "../../dialog/message";
 import {processSync} from "../../dialog/processSystem";
 import {writeText} from "../../protyle/util/compatibility";
 import {bindSyncCloudListEvent, renderSyncCloudList, setKey} from "../../sync/syncGuide";
-import {Dialog} from "../../dialog";
 import {genConfigItemMainHtml, genConfigItemName} from "../render/fragments";
 import {getLANSyncSearchAvailability, getSyncProviderConfigKeywords} from "./syncUi";
-import {mountLANSyncStatus, mountSyncAssetDownloadMode, patchSyncConfig} from "./syncRuntime";
+import {mountLANSyncStatus, mountSyncAssetDownloadMode} from "./syncRuntime";
 import {openHistory} from "../../history/history";
 
 const registerSyncGroup = (tab: SettingTabBuilder) => {
@@ -25,7 +25,6 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
             {value: 3, label: "WebDAV"},
             ...(["std", "docker"].includes(window.siyuan.config.system.container) ? [{value: 4, label: window.siyuan.languages.localFileSystem}] : []),
         ],
-        save: (value) => patchSyncConfig("sync.provider", value),
     });
     group.slot({
         key: "syncProviderConfig",
@@ -40,12 +39,10 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
     group.switch("sync.enabled", {
         title: window.siyuan.languages.cloudSync,
         desc: window.siyuan.languages.openSyncTip2,
-        save: (value) => patchSyncConfig("sync.enabled", value),
     });
     group.switch("sync.generateConflictDoc", {
         title: window.siyuan.languages.generateConflictDoc,
         desc: window.siyuan.languages.generateConflictDocTip,
-        save: (value) => patchSyncConfig("sync.generateConflictDoc", value),
     });
     group.select("sync.mode", {
         title: window.siyuan.languages.syncMode,
@@ -55,7 +52,6 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
             {value: 2, label: window.siyuan.languages.syncMode2},
             {value: 3, label: window.siyuan.languages.syncMode3},
         ],
-        save: (value) => patchSyncConfig("sync.mode", value),
     });
     group.select("sync.assetDownloadMode", {
         title: window.siyuan.languages.syncAssetDownloadMode,
@@ -64,7 +60,6 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
             {value: 0, label: window.siyuan.languages.syncAssetDownloadAll},
             {value: 1, label: window.siyuan.languages.syncAssetDownloadOnDemand},
         ],
-        save: (value) => patchSyncConfig("sync.assetDownloadMode", value),
         afterMount: mountSyncAssetDownloadMode,
     });
     group.number("sync.interval", {
@@ -73,17 +68,14 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
         min: 30,
         max: 43200,
         unit: window.siyuan.languages.second,
-        save: (value) => patchSyncConfig("sync.interval", value),
     });
     group.switch("sync.perception", {
         title: window.siyuan.languages.syncPerception,
         desc: window.siyuan.languages.syncPerceptionTip,
-        save: (value) => patchSyncConfig("sync.perception", value),
     });
     group.switch("sync.lan.enabled", {
         title: window.siyuan.languages.lanSync,
         desc: `${window.siyuan.languages.lanSyncTip}<div data-type="lanSyncStatus"></div>`,
-        save: (value) => patchSyncConfig("sync.lan.enabled", value),
         afterMount: mountLANSyncStatus,
         searchAvailability: getLANSyncSearchAvailability,
     });
@@ -224,31 +216,20 @@ const mountRepoKey = (root: HTMLElement) => {
     };
     toggleRepoKeyActions();
     root.querySelector("#importKey")?.addEventListener("click", () => {
-        const passwordDialog = new Dialog({
+        const passwordDialog = openInputDialog({
             title: "🔑 " + window.siyuan.languages.key,
-            content: `<div class="b3-dialog__content">
-    <input type="text" spellcheck="false" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.keyPlaceholder}">
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div>`,
+            value: "",
+            placeholder: window.siyuan.languages.keyPlaceholder,
             width: "520px",
+            onConfirm: (value, passwordDialog) => {
+                fetchPost("/api/repo/importRepoKey", {key: value}, (response) => {
+                    window.siyuan.config.repo.key = response.data.key;
+                    toggleRepoKeyActions();
+                    passwordDialog.destroy();
+                });
+            },
         });
         passwordDialog.element.setAttribute("data-key", Constants.DIALOG_PASSWORD);
-        const inputElement = passwordDialog.element.querySelector("input");
-        inputElement.focus();
-        const btnsElement = passwordDialog.element.querySelectorAll(".b3-button");
-        btnsElement[0].addEventListener("click", () => {
-            passwordDialog.destroy();
-        });
-        btnsElement[1].addEventListener("click", () => {
-            fetchPost("/api/repo/importRepoKey", {key: inputElement.value}, (response) => {
-                window.siyuan.config.repo.key = response.data.key;
-                toggleRepoKeyActions();
-                passwordDialog.destroy();
-            });
-        });
     });
     root.querySelector("#initKey")?.addEventListener("click", () => {
         confirmDialog("🔑 " + window.siyuan.languages.genKey, window.siyuan.languages.initRepoKeyTip, () => {

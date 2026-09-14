@@ -26,6 +26,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
 )
 
@@ -133,12 +134,12 @@ func TestReadCustomEmojisRecursively(t *testing.T) {
 		t.Fatalf("write custom emoji failed: %s", err)
 	}
 
-	items := []map[string]any{}
+	items := []*apicontract.SystemEmoji{}
 	readCustomEmojis(root, "", &items)
 	if len(items) != 1 {
 		t.Fatalf("expected one custom emoji, got %d", len(items))
 	}
-	if actual := items[0]["unicode"]; actual != "folder/sub/icon.png" {
+	if actual := items[0].Unicode; actual != "folder/sub/icon.png" {
 		t.Fatalf("unexpected custom emoji path [%v]", actual)
 	}
 }

@@ -162,7 +162,9 @@ var repoCheckoutCmd = &cobra.Command{
 			return nil
 		}
 
-		model.CheckoutRepoDirect(id)
+		if err := model.CheckoutRepoDirect(id); err != nil {
+			return err
+		}
 		model.AppendPushReloadFiletreeEntry()
 		model.AppendPushReloadUIEntry()
 		fmt.Println("ok")

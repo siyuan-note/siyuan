@@ -595,7 +595,9 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
     // 先批量读取所有几何信息，再统一写入 style，避免读-写交错触发强制重排
     const elementRect = scrollElement.getBoundingClientRect();
     const breadcrumbElement = scrollElement.previousElementSibling as HTMLElement;
-    const breadcrumbBottom = breadcrumbElement?.classList.contains("protyle-breadcrumb") ?
+    // 移动端面包屑隐藏后仍保留布局尺寸，吸顶位置需回到滚动视口顶部。
+    const breadcrumbBottom = breadcrumbElement?.classList.contains("protyle-breadcrumb") &&
+        breadcrumbElement.getAttribute("aria-hidden") !== "true" ?
         breadcrumbElement.getBoundingClientRect().bottom : elementRect.top;
     const scrollTop = scrollElement.scrollTop;
     const scrollLeft = scrollEl ? scrollEl.scrollLeft : 0;

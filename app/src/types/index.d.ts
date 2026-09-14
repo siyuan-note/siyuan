@@ -3,99 +3,7 @@ type TDockPosition = "Left" | "Right" | "Bottom"
 type TWS = "main" | "filetree" | "protyle" | "backlink" | "bookmark" | "graph" | "outline" | "tag" | "agentChat"
 type TDock = "file" | "outline" | "inbox" | "bookmark" | "tag" | "graph" | "globalGraph" | "backlink" | "agentChat"
 type TTab = "Outline" | "Graph" | "Backlink" | "Asset" | "Editor" | "Search" | "siyuan-card"
-type TOperation =
-    "insert"
-    | "restoreCreatedDoc"
-    | "removeCreatedDoc"
-    | "update"
-    | "delete"
-    | "move"
-    | "foldHeading"
-    | "unfoldHeading"
-    | "setAttrs"
-    | "updateAttrs"
-    | "append"
-    | "insertAttrViewBlock"
-    | "removeAttrViewBlock"
-    | "addAttrViewCol"
-    | "removeAttrViewCol"
-    | "addFlashcards"
-    | "removeFlashcards"
-    | "updateAttrViewCell"
-    | "updateAttrViewCells"
-    | "updateAttrViewCol"
-    | "updateAttrViewColTemplate"
-    | "sortAttrViewRow"
-    | "sortAttrViewCol"
-    | "sortAttrViewKey"
-    | "sortAttrViewBinding"
-    | "setAttrViewColPin"
-    | "setAttrViewColHidden"
-    | "setAttrViewColWrap"
-    | "setAttrViewColWidth"
-    | "setAttrViewColsWidth"
-    | "setAttrViewColAlign"
-    | "updateAttrViewColOptions"
-    | "removeAttrViewColOption"
-    | "updateAttrViewColOption"
-    | "setAttrViewCustomColors"
-    | "setAttrViewName"
-    | "setAttrViewNewItemTemplates"
-    | "doUpdateUpdated"
-    | "duplicateAttrViewKey"
-    | "setAttrViewColIcon"
-    | "setAttrViewFilters"
-    | "setAttrViewColRelationFilters"
-    | "setAttrViewColRollupFilters"
-    | "setAttrViewSorts"
-    | "setAttrViewColCalc"
-    | "updateAttrViewColNumberFormat"
-    | "setAttrViewColDateFormat"
-    | "replaceAttrViewBlock"
-    | "addAttrViewView"
-    | "setAttrViewViewName"
-    | "removeAttrViewView"
-    | "setAttrViewViewIcon"
-    | "duplicateAttrViewView"
-    | "duplicateAttrViewRow"
-    | "setAttrViewBlockVisibleViews"
-    | "setAttrViewContextFilter"
-    | "sortAttrViewView"
-    | "setAttrViewPageSize"
-    | "updateAttrViewColRelation"
-    | "moveOutlineHeading"
-    | "updateAttrViewColRollup"
-    | "hideAttrViewName"
-    | "setAttrViewCardSize"
-    | "setAttrViewCardWidth"
-    | "setAttrViewCardAspectRatio"
-    | "setAttrViewCardAspectRatioValue"
-    | "setAttrViewCardLayout"
-    | "setAttrViewColFullRow"
-    | "setAttrViewCoverFrom"
-    | "setAttrViewCoverFromAssetKeyID"
-    | "setAttrViewCardCoverPosition"
-    | "setAttrViewFitImage"
-    | "setAttrViewShowIcon"
-    | "setAttrViewWrapField"
-    | "setAttrViewColDateFillCreated"
-    | "setAttrViewColDateFillSpecificTime"
-    | "setAttrViewViewDesc"
-    | "setAttrViewColDesc"
-    | "setAttrViewBlockView"
-    | "setAttrViewGroup"
-    | "removeAttrViewGroup"
-    | "hideAttrViewAllGroups"
-    | "syncAttrViewTableColWidth"
-    | "hideAttrViewGroup"
-    | "sortAttrViewGroup"
-    | "foldAttrViewGroup"
-    | "foldAttrViewGroups"
-    | "setAttrViewDisplayFieldName"
-    | "setAttrViewDisplayEmptyFields"
-    | "setAttrViewFillColBackgroundColor"
-    | "setAttrViewUpdatedIncludeTime"
-    | "setAttrViewCreatedIncludeTime"
+type TOperation = IOperation["action"];
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TBazaarPackageInvalidReason = "missing-manifest" | "invalid-manifest" | "name-mismatch"
 type TCardType = "doc" | "notebook" | "all"
@@ -158,7 +66,6 @@ type TAVFilterOperator =
     | "Starts with"
     | "Ends with"
     | "Is between"
-    | "Is relative to today"
     | "Is true"
     | "Is false"
 
@@ -793,42 +700,7 @@ interface ISiyuan {
     isPublish?: boolean;
 }
 
-interface IOperation {
-    action: TOperation, // move， delete 不需要传 data
-    id?: string,
-    context?: Record<string, string>,  // focusId, message, ignoreProcess, setRange
-    blockID?: string,
-    isTwoWay?: boolean, // 是否双向关联
-    backRelationKeyID?: string, // 双向关联的目标关联列 ID
-    avID?: string,  // av
-    format?: string // 属性视图字段格式化
-    keyID?: string // 属性视图字段 ID
-    rowID?: string // updateAttrViewCell 专享
-    cellUpdates?: Array<{
-        keyID: string,
-        rowID: string,
-        data: IAVCellValue,
-    }> // updateAttrViewCells 专享
-    data?: any, // updateAttr 时为  { old: IObject, new: IObject }, updateAttrViewCell 时为 {TAVCol: {content: string}}
-    parentID?: string
-    previousID?: string
-    retData?: any
-    nextID?: string // insert 专享
-    isDetached?: boolean // insertAttrViewBlock 专享
-    srcIDs?: string[] // removeAttrViewBlock 专享
-    srcs?: IOperationSrcs[] // insertAttrViewBlock 专享
-    ignoreDefaultFill?: boolean // insertAttrViewBlock 专享
-    viewID?: string // 多个属性视图操作使用，用于推送时不影响其他视图
-    viewIDs?: string[] // setAttrViewColHidden 批量指定数据库视图
-    name?: string // addAttrViewCol 专享
-    type?: TAVCol // addAttrViewCol 专享
-    deckID?: string // add/removeFlashcards 专享
-    blockIDs?: string[] // add/removeFlashcards 专享
-    removeDest?: boolean // removeAttrViewCol 专享
-    layout?: string // addAttrViewView 专享
-    groupID?: string // insertAttrViewBlock, sortAttrViewRow 专享
-    targetGroupID?: string // sortAttrViewRow 专享
-}
+type IOperation = Exclude<import("./api").TransactionOperationRequest, {action: import("./api").UnknownTransactionAction}>;
 
 interface IAVFilterOperation {
     action: "setAttrViewColRelationFilters" | "setAttrViewColRollupFilters";
@@ -927,7 +799,7 @@ interface IPluginData {
     name: string,
     js: string,
     css: string,
-    i18n: Record<string, string>
+    i18n: Record<string, import("./api").JSONValue>
 }
 
 interface IPluginDockTab {
@@ -1059,9 +931,9 @@ interface IFile {
     hMtime: string;
     hCtime: string;
     hSize: string;
-    dueFlashcardCount?: string;
-    newFlashcardCount?: string;
-    flashcardCount?: string;
+    dueFlashcardCount?: number;
+    newFlashcardCount?: number;
+    flashcardCount?: number;
     id: string;
     count: number;
     subFileCount: number;
@@ -1325,23 +1197,23 @@ interface IAVNewItemTemplate {
 }
 
 interface IAVView {
-    name: string;
-    desc: string;
-    id: string;
-    type: TAVView;
-    icon: string;
-    hideAttrViewName: boolean;
-    pageSize: number;
-    showIcon: boolean;
-    wrapField: boolean;
+    name?: string;
+    desc?: string;
+    id?: string;
+    type?: TAVView;
+    icon?: string;
+    hideAttrViewName?: boolean;
+    pageSize?: number;
+    showIcon?: boolean;
+    wrapField?: boolean;
     groupHidden?: number,  // 0：显示，1：空白隐藏，2：手动隐藏
     groupFolded?: boolean,
-    filters: IAVFilter[],
-    sorts: IAVSort[],
-    groups: IAVView[]
-    group: IAVGroup
-    groupKey: IAVColumn
-    groupValue: IAVCellValue
+    filters?: IAVFilter[],
+    sorts?: IAVSort[],
+    groups?: IAVView[]
+    group?: IAVGroup
+    groupKey?: IAVColumn
+    groupValue?: IAVCellValue
 }
 
 interface IAVFieldView {
@@ -1378,7 +1250,7 @@ interface IAVGallery extends IAVView {
     displayEmptyFields: boolean;
     fitImage: boolean;
     cards: IAVGalleryItem[],
-    desc: string
+    desc?: string
     fields: IAVColumn[]
     cardCount: number,
 }
@@ -1395,7 +1267,7 @@ interface IAVKanban extends IAVView {
     displayEmptyFields: boolean;
     fitImage: boolean;
     cards: IAVGalleryItem[],
-    desc: string
+    desc?: string
     fields: IAVColumn[]
     cardCount: number,
     fillColBackgroundColor: boolean
@@ -1404,7 +1276,7 @@ interface IAVKanban extends IAVView {
 interface IAVFilter {
     column?: string,                                  // 叶子节点：字段（列）ID
     valueSource?: "stored" | "rendered",             // 叶子节点：值来源，默认为存储值
-    operator?: TAVFilterOperator,                     // 叶子节点：操作符
+    operator?: TAVFilterOperator | "",                     // 叶子节点：操作符
     quantifier?: string,                              // 叶子节点：量词
     value?: IAVCellValue,                             // 叶子节点：过滤值
     relativeDate?: IAVRelativeDate,                   // 叶子节点：相对时间
@@ -1436,27 +1308,27 @@ interface IAVGroup {
 interface IAVSort {
     column: string,
     valueSource?: "stored" | "rendered",             // 值来源，默认为存储值
-    order: "ASC" | "DESC",
+    order: "ASC" | "DESC" | "",
     dateEndpoint?: "start" | "end"
 }
 
 interface IAVColumn {
-    width: string,
-    align: TAVAlign,
-    icon: string,
-    id: string,
-    name: string,
-    desc: string,
-    wrap: boolean,
-    pin: boolean,
-    hidden: boolean,
+    width?: string,
+    align?: TAVAlign,
+    icon?: string,
+    id?: string,
+    name?: string,
+    desc?: string,
+    wrap?: boolean,
+    pin?: boolean,
+    hidden?: boolean,
     fullRow?: boolean,
-    type: TAVCol,
-    numberFormat: string,
+    type?: TAVCol,
+    numberFormat?: string,
     dateFormat?: TAVDateFormat,
-    template: string,
+    template?: string,
     renderTemplate?: string,
-    calc: IAVCalc,
+    calc?: IAVCalc,
     updated?: {
         includeTime: boolean
     }
@@ -1498,18 +1370,18 @@ interface IAVCardCoverPosition {
 }
 
 interface IAVCell {
-    id: string,
-    color: string,
-    bgColor: string,
-    value: IAVCellValue,
-    valueType: TAVCol,
+    id?: string,
+    color?: string,
+    bgColor?: string,
+    value?: IAVCellValue,
+    valueType?: TAVCol,
 }
 
 interface IAVCellValue {
     keyID?: string,
     id?: string,
     blockID?: string // 为 row id
-    type: TAVCol,
+    type?: TAVCol,
     renderedContent?: string,
     isDetached?: boolean,
     text?: {
@@ -1739,4 +1611,5 @@ interface ISiYuanUriBlockInfo {
     avItemID?: string;
     avViewID?: string;
     avGroupID?: string;
+    avStandalone?: boolean;
 }

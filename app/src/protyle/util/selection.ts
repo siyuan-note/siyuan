@@ -660,7 +660,10 @@ Record<string, string> | undefined => {
     return context;
 };
 
-export const restoreFocusContext = (protyle: IProtyle, context: Record<string, string>) => {
+export const restoreFocusContext = (protyle: IProtyle, context: Pick<IOperation["context"],
+    "undoFocusStart" | "undoFocusEnd" | "undoFocusId" | "undoFocusIndex" | "undoFocusEndId" |
+    "undoFocusEndIndex" | "undoFocusEmbedId" | "undoFocusTableCell" | "undoFocusTableSelection" |
+    "undoFocusCalloutTitle" | "undoFocusIgnoreZWSP" | "undoFocusCollapseToEnd" | "undoFocusStartAtEnd">) => {
     const start = Number(context.undoFocusStart);
     const end = Number(context.undoFocusEnd);
     if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end < 0) {

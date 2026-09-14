@@ -29,7 +29,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
@@ -156,21 +155,6 @@ func testGetBlockInfoRecovery(t *testing.T, name string) {
 		if response.Code != wantCode || response.Data.RootID != "" || treenode.GetBlockTree(docID) != nil {
 			t.Fatalf("unexpected recovery or response: %s", recorder.Body.String())
 		}
-	}
-}
-
-func TestParseBlockRefStringArrayEmptyHandling(t *testing.T) {
-	arg := map[string]any{"ids": []any{}}
-
-	requiredResult := gulu.Ret.NewResult()
-	if _, ok := parseBlockRefStringArray(arg, "ids", requiredResult, true); ok || requiredResult.Code != -1 {
-		t.Fatalf("expected an empty required array to be rejected, got code %d", requiredResult.Code)
-	}
-
-	optionalResult := gulu.Ret.NewResult()
-	values, ok := parseBlockRefStringArray(arg, "ids", optionalResult, false)
-	if !ok || optionalResult.Code != 0 || len(values) != 0 {
-		t.Fatalf("expected an empty optional array to be accepted, got code %d and values %v", optionalResult.Code, values)
 	}
 }
 

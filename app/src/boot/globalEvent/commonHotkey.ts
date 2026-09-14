@@ -1,3 +1,4 @@
+import {keymapPayload} from "../../config/keymapPayload";
 import {mergeKeymapDefault} from "../../util/keymapBindings";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
@@ -74,7 +75,7 @@ const matchKeymap = (keymap: Config.IKeys, key1: "general" | "editor", key2?: "g
     return match;
 };
 
-const hasKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
+const hasKeymap = (keymap: Config.IKeys, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     let match = true;
     if (key1 === "editor") {
         if (Object.keys(window.siyuan.config.keymap[key1][key2]).length !== Object.keys(Constants.SIYUAN_KEYMAP[key1][key2]).length) {
@@ -151,7 +152,7 @@ export const correctHotkey = (app: App) => {
         });
         /// #endif
         fetchPost("/api/setting/setKeymap", {
-            data: window.siyuan.config.keymap
+            data: keymapPayload(window.siyuan.config.keymap)
         }, () => {
             /// #if !BROWSER
             sendGlobalShortcut(app);
@@ -168,7 +169,7 @@ export const syncAppMenuShortcuts = (suspended = false) => {
     if (!isMac()) {
         return;
     }
-    const appMenuHotkeyItems: Record<string, IKeymapItem> = {
+    const appMenuHotkeyItems: Config.IKeys = {
         config: window.siyuan.config.keymap.general.config,
         toggleWin: window.siyuan.config.keymap.general.toggleWin,
         undo: window.siyuan.config.keymap.editor.general.undo,

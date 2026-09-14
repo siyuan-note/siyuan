@@ -255,6 +255,7 @@ test("visibility menu leaves custom controls blank while preserving ordinary plu
         {getAttribute: () => "#iconClock"} : null});
     const dependencies = {
         TOP_BAR_ROOT_PATH: "topBar",
+        isInMobileApp: () => false,
         STATUS_BAR_ROOT_PATH: "statusBar",
         buildEntryVisibilityMenuItems: (_path: string, runtime: {getEntryIcon: (path: string) => object}) => [
             runtime.getEntryIcon("topBar.custom"), runtime.getEntryIcon("topBar.icon"),
@@ -287,6 +288,7 @@ test("plugin menu supports custom content without SVG icons", () => {
         Constants: {},
         isBazaarAvailable: () => true,
         isMobile: () => false,
+        isInMobileApp: () => false,
         hasPluginSetting: () => false,
     };
     const exports: {openTopBarMenu?: typeof import("./openTopBarMenu").openTopBarMenu} = {};

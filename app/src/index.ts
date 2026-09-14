@@ -1,4 +1,6 @@
 import {Constants} from "./constants";
+import {systemConfig} from "./config/systemConfig";
+import {openStandaloneDatabaseItemByURI} from "./protyle/render/av/openStandaloneDatabaseItem";
 /// #if BROWSER
 import "./util/iosWindowControls";
 /// #endif
@@ -307,7 +309,7 @@ export class App {
         fetchPost("/api/system/getConf", {}, async (response) => {
             await addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
-            window.siyuan.config = response.data.conf;
+            window.siyuan.config = systemConfig(response.data.conf, () => structuredClone(Constants.SIYUAN_EMPTY_LAYOUT));
             await loadDesktopHostConnection();
             ensureUILayout();
             window.siyuan.isPublish = response.data.isPublish;
@@ -325,7 +327,7 @@ export class App {
                     window.siyuan.menus = new Menus(this);
                     bootSync();
                     fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
-                        window.siyuan.user = userResponse.data;
+                        window.siyuan.user = userResponse.data && "userId" in userResponse.data ? userResponse.data : null;
                         await ensureOnboarding();
                         await setNoteBook();
                         await onGetConfig(response.data.start, this);
@@ -355,6 +357,9 @@ const siyuanApp = new App();
 window.openFileByURL = (openURL) => {
     const blockInfo = parseSiYuanUriInfo(openURL);
     if (blockInfo != null) {
+        if (openStandaloneDatabaseItemByURI(siyuanApp, blockInfo)) {
+            return true;
+        }
         if (blockInfo.avItemID) {
             queueAVLocateRequest(blockInfo.id, {
                 itemID: blockInfo.avItemID,

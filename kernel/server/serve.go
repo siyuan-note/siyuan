@@ -317,7 +317,7 @@ func Serve(fastMode bool, cookieKey string) {
 
 func gzipMiddleware() gin.HandlerFunc {
 	return gzip.Gzip(gzip.DefaultCompression,
-		gzip.WithExcludedExtensions([]string{".pdf", ".mp3", ".wav", ".ogg", ".mov", ".weba", ".mkv", ".mp4", ".webm", ".flac", ".gz"}),
+		gzip.WithExcludedExtensions([]string{".png", ".gif", ".jpeg", ".jpg", ".webp", ".avif", ".pdf", ".mp3", ".wav", ".ogg", ".mov", ".weba", ".mkv", ".mp4", ".webm", ".flac", ".gz"}),
 		gzip.WithExcludedPathsRegexs([]string{`(?i)\.hei[cf]$`}))
 }
 
@@ -740,9 +740,9 @@ func serveAppearance(ginServer *gin.Engine) {
 		appearancePath = filepath.Join(util.WorkingDir, "appearance")
 	}
 	siyuan.GET("/appearance/*filepath", func(c *gin.Context) {
-		filePath := filepath.Join(appearancePath, strings.TrimPrefix(c.Request.URL.Path, "/appearance/"))
-		if !gulu.File.IsSubPath(appearancePath, filePath) {
-			c.Status(http.StatusUnauthorized)
+		filePath, status := resolveAppearanceFile(appearancePath, strings.TrimPrefix(c.Request.URL.Path, "/appearance/"))
+		if status != 0 {
+			c.Status(status)
 			return
 		}
 
@@ -762,7 +762,11 @@ func serveAppearance(ginServer *gin.Engine) {
 			if "zh-CN" != lang && "en" != lang {
 				// 多语言配置缺失项使用对应英文配置项补齐 https://github.com/siyuan-note/siyuan/issues/5322
 
-				enUSFilePath := filepath.Join(appearancePath, "langs", "en.json")
+				enUSFilePath, status := resolveAppearanceFile(appearancePath, "langs/en.json")
+				if status != 0 {
+					c.Status(status)
+					return
+				}
 				enUSData, err := os.ReadFile(enUSFilePath)
 				if err != nil {
 					logging.LogErrorf("read en_US.json [%s] failed: %s", enUSFilePath, err)
@@ -905,27 +909,69 @@ func setAssetsAttachmentDisposition(c *gin.Context, pathForBaseName string) {
 
 const htmlAssetIFrameCSP = "sandbox allow-scripts; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
 
-// isAssetInlineUnsafe 判断资产是否禁止浏览器内联渲染，采用媒体类型白名单策略：
-// 仅图片、音视频、PDF 和纯文本允许内联渲染；白名单之外的任何类型（包括所有 text/html、
-// text/xml 及 +xml 类型，以及无法识别 Content-Type 的扩展名）一律强制以附件形式下载。
-// 无法识别的类型可能被 http.ServeFile 内容嗅探识别为 text/html，因此同样视为不安全
+// assetInlineMediaType 使用固定映射决定允许内联的类型，避免宿主 MIME 配置改变安全边界。
+// 未列出的扩展名一律强制下载，SVG 等可执行脚本的格式不允许内联。
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-7h8j-qw37-w46g
+func assetInlineMediaType(absPath string) string {
+	switch strings.ToLower(filepath.Ext(absPath)) {
+	case ".jpg", ".jpe", ".jpeg", ".jfif", ".pjp", ".pjpeg":
+		return "image/jpeg"
+	case ".png", ".apng":
+		return "image/png"
+	case ".gif":
+		return "image/gif"
+	case ".webp":
+		return "image/webp"
+	case ".bmp":
+		return "image/bmp"
+	case ".ico", ".cur":
+		return "image/x-icon"
+	case ".avif":
+		return "image/avif"
+	case ".heic":
+		return "image/heic"
+	case ".heif":
+		return "image/heif"
+	case ".tif", ".tiff":
+		return "image/tiff"
+	case ".mp3":
+		return "audio/mpeg"
+	case ".wav":
+		return "audio/wav"
+	case ".ogg", ".oga", ".opus":
+		return "audio/ogg"
+	case ".m4a":
+		return "audio/mp4"
+	case ".aac":
+		return "audio/aac"
+	case ".flac":
+		return "audio/flac"
+	case ".weba":
+		return "audio/webm"
+	case ".mov":
+		return "video/quicktime"
+	case ".mkv":
+		return "video/x-matroska"
+	case ".mp4", ".m4v":
+		return "video/mp4"
+	case ".webm":
+		return "video/webm"
+	case ".ogv":
+		return "video/ogg"
+	case ".mpeg", ".mpg":
+		return "video/mpeg"
+	case ".avi":
+		return "video/x-msvideo"
+	case ".pdf":
+		return "application/pdf"
+	case ".txt", ".text", ".log":
+		return "text/plain; charset=utf-8"
+	}
+	return ""
+}
+
 func isAssetInlineUnsafe(absPath string) bool {
-	ext := strings.ToLower(filepath.Ext(absPath))
-	mediaType := mime.TypeByExtension(ext)
-	if mediaType == "" {
-		return true
-	}
-	mediaType, _, _ = mime.ParseMediaType(mediaType)
-	switch {
-	case strings.HasPrefix(mediaType, "image/") && "image/svg+xml" != mediaType:
-		return false
-	case strings.HasPrefix(mediaType, "audio/"), strings.HasPrefix(mediaType, "video/"):
-		return false
-	case "application/pdf" == mediaType, "text/plain" == mediaType:
-		return false
-	}
-	return true
+	return assetInlineMediaType(absPath) == ""
 }
 
 // secureAssetContentHeaders 统一为资产响应设置安全头：
@@ -939,6 +985,9 @@ func secureAssetContentHeaders(context *gin.Context, absPath, dispositionName st
 		return
 	}
 	setAssetsAttachmentDisposition(context, dispositionName)
+	if mediaType := assetInlineMediaType(absPath); mediaType != "" {
+		context.Header("Content-Type", mediaType)
+	}
 	if isAssetInlineUnsafe(absPath) {
 		context.Header("Content-Disposition", formatContentDispositionAttachment(filepath.Base(dispositionName)))
 	}

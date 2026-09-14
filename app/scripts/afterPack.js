@@ -75,7 +75,7 @@ async function trimPackagedChangelogs(appOutDir, packager, platform) {
 
 async function removeLanguagePacks(appOutDir, packager, platform) {
   // 支持的语言都要保留，否则影响开发者工具字体显示
-  const wantedLanguages = ["ar", "de", "en", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "nl", "pl", "pt-BR", "ru", "sk", "th", "tr", "uk", "zh-TW", "zh-CN"];
+  const wantedLanguages = ["ar", "de", "en", "es", "fr", "he", "hi", "id", "it", "ja", "ko", "nl", "pl", "pt-BR", "ru", "sk", "sr", "th", "tr", "uk", "zh-TW", "zh-CN"];
   const keepPrefixes = new Set(wantedLanguages.map(lang => lang.substring(0, 2)));
 
   let resourcePath;

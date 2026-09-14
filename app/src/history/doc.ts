@@ -1,3 +1,5 @@
+import {openInputDialog} from "../dialog/inputDialog";
+import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {Constants} from "../constants";
@@ -463,17 +465,21 @@ export const openDocHistory = (options: {
                 break;
             } else if (type === "jumpRepoPage") {
                 const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
-                confirmDialog(
-                    window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
-                    `<input class="b3-text-field fn__block" type="number" min="1" max="${totalPage}" value="${pageNumElement.textContent}">`,
-                    (confirmD) => {
-                        const inputElement = confirmD.element.querySelector(".b3-text-field") as HTMLInputElement;
-                        if (inputElement.value === "") {
+                openInputDialog({
+                    title: window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
+                    value: String(pageNumElement.textContent),
+                    type: "number",
+                    min: "1",
+                    max: String(totalPage),
+                    onConfirm: (value, dialog) => {
+                        if (!Number.isFinite(parseInt(value))) {
+                            showMessage(window.siyuan.languages.jumpToPage.replace("${x}", totalPage));
                             return;
                         }
-                        renderDoc(fileElement, Math.max(1, Math.min(parseInt(inputElement.value), totalPage)), options.id);
-                    }
-                );
+                        renderDoc(fileElement, Math.max(1, Math.min(parseInt(value), totalPage)), options.id);
+                        dialog.destroy();
+                    },
+                });
             } else if ((type === "snapshotprevious" || type === "snapshotnext") &&
                 target.getAttribute("disabled") !== "disabled") {
                 const currentPage = parseInt(repoElement.getAttribute("data-page") || "1");
@@ -483,17 +489,21 @@ export const openDocHistory = (options: {
                 break;
             } else if (type === "jumpSnapshotPage") {
                 const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
-                confirmDialog(
-                    window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
-                    `<input class="b3-text-field fn__block" type="number" min="1" max="${totalPage}" value="${target.textContent}">`,
-                    (confirmD) => {
-                        const inputElement = confirmD.element.querySelector(".b3-text-field") as HTMLInputElement;
-                        if (inputElement.value === "") {
+                openInputDialog({
+                    title: window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
+                    value: String(target.textContent),
+                    type: "number",
+                    min: "1",
+                    max: String(totalPage),
+                    onConfirm: (value, dialog) => {
+                        if (!Number.isFinite(parseInt(value))) {
+                            showMessage(window.siyuan.languages.jumpToPage.replace("${x}", totalPage));
                             return;
                         }
-                        renderRepo(repoElement, Math.max(1, Math.min(parseInt(inputElement.value), totalPage)), options.id);
-                    }
-                );
+                        renderRepo(repoElement, Math.max(1, Math.min(parseInt(value), totalPage)), options.id);
+                        dialog.destroy();
+                    },
+                });
             }
             target = target.parentElement;
         }

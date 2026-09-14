@@ -16,8 +16,8 @@ export interface IFileTreeSortRefreshTarget {
     path: string;
 }
 
-const parseSortMode = (value: string | null) => {
-    if (value === null || value.trim() === "") {
+const parseSortMode = (value: string | null | undefined) => {
+    if (typeof value !== "string" || value.trim() === "") {
         return;
     }
     const sortMode = Number(value);
@@ -34,7 +34,7 @@ export const getFileTreeListSortMode = (element: Element) => {
         return effectiveSortMode;
     }
 
-    const notebookElement = element?.closest("ul[data-url][data-sortmode]");
+    const notebookElement = element?.closest("[data-sortmode]");
     const notebookSortMode = parseSortMode(notebookElement?.getAttribute("data-sortmode"));
     return notebookSortMode === 15 || typeof notebookSortMode !== "number" ?
         window.siyuan.config.fileTree.sort : notebookSortMode;

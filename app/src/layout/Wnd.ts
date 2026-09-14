@@ -951,13 +951,13 @@ export class Wnd {
             }
             window.siyuan.storage[Constants.LOCAL_CLOSED_TABS] =
                 sanitizeClosedTabs(window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
-            if (window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length > Constants.SIZE_UNDO) {
-                window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].pop();
-            }
             if (item.headElement && !isSensitiveTab(item)) {
                 const tabJSON = {};
                 layoutToJSON(item, tabJSON);
                 window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].push(tabJSON);
+            }
+            while (window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length > Constants.SIZE_UNDO) {
+                window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].shift();
             }
             setStorageVal(Constants.LOCAL_CLOSED_TABS, window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
             if (item.model instanceof Custom && item.model.beforeDestroy) {

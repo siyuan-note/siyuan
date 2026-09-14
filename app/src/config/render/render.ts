@@ -69,7 +69,7 @@ const genTextBlockFieldHtml = (
 ): string => {
     const spellcheck = window.siyuan.config.editor.spellcheck ? "true" : "false";
     if (mode === "textarea") {
-        return `<textarea class="b3-text-field fn__block" id="${id}" spellcheck="${spellcheck}">${value}</textarea>`;
+        return `<textarea class="b3-text-field fn__block" id="${id}" spellcheck="${spellcheck}">${Lute.EscapeHTMLStr(value)}</textarea>`;
     }
     if (mode === "input-password") {
         return `<div class="b3-form__icona fn__block">

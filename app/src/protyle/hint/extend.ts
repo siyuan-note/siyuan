@@ -52,7 +52,7 @@ import {
     setBlockSelectionModeElement
 } from "../wysiwyg/blockSelection";
 import {countBlockWord} from "../../layout/status";
-import {genTemplateDocTreePlanHTML, ITemplateDocTreePlan} from "../../template/docTree";
+import {genTemplateDocTreePlanHTML} from "../../template/docTree";
 
 const slashBuiltinStyleIDs: Partial<Record<string, TBuiltinInlineStyleID>> = {
     infoStyle: "info",
@@ -549,7 +549,7 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
     const nodeElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
     const createTarget = protyle.hint.prepareCreateTarget(protyle, "ref");
     protyle.hint.genLoading(protyle);
-    let refParam: IObject;
+    let refParam: import("../../types/api").SearchRefBlockRequestInput;
     if (protyle.lite) {
         refParam = {k: key, id: "", rootID: "", beforeLen: 48, isDatabase: false, isSquareBrackets: true};
     } else {
@@ -633,7 +633,7 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
     }
     protyle.hint.genLoading(protyle);
     const nodeElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
-    const embedParam: IObject = {
+    const embedParam: import("../../types/api").SearchRefBlockRequestInput = {
         k: key,
         isDatabase: false,
         beforeLen: Math.floor((Math.max(protyle.element.clientWidth / 2, 320) - 58) / 28.8),
@@ -686,7 +686,7 @@ export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement
             highlightRender(protyle.wysiwyg.element);
             hideElements(["util"], protyle);
         };
-        const docTreePlan = response.data.docTreePlan as ITemplateDocTreePlan | undefined;
+        const docTreePlan = response.data.docTreePlan;
         if (docTreePlan?.id) {
             hideElements(["util"], protyle);
             confirmDialog(window.siyuan.languages.template, genTemplateDocTreePlanHTML(docTreePlan, window.siyuan.languages.newSubDoc), () => {

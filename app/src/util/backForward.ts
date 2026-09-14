@@ -1,3 +1,4 @@
+import type {FileTreeGetDocRequestInput} from "../types/api";
 import {hasClosestBlock, isInEmbedBlock} from "../protyle/util/hasClosest";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 import {focusByOffset, focusByRange, getSelectionOffset} from "../protyle/util/selection";
@@ -179,7 +180,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
         }
         // 动态加载导致内容移除 https://github.com/siyuan-note/siyuan/issues/10692
         if (!blockElement && !stack.zoomId && !stack.protyle.scroll.element.classList.contains("fn__none")) {
-            const getDocParam: IObject = {
+            const getDocParam: FileTreeGetDocRequestInput = {
                 id: stack.id,
                 mode: 3,
                 size: window.siyuan.config.editor.dynamicLoadBlocks,

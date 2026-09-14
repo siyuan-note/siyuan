@@ -20,6 +20,19 @@ type Route struct {
 
 func (r Route) Key() string { return r.Method + " " + r.Path }
 
+// ExpandMethods 按路由器的 Any 注册行为展开实际 HTTP 方法。
+func ExpandMethods(methods []string) []string {
+	var result []string
+	for _, method := range methods {
+		if method == "ANY" {
+			result = append(result, "GET", "POST", "PUT", "PATCH", "HEAD", "OPTIONS", "DELETE", "CONNECT", "TRACE")
+		} else {
+			result = append(result, method)
+		}
+	}
+	return result
+}
+
 // ReadRoutes 读取实际路由及处理函数声明，防止契约与独立登记表各自漂移。
 func ReadRoutes(apiDir string) ([]Route, map[string]string, error) {
 	var routes []Route
@@ -42,7 +55,7 @@ func ReadRoutes(apiDir string) ([]Route, map[string]string, error) {
 		}
 		ast.Inspect(file, func(node ast.Node) bool {
 			if spec, ok := node.(*ast.ValueSpec); ok && len(spec.Names) == 1 && len(spec.Values) == 1 {
-				if call, ok := spec.Values[0].(*ast.CallExpr); ok && len(call.Args) == 2 {
+				if call, ok := spec.Values[0].(*ast.CallExpr); ok && len(call.Args) >= 2 {
 					if fun, ok := call.Fun.(*ast.Ident); ok && fun.Name == "contractHandler" {
 						if endpoint, ok := call.Args[0].(*ast.SelectorExpr); ok {
 							bindings[spec.Names[0].Name] = endpointNames[endpoint.Sel.Name]

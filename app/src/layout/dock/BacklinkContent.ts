@@ -1,3 +1,4 @@
+import {normalizeAssetOpenConfig} from "../../editor/assetOpen";
 import {bindPanelSearch} from "./panelSearch";
 import type {Tab} from "../Tab";
 import {Model} from "../Model";
@@ -777,7 +778,7 @@ export class BacklinkContent extends Model {
                 window.siyuan.config.editor.backmentionSort = sortValue;
             }
             fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
-                window.siyuan.config.editor = response.data;
+                window.siyuan.config.editor = {...response.data, assetOpen: normalizeAssetOpenConfig(response.data.assetOpen)};
             });
             this.searchBacklinks();
         };
@@ -1111,7 +1112,7 @@ export class BacklinkContent extends Model {
         const viewStateGeneration = this.viewStateGeneration;
         const contextRequestVersion = this.contextRequestVersions[index];
         const requestGeneration = ++record.requestGeneration;
-        const param: {[key: string]: string | number | boolean | IBacklinkSourceFilter} = {
+        const param: import("../../types/api").BacklinkDocumentRequestInput = {
             defID: blockId,
             refTreeID: docId,
             highlight: !isSupportCSSHL(),
@@ -1137,7 +1138,7 @@ export class BacklinkContent extends Model {
                 requestGeneration !== record.requestGeneration) {
                 return;
             }
-            if (!response.data) {
+            if (response.code !== 0 || !response.data) {
                 return;
             }
             svgElement.removeAttribute("disabled");
@@ -1949,7 +1950,7 @@ export class BacklinkContent extends Model {
                 this.markDirty();
                 return;
             }
-            if (!response.data) {
+            if (response.code !== 0 || !response.data || !("revision" in response.data)) {
                 if (this.showingLoading || init) {
                     this.render(undefined, init);
                 }

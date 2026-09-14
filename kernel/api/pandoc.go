@@ -17,30 +17,15 @@
 package api
 
 import (
-	"net/http"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func pandoc(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	var dirStr string
-	var pandocArgs []any
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("dir", &dirStr, false, false),
-		util.BindJsonArg("args", &pandocArgs, true, false),
-	) {
-		return
-	}
+var pandoc = contractHandler(apicontract.Pandoc, func(c *gin.Context, request apicontract.PandocRequest) apicontract.Response[apicontract.PandocData] {
+	dirStr := request.Dir
 
 	var dir string
 	if dirStr != "" {
@@ -48,19 +33,10 @@ func pandoc(c *gin.Context) {
 	} else {
 		dir = gulu.Rand.String(7)
 	}
-	var args []string
-	for _, v := range pandocArgs {
-		args = append(args, v.(string))
-	}
-
-	path, err := util.ConvertPandoc(dir, args...)
+	path, err := util.ConvertPandoc(dir, request.Args...)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+		return apicontract.Failure[apicontract.PandocData](-1, err.Error())
 	}
 
-	ret.Data = map[string]any{
-		"path": path,
-	}
-}
+	return apicontract.Success(apicontract.PandocData{Path: path})
+})

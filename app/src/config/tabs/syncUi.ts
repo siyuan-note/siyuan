@@ -1,5 +1,7 @@
 import {showMessage} from "../../dialog/message";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {ContractFormData} from "../../util/contractFormData";
+import type {APICallbackResponse, APIPOSTRoutes} from "../../types/api";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {isInIOS, saveExportFile} from "../../protyle/util/compatibility";
 import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
@@ -362,11 +364,10 @@ const bindProviderConfigEvent = (configElement: Element, root: Element) => {
         if (!getHostCapabilities().importExport) {
             return;
         }
-        const formData = new FormData();
-        formData.append("file", importElement.files[0]);
+        const formData = new ContractFormData({file: importElement.files[0]});
         const isS3 = importElement.getAttribute("data-type") === "s3";
-        fetchPost(isS3 ? "/api/sync/importSyncProviderS3" : "/api/sync/importSyncProviderWebDAV", formData, (response) => {
-            if (isS3) {
+        fetchPost(isS3 ? "/api/sync/importSyncProviderS3" : "/api/sync/importSyncProviderWebDAV", formData, (response: APICallbackResponse<APIPOSTRoutes["/api/sync/importSyncProviderS3" | "/api/sync/importSyncProviderWebDAV"]["response"]>) => {
+            if ("s3" in response.data) {
                 window.siyuan.config.sync.s3 = response.data.s3;
             } else {
                 window.siyuan.config.sync.webdav = response.data.webdav;

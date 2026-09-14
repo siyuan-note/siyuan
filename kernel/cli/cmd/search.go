@@ -214,7 +214,7 @@ func init() {
 	searchCmd.Flags().StringArray("ext", nil, "asset file extension filter, repeatable, e.g. --ext pdf --ext docx (asset mode only)")
 	searchCmd.Flags().StringArrayP("notebook", "n", nil, "notebook ID filter (repeatable)")
 	searchCmd.Flags().StringArray("path", nil, "path prefix filter (repeatable)")
-	searchCmd.Flags().StringArrayP("type", "t", nil, "block type filter, repeatable (document heading paragraph list listItem codeBlock mathBlock table blockquote superBlock htmlBlock embedBlock databaseBlock audioBlock videoBlock iframeBlock widgetBlock callout)")
+	searchCmd.Flags().StringArrayP("type", "t", nil, "block type filter, repeatable (document heading paragraph list listItem codeBlock mathBlock table blockquote superBlock htmlBlock embedBlock databaseBlock audioBlock videoBlock iframeBlock widgetBlock callout tabs tabItem)")
 	searchCmd.Flags().StringArray("subtype", nil, "block subtype filter, repeatable (h1-h6, list:o, list:u, list:t, listItem:o, listItem:u, listItem:t)")
 	searchCmd.Flags().IntP("method", "m", 0, "search method: 0=keyword 1=query-syntax 2=sql 3=regex 4=semantic (asset mode ignores 4=semantic; uses 0-3 with same meanings)")
 	searchCmd.Flags().IntP("order-by", "o", 0, "order — blocks: 0=type 1=created-asc 2=created-desc 3=updated-asc 4=updated-desc 5=content 6=relevance-asc 7=relevance-desc; asset: 0=relevance-desc 1=relevance-asc 2=updated-asc 3=updated-desc")

@@ -7,7 +7,7 @@
 		"id": "20240530101000-gc0tuyd",
 		"title": "データバックアップ",
 		"type": "doc",
-		"updated": "20260803165036"
+		"updated": "20260914101605"
 	},
 	"Children": [
 		{
@@ -57,7 +57,7 @@
 			"Properties": {
 				"ID": "20240530101000-8fowrbc",
 				"id": "20240530101000-k3k2ztd",
-				"updated": "20260803165036"
+				"updated": "20260914101605"
 			},
 			"Children": [
 				{
@@ -75,7 +75,7 @@
 			"Properties": {
 				"ID": "20240530101000-0xlt5lu",
 				"id": "20240530101000-t8xga8c",
-				"updated": "20260803165036"
+				"updated": "20260914101605"
 			},
 			"Children": [
 				{
@@ -133,7 +133,7 @@
 					"Properties": {
 						"ID": "20240530101000-ho2ujhs",
 						"id": "20240530101000-236te0m",
-						"updated": "20260803165036"
+						"updated": "20260914101605"
 					},
 					"Children": [
 						{
@@ -142,21 +142,17 @@
 							"Properties": {
 								"ID": "20240530101000-sa1nf4z",
 								"id": "20240530101000-ao85v8q",
-								"updated": "20260803165036"
+								"updated": "20260914101605"
 							},
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "​ "
-								},
-								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "データ履歴"
+									"TextMarkTextContent": "履歴"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -165,16 +161,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ タブを開き、バックアップしたいスナップショットを選択して "
+									"Data": " を開き、ローカル欄でバックアップするスナップショットを探して、その項目の "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "タグアイコン"
+									"TextMarkTextContent": "スナップショットにタグを付ける"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ をクリックします"
+									"Data": " をクリックし、タグを入力します"
 								}
 							]
 						}
@@ -192,7 +188,7 @@
 					"Properties": {
 						"ID": "20240530101000-jjg53wa",
 						"id": "20240530101000-za65ndl",
-						"updated": "20240530101000"
+						"updated": "20260914101605"
 					},
 					"Children": [
 						{
@@ -201,30 +197,30 @@
 							"Properties": {
 								"ID": "20240530101000-77wtdl0",
 								"id": "20240530101000-uv0qj06",
-								"updated": "20240530101000"
+								"updated": "20260914101605"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ドロップダウンリストから "
+									"Data": "上部の "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "ローカルのタグ付きスナップショット"
+									"TextMarkTextContent": "タグ付きスナップショット"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ を選択し、アップロードしたいスナップショットを選択して "
+									"Data": " に切り替え、ローカル欄でアップロードするタグ付きスナップショットを探して "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "アップロードアイコン"
+									"TextMarkTextContent": "アップロード"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ をクリックします"
+									"Data": " をクリックします"
 								}
 							]
 						}
@@ -242,7 +238,7 @@
 					"Properties": {
 						"ID": "20240530101000-mbwy12q",
 						"id": "20240530101000-w0h8rba",
-						"updated": "20240530101000"
+						"updated": "20260914101605"
 					},
 					"Children": [
 						{
@@ -251,21 +247,30 @@
 							"Properties": {
 								"ID": "20240530101000-07hv5ac",
 								"id": "20240530101000-tdiqm45",
-								"updated": "20240530101000"
+								"updated": "20260914101605"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "アップロードが完了したら、ドロップダウンリストから "
+									"Data": "アップロード後はクラウド欄でバックアップしたタグ付きスナップショットを確認できます。幅の狭いウィンドウやモバイルでは、"
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "クラウドのタグ付きスナップショット"
+									"TextMarkTextContent": "ローカルスナップショット"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ を選択すると、クラウドにバックアップされたスナップショットが表示されます"
+									"Data": " と "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "クラウドスナップショット"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " で一覧を切り替えます"
 								}
 							]
 						}
@@ -313,6 +318,31 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20260914101605-2iswd6u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914101605-2iswd6u",
+				"updated": "20260914101605"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "一部のバックアップタグを削除する方法については、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260914101605-9l0hxqv",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "タグ付きスナップショットの一括管理"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を参照してください。"
 				}
 			]
 		},

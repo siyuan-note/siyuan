@@ -1148,6 +1148,9 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                         const foldTransaction = await fetchSyncPost("/api/block/getHeadingDeleteTransaction", {
                             id: foldId,
                         });
+                        if (foldTransaction.code !== 0) {
+                            return;
+                        }
                         unfoldData[foldId] = {
                             element: foldPreviousBlockElement,
                             previousID: foldTransaction.data.doOperations[foldTransaction.data.doOperations.length - 1].id
@@ -1176,6 +1179,9 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                         const foldTransaction = await fetchSyncPost("/api/block/getHeadingDeleteTransaction", {
                             id: foldId,
                         });
+                        if (foldTransaction.code !== 0) {
+                            return;
+                        }
                         unfoldData[foldId] = {
                             element: previousBlockElement,
                             previousID: foldTransaction.data.doOperations[foldTransaction.data.doOperations.length - 1].id

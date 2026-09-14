@@ -443,6 +443,9 @@ func indexTree(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err error)
 }
 
 func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err error) {
+	if isIndexIgnored(tree) {
+		return
+	}
 	oldBlockHashes := queryBlockHashes(tx, tree.ID)
 	blocks, spans, assets, attributes := fromTree(tree.Root, tree)
 	newBlockHashes := map[string]string{}
@@ -498,15 +501,19 @@ func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err error
 	return err
 }
 
+func isIndexIgnored(tree *parse.Tree) bool {
+	if ignoreLines := getIndexIgnoreLines(); 0 < len(ignoreLines) {
+		matcher := ignore.CompileIgnoreLines(ignoreLines...)
+		return matcher.MatchesPath("/" + path.Join(tree.Box, tree.Path))
+	}
+	return false
+}
+
 func insertTree0(tx *sql.Tx, tree *parse.Tree, context map[string]any,
 	blocks []*Block, spans []*Span, assets []*Asset, attributes []*Attribute,
 	refs []*Ref, fileAnnotationRefs []*FileAnnotationRef) (err error) {
-	if ignoreLines := getIndexIgnoreLines(); 0 < len(ignoreLines) {
-		// Support ignore index https://github.com/siyuan-note/siyuan/issues/9198
-		matcher := ignore.CompileIgnoreLines(ignoreLines...)
-		if matcher.MatchesPath("/" + path.Join(tree.Box, tree.Path)) {
-			return
-		}
+	if isIndexIgnored(tree) {
+		return
 	}
 
 	if err = insertBlocks(tx, blocks, context); err != nil {

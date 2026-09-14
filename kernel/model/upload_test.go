@@ -133,7 +133,7 @@ func cleanupAssetUploadTestHashes(t *testing.T, successes []AssetUploadSuccess) 
 }
 
 func TestRecordAssetUploadSuccessPreservesDuplicateNames(t *testing.T) {
-	succMap := map[string]any{}
+	succMap := map[string]string{}
 	var succFiles []AssetUploadSuccess
 	recordAssetUploadSuccess(succMap, &succFiles, 0, "image.png", "assets/image-first.png")
 	recordAssetUploadSuccess(succMap, &succFiles, 1, "image.png", "assets/image-second.png")

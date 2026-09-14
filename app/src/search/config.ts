@@ -1,3 +1,20 @@
+import type {FullTextSearchBlockRequestInput} from "../types/api";
+
+export const buildSearchRequest = (config: Config.IUILayoutTabSearchConfig): FullTextSearchBlockRequestInput => {
+    return {
+        query: config.query,
+        method: config.method,
+        types: {...config.types},
+        subTypes: config.subTypes,
+        paths: config.idPath || [],
+        groupBy: config.group,
+        orderBy: config.sort,
+        page: config.page || 1,
+        pageSize: 32,
+        searchHPath: !config.hasReplace,
+    };
+};
+
 const temporaryPathConfigs = new WeakSet<Config.IUILayoutTabSearchConfig>();
 const searchPathRequestVersions = new WeakMap<object, number>();
 

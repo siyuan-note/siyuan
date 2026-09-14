@@ -321,9 +321,12 @@ const pasteAVMatrix = async (options: {
         startItemID,
         count: Math.max(options.values.length, 1),
     });
-    const view = response.data?.view as IAVTable;
+    if (response.code !== 0) {
+        return;
+    }
+    const view: IAVTable = response.data?.view;
     const rows = view?.rows;
-    if (response.code !== 0 || !Array.isArray(rows) || rows.length === 0) {
+    if (!Array.isArray(rows) || rows.length === 0) {
         return;
     }
 

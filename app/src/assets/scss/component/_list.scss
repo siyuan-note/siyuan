@@ -3,13 +3,32 @@
 
 .file-tree__pins {
   --file-toggle-width: 0px;
-  padding-bottom: 2px;
+  padding-bottom: 8px;
+  margin-bottom: 6px;
+  flex-shrink: 0;
+  max-height: 40%;
+  min-height: 30px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--b3-border-color);
 
-  &.b3-list--background .b3-list-item.dragover__top::after {
+  > .b3-list {
+    min-height: 0;
+  }
+
+  &-list {
+    overflow: auto;
+    min-height: 0;
+  }
+
+  [data-pin-heading] > .b3-list-item__icon:hover {
+    background-color: transparent;
+  }
+
+  .b3-list--background .b3-list-item.dragover__top::after {
     top: 0;
   }
 
-  &.b3-list--background .b3-list-item.dragover__bottom::after {
+  .b3-list--background .b3-list-item.dragover__bottom::after {
     bottom: 0;
   }
 }

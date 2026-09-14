@@ -5,6 +5,7 @@ import * as path from "path";
 import type {SettingTabBuilder} from "../setting/builder";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
+import {ContractFormData} from "../../util/contractFormData";
 /// #if !MOBILE
 import {exportLayout} from "../../layout/util";
 /// #endif
@@ -302,8 +303,7 @@ const registerAppDataGroup = (tab: SettingTabBuilder) => {
         afterMount: (root) => {
             root.querySelector("#importData")?.addEventListener("change", (event: Event) => {
                 const target = event.target as HTMLInputElement;
-                const formData = new FormData();
-                formData.append("file", target.files[0]);
+                const formData = new ContractFormData({file: target.files[0]});
                 fetchPost("/api/import/importData", formData);
             });
         },
@@ -333,8 +333,7 @@ const registerAppDataGroup = (tab: SettingTabBuilder) => {
         afterMount: (root) => {
             root.querySelector("#importConf")?.addEventListener("change", (event: Event) => {
                 const target = event.target as HTMLInputElement;
-                const formData = new FormData();
-                formData.append("file", target.files[0]);
+                const formData = new ContractFormData({file: [target.files[0]]});
                 fetchPost("/api/system/importConf", formData, (response) => {
                     if (response.code !== 0) {
                         showMessage(response.msg);
@@ -362,7 +361,9 @@ const mountExportData = (root: HTMLElement) => {
     root.querySelector("#exportData")?.addEventListener("click", async () => {
         /// #if BROWSER
         fetchPost("/api/export/exportData", {}, (response) => {
-            saveExportFile(response.data.zip);
+            if (response.code === 0) {
+                saveExportFile(response.data.zip);
+            }
         });
         /// #else
         const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {

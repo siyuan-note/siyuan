@@ -1,3 +1,4 @@
+import type {BlockQueryRequestInput} from "../types/api";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {getDisplayName, getNotebookName, isEncryptedBox} from "../util/pathName";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -22,7 +23,7 @@ export const deleteFile = async (notebookId: string, pathString: string) => {
         });
         return;
     }
-    const docInfoParam: IObject = {
+    const docInfoParam: BlockQueryRequestInput = {
         id: getDisplayName(pathString, true, true)
     };
     if (isEncryptedBox(notebookId)) {
@@ -80,7 +81,7 @@ export const deleteFiles = async (liElements: Element[]) => {
     if (liElements.length === 1) {
         const itemTopULElement = hasTopClosestByTag(liElements[0], "UL");
         if (itemTopULElement) {
-            const itemNotebookId = itemTopULElement.getAttribute("data-url");
+            const itemNotebookId = liElements[0].getAttribute("data-notebook") || itemTopULElement.getAttribute("data-url");
             if (liElements[0].getAttribute("data-type") === "navigation-file") {
                 deleteFile(itemNotebookId, liElements[0].getAttribute("data-path"));
             } else {

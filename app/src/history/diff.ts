@@ -260,6 +260,7 @@ const genSnapshotSide = (state: SnapshotDiffFilterState) => {
 };
 
 const resetSnapshotPreview = (dialog: Dialog) => {
+    dialog.element.querySelector(".history__snapshot-diff")?.classList.remove("history__snapshot-diff--preview");
     dialog.element.querySelectorAll('[data-type="editors"] > div').forEach((item) => item.classList.add("fn__none"));
 };
 
@@ -306,6 +307,17 @@ const renderCompare = (app: App, element: HTMLElement) => {
         }
     }
     const editorsElement = dialogContainerElement.querySelector('[data-type="editors"]');
+    const panel = dialogContainerElement.querySelector<HTMLElement>(".history__snapshot-diff");
+    panel.classList.add("history__snapshot-diff--preview");
+    panel.dataset.side = "left";
+    panel.querySelectorAll<HTMLElement>('[data-type="snapshotVersion"]').forEach(button => {
+        button.setAttribute("aria-pressed", String(button.dataset.side === "left"));
+        button.classList.toggle("fn__none", button.dataset.side === "right" && !id2);
+        const snapshotIndex = button.dataset.side === "right" || element.parentElement.dataset.type === "update" ? 1 : 0;
+        const snapshot = dialogContainerElement.querySelectorAll<HTMLElement>(".b3-dialog__header [data-snapshot]")[snapshotIndex];
+        button.textContent = dayjs(parseInt(snapshot.dataset.created)).format("MM-DD HH:mm");
+        button.setAttribute("aria-label", dayjs(parseInt(snapshot.dataset.created)).format("YYYY-MM-DD HH:mm"));
+    });
     const leftElement = editorsElement.firstElementChild;
     const rightElement = editorsElement.lastElementChild;
     if (!leftEditor) {
@@ -368,6 +380,7 @@ const renderCompare = (app: App, element: HTMLElement) => {
             });
         }
         titleElement.textContent = response.data.title;
+        titleElement.setAttribute("title", response.data.title);
         leftElement.querySelector(".history__date").textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm");
     });
     if (id2) {
@@ -398,6 +411,7 @@ const renderCompare = (app: App, element: HTMLElement) => {
                 });
             }
             titleElement.textContent = response.data.title;
+            titleElement.setAttribute("title", response.data.title);
             rightElement.querySelector(".history__date").textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm");
         });
     } else {
@@ -427,9 +441,9 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
     const dialog = new Dialog({
         title: window.siyuan.languages.compare,
         content: "",
-        width: isMobile() ? "92vw" : "90vw",
-        height: "80vh",
-        containerClassName: "b3-dialog__container--theme",
+        width: isMobile() ? "100vw" : "90vw",
+        height: isMobile() ? "100%" : "80vh",
+        containerClassName: `b3-dialog__container--theme${isMobile() ? " history__snapshot-diff-dialog" : ""}`,
         destroyCallback() {
             leftEditor = undefined;
             rightEditor = undefined;
@@ -445,7 +459,20 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
         }
         let target = event.target as HTMLElement;
         while (target && target !== dialog.element) {
-            if (target.dataset.type === "snapshotAggregate") {
+            if (target.dataset.type === "snapshotBack") {
+                dialog.element.querySelector(".history__snapshot-diff").classList.remove("history__snapshot-diff--preview");
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.dataset.type === "snapshotVersion") {
+                dialog.element.querySelector<HTMLElement>(".history__snapshot-diff").dataset.side = target.dataset.side;
+                dialog.element.querySelectorAll<HTMLElement>('[data-type="snapshotVersion"]').forEach(button => {
+                    button.setAttribute("aria-pressed", String(button.dataset.side === target.dataset.side));
+                });
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.dataset.type === "snapshotAggregate") {
                 filterState.aggregate = target.dataset.value as SnapshotDiffAggregate;
                 filterState.kind = "all";
                 renderSnapshotSide(dialog, filterState);
@@ -472,7 +499,7 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
                 event.stopPropagation();
                 break;
             } else if (target.classList.contains("b3-list-item") && target.dataset.id) {
-                if (target.classList.contains("b3-list-item--focus") &&
+                if (!isMobile() && target.classList.contains("b3-list-item--focus") &&
                     !(target.dataset.kind === "document" && target.dataset.id2)) {
                     return;
                 }
@@ -536,9 +563,14 @@ const genHTML = (app: App, left: string, right: string, dialog: Dialog, direct: 
     ${dayjs(response.data.right.created).format("YYYY-MM-DD HH:mm")}
     <span class="fn__flex-1"></span>
 </div>`;
-        headElement.nextElementSibling.innerHTML = `<div class="fn__flex history__panel" style="height: 100%">
+        headElement.nextElementSibling.innerHTML = `<div class="fn__flex history__panel history__snapshot-diff" style="height: 100%" data-side="left">
     <div class="history__side history__side--diff" ${isMobile() ? "" : `style="width: ${window.siyuan.storage[Constants.LOCAL_HISTORY].sideDiffWidth}"`}>${genSnapshotSide(filterState)}</div>
     <div class="history__resize"></div>
+    ${isPhone ? `<div class="history__snapshot-diff-nav">
+        <button class="b3-button b3-button--text" data-type="snapshotBack">${window.siyuan.languages.back}</button>
+        <button class="b3-button b3-button--text" data-type="snapshotVersion" data-side="left" aria-pressed="true" aria-label="${dayjs(response.data.left.created).format("YYYY-MM-DD HH:mm")}">${dayjs(response.data.left.created).format("MM-DD HH:mm")}</button>
+        <button class="b3-button b3-button--text" data-type="snapshotVersion" data-side="right" aria-pressed="false" aria-label="${dayjs(response.data.right.created).format("YYYY-MM-DD HH:mm")}">${dayjs(response.data.right.created).format("MM-DD HH:mm")}</button>
+    </div>` : ""}
     <div class="fn__flex-1 fn__flex" data-type="editors">
         <div class="fn__none fn__flex-1 fn__flex-column">
             <div class="history__date">${dayjs(response.data.left.created).format("YYYY-MM-DD HH:mm")}</div>

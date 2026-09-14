@@ -92,10 +92,6 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
     <button class="b3-button b3-button--outline fn__none" data-action="manage">${lang.repoBatchManage}</button>
     <button class="b3-button b3-button--outline" data-type="genRepo">${lang.createSnapshot}</button>
 </div>
-<div class="history__snapshot-sources">
-    <button class="b3-button b3-button--text" data-action="local" aria-pressed="true">${lang.localSnapshot}</button>
-    <button class="b3-button b3-button--text" data-action="cloud" aria-pressed="false">${lang.cloudSnapshot}</button>
-</div>
 <div class="history__snapshot-columns"></div>
 <div class="history__snapshot-toolbar fn__none" data-role="batch">
     <span data-role="selection" aria-live="polite"></span><span class="fn__flex-1"></span>
@@ -109,7 +105,11 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
         pane.className = "history__repo history__snapshot-pane";
         pane.dataset.repoSource = source;
         pane.innerHTML = `<div class="history__snapshot-toolbar history__snapshot-heading">
-    <span>${source === "local" ? lang.localSnapshot : lang.cloudSnapshot}</span><span class="fn__flex-1"></span>
+    <span class="history__snapshot-label">${source === "local" ? lang.localSnapshot : lang.cloudSnapshot}</span>
+    <div class="history__snapshot-sources">
+        <button class="b3-button b3-button--text" data-action="local" aria-pressed="true">${lang.localSnapshot}</button>
+        <button class="b3-button b3-button--text" data-action="cloud" aria-pressed="false">${lang.cloudSnapshot}</button>
+    </div><span class="fn__flex-1"></span>
     <button class="b3-button b3-button--text${canPurgeRepo(source, window.siyuan.config.sync.provider) ? "" : " fn__none"}" data-action="purge">${source === "local" ? lang.dataRepoPurge : lang.cloudStoragePurge}</button>
 </div>
 <label class="history__snapshot-toolbar fn__none"><input type="checkbox" class="history__snapshot-check" data-repo-all> ${lang.selectAll}</label>${template}`;
@@ -184,7 +184,7 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
             refresh();
         } else if (action === "local" || action === "cloud") {
             root.dataset.source = action;
-            root.querySelectorAll("[data-action=local], [data-action=cloud]").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+            root.querySelectorAll<HTMLElement>("[data-action=local], [data-action=cloud]").forEach(item => item.setAttribute("aria-pressed", String(item.dataset.action === action)));
         } else if (action === "manage" || action === "clear") {
             if (action === "manage") {
                 state.managing = !state.managing;

@@ -117,6 +117,14 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
         endTitleEditing();
         schedule();
     });
+    const onAncestorScroll = (event: Event) => {
+        // 吸顶标题随外层容器滚动时，同步正文内重命名输入层的位置。
+        if ((event.target === document || (event.target instanceof Element &&
+            event.target !== element && event.target.contains(element))) &&
+            element.querySelector(".tabs-title-editor")) {
+            schedule();
+        }
+    };
     const controller: ITabsRoot = {
         options,
         select(tabs, id, persist) {
@@ -287,6 +295,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                             event.preventDefault();
                             event.stopPropagation();
                             controller.select(tabs, itemID(item), true);
+                            tabs.scrollIntoView({block: "start", inline: "nearest"});
                         });
                         button.addEventListener("dblclick", event => {
                             event.preventDefault();
@@ -309,6 +318,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                                 event.preventDefault();
                                 event.stopPropagation();
                                 controller.select(tabs, itemID(item), true);
+                                tabs.scrollIntoView({block: "start", inline: "nearest"});
                                 return;
                             }
                             const target = tabKeyboardTarget(ids, itemID(item), event.key,
@@ -471,6 +481,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
             controller.resize.disconnect();
             element.removeEventListener("focusout", onFocusOut);
             element.removeEventListener("scroll", schedule, true);
+            document.removeEventListener("scroll", onAncestorScroll, true);
             document.removeEventListener("selectionchange", endTitleEditing);
             roots.delete(element);
         },
@@ -478,6 +489,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
     roots.set(element, controller);
     element.addEventListener("focusout", onFocusOut);
     element.addEventListener("scroll", schedule, true);
+    document.addEventListener("scroll", onAncestorScroll, true);
     document.addEventListener("selectionchange", endTitleEditing);
     controller.render();
 };

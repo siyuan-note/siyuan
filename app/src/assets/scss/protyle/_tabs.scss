@@ -15,6 +15,10 @@
   }
 
   .tabs-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: var(--b3-theme-background);
     display: none;
     align-items: center;
     min-width: 0;
@@ -151,7 +155,7 @@
 
   .tabs-title-editor {
     position: absolute;
-    z-index: 1;
+    z-index: 2;
     box-sizing: border-box;
     display: flex;
     align-items: center;
@@ -217,6 +221,7 @@
       column-gap: 48px;
 
       > .tabs-header {
+        align-self: start;
         box-sizing: border-box;
         min-width: 80px;
         flex-wrap: wrap;

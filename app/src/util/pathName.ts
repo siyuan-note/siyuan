@@ -478,6 +478,7 @@ export const movePathTo = (options: {
     addClearButton({
         inputElement,
         right: 8,
+        height: inputElement.clientHeight,
         clearCB() {
             saveMovePathHistory();
             inputEvent();

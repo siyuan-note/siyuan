@@ -91,7 +91,7 @@ export class Menus {
                     // navigation 根上：新建文档/文件夹/取消挂在/打开文件位置
                     const rect = target.getBoundingClientRect();
                     initNavigationMenu(app, target).popup({
-                        x: rect.left,
+                        x: event.clientX,
                         y: rect.bottom,
                         h: rect.height,
                     });
@@ -103,7 +103,7 @@ export class Menus {
                     const rect = target.getBoundingClientRect();
                     // navigation 文件上：删除/重命名/打开文件位置/导出
                     initFileMenu(app, this.getDir(target), target.getAttribute("data-path"), target).popup({
-                        x: rect.left,
+                        x: event.clientX,
                         y: rect.bottom,
                         h: rect.height,
                     });

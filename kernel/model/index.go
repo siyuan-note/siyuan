@@ -378,6 +378,9 @@ func autoIndexEmbedBlock() {
 
 		// 需要移除首尾的空白字符以判断是否具有 //!js 标记
 		stmt = strings.TrimSpace(stmt)
+		if "" == stmt {
+			continue
+		}
 		if strings.HasPrefix(stmt, "//!js") {
 			// https://github.com/siyuan-note/siyuan/issues/9648
 			// js 嵌入块不支持自动索引，由前端主动调用 /api/search/updateEmbedBlock 接口更新内容 https://github.com/siyuan-note/siyuan/issues/9736

@@ -487,6 +487,8 @@ export const bindRelationEvent = (options: {
 }) => {
     const inputElement = options.menuElement.querySelector("input");
     const listElement = options.menuElement.querySelector(".b3-menu__items") as HTMLElement;
+    // 移动端菜单顶部会插入抓手标题，关联面板根节点按类名定位
+    const relationElement = options.menuElement.querySelector(".av__relation") as HTMLElement;
     const measureText = getAVColumnTextMeasurer(options.blockElement as HTMLElement);
     const state = {
         page: 0,
@@ -681,8 +683,8 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
         setLoading(true, initialLoad && reset, controller);
         let succeeded = false;
         fetchPost("/api/av/getAttributeViewRelationCandidates", {
-            avID: options.menuElement.firstElementChild.getAttribute("data-source-av-id"),
-            keyID: options.menuElement.firstElementChild.getAttribute("data-key-id"),
+            avID: relationElement.getAttribute("data-source-av-id"),
+            keyID: relationElement.getAttribute("data-key-id"),
             keyword,
             page,
             pageSize: RELATION_PAGE_SIZE,
@@ -698,7 +700,6 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
             const databaseName = inputElement.parentElement.parentElement.querySelector(".popover__block");
             databaseName.textContent = response.data.name;
             databaseName.setAttribute("data-id", response.data.blockIDs?.[0] || "");
-            const relationElement = options.menuElement.firstElementChild as HTMLElement;
             relationElement.dataset.databaseBlockId = response.data.blockIDs?.[0] || "";
             relationElement.dataset.notebookId = response.data.notebookID || "";
             const columns = response.data.columns as IAVColumn[] || [];
@@ -794,7 +795,6 @@ ${genRelationLoaderHTML(state.loading, state.loaderVisible)}`;
         const rowElement = hasClosestByClassName(openElement, "av__relation-table-row") as HTMLElement;
         const primaryElement = rowElement?.querySelector(".av__relation-table-primary") as HTMLElement;
         const blockElement = primaryElement?.querySelector(".b3-menu__label") as HTMLElement;
-        const relationElement = options.menuElement.firstElementChild as HTMLElement;
         if (!rowElement || !primaryElement || !blockElement || !relationElement.dataset.databaseBlockId) {
             return;
         }
@@ -925,6 +925,8 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
     if (menuElement.querySelector(".dragover__bottom, .dragover__top")) {
         return;
     }
+    // 移动端菜单顶部会插入抓手标题，关联面板根节点按类名定位
+    const relationElement = menuElement.querySelector(".av__relation") as HTMLElement;
 
     if (!nodeElement.contains(cellElements[0])) {
         const viewType = nodeElement.getAttribute("data-av-type") as TAVView;
@@ -965,7 +967,7 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
             const doOperations: IOperation[] = [{
                 action: "insertAttrViewBlock",
                 ignoreDefaultFill: true,
-                avID: menuElement.firstElementChild.getAttribute("data-av-id"),
+                avID: relationElement.getAttribute("data-av-id"),
                 srcs: [{
                     itemID: rowId,
                     id: Lute.NewNodeID(),

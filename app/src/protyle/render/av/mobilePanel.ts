@@ -10,6 +10,10 @@ export const bindMobileAVPanel = (panelElement: HTMLElement, menuElement: HTMLEl
         menuElement.style.height = Math.max(window.innerHeight, orientation?.height1 || 0) * .56 + "px";
     };
     const updateContent = () => {
+        // 抓手统一由 b3-menu__title 的伪元素绘制，与其它底部面板保持一致
+        if (!menuElement.firstElementChild?.classList.contains("b3-menu__title")) {
+            menuElement.insertAdjacentHTML("afterbegin", '<div class="b3-menu__title b3-menu__title--root"></div>');
+        }
         // 保留原有节点和事件绑定，标题的返回操作仍由数据库面板处理
         menuElement.querySelectorAll(".b3-menu__items, .av__select-list").forEach((itemsElement) => {
             const titleElement = itemsElement.firstElementChild;

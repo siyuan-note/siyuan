@@ -1527,18 +1527,6 @@ body.mobile-topbar--merged {
     transform: none;
     will-change: auto;
 
-    &::before {
-      content: "";
-      display: block;
-      flex-shrink: 0;
-      width: 32px;
-      height: 4px;
-      margin: 5px auto 7px;
-      border-radius: 2px;
-      background-color: var(--b3-theme-on-surface-light);
-      opacity: .45;
-    }
-
     > .b3-menu__items {
       max-height: none;
       min-height: 0;
@@ -1614,8 +1602,15 @@ body.mobile-topbar--merged {
       background-color: var(--b3-theme-surface);
       border: 0 !important;
 
-      &::before {
+      // 内容标题不绘制抓手，抓手统一由顶部的 --root 标题绘制
+      &:not(.b3-menu__title--root)::before {
         content: none;
+      }
+
+      &--root {
+        height: 16px;
+        min-height: 0;
+        padding: 0;
       }
 
       > .b3-menu__label {

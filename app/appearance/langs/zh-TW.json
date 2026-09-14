@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookFollowSystemLock": "跟隨系統鎖定螢幕",
+	"encryptedNotebookFollowSystemLockDesc": "系統鎖定螢幕時鎖定所有已解鎖的加密筆記本，不受閒置自動鎖定時間影響；系統解鎖後仍需輸入主密碼",
 	"customBlock": "自訂區塊",
 	"embedHeadingLevel": "嵌入標題層級",
 	"embedHeadingLevelPreserve": "保持原層級",

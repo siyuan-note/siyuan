@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookFollowSystemLock": "시스템 화면 잠금에 따라 잠금",
+	"encryptedNotebookFollowSystemLockDesc": "시스템이 잠기면 유휴 시간 설정과 관계없이 잠금 해제된 모든 암호화 노트북을 잠그며, 시스템 잠금을 해제해도 노트북은 잠금 상태를 유지합니다",
 	"customBlock": "사용자 정의 블록",
 	"embedHeadingLevel": "임베드된 제목 수준",
 	"embedHeadingLevelPreserve": "원래 제목 수준 유지",

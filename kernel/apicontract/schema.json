@@ -21035,6 +21035,18 @@
       "type": "object",
       "additionalProperties": false
     },
+    "EncryptedNotebookFollowSystemLockRequestInput": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled"
+      ],
+      "additionalProperties": false
+    },
     "EncryptedNotebookStatus": {
       "type": "object",
       "properties": {
@@ -45677,6 +45689,9 @@
         "downloadInstallPkg": {
           "type": "boolean"
         },
+        "encryptedNotebookFollowSystemLock": {
+          "type": "boolean"
+        },
         "homeDir": {
           "type": "string"
         },
@@ -45738,6 +45753,7 @@
         "dataDir",
         "disabledFeatures",
         "downloadInstallPkg",
+        "encryptedNotebookFollowSystemLock",
         "homeDir",
         "id",
         "isMicrosoftStore",
@@ -136916,6 +136932,81 @@
     },
     {
       "method": "POST",
+      "path": "/api/notebook/lockEncryptedNotebooksOnSystemLock",
+      "handler": "lockEncryptedNotebooksOnSystemLock",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/EmptyRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
       "path": "/api/notebook/lockNotebook",
       "handler": "lockNotebook",
       "body": "json",
@@ -137371,6 +137462,81 @@
                         "type": "null"
                       }
                     ]
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/notebook/setEncryptedNotebookFollowSystemLock",
+      "handler": "setEncryptedNotebookFollowSystemLock",
+      "body": "json",
+      "request": {
+        "$ref": "#/$defs/EncryptedNotebookFollowSystemLockRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
                   }
                 ]
               },

@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookFollowSystemLock": "Прати закључавање екрана система",
+	"encryptedNotebookFollowSystemLockDesc": "Закључај све откључане шифроване бележнице када се систем закључа, независно од времена неактивности; бележнице остају закључане након откључавања система",
 	"customBlock": "Прилагођени блок",
 	"embedHeadingLevel": "Ниво уграђених наслова",
 	"embedHeadingLevelPreserve": "Задржи изворне нивое",

@@ -44,6 +44,8 @@ type System struct {
 	AutoLaunch2        int    `json:"autoLaunch2"`    // 0：不自动启动，1：自动启动，2：自动启动+隐藏主窗口
 	LockScreenMode     int    `json:"lockScreenMode"` // 0：手动，1：手动+跟随系统 https://github.com/siyuan-note/siyuan/issues/9087
 
+	EncryptedNotebookFollowSystemLock bool `json:"encryptedNotebookFollowSystemLock"` // 系统锁屏时锁定加密笔记本，默认关闭
+
 	DisabledFeatures []string `json:"disabledFeatures"`
 
 	MicrosoftDefenderExcluded bool `json:"microsoftDefenderExcluded"` // 是否已加入 Microsoft Defender 排除项 https://github.com/siyuan-note/siyuan/issues/13650

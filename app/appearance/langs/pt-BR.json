@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookFollowSystemLock": "Seguir o bloqueio de tela do sistema",
+	"encryptedNotebookFollowSystemLockDesc": "Bloquear todos os cadernos criptografados desbloqueados quando o sistema for bloqueado, independentemente do tempo de inatividade; eles permanecem bloqueados após desbloquear o sistema",
 	"customBlock": "Bloco personalizado",
 	"embedHeadingLevel": "Nível dos títulos incorporados",
 	"embedHeadingLevelPreserve": "Manter os níveis originais",

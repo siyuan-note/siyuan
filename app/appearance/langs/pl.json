@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookFollowSystemLock": "Blokuj wraz z ekranem systemu",
+	"encryptedNotebookFollowSystemLockDesc": "Blokuj wszystkie odblokowane zaszyfrowane notatniki przy blokowaniu systemu, niezależnie od czasu bezczynności; pozostają zablokowane po odblokowaniu systemu",
 	"customBlock": "Blok niestandardowy",
 	"embedHeadingLevel": "Poziom osadzonych nagłówków",
 	"embedHeadingLevelPreserve": "Zachowaj oryginalne poziomy",

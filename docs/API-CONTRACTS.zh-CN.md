@@ -34,6 +34,8 @@
 
 ## 兼容要求
 
+加密笔记本系统锁屏接口保留管理员鉴权和只读检查。布尔开关保存在系统配置中，不进入密钥备份的认证数据。`TestAPIContractNotebookSystemLock` 覆盖配置持久化、关闭开关、独立于闲置时间、多笔记本（包括仅解锁未挂载的笔记本）、重复锁定、锁定后拒绝读取，以及重新解锁后认证读取未改变的密文。该测试已包含在下文的内核全量命令中，也可单独运行 `go test -tags "fts5 sqlcipher" ./api -run 'TestAPIContractNotebook(SystemLock|CryptoAuthorization|PasswordRecovery)$' -count=1`。`TestNotebookSystemLockContract` 覆盖严格布尔输入，`TestRouteCoverage` 检查路由注册和处理器绑定。
+
 2026 年 9 月 14 日迁移完成时，`kernel/api/router.go` 中的 629 条方法和路径注册均已接入契约，旧路由清单为空。该基线中的 4 条 `ANY` 注册在生成声明中展开为 661 条具体方法和路径。后续新增接口时，以生成器和路由覆盖检查的统计为准。由 `kernel/server/serve.go` 注册的静态资源、应用主 WebSocket 和其他传输服务不属于这份 API 路由清单。
 
 系统契约保留完整配置、工作空间管理、上传、认证、OIDC 响应分支、启动事件流以及空响应和二进制响应。前端在读取持久化布局和快捷键的位置收窄类型，保留原有默认值修复、废弃键清理和绑定过滤逻辑。配置导入、导出和退出保持原有生命周期及加密行为。

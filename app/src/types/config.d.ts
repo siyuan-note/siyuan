@@ -2019,6 +2019,7 @@ declare namespace Config {
          * - `1`: Manual + Follow the operating system
          */
         lockScreenMode: number;
+        encryptedNotebookFollowSystemLock: boolean;
         /**
          * The name of the current device
          */

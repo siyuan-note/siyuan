@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookFollowSystemLock": "ล็อกตามหน้าจอระบบ",
+	"encryptedNotebookFollowSystemLockDesc": "ล็อกสมุดบันทึกที่เข้ารหัสและปลดล็อกอยู่ทั้งหมดเมื่อระบบล็อก โดยไม่ขึ้นกับระยะเวลาที่ไม่ได้ใช้งาน สมุดบันทึกจะยังคงล็อกอยู่หลังจากปลดล็อกระบบ",
 	"customBlock": "บล็อกที่กำหนดเอง",
 	"embedHeadingLevel": "ระดับหัวเรื่องที่ฝัง",
 	"embedHeadingLevelPreserve": "คงระดับเดิม",

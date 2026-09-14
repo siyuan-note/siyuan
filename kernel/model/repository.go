@@ -1378,7 +1378,18 @@ func checkoutRepo(id string) (err error) {
 		return
 	}
 
-	_, _, err = repo.Checkout(id, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	err = checkoutRepoSnapshot(repo, id, func(checkoutErr error) {
+		release()
+		FullReindexDirect()
+		if checkoutErr != nil {
+			util.ReloadUI()
+			return
+		}
+		appendAgentRollbackEntries()
+		time.Sleep(time.Second)
+		FlushTxQueue()
+		task.AppendAsyncTaskWithDelay(task.ReloadUI, 1*time.Second, util.ReloadUI)
+	})
 	if err != nil {
 		logging.LogErrorf("checkout repository failed: %s", err)
 		util.PushClearProgress()
@@ -1386,13 +1397,14 @@ func checkoutRepo(id string) (err error) {
 		return
 	}
 
-	release()
-	FullReindexDirect()
-	appendAgentRollbackEntries()
-	time.Sleep(time.Second)
-	FlushTxQueue()
-	task.AppendAsyncTaskWithDelay(task.ReloadUI, 1*time.Second, util.ReloadUI)
 	return
+}
+
+// checkoutRepoSnapshot 恢复失败前可能已有文件落盘，返回结果前同步更新索引、缓存和界面。
+func checkoutRepoSnapshot(repo *dejavu.Repo, id string, refresh func(error)) error {
+	_, _, err := repo.Checkout(id, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	refresh(err)
+	return err
 }
 
 func appendAgentRollbackEntries() {

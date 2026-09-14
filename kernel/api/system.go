@@ -234,13 +234,13 @@ func readCustomEmojis(rootDir, relativeDir string, items *[]*apicontract.SystemE
 			continue
 		}
 
-		if !util.IsValidUploadFileName(html.UnescapeString(name)) {
+		if !util.IsValidExistingEmojiFileName(html.UnescapeString(name)) {
 			oldPath := filepath.Join(dir, name)
 			name = util.FilterUploadEmojiFileName(name)
 			newPath := filepath.Join(dir, name)
 			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
 			logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", oldPath, newPath)
-			if renameErr := filelock.Rename(oldPath, newPath); nil != renameErr {
+			if renameErr := util.RenameEmojiFile(oldPath, newPath); nil != renameErr {
 				logging.LogErrorf("renaming invalid custom emoji file to [%s] failed: %s", newPath, renameErr)
 				continue
 			}

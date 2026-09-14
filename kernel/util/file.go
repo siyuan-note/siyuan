@@ -218,6 +218,33 @@ func IsValidUploadFileName(name string) bool {
 	return name == FilterUploadFileName(name)
 }
 
+// IsValidExistingEmojiFileName 保留已有表情名中的合法替换字符，新上传文件仍按命名规则清洗。
+func IsValidExistingEmojiFileName(name string) bool {
+	return utf8.ValidString(name) && strings.ReplaceAll(name, "\ufffd", "_") == FilterUploadFileName(name)
+}
+
+// RenameEmojiFile 在源和目标文件锁内迁移表情，目标已存在时保留两者，不覆盖文件或合并目录。
+func RenameEmojiFile(oldPath, newPath string) error {
+	oldPath, newPath = filepath.Clean(oldPath), filepath.Clean(newPath)
+	if oldPath == newPath {
+		return nil
+	}
+	first, second := oldPath, newPath
+	if first > second {
+		first, second = second, first
+	}
+	filelock.Lock(first)
+	defer filelock.Unlock(first)
+	filelock.Lock(second)
+	defer filelock.Unlock(second)
+	if _, err := os.Lstat(newPath); err == nil {
+		return &os.LinkError{Op: "rename", Old: oldPath, New: newPath, Err: os.ErrExist}
+	} else if !os.IsNotExist(err) {
+		return err
+	}
+	return os.Rename(oldPath, newPath)
+}
+
 func IsNetworkIconURL(icon string) bool {
 	u, err := url.Parse(icon)
 	return nil == err && "" != u.Host && ("http" == strings.ToLower(u.Scheme) || "https" == strings.ToLower(u.Scheme))

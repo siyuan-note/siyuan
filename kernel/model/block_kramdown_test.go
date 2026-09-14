@@ -30,7 +30,7 @@ func TestCanonicalBlockKramdownIAL(t *testing.T) {
 	ial := testBlockKramdownIAL(
 		"custom-z", "title-img", "fold", "style", "icon", "tags", "bookmark", "memo", "alias", "name", "title",
 		"type", "updated", "id", "custom-sy-readonly", "custom-riff-decks", "custom-reminder-wechat",
-		"custom-heading-mode", "custom-avs", "unknown", "heading-fold", "custom-a",
+		"custom-heading-mode", "custom-heading-level", "custom-avs", "unknown", "heading-fold", "custom-a",
 	)
 	originalNames := blockKramdownIALAttrNames(ial)
 
@@ -38,7 +38,7 @@ func TestCanonicalBlockKramdownIAL(t *testing.T) {
 
 	assertBlockKramdownIALAttrNames(t, canonical, []string{
 		"id", "updated", "type", "title", "name", "alias", "memo", "bookmark", "tags", "icon", "title-img", "style",
-		"fold", "custom-avs", "custom-heading-mode", "custom-reminder-wechat", "custom-riff-decks", "custom-sy-readonly",
+		"fold", "custom-avs", "custom-heading-level", "custom-heading-mode", "custom-reminder-wechat", "custom-riff-decks", "custom-sy-readonly",
 		"custom-a", "custom-z", "heading-fold", "unknown",
 	})
 	assertBlockKramdownIALAttrNames(t, ial, originalNames)

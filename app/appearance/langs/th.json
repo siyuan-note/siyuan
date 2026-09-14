@@ -1,4 +1,6 @@
 {
+	"embedHeadingLevel": "ระดับหัวเรื่องที่ฝัง",
+	"embedHeadingLevelAuto": "อัตโนมัติ",
 	"originalToRef": "แปลงบล็อกต้นฉบับเป็นการอ้างอิงบล็อก",
 	"originalToEmbed": "แปลงบล็อกต้นฉบับเป็นบล็อกฝัง",
 	"mobileFileTreeMultiSelectTip": "แตะเอกสารหรือสมุดบันทึกเพื่อเลือกหรือยกเลิกการเลือก",

@@ -442,6 +442,10 @@ const gutterSingle = () => [
             node("showHeadingOnlyBlocks", lang("showHeadingOnlyBlocks")),
             node("default", lang("default")),
         ]),
+        node("embedHeadingLevel", lang("embedHeadingLevel"), true, [
+            node("auto", lang("embedHeadingLevelAuto")),
+            ...[1, 2, 3, 4, 5, 6].map(level => node(`heading${level}`, lang(`heading${level}`))),
+        ]),
     ]),
     separator("separator_1"),
     gutterHeadingTransform(),

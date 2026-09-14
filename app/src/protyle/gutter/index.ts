@@ -117,6 +117,7 @@ import {
     setOrderedListStart
 } from "../wysiwyg/list";
 import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../util/headingTransform";
+import {getEmbedHeadingLevel, isHeadingEmbed, renderEmbedHeadings} from "../render/embedHeading";
 import {getBlockSelectionModeElement} from "../wysiwyg/blockSelection";
 import {
     getBacklinkGutterContentTop,
@@ -2638,6 +2639,30 @@ export class Gutter {
                             blockRender(protyle, nodeElement);
                         }
                     }]
+                }, {
+                    id: "embedHeadingLevel",
+                    label: window.siyuan.languages.embedHeadingLevel,
+                    type: "submenu",
+                    ignore: !isHeadingEmbed(nodeElement),
+                    submenu: [0, 1, 2, 3, 4, 5, 6].map(level => ({
+                        id: level === 0 ? "auto" : `heading${level}`,
+                        label: level === 0 ? window.siyuan.languages.embedHeadingLevelAuto : window.siyuan.languages[`heading${level}`],
+                        iconHTML: "",
+                        checked: getEmbedHeadingLevel(nodeElement.getAttribute("custom-heading-level")) === level,
+                        click() {
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id,
+                                attrs: {"custom-heading-level": level === 0 ? "" : level.toString()}
+                            }, () => {
+                                if (level === 0) {
+                                    nodeElement.removeAttribute("custom-heading-level");
+                                } else {
+                                    nodeElement.setAttribute("custom-heading-level", level.toString());
+                                }
+                                renderEmbedHeadings(nodeElement);
+                            });
+                        }
+                    }))
                 }]
             }).element);
         } else if (type === "NodeHeading" && !protyle.disabled) {

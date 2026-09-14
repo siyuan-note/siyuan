@@ -1,4 +1,6 @@
 {
+	"embedHeadingLevel": "Gömülü başlık düzeyi",
+	"embedHeadingLevelAuto": "Otomatik",
 	"originalToRef": "Özgün bloğu blok referansına dönüştür",
 	"originalToEmbed": "Özgün bloğu gömülü bloğa dönüştür",
 	"mobileFileTreeMultiSelectTip": "Belgeleri veya not defterlerini seçmek ya da seçimlerini kaldırmak için dokunun",

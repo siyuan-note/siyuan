@@ -1553,7 +1553,7 @@ func compareBlockKramdownIALAttrNames(a, b string) int {
 }
 
 func isSystemManagedBlockKramdownIALAttr(name string) bool {
-	return "custom-avs" == name || "custom-heading-mode" == name || "custom-reminder-wechat" == name ||
+	return "custom-avs" == name || "custom-heading-mode" == name || embedHeadingLevelAttr == name || "custom-reminder-wechat" == name ||
 		strings.HasPrefix(name, "custom-riff-") || strings.HasPrefix(name, "custom-sy-")
 }
 

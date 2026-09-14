@@ -1,4 +1,6 @@
 {
+	"embedHeadingLevel": "Niveau des titres intégrés",
+	"embedHeadingLevelAuto": "Automatique",
 	"originalToRef": "Convertir le bloc original en référence de bloc",
 	"originalToEmbed": "Convertir le bloc original en bloc intégré",
 	"mobileFileTreeMultiSelectTip": "Touchez les documents ou les carnets pour les sélectionner ou les désélectionner",

@@ -1,4 +1,6 @@
 {
+	"embedHeadingLevel": "Ниво уграђених наслова",
+	"embedHeadingLevelAuto": "Аутоматски",
 	"originalToRef": "Претвори изворни блок у референцу на блок",
 	"originalToEmbed": "Претвори изворни блок у уграђени блок",
 	"mobileFileTreeMultiSelectTip": "Додирните документе или бележнице да бисте их изабрали или поништили избор",

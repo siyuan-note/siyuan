@@ -21,6 +21,7 @@ import {
 } from "./getBlock";
 import {Constants} from "../../constants";
 import {blockRender} from "../render/blockRender";
+import {renderEmbedHeadings} from "../render/embedHeading";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../render/highlightRender";
 import {hasClosestBlock, hasClosestByAttribute, hasTopClosestByAttribute, isInEmbedBlock} from "../util/hasClosest";
@@ -1078,6 +1079,10 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                     nodeAttrHTML += refElement.outerHTML;
                 }
                 attrElement.innerHTML = nodeAttrHTML + Constants.ZWSP;
+                if (data.new["custom-heading-level"] !== data.old["custom-heading-level"] &&
+                    item.getAttribute("data-type") === "NodeBlockQueryEmbed") {
+                    renderEmbedHeadings(item);
+                }
                 if (mermaidLayoutChanged && item.getAttribute("data-subtype") === "mermaid") {
                     item.removeAttribute("data-render");
                     processRender(item);

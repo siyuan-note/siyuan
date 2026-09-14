@@ -1,4 +1,5 @@
 {
+	"newTabItem": "Nieuw tabbladitemblok maken",
 	"encryptedNotebookFollowSystemLock": "Systeemschermvergrendeling volgen",
 	"encryptedNotebookFollowSystemLockDesc": "Vergrendel alle ontgrendelde versleutelde notitieboeken wanneer het systeem wordt vergrendeld, ongeacht de inactiviteitsduur; ze blijven vergrendeld nadat het systeem is ontgrendeld",
 	"customBlock": "Aangepast blok",
@@ -2820,6 +2821,7 @@
 		"393": "Versleutelde notitieboeken ondersteunen deze bewerking niet",
 		"394": "Versleutelde notitieboeken ondersteunen geen publicatie, publicatierechten kunnen niet worden ingesteld",
 		"395": "Batch-export ondersteunt geen versleutelde notitieboeken, ontgrendel ze en exporteer ze een voor een, of exporteer gewone notitieboeken",
-		"396": "Versleutelde notitieboeken ondersteunen het vastzetten van documenten niet"
+		"396": "Versleutelde notitieboeken ondersteunen het vastzetten van documenten niet",
+		"397": "Dit apparaat kan het gesynchroniseerde bestand niet aanmaken. Hernoem het in SiYuan op een apparaat waarop het toegankelijk is en synchroniseer opnieuw: %s"
 	}
 }

@@ -1,4 +1,5 @@
 {
+	"newTabItem": "Vytvoriť blok položky karty",
 	"encryptedNotebookFollowSystemLock": "Sledovať uzamknutie obrazovky systému",
 	"encryptedNotebookFollowSystemLockDesc": "Pri uzamknutí systému uzamknúť všetky odomknuté šifrované zápisníky bez ohľadu na čas nečinnosti; po odomknutí systému zostanú uzamknuté",
 	"customBlock": "Vlastný blok",
@@ -2820,6 +2821,7 @@
 		"393": "Šifrované zápisníky túto operáciu nepodporujú",
 		"394": "Šifrované zápisníky nepodporujú publikovanie, práva na publikovanie nie je možné nastaviť",
 		"395": "Hromadný export nepodporuje šifrované zápisníky, odomknite ich a exportujte po jednom alebo exportujte bežné zápisníky",
-		"396": "Šifrované zápisníky nepodporujú pripínanie dokumentov"
+		"396": "Šifrované zápisníky nepodporujú pripínanie dokumentov",
+		"397": "Toto zariadenie nemôže vytvoriť synchronizovaný súbor. Premenujte ho v SiYuan na zariadení, kde je dostupný, a potom zopakujte synchronizáciu: %s"
 	}
 }

@@ -6,7 +6,7 @@
 		"id": "20260612192417-fb4ueux",
 		"title": "コマンドラインインターフェース",
 		"type": "doc",
-		"updated": "20260913020024"
+		"updated": "20260914195107"
 	},
 	"Children": [
 		{
@@ -1579,7 +1579,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260618123956-poyqeb5",
-				"updated": "20260913020024"
+				"updated": "20260914195107"
 			},
 			"Children": [
 				{
@@ -12577,7 +12577,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260809180000-e111750",
-				"updated": "20260809232000"
+				"updated": "20260914195107"
 			},
 			"Children": [
 				{
@@ -12591,7 +12591,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260809180000-93036f1",
-				"updated": "20260809232000"
+				"updated": "20260914195107"
 			},
 			"Children": [
 				{
@@ -12632,7 +12632,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " でアクセス認証コード、"
+					"Data": " でロック画面パスワード、"
 				},
 				{
 					"Type": "NodeTextMark",

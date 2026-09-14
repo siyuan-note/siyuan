@@ -1,4 +1,5 @@
 {
+	"newTabItem": "Criar bloco de item de aba",
 	"encryptedNotebookFollowSystemLock": "Seguir o bloqueio de tela do sistema",
 	"encryptedNotebookFollowSystemLockDesc": "Bloquear todos os cadernos criptografados desbloqueados quando o sistema for bloqueado, independentemente do tempo de inatividade; eles permanecem bloqueados após desbloquear o sistema",
 	"customBlock": "Bloco personalizado",
@@ -2820,6 +2821,7 @@
 		"393": "Notebooks criptografados não suportam esta operação",
 		"394": "Cadernos criptografados não são compatíveis com publicação, não é possível configurar permissões de publicação",
 		"395": "A exportação em lote não é compatível com cadernos criptografados; desbloqueie-os e exporte um por um, ou exporte cadernos comuns",
-		"396": "Cadernos criptografados não permitem fixar documentos"
+		"396": "Cadernos criptografados não permitem fixar documentos",
+		"397": "Este dispositivo não pode criar o arquivo sincronizado. Renomeie-o no SiYuan em um dispositivo onde ele esteja acessível e sincronize novamente: %s"
 	}
 }

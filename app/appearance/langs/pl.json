@@ -1,4 +1,5 @@
 {
+	"newTabItem": "Utwórz blok elementu karty",
 	"encryptedNotebookFollowSystemLock": "Blokuj wraz z ekranem systemu",
 	"encryptedNotebookFollowSystemLockDesc": "Blokuj wszystkie odblokowane zaszyfrowane notatniki przy blokowaniu systemu, niezależnie od czasu bezczynności; pozostają zablokowane po odblokowaniu systemu",
 	"customBlock": "Blok niestandardowy",
@@ -2820,6 +2821,7 @@
 		"393": "Zaszyfrowane notatniki nie obsługują tej operacji",
 		"394": "Zaszyfrowane notatniki nie obsługują publikowania, nie można skonfigurować uprawnień publikowania",
 		"395": "Eksport zbiorczy nie obsługuje zaszyfrowanych notatników, odblokuj je i wyeksportuj pojedynczo albo wyeksportuj zwykłe notatniki",
-		"396": "Zaszyfrowane notatniki nie obsługują przypinania dokumentów"
+		"396": "Zaszyfrowane notatniki nie obsługują przypinania dokumentów",
+		"397": "To urządzenie nie może utworzyć synchronizowanego pliku. Zmień jego nazwę w SiYuan na urządzeniu, na którym jest dostępny, a następnie zsynchronizuj ponownie: %s"
 	}
 }

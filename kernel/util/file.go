@@ -28,6 +28,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/88250/gulu"
@@ -215,6 +216,33 @@ func LastID(p string) (name, id string) {
 
 func IsValidUploadFileName(name string) bool {
 	return name == FilterUploadFileName(name)
+}
+
+// IsValidExistingEmojiFileName 保留已有表情名中的合法替换字符，新上传文件仍按命名规则清洗。
+func IsValidExistingEmojiFileName(name string) bool {
+	return utf8.ValidString(name) && strings.ReplaceAll(name, "\ufffd", "_") == FilterUploadFileName(name)
+}
+
+// RenameEmojiFile 在源和目标文件锁内迁移表情，目标已存在时保留两者，不覆盖文件或合并目录。
+func RenameEmojiFile(oldPath, newPath string) error {
+	oldPath, newPath = filepath.Clean(oldPath), filepath.Clean(newPath)
+	if oldPath == newPath {
+		return nil
+	}
+	first, second := oldPath, newPath
+	if first > second {
+		first, second = second, first
+	}
+	filelock.Lock(first)
+	defer filelock.Unlock(first)
+	filelock.Lock(second)
+	defer filelock.Unlock(second)
+	if _, err := os.Lstat(newPath); err == nil {
+		return &os.LinkError{Op: "rename", Old: oldPath, New: newPath, Err: os.ErrExist}
+	} else if !os.IsNotExist(err) {
+		return err
+	}
+	return os.Rename(oldPath, newPath)
 }
 
 func IsNetworkIconURL(icon string) bool {
@@ -408,7 +436,17 @@ func FilterFileName(name string) string {
 	name = strings.ReplaceAll(name, "<", "_")
 	name = strings.ReplaceAll(name, ">", "_")
 	name = strings.ReplaceAll(name, "|", "_")
-	name = RemoveInvalid(name) // Remove invisible characters from file names when uploading assets https://github.com/siyuan-note/siyuan/issues/11683
+	// 文件名保留私用区字符，移除不可打印字符，并替换损坏编码。
+	name = gulu.Str.RemoveZeroWidthCharacters(strings.ReplaceAll(name, "\u00a0", " "))
+	name = strings.Map(func(r rune) rune {
+		if r == utf8.RuneError {
+			return '_'
+		}
+		if unicode.IsPrint(r) || unicode.Is(unicode.Co, r) {
+			return r
+		}
+		return -1
+	}, name)
 	name = strings.TrimSpace(name)
 	name = strings.TrimSuffix(name, ".")
 	return name

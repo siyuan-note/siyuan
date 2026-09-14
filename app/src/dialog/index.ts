@@ -17,6 +17,30 @@ export class Dialog {
     private previousFocus: HTMLElement;
     private previousRange: Range;
     private destroying = false;
+    private trapFocus = (event: KeyboardEvent) => {
+        if (event.key !== "Tab" || this.destroying ||
+            window.siyuan.dialogs[window.siyuan.dialogs.length - 1] !== this) {
+            return;
+        }
+        // 对话框上方的菜单也需要约束 Tab，避免从菜单末尾进入背景。
+        const menu = window.siyuan.menus.menu.element;
+        const container = menu.contains(document.activeElement) && isAbove(menu, this.element.querySelector(".b3-dialog")) ?
+            menu : this.element.querySelector(".b3-dialog__container") as HTMLElement;
+        const elements = Array.from(container.querySelectorAll<HTMLElement>(
+            "a[href], button, input, select, textarea, [tabindex], [contenteditable]"
+        )).filter(element => (element.tabIndex >= 0 || (element.isContentEditable && !element.hasAttribute("tabindex"))) &&
+            !element.matches(":disabled") &&
+            !element.closest("[inert]") && element.getClientRects().length &&
+            getComputedStyle(element).visibility === "visible");
+        elements.sort((a, b) => (a.tabIndex > 0 ? a.tabIndex : Infinity) - (b.tabIndex > 0 ? b.tabIndex : Infinity));
+        const active = document.activeElement;
+        if (!elements.length || !container.contains(active) || active === container ||
+            (event.shiftKey ? active === elements[0] : active === elements[elements.length - 1])) {
+            event.preventDefault();
+            event.stopPropagation();
+            (elements.length ? elements[event.shiftKey ? elements.length - 1 : 0] : container).focus({preventScroll: true});
+        }
+    };
 
     constructor(options: {
         positionId?: string,
@@ -63,10 +87,10 @@ export class Dialog {
         }
         this.element.innerHTML = `<div class="b3-dialog" style="z-index: ${++window.siyuan.zIndex};${typeof left === "string" ? "display:block" : ""}">
 <div class="b3-dialog__scrim"${options.transparent ? ' style="background-color:transparent"' : ""}></div>
-<div class="b3-dialog__container ${options.containerClassName || ""}" style="width:${options.width || "auto"};height:${options.height || "auto"};
+<div role="dialog" aria-modal="true" ${options.title ? `aria-labelledby="dialog-title-${this.id}" ` : ""}tabindex="-1" class="b3-dialog__container ${options.containerClassName || ""}" style="width:${options.width || "auto"};height:${options.height || "auto"};
 left:${left || "auto"};top:${top || "auto"}">
   <svg class="b3-dialog__close${(!isMobile() || this.disableClose || options.hideCloseIcon) ? " fn__none" : ""}"><use xlink:href="#iconCloseRound"></use></svg>
-  <div class="resize__move b3-dialog__header${options.title ? "" : " fn__none"}" ${(isMobile() &&options.title) ? 'style="padding-right: 38px;"' : ""} onselectstart="return false;">${options.title || ""}</div>
+  <div id="dialog-title-${this.id}" class="resize__move b3-dialog__header${options.title ? "" : " fn__none"}" ${(isMobile() &&options.title) ? 'style="padding-right: 38px;"' : ""} onselectstart="return false;">${options.title || ""}</div>
   <div class="b3-dialog__body">${options.content}</div>
   <div class="resize__rd"></div><div class="resize__ld"></div><div class="resize__lt"></div><div class="resize__rt"></div><div class="resize__r"></div><div class="resize__d"></div><div class="resize__t"></div><div class="resize__l"></div>
 </div></div>`;
@@ -86,6 +110,8 @@ left:${left || "auto"};top:${top || "auto"}">
             });
         }
         document.body.append(this.element);
+        document.addEventListener("keydown", this.trapFocus, true);
+        (this.element.querySelector(".b3-dialog__container") as HTMLElement).focus({preventScroll: true});
         if (options.disableAnimation) {
             this.element.classList.add("b3-dialog--open");
         } else {
@@ -110,6 +136,7 @@ left:${left || "auto"};top:${top || "auto"}">
             return;
         }
         this.destroying = true;
+        document.removeEventListener("keydown", this.trapFocus, true);
         this.element.classList.remove("b3-dialog--open");
         setTimeout(() => {
             // av 修改列头emoji后点击关闭emoji图标

@@ -43,6 +43,7 @@
   - [Installation Package](#installation-package)
   - [Package Manager](#package-manager)
   - [Docker Hosting](#docker-hosting)
+  - [Kubernetes Hosting](#kubernetes-hosting)
   - [Unraid Hosting](#unraid-hosting)
   - [TrueNAS Hosting](#truenas-hosting)
   - [Test Channels](#test-channels)
@@ -295,6 +296,35 @@ Use an NGINX reverse proxy to hide port 6806. Please note:
 - Does not support desktop and mobile application connections, only supports use on browsers
 - Export to PDF, HTML and Word formats is not supported
 - Import Markdown file is not supported
+
+</details>
+
+### Kubernetes Hosting
+
+<details>
+<summary>Kubernetes Deployment</summary>
+
+The [HelmForge SiYuan chart](https://github.com/helmforgedev/charts/tree/main/charts/siyuan) is community-maintained by HelmForge, uses the official `b3log/siyuan` image, and is not an official SiYuan chart. Please report chart issues to [HelmForge](https://github.com/helmforgedev/charts/issues).
+
+Prepare Helm, kubectl, and a Kubernetes cluster with a default StorageClass that can provision a 10Gi ReadWriteOnce volume, then run the following commands:
+
+```bash
+helm repo add helmforge https://repo.helmforge.dev
+helm repo update
+helm install siyuan helmforge/siyuan --namespace siyuan --create-namespace --wait
+kubectl -n siyuan get secret siyuan-siyuan-auth -o go-template='{{index .data "access-code" | base64decode}}{{"\n"}}'
+kubectl -n siyuan port-forward service/siyuan-siyuan 6806:6806
+```
+
+Open <http://localhost:6806> and enter the generated lock screen password. Keep this password secure; it is distinct from the API token. The names above assume the default chart values and release name `siyuan`.
+
+For remote access, use a dedicated HTTPS hostname and an Ingress controller that proxies WebSockets on `/ws`, without URL rewriting. Configure `ingress` and allow the controller's namespace through `networkPolicy.ingressFrom`; the default policy allows same-namespace ingress and DNS egress only. Add explicit egress rules for cloud sync or other external services. See the [chart guide and production example](https://helmforge.dev/docs/charts/siyuan) for TLS, existing Secrets, and storage configuration.
+
+- **One workspace, one writer:** Never scale replicas or mount the same workspace in another running instance, even with ReadWriteMany storage. The chart uses `Recreate`, so upgrades stop the old writer before starting the new one and cause downtime.
+- **Persistence:** The complete workspace is mounted at `/siyuan/workspace`. The chart retains its generated PVC on uninstall by default; deleting the namespace or PVC can still destroy data. Reuse a retained or restored claim with `persistence.existingClaim`.
+- **Backups and upgrades:** Gracefully stop the writer before backing up the complete workspace, or use an application-consistent backup procedure. A copy of the live SQLite index alone is insufficient. Securely preserve authentication Secrets, encryption keys, and encrypted-notebook recovery passwords, and test restores into a separate PVC. Back up before upgrades and review storage-format changes: Helm rollback does not undo data migrations.
+
+The Docker hosting limitations also apply: browser use only, no desktop or mobile application connections, no PDF/HTML/Word export, and no Markdown file import.
 
 </details>
 

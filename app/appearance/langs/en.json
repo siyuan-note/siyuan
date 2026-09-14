@@ -1,4 +1,5 @@
 {
+	"newTabItem": "New tab item block",
 	"encryptedNotebookFollowSystemLock": "Follow system screen lock",
 	"encryptedNotebookFollowSystemLockDesc": "Lock all unlocked encrypted notebooks when the system locks, independently of the idle timeout; notebooks remain locked after the system unlocks",
 	"customBlock": "Custom block",
@@ -2820,6 +2821,7 @@
 		"393": "Encrypted notebooks do not support this operation",
 		"394": "Encrypted notebooks do not support publishing, publish access cannot be configured",
 		"395": "Batch export does not support encrypted notebooks, please unlock and export them one by one, or export regular notebooks instead",
-		"396": "Encrypted notebooks do not support pinning documents"
+		"396": "Encrypted notebooks do not support pinning documents",
+		"397": "This device cannot create the synced file. Rename it in SiYuan on a device where it is accessible, then sync again: %s"
 	}
 }

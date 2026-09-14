@@ -8,7 +8,6 @@ import {copyFileSync, existsSync, readdirSync, readFileSync, statSync, unlinkSyn
 import os from "node:os";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
-import {selectDuplicateDevice} from "./android-device.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const appDir = path.join(repoRoot, "app");
@@ -147,6 +146,28 @@ function findTool(name) {
 
 function wait(milliseconds) {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
+}
+
+function selectDuplicateDevice(adb, devices, execute = spawnSync) {
+  let identity = null;
+  for (const serial of devices) {
+    // 连接名称可能随无线服务重新发布而变化，使用手机报告的序列号核对身份。
+    const result = execute(adb, ["-s", serial, "shell", "getprop", "ro.serialno"], {
+      encoding: "utf8",
+      timeout: 3000,
+      windowsHide: true,
+    });
+    const value = result.stdout?.trim();
+    // 无法确认身份时保留手动选择，避免把未知连接合并到另一台手机。
+    if (result.error || result.status !== 0 || !value || /^(unknown|null|0+)$/i.test(value)) {
+      return null;
+    }
+    if (identity !== null && identity !== value) {
+      return null;
+    }
+    identity = value;
+  }
+  return devices[0] || null;
 }
 
 function deviceSerial(adb) {

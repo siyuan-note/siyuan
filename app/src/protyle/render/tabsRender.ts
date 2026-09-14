@@ -348,6 +348,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                         add.className = "tabs-control ariaLabel";
                         add.innerHTML = '<svg><use xlink:href="#iconAdd"></use></svg>';
                         add.setAttribute("aria-label", escapeHtml(controller.options.addLabel || "+"));
+                        add.setAttribute("data-position", "north");
                         add.addEventListener("click", event => {
                             event.stopPropagation();
                             controller.options.add?.(tabs);

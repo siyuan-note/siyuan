@@ -106,10 +106,41 @@ const runCases = async (source) => {
     assert.equal(document.activeElement, editor);
     assert.equal(window.getSelection().anchorOffset, 3);
     assert.equal(window.siyuan.dialogs.length, 0);
+
+    dialog = new Dialog({content: '<button id="first">First</button><input disabled><button hidden>Hidden</button><button id="last">Last</button>'});
+    const container = dialog.element.querySelector(".b3-dialog__container");
+    assert.equal(document.activeElement, container);
+    const tab = (shiftKey = false) => document.activeElement.dispatchEvent(new KeyboardEvent("keydown", {
+        key: "Tab", shiftKey, bubbles: true, cancelable: true,
+    }));
+    tab();
+    assert.equal(document.activeElement.id, "first");
+    tab(true);
+    assert.equal(document.activeElement.id, "last");
+    tab();
+    assert.equal(document.activeElement.id, "first");
+    editor.focus();
+    tab();
+    assert.equal(document.activeElement.id, "first");
+    for (const shift of [false, true]) {
+        for (let i = 0; i < 6; i++) {
+            await require("electron").ipcRenderer.invoke("dialog-test-tab", shift);
+            assert.ok(container.contains(document.activeElement));
+        }
+    }
+    assert.equal(editor.textContent, "Editor content");
+    const empty = new Dialog({content: "No controls"});
+    tab(true);
+    assert.equal(document.activeElement, empty.element.querySelector(".b3-dialog__container"));
+    empty.destroy();
+    await tick();
+    assert.equal(document.activeElement.id, "first");
+    dialog.destroy();
+    await tick();
 };
 
 if (process.versions.electron && process.type === "browser") {
-    const {app, BrowserWindow} = require("electron");
+    const {app, BrowserWindow, ipcMain} = require("electron");
     app.setPath("userData", process.argv[2]);
     app.whenReady().then(async () => {
         const win = new BrowserWindow({show: false, webPreferences: {nodeIntegration: true, contextIsolation: false}});
@@ -118,6 +149,13 @@ if (process.versions.electron && process.type === "browser") {
             await win.loadURL("data:text/html,<html><body></body></html>");
             win.webContents.debugger.attach("1.3");
             await win.webContents.debugger.sendCommand("Emulation.setFocusEmulationEnabled", {enabled: true});
+            ipcMain.handle("dialog-test-tab", async (_event, shift) => {
+                for (const type of ["keyDown", "keyUp"]) {
+                    await win.webContents.debugger.sendCommand("Input.dispatchKeyEvent", {
+                        type, key: "Tab", code: "Tab", windowsVirtualKeyCode: 9, modifiers: shift ? 8 : 0,
+                    });
+                }
+            });
             const ts = require("typescript");
             const source = ts.transpileModule(fs.readFileSync(path.join(__dirname, "../src/dialog/index.ts"), "utf8"), {
                 compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020},

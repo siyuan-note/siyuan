@@ -306,7 +306,7 @@ Use an NGINX reverse proxy to hide port 6806. Please note:
 
 The [HelmForge SiYuan chart](https://github.com/helmforgedev/charts/tree/main/charts/siyuan) is community-maintained by HelmForge, uses the official `b3log/siyuan` image, and is not an official SiYuan chart. Please report chart issues to [HelmForge](https://github.com/helmforgedev/charts/issues).
 
-With Helm, kubectl, and a Kubernetes cluster with a default StorageClass that can provision a 10Gi ReadWriteOnce volume:
+Prepare Helm, kubectl, and a Kubernetes cluster with a default StorageClass that can provision a 10Gi ReadWriteOnce volume, then run the following commands:
 
 ```bash
 helm repo add helmforge https://repo.helmforge.dev

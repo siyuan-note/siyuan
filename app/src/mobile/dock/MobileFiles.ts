@@ -141,7 +141,8 @@ export class MobileFiles extends Model {
             }
             const target = event.target as HTMLElement;
             const item = target.closest<HTMLElement>('li[data-type="navigation-file"], li[data-type="navigation-root"]');
-            const toggle = target.closest(".b3-list-item__toggle:not(.fn__hidden)");
+            const toggle = target.closest(".b3-list-item__toggle:not(.fn__hidden)") ||
+                (target.closest(".b3-list-item__icon") ? item?.querySelector(":scope > .b3-list-item__toggle:not(.fn__hidden)") : null);
             if (item && this.element.contains(item) && !this.pinnedDocs.element.contains(item)) {
                 if (toggle) {
                     this.toggleTreeItem(item);

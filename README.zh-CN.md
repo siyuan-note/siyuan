@@ -314,13 +314,13 @@ kubectl -n siyuan get secret siyuan-siyuan-auth -o go-template='{{index .data "a
 kubectl -n siyuan port-forward service/siyuan-siyuan 6806:6806
 ```
 
-打开 <http://localhost:6806>，输入生成的访问授权码。请像密码一样妥善保管该授权码；它与 API Token 不同。以上资源名称以 Chart 默认配置和 Helm 实例名称 `siyuan` 为前提。
+打开 <http://localhost:6806>，输入生成的锁屏密码。请妥善保管该密码；它与 API Token 不同。以上资源名称以 Chart 默认配置和 Helm 实例名称 `siyuan` 为前提。
 
 远程访问时，请使用独立的 HTTPS 域名，以及支持代理 `/ws` WebSocket 连接的 Ingress 控制器，不要进行 URL 重写。配置 `ingress`，并通过 `networkPolicy.ingressFrom` 允许控制器所在命名空间的流量；默认策略仅允许同命名空间的入站流量和 DNS 出站流量。云端同步等外部服务需要显式配置出站规则。TLS、现有 Secret 和存储配置请参阅 [Chart 指南及生产环境示例](https://helmforge.dev/docs/charts/siyuan)。
 
 - **一个工作区只能有一个写入实例：** 不要增加副本数，也不要将同一工作区挂载到另一个运行中的实例，即使使用 ReadWriteMany 存储也不例外。Chart 使用 `Recreate` 策略，升级时会先停止旧实例，再启动新实例，因此会有服务中断。
 - **持久化：** 完整工作区挂载在 `/siyuan/workspace`。默认情况下，卸载 Chart 会保留其创建的 PVC，但删除命名空间或 PVC 仍可能导致数据丢失。通过 `persistence.existingClaim` 复用保留或恢复后的存储卷声明。
-- **备份与升级：** 备份完整工作区前，请正常停止写入实例，或使用能够保证应用一致性的备份流程。仅复制运行中的 SQLite 索引文件无法保证备份完整且一致。请妥善保管保存访问授权码的 Secret、加密密钥和加密笔记本恢复密码，并在独立 PVC 上测试恢复。升级前先备份，并确认新版本是否涉及存储格式变更：Helm 回滚不会撤销数据迁移。
+- **备份与升级：** 备份完整工作区前，请正常停止写入实例，或使用能够保证应用一致性的备份流程。仅复制运行中的 SQLite 索引文件无法保证备份完整且一致。请妥善保管保存锁屏密码的 Secret、加密密钥和加密笔记本恢复密码，并在独立 PVC 上测试恢复。升级前先备份，并确认新版本是否涉及存储格式变更：Helm 回滚不会撤销数据迁移。
 
 Docker 部署的限制同样适用：仅支持浏览器访问，不支持桌面端和移动端应用连接，不支持导出 PDF、HTML 和 Word 格式，也不支持导入 Markdown 文件。
 

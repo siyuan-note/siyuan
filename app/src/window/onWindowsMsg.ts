@@ -2,6 +2,8 @@ import {getInstanceById} from "../layout/util";
 import {Tab} from "../layout/Tab";
 import {lockScreen} from "../dialog/processSystem";
 import {clearTabDragPreview} from "../layout/tabDrag";
+import {getAllEditor} from "../layout/getAll";
+import {ipcRenderer} from "electron";
 
 const closeTab = (ipcData: IWebSocketData) => {
     const tab = getInstanceById(ipcData.data);
@@ -11,6 +13,12 @@ const closeTab = (ipcData: IWebSocketData) => {
 };
 export const onWindowsMsg = (ipcData: IWebSocketData) => {
     switch (ipcData.cmd) {
+        case "prepareNotebookSystemLock":
+            void Promise.all(getAllEditor().filter(editor => editor?.protyle?.wysiwyg)
+                .map(editor => editor.flushPendingTransactions())).then(() => {
+                ipcRenderer.send("siyuan-notebook-system-lock-ready", ipcData.data);
+            }).catch(error => console.error(error));
+            break;
         case "closetab":
             closeTab(ipcData);
             break;

@@ -2,6 +2,19 @@ import {strict as assert} from "node:assert";
 import test from "node:test";
 import type {Transaction} from "../../types/api";
 import {getEditorTransaction} from "./transactionContract";
+import {operationsMayChangeHeadingNumbers, operationsMayChangeOutline} from "./headingNumberCore";
+
+test("block reference swaps retain affected roots and invalidate the outline", () => {
+    const response: Transaction = JSON.parse(`{"doOperations":[{
+        "action":"swapBlockRef","id":"ref","blockID":"def",
+        "data":{"includeChildren":true,"originalToEmbed":true},"retData":["source","target"]
+    }]}`);
+    const operations = getEditorTransaction(response).doOperations;
+    assert.equal(operations.length, 1);
+    assert.deepEqual(operations[0].retData, ["source", "target"]);
+    assert.equal(operationsMayChangeOutline(operations), true);
+    assert.equal(operationsMayChangeHeadingNumbers(operations), true);
+});
 
 test("editor transaction selection preserves the original extension response", () => {
     const response: Transaction = JSON.parse(`{

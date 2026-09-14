@@ -1,4 +1,7 @@
 {
+	"encryptedNotebookFollowSystemLock": "Sistem ekran kilidini takip et",
+	"encryptedNotebookFollowSystemLockDesc": "Sistem kilitlendiğinde boşta kalma süresinden bağımsız olarak kilidi açık tüm şifreli not defterlerini kilitle; sistemin kilidi açıldıktan sonra defterler kilitli kalır",
+	"customBlock": "Özel blok",
 	"embedHeadingLevel": "Gömülü başlık düzeyi",
 	"embedHeadingLevelPreserve": "Özgün düzeyleri koru",
 	"originalToRef": "Özgün bloğu blok referansına dönüştür",

@@ -1,4 +1,7 @@
 {
+	"encryptedNotebookFollowSystemLock": "Suivre le verrouillage de l’écran du système",
+	"encryptedNotebookFollowSystemLockDesc": "Verrouiller tous les carnets chiffrés déverrouillés lorsque le système se verrouille, indépendamment du délai d’inactivité ; ils restent verrouillés après le déverrouillage du système",
+	"customBlock": "Bloc personnalisé",
 	"embedHeadingLevel": "Niveau des titres intégrés",
 	"embedHeadingLevelPreserve": "Conserver les niveaux d’origine",
 	"originalToRef": "Convertir le bloc original en référence de bloc",

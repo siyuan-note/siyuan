@@ -1,4 +1,7 @@
 {
+	"encryptedNotebookFollowSystemLock": "システムの画面ロックに連動",
+	"encryptedNotebookFollowSystemLockDesc": "システムの画面ロック時に、アイドル時間の設定に関係なく、ロック解除済みの暗号化ノートブックをすべてロックします。システムのロック解除後もノートブックはロックされたままです",
+	"customBlock": "カスタムブロック",
 	"embedHeadingLevel": "埋め込み見出しのレベル",
 	"embedHeadingLevelPreserve": "元の見出しレベルを維持",
 	"originalToRef": "元の定義ブロックをブロック参照に変換",

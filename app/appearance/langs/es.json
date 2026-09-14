@@ -1,4 +1,7 @@
 {
+	"encryptedNotebookFollowSystemLock": "Seguir el bloqueo de pantalla del sistema",
+	"encryptedNotebookFollowSystemLockDesc": "Bloquear todos los cuadernos cifrados desbloqueados al bloquear el sistema, independientemente del tiempo de inactividad; permanecen bloqueados al desbloquear el sistema",
+	"customBlock": "Bloque personalizado",
 	"embedHeadingLevel": "Nivel de los encabezados incrustados",
 	"embedHeadingLevelPreserve": "Mantener los niveles originales",
 	"originalToRef": "Convertir el original en referencia a bloque",

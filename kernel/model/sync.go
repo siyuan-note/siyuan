@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -593,6 +594,9 @@ func SetSyncProvider(provider int) (err error) {
 func SetSyncProviderS3(s3 *conf.S3) (err error) {
 	release := lockAssetSourceChange()
 	defer release()
+	if err = validateSyncS3(s3); err != nil {
+		return
+	}
 	s3.Endpoint = strings.TrimSpace(s3.Endpoint)
 	s3.Endpoint = util.NormalizeEndpoint(s3.Endpoint)
 	s3.AccessKey = strings.TrimSpace(s3.AccessKey)
@@ -612,6 +616,28 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 	Conf.Save()
 	refreshLANSyncManager()
 	return
+}
+
+func validateSyncS3(s3 *conf.S3) error {
+	if s3 == nil {
+		return errors.New(Conf.Language(249))
+	}
+	for _, value := range []string{s3.Endpoint, s3.AccessKey, s3.SecretKey, s3.Bucket, s3.Region} {
+		if strings.TrimSpace(value) == "" {
+			return errors.New(Conf.Language(249))
+		}
+	}
+	rawEndpoint := strings.TrimSpace(s3.Endpoint)
+	rawEndpoint = strings.Replace(rawEndpoint, "http://http(s)://", "https://", 1)
+	rawEndpoint = strings.Replace(rawEndpoint, "http(s)://", "https://", 1)
+	if strings.Contains(rawEndpoint, "://") && !strings.HasPrefix(rawEndpoint, "http://") && !strings.HasPrefix(rawEndpoint, "https://") {
+		return errors.New(Conf.Language(249))
+	}
+	endpoint, err := url.Parse(util.NormalizeEndpoint(rawEndpoint))
+	if err != nil || endpoint.Hostname() == "" || (endpoint.Scheme != "http" && endpoint.Scheme != "https") {
+		return errors.New(Conf.Language(249))
+	}
+	return nil
 }
 
 func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
@@ -719,7 +745,7 @@ func CreateCloudSyncDir(name string) (err error) {
 
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
-	repo, err := newRepositoryWithAssetSourceLocked()
+	repo, err := newCloudRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -753,7 +779,7 @@ func RemoveCloudSyncDir(name string) (err error) {
 
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
-	repo, err := newRepositoryWithAssetSourceLocked()
+	repo, err := newCloudRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -784,7 +810,7 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
-	repo, err := newRepositoryWithAssetSourceLocked()
+	repo, err := newCloudRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}

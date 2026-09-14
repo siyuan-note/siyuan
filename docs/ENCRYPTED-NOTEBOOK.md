@@ -100,6 +100,12 @@ An encrypted notebook is an island; some features are unsupported because of the
 
 ## User interaction
 
+On Windows and macOS, Settings - Authentication - Encrypted Notebook provides an optional “Follow system screen lock” switch, disabled by default. It locks all unlocked encrypted notebooks in workspaces whose kernels are owned by the desktop app, independently of the idle timeout (including when that timeout is zero). Remote connections, browser clients, Linux, and mobile clients do not emit this desktop system-lock action. System unlock never unlocks a notebook automatically.
+
+The desktop main process gives responsive editor windows up to one second to submit pending input, then invokes the authenticated kernel lock operation. The kernel waits for an ongoing unlock before collecting unlocked notebooks and reuses normal unmounting to drain transactions, save history, revoke access, and clear managed keys and caches. Unresponsive windows cannot indefinitely prevent locking; input that has not reached the kernel cannot be guaranteed to persist. Failed requests are retried on system unlock or resume. This is an asynchronous lock operation, not a guarantee that the OS waits for completion before suspending.
+
+The preference is persisted as `system.encryptedNotebookFollowSystemLock`, outside `NotebookCrypto`. Changing it does not modify key backups, authenticated payloads, ciphertext formats, or recovery material. Locking affects every client connected to the affected local kernel.
+
 ### Interaction design
 
 | Scenario | Interaction |

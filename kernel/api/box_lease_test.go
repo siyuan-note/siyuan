@@ -57,6 +57,10 @@ func TestImplicitNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, false, false)
 }
 
+func TestContractBlockSwapReplayNotebookResponseLease(t *testing.T) {
+	runNotebookResponseLease(t, false, true)
+}
+
 func TestContractRefIDsNotebookResponseLease(t *testing.T) {
 	runNotebookResponseLease(t, true, false)
 }
@@ -235,6 +239,14 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	engine.POST("/api/block/getBlockInfo", getBlockInfo)
 	engine.POST("/api/block/getBlockSiblingID", getBlockSiblingID)
 	engine.POST("/api/block/getBlocksIndexes", getBlocksIndexes)
+	engine.POST("/review/blockSwapLease", func(c *gin.Context) {
+		tx := &model.Transaction{DoOperations: []*model.Operation{{Action: "swapBlockRef"}}}
+		if err := holdBlockSwapReplayRequests(c, tx, boxIDs); err != nil {
+			c.JSON(http.StatusOK, map[string]string{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, map[string]int{"code": 0})
+	})
 	writer := &blockedBlockResponseWriter{ResponseRecorder: httptest.NewRecorder(), ready: make(chan []byte, 1), proceed: make(chan struct{})}
 	var releaseWriter sync.Once
 	defer releaseWriter.Do(func() { close(writer.proceed) })
@@ -253,6 +265,8 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	}
 	typedQuery := false
 	switch t.Name() {
+	case "TestContractBlockSwapReplayNotebookResponseLease":
+		endpoint, typedQuery = "/review/blockSwapLease", true
 	case "TestContractCheckBlockRefNotebookResponseLease":
 		endpoint, typedQuery = "/api/block/checkBlockRef", true
 	case "TestContractCheckBlockRefExplicitNotebookResponseLease":
@@ -325,7 +339,9 @@ func testNotebookResponseLease(t *testing.T, explicitNotebook, batch bool) {
 	releaseWriter.Do(func() { close(writer.proceed) })
 	<-responseDone
 	if typedQuery {
-		requireAPIContract(t, http.MethodPost, endpoint, writer.ResponseRecorder)
+		if t.Name() != "TestContractBlockSwapReplayNotebookResponseLease" {
+			requireAPIContract(t, http.MethodPost, endpoint, writer.ResponseRecorder)
+		}
 		var response struct {
 			Code int             `json:"code"`
 			Data json.RawMessage `json:"data"`

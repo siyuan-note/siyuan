@@ -517,6 +517,7 @@ func settingSearchPayload(value *conf.Search) *apicontract.SettingSearch {
 	result.Callout = value.Callout
 	result.Tabs = value.Tabs
 	result.TabItem = value.TabItem
+	result.CustomBlock = value.CustomBlock
 	result.Limit = value.Limit
 	result.CaseSensitive = value.CaseSensitive
 	result.HanSensitive = value.HanSensitive

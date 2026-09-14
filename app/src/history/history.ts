@@ -440,7 +440,7 @@ const renderRepo = async (element: Element, currentPage: number) => {
         }
     } catch (error) {
         if (repoRequests.get(element) === request && element.isConnected) {
-            listElement.innerHTML = `<li class="b3-list--empty">${escapeHtml(String(error))}<br><button class="b3-button b3-button--outline" data-type="retryRepo">${window.siyuan.languages.retry}</button></li>`;
+            listElement.innerHTML = `<li class="b3-list--empty">${escapeHtml(String(error))}<div class="fn__hr"></div><button class="b3-button b3-button--outline" data-type="retryRepo">${window.siyuan.languages.retry}</button></li>`;
             updateRepoSelection(element);
         }
     } finally {
@@ -515,7 +515,7 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
     <div class="fn__flex-1 fn__flex" id="historyContainer">
         <div data-type="doc" class="history__repo fn__block" data-init="true">
             <div class="history__action">
-                <div class="block__icons">
+                <div class="block__icons${isMobile() ? " fn__flex-wrap" : ""}">
                     <span data-type="docprevious" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                     <button class="b3-button b3-button--text ft__selectnone" data-type="jumpHistoryPage" data-totalpage="1">1</button>
                     <span data-type="docnext" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
@@ -528,14 +528,14 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
                         <input class="b3-text-field b3-form__icon-input ${isMobile() ? "fn__size96" : "fn__size200"}" placeholder="${window.siyuan.languages.searchPlaceholder}">
                     </div>
                     <span class="fn__space"></span>
-                    <select data-type="typeselect" class="b3-select ${isMobile() ? "fn__size96" : "fn__size200"}">
+                    <select data-type="typeselect" class="b3-select ${isMobile() ? "fn__flex-shrink" : "fn__size200"}">
                         <option value="0" ${localHistory.type === 0 ? "selected" : ""}>${window.siyuan.languages.docName}</option>
                         <option value="1" ${localHistory.type === 1 ? "selected" : ""}>${window.siyuan.languages.docNameAndContent}</option>
                         <option value="2" ${localHistory.type === 2 ? "selected" : ""}>${window.siyuan.languages.assets}</option>
                         <option value="4" ${localHistory.type === 4 ? "selected" : ""}>${window.siyuan.languages.database}</option>
                     </select>
                     <span class="fn__space"></span>
-                    <select data-type="opselect" class="b3-select${isMobile() ? " fn__size96" : ""}">
+                    <select data-type="opselect" class="b3-select${isMobile() ? " fn__flex-shrink" : ""}">
                         <option value="all" ${localHistory.operation === "all" ? "selected" : ""}>${window.siyuan.languages.allOp}</option>
                         <option value="clean" ${localHistory.operation === "clean" ? "selected" : ""}>${window.siyuan.languages.historyClean}</option>
                         <option value="update" ${localHistory.operation === "update" ? "selected" : ""}>${window.siyuan.languages.historyUpdate}</option>

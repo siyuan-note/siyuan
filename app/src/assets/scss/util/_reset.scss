@@ -295,6 +295,12 @@ textarea {
   outline: none;
 }
 
+// 为缺少组件焦点样式的表单控件提供可见焦点轮廓，文本输入也可由鼠标触发，内缩轮廓避免被滚动容器裁剪。
+:is(button, input, select, textarea):where(:not(.b3-button, .b3-switch, .b3-slider, .b3-text-field:not(.b3-text-field--text), .b3-select:not(.b3-select--noborder))):focus-visible {
+  outline: 2px solid var(--b3-theme-primary);
+  outline-offset: -2px;
+}
+
 button,
 input {
   line-height: normal;

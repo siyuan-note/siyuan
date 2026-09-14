@@ -82,7 +82,7 @@ func TestAPIContractNotebookCryptoAuthorization(t *testing.T) {
 			c.Next()
 		})
 		ServeAPI(engine)
-		for _, name := range []string{"enableEncryptedNotebooks", "disableEncryptedNotebooks", "createEncryptedNotebook", "unlockNotebook", "unlockAndOpenNotebook", "lockNotebook", "setNotebookCryptoAutoLock", "changeMasterPassword", "exportNotebookCryptoBackup", "importNotebookCryptoBackup"} {
+		for _, name := range []string{"enableEncryptedNotebooks", "disableEncryptedNotebooks", "createEncryptedNotebook", "unlockNotebook", "unlockAndOpenNotebook", "lockNotebook", "setNotebookCryptoAutoLock", "setEncryptedNotebookFollowSystemLock", "lockEncryptedNotebooksOnSystemLock", "changeMasterPassword", "exportNotebookCryptoBackup", "importNotebookCryptoBackup"} {
 			recorder := httptest.NewRecorder()
 			engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodPost, "/api/notebook/"+name, strings.NewReader(`{}`)))
 			if recorder.Code != http.StatusForbidden {

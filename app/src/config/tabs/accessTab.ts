@@ -741,6 +741,18 @@ const registerEncryptedNotebookGroup = (tab: SettingTabBuilder) => {
             }
         },
     });
+    if (!isBrowser() && !isMobile() && getHostCapabilities().ownsKernel &&
+        (window.siyuan.config.system.os === "windows" || window.siyuan.config.system.os === "darwin")) {
+        group.switch("system.encryptedNotebookFollowSystemLock", {
+            title: window.siyuan.languages.encryptedNotebookFollowSystemLock,
+            desc: window.siyuan.languages.encryptedNotebookFollowSystemLockDesc,
+            save: (value) => {
+                if (typeof value === "boolean") {
+                    fetchPost("/api/notebook/setEncryptedNotebookFollowSystemLock", {enabled: value});
+                }
+            },
+        });
+    }
 };
 
 const mountEncryptedNotebook = (root: HTMLElement) => {

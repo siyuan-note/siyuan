@@ -703,6 +703,9 @@ func InitConf() {
 	if nil == Conf.Search {
 		Conf.Search = conf.NewSearch()
 	}
+	if nil == Conf.Search.CustomBlock {
+		Conf.Search.CustomBlock = new(true)
+	}
 	if 1 > Conf.Search.Limit {
 		Conf.Search.Limit = 64
 	}

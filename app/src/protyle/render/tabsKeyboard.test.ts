@@ -32,7 +32,14 @@ const fixture = (readonly: boolean, vertical = false) => {
     const calls: string[] = [];
     const globals = {
         ids: ["a", "b"], item: {}, itemID: () => "a", type: "keydown", readonly,
-        tabs: {getAttribute: () => vertical ? "vertical" : "horizontal"},
+        tabs: {
+            getAttribute: () => vertical ? "vertical" : "horizontal",
+            scrollIntoView: (options: ScrollIntoViewOptions) => {
+                assert.equal(options.block, "start");
+                assert.equal(options.inline, "nearest");
+                calls.push("panel-start");
+            },
+        },
         tabKeyboardTarget,
         list: {children: [{
             dataset: {tabId: "b"},
@@ -97,5 +104,5 @@ test("readonly task activation cannot toggle the task or select the parent tab",
     assert.deepEqual(editable.calls, ["task"]);
     const tab = fixture(true);
     assert.equal(tab.dispatch("Enter").propagationStopped, true);
-    assert.deepEqual(tab.calls, ["select"]);
+    assert.deepEqual(tab.calls, ["select", "panel-start"]);
 });

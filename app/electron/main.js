@@ -73,6 +73,7 @@ const {
     unsafeRemoteChromiumSwitchNames,
 } = require("./remoteKernel");
 const {dispatchWindowMessage} = require("./windowMessaging");
+const {createNotebookSystemLock, prepareNotebookSystemLock} = require("./notebookSystemLock");
 
 process.noAsar = true;
 const appDir = path.dirname(app.getAppPath());
@@ -100,6 +101,14 @@ let bootAppearanceFallback = false;
 let latestActiveWindow;
 let firstOpen = false;
 let workspaces = []; // workspaceDir, id, port, webContentsId, browserWindow, tray, hideShortcut
+const notebookSystemLock = createNotebookSystemLock({
+    getWorkspaces: () => workspaces,
+    fetch: (...args) => net.fetch(...args),
+    writeLog: (message) => writeLog(message),
+    prepare: (workspace) => prepareNotebookSystemLock(BrowserWindow.getAllWindows().filter(window =>
+        initializedWindowIds.has(window.webContents.id) &&
+        windowKernelTargets.get(window.webContents.id)?.origin === workspace.kernelTarget.origin), ipcMain),
+});
 const windowKernelTargets = new Map();
 const initializedWindowIds = new Set();
 const pendingRemoteOpenURLs = [];
@@ -4124,6 +4133,7 @@ app.whenReady().then(() => {
     powerMonitor.on("resume", async () => {
         // 桌面端系统休眠唤醒后判断网络连通性后再执行数据同步 https://github.com/siyuan-note/siyuan/issues/6687
         writeLog("system resume");
+        void notebookSystemLock.retry();
 
         const isOnline = async () => {
             return net.isOnline();
@@ -4161,9 +4171,25 @@ app.whenReady().then(() => {
     });
     powerMonitor.on("lock-screen", () => {
         writeLog("system lock-screen");
-        BrowserWindow.getAllWindows().forEach(item => {
-            item.webContents.send("siyuan-send-windows", {cmd: "lockscreenByMode"});
+        let applicationLocked = false;
+        const lockApplication = () => {
+            if (applicationLocked) {
+                return;
+            }
+            applicationLocked = true;
+            BrowserWindow.getAllWindows().forEach(item => {
+                item.webContents.send("siyuan-send-windows", {cmd: "lockscreenByMode"});
+            });
+        };
+        // 编辑器提交完成前保留访问会话，但内核请求失败不能延迟应用锁屏。
+        const timeout = setTimeout(lockApplication, 1000);
+        void notebookSystemLock.lock().finally(() => {
+            clearTimeout(timeout);
+            lockApplication();
         });
+    });
+    powerMonitor.on("unlock-screen", () => {
+        void notebookSystemLock.retry();
     });
 });
 

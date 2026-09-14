@@ -296,16 +296,18 @@ var (
 )
 
 var (
-	EnableEncryptedNotebooks   = define[NotebookPasswordRequest, Null]("enableEncryptedNotebooks", "/api/notebook/enableEncryptedNotebooks", JSONBody, ResponseOptions{}, "POST")
-	DisableEncryptedNotebooks  = define[EmptyRequest, Null]("disableEncryptedNotebooks", "/api/notebook/disableEncryptedNotebooks", NoBody, ResponseOptions{}, "POST")
-	CreateEncryptedNotebook    = define[CreateEncryptedNotebookRequest, CreateNotebookData]("createEncryptedNotebook", "/api/notebook/createEncryptedNotebook", JSONBody, ResponseOptions{}, "POST")
-	UnlockNotebook             = define[UnlockNotebookRequest, Null]("unlockNotebook", "/api/notebook/unlockNotebook", JSONBody, ResponseOptions{}, "POST")
-	UnlockAndOpenNotebook      = define[UnlockNotebookRequest, Null]("unlockAndOpenNotebook", "/api/notebook/unlockAndOpenNotebook", JSONBody, ResponseOptions{}, "POST")
-	LockNotebook               = define[NotebookIDRequest, Null]("lockNotebook", "/api/notebook/lockNotebook", JSONBody, ResponseOptions{}, "POST")
-	SetNotebookCryptoAutoLock  = define[NotebookCryptoAutoLockRequest, Null]("setNotebookCryptoAutoLock", "/api/notebook/setNotebookCryptoAutoLock", JSONBody, ResponseOptions{}, "POST")
-	ChangeMasterPassword       = define[ChangeMasterPasswordRequest, Null]("changeMasterPassword", "/api/notebook/changeMasterPassword", JSONBody, ResponseOptions{}, "POST")
-	ExportNotebookCryptoBackup = define[EmptyRequest, NotebookCryptoBackupData]("exportNotebookCryptoBackup", "/api/notebook/exportNotebookCryptoBackup", NoBody, ResponseOptions{}, "POST")
-	TouchEncryptedNotebooks    = define[EmptyRequest, Null]("touchEncryptedNotebooks", "/api/notebook/touchEncryptedNotebooks", NoBody, ResponseOptions{}, "POST")
+	EnableEncryptedNotebooks             = define[NotebookPasswordRequest, Null]("enableEncryptedNotebooks", "/api/notebook/enableEncryptedNotebooks", JSONBody, ResponseOptions{}, "POST")
+	DisableEncryptedNotebooks            = define[EmptyRequest, Null]("disableEncryptedNotebooks", "/api/notebook/disableEncryptedNotebooks", NoBody, ResponseOptions{}, "POST")
+	CreateEncryptedNotebook              = define[CreateEncryptedNotebookRequest, CreateNotebookData]("createEncryptedNotebook", "/api/notebook/createEncryptedNotebook", JSONBody, ResponseOptions{}, "POST")
+	UnlockNotebook                       = define[UnlockNotebookRequest, Null]("unlockNotebook", "/api/notebook/unlockNotebook", JSONBody, ResponseOptions{}, "POST")
+	UnlockAndOpenNotebook                = define[UnlockNotebookRequest, Null]("unlockAndOpenNotebook", "/api/notebook/unlockAndOpenNotebook", JSONBody, ResponseOptions{}, "POST")
+	LockNotebook                         = define[NotebookIDRequest, Null]("lockNotebook", "/api/notebook/lockNotebook", JSONBody, ResponseOptions{}, "POST")
+	SetEncryptedNotebookFollowSystemLock = define[EncryptedNotebookFollowSystemLockRequest, Null]("setEncryptedNotebookFollowSystemLock", "/api/notebook/setEncryptedNotebookFollowSystemLock", JSONBody, ResponseOptions{}, "POST")
+	LockEncryptedNotebooksOnSystemLock   = define[EmptyRequest, Null]("lockEncryptedNotebooksOnSystemLock", "/api/notebook/lockEncryptedNotebooksOnSystemLock", JSONBody, ResponseOptions{}, "POST")
+	SetNotebookCryptoAutoLock            = define[NotebookCryptoAutoLockRequest, Null]("setNotebookCryptoAutoLock", "/api/notebook/setNotebookCryptoAutoLock", JSONBody, ResponseOptions{}, "POST")
+	ChangeMasterPassword                 = define[ChangeMasterPasswordRequest, Null]("changeMasterPassword", "/api/notebook/changeMasterPassword", JSONBody, ResponseOptions{}, "POST")
+	ExportNotebookCryptoBackup           = define[EmptyRequest, NotebookCryptoBackupData]("exportNotebookCryptoBackup", "/api/notebook/exportNotebookCryptoBackup", NoBody, ResponseOptions{}, "POST")
+	TouchEncryptedNotebooks              = define[EmptyRequest, Null]("touchEncryptedNotebooks", "/api/notebook/touchEncryptedNotebooks", NoBody, ResponseOptions{}, "POST")
 )
 
 var (

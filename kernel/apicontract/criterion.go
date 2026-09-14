@@ -18,6 +18,8 @@ type Criterion struct {
 }
 
 type CriterionTypes struct {
+	CustomBlock *bool `json:"customBlock,omitempty" api:"optional,nullable"`
+
 	MathBlock     bool `json:"mathBlock" api:"optional,nullable"`
 	Table         bool `json:"table" api:"optional,nullable"`
 	Blockquote    bool `json:"blockquote" api:"optional,nullable"`

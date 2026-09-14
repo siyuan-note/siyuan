@@ -134,6 +134,16 @@
     overflow: hidden;
     cursor: pointer;
     font-size: 0;
+
+    // 聚焦时显示输入框轮廓，隐藏原生文件按钮以保留上传入口的外观。
+    &:focus-visible {
+      opacity: 1;
+      color: transparent;
+
+      &::file-selector-button {
+        opacity: 0;
+      }
+    }
   }
 }
 

@@ -16,6 +16,7 @@ var transactionActionPayloads = []transactionActionPayload{
 	{"insert", reflect.TypeFor[string](), reflect.TypeFor[BlockOperationResult]()},
 	{"delete", reflect.TypeFor[BlockDeleteData](), reflect.TypeFor[BlockOperationResult]()},
 	{"move", reflect.TypeFor[string](), reflect.TypeFor[Null]()},
+	{"swapBlockRef", reflect.TypeFor[TransactionBlockSwap](), reflect.TypeFor[[]string]()},
 	{"moveOutlineHeading", reflect.TypeFor[Null](), reflect.TypeFor[BlockOperationResult]()},
 	{"append", reflect.TypeFor[string](), reflect.TypeFor[Null]()},
 	{"appendInsert", reflect.TypeFor[string](), reflect.TypeFor[BlockOperationResult]()},

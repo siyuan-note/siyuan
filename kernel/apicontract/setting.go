@@ -311,6 +311,7 @@ type SettingFileTree struct {
 }
 
 type SettingSearch struct {
+	CustomBlock                  *bool `json:"customBlock" api:"optional,nullable"`
 	Document                     bool  `json:"document" api:"optional,nullable"`
 	Heading                      bool  `json:"heading" api:"optional,nullable"`
 	List                         bool  `json:"list" api:"optional,nullable"`

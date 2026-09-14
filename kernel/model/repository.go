@@ -1167,7 +1167,7 @@ func PurgeCloud() (err error) {
 
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
-	repo, err := newRepositoryWithAssetSourceLocked()
+	repo, err := newCloudRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -1461,7 +1461,7 @@ func DownloadCloudSnapshot(tag, id string) (err error) {
 
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
-	repo, err := newRepositoryWithAssetSourceLocked()
+	repo, err := newCloudRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -1507,7 +1507,7 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
-	repo, err := newRepositoryWithAssetSourceLocked()
+	repo, err := newCloudRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -1553,7 +1553,7 @@ func RemoveCloudRepoTag(tag string) (err error) {
 
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
-	repo, err := newRepositoryWithAssetSourceLocked()
+	repo, err := newCloudRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -1589,7 +1589,7 @@ func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
 
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
-	repo, err := newRepositoryWithAssetSourceLocked()
+	repo, err := newCloudRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -1629,7 +1629,7 @@ func GetCloudRepoSnapshots(page int) (ret []*dejavu.Log, pageCount, totalCount i
 
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
-	repo, err := newRepositoryWithAssetSourceLocked()
+	repo, err := newCloudRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}
@@ -2961,6 +2961,16 @@ func newRepository() (ret *dejavu.Repo, err error) {
 	return newRepositoryWithAssetSourceLocked()
 }
 
+// newCloudRepositoryWithAssetSourceLocked 在访问云端前校验配置，保留未配置云端时的本地快照功能。
+func newCloudRepositoryWithAssetSourceLocked() (*dejavu.Repo, error) {
+	if Conf.Sync.Provider == conf.ProviderS3 {
+		if err := validateSyncS3(Conf.Sync.S3); err != nil {
+			return nil, err
+		}
+	}
+	return newRepositoryWithAssetSourceLocked()
+}
+
 // newRepositoryWithAssetSourceLocked 由已持有来源锁的调用方创建仓库，避免读写锁递归等待。
 func newRepositoryWithAssetSourceLocked() (ret *dejavu.Repo, err error) {
 	cloudConf, err := buildCloudConf()
@@ -3377,7 +3387,7 @@ func getCloudSpace() (stat *cloud.Stat, err error) {
 	defer assetDownloadSourceMu.RUnlock()
 	handleCloudError := cloudRepoErrorHandler()
 	defer func() { handleCloudError(err) }()
-	repo, err := newRepositoryWithAssetSourceLocked()
+	repo, err := newCloudRepositoryWithAssetSourceLocked()
 	if err != nil {
 		return
 	}

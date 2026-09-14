@@ -237,6 +237,10 @@ var performUndo = contractHandler(apicontract.PerformUndo, func(c *gin.Context, 
 		DoOperations:   entry.UndoOperationsForReplay(),
 		UndoOperations: entry.DoOperationsForReplay(),
 	}
+	if err := holdBlockSwapReplayRequests(c, tx, entry.MutatedRootIDs()); err != nil {
+		model.GlobalUndoLog.UndoRollback(entry, request.RootID)
+		return apicontract.Success(apicontract.FailedTransactionHistory("undo failed: " + err.Error()))
+	}
 	tx.MarkReplay()
 	// 重放前解决剪切后粘贴造成的块 ID 冲突（已存在的 ID 换新，避免重复）
 	model.ResolveReplayDuplicateIds(tx)
@@ -280,6 +284,10 @@ var performRedo = contractHandler(apicontract.PerformRedo, func(c *gin.Context, 
 		Timestamp:      time.Now().UnixMilli(),
 		DoOperations:   entry.DoOperationsForReplay(),
 		UndoOperations: entry.UndoOperationsForReplay(),
+	}
+	if err := holdBlockSwapReplayRequests(c, tx, entry.MutatedRootIDs()); err != nil {
+		model.GlobalUndoLog.RedoRollback(entry, request.RootID)
+		return apicontract.Success(apicontract.FailedTransactionHistory("redo failed: " + err.Error()))
 	}
 	tx.MarkReplay()
 	// 重放前解决剪切后粘贴造成的块 ID 冲突（已存在的 ID 换新，避免重复）
@@ -363,6 +371,15 @@ func pushUndoTransactions(app, session string, transactions []*model.Transaction
 		tx.WaitForCommit()
 	}
 	util.PushEvent(evt)
+}
+
+func holdBlockSwapReplayRequests(c *gin.Context, tx *model.Transaction, rootIDs []string) error {
+	for _, operation := range tx.DoOperations {
+		if operation != nil && operation.Action == "swapBlockRef" {
+			return holdEncryptedBlockRequests(c, "", rootIDs, false)
+		}
+	}
+	return nil
 }
 
 func shouldBroadcastAttrViewTransactions(transactions []*model.Transaction) bool {

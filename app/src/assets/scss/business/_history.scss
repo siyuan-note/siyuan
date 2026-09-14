@@ -16,8 +16,21 @@
     }
 
     &--narrow {
+      .history__snapshot-toolbar {
+        padding: 4px;
+        gap: 4px;
+      }
+
+      .history__snapshot-heading {
+        min-height: 37px;
+      }
+
       .history__snapshot-sources {
         display: flex;
+      }
+
+      .history__snapshot-label {
+        display: none;
       }
 
       &[data-source="local"] [data-repo-source="cloud"],
@@ -36,6 +49,77 @@
   }
 
   &__snapshot {
+    &-diff-dialog {
+      border-radius: 0;
+
+      .history__snapshot-diff {
+        min-height: 0;
+        flex-direction: column;
+
+        > .history__side {
+          flex: 1;
+          width: auto;
+          min-height: 0;
+        }
+
+        > .history__resize,
+        > [data-type="editors"],
+        > .history__snapshot-diff-nav {
+          display: none;
+        }
+
+        &--preview {
+          > .history__side {
+            display: none;
+          }
+
+          > [data-type="editors"],
+          > .history__snapshot-diff-nav {
+            display: flex;
+          }
+        }
+
+        &[data-side="left"] > [data-type="editors"] > :last-child,
+        &[data-side="right"] > [data-type="editors"] > :first-child {
+          display: none;
+        }
+
+        > [data-type="editors"] {
+          min-height: 0;
+          min-width: 0;
+
+          > div {
+            min-height: 0;
+            min-width: 0;
+          }
+
+          .protyle-title__input {
+            margin: 0;
+            padding: 4px 8px;
+            font-size: 14px;
+            line-height: 20px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+        }
+      }
+    }
+
+    &-diff-nav {
+      flex-shrink: 0;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px;
+      padding: 4px;
+      border-bottom: 1px solid var(--b3-border-color);
+
+      [aria-pressed="true"] {
+        background-color: var(--b3-theme-primary-lightest);
+        color: var(--b3-theme-primary);
+      }
+    }
+
     &-toolbar,
     &-sources {
       display: flex;
@@ -54,6 +138,9 @@
 
     &-sources {
       display: none;
+      padding: 0;
+      gap: 4px;
+      border: 0;
     }
 
     &-heading,

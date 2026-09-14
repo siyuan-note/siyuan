@@ -1,4 +1,7 @@
 {
+	"encryptedNotebookFollowSystemLock": "Sledovať uzamknutie obrazovky systému",
+	"encryptedNotebookFollowSystemLockDesc": "Pri uzamknutí systému uzamknúť všetky odomknuté šifrované zápisníky bez ohľadu na čas nečinnosti; po odomknutí systému zostanú uzamknuté",
+	"customBlock": "Vlastný blok",
 	"embedHeadingLevel": "Úroveň vložených nadpisov",
 	"embedHeadingLevelPreserve": "Zachovať pôvodné úrovne",
 	"originalToRef": "Previesť pôvodný blok na odkaz na blok",

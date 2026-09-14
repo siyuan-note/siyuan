@@ -1581,6 +1581,7 @@ declare namespace Config {
         callout: boolean;
         tabs?: boolean;
         tabItem?: boolean;
+        customBlock?: boolean;
         /**
          * Whether to distinguish between uppercase and lowercase letters when searching
          */
@@ -2018,6 +2019,7 @@ declare namespace Config {
          * - `1`: Manual + Follow the operating system
          */
         lockScreenMode: number;
+        encryptedNotebookFollowSystemLock: boolean;
         /**
          * The name of the current device
          */
@@ -2801,6 +2803,7 @@ declare namespace Config {
         callout: boolean;
         tabs?: boolean;
         tabItem?: boolean;
+        customBlock?: boolean;
         /**
          * Search results contain code blocks
          * @default false

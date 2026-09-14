@@ -584,6 +584,10 @@ const promiseTransaction = (options: {
             countBlockWord(ids, protyle, true);
             if (!options.skipSync) {
                 responseTransaction.doOperations.forEach((operation: IOperation) => {
+                    if (operation.action === "swapBlockRef" && operation.retData?.length) {
+                        reloadProtyle(protyle, false);
+                        return;
+                    }
                     if (handleViewFoldSourceOperation(protyle, operation)) {
                         return;
                     }
@@ -798,6 +802,17 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
     const deferUndoFocus = !!undoFocusContext?.undoFocusEmbedId;
     const pendingUndoEmbedElements = new Set<Element>();
     operations.forEach(operation => {
+        if (operation.action === "swapBlockRef") {
+            if (operation.retData?.includes(protyle.block.rootID)) {
+                reloadProtyle(protyle, false);
+            } else if (operation.retData?.length) {
+                protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach(item => {
+                    item.removeAttribute("data-render");
+                    blockRender(protyle, item);
+                });
+            }
+            return;
+        }
         if (handleViewFoldSourceOperation(protyle, operation)) {
             return;
         }

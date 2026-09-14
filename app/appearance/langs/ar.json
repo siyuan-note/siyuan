@@ -1,4 +1,7 @@
 {
+	"encryptedNotebookFollowSystemLock": "اتباع قفل شاشة النظام",
+	"encryptedNotebookFollowSystemLockDesc": "قفل جميع دفاتر الملاحظات المشفرة المفتوحة عند قفل النظام، بغض النظر عن مهلة الخمول؛ وتبقى مقفلة بعد فتح النظام",
+	"customBlock": "كتلة مخصصة",
 	"embedHeadingLevel": "مستوى عناوين الكتلة المضمنة",
 	"embedHeadingLevelPreserve": "الاحتفاظ بالمستوى الأصلي",
 	"originalToRef": "تحويل الكتلة الأصلية إلى مرجع كتلة",

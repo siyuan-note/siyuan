@@ -1,4 +1,7 @@
 {
+	"encryptedNotebookFollowSystemLock": "Ikuti penguncian layar sistem",
+	"encryptedNotebookFollowSystemLockDesc": "Kunci semua buku catatan terenkripsi yang terbuka saat sistem terkunci, terlepas dari batas waktu tidak aktif; buku catatan tetap terkunci setelah sistem dibuka",
+	"customBlock": "Blok kustom",
 	"embedHeadingLevel": "Tingkat judul tersemat",
 	"embedHeadingLevelPreserve": "Pertahankan tingkat asli",
 	"originalToRef": "Ubah blok asli menjadi referensi blok",

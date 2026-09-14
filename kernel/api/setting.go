@@ -579,6 +579,9 @@ var setSearch = contractHandler(apicontract.SetSearch, func(c *gin.Context, requ
 		// 兼容未携带该字段的旧版前端/第三方调用：保持当前值，避免被零值意外关闭并触发重建索引
 		s.HanSensitive = model.Conf.Search.HanSensitive
 	}
+	if s.CustomBlock == nil {
+		s.CustomBlock = new(model.Conf.Search.CustomBlockEnabled())
+	}
 
 	if 32 > s.Limit {
 		s.Limit = 32

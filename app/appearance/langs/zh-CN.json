@@ -1,4 +1,7 @@
 {
+	"encryptedNotebookFollowSystemLock": "跟随系统锁屏",
+	"encryptedNotebookFollowSystemLockDesc": "系统锁屏时锁定所有已解锁的加密笔记本，不受闲置自动锁定时间影响；系统解锁后仍需输入主密码",
+	"customBlock": "自定义块",
 	"embedHeadingLevel": "嵌入标题层级",
 	"embedHeadingLevelPreserve": "保持原层级",
 	"originalToRef": "定义块转为引用",

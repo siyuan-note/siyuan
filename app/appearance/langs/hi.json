@@ -1,4 +1,7 @@
 {
+	"encryptedNotebookFollowSystemLock": "सिस्टम स्क्रीन लॉक का पालन करें",
+	"encryptedNotebookFollowSystemLockDesc": "सिस्टम लॉक होने पर सभी अनलॉक की गई एन्क्रिप्टेड नोटबुक लॉक करें, निष्क्रियता की समय सीमा से स्वतंत्र; सिस्टम अनलॉक होने के बाद भी नोटबुक लॉक रहेंगी",
+	"customBlock": "कस्टम ब्लॉक",
 	"embedHeadingLevel": "एम्बेड किए गए शीर्षकों का स्तर",
 	"embedHeadingLevelPreserve": "मूल स्तर बनाए रखें",
 	"originalToRef": "मूल ब्लॉक को ब्लॉक संदर्भ में बदलें",

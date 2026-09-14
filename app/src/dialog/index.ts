@@ -14,6 +14,9 @@ export class Dialog {
     public editors: { [key: string]: Protyle };
     public data: any;
     private resizeCallback: (type: string) => void;
+    private previousFocus: HTMLElement;
+    private previousRange: Range;
+    private destroying = false;
 
     constructor(options: {
         positionId?: string,
@@ -29,6 +32,15 @@ export class Dialog {
         resizeCallback?: (type: string) => void,
         containerClassName?: string
     }) {
+        const activeElement = document.activeElement;
+        if (activeElement instanceof HTMLElement && activeElement !== document.body) {
+            this.previousFocus = activeElement;
+            const selection = window.getSelection();
+            if (activeElement.isContentEditable && selection?.rangeCount &&
+                activeElement.contains(selection.getRangeAt(0).commonAncestorContainer)) {
+                this.previousRange = selection.getRangeAt(0).cloneRange();
+            }
+        }
         this.resizeCallback = options.resizeCallback;
         this.disableClose = options.disableClose;
         this.id = genUUID();
@@ -94,6 +106,10 @@ left:${left || "auto"};top:${top || "auto"}">
     }
 
     public destroy(options?: IObject) {
+        if (this.destroying) {
+            return;
+        }
+        this.destroying = true;
         this.element.classList.remove("b3-dialog--open");
         setTimeout(() => {
             // av 修改列头emoji后点击关闭emoji图标
@@ -101,6 +117,8 @@ left:${left || "auto"};top:${top || "auto"}">
                 // https://github.com/siyuan-note/siyuan/issues/6783
                 window.siyuan.menus.menu.remove();
             }
+            const activeElement = document.activeElement;
+            const restoreFocus = activeElement === document.body || this.element.contains(activeElement);
             this.element.remove();
             if (this.destroyCallback) {
                 this.destroyCallback(options);
@@ -111,6 +129,20 @@ left:${left || "auto"};top:${top || "auto"}">
                     return true;
                 }
             });
+            // 调用方和上层对话框已接管焦点时，不覆盖其焦点；失效或隐藏的触发元素不再恢复。
+            const target = this.previousFocus;
+            const topDialog = window.siyuan.dialogs[window.siyuan.dialogs.length - 1];
+            if (restoreFocus && document.activeElement === document.body && target?.isConnected &&
+                target.getClientRects().length && getComputedStyle(target).visibility === "visible" &&
+                !target.closest("[inert]") && (!topDialog || topDialog.element.contains(target))) {
+                target.focus({preventScroll: true});
+                if (document.activeElement === target && this.previousRange?.startContainer.isConnected &&
+                    this.previousRange.endContainer.isConnected && target.contains(this.previousRange.commonAncestorContainer)) {
+                    const selection = window.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(this.previousRange);
+                }
+            }
             // https://github.com/siyuan-note/siyuan/issues/10475
             document.getElementById("drag")?.classList.remove("fn__hidden");
         }, Constants.TIMEOUT_DBLCLICK);

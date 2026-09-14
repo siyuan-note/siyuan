@@ -19,6 +19,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"html"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -67,7 +68,8 @@ func RemoveBookmark(bookmark string) (err error) {
 				continue
 			}
 
-			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == bookmark {
+			// 前端按纯文本回传标签，存储态为转义形态，比较前统一还原
+			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == html.UnescapeString(bookmark) {
 				node.RemoveIALAttr("bookmark")
 				cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
 				changed = true
@@ -139,7 +141,8 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 				continue
 			}
 
-			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == oldBookmark {
+			// 前端按纯文本回传旧标签，存储态为转义形态，比较前统一还原
+			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == html.UnescapeString(oldBookmark) {
 				node.SetIALAttr("bookmark", newBookmark)
 				cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
 				changed = true
@@ -245,7 +248,9 @@ func BuildBookmark() (ret *Bookmarks) {
 			}
 		}
 
-		label := BookmarkLabel(block.IAL["bookmark"])
+		// 存储态为 HTML 转义形态，统一还原为纯文本：前端按上下文转义展示，
+		// 重命名/删除也按纯文本回传，保证比较一致
+		label := BookmarkLabel(html.UnescapeString(block.IAL["bookmark"]))
 		if bs, ok := labelBlocks[label]; ok {
 			bs = append(bs, block)
 			labelBlocks[label] = bs

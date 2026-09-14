@@ -20,6 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func tagContracts(tags model.Tags) []*apicontract.TagData {
@@ -29,7 +30,8 @@ func tagContracts(tags model.Tags) []*apicontract.TagData {
 	ret := make([]*apicontract.TagData, len(tags))
 	for i, tag := range tags {
 		if tag != nil {
-			ret[i] = &apicontract.TagData{Name: tag.Name, Label: tag.Label, Children: tagContracts(tag.Children),
+			// 模型层的 Name/Label 为 HTML 转义形态，前端负责按上下文转义，这里还原为纯文本
+			ret[i] = &apicontract.TagData{Name: util.UnescapeHTML(tag.Name), Label: tag.Label, Children: tagContracts(tag.Children),
 				Type: tag.Type, Depth: tag.Depth, Count: tag.Count}
 		}
 	}

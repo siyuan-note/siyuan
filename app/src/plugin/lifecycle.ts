@@ -454,14 +454,17 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
         // 加载阶段收到的拆除请求与后续拆除钩子共用首次请求建立的超时预算。
         // Promise 无法取消；预算耗尽后仍尽力调用后续钩子，但不再为它们追加等待时间。
         const deadline = record.removalDeadline ?? this.now() + this.teardownTimeout;
+        let deadlineReached = false;
         record.state = "unloading";
         if (!await this.runTeardownHook(record.name, "onunload", () => this.adapter.onunload(plugin), deadline)) {
+            deadlineReached = true;
             this.reportTimeout(record.name, "onunload");
         }
         uninstall = uninstall || this.hasPendingUninstall(record);
         if (uninstall) {
             record.state = "uninstalling";
-            if (!await this.runTeardownHook(record.name, "uninstall", () => this.adapter.uninstall(plugin), deadline)) {
+            if (!await this.runTeardownHook(record.name, "uninstall", () => this.adapter.uninstall(plugin), deadline, deadlineReached)) {
+                deadlineReached = true;
                 this.reportTimeout(record.name, "uninstall");
             }
             this.markPendingUninstallsHandled(record, task);
@@ -478,7 +481,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
     }
 
     private runTeardownHook(name: string, hook: "onunload" | "uninstall",
-                            callback: () => Promise<void> | void, deadline: number) {
+                            callback: () => Promise<void> | void, deadline: number, deadlineReached = false) {
         try {
             const result = callback();
             if (!result || typeof result.then !== "function") {
@@ -487,7 +490,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
             const promise = Promise.resolve(result).catch((error) => {
                 this.adapter.onError(name, hook, error);
             });
-            if (deadline <= this.now()) {
+            if (deadlineReached || deadline <= this.now()) {
                 return Promise.resolve(true);
             }
             return this.waitUntilDeadline(promise, deadline);

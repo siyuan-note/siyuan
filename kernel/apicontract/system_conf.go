@@ -111,7 +111,6 @@ type SystemOIDCClaimRule struct {
 }
 
 type SystemSystem struct {
-	EncryptedNotebookFollowSystemLock bool                `json:"encryptedNotebookFollowSystemLock" api:"optional,nullable"`
 	ID                                string              `json:"id" api:"optional,nullable"`
 	Name                              string              `json:"name" api:"optional,nullable"`
 	KernelVersion                     string              `json:"kernelVersion" api:"optional,nullable"`
@@ -131,6 +130,7 @@ type SystemSystem struct {
 	UpdateChannel                     string              `json:"updateChannel,omitempty" api:"optional,nullable"`
 	AutoLaunch2                       int                 `json:"autoLaunch2" api:"optional,nullable"`
 	LockScreenMode                    int                 `json:"lockScreenMode" api:"optional,nullable"`
+	EncryptedNotebookFollowSystemLock bool                `json:"encryptedNotebookFollowSystemLock" api:"optional,nullable"`
 	DisabledFeatures                  []string            `json:"disabledFeatures" api:"optional,nullable"`
 	MicrosoftDefenderExcluded         bool                `json:"microsoftDefenderExcluded" api:"optional,nullable"`
 	SafeMode                          bool                `json:"safeMode" api:"optional,nullable"`

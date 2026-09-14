@@ -24,6 +24,15 @@ import (
 )
 
 func TestDeferredAssetAPIAuthorizationAndMetadata(t *testing.T) {
+	testDeferredAssetAPIAuthorizationAndMetadata(t, false)
+}
+
+func TestAPIContractDeferredAssetSymlinkWorkspace(t *testing.T) {
+	testDeferredAssetAPIAuthorizationAndMetadata(t, true)
+}
+
+func testDeferredAssetAPIAuthorizationAndMetadata(t *testing.T, symlinkWorkspace bool) {
+	t.Helper()
 	gin.SetMode(gin.TestMode)
 	originalConf := model.Conf
 	originalWorkspace, originalData, originalRepo := util.WorkspaceDir, util.DataDir, util.RepoDir
@@ -36,6 +45,13 @@ func TestDeferredAssetAPIAuthorizationAndMetadata(t *testing.T) {
 		util.StatusBarCfg = originalStatusBar
 	})
 	base := t.TempDir()
+	if symlinkWorkspace {
+		link := filepath.Join(t.TempDir(), "workspace-link")
+		if err := os.Symlink(base, link); err != nil {
+			t.Skipf("symlinks are not supported on this system: %s", err)
+		}
+		base = link
+	}
 	remote := filepath.Join(base, "cloud")
 	key := []byte("0123456789abcdef0123456789abcdef")
 	model.Conf = model.NewAppConf()

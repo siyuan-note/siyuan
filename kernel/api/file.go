@@ -464,8 +464,14 @@ var getFile = contractHandler(apicontract.GetFile, func(c *gin.Context, request 
 		}
 	}
 
-	if gulu.File.IsSubPath(util.DataDir, fileAbsPath) {
-		if err = model.EnsureAssetLocal(fileAbsPath); err != nil {
+	dataRoot, dataRootErr := model.ResolveAssetPathWithMissingLeaf(util.DataDir)
+	if dataRootErr == nil && gulu.File.IsSubPath(dataRoot, fileAbsPath) {
+		// 将授权后的真实路径映射回数据目录路径，使符号链接工作空间也能匹配按需下载清单。
+		rel, relErr := filepath.Rel(dataRoot, fileAbsPath)
+		if relErr != nil {
+			return apicontract.Failure[apicontract.BinaryContent](http.StatusInternalServerError, relErr.Error())
+		}
+		if err = model.EnsureAssetLocal(filepath.Join(util.DataDir, rel)); err != nil {
 			ret.Code = http.StatusServiceUnavailable
 			if os.IsNotExist(err) {
 				ret.Code = http.StatusNotFound

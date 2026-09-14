@@ -43,6 +43,7 @@
   - [安装包](#安装包)
   - [包管理器](#包管理器)
   - [Docker 部署](#docker-部署)
+  - [Kubernetes 部署](#kubernetes-部署)
   - [Unraid 部署](#unraid-部署)
   - [TrueNAS 部署](#truenas-部署)
   - [宝塔面板部署](#宝塔面板部署)
@@ -293,6 +294,35 @@ chown -R 1001:1002 /siyuan/workspace
 - 不支持桌面端和移动端应用连接，仅支持在浏览器上使用
 - 不支持导出 PDF、HTML 和 Word 格式
 - 不支持导入 Markdown 文件
+
+</details>
+
+### Kubernetes 部署
+
+<details>
+<summary>Kubernetes 部署文档</summary>
+
+[HelmForge 思源 Chart](https://github.com/helmforgedev/charts/tree/main/charts/siyuan) 由 HelmForge 社区维护，使用官方 `b3log/siyuan` 镜像，并非思源官方 Chart。Chart 相关问题请反馈至 [HelmForge](https://github.com/helmforgedev/charts/issues)。
+
+准备好 Helm、kubectl，以及默认 StorageClass 能够动态供应 10Gi ReadWriteOnce 存储卷的 Kubernetes 集群后，执行：
+
+```bash
+helm repo add helmforge https://repo.helmforge.dev
+helm repo update
+helm install siyuan helmforge/siyuan --namespace siyuan --create-namespace --wait
+kubectl -n siyuan get secret siyuan-siyuan-auth -o go-template='{{index .data "access-code" | base64decode}}{{"\n"}}'
+kubectl -n siyuan port-forward service/siyuan-siyuan 6806:6806
+```
+
+打开 <http://localhost:6806>，输入生成的访问授权码。请像密码一样保护显示的授权码；它与 API Token 不同。以上资源名称以 Chart 默认配置和发布名称 `siyuan` 为前提。
+
+远程访问时，请使用独立的 HTTPS 域名，以及支持代理 `/ws` WebSocket 连接的 Ingress 控制器，不要进行 URL 重写。配置 `ingress`，并通过 `networkPolicy.ingressFrom` 允许控制器所在命名空间的流量；默认策略仅允许同命名空间的入站流量和 DNS 出站流量。云端同步等外部服务需要显式配置出站规则。TLS、现有 Secret 和存储配置请参阅 [Chart 指南及生产环境示例](https://helmforge.dev/docs/charts/siyuan)。
+
+- **一个工作区只能有一个写入实例：** 不要增加副本数，也不要将同一工作区挂载到另一个运行中的实例，即使使用 ReadWriteMany 存储也不例外。Chart 使用 `Recreate` 策略，升级时会先停止旧实例，再启动新实例，因此会有服务中断。
+- **持久化：** 完整工作区挂载在 `/siyuan/workspace`。默认情况下，卸载 Chart 会保留其创建的 PVC，但删除命名空间或 PVC 仍可能导致数据丢失。通过 `persistence.existingClaim` 复用保留或恢复后的存储卷声明。
+- **备份与升级：** 备份完整工作区前，请正常停止写入实例，或使用能够保证应用一致性的备份流程。仅复制正在使用的 SQLite 索引不足以完成备份。请安全保存身份验证 Secret、加密密钥和加密笔记本恢复密码，并在独立 PVC 上测试恢复。升级前先备份并检查存储格式变更：Helm 回滚不会撤销数据迁移。
+
+Docker 部署的限制同样适用：仅支持浏览器访问，不支持桌面端和移动端应用连接，不支持导出 PDF、HTML 和 Word 格式，也不支持导入 Markdown 文件。
 
 </details>
 

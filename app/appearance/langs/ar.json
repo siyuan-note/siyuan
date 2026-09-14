@@ -1,4 +1,6 @@
 {
+	"originalToRef": "تحويل الكتلة الأصلية إلى مرجع كتلة",
+	"originalToEmbed": "تحويل الكتلة الأصلية إلى كتلة مضمنة",
 	"mobileFileTreeMultiSelectTip": "اضغط على المستندات أو دفاتر الملاحظات لتحديدها أو إلغاء تحديدها",
 	"repoBatchDelete": "حذف الوسوم المحددة",
 	"repoBatchDone": "تم",

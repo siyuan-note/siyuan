@@ -1,4 +1,6 @@
 {
+	"originalToRef": "Zamień oryginalny blok na odwołanie do bloku",
+	"originalToEmbed": "Zamień oryginalny blok na osadzony blok",
 	"mobileFileTreeMultiSelectTip": "Dotknij dokumentów lub notatników, aby je zaznaczyć lub odznaczyć",
 	"repoBatchDelete": "Usuń wybrane oznaczenia",
 	"repoBatchDone": "Gotowe",

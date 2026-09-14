@@ -1,4 +1,6 @@
 {
+	"originalToRef": "Convertir el original en referencia a bloque",
+	"originalToEmbed": "Convertir el original en bloque incrustado",
 	"mobileFileTreeMultiSelectTip": "Toca los documentos o cuadernos para seleccionarlos o deseleccionarlos",
 	"repoBatchDelete": "Eliminar etiquetas seleccionadas",
 	"repoBatchDone": "Finalizar",

@@ -1,4 +1,6 @@
 {
+	"originalToRef": "Origineel omzetten naar blokverwijzing",
+	"originalToEmbed": "Origineel omzetten naar ingesloten blok",
 	"mobileFileTreeMultiSelectTip": "Tik op documenten of notitieboeken om ze te selecteren of te deselecteren",
 	"repoBatchDelete": "Geselecteerde markeringen verwijderen",
 	"repoBatchDone": "Gereed",

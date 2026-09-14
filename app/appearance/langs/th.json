@@ -1,4 +1,6 @@
 {
+	"originalToRef": "แปลงบล็อกต้นฉบับเป็นการอ้างอิงบล็อก",
+	"originalToEmbed": "แปลงบล็อกต้นฉบับเป็นบล็อกฝัง",
 	"mobileFileTreeMultiSelectTip": "แตะเอกสารหรือสมุดบันทึกเพื่อเลือกหรือยกเลิกการเลือก",
 	"repoBatchDelete": "ลบแท็กที่เลือก",
 	"repoBatchDone": "เสร็จสิ้น",

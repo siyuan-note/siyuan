@@ -1,4 +1,6 @@
 {
+	"originalToRef": "原定義區塊轉為區塊引用",
+	"originalToEmbed": "原定義區塊轉為嵌入區塊",
 	"mobileFileTreeMultiSelectTip": "輕點文件或筆記本以選取或取消選取",
 	"repoBatchDelete": "刪除所選標記",
 	"repoBatchDone": "完成管理",

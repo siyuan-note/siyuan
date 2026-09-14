@@ -1,4 +1,6 @@
 {
+	"originalToRef": "Ubah blok asli menjadi referensi blok",
+	"originalToEmbed": "Ubah blok asli menjadi blok sematan",
 	"mobileFileTreeMultiSelectTip": "Ketuk dokumen atau buku catatan untuk memilih atau membatalkan pilihan",
 	"repoBatchDelete": "Hapus tanda yang dipilih",
 	"repoBatchDone": "Selesai",

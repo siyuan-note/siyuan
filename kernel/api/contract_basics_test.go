@@ -25,6 +25,7 @@ func TestAPIContractBasicRequests(t *testing.T) {
 		{"/api/block/getHeadingFoldTransaction", `{"id":"id","scope":null}`, getHeadingFoldTransaction, -1},
 		{"/api/block/transferBlockRef", `{"fromID":"invalid","toID":"invalid"}`, transferBlockRef, -1},
 		{"/api/block/swapBlockRef", `{"refID":"id","defID":"id","includeChildren":null}`, swapBlockRef, -1},
+		{"/api/block/swapBlockRef", `{"refID":"id","defID":"id","includeChildren":false,"originalToEmbed":"true"}`, swapBlockRef, -1},
 		{"/api/block/setBlockReminder", `{"id":"id","timed":null}`, setBlockReminder, -1},
 		{"/api/block/getDocInfo", `{"id":null}`, getDocInfo, -1},
 		{"/api/block/getDocsInfo", `{"ids":[],"refCount":null,"av":false}`, getDocsInfo, -1},

@@ -1920,7 +1920,7 @@ export type StorageSetKeysRequestInput = { "app"?: string | null; "keyVals": { [
 
 export type StorageSetRequestInput = { "app"?: string | null; "key": string; "val"?: JSONValue | null; };
 
-export type SwapBlockRefRequestInput = { "defID": string; "includeChildren": boolean; "refID": string; };
+export type SwapBlockRefRequestInput = { "defID": string; "includeChildren": boolean; "originalToEmbed"?: boolean; "refID": string; };
 
 export type SyncAssetDownloadModeData = { "assetDownloadMode": number; };
 

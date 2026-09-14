@@ -1,4 +1,6 @@
 {
+	"originalToRef": "元の定義ブロックをブロック参照に変換",
+	"originalToEmbed": "元の定義ブロックを埋め込みブロックに変換",
 	"mobileFileTreeMultiSelectTip": "ドキュメントやノートブックをタップして選択または選択解除",
 	"repoBatchDelete": "選択したタグを削除",
 	"repoBatchDone": "管理を終了",

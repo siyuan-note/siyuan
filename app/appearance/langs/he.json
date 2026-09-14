@@ -1,4 +1,6 @@
 {
+	"originalToRef": "המרת הבלוק המקורי להפניה לבלוק",
+	"originalToEmbed": "המרת הבלוק המקורי לבלוק מוטמע",
 	"mobileFileTreeMultiSelectTip": "הקישו על מסמכים או מחברות כדי לבחור אותם או לבטל את בחירתם",
 	"repoBatchDelete": "מחיקת התגיות שנבחרו",
 	"repoBatchDone": "סיום",

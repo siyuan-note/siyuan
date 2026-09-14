@@ -1,4 +1,6 @@
 {
+	"originalToRef": "Converter o original em referência de bloco",
+	"originalToEmbed": "Converter o original em bloco incorporado",
 	"mobileFileTreeMultiSelectTip": "Toque nos documentos ou cadernos para selecioná-los ou desmarcá-los",
 	"repoBatchDelete": "Excluir marcações selecionadas",
 	"repoBatchDone": "Concluir",

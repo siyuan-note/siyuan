@@ -974,8 +974,14 @@ export const entryCatalog: IEntryCatalogSection[] = [
                 node("text*", () => `${window.siyuan.languages.text} *`),
                 node("link", lang("hyperlink")),
                 node("blockEmbed", lang("blockEmbed")),
-                node("defBlock", lang("defBlock"), false),
-                node("defBlockChildren", lang("defBlockChildren"), false),
+                node("defBlock", lang("defBlock"), false, [
+                    node("originalToRef", lang("originalToRef")),
+                    node("originalToEmbed", lang("originalToEmbed")),
+                ]),
+                node("defBlockChildren", lang("defBlockChildren"), false, [
+                    node("originalToRef", lang("originalToRef")),
+                    node("originalToEmbed", lang("originalToEmbed")),
+                ]),
             ]),
             node("copy", lang("copy")),
             node("cut", lang("cut")),

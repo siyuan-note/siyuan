@@ -1,4 +1,6 @@
 {
+	"originalToRef": "Converti il blocco originale in riferimento a blocco",
+	"originalToEmbed": "Converti il blocco originale in blocco incorporato",
 	"mobileFileTreeMultiSelectTip": "Tocca i documenti o i quaderni per selezionarli o deselezionarli",
 	"repoBatchDelete": "Elimina i contrassegni selezionati",
 	"repoBatchDone": "Fine",

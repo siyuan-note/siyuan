@@ -1,4 +1,6 @@
 {
+	"originalToRef": "Convert original to block reference",
+	"originalToEmbed": "Convert original to embed block",
 	"mobileFileTreeMultiSelectTip": "Tap documents or notebooks to select or deselect them",
 	"repoBatchDelete": "Delete selected tags",
 	"repoBatchDone": "Done",

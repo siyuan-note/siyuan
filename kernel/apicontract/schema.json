@@ -43112,6 +43112,9 @@
         "includeChildren": {
           "type": "boolean"
         },
+        "originalToEmbed": {
+          "type": "boolean"
+        },
         "refID": {
           "type": "string"
         }

@@ -716,7 +716,7 @@ func TransferBlockRef(fromID, toID string, refIDs []string) (err error) {
 	return
 }
 
-func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
+func SwapBlockRef(refID, defID string, includeChildren, originalToEmbed bool) (err error) {
 	refTree, err := LoadTreeByBlockID(refID)
 	if err != nil {
 		return
@@ -724,9 +724,6 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 	refNode := treenode.GetNodeInTree(refTree, refID)
 	if nil == refNode {
 		return
-	}
-	if ast.NodeListItem == refNode.Parent.Type {
-		refNode = refNode.Parent
 	}
 	defTree, err := LoadTreeByBlockID(defID)
 	if err != nil {
@@ -741,6 +738,26 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 	}
 	if nil == defNode {
 		return
+	}
+	swapBlockRefNodes(refNode, defNode, defID, includeChildren, originalToEmbed)
+
+	if err = indexWriteTreeUpsertQueue(refTree); err != nil {
+		return
+	}
+	if !sameTree {
+		if err = indexWriteTreeUpsertQueue(defTree); err != nil {
+			return
+		}
+	}
+	FlushTxQueue()
+	util.ReloadUI()
+	return
+}
+
+func swapBlockRefNodes(refNode, defNode *ast.Node, defID string, includeChildren, originalToEmbed bool) {
+	originalRefNode := refNode
+	if ast.NodeListItem == refNode.Parent.Type {
+		refNode = refNode.Parent
 	}
 	var defNodeChildren []*ast.Node
 	if ast.NodeListItem == defNode.Parent.Type {
@@ -818,18 +835,12 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 		}
 	}
 	refPivot.Unlink()
-
-	if err = indexWriteTreeUpsertQueue(refTree); err != nil {
-		return
+	if originalToEmbed {
+		embed := &ast.Node{ID: originalRefNode.ID, Type: ast.NodeBlockQueryEmbed, KramdownIAL: originalRefNode.KramdownIAL}
+		embed.AppendChild(&ast.Node{Type: ast.NodeBlockQueryEmbedScript, Tokens: []byte("select * from blocks where id='" + defID + "'")})
+		originalRefNode.InsertBefore(embed)
+		originalRefNode.Unlink()
 	}
-	if !sameTree {
-		if err = indexWriteTreeUpsertQueue(defTree); err != nil {
-			return
-		}
-	}
-	FlushTxQueue()
-	util.ReloadUI()
-	return
 }
 
 func GetHeadingDeleteTransaction(id string) (transaction *Transaction, err error) {

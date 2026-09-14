@@ -620,25 +620,37 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 id: "defBlock",
                 iconHTML: "",
                 label: window.siyuan.languages.defBlock,
-                click() {
-                    fetchPost("/api/block/swapBlockRef", {
-                        refID: id,
-                        defID: refBlockId,
-                        includeChildren: false
-                    });
-                }
+                submenu: [false, true].map((originalToEmbed) => ({
+                    id: originalToEmbed ? "originalToEmbed" : "originalToRef",
+                    iconHTML: "",
+                    label: originalToEmbed ? window.siyuan.languages.originalToEmbed : window.siyuan.languages.originalToRef,
+                    click() {
+                        fetchPost("/api/block/swapBlockRef", {
+                            refID: id,
+                            defID: refBlockId,
+                            includeChildren: false,
+                            originalToEmbed
+                        });
+                    }
+                }))
             });
             submenu.push({
                 id: "defBlockChildren",
                 iconHTML: "",
                 label: window.siyuan.languages.defBlockChildren,
-                click() {
-                    fetchPost("/api/block/swapBlockRef", {
-                        refID: id,
-                        defID: refBlockId,
-                        includeChildren: true
-                    });
-                }
+                submenu: [false, true].map((originalToEmbed) => ({
+                    id: originalToEmbed ? "originalToEmbed" : "originalToRef",
+                    iconHTML: "",
+                    label: originalToEmbed ? window.siyuan.languages.originalToEmbed : window.siyuan.languages.originalToRef,
+                    click() {
+                        fetchPost("/api/block/swapBlockRef", {
+                            refID: id,
+                            defID: refBlockId,
+                            includeChildren: true,
+                            originalToEmbed
+                        });
+                    }
+                }))
             });
         }
         window.siyuan.menus.menu.append(new MenuItem({

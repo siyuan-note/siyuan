@@ -17,6 +17,7 @@ type SwapBlockRefRequest struct {
 	RefID           string `json:"refID"`
 	DefID           string `json:"defID"`
 	IncludeChildren bool   `json:"includeChildren"`
+	OriginalToEmbed bool   `json:"originalToEmbed" api:"optional"`
 }
 
 type BlockReminderRequest struct {

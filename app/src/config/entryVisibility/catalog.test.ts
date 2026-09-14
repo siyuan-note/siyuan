@@ -110,6 +110,19 @@ const slashMenuBuiltinOrder = [
     "clearFontStyle",
 ];
 
+test("definition conversion retains parent paths and registers original block choices", () => {
+    for (const id of ["defBlock", "defBlockChildren"]) {
+        const path = `inline.ref.turnInto.${id}`;
+        assert.equal(getEntryCatalogNode(path).simple, false);
+        assert.deepEqual(getEntryCatalogChildren(path).map((item) => item.key), ["originalToRef", "originalToEmbed"]);
+        for (const child of getEntryCatalogChildren(path)) {
+            assert.equal(child.type, "entry");
+            assert.equal(child.simple, true);
+            assert.equal(getEntryParentPath(`${path}.${child.key}`), path);
+        }
+    }
+});
+
 test("entry catalog paths are unique and indexed", () => {
     const paths: string[] = [];
     const visit = (prefix: string, nodes: typeof entryCatalog[number]["children"]) => {

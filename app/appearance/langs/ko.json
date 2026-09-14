@@ -1,4 +1,6 @@
 {
+	"originalToRef": "원본 정의 블록을 블록 참조로 변환",
+	"originalToEmbed": "원본 정의 블록을 임베드 블록으로 변환",
 	"mobileFileTreeMultiSelectTip": "문서나 노트북을 탭하여 선택하거나 선택 해제하세요",
 	"repoBatchDelete": "선택한 태그 삭제",
 	"repoBatchDone": "관리 완료",

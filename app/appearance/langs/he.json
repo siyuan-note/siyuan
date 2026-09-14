@@ -1,4 +1,12 @@
 {
+	"repoBatchDelete": "מחיקת התגיות שנבחרו",
+	"repoBatchDone": "סיום",
+	"repoBatchClear": "ביטול הבחירה",
+	"repoBatchSelection": "נבחרו מקומית: ${x} · בענן: ${y}",
+	"repoTaggedSnapshots": "תמונות מצב מתויגות",
+	"repoBatchManage": "ניהול מרוכז",
+	"repoRemoveTagsTip": "רק התגיות שנבחרו יוסרו. נתוני תמונות המצב לא יימחקו מיד; במידת הצורך יש לנקות בנפרד את מאגר הנתונים המתאים.",
+	"repoBatchResult": "הוסרו: ${x}. נכשלו או לא אומתו: ${y}; פריטים אלה נשארים מסומנים לניסיון חוזר.",
 	"enterMasterPassword": "נא להזין את הסיסמה הראשית",
 	"orderedListItemBlock": "בלוק פריט ברשימה מסודרת",
 	"unorderedListItemBlock": "בלוק פריט ברשימה לא מסודרת",

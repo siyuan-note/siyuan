@@ -1,4 +1,12 @@
 {
+	"repoBatchDelete": "Geselecteerde markeringen verwijderen",
+	"repoBatchDone": "Gereed",
+	"repoBatchClear": "Selectie wissen",
+	"repoBatchSelection": "Lokaal geselecteerd: ${x} · Cloud geselecteerd: ${y}",
+	"repoTaggedSnapshots": "Gemarkeerde momentopnamen",
+	"repoBatchManage": "Groepsbeheer",
+	"repoRemoveTagsTip": "Alleen de geselecteerde markeringen worden verwijderd. De gegevens van momentopnamen worden niet direct verwijderd; ruim indien nodig de bijbehorende gegevensopslag afzonderlijk op.",
+	"repoBatchResult": "Verwijderd: ${x}. Mislukt of niet bevestigd: ${y}; deze items blijven geselecteerd om opnieuw te proberen.",
 	"enterMasterPassword": "Voer het hoofdwachtwoord in",
 	"orderedListItemBlock": "Geordend lijstitemblok",
 	"unorderedListItemBlock": "Ongeordend lijstitemblok",

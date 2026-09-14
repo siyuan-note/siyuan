@@ -1,4 +1,12 @@
 {
+	"repoBatchDelete": "Обриши изабране ознаке",
+	"repoBatchDone": "Готово",
+	"repoBatchClear": "Поништи избор",
+	"repoBatchSelection": "Изабрано локално: ${x} · У облаку: ${y}",
+	"repoTaggedSnapshots": "Означени снимци",
+	"repoBatchManage": "Групно управљање",
+	"repoRemoveTagsTip": "Биће уклоњене само изабране ознаке. Подаци снимака се не бришу одмах; по потреби засебно очистите одговарајуће складиште података.",
+	"repoBatchResult": "Уклоњено: ${x}. Неуспело или непотврђено: ${y}; ове ставке остају изабране за поновни покушај.",
 	"enterMasterPassword": "Unesite glavnu lozinku",
 	"orderedListItemBlock": "Blok stavke numerisane liste",
 	"unorderedListItemBlock": "Blok stavke nenumerisane liste",

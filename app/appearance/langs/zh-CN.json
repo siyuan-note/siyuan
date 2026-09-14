@@ -1,4 +1,12 @@
 {
+	"repoBatchDelete": "删除所选标记",
+	"repoBatchDone": "完成管理",
+	"repoBatchClear": "取消选择",
+	"repoBatchSelection": "本地已选 ${x} 项 · 云端已选 ${y} 项",
+	"repoTaggedSnapshots": "标记快照",
+	"repoBatchManage": "批量管理",
+	"repoRemoveTagsTip": "仅删除所选标记，不会立即删除快照数据；如需释放空间，请另行清理对应的数据仓库。",
+	"repoBatchResult": "已删除 ${x} 项，失败或未能确认 ${y} 项；这些项目仍保留选中，可重试。",
 	"enterMasterPassword": "请输入主密码",
 	"orderedListItemBlock": "有序列表项块",
 	"unorderedListItemBlock": "无序列表项块",

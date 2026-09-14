@@ -1,4 +1,12 @@
 {
+	"repoBatchDelete": "Odstrániť vybrané značky",
+	"repoBatchDone": "Hotovo",
+	"repoBatchClear": "Zrušiť výber",
+	"repoBatchSelection": "Vybrané lokálne: ${x} · V cloude: ${y}",
+	"repoTaggedSnapshots": "Označené snímky",
+	"repoBatchManage": "Hromadná správa",
+	"repoRemoveTagsTip": "Odstránia sa iba vybrané značky. Údaje snímok sa neodstránia okamžite; v prípade potreby vyčistite príslušný dátový repozitár samostatne.",
+	"repoBatchResult": "Odstránené: ${x}. Zlyhané alebo neoverené: ${y}; tieto položky zostávajú vybrané na opakovanie.",
 	"enterMasterPassword": "Zadajte hlavné heslo",
 	"orderedListItemBlock": "Blok položky číslovaného zoznamu",
 	"unorderedListItemBlock": "Blok položky neusporiadaného zoznamu",

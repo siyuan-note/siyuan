@@ -1,4 +1,12 @@
 {
+	"repoBatchDelete": "Eliminar etiquetas seleccionadas",
+	"repoBatchDone": "Finalizar",
+	"repoBatchClear": "Borrar selección",
+	"repoBatchSelection": "Selección local: ${x} · Selección en la nube: ${y}",
+	"repoTaggedSnapshots": "Instantáneas etiquetadas",
+	"repoBatchManage": "Gestión por lotes",
+	"repoRemoveTagsTip": "Solo se eliminarán las etiquetas seleccionadas. Los datos de las instantáneas no se borran de inmediato; limpie el repositorio correspondiente por separado si es necesario.",
+	"repoBatchResult": "Eliminadas: ${x}. Fallidas o sin verificar: ${y}; estos elementos siguen seleccionados para reintentar.",
 	"enterMasterPassword": "Introduce la contraseña maestra",
 	"orderedListItemBlock": "Bloque de elemento de lista ordenada",
 	"unorderedListItemBlock": "Bloque de elemento de lista no ordenada",

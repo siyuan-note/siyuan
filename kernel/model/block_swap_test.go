@@ -86,6 +86,16 @@ func TestSwapBlockRefNodes(t *testing.T) {
 							if replacement.Type != ast.NodeBlockQueryEmbed || replacement.FirstChild.TokensStr() != "select * from blocks where id='"+def.ID+"'" {
 								t.Fatal("invalid embed replacement")
 							}
+							wantMode := ""
+							if kind == "heading" {
+								wantMode = "1"
+								if includeChildren {
+									wantMode = "0"
+								}
+							}
+							if mode := replacement.IALAttr("custom-heading-mode"); mode != wantMode {
+								t.Fatalf("heading embed mode = %q, want %q", mode, wantMode)
+							}
 						} else if replacement != ref {
 							t.Fatal("default reference behavior changed")
 						}

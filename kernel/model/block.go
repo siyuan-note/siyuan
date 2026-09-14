@@ -756,6 +756,7 @@ func SwapBlockRef(refID, defID string, includeChildren, originalToEmbed bool) (e
 
 func swapBlockRefNodes(refNode, defNode *ast.Node, defID string, includeChildren, originalToEmbed bool) {
 	originalRefNode := refNode
+	isHeading := ast.NodeHeading == defNode.Type
 	if ast.NodeListItem == refNode.Parent.Type {
 		refNode = refNode.Parent
 	}
@@ -837,6 +838,13 @@ func swapBlockRefNodes(refNode, defNode *ast.Node, defID string, includeChildren
 	refPivot.Unlink()
 	if originalToEmbed {
 		embed := &ast.Node{ID: originalRefNode.ID, Type: ast.NodeBlockQueryEmbed, KramdownIAL: originalRefNode.KramdownIAL}
+		if isHeading {
+			headingMode := "1"
+			if includeChildren {
+				headingMode = "0"
+			}
+			embed.SetIALAttr("custom-heading-mode", headingMode)
+		}
 		embed.AppendChild(&ast.Node{Type: ast.NodeBlockQueryEmbedScript, Tokens: []byte("select * from blocks where id='" + defID + "'")})
 		originalRefNode.InsertBefore(embed)
 		originalRefNode.Unlink()

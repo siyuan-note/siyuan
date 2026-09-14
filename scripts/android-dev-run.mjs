@@ -8,6 +8,7 @@ import {copyFileSync, existsSync, readdirSync, readFileSync, statSync, unlinkSyn
 import os from "node:os";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
+import {selectDuplicateDevice} from "./android-device.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const appDir = path.join(repoRoot, "app");
@@ -18,7 +19,7 @@ function usage() {
   console.log("Options:");
   console.log("  --flavor=<flavor>      Flavor: cn / googleplay / huawei / official (default: official)");
   console.log("  --android-dir=<path>   Path to the siyuan-android project (default: next to the siyuan project)");
-  console.log("  --device=<serial>      Specify an adb device (required when multiple devices are connected)");
+  console.log("  --device=<serial>      Specify an adb connection (required for different or unidentified devices)");
   console.log("  --skip-ui              Skip pnpm build:mobile and use the existing stage/build/mobile output");
   console.log("  --skip-kernel          Skip the gomobile build and use the existing kernel/kernel.aar");
   console.log("  --skip-gradle          Skip the Gradle build and reinstall the most recently built APK");
@@ -182,7 +183,12 @@ function deviceSerial(adb) {
   if (devices.length === 0) {
     fail("No connected devices detected. To connect using wireless debugging, enable Wireless debugging on the device, run adb pair <ip>:<port> <pairing-code>, and then run adb connect <ip>:<port>");
   }
-  fail(`Multiple devices detected: ${devices.join(", ")}. Specify one using --device=<serial>`);
+  const selected = selectDuplicateDevice(adb, devices);
+  if (selected) {
+    console.log(`Multiple connections to the same device detected; using ${selected}`);
+    return selected;
+  }
+  fail(`Multiple different or unidentified devices detected: ${devices.join(", ")}. Specify one using --device=<serial>`);
 }
 
 const sdkDir = findSdkDir();

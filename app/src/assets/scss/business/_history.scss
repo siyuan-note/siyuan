@@ -61,6 +61,11 @@
       background-color: var(--b3-theme-surface);
     }
 
+    &-heading {
+      min-height: 45px;
+      box-sizing: border-box;
+    }
+
     &-message {
       padding: 8px;
       flex-shrink: 0;

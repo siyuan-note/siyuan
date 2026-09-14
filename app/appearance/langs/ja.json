@@ -5,7 +5,7 @@
 	"repoBatchSelection": "ローカルで ${x} 件選択 · クラウドで ${y} 件選択",
 	"repoTaggedSnapshots": "タグ付きスナップショット",
 	"repoBatchManage": "一括管理",
-	"repoRemoveTagsTip": "選択したタグのみを削除します。スナップショットのデータはすぐには削除されません。必要に応じて、対応するデータリポジトリを別途クリーンアップしてください。",
+	"repoRemoveTagsTip": "選択したタグのみを削除します。スナップショットのデータはすぐには削除されず、リポジトリのクリーンアップも自動では実行されません。",
 	"repoBatchResult": "${x} 件を削除しました。失敗または未確認は ${y} 件です。再試行できるよう、これらの項目は選択されたままになります。",
 	"enterMasterPassword": "マスターパスワードを入力してください",
 	"orderedListItemBlock": "番号付きリスト項目ブロック",

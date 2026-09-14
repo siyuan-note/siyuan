@@ -5,7 +5,7 @@
 	"repoBatchSelection": "Yerel seçim: ${x} · Bulut seçimi: ${y}",
 	"repoTaggedSnapshots": "Etiketli anlık görüntüler",
 	"repoBatchManage": "Toplu yönetim",
-	"repoRemoveTagsTip": "Yalnızca seçilen etiketler kaldırılır. Anlık görüntü verileri hemen silinmez; gerekirse ilgili veri deposunu ayrıca temizleyin.",
+	"repoRemoveTagsTip": "Yalnızca seçilen etiketler kaldırılır. Anlık görüntü verileri hemen silinmez ve depo otomatik olarak temizlenmez.",
 	"repoBatchResult": "Kaldırılan: ${x}. Başarısız veya doğrulanamayan: ${y}; bu öğeler yeniden denemek için seçili kalır.",
 	"enterMasterPassword": "Lütfen ana parolayı girin",
 	"orderedListItemBlock": "Sıralı liste öğesi bloğu",

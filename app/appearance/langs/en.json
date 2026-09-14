@@ -5,7 +5,7 @@
 	"repoBatchSelection": "Local selected: ${x} · Cloud selected: ${y}",
 	"repoTaggedSnapshots": "Tagged snapshots",
 	"repoBatchManage": "Batch manage",
-	"repoRemoveTagsTip": "Only the selected tags will be removed. Snapshot data is not immediately deleted; purge the corresponding data repository separately if needed.",
+	"repoRemoveTagsTip": "Only the selected tags will be removed. Snapshot data is not immediately deleted, and the repository is not automatically purged.",
 	"repoBatchResult": "Removed: ${x}. Failed or unverified: ${y}; these items remain selected for retry.",
 	"enterMasterPassword": "Please enter the master password",
 	"orderedListItemBlock": "Ordered list item block",

@@ -5,7 +5,7 @@
 	"repoBatchSelection": "Sélection locale : ${x} · Sélection cloud : ${y}",
 	"repoTaggedSnapshots": "Instantanés marqués",
 	"repoBatchManage": "Gestion par lot",
-	"repoRemoveTagsTip": "Seules les étiquettes sélectionnées seront supprimées. Les données des instantanés ne sont pas supprimées immédiatement ; nettoyez séparément le dépôt correspondant si nécessaire.",
+	"repoRemoveTagsTip": "Seules les étiquettes sélectionnées seront supprimées. Les données des instantanés ne sont pas supprimées immédiatement et le dépôt n’est pas nettoyé automatiquement.",
 	"repoBatchResult": "Supprimés : ${x}. Échecs ou résultats non vérifiés : ${y} ; ces éléments restent sélectionnés pour réessayer.",
 	"enterMasterPassword": "Veuillez saisir le mot de passe principal",
 	"orderedListItemBlock": "Bloc d’élément de liste ordonnée",

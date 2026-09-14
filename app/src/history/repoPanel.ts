@@ -3,6 +3,7 @@ import {fetchSyncPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
 import {isMobile} from "../util/functions";
 import {removeSelectedRepoTags, repoSelectionKey, RepoSource, RepoTagSelection} from "./repoBatch";
+import {canPurgeRepo} from "./repoPurge";
 
 interface RepoPanelState {
     selected: Map<string, RepoTagSelection>;
@@ -37,6 +38,7 @@ export const updateRepoSelection = (pane: Element) => {
     root.querySelector<HTMLButtonElement>('[data-action="delete"]').disabled = state.busy || state.selected.size === 0;
     root.querySelectorAll<HTMLElement>("[data-repo-source]").forEach(column => {
         const source = column.dataset.repoSource as RepoSource;
+        column.querySelector('[data-action="purge"]').classList.toggle("fn__none", !canPurgeRepo(source, window.siyuan.config.sync.provider));
         const comparison: {id: string}[] = JSON.parse(column.querySelector('[data-type="compare"]').getAttribute("data-ids") || "[]");
         column.querySelectorAll<HTMLLIElement>('li[data-type="repoitem"]').forEach(row => {
             row.classList.toggle("b3-list-item--focus", !state.managing && comparison.some(item => item.id === row.dataset.id));
@@ -108,7 +110,7 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
         pane.dataset.repoSource = source;
         pane.innerHTML = `<div class="history__snapshot-toolbar history__snapshot-heading">
     <span>${source === "local" ? lang.localSnapshot : lang.cloudSnapshot}</span><span class="fn__flex-1"></span>
-    <button class="b3-button b3-button--text" data-action="purge">${source === "local" ? lang.dataRepoPurge : lang.cloudStoragePurge}</button>
+    <button class="b3-button b3-button--text${canPurgeRepo(source, window.siyuan.config.sync.provider) ? "" : " fn__none"}" data-action="purge">${source === "local" ? lang.dataRepoPurge : lang.cloudStoragePurge}</button>
 </div>
 <label class="history__snapshot-toolbar fn__none"><input type="checkbox" class="history__snapshot-check" data-repo-all> ${lang.selectAll}</label>${template}`;
         pane.querySelector('[data-type="genRepo"]').remove();
@@ -215,8 +217,18 @@ export const initRepoPanel = (root: HTMLElement, render: (pane: Element, page: n
             }, undefined, true);
         } else if (action === "purge") {
             const pane = button.closest<HTMLElement>("[data-repo-source]");
-            const local = pane.dataset.repoSource === "local";
+            const source = pane.dataset.repoSource as RepoSource;
+            const provider = window.siyuan.config.sync.provider;
+            if (!canPurgeRepo(source, provider)) {
+                updateRepoSelection(pane);
+                return;
+            }
+            const local = source === "local";
             confirmDialog(local ? lang.dataRepoPurge : lang.cloudStoragePurge, local ? lang.dataRepoPurgeConfirm : lang.cloudStoragePurgeConfirm, async () => {
+                if (!local && (provider !== window.siyuan.config.sync.provider || !canPurgeRepo(source, window.siyuan.config.sync.provider))) {
+                    updateRepoSelection(pane);
+                    return;
+                }
                 setBusy(true);
                 try {
                     await fetchSyncPost(local ? "/api/repo/purgeRepo" : "/api/repo/purgeCloudRepo", {});

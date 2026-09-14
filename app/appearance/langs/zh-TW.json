@@ -5,7 +5,7 @@
 	"repoBatchSelection": "本機已選 ${x} 項 · 雲端已選 ${y} 項",
 	"repoTaggedSnapshots": "標記快照",
 	"repoBatchManage": "批次管理",
-	"repoRemoveTagsTip": "僅刪除所選標記，不會立即刪除快照資料；如需釋放空間，請另行清理對應的資料倉庫。",
+	"repoRemoveTagsTip": "僅刪除所選標記，不會立即刪除快照資料，也不會自動清理資料倉庫。",
 	"repoBatchResult": "已刪除 ${x} 項，失敗或未能確認 ${y} 項；這些項目仍保留選取，可重試。",
 	"enterMasterPassword": "請輸入主密碼",
 	"orderedListItemBlock": "有序列表項區塊",

@@ -5,7 +5,7 @@
 	"repoBatchSelection": "Lokal ausgewählt: ${x} · Cloud ausgewählt: ${y}",
 	"repoTaggedSnapshots": "Markierte Schnappschüsse",
 	"repoBatchManage": "Stapelverwaltung",
-	"repoRemoveTagsTip": "Nur die ausgewählten Markierungen werden entfernt. Schnappschussdaten werden nicht sofort gelöscht; bereinigen Sie bei Bedarf das entsprechende Datenrepository separat.",
+	"repoRemoveTagsTip": "Nur die ausgewählten Markierungen werden entfernt. Schnappschussdaten werden nicht sofort gelöscht und das Repository wird nicht automatisch bereinigt.",
 	"repoBatchResult": "Entfernt: ${x}. Fehlgeschlagen oder unbestätigt: ${y}; diese Einträge bleiben für einen erneuten Versuch ausgewählt.",
 	"enterMasterPassword": "Bitte gib das Hauptpasswort ein",
 	"orderedListItemBlock": "Block eines geordneten Listenelements",

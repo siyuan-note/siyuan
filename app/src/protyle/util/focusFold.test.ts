@@ -40,6 +40,23 @@ const editor = (elements: FoldElement[]) => ({
 } as unknown as IProtyle);
 
 describe("focused list folding", () => {
+    for (const type of ["NodeBlockquote", "NodeCallout", "NodeSuperBlock"]) {
+        it(`temporarily expands ${type} without loading or changing child folds`, async () => {
+            const parent = new FoldElement("parent", type);
+            const child = new FoldElement("child", type);
+            const protyle = editor([parent, child]);
+            await applyFocusFold(protyle, async () => {
+                assert.fail("Container blocks must not load heading content");
+            });
+            assert.equal(parent.getAttribute("fold"), null);
+            assert.equal(child.getAttribute("fold"), "1");
+            protyle.block.showAll = false;
+            applyFocusFold(protyle);
+            assert.equal(parent.getAttribute("fold"), "1");
+            assert.equal(parent.hasAttribute("data-view-fold-source"), false);
+        });
+    }
+
     it("temporarily unfolds only the focused item and restores it on exit", () => {
         const parent = new FoldElement("parent");
         const child = new FoldElement("child");

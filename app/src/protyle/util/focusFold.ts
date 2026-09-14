@@ -38,7 +38,8 @@ export const applyFocusFold = (protyle: IProtyle,
     }
     const element = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
     const type = element?.getAttribute("data-type");
-    if (type !== "NodeListItem" && (type !== "NodeHeading" || !loadHeading)) {
+    if (!["NodeListItem", "NodeBlockquote", "NodeCallout", "NodeSuperBlock"].includes(type) &&
+        (type !== "NodeHeading" || !loadHeading)) {
         return;
     }
     if (!state) {

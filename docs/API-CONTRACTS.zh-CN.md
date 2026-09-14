@@ -30,11 +30,11 @@
 
 笔记本创建、重命名、删除、关闭、图标更新和排序已接入类型契约。重命名、删除和图标更新会去除笔记本 ID 两端空白；关闭保留空白并交给 ID 校验。空名称和空图标仍交给业务层处理，重命名失败保留提示显示时长。
 
-加密笔记本生命周期接口原样保留密码，包括首尾空白及仅含空白的字符串。字符串选项 `nonempty` 仅拒绝空字符串，不执行规范化；必填密码字段同时拒绝缺失、null 和非字符串值。备份导入原样保留表单中的密码文本及其可选字段行为，由模型层执行认证。分钟数截断与负值归零、管理员权限、租约获取和挂载失败回滚保持不变。密钥派生、密文格式及恢复材料仍由模型层维护。
+加密笔记本生命周期接口使用类型化请求与响应，保留密码去除两端空白、分钟数截断与负值归零、管理员权限、租约获取和挂载失败回滚。密钥派生、密文格式及恢复材料仍由模型层维护。
 
 ## 兼容要求
 
-加密笔记本系统锁屏接口保留管理员鉴权和只读检查。布尔开关保存在系统配置中，不进入密钥备份的认证数据。`TestAPIContractNotebookSystemLock` 覆盖配置持久化、关闭开关、独立于闲置时间、多笔记本（包括仅解锁未挂载的笔记本）、重复锁定、锁定后拒绝读取，以及重新解锁后认证读取未改变的密文。该测试已包含在下文的内核全量命令中，也可单独运行 `go test -tags "fts5 sqlcipher" ./api -run 'TestAPIContractNotebook(SystemLock|CryptoAuthorization|PasswordRecovery)$' -count=1`。`TestNotebookSystemLockContract` 覆盖严格布尔输入，`TestRouteCoverage` 检查路由注册和处理器绑定。
+加密笔记本系统锁屏接口保留管理员鉴权和只读检查。布尔开关保存在系统配置中，不进入密钥备份的认证数据。`TestAPIContractNotebookSystemLock` 覆盖配置持久化、关闭开关、独立于闲置时间、多笔记本（包括仅解锁未挂载的笔记本）、重复锁定、锁定后拒绝读取，以及重新解锁后认证读取未改变的密文。该测试已包含在下文的内核全量命令中，也可单独运行 `go test -tags "fts5 sqlcipher" ./api -run 'TestAPIContractNotebook(SystemLock|CryptoAuthorization)$' -count=1`。`TestNotebookSystemLockContract` 覆盖严格布尔输入，`TestRouteCoverage` 检查路由注册和处理器绑定。
 
 2026 年 9 月 14 日迁移完成时，`kernel/api/router.go` 中的 629 条方法和路径注册均已接入契约，旧路由清单为空。该基线中的 4 条 `ANY` 注册在生成声明中展开为 661 条具体方法和路径。后续新增接口时，以生成器和路由覆盖检查的统计为准。由 `kernel/server/serve.go` 注册的静态资源、应用主 WebSocket 和其他传输服务不属于这份 API 路由清单。
 

@@ -812,7 +812,7 @@ const mountEncryptedNotebook = (root: HTMLElement) => {
                 placeholder: window.siyuan.languages.masterPassword,
                 width: "520px",
                 onConfirm: (value, passwordDialog) => {
-                    const password = value;
+                    const password = value.trim();
                     if (!password) {
                         showMessage(window.siyuan.languages.enterMasterPassword);
                         return;

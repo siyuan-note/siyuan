@@ -51,7 +51,7 @@ test("encrypted notebook system lock is offered only for supported local desktop
     }
 });
 
-test("crypto backup import preserves password bytes and rejects only an empty input", async () => {
+test("crypto backup import trims passwords and rejects whitespace-only input", async () => {
     const compiled = transpileModule(readFileSync("src/config/tabs/accessTab.ts", "utf8") +
         "\nexport {mountEncryptedNotebook};", {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
@@ -91,12 +91,14 @@ test("crypto backup import preserves password bytes and rejects only an empty in
     listeners.get("#importCryptoBackupBtn")();
     const dialog = {destroy: () => { destroyed++; }};
     confirm("", dialog);
+    confirm("   ", dialog);
+    confirm("\t\u00a0\u3000\n", dialog);
     assert.equal(requests.length, 0);
-    for (const password of [" password ", "   ", "\tpassword\n", "\u00a0password\u3000"]) {
+    for (const password of [" password ", "\tpassword\n", "\u00a0password\u3000"]) {
         confirm(password, dialog);
         await Promise.resolve();
-        assert.equal(requests[requests.length - 1].get("password"), password);
+        assert.equal(requests[requests.length - 1].get("password"), password.trim());
         assert.ok(requests[requests.length - 1].get("file") instanceof Blob);
     }
-    assert.equal(destroyed, 4);
+    assert.equal(destroyed, 3);
 });

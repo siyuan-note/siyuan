@@ -310,16 +310,20 @@ export class Menu {
             window.setTimeout(() => this.remove(), Constants.TIMEOUT_DBLCLICK);
             return;
         }
+        const restoreKeyboard = this.restoreKeyboard;
+        if (restoreKeyboard) {
+            // 先隐藏菜单，避免软键盘改变视口时将退出中的菜单重新顶入可视区域。
+            this.removeImmediately();
+            // 在关闭手势中恢复焦点，使浏览器端也能响应用户操作弹出软键盘。
+            restoreKeyboard();
+            return;
+        }
         clearTimeout(fullscreenCloseTimeout);
         this.element.style.transition = "";
         void this.element.offsetHeight;
         this.element.style.transform = "translateY(100%)";
         this.hideFullscreenScrim();
         fullscreenCloseTimeout = window.setTimeout(() => this.removeImmediately(), Constants.TIMEOUT_DBLCLICK);
-        const restoreKeyboard = this.restoreKeyboard;
-        this.restoreKeyboard = undefined;
-        // 在关闭手势中恢复焦点，使浏览器端也能响应用户操作弹出软键盘。
-        restoreKeyboard?.();
     }
 
     private updateSheetTitle() {

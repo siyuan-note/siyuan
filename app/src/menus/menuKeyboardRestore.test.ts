@@ -122,6 +122,29 @@ describe("mobile menu keyboard lifecycle", () => {
         assert.equal(events.filter(event => event === "restore").length, 1);
     });
 
+    it("hides the sheet before restoring the keyboard can resize the viewport", () => {
+        const {menu, element, tick} = setup();
+        menu.fullscreen("all", () => {
+            assert.equal(element.classList.contains("fn__none"), true);
+            assert.equal(element.classList.contains("b3-menu--sheet"), false);
+        });
+        tick(500, 808);
+        tick(532);
+        menu.closeSheet();
+        tick(550, 476);
+        assert.equal(element.classList.contains("fn__none"), true);
+    });
+
+    it("keeps the closing animation when no keyboard needs restoring", () => {
+        const {menu, element, finishClose} = setup();
+        menu.fullscreen();
+        menu.closeSheet();
+        assert.equal(element.style.transform, "translateY(100%)");
+        assert.equal(element.classList.contains("fn__none"), false);
+        finishClose();
+        assert.equal(element.classList.contains("fn__none"), true);
+    });
+
     it("restores on system back but leaves submenu back navigation alone", () => {
         const {menu, events, element} = setup();
         menu.fullscreen("all", () => events.push("restore"));
@@ -144,13 +167,12 @@ describe("mobile menu keyboard lifecycle", () => {
 
     it("cancels the old closing timer when another menu opens", () => {
         const {menu, element, events, finishClose} = setup();
-        menu.fullscreen("all", () => events.push("restore-first"));
+        menu.fullscreen();
         menu.closeSheet();
         menu.fullscreen("all", () => events.push("restore-second"));
         finishClose();
         assert.equal(element.classList.contains("fn__none"), false);
         menu.closeSheet();
-        assert.equal(events.filter(event => event === "restore-first").length, 1);
         assert.equal(events.filter(event => event === "restore-second").length, 1);
     });
 });

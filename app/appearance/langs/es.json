@@ -1,4 +1,5 @@
 {
+	"newTabItem": "Crear bloque de elemento de pestaña",
 	"encryptedNotebookFollowSystemLock": "Seguir el bloqueo de pantalla del sistema",
 	"encryptedNotebookFollowSystemLockDesc": "Bloquear todos los cuadernos cifrados desbloqueados al bloquear el sistema, independientemente del tiempo de inactividad; permanecen bloqueados al desbloquear el sistema",
 	"customBlock": "Bloque personalizado",

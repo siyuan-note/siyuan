@@ -1,4 +1,5 @@
 {
+	"newTabItem": "Criar bloco de item de aba",
 	"encryptedNotebookFollowSystemLock": "Seguir o bloqueio de tela do sistema",
 	"encryptedNotebookFollowSystemLockDesc": "Bloquear todos os cadernos criptografados desbloqueados quando o sistema for bloqueado, independentemente do tempo de inatividade; eles permanecem bloqueados após desbloquear o sistema",
 	"customBlock": "Bloco personalizado",

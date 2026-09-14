@@ -1,4 +1,5 @@
 {
+	"newTabItem": "タブ項目ブロックを新規作成",
 	"encryptedNotebookFollowSystemLock": "システムの画面ロックに連動",
 	"encryptedNotebookFollowSystemLockDesc": "システムの画面ロック時に、アイドル時間の設定に関係なく、ロック解除済みの暗号化ノートブックをすべてロックします。システムのロック解除後もノートブックはロックされたままです",
 	"customBlock": "カスタムブロック",

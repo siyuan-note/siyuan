@@ -1,4 +1,5 @@
 {
+	"newTabItem": "יצירת בלוק פריט כרטיסייה",
 	"encryptedNotebookFollowSystemLock": "נעילה בהתאם לנעילת מסך המערכת",
 	"encryptedNotebookFollowSystemLockDesc": "נעילת כל המחברות המוצפנות הפתוחות בעת נעילת המערכת, ללא תלות בזמן חוסר הפעילות; המחברות נשארות נעולות לאחר ביטול נעילת המערכת",
 	"customBlock": "בלוק מותאם אישית",

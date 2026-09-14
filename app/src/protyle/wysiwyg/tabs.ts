@@ -211,7 +211,7 @@ export const initEditorTabs = (protyle: IProtyle) => {
     tabsRender(root, {
         readonly: tabs => !canEdit(protyle, tabs || root),
         label: window.siyuan.languages.tabItem,
-        addLabel: window.siyuan.languages.tabItem,
+        addLabel: window.siyuan.languages.newTabItem,
         taskLabel: window.siyuan.languages.task,
         task: item => setTabTask(protyle, item, nextTaskListMarker(item.getAttribute("tabs-task"))),
         taskMenu: item => editTabTask(protyle, item),

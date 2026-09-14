@@ -1,4 +1,5 @@
 {
+	"newTabItem": "Créer un bloc d’onglet",
 	"encryptedNotebookFollowSystemLock": "Suivre le verrouillage de l’écran du système",
 	"encryptedNotebookFollowSystemLockDesc": "Verrouiller tous les carnets chiffrés déverrouillés lorsque le système se verrouille, indépendamment du délai d’inactivité ; ils restent verrouillés après le déverrouillage du système",
 	"customBlock": "Bloc personnalisé",

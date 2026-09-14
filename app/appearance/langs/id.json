@@ -1,4 +1,5 @@
 {
+	"newTabItem": "Buat blok item tab",
 	"encryptedNotebookFollowSystemLock": "Ikuti penguncian layar sistem",
 	"encryptedNotebookFollowSystemLockDesc": "Kunci semua buku catatan terenkripsi yang terbuka saat sistem terkunci, terlepas dari batas waktu tidak aktif; buku catatan tetap terkunci setelah sistem dibuka",
 	"customBlock": "Blok kustom",

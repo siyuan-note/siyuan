@@ -1,4 +1,5 @@
 {
+	"newTabItem": "New tab item block",
 	"encryptedNotebookFollowSystemLock": "Follow system screen lock",
 	"encryptedNotebookFollowSystemLockDesc": "Lock all unlocked encrypted notebooks when the system locks, independently of the idle timeout; notebooks remain locked after the system unlocks",
 	"customBlock": "Custom block",

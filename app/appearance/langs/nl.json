@@ -1,4 +1,5 @@
 {
+	"newTabItem": "Nieuw tabbladitemblok maken",
 	"encryptedNotebookFollowSystemLock": "Systeemschermvergrendeling volgen",
 	"encryptedNotebookFollowSystemLockDesc": "Vergrendel alle ontgrendelde versleutelde notitieboeken wanneer het systeem wordt vergrendeld, ongeacht de inactiviteitsduur; ze blijven vergrendeld nadat het systeem is ontgrendeld",
 	"customBlock": "Aangepast blok",

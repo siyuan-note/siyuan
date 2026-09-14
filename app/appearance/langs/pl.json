@@ -1,4 +1,5 @@
 {
+	"newTabItem": "Utwórz blok elementu karty",
 	"encryptedNotebookFollowSystemLock": "Blokuj wraz z ekranem systemu",
 	"encryptedNotebookFollowSystemLockDesc": "Blokuj wszystkie odblokowane zaszyfrowane notatniki przy blokowaniu systemu, niezależnie od czasu bezczynności; pozostają zablokowane po odblokowaniu systemu",
 	"customBlock": "Blok niestandardowy",

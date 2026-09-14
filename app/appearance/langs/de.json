@@ -1,4 +1,5 @@
 {
+	"newTabItem": "Neuen Registerkartenblock erstellen",
 	"encryptedNotebookFollowSystemLock": "Der Systemsperre folgen",
 	"encryptedNotebookFollowSystemLockDesc": "Alle entsperrten verschlüsselten Notizbücher beim Sperren des Systems unabhängig vom Inaktivitätszeitlimit sperren; sie bleiben nach dem Entsperren des Systems gesperrt",
 	"customBlock": "Benutzerdefinierter Block",

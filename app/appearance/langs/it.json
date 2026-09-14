@@ -1,4 +1,5 @@
 {
+	"newTabItem": "Crea blocco elemento di scheda",
 	"encryptedNotebookFollowSystemLock": "Segui il blocco schermo del sistema",
 	"encryptedNotebookFollowSystemLockDesc": "Blocca tutti i quaderni crittografati sbloccati quando il sistema si blocca, indipendentemente dal tempo di inattività; restano bloccati dopo lo sblocco del sistema",
 	"customBlock": "Blocco personalizzato",

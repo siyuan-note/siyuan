@@ -145,7 +145,7 @@ const getValueInputHTML = (column: IAVColumn, fieldValue?: IAVNewItemFieldValue)
     const value = fieldValue?.value;
     if (column.type === "checkbox") {
         const checked = value?.checkbox?.checked || false;
-        return `<button class="fn__flex-center" data-role="field-value" data-value-type="checkbox" aria-pressed="${checked}" type="button" style="background:transparent;border:0;color:inherit;padding:0"><svg class="av__checkbox"><use xlink:href="#icon${checked ? "Check" : "Uncheck"}"></use></svg></button>`;
+        return `<button class="fn__flex-center" data-role="field-value" data-value-type="checkbox" aria-label="${escapeAttr(column.name || window.siyuan.languages.checkbox)}" aria-pressed="${checked}" type="button" style="background:transparent;border:0;color:inherit;padding:0"><svg class="av__checkbox"><use xlink:href="#icon${checked ? "Check" : "Uncheck"}"></use></svg></button>`;
     }
     if (["select", "mSelect"].includes(column.type)) {
         const selected = value?.mSelect?.map(item => item.content) || [];

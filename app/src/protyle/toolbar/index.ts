@@ -2371,21 +2371,21 @@ export class Toolbar {
         const hasCopy = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("") !== "" ||
             (range.cloneContents().childNodes[0] as HTMLElement)?.classList?.contains("emoji");
         if (hasCopy) {
-            html += '<button class="keyboard__action" data-action="copy"><svg><use xlink:href="#iconCopy"></use></svg></button>';
+            html += `<button class="keyboard__action" data-action="copy" aria-label="${window.siyuan.languages.copy}"><svg><use xlink:href="#iconCopy"></use></svg></button>`;
             if (!protyle.disabled) {
-                html += `<button class="keyboard__action" data-action="cut"><svg><use xlink:href="#iconCut"></use></svg></button>
-<button class="keyboard__action" data-action="delete"><svg><use xlink:href="#iconTrashcan"></use></svg></button>`;
+                html += `<button class="keyboard__action" data-action="cut" aria-label="${window.siyuan.languages.cut}"><svg><use xlink:href="#iconCut"></use></svg></button>
+<button class="keyboard__action" data-action="delete" aria-label="${window.siyuan.languages.delete}"><svg><use xlink:href="#iconTrashcan"></use></svg></button>`;
             }
         }
         if (!protyle.disabled) {
-            html += `<button class="keyboard__action" data-action="paste"><svg><use xlink:href="#iconPaste"></use></svg></button>
-<button class="keyboard__action" data-action="select"><svg><use xlink:href="#iconSelect"></use></svg></button>`;
+            html += `<button class="keyboard__action" data-action="paste" aria-label="${window.siyuan.languages.paste}"><svg><use xlink:href="#iconPaste"></use></svg></button>
+<button class="keyboard__action" data-action="select" aria-label="${window.siyuan.languages.select}"><svg><use xlink:href="#iconSelect"></use></svg></button>`;
         }
         if (pluginMenus.length > 0) {
             html += `<button class="keyboard__action" data-action="plugin" data-menu="true" aria-label="${window.siyuan.languages.plugin}"><svg><use xlink:href="#iconPlugin"></use></svg></button>`;
         }
         if (hasCopy || !protyle.disabled) {
-            html += '<button class="keyboard__action" data-action="more"><svg><use xlink:href="#iconMore"></use></svg></button>';
+            html += `<button class="keyboard__action" data-action="more" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>`;
         }
         this.subElement.innerHTML = `<div class="fn__flex">${html}</div>`;
         const setContentPosition = () => {
@@ -2471,7 +2471,7 @@ export class Toolbar {
 <div class="keyboard__split${protyle.disabled ? " fn__none" : ""}"></div>
 <button class="keyboard__action${protyle.disabled ? " fn__none" : ""}" data-action="pasteEscaped"><span>${window.siyuan.languages.pasteEscaped}</span></button>
 <div class="keyboard__split${protyle.disabled ? " fn__none" : ""}"></div>
-<button class="keyboard__action" data-action="back"><svg><use xlink:href="#iconBack"></use></svg></button>`;
+<button class="keyboard__action" data-action="back" aria-label="${window.siyuan.languages.back}"><svg><use xlink:href="#iconBack"></use></svg></button>`;
                 setContentPosition();
             }
         });

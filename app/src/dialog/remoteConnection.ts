@@ -39,7 +39,7 @@ export const openRemoteConnection = (initialOrigin = "") => {
                 <div class="fn__flex">
                     <input data-field="captcha" class="b3-text-field fn__flex-1" autocomplete="off">
                     <div class="fn__space"></div>
-                    <button data-field="refreshCaptcha" class="b3-button b3-button--outline" type="button"><img data-field="captchaImage"></button>
+                    <button data-field="refreshCaptcha" aria-label="${escapeHtml(languages.refresh)}" class="b3-button b3-button--outline" type="button"><img data-field="captchaImage"></button>
                 </div>
             </div>
             <div class="fn__hr"></div>

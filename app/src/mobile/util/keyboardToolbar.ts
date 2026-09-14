@@ -1393,45 +1393,45 @@ export const initKeyboardToolbar = () => {
     toolbarElement.innerHTML = `<div class="fn__flex keyboard__bar">
     <div class="fn__flex-1">
         <div class="fn__none keyboard__dynamic">
-            <button class="keyboard__action" data-type="outdent"><svg><use xlink:href="#iconOutdent"></use></svg></button>
-            <button class="keyboard__action" data-type="indent"><svg><use xlink:href="#iconIndent"></use></svg></button>
-            <button class="keyboard__action" data-type="add"><svg><use xlink:href="#iconAdd"></use></svg></button>
-            <button class="keyboard__action" data-type="block"><svg><use xlink:href="#iconParagraph"></use></svg></button>
-            <button class="keyboard__action" data-type="goinline"><svg class="keyboard__svg--big"><use xlink:href="#iconBIU"></use></svg></button>
-            <button class="keyboard__action" data-type="softLine"><svg><use xlink:href="#iconSoftWrap"></use></svg></button>
+            <button class="keyboard__action" data-type="outdent" aria-label="${window.siyuan.languages.outdent}"><svg><use xlink:href="#iconOutdent"></use></svg></button>
+            <button class="keyboard__action" data-type="indent" aria-label="${window.siyuan.languages.indent}"><svg><use xlink:href="#iconIndent"></use></svg></button>
+            <button class="keyboard__action" data-type="add" aria-label="${window.siyuan.languages.addAttr}"><svg><use xlink:href="#iconAdd"></use></svg></button>
+            <button class="keyboard__action" data-type="block" aria-label="${window.siyuan.languages.paragraph}"><svg><use xlink:href="#iconParagraph"></use></svg></button>
+            <button class="keyboard__action" data-type="goinline" aria-label="${window.siyuan.languages.entryInlineMenu}"><svg class="keyboard__svg--big"><use xlink:href="#iconBIU"></use></svg></button>
+            <button class="keyboard__action" data-type="softLine" aria-label="${window.siyuan.languages.wrap}"><svg><use xlink:href="#iconSoftWrap"></use></svg></button>
             <span class="keyboard__split"></span>
-            <button class="keyboard__action" data-type="undo"><svg><use xlink:href="#iconUndo"></use></svg></button>
-            <button class="keyboard__action" data-type="redo"><svg><use xlink:href="#iconRedo"></use></svg></button>
+            <button class="keyboard__action" data-type="undo" aria-label="${window.siyuan.languages.undo}"><svg><use xlink:href="#iconUndo"></use></svg></button>
+            <button class="keyboard__action" data-type="redo" aria-label="${window.siyuan.languages.redo}"><svg><use xlink:href="#iconRedo"></use></svg></button>
             <span class="keyboard__split"></span>
-            <button class="keyboard__action" data-type="moveup"><svg><use xlink:href="#iconUp"></use></svg></button>
-            <button class="keyboard__action" data-type="movedown"><svg><use xlink:href="#iconDown"></use></svg></button>
+            <button class="keyboard__action" data-type="moveup" aria-label="${window.siyuan.languages.moveToUp}"><svg><use xlink:href="#iconUp"></use></svg></button>
+            <button class="keyboard__action" data-type="movedown" aria-label="${window.siyuan.languages.moveToDown}"><svg><use xlink:href="#iconDown"></use></svg></button>
         </div>
         <div class="fn__none keyboard__dynamic">
-            <button class="keyboard__action" data-type="goback"><svg><use xlink:href="#iconBack"></use></svg></button>
-            <button class="keyboard__action" data-type="block-ref"><svg><use xlink:href="#iconRef"></use></svg></button>
-            <button class="keyboard__action" data-type="a"><svg><use xlink:href="#iconLink"></use></svg></button>
+            <button class="keyboard__action" data-type="goback" aria-label="${window.siyuan.languages.back}"><svg><use xlink:href="#iconBack"></use></svg></button>
+            <button class="keyboard__action" data-type="block-ref" aria-label="${window.siyuan.languages.ref}"><svg><use xlink:href="#iconRef"></use></svg></button>
+            <button class="keyboard__action" data-type="a" aria-label="${window.siyuan.languages.link}"><svg><use xlink:href="#iconLink"></use></svg></button>
             <span class="keyboard__split" data-id="separator_1"></span>
             <button class="keyboard__action" data-type="font-family" aria-label="${window.siyuan.languages.fontFamily}">${window.siyuan.languages.fontFamily}</button>
             <button class="keyboard__action" data-type="font-size" aria-label="${window.siyuan.languages.fontSize}">${window.siyuan.languages.fontSize}</button>
-            <button class="keyboard__action" data-type="text"><svg><use xlink:href="#iconFont"></use></svg></button>
-            <button class="keyboard__action" data-type="strong"><svg><use xlink:href="#iconBold"></use></svg></button>
-            <button class="keyboard__action" data-type="em"><svg><use xlink:href="#iconItalic"></use></svg></button>
-            <button class="keyboard__action" data-type="u"><svg><use xlink:href="#iconUnderline"></use></svg></button>
-            <button class="keyboard__action" data-type="s"><svg><use xlink:href="#iconStrike"></use></svg></button>
-            <button class="keyboard__action" data-type="mark"><svg><use xlink:href="#iconMark"></use></svg></button>
-            <button class="keyboard__action" data-type="sup"><svg><use xlink:href="#iconSup"></use></svg></button>
-            <button class="keyboard__action" data-type="sub"><svg><use xlink:href="#iconSub"></use></svg></button>
-            <button class="keyboard__action" data-type="code"><svg><use xlink:href="#iconInlineCode"></use></svg></button>
-            <button class="keyboard__action" data-type="kbd"><svg><use xlink:href="#iconKeymap"></use></svg></button>
-            <button class="keyboard__action" data-type="tag"><svg><use xlink:href="#iconTag"></use></svg></button>
-            <button class="keyboard__action" data-type="inline-math"><svg><use xlink:href="#iconMath"></use></svg></button>
-            <button class="keyboard__action" data-type="inline-memo"><svg><use xlink:href="#iconM"></use></svg></button>
+            <button class="keyboard__action" data-type="text" aria-label="${window.siyuan.languages.fontStyle}"><svg><use xlink:href="#iconFont"></use></svg></button>
+            <button class="keyboard__action" data-type="strong" aria-label="${window.siyuan.languages.bold}"><svg><use xlink:href="#iconBold"></use></svg></button>
+            <button class="keyboard__action" data-type="em" aria-label="${window.siyuan.languages.italic}"><svg><use xlink:href="#iconItalic"></use></svg></button>
+            <button class="keyboard__action" data-type="u" aria-label="${window.siyuan.languages.underline}"><svg><use xlink:href="#iconUnderline"></use></svg></button>
+            <button class="keyboard__action" data-type="s" aria-label="${window.siyuan.languages.strike}"><svg><use xlink:href="#iconStrike"></use></svg></button>
+            <button class="keyboard__action" data-type="mark" aria-label="${window.siyuan.languages.mark}"><svg><use xlink:href="#iconMark"></use></svg></button>
+            <button class="keyboard__action" data-type="sup" aria-label="${window.siyuan.languages.sup}"><svg><use xlink:href="#iconSup"></use></svg></button>
+            <button class="keyboard__action" data-type="sub" aria-label="${window.siyuan.languages.sub}"><svg><use xlink:href="#iconSub"></use></svg></button>
+            <button class="keyboard__action" data-type="code" aria-label="${window.siyuan.languages["inline-code"]}"><svg><use xlink:href="#iconInlineCode"></use></svg></button>
+            <button class="keyboard__action" data-type="kbd" aria-label="${window.siyuan.languages.kbd}"><svg><use xlink:href="#iconKeymap"></use></svg></button>
+            <button class="keyboard__action" data-type="tag" aria-label="${window.siyuan.languages.tag}"><svg><use xlink:href="#iconTag"></use></svg></button>
+            <button class="keyboard__action" data-type="inline-math" aria-label="${window.siyuan.languages["inline-math"]}"><svg><use xlink:href="#iconMath"></use></svg></button>
+            <button class="keyboard__action" data-type="inline-memo" aria-label="${window.siyuan.languages.memo}"><svg><use xlink:href="#iconM"></use></svg></button>
             <span class="keyboard__split" data-id="separator_2"></span>
-            <button class="keyboard__action" data-type="clear"><svg><use xlink:href="#iconEraser"></use></svg></button>
+            <button class="keyboard__action" data-type="clear" aria-label="${window.siyuan.languages.clearInline}"><svg><use xlink:href="#iconEraser"></use></svg></button>
         </div>
     </div>
     <span class="keyboard__split"></span>
-    <button class="keyboard__action" data-type="done"><svg style="width: 36px"><use xlink:href="#iconKeyboardHide"></use></svg></button>
+    <button class="keyboard__action" data-type="done" aria-label="${window.siyuan.languages.close}"><svg style="width: 36px"><use xlink:href="#iconKeyboardHide"></use></svg></button>
 </div>
 <div class="keyboard__util"></div>`;
     const refreshEntries = () => {

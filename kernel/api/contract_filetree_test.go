@@ -13,8 +13,65 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestAPIContractFileTreeMissingDocuments(t *testing.T) {
+	previousConf, previousPath := model.Conf, util.BlockTreeDBPath
+	model.Conf = model.NewAppConf()
+	util.BlockTreeDBPath = filepath.Join(t.TempDir(), "blocktree.db")
+	treenode.InitBlockTree(true)
+	t.Cleanup(func() {
+		treenode.CloseDatabase()
+		model.Conf, util.BlockTreeDBPath = previousConf, previousPath
+		if previousPath != "" {
+			treenode.InitBlockTree(false)
+		}
+	})
+	const id = "29991231235959-zzzzzzz"
+	for _, entry := range []struct {
+		name    string
+		handler gin.HandlerFunc
+		body    string
+		timeout int
+	}{
+		{"removeDocByID", removeDocByID, `{"id":"` + id + `"}`, 7000},
+		{"renameDocByID", renameDocByID, `{"id":"` + id + `","title":"missing"}`, 7000},
+		{"duplicateDoc", duplicateDoc, `{"id":"` + id + `"}`, 7000},
+		{"getPathByID", getPathByID, `{"id":"` + id + `"}`, 0},
+		{"moveDocsByID", moveDocsByID, `{"fromIDs":["` + id + `"],"toID":"` + id + `"}`, 7000},
+	} {
+		t.Run(entry.name, func(t *testing.T) {
+			engine := gin.New()
+			path := "/api/filetree/" + entry.name
+			engine.POST(path, entry.handler)
+			recorder := httptest.NewRecorder()
+			engine.ServeHTTP(recorder, httptest.NewRequest("POST", path, strings.NewReader(entry.body)))
+			requireAPIContract(t, "POST", path, recorder)
+			var response struct {
+				Code int    `json:"code"`
+				Msg  string `json:"msg"`
+				Data *struct {
+					CloseTimeout int `json:"closeTimeout"`
+				} `json:"data"`
+			}
+			if err := json.Unmarshal(recorder.Body.Bytes(), &response); err != nil {
+				t.Fatal(err)
+			}
+			if response.Code != -1 || response.Msg != "tree not found" {
+				t.Fatalf("missing document response changed: %s", recorder.Body.String())
+			}
+			if entry.timeout == 0 {
+				if response.Data != nil {
+					t.Fatalf("unexpected error data: %s", recorder.Body.String())
+				}
+			} else if response.Data == nil || response.Data.CloseTimeout != entry.timeout {
+				t.Fatalf("error display duration changed: %s", recorder.Body.String())
+			}
+		})
+	}
+}
 
 func TestAPIContractFileTreePayloadConversions(t *testing.T) {
 	compare := func(before, after []byte) {

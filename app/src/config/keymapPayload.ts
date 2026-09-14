@@ -10,7 +10,7 @@ export const keymapPayload = (keymap: Config.IKeymap): {[key: string]: JSONValue
         return result;
     };
     const plugin: {[key: string]: JSONValue} = {};
-    for (const [name, items] of Object.entries(keymap.plugin)) {
+    for (const [name, items] of Object.entries(keymap.plugin || {})) {
         plugin[name] = keys(items);
     }
     return {

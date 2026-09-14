@@ -222,8 +222,7 @@ func doc2HeadingContract(c *gin.Context, request apicontract.FileTreeDocHeadingR
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return contractFailure[apicontract.FileTreeDocHeadingData](ret)
+		return apicontract.FailureWithTimeout[apicontract.FileTreeDocHeadingData](ret.Code, ret.Msg, 5000)
 	}
 
 	return apicontract.Success(apicontract.FileTreeDocHeadingData{SrcTreeBox: srcTreeBox, SrcTreePath: srcTreePath})
@@ -241,8 +240,7 @@ func heading2DocContract(c *gin.Context, request apicontract.FileTreeHeadingDocR
 	if bt := treenode.GetBlockTree(srcHeadingID); bt != nil && model.IsEncryptedBox(bt.BoxID) && bt.BoxID != targetNotebook {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(391)
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
 	}
 	options, err := request.Options()
 	if err != nil {
@@ -253,8 +251,7 @@ func heading2DocContract(c *gin.Context, request apicontract.FileTreeHeadingDocR
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
 	}
 
 	model.FlushTxQueue()
@@ -282,8 +279,7 @@ func li2DocContract(c *gin.Context, request apicontract.FileTreeListItemDocReque
 	if bt := treenode.GetBlockTree(srcListItemID); bt != nil && model.IsEncryptedBox(bt.BoxID) && bt.BoxID != targetNotebook {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(391)
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
 	}
 
 	options, err := request.Options()
@@ -295,8 +291,7 @@ func li2DocContract(c *gin.Context, request apicontract.FileTreeListItemDocReque
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 5000}
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 5000)
 	}
 
 	model.FlushTxQueue()
@@ -530,8 +525,7 @@ func moveDocsContract(c *gin.Context, request apicontract.FileTreeMoveRequest) a
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 7000)
 	}
 	return contractFailure[apicontract.Null](ret)
 }
@@ -561,8 +555,7 @@ func moveDocsByIDContract(c *gin.Context, request apicontract.FileTreeMoveIDsReq
 		if err != nil {
 			ret.Code = -1
 			ret.Msg = err.Error()
-			ret.Data = map[string]any{"closeTimeout": 7000}
-			return contractFailure[apicontract.Null](ret)
+			return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 7000)
 		}
 		fromPaths = append(fromPaths, tree.Path)
 	}
@@ -575,8 +568,7 @@ func moveDocsByIDContract(c *gin.Context, request apicontract.FileTreeMoveIDsReq
 		if nil == box {
 			ret.Code = -1
 			ret.Msg = "can't found box or tree by id [" + toID + "]"
-			ret.Data = map[string]any{"closeTimeout": 7000}
-			return contractFailure[apicontract.Null](ret)
+			return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 7000)
 		}
 	}
 
@@ -593,8 +585,7 @@ func moveDocsByIDContract(c *gin.Context, request apicontract.FileTreeMoveIDsReq
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 7000)
 	}
 	return contractFailure[apicontract.Null](ret)
 }
@@ -631,8 +622,7 @@ func removeDocByIDContract(c *gin.Context, request apicontract.FileTreeTrimIDReq
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 7000)
 	}
 
 	if err = model.RemoveDoc(notebook, p); err != nil {
@@ -704,8 +694,7 @@ func renameDocByIDContract(c *gin.Context, request apicontract.FileTreeRenameIDR
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return contractFailure[apicontract.Null](ret)
+		return apicontract.FailureWithTimeout[apicontract.Null](ret.Code, ret.Msg, 7000)
 	}
 
 	err = model.RenameDoc(tree.Box, tree.Path, title)
@@ -727,8 +716,7 @@ func duplicateDocContract(c *gin.Context, request apicontract.FileTreeIDRequest)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return contractFailure[apicontract.FileTreeDuplicateData](ret)
+		return apicontract.FailureWithTimeout[apicontract.FileTreeDuplicateData](ret.Code, ret.Msg, 7000)
 	}
 
 	notebook := tree.Box
@@ -751,8 +739,7 @@ func createDocContract(c *gin.Context, request apicontract.FileTreeCreateRequest
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]any{"closeTimeout": 7000}
-		return contractFailure[apicontract.FileTreeCreateData](ret)
+		return apicontract.FailureWithTimeout[apicontract.FileTreeCreateData](ret.Code, ret.Msg, 7000)
 	}
 
 	return apicontract.Success(apicontract.FileTreeCreateData{ID: tree.Root.ID})

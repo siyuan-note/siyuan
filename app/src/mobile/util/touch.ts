@@ -20,6 +20,7 @@ import {
 import {stripSemanticMarkersFromRangeText} from "../../protyle/util/inlineElementMarker";
 import {getTouchAxis, shouldStartLongPressMultiSelect} from "./touchGesture";
 import {getMobileBlockSelectionElement} from "./blockSelection";
+import {updateMultiSelectToolbar} from "./multiSelectToolbar";
 import {
     getOpeningSidebar,
     getOpenSidebarReleaseAction,
@@ -213,8 +214,8 @@ export const handleTouchEnd = (event: TouchEvent) => {
                     blockParentElement.classList.remove("protyle-wysiwyg--select");
                 }
                 blockElement.classList.toggle("protyle-wysiwyg--select");
-                editor.protyle.toolbar.subElement.querySelector(".multiSelectCount").textContent =
-                    editor.protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").length.toString();
+                updateMultiSelectToolbar(editor.protyle.toolbar.subElement,
+                    editor.protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").length);
                 event.stopImmediatePropagation();
                 event.preventDefault();
             }

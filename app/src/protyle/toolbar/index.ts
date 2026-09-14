@@ -1,4 +1,5 @@
 import {Divider} from "./Divider";
+import {renderMultiSelectToolbar} from "../../mobile/util/multiSelectToolbar";
 import {ContractFormData} from "../../util/contractFormData";
 import {Font, hasSameTextStyle, setFontStyle} from "./Font";
 import {
@@ -2086,39 +2087,16 @@ export class Toolbar {
         blockElement.classList.add("protyle-wysiwyg--select");
         window.siyuan.menus.menu.remove();
         this.subElement.style.width = window.innerWidth - 16 + "px";
-        this.subElement.style.padding = "0";
-        this.subElement.innerHTML = `<div class="block__icons">
-    <div class="block__logo">
-        <svg class="block__logoicon"><use xlink:href="#iconCheck"></use></svg> 
-        <span class="multiSelectCount">${protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").length}</span>
-    </div>
-    <span class="fn__flex-1"></span>
-    <button class="block__icon block__icon--show" data-type="menu" data-menu="true"><svg><use xlink:href="#iconMore"></use></svg></button>
-    <span class="fn__space"></span>
-    <button class="block__icon block__icon--show" data-type="exitMultiSelectMode"><svg><use xlink:href="#iconClose"></use></svg></button>
-</div>`;
+        renderMultiSelectToolbar(this.subElement, protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").length, () => {
+            protyle.gutter.renderMenu(protyle, protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select"));
+            window.siyuan.menus.menu.fullscreen();
+        }, () => {
+            this.subElement.classList.add("fn__none");
+            this.subElement.innerHTML = "";
+            hideElements(["select"], protyle);
+        });
         this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
         this.subElement.classList.remove("fn__none");
-        this.subElement.firstElementChild.addEventListener("click", (event) => {
-            let target = event.target as HTMLElement;
-            while (target && target !== this.subElement) {
-                if (target.dataset.type === "exitMultiSelectMode") {
-                    this.subElement.classList.add("fn__none");
-                    this.subElement.innerHTML = "";
-                    hideElements(["select"], protyle);
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
-                } else if (target.dataset.type === "menu") {
-                    protyle.gutter.renderMenu(protyle, protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select"));
-                    window.siyuan.menus.menu.fullscreen();
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
-                }
-                target = target.parentElement;
-            }
-        });
         setPosition(this.subElement, 8, 8);
         this.element.classList.add("fn__none");
         activeBlur();

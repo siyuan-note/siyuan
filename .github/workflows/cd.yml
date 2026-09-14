@@ -105,10 +105,75 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  contracts:
+    name: API contracts and kernel tests
+    needs: prepare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: kernel/go.mod
+          cache-dependency-path: kernel/go.sum
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Install repository pnpm version
+        run: npm install --global ${{ needs.prepare.outputs.packageManager }}
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: app
+      - name: Check generated contracts and route coverage
+        run: pnpm run api:check
+        working-directory: app
+      - name: Check legacy coverage does not grow
+        # 排除当前提交上的标签，与上一个版本比较旧接口列表。
+        run: |
+          API_CONTRACT_BASE=$(git describe --tags --match 'v[0-9]*' --abbrev=0 HEAD^)
+          pnpm run api:check --base "$API_CONTRACT_BASE"
+        working-directory: app
+      - name: Check application and strict contract types
+        run: pnpm run typecheck
+        working-directory: app
+      - name: Test all kernel packages
+        run: go test -tags "fts5 sqlcipher" ./... -count=1
+        working-directory: kernel
+      - name: Test path fixtures with custom temporary directories
+        run: go test -tags "fts5 sqlcipher" ./internal/testutil ./util ./model ./server -run 'Test(PublicDataDir|IsSensitivePath|.*Obsidian|RegisterStaticFileHandlers|StaticFile|WidgetResponseCacheControl|TemplatesAndExportRequireAdministrator|SnippetPublishAccess|PluginPublishAccess)' -count=1
+        working-directory: kernel
+        env:
+          TMPDIR: /tmp
+          GOTMPDIR: ${{ runner.temp }}
+
+  frontend-tests:
+    name: Frontend, Electron and packaging tests
+    needs: prepare
+    runs-on: windows-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Install repository pnpm version
+        run: npm install --global ${{ needs.prepare.outputs.packageManager }}
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: app
+      - name: Test frontend, Electron and packaging scripts
+        run: pnpm test
+        working-directory: app
+
   build:
     runs-on: ${{ matrix.config.os }}
     name: ${{ matrix.config.name }}
-    needs: [prepare]
+    needs: [prepare, contracts, frontend-tests]
     env:
       SIYUAN_E2E_SHARDS: ${{ matrix.config.e2e_shards }}
     strategy:
@@ -454,9 +519,8 @@ jobs:
   build_android:
     runs-on: ubuntu-latest
     name: ubuntu build android.apk
-    # Android and desktop builds run in parallel, both depend on prepare.
-    # create_release aggregates all artifacts once both jobs succeed.
-    needs: prepare
+    # 测试通过后并行执行 Android 和桌面构建，全部成功后汇总产物并创建发布。
+    needs: [prepare, contracts, frontend-tests]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6

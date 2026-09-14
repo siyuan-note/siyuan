@@ -1,8 +1,9 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {applyFocusFold, stopFocusFold, updateFocusFoldSource} from "./focusFold";
+import {applyFocusFold, invalidateFocusFoldRequests, stopFocusFold, updateFocusFoldSource} from "./focusFold";
 
 class FoldElement {
+    isConnected = true;
     attrs: Record<string, string>;
 
     constructor(id: string, type = "NodeListItem", fold = "1") {
@@ -32,7 +33,8 @@ const editor = (elements: FoldElement[]) => ({
     wysiwyg: {
         element: {
             querySelector: (selector: string) => elements.find(element =>
-                selector === `[data-node-id="${element.attrs["data-node-id"]}"][data-type="${element.attrs["data-type"]}"]`),
+                selector === `[data-node-id="${element.attrs["data-node-id"]}"]`),
+            contains: (element: FoldElement) => elements.includes(element),
         },
     },
 } as unknown as IProtyle);
@@ -122,7 +124,7 @@ describe("focused list folding", () => {
         assert.equal(parent.getAttribute("fold"), null);
     });
 
-    it("does not unfold headings, ordinary document views, or backlink views", () => {
+    it("requires a loader for headings and excludes ordinary document and backlink views", () => {
         const heading = new FoldElement("parent", "NodeHeading");
         applyFocusFold(editor([heading]));
         assert.equal(heading.getAttribute("fold"), "1");
@@ -135,5 +137,117 @@ describe("focused list folding", () => {
         protyle.options.backlinkData = {} as IProtyle["options"]["backlinkData"];
         applyFocusFold(protyle);
         assert.equal(parent.getAttribute("fold"), "1");
+    });
+});
+
+describe("focused heading loading", () => {
+    it("loads once, preserves child folds, and restores the source on exit", async () => {
+        const heading = new FoldElement("parent", "NodeHeading");
+        const child = new FoldElement("child", "NodeHeading");
+        const protyle = editor([heading, child]);
+        let loads = 0;
+        const load = async () => {
+            loads++;
+            return true;
+        };
+        await applyFocusFold(protyle, load);
+        await applyFocusFold(protyle, load);
+        assert.equal(loads, 1);
+        assert.equal(heading.getAttribute("fold"), null);
+        assert.equal(heading.getAttribute("data-view-fold-source"), "1");
+        assert.equal(child.getAttribute("fold"), "1");
+        protyle.block.showAll = false;
+        await applyFocusFold(protyle, load);
+        assert.equal(heading.getAttribute("fold"), "1");
+    });
+
+    it("shares an in-flight load and ignores it after a focus switch", async () => {
+        const protyle = editor([new FoldElement("parent", "NodeHeading")]);
+        let complete: (value: boolean) => void;
+        let valid: () => boolean;
+        const load = (_element: Element, isValid: () => boolean) => {
+            valid = isValid;
+            return new Promise<boolean>(resolve => complete = resolve);
+        };
+        const request = applyFocusFold(protyle, load);
+        assert.equal(applyFocusFold(protyle, load), request);
+        await Promise.resolve();
+        protyle.block.id = "another";
+        assert.equal(valid(), false);
+        complete(true);
+        await request;
+    });
+
+    it("invalidates pending content after an edit and allows a fresh request", async () => {
+        const protyle = editor([new FoldElement("parent", "NodeHeading")]);
+        let complete: (value: boolean) => void;
+        let valid: () => boolean;
+        const request = applyFocusFold(protyle, (_element, isValid) => {
+            valid = isValid;
+            return new Promise<boolean>(resolve => complete = resolve);
+        });
+        await Promise.resolve();
+        invalidateFocusFoldRequests(protyle);
+        assert.equal(valid(), false);
+        let fresh = false;
+        await applyFocusFold(protyle, async () => {
+            fresh = true;
+            return true;
+        });
+        complete(false);
+        await request;
+        assert.equal(fresh, true);
+        assert.equal(protyle.wysiwyg.element.querySelector('[data-node-id="parent"]').getAttribute("fold"), null);
+    });
+
+    it("honors manual folding while loading and after refreshing the heading", async () => {
+        const elements = [new FoldElement("parent", "NodeHeading")];
+        const protyle = editor(elements);
+        let complete: (value: boolean) => void;
+        let valid: () => boolean;
+        const request = applyFocusFold(protyle, (_element, isValid) => {
+            valid = isValid;
+            return new Promise<boolean>(resolve => complete = resolve);
+        });
+        await Promise.resolve();
+        stopFocusFold(protyle, "parent");
+        elements[0].setAttribute("fold", "1");
+        assert.equal(valid(), false);
+        complete(true);
+        await request;
+        elements[0] = new FoldElement("parent", "NodeHeading");
+        await applyFocusFold(protyle, async () => assert.fail("manual folding must survive refresh"));
+        assert.equal(elements[0].getAttribute("fold"), "1");
+    });
+
+    it("rejects a detached or replaced heading and reloads the new element", async () => {
+        const elements = [new FoldElement("parent", "NodeHeading")];
+        const protyle = editor(elements);
+        let complete: (value: boolean) => void;
+        let valid: () => boolean;
+        const request = applyFocusFold(protyle, (_element, isValid) => {
+            valid = isValid;
+            return new Promise<boolean>(resolve => complete = resolve);
+        });
+        await Promise.resolve();
+        elements[0].isConnected = false;
+        assert.equal(valid(), false);
+        elements[0] = new FoldElement("parent", "NodeHeading");
+        await applyFocusFold(protyle, async () => true);
+        complete(false);
+        await request;
+        assert.equal(elements[0].getAttribute("fold"), null);
+    });
+
+    it("restores folding on failure without repeatedly retrying and retries after refresh", async () => {
+        const elements = [new FoldElement("parent", "NodeHeading")];
+        const protyle = editor(elements);
+        await applyFocusFold(protyle, async () => false);
+        assert.equal(elements[0].getAttribute("fold"), "1");
+        assert.equal(elements[0].hasAttribute("data-view-fold-source"), false);
+        await applyFocusFold(protyle, async () => assert.fail("failed loads must not loop"));
+        elements[0] = new FoldElement("parent", "NodeHeading");
+        await applyFocusFold(protyle, async () => true);
+        assert.equal(elements[0].getAttribute("fold"), null);
     });
 });

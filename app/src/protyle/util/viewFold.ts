@@ -9,7 +9,10 @@ import {
     clearViewFoldOccurrenceRuntimeState,
 } from "./viewFoldRuntimeState";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
-import {applyFocusFold, stopFocusFold, updateFocusFoldSource} from "./focusFold";
+import {applyFocusFold as applyFocusFoldState, invalidateFocusFoldRequests, stopFocusFold, updateFocusFoldSource} from "./focusFold";
+import {getFocusedHeadingChildren} from "./heading";
+import {queueHeadingNumberRefresh, renderHeadingNumbers} from "./headingNumber";
+import {updateDocumentBottomEof} from "./documentRange";
 
 const VIEW_FOLD_SOURCE = "data-view-fold-source";
 const VIEW_FOLD_VALUE = "data-view-fold";
@@ -132,7 +135,7 @@ const getHeadingToken = (protyle: IProtyle, heading: Element) => {
     return encodeKeyPart(getViewFoldStateKey(protyle, heading) || heading.getAttribute("data-node-id"));
 };
 
-const renderHeadingChildren = (protyle: IProtyle, heading: Element, children: Element[]) => {
+const renderHeadingChildren = (protyle: IProtyle, heading: Element, children: Element[], insertAfter = heading) => {
     if (children.length === 0) {
         return;
     }
@@ -143,7 +146,7 @@ const renderHeadingChildren = (protyle: IProtyle, heading: Element, children: El
         child.setAttribute(VIEW_HEADING_OWNER, token);
         fragment.appendChild(child);
     });
-    heading.after(fragment);
+    insertAfter.after(fragment);
     children.forEach(child => {
         processRender(child);
         highlightRender(child);
@@ -154,6 +157,60 @@ const renderHeadingChildren = (protyle: IProtyle, heading: Element, children: El
         disabledProtyle(protyle);
     }
 };
+
+export const applyFocusFold = (protyle: IProtyle) => applyFocusFoldState(protyle, async (heading, isValid) => {
+    if (!getSourceFold(heading) && getHeadingChildren(heading).length > 0) {
+        return true;
+    }
+    const response = await fetchSyncPost("/api/block/getHeadingChildrenDOM", {
+        id: heading.getAttribute("data-node-id"),
+        removeFoldAttr: false,
+    });
+    if (!isValid() || response.code !== 0 || typeof response.data !== "string") {
+        return false;
+    }
+    const template = document.createElement("template");
+    template.innerHTML = normalizeHTMLAssetIFrameBlockDOM(response.data);
+    const content = getFocusedHeadingChildren(template.content, heading.getAttribute("data-node-id"));
+    if (!content) {
+        return false;
+    }
+    updateFocusFoldSource(protyle, heading.getAttribute("data-node-id"), content.folded);
+    const lastElement = protyle.wysiwyg.element.lastElementChild;
+    const wasBottom = lastElement?.getAttribute("data-eof") === "2";
+    const existing = new Map(getHeadingChildren(heading).map(element => [element.getAttribute("data-node-id"), element]));
+    let previous = heading;
+    let pending: Element[] = [];
+    const flush = () => {
+        if (pending.length > 0) {
+            renderHeadingChildren(protyle, heading, pending, previous);
+            previous = pending[pending.length - 1];
+            pending = [];
+        }
+    };
+    // 加载期间新增的块和已编辑的 DOM 保持原样，只按响应顺序补入缺少的子块。
+    content.children.forEach(child => {
+        const current = existing.get(child.getAttribute("data-node-id"));
+        if (current) {
+            flush();
+            previous = current;
+        } else {
+            pending.push(child);
+        }
+    });
+    flush();
+    if (wasBottom && lastElement !== protyle.wysiwyg.element.lastElementChild) {
+        lastElement.removeAttribute("data-eof");
+        protyle.wysiwyg.element.lastElementChild.setAttribute("data-eof", "2");
+    }
+    updateDocumentBottomEof(protyle.wysiwyg.element);
+    renderHeadingNumbers(protyle);
+    queueHeadingNumberRefresh(protyle);
+    if (protyle.options.render.scroll) {
+        protyle.scroll.update(protyle);
+    }
+    return true;
+});
 
 const ensureHeadingChildren = async (protyle: IProtyle, heading: Element, stateKey: string, force = false) => {
     if (getHeadingChildren(heading).length > 0 || heading.getAttribute(VIEW_HEADING_LOADED) === "1" ||
@@ -319,6 +376,7 @@ export const clearViewFoldOccurrenceState = (protyle: IProtyle, occurrenceID: st
 };
 
 export const invalidateViewFoldRequests = (protyle: IProtyle) => {
+    invalidateFocusFoldRequests(protyle);
     const context = viewFoldContexts.get(protyle);
     if (context) {
         context.generation = (context.generation || 0) + 1;
@@ -370,10 +428,10 @@ export const setViewFoldTransient = async (protyle: IProtyle, element: Element, 
 };
 
 export const applyViewFoldStates = async (protyle: IProtyle, scope?: ParentNode) => {
-    applyFocusFold(protyle);
+    const focusRequest = applyFocusFold(protyle);
     const context = viewFoldContexts.get(protyle);
     if (!context) {
-        return;
+        return focusRequest;
     }
     const root = scope || protyle.wysiwyg.element;
     const elements: Element[] = [];
@@ -404,7 +462,7 @@ export const applyViewFoldStates = async (protyle: IProtyle, scope?: ParentNode)
             headings.push(ensureHeadingChildren(protyle, element, stateKey, true));
         }
     });
-    await Promise.all(headings);
+    await Promise.all([...headings, focusRequest]);
 };
 
 const restoreViewFoldElement = (element: Element) => {

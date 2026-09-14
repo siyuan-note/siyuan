@@ -184,6 +184,13 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                 const narrow = tabs.clientWidth < 420;
                 const vertical = tabs.getAttribute("tabs-position") === "left" && !narrow;
                 tabs.setAttribute("data-tabs-orientation", vertical ? "vertical" : "horizontal");
+                if (!tabs.querySelector(":scope > .tabs-divider")) {
+                    const divider = document.createElement("div");
+                    divider.className = "tabs-divider protyle-action";
+                    divider.setAttribute("contenteditable", "false");
+                    divider.setAttribute("aria-hidden", "true");
+                    tabs.prepend(divider);
+                }
                 let header = tabs.querySelector<HTMLElement>(":scope > .tabs-header");
                 if (!header) {
                     header = document.createElement("div");

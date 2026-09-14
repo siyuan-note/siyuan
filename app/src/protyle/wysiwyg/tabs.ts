@@ -150,6 +150,7 @@ export const unwrapTabs = (protyle: IProtyle, tabs: HTMLElement) => {
             item.replaceChildren(...blocks, genSBElement("row").lastElementChild);
         });
         tabs.querySelector(":scope > .tabs-header")?.remove();
+        tabs.querySelector(":scope > .tabs-divider")?.remove();
         tabs.className = "sb";
         tabs.dataset.type = "NodeSuperBlock";
         tabs.dataset.sbLayout = "row";

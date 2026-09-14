@@ -76,7 +76,8 @@
     overflow: initial;
   }
 
-  &:hover::after {
+  &:hover::after,
+  &:focus-within::after {
     display: inline-block;
     opacity: 1;
     transform: scale(1);
@@ -124,7 +125,9 @@
   }
 
   &__s:hover::after,
-  &__n:hover::after {
+  &__n:hover::after,
+  &__s:focus-within::after,
+  &__n:focus-within::after {
     transform: translateX(50%) scale(1);
   }
 
@@ -143,7 +146,9 @@
   }
 
   &__e:hover::after,
-  &__w:hover::after {
+  &__w:hover::after,
+  &__e:focus-within::after,
+  &__w:focus-within::after {
     transform: translateY(50%) scale(1);
   }
 }

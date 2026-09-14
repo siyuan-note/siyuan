@@ -189,6 +189,7 @@ if (!process.versions.electron) {
                     return exports;
                 };
                 modules["../util/escape"] = load(${JSON.stringify(compile("util/escape.ts"))});
+                modules["../util/zIndex"] = load(${JSON.stringify(compile("util/zIndex.ts"))});
                 modules["./index"] = load(${JSON.stringify(compile("dialog/index.ts"))});
                 window.openRemoteConnection = load(${JSON.stringify(compile("dialog/remoteConnection.ts"))}).openRemoteConnection;
                 window.openRemoteConnection(${JSON.stringify(origin)});

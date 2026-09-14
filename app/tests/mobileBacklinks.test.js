@@ -10,7 +10,7 @@ const sources = () => {
     for (const name of ["layout/dock/BacklinkContent", "layout/dock/backlinkRefresh",
         "layout/dock/backlinkReadingAnchor", "layout/dock/backlinkSourceFilter", "mobile/util/secondaryEditors",
         "mobile/util/backlinkPanels", "mobile/util/openBacklinks", "mobile/util/bindBottomSheetDrag", "mobile/util/bindBottomSheetDialog", "protyle/util/transactionQueue",
-        "util/escape", "dialog/index", "layout/dock/panelSearch", "protyle/wysiwyg/backlinkTypeFold",
+        "util/escape", "util/zIndex", "dialog/index", "layout/dock/panelSearch", "protyle/wysiwyg/backlinkTypeFold",
         "layout/dock/backlinkMentionCache", "layout/dock/bottomBacklinkScroll"]) {
         modules[name] = ts.transpileModule(preprocess(
             readFileSync(path.join(__dirname, "../src", name + ".ts"), "utf8"),

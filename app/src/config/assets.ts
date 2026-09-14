@@ -233,7 +233,7 @@ const assets = {
                     const blockIDs = JSON.parse(target.getAttribute("data-id")) as string[];
                     if (blockIDs.length > 0) {
                         /// #if MOBILE
-                        openMobileFileById(app, blockIDs[0], [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                        openMobileFileById(app, blockIDs[0], [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL], "start");
                         /// #else
                         window.siyuan.blockPanels.push(new BlockPanel({
                             app,

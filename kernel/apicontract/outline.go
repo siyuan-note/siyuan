@@ -18,21 +18,22 @@ type HeadingNumbersRequest struct {
 }
 
 type SearchPath struct {
-	ID       string         `json:"id"`
-	Box      string         `json:"box"`
-	Name     string         `json:"name"`
-	Number   string         `json:"number,omitempty"`
-	HPath    string         `json:"hPath"`
-	Type     string         `json:"type"`
-	NodeType string         `json:"nodeType"`
-	SubType  string         `json:"subType"`
-	Blocks   []*SearchBlock `json:"blocks,omitempty"`
-	Children []*SearchPath  `json:"children,omitempty"`
-	Depth    int            `json:"depth"`
-	Count    int            `json:"count"`
-	Folded   bool           `json:"folded"`
-	Updated  string         `json:"updated"`
-	Created  string         `json:"created"`
+	ID         string         `json:"id"`
+	Box        string         `json:"box"`
+	Name       string         `json:"name"`
+	NameIsHTML bool           `json:"nameIsHTML,omitempty"`
+	Number     string         `json:"number,omitempty"`
+	HPath      string         `json:"hPath"`
+	Type       string         `json:"type"`
+	NodeType   string         `json:"nodeType"`
+	SubType    string         `json:"subType"`
+	Blocks     []*SearchBlock `json:"blocks,omitempty"`
+	Children   []*SearchPath  `json:"children,omitempty"`
+	Depth      int            `json:"depth"`
+	Count      int            `json:"count"`
+	Folded     bool           `json:"folded"`
+	Updated    string         `json:"updated"`
+	Created    string         `json:"created"`
 }
 
 func init() {

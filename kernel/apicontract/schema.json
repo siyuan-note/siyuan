@@ -14161,6 +14161,9 @@
         "name": {
           "type": "string"
         },
+        "nameIsHTML": {
+          "type": "boolean"
+        },
         "nodeType": {
           "type": "string"
         },
@@ -35246,6 +35249,9 @@
         },
         "name": {
           "type": "string"
+        },
+        "nameIsHTML": {
+          "type": "boolean"
         },
         "nodeType": {
           "type": "string"

@@ -554,7 +554,7 @@ export type BacklinkList = { "backlinks": Array<BacklinkPath | null> | null; "ba
 
 export type BacklinkListRequestInput = { "containChildren"?: boolean | null; "id"?: string | null; "includeMentions"?: boolean | null; "k"?: string; "knownRevision"?: string | null; "mSort"?: string | null; "mk"?: string; "notebook"?: string | null; "refDefCandidates"?: boolean | null; "sort"?: string | null; "sourceFilter"?: BacklinkSourceFilterInput | null; };
 
-export type BacklinkPath = { "blocks"?: Array<SearchBlock | null>; "box": string; "children"?: Array<SearchPath | null>; "count": number; "created": string; "depth": number; "folded": boolean; "hPath": string; "id": string; "name": string; "nodeType": string; "number"?: string; "revision": string; "subType": string; "type": string; "updated": string; };
+export type BacklinkPath = { "blocks"?: Array<SearchBlock | null>; "box": string; "children"?: Array<SearchPath | null>; "count": number; "created": string; "depth": number; "folded": boolean; "hPath": string; "id": string; "name": string; "nameIsHTML"?: boolean; "nodeType": string; "number"?: string; "revision": string; "subType": string; "type": string; "updated": string; };
 
 export type BacklinkRefDef = { "id": string; "path": string; "text": string; };
 
@@ -1612,7 +1612,7 @@ export type SearchListFilterInput = { "o"?: boolean | null; "t"?: boolean | null
 
 export type SearchPageRequestInput = { "page"?: number | null; "pageSize"?: number | null; };
 
-export type SearchPath = { "blocks"?: Array<SearchBlock | null>; "box": string; "children"?: Array<SearchPath | null>; "count": number; "created": string; "depth": number; "folded": boolean; "hPath": string; "id": string; "name": string; "nodeType": string; "number"?: string; "subType": string; "type": string; "updated": string; };
+export type SearchPath = { "blocks"?: Array<SearchBlock | null>; "box": string; "children"?: Array<SearchPath | null>; "count": number; "created": string; "depth": number; "folded": boolean; "hPath": string; "id": string; "name": string; "nameIsHTML"?: boolean; "nodeType": string; "number"?: string; "subType": string; "type": string; "updated": string; };
 
 export type SearchPathRequestInput = { "path": string; };
 

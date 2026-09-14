@@ -130,7 +130,7 @@ ${item.label !== undefined && item.label !== null ? `data-label='${item.label}'`
     </span>
     ${iconHTML}
     ${numberHTML}
-    <span class="b3-list-item__text ariaLabel" data-position="${this.titleTooltipPosition}"${titleTip}>${item.name}</span>
+    <span class="b3-list-item__text ariaLabel" data-position="${this.titleTooltipPosition}"${titleTip}>${item.nameIsHTML ? item.name : escapeHtml(item.name)}</span>
     ${getTreeItemTailHTML(countHTML, this.topExtHTML || "", isM)}
 </li>`;
             if (item.children && item.children.length > 0) {

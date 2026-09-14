@@ -1779,7 +1779,7 @@
 	"recentEmoji": "Emotikon Umum",
 	"changeIcon": "Ganti ikon",
 	"addIcon": "Tambah ikon",
-	"includeSubFile": "\nSertakan ${x} sub-dokumen",
+	"includeSubFile": "\nSertakan x sub-dokumen",
 	"untitled": "Tanpa Judul",
 	"lockScreen": "Kunci Layar",
 	"cloudIntro1": "Sinkronisasi data terenkripsi ujung-ke-ujung",

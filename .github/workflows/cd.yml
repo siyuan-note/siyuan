@@ -105,6 +105,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  languages:
+    name: Language validation
+    needs: prepare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+      - name: Test language validation
+        run: python -m unittest discover -s scripts -p "test_check_lang_keys.py"
+      - name: Check language keys and kernel placeholders
+        run: python scripts/check-lang-keys.py
+
   contracts:
     name: API contracts and kernel tests
     needs: prepare
@@ -173,7 +189,7 @@ jobs:
   build:
     runs-on: ${{ matrix.config.os }}
     name: ${{ matrix.config.name }}
-    needs: [prepare, contracts, frontend-tests]
+    needs: [prepare, languages, contracts, frontend-tests]
     env:
       SIYUAN_E2E_SHARDS: ${{ matrix.config.e2e_shards }}
     strategy:
@@ -520,7 +536,7 @@ jobs:
     runs-on: ubuntu-latest
     name: ubuntu build android.apk
     # 测试通过后并行执行 Android 和桌面构建，全部成功后汇总产物并创建发布。
-    needs: [prepare, contracts, frontend-tests]
+    needs: [prepare, languages, contracts, frontend-tests]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6

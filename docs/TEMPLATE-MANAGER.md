@@ -14,19 +14,19 @@ Open the manager from a template entry's Template manager button in the editor's
 
 The left pane displays a collapsible tree of directories and Markdown files under `data/templates`, with directories first. Search matches template names or full paths and expands parent directories of matches. Clearing search restores the previous expansion state. Clicking a directory selects it and toggles its children without changing the editor or preview. New templates and folders default to the selected directory, while Save and Preview still apply to the template being edited. Rename changes only the name and retains the parent directory; moving across directories uses a directory picker. Existing targets are not overwritten. Successful creation, rename, or move clears search and expands the target parent. Rename and move do not rewrite template paths referenced by other templates, notebook configuration, or documents; those references require corresponding updates.
 
-Template package directories containing `template.json` cannot be renamed or moved, preserving package identity and marketplace updates. Templates inside a package remain editable. Existing files retain their original names and are not rejected because of valid characters such as single quotes.
+Template package directories containing `template.json` cannot be renamed or moved, preserving package identity and marketplace updates. However, templates inside a package remain editable. Existing files retain their original names and are not rejected because of valid characters such as single quotes.
 
 ### Editing and saving
 
-The right pane edits source in a plain text field. Saving checks the file version recorded when reading. If sync or another window changed the file, the manager rejects the overwrite; retain current edits and refresh before resolving the conflict. Switching files, refreshing, or closing asks for confirmation before discarding unsaved changes. Templates with Windows line endings retain them when saved.
+The right pane edits source in a plain text field. Saving checks the file version recorded when reading. If sync or another window changed the file, then the manager rejects the overwrite; retain current edits and refresh before resolving the conflict. Switching files, refreshing, or closing asks for confirmation before discarding unsaved changes. Templates with Windows line endings retain them when saved.
 
-Deletion directly removes the selected file or directory and all its contents without writing to a separate trash folder. This cannot be undone. Templates do not participate in file history, so file history cannot restore them. Existing content under `data/templates/.trash/` is not automatically cleaned up, and that hidden directory remains absent from template search and management lists.
+Deletion directly removes the selected file or directory and all its contents without writing to a separate trash folder. This cannot be undone. Templates are not part of file history, so file history cannot restore them. Existing content under `data/templates/.trash/` is not automatically cleaned up, and that hidden directory remains absent from template search and management lists.
 
 ### Preview
 
 Preview template runs the current editor content without saving it or inserting it into a document. The default context is the document or block used to open the manager. Preview context shows the selected name, an explanation of its purpose, and a document picker that can search for another context document. This search selects the context document, not templates in the left pane. Rendering uses the selected document's title, ID, and other information without modifying that document. Title, ID, path, and SQL results depend on the selected context and current data.
 
-Preview uses existing read-only rendering. It neither saves source nor commits a document-tree creation plan. The preview background follows the editor theme in light and dark modes rather than using a fixed white background. Database previews use tables and do not reproduce every interaction available after insertion.
+Preview uses existing read-only rendering. It neither saves source nor commits a document-tree creation plan. The preview background follows the editor theme in light and dark modes rather than using a fixed white background. Database previews use tables and therefore do not reproduce every interaction available after insertion.
 
 Templates using `createDocTree` display the planned document names, hierarchy, and count in the preview, including templates with no body.
 
@@ -64,10 +64,10 @@ UI renaming reuses existing filename handling: ASCII slash `/` becomes full-widt
 
 ## Compatibility and recovery
 
-Existing templates retain their original filenames, Windows line endings, and support for document attributes declared directly at the end of the file. New standalone attribute exports use `siyuan-template-doc-attrs-v1` to preserve evaluation position. Moving and renaming do not migrate external template references; callers must update those paths.
+Existing templates retain their original filenames, Windows line endings, and support for document attributes declared directly at the end of the file. New standalone attribute exports use `siyuan-template-doc-attrs-v1` to preserve evaluation position. Moving and renaming do not migrate external template references; therefore callers must update those paths.
 
-File-version conflicts preserve current editor content and reject overwrites. Deletion creates no file history and cannot be undone through the manager. Existing `data/templates/.trash/` content remains and is not automatically cleaned up.
+File-version conflicts preserve current editor content and reject overwrites. Deletion creates no file history and therefore cannot be undone through the manager. Existing `data/templates/.trash/` content remains and is not automatically cleaned up.
 
 ## Verification
 
-Verify file-tree ordering, expansion state after search, target directories for creation and moves, valid filename access, package-directory protection, version conflicts, and unsaved-change confirmation. Preview checks cover unsaved source, context changes, read-only rendering, document-tree plans, and theme changes. Export checks cover directory fallback, memory updates only after success, database-range detection, attribute evaluation position, and old-template compatibility. Deletion checks cover path boundaries, symbolic links, revisions, and preservation of existing hidden recovery directories.
+Verify file-tree ordering, expansion state after search, target directories for creation and moves, valid filename access, package-directory protection, version conflicts, and unsaved-change confirmation. Preview checks include unsaved source, context changes, read-only rendering, document-tree plans, and theme changes. Export checks include directory fallback, memory updates only after success, database-range detection, attribute evaluation position, and old-template compatibility. Deletion checks include path boundaries, symbolic links, revisions, and preservation of existing hidden recovery directories.

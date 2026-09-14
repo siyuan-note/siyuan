@@ -5,12 +5,12 @@
 > 规范写入基准：普通文档为 Spec `2`，包含页签的文档为 Spec `3`，使用表格单元格富文本的文档为 Spec `4`；兼容读取器可以升级旧版或缺少 `Spec` 的数据。
 > 核验样本：`20200825162036-4dx365o.sy`（排版元素）、`20200905090211-2vixtlf.sy`（内容块类型）。
 > 本文档所有结论均基于真实样本及当前 Lute / 思源内核源码核验。上述样本包含少量已知的历史遗留数据；样本与当前源码不一致时，规范写入规则以当前源码为准。
-> 本指南描述普通笔记本中的明文 `.sy` JSON，或已解锁加密笔记本的解密后 AST。加密笔记本磁盘上的 `.sy` 文件是密文，不能当作 JSON 直接编辑。
+> 本指南描述普通笔记本中的明文 `.sy` JSON，或已解锁加密笔记本的解密后 AST。但加密笔记本磁盘上的 `.sy` 文件是密文，不能当作 JSON 直接编辑。
 > 配套文档：[`WORKSPACE.zh-CN.md`](./WORKSPACE.zh-CN.md) 讲工作区在磁盘上的整体布局（笔记本、父子文档、资源文件的组织方式）；本文档专注 `.sy` 文件**内部**的 JSON 结构。
 
 ## 0. 概述
 
-明文 `.sy` 文件是序列化为 JSON 的 Lute AST 树。根节点为 `NodeDocument`，正文是递归嵌套的 `Children` 数组。不存在单独维护的 JSON Schema；Lute 的 `ast.Node` 和 `ListData` Go 结构体是序列化格式的事实来源。树中保存文档 AST 及其 IAL，资源文件、属性视图定义和可重建索引则位于树外。
+明文 `.sy` 文件是序列化为 JSON 的 Lute AST 树。根节点为 `NodeDocument`，正文是递归嵌套的 `Children` 数组。不存在单独维护的 JSON Schema；因此 Lute 的 `ast.Node` 和 `ListData` Go 结构体是序列化格式的事实来源。树中保存文档 AST 及其 IAL，资源文件、属性视图定义和可重建索引则位于树外。
 
 ## 0.1 规范写入与兼容读取
 
@@ -22,13 +22,13 @@
 | **可选** | 字段为空或带有 `omitempty` 时可以省略 |
 | **兼容输入** | 读取器可按明确兼容规则接收并保留、修复或升级的历史或外部数据 |
 
-除非某节另有说明，本文的“必需”均指新数据的规范写入要求。`dataparser.ParseJSON` 是兼容读取器，而不是严格的 Schema 校验器；例如，它可以补入缺失的空段落、为缺少 ID 的块分配 ID，并升级旧版 `Spec`。
+除非某节另有说明，本文的“必需”均指新数据的规范写入要求。`dataparser.ParseJSON` 是兼容读取器，而不是严格的 Schema 校验器；例如，它可以填充缺失的空段落、为缺少 ID 的块分配 ID，并升级旧版 `Spec`。
 
 ---
 
 ## 0.5 何时直接读写 `.sy`（优先级）
 
-思源提供了 **HTTP API、MCP、CLI** 三条官方路径来修改数据。**默认应优先使用它们**，因为内核会负责 AST 序列化、块 ID 分配，以及两套索引的同步——块树索引（`blocktree.db`，块 ID 到文件路径的映射，块引用和面包屑依赖它）和全文搜索索引（`siyuan.db` + FTS5）。直接改盘绕过了这些逻辑，容易导致索引不一致。
+思源提供了 **HTTP API、MCP、CLI** 三条官方路径来修改数据。**默认应优先使用它们**，因为内核会负责 AST 序列化、块 ID 分配，以及两套索引的同步——块树索引（`blocktree.db`，块 ID 到文件路径的映射，块引用和面包屑依赖它）和全文搜索索引（`siyuan.db` + FTS5）。直接改盘绕过了这些逻辑，因此容易导致索引不一致。
 
 **仅当官方路径不便时，才直接以 JSON 读写 `.sy`**。适用场景：
 - 批量离线迁移（冷初始化工作区、外部数据导入；工作区的磁盘布局见 [`WORKSPACE.zh-CN.md`](./WORKSPACE.zh-CN.md)）
@@ -92,7 +92,7 @@
 | `Children` | array | 容器和结构复合节点 | 子节点数组 |
 | 类型专属字段 | - | 按类型 | 如 `HeadingLevel`、`ListData`、`TextMarkType`、`AttributeViewID` |
 
-**核心判别规则**：`Type` 决定节点是否为块，`ast.Node.IsBlock()` 是权威判断；不能根据是否存在 `ID` 判断。规范数据中的每个块都有 `ID` 及与之匹配的 `Properties.id`，新建的内联或标记节点则没有这些字段。旧版缺陷生成的历史文件可能在 `NodeCodeBlockCode`、`NodeMathBlockContent` 等非块节点上带有 ID。兼容读取器和编辑器可在规范化过程中清理这些遗留的 `ID` / `Properties.id` 字段，但必须按 `Type` 判断节点类型，不能仅因 `ID` 不符合规范而删除节点本身。
+**核心判别规则**：`Type` 决定节点是否为块，`ast.Node.IsBlock()` 是权威判断；因此不能根据是否存在 `ID` 判断。规范数据中的每个块都有 `ID` 及与之匹配的 `Properties.id`，新建的内联或标记节点则没有这些字段。旧版缺陷生成的历史文件可能在 `NodeCodeBlockCode`、`NodeMathBlockContent` 等非块节点上带有 ID。兼容读取器和编辑器可在规范化过程中清理这些遗留的 `ID` / `Properties.id` 字段，但必须按 `Type` 判断节点类型，不能仅因 `ID` 不符合规范而删除节点本身。
 
 ---
 
@@ -121,7 +121,7 @@
 
 `NodeText`、`NodeTextMark`、`NodeImage`、`NodeKramdownSpanIAL`、`NodeSoftBreak`、`NodeBr`、`NodeBackslash`、`NodeBackslashContent`、`NodeHeadingC8hMarker`、`NodeBlockquoteMarker`、`NodeTaskListItemMarker`、`NodeBang`、`NodeOpenBracket`、`NodeCloseBracket`、`NodeOpenParen`、`NodeCloseParen`、`NodeLinkText`、`NodeLinkDest`、`NodeLinkSpace`、`NodeLinkTitle`、`NodeCodeBlockCode`、`NodeCodeBlockFenceOpenMarker`、`NodeCodeBlockFenceInfoMarker`、`NodeCodeBlockFenceCloseMarker`、`NodeMathBlockContent`、`NodeMathBlockOpenMarker`、`NodeMathBlockCloseMarker`、`NodeSuperBlockOpenMarker`、`NodeSuperBlockLayoutMarker`、`NodeSuperBlockCloseMarker`、`NodeOpenBrace`、`NodeCloseBrace`、`NodeBlockQueryEmbedScript`、`NodeTableHead`、`NodeTableRow`、`NodeTableCell`
 
-> “叶子块”表示该节点不能包含其他**块节点**；它仍可拥有结构性内联子节点，例如代码块、数学块和表格。
+> “叶子块”表示该节点不能包含其他**块节点**；但它仍可拥有结构性内联子节点，例如代码块、数学块和表格。
 > 上述“规范数据中无 ID”是规范写入规则。显式规范化过程可以清理兼容历史非块节点已有的 `ID`，但不能用该字段判断节点是否为块，也不能据此删除节点本身。
 > 规范写入禁用的类型，包括解析器禁用的语法及仅用于检测的 `NodeGitConflict` 节点族，列于 §11，因此未纳入此目录。
 
@@ -150,7 +150,7 @@
 
 ### 5.3 列表（关键：用 `ListData.Typ` 区分类型）
 
-> **★ 列表的规范结构约束**：`NodeList` 的直接子节点**只能**是 `NodeListItem`，即 `CanContain` 返回 `NodeListItem == nodeType`。段落、代码块、子列表等任何其他块都**不能**直接挂在 `NodeList` 下，必须先包一层 `NodeListItem`。`dataparser.ParseJSON` 不会将其作为严格校验步骤，因此直接写入器必须自行验证结构。
+> **★ 列表的规范结构约束**：`NodeList` 的直接子节点**只能**是 `NodeListItem`，即 `CanContain` 返回 `NodeListItem == nodeType`。段落、代码块、子列表等任何其他块都**不能**直接作为 `NodeList` 的子节点，必须先包一层 `NodeListItem`。`dataparser.ParseJSON` 不会将其作为严格校验步骤，因此直接写入器必须自行验证结构。
 
 ```
 ✅ 正确                          ❌ 错误
@@ -159,7 +159,7 @@ NodeList                        NodeList
    └─ NodeParagraph              └─ NodeCodeBlock         ← 非法
 ```
 
-**嵌套列表**的正确写法是再套一层 `NodeList`（`NodeListItem` 走默认 `CanContain` 分支，不能直接含另一个 `NodeListItem`）：
+**嵌套列表**的正确写法是再套一层 `NodeList`（`NodeListItem` 按默认 `CanContain` 分支处理，不能直接含另一个 `NodeListItem`）：
 
 ```
 ✅ 正确                          ❌ 错误
@@ -257,7 +257,7 @@ NodeList                        NodeList
 { "Type": "NodeTaskListItemMarker", "TaskListItemChecked": true, "TaskListItemMarker": 33 }
 ```
 
-`TaskListItemMarker` 是 Go `byte`，因此 JSON 使用数字保存其 ASCII 码点。当前渲染优先读取该字段，并在兼容旧数据时回退到 `TaskListItemChecked`。AST 直接由 Markdown 解析而来时，`Data` 可能存在，例如 `"[X]"`；编辑器生成的 `.sy` 数据通常省略它，不能将 `Data` 当作任务状态的权威来源。
+`TaskListItemMarker` 是 Go `byte`，因此 JSON 使用数字保存其 ASCII 码点。当前渲染优先读取该字段，并在兼容旧数据时回退到 `TaskListItemChecked`。AST 直接由 Markdown 解析而来时，`Data` 可能存在，例如 `"[X]"`；但编辑器生成的 `.sy` 数据通常省略它，不能将 `Data` 当作任务状态的权威来源。
 
 ### 5.6 引述块
 
@@ -321,7 +321,7 @@ NodeList                        NodeList
 
 ### 5.9.1 页签容器与页签项（Spec 3）
 
-`NodeTabs` 和 `NodeTabItem` 都是真实容器块，具有独立的 `ID`、`Properties.id` 和 `Properties.updated`。页签容器只容纳页签项；页签项容纳普通内容块及嵌套页签容器，每页至少有一个正文块，空正文使用空段落。独立页签项仅作为编辑片段，不能直接挂在文档下。
+`NodeTabs` 和 `NodeTabItem` 都是真实容器块，具有独立的 `ID`、`Properties.id` 和 `Properties.updated`。页签容器只容纳页签项；页签项容纳普通内容块及嵌套页签容器，每页至少有一个正文块，空正文使用空段落。独立页签项仅作为编辑片段，因此不能直接作为文档的子节点。
 
 ```json
 {
@@ -342,9 +342,9 @@ NodeList                        NodeList
 
 包含这两类节点的文档必须至少使用 `Spec: "3"`；使用表格单元格富文本的文档为 Spec 4，普通文档保持 Spec 2。移除功能后不降低版本。向容错解析器传递 JSON 之前，先读取根的原始 `Spec`，避免未知节点的子内容被清空；不得修复并写回不支持的版本。
 
-内部 Markdown 使用 `::: tabs` 开始一组页签，`@tab <行级标题>` 开始一个页签项，`@tab:active <行级标题>` 标识选中项。开始围栏至少包含三个冒号，冒号与 `tabs` 之间需要空格或制表符，规范输出使用一个空格。页签项没有单独的结束标记；整组以独占一行、与开始围栏冒号数量相同的结束围栏闭合。外层围栏必须比内层长，缩进可选；规范输出根据嵌套深度计算围栏长度，不额外缩进页签正文。旧的 `:::tabs`、`:::tab` 语法不再识别，既有 `.sy` 页签节点结构保持不变。
+内部 Markdown 使用 `::: tabs` 开始一组页签，`@tab <行级标题>` 开始一个页签项，`@tab:active <行级标题>` 标识选中项。开始围栏至少包含三个冒号，冒号与 `tabs` 之间需要空格或制表符，规范输出使用一个空格。页签项没有单独的结束标记；整组以独占一行、与开始围栏冒号数量相同的结束围栏闭合。外层围栏必须比内层长，缩进可选；规范输出根据嵌套深度计算围栏长度，不额外缩进页签正文。旧的 `:::tabs`、`:::tab` 语法不再识别，但既有 `.sy` 页签节点结构保持不变。
 
-页签项的 IAL 紧接标题标记下一行，中间不留空行，之后以空行分隔正文。整组容器的 IAL 位于结束围栏之后，正文块的 IAL 紧随对应正文块。导入时，第一个有效的 `@tab:active` 标记决定 `tabs-active-id`，优先于组 IAL 中的值；没有选中标记时保留有效的 `tabs-active-id`，缺失或失效时回退到第一页。嵌套各组独立保存选择。代码块中的标记按字面保留；正文行首的字面标记使用 `\@tab` 或 `\@tab:active` 转义。标准 Markdown 导出所有页签的标题段落及正文；HTML 可增强为交互页签，打印、PDF 和 Word 展示全部页签。完整约定参见[页签块](TAB-BLOCK.zh-CN.md)。
+页签项的 IAL 位于标题标记的下一行，中间不留空行，之后以空行分隔正文。整组容器的 IAL 位于结束围栏之后，正文块的 IAL 位于对应正文块之后。导入时，第一个有效的 `@tab:active` 标记决定 `tabs-active-id`，优先于组 IAL 中的值；没有选中标记时保留有效的 `tabs-active-id`，缺失或失效时回退到第一页。嵌套各组独立保存选择。代码块中的标记按字面保留；正文行首的字面标记使用 `\@tab` 或 `\@tab:active` 转义。标准 Markdown 导出所有页签的标题段落及正文；HTML 可增强为交互页签，打印、PDF 和 Word 展示全部页签。完整约定参见[页签块](TAB-BLOCK.zh-CN.md)。
 
 ### 5.10 代码块（四段结构，仅围栏式）
 
@@ -363,7 +363,7 @@ NodeList                        NodeList
 
 要点：
 
-- `NodeCodeBlockCode` 承载代码内容（放 `Data`，原始文本，`\n` 转义），是 `NodeCodeBlock` 的内联子节点。
+- `NodeCodeBlockCode` 承载代码内容（写入 `Data`，原始文本，`\n` 转义），是 `NodeCodeBlock` 的内联子节点。
 - 外围 fence marker（Open/Info/Close）同样是内联子节点。
 - `CodeBlockInfo` 是**语言名的 base64**（`"Z28="` = `go`）。父节点上的六个字段（`IsFencedCodeBlock` / `CodeBlockFenceChar` / `CodeBlockFenceLen` / `CodeBlockOpenFence` / `CodeBlockInfo` / `CodeBlockCloseFence`）均带 `omitempty`，可按需省略；较新的 `.sy` 文件通常只写 `"IsFencedCodeBlock": true`。
 - 当前思源 Markdown 配置禁用缩进式代码块（`SetIndentCodeBlock(false)`）；规范新代码块采用围栏式结构。
@@ -389,7 +389,7 @@ NodeList                        NodeList
 { "Type": "NodeAudio", "ID": "...", "Data": "<audio controls src=\"assets/x.wav\"></audio>", "Properties": { "id": "...", "updated": "..." } }
 ```
 
-> 这五种节点**没有 `Children`**；HTML 内容经 JSON 转义后直接放在顶层 `Data` 中。
+> 这五种节点**没有 `Children`**；HTML 内容经 JSON 转义后直接写入顶层 `Data` 中。
 
 ### 5.13 表格
 
@@ -419,7 +419,7 @@ NodeList                        NodeList
 
 片段内部只支持段落、标题、列表、引述、普通代码和公式。不支持嵌套表格、数据库、超级块、页签、提示块、查询嵌入、可执行图表、媒体、挂件和 HTML 块。BlockDOM 将源内容封装为 UTF-8 JSON，使用无填充的 URL 安全 Base64 编码，保存在单元格的 `data-sy-table-cell-rich` 属性中。内部 Kramdown 使用对应的 `table-cell-rich` 单元格 IAL；这两种表示都不是标准 Markdown 交换格式。
 
-读取器先校验源内容版本和内容，再重建投影。封装字段缺失、为 null、未知或格式错误时必须报错，不支持的输入必须保持原样。普通单元格没有此封装，不能将其中的文字重新解释为 Markdown。仅打开单元格或编辑普通行级内容时保留现有表示。首次添加块内容时创建富文本封装，并将文档 `Spec` 提升到 `4`。已有富文本封装在内容变为纯行级或空内容后仍保留，文档版本不降低。标准 Markdown 导出使用可读的内联投影；HTML、PDF 和 Word 导出仅在临时导出树中展开片段。加密笔记本在解析同一 JSON 之前，先认证现有文档加密封装；密钥派生、AAD 和恢复材料均不改变。
+读取器先校验源内容版本和内容，再重建投影。封装字段缺失、为 null、未知或格式错误时必须报错，不支持的输入必须保持原样。普通单元格没有此封装，因此不能将其中的文字重新解释为 Markdown。仅打开单元格或编辑普通行级内容时保留现有表示。首次添加块内容时创建富文本封装，并将文档 `Spec` 提升到 `4`。已有富文本封装在内容变为纯行级或空内容后仍保留，文档版本不降低。标准 Markdown 导出使用可读的内联投影；HTML、PDF 和 Word 导出仅在临时导出树中展开片段。加密笔记本在解析同一 JSON 之前，先认证现有文档加密封装；密钥派生、AAD 和恢复材料均不改变。
 
 ### 5.14 数据库块（AttributeView，叶子）
 
@@ -431,7 +431,7 @@ NodeList                        NodeList
 ```
 
 - **没有 Children**。
-- `AttributeViewID` 指向 AV 表数据，该数据存放在单独的 `.json` 中；**不要**凭空构造此 ID。
+- `AttributeViewID` 指向 AV 表数据，该数据保存在单独的 `.json` 中；**不要**凭空构造此 ID。
 - `AttributeViewType`：`table` / `kanban` / `gallery` 等。该值由载体绑定视图的布局派生，不是独立的视图选择器。
 - 可选的 `custom-sy-av-view` 记录当前视图 ID。缺失或未指向所引用 AttributeView 中的视图时，回退到 AttributeView 的当前视图或首个可用视图。
 
@@ -520,7 +520,7 @@ NodeList                        NodeList
 { "Type": "NodeKramdownSpanIAL", "Data": "{: style=\"color: var(--b3-font-color1); background-color: var(--b3-font-background1);\"}" }
 ```
 
-> AI 生成带样式的内联文本时，这两节点必须成对出现，否则 kramdown 往返会丢样式。
+> AI 生成带样式的内联文本时，这两节点必须成对出现，否则 kramdown 往返会导致样式丢失。
 
 ### 6.4 `NodeImage`（七段核心结构；可选标题增加两个节点）
 
@@ -641,7 +641,7 @@ NodeList                        NodeList
 4. ☐ 根据 `Type` 而不是 `ID` 判断块；不要为新内联或标记节点添加 ID，只能将历史非块 ID 作为字段规范化清理，不能删除节点本身
 5. ☐ 修改内容或结构时，刷新被修改块、其块级祖先、适用的前置标题以及文档根节点的 `updated`
 6. ☐ 列表通过 `ListData.Typ` 区分（`0` 或省略表示无序，`1` 表示有序，`3` 表示任务），`NodeList` 和每个 `NodeListItem` 都使用对应的 `Typ`
-7. ☐ `NodeList` 的直接子节点**只能**是 `NodeListItem`；嵌套列表应在列表项中再放一个 `NodeList`
+7. ☐ `NodeList` 的直接子节点**只能**是 `NodeListItem`；嵌套列表应在列表项中再创建一个 `NodeList`
 8. ☐ Go `byte` 字段（`BulletChar`、`Delimiter`、`TaskListItemMarker`）是 JSON 数字；Go `[]byte` 字段（`Marker`、围栏、信息）是 base64 字符串
 9. ☐ 任务标记使用 `TaskListItemMarker` 保存原始标记字节（`32` 表示空格，`88` 表示 `X`，其他非空格字节表示已勾选）；`TaskListItemChecked` 是兼容回退，`Data` 不是权威状态
 10. ☐ 代码块有四个结构子节点，数学块有三个，查询嵌入块有五个，超级块使用开始、布局、结束标记包裹至少一个内容块
@@ -649,7 +649,7 @@ NodeList                        NodeList
 12. ☐ 内容字符串保持原文；只有 `[]byte` 字段使用 base64
 13. ☐ 现代内联格式优先使用 `NodeTextMark`，而不是旧式 `NodeStrong` / `NodeEmphasis` / `NodeLink`
 14. ☐ 带样式的 `NodeTextMark` 后紧跟配对的 `NodeKramdownSpanIAL`
-15. ☐ HTML / IFrame / Widget / Video / Audio / AttributeView / CustomBlock 节点是没有 `Children` 的叶子；内容放在 `Data` 或类型专属字段中
+15. ☐ HTML / IFrame / Widget / Video / Audio / AttributeView / CustomBlock 节点是没有 `Children` 的叶子；内容写入 `Data` 或类型专属字段中
 16. ☐ 不要凭空构造 `AttributeViewID` 或块引用目标 ID；它们必须指向真实的属性视图或块
 17. ☐ 不要生成 `NodeGitConflict`、脚注、ToC、YAML、LinkRef、HeadingID 等禁用类型；兼容读取历史或外部数据时应容忍它们
 18. ☐ 编辑时保留已有的 U+200B 文本，但不要在内联元素周围统一合成零宽空格节点
@@ -670,10 +670,10 @@ NodeList                        NodeList
 | 带样式 `TextMark` 不配 IAL | 必须配 `NodeKramdownSpanIAL` |
 | 给 AttributeView、Widget 或 CustomBlock 节点添加 `Children` | 它们是叶子，应使用 `Data` 或类型专属字段 |
 | 改 `ID` 不同步 `Properties.id` | 二者必须一致 |
-| 只更新时间戳被直接编辑的块 | 还要刷新其块级祖先、适用的前置标题以及文档根节点 |
+| 只更新被直接编辑的块的时间戳 | 还要刷新其块级祖先、适用的前置标题以及文档根节点 |
 | `inline-math` 带 `TextMarkTextContent` | 它只有 `TextMarkInlineMathContent` |
 | 凭空构造块引用或属性视图的目标 ID | 目标必须真实存在 |
-| 把段落直接挂到 `NodeList` 下 | `NodeList` 只能含 `NodeListItem`，必须先包一层 |
+| 把段落直接作为 `NodeList` 的子节点 | `NodeList` 只能含 `NodeListItem`，必须先包一层 |
 | 在每个内联元素两侧都添加 U+200B 文本节点 | 保留已有 U+200B；由 Protyle 按上下文添加编辑器 DOM 光标占位符 |
 | 生成 `NodeGitConflict`、脚注、ToC、YAML 等节点 | 它们属于规范写入禁用类型；兼容读取器仍可能遇到历史或外部节点 |
 

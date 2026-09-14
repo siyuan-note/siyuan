@@ -34,7 +34,7 @@ On-demand assets, encrypted notebooks, pinned documents, tab blocks, and templat
 | Compatibility and recovery | Existing-data support, version rules, failure preservation, interruption recovery, and security boundaries |
 | Verification | Required checks for normal, error, concurrent, cross-platform, and existing-data scenarios |
 
-API contract maintenance, file formats, and workspace layout are maintenance specifications or reference manuals. Organize them by topic rather than imposing the feature design structure.
+API contract maintenance, file formats, and workspace layout are maintenance specifications or reference manuals. Therefore, organize them by topic rather than imposing the feature design structure.
 
 ## Style and formatting
 

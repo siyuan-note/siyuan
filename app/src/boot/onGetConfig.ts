@@ -157,6 +157,8 @@ export const onGetConfig = (isStart: boolean, app: App) => {
 
 export const initWindow = async (app: App) => {
     /// #if !BROWSER
+    // 主窗口和独立窗口都先同步本地化菜单，不依赖后续异步窗口状态查询。
+    syncAppMenuShortcuts();
     ipcRenderer.send(Constants.SIYUAN_CMD, {
         cmd: "setSpellCheckerLanguages",
         languages: window.siyuan.config.editor.spellcheckLanguages
@@ -447,7 +449,6 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
             }
         });
     }
-    syncAppMenuShortcuts();
     /// #else
     if (!isWindow()) {
         document.querySelector(".toolbar").classList.add("toolbar--browser");

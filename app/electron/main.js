@@ -922,25 +922,6 @@ const getAppWindow = () => {
     return BrowserWindow.getAllWindows().find(isInitializedAppWindow) || null;
 };
 
-const setNonDarwinApplicationMenu = () => {
-    const productName = "SiYuan";
-    const template = [{
-        label: productName, submenu: [{
-            label: `About ${productName}`, role: "about",
-        }, {type: "separator"}, {role: "services"}, {type: "separator"}, {
-            label: `Hide ${productName}`, role: "hide",
-        }, {role: "hideOthers"}, {role: "unhide"}, {type: "separator"}, {
-            label: `Quit ${productName}`, role: "quit",
-        },],
-    }, {
-        role: "editMenu", submenu: [{role: "cut"}, {role: "copy"}, {role: "paste"}, {role: "selectAll"}],
-    }, {
-        role: "windowMenu",
-        submenu: [{role: "minimize"}, {role: "zoom"}, {role: "togglefullscreen"}, {type: "separator"}, {role: "toggledevtools"}, {type: "separator"}, {role: "front"},],
-    },];
-    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
-};
-
 const applyMacAppMenu = (sync) => {
     if ("darwin" !== process.platform || !sync || !sync.i18n || typeof sync.i18n !== "object" ||
         !sync.hotkey || typeof sync.hotkey !== "object") {
@@ -1041,6 +1022,55 @@ const applyMacAppMenu = (sync) => {
         ],
     }];
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+};
+
+const setStartupApplicationMenu = () => {
+    // 启动阶段使用现有语言资源，工作空间就绪后再同步用户配置的语言和快捷键。
+    const language = resolveAppLanguage(getArg("--lang") ? [getArg("--lang")] : app.getPreferredSystemLanguages());
+    let languages = {};
+    try {
+        languages = JSON.parse(fs.readFileSync(path.join(appDir, "appearance", "langs", `${language}.json`), "utf8"));
+    } catch (error) {
+        writeLog("load startup menu language failed: " + error.message);
+    }
+    Menu.setApplicationMenu(Menu.buildFromTemplate([{
+        role: "appMenu",
+        label: "SiYuan",
+        submenu: [
+            {role: "about", label: languages.appMenuAbout},
+            {type: "separator"},
+            {role: "services", label: languages.appMenuServices},
+            {type: "separator"},
+            {role: "hide", label: languages.appMenuHide},
+            {role: "hideOthers", label: languages.appMenuHideOthers},
+            {role: "unhide", label: languages.showAll},
+            {type: "separator"},
+            {role: "quit", label: languages.appMenuQuit},
+        ],
+    }, {
+        role: "editMenu",
+        label: languages.edit,
+        submenu: [
+            ...["undo", "redo"].map(role => ({role, label: languages[role]})),
+            {type: "separator"},
+            ...["cut", "copy", "paste"].map(role => ({role, label: languages[role]})),
+            {role: "pasteAndMatchStyle", label: languages.pasteAsPlainText},
+            {type: "separator"},
+            {role: "selectAll", label: languages.selectAll},
+        ],
+    }, {
+        role: "windowMenu",
+        label: languages.appMenuWindow,
+        submenu: [
+            {role: "minimize", label: languages.appMenuMinimize},
+            {role: "zoom", label: languages.zoom},
+            {role: "togglefullscreen", label: languages.appMenuTogglefullscreen},
+            {type: "separator"},
+            {role: "toggledevtools", label: languages.debug},
+            {type: "separator"},
+            {role: "front", label: languages.appMenuBringAllToFront},
+        ],
+    }]));
 };
 
 const applyMacAppMenuForWindow = (wnd) => {
@@ -2201,7 +2231,7 @@ const initMainWindow = (kernel = kernelPort, remoteAuthenticated = true) => {
     });
 
     if ("darwin" !== process.platform) {
-        setNonDarwinApplicationMenu();
+        setStartupApplicationMenu();
     }
     // 当前页面链接使用浏览器打开
     windowNavigate(currentWindow, "app", kernelTarget.origin, kernelTarget.mode === "remote");
@@ -2822,11 +2852,8 @@ app.whenReady().then(() => {
             }
         }
     });
-    if ("darwin" === process.platform) {
-        Menu.setApplicationMenu(Menu.buildFromTemplate([{role: "appMenu"}]));
-    } else {
-        setNonDarwinApplicationMenu();
-    }
+    // 前端菜单同步完成前也保留原生编辑操作，避免复制、粘贴依赖界面初始化成功。
+    setStartupApplicationMenu();
     // 仅本进程启动的本地内核允许自签名证书，远程内核始终使用系统信任链。
     session.defaultSession.setCertificateVerifyProc((request, callback) => {
         const kernelMode = remoteKernelTarget ? "remote" : "local";

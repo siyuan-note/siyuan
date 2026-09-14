@@ -421,6 +421,32 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
+        } else if (type === "av-mobile-more" && !protyle.disabled) {
+            const menu = new Menu();
+            const entries: Array<{type: "filters" | "contextFilter" | "sorts" | "config", action: string, icon: string, label: string}> = [
+                {type: "filters", action: "av-filter", icon: "iconFilter", label: window.siyuan.languages.filter},
+                {type: "contextFilter", action: "av-context-filter", icon: "iconFocus", label: window.siyuan.languages.contextFilter},
+                {type: "sorts", action: "av-sort", icon: "iconSort", label: window.siyuan.languages.sort},
+                {type: "config", action: "av-more", icon: "iconSettings", label: window.siyuan.languages.config},
+            ];
+            entries.forEach(entry => {
+                const control = blockElement.querySelector(`[data-type="${entry.action}"]`);
+                if (!control) {
+                    return;
+                }
+                menu.addItem({
+                    icon: entry.icon,
+                    label: entry.label,
+                    checked: control.classList.contains("block__icon--active"),
+                    click() {
+                        openMenuPanel({protyle, blockElement, type: entry.type});
+                    }
+                });
+            });
+            menu.fullscreen();
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
         } else if (type === "av-more" && !protyle.disabled) {
             openMenuPanel({protyle, blockElement, type: "config"});
             event.preventDefault();
@@ -785,6 +811,14 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
+        } else if (type === "av-search-close") {
+            const searchElement = blockElement.querySelector<HTMLElement>('[data-type="av-search"]');
+            searchElement.textContent = "";
+            searchElement.blur();
+            searchElement.dispatchEvent(new Event("input", {bubbles: true}));
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
         } else if (type === "av-search-icon") {
             const searchElement = blockElement.querySelector('div[data-type="av-search"]') as HTMLInputElement;
             searchElement.style.width = "128px";
@@ -792,7 +826,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             searchElement.style.marginRight = "1em";
             const viewsElement = hasClosestByClassName(searchElement, "av__views");
             if (viewsElement) {
-                viewsElement.classList.add("av__views--show");
+                viewsElement.classList.add("av__views--show", "av__views--search");
             }
             if (window.JSAndroid && window.JSAndroid.showKeyboard || window.JSHarmony && window.JSHarmony.showKeyboard) {
                 callMobileAppShowKeyboard();

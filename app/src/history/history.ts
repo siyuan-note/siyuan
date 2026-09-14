@@ -440,7 +440,7 @@ const renderRepo = async (element: Element, currentPage: number) => {
         }
     } catch (error) {
         if (repoRequests.get(element) === request && element.isConnected) {
-            listElement.innerHTML = `<li class="b3-list--empty">${escapeHtml(String(error))}<br><button class="b3-button b3-button--outline" data-type="retryRepo">${window.siyuan.languages.retry}</button></li>`;
+            listElement.innerHTML = `<li class="b3-list--empty">${escapeHtml(String(error))}<div class="fn__hr"></div><button class="b3-button b3-button--outline" data-type="retryRepo">${window.siyuan.languages.retry}</button></li>`;
             updateRepoSelection(element);
         }
     } finally {

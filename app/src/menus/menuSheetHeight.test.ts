@@ -1,0 +1,69 @@
+import {readFileSync} from "node:fs";
+import {describe, it} from "node:test";
+import * as assert from "node:assert/strict";
+import {runInNewContext} from "node:vm";
+import {createSourceFile, isClassDeclaration, ModuleKind, ScriptTarget, transpileModule} from "typescript";
+import type {Menu} from "./Menu";
+
+const source = createSourceFile("Menu.ts", readFileSync("src/menus/Menu.ts", "utf8"), ScriptTarget.ES2021, true);
+const declaration = source.statements.find(statement => isClassDeclaration(statement) && statement.name?.text === "Menu");
+const compiled = transpileModule(declaration.getText(source), {
+    compilerOptions: {target: ScriptTarget.ES2021, module: ModuleKind.CommonJS},
+}).outputText;
+
+const setup = (options: {fit: boolean, contentHeight: number, viewportHeight: number}) => {
+    const classes = new Set<string>(["b3-menu--sheet"]);
+    if (options.fit) {
+        classes.add("b3-menu--fit");
+    }
+    const title = {getBoundingClientRect: () => ({height: 16})};
+    const items = {scrollHeight: options.contentHeight};
+    const element = {
+        style: {height: "100px"} as CSSStyleDeclaration,
+        firstElementChild: title,
+        lastElementChild: items,
+        classList: {
+            contains: (name: string) => classes.has(name),
+        },
+    };
+    const module = {exports: {} as {Menu: typeof Menu}};
+    runInNewContext(compiled, {
+        exports: module.exports,
+        window: {
+            innerHeight: options.viewportHeight,
+            siyuan: {mobile: {size: {portrait: {height1: options.viewportHeight}}}},
+        },
+    });
+    const menu = Object.create(module.exports.Menu.prototype) as Menu;
+    Object.assign(menu, {
+        element,
+        updateSheetTitle: () => {},
+    });
+    return {menu, element};
+};
+
+describe("mobile menu sheet content fit", () => {
+    it("keeps the standard sheet height when fitting is not requested", () => {
+        const {menu, element} = setup({fit: false, contentHeight: 272, viewportHeight: 2000});
+        menu.resetPosition();
+        assert.equal(element.style.height, "1120px");
+    });
+
+    it("shrinks the sheet to short content", () => {
+        const {menu, element} = setup({fit: true, contentHeight: 272, viewportHeight: 2000});
+        menu.resetPosition();
+        assert.equal(element.style.height, "288px");
+    });
+
+    it("caps fitted content at the standard sheet height", () => {
+        const {menu, element} = setup({fit: true, contentHeight: 2000, viewportHeight: 2000});
+        menu.resetPosition();
+        assert.equal(element.style.height, "1120px");
+    });
+
+    it("keeps a minimum height for empty content", () => {
+        const {menu, element} = setup({fit: true, contentHeight: 0, viewportHeight: 2000});
+        menu.resetPosition();
+        assert.equal(element.style.height, "160px");
+    });
+});

@@ -31,6 +31,10 @@ func resolveAppearanceFile(root, requestPath string) (string, int) {
 	if !ok {
 		return "", http.StatusForbidden
 	}
+	// 启动页目录映射到首页，首页仍需经过完整的路径和符号链接校验。
+	if relativePath == "boot" {
+		relativePath = filepath.Join(relativePath, "index.html")
+	}
 	root, err := filepath.Abs(root)
 	if err != nil {
 		return "", http.StatusInternalServerError

@@ -118,6 +118,21 @@
     * `msg`: 通常は空文字列、異常時にはエラーテキストが返される
     * `data`: インターフェースによって`{}`、`[]`、または`NULL`となる
 
+### TypeScript 型契約
+
+プラグインの `fetchPost`、`fetchSyncPost`、`fetchGet` の型宣言は、移行済み API パスのリクエスト型とレスポンス型を、生成されたカーネル契約から推論します。対象範囲は拡大中で、システムユーティリティ、ブロック属性の一括操作、タグとブックマークの操作、一部のブロッククエリ、ノートブック一覧、履歴検索、スナップショット操作を含みます。既存の型付けされていないエンドポイントと動的 URL も引き続きサポートされます。非同期呼び出しの成功データを読み取る前にレスポンスコードを確認し、null を許容するフィールドを明示的に処理してください。
+
+```typescript
+import {fetchSyncPost} from "siyuan";
+
+const response = await fetchSyncPost("/api/attr/getBlockAttrs", {id: blockID});
+if (response.code === 0 && response.data) {
+    const value = response.data["custom-value"];
+}
+```
+
+正確な対象範囲は[生成されたルート宣言](../app/src/types/api/index.d.ts)、生成と互換性のルールは[契約の保守ガイド](API-CONTRACTS.md)を参照してください。型宣言自体は実行時の JSON 検証を行いません。
+
 ### 動作セマンティクス
 
 * 本文書に個別のインターフェース説明があるものだけが公開 API です。その他のカーネルルートと `/api/transactions` の操作は内部実装であり、別途明記されていない限り、互換性や動作の安定性は保証されません
@@ -1316,12 +1331,15 @@
   ```json
   {
     "id": "20220724223548-j6g0o87",
-    "path": "F:\\SiYuan\\data\\templates\\foo.md"
+    "path": "F:\\SiYuan\\data\\templates\\foo.md",
+    "mode": "editorInsert"
   }
   ```
 
-    * `id`: レンダリングが呼び出されるドキュメントのID
+    * `id`: レンダリングが呼び出されるドキュメントの ID
     * `path`: テンプレートファイルの絶対パス
+    * `mode`: 任意のレンダリングモード。現在は `"preview"` と `"editorInsert"` のみをサポートします。プレビューモードではファイルを書き込まずにドキュメントツリーの計画を生成します。エディター挿入モードでは、確認後に対応するエディタートランザクションで適用できる計画を生成します
+    * `mode` を省略した場合、従来のブール値パラメータ `preview` も引き続きサポートされます。`preview: true` は `mode: "preview"` と同等です。それ以外の場合、テンプレートは通常のコンテンツとしてレンダリングされ、`createDocTree` は無効になります
 * 戻り値
 
   ```json
@@ -1330,10 +1348,41 @@
     "msg": "",
     "data": {
       "content": "<div data-node-id=\"20220729234848-dlgsah7\" data-node-index=\"1\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20220729234840\"><div contenteditable=\"true\" spellcheck=\"false\">foo</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>",
-      "path": "F:\\SiYuan\\data\\templates\\foo.md"
+      "path": "F:\\SiYuan\\data\\templates\\foo.md",
+      "docTreePlan": {
+        "id": "template-plan-token",
+        "count": 2,
+        "nodes": [
+          {
+            "id": "20260830150000-abc1234",
+            "title": "Materials",
+            "parentID": "20220724223548-j6g0o87",
+            "hPath": "/Parent/Materials",
+            "depth": 1
+          },
+          {
+            "id": "20260830150001-def5678",
+            "title": "Review",
+            "parentID": "20260830150000-abc1234",
+            "hPath": "/Parent/Materials/Review",
+            "depth": 2
+          }
+        ]
+      }
     }
   }
   ```
+
+    * `docTreePlan`: テンプレートが `createDocTree` で子ドキュメントツリーを宣言した場合に返されます
+        * `id`: プレビューモードでは空で、ファイルは書き込まれません。エディター挿入モードでは、有効期間が短い一度限りの計画トークンです。確認後、対応するトランザクションオブジェクトの最上位フィールド `templateDocTreePlanID` として送信します
+        * `count`: 計画に含まれる子ドキュメントの総数
+        * `nodes`: 計画されたドキュメントの静的な説明
+            * `id`: 計画されたドキュメントの ID
+            * `title`: 計画されたドキュメントのタイトル
+            * `parentID`: 計画された親ドキュメントの ID
+            * `hPath`: 計画されたドキュメントの可読パス
+            * `depth`: テンプレートを挿入するドキュメントからの相対的な深さ
+        * 単一の計画に含められるドキュメントは最大 128 件で、宣言する子ドキュメントツリーの深さは最大 16 階層です。最終的なファイルツリーの絶対的な深さは、7 階層を超える子ドキュメントの作成を許可する設定にも制限されます
 
 ### ドキュメントをテンプレートとして保存
 

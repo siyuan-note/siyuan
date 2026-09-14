@@ -148,7 +148,7 @@ JSON SSE 接口通过 `SSEOptions` 和 `SSEEvent` 声明各事件名称及载荷
 pnpm run api:generate --petal ../../petal
 pnpm run api:check --petal ../../petal
 pnpm run lint
-pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts src/util/contractFormData.test.ts src/config/systemConfig.test.ts src/util/keymapBindings.test.ts src/config/tabs/cloudUser.test.ts src/protyle/util/transactionContract.test.ts
+pnpm test
 ```
 
 上述生成命令同时更新本仓库与 `petal`，无须再单独执行不带 `--petal` 的生成命令。`--petal` 路径相对于生成器的工作目录 `kernel/`，示例对应同级仓库。CI 只检查本仓库产物，本地跨仓库同步须使用该参数核对插件声明。
@@ -156,11 +156,11 @@ pnpm exec tsx --test src/util/fetch.test.ts src/util/fetchTimeout.test.ts src/ut
 在 `kernel/` 下运行：
 
 ```text
-go test ./apicontract/...
-go test -tags "fts5 sqlcipher" ./model -run "TestMultipartUpload|TestInsertLocalAssets|TestRecordAssetUpload|TestReadRTFD|TestCopyRTFD|Test.*OIDC" -count=1
-go test -tags "fts5 sqlcipher" ./api ./plugin -run "Test.*Contract|TestPluginService|TestGetDynamicIcon|TestInsertLocalAssets|TestSetFileAnnotation|TestDeferredAsset|TestExportBrowserHTML|TestCopyExport|TestRepoFileWireCompatibility|TestRPCWebSocketOriginCheck|TestBlockAttrsRespectPublishAccess|TestGetBlockInfoRecovery|TestGetBlockInfoPublishAccess|TestListNotebooksSortsBySubDocCount|TestHTTPProxyResponseSecurityHeaders|TestEventSourceProxyResponseSecurityHeaders|TestForwardProxy|TestConfigureForwardProxy|TestAttributeViewLayoutRejectsReadonlyKernel|TestAttributeViewEditorEndpointsRejectReader|TestMutateViewStateByRoleAndReadonly" -count=1
+go test -tags "fts5 sqlcipher" ./... -count=1
 ```
 
 `tsconfig.api.json` 单独启用严格检查并检查声明文件，覆盖参数错误、字段拼写、必填请求体、成功与失败分支、可空值和方法不匹配。主应用继续沿用现有配置，不假定全部调用都启用了严格空值检查。处理函数测试使用临时工作区和独立测试进程，不启动或重启运行中的内核。
 
-Go 契约回归测试的名称应包含 `Contract`，以纳入 CI 的筛选范围；既有专用协议用例通过显式规则选择。新增前端契约调用方或模型兼容用例时，同步更新 CI 与上述命令，确保对应回归被执行。
+导入和静态文件测试数据使用 `internal/testutil.PublicDataDir` 创建并清理经过显式验证的非敏感目录，不依赖 `TMPDIR` 和 `GOTMPDIR`。该辅助函数依次尝试用户主目录、当前目录和文件系统根目录；若没有安全且可写的位置，则报告测试数据准备失败。CI 还会将 `TMPDIR` 设为 `/tmp`，并使用独立的 `GOTMPDIR` 重新运行受影响的路径测试，以覆盖环境变量覆盖的情况。
+
+CI 在 Linux 上运行所有内核包的测试，在 Windows 上运行所有前端、Electron 和打包脚本测试。前端测试发现范围限定为 `src/**/*.test.ts`、`tests/**/*.test.js`、`electron/**/*.test.js` 和 `scripts/**/*.test.js`，因此排除 `app/build` 下的打包副本。测试文件串行执行，以避免 Electron 进程启动争用。这些位置新增的回归测试会自动纳入；新增测试位置或文件命名约定时，须同步更新测试命令和本文档。Go 契约回归测试的名称应保留 `Contract`，以便单独运行。

@@ -667,7 +667,7 @@ NodeList                        NodeList
 | `ListData.Typ` 只接受 `1` | `0` 或省略表示无序，`1` 表示有序，`3` 表示任务 |
 | 把 `BulletChar` 当作 base64 | 它是 `byte`，在 JSON 中表现为 int 码点（`42` = `*`） |
 | 把 `"Data":"[X]"` 当作权威任务状态 | 使用数字 `TaskListItemMarker` 保存原始标记字节；`TaskListItemChecked` 是兼容回退 |
-| 带样式 TextMark 不配 IAL | 必须配 `NodeKramdownSpanIAL` |
+| 带样式 `TextMark` 不配 IAL | 必须配 `NodeKramdownSpanIAL` |
 | 给 AttributeView、Widget 或 CustomBlock 节点添加 `Children` | 它们是叶子，应使用 `Data` 或类型专属字段 |
 | 改 `ID` 不同步 `Properties.id` | 二者必须一致 |
 | 只更新时间戳被直接编辑的块 | 还要刷新其块级祖先、适用的前置标题以及文档根节点 |

@@ -421,32 +421,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-mobile-more" && !protyle.disabled) {
-            const menu = new Menu();
-            const entries: Array<{type: "filters" | "contextFilter" | "sorts" | "config", action: string, icon: string, label: string}> = [
-                {type: "filters", action: "av-filter", icon: "iconFilter", label: window.siyuan.languages.filter},
-                {type: "contextFilter", action: "av-context-filter", icon: "iconFocus", label: window.siyuan.languages.contextFilter},
-                {type: "sorts", action: "av-sort", icon: "iconSort", label: window.siyuan.languages.sort},
-                {type: "config", action: "av-more", icon: "iconSettings", label: window.siyuan.languages.config},
-            ];
-            entries.forEach(entry => {
-                const control = blockElement.querySelector(`[data-type="${entry.action}"]`);
-                if (!control) {
-                    return;
-                }
-                menu.addItem({
-                    icon: entry.icon,
-                    label: entry.label,
-                    checked: control.classList.contains("block__icon--active"),
-                    click() {
-                        openMenuPanel({protyle, blockElement, type: entry.type});
-                    }
-                });
-            });
-            menu.fullscreen();
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
         } else if (type === "av-more" && !protyle.disabled) {
             openMenuPanel({protyle, blockElement, type: "config"});
             event.preventDefault();

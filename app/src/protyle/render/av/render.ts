@@ -136,9 +136,6 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
                 <span class="fn__ellipsis">${escapeHtml(viewData?.name || data.name || "")}</span>
                 <svg><use xlink:href="#iconDown"></use></svg>
             </button>
-            <button data-type="av-mobile-more" class="block__icon block__icon--show av__mobile-more${hasFilter || data.view.sorts.length > 0 || getContextFilterKeyID(data.contextFilter) ? " block__icon--active" : ""}" aria-label="${window.siyuan.languages.more}">
-                <svg><use xlink:href="#iconMore"></use></svg>
-            </button>
             <button data-type="av-search-close" class="block__icon block__icon--show av__search-close" aria-label="${window.siyuan.languages.close}">
                 <svg><use xlink:href="#iconClose"></use></svg>
             </button>` : ""}

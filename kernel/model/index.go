@@ -384,7 +384,10 @@ func autoIndexEmbedBlock() {
 			continue
 		}
 
-		if !strings.Contains(strings.ToLower(stmt), "select") {
+		// 嵌入块脚本来自文档内容，属于不可信输入：执行前必须校验为单条只读查询，
+		// 不能用「是否包含 select 子串」代替，注释或子查询即可绕过
+		if err := sql.CheckReadonlyBlockQueryStatement(stmt, embedBlock.Box); nil != err {
+			logging.LogWarnf("skip non-readonly embed block [%s] script: %s", embedBlock.ID, err)
 			continue
 		}
 

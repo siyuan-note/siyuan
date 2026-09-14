@@ -19,11 +19,22 @@ import (
 	"testing"
 
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/siyuan/kernel/internal/testutil"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+// newObsidianTestDir 隔离工作空间，确保外部 Vault 夹具不依赖进程的当前目录。
+func newObsidianTestDir(t *testing.T) string {
+	t.Helper()
+	originalWorkspace := util.WorkspaceDir
+	util.WorkspaceDir = t.TempDir()
+	t.Cleanup(func() { util.WorkspaceDir = originalWorkspace })
+	return testutil.PublicDataDir(t)
+}
+
 func TestAnalyzeObsidianVault(t *testing.T) {
-	root := t.TempDir()
+	root := newObsidianTestDir(t)
 	if err := os.Mkdir(filepath.Join(root, ".obsidian"), 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +64,7 @@ func TestAnalyzeObsidianVault(t *testing.T) {
 }
 
 func TestRevalidateObsidianVaultDetectsAttachmentListChanges(t *testing.T) {
-	root := t.TempDir()
+	root := newObsidianTestDir(t)
 	if err := os.Mkdir(filepath.Join(root, ".obsidian"), 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +90,7 @@ func TestRevalidateObsidianVaultDetectsAttachmentListChanges(t *testing.T) {
 }
 
 func TestObsidianVaultValidationErrors(t *testing.T) {
-	notDirectory := filepath.Join(t.TempDir(), "vault.md")
+	notDirectory := filepath.Join(newObsidianTestDir(t), "vault.md")
 	if err := os.WriteFile(notDirectory, []byte("content"), 0644); err != nil {
 		t.Fatal(err)
 	}
@@ -87,12 +98,12 @@ func TestObsidianVaultValidationErrors(t *testing.T) {
 		t.Fatalf("unexpected non-directory error: %v", err)
 	}
 
-	missingConfig := t.TempDir()
+	missingConfig := newObsidianTestDir(t)
 	if _, err := validateObsidianVaultRoot(missingConfig); !errors.Is(err, errObsidianVaultConfigMissing) || obsidianVaultErrorLanguage(err) != 339 {
 		t.Fatalf("unexpected missing config error: %v", err)
 	}
 
-	missingMarkdown := t.TempDir()
+	missingMarkdown := newObsidianTestDir(t)
 	if err := os.Mkdir(filepath.Join(missingMarkdown, ".obsidian"), 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -103,7 +114,7 @@ func TestObsidianVaultValidationErrors(t *testing.T) {
 }
 
 func TestAnalyzeObsidianVaultReportsMarkdownEncodingPath(t *testing.T) {
-	root := t.TempDir()
+	root := newObsidianTestDir(t)
 	if err := os.Mkdir(filepath.Join(root, ".obsidian"), 0755); err != nil {
 		t.Fatal(err)
 	}
@@ -303,7 +314,7 @@ func TestResolveObsidianSubdirectoryPaths(t *testing.T) {
 }
 
 func TestImportObsidianRelativeSubdirectoryLinks(t *testing.T) {
-	root := t.TempDir()
+	root := newObsidianTestDir(t)
 	source := "![[Note-assets/image.png]]\n\n[[Sub/Target]]\n\n![[Sub/Target]]\n\n![image](Note-assets/image.png)\n\n[Target](Sub/Target.md)\n"
 	for name, content := range map[string]string{
 		"Folder/Current.md":            source,
@@ -587,7 +598,7 @@ func TestParseObsidianCalloutAndCustomTaskMarker(t *testing.T) {
 }
 
 func TestStartObsidianVaultAnalysisReplacesPreImportTask(t *testing.T) {
-	root := t.TempDir()
+	root := newObsidianTestDir(t)
 	if err := os.Mkdir(filepath.Join(root, ".obsidian"), 0755); err != nil {
 		t.Fatal(err)
 	}

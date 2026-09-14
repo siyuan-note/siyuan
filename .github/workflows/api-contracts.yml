@@ -42,8 +42,12 @@ jobs:
       - name: Test all kernel packages
         run: go test -tags "fts5 sqlcipher" ./... -count=1
         working-directory: kernel
+      - name: Test path fixtures with custom temporary directories
+        run: go test -tags "fts5 sqlcipher" ./internal/testutil ./util ./model ./server -run 'Test(PublicDataDir|IsSensitivePath|.*Obsidian|RegisterStaticFileHandlers|StaticFile|WidgetResponseCacheControl|TemplatesAndExportRequireAdministrator|SnippetPublishAccess|PluginPublishAccess)' -count=1
+        working-directory: kernel
         env:
-          TMPDIR: ${{ runner.temp }}
+          TMPDIR: /tmp
+          GOTMPDIR: ${{ runner.temp }}
 
   frontend-tests:
     runs-on: windows-latest

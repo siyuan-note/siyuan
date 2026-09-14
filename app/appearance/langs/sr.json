@@ -2820,6 +2820,7 @@
 		"393": "Šifrovane beležnice ne podržavaju ovu radnju",
 		"394": "Šifrovane beležnice ne podržavaju objavljivanje, pa pristup za objavljivanje ne može da se podesi",
 		"395": "Grupni izvoz ne podržava šifrovane beležnice; otključajte ih i izvezite jednu po jednu, ili izvezite obične beležnice",
-		"396": "Šifrovane beležnice ne podržavaju kačenje dokumenata"
+		"396": "Šifrovane beležnice ne podržavaju kačenje dokumenata",
+		"397": "Овај уређај не може да направи синхронизовану датотеку. Преименујте је у SiYuan на уређају на ком је доступна, па поново синхронизујте: %s"
 	}
 }

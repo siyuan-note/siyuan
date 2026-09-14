@@ -2820,6 +2820,7 @@
 		"393": "Buku catatan terenkripsi tidak mendukung operasi ini",
 		"394": "Buku catatan terenkripsi tidak mendukung publikasi, izin publikasi tidak dapat dikonfigurasi",
 		"395": "Ekspor massal tidak mendukung buku catatan terenkripsi, buka kuncinya lalu ekspor satu per satu, atau ekspor buku catatan biasa",
-		"396": "Buku catatan terenkripsi tidak mendukung penyematan dokumen"
+		"396": "Buku catatan terenkripsi tidak mendukung penyematan dokumen",
+		"397": "Perangkat ini tidak dapat membuat berkas yang disinkronkan. Ubah namanya di SiYuan pada perangkat yang dapat mengaksesnya, lalu sinkronkan kembali: %s"
 	}
 }

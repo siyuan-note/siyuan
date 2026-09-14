@@ -28,6 +28,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/88250/gulu"
@@ -408,7 +409,17 @@ func FilterFileName(name string) string {
 	name = strings.ReplaceAll(name, "<", "_")
 	name = strings.ReplaceAll(name, ">", "_")
 	name = strings.ReplaceAll(name, "|", "_")
-	name = RemoveInvalid(name) // Remove invisible characters from file names when uploading assets https://github.com/siyuan-note/siyuan/issues/11683
+	// 文件名保留私用区字符，移除不可打印字符，并替换损坏编码。
+	name = gulu.Str.RemoveZeroWidthCharacters(strings.ReplaceAll(name, "\u00a0", " "))
+	name = strings.Map(func(r rune) rune {
+		if r == utf8.RuneError {
+			return '_'
+		}
+		if unicode.IsPrint(r) || unicode.Is(unicode.Co, r) {
+			return r
+		}
+		return -1
+	}, name)
 	name = strings.TrimSpace(name)
 	name = strings.TrimSuffix(name, ".")
 	return name

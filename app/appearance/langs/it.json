@@ -2820,6 +2820,7 @@
 		"393": "I quaderni crittografati non supportano questa operazione",
 		"394": "I quaderni crittografati non supportano la pubblicazione, non è possibile configurare i permessi di pubblicazione",
 		"395": "L’esportazione in blocco non supporta i quaderni crittografati, sbloccali ed esportali uno alla volta, oppure esporta quaderni normali",
-		"396": "I quaderni crittografati non supportano il fissaggio dei documenti"
+		"396": "I quaderni crittografati non supportano il fissaggio dei documenti",
+		"397": "Questo dispositivo non può creare il file sincronizzato. Rinominalo in SiYuan su un dispositivo da cui è accessibile, quindi sincronizza di nuovo: %s"
 	}
 }

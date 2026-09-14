@@ -2820,6 +2820,7 @@
 		"393": "Şifrelenmiş not defterleri bu işlemi desteklemez",
 		"394": "Şifrelenmiş not defterleri yayımlamayı desteklemez, yayımlama izinleri yapılandırılamaz",
 		"395": "Toplu dışa aktarma şifrelenmiş not defterlerini desteklemez; kilitlerini açıp tek tek dışa aktarın veya normal not defterlerini dışa aktarın",
-		"396": "Şifrelenmiş not defterleri belgeleri sabitlemeyi desteklemez"
+		"396": "Şifrelenmiş not defterleri belgeleri sabitlemeyi desteklemez",
+		"397": "Bu cihaz eşitlenen dosyayı oluşturamıyor. Dosyaya erişilebilen bir cihazda SiYuan üzerinden dosyayı yeniden adlandırıp tekrar eşitleyin: %s"
 	}
 }

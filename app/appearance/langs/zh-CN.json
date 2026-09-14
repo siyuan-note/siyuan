@@ -1,6 +1,6 @@
 {
 	"embedHeadingLevel": "嵌入标题层级",
-	"embedHeadingLevelAuto": "自动",
+	"embedHeadingLevelPreserve": "保持原层级",
 	"originalToRef": "定义块转为引用",
 	"originalToEmbed": "定义块转为嵌入块",
 	"mobileFileTreeMultiSelectTip": "轻点文档或笔记本以选中或取消选中",

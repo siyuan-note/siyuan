@@ -1,6 +1,6 @@
 {
 	"embedHeadingLevel": "Niveau van ingesloten koppen",
-	"embedHeadingLevelAuto": "Automatisch",
+	"embedHeadingLevelPreserve": "Oorspronkelijke niveaus behouden",
 	"originalToRef": "Origineel omzetten naar blokverwijzing",
 	"originalToEmbed": "Origineel omzetten naar ingesloten blok",
 	"mobileFileTreeMultiSelectTip": "Tik op documenten of notitieboeken om ze te selecteren of te deselecteren",

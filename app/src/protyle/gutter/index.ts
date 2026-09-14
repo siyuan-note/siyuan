@@ -2646,7 +2646,7 @@ export class Gutter {
                     ignore: !isHeadingEmbed(nodeElement),
                     submenu: [0, 1, 2, 3, 4, 5, 6].map(level => ({
                         id: level === 0 ? "auto" : `heading${level}`,
-                        label: level === 0 ? window.siyuan.languages.embedHeadingLevelAuto : window.siyuan.languages[`heading${level}`],
+                        label: level === 0 ? window.siyuan.languages.embedHeadingLevelPreserve : window.siyuan.languages[`heading${level}`],
                         iconHTML: "",
                         checked: getEmbedHeadingLevel(nodeElement.getAttribute("custom-heading-level")) === level,
                         click() {

@@ -36,7 +36,7 @@ func TestEmbedHeadingLevels(t *testing.T) {
 		{"heading only", 1, 5, "##### A"},
 		{"visible children", 2, 2, "## B\n\n#### C"},
 		{"overflow", 2, 5, "##### B\n\n**C**"},
-		{"automatic", 0, 0, "## A\n\n### B\n\n##### C"},
+		{"preserve original", 0, 0, "## A\n\n### B\n\n##### C"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			engine := lute.New()

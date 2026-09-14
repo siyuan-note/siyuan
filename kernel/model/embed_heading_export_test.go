@@ -77,24 +77,48 @@ func TestExportExplicitEmbedHeadingLevels(t *testing.T) {
 	sql.IndexTreeQueue(tree)
 	sql.FlushQueue()
 	for _, mode := range []int{0, 1} {
-		t.Run([]string{"original", "blockquote"}[mode], func(t *testing.T) {
-			root := &ast.Node{Type: ast.NodeDocument}
-			embed := &ast.Node{Type: ast.NodeBlockQueryEmbed, ID: ast.NewNodeID()}
-			embed.SetIALAttr("custom-heading-mode", "2")
-			embed.SetIALAttr(embedHeadingLevelAttr, "5")
-			embed.AppendChild(&ast.Node{Type: ast.NodeBlockQueryEmbedScript, Tokens: []byte("select * from blocks where id='" + headingID + "'")})
-			root.AppendChild(embed)
-			depth := 0
-			engine := lute.New()
-			resolveEmbedR(root, mode, engine, &[]string{}, &depth)
-			md, _ := lute.FormatNodeSync(root, engine.ParseOptions, engine.RenderOptions)
-			if !strings.Contains(md, "##### B") || !strings.Contains(md, "**C**") || strings.Contains(md, " A") {
-				t.Fatalf("unexpected export: %s", md)
-			}
-			if (mode == 1) != (root.FirstChild.Type == ast.NodeBlockquote) {
-				t.Fatalf("unexpected export container: %s", md)
-			}
-		})
+		for _, setting := range []struct {
+			name        string
+			level       string
+			headingMode string
+			want        []string
+		}{
+			{"explicit", "5", "2", []string{"##### B", "**C**"}},
+			{"preserve children", "", "2", []string{"### B", "##### C"}},
+			{"preserve all", "", "0", []string{"## A", "### B", "##### C"}},
+			{"preserve title", "", "1", []string{"## A"}},
+			{"invalid preserves", "invalid", "2", []string{"### B", "##### C"}},
+		} {
+			t.Run([]string{"original", "blockquote"}[mode]+"/"+setting.name, func(t *testing.T) {
+				root := &ast.Node{Type: ast.NodeDocument}
+				parentHeading := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 6}
+				parentHeading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("Host")})
+				root.AppendChild(parentHeading)
+				embed := &ast.Node{Type: ast.NodeBlockQueryEmbed, ID: ast.NewNodeID()}
+				embed.SetIALAttr("custom-heading-mode", setting.headingMode)
+				if setting.level != "" {
+					embed.SetIALAttr(embedHeadingLevelAttr, setting.level)
+				}
+				embed.AppendChild(&ast.Node{Type: ast.NodeBlockQueryEmbedScript, Tokens: []byte("select * from blocks where id='" + headingID + "'")})
+				root.AppendChild(embed)
+				depth := 0
+				engine := lute.New()
+				resolveEmbedR(root, mode, engine, &[]string{}, &depth)
+				md, _ := lute.FormatNodeSync(root, engine.ParseOptions, engine.RenderOptions)
+				normalized := "\n" + strings.ReplaceAll(md, "> ", "") + "\n"
+				for _, want := range setting.want {
+					if !strings.Contains(normalized, "\n"+want+"\n") {
+						t.Fatalf("unexpected export: %s", md)
+					}
+				}
+				if setting.headingMode == "2" && strings.Contains(md, " A") {
+					t.Fatalf("hidden heading exported: %s", md)
+				}
+				if (mode == 1) != (root.LastChild.Type == ast.NodeBlockquote) {
+					t.Fatalf("unexpected export container: %s", md)
+				}
+			})
+		}
 	}
 	loaded, err := LoadTreeByBlockID(headingID)
 	if err != nil || treenode.GetNodeInTree(loaded, headingID).HeadingLevel != 2 {

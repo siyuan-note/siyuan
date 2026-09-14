@@ -1,6 +1,6 @@
 {
 	"embedHeadingLevel": "Tingkat judul tersemat",
-	"embedHeadingLevelAuto": "Otomatis",
+	"embedHeadingLevelPreserve": "Pertahankan tingkat asli",
 	"originalToRef": "Ubah blok asli menjadi referensi blok",
 	"originalToEmbed": "Ubah blok asli menjadi blok sematan",
 	"mobileFileTreeMultiSelectTip": "Ketuk dokumen atau buku catatan untuk memilih atau membatalkan pilihan",

@@ -1,6 +1,6 @@
 {
 	"embedHeadingLevel": "Livello dei titoli incorporati",
-	"embedHeadingLevelAuto": "Automatico",
+	"embedHeadingLevelPreserve": "Mantieni i livelli originali",
 	"originalToRef": "Converti il blocco originale in riferimento a blocco",
 	"originalToEmbed": "Converti il blocco originale in blocco incorporato",
 	"mobileFileTreeMultiSelectTip": "Tocca i documenti o i quaderni per selezionarli o deselezionarli",

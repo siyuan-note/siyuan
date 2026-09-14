@@ -1,6 +1,6 @@
 {
 	"embedHeadingLevel": "Überschriftenebene des eingebetteten Blocks",
-	"embedHeadingLevelAuto": "Automatisch",
+	"embedHeadingLevelPreserve": "Ursprüngliche Ebene beibehalten",
 	"originalToRef": "Original in Blockreferenz umwandeln",
 	"originalToEmbed": "Original in eingebetteten Block umwandeln",
 	"mobileFileTreeMultiSelectTip": "Tippe auf Dokumente oder Notizbücher, um sie auszuwählen oder die Auswahl aufzuheben",

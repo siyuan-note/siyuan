@@ -1,6 +1,6 @@
 {
 	"embedHeadingLevel": "Nivel de los encabezados incrustados",
-	"embedHeadingLevelAuto": "Automático",
+	"embedHeadingLevelPreserve": "Mantener los niveles originales",
 	"originalToRef": "Convertir el original en referencia a bloque",
 	"originalToEmbed": "Convertir el original en bloque incrustado",
 	"mobileFileTreeMultiSelectTip": "Toca los documentos o cuadernos para seleccionarlos o deseleccionarlos",

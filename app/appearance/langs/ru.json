@@ -1,6 +1,6 @@
 {
 	"embedHeadingLevel": "Уровень встроенных заголовков",
-	"embedHeadingLevelAuto": "Автоматически",
+	"embedHeadingLevelPreserve": "Сохранять исходные уровни",
 	"originalToRef": "Преобразовать исходный блок в ссылку на блок",
 	"originalToEmbed": "Преобразовать исходный блок во встроенный блок",
 	"mobileFileTreeMultiSelectTip": "Нажимайте на документы или блокноты, чтобы выделить их или снять выделение",

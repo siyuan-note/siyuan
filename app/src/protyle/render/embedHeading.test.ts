@@ -14,7 +14,7 @@ test("only direct heading embeds enable heading level selection", () => {
     assert.equal(isDirectHeadingEmbed(`//!js\nreturn ["${id}"];`, id, "NodeHeading"), false);
 });
 
-test("visible headings retain level gaps and automatic restores source levels", () => {
+test("visible headings retain level gaps and the default preserves source levels", () => {
     assert.deepEqual(getEmbedHeadingLevels([3, 5], 2), [2, 4]);
     assert.deepEqual(getEmbedHeadingLevels([5, 3, 6], 2), [4, 2, 5]);
     assert.deepEqual(getEmbedHeadingLevels([3, 5], 5), [5, 7]);

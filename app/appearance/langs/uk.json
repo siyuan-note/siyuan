@@ -1,6 +1,6 @@
 {
 	"embedHeadingLevel": "Рівень вбудованих заголовків",
-	"embedHeadingLevelAuto": "Автоматично",
+	"embedHeadingLevelPreserve": "Зберігати початкові рівні",
 	"originalToRef": "Перетворити початковий блок на посилання на блок",
 	"originalToEmbed": "Перетворити початковий блок на вбудований блок",
 	"mobileFileTreeMultiSelectTip": "Торкайтеся документів або блокнотів, щоб вибрати їх або скасувати вибір",

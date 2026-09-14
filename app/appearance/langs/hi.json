@@ -1,6 +1,6 @@
 {
 	"embedHeadingLevel": "एम्बेड किए गए शीर्षकों का स्तर",
-	"embedHeadingLevelAuto": "स्वचालित",
+	"embedHeadingLevelPreserve": "मूल स्तर बनाए रखें",
 	"originalToRef": "मूल ब्लॉक को ब्लॉक संदर्भ में बदलें",
 	"originalToEmbed": "मूल ब्लॉक को एम्बेड ब्लॉक में बदलें",
 	"mobileFileTreeMultiSelectTip": "दस्तावेज़ या नोटबुक चुनने या उनका चयन हटाने के लिए उन पर टैप करें",

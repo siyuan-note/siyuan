@@ -1,6 +1,6 @@
 {
 	"embedHeadingLevel": "Úroveň vložených nadpisov",
-	"embedHeadingLevelAuto": "Automaticky",
+	"embedHeadingLevelPreserve": "Zachovať pôvodné úrovne",
 	"originalToRef": "Previesť pôvodný blok na odkaz na blok",
 	"originalToEmbed": "Previesť pôvodný blok na vložený blok",
 	"mobileFileTreeMultiSelectTip": "Ťuknutím na dokumenty alebo zápisníky ich vyberiete alebo zrušíte ich výber",

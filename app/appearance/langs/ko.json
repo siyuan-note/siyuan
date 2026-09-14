@@ -1,6 +1,6 @@
 {
 	"embedHeadingLevel": "임베드된 제목 수준",
-	"embedHeadingLevelAuto": "자동",
+	"embedHeadingLevelPreserve": "원래 제목 수준 유지",
 	"originalToRef": "원본 정의 블록을 블록 참조로 변환",
 	"originalToEmbed": "원본 정의 블록을 임베드 블록으로 변환",
 	"mobileFileTreeMultiSelectTip": "문서나 노트북을 탭하여 선택하거나 선택 해제하세요",

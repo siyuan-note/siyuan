@@ -14,11 +14,6 @@
   overflow: inherit;
   user-select: none;
 
-  &:focus-visible {
-    outline: 2px solid var(--b3-theme-primary);
-    outline-offset: 2px;
-  }
-
   &--side {
     margin-right: 14px;
     margin-left: 14px;

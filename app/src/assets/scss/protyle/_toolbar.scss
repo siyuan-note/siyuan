@@ -21,6 +21,10 @@
       white-space: nowrap;
       padding: 1px 6px;
 
+      &:focus {
+        outline: none;
+      }
+
       svg {
         fill: currentColor;
         display: inline-block;

@@ -69,11 +69,6 @@
       color: var(--b3-theme-on-background);
     }
 
-    &:focus-visible {
-      outline: 2px solid var(--b3-theme-primary);
-      outline-offset: -2px;
-    }
-
     &[aria-selected="true"] {
       color: var(--b3-theme-on-background);
       background: var(--b3-theme-primary-lightest);

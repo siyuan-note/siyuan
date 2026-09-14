@@ -80,6 +80,10 @@
           background-color: var(--b3-theme-surface);
         }
 
+        &:focus {
+          outline: none;
+        }
+
         svg {
           fill: currentColor;
           height: 15px;

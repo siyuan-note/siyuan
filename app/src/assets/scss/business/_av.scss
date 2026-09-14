@@ -1835,8 +1835,7 @@
         box-sizing: border-box;
         overflow: hidden;
 
-        &:hover,
-        &:focus-visible {
+        &:hover {
           background-color: var(--b3-list-hover);
         }
 
@@ -1963,8 +1962,7 @@
         text-align: left;
         cursor: pointer;
 
-        &:hover,
-        &:focus-visible {
+        &:hover {
           background-color: var(--b3-list-hover);
         }
       }
@@ -2442,8 +2440,7 @@ img.av__cellassetimg {
     padding: 5px;
     width: 26px;
 
-    &:hover,
-    &:focus-visible {
+    &:hover {
       background-color: var(--b3-list-hover);
       opacity: 1;
     }

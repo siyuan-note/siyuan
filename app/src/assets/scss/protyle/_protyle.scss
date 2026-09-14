@@ -356,15 +356,9 @@
       padding: 5px;
       width: 24px;
 
-      &:hover,
-      &:focus-visible {
+      &:hover {
         background-color: var(--b3-list-hover);
         color: var(--b3-theme-on-background);
-      }
-
-      &:focus-visible {
-        outline: 1px solid var(--b3-theme-primary);
-        outline-offset: 0;
       }
 
       svg {
@@ -418,15 +412,9 @@
     }
 
     &:hover,
-    &:focus-visible,
     &--active {
       color: var(--b3-theme-on-background);
       background-color: var(--b3-list-hover);
-    }
-
-    &:focus-visible {
-      outline: 1px solid var(--b3-theme-primary);
-      outline-offset: 0;
     }
   }
 }
@@ -588,11 +576,6 @@
     &:hover {
       background-color: var(--b3-list-hover);
       color: var(--b3-theme-on-background);
-    }
-
-    &:focus-visible {
-      outline: 1px solid var(--b3-theme-primary);
-      outline-offset: -1px;
     }
 
     svg {
@@ -1195,8 +1178,7 @@ table + .protyle-action__table {
       transition: opacity 150ms linear;
     }
 
-    &:hover,
-    &:focus-visible {
+    &:hover {
       &::before {
         opacity: 0;
       }

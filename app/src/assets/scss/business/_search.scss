@@ -54,12 +54,6 @@
       padding: 5px 8px 5px 44px !important;
       box-shadow: none;
       width: 100%;
-
-      &:focus {
-        outline: 1px solid var(--b3-theme-primary-light);
-        outline-offset: -1px;
-        box-shadow: 0 0 0 .6px var(--b3-theme-primary-lighter);
-      }
     }
 
     .b3-form__icon-icon {

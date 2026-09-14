@@ -402,7 +402,7 @@
     height: 14px;
   }
 
-  &:hover, &:focus-visible {
+  &:hover {
     background: var(--b3-list-hover);
   }
 }
@@ -1025,7 +1025,7 @@
   cursor: pointer;
   transition: var(--b3-transition);
 
-  &:hover, &:focus-visible {
+  &:hover {
     background: var(--b3-theme-surface-light);
   }
 

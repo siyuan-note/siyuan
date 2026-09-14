@@ -1,4 +1,5 @@
 {
+	"quickMakeCardEmpty": "没有可用于快速制卡的内容",
 	"flashcardWaitingDue": "下一张学习卡片将在 ${time} 后到期",
 	"flashcardFinishSession": "结束复习",
 	"flashcardAnswerMaxDistance": "答案最大编辑距离",

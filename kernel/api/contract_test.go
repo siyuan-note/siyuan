@@ -158,6 +158,24 @@ func TestAPIContractHandlers(t *testing.T) {
 		return response
 	}
 	admin := model.RoleAdministrator
+	quickInvalid := request("POST", "/api/flashcard/createQuickSources", "{", admin, createQuickFlashcardSources)
+	if quickInvalid["code"] != float64(-1) || quickInvalid["data"] != nil ||
+		quickInvalid["msg"] != "invalid flashcard request: unexpected EOF" {
+		t.Fatalf("quick flashcard decode response changed: %+v", quickInvalid)
+	}
+	quickDenied := request("POST", "/api/flashcard/createQuickSources", "{", model.RoleReader,
+		model.CheckReadonly, createQuickFlashcardSources)
+	if quickDenied["code"] != float64(-1) || quickDenied["msg"] == quickInvalid["msg"] {
+		t.Fatalf("quick flashcard admission must precede decoding: %+v", quickDenied)
+	}
+	quickEngine := gin.New()
+	quickEngine.Use(func(c *gin.Context) { c.Set(model.RoleContextKey, model.RoleReader); c.Next() })
+	quickEngine.POST("/api/flashcard/createQuickSources", model.CheckAdminRole, model.CheckReadonly, createQuickFlashcardSources)
+	quickRecorder := httptest.NewRecorder()
+	quickEngine.ServeHTTP(quickRecorder, httptest.NewRequest("POST", "/api/flashcard/createQuickSources", strings.NewReader("{")))
+	if quickRecorder.Code != 403 || quickRecorder.Body.Len() != 0 {
+		t.Fatalf("quick flashcard administrator admission changed: %d %s", quickRecorder.Code, quickRecorder.Body.String())
+	}
 	testSQLContractQueries(t)
 	testGraphResetContracts(t)
 	testGraphQueryContracts(t, docID)

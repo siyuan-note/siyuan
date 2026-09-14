@@ -786,6 +786,21 @@ func CreateFlashcardV2QuickSources(ctx context.Context,
 	if err != nil {
 		return flashcardv2.QuickSourceResult{}, err
 	}
+	if strings.TrimSpace(request.OperationID) == "" || len(request.BlockIDs) == 0 || request.CreatedAt <= 0 {
+		return flashcardv2.QuickSourceResult{}, errors.New("quick flashcard operation, blocks and time are required")
+	}
+	empty, err := emptyQuickFlashcardBlocks(request.BlockIDs)
+	if err != nil {
+		return flashcardv2.QuickSourceResult{}, err
+	}
+	request.BlockIDs, err = store.FilterQuickSourceBlocks(ctx, request.BlockIDs, empty, request.Toggle)
+	if err != nil {
+		return flashcardv2.QuickSourceResult{}, err
+	}
+	if len(request.BlockIDs) == 0 {
+		return flashcardv2.QuickSourceResult{SourceIDs: []string{}, CardIDs: []string{},
+			Action: flashcardv2.QuickSourceActionCreated}, nil
+	}
 	request.BlockMetadata = flashcardV2CreationMetadata(request.BlockIDs)
 	if request.Toggle {
 		return store.ToggleQuickSources(ctx, request)

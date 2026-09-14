@@ -1,4 +1,5 @@
 {
+	"quickMakeCardEmpty": "Nie je k dispozícii žiadny obsah na rýchle vytvorenie kartičiek",
 	"flashcardWaitingDue": "Ďalšia karta na učenie o ${time}",
 	"flashcardFinishSession": "Ukončiť reláciu",
 	"flashcardAnswerMaxDistance": "Maximálna editačná vzdialenosť odpovede",

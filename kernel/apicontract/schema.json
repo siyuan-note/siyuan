@@ -19366,6 +19366,49 @@
       ],
       "additionalProperties": false
     },
+    "CreateQuickFlashcardSourcesRequestInput": {
+      "type": "object",
+      "properties": {
+        "blockIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "integer"
+        },
+        "defaultPresetID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "operationID": {
+          "type": "string"
+        },
+        "toggle": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "blockIDs",
+        "createdAt",
+        "operationID"
+      ],
+      "additionalProperties": false
+    },
     "CreateRiffDeckRequestInput": {
       "type": "object",
       "properties": {
@@ -32090,6 +32133,36 @@
           "type": "string"
         }
       },
+      "additionalProperties": false
+    },
+    "QuickFlashcardSourcesData": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "created",
+            "removed"
+          ]
+        },
+        "cardIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sourceIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "action",
+        "cardIDs",
+        "sourceIDs"
+      ],
       "additionalProperties": false
     },
     "ReadDirectoryRequestInput": {
@@ -131825,6 +131898,81 @@
               },
               "data": {
                 "type": "null"
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  -1
+                ]
+              },
+              "data": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "closeTimeout": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "closeTimeout"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "msg": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "msg",
+              "data"
+            ],
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/flashcard/createQuickSources",
+      "handler": "createQuickFlashcardSources",
+      "body": "structJSON",
+      "request": {
+        "$ref": "#/$defs/CreateQuickFlashcardSourcesRequestInput"
+      },
+      "response": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "integer",
+                "enum": [
+                  0
+                ]
+              },
+              "data": {
+                "$ref": "#/$defs/QuickFlashcardSourcesData"
               },
               "msg": {
                 "type": "string"

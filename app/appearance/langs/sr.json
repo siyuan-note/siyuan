@@ -1,4 +1,5 @@
 {
+	"quickMakeCardEmpty": "Нема доступног садржаја за брзо прављење картица",
 	"flashcardWaitingDue": "Следећа картица за учење за ${time}",
 	"flashcardFinishSession": "Заврши сесију",
 	"flashcardAnswerMaxDistance": "Највећа удаљеност измена одговора",

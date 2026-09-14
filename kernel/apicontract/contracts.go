@@ -75,6 +75,9 @@ type ResponseOptions struct {
 
 var definitions []Definition
 
+var CreateQuickFlashcardSources = define[CreateQuickFlashcardSourcesRequest, QuickFlashcardSourcesData](
+	"createQuickFlashcardSources", "/api/flashcard/createQuickSources", StructJSONBody, ResponseOptions{}, "POST")
+
 var (
 	GetChildBlocks     = define[BlockQueryRequest, []*ChildBlock]("getChildBlocks", "/api/block/getChildBlocks", JSONBody, ResponseOptions{NonNullable: true}, "POST")
 	GetTailChildBlocks = define[TailChildBlocksRequest, []*ChildBlock]("getTailChildBlocks", "/api/block/getTailChildBlocks", JSONBody, ResponseOptions{NonNullable: true}, "POST")

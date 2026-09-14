@@ -1,4 +1,5 @@
 {
+	"quickMakeCardEmpty": "빠른 카드를 만들 수 있는 내용이 없습니다",
 	"flashcardWaitingDue": "다음 학습 카드까지 ${time}",
 	"flashcardFinishSession": "복습 종료",
 	"flashcardAnswerMaxDistance": "답변의 최대 편집 거리",

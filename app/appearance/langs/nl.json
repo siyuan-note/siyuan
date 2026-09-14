@@ -1,4 +1,5 @@
 {
+	"quickMakeCardEmpty": "Geen inhoud beschikbaar om snel kaarten te maken",
 	"flashcardWaitingDue": "Volgende leerkaart over ${time}",
 	"flashcardFinishSession": "Sessie beëindigen",
 	"flashcardAnswerMaxDistance": "Maximale bewerkingsafstand van het antwoord",

@@ -1,4 +1,5 @@
 {
+	"quickMakeCardEmpty": "Немає вмісту для швидкого створення карток",
 	"flashcardWaitingDue": "Наступна навчальна картка через ${time}",
 	"flashcardFinishSession": "Завершити сеанс",
 	"flashcardAnswerMaxDistance": "Максимальна відстань редагування відповіді",

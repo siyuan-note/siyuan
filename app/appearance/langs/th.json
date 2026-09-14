@@ -1,4 +1,5 @@
 {
+	"quickMakeCardEmpty": "ไม่มีเนื้อหาสำหรับสร้างแฟลชการ์ดด่วน",
 	"flashcardWaitingDue": "บัตรเรียนรู้ถัดไปในอีก ${time}",
 	"flashcardFinishSession": "จบการทบทวน",
 	"flashcardAnswerMaxDistance": "ระยะการแก้ไขคำตอบสูงสุด",

@@ -1,4 +1,5 @@
 {
+	"quickMakeCardEmpty": "Hızlı kart oluşturmak için kullanılabilir içerik yok",
 	"flashcardWaitingDue": "Sonraki öğrenme kartına ${time} kaldı",
 	"flashcardFinishSession": "Oturumu bitir",
 	"flashcardAnswerMaxDistance": "Yanıtın azami düzenleme uzaklığı",

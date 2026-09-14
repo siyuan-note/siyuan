@@ -776,6 +776,8 @@ export type CreateNotebookData = { "notebook": Notebook | null; };
 
 export type CreateNotebookRequestInput = { "name": string; };
 
+export type CreateQuickFlashcardSourcesRequestInput = { "blockIDs": Array<string>; "createdAt": number; "defaultPresetID"?: string | null; "operationID": string; "toggle"?: boolean | null; };
+
 export type CreateRiffDeckRequestInput = { "name": string; };
 
 export type CreateSnapshotData = { "created": boolean; "id": string; };
@@ -1417,6 +1419,8 @@ export type ProxyFailure = { "code": number; "msg": string; };
 export type PublishedBlockInfo = { "publishAccessRequired": true; "rootID": string; "rootIcon": string; "rootTitle": string; "rootTitleEmpty": boolean; };
 
 export type PutFileRequestInput = { "app"?: string; "file"?: Blob; "isDir"?: string; "modTime"?: string; "path"?: string; };
+
+export type QuickFlashcardSourcesData = { "action": "created" | "removed"; "cardIDs": Array<string>; "sourceIDs": Array<string>; };
 
 export type ReadDirectoryRequestInput = { "path": string; };
 
@@ -2378,7 +2382,6 @@ export type APILegacyPOSTPath =
     "/api/flashcard/activateMigration" |
     "/api/flashcard/createAdvancedSource" |
     "/api/flashcard/createBasicSource" |
-    "/api/flashcard/createQuickSources" |
     "/api/flashcard/deleteInvalidSources" |
     "/api/flashcard/deleteReviewSet" |
     "/api/flashcard/finishSession" |
@@ -3964,6 +3967,11 @@ export interface APIPOSTRoutes {
         request: FileTreePathsRequestInput;
         response: { "code": 0; "data": null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
+    };
+    "/api/flashcard/createQuickSources": {
+        request: CreateQuickFlashcardSourcesRequestInput;
+        response: { "code": 0; "data": QuickFlashcardSourcesData; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "structJSON";
     };
     "/api/format/autoSpace": {
         request: TrimmedIDRequestInput;

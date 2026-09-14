@@ -1,4 +1,5 @@
 {
+	"quickMakeCardEmpty": "Brak treści do szybkiego tworzenia fiszek",
 	"flashcardWaitingDue": "Następna karta do nauki za ${time}",
 	"flashcardFinishSession": "Zakończ sesję",
 	"flashcardAnswerMaxDistance": "Maksymalna odległość edycyjna odpowiedzi",

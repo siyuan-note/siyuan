@@ -1,4 +1,5 @@
 {
+	"quickMakeCardEmpty": "No content available for quick card creation",
 	"flashcardWaitingDue": "Next learning card in ${time}",
 	"flashcardFinishSession": "End session",
 	"flashcardAnswerMaxDistance": "Maximum answer edit distance",

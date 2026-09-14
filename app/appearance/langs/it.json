@@ -1,4 +1,5 @@
 {
+	"quickMakeCardEmpty": "Nessun contenuto disponibile per la creazione rapida di schede",
 	"flashcardWaitingDue": "Prossima scheda di apprendimento tra ${time}",
 	"flashcardFinishSession": "Termina sessione",
 	"flashcardAnswerMaxDistance": "Distanza di modifica massima della risposta",

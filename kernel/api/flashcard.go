@@ -25,6 +25,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	flashcardv2 "github.com/siyuan-note/siyuan/kernel/flashcard"
 	"github.com/siyuan-note/siyuan/kernel/model"
 )
@@ -284,20 +285,19 @@ func createBasicFlashcardSource(c *gin.Context) {
 	ret.Data = result
 }
 
-func createQuickFlashcardSources(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-	request := &flashcardv2.QuickSourceRequest{}
-	if !bindFlashcardRequest(c, ret, request) {
-		return
-	}
-	result, err := model.CreateFlashcardV2QuickSources(c.Request.Context(), *request)
+var createQuickFlashcardSources = contractHandler(apicontract.CreateQuickFlashcardSources, func(c *gin.Context,
+	request apicontract.CreateQuickFlashcardSourcesRequest) apicontract.Response[apicontract.QuickFlashcardSourcesData] {
+	result, err := model.CreateFlashcardV2QuickSources(c.Request.Context(), flashcardv2.QuickSourceRequest{
+		OperationID: request.OperationID, BlockIDs: request.BlockIDs, CreatedAt: request.CreatedAt,
+		Toggle: request.Toggle, DefaultPresetID: request.DefaultPresetID,
+	})
 	if err != nil {
-		setFlashcardAPIError(ret, err)
-		return
+		return apicontract.Failure[apicontract.QuickFlashcardSourcesData](-1, err.Error())
 	}
-	ret.Data = result
-}
+	return apicontract.Success(apicontract.QuickFlashcardSourcesData{
+		SourceIDs: result.SourceIDs, CardIDs: result.CardIDs, Action: result.Action,
+	})
+})
 
 func manageFlashcardSourceLifecycle(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

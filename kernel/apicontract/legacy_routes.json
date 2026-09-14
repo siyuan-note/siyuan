@@ -2,7 +2,6 @@
   {"method":"POST","path":"/api/flashcard/activateMigration","handler":"activateFlashcardMigration"},
   {"method":"POST","path":"/api/flashcard/createAdvancedSource","handler":"createAdvancedFlashcardSource"},
   {"method":"POST","path":"/api/flashcard/createBasicSource","handler":"createBasicFlashcardSource"},
-  {"method":"POST","path":"/api/flashcard/createQuickSources","handler":"createQuickFlashcardSources"},
   {"method":"POST","path":"/api/flashcard/deleteInvalidSources","handler":"deleteInvalidFlashcardSources"},
   {"method":"POST","path":"/api/flashcard/deleteReviewSet","handler":"deleteFlashcardReviewSet"},
   {"method":"POST","path":"/api/flashcard/finishSession","handler":"finishFlashcardSession"},

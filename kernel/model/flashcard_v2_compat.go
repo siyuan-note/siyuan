@@ -320,6 +320,19 @@ func AddLegacyFlashcardV2Cards(ctx context.Context, deckID string, blockIDs []st
 	if err != nil {
 		return flashcardv2.LegacyReviewSetInfo{}, err
 	}
+	if len(blockIDs) > 0 {
+		empty, filterErr := emptyQuickFlashcardBlocks(blockIDs)
+		if filterErr != nil {
+			return flashcardv2.LegacyReviewSetInfo{}, filterErr
+		}
+		blockIDs, filterErr = store.FilterQuickSourceBlocks(ctx, blockIDs, empty, true)
+		if filterErr != nil {
+			return flashcardv2.LegacyReviewSetInfo{}, filterErr
+		}
+		if len(blockIDs) == 0 {
+			return getLegacyFlashcardV2ReviewSet(ctx, store, deckID)
+		}
+	}
 	if _, err = store.AddLegacyQuickCards(ctx, flashcardv2.NewID(), deckID, blockIDs,
 		time.Now().UnixMilli(), flashcardV2CreationMetadata(blockIDs)...); err != nil {
 		return flashcardv2.LegacyReviewSetInfo{}, err

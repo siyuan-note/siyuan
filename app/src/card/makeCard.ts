@@ -43,7 +43,8 @@ export const createQuickSources = (blockIDs: string[], callback?: () => void) =>
             createdAt: Date.now(),
             toggle: true,
         }, (response) => {
-            showMessage(response.data.action === "removed" ? window.siyuan.languages.quickMakeCardCanceled :
+            showMessage(response.data.cardIDs.length === 0 ? window.siyuan.languages.quickMakeCardEmpty :
+                response.data.action === "removed" ? window.siyuan.languages.quickMakeCardCanceled :
                 window.siyuan.languages.quickMakeCardCompleted);
             callback?.();
         });

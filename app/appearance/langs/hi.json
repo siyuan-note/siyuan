@@ -1,4 +1,5 @@
 {
+	"quickMakeCardEmpty": "त्वरित कार्ड बनाने के लिए कोई सामग्री उपलब्ध नहीं है",
 	"flashcardWaitingDue": "अगला सीखने वाला कार्ड ${time} में",
 	"flashcardFinishSession": "सत्र समाप्त करें",
 	"flashcardAnswerMaxDistance": "उत्तर की अधिकतम संपादन दूरी",

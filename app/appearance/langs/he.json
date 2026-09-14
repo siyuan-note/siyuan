@@ -1,4 +1,5 @@
 {
+	"quickMakeCardEmpty": "אין תוכן זמין ליצירה מהירה של כרטיסיות",
 	"flashcardWaitingDue": "כרטיס הלמידה הבא בעוד ${time}",
 	"flashcardFinishSession": "סיום המפגש",
 	"flashcardAnswerMaxDistance": "מרחק עריכה מרבי לתשובה",

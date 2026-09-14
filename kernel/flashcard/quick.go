@@ -45,6 +45,36 @@ const (
 	QuickSourceActionRemoved = "removed"
 )
 
+// FilterQuickSourceBlocks 跳过空白候选块，切换操作保留已启用的卡源以便取消制卡。
+func (store *Store) FilterQuickSourceBlocks(ctx context.Context, blockIDs []string, empty map[string]bool,
+	keepActive bool) ([]string, error) {
+	ret := make([]string, 0, len(blockIDs))
+	for _, blockID := range uniqueSortedStrings(blockIDs) {
+		if !empty[blockID] {
+			ret = append(ret, blockID)
+			continue
+		}
+		if !keepActive {
+			continue
+		}
+		revision, found, err := store.projection.CurrentEntity(ctx, EntityCardSource, LegacyQuickSourceID(blockID))
+		if err != nil {
+			return nil, err
+		}
+		if !found || revision.Deleted {
+			continue
+		}
+		var source CardSource
+		if err = decodeStrictJSON(revision.Payload, &source); err != nil {
+			return nil, err
+		}
+		if source.Status == "active" {
+			ret = append(ret, blockID)
+		}
+	}
+	return ret, nil
+}
+
 // UpgradeBlockFlashcardMode 将旧快速卡的内置定义原位升级为块闪卡，并保留全部稳定实体 ID。
 func (store *Store) UpgradeBlockFlashcardMode(ctx context.Context) (bool, error) {
 	schemaRevision, schemaFound, err := store.projection.CurrentEntity(ctx, EntityCardSchema, legacyQuickSchemaID)

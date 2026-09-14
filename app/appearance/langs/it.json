@@ -1,4 +1,5 @@
 {
+	"customBlock": "Blocco personalizzato",
 	"embedHeadingLevel": "Livello dei titoli incorporati",
 	"embedHeadingLevelPreserve": "Mantieni i livelli originali",
 	"originalToRef": "Converti il blocco originale in riferimento a blocco",

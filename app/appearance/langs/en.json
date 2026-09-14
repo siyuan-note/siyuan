@@ -1,4 +1,5 @@
 {
+	"customBlock": "Custom block",
 	"embedHeadingLevel": "Embedded heading level",
 	"embedHeadingLevelPreserve": "Keep original levels",
 	"originalToRef": "Convert original to block reference",

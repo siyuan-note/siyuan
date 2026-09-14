@@ -1,4 +1,5 @@
 {
+	"customBlock": "Користувацький блок",
 	"embedHeadingLevel": "Рівень вбудованих заголовків",
 	"embedHeadingLevelPreserve": "Зберігати початкові рівні",
 	"originalToRef": "Перетворити початковий блок на посилання на блок",

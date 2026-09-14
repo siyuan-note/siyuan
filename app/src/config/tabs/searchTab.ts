@@ -8,6 +8,7 @@ const registerSearchQueryGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.searchBlockType,
         footer: `[1] ${window.siyuan.languages.containerBlockTip1}`,
         items: [
+            {kind: "switch", id: "search.customBlock", label: window.siyuan.languages.customBlock, icon: "iconPlugin"},
             {kind: "switch", id: "search.mathBlock", label: window.siyuan.languages.math, icon: "iconMath"},
             {kind: "switch", id: "search.table", label: window.siyuan.languages.tableBlock, icon: "iconTable"},
             {kind: "switch", id: "search.paragraph", label: window.siyuan.languages.paragraph, icon: "iconParagraph"},

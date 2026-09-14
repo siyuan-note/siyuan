@@ -1,4 +1,5 @@
 {
+	"customBlock": "Blok niestandardowy",
 	"embedHeadingLevel": "Poziom osadzonych nagłówków",
 	"embedHeadingLevelPreserve": "Zachowaj oryginalne poziomy",
 	"originalToRef": "Zamień oryginalny blok na odwołanie do bloku",

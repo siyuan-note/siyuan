@@ -1,4 +1,5 @@
 {
+	"customBlock": "บล็อกที่กำหนดเอง",
 	"embedHeadingLevel": "ระดับหัวเรื่องที่ฝัง",
 	"embedHeadingLevelPreserve": "คงระดับเดิม",
 	"originalToRef": "แปลงบล็อกต้นฉบับเป็นการอ้างอิงบล็อก",

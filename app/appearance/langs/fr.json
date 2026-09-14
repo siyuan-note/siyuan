@@ -1,4 +1,5 @@
 {
+	"customBlock": "Bloc personnalisé",
 	"embedHeadingLevel": "Niveau des titres intégrés",
 	"embedHeadingLevelPreserve": "Conserver les niveaux d’origine",
 	"originalToRef": "Convertir le bloc original en référence de bloc",

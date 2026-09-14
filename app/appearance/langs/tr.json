@@ -1,4 +1,5 @@
 {
+	"customBlock": "Özel blok",
 	"embedHeadingLevel": "Gömülü başlık düzeyi",
 	"embedHeadingLevelPreserve": "Özgün düzeyleri koru",
 	"originalToRef": "Özgün bloğu blok referansına dönüştür",

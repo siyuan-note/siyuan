@@ -1,4 +1,5 @@
 {
+	"customBlock": "Benutzerdefinierter Block",
 	"embedHeadingLevel": "Überschriftenebene des eingebetteten Blocks",
 	"embedHeadingLevelPreserve": "Ursprüngliche Ebene beibehalten",
 	"originalToRef": "Original in Blockreferenz umwandeln",

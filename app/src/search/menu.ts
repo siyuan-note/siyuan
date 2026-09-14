@@ -10,13 +10,20 @@ import {isSensitiveSearchConfig, setStorageVal} from "../protyle/util/compatibil
 import {confirmDialog} from "../dialog/confirmDialog";
 import {goUnRef, updateSearchResult} from "../mobile/menu/search";
 import {bindSearchSubtypeFilters} from "./subTypes";
-import {getDefaultSubType} from "./getDefault";
+import {getDefaultSubType, normalizeSearchTypes} from "./getDefault";
 import {hasSearchConfigTemporaryPath, resolvePersistedSearchConfig} from "./config";
 
 export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => void) => {
+    config.types = normalizeSearchTypes(config.types);
     const filterDialog = new Dialog({
         title: window.siyuan.languages.searchType,
         content: `<div class="b3-dialog__content">
+    <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconPlugin"></use></svg>
+        <span class="fn__space"></span>
+        <div class="fn__flex-1 fn__flex-center">${window.siyuan.languages.customBlock}</div>
+        <input class="b3-switch fn__flex-center" data-type="customBlock" type="checkbox"${config.types.customBlock ? " checked" : ""}>
+    </label>
     <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconMath"></use></svg>
         <span class="fn__space"></span>
@@ -707,6 +714,7 @@ export const initCriteriaMenu = (element: HTMLElement, data: Config.IUILayoutTab
             const defaults = getDefaultSubType();
             const item: Config.IUILayoutTabSearchConfig = {
                 ...criterion,
+                types: normalizeSearchTypes(criterion.types),
                 subTypes: {
                     heading: {...defaults.heading, ...criterion.subTypes?.heading},
                     list: {...defaults.list, ...criterion.subTypes?.list},

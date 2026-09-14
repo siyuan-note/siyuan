@@ -1,4 +1,5 @@
 {
+	"customBlock": "カスタムブロック",
 	"embedHeadingLevel": "埋め込み見出しのレベル",
 	"embedHeadingLevelPreserve": "元の見出しレベルを維持",
 	"originalToRef": "元の定義ブロックをブロック参照に変換",

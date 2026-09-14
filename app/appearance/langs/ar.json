@@ -1,4 +1,5 @@
 {
+	"customBlock": "كتلة مخصصة",
 	"embedHeadingLevel": "مستوى عناوين الكتلة المضمنة",
 	"embedHeadingLevelPreserve": "الاحتفاظ بالمستوى الأصلي",
 	"originalToRef": "تحويل الكتلة الأصلية إلى مرجع كتلة",

@@ -140,6 +140,8 @@ Dynamic multipart endpoints use `MultipartFields` to retain every text value and
 
 ## Generation and verification
 
+Custom block search uses the optional `customBlock` type filter. Explicit API type maps select only their enabled types; omitted type maps use search settings, which enable custom blocks by default. Saved criteria preserve omission separately from `false` so older frontend search configurations can inherit the setting. `TestCustomBlockSearch` regressions cover configuration compatibility, saved criteria, filtering, and FTS updates; `TestAPIContractSettingConfigCompatibility` and `TestAPIContractSettingCompletePayloads` cover the setting contract. All are included in the full kernel command below.
+
 `TestAPIContractFileTreeMissingDocuments` exercises actual HTTP responses for missing documents during path lookup, removal, renaming, duplication, and moving. It checks business errors and preserved `closeTimeout` values against the response contracts and runs in the full kernel command below. Run it separately with `go test -tags "fts5 sqlcipher" ./api -run TestAPIContractFileTreeMissingDocuments -count=1` from `kernel/`.
 
 `swapBlockRef` accepts the optional boolean `originalToEmbed`. Omission or `false` keeps the reference at the original definition position; `true` replaces it with an embed querying the moved definition ID. `includeChildren` retains its heading and list behavior. `TestSwapBlockRefContractCompatibility` and `TestSwapBlockRefNodes` cover request defaults, invalid options, and both replacement modes across document, heading, and list cases; they run in the full kernel command below.

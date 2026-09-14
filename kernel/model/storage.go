@@ -140,6 +140,8 @@ type Criterion struct {
 }
 
 type CriterionTypes struct {
+	CustomBlock *bool `json:"customBlock,omitempty"`
+
 	MathBlock     bool `json:"mathBlock"`
 	Table         bool `json:"table"`
 	Blockquote    bool `json:"blockquote"`

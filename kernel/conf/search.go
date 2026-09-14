@@ -25,6 +25,8 @@ import (
 )
 
 type Search struct {
+	CustomBlock *bool `json:"customBlock"`
+
 	Document      bool `json:"document"`
 	Heading       bool `json:"heading"`
 	List          bool `json:"list"`
@@ -71,6 +73,7 @@ type Search struct {
 
 func NewSearch() *Search {
 	return &Search{
+		CustomBlock:   new(true),
 		Document:      true,
 		Heading:       true,
 		List:          false,
@@ -153,6 +156,11 @@ func (s *Search) NAMFilter(keyword string) string {
 		buf.WriteString(" OR memo LIKE " + pattern)
 	}
 	return buf.String()
+}
+
+// CustomBlockEnabled 为缺少新字段的配置启用自定义块搜索。
+func (s *Search) CustomBlockEnabled() bool {
+	return s.CustomBlock == nil || *s.CustomBlock
 }
 
 func (s *Search) TypeFilter() string {
@@ -271,6 +279,9 @@ func (s *Search) TypeFilter() string {
 	}
 	if s.TabItem {
 		buf.WriteString("'tab',")
+	}
+	if s.CustomBlockEnabled() {
+		buf.WriteString("'custom',")
 	}
 	ret := buf.String()
 	if "" == ret {

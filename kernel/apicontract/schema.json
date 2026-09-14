@@ -19991,6 +19991,9 @@
         "codeBlock": {
           "type": "boolean"
         },
+        "customBlock": {
+          "type": "boolean"
+        },
         "databaseBlock": {
           "type": "boolean"
         },
@@ -20098,6 +20101,16 @@
           ]
         },
         "codeBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "customBlock": {
           "anyOf": [
             {
               "type": "boolean"
@@ -38007,6 +38020,16 @@
             }
           ]
         },
+        "customBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "databaseBlock": {
           "anyOf": [
             {
@@ -42116,6 +42139,16 @@
         "codeBlock": {
           "type": "boolean"
         },
+        "customBlock": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "databaseBlock": {
           "type": "boolean"
         },
@@ -42214,6 +42247,7 @@
         "callout",
         "caseSensitive",
         "codeBlock",
+        "customBlock",
         "databaseBlock",
         "document",
         "embedBlock",

@@ -140,6 +140,8 @@ JSON SSE 接口通过 `SSEOptions` 和 `SSEEvent` 声明各事件名称及载荷
 
 ## 生成与验证
 
+自定义块搜索使用可选的 `customBlock` 类型筛选字段。API 显式传入类型映射时仅搜索其中启用的类型；省略类型映射时使用搜索设置，默认启用自定义块。保存的搜索条件区分字段缺失与 `false`，使旧版前端搜索配置能够继承设置。`TestCustomBlockSearch` 回归覆盖配置兼容、搜索条件保存、类型筛选和全文索引更新；`TestAPIContractSettingConfigCompatibility` 与 `TestAPIContractSettingCompletePayloads` 覆盖设置契约，均包含在下方完整内核测试命令中。
+
 编辑器通过独立的 `swapBlockRef` 事务转换块引用：`id` 指定引用块，`blockID` 指定定义块，`data` 包含布尔选项 `includeChildren` 和 `originalToEmbed`。内核在 `retData` 中返回受影响的文档 ID，并以受影响顶层块的私有内存快照生成逆向操作。快照不传给客户端，也不接受客户端提交。重放保留块 ID 和数据库绑定；内容或位置已改变时拒绝覆盖；提交失败时补偿已写入的文档。`TestBlockSwapTransaction` 覆盖落盘后的撤销和重做、跨文档历史、冲突拒绝及写入失败恢复，包含在下方完整内核测试命令中，也可在 `kernel/` 下运行 `go test -tags "fts5 sqlcipher" ./model -run 'Test(SwapBlockRefNodes|BlockSwapTransaction)' -count=1` 单独验证
 
 块交换的撤销和重做为所有受影响文档持有笔记本租约，直到响应序列化完成。`TestContractBlockSwapReplayNotebookResponseLease` 验证锁定操作会等待响应结束，包含在完整内核测试命令中。

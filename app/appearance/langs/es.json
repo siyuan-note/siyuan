@@ -1,4 +1,5 @@
 {
+	"customBlock": "Bloque personalizado",
 	"embedHeadingLevel": "Nivel de los encabezados incrustados",
 	"embedHeadingLevelPreserve": "Mantener los niveles originales",
 	"originalToRef": "Convertir el original en referencia a bloque",

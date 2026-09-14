@@ -1,4 +1,5 @@
 {
+	"customBlock": "自訂區塊",
 	"embedHeadingLevel": "嵌入標題層級",
 	"embedHeadingLevelPreserve": "保持原層級",
 	"originalToRef": "原定義區塊轉為區塊引用",

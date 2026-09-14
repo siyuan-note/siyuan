@@ -4,7 +4,7 @@ import {Constants} from "../../constants";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
-import {getDefaultSubType, getDefaultType} from "../../search/getDefault";
+import {getDefaultSubType, getDefaultType, normalizeSearchTypes} from "../../search/getDefault";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {isEncryptedBox, isSiYuanUriProtocol} from "../../util/pathName";
 import {isBrowser} from "../../util/functions";
@@ -834,6 +834,7 @@ export const getLocalStorage = (cb: () => void) => {
                 window.siyuan.storage[key] = defaultStorage[key];
             }
         });
+        window.siyuan.storage[Constants.LOCAL_SEARCHDATA].types = normalizeSearchTypes(window.siyuan.storage[Constants.LOCAL_SEARCHDATA].types);
         // 搜索数据添加 replaceTypes 兼容
         if (!window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes ||
             Object.keys(window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes).length === 0) {

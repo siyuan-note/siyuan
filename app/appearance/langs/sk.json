@@ -1,4 +1,5 @@
 {
+	"customBlock": "Vlastný blok",
 	"embedHeadingLevel": "Úroveň vložených nadpisov",
 	"embedHeadingLevelPreserve": "Zachovať pôvodné úrovne",
 	"originalToRef": "Previesť pôvodný blok na odkaz na blok",

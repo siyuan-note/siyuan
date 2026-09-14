@@ -354,18 +354,52 @@ func (p *assetRelinkPlan) scanViews() error {
 			}
 		}
 	}
+	availability := map[string]string{}
+	boxNames := map[string]string{}
 	for _, tree := range p.trees {
-		var missing string
+		var checkErr error
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if entering && n.Type == ast.NodeAttributeView {
-				if !ast.IsNodeIDPattern(n.AttributeViewID) || !filelock.IsExist(filepath.Join(dir, n.AttributeViewID+".json")) {
-					missing = n.AttributeViewID
+			if !entering || n.Type != ast.NodeAttributeView {
+				return ast.WalkContinue
+			}
+			reason, checked := availability[n.AttributeViewID]
+			if !checked {
+				if !ast.IsNodeIDPattern(n.AttributeViewID) {
+					reason = "invalid_id"
+				} else {
+					abs := filepath.Join(dir, n.AttributeViewID+".json")
+					if checkErr = p.observe(abs); checkErr != nil {
+						return ast.WalkStop
+					}
+					info, statErr := os.Lstat(abs)
+					if os.IsNotExist(statErr) {
+						// 数据库定义不参与资源按需下载；缺失定义作为历史残留上报，保留数据库块。
+						reason = "missing_definition"
+					} else if statErr != nil {
+						checkErr = statErr
+						return ast.WalkStop
+					} else if !info.Mode().IsRegular() {
+						checkErr = fmt.Errorf("attribute view definition is not a regular file: %s", abs)
+						return ast.WalkStop
+					}
 				}
+				availability[n.AttributeViewID] = reason
+			}
+			if reason != "" {
+				name, loaded := boxNames[tree.Box]
+				if !loaded {
+					name = (&Box{ID: tree.Box}).GetConf().Name
+					boxNames[tree.Box] = name
+				}
+				p.result.UnavailableAttributeViews = append(p.result.UnavailableAttributeViews, apicontract.UnavailableAssetAttributeView{
+					AvID: n.AttributeViewID, Notebook: tree.Box, NotebookName: name, RootID: tree.Root.ID,
+					BlockID: n.ID, Path: tree.Path, HPath: tree.HPath, Reason: reason,
+				})
 			}
 			return ast.WalkContinue
 		})
-		if missing != "" {
-			return fmt.Errorf("attribute view is unavailable: %s", missing)
+		if checkErr != nil {
+			return fmt.Errorf("cannot inspect attribute view in notebook %s, document %s: %w", tree.Box, tree.Path, checkErr)
 		}
 	}
 	return nil

@@ -9,14 +9,31 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/88250/lute/ast"
+	"github.com/88250/lute/render"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/apicontract"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestAssetRelinkContract(t *testing.T) {
 	assets := setupAssetContractWorkspace(t)
+	const box, viewID = "20260914070000-closed0", "20260914070001-missing"
+	boxDir := filepath.Join(util.DataDir, box)
+	if err := os.MkdirAll(filepath.Join(boxDir, ".siyuan"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(boxDir, ".siyuan", "conf.json"), []byte(`{"name":"Closed notebook","closed":true}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+	tree := treenode.NewTree(box, "/20260914070002-orphan0.sy", "/Orphan", "Orphan")
+	tree.Root.AppendChild(&ast.Node{Type: ast.NodeAttributeView, ID: "20260914070003-orphan1", AttributeViewID: viewID})
+	l := util.NewLute()
+	if err := os.WriteFile(filepath.Join(boxDir, tree.Path), render.NewJSONRenderer(tree, l.RenderOptions, l.ParseOptions).Render(), 0644); err != nil {
+		t.Fatal(err)
+	}
 	for _, name := range []string{"contract-relink.png", "contract-relink.webp"} {
 		if err := os.WriteFile(filepath.Join(assets, name), []byte("asset"), 0644); err != nil {
 			t.Fatal(err)
@@ -72,6 +89,12 @@ func TestAssetRelinkContract(t *testing.T) {
 			}
 			if !test.failure && (response.Data == nil || response.Data.References == nil || response.Data.SkippedNotebooks == nil) {
 				t.Fatal("success arrays must not be null")
+			}
+			if !test.failure {
+				warnings := response.Data.UnavailableAttributeViews
+				if len(warnings) != 1 || warnings[0].AvID != viewID || warnings[0].Notebook != box || warnings[0].NotebookName != "Closed notebook" || warnings[0].Path != tree.Path || warnings[0].Reason != "missing_definition" {
+					t.Fatalf("missing definition warning contract: %+v", warnings)
+				}
 			}
 			if !test.failure && (strings.Contains(test.body, `"paths"`) || strings.Contains(test.body, `"mappings"`)) {
 				if len(response.Data.Items) != 2 || !response.Data.Items[0].OK || response.Data.Items[1].OK || response.Data.Items[1].Reason == "" {

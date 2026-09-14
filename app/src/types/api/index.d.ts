@@ -510,7 +510,7 @@ export type AssetPathsData = { "paths": Array<string> | null; };
 
 export type AssetReference = { "avID": string; "blockID": string; "notebook": string; "oldPath"?: string; "path": string; "reason": string; "reference": string; "relinkable": boolean; "replacement": string; "rootID": string; "type": string; "valueID": string; };
 
-export type AssetReferencesData = { "dryRun": boolean; "historyPath": string; "items"?: Array<AssetRelinkItemResult>; "references": Array<AssetReference> | null; "skippedNotebooks": Array<string> | null; "updated": number; };
+export type AssetReferencesData = { "dryRun": boolean; "historyPath": string; "items"?: Array<AssetRelinkItemResult>; "references": Array<AssetReference> | null; "skippedNotebooks": Array<string> | null; "unavailableAttributeViews"?: Array<UnavailableAssetAttributeView>; "updated": number; };
 
 export type AssetRelinkItemResult = { "newPath": string; "ok": boolean; "oldPath": string; "reason": string; "references": Array<AssetReference> | null; "updated": number; };
 
@@ -2182,6 +2182,8 @@ export type TreeStatRequestInput = { "id": string; "ids"?: Array<string> | null;
 
 export type TrimmedIDRequestInput = { "id": string; };
 
+export type UnavailableAssetAttributeView = { "avID": string; "blockID": string; "hPath": string; "notebook": string; "notebookName": string; "path": string; "reason": string; "rootID": string; };
+
 export type UnfoldedParentData = { "parentID": string; };
 
 export type UninstallBazaarIconRequestInput = { "keyword"?: string | null; "packageName": string; };
@@ -2594,7 +2596,7 @@ export interface APIPOSTRoutes {
     };
     "/api/asset/findAssetReferences": {
         request: FindAssetReferencesRequestInput;
-        response: { "code": 0; "data": AssetReferencesData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "dryRun"?: never; "historyPath"?: never; "items"?: never; "references"?: never; "skippedNotebooks"?: never; "updated"?: never; }) | null | (AssetReferencesData & { "closeTimeout"?: never; }); "msg": string; };
+        response: { "code": 0; "data": AssetReferencesData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "dryRun"?: never; "historyPath"?: never; "items"?: never; "references"?: never; "skippedNotebooks"?: never; "unavailableAttributeViews"?: never; "updated"?: never; }) | null | (AssetReferencesData & { "closeTimeout"?: never; }); "msg": string; };
         body: "json";
     };
     "/api/asset/fullReindexAssetContent": {
@@ -2649,7 +2651,7 @@ export interface APIPOSTRoutes {
     };
     "/api/asset/relinkAsset": {
         request: RelinkAssetRequestInput;
-        response: { "code": 0; "data": AssetReferencesData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "dryRun"?: never; "historyPath"?: never; "items"?: never; "references"?: never; "skippedNotebooks"?: never; "updated"?: never; }) | null | (AssetReferencesData & { "closeTimeout"?: never; }); "msg": string; };
+        response: { "code": 0; "data": AssetReferencesData; "msg": string; } | { "code": -1; "data": ({ "closeTimeout": number; } & { "dryRun"?: never; "historyPath"?: never; "items"?: never; "references"?: never; "skippedNotebooks"?: never; "unavailableAttributeViews"?: never; "updated"?: never; }) | null | (AssetReferencesData & { "closeTimeout"?: never; }); "msg": string; };
         body: "json";
     };
     "/api/asset/removeUnusedAsset": {

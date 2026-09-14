@@ -13263,6 +13263,12 @@
             }
           ]
         },
+        "unavailableAttributeViews": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UnavailableAssetAttributeView"
+          }
+        },
         "updated": {
           "type": "integer"
         }
@@ -102686,6 +102692,46 @@
       },
       "required": [
         "id"
+      ],
+      "additionalProperties": false
+    },
+    "UnavailableAssetAttributeView": {
+      "type": "object",
+      "properties": {
+        "avID": {
+          "type": "string"
+        },
+        "blockID": {
+          "type": "string"
+        },
+        "hPath": {
+          "type": "string"
+        },
+        "notebook": {
+          "type": "string"
+        },
+        "notebookName": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "rootID": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "avID",
+        "blockID",
+        "hPath",
+        "notebook",
+        "notebookName",
+        "path",
+        "reason",
+        "rootID"
       ],
       "additionalProperties": false
     },

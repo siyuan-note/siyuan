@@ -42,10 +42,22 @@ type AssetReference struct {
 }
 
 type AssetReferencesData struct {
-	Items            []AssetRelinkItemResult `json:"items,omitempty"`
-	References       []AssetReference        `json:"references"`
-	SkippedNotebooks []string                `json:"skippedNotebooks"`
-	DryRun           bool                    `json:"dryRun"`
-	HistoryPath      string                  `json:"historyPath"`
-	Updated          int                     `json:"updated"`
+	UnavailableAttributeViews []UnavailableAssetAttributeView `json:"unavailableAttributeViews,omitempty"`
+	Items                     []AssetRelinkItemResult         `json:"items,omitempty"`
+	References                []AssetReference                `json:"references"`
+	SkippedNotebooks          []string                        `json:"skippedNotebooks"`
+	DryRun                    bool                            `json:"dryRun"`
+	HistoryPath               string                          `json:"historyPath"`
+	Updated                   int                             `json:"updated"`
+}
+
+type UnavailableAssetAttributeView struct {
+	AvID         string `json:"avID"`
+	Notebook     string `json:"notebook"`
+	NotebookName string `json:"notebookName"`
+	RootID       string `json:"rootID"`
+	BlockID      string `json:"blockID"`
+	Path         string `json:"path"`
+	HPath        string `json:"hPath"`
+	Reason       string `json:"reason"`
 }

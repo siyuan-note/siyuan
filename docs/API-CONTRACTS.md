@@ -140,6 +140,8 @@ Dynamic multipart endpoints use `MultipartFields` to retain every text value and
 
 ## Generation and verification
 
+Asset-reference scans report missing attribute-view definitions and invalid definition IDs in the optional `unavailableAttributeViews` list without blocking queries, previews, or replacement. Each entry identifies the notebook ID/name, document ID/path/human-readable path, block ID, view ID, and reason. Existing unreadable or corrupt definitions remain errors. Missing-file snapshots are revalidated before writing so a definition restored during scanning cannot be silently omitted. Attribute-view definitions are not deferred assets under the current download-path policy; the regression suite checks this assumption. The unavailable-definition regressions run through the model and actual HTTP contracts, including closed notebooks and shared definitions.
+
 Asset-reference query and replacement contracts preserve scalar requests and also accept batches. Batch results retain input order and report each mapping's status, reason, references, and changed-file count; the top-level count includes each shared file once. Empty batches, duplicate sources, and chained or cyclic mappings are rejected. Independent mappings may succeed when another mapping fails; a shared-file write failure belongs to every affected mapping. Scans allow editing and validate the workspace snapshot before saving; cancellation and unchanged retries preserve source data. `TestAssetRelink` regressions cover scalar compatibility, batch validation, shared document/database/OCR persistence, history, and concurrent edits and are included in the full kernel command below.
 
 Run from `app/`:

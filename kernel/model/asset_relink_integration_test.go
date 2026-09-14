@@ -43,6 +43,7 @@ func TestAssetRelinkPersistenceAndHistory(t *testing.T) {
 	sql.InitAssetContentDatabase(true)
 	sql.InitHistoryDatabase(true)
 	t.Cleanup(sql.CloseDatabase)
+	orphan, orphanBefore := assetRelinkUnavailableTree(t)
 	writeAssetRelinkTestFile(t, "assets/a.png", []byte("original asset"))
 	writeAssetRelinkTestFile(t, "assets/b.webp", []byte("replacement asset"))
 	writeAssetRelinkTestFile(t, "assets/ocr-texts.json", []byte(`{"assets/a.png":"OCR text"}`))
@@ -76,6 +77,11 @@ func TestAssetRelinkPersistenceAndHistory(t *testing.T) {
 	result, err := RelinkAsset("assets/a.png", "assets/b.webp", false)
 	if err != nil || result.Updated != 3 || result.HistoryPath == "" || len(result.References) != len(preview.References) {
 		t.Fatalf("apply: %+v %v", result, err)
+	}
+	checkAssetRelinkUnavailable(t, result, orphan)
+	orphanAfter, _ := os.ReadFile(filepath.Join(util.DataDir, orphan.Box, orphan.Path))
+	if !bytes.Equal(orphanBefore, orphanAfter) {
+		t.Fatal("unrelated orphan document changed during relink")
 	}
 	for _, source := range sources {
 		history, readErr := os.ReadFile(filepath.Join(result.HistoryPath, source))
@@ -172,7 +178,8 @@ func TestAssetRelinkPersistenceAndHistory(t *testing.T) {
 	if err != nil || batch.Updated != 3 || len(batch.Items) != 3 || !batch.Items[0].OK || !batch.Items[1].OK || batch.Items[2].OK || batch.Items[2].Updated != 0 {
 		t.Fatalf("batch apply: %+v %v", batch, err)
 	}
-	if plan.parsedDocuments != 1 || plan.parsedViews != 1 || batch.Items[0].Updated != 2 || batch.Items[1].Updated != 3 {
+	checkAssetRelinkUnavailable(t, batch, orphan)
+	if plan.parsedDocuments != 2 || plan.parsedViews != 1 || batch.Items[0].Updated != 2 || batch.Items[1].Updated != 3 {
 		t.Fatalf("shared work was duplicated: documents=%d views=%d items=%+v", plan.parsedDocuments, plan.parsedViews, batch.Items)
 	}
 	for _, source := range sources {

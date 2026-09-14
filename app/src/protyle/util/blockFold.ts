@@ -8,6 +8,7 @@ import {clearSelect} from "./clear";
 import {removeFoldHeading} from "./heading";
 import {getSbChildBlockCount, getTopAloneElement} from "../wysiwyg/getBlock";
 import {fetchSyncPost} from "../../util/fetch";
+import {stopFocusFold} from "./focusFold";
 import {
     getViewFoldOccurrenceID,
     hasViewFoldContext,
@@ -63,6 +64,9 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
         return getEmptyFoldResult();
     }
     const hasFold = nodeElement.getAttribute("fold") === "1";
+    if (typeof isOpen !== "boolean") {
+        stopFocusFold(protyle, nodeElement.getAttribute("data-node-id"));
+    }
     if (hasViewFoldContext(protyle)) {
         if ((hasFold && typeof isOpen === "boolean" && !isOpen) ||
             (!hasFold && typeof isOpen === "boolean" && isOpen)) {

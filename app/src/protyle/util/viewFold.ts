@@ -9,6 +9,7 @@ import {
     clearViewFoldOccurrenceRuntimeState,
 } from "./viewFoldRuntimeState";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
+import {applyFocusFold, stopFocusFold, updateFocusFoldSource} from "./focusFold";
 
 const VIEW_FOLD_SOURCE = "data-view-fold-source";
 const VIEW_FOLD_VALUE = "data-view-fold";
@@ -369,6 +370,7 @@ export const setViewFoldTransient = async (protyle: IProtyle, element: Element, 
 };
 
 export const applyViewFoldStates = async (protyle: IProtyle, scope?: ParentNode) => {
+    applyFocusFold(protyle);
     const context = viewFoldContexts.get(protyle);
     if (!context) {
         return;
@@ -520,6 +522,11 @@ const getFoldValue = (operation: IOperation) => {
 };
 
 export const prepareViewFoldTransaction = (protyle: IProtyle, doOperations: IOperation[], undoOperations?: IOperation[]) => {
+    doOperations.forEach(operation => {
+        if (typeof getFoldValue(operation) === "boolean") {
+            stopFocusFold(protyle, operation.id);
+        }
+    });
     if (!hasViewFoldContext(protyle)) {
         return {
             doOperations: sanitizeOperationHTML(doOperations),
@@ -533,6 +540,10 @@ export const prepareViewFoldTransaction = (protyle: IProtyle, doOperations: IOpe
 };
 
 export const handleViewFoldSourceOperation = (protyle: IProtyle, operation: IOperation) => {
+    const focusFold = getFoldValue(operation);
+    if (typeof focusFold === "boolean") {
+        updateFocusFoldSource(protyle, operation.id, focusFold);
+    }
     if (!hasViewFoldContext(protyle) || !operation.id) {
         return false;
     }

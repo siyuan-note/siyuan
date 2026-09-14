@@ -39,6 +39,7 @@ import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {disposeCustomBlocksInElement, setCustomBlockRootReady} from "../../plugin/customBlockRender";
 import {invalidateTrackedRanges, invalidateTrackedRangesInElement} from "./trackedRange";
 import {areProtylePluginExtensionsEnabled} from "../runtimeCapabilities";
+import {applyFocusFold} from "./focusFold";
 /// #if MOBILE
 import {updateMobileTitleReadonly} from "./setEditMode";
 /// #endif
@@ -332,6 +333,7 @@ const setHTML = (options: {
         }
     }
 
+    applyFocusFold(protyle);
     if (options.eof) {
         const eofElement = options.action.includes(Constants.CB_GET_BEFORE) ?
             protyle.wysiwyg.element.firstElementChild : protyle.wysiwyg.element.lastElementChild;

@@ -100,4 +100,17 @@ describe("tree item name escaping", () => {
         assert.ok(html.includes("<span style=\"color: red;\">标题</span>"), html);
         assert.ok(!html.includes("&lt;span"), html);
     });
+
+    it("escapes quotes in the data-label attribute so tag names cannot break out", async () => {
+        const html = await renderItem({
+            id: "20260101120000-abcdefg",
+            label: "x' onmouseenter='alert(1)",
+            name: "tag",
+            type: "tag",
+            depth: 0,
+            count: 0,
+        });
+        assert.ok(!html.includes("onmouseenter='alert(1)'"), `attribute broke out: ${html}`);
+        assert.ok(html.includes("data-label='x&apos; onmouseenter=&apos;alert(1)'"), `actual: ${JSON.stringify(html)}`);
+    });
 });

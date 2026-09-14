@@ -324,7 +324,7 @@ window.openFileByURL = (openURL) => {
         }
         openMobileFileById(siyuanApp, blockInfo.id, blockInfo.avItemID ? [Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL] :
             (blockInfo.focus ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]),
-        undefined, undefined, blockInfo.avItemID ? (protyle) => activateQueuedAVLocate(protyle, blockInfo.id) : undefined);
+        blockInfo.avItemID ? undefined : "start", undefined, blockInfo.avItemID ? (protyle) => activateQueuedAVLocate(protyle, blockInfo.id) : undefined);
         return true;
     }
     return false;

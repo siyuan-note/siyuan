@@ -20,8 +20,12 @@
     min-height: 0;
   }
 
-  [data-pin-heading] > .b3-list-item__icon:hover {
-    background-color: transparent;
+  [data-pin-heading] {
+    --file-toggle-width: 22px;
+
+    > .b3-list-item__icon:hover {
+      background-color: transparent;
+    }
   }
 
   .b3-list--background .b3-list-item.dragover__top::after {

@@ -1,5 +1,6 @@
 import {setStorageVal, updateHotkeyTip} from "../../protyle/util/compatibility";
 import {Layout} from "../index";
+import {isAbove} from "../../util/zIndex";
 import {Wnd} from "../Wnd";
 import {Tab} from "../Tab";
 import {Files} from "./Files";
@@ -639,9 +640,9 @@ export class Dock {
         const dialogElement = document.querySelector(".b3-dialog") as HTMLElement;
         const blockElement = document.querySelector(".block__popover") as HTMLElement;
         const menuElement = document.querySelector("#commonMenu:not(.fn__none)") as HTMLElement;
-        if (!reset && ((dialogElement && dialogElement.style.zIndex > this.layout.element.style.zIndex) ||  // 文档树上修改 emoji 时
-            (blockElement && blockElement.style.zIndex > this.layout.element.style.zIndex) ||  // 文档树上弹出悬浮层
-            (menuElement && menuElement.style.zIndex > this.layout.element.style.zIndex))  // 面板上弹出菜单时
+        if (!reset && ((dialogElement && isAbove(dialogElement, this.layout.element)) ||  // 文档树上修改 emoji 时
+            (blockElement && isAbove(blockElement, this.layout.element)) ||  // 文档树上弹出悬浮层
+            (menuElement && isAbove(menuElement, this.layout.element)))  // 面板上弹出菜单时
         ) {
             return;
         }

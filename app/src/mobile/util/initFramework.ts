@@ -373,7 +373,7 @@ export const initFramework = async (app: App, isStart: boolean) => {
             }
             openMobileFileById(app, info.id, info.avItemID ? [Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL] :
                 (info.focus ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]),
-            undefined, undefined, info.avItemID ? (protyle) => activateQueuedAVLocate(protyle, info.id) : undefined);
+            info.avItemID ? undefined : "start", undefined, info.avItemID ? (protyle) => activateQueuedAVLocate(protyle, info.id) : undefined);
             return;
         }
         if (openMobileOnboarding(app)) {

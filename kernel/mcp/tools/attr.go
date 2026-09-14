@@ -34,7 +34,7 @@ var AttrTool = &Tool{
 			"action": {Type: "string", Description: "Operation", Enum: []string{"get", "set", "batch-get"}},
 			"id":     {Type: "string", Description: "Block ID"},
 			"ids":    {Type: "string", Description: "Comma-separated block IDs (for batch-get)"},
-			"attrs":  {Type: "object", Description: "Attribute key-value pairs (for set).\nCommon attributes:\n- icon: emoji hex codepoint like \"1f4ca\", emoji character like \"📊\", custom image path like \"1/b3log.png\", network image URL like \"https://example.com/icon.png\", or dynamic icon URL like \"api/icon/getDynamicIcon?type=8&color=%23d23f31&content=SiYuan&id=xxx\"\n- title-img: CSS format like 'background-image:url(\"assets/example.jpg\")', NOT a bare asset path\n- tags: comma-separated tag names"},
+			"attrs":  {Type: "object", Description: "Attribute key-value pairs (for set). Values must be strings or null; null and empty strings delete attributes.\nCommon attributes:\n- icon: emoji hex codepoint like \"1f4ca\", emoji character like \"📊\", custom image path like \"1/b3log.png\", network image URL like \"https://example.com/icon.png\", or dynamic icon URL like \"api/icon/getDynamicIcon?type=8&color=%23d23f31&content=SiYuan&id=xxx\"\n- title-img: CSS format like 'background-image:url(\"assets/example.jpg\")', NOT a bare asset path\n- tags: comma-separated tag names"},
 		},
 		Required: []string{"action"},
 	},
@@ -91,9 +91,9 @@ func attrSet(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "attrs (key-value object) is required"}}, IsError: true}, nil
 	}
 
-	nameValues := make(map[string]string, len(attrsArg))
-	for k, v := range attrsArg {
-		nameValues[k] = fmt.Sprintf("%v", v)
+	nameValues, err := parseAttrValues(attrsArg)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
 	}
 
 	if err := model.SetBlockAttrs(id, nameValues); err != nil {
@@ -102,6 +102,21 @@ func attrSet(args map[string]any) (CallToolResult, error) {
 
 	util.PushReloadFiletree()
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "attributes set for: " + id}}}, nil
+}
+
+func parseAttrValues(attrs map[string]any) (map[string]string, error) {
+	nameValues := make(map[string]string, len(attrs))
+	for name, value := range attrs {
+		switch typed := value.(type) {
+		case nil:
+			nameValues[name] = ""
+		case string:
+			nameValues[name] = typed
+		default:
+			return nil, fmt.Errorf("attr %q must be a string or null (got %T)", name, value)
+		}
+	}
+	return nameValues, nil
 }
 
 func attrBatchGet(args map[string]any) (CallToolResult, error) {

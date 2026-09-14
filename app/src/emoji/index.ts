@@ -840,8 +840,6 @@ export const openEmojiPanel = (
     }) => {
     if (type !== "av") {
         window.siyuan.menus.menu.remove();
-    } else {
-        window.siyuan.menus.menu.removeScrollEvent();
     }
 
     const popoverElement = options?.ownerElement?.closest<HTMLElement>(".block__popover");

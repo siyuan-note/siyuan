@@ -1,5 +1,6 @@
 import {getEventName, updateHotkeyTip} from "../protyle/util/compatibility";
 import {setPosition} from "../util/setPosition";
+import {isScrollAboveMenu} from "../util/zIndex";
 import {getAnchoredMenuPosition} from "./menuPosition";
 import {updateMenuGroupsOnMutation, updateMenuItemGroupClasses} from "./menuGroup";
 import {waitForSheetViewport} from "./sheetOpen";
@@ -424,11 +425,8 @@ export class Menu {
         itemsMenuElement.style.maxHeight = Math.max(window.innerHeight - menuElement.getBoundingClientRect().top - 18 + 1, 30) + "px";
     }
 
-    private preventDefault(event: KeyboardEvent) {
-        if (!hasClosestByClassName(event.target as Element, "b3-menu") &&
-            !hasClosestByClassName(event.target as Element, "tooltip") &&
-            // 移动端底部键盘菜单
-            !hasClosestByClassName(event.target as Element, "keyboard__bar")) {
+    private preventDefault(event: Event) {
+        if (!isScrollAboveMenu(event.target as Element, this.element)) {
             event.preventDefault();
         }
     }
@@ -441,7 +439,7 @@ export class Menu {
         }
     }
 
-    public removeScrollEvent() {
+    private removeScrollEvent() {
         window.removeEventListener(isMobile() ? "touchmove" : this.wheelEvent, this.preventDefault, false);
     }
 

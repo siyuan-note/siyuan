@@ -320,7 +320,7 @@ export const jumpToParent = (protyle: IProtyle, nodeElement: Element, type: "par
                 action
             });
             /// #else
-            openMobileFileById(protyle.app, targetId, action);
+            openMobileFileById(protyle.app, targetId, action, "start");
             /// #endif
         });
     });

@@ -89,7 +89,7 @@ export class Menus {
                     }
                     this.unselect();
                     // navigation 根上：新建文档/文件夹/取消挂在/打开文件位置
-                    const menuButton = (event.target as Element).closest("[data-type='more-root']");
+                    const menuButton = (event.target as Element).closest("[data-type='more-root'], .b3-list-item__action[data-type='new']");
                     const rect = menuButton?.getBoundingClientRect();
                     initNavigationMenu(app, target).popup({
                         x: rect ? rect.left : event.clientX,
@@ -101,7 +101,7 @@ export class Menus {
                     break;
                 } else if (dataType === "navigation-file") {
                     this.unselect();
-                    const menuButton = (event.target as Element).closest("[data-type='more-file']");
+                    const menuButton = (event.target as Element).closest("[data-type='more-file'], .b3-list-item__action[data-type='new']");
                     const rect = menuButton?.getBoundingClientRect();
                     // navigation 文件上：删除/重命名/打开文件位置/导出
                     initFileMenu(app, this.getDir(target), target.getAttribute("data-path"), target).popup({

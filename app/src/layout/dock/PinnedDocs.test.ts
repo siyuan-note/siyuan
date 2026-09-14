@@ -34,6 +34,7 @@ interface IPanelHarness {
     suppressClick?: boolean;
     touch?: {dragging: boolean};
     contextMenu(event: unknown): void;
+    setDragImage(row: unknown, dataTransfer: unknown): void;
 }
 
 const loadPanel = (fetchCode = 0) => {
@@ -43,6 +44,8 @@ const loadPanel = (fetchCode = 0) => {
     const childData = {effectiveSortMode: 6, files: [] as {id: string, name: string, icon?: string}[]};
     const config = {readonly: false, fileTree: {docIconClickExpand: false, parentDocClickExpand: false}};
     const calls: {kind: string, args: unknown[]}[] = [];
+    const timers: (() => void)[] = [];
+    const runtime = {config, notebooks: [] as unknown[], languages: {}, touchDragActive: false, touchDragGhost: undefined as unknown};
     const record = (kind: string) => async (...args: unknown[]) => {
         calls.push({kind, args});
         return {code: kind === "http" ? fetchCode : 0, data: args[0] === "/api/filetree/listDocsByPath" ? childData : docs};
@@ -54,14 +57,17 @@ const loadPanel = (fetchCode = 0) => {
     runInNewContext(source, {
         exports,
         localStorage: {setItem: (key: string, value: string) => storage.set(key, value)},
-        window: {siyuan: {config, notebooks: [], languages: {}}},
-        document: {activeElement: null, elementFromPoint: () => hitTest.target, createElement: (tagName: string) => ({
+        window: {siyuan: runtime, setTimeout: (callback: () => void) => timers.push(callback)},
+        document: {activeElement: null, body: {append: (ghost: unknown) => calls.push({kind: "ghost", args: [ghost]})},
+            elementFromPoint: () => hitTest.target, createElement: (tagName: string) => ({
             tagName, style: {setProperty: () => {}},
             setAttribute: () => {}, addEventListener: () => {},
             dataset: {}, children: [] as unknown[],
             append(child: unknown) { this.children.push(child); },
+            remove() { calls.push({kind: "removeGhost", args: [this]}); },
         })},
         require: (name: string) => {
+            if (name.endsWith("/dragTip")) { return {setDragTipGhost: record("dragTipGhost")}; }
             if (name.endsWith("/fileTreeAnimation")) { return {setFileTreeVisibility: (element: HTMLElement, visible: boolean) => element.classList.toggle("fn__none", !visible)}; }
             if (name.endsWith("/pinnedDocsDrop")) { return {getPinnedDropPosition}; }
             if (name.endsWith("/dragover")) { return {dragOverScroll: () => {}}; }
@@ -86,7 +92,7 @@ const loadPanel = (fetchCode = 0) => {
     panel.scheduleRefresh = () => {};
     panel.list = {querySelectorAll: (): unknown[] => []};
     panel.sourceTree = {querySelectorAll: (): unknown[] => []};
-    return {panel, calls, config, docs, storage, childData, hitTest};
+    return {panel, calls, config, docs, storage, childData, hitTest, runtime, timers};
 };
 
 test("collapse clears descendant expansion and persists the closed section", async () => {
@@ -253,11 +259,38 @@ test("pinned heading highlights the whole row while root reorder keeps insertion
     panel.previewDrop(10, 0);
     assert.deepEqual(highlights, ["dragover"]);
     assert.equal(panel.dropTarget.id, "");
+    hitTest.target = {closest: (): Element | null => null};
+    panel.previewDrop(10, 20);
+    assert.deepEqual(highlights, ["dragover", "dragover"]);
     const row = {dataset: {pinRoot: "true", nodeId: "document"},
         getBoundingClientRect: () => ({top: 0, height: 30}), classList: {add: (name: string) => highlights.push(name)}};
     hitTest.target = {closest: () => row};
     panel.previewDrop(10, 1);
-    assert.equal(highlights[1], "dragover__top");
+    assert.equal(highlights[2], "dragover__top");
+});
+
+test("desktop pinned drags create an unclipped ghost and preserve synthetic touch ghosts", () => {
+    for (const touchDragActive of [false, true]) {
+        const {panel, calls, runtime, timers} = loadPanel();
+        runtime.touchDragActive = touchDragActive;
+        const clone = {};
+        const images: unknown[][] = [];
+        panel.setDragImage({cloneNode: () => clone}, {setDragImage: (...args: unknown[]) => images.push(args)});
+        const ghost = calls[0].args[0] as {children: unknown[], className: string, style: {cssText: string}};
+        assert.equal(calls[0].kind, "ghost");
+        assert.equal(ghost.children[0], clone);
+        assert.equal(ghost.className, "b3-list b3-list--background");
+        assert.match(ghost.style.cssText, /position:fixed/);
+        assert.deepEqual(images[0], [ghost, 16, 16]);
+        if (touchDragActive) {
+            assert.equal(runtime.touchDragGhost, ghost);
+            assert.equal(timers.length, 0);
+        } else {
+            assert.equal(calls.some(call => call.kind === "removeGhost"), false);
+            timers[0]();
+            assert.equal(calls.at(-1).kind, "removeGhost");
+        }
+    }
 });
 
 test("invalid drop targets and self moves do not mutate source documents", async () => {

@@ -1,4 +1,5 @@
 import {genUUID} from "../util/genID";
+import {isAbove} from "../util/zIndex";
 import {moveResize} from "./moveResize";
 import {isMobile} from "../util/functions";
 import {isNotCtrl} from "../protyle/util/compatibility";
@@ -96,7 +97,7 @@ left:${left || "auto"};top:${top || "auto"}">
         this.element.classList.remove("b3-dialog--open");
         setTimeout(() => {
             // av 修改列头emoji后点击关闭emoji图标
-            if ((this.element.querySelector(".b3-dialog") as HTMLElement).style.zIndex < window.siyuan.menus.menu.element.style.zIndex) {
+            if (isAbove(window.siyuan.menus.menu.element, this.element.querySelector(".b3-dialog"))) {
                 // https://github.com/siyuan-note/siyuan/issues/6783
                 window.siyuan.menus.menu.remove();
             }

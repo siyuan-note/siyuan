@@ -102,7 +102,7 @@
 - 数据库
   - 表格视图
 - 闪卡间隔重复
-- 接入 OpenAI 接口支持人工智能写作和问答聊天
+- 连接 OpenAI 接口支持人工智能写作和问答聊天
 - Tesseract OCR
 - 模板片段
 - JavaScript/CSS 代码片段
@@ -193,7 +193,7 @@
 
 入口点在构建 Docker 镜像时设置：`ENTRYPOINT ["/opt/siyuan/entrypoint.sh"]`。该脚本允许更改将在容器内运行的用户的 `PUID` 和 `PGID`。这对于解决从主机挂载目录时的权限问题尤为重要。`PUID` 和 `PGID` 可以作为环境变量传递，这样在访问主机挂载的目录时就能更容易地确保正确的权限。
 
-使用 `docker run b3log/siyuan` 运行容器时，请带入以下参数：
+使用 `docker run b3log/siyuan` 运行容器时，请指定以下参数：
 
 - `--workspace`：指定工作空间文件夹路径，在宿主机上通过 `-v` 挂载到容器中
 - `--accessAuthCode`：指定锁屏密码
@@ -264,7 +264,7 @@ services:
 在此设置中：
 
 - PUID “和 ”PGID "是动态设置并传递给容器的
-- 如果没有提供这些变量，将使用默认的 `1000`
+- 如果没有提供这些变量，则使用默认的 `1000`
 
 在环境中指定 `PUID` 和 `PGID` 后，就无需在 compose 文件中明确设置 `user` 指令（`user: '1000:1000'`）。容器将在启动时根据这些环境变量动态调整用户和组。
 
@@ -319,7 +319,7 @@ kubectl -n siyuan port-forward service/siyuan-siyuan 6806:6806
 远程访问时，请使用独立的 HTTPS 域名，以及支持代理 `/ws` WebSocket 连接的 Ingress 控制器，不要进行 URL 重写。配置 `ingress`，并通过 `networkPolicy.ingressFrom` 允许控制器所在命名空间的流量；默认策略仅允许同命名空间的入站流量和 DNS 出站流量。云端同步等外部服务需要显式配置出站规则。TLS、现有 Secret 和存储配置请参阅 [Chart 指南及生产环境示例](https://helmforge.dev/docs/charts/siyuan)。
 
 - **一个工作区只能有一个写入实例：** 不要增加副本数，也不要将同一工作区挂载到另一个运行中的实例，即使使用 ReadWriteMany 存储也不例外。Chart 使用 `Recreate` 策略，升级时会先停止旧实例，再启动新实例，因此会有服务中断。
-- **持久化：** 完整工作区挂载在 `/siyuan/workspace`。默认情况下，卸载 Chart 会保留其创建的 PVC，但删除命名空间或 PVC 仍可能导致数据丢失。通过 `persistence.existingClaim` 复用保留或恢复后的存储卷声明。
+- **持久化：** 完整工作区挂载在 `/siyuan/workspace`。默认情况下，卸载 Chart 会保留其创建的 PVC，但删除命名空间或 PVC 仍可能导致数据丢失。可通过 `persistence.existingClaim` 复用保留或恢复后的存储卷声明。
 - **备份与升级：** 备份完整工作区前，请正常停止写入实例，或使用能够保证应用一致性的备份流程。仅复制运行中的 SQLite 索引文件无法保证备份完整且一致。请妥善保管保存锁屏密码的 Secret、加密密钥和加密笔记本恢复密码，并在独立 PVC 上测试恢复。升级前先备份，并确认新版本是否涉及存储格式变更：Helm 回滚不会撤销数据迁移。
 
 Docker 部署的限制同样适用：仅支持浏览器访问，不支持桌面端和移动端应用连接，不支持导出 PDF、HTML 和 Word 格式，也不支持导入 Markdown 文件。
@@ -564,7 +564,7 @@ CLI 可执行文件为 `<安装目录>/resources/kernel/SiYuan-Kernel`，可通�
 
 ### 思源是如何存储数据的？
 
-数据保存在工作空间文件夹下，在工作空间 data 文件夹下：
+数据保存在工作空间 data 文件夹下：
 
 - `assets` 用于保存所有插入的资源文件
 - `emojis` 用于保存自定义图标表情图片
@@ -580,7 +580,7 @@ CLI 可执行文件为 `<安装目录>/resources/kernel/SiYuan-Kernel`，可通�
 
 不支持通过第三方同步盘进行数据同步，否则可能会导致数据损坏。
 
-虽然不支持第三方同步盘，但是支持对接第三方云端存储（会员特权）。
+虽然不支持第三方同步盘，但是支持连接第三方云端存储（会员特权）。
 
 ### 思源是开源的吗？
 

@@ -10,7 +10,7 @@ The pinned section appears at the top of the document panel and uses pinned docu
 
 ## User interaction
 
-The section appears when it contains pinned documents and hides automatically when empty, on both desktop and mobile. Pin the first document through its context menu; once the section is visible, documents can also be added by dragging. Unpinning the last document hides the section. Incoming synchronized pin data updates visibility in the same way. There is no separate visibility switch, and previously saved visibility settings no longer affect the section. Collapsing the section preserves its entries and their order.
+The section appears when it contains pinned documents and hides automatically when empty, on both desktop and mobile. Pin the first document through its context menu; once the section is visible, documents can also be added by dragging. Unpinning the last document hides the section. Pin data obtained from sync updates visibility in the same way. There is no separate visibility switch, and previously saved visibility settings no longer affect the section. Collapsing the section preserves its entries and their order.
 
 | Operation | Behavior |
 |---|---|

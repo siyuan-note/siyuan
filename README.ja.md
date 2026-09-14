@@ -43,6 +43,7 @@
   - [インストールパッケージ](#インストールパッケージ)
   - [パッケージマネージャー](#パッケージマネージャー)
   - [Docker ホスティング](#docker-ホスティング)
+  - [Kubernetes ホスティング](#kubernetes-ホスティング)
   - [Unraid ホスティング](#unraid-ホスティング)
   - [TrueNAS ホスティング](#truenas-ホスティング)
   - [テストチャンネル](#テストチャンネル)
@@ -289,6 +290,35 @@ NGINXリバースプロキシを使用してポート6806を隠します。注�
 - デスクトップおよびモバイルアプリケーションの接続はサポートされておらず、ブラウザでの使用のみサポートされています
 - PDF、HTML、Word形式へのエクスポートはサポートされていません
 - Markdownファイルのインポートはサポートされていません
+
+</details>
+
+### Kubernetes ホスティング
+
+<details>
+<summary>Kubernetes デプロイメント</summary>
+
+[HelmForge SiYuan チャート](https://github.com/helmforgedev/charts/tree/main/charts/siyuan) は HelmForge コミュニティが保守しており、公式の `b3log/siyuan` イメージを使用します。SiYuan 公式のチャートではありません。チャートに関する問題は [HelmForge](https://github.com/helmforgedev/charts/issues) に報告してください。
+
+Helm、kubectl、およびデフォルトの StorageClass で 10Gi の ReadWriteOnce ボリュームを動的に確保できる Kubernetes クラスターを用意して、次を実行します：
+
+```bash
+helm repo add helmforge https://repo.helmforge.dev
+helm repo update
+helm install siyuan helmforge/siyuan --namespace siyuan --create-namespace --wait
+kubectl -n siyuan get secret siyuan-siyuan-auth -o go-template='{{index .data "access-code" | base64decode}}{{"\n"}}'
+kubectl -n siyuan port-forward service/siyuan-siyuan 6806:6806
+```
+
+<http://localhost:6806> を開き、生成されたアクセス認証コードを入力します。表示されたコードはパスワードとして保護してください。API トークンとは異なる認証情報です。上記のリソース名は、チャートのデフォルト設定とリリース名 `siyuan` を前提としています。
+
+リモートアクセスには、専用の HTTPS ホスト名と、`/ws` の WebSocket 接続を中継できる Ingress コントローラーを使用し、URL の書き換えは行わないでください。`ingress` を設定し、`networkPolicy.ingressFrom` でコントローラーの名前空間からの通信を許可します。デフォルトのポリシーでは、同じ名前空間からの受信と DNS への送信のみが許可されます。クラウド同期などの外部サービスには、明示的な送信ルールが必要です。TLS、既存の Secret、ストレージの設定は、[チャートガイドと本番環境の設定例](https://helmforge.dev/docs/charts/siyuan)を参照してください。
+
+- **ワークスペースに書き込むインスタンスは 1 つだけ：** レプリカ数を増やしたり、同じワークスペースを別の実行中インスタンスにマウントしたりしないでください。ReadWriteMany ストレージでも同様です。チャートは `Recreate` を使用し、古いインスタンスの停止後に新しいインスタンスを起動するため、アップグレード中はサービスが停止します。
+- **永続化：** ワークスペース全体を `/siyuan/workspace` にマウントします。チャートが作成した PVC はアンインストール時にデフォルトで保持されますが、名前空間や PVC を削除するとデータが失われる可能性があります。保持または復元した PVC は `persistence.existingClaim` で再利用します。
+- **バックアップとアップグレード：** 書き込みインスタンスを正常に停止してからワークスペース全体をバックアップするか、アプリケーションの整合性を保証するバックアップ手順を使用してください。使用中の SQLite インデックスをコピーするだけでは不十分です。認証用 Secret、暗号鍵、暗号化ノートブックの復旧パスワードを安全に保管し、別の PVC への復元をテストしてください。アップグレード前にバックアップを取得し、ストレージ形式の変更を確認してください。Helm のロールバックではデータの移行は元に戻りません。
+
+Docker ホスティングの制限も適用されます。ブラウザーでのみ利用でき、デスクトップおよびモバイルアプリからの接続、PDF・HTML・Word へのエクスポート、Markdown ファイルのインポートはサポートされません。
 
 </details>
 

@@ -1,56 +1,45 @@
+const editors = new Map<Element, IProtyle>();
+let activeEditor: IProtyle;
+const undoContexts = new WeakMap<IProtyle, {owner: IProtyle, run: (redo: boolean) => void}>();
+
+export const setMobileToolbarUndo = (protyle: IProtyle, owner: IProtyle, run: (redo: boolean) => void) => {
+    undoContexts.set(protyle, {owner, run});
+};
+
+export const getMobileToolbarUndo = (protyle: IProtyle) => undoContexts.get(protyle);
+
+export const getMobileToolbarProtyle = () => {
+    const root = document.activeElement?.closest(".protyle-wysiwyg");
+    if (root) {
+        activeEditor = editors.get(root);
+    }
+    if (activeEditor && (!activeEditor.element.isConnected || activeEditor.element.closest("[inert]"))) {
+        activeEditor = undefined;
+    }
+    return activeEditor;
+};
+
 export const bindMobileToolbar = (protyle: IProtyle) => {
-    let frame: number | undefined;
-    const toolbar = protyle.toolbar;
-    const viewport = window.visualViewport;
-    const position = () => {
-        const top = viewport?.offsetTop || 0;
-        toolbar.element.style.left = `${viewport?.offsetLeft || 0}px`;
-        toolbar.element.style.width = `${viewport?.width || window.innerWidth}px`;
-        toolbar.element.style.top = `${Math.max(top, top + (viewport?.height || window.innerHeight) - toolbar.element.offsetHeight)}px`;
-    };
-    const render = () => {
-        if (frame !== undefined) {
+    const element = protyle.wysiwyg.element;
+    editors.set(element, protyle);
+    const activate = (event: Event) => {
+        if ((event.target as Element).closest(".protyle-wysiwyg") !== element || activeEditor === protyle) {
             return;
         }
-        frame = window.requestAnimationFrame(() => {
-            frame = undefined;
-            if (toolbar.subElement.contains(document.activeElement)) {
-                return;
-            }
-            const selection = window.getSelection();
-            const range = selection?.rangeCount > 0 ? selection.getRangeAt(0) : undefined;
-            const belongsToEditor = (node: Node) =>
-                (node.nodeType === 1 ? node as Element : node.parentElement)?.closest(".protyle-wysiwyg") ===
-                protyle.wysiwyg.element;
-            if (!range || selection.isCollapsed || !belongsToEditor(range.startContainer) ||
-                !belongsToEditor(range.endContainer)) {
-                toolbar.element.classList.add("fn__none");
-                return;
-            }
-            toolbar.render(protyle, range);
-            position();
-            toolbar.element.style.zIndex = (++window.siyuan.zIndex).toString();
-        });
+        const previous = activeEditor;
+        activeEditor = protyle;
+        // 共享工具栏切换编辑上下文，保留各编辑器自己的选区和撤销栈。
+        window.dispatchEvent(new CustomEvent("siyuan-mobile-toolbar-editor", {detail: previous}));
     };
-    const preventBlur = (event: MouseEvent) => event.preventDefault();
-    // 工具栏固定在键盘上方，避开原生选区菜单，并脱离宿主的变换和裁剪边界。
-    toolbar.element.setAttribute("data-position-boundary", "viewport");
-    toolbar.element.classList.add("protyle-toolbar--mobile");
-    document.body.appendChild(toolbar.element);
-    toolbar.element.addEventListener("mousedown", preventBlur);
-    document.addEventListener("selectionchange", render);
-    window.addEventListener("resize", position);
-    viewport?.addEventListener("resize", position);
-    viewport?.addEventListener("scroll", position);
+    element.addEventListener("focusin", activate);
+    element.addEventListener("pointerdown", activate);
     return () => {
-        window.removeEventListener("resize", position);
-        viewport?.removeEventListener("resize", position);
-        viewport?.removeEventListener("scroll", position);
-        document.removeEventListener("selectionchange", render);
-        toolbar.element.removeEventListener("mousedown", preventBlur);
-        toolbar.element.remove();
-        if (frame !== undefined) {
-            window.cancelAnimationFrame(frame);
+        element.removeEventListener("focusin", activate);
+        element.removeEventListener("pointerdown", activate);
+        editors.delete(element);
+        if (activeEditor === protyle) {
+            activeEditor = undefined;
+            window.dispatchEvent(new CustomEvent("siyuan-mobile-toolbar-editor", {detail: protyle}));
         }
     };
 };

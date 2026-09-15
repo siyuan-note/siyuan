@@ -26,6 +26,20 @@ class ToolbarElement {
     }
 }
 
+test("shared toolbar restores document entries after editing a restricted fragment", () => {
+    const root = new ToolbarElement();
+    const back = new ToolbarElement("goback");
+    const bold = new ToolbarElement("strong");
+    const tag = new ToolbarElement("tag");
+    const separator = new ToolbarElement(undefined, "separator_1");
+    root.children = [back, bold, separator, tag];
+    const options = {order: ["strong", "separator_1", "tag"], isVisible: () => true};
+    applyMobileToolbarEntries(root as unknown as HTMLElement, ["strong"], options);
+    assert.deepEqual(root.children.filter(item => !item.classList.contains("fn__none")), [back, bold]);
+    applyMobileToolbarEntries(root as unknown as HTMLElement, getDefaultToolbar(true), options);
+    assert.deepEqual(root.children.filter(item => !item.classList.contains("fn__none")), [back, bold, separator, tag]);
+});
+
 test("mobile toolbar keeps navigation reachable and removes empty separators", () => {
     const root = new ToolbarElement();
     const back = new ToolbarElement("goback");

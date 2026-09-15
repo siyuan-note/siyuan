@@ -17,9 +17,13 @@ const loadFunction = (path: string, name: string, globals: Record<string, unknow
     return exports.subject;
 };
 
-const keyboardEvent = (key: string, header = false) => ({
+const keyboardEvent = (key: string, control: boolean | string = false) => ({
     key,
-    target: {localName: "div", closest: () => header ? {} : null},
+    target: {
+        localName: "div",
+        closest: (selector: string) => selector.split(", ").some(value =>
+            control === true ? [".tabs-header", ".protyle-action"].includes(value) : control === value) ? {} : null,
+    },
     defaultPrevented: false,
     propagationStopped: false,
     preventDefault() { this.defaultPrevented = true; },
@@ -46,16 +50,20 @@ test("readonly body and tab header preserve keyboard defaults and bubbling", asy
 
 const globalFixture = (disabled: boolean, hasRange = true, foreignRange = false) => {
     const calls: string[] = [];
+    const contexts: Array<{protyle: unknown, previousRange?: unknown}> = [];
     const body = {};
     const range = {commonAncestorContainer: foreignRange ? {} : body};
     const protyle = {
         disabled,
-        options: {},
+        options: {render: {}},
+        block: {id: "doc", rootID: "doc"},
+        preview: {element: {classList: {contains: () => true}}},
+        getInstance: () => ({isFullscreen: () => false, setFullscreen: () => calls.push("fullscreen")}),
         element: {contains: (node: unknown) => node === body || (node as any)?.localName === "div"},
         undo: {undo: () => calls.push("undo"), redo: () => calls.push("redo")},
     };
     const bindings = new Proxy({}, {get: (_target, key) => key});
-    const edit = loadFunction("src/boot/globalEvent/keydown.ts", "editKeydown", {
+    const globals = {
         getAllEditor: () => [{protyle}],
         getSelection: () => ({rangeCount: hasRange ? 1 : 0, getRangeAt: () => range}),
         getActiveTab: (): null => null,
@@ -64,10 +72,27 @@ const globalFixture = (disabled: boolean, hasRange = true, foreignRange = false)
         hasClosestByClassName: () => false,
         isOnlyMeta: () => false,
         matchHotKey: (binding: string, event: {key: string}) => binding === event.key,
-        execByCommand: ({command}: {command: string}) => calls.push(command),
-        onlyProtyleCommand: ({command}: {command: string}) => calls.push(command),
-    });
-    return {edit: (event: any) => edit({}, event), calls};
+        execByCommand: (context: {command: string, protyle: unknown, previousRange?: unknown}) => {
+            calls.push(context.command);
+            contexts.push(context);
+        },
+        onlyProtyleCommand: (context: {command: string, protyle: unknown, previousRange?: unknown}) => {
+            calls.push(context.command);
+            contexts.push(context);
+        },
+        isEncryptedBox: () => false,
+        fetchPost: () => calls.push("spaceRepetition"),
+        zoomOut: () => calls.push("exitFocus"),
+        openBacklink: () => calls.push("backlinks"),
+        openGraph: () => calls.push("graphView"),
+        openOutline: () => calls.push("outline"),
+        reloadProtyle: () => calls.push("refresh"),
+        toggleEditMode: () => calls.push("editMode"),
+        saveLayout: (): void => undefined,
+    };
+    const documentKeydown = loadFunction("src/boot/globalEvent/keydown.ts", "documentKeydown", globals);
+    const edit = loadFunction("src/boot/globalEvent/keydown.ts", "editKeydown", {...globals, documentKeydown});
+    return {edit: (event: any) => edit({}, event), calls, contexts, protyle, range};
 };
 
 test("readonly content mutations are consumed before command execution, even without a valid selection", () => {
@@ -120,15 +145,45 @@ test("document readonly shortcut works without a body selection", () => {
     }
 });
 
-test("tab headers can toggle document readonly without using a body selection", () => {
+test("editor controls dispatch document commands without carrying stale body selections", () => {
     for (const disabled of [false, true]) {
         for (const [hasRange, foreignRange] of [[true, false], [false, false], [true, true]]) {
-            const fixture = globalFixture(disabled, hasRange, foreignRange);
-            const event = keyboardEvent("switchReadonly", true);
-            assert.equal(fixture.edit(event), true);
-            assert.equal(event.defaultPrevented, true);
-            assert.deepEqual(fixture.calls, ["switchReadonly"]);
+            for (const command of ["switchReadonly", "switchAdjust", "search", "replace", "spaceRepetition",
+                "exitFocus", "backlinks", "graphView", "outline", "refresh", "fullscreen", "editMode"]) {
+                const fixture = globalFixture(disabled, hasRange, foreignRange);
+                const event = keyboardEvent(command, true);
+                assert.equal(fixture.edit(event), true, command);
+                assert.equal(event.defaultPrevented, true, command);
+                assert.deepEqual(fixture.calls, [command]);
+                for (const context of fixture.contexts) {
+                    assert.equal(context.protyle, fixture.protyle);
+                    assert.equal(context.previousRange, undefined);
+                }
+            }
         }
+    }
+});
+
+test("editor controls cannot execute body commands even with a retained selection", () => {
+    for (const disabled of [false, true]) {
+        for (const control of [true, "button", '[role="tab"]', '[role="checkbox"]']) {
+            const fixture = globalFixture(disabled);
+            for (const command of ["undo", "redo", "duplicate", "duplicateCompletely", "quickMakeCard", "move",
+                "addToDatabase", "copyRichText", "copyPlainText", "copyBlockRef", "focusBreadcrumb", "customShortcut"]) {
+                fixture.edit(keyboardEvent(command, control));
+            }
+            assert.deepEqual(fixture.calls, []);
+            assert.equal(fixture.edit(keyboardEvent("switchAdjust", control)), true);
+            assert.deepEqual(fixture.calls, ["switchAdjust"]);
+        }
+    }
+});
+
+test("document search retains the selection only for body focus in the same editor", () => {
+    for (const foreignRange of [false, true]) {
+        const fixture = globalFixture(false, true, foreignRange);
+        assert.equal(fixture.edit(keyboardEvent("search")), true);
+        assert.equal(fixture.contexts[0].previousRange, foreignRange ? undefined : fixture.range);
     }
 });
 

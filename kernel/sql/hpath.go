@@ -1,7 +1,6 @@
 package sql
 
 import (
-	"database/sql"
 	"errors"
 
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -28,45 +27,47 @@ func RefreshHPathsBatch(doc *treenode.BlockTree, blockAfter, treeAfter int64, li
 			return txErr
 		}
 		defer tx.Rollback()
-		var last sql.NullInt64
-		if txErr = tx.QueryRow("SELECT MAX(rowid) FROM (SELECT rowid FROM blocks WHERE root_id = ? AND box = ? AND path = ? AND rowid > ? ORDER BY rowid LIMIT ?)", doc.ID, doc.BoxID, doc.Path, blockAfter, limit).Scan(&last); txErr != nil {
+		// 同时取得游标和需要清理缓存的块，多读一行判断本批是否已经完成文档。
+		rows, txErr := tx.Query("SELECT rowid, id, hpath FROM blocks WHERE root_id = ? AND box = ? AND path = ? AND rowid > ? ORDER BY rowid LIMIT ?", doc.ID, doc.BoxID, doc.Path, blockAfter, limit+1)
+		if txErr != nil {
 			return txErr
 		}
-		blockDone = !last.Valid
-		if last.Valid {
-			rows, queryErr := tx.Query("SELECT id FROM blocks WHERE root_id = ? AND box = ? AND path = ? AND rowid > ? AND rowid <= ? AND hpath != ?", doc.ID, doc.BoxID, doc.Path, blockAfter, last.Int64, doc.HPath)
-			if queryErr != nil {
-				return queryErr
+		last, count := blockAfter, 0
+		blockDone = true
+		var ids []string
+		for rows.Next() {
+			if count == limit {
+				blockDone = false
+				break
 			}
-			var ids []string
-			for rows.Next() {
-				var id string
-				if queryErr = rows.Scan(&id); queryErr != nil {
-					rows.Close()
-					return queryErr
-				}
-				ids = append(ids, id)
-			}
-			queryErr = rows.Err()
-			rows.Close()
-			if queryErr != nil {
-				return queryErr
-			}
-			if len(ids) > 0 {
-				if _, txErr = tx.Exec("UPDATE blocks SET hpath = ? WHERE root_id = ? AND box = ? AND path = ? AND rowid > ? AND rowid <= ? AND hpath != ?", doc.HPath, doc.ID, doc.BoxID, doc.Path, blockAfter, last.Int64, doc.HPath); txErr != nil {
-					return txErr
-				}
-			}
-			if txErr = tx.Commit(); txErr != nil {
+			var id, hpath string
+			if txErr = rows.Scan(&last, &id, &hpath); txErr != nil {
+				rows.Close()
 				return txErr
 			}
-			for _, id := range ids {
-				removeBlockCache(id)
+			count++
+			if hpath != doc.HPath {
+				ids = append(ids, id)
 			}
-			nextBlock = last.Int64
-			return nil
 		}
-		return tx.Commit()
+		txErr = rows.Err()
+		rows.Close()
+		if txErr != nil {
+			return txErr
+		}
+		if len(ids) > 0 {
+			if _, txErr = tx.Exec("UPDATE blocks SET hpath = ? WHERE root_id = ? AND box = ? AND path = ? AND rowid > ? AND rowid <= ? AND hpath != ?", doc.HPath, doc.ID, doc.BoxID, doc.Path, blockAfter, last, doc.HPath); txErr != nil {
+				return txErr
+			}
+		}
+		if txErr = tx.Commit(); txErr != nil {
+			return txErr
+		}
+		for _, id := range ids {
+			removeBlockCache(id)
+		}
+		nextBlock = last
+		return nil
 	})
 	if errors.Is(err, treenode.ErrHPathRefreshBusy) {
 		return blockAfter, treeAfter, false, true, nil

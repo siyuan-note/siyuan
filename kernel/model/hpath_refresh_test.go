@@ -226,6 +226,69 @@ func TestDocumentHPathRefresh(t *testing.T) {
 		drainHPathRefreshTest(t)
 		assertHPathTestDoc(t, database, child, "/Synced/RecoveredChild")
 	})
+
+	t.Run("batch boundaries and independent cursors", func(t *testing.T) {
+		for _, test := range []struct {
+			name      string
+			limit     int
+			shortened string
+		}{
+			{"partial batch", 33, ""},
+			{"exact batch", 32, ""},
+			{"one row tail", 31, ""},
+			{"exact multiple", 16, ""},
+			{"content finishes first", 16, "blocks"},
+			{"blocktree finishes first", 16, "blocktrees"},
+		} {
+			t.Run(test.name, func(t *testing.T) {
+				tree := newHPathTestDoc(t, box.ID, "/", "Batch", 31)
+				sql.FlushQueue()
+				if test.shortened != "" {
+					db := database
+					if test.shortened == "blocktrees" {
+						db = btDatabase
+					}
+					if _, err := db.Exec("DELETE FROM "+test.shortened+" WHERE rowid IN (SELECT rowid FROM "+test.shortened+" WHERE root_id = ? AND type != 'd' ORDER BY rowid DESC LIMIT 17)", tree.ID); err != nil {
+						t.Fatal(err)
+					}
+				}
+				if err := RenameDoc(box.ID, tree.Path, "BatchRenamed"); err != nil {
+					t.Fatal(err)
+				}
+				sql.FlushQueue()
+				doc := treenode.GetBlockTreeInBox(tree.ID, box.ID)
+				var blockAfter, treeAfter int64
+				for batch := 1; batch <= (32+test.limit-1)/test.limit; batch++ {
+					nextBlock, nextTree, done, busy, err := sql.RefreshHPathsBatch(doc, blockAfter, treeAfter, test.limit)
+					if err != nil || busy {
+						t.Fatalf("batch %d failed: busy=%v err=%v", batch, busy, err)
+					}
+					if done != (batch == (32+test.limit-1)/test.limit) {
+						t.Fatalf("batch %d has incorrect completion: %v", batch, done)
+					}
+					for _, cursor := range []struct {
+						db          *gosql.DB
+						table       string
+						after, next int64
+					}{{database, "blocks", blockAfter, nextBlock}, {btDatabase, "blocktrees", treeAfter, nextTree}} {
+						var advanced, skipped, premature int
+						if err = cursor.db.QueryRow("SELECT COUNT(*) FROM "+cursor.table+" WHERE root_id = ? AND rowid > ? AND rowid <= ?", tree.ID, cursor.after, cursor.next).Scan(&advanced); err != nil || cursor.next < cursor.after || advanced > test.limit {
+							t.Fatalf("invalid %s cursor %d -> %d: rows=%d err=%v", cursor.table, cursor.after, cursor.next, advanced, err)
+						}
+						if err = cursor.db.QueryRow("SELECT COUNT(*) FROM "+cursor.table+" WHERE root_id = ? AND rowid <= ? AND hpath != ?", tree.ID, cursor.next, doc.HPath).Scan(&skipped); err != nil || skipped != 0 {
+							t.Fatalf("batch skipped %s rows: %d, %v", cursor.table, skipped, err)
+						}
+						if err = cursor.db.QueryRow("SELECT COUNT(*) FROM "+cursor.table+" WHERE root_id = ? AND rowid > ? AND type != 'd' AND hpath = ?", tree.ID, cursor.next, doc.HPath).Scan(&premature); err != nil || premature != 0 {
+							t.Fatalf("batch updated lookahead %s rows: %d, %v", cursor.table, premature, err)
+						}
+					}
+					blockAfter, treeAfter = nextBlock, nextTree
+				}
+				assertHPathTestDoc(t, database, tree, "/BatchRenamed")
+			})
+		}
+		drainHPathRefreshTest(t)
+	})
 }
 
 func prepareHPathRefreshTest(t *testing.T) {

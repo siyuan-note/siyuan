@@ -11,9 +11,18 @@ import (
 
 var ErrHPathRefreshBusy = errors.New("blocktree writer is busy")
 
-func ensureDocPathIndex(database *sql.DB) error {
-	_, err := database.Exec("CREATE INDEX IF NOT EXISTS idx_blocktrees_doc_path ON blocktrees(box_id, path) WHERE type = 'd'")
-	return err
+const blockHPathBatchQuery = "SELECT rowid FROM blocktrees WHERE root_id = ? AND box_id = ? AND path = ? AND rowid > ? ORDER BY rowid LIMIT ?"
+
+func ensureHPathIndexes(database *sql.DB) error {
+	for _, stmt := range []string{
+		"CREATE INDEX IF NOT EXISTS idx_blocktrees_doc_path ON blocktrees(box_id, path) WHERE type = 'd'",
+		"CREATE INDEX IF NOT EXISTS idx_blocktrees_root_box ON blocktrees(root_id, box_id)",
+	} {
+		if _, err := database.Exec(stmt); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // DocHPaths 返回文档及其后代的文档行，不加载正文或枚举内容块。
@@ -96,6 +105,9 @@ func CurrentParentHPath(tree *parse.Tree) string {
 // RefreshBlockHPathsBatch 在块树写锁内校验文档快照，并提交一个有界批次。
 // apply 在同一临界区更新内容库；两库任一提交失败时，由未清除的恢复任务重试。
 func RefreshBlockHPathsBatch(doc *BlockTree, after int64, limit int, apply func() error) (next int64, done bool, err error) {
+	if limit < 1 || limit > 512 {
+		return after, false, errors.New("invalid hpath batch limit")
+	}
 	if !indexBlockTreeLock.TryLock() {
 		return after, false, ErrHPathRefreshBusy
 	}
@@ -109,12 +121,30 @@ func RefreshBlockHPathsBatch(doc *BlockTree, after int64, limit int, apply func(
 		return after, false, err
 	}
 	defer tx.Rollback()
-	var last sql.NullInt64
-	if err = tx.QueryRow("SELECT MAX(rowid) FROM (SELECT rowid FROM blocktrees WHERE root_id = ? AND box_id = ? AND path = ? AND rowid > ? ORDER BY rowid LIMIT ?)", doc.ID, doc.BoxID, doc.Path, after, limit).Scan(&last); err != nil {
+	// 多读取一行判断是否还有下一批，末批在当前事务中确认完成。
+	rows, err := tx.Query(blockHPathBatchQuery, doc.ID, doc.BoxID, doc.Path, after, limit+1)
+	if err != nil {
 		return after, false, err
 	}
-	if last.Valid {
-		if _, err = tx.Exec("UPDATE blocktrees SET hpath = ? WHERE root_id = ? AND box_id = ? AND path = ? AND rowid > ? AND rowid <= ? AND hpath != ?", doc.HPath, doc.ID, doc.BoxID, doc.Path, after, last.Int64, doc.HPath); err != nil {
+	last, count, done := after, 0, true
+	for rows.Next() {
+		if count == limit {
+			done = false
+			break
+		}
+		if err = rows.Scan(&last); err != nil {
+			rows.Close()
+			return after, false, err
+		}
+		count++
+	}
+	err = rows.Err()
+	rows.Close()
+	if err != nil {
+		return after, false, err
+	}
+	if count > 0 {
+		if _, err = tx.Exec("UPDATE blocktrees SET hpath = ? WHERE root_id = ? AND box_id = ? AND path = ? AND rowid > ? AND rowid <= ? AND hpath != ?", doc.HPath, doc.ID, doc.BoxID, doc.Path, after, last, doc.HPath); err != nil {
 			return after, false, err
 		}
 	}
@@ -124,8 +154,5 @@ func RefreshBlockHPathsBatch(doc *BlockTree, after int64, limit int, apply func(
 	if err = tx.Commit(); err != nil {
 		return after, false, err
 	}
-	if !last.Valid {
-		return after, true, nil
-	}
-	return last.Int64, false, nil
+	return last, done, nil
 }

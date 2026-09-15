@@ -7,7 +7,9 @@
 - 纯重命名不加载后代正文，不删除重建后代块树，不修改后代 `.sy` 文件
 - 相同文档的重复重命名合并处理；父任务可以覆盖后代的批量更新，但每个改名源文档保留独立恢复记录
 - 文档行通过按笔记本、数据路径建立的局部索引定位，避免为了统计子树规模扫描全部内容块
+- 块树批量查询使用 `(root_id, box_id)` 联合索引，将扫描范围限制在当前文档；既有普通数据库及加密数据库初始化时幂等补建，不修改源文档格式
 - 后台每次最多运行约 20 毫秒，每批最多更新两库各 512 行，根据实测批次耗时在 32 至 512 行之间调整；单条语句不能强行打断，所以预算不是严格的延迟上限
+- 每批额外预读一行判断是否还有后续数据，预读行不写入且不推进游标，末批直接确认完成；内容库在同一次查询中收集待清理缓存的块 ID，两个数据库分别维护游标与完成状态
 - 批次之间释放数据库事务和锁，普通编辑及索引队列优先，同步期间暂停后台更新；默认每 100 毫秒调度一次
 - 执行批次前重新读取文档位置与路径，并在块树写锁内校验快照；普通索引操作使用当前文档路径，避免旧队列写回过期的 `hpath`
 - 移动仍走原有流程，后台路径更新不会修改笔记本归属或真实数据路径
@@ -25,9 +27,9 @@
 在 `kernel/` 执行：
 
 ```text
-go test -tags "fts5 sqlcipher" ./model ./sql ./treenode ./filesys -run "Test(DocumentHPathRefresh|EncryptedDocumentHPathRefresh|IndexQueueRenameRecovery|ReadDocHPathDoesNotRepairSource|HPathRefreshYieldsToBlockTreeWriter)" -count=1
+go test -tags "fts5 sqlcipher" ./model ./sql ./treenode ./filesys -run "Test(DocumentHPathRefresh|EncryptedDocumentHPathRefresh|IndexQueueRenameRecovery|ReadDocHPathDoesNotRepairSource|HPathRefresh)" -count=1
 ```
 
-这些测试包含有界更新、后代文件和块树行身份保持不变、按新路径创建文档、重复及父子改名、旧编辑快照、部分更新后的恢复、源文件已保存但元数据未更新时的恢复、数据库写入失败、移动、删除、同步标题、加密锁定及重新解锁、密文保持不变和认证失败保留原数据。它们也包含在 CI 的完整内核测试命令 `go test -tags "fts5 sqlcipher" ./... -count=1` 中。
+这些测试包含有界更新、满批与尾批结束判定、两库行数不同的游标推进、预读行不提前更新、既有索引迁移与查询扫描范围、后代文件和块树行身份保持不变、按新路径创建文档、重复及父子改名、旧编辑快照、部分更新后的恢复、源文件已保存但元数据未更新时的恢复、数据库写入失败、移动、删除、同步标题、加密锁定及重新解锁、密文保持不变和认证失败保留原数据。它们也包含在 CI 的完整内核测试命令 `go test -tags "fts5 sqlcipher" ./... -count=1` 中。
 
 耗时超过一秒的后台任务会记录文档数、批次数、总耗时和实际数据库批次耗时。评估性能时应同时观察前台响应时间、CPU 和磁盘读写量，不应将包含调度等待的总耗时视为数据库写入时间。

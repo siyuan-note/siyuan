@@ -272,6 +272,12 @@
     }
   }
 
+  &__template-panels {
+    @media (max-width: 750px) {
+      flex-direction: column;
+    }
+  }
+
   &__template-list {
     --file-toggle-width: 0px;
     border-right: 1px solid var(--b3-border-color);
@@ -291,6 +297,14 @@
         padding: 0 6px 0 4px;
       }
     }
+
+    @media (max-width: 750px) {
+      border-bottom: 1px solid var(--b3-border-color);
+      border-right: 0;
+      flex-shrink: 1;
+      max-height: 30vh;
+      width: auto;
+    }
   }
 
   &__template-editor .custom-attr__avvalue.av__template-switch {
@@ -304,11 +318,46 @@
     }
   }
 
+  &__template-editor .custom-attr .block__icons {
+    @media (max-width: 750px) {
+      flex-wrap: wrap;
+    }
+  }
+
   &__template-editor .custom-attr .block__logo:not(.popover__block) {
     cursor: default;
 
+    @media (max-width: 750px) {
+      align-self: auto;
+      flex: 1 1 100%;
+      width: auto;
+    }
+
     &:hover {
       background-color: transparent;
+    }
+  }
+
+  // 模板编辑器控件与筛选面板统一为描边卡片样式
+  &__template-editor .custom-attr {
+    .b3-text-field,
+    .b3-select {
+      border: 1px solid var(--b3-theme-surface-lighter);
+      border-radius: var(--b3-border-radius);
+      background-color: var(--b3-menu-background);
+      box-shadow: none;
+      outline: none;
+
+      &:hover,
+      &:focus {
+        background-color: var(--b3-menu-background);
+        box-shadow: none;
+      }
+    }
+
+    .b3-text-field {
+      min-height: 0;
+      padding: 4px 8px;
     }
   }
 

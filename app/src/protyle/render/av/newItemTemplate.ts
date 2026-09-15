@@ -16,6 +16,11 @@ import * as dayjs from "dayjs";
 import {getAVBlockRefSubtype} from "./cellValue";
 import {getAVColorStyle} from "./color";
 import {createAVPlainTextEditValue} from "./richTextValue";
+import {isMobile} from "../../../util/functions";
+/// #if MOBILE
+import {activeBlur} from "../../../mobile/util/keyboardToolbar";
+import {bindBottomSheetDialog} from "../../../mobile/util/bindBottomSheetDialog";
+/// #endif
 
 interface ICreatePosition {
     previousID?: string;
@@ -609,18 +614,34 @@ export const openNewItemTemplateDialog = (options: {
     }
     let defaultTemplateID = options.data.defaultTemplateID || "";
     const dialog = new Dialog({
-        title: window.siyuan.languages.itemTemplate,
-        width: "820px",
-        height: "70vh",
+        title: isMobile() ? undefined : window.siyuan.languages.itemTemplate,
+        width: isMobile() ? "100vw" : "820px",
+        height: isMobile() ? "60vh" : "70vh",
         containerClassName: "b3-dialog__container--theme",
+        hideCloseIcon: isMobile(),
         content: `<div class="fn__flex fn__flex-column" style="height:100%">
-    <div class="fn__flex fn__flex-1" style="min-height:0">
+    <div class="av__template-panels fn__flex fn__flex-1" style="min-height:0">
         <ul class="av__template-list b3-list b3-list--background" data-role="template-list"></ul>
         <div data-role="editor-host" class="fn__flex-1 fn__flex"></div>
     </div>
     <div class="b3-dialog__action"><button class="b3-button b3-button--cancel" data-role="cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text" data-role="confirm">${window.siyuan.languages.confirm}</button></div>
 </div>`,
+        destroyCallback: () => {
+            /// #if MOBILE
+            disposeSheet();
+            /// #endif
+        },
     });
+    /// #if MOBILE
+    const destroyDialog = dialog.destroy.bind(dialog);
+    dialog.destroy = (destroyOptions?: IObject) => {
+        if (dialog.element.contains(document.activeElement)) {
+            activeBlur(true);
+        }
+        destroyDialog(destroyOptions);
+    };
+    const disposeSheet = bindBottomSheetDialog(dialog, async () => dialog.destroy());
+    /// #endif
     const root = dialog.element;
     const listElement = root.querySelector('[data-role="template-list"]') as HTMLElement;
     const hostElement = root.querySelector('[data-role="editor-host"]') as HTMLElement;

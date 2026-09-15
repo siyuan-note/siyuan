@@ -1729,7 +1729,7 @@ body.mobile-topbar--merged {
     transition: transform .15s cubic-bezier(0, 0, .2, 1);
   }
 
-  .mobile-bottom-sheet__handle {
+  .mobile-bottom-sheet > .b3-menu__title--root {
     height: 16px;
     flex-shrink: 0;
     position: relative;

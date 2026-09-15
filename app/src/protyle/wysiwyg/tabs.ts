@@ -202,6 +202,21 @@ export const initEditorTabs = (protyle: IProtyle) => {
         taskLabel: window.siyuan.languages.task,
         task: item => setTabTask(protyle, item, nextTaskListMarker(getTabTask(item))),
         endEdit: () => hideElements(["toolbar"], protyle),
+        activate: item => {
+            if (!canEdit(protyle, item)) {
+                return;
+            }
+            // 切换页签时同步正文光标和工具栏选区，后续操作沿用当前页签的位置。
+            const content = getTabContent(item);
+            const target = Array.from(content.querySelectorAll<HTMLElement>('[contenteditable="true"]'))
+                .find(element => !isHiddenTabContent(element) && element.getClientRects().length > 0);
+            const range = document.createRange();
+            range.selectNodeContents(target || content);
+            range.collapse(true);
+            hideElements(["toolbar"], protyle);
+            focusByRange(range);
+            protyle.toolbar.range = range.cloneRange();
+        },
         select: (tabs, id) => {
             if (!canEdit(protyle, tabs) || tabs.getAttribute("tabs-active-id") === id) {
                 return;

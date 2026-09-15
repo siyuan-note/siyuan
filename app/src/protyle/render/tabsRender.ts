@@ -7,6 +7,7 @@ export interface ITabsRenderOptions {
     label?: string;
     addLabel?: string;
     select?: (tabs: HTMLElement, id: string) => void;
+    activate?: (item: HTMLElement) => void;
     rename?: (item: HTMLElement) => void;
     add?: (tabs: HTMLElement) => void;
     menu?: (tabs: HTMLElement, item: HTMLElement, anchor: HTMLElement) => void;
@@ -244,6 +245,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                             }
                         }
                         controller.select(tabs, id, true);
+                        controller.options.activate?.(items.find(item => itemID(item) === id));
                         if (top < visibleTop) {
                             tabs.scrollIntoView({block: "start", inline: "nearest"});
                         }

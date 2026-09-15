@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20260816130653"
+		"updated": "20260914201256"
 	},
 	"Children": [
 		{
@@ -739,7 +739,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170054-1c4wqjk",
-				"updated": "20260812170000"
+				"updated": "20260914201256"
 			},
 			"Children": [
 				{
@@ -844,6 +844,410 @@
 				{
 					"Type": "NodeText",
 					"Data": ". External MCP tools may send local data, change external systems, or incur charges; review the effects shown on confirmation cards."
+				}
+			]
+		},
+		{
+			"ID": "20260914200109-onf0hf6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260914200109-onf0hf6",
+				"updated": "20260914201256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Public-web research with Parallel Search MCP"
+				}
+			]
+		},
+		{
+			"ID": "20260914200109-b0z5f3j",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914200109-b0z5f3j",
+				"updated": "20260914201256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "Parallel Search MCP",
+					"TextMarkAHref": "https://docs.parallel.ai/integrations/mcp/search-mcp"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " for public-web research alongside your notes. This example connects to its free, rate-limited anonymous endpoint over Streamable HTTP; no Parallel account or API key is required. Your AI provider's charges still apply."
+				}
+			]
+		},
+		{
+			"ID": "20260914200109-zzxlzx3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914200109-zzxlzx3",
+				"updated": "20260914201256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Artificial Intelligence"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Agent MCP Service"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", select "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Add MCP server"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", then fill in:"
+				}
+			]
+		},
+		{
+			"ID": "20260914200109-r9wpkm6",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260914200109-r9wpkm6",
+				"updated": "20260914201256"
+			},
+			"Children": [
+				{
+					"ID": "20260914200109-5fg5tw8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260914200109-5fg5tw8",
+						"updated": "20260914201256"
+					},
+					"Children": [
+						{
+							"ID": "20260914200109-h4gm91b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914200109-h4gm91b",
+								"updated": "20260914201256"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Name"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Parallel Search MCP"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914200109-e1wh3d5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260914200109-e1wh3d5",
+						"updated": "20260914201256"
+					},
+					"Children": [
+						{
+							"ID": "20260914200109-b8abgt1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914200109-b8abgt1",
+								"updated": "20260914201256"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Connection type"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Remote service (HTTP/OAuth)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914200109-8thunsd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260914200109-8thunsd",
+						"updated": "20260914201256"
+					},
+					"Children": [
+						{
+							"ID": "20260914200109-lutwm2p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914200109-lutwm2p",
+								"updated": "20260914201256"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "URL"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "https://search.parallel.ai/mcp"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914200109-1vlvzm5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260914200109-1vlvzm5",
+						"updated": "20260914201256"
+					},
+					"Children": [
+						{
+							"ID": "20260914200109-uergkd1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914200109-uergkd1",
+								"updated": "20260914201256"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "HTTP headers"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "leave empty"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914200109-uqlc2ir",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260914200109-uqlc2ir",
+						"updated": "20260914201256"
+					},
+					"Children": [
+						{
+							"ID": "20260914200109-elywigx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914200109-elywigx",
+								"updated": "20260914201256"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Timeout"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "keep the default 30 seconds"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260914200109-xv0dof7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914200109-xv0dof7",
+				"updated": "20260914201256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Save the service with the remaining settings at their defaults and keep it enabled. Wait for "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Connected"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "2 tools"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", then ask the agent:"
+				}
+			]
+		},
+		{
+			"ID": "20260914200109-1l4py69",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914200109-1l4py69",
+				"updated": "20260914201256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "“Use Parallel Search MCP to find the official MCP Streamable HTTP documentation and summarize it with source links.”"
+				}
+			]
+		},
+		{
+			"ID": "20260914200109-g6qr8bp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914200109-g6qr8bp",
+				"updated": "20260914201256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Once enabled, the agent can choose "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "web_search"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "web_fetch"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " during a task. Queries, requested URLs and any objective/context sent in those calls go to Parallel, including note content if the agent supplies it. Review confirmation cards and avoid sharing private notes or secrets in public-web requests. Disable the service on the same settings page to remove these tools from the agent."
+				}
+			]
+		},
+		{
+			"ID": "20260914200109-ksad4in",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914200109-ksad4in",
+				"updated": "20260914201256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Requests also carry SiYuan's normal "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "User-Agent"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", which identifies the app, version and platform for aggregate usage measurement."
 				}
 			]
 		},

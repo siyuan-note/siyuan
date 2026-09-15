@@ -6,7 +6,7 @@
 		"id": "20260804171002-aiagt02",
 		"title": "AI 智能體",
 		"type": "doc",
-		"updated": "20260816130653"
+		"updated": "20260914201256"
 	},
 	"Children": [
 		{
@@ -739,7 +739,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170054-vppxnqj",
-				"updated": "20260812170000"
+				"updated": "20260914201256"
 			},
 			"Children": [
 				{
@@ -844,6 +844,410 @@
 				{
 					"Type": "NodeText",
 					"Data": "。呼叫外部 MCP 工具可能傳送本機資料、修改外部系統或產生費用，應根據確認卡片核對具體影響。"
+				}
+			]
+		},
+		{
+			"ID": "20260914200109-1kbyach",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260914200109-1kbyach",
+				"updated": "20260914201256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用 Parallel Search MCP 研究公開網頁"
+				}
+			]
+		},
+		{
+			"ID": "20260914200109-8voflia",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914200109-8voflia",
+				"updated": "20260914201256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "Parallel Search MCP",
+					"TextMarkAHref": "https://docs.parallel.ai/integrations/mcp/search-mcp"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可以在處理筆記的同時研究公開網頁。本範例透過 Streamable HTTP 連線至免費且有速率限制的匿名端點，無需 Parallel 帳號或 API 金鑰。AI 提供者的費用仍然適用。"
+				}
+			]
+		},
+		{
+			"ID": "20260914200109-y9k3623",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914200109-y9k3623",
+				"updated": "20260914201256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "智能體 MCP 服務"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新增 MCP 服務"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，然後填寫以下內容："
+				}
+			]
+		},
+		{
+			"ID": "20260914200109-x7dppi6",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260914200109-x7dppi6",
+				"updated": "20260914201256"
+			},
+			"Children": [
+				{
+					"ID": "20260914200109-6hgckm3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260914200109-6hgckm3",
+						"updated": "20260914201256"
+					},
+					"Children": [
+						{
+							"ID": "20260914200109-xcilte7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914200109-xcilte7",
+								"updated": "20260914201256"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "名稱"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Parallel Search MCP"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914200109-6r25j0v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260914200109-6r25j0v",
+						"updated": "20260914201256"
+					},
+					"Children": [
+						{
+							"ID": "20260914200109-xroko28",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914200109-xroko28",
+								"updated": "20260914201256"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "連線類型"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "遠端服務（HTTP/OAuth）"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914200109-j95cbph",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260914200109-j95cbph",
+						"updated": "20260914201256"
+					},
+					"Children": [
+						{
+							"ID": "20260914200109-2jv7knn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914200109-2jv7knn",
+								"updated": "20260914201256"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "URL"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "https://search.parallel.ai/mcp"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914200109-so31ery",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260914200109-so31ery",
+						"updated": "20260914201256"
+					},
+					"Children": [
+						{
+							"ID": "20260914200109-eubgn6i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914200109-eubgn6i",
+								"updated": "20260914201256"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "HTTP 請求標頭"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
+								},
+								{
+									"Type": "NodeText",
+									"Data": "留空"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260914200109-bnyxvx8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260914200109-bnyxvx8",
+						"updated": "20260914201256"
+					},
+					"Children": [
+						{
+							"ID": "20260914200109-000skkt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260914200109-000skkt",
+								"updated": "20260914201256"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "超時時間"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "："
+								},
+								{
+									"Type": "NodeText",
+									"Data": "保留預設的 30 秒"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260914200109-4wzpxfg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914200109-4wzpxfg",
+				"updated": "20260914201256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "儲存服務，保留其餘設定的預設值，並保持服務啟用。等到顯示 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "已連接"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "2 個工具"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 後，向智能體提出以下請求："
+				}
+			]
+		},
+		{
+			"ID": "20260914200109-0v60gg3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914200109-0v60gg3",
+				"updated": "20260914201256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "「使用 Parallel Search MCP 尋找 MCP Streamable HTTP 的官方文件，歸納內容並附上來源連結。」"
+				}
+			]
+		},
+		{
+			"ID": "20260914200109-h30o7w1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914200109-h30o7w1",
+				"updated": "20260914201256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "服務啟用後，智能體可以在任務中選擇呼叫 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "web_search"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "web_fetch"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。呼叫中的查詢、請求的網址以及目標或上下文會傳送給 Parallel；如果智能體在參數中加入筆記內容，這些內容也會傳送。請檢查確認卡片，避免在公開網頁請求中分享私人筆記或金鑰。在同一設定頁面停用服務，即可從智能體中移除這些工具。"
+				}
+			]
+		},
+		{
+			"ID": "20260914200109-6gk4xyy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260914200109-6gk4xyy",
+				"updated": "20260914201256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "請求還會攜帶思源通常使用的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "User-Agent"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，其中的應用程式、版本和平台資訊用於彙總統計使用情況。"
 				}
 			]
 		},

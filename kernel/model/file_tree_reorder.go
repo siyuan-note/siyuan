@@ -1,6 +1,7 @@
 package model
 
 import (
+	"errors"
 	"fmt"
 	"maps"
 	"path"
@@ -153,7 +154,7 @@ func ReorderDocTree(sourceIDs []string, targetID, position string, preview, remo
 		}
 		if source.BoxID == target.BoxID && (target.Path == source.Path ||
 			strings.HasPrefix(target.Path, strings.TrimSuffix(source.Path, ".sy")+"/")) {
-			return nil, fmt.Errorf("cannot move document [%s] into itself", id)
+			return nil, errors.New(Conf.Language(87))
 		}
 		if byID[id] != nil {
 			continue

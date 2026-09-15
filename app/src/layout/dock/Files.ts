@@ -858,6 +858,7 @@ export class Files extends Model {
             const selectRootElements: HTMLElement[] = [];
             const selectFileElements: HTMLElement[] = [];
             const fromPaths: string[] = [];
+            let invalidMoveTarget = false;
             this.element.querySelectorAll(".b3-list-item--focus").forEach((item: HTMLElement) => {
                 if (item.getAttribute("data-type") === "navigation-root") {
                     selectRootElements.push(item);
@@ -871,6 +872,7 @@ export class Files extends Model {
                     if (!isChild) {
                         // 禁止父节点移动到子节点 https://github.com/siyuan-note/siyuan/issues/12539
                         if (newElement.getAttribute("data-path").startsWith(item.dataset.path.replace(".sy", ""))) {
+                            invalidMoveTarget = true;
                             return;
                         }
                         selectFileElements.push(item);
@@ -878,6 +880,11 @@ export class Files extends Model {
                     }
                 }
             });
+            if (invalidMoveTarget) {
+                showMessage(window.siyuan.languages._kernel[87]);
+                newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
+                return;
+            }
             if (newElement.classList.contains("dragover")) {
                 const sourceNotebookIds = selectFileElements.map((item) =>
                     item.getAttribute("data-notebook-id") || item.closest("ul[data-url]")?.getAttribute("data-url") || "");

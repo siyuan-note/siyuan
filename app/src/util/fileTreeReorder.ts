@@ -1,12 +1,23 @@
 import {confirmDialog} from "../dialog/confirmDialog";
 import {fetchSyncPost} from "./fetch";
 import {getRelativeReorderRequest} from "./fileTreeMove";
+import {showMessage} from "../dialog/message";
+import {processMessage} from "./processMessage";
+
+const processReorderMessage = (response: IWebSocketData) => {
+    if (response.code === -1 && response.msg === window.siyuan.languages._kernel[87]) {
+        showMessage(response.msg, 7000, "error");
+        return;
+    }
+    processMessage(response);
+};
 
 // 确认前只请求预览，取消或关闭对话框不会移动文档。
 export const reorderSortedFileTree = async (sourceIDs: string[], targetID: string, after: boolean):
     Promise<{notebook: string, parentPath: string} | undefined> => {
     const request = {...getRelativeReorderRequest(sourceIDs, targetID, after), respectSort: true};
-    const preview = await fetchSyncPost("/api/filetree/reorderDocs", {...request, preview: true});
+    const preview = await fetchSyncPost("/api/filetree/reorderDocs", {...request, preview: true}, undefined, false);
+    processReorderMessage(preview);
     if (preview.code !== 0 || !preview.data?.changed) {
         return;
     }
@@ -20,7 +31,8 @@ export const reorderSortedFileTree = async (sourceIDs: string[], targetID: strin
             return;
         }
     }
-    const response = await fetchSyncPost("/api/filetree/reorderDocs", {...request, removeSorts});
+    const response = await fetchSyncPost("/api/filetree/reorderDocs", {...request, removeSorts}, undefined, false);
+    processReorderMessage(response);
     if (response.code !== 0) {
         return;
     }

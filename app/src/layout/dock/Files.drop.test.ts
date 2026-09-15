@@ -44,7 +44,7 @@ test("dropping a document into itself or descendants reports an invalid target w
     for (const target of ["/parent.sy", "/parent/child.sy", "/parent/child/grandchild.sy"]) {
         for (const sources of [["/parent.sy"], ["/other.sy", "/parent.sy"]]) {
             const result = dropDocuments(sources, target);
-            assert.deepEqual(result.messages, [{message: "Cannot move to this location", timeout: 0, type: "error"}]);
+            assert.deepEqual(result.messages, [{message: "Cannot move to this location", timeout: 7000, type: "error"}]);
             assert.equal(result.requests.length, 0);
             assert.equal(result.classes.size, 0);
         }

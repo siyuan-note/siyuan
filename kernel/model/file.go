@@ -1223,12 +1223,10 @@ func indexWriteTreeUpsertQueue(tree *parse.Tree) (err error) {
 }
 
 func renameWriteJSONQueue(tree *parse.Tree) (err error) {
-	size, err := filesys.WriteTree(tree)
+	size, err := writeRenameDoc(tree)
 	if err != nil {
 		return
 	}
-	sql.RenameTreeQueue(tree)
-	treenode.UpsertBlockTree(tree)
 	refreshDocInfoWithSize(tree, size)
 	return
 }
@@ -1889,6 +1887,9 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 		}
 	}
 
+	// 文件位置和块树索引切换期间暂停后台路径任务，避免将移动中的文档误判为已删除。
+	hpathRefresh.Lock()
+	defer hpathRefresh.Unlock()
 	needMoveSubDocs := fromBox.Exist(fromFolder)
 	if needMoveSubDocs {
 		// 移动子文档文件夹
@@ -2237,21 +2238,6 @@ func renameDoc0(boxID, p, title string) (err error) {
 		tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 		if err = renameWriteJSONQueue(tree); err != nil {
 			return
-		}
-
-		subFiles := box.ListFiles(tree.Path)
-		for _, subFile := range subFiles {
-			if !strings.HasSuffix(subFile.path, ".sy") {
-				continue
-			}
-
-			subTree, loadErr := filesys.LoadTree(box.ID, subFile.path, luteEngine) // LoadTree 会重新构造 HPath
-			if loadErr != nil {
-				continue
-			}
-
-			treenode.SetBlockTreePath(subTree)
-			sql.RenameTreeQueue(subTree)
 		}
 
 		refText := getNodeRefText(tree.Root)

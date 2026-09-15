@@ -325,6 +325,10 @@ func checkTreeFile(absPath string) error {
 
 // readParentDocIAL 区分父文档缺失与读取、认证、解析失败，只有缺失才允许补树。
 func readParentDocIAL(absPath string) (map[string]string, error) {
+	return readDocIAL(absPath, false)
+}
+
+func readDocIAL(absPath string, strict bool) (map[string]string, error) {
 	boxID := docIALBoxID(absPath)
 	dek, _, release, err := acquireCryptoLease(boxID)
 	if err != nil {
@@ -343,11 +347,21 @@ func readParentDocIAL(absPath string) (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	if strict {
+		if err = treenode.CheckSpecJSON(data); err != nil {
+			return nil, err
+		}
+	}
 	var doc struct {
+		ID         string
+		Type       string
 		Properties map[string]string
 	}
 	if err = json.Unmarshal(data, &doc); err != nil {
 		return nil, fmt.Errorf("parse parent document [%s]: %w", absPath, err)
+	}
+	if strict && (doc.ID != util.GetTreeID(absPath) || doc.Type != "NodeDocument") {
+		return nil, fmt.Errorf("invalid document identity [%s]", absPath)
 	}
 	if len(doc.Properties) == 0 {
 		return nil, fmt.Errorf("missing parent document properties [%s]", absPath)

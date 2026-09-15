@@ -107,8 +107,8 @@ func dbOpToIndexEntry(op *dbQueueOperation) *indexEntry {
 		return &indexEntry{Action: "upsert", ID: op.upsertTree.ID, Box: op.upsertTree.Box, Path: op.upsertTree.Path}
 	case "index":
 		return &indexEntry{Action: "index", ID: op.indexTree.ID, Box: op.indexTree.Box, Path: op.indexTree.Path}
-	case "rename":
-		return &indexEntry{Action: "rename", ID: op.indexTree.ID, Box: op.indexTree.Box, Path: op.indexTree.Path}
+	case "rename", "rename_doc":
+		return &indexEntry{Action: op.action, ID: op.indexTree.ID, Box: op.indexTree.Box, Path: op.indexTree.Path}
 	case "move":
 		return &indexEntry{Action: "move", ID: op.indexTree.ID, Box: op.indexTree.Box, Path: op.indexTree.Path}
 	case "update_refs":
@@ -273,13 +273,13 @@ func indexEntryToOp(e indexEntry, luteEngine *lute.Lute, prefix string) *dbQueue
 			return nil
 		}
 		return &dbQueueOperation{indexTree: tree, inQueueTime: time.Now(), action: "index"}
-	case "rename":
+	case "rename", "rename_doc":
 		tree, err := filesys.LoadTree(e.Box, e.Path, luteEngine)
 		if err != nil {
 			logIndexEntryLoadError(prefix, "rename", e, err)
 			return nil
 		}
-		return &dbQueueOperation{indexTree: tree, inQueueTime: time.Now(), action: "rename"}
+		return &dbQueueOperation{indexTree: tree, inQueueTime: time.Now(), action: e.Action}
 	case "move":
 		tree, err := filesys.LoadTree(e.Box, e.Path, luteEngine)
 		if err != nil {

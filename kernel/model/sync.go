@@ -478,6 +478,8 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 			}
 
 			p := strings.TrimPrefix(upsertFile, box)
+			hpathRefresh.Lock()
+			defer hpathRefresh.Unlock()
 			msg := fmt.Sprintf(Conf.Language(40), util.GetTreeID(p))
 			util.IncBootProgress(bootProgressPart, msg)
 			pushSyncStatusBar(msg)
@@ -488,7 +490,23 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 			if nil != err0 {
 				return "", false
 			}
+			oldDoc := treenode.GetBlockTreeInBox(rootID, box)
+			refreshPath := oldDoc != nil && oldDoc.BoxID == box && oldDoc.HPath != tree.HPath
+			var refreshKey string
+			if refreshPath {
+				if refreshKey, err0 = queueHPathRefreshLocked(tree); err0 != nil {
+					logging.LogErrorf("queue synced document hpaths [%s] failed: %s", rootID, err0)
+					return "", false
+				}
+			}
 			treenode.UpsertBlockTree(tree)
+			if refreshPath {
+				if err0 = treenode.RefreshDocHPaths(tree); err0 != nil {
+					logging.LogErrorf("refresh synced document paths [%s] failed: %s", rootID, err0)
+					return "", false
+				}
+				hpathRefresh.tasks[refreshKey].recover = false
+			}
 			sql.UpsertTreeQueue(tree)
 
 			bts := treenode.GetBlockTreesByRootIDInBox(rootID, tree.Box)

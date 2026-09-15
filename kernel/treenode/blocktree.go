@@ -74,6 +74,9 @@ func initDatabase(forceRebuild bool) {
 		}
 	}
 	if !forceRebuild {
+		if err := ensureDocPathIndex(db); err != nil {
+			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document path index failed: %s", err)
+		}
 		if _, err := db.Exec("CREATE INDEX IF NOT EXISTS idx_blocktrees_box_id ON blocktrees(box_id)"); err != nil {
 			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create blocktree box index failed: %s", err)
 		}
@@ -112,6 +115,9 @@ func initDBTables() {
 	_, err = db.Exec("CREATE INDEX idx_blocktrees_box_id ON blocktrees(box_id)")
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create index [idx_blocktrees_box_id] failed: %s", err)
+	}
+	if err = ensureDocPathIndex(db); err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create document path index failed: %s", err)
 	}
 }
 
@@ -705,6 +711,7 @@ func RemoveBlockTree(boxID, id string) {
 var indexBlockTreeLock = sync.Mutex{}
 
 func IndexBlockTree(tree *parse.Tree) {
+	tree.HPath = CurrentParentHPath(tree)
 	var changedNodes []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || !n.IsBlock() || "" == n.ID {
@@ -742,6 +749,7 @@ func IndexBlockTree(tree *parse.Tree) {
 }
 
 func UpsertBlockTree(tree *parse.Tree) {
+	tree.HPath = CurrentParentHPath(tree)
 	oldBts := map[string]*BlockTree{}
 	bts := GetBlockTreesByRootIDInBox(tree.ID, tree.Box)
 	for _, bt := range bts {
@@ -1030,6 +1038,7 @@ func initEncryptedBlockTreeTables(boxDB *sql.DB) (err error) {
 		"CREATE INDEX IF NOT EXISTS idx_blocktrees_id ON blocktrees(id)",
 		"CREATE INDEX IF NOT EXISTS idx_blocktrees_root_id ON blocktrees(root_id)",
 		"CREATE INDEX IF NOT EXISTS idx_blocktrees_box_id ON blocktrees(box_id)",
+		"CREATE INDEX IF NOT EXISTS idx_blocktrees_doc_path ON blocktrees(box_id, path) WHERE type = 'd'",
 	}
 	for _, s := range stmts {
 		if _, err = boxDB.Exec(s); err != nil {

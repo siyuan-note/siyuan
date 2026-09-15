@@ -311,6 +311,9 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         fragment.protyle.toolbar.element.contains(target) || fragment.protyle.toolbar.subElement.contains(target) ||
         !!(target instanceof Element && target.closest("#commonMenu, .b3-dialog"));
     document.addEventListener("pointerdown", event => {
+        if (belongsToEditor(event.target as Node)) {
+            return;
+        }
         // 表格右侧空白由外层编辑器忽略，保持单元格编辑状态，避免销毁编辑器后留下失效光标。
         const target = event.target instanceof Element ? event.target : undefined;
         if (target && owner.wysiwyg.element.contains(target) &&
@@ -319,12 +322,11 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
             const nodeRect = table.getBoundingClientRect();
             if (tableRect && event.clientX > tableRect.right &&
                 event.clientY >= nodeRect.top && event.clientY <= nodeRect.bottom) {
+                hideElements(["hint", "toolbar", "util"], fragment.protyle);
                 return;
             }
         }
-        if (!belongsToEditor(event.target as Node)) {
-            finish();
-        }
+        finish();
     }, {capture: true, signal});
     window.addEventListener("pagehide", finish, {signal});
     window.addEventListener("blur", commit, {signal});

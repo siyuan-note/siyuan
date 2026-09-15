@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -229,6 +230,15 @@ var html2BlockDOM = contractHandler(apicontract.HTML2BlockDOM, func(c *gin.Conte
 
 	parse.TextMarks2Inlines(tree) // 先将 TextMark 转换为 Inlines https://github.com/siyuan-note/siyuan/issues/13056
 	parse.NestedInlines2FlattedSpansHybrid(tree, false)
+	// 合并转义节点拆分出的同格式文本，避免重解析时将片段边缘空白重复移到标记外。
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && n.Type == ast.NodeTextMark && n.Previous != nil && n.Previous.Type == ast.NodeTextMark &&
+			n.ContainTextMarkTypes("strong", "em", "s", "mark", "sup", "sub") &&
+			n.TextMarkATitle == n.Previous.TextMarkATitle && reflect.DeepEqual(n.KramdownIAL, n.Previous.KramdownIAL) {
+			luteEngine.MergeSameTextMark(n)
+		}
+		return ast.WalkContinue
+	})
 	removeWhitespaceTextMarkStyles(tree)
 
 	md, err := lute.FormatNodeSync(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
@@ -241,6 +251,8 @@ var html2BlockDOM = contractHandler(apicontract.HTML2BlockDOM, func(c *gin.Conte
 		}
 	}
 
+	// 中间格式已经对 HTML 文本编码，重解析时保留实体，避免将正文中的标签当作 DOM 渲染。
+	luteEngine.ParseOptions.KeepEscaped = true
 	tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering && ast.NodeIFrame == n.Type {

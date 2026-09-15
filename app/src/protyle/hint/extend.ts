@@ -1,4 +1,5 @@
 import {fetchPost} from "../../util/fetch";
+import {registerBuiltinSlashHint} from "./builtinSlash";
 import {insertHTML} from "../util/insertHTML";
 import {TABLE_CELL_SLASH_IDS} from "../util/tableCellRichMenu";
 import {getIconByType} from "../../editor/getIcon";
@@ -424,7 +425,7 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
     }];
 };
 
-export const hintSlash = (key: string, protyle: IProtyle, sourceOrHideConfiguredCreate: THintSource | boolean = false) => {
+export const hintSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle, sourceOrHideConfiguredCreate: THintSource | boolean = false) => {
     const enabled = isEntryVisible(SLASH_MENU_ROOT_PATH);
     if (!enabled) {
         return [];
@@ -475,7 +476,7 @@ export const hintSlash = (key: string, protyle: IProtyle, sourceOrHideConfigured
         order: getEntryOrder(SLASH_MENU_ROOT_PATH),
         visible: (entryKey) => isEntryVisible(getSlashMenuEntryPath(entryKey)),
     });
-};
+});
 
 export const hintTag = (key: string, protyle: IProtyle): IHintData[] => {
     protyle.hint.genLoading(protyle);

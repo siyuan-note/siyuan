@@ -1,6 +1,7 @@
 import {isMobile} from "../../util/functions";
 import {showMessage} from "../../dialog/message";
 import {hintRef, hintSlash} from "../hint/extend";
+import {registerBuiltinSlashHint} from "../hint/builtinSlash";
 import {mountProtyleLiteFragment} from "../lite/fragmentEditor";
 import {getDefaultToolbar} from "../toolbar/defaults";
 import {hideElements} from "../ui/hideElements";
@@ -144,8 +145,8 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         event.stopPropagation();
     }));
     const toolbar = getDefaultToolbar(isMobile()).filter(item => typeof item === "string" ? item !== "ai" : item.name !== "ai");
-    const safeSlash = (key: string, protyle: IProtyle, hintSource: THintSource) =>
-        hintSlash(key, protyle, hintSource).filter(item => TABLE_CELL_SLASH_IDS.has(item.id));
+    const safeSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle, hintSource: THintSource) =>
+        hintSlash(key, protyle, hintSource).filter(item => TABLE_CELL_SLASH_IDS.has(item.id)));
     const hint: IProtyleOptions["hint"] = {
         extend: [{key: "((", hint: hintRef}, {key: "【【", hint: hintRef}, {key: "（（", hint: hintRef},
             {key: "[[", hint: hintRef}, {key: "/", hint: safeSlash}, {key: "、", hint: safeSlash}],

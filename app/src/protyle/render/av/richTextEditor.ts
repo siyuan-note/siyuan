@@ -2,6 +2,7 @@ import {escapeHtml} from "../../../util/escape";
 import {isMobile} from "../../../util/functions";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
 import {hintRef, hintSlash} from "../../hint/extend";
+import {registerBuiltinSlashHint} from "../../hint/builtinSlash";
 import {mountProtyleLiteFragment} from "../../lite/fragmentEditor";
 import {getDefaultToolbar} from "../../toolbar/defaults";
 import {highlightRender} from "../highlightRender";
@@ -78,10 +79,10 @@ const hintAVRef = (key: string, protyle: IProtyle, source: THintSource) => {
     return hintRef(key, protyle, source);
 };
 
-const hintAVSlash = (key: string, protyle: IProtyle, source: THintSource) => {
+const hintAVSlash = registerBuiltinSlashHint((key: string, protyle: IProtyle, source: THintSource) => {
     prepareHint(protyle);
     return hintSlash(key, protyle, source).filter((item) => item.id && SAFE_SLASH_IDS.has(item.id));
-};
+});
 
 const setPanelPosition = (panelElement: HTMLElement, anchorElement: HTMLElement) => {
     if (isMobile()) {

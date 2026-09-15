@@ -709,10 +709,9 @@ body.mobile-topbar--merged {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 16px;
-    height: 16px;
+    width: 34px;
+    height: 30px;
     flex-shrink: 0;
-    margin-right: 4px;
     color: var(--b3-theme-primary);
 
     svg {
@@ -759,6 +758,7 @@ body.mobile-topbar--merged {
     svg {
       width: 16px;
       height: 16px;
+      margin-right: 0;
     }
   }
 

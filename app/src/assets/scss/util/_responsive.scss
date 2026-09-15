@@ -147,6 +147,19 @@
     &__panel {
       flex-direction: column;
 
+      &.history__panel--empty {
+        & > .history__side {
+          flex: 1;
+          height: auto;
+          border-bottom: 0;
+        }
+
+        & > .history__resize,
+        & > .fn__flex-column {
+          display: none;
+        }
+      }
+
       & > .fn__flex-column {
         min-height: auto;
         border-radius: var(--b3-border-radius-b);

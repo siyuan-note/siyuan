@@ -100,6 +100,7 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
     assetElement.classList.add("fn__none");
     mdElement.classList.add("fn__none");
     docElement.classList.add("fn__none");
+    element.querySelector(".history__panel").classList.add("history__panel--empty");
     if (typeElement.value === "2" || typeElement.value === "4") {
         notebookElement.setAttribute("disabled", "disabled");
         if (window.siyuan.storage[Constants.LOCAL_HISTORY].type !== 2 && window.siyuan.storage[Constants.LOCAL_HISTORY].type !== 4) {
@@ -937,6 +938,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.preventDefault();
                 break;
             } else if (target.classList.contains("b3-list-item") && ["assets", "doc", "av"].includes(type)) {
+                firstPanelElement.querySelector(".history__panel").classList.remove("history__panel--empty");
                 const dataPath = target.getAttribute("data-path");
                 if (type === "assets") {
                     assetElement.classList.remove("fn__none");

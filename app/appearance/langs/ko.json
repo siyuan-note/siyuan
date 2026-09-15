@@ -1,4 +1,5 @@
 {
+	"pluginPublishDataTip": "플러그인 데이터 공개",
 	"pluginPublishData": "플러그인 공개 데이터",
 	"pluginPublishDataGrantTip": "게시 서비스 방문자가 다음 필드를 읽도록 허용할까요? 공개해도 되는 내용만 게시하세요. 기존 공개 데이터는 삭제됩니다",
 	"pluginPublishDataRevokeTip": "접근 권한을 취소하고 이 플러그인의 공개 데이터 삭제",

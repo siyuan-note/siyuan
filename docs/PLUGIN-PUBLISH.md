@@ -4,6 +4,53 @@
 
 Publish permissions apply to visitors, not individual browser plugins. Published data can be downloaded by visitors and read by other code in the same page. Never publish tokens, passwords, registration codes, or private notebook content.
 
+## User interactions and feedback
+
+A public snapshot is a separate copy of data that a plugin prepares for publishing-service visitors. Allowing a plugin in the publishing service, authorizing its data fields, and generating public data are three separate steps. Authorization does not generate data or copy private settings.
+
+### Interface responsibilities
+
+Data authorization is accessed through the upload icon button beside the plugin card's **Publish service** switch. Its tooltip is **Publish plugin data**, and it opens the **Plugin published data** dialog. References to the **Plugin published data** action below mean this icon button.
+
+| Action | Provided by | Interface and behavior |
+| --- | --- | --- |
+| Enable the publishing service | SiYuan | Enable the service in settings; downloaded plugin cards then show the per-plugin **Publish service** switch and **Plugin published data** button |
+| Allow plugin publishing | SiYuan | The card's **Publish service** switch controls whether the plugin can be published; the switch is disabled when the author prohibits publishing |
+| Grant or revoke data access | SiYuan | The **Plugin published data** dialog shows the package name, declared fields, and grant or revocation information, with **Cancel** and **Confirm** buttons |
+| Generate or update public data | Plugin | The plugin provides an action or documented automatic updates in the administrator environment; SiYuan has no shared generate-snapshot button |
+| Display public content and read status | Plugin | The plugin displays content and handles missing authorization, missing snapshots, and read failures; SiYuan returns corresponding API errors rather than rendering a shared plugin content area |
+
+### First use
+
+1. The administrator enables the publishing service in settings and configures access and document permissions through the existing publishing features
+2. Open <kbd>Settings</kbd> - <kbd>Marketplace</kbd> - <kbd>Downloaded</kbd>, select **Plugin**, check that plugins are globally enabled and the target plugin is enabled, then turn on its card's **Publish service** switch
+3. If the plugin needs public data, click **Plugin published data** on the same card; when no fields are declared, SiYuan reports that the plugin has not declared publishable fields and does not open a grant dialog; plugins using only frontend resources do not need a data grant
+4. Review the package name and complete field list, including the disclosure scope and notice that the previous snapshot will be cleared; the current dialog grants the declared fields as a group without individual checkboxes, and **Cancel** leaves authorization unchanged
+5. Click **Confirm** to submit the grant and close the dialog; closing it does not mean data has been generated and must not be treated as proof that saving succeeded; there is currently no separate grant-success notification or snapshot-status panel, and reopening **Plugin published data** reads the current grant, showing revocation information when access is granted
+6. Follow the plugin's instructions to generate data in the administrator interface or trigger its automatic update condition; the plugin should explain the entry point, public content, and update timing, reporting an update only after saving succeeds
+7. Visitors open the published page, where the plugin reads and displays public data; if authorization exists but generation has not succeeded, the plugin should display a missing-snapshot message or safe defaults without attempting to read private settings
+
+### Updates and stopping publication
+
+* Update: regenerate public data through the plugin in the administrator environment; updates within the existing scope need no new grant, and the plugin must explain whether saving private settings also updates public data
+* View updates: visitors reload the published page or use the plugin's refresh action; SiYuan has no shared plugin-snapshot refresh button
+* Revoke: click **Plugin published data** again, review the revocation information, and click **Confirm**; success removes the grant and snapshot and denies subsequent data reads, while frontend resources remain controlled by the plugin's publishing switch
+* Pause all publishing for a plugin: turn off its card's **Publish service** switch to deny subsequent resource and data reads; this does not revoke the data grant, so turning it back on can make the retained snapshot readable if its grant remains valid
+* Grant again: after revocation, a new grant still requires the plugin to generate new public data; expanding the declaration also requires a new grant, which clears the previous snapshot
+* Uninstall and reinstall: uninstall removes authorization and the snapshot, so reinstall requires authorization and generation again; stopping publication cannot recover content already downloaded by visitors
+
+### Error feedback and interaction acceptance
+
+The following table specifies feedback that plugins should provide. Each plugin implements its own entry points and wording; the table does not describe an existing shared SiYuan status interface. After a failed public read, stop using the previous snapshot and show a message or safe defaults without falling back to private storage.
+
+| Scenario | Expected administrator or visitor feedback | Acceptance criteria |
+| --- | --- | --- |
+| Missing authorization or unavailable plugin (403) | Visitors see that data is unavailable; the plugin's administrator action prompts checking the publishing switch and data grant | No private data is displayed, and the plugin does not grant itself access |
+| Authorized but not generated (404) | Visitors see a missing-snapshot message or defaults; administrators follow the plugin's generation instructions | Verify authorization and generation separately; a missing snapshot must not prevent the whole plugin from loading |
+| Read, network, or storage failure | The plugin reports a read failure and provides a retry suitable for its interface | Do not treat errors as valid empty data or continue displaying previously read content |
+| Save failure or changed fields during authorization | Administrators see failure feedback and reopen the grant dialog to review current fields when needed | No false update-success message or scope expansion through a stale field list |
+| Read after revocation or publishing disablement | Visitors cannot obtain public data; disabling plugin publishing also denies its resources | Subsequent requests are denied; already downloaded copies cannot be recalled |
+
 ## Resource declaration
 
 Standard frontend entries (`index.js`, `index.css`, and direct `i18n/*.json` language files) remain available for enabled plugins. Declare every additional frontend file in `plugin.json`:

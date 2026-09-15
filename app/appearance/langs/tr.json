@@ -1,4 +1,5 @@
 {
+	"pluginPublishDataTip": "Eklenti verilerini yayımla",
 	"pluginPublishData": "Eklentinin yayımlanan verileri",
 	"pluginPublishDataGrantTip": "Yayın hizmeti ziyaretçilerinin bu alanları okumasına izin verilsin mi? Yalnızca açıklanmaya uygun içerikleri yayımlayın. Mevcut yayımlanmış veriler silinecek",
 	"pluginPublishDataRevokeTip": "Erişimi iptal et ve bu eklentinin yayımlanan verilerini sil",

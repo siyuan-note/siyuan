@@ -1,4 +1,5 @@
 {
+	"pluginPublishDataTip": "發佈外掛資料",
 	"pluginPublishData": "外掛程式發佈資料",
 	"pluginPublishDataGrantTip": "允許發佈服務訪客讀取下列欄位？請僅公開適合披露的內容，現有發佈資料將被清空",
 	"pluginPublishDataRevokeTip": "撤銷授權並刪除此外掛程式的發佈資料",

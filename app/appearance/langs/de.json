@@ -1,4 +1,5 @@
 {
+	"pluginPublishDataTip": "Plugin-Daten veröffentlichen",
 	"pluginPublishData": "Veröffentlichte Plugin-Daten",
 	"pluginPublishDataGrantTip": "Besuchern des Veröffentlichungsdienstes Zugriff auf diese Felder erlauben? Veröffentlichen Sie nur dafür geeignete Inhalte. Bisher veröffentlichte Daten werden gelöscht",
 	"pluginPublishDataRevokeTip": "Zugriff widerrufen und die veröffentlichten Daten dieses Plugins löschen",

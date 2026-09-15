@@ -1,4 +1,5 @@
 {
+	"pluginPublishDataTip": "Publier les données du plugin",
 	"pluginPublishData": "Données publiées du greffon",
 	"pluginPublishDataGrantTip": "Autoriser les visiteurs du service de publication à lire ces champs ? Ne publiez que du contenu destiné à être divulgué. Les données déjà publiées seront effacées",
 	"pluginPublishDataRevokeTip": "Révoquer l’accès et supprimer les données publiées de ce greffon",

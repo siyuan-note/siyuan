@@ -1,4 +1,5 @@
 {
+	"pluginPublishDataTip": "プラグインデータを公開",
 	"pluginPublishData": "プラグインの公開データ",
 	"pluginPublishDataGrantTip": "公開サービスの閲覧者に以下のフィールドの読み取りを許可しますか？公開してよい内容のみを含めてください。既存の公開データは消去されます",
 	"pluginPublishDataRevokeTip": "許可を取り消し、このプラグインの公開データを削除する",

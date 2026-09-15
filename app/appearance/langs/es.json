@@ -1,4 +1,5 @@
 {
+	"pluginPublishDataTip": "Publicar datos del complemento",
 	"pluginPublishData": "Datos publicados del complemento",
 	"pluginPublishDataGrantTip": "¿Permitir que los visitantes del servicio de publicación lean estos campos? Publique solo contenido apto para divulgar. Se borrarán los datos publicados existentes",
 	"pluginPublishDataRevokeTip": "Revocar el acceso y eliminar los datos publicados de este complemento",

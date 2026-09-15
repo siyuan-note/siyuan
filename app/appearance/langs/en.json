@@ -1,4 +1,5 @@
 {
+	"pluginPublishDataTip": "Publish plugin data",
 	"pluginPublishData": "Plugin published data",
 	"pluginPublishDataGrantTip": "Allow publishing-service visitors to read these fields? Only publish content suitable for disclosure. Existing published data will be cleared",
 	"pluginPublishDataRevokeTip": "Revoke access and delete this plugin's published data",

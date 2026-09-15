@@ -1,4 +1,5 @@
 {
+	"pluginPublishDataTip": "Plugingegevens publiceren",
 	"pluginPublishData": "Gepubliceerde plug-ingegevens",
 	"pluginPublishDataGrantTip": "Bezoekers van de publicatiedienst toestaan deze velden te lezen? Publiceer alleen inhoud die openbaar mag worden. Bestaande gepubliceerde gegevens worden gewist",
 	"pluginPublishDataRevokeTip": "Toegang intrekken en de gepubliceerde gegevens van deze plug-in verwijderen",

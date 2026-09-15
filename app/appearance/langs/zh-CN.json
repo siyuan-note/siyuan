@@ -1,4 +1,5 @@
 {
+	"pluginPublishDataTip": "发布插件数据",
 	"pluginPublishData": "插件发布数据",
 	"pluginPublishDataGrantTip": "允许发布服务访问者读取以下字段？请仅公开适合披露的内容，现有发布数据将被清空",
 	"pluginPublishDataRevokeTip": "撤销授权并删除此插件的发布数据",

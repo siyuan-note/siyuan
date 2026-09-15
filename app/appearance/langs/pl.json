@@ -1,4 +1,5 @@
 {
+	"pluginPublishDataTip": "Publikuj dane wtyczki",
 	"pluginPublishData": "Opublikowane dane wtyczki",
 	"pluginPublishDataGrantTip": "Zezwolić odwiedzającym usługę publikowania na odczyt tych pól? Publikuj tylko treści odpowiednie do ujawnienia. Dotychczas opublikowane dane zostaną usunięte",
 	"pluginPublishDataRevokeTip": "Cofnij dostęp i usuń opublikowane dane tej wtyczki",

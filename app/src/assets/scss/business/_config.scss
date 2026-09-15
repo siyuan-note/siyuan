@@ -610,6 +610,11 @@
       display: inline-flex;
     }
 
+    &__publish-data {
+      display: inline-flex;
+      vertical-align: middle;
+    }
+
     &__panel {
       height: 100%;
       overflow: auto;

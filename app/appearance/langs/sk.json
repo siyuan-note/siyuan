@@ -1,4 +1,5 @@
 {
+	"pluginPublishDataTip": "Zverejniť údaje doplnku",
 	"pluginPublishData": "Zverejnené údaje doplnku",
 	"pluginPublishDataGrantTip": "Povoliť návštevníkom publikačnej služby čítať tieto polia? Zverejňujte iba obsah vhodný na sprístupnenie. Doteraz zverejnené údaje sa vymažú",
 	"pluginPublishDataRevokeTip": "Odvolať prístup a odstrániť zverejnené údaje tohto doplnku",

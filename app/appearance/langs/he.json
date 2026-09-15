@@ -1,4 +1,5 @@
 {
+	"pluginPublishDataTip": "פרסום נתוני התוסף",
 	"pluginPublishData": "הנתונים שפורסמו מהתוסף",
 	"pluginPublishDataGrantTip": "לאפשר למבקרים בשירות הפרסום לקרוא שדות אלה? יש לפרסם רק תוכן המתאים לחשיפה. הנתונים שכבר פורסמו יימחקו",
 	"pluginPublishDataRevokeTip": "ביטול הגישה ומחיקת הנתונים שפורסמו מתוסף זה",

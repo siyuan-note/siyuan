@@ -267,9 +267,13 @@
 
 .agent-chat__body--streaming {
   min-height: 20px;
-  // 流式期 body 是纯文本（textContent），需保留换行与空白，富渲染在结束后才进行。
+  // 纯文本流式输出保留换行和空白，Markdown 预览使用正常排版。
   white-space: pre-wrap;
   word-break: break-word;
+
+  &.agent-chat__body--streaming-markdown {
+    white-space: normal;
+  }
 }
 
 .agent-chat__body {
@@ -1018,7 +1022,7 @@
 
 .agent-chat__question-option {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   padding: 6px 8px;
   border-radius: var(--b3-border-radius);
@@ -1031,7 +1035,15 @@
 
   input {
     flex-shrink: 0;
+    margin-top: 2px;
   }
+}
+
+.agent-chat__question-option-content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .agent-chat__question-option-label {

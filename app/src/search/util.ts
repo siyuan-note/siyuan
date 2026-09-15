@@ -1,4 +1,5 @@
 import type {FileTreeGetDocRequestInput} from "../types/api";
+import {getAttr} from "./attrs";
 import type {APICallbackResponse, APIPOSTRoutes, BlockQueryRequestInput} from "../types/api";
 import {getAllModels} from "../layout/getAll";
 /// #if !BROWSER
@@ -1553,19 +1554,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
     });
 };
 
-export const getAttr = (block: IBlock) => {
-    let attrHTML = "";
-    if (block.name) {
-        attrHTML += `<span class="b3-list-item__meta fn__flex" style="max-width: 30%"><svg class="b3-list-item__hinticon"><use xlink:href="#iconN"></use></svg><span class="b3-list-item__hinttext">${block.name}</span></span>`;
-    }
-    if (block.alias) {
-        attrHTML += `<span class="b3-list-item__meta fn__flex" style="max-width: 30%"><svg class="b3-list-item__hinticon"><use xlink:href="#iconA"></use></svg><span class="b3-list-item__hinttext">${block.alias}</span></span>`;
-    }
-    if (block.memo) {
-        attrHTML += `<span class="b3-list-item__meta fn__flex" style="max-width: 30%"><svg class="b3-list-item__hinticon"><use xlink:href="#iconM"></use></svg><span class="b3-list-item__hinttext">${block.memo}</span></span>`;
-    }
-    return attrHTML;
-};
+export {getAttr} from "./attrs";
 
 const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: Config.IUILayoutTabSearchConfig,
                   focusId?: {

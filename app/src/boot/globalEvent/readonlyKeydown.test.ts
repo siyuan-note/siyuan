@@ -17,9 +17,13 @@ const loadFunction = (path: string, name: string, globals: Record<string, unknow
     return exports.subject;
 };
 
-const keyboardEvent = (key: string, header = false) => ({
+const keyboardEvent = (key: string, control: boolean | string = false) => ({
     key,
-    target: {localName: "div", closest: () => header ? {} : null},
+    target: {
+        localName: "div",
+        closest: (selector: string) => selector.split(", ").some(value =>
+            control === true ? [".tabs-header", ".protyle-action"].includes(value) : control === value) ? {} : null,
+    },
     defaultPrevented: false,
     propagationStopped: false,
     preventDefault() { this.defaultPrevented = true; },
@@ -46,28 +50,54 @@ test("readonly body and tab header preserve keyboard defaults and bubbling", asy
 
 const globalFixture = (disabled: boolean, hasRange = true, foreignRange = false) => {
     const calls: string[] = [];
+    const contexts: Array<{protyle: unknown, previousRange?: unknown}> = [];
     const body = {};
     const range = {commonAncestorContainer: foreignRange ? {} : body};
     const protyle = {
         disabled,
-        options: {},
+        options: {render: {}},
+        block: {id: "doc", rootID: "doc"},
+        preview: {element: {classList: {contains: () => true}}},
+        getInstance: () => ({isFullscreen: () => false, setFullscreen: () => calls.push("fullscreen")}),
         element: {contains: (node: unknown) => node === body || (node as any)?.localName === "div"},
         undo: {undo: () => calls.push("undo"), redo: () => calls.push("redo")},
     };
     const bindings = new Proxy({}, {get: (_target, key) => key});
-    const edit = loadFunction("src/boot/globalEvent/keydown.ts", "editKeydown", {
+    const globals = {
         getAllEditor: () => [{protyle}],
         getSelection: () => ({rangeCount: hasRange ? 1 : 0, getRangeAt: () => range}),
         getActiveTab: (): null => null,
         document: {querySelector: (): null => null},
-        window: {siyuan: {config: {keymap: {general: bindings, editor: {general: bindings}}}}},
+        window: {siyuan: {languages: {untitled: "Untitled"}, config: {keymap: {general: bindings, editor: {general: bindings}}}}},
         hasClosestByClassName: () => false,
         isOnlyMeta: () => false,
         matchHotKey: (binding: string, event: {key: string}) => binding === event.key,
-        execByCommand: ({command}: {command: string}) => calls.push(command),
-        onlyProtyleCommand: ({command}: {command: string}) => calls.push(command),
-    });
-    return {edit: (event: any) => edit({}, event), calls};
+        execByCommand: (context: {command: string, protyle: unknown, previousRange?: unknown}) => {
+            calls.push(context.command);
+            contexts.push(context);
+        },
+        onlyProtyleCommand: (context: {command: string, protyle: unknown, previousRange?: unknown}) => {
+            calls.push(context.command);
+            contexts.push(context);
+        },
+        isEncryptedBox: () => false,
+        openCardByScope: (_app: unknown, scope: string, id: string, title: string) => {
+            assert.equal(scope, "doc");
+            assert.equal(id, protyle.block.rootID);
+            assert.equal(title, "Untitled");
+            calls.push("spaceRepetition");
+        },
+        zoomOut: () => calls.push("exitFocus"),
+        openBacklink: () => calls.push("backlinks"),
+        openGraph: () => calls.push("graphView"),
+        openOutline: () => calls.push("outline"),
+        reloadProtyle: () => calls.push("refresh"),
+        toggleEditMode: () => calls.push("editMode"),
+        saveLayout: (): void => undefined,
+    };
+    const documentKeydown = loadFunction("src/boot/globalEvent/keydown.ts", "documentKeydown", globals);
+    const edit = loadFunction("src/boot/globalEvent/keydown.ts", "editKeydown", {...globals, documentKeydown});
+    return {edit: (event: any) => edit({}, event), calls, contexts, protyle, range};
 };
 
 test("readonly content mutations are consumed before command execution, even without a valid selection", () => {
@@ -120,6 +150,48 @@ test("document readonly shortcut works without a body selection", () => {
     }
 });
 
+test("editor controls dispatch document commands without carrying stale body selections", () => {
+    for (const disabled of [false, true]) {
+        for (const [hasRange, foreignRange] of [[true, false], [false, false], [true, true]]) {
+            for (const command of ["switchReadonly", "switchAdjust", "search", "replace", "spaceRepetition",
+                "exitFocus", "backlinks", "graphView", "outline", "refresh", "fullscreen", "editMode"]) {
+                const fixture = globalFixture(disabled, hasRange, foreignRange);
+                const event = keyboardEvent(command, true);
+                assert.equal(fixture.edit(event), true, command);
+                assert.equal(event.defaultPrevented, true, command);
+                assert.deepEqual(fixture.calls, [command]);
+                for (const context of fixture.contexts) {
+                    assert.equal(context.protyle, fixture.protyle);
+                    assert.equal(context.previousRange, undefined);
+                }
+            }
+        }
+    }
+});
+
+test("editor controls cannot execute body commands even with a retained selection", () => {
+    for (const disabled of [false, true]) {
+        for (const control of [true, "button", '[role="tab"]', '[role="checkbox"]']) {
+            const fixture = globalFixture(disabled);
+            for (const command of ["undo", "redo", "duplicate", "duplicateCompletely", "quickMakeCard", "move",
+                "addToDatabase", "copyRichText", "copyPlainText", "copyBlockRef", "focusBreadcrumb", "customShortcut"]) {
+                fixture.edit(keyboardEvent(command, control));
+            }
+            assert.deepEqual(fixture.calls, []);
+            assert.equal(fixture.edit(keyboardEvent("switchAdjust", control)), true);
+            assert.deepEqual(fixture.calls, ["switchAdjust"]);
+        }
+    }
+});
+
+test("document search retains the selection only for body focus in the same editor", () => {
+    for (const foreignRange of [false, true]) {
+        const fixture = globalFixture(false, true, foreignRange);
+        assert.equal(fixture.edit(keyboardEvent("search")), true);
+        assert.equal(fixture.contexts[0].previousRange, foreignRange ? undefined : fixture.range);
+    }
+});
+
 test("body shortcuts follow the current document while preserving focused panel priority", () => {
     const calls: string[] = [];
     const element = (selector: string) => ({closest: (value: string) => value.split(", ").includes(selector)});
@@ -154,6 +226,90 @@ test("body shortcuts follow the current document while preserving focused panel 
     activePanel = filePanel;
     dispatch({}, event);
     assert.deepEqual(calls, ["first", "second", "files"]);
+});
+
+test("readonly cross-block Escape bypasses stale panel shortcut focus", () => {
+    const calls: string[] = [];
+    const body = {tagName: "BODY", closest: (): null => null};
+    const filePanel = {
+        closest: (selector: string) => selector.split(", ").some(value =>
+            [".layout__tab--active", ".sy__file"].includes(value)) ? filePanel : null,
+    };
+    const startContainer = {};
+    const endContainer = {};
+    const startBlock = {};
+    const endBlock = {};
+    const range = {startContainer, endContainer};
+    const protyle = {
+        disabled: true,
+        wysiwyg: {element: {contains: (element: unknown) => element === startBlock || element === endBlock}},
+    };
+    const selection = {rangeCount: 1, getRangeAt: () => range};
+    const globals = {
+        getSelection: () => selection,
+        hasClosestBlock: (element: unknown) => element === startContainer ? startBlock : endBlock,
+        getAllEditor: () => [{protyle}],
+        hideElements: () => calls.push("hide"),
+        selectBlocksByRange: () => calls.push("select"),
+    };
+    const getReadonlyBlockSelectionProtyle = loadFunction("src/boot/globalEvent/keydown.ts",
+        "getReadonlyBlockSelectionProtyle", globals);
+    const selectReadonlyBlocksByRange = loadFunction("src/boot/globalEvent/keydown.ts",
+        "selectReadonlyBlocksByRange", {...globals, getReadonlyBlockSelectionProtyle});
+    const dispatch = loadFunction("src/boot/globalEvent/keydown.ts", "windowKeyDown", {
+        ...globals,
+        getReadonlyBlockSelectionProtyle,
+        selectReadonlyBlocksByRange,
+        filterHotkey: () => false,
+        switchDialog: undefined,
+        searchKeydown: () => false,
+        isWindow: () => false,
+        bindMenuKeydown: () => false,
+        bindAVPanelKeydown: () => false,
+        document: {
+            body,
+            activeElement: null,
+            querySelector: (selector: string) => selector === ".layout__tab--active" ? filePanel : null,
+        },
+        getActiveTab: (): null => null,
+        editKeydown: () => false,
+        fileTreeKeydown: () => {
+            calls.push("file");
+            return true;
+        },
+        panelTreeKeydown: () => false,
+        EDITOR_FONT_SIZE_COMMANDS: [],
+        getKeymapBindings: (): string[] => [],
+        matchHotKey: () => false,
+        isNotCtrl: () => true,
+        hasClosestByClassName: (_element: unknown, className: string) => className === "protyle-content",
+        getAllDocks: (): unknown[] => [],
+        formatPainter: {deactivate: () => false},
+        cancelDrag: (): void => undefined,
+        window: {
+            siyuan: {
+                config: {readonly: false, keymap: {general: new Proxy({}, {get: () => ({})})}},
+                menus: {menu: {element: {classList: {contains: () => true}}}},
+                dialogs: [],
+                blockPanels: [],
+                backStack: [],
+            },
+        },
+    });
+    const event = {
+        ...keyboardEvent("Escape"),
+        target: body,
+        repeat: false,
+        isComposing: false,
+        keyCode: 27,
+        ctrlKey: false,
+        metaKey: false,
+        altKey: false,
+        shiftKey: false,
+    };
+    dispatch({}, event);
+    assert.deepEqual(calls, ["hide", "select"]);
+    assert.equal(event.defaultPrevented, true);
 });
 
 test("native command availability protects readonly content across command panel and shortcuts", () => {

@@ -112,8 +112,10 @@ const isSearchConfig = (value: unknown): boolean => {
         return false;
     }
     const flags = (group: unknown) => group == null || isObject(group) && Object.values(group).every(optionalBoolean);
-    return flags(value.types) && flags(value.replaceTypes) && (value.subTypes == null || isObject(value.subTypes) &&
-        Object.values(value.subTypes).every(flags));
+    const subTypes = value.subTypes;
+    // 只核对参与筛选的已知分组，未知顶层键保留但不参与筛选。
+    return flags(value.types) && flags(value.replaceTypes) && (subTypes == null || isObject(subTypes) &&
+        ["heading", "list", "listItem"].every(key => flags(subTypes[key])));
 };
 
 const isLayoutItem = (value: unknown): boolean => {

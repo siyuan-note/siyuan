@@ -1,0 +1,91 @@
+@use "sass:string";
+
+.protyle-wysiwyg, .b3-typography {
+  .protyle-action--task[data-task] {
+    --task-marker: attr(data-task);
+  }
+
+  // 单字符图标按字形视觉中心对齐，高笔画字符向下补偿，短小写字符保持原位。
+  @each $marker in "b", "d", "f", "h", "k", "l", "t",
+    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+    "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "Y", "Z",
+    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" {
+    .li[data-task="#{$marker}"] > .protyle-action--task,
+    .protyle-action--task[data-task="#{$marker}"],
+    .tabs-task[data-task="#{$marker}"] {
+      --task-character-offset: .1em;
+    }
+  }
+
+  .tabs-task--custom > span {
+    transform: translateY(var(--task-character-offset, 0em));
+  }
+  // 将可打印的单字节标记传给图标，直接响应块属性变化，无需修改渲染结果或任务数据。
+  @each $code in string.split("21 22 23 24 25 26 27 28 29 2a 2b 2c 2d 2e 2f 30 31 32 33 34 35 36 37 38 39 3a 3b 3c 3d 3e 3f 40 41 42 43 44 45 46 47 48 49 4a 4b 4c 4d 4e 4f 50 51 52 53 54 55 56 57 59 5a 5c 5e 5f 60 61 62 63 64 65 66 67 68 69 6a 6b 6c 6d 6e 6f 70 71 72 73 74 75 76 77 79 7a 7b 7c 7d 7e", " ") {
+    .li[data-subtype="t"][data-task="#{'\\'}#{$code}"] > .protyle-action--task {
+      --task-marker: "#{'\\'}#{$code}";
+    }
+  }
+
+  .li[data-subtype="t"][data-task]:not([data-task=" "]):not([data-task="x"]):not([data-task="X"]) > .protyle-action--task,
+  .protyle-action--task[data-task]:not([data-task=" "]):not([data-task="x"]):not([data-task="X"]) {
+    > svg {
+      background-color: currentColor;
+      -webkit-mask: var(--task-icon, url("../icon/task-unchecked.svg")) center / auto 100% no-repeat;
+      mask: var(--task-icon, url("../icon/task-unchecked.svg")) center / auto 100% no-repeat;
+
+      > use {
+        visibility: hidden;
+      }
+    }
+
+    &::before {
+      content: var(--task-character, var(--task-marker, attr(data-task)));
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, calc(-50% + var(--task-character-offset, 0em)));
+      font-family: var(--b3-font-family-code);
+      font-size: max(10px, (1em - 4px) / 1.4);
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      pointer-events: none;
+      z-index: 1;
+    }
+  }
+
+  .li[data-task="/"] > .protyle-action--task,
+  .protyle-action--task[data-task="/"] {
+    --task-icon: url("../icon/task-in-progress.svg");
+
+    --task-character: none;
+  }
+
+  .li[data-task="-"] > .protyle-action--task,
+  .protyle-action--task[data-task="-"] {
+    --task-icon: url("../icon/task-canceled.svg");
+
+    --task-character: none;
+  }
+
+  .li[data-task="/"] > div.p,
+  .li > .protyle-action--task[data-task="/"] ~ div.p {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .li.protyle-task--done > .protyle-action--task[data-task="/"] ~ div[data-node-id].p {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .li[data-task="-"] > div.p,
+  .li > .protyle-action--task[data-task="-"] ~ div.p,
+  .tabs-task[data-task="-"] ~ .tabs-tab-label {
+    color: var(--b3-theme-on-surface-light);
+    text-decoration: line-through;
+  }
+}

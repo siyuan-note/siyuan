@@ -2,7 +2,7 @@ import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {runInNewContext} from "node:vm";
-import {createSourceFile, isArrowFunction, isCallExpression, ModuleKind, Node, ScriptTarget, transpileModule} from "typescript";
+import {createSourceFile, isArrowFunction, isCallExpression, isVariableDeclaration, ModuleKind, Node, ScriptTarget, transpileModule} from "typescript";
 import {tabKeyboardTarget} from "./tabsState";
 
 const source = createSourceFile("tabsRender.ts", readFileSync("src/protyle/render/tabsRender.ts", "utf8"),
@@ -10,7 +10,11 @@ const source = createSourceFile("tabsRender.ts", readFileSync("src/protyle/rende
 
 const loadHandler = (element: "button" | "task", globals: Record<string, unknown>) => {
     let handler: Node;
+    let selectTab: Node;
     const visit = (node: Node) => {
+        if (isVariableDeclaration(node) && node.name.getText(source) === "selectTab") {
+            selectTab = node.initializer;
+        }
         if (isCallExpression(node) && node.expression.getText(source) === `${element}.addEventListener` &&
             node.arguments[0].getText(source) === (element === "button" ? '"keydown"' : "type") &&
             isArrowFunction(node.arguments[1])) {
@@ -20,7 +24,7 @@ const loadHandler = (element: "button" | "task", globals: Record<string, unknown
     };
     visit(source);
     assert.ok(handler);
-    const compiled = transpileModule(`exports.handler = ${handler.getText(source)};`, {
+    const compiled = transpileModule(`const selectTab = ${selectTab.getText(source)}; exports.handler = ${handler.getText(source)};`, {
         compilerOptions: {module: ModuleKind.CommonJS, target: ScriptTarget.ES2021},
     }).outputText;
     const exports: any = {};
@@ -31,8 +35,9 @@ const loadHandler = (element: "button" | "task", globals: Record<string, unknown
 const fixture = (readonly: boolean, vertical = false) => {
     const calls: string[] = [];
     const globals = {
-        ids: ["a", "b"], item: {}, itemID: () => "a", type: "keydown", readonly,
+        ids: ["a", "b"], items: [{}], item: {}, itemID: () => "a", type: "keydown", readonly,
         tabs: {
+            getBoundingClientRect: () => ({top: -1}),
             getAttribute: () => vertical ? "vertical" : "horizontal",
             scrollIntoView: (options: ScrollIntoViewOptions) => {
                 assert.equal(options.block, "start");
@@ -46,7 +51,10 @@ const fixture = (readonly: boolean, vertical = false) => {
             scrollIntoView: () => calls.push("scroll"),
             focus: () => calls.push("focus"),
         }]},
-        controller: {select: () => calls.push("select"), options: {task: () => calls.push("task")}},
+        controller: {select: () => calls.push("select"), options: {
+            task: () => calls.push("task"),
+            activate: () => calls.push("activate"),
+        }},
     };
     const button = loadHandler("button", globals);
     const task = loadHandler("task", globals);
@@ -104,5 +112,5 @@ test("readonly task activation cannot toggle the task or select the parent tab",
     assert.deepEqual(editable.calls, ["task"]);
     const tab = fixture(true);
     assert.equal(tab.dispatch("Enter").propagationStopped, true);
-    assert.deepEqual(tab.calls, ["select", "panel-start"]);
+    assert.deepEqual(tab.calls, ["select", "activate", "panel-start"]);
 });

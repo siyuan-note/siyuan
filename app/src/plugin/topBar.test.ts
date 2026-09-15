@@ -4,6 +4,7 @@ import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
 import {runInNewContext} from "node:vm";
 import * as ts from "typescript";
+import {setTopBarContextMenu, fillTopBarContextMenu} from "./topBarContextMenu";
 import {getLegacyPluginTopBarEntryKey, getPluginTopBarEntryKey} from "./topBarKey";
 
 const buildPluginMenu = (counts: number[], settings: boolean[], mobile = false, readonly = false) => {
@@ -126,6 +127,7 @@ const setup = (mobile = false, detached = false, mounted = false) => {
     const toolbar = new TestElement();
     const insertions: string[] = [];
     const dependencies = {
+        setTopBarContextMenu,
         isMobile: () => mobile,
         isWindow: () => detached,
         getPluginTopBarEntryKey,
@@ -154,6 +156,26 @@ const setup = (mobile = false, detached = false, mounted = false) => {
     Object.assign(plugin, {name: "test", topBarIcons: [], customTopBarElements: new WeakSet()});
     return {plugin, toolbar, insertions, refreshes: () => refreshes};
 };
+
+test("context menu callbacks are isolated and cleared on update, replacement and removal", () => {
+    const {plugin} = setup();
+    const calls: string[] = [];
+    const menu = {} as import("../menus/Menu").subMenu;
+    const first = plugin.addTopBar({id: "first", title: "First", icon: "iconClock", contextMenu: () => calls.push("first")});
+    const second = plugin.addTopBar({id: "second", title: "Second", icon: "iconClock", contextMenu: () => calls.push("second")});
+    fillTopBarContextMenu(first, menu);
+    assert.deepEqual(calls, ["first"]);
+    plugin.addTopBar({id: "first", title: "Updated", icon: "iconClock", contextMenu: () => calls.push("updated")});
+    fillTopBarContextMenu(first, menu);
+    plugin.addTopBar({id: "first", title: "Cleared", icon: "iconClock"});
+    fillTopBarContextMenu(first, menu);
+    const custom = plugin.addTopBar({id: "second", title: "Custom", element: new TestElement(), contextMenu: () => calls.push("custom")});
+    fillTopBarContextMenu(second, menu);
+    fillTopBarContextMenu(custom, menu);
+    plugin.removeTopBar("second");
+    fillTopBarContextMenu(custom, menu);
+    assert.deepEqual(calls, ["first", "updated", "custom"]);
+});
 
 test("custom top bar preserves content and handlers and registers a configurable entry", () => {
     const {plugin, refreshes} = setup();

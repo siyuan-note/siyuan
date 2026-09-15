@@ -12,6 +12,7 @@ export const repairActiveTab = (tabs: HTMLElement, oldIDs: string[], removedID: 
         tabs.innerHTML = paragraph.innerHTML;
         tabs.removeAttribute("tabs-active-id");
         tabs.removeAttribute("tabs-position");
+        tabs.removeAttribute("tabs-task");
     } else if (!items.some(item => item.dataset.nodeId === tabs.getAttribute("tabs-active-id"))) {
         const remainingIDs = items.map(item => item.dataset.nodeId);
         const index = oldIDs.indexOf(removedID);

@@ -42,6 +42,7 @@ import {
     AV_PASTE_READONLY_TYPES,
     compactAVCellOperations,
     getAVPasteCellValue,
+    getAVPasteContentRowCount,
     getAVPasteValueForType,
     getAVPasteMatrixWidth,
     getUniqueAVPasteColumnName,
@@ -696,6 +697,9 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                 cellHTML.push(rowHTML);
             }
         });
+        const contentRowCount = getAVPasteContentRowCount(values);
+        values.length = contentRowCount;
+        cellHTML.length = contentRowCount;
         headerCandidate = isAVPasteHeaderCandidate(values, headerCandidate);
     }
     const avID = blockElement.dataset.avId;

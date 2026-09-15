@@ -2,6 +2,8 @@
 | **中文**
 | [日本語](API.ja.md)
 
+插件资源声明、数据授权与相关接口详见[插件发布](PLUGIN-PUBLISH.zh-CN.md)。
+
 * [卡源配置历史](FLASHCARD-HISTORY-API.md)
 * [规范](#规范)
     * [参数和返回值](#参数和返回值)
@@ -386,7 +388,10 @@ if (response.code === 0 && response.data) {
   ```
 
     * `notebook`：笔记本 ID
-    * `path`：文档路径，需要以 / 开头，中间使用 / 分隔层级（这里的 path 对应数据库 hpath 字段）
+    * `path`：文档路径，需要以 `/` 开头，中间使用 `/` 分隔层级（对应数据库 `hpath` 字段）
+        * `/` 是层级分隔符，不能表示文档标题中的斜杠；不存在的父文档会自动创建
+        * 例如，`/Notes/Programming in C/C++` 会在 `Notes` 下的 `Programming in C` 下创建标题为 `C++` 的文档
+        * 导入程序应在拼接路径前逐个处理标题，例如将 ASCII `/` 替换为全角 `／`（U+FF0F）：`/Notes/Programming in C／C++` 会在 `Notes` 下创建标题为 `Programming in C／C++` 的文档。此替换会改变标题文本
     * `markdown`：GFM Markdown 内容
 * 返回值
 

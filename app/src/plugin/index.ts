@@ -1,7 +1,9 @@
 import {sendGlobalShortcut} from "../boot/globalEvent/globalShortcut";
 import type {App} from "../index";
 import {EventBus} from "./EventBus";
-import {fetchPost} from "../util/fetch";
+import type {subMenu} from "../menus/Menu";
+import {setTopBarContextMenu} from "./topBarContextMenu";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
 import {isMobile, isWindow} from "../util/functions";
 import {getAllEditor, getAllModels} from "../layout/getAll";
@@ -245,6 +247,7 @@ export class Plugin {
         title: string,
         position?: "right" | "left",
         element?: HTMLElement,
+        contextMenu?: (menu: subMenu) => void,
         callback?: (evt: MouseEvent) => void
     }) {
         if (isPluginDisposed(this)) {
@@ -280,6 +283,7 @@ export class Plugin {
                     replacement.setAttribute(name, value);
                 }
             });
+            setTopBarContextMenu(iconElement);
             iconElement.replaceWith(replacement);
             this.topBarIcons[this.topBarIcons.indexOf(iconElement)] = replacement;
             iconElement = replacement;
@@ -300,6 +304,11 @@ export class Plugin {
             }
         }
         const previousLocation = iconElement.getAttribute("data-location");
+        setTopBarContextMenu(iconElement, options.contextMenu ? (menu) => {
+            if (!isPluginDisposed(this)) {
+                options.contextMenu(menu);
+            }
+        } : undefined);
         if (options.element) {
             this.customTopBarElements.add(iconElement);
             iconElement.setAttribute("data-topbar-custom", "true");
@@ -355,6 +364,7 @@ export class Plugin {
         if (index === -1) {
             return;
         }
+        setTopBarContextMenu(this.topBarIcons[index]);
         this.topBarIcons[index].remove();
         this.topBarIcons.splice(index, 1);
         /// #if !MOBILE
@@ -418,6 +428,27 @@ export class Plugin {
             return;
         }
         this.setting.open(this.displayName || this.name);
+    }
+
+    public async loadPublishData(): Promise<Record<string, string | number | boolean | null>> {
+        if (isPluginDisposed(this)) {
+            throw {code: 410, msg: "Plugin lifecycle has ended", data: null};
+        }
+        const response = await fetchSyncPost("/api/petal/loadPluginPublishData", {packageName: this.name}, undefined, false);
+        if (response.code !== 0 || !response.data) {
+            throw response;
+        }
+        return response.data;
+    }
+
+    public async savePublishData(data: Record<string, string | number | boolean | null>): Promise<void> {
+        if (isPluginDisposed(this)) {
+            throw {code: 410, msg: "Plugin lifecycle has ended", data: null};
+        }
+        const response = await fetchSyncPost("/api/petal/savePluginPublishData", {packageName: this.name, data}, undefined, false);
+        if (response.code !== 0) {
+            throw response;
+        }
     }
 
     public loadData(storageName: string): Promise<any> {

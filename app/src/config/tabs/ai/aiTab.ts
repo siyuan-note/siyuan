@@ -28,6 +28,7 @@ import {
     getUserSkillsBlockKeywords,
     mountUserSkillsBlock,
 } from "./aiSkillUi";
+import {isAgentStreamingMarkdownEnabled, setAgentStreamingMarkdownEnabled} from "./agentStreamingMarkdown";
 
 const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("providers", window.siyuan.languages.apiProvider);
@@ -88,6 +89,12 @@ const registerAiAgentGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.apiMaxTokens,
         desc: window.siyuan.languages.apiMaxTokensTip,
         min: 0,
+    });
+    group.switch("agentStreamingMarkdown", {
+        title: window.siyuan.languages.agentStreamingMarkdown,
+        desc: window.siyuan.languages.agentStreamingMarkdownTip,
+        readConfig: isAgentStreamingMarkdownEnabled,
+        save: (value) => setAgentStreamingMarkdownEnabled(value === true),
     });
     group.number("ai.agent.maxToolCallRounds", {
         title: window.siyuan.languages.agentMaxToolCallRounds,

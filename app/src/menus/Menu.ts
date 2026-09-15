@@ -195,7 +195,8 @@ export class Menu {
     }
 
     private canDragSheet(target: HTMLElement) {
-        if (target.closest("input, textarea, select, [contenteditable=\"true\"]")) {
+        // 文件选择框覆盖上传菜单项，允许从该区域开始下拉关闭菜单。
+        if (target.closest("input:not([type=\"file\"]), textarea, select, [contenteditable=\"true\"]")) {
             return false;
         }
         if (target.closest(".b3-menu__title")) {
@@ -352,10 +353,14 @@ export class Menu {
         // 使用当前方向记录的完整视口高度，避免软键盘收起期间菜单高度被压缩
         const maxHeight = Math.max(window.innerHeight, orientationSize?.height1 || 0) * .56;
         if (this.element.classList.contains("b3-menu--fit")) {
-            // 内容不足时收缩面板，避免列表下方留白；先清空高度，否则 scrollHeight 会被当前高度撑大
+            // 内容不足时收缩面板，避免列表下方留白；测量时取消弹性拉伸，否则 scrollHeight 会包含被撑大的空白
             this.element.style.height = "";
+            const itemsElement = this.element.lastElementChild as HTMLElement;
+            const itemsFlex = itemsElement.style.flex;
+            itemsElement.style.flex = "none";
             const titleHeight = this.element.firstElementChild.getBoundingClientRect().height;
-            const contentHeight = this.element.lastElementChild.scrollHeight;
+            const contentHeight = itemsElement.scrollHeight;
+            itemsElement.style.flex = itemsFlex;
             this.element.style.height = Math.min(maxHeight, Math.max(160, titleHeight + contentHeight)) + "px";
             return;
         }
@@ -619,6 +624,12 @@ export class Menu {
         window.visualViewport?.addEventListener("scroll", this.updateTargetPosition);
     }
 
+    private startTrackingSheetViewport() {
+        this.stopTrackingTargetPosition();
+        window.addEventListener("resize", this.updateTargetPosition);
+        window.visualViewport?.addEventListener("resize", this.updateTargetPosition);
+    }
+
     private stopTrackingTargetPosition() {
         window.removeEventListener("resize", this.updateTargetPosition);
         window.visualViewport?.removeEventListener("resize", this.updateTargetPosition);
@@ -668,6 +679,10 @@ export class Menu {
         this.element.querySelectorAll(":scope > .b3-menu__items, .b3-menu__submenu > .b3-menu__items")
             .forEach(updateMenuItemGroupClasses);
         this.element.classList.add("b3-menu--fullscreen", "b3-menu--sheet");
+        if (this.element.classList.contains("b3-menu--fit")) {
+            // 输入法弹出后视口会异步收缩，持续跟踪视口才能按最终可用高度重新适配内容
+            this.startTrackingSheetViewport();
+        }
         this.element.style.transform = "translateY(100%)";
         this.showFullscreenScrim();
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();

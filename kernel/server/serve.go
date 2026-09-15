@@ -447,11 +447,20 @@ func serveWidgets(ginServer *gin.Engine) {
 	widgets := ginServer.Group("/widgets/", model.CheckAuth)
 	registerStaticFileHandlers(widgets, filepath.Join(util.DataDir, "widgets"), true, func(c *gin.Context, relativePath string) bool {
 		if model.IsReadOnlyRoleContext(c) {
-			name, _, _ := strings.Cut(filepath.ToSlash(relativePath), "/")
+			c.Header("Cache-Control", "private, no-store")
+			resource := strings.TrimPrefix(c.Param("filepath"), "/")
+			if strings.HasSuffix(resource, "/") {
+				resource += "index.html"
+			}
+			name, _, _ := strings.Cut(resource, "/")
 			if !model.CheckWidgetAccessableByPublishAccess(c, name, model.GetPublishAccess()) {
-				c.Header("Cache-Control", "private, no-store")
 				return false
 			}
+			file, err := util.OpenPublishFile(util.DataDir, "widgets/"+resource)
+			if err != nil {
+				return false
+			}
+			return serveOpenedPublishFile(c, file, resource)
 		}
 		setWidgetCacheControl(c, relativePath)
 		return true
@@ -473,9 +482,32 @@ func servePlugins(ginServer *gin.Engine) {
 		if !model.IsReadOnlyRoleContext(c) {
 			return true
 		}
-		name, _, _ := strings.Cut(filepath.ToSlash(relativePath), "/")
-		return model.CheckPluginAccessableInPublish(name)
+		c.Header("Cache-Control", "private, no-store")
+		requestPath := strings.TrimPrefix(c.Param("filepath"), "/")
+		if strings.HasSuffix(requestPath, "/") {
+			requestPath += "index.html"
+		}
+		name, resource, ok := strings.Cut(requestPath, "/")
+		if !ok {
+			return false
+		}
+		file, err := model.OpenPluginPublishResource(name, resource)
+		if err != nil {
+			return false
+		}
+		return serveOpenedPublishFile(c, file, resource)
 	})
+}
+
+func serveOpenedPublishFile(c *gin.Context, file *os.File, resource string) bool {
+	defer file.Close()
+	info, err := file.Stat()
+	if err != nil {
+		return false
+	}
+	http.ServeContent(c.Writer, c.Request, resource, info.ModTime(), file)
+	c.Abort()
+	return true
 }
 
 func serveBootAppearanceAssets(ginServer *gin.Engine) {
@@ -520,7 +552,26 @@ func serveTemplates(ginServer *gin.Engine) {
 
 func servePublic(ginServer *gin.Engine) {
 	// Support directly access `data/public/*` contents via URL link https://github.com/siyuan-note/siyuan/issues/8593
-	ginServer.Static("/public/", filepath.Join(util.DataDir, "public"))
+	handler := func(c *gin.Context) {
+		relative := strings.TrimPrefix(c.Param("filepath"), "/")
+		if relative == "" || strings.HasSuffix(relative, "/") {
+			relative += "index.html"
+		}
+		file, err := util.OpenPublishFile(util.DataDir, "public/"+relative)
+		if err != nil {
+			c.Status(http.StatusNotFound)
+			return
+		}
+		defer file.Close()
+		info, err := file.Stat()
+		if err != nil {
+			c.Status(http.StatusNotFound)
+			return
+		}
+		http.ServeContent(c.Writer, c.Request, relative, info.ModTime(), file)
+	}
+	ginServer.GET("/public/*filepath", handler)
+	ginServer.HEAD("/public/*filepath", handler)
 }
 
 func serveSnippets(ginServer *gin.Engine) {
@@ -583,6 +634,9 @@ func registerStaticFileHandlers(group *gin.RouterGroup, root string, packageScop
 		}
 		if accessCheck != nil && !accessCheck(c, relativePath) {
 			c.Status(http.StatusForbidden)
+			return
+		}
+		if c.IsAborted() {
 			return
 		}
 		serveStaticFile(c, root, relativePath, packageScoped)

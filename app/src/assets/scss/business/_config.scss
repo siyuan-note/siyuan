@@ -608,6 +608,14 @@
 
     &__publish-switch {
       display: inline-flex;
+      align-items: center;
+    }
+
+    &__publish-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      vertical-align: middle;
     }
 
     &__panel {

@@ -6,6 +6,7 @@ export const applyMobileToolbarEntries = (element: HTMLElement, toolbar: Array<s
 }) => {
     const items = new Map(toolbar.filter((item): item is IMenuItem => typeof item !== "string")
         .map(item => [item.name, item]));
+    const available = new Set(toolbar.map(item => typeof item === "string" ? item : item.name));
     const children = Array.from(element.children).filter((child: HTMLElement) => child.dataset.type !== "goback") as HTMLElement[];
     children.forEach(child => {
         const item = items.get(child.dataset.type);
@@ -17,7 +18,8 @@ export const applyMobileToolbarEntries = (element: HTMLElement, toolbar: Array<s
     const result = resolveToolbarItems(children, {
         getKey: item => item.dataset.id,
         isSeparator: item => item.classList.contains("keyboard__split"),
-        isVisible: options.isVisible,
+        isVisible: key => options.isVisible(key) && children.some(item => item.dataset.id === key &&
+            (item.classList.contains("keyboard__split") || available.has(item.dataset.type))),
         order: options.order,
     });
     const visible = new Set(result.visible);

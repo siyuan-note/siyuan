@@ -245,7 +245,13 @@ func loadPetals(frontend string, isPublish, isKernel bool) (ret []*Petal) {
 			continue
 		}
 
-		loadCode(petal)
+		if isPublish {
+			if !loadPluginPublishCode(petal) {
+				continue
+			}
+		} else {
+			loadCode(petal)
+		}
 		if isKernel {
 			if !petal.Kernel.Existed {
 				logging.LogWarnf("plugin [%s] kernel.js not found, skip loading as kernel plugin", petal.Name)

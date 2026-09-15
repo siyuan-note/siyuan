@@ -277,7 +277,7 @@ func (b *schemaBuilder) schema(t reflect.Type, input bool) (*Schema, error) {
 		}
 		return &Schema{AnyOf: append(variants, &Schema{Type: "null"})}, nil
 	}
-	if t == reflect.TypeFor[SQLValue]() {
+	if t == reflect.TypeFor[SQLValue]() || t == reflect.TypeFor[PublishDataValue]() {
 		return &Schema{AnyOf: []*Schema{{Type: "null"}, {Type: "string"}, {Type: "number"}, {Type: "boolean"}}}, nil
 	}
 	if t == reflect.TypeFor[BinaryContent]() {

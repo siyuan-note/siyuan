@@ -37,6 +37,7 @@ func appendAttributeViewRichTextExport(cell *ast.Node, value *av.ValueText) erro
 
 // normalizeExportPreviewTree 保留包含块级内容的单元格，避免 Markdown 往返将其拆到表格外。
 func normalizeExportPreviewTree(tree *parse.Tree, luteEngine *lute.Lute) *parse.Tree {
+	convertExportPreviewTabs(tree.Root)
 	tables := map[*ast.Node]struct{}{}
 	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || node.Type != ast.NodeTableCell {

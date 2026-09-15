@@ -20,7 +20,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"math"
 	"path"
 	"runtime/debug"
 	"sort"
@@ -79,7 +78,7 @@ func (change *backlinkIndexChange) addRootID(rootID string) {
 
 func (change *backlinkIndexChange) addOperation(op *dbQueueOperation) {
 	switch op.action {
-	case "index", "rename", "move":
+	case "index", "rename", "rename_doc", "move":
 		change.changed = true
 		if op.indexTree == nil {
 			change.full = true
@@ -138,7 +137,7 @@ func (change *backlinkIndexChange) data() map[string]any {
 // delete_ids/delete_assets 无 box 上下文，返回空串 → 走全局 db。
 func (op *dbQueueOperation) boxID() string {
 	switch op.action {
-	case "index", "rename", "move":
+	case "index", "rename", "rename_doc", "move":
 		if op.indexTree != nil {
 			return op.indexTree.Box
 		}
@@ -223,30 +222,6 @@ func FlushQueue() {
 	start := time.Now()
 
 	// logging.LogInfof("flushing database queue, total operations [%d]", total)
-
-	// 如果有重命名树的操作，则统计各路径前缀的块树数量，数量较大的话阻塞整个队列，以便尽可能合并重命名树的操作 RenameTreeQueue(tree)
-	var renameTreeOp *dbQueueOperation
-	for _, op := range ops {
-		if "rename" == op.action {
-			renameTreeOp = op
-			break
-		}
-	}
-	if nil != renameTreeOp {
-		childCount := treenode.CountBlockTreesByPathPrefix(renameTreeOp.indexTree.Box, path.Dir(renameTreeOp.indexTree.Path))
-		if 512 < childCount {
-			scale := math.Log(float64(childCount)/512.0+1.0) / math.Log(2.0)
-			secs := 1.0 * scale
-			if secs < 1.0 {
-				secs = 1.0
-			}
-			if secs > 12.0 {
-				secs = 12.0
-			}
-			logging.LogInfof("rename tree [%s] with large child count [%d], sleep [%.2fs] to wait for more operations", renameTreeOp.indexTree.Path, childCount, secs)
-			time.Sleep(time.Duration(secs * float64(time.Second)))
-		}
-	}
 
 	context := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	if 512 < len(ops) {
@@ -338,6 +313,26 @@ func invalidateRefsCacheForOperation(op *dbQueueOperation) {
 }
 
 func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error) {
+	// 排队中的内容快照保留编辑内容，但路径采用已经提交的文档元数据。
+	currentOp := *op
+	op = &currentOp
+	if op.action == "rename_doc" {
+		doc := treenode.GetBlockTreeInBox(op.indexTree.ID, op.indexTree.Box)
+		if doc == nil || doc.BoxID != op.indexTree.Box || doc.Path != op.indexTree.Path {
+			// 移动或删除后的文档由对应操作维护，旧重命名快照不能写回原路径。
+			return nil
+		}
+	}
+	if op.indexTree != nil && op.action != "rename" {
+		tree := *op.indexTree
+		tree.HPath = treenode.CurrentTreeHPath(&tree)
+		op.indexTree = &tree
+	}
+	if op.upsertTree != nil && op.action == "upsert" {
+		tree := *op.upsertTree
+		tree.HPath = treenode.CurrentTreeHPath(&tree)
+		op.upsertTree = &tree
+	}
 	switch op.action {
 	case "index":
 		err = indexTree(tx, op.indexTree, context)
@@ -360,8 +355,13 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 				tx.Exec("DELETE FROM block_embeddings WHERE root_id = ?", rootID)
 			}
 		}
-	case "rename":
-		err = batchUpdateHPath(tx, op.indexTree, context)
+	case "rename", "rename_doc":
+		if op.action == "rename_doc" {
+			err = execStmtTx(tx, "UPDATE blocks SET hpath = ? WHERE id = ? AND box = ? AND type = 'd'", op.indexTree.HPath, op.indexTree.ID, op.indexTree.Box)
+		} else {
+			// 保留既有磁盘队列的逐文档重命名恢复行为。
+			err = batchUpdateHPath(tx, op.indexTree, context)
+		}
 		if err != nil {
 			break
 		}
@@ -533,16 +533,25 @@ func UpsertTreeQueue(tree *parse.Tree) {
 }
 
 func RenameTreeQueue(tree *parse.Tree) {
+	renameTreeQueue(tree, "rename")
+}
+
+// RenameDocQueue 及时更新文档标题，内容块的路径副本由独立后台任务补齐。
+func RenameDocQueue(tree *parse.Tree) {
+	renameTreeQueue(tree, "rename_doc")
+}
+
+func renameTreeQueue(tree *parse.Tree, action string) {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 
 	newOp := &dbQueueOperation{
 		indexTree:   tree,
 		inQueueTime: time.Now(),
-		action:      "rename",
+		action:      action,
 	}
 	for i, op := range operationQueue {
-		if "rename" == op.action && op.indexTree.ID == tree.ID { // 相同树则覆盖
+		if action == op.action && op.indexTree.Box == tree.Box && op.indexTree.ID == tree.ID { // 相同树则覆盖
 			operationQueue[i] = newOp
 			return
 		}

@@ -465,6 +465,11 @@ var SetPetalEnabled = define[SetPetalEnabledRequest, *Petal]("setPetalEnabled", 
 
 var SetPetalPublishEnabled = define[SetPetalPublishEnabledRequest, *Petal]("setPetalPublishEnabled", "/api/petal/setPetalPublishEnabled", JSONBody, ResponseOptions{}, "POST")
 
+var GetPluginPublishInfo = define[PluginPublishRequest, PluginPublishInfo]("getPluginPublishInfo", "/api/petal/getPluginPublishInfo", JSONBody, ResponseOptions{AdditionalCodes: []int{400, 403, 500}}, "POST")
+var SetPluginPublishDataGrant = define[SetPluginPublishDataGrantRequest, Null]("setPluginPublishDataGrant", "/api/petal/setPluginPublishDataGrant", JSONBody, ResponseOptions{AdditionalCodes: []int{400, 403, 500}}, "POST")
+var SavePluginPublishData = define[SavePluginPublishDataRequest, Null]("savePluginPublishData", "/api/petal/savePluginPublishData", JSONBody, ResponseOptions{AdditionalCodes: []int{400, 403, 500}}, "POST")
+var LoadPluginPublishData = define[PluginPublishRequest, map[string]PublishDataValue]("loadPluginPublishData", "/api/petal/loadPluginPublishData", JSONBody, ResponseOptions{NonNullable: true, AdditionalCodes: []int{400, 403, 404, 500}}, "POST")
+
 var Pandoc = define[PandocRequest, PandocData]("pandoc", "/api/convert/pandoc", JSONBody, ResponseOptions{}, "POST")
 
 var PostBroadcastMessage = define[BroadcastMessageRequest, BroadcastChannelData]("postMessage", "/api/broadcast/postMessage", JSONBody, ResponseOptions{AdditionalCodes: []int{1}}, "POST")

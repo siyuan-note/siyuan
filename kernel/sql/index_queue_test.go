@@ -17,10 +17,58 @@
 package sql
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/88250/lute"
+	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestIndexQueueRenameRecovery(t *testing.T) {
+	prepareIndexQueueTest(t)
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = oldDataDir })
+	box := "20260915000000-hpath01"
+	id := "20260915000001-hpath01"
+	if err := os.MkdirAll(filepath.Join(util.DataDir, box), 0755); err != nil {
+		t.Fatal(err)
+	}
+	tree := treenode.NewTree(box, "/"+id+".sy", "/Latest", "Latest")
+	if _, err := filesys.WriteTree(tree); err != nil {
+		t.Fatal(err)
+	}
+	for _, action := range []string{"rename", "rename_doc"} {
+		entry := dbOpToIndexEntry(&dbQueueOperation{action: action, indexTree: tree})
+		op := indexEntryToOp(*entry, lute.New(), "test rename recovery")
+		if op == nil || op.action != action || op.indexTree.HPath != "/Latest" {
+			t.Fatalf("rename queue format did not recover: %s, %#v", action, op)
+		}
+	}
+
+	RenameDocQueue(tree)
+	latest := *tree
+	latest.HPath = "/Newer"
+	RenameDocQueue(&latest)
+	other := *tree
+	other.Box = "20260915000002-hpath02"
+	RenameDocQueue(&other)
+	ops, _ := getOperations()
+	if len(ops) != 2 {
+		t.Fatalf("unexpected coalesced operations: %d", len(ops))
+	}
+	byBox := map[string]*parse.Tree{}
+	for _, op := range ops {
+		byBox[op.indexTree.Box] = op.indexTree
+	}
+	if byBox[box].HPath != "/Newer" || byBox[other.Box].HPath != "/Latest" {
+		t.Fatalf("rename coalescing crossed notebook boundaries: %#v", byBox)
+	}
+}
 
 func TestIndexQueuePreservesOperationsAppendedDuringFlush(t *testing.T) {
 	prepareIndexQueueTest(t)

@@ -24,7 +24,7 @@ import {openInputDialog} from "../../dialog/inputDialog";
 import {showMessage} from "../../dialog/message";
 import {activateTrackedRangeInsertion, type ITrackedRangeInsertion} from "../util/trackedRange";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
-import {nextTaskListMarker} from "./taskListMarker";
+import {isTaskListMarker, nextTaskListMarker, nextTaskListStatus} from "./taskListMarker";
 
 const getLastChildBlock = (element: Element) => {
     if (!element || !element.lastElementChild) {
@@ -132,23 +132,27 @@ export const openOrderedListStartDialog = (protyle: IProtyle, listElement: HTMLE
     });
 };
 
-export const toggleTaskListItem = (protyle: IProtyle, taskItemElement: Element): void => {
-    const html = taskItemElement.outerHTML;
-    const marker = nextTaskListMarker(taskItemElement.getAttribute("data-task"));
-    const useElement = taskItemElement.querySelector("use");
-    if (marker === " ") {
-        taskItemElement.setAttribute("data-task", " ");
-        taskItemElement.classList.remove("protyle-task--done");
-        useElement?.setAttribute("xlink:href", "#iconUncheck");
-    } else {
-        taskItemElement.setAttribute("data-task", "X");
-        taskItemElement.classList.add("protyle-task--done");
-        useElement?.setAttribute("xlink:href", "#iconCheck");
+export const setTaskListItemMarker = (protyle: IProtyle, taskItemElement: Element, marker: string): void => {
+    if (!taskItemElement.isConnected || protyle.disabled || protyle.options.action.includes(Constants.CB_GET_HISTORY) ||
+        taskItemElement.getAttribute("data-type") !== "NodeListItem" ||
+        taskItemElement.getAttribute("data-subtype") !== "t" || !isTaskListMarker(marker)) {
+        return;
     }
+    const html = taskItemElement.outerHTML;
+    taskItemElement.setAttribute("data-task", marker);
+    taskItemElement.classList.toggle("protyle-task--done", marker !== " ");
+    taskItemElement.querySelector(":scope > .protyle-action use")?.setAttribute("xlink:href",
+        marker === " " ? "#iconUncheck" : "#iconCheck");
     taskItemElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
     taskItemElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
     updateTransaction(protyle, taskItemElement, html);
 };
+
+export const toggleTaskListItem = (protyle: IProtyle, taskItemElement: Element): void =>
+    setTaskListItemMarker(protyle, taskItemElement, nextTaskListMarker(taskItemElement.getAttribute("data-task")));
+
+export const cycleTaskListItemStatus = (protyle: IProtyle, taskItemElement: Element): void =>
+    setTaskListItemMarker(protyle, taskItemElement, nextTaskListStatus(taskItemElement.getAttribute("data-task")));
 
 export const genListItemElement = (listItemElement: Element, offset = 0, wbr = false, startIndex?: number) => {
     const element = document.createElement("template");

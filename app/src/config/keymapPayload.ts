@@ -5,13 +5,21 @@ export const keymapPayload = (keymap: Config.IKeymap): {[key: string]: JSONValue
     const keys = (items: Config.IKeys): {[key: string]: JSONValue} => {
         const result: {[key: string]: JSONValue} = {};
         for (const [name, item] of Object.entries(items)) {
-            result[name] = {...item};
+            if (item == null) {
+                result[name] = item === null ? null : undefined;
+            } else {
+                result[name] = {...item};
+            }
         }
         return result;
     };
     const plugin: {[key: string]: JSONValue} = {};
     for (const [name, items] of Object.entries(keymap.plugin || {})) {
-        plugin[name] = keys(items);
+        if (items == null) {
+            plugin[name] = items === null ? null : undefined;
+        } else {
+            plugin[name] = keys(items);
+        }
     }
     return {
         ...keymap,

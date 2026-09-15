@@ -351,6 +351,14 @@ export const queryMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => voi
     }
 };
 
+const removeCriterionData = (criteriaData: Config.IUILayoutTabSearchConfig[], names: string[]) => {
+    for (let index = criteriaData.length - 1; index >= 0; index--) {
+        if (names.includes(criteriaData[index].name)) {
+            criteriaData.splice(index, 1);
+        }
+    }
+};
+
 const saveCriterionData = (config: Config.IUILayoutTabSearchConfig,
                            criteriaData: Config.IUILayoutTabSearchConfig[],
                            element: Element,
@@ -359,6 +367,7 @@ const saveCriterionData = (config: Config.IUILayoutTabSearchConfig,
     config.removed = false;
     const criterion = config;
     criterion.name = value;
+    removeCriterionData(criteriaData, [value]);
     criteriaData.push(Object.assign({}, criterion));
     window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
     setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
@@ -414,12 +423,7 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
                             item.remove();
                         }
                     });
-                    criteriaData.find((item, index) => {
-                        if (item.name === value) {
-                            criteriaData.splice(index, 1);
-                            return true;
-                        }
-                    });
+                    removeCriterionData(criteriaData, [value]);
                     saveCriterionData(config, criteriaData, element, value, saveDialog);
                 });
             } else if (hasSameName && hasSameConfig) {
@@ -433,13 +437,8 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
                                 item.remove();
                             }
                         });
-                        criteriaData.find((item, index) => {
-                            if (item.name === removeName || item.name === hasSameName) {
-                                fetchPost("/api/storage/removeCriterion", {name: removeName});
-                                criteriaData.splice(index, 1);
-                                return true;
-                            }
-                        });
+                        fetchPost("/api/storage/removeCriterion", {name: removeName});
+                        removeCriterionData(criteriaData, [hasSameConfig, hasSameName]);
                         saveCriterionData(config, criteriaData, element, value, saveDialog);
                     });
                 }
@@ -450,13 +449,8 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
                             item.remove();
                         }
                     });
-                    criteriaData.find((item, index) => {
-                        if (item.name === hasSameConfig) {
-                            fetchPost("/api/storage/removeCriterion", {name: hasSameConfig});
-                            criteriaData.splice(index, 1);
-                            return true;
-                        }
-                    });
+                    fetchPost("/api/storage/removeCriterion", {name: hasSameConfig});
+                    removeCriterionData(criteriaData, [hasSameConfig]);
                     saveCriterionData(config, criteriaData, element, value, saveDialog);
                 });
             } else {

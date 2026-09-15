@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -83,6 +84,40 @@ func TestDocTreeReorderRejectsUnreadableSort(t *testing.T) {
 	actual, err := os.ReadFile(confPath)
 	if err != nil || string(actual) != string(bad) {
 		t.Fatalf("invalid sort data was overwritten: %s, %v", actual, err)
+	}
+}
+
+func TestDocTreeReorderRejectsDescendantTargetsWithLocalizedMessage(t *testing.T) {
+	f := setupFileOperationTest(t)
+	Conf.FileTree.Sort = util.SortModeNameASC
+	childPath := strings.TrimSuffix(f.sourcePath, ".sy") + "/20260718000003-abcdefg.sy"
+	grandchildPath := strings.TrimSuffix(childPath, ".sy") + "/20260718000004-abcdefg.sy"
+	for _, docPath := range []string{childPath, grandchildPath} {
+		tree := treenode.NewTree(f.box.ID, docPath, "/Source/Descendant", "Descendant")
+		if _, err := filesys.WriteTree(tree); err != nil {
+			t.Fatal(err)
+		}
+		treenode.UpsertBlockTree(tree)
+		t.Cleanup(func() {
+			cache.RemoveTreeData(tree.ID)
+			cache.RemoveDocIAL(tree.Path)
+		})
+	}
+	for _, targetPath := range []string{childPath, grandchildPath} {
+		for _, position := range []string{"before", "after"} {
+			for _, preview := range []bool{true, false} {
+				_, err := ReorderDocTree([]string{f.sourceID}, util.GetTreeID(targetPath), position, preview, true)
+				if err == nil || err.Error() != Conf.Language(87) {
+					t.Fatalf("expected localized invalid target error for %s, %s, preview=%t, got %v",
+						targetPath, position, preview, err)
+				}
+				for _, docPath := range []string{f.sourcePath, childPath, grandchildPath} {
+					if !f.box.Exist(docPath) {
+						t.Fatalf("invalid reorder changed document %s", docPath)
+					}
+				}
+			}
+		}
 	}
 }
 

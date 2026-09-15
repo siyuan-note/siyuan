@@ -3,6 +3,7 @@ import * as assert from "node:assert/strict";
 import {
     compactAVCellOperations,
     getAVPasteCellValue,
+    getAVPasteContentRowCount,
     getAVPasteValueForType,
     getAVPasteMatrixWidth,
     getUniqueAVPasteColumnName,
@@ -126,6 +127,13 @@ describe("AV paste matrix helpers", () => {
     it("uses the widest header or data row", () => {
         assert.equal(getAVPasteMatrixWidth([["1"], ["2", "3"]], ["a", "b", "c"]), 3);
         assert.equal(getAVPasteMatrixWidth([["1", "2", "3"]], ["a"]), 3);
+    });
+
+    it("ignores trailing empty table rows without removing intentional empty rows", () => {
+        assert.equal(getAVPasteContentRowCount([["value"], [""]]), 1);
+        assert.equal(getAVPasteContentRowCount([["value"], [""], ["next"]]), 3);
+        assert.equal(getAVPasteContentRowCount([["value"], [" "]]), 2);
+        assert.equal(getAVPasteContentRowCount([[""]]), 1);
     });
 
     it("generates localized unique field names", () => {

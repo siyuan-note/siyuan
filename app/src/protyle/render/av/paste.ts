@@ -124,6 +124,14 @@ export const getAVPasteMatrixWidth = (rows: unknown[][], header?: string[]) => {
     return Math.max(header?.length || 0, ...rows.map(row => row.length), 0);
 };
 
+export const getAVPasteContentRowCount = (rows: unknown[][]) => {
+    let rowCount = rows.length;
+    while (rowCount > 1 && rows[rowCount - 1].every(value => typeof value === "string" && value === "")) {
+        rowCount--;
+    }
+    return rowCount;
+};
+
 export const shouldShowAVPasteSkeleton = (rows: unknown[][]) => {
     return rows.reduce((count, row) => count + row.length, 0) >= 100;
 };

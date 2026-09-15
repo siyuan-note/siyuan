@@ -159,7 +159,7 @@ func decodeRequestFields(value reflect.Value, fields map[string]json.RawMessage)
 
 // decodeRequestValue 递归绑定复合参数，避免数组元素和嵌套字段绕过空值及必填检查。
 func decodeRequestValue(raw json.RawMessage, value reflect.Value) error {
-	if value.Type() == reflect.TypeFor[JSONValue]() {
+	if value.Type() == reflect.TypeFor[JSONValue]() || value.Type() == reflect.TypeFor[PublishDataValue]() {
 		return json.Unmarshal(raw, value.Addr().Interface())
 	}
 	if bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {

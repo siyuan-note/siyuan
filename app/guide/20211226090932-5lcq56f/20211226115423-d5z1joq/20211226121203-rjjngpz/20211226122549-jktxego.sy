@@ -12172,7 +12172,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "完成和待辦之間切換"
+									"Data": "依序循環切換待辦、進行中、完成、放棄（自訂狀態切換回待辦）"
 								}
 							]
 						},
@@ -12215,11 +12215,39 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⇧⌘L"
-								},
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": " / "
-								},
+									"Data": "任務列表"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "待辦和進行中切換為完成，其他狀態切換為待辦"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",

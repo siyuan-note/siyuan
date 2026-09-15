@@ -101,6 +101,30 @@ module.exports = async () => {
                 mode + "/" + key + " expected " + expected.dataset.nodeId + " got " +
                 editor.querySelector("." + className)?.dataset.nodeId);
             assert.equal(custom.querySelector("." + className), null);
+            assert.equal(editor.querySelectorAll(".protyle-wysiwyg--navigation").length,
+                expected === custom ? 1 : 0);
+        }
+        cases++;
+    }
+    // 块选择把容器作为整体，上下移动经过相同的顶层块。
+    {
+        const {protyle, editor} = setup(p("before") +
+            `<div class="list" data-type="NodeList" data-node-id="list"><div class="li" data-type="NodeListItem" data-node-id="li">${p("list-p")}</div></div>` +
+            `<div class="bq" data-type="NodeBlockquote" data-node-id="quote">${p("quote-p")}</div>` +
+            `<div class="callout" data-type="NodeCallout" data-node-id="callout"><div class="callout-title" contenteditable="true">title</div><div class="callout-content">${p("callout-p")}</div></div>` +
+            `<div class="tabs" data-type="NodeTabs" data-node-id="tabs"><div class="tab-item" data-type="NodeTabItem" data-node-id="tab"><div class="tab-item-content">${p("tab-p")}</div></div></div>` +
+            p("after"));
+        const blocks = Array.from(editor.children);
+        const className = "protyle-wysiwyg--select-mode";
+        blocks[0].classList.add(className);
+        select(blocks[0].firstElementChild);
+        load("wysiwyg/selectedNavigationKeydown").bind(protyle);
+        for (const [key, sequence] of [["Down", blocks.slice(1)], ["Up", blocks.slice(0, -1).reverse()]]) {
+            for (const expected of sequence) {
+                await ipcRenderer.invoke("vertical-navigation-key", key);
+                await frame();
+                assert.equal(editor.querySelector("." + className), expected, key + "/" + expected.dataset.nodeId);
+            }
         }
         cases++;
     }

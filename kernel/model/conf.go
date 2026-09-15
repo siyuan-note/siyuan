@@ -1057,6 +1057,9 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 	sql.FlushQueue()
 
 	util.IsExiting.Store(true)
+	// 等待正在执行的路径批次退出，未完成任务保留在配置目录供下次启动恢复。
+	hpathRefresh.Lock()
+	hpathRefresh.Unlock()
 	newVerInstallPkgPath := getNewVerInstallPkgPath()
 	if !skipNewVerInstallPkg() && "" != newVerInstallPkgPath {
 		if 2 == execInstallPkg || (force && 0 == execInstallPkg) { // 将新版本安装包交给桌面宿主执行
@@ -1338,6 +1341,7 @@ func InitBoxes() {
 		}
 	}
 
+	recoverDocHPaths()
 	logging.LogInfof("tree/block count [%d/%d]", treenode.CountTrees(), blockCount)
 }
 

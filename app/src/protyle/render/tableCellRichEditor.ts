@@ -3,6 +3,7 @@ import {showMessage} from "../../dialog/message";
 import {hintRef, hintSlash} from "../hint/extend";
 import {registerBuiltinSlashHint} from "../hint/builtinSlash";
 import {mountProtyleLiteFragment} from "../lite/fragmentEditor";
+import {setMobileToolbarUndo} from "../lite/mobileToolbar";
 import {getDefaultToolbar} from "../toolbar/defaults";
 import {hideElements} from "../ui/hideElements";
 import {updateTransaction} from "../wysiwyg/transaction";
@@ -259,6 +260,24 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         }
     };
     activeEditor = {cell, finish};
+    const undoCell = (redo: boolean) => {
+        if (composing) {
+            return;
+        }
+        // 先提交当前单元格，再由所属文档撤销，保证切换单元格后仍可连续回退。
+        finish();
+        const range = document.createRange();
+        range.selectNodeContents(cell);
+        range.collapse(true);
+        owner.wysiwyg.element.focus({preventScroll: true});
+        focusByRange(range);
+        if (redo) {
+            owner.undo.redo(owner);
+        } else {
+            owner.undo.undo(owner);
+        }
+    };
+    setMobileToolbarUndo(fragment.protyle, owner, undoCell);
     setTableCellRichContext(fragment.protyle, {owner, cell, finish});
     const signal = controller.signal;
     bindTableCellRichDrag(owner, cell, fragment.wysiwyg, finish, signal,
@@ -309,7 +328,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
     }, {capture: true, signal});
     const belongsToEditor = (target: Node) => host.contains(target) || fragment.hintElement.contains(target) ||
         fragment.protyle.toolbar.element.contains(target) || fragment.protyle.toolbar.subElement.contains(target) ||
-        !!(target instanceof Element && target.closest("#commonMenu, .b3-dialog"));
+        !!(target instanceof Element && target.closest("#keyboardToolbar, #commonMenu, .b3-dialog"));
     document.addEventListener("pointerdown", event => {
         if (belongsToEditor(event.target as Node)) {
             return;
@@ -377,18 +396,7 @@ export const openTableCellRichEditor = (owner: IProtyle, cell: HTMLTableCellElem
         if (!event.isComposing && !composing && (undo || redo)) {
             event.preventDefault();
             event.stopImmediatePropagation();
-            // 先提交当前单元格，再由所属文档撤销，保证切换单元格后仍可连续回退。
-            finish();
-            const range = document.createRange();
-            range.selectNodeContents(cell);
-            range.collapse(true);
-            owner.wysiwyg.element.focus({preventScroll: true});
-            focusByRange(range);
-            if (undo) {
-                owner.undo.undo(owner);
-            } else {
-                owner.undo.redo(owner);
-            }
+            undoCell(redo);
             return;
         }
         if (!event.isComposing && !composing && !event.ctrlKey && !event.metaKey && !event.altKey &&

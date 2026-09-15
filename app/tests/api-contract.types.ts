@@ -6,6 +6,21 @@ declare const fetchGet: FetchGet;
 declare const fetchSyncPost: FetchSyncPost;
 declare const dynamicURL: string;
 
+fetchPost("/api/petal/savePluginPublishData", {packageName: "example", data: {theme: "dark", enabled: true, count: 1, empty: null}});
+fetchPost("/api/petal/setPluginPublishDataGrant", {packageName: "example", fields: ["theme"], enabled: true});
+// @ts-expect-error 公开字段不能包含未经独立授权的嵌套对象。
+fetchPost("/api/petal/savePluginPublishData", {packageName: "example", data: {settings: {token: "secret"}}});
+// @ts-expect-error 授权必须携带管理员实际查看的字段清单。
+fetchPost("/api/petal/setPluginPublishDataGrant", {packageName: "example", enabled: true});
+// @ts-expect-error 发布数据接口只支持 POST。
+fetchGet("/api/petal/loadPluginPublishData", () => undefined);
+fetchPost("/api/petal/loadPluginPublishData", {packageName: "example"}, response => {
+    if (response.code === 0) {
+        const value: string | number | boolean | null = response.data.theme;
+        void value;
+    }
+});
+
 fetchPost("/api/setting/setEditor", {markdown: {inlineMath: null}, fontFamilies: null});
 fetchPost("/api/setting/setAI", {mcp: {servers: [{name: "server", env: {KEY: "value"}}]}});
 fetchPost("/api/setting/setKeymap", {data: {extension: {items: [null, false, 1, "text", {}]}}});

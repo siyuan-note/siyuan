@@ -62,7 +62,7 @@ export const isEmptyTabPlaceholder = (paragraph: Element): boolean => {
 const convertContainer = (source: Element, target: HTMLElement): HTMLElement => {
     const result = source.cloneNode(false) as HTMLElement;
     ["data-subtype", "data-marker", "data-task", "data-tight", "fold", "data-tabs-hidden", "data-tabs-editing",
-        "tabs-active-id", "tabs-position", "data-sb-layout", "data-list-index", "aria-hidden", "hidden"].forEach(name =>
+        "tabs-active-id", "tabs-position", "tabs-task", "data-sb-layout", "data-list-index", "aria-hidden", "hidden"].forEach(name =>
         result.removeAttribute(name));
     Array.from(target.attributes).forEach(attr => {
         if (!["data-node-id", "updated"].includes(attr.name)) {
@@ -91,6 +91,9 @@ export const convertTabsList = (source: Element, type: TTabsListConversion, lute
     const target = skeleton(lute, toTabs ? "::: tabs\n@tab\n\n:::\n" : `${listMarker} \n`);
     const itemTemplate = target.querySelector(toTabs ? ":scope > .tab-item" : ":scope > .li") as HTMLElement;
     const result = convertContainer(source, target);
+    if (toTabs && source.getAttribute("data-subtype") === "t") {
+        result.setAttribute("tabs-task", "true");
+    }
     result.querySelector(toTabs ? ":scope > .tab-item" : ":scope > .li").remove();
     items.forEach((item, index) => {
         const converted = convertContainer(item, itemTemplate.cloneNode(true) as HTMLElement);

@@ -12,6 +12,7 @@ import {getActiveTab} from "../../layout/tabUtil";
 /// #endif
 /// #if MOBILE
 import {getCurrentEditor} from "../../mobile/editor";
+import {getMobileToolbarProtyle, getMobileToolbarUndo} from "../lite/mobileToolbar";
 /// #endif
 
 // 本地镜像：按 rootID 缓存 {canUndo, canRedo}，按钮态零 fetch 读取。
@@ -115,7 +116,10 @@ const applyUndoButtons = (protyle: IProtyle, rootID: string) => {
         applyState(protyle.breadcrumb.element.parentElement);
     }
     /// #if MOBILE
-    if (getCurrentEditor()?.protyle === protyle && getUndoRootID(protyle, protyle.toolbar?.range) === rootID) {
+    const toolbarEditor = getMobileToolbarProtyle();
+    const undoOwner = toolbarEditor ? getMobileToolbarUndo(toolbarEditor)?.owner : getCurrentEditor()?.protyle;
+    if (undoOwner === protyle &&
+        getUndoRootID(protyle, protyle.toolbar?.range) === rootID) {
         const keyboardToolbar = document.getElementById("keyboardToolbar");
         if (keyboardToolbar) {
             applyState(keyboardToolbar);

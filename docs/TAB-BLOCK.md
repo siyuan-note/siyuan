@@ -22,11 +22,13 @@ A new tab block starts with two items, each containing an empty paragraph. Addin
 
 #### Task state
 
-A single ASCII space in `tabs-task` means incomplete. `X` or `x` displays the completed icon; other supported single-character states display their exact character. Custom-state input uses task-list marker validation, accepting a single ASCII character other than square brackets. State is independent of title and selection and is saved and synced with the document.
+Setting `tabs-task="true"` on a tab block displays task status for every direct item, defaulting to incomplete when an item has no explicit state. A single ASCII space in an item's `tabs-task` means incomplete. `X` or `x` displays the completed icon; other supported single-character states display their exact character inside the same outline as the incomplete icon. Custom-state input uses task-list marker validation, accepting a single ASCII character other than square brackets. State is independent of title and selection and is saved and synced with the document.
 
-Task in the block menu is a group toggle. It is checked if any direct item has `tabs-task`. Turning it off removes the attribute from every direct item; turning it on initializes all items as incomplete. A new item is an incomplete task whenever the group contains any task item. Moving between groups retains each item's state, so mixed groups remain possible and can be normalized through the group toggle.
+Task in the block menu is a group toggle. It is checked if the group has `tabs-task="true"` or any direct item has `tabs-task`. Turning it off removes the attribute from the group and every direct item; turning it on sets the group attribute so all direct items default to incomplete. A new item is an incomplete task whenever the group contains any task item. Moving between groups retains each item's state; ordinary items moved into task groups default to incomplete. Existing documents without the group attribute still support mixed groups, which can be normalized through the group toggle.
 
-Clicking a state icon does not select the tab or start renaming: incomplete becomes `X`, while any other state becomes a space. Right-clicking the icon or choosing Custom task status in the title menu edits the current item's state. The icon has no separate Task List tooltip.
+Clicking a state icon does not select the tab or start renaming: To do and In progress become Completed (`X`), while any other state becomes To do (a space). Right-clicking either the icon or title opens the complete item menu. When editable, it directly offers To do, In progress, Completed, Canceled and Custom task status, separated from other operations without a nested Task status submenu. Read-only items still offer copying a block reference. In progress uses `/`; Canceled uses `-` and dims and strikes through the navigation title. In-progress titles retain their normal appearance. The icon has no separate Task List tooltip.
+
+Right-clicking a task list icon opens the complete list item block menu. The block menu - List block directly lists the five states with a single custom-state entry and a separator before list insertion operations. Menu configuration version 6 expands the old status submenu in place, preserving child order and plugin positions. The merged custom-state entry remains visible whenever either former entry was visible. Task icons display the original custom character. In-progress text retains its normal appearance, canceled text is dimmed and struck through, and completed text keeps its existing style. Display follows the original marker; the stored compatibility rule that non-space markers are checked remains unchanged, as does the existing Markdown export normalization. Setting and toggling states support undo and redo. Copying, cutting or dragging an individual tab item materializes its inherited incomplete state in the destination so it remains a task outside its original group; undoing a move restores the original inherited attribute state.
 
 #### List and super-block conversion
 
@@ -62,7 +64,7 @@ Deleting the active item selects the next item if available, otherwise the previ
 | `tabs-title="true"` | Marks the item's first `NodeParagraph` as a separate title block; when present, this paragraph is the sole title source and overrides `TabItemTitle` |
 | `tabs-active-id` | Selected direct item ID in the container IAL; missing or invalid values fall back to the first item |
 | `tabs-position` | Container IAL layout attribute: `top` or `left`, defaulting to `top` |
-| `tabs-task` | Optional task-state character in the item IAL; absence means an ordinary tab |
+| `tabs-task` | `true` in the group IAL enables tasks for all direct items; an item IAL stores its state character, defaulting to incomplete in task groups and an ordinary tab otherwise |
 | `tabs-placeholder="true"` | Marks an empty body paragraph added during list-to-tabs conversion |
 
 Child order determines tab order. Empty and duplicate titles are valid, and UI placeholder text is not saved as content. A separate title paragraph retains its ID, block attributes and complete inline content.

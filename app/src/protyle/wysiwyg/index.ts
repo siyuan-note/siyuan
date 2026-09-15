@@ -70,6 +70,7 @@ import {
 } from "./getBlock";
 import {transaction, updateTransaction} from "./transaction";
 import {toggleTaskListItem} from "./list";
+import {preserveCopiedTabTask} from "../util/tabsCopy";
 import {hideElements} from "../ui/hideElements";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
@@ -149,6 +150,7 @@ import {checkFold} from "../../util/noRelyPCFunction";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 import {
     addDragFill,
+    cellValueIsEmpty,
     dragFillCellsValue,
     getAVCellData,
     getAVSelectedCellData,
@@ -853,7 +855,7 @@ export class WYSIWYG {
                         } else {
                             itemHTML = removeEmbed(item);
                         }
-                        itemHTML = cleanBlockSelectionModeHTML(itemHTML);
+                        itemHTML = preserveCopiedTabTask(item, cleanBlockSelectionModeHTML(itemHTML));
                         if (item.getAttribute("data-type") === "NodeListItem") {
                             if (!listHTML) {
                                 listHTML = `<div data-subtype="${item.getAttribute("data-subtype")}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">`;
@@ -1166,6 +1168,7 @@ export class WYSIWYG {
                 !event.altKey && !protyle.disabled) {
                 repairHiddenTabSelection(this.element, target);
             }
+            const avCellElement = hasClosestByClassName(target, "av__cell");
             const emptyCell = target.closest<HTMLTableCellElement>("td:empty, th:empty");
             if (emptyCell && event.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey &&
                 !event.altKey && !protyle.disabled && emptyCell.closest(".protyle-wysiwyg") === this.element) {
@@ -1173,7 +1176,8 @@ export class WYSIWYG {
                 event.preventDefault();
             }
             const customElement = hasClosestByClassName(target, "protyle-custom");
-            let nodeElement = hasClosestBlock(target) as HTMLElement;
+            // 富文本预览以 b3-typography 作为渲染边界，先回到单元格再查找数据库块。
+            let nodeElement = hasClosestBlock(avCellElement || target) as HTMLElement;
             let clickedTableNode = !customElement && nodeElement && nodeElement.dataset.type === "NodeTable" ?
                 nodeElement : undefined;
             if (!nodeElement && !customElement) {
@@ -1212,7 +1216,14 @@ export class WYSIWYG {
             const hasSelectClassElement = this.element.querySelector(".protyle-wysiwyg--select");
             const galleryItemElement = hasClosestByClassName(target, "av__gallery-item");
             const rowElement = hasClosestByClassName(target, "av__row");
-            const avCellElement = hasClosestByClassName(target, "av__cell");
+            const selectFilledTextCell = Boolean(!isMobile() && avCellElement &&
+                avCellElement.dataset.dtype === "text" &&
+                !avCellElement.classList.contains("av__cell--select") &&
+                !cellValueIsEmpty(genCellValueByElement("text", avCellElement)) &&
+                !target.closest(".av__cell-action, .av__celltext--rich [data-type~='block-ref'][data-id], " +
+                    ".av__celltext--rich [data-type~='file-annotation-ref'][data-id], " +
+                    ".av__celltext--rich [data-type~='tag'], .av__celltext--rich [data-type~='a'], " +
+                    ".av__celltext--rich a[href]"));
             const avElement = getAVSelectionRoot(target);
             const wysiwygRect = protyle.wysiwyg.element.getBoundingClientRect();
             const wysiwygStyle = window.getComputedStyle(protyle.wysiwyg.element);
@@ -1832,7 +1843,7 @@ export class WYSIWYG {
                     }
                 };
 
-                documentSelf.onmouseup = () => {
+                documentSelf.onmouseup = (upEvent: MouseEvent) => {
                     documentSelf.onmousemove = null;
                     documentSelf.onmouseup = null;
                     documentSelf.ondragstart = null;
@@ -1842,6 +1853,10 @@ export class WYSIWYG {
                         selectRow(nodeElement.querySelector(".av__firstcol"), "unselectAll");
                         focusBlock(nodeElement);
                         addDragFill(lastCellElement);
+                        this.preventClick = true;
+                    } else if (selectFilledTextCell &&
+                        hasClosestByClassName(upEvent.target as HTMLElement, "av__cell") === avCellElement) {
+                        focusBlock(nodeElement);
                         this.preventClick = true;
                     }
                     return false;
@@ -3212,7 +3227,7 @@ export class WYSIWYG {
                     } else {
                         itemHTML = removeEmbed(item);
                     }
-                    itemHTML = cleanBlockSelectionModeHTML(itemHTML);
+                    itemHTML = preserveCopiedTabTask(item, cleanBlockSelectionModeHTML(itemHTML));
                     if (item.getAttribute("data-type") === "NodeListItem") {
                         if (!listHTML) {
                             listHTML = `<div data-subtype="${item.getAttribute("data-subtype")}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">`;
@@ -3755,7 +3770,7 @@ export class WYSIWYG {
                         nodeElement.querySelector(".table__select").removeAttribute("style");
                     }
                 }
-            } else if (protyle.toolbar.range.toString() === "") {
+            } else if (protyle.toolbar.range.toString() === "" || hasClosestByClassName(target, "protyle-action--task")) {
                 if (!protyle.gutter) {
                     event.preventDefault();
                     window.siyuan.menus.menu.remove();

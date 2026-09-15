@@ -217,13 +217,10 @@ func (t *extraBodyTransport) Do(req *http.Request) (*http.Response, error) {
 }
 
 // NewOpenAIClientWithModel 创建 OpenAI client，并按模型与端点启用兼容适配。
-// 绝大多数模型走 NewOpenAIClient 路径；命中清单的模型会注入额外参数，官方 Gemini 端点会保留工具调用签名。
+// 模型请求统一启用思考字段适配，命中清单的模型会注入额外参数，官方 Gemini 端点会保留工具调用签名。
 func NewOpenAIClientWithModel(apiKey, apiBaseURL, model string, headers ...map[string]string) *openai.Client {
 	extra := ExtraBodyForModel(model)
 	geminiThoughtSignatures := isGoogleGeminiOpenAICompatibleEndpoint(apiBaseURL, model)
-	if len(extra) == 0 && !geminiThoughtSignatures {
-		return NewOpenAIClient(apiKey, apiBaseURL, headers...)
-	}
 	config := openai.DefaultConfig(apiKey)
 	config.BaseURL = apiBaseURL
 	var transport openai.HTTPDoer = newAIProviderHTTPClient(apiBaseURL, headers...)
@@ -233,6 +230,7 @@ func NewOpenAIClientWithModel(apiKey, apiBaseURL, model string, headers ...map[s
 	if geminiThoughtSignatures {
 		transport = WrapGeminiThoughtSignatureTransport(transport)
 	}
+	transport = &reasoningResponseTransport{base: transport}
 	config.HTTPClient = transport
 	return openai.NewClientWithConfig(config)
 }

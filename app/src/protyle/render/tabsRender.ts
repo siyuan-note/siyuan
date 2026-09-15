@@ -7,6 +7,7 @@ export interface ITabsRenderOptions {
     label?: string;
     addLabel?: string;
     select?: (tabs: HTMLElement, id: string) => void;
+    activate?: (item: HTMLElement) => void;
     rename?: (item: HTMLElement) => void;
     add?: (tabs: HTMLElement) => void;
     menu?: (tabs: HTMLElement, item: HTMLElement, anchor: HTMLElement) => void;
@@ -44,6 +45,12 @@ let instanceID = 0;
 
 export const getTabItems = (tabs: Element): HTMLElement[] =>
     Array.from(tabs.children).filter(item => item.classList.contains("tab-item")) as HTMLElement[];
+
+export const getTabTask = (item: Element): string => item.getAttribute("tabs-task") ??
+    (item.parentElement?.getAttribute("tabs-task") === "true" ? " " : null);
+
+export const hasTabsTasks = (tabs: Element): boolean => tabs.getAttribute("tabs-task") === "true" ||
+    getTabItems(tabs).some(item => item.hasAttribute("tabs-task"));
 
 export const getTabTitle = (item: Element) =>
     item.querySelector<HTMLElement>(":scope > .tab-item-info > .tab-item-title, :scope > .tab-item-info > [tabs-title] > .tab-item-title");
@@ -206,7 +213,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                     header.addEventListener("selectstart", event => event.preventDefault());
                 }
                 const signature = JSON.stringify([readonly, ...items.map(item => [itemID(item),
-                    item.getAttribute("tabs-task"), item.dataset.tabsEditing === "true" ? null : getTabTitle(item)?.innerHTML])]);
+                    getTabTask(item), item.dataset.tabsEditing === "true" ? null : getTabTitle(item)?.innerHTML])]);
                 let previousScroll: {left: number, top: number};
                 if (state.signature !== signature || !header.firstElementChild) {
                     const previousList = header.querySelector<HTMLElement>(".tabs-list");
@@ -238,6 +245,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                             }
                         }
                         controller.select(tabs, id, true);
+                        controller.options.activate?.(items.find(item => itemID(item) === id));
                         if (top < visibleTop) {
                             tabs.scrollIntoView({block: "start", inline: "nearest"});
                         }
@@ -270,7 +278,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                         }
                         button.setAttribute("aria-label", escapeHtml(button.textContent));
                         button.setAttribute("data-position", "north");
-                        const marker = item.getAttribute("tabs-task");
+                        const marker = getTabTask(item);
                         if (marker !== null) {
                             const task = document.createElement("span");
                             task.className = "tabs-task";
@@ -288,8 +296,13 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                             });
                             if (marker === " " || marker.toLowerCase() === "x") {
                                 task.innerHTML = `<svg><use xlink:href="#${marker === " " ? "iconUncheck" : "iconCheck"}"></use></svg>`;
+                            } else if (marker === "/" || marker === "-") {
+                                task.innerHTML = `<svg><use xlink:href="#${marker === "/" ? "iconTaskInProgress" : "iconIndeterminateCheck"}"></use></svg>`;
                             } else {
-                                task.textContent = marker;
+                                task.innerHTML = '<svg><use xlink:href="#iconUncheck"></use></svg>';
+                                const character = document.createElement("span");
+                                character.textContent = marker;
+                                task.appendChild(character);
                                 task.classList.add("tabs-task--custom");
                             }
                             ["click", "dblclick", "contextmenu", "keydown"].forEach(type => task.addEventListener(type, event => {
@@ -302,12 +315,15 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                                 }
                                 event.stopPropagation();
                                 event.preventDefault();
-                                if (!readonly) {
-                                    if (type === "contextmenu") {
+                                if (type === "contextmenu") {
+                                    if (controller.options.menu) {
+                                        controller.select(tabs, itemID(item), true);
+                                        controller.options.menu(tabs, item, button);
+                                    } else if (!readonly) {
                                         controller.options.taskMenu?.(item);
-                                    } else if (type !== "dblclick") {
-                                        controller.options.task?.(item);
                                     }
+                                } else if (!readonly && type !== "dblclick") {
+                                    controller.options.task?.(item);
                                 }
                             }));
                             button.prepend(task);
@@ -422,6 +438,11 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                     }
                 });
                 tabs.setAttribute("data-tabs-ready", "true");
+                // 从容器读取主题设置的实际边框，吸顶标题沿用相同宽度及圆角。
+                const tabsStyle = getComputedStyle(tabs);
+                ["top-width", "right-width", "left-width", "top-left-radius", "top-right-radius"].forEach(property => {
+                    header.style.setProperty(`--tabs-border-${property}`, tabsStyle.getPropertyValue(`border-${property}`));
+                });
                 if (previousScroll) {
                     list.scrollLeft = previousScroll.left;
                     list.scrollTop = previousScroll.top;
@@ -457,7 +478,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                         `${Math.max(0, rect.bottom - listRect.bottom) * scale}px ` +
                         `${Math.max(0, listRect.left - rect.left) * scale}px)`;
                 });
-                controller.resize.observe(tabs);
+                controller.resize.observe(tabs, {box: "border-box"});
                 if (!tabs.closest('.tab-item[data-tabs-hidden="true"]') && state.renderedActive !== state.active) {
                     state.renderedActive = state.active;
                     const button = list.querySelector<HTMLElement>('[aria-selected="true"]');
@@ -484,7 +505,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
             let changed = false;
             entries.forEach(entry => {
                 const target = entry.target as HTMLElement;
-                const size = `${target.clientWidth}:${target.clientHeight}`;
+                const size = `${target.clientWidth}:${target.clientHeight}:${target.offsetWidth}:${target.offsetHeight}`;
                 if (sizes.get(target) !== size) {
                     sizes.set(target, size);
                     changed = true;

@@ -14,6 +14,19 @@ test("entry order keeps custom order and inserts new entries by their default ne
     assert.deepEqual(mergeEntryOrder(["a", "new", "b", "c"], ["c", "a", "b"]), ["c", "a", "new", "b"]);
 });
 
+test("custom task status merges into saved list menus without moving existing entries", () => {
+    const entries = getEntryCatalogChildren("gutter.single.listBlock");
+    const defaults = entries.map(item => item.key);
+    const saved = ["appendListItem", "plugin:example:item", "orderedListStart", "continueListNumbering",
+        "separator_numbering", "prependListItem"];
+    const merged = mergeEntryOrderPreservingUnknown(defaults, saved);
+    const added = ["taskStatusTodo", "taskStatusInProgress", "taskStatusDone", "taskStatusCanceled", "customTaskStatus", "separator_taskStatus"];
+    assert.deepEqual(merged.filter(key => !added.includes(key)), saved);
+    assert.deepEqual(merged.slice(merged.indexOf("taskStatusTodo"), merged.indexOf("orderedListStart")), added);
+    assert.deepEqual(resolveEntryOrder(["customTaskStatus", "prependListItem", "appendListItem", "plugin:example:item"],
+        merged, new Set(["separator_numbering"])), ["appendListItem", "plugin:example:item", "customTaskStatus", "prependListItem"]);
+});
+
 test("definition conversion submenus preserve custom order and plugin slots", () => {
     for (const id of ["defBlock", "defBlockChildren"]) {
         const entries = getEntryCatalogChildren(`inline.ref.turnInto.${id}`);

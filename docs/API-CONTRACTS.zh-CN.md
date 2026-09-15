@@ -142,6 +142,8 @@ JSON SSE 接口通过 `SSEOptions` 和 `SSEEvent` 声明各事件名称及载荷
 
 ## 生成与验证
 
+HTML 剪贴板转换保留字面反斜杠和标记字符，并在关闭 Markdown 语法时保留 HTML 格式。`TestHTML2BlockDOMContractEscapedText` 覆盖两种源格式模式、实际响应模式校验、编辑往返、HTML 实体以及样式和链接边界。可使用 `go test -tags "fts5 sqlcipher" ./api ./model -run 'Test(.*HTML.*|.*Clipboard.*|.*IFrame.*|SpinBlockDOM.*|WPSPresentation.*|NormalizeMSWord.*|NormalizeWPS.*)' -count=1` 运行相关转换回归。下方内核全量命令已包含这些测试，`app/tests/luteHtmlEscapes.test.js` 通过前端全量测试检查生成的 Lute JavaScript。修改 Lute 源码后，还需在 Lute 仓库运行 `go test ./...` 并重新生成内置 JavaScript。
+
 自定义块搜索使用可选的 `customBlock` 类型筛选字段。API 显式传入类型映射时仅搜索其中启用的类型；省略类型映射时使用搜索设置，默认启用自定义块。保存的搜索条件区分字段缺失与 `false`，使旧版前端搜索配置能够继承设置。`TestCustomBlockSearch` 回归覆盖配置兼容、搜索条件保存、类型筛选和全文索引更新；`TestAPIContractSettingConfigCompatibility` 与 `TestAPIContractSettingCompletePayloads` 覆盖设置契约，均包含在下方完整内核测试命令中。
 
 编辑器通过独立的 `swapBlockRef` 事务转换块引用：`id` 指定引用块，`blockID` 指定定义块，`data` 包含布尔选项 `includeChildren` 和 `originalToEmbed`。内核在 `retData` 中返回受影响的文档 ID，并以受影响顶层块的私有内存快照生成逆向操作。快照不传给客户端，也不接受客户端提交。重放保留块 ID 和数据库绑定；内容或位置已改变时拒绝覆盖；提交失败时补偿已写入的文档。`TestBlockSwapTransaction` 覆盖落盘后的撤销和重做、跨文档历史、冲突拒绝及写入失败恢复，包含在下方完整内核测试命令中，也可在 `kernel/` 下运行 `go test -tags "fts5 sqlcipher" ./model -run 'Test(SwapBlockRefNodes|BlockSwapTransaction)' -count=1` 单独验证
@@ -153,6 +155,8 @@ JSON SSE 接口通过 `SSEOptions` 和 `SSEEvent` 声明各事件名称及载荷
 资源引用扫描将定义文件缺失或定义 ID 无效的数据库记录到可选的 `unavailableAttributeViews` 列表，不阻断查询、预演或替换。每项包含笔记本 ID 与名称、文档 ID 与路径及人类可读路径、块 ID、数据库 ID 和原因。已存在但无法读取或内容损坏的定义仍返回错误。保存前重新校验缺失文件快照，避免遗漏扫描期间恢复的定义。当前按需下载规则不包含数据库定义，回归测试会检查这一前提。缺失定义回归覆盖模型和实际 HTTP 契约，包括关闭的笔记本和共享定义。
 
 资源引用查询和替换契约保留单资源请求，同时支持批量参数。批量结果按输入顺序返回每项状态、原因、引用和改动文件数；顶层计数对共享文件去重。空批次、重复源路径、链式和循环映射会被拒绝。独立映射可以在其他项失败时完成，共享文件写入失败归属所有受影响映射。扫描期间允许编辑，保存前校验工作区快照；取消和无变化重试保留源数据。`TestAssetRelink` 回归覆盖单资源兼容、批量校验、共享文档、数据库及 OCR 保存、历史和并发编辑，已包含在下方完整内核测试命令中。
+
+插件发布契约将仅管理员可用的授权、快照写入与已认证访问者的公开读取分离。公开数据仅包含声明的标量字段，授权和快照使用独立于同步插件私有存储的本地版本化文件。静态路由与文件接口共用插件状态和安全文件打开规则，发布加载响应排除内核代码。`TestAPIContractPluginPublish`、`TestPluginPublishContracts`、`TestPluginPublish*` 和 `TestPublishFile*` 覆盖实际响应、准入、范围变化、撤销、重装、损坏及路径边界，均包含在完整内核测试中。可运行 `go test -tags "fts5 sqlcipher" ./api ./model ./server ./util ./apicontract -run 'Test(APIContractPluginPublish|PluginPublish|PublishFile|RouteCoverage)' -count=1` 单独验证。路径测试的 CI 筛选也包含模型、静态路由与文件边界回归。接口说明和迁移示例见[插件发布](PLUGIN-PUBLISH.zh-CN.md)。
 
 在 `app/` 下运行：
 

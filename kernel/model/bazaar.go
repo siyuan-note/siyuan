@@ -702,6 +702,13 @@ func UninstallPackage(pkgType, packageName string) error {
 		return err
 	}
 
+	if pkgType == "plugins" {
+		pluginPublishLock.Lock()
+		defer pluginPublishLock.Unlock()
+		if err = removePluginPublishData(packageName); err != nil {
+			return err
+		}
+	}
 	err = bazaar.UninstallPackage(installPath)
 	if err != nil {
 		return fmt.Errorf(Conf.Language(47), err.Error())

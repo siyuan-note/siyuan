@@ -45,7 +45,10 @@ const loadPanel = (fetchCode = 0) => {
     const config = {readonly: false, fileTree: {docIconClickExpand: false, parentDocClickExpand: false}};
     const calls: {kind: string, args: unknown[]}[] = [];
     const timers: (() => void)[] = [];
-    const runtime = {config, notebooks: [] as unknown[], languages: {}, touchDragActive: false, touchDragGhost: undefined as unknown};
+    const runtime = {config, notebooks: [] as unknown[], languages: {pinDoc: "Pin", dragTipMoveChild: "Into ${x}",
+        dragTipMoveBefore: "Before ${x}", dragTipMoveAfter: "After ${x}"}, dragElement: undefined as {innerText: string},
+        dragTitle: "Document", touchDragActive: false, touchDragGhost: undefined as unknown};
+    const tips: unknown[][] = [];
     const record = (kind: string) => async (...args: unknown[]) => {
         calls.push({kind, args});
         return {code: kind === "http" ? fetchCode : 0, data: args[0] === "/api/filetree/listDocsByPath" ? childData : docs};
@@ -67,7 +70,8 @@ const loadPanel = (fetchCode = 0) => {
             remove() { calls.push({kind: "removeGhost", args: [this]}); },
         })},
         require: (name: string) => {
-            if (name.endsWith("/dragTip")) { return {setDragTipGhost: record("dragTipGhost")}; }
+            if (name.endsWith("/dragTip")) { return {setDragTipGhost: record("dragTipGhost"),
+                showDragTip: (...args: unknown[]) => tips.push(args), hideDragTip: () => tips.push([])}; }
             if (name.endsWith("/fileTreeAnimation")) { return {setFileTreeVisibility: (element: HTMLElement, visible: boolean) => element.classList.toggle("fn__none", !visible)}; }
             if (name.endsWith("/pinnedDocsDrop")) { return {getPinnedDropPosition}; }
             if (name.endsWith("/dragover")) { return {dragOverScroll: () => {}}; }
@@ -92,7 +96,7 @@ const loadPanel = (fetchCode = 0) => {
     panel.scheduleRefresh = () => {};
     panel.list = {querySelectorAll: (): unknown[] => []};
     panel.sourceTree = {querySelectorAll: (): unknown[] => []};
-    return {panel, calls, config, docs, storage, childData, hitTest, runtime, timers};
+    return {panel, calls, config, docs, storage, childData, hitTest, runtime, timers, tips};
 };
 
 test("collapse clears descendant expansion and persists the closed section", async () => {
@@ -231,6 +235,7 @@ test("dropping on a notebook resolves its outer list ID with or without root doc
     const {panel, calls, hitTest} = loadPanel();
     const highlights: string[] = [];
     const row = {dataset: {type: "navigation-root", nodeId: ""},
+        querySelector: () => ({textContent: "Notebook"}),
         closest: (selector: string) => selector === "ul[data-url]" ? {dataset: {url: "notebook"}} : null,
         getBoundingClientRect: () => ({top: 0, height: 30}), classList: {add: (name: string) => highlights.push(name)}};
     hitTest.target = {closest: () => row};
@@ -263,6 +268,7 @@ test("pinned heading highlights the whole row while root reorder keeps insertion
     panel.previewDrop(10, 20);
     assert.deepEqual(highlights, ["dragover", "dragover"]);
     const row = {dataset: {pinRoot: "true", nodeId: "document"},
+        querySelector: () => ({textContent: "Document"}),
         getBoundingClientRect: () => ({top: 0, height: 30}), classList: {add: (name: string) => highlights.push(name)}};
     hitTest.target = {closest: () => row};
     panel.previewDrop(10, 1);
@@ -290,6 +296,38 @@ test("desktop pinned drags create an unclipped ghost and preserve synthetic touc
             timers[0]();
             assert.equal(calls.at(-1).kind, "removeGhost");
         }
+    }
+});
+
+test("pin drop tips describe pinning and source moves, and self targets clear feedback", () => {
+    const {panel, hitTest, runtime, tips} = loadPanel();
+    const highlights: string[] = [];
+    let source = false;
+    const row = {dataset: {pinRoot: "true", nodeId: "target"}, querySelector: () => ({textContent: "Target"}),
+        getBoundingClientRect: () => ({top: 0, height: 30}), classList: {add: (name: string) => highlights.push(name)},
+        closest: (): Element | null => null};
+    hitTest.target = {closest: () => row};
+    panel.sourceTree = {contains: () => source, getBoundingClientRect: () => ({})};
+    panel.element = {contains: () => !source};
+    panel.list = {getBoundingClientRect: () => ({})};
+    runtime.dragElement = {innerText: "source"};
+    panel.previewDrop(10, 1);
+    assert.deepEqual(tips.at(-1), ["Document", "Pin", 10, 1]);
+    source = true;
+    row.dataset.pinRoot = "false";
+    panel.previewDrop(10, 15, true);
+    assert.deepEqual(tips.at(-1), ["Document", "Into Target", 10, 15]);
+    panel.previewDrop(10, 1, true);
+    assert.deepEqual(tips.at(-1), ["Document", "Before Target", 10, 1]);
+    panel.previewDrop(10, 29, true);
+    assert.deepEqual(tips.at(-1), ["Document", "After Target", 10, 29]);
+    for (source of [true, false]) {
+        runtime.dragElement.innerText = "target";
+        const count = highlights.length;
+        assert.equal(panel.previewDrop(10, 15, true), false);
+        assert.equal(panel.dropTarget, undefined);
+        assert.equal(highlights.length, count);
+        assert.deepEqual(tips.at(-1), []);
     }
 });
 

@@ -12130,7 +12130,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "完了と未完了を切り替え"
+									"Data": "未着手、進行中、完了、中止の順に循環して切り替え（カスタム状態からは未着手に戻る）"
 								}
 							]
 						},
@@ -12173,11 +12173,39 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⇧⌘L"
-								},
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": " / "
-								},
+									"Data": "タスクリスト"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "未着手と進行中は完了に、その他の状態は未着手に切り替え"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",

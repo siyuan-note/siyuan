@@ -2,6 +2,8 @@
 | [中文](API.zh-CN.md)
 | [日本語](API.ja.md)
 
+Plugin resource declarations, data authorization, and publishing APIs are documented in [Plugin publishing](PLUGIN-PUBLISH.md).
+
 * [Flashcard source history](FLASHCARD-HISTORY-API.md)
 * [Specification](#Specification)
     * [Parameters and return values](#Parameters-and-return-values)
@@ -386,8 +388,10 @@ The close endpoint validates the notebook ID without trimming whitespace. Typed 
   ```
 
     * `notebook`: Notebook ID
-    * `path`: Document path, which needs to start with / and separate levels with / (path here corresponds to the
-      database hpath field)
+    * `path`: Document path, which needs to start with `/` and separate levels with `/` (corresponds to the database `hpath` field)
+        * `/` is a hierarchy separator and cannot represent a literal slash in a document title; missing parent documents are created automatically
+        * For example, `/Notes/Programming in C/C++` creates a document titled `C++` under `Programming in C` under `Notes`
+        * Importers should sanitize each title before joining titles into a path, for example by replacing ASCII `/` with full-width `／` (U+FF0F): `/Notes/Programming in C／C++` creates a document titled `Programming in C／C++` under `Notes`. This replacement changes the title text
     * `markdown`: GFM Markdown content
 * Return value
 

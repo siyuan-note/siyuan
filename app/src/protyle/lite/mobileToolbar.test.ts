@@ -1,91 +1,63 @@
 import * as assert from "node:assert/strict";
 import {test} from "node:test";
-import {bindMobileToolbar} from "./mobileToolbar";
+import {bindMobileToolbar, getMobileToolbarProtyle, getMobileToolbarUndo, setMobileToolbarUndo} from "./mobileToolbar";
 
-test("mobile fragment toolbar follows its own selection and cleans up pending rendering", () => {
+test("shared mobile toolbar follows fragment focus, retains panel ownership and releases destroyed editors", () => {
     const originalWindow = Object.getOwnPropertyDescriptor(globalThis, "window");
     const originalDocument = Object.getOwnPropertyDescriptor(globalThis, "document");
     const events = new EventTarget();
-    const frames = new Map<number, FrameRequestCallback>();
-    let frameID = 0;
-    const root = {};
-    const ownNode = {nodeType: 1, closest: () => root};
-    const foreignNode = {nodeType: 1, closest: () => ({})};
-    let range = {startContainer: ownNode, endContainer: ownNode};
-    let collapsed = false;
-    let panelFocused = false;
-    let renders = 0;
-    const classes = new Set<string>();
-    const element = Object.assign(new EventTarget(), {
-        classList: classes,
-        style: {},
-        setAttribute: () => {},
-    });
-    const protyle = {
-        wysiwyg: {element: root},
-        toolbar: {
-            element,
-            subElement: {contains: () => panelFocused},
-            render: (owner: unknown, selectedRange: unknown) => {
-                assert.equal(owner, protyle);
-                assert.equal(selectedRange, range);
-                renders++;
-                classes.delete("fn__none");
-            },
-        },
-    } as unknown as IProtyle;
-    Object.defineProperty(globalThis, "document", {configurable: true, value: events});
-    Object.defineProperty(globalThis, "window", {configurable: true, value: {
-        requestAnimationFrame: (callback: FrameRequestCallback) => {
-            frames.set(++frameID, callback);
-            return frameID;
-        },
-        cancelAnimationFrame: (id: number) => frames.delete(id),
-        getSelection: () => ({rangeCount: 1, isCollapsed: collapsed, getRangeAt: () => range}),
-    }});
-    const flush = () => {
-        const callbacks = Array.from(frames.values());
-        frames.clear();
-        callbacks.forEach(callback => callback(0));
+    const state = {activeElement: {closest: (): unknown => null}};
+    const createEditor = () => {
+        const element = Object.assign(new EventTarget(), {
+            isConnected: true,
+            closest: (selector: string): unknown => selector === ".protyle-wysiwyg" ? element : null,
+        });
+        return {element, wysiwyg: {element}} as unknown as IProtyle;
     };
-    let cleanup: () => void;
+    const composer = createEditor();
+    const cell = createEditor();
+    const changes: IProtyle[] = [];
+    events.addEventListener("siyuan-mobile-toolbar-editor", (event: CustomEvent<IProtyle>) => changes.push(event.detail));
+    Object.defineProperty(globalThis, "window", {configurable: true, value: events});
+    Object.defineProperty(globalThis, "document", {configurable: true, value: state});
+    const cleanups: Array<() => void> = [];
     try {
-        cleanup = bindMobileToolbar(protyle);
-        events.dispatchEvent(new Event("selectionchange"));
-        events.dispatchEvent(new Event("selectionchange"));
-        assert.equal(frames.size, 1);
-        flush();
-        assert.equal(renders, 1);
+        cleanups.push(bindMobileToolbar(composer), bindMobileToolbar(cell));
+        const owner = createEditor();
+        const operations: boolean[] = [];
+        setMobileToolbarUndo(cell, owner, redo => operations.push(redo));
+        assert.equal(getMobileToolbarUndo(composer), undefined);
+        assert.equal(getMobileToolbarUndo(cell).owner, owner);
+        getMobileToolbarUndo(cell).run(false);
+        getMobileToolbarUndo(cell).run(true);
+        assert.deepEqual(operations, [false, true]);
+        state.activeElement = {closest: () => composer.wysiwyg.element};
+        composer.wysiwyg.element.dispatchEvent(new Event("focusin"));
+        assert.equal(getMobileToolbarProtyle(), composer);
 
-        range = {startContainer: ownNode, endContainer: foreignNode};
-        events.dispatchEvent(new Event("selectionchange"));
-        flush();
-        assert.equal(renders, 1);
-        assert.ok(classes.has("fn__none"));
+        state.activeElement = {closest: () => null};
+        assert.equal(getMobileToolbarProtyle(), composer);
 
-        range = {startContainer: ownNode, endContainer: ownNode};
-        collapsed = true;
-        events.dispatchEvent(new Event("selectionchange"));
-        flush();
-        assert.equal(renders, 1);
+        state.activeElement = {closest: () => cell.wysiwyg.element};
+        cell.wysiwyg.element.dispatchEvent(new Event("focusin"));
+        assert.equal(getMobileToolbarProtyle(), cell);
+        assert.equal(changes.at(-1), composer);
 
-        panelFocused = true;
-        classes.delete("fn__none");
-        events.dispatchEvent(new Event("selectionchange"));
-        flush();
-        assert.ok(!classes.has("fn__none"));
+        state.activeElement = {closest: () => ({})};
+        assert.equal(getMobileToolbarProtyle(), undefined);
 
-        const pointer = new Event("mousedown", {cancelable: true});
-        element.dispatchEvent(pointer);
-        assert.ok(pointer.defaultPrevented);
+        state.activeElement = {closest: () => cell.wysiwyg.element};
+        cell.wysiwyg.element.dispatchEvent(new Event("focusin"));
+        cleanups.pop()();
+        assert.equal(getMobileToolbarProtyle(), undefined);
+        assert.equal(changes.at(-1), cell);
 
-        events.dispatchEvent(new Event("selectionchange"));
-        cleanup();
-        assert.equal(frames.size, 0);
-        events.dispatchEvent(new Event("selectionchange"));
-        assert.equal(frames.size, 0);
+        state.activeElement = {closest: () => composer.wysiwyg.element};
+        composer.wysiwyg.element.dispatchEvent(new Event("focusin"));
+        Object.defineProperty(composer.element, "isConnected", {value: false});
+        assert.equal(getMobileToolbarProtyle(), undefined);
     } finally {
-        cleanup?.();
+        cleanups.forEach(cleanup => cleanup());
         if (originalWindow) {
             Object.defineProperty(globalThis, "window", originalWindow);
         } else {

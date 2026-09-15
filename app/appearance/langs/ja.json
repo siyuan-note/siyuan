@@ -1,4 +1,6 @@
 {
+	"agentStreamingMarkdown": "ストリーミング Markdown プレビュー",
+	"agentStreamingMarkdownTip": "応答中に Markdown をプレビューします（パフォーマンスに影響する場合があります）",
 	"taskStatus": "タスクの状態",
 	"taskStatusTodo": "未着手",
 	"taskStatusInProgress": "進行中",

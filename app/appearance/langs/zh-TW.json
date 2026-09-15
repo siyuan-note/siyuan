@@ -1,4 +1,6 @@
 {
+	"agentStreamingMarkdown": "串流 Markdown 預覽",
+	"agentStreamingMarkdownTip": "在回覆過程中預覽 Markdown，可能影響效能",
 	"taskStatus": "任務狀態",
 	"taskStatusTodo": "待辦",
 	"taskStatusInProgress": "進行中",

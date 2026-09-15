@@ -1,4 +1,6 @@
 {
+	"agentStreamingMarkdown": "Náhľad Markdown počas streamovania",
+	"agentStreamingMarkdownTip": "Náhľad Markdown počas odpovede agenta; môže ovplyvniť výkon",
 	"taskStatus": "Stav úlohy",
 	"taskStatusTodo": "Na vykonanie",
 	"taskStatusInProgress": "Prebieha",

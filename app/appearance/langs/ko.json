@@ -1,4 +1,6 @@
 {
+	"agentStreamingMarkdown": "스트리밍 Markdown 미리보기",
+	"agentStreamingMarkdownTip": "에이전트 응답 중 Markdown을 미리 표시하며, 성능에 영향을 줄 수 있습니다",
 	"taskStatus": "작업 상태",
 	"taskStatusTodo": "할 일",
 	"taskStatusInProgress": "진행 중",

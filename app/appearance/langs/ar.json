@@ -1,4 +1,6 @@
 {
+	"agentStreamingMarkdown": "معاينة Markdown أثناء البث",
+	"agentStreamingMarkdownTip": "معاينة Markdown أثناء رد الوكيل؛ قد يؤثر ذلك في الأداء",
 	"taskStatus": "حالة المهمة",
 	"taskStatusTodo": "للقيام بها",
 	"taskStatusInProgress": "قيد التنفيذ",

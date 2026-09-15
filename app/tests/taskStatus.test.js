@@ -1,0 +1,268 @@
+const assert = require("node:assert/strict");
+const {readFileSync, mkdtempSync, rmSync} = require("node:fs");
+const path = require("node:path");
+const os = require("node:os");
+
+const sources = () => {
+    const ts = require("typescript");
+    const compile = source => ts.transpileModule(source.replace(/export /g, ""), {
+        compilerOptions: {target: ts.ScriptTarget.ES2021},
+    }).outputText;
+    const extract = (file, names) => {
+        const source = ts.createSourceFile(file, readFileSync(path.join(__dirname, "../src", file), "utf8"),
+            ts.ScriptTarget.Latest, true);
+        const statements = source.statements.filter(statement => ts.isVariableStatement(statement) &&
+            statement.declarationList.declarations.some(declaration => names.includes(declaration.name.getText(source))));
+        assert.equal(statements.length, names.length);
+        return compile(statements.map(statement => statement.getText(source)).join("\n"));
+    };
+    const renderSource = readFileSync(path.join(__dirname, "../src/protyle/render/tabsRender.ts"), "utf8");
+    return {
+        actions: extract("protyle/render/tabsRender.ts", ["getTabTask", "getTabItems", "hasTabsTasks"]) +
+            extract("protyle/util/tabsCopy.ts", ["preserveTabTask", "preserveCopiedTabTask", "remapTabsDOMIDs", "wrapPastedTabItems"]) +
+            extract("protyle/wysiwyg/tabsRemoval.ts", ["repairActiveTab"]) +
+            extract("protyle/wysiwyg/taskListMarker.ts", ["getTaskListMarker", "isTaskListMarker", "nextTaskListMarker"]) +
+            extract("protyle/wysiwyg/tabs.ts", ["canEdit", "changeTabs", "toggleTabsTasks", "setTabTask", "moveTab"]) +
+            extract("protyle/wysiwyg/list.ts", ["setTaskListItemMarker", "toggleTaskListItem"]) +
+            extract("protyle/util/editorCommonEvent.ts", ["moveTo"]),
+        renderer: compile(renderSource.replace(/^import .*;\r?\n/gm, "")) +
+            extract("protyle/render/tabsState.ts", ["resolveTabID", "tabKeyboardTarget"]),
+        css: require("sass").compile(path.join(__dirname, "../src/assets/scss/protyle/_tabs.scss")).css,
+    };
+};
+
+const cases = async source => {
+    const check = require("node:assert/strict");
+    const lute = window.Lute.New();
+    lute.SetTabs(true);
+    lute.SetKramdownIAL(true);
+    lute.SetProtyleWYSIWYG(true);
+    lute.SetSpin(true);
+    lute.SetArbitraryTaskListItemMarker(true);
+    lute.SetDataTask(true);
+    lute.SetExportNormalizeTaskListMarker(true);
+    let lastTransaction;
+    const api = new Function("Constants", "transaction", "updateTransaction", "dayjs", "getParentBlock",
+        "getPreviousBlockSibling", "getTopAloneElement", source.actions +
+        "; return {getTabTask, hasTabsTasks, preserveCopiedTabTask, wrapPastedTabItems, moveTo, moveTab, toggleTabsTasks, setTabTask, setTaskListItemMarker, toggleTaskListItem};")(
+        {CB_GET_HISTORY: "history", ATTRIBUTE_EDITING: "data-editing", ZWSP: "\u200b"},
+        (_protyle, forward, backward) => { lastTransaction = {forward, backward}; },
+        (_protyle, item, html) => { lastTransaction = {forward: item.outerHTML, backward: html}; },
+        () => ({format: () => "20260915120000"}), item => item.parentElement,
+        item => item.previousElementSibling, item => item);
+    const root = document.createElement("div");
+    root.className = "protyle-wysiwyg";
+    document.body.append(root);
+    const protyle = {lute, disabled: false, options: {action: []}, block: {rootID: "doc"}, wysiwyg: {element: root}};
+    const markdown = "::: tabs\n@tab Keep\n\nA\n@tab Task\n\nB\n:::\n{: tabs-task=\"true\"}\n\n::: tabs\n@tab Target\n\nC\n:::\n";
+    const reset = () => {
+        root.innerHTML = lute.Md2BlockDOM(markdown);
+        const groups = root.querySelectorAll(".tabs");
+        return {from: groups[0], to: groups[1], item: groups[0].querySelectorAll(":scope > .tab-item")[1],
+            target: groups[1].querySelector(".tab-item")};
+    };
+    const find = id => root.querySelector(`[data-node-id="${id}"]`);
+    const apply = operations => operations.forEach(operation => {
+        const item = find(operation.id);
+        if (operation.action === "setAttrs") {
+            Object.entries(JSON.parse(operation.data)).forEach(([name, value]) => {
+                if (value === "") {
+                    item.removeAttribute(name);
+                } else {
+                    item.setAttribute(name, value);
+                }
+            });
+        } else if (operation.action === "move") {
+            if (operation.previousID) {
+                find(operation.previousID).after(item);
+            } else {
+                find(operation.parentID).prepend(item);
+            }
+        } else if (operation.action === "update") {
+            item.outerHTML = operation.data;
+        } else {
+            check.fail(`Unexpected operation ${operation.action}`);
+        }
+    });
+
+    // 同一继承状态覆盖块标移动、复制、剪贴板和导航移动，真实应用事务检查撤销及重做。
+    for (const marker of [null, " ", "X", "/"]) {
+        for (const copy of [false, true]) {
+            const {from, to, item, target} = reset();
+            if (marker !== null) {
+                item.setAttribute("tabs-task", marker);
+            }
+            const id = item.dataset.nodeId;
+            const positions = new Map([[id, {parentID: from.dataset.nodeId, previousID: item.previousElementSibling.dataset.nodeId}]]);
+            const operations = await api.moveTo(protyle, [item], target, true, "afterend", copy, positions);
+            const moved = to.querySelectorAll(":scope > .tab-item")[1];
+            check.equal(api.getTabTask(moved), marker ?? " ");
+            if (copy) {
+                check.equal(item.getAttribute("tabs-task"), marker);
+                check.ok(operations.doOperations.some(operation => operation.action === "insert" &&
+                    operation.data.includes("tabs-task=")));
+            } else {
+                apply(operations.undoOperations);
+                check.equal(find(id).parentElement.dataset.nodeId, from.dataset.nodeId);
+                check.equal(find(id).getAttribute("tabs-task"), marker);
+                apply(operations.doOperations);
+                check.equal(find(id).parentElement.dataset.nodeId, to.dataset.nodeId);
+                check.equal(api.getTabTask(find(id)), marker ?? " ");
+            }
+        }
+        const {from, item, target} = reset();
+        if (marker !== null) {
+            item.setAttribute("tabs-task", marker);
+        }
+        const clipboard = document.createElement("div");
+        clipboard.innerHTML = api.preserveCopiedTabTask(item, item.outerHTML);
+        api.wrapPastedTabItems(clipboard, lute);
+        check.equal(api.getTabTask(clipboard.querySelector(".tab-item")), marker ?? " ");
+        check.equal(item.getAttribute("tabs-task"), marker);
+        const id = item.dataset.nodeId;
+        api.moveTab(protyle, item, target, true);
+        const saved = lastTransaction;
+        check.equal(api.getTabTask(item), marker ?? " ");
+        apply(saved.backward);
+        check.equal(find(id).parentElement.dataset.nodeId, from.dataset.nodeId);
+        check.equal(find(id).getAttribute("tabs-task"), marker);
+        apply(saved.forward);
+        check.equal(api.getTabTask(find(id)), marker ?? " ");
+    }
+    let {from, item} = reset();
+    const ordinaryItem = root.querySelectorAll(".tabs")[1].querySelector(".tab-item");
+    const ordinaryClipboard = api.preserveCopiedTabTask(ordinaryItem, ordinaryItem.outerHTML);
+    check.equal(ordinaryClipboard, ordinaryItem.outerHTML);
+    const reorderID = item.dataset.nodeId;
+    const reorder = await api.moveTo(protyle, [item], from.querySelector(".tab-item"), true, "beforebegin", false,
+        new Map([[reorderID, {parentID: from.dataset.nodeId, previousID: item.previousElementSibling.dataset.nodeId}]]));
+    check.equal(item.hasAttribute("tabs-task"), false);
+    apply(reorder.undoOperations);
+    item = find(reorderID);
+    api.setTabTask(protyle, item, "/");
+    check.equal(item.getAttribute("tabs-task"), "/");
+    apply(lastTransaction.backward);
+    item = from.querySelectorAll(":scope > .tab-item")[1];
+    check.equal(item.hasAttribute("tabs-task"), false);
+    api.toggleTabsTasks(protyle, from);
+    check.equal(api.hasTabsTasks(from), false);
+    api.toggleTabsTasks(protyle, from);
+    check.equal(from.getAttribute("tabs-task"), "true");
+    check.equal(api.getTabTask(item), " ");
+    const nested = document.createElement("div");
+    nested.innerHTML = lute.Md2BlockDOM("::: tabs\n@tab Nested\n\nBody\n:::\n");
+    item.querySelector(".tab-item-content").append(nested.firstElementChild);
+    check.equal(api.getTabTask(item.querySelector(".tab-item")), null);
+
+    // 列表自定义状态保留原始字符，并沿用点击切换、只读保护和撤销快照。
+    root.innerHTML = lute.Md2BlockDOM("* [ ] Task\n");
+    const taskItem = root.querySelector(".li");
+    for (const marker of ["/", "-", "?", "X", "x", " ", "\"", "&", "<"]) {
+        const before = taskItem.outerHTML;
+        api.setTaskListItemMarker(protyle, taskItem, marker);
+        check.equal(taskItem.getAttribute("data-task"), marker);
+        check.equal(lastTransaction.backward, before);
+        const imported = document.createElement("div");
+        imported.innerHTML = lute.SpinBlockDOM(root.innerHTML);
+        check.equal(imported.querySelector(".li").getAttribute("data-task"), marker === "x" ? "X" : marker);
+        api.toggleTaskListItem(protyle, taskItem);
+        check.equal(taskItem.getAttribute("data-task"), marker === " " ? "X" : " ");
+    }
+    const before = taskItem.outerHTML;
+    for (const marker of ["ab", "[", "]"]) {
+        api.setTaskListItemMarker(protyle, taskItem, marker);
+        check.equal(taskItem.outerHTML, before);
+    }
+    protyle.disabled = true;
+    api.setTaskListItemMarker(protyle, taskItem, "/");
+    check.equal(taskItem.outerHTML, before);
+    protyle.disabled = false;
+    protyle.options.action = ["history"];
+    api.setTaskListItemMarker(protyle, taskItem, "/");
+    check.equal(taskItem.outerHTML, before);
+    protyle.options.action = [];
+
+    // 真实导航渲染验证三种状态共用图标轮廓，右键入口和只读行为保持一致。
+    const renderer = new Function("bindTabsDrag", "cancelTabsDrag", "isDraggingTabs", "escapeHtml",
+        source.renderer + "; return {tabsRender, destroyTabsRender};")(() => {}, () => {}, () => false, value => value);
+    const style = document.createElement("style");
+    style.textContent = source.css;
+    document.head.append(style);
+    ({from} = reset());
+    const items = from.querySelectorAll(":scope > .tab-item");
+    items[1].setAttribute("tabs-task", "/");
+    const completed = items[0].cloneNode(true);
+    completed.dataset.nodeId = window.Lute.NewNodeID();
+    completed.setAttribute("tabs-task", "X");
+    from.insertBefore(completed, from.querySelector(":scope > .protyle-attr"));
+    let edited;
+    let toggled;
+    renderer.tabsRender(root, {readonly: () => false, taskMenu: entry => { edited = entry; }, task: entry => { toggled = entry; }});
+    const custom = from.querySelector(".tabs-task--custom");
+    const incomplete = from.querySelector(".tabs-task:not(.tabs-task--custom)");
+    check.equal(custom.querySelector("use").getAttribute("xlink:href"), incomplete.querySelector("use").getAttribute("xlink:href"));
+    check.equal(custom.querySelector("span").textContent, "/");
+    check.equal(custom.getBoundingClientRect().width, incomplete.getBoundingClientRect().width);
+    check.equal(custom.getBoundingClientRect().height, incomplete.getBoundingClientRect().height);
+    const checked = from.querySelector('.tabs-task[data-task="X"]');
+    check.equal(checked.querySelector("use").getAttribute("xlink:href"), "#iconCheck");
+    check.equal(custom.getBoundingClientRect().width, checked.getBoundingClientRect().width);
+    const active = from.getAttribute("tabs-active-id");
+    custom.dispatchEvent(new MouseEvent("contextmenu", {bubbles: true, cancelable: true}));
+    check.equal(edited, items[1]);
+    check.equal(from.getAttribute("tabs-active-id"), active);
+    custom.click();
+    check.equal(toggled, items[1]);
+    check.equal(from.getAttribute("tabs-active-id"), active);
+    renderer.tabsRender(root, {readonly: () => true});
+    check.equal(from.querySelector(".tabs-task--custom").getAttribute("aria-disabled"), "true");
+    renderer.destroyTabsRender(root);
+    root.remove();
+    return "Task status cases passed";
+};
+
+const run = async () => {
+    const {app, BrowserWindow} = require("electron");
+    app.setPath("userData", process.argv[2]);
+    app.commandLine.appendSwitch("disable-gpu");
+    await app.whenReady();
+    const win = new BrowserWindow({show: false, webPreferences: {
+        nodeIntegration: true, contextIsolation: false, offscreen: true,
+    }});
+    let code = 0;
+    try {
+        await win.loadURL("data:text/html,<html><body></body></html>");
+        await win.webContents.executeJavaScript(readFileSync(path.join(__dirname,
+            "../stage/protyle/js/lute/lute.min.js"), "utf8"));
+        const result = await win.webContents.executeJavaScript(`(${cases.toString()})(${JSON.stringify(sources())})`);
+        assert.equal(result, "Task status cases passed");
+        console.log(result);
+    } catch (error) {
+        console.error(error);
+        code = 1;
+    } finally {
+        win.destroy();
+        app.exit(code);
+    }
+};
+
+if (process.versions.electron && process.type === "browser") {
+    run().catch(error => { console.error(error); require("electron").app.exit(1); });
+} else {
+    require("node:test").test("task status editing, inherited transfers, undo and rendering", {
+        skip: process.platform === "linux" && !process.env.DISPLAY && !process.env.WAYLAND_DISPLAY,
+        timeout: 45000,
+    }, async () => {
+        const profile = mkdtempSync(path.join(os.tmpdir(), "siyuan-task-test-"));
+        const env = {...process.env};
+        delete env.ELECTRON_RUN_AS_NODE;
+        try {
+            const {stdout} = await require("node:util").promisify(require("node:child_process").execFile)(
+                require("electron"), [__filename, profile], {env, windowsHide: true, timeout: 40000});
+            assert.match(stdout, /Task status cases passed/);
+        } finally {
+            assert.ok(path.resolve(profile).startsWith(path.resolve(os.tmpdir()) + path.sep));
+            rmSync(profile, {recursive: true, force: true});
+        }
+    });
+}

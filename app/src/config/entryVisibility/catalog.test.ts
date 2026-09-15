@@ -734,12 +734,19 @@ test("list block submenu follows the base block entries", () => {
     assert.equal(listBlock?.type, "entry");
     assert.equal(listBlock?.simple, true);
     assert.deepEqual(listBlock?.children?.map((item) => item.key), [
+        "customTaskStatus",
         "orderedListStart",
         "continueListNumbering",
         "separator_numbering",
         "prependListItem",
         "appendListItem",
     ]);
+    assert.equal(getEntryCatalogNode("gutter.single.listBlock.customTaskStatus")?.simple, true);
+    assert.equal(getEntryCatalogNode("gutter.single.listBlock.customTaskStatus")?.type, "entry");
+    const source = readFileSync(resolve(process.cwd(), "src/protyle/gutter/index.ts"), "utf8");
+    const submenu = source.slice(source.indexOf("const genListBlockSubmenu"), source.indexOf("return submenu;", source.indexOf("const genListBlockSubmenu")));
+    assert.deepEqual(Array.from(submenu.matchAll(/id: "([^"]+)"/g), match => match[1]),
+        listBlock.children.map(item => item.key));
 });
 
 test("tabs layout and task actions have their own configurable block menu", () => {

@@ -85,8 +85,8 @@ import {setAVItemAnchor} from "../render/av/rangeSelect";
 import {getCaretRect} from "./caretRect";
 import {isBlockRefDropTargetDisabled} from "./blockRefDrop";
 import {appendCancelSuperBlockOperations} from "../../block/cancelSuperBlock";
-import {remapTabsDOMIDs} from "./tabsCopy";
-import {getTabItems} from "../render/tabsRender";
+import {preserveTabTask, remapTabsDOMIDs} from "./tabsCopy";
+import {getTabItems, getTabTask} from "../render/tabsRender";
 import {repairActiveTab} from "../wysiwyg/tabsRemoval";
 import {sortAVRows} from "../render/av/rowSort";
 
@@ -327,6 +327,9 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         const id = item.getAttribute("data-node-id");
         const parentID = getParentBlock(item).getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID;
         const isTabItem = item.getAttribute("data-type") === "NodeTabItem";
+        const targetParent = position === "afterbegin" ? targetElement : targetElement.parentElement;
+        const inheritedTask = isTabItem && item.parentElement !== targetParent && !item.hasAttribute("tabs-task") ?
+            getTabTask(item) : null;
         const needsTabs = isTabItem && (position === "afterbegin" ?
             targetElement.getAttribute("data-type") !== "NodeTabs" :
             targetElement.parentElement.getAttribute("data-type") !== "NodeTabs");
@@ -395,6 +398,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         }
         if (isCopy) {
             copyElement = item.cloneNode(true) as HTMLElement;
+            preserveTabTask(item, copyElement);
             const copiedIDs = new Map<string, string>([[id, copyNewId]]);
             copyElement.setAttribute("data-node-id", copyNewId);
             copyElement.querySelectorAll("[data-node-id]").forEach((e) => {
@@ -477,6 +481,11 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                         start: getOrderedListStart(listElement),
                     };
                 }
+            }
+            if (inheritedTask !== null) {
+                item.setAttribute("tabs-task", inheritedTask);
+                doOperations.push({action: "setAttrs", id, data: JSON.stringify({"tabs-task": inheritedTask})});
+                undoOperations.push({action: "setAttrs", id, data: JSON.stringify({"tabs-task": ""})});
             }
             if (newListId) {
                 newListElement.insertAdjacentElement("afterbegin", item);

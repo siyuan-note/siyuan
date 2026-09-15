@@ -1,8 +1,16 @@
 import * as assert from "node:assert/strict";
 import {describe, it} from "node:test";
-import {getTaskListMarker} from "./taskListMarker";
+import {getTaskListMarker, isTaskListMarker} from "./taskListMarker";
 
 describe("getTaskListMarker", () => {
+    it("validates a complete custom status instead of an empty shortcut prefix", () => {
+        for (const marker of [" ", "X", "x", "/", "-", "?", "\"", "&", "<"]) {
+            assert.equal(isTaskListMarker(marker), true, marker);
+        }
+        for (const marker of ["", "ab", "[", "]", "【", "】", "中"]) {
+            assert.equal(isTaskListMarker(marker), false, marker);
+        }
+    });
     it("recognizes full-width task list shortcuts when enabled", () => {
         assert.deepEqual(getTaskListMarker("【】待办", true), {
             contentStartIndex: 2,

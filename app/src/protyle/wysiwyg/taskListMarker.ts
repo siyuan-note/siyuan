@@ -5,6 +5,9 @@ interface ITaskListMarker {
 
 export const nextTaskListMarker = (marker: string | null) => marker !== null && marker !== " " ? " " : "X";
 
+export const isTaskListMarker = (marker: string): boolean => marker.length === 1 &&
+    getTaskListMarker(`[${marker}]`, false)?.marker === marker;
+
 export const getTaskListMarker = (html: string, enableFullWidth: boolean): ITaskListMarker | undefined => {
     const dataTask = html.substring(0, 3).match(enableFullWidth ?
         /^[\[【]([^\x80-\uffff\[\]【】])[\]】]$/ :

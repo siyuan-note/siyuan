@@ -113,6 +113,7 @@ import {chartRender} from "../render/chartRender";
 import {
     appendListItem,
     openOrderedListStartDialog,
+    editTaskListItem,
     prependListItem,
     setOrderedListStart
 } from "../wysiwyg/list";
@@ -132,7 +133,7 @@ import {getViewFoldOccurrenceID, hasViewFoldContext, setViewFold} from "../util/
 import {exportImage} from "../export/util";
 import {CALLOUT_PRESETS, updateCalloutType, updateCustomCalloutType} from "../wysiwyg/callout";
 import {setTabsPosition, toggleTabsTasks, unwrapTabs} from "../wysiwyg/tabs";
-import {getTabItems} from "../render/tabsRender";
+import {hasTabsTasks} from "../render/tabsRender";
 
 const restoreGutterRange = (protyle: IProtyle) => {
     // 多选块菜单只操作选中的块，不恢复旧文本光标，避免编辑器滚动到光标位置。
@@ -2137,6 +2138,14 @@ export class Gutter {
             }).catch(() => undefined) : undefined;
             const genListBlockSubmenu = (continueListStart?: number) => {
                 const submenu: IMenu[] = [];
+                if (type === "NodeListItem" && nodeElement.getAttribute("data-subtype") === "t") {
+                    submenu.push({
+                        id: "customTaskStatus",
+                        icon: "iconCheck",
+                        label: window.siyuan.languages.customTaskStatus,
+                        click: () => editTaskListItem(protyle, nodeElement),
+                    });
+                }
                 if (isOrderedList) {
                     submenu.push({
                         id: "orderedListStart",
@@ -2222,7 +2231,7 @@ export class Gutter {
                     id: "tabsTask",
                     label: window.siyuan.languages.task,
                     icon: "iconCheck",
-                    checked: getTabItems(nodeElement as HTMLElement).some(item => item.hasAttribute("tabs-task")),
+                    checked: hasTabsTasks(nodeElement),
                     click: () => toggleTabsTasks(protyle, nodeElement as HTMLElement),
                 }],
             }).element);

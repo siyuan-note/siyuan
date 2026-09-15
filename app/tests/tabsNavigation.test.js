@@ -37,15 +37,18 @@ const cases = (source) => {
     root.innerHTML = lute.Md2BlockDOM("::: tabs\n@tab Original\n\nBody\n:::\n");
     const item = root.querySelector(".tab-item");
     const id = item.dataset.nodeId;
+    root.querySelector(".tabs").setAttribute("tabs-task", "true");
     for (const value of [" leading", "trailing ", "two  spaces", "   "]) {
         item.querySelector(".tab-item-title").textContent = value;
         const roundtrip = document.createElement("div");
         roundtrip.innerHTML = lute.SpinBlockDOM(root.innerHTML);
         check.equal(roundtrip.querySelector(".tab-item-title").textContent.replace(/\u00a0/g, " "), value, roundtrip.innerHTML);
         check.equal(roundtrip.querySelector(".tab-item").dataset.nodeId, id);
+        check.equal(roundtrip.querySelector(".tabs").getAttribute("tabs-task"), "true");
         const markdown = lute.BlockDOM2StdMd(roundtrip.innerHTML);
         const imported = document.createElement("div");
         imported.innerHTML = lute.Md2BlockDOM(markdown);
+        check.equal(imported.querySelector(".tabs").getAttribute("tabs-task"), "true");
         check.equal(imported.querySelector(".tab-item-title").textContent.replace(/\u00a0/g, " "), value);
     }
 

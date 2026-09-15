@@ -69,7 +69,8 @@ import {
     isNotEditBlock
 } from "./getBlock";
 import {transaction, updateTransaction} from "./transaction";
-import {toggleTaskListItem} from "./list";
+import {editTaskListItem, toggleTaskListItem} from "./list";
+import {preserveCopiedTabTask} from "../util/tabsCopy";
 import {hideElements} from "../ui/hideElements";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
@@ -853,7 +854,7 @@ export class WYSIWYG {
                         } else {
                             itemHTML = removeEmbed(item);
                         }
-                        itemHTML = cleanBlockSelectionModeHTML(itemHTML);
+                        itemHTML = preserveCopiedTabTask(item, cleanBlockSelectionModeHTML(itemHTML));
                         if (item.getAttribute("data-type") === "NodeListItem") {
                             if (!listHTML) {
                                 listHTML = `<div data-subtype="${item.getAttribute("data-subtype")}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">`;
@@ -3212,7 +3213,7 @@ export class WYSIWYG {
                     } else {
                         itemHTML = removeEmbed(item);
                     }
-                    itemHTML = cleanBlockSelectionModeHTML(itemHTML);
+                    itemHTML = preserveCopiedTabTask(item, cleanBlockSelectionModeHTML(itemHTML));
                     if (item.getAttribute("data-type") === "NodeListItem") {
                         if (!listHTML) {
                             listHTML = `<div data-subtype="${item.getAttribute("data-subtype")}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">`;
@@ -3576,6 +3577,11 @@ export class WYSIWYG {
             const nodeElement = hasClosestBlock(target);
             if (!nodeElement) {
                 return false;
+            }
+            if (hasClosestByClassName(target, "protyle-action--task")) {
+                editTaskListItem(protyle, nodeElement);
+                event.preventDefault();
+                return;
             }
             const widthDragElement = hasClosestByClassName(target, "av__widthdrag") as HTMLElement;
             if (widthDragElement) {

@@ -100,9 +100,18 @@
     }
 
     &--custom {
-      box-sizing: border-box;
-      border: 1px solid currentColor;
-      border-radius: 2px;
+      display: inline-grid;
+
+      svg,
+      span {
+        grid-area: 1 / 1;
+      }
+
+      span {
+        text-align: center;
+        line-height: 16px;
+        font-size: 10px;
+      }
     }
   }
 

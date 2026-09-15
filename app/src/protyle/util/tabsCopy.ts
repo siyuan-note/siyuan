@@ -1,3 +1,32 @@
+import {getTabTask} from "../render/tabsRender";
+
+// 独立页签项离开原容器前，将继承的任务状态写入副本。
+export const preserveTabTask = (source: Element, copy: Element): boolean => {
+    if (source.getAttribute("data-type") !== "NodeTabItem" || copy.hasAttribute("tabs-task")) {
+        return false;
+    }
+    const marker = getTabTask(source);
+    if (marker === null) {
+        return false;
+    }
+    copy.setAttribute("tabs-task", marker);
+    return true;
+};
+
+export const preserveCopiedTabTask = (source: Element, html: string): string => {
+    if (source.getAttribute("data-type") !== "NodeTabItem" || source.hasAttribute("tabs-task") ||
+        getTabTask(source) === null) {
+        return html;
+    }
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    const copy = template.content.firstElementChild;
+    if (copy?.getAttribute("data-type") === "NodeTabItem") {
+        preserveTabTask(source, copy);
+    }
+    return template.innerHTML;
+};
+
 // 同时映射页签选择和正文、标题中的内部链接，外部引用继续指向原目标。
 export const remapTabsDOMIDs = (root: Element, ids: Map<string, string>) => {
     const blocks = [root, ...Array.from(root.querySelectorAll("[tabs-active-id]"))];

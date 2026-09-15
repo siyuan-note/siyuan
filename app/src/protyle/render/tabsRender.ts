@@ -45,6 +45,12 @@ let instanceID = 0;
 export const getTabItems = (tabs: Element): HTMLElement[] =>
     Array.from(tabs.children).filter(item => item.classList.contains("tab-item")) as HTMLElement[];
 
+export const getTabTask = (item: Element): string => item.getAttribute("tabs-task") ??
+    (item.parentElement?.getAttribute("tabs-task") === "true" ? " " : null);
+
+export const hasTabsTasks = (tabs: Element): boolean => tabs.getAttribute("tabs-task") === "true" ||
+    getTabItems(tabs).some(item => item.hasAttribute("tabs-task"));
+
 export const getTabTitle = (item: Element) =>
     item.querySelector<HTMLElement>(":scope > .tab-item-info > .tab-item-title, :scope > .tab-item-info > [tabs-title] > .tab-item-title");
 
@@ -206,7 +212,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                     header.addEventListener("selectstart", event => event.preventDefault());
                 }
                 const signature = JSON.stringify([readonly, ...items.map(item => [itemID(item),
-                    item.getAttribute("tabs-task"), item.dataset.tabsEditing === "true" ? null : getTabTitle(item)?.innerHTML])]);
+                    getTabTask(item), item.dataset.tabsEditing === "true" ? null : getTabTitle(item)?.innerHTML])]);
                 let previousScroll: {left: number, top: number};
                 if (state.signature !== signature || !header.firstElementChild) {
                     const previousList = header.querySelector<HTMLElement>(".tabs-list");
@@ -270,7 +276,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                         }
                         button.setAttribute("aria-label", escapeHtml(button.textContent));
                         button.setAttribute("data-position", "north");
-                        const marker = item.getAttribute("tabs-task");
+                        const marker = getTabTask(item);
                         if (marker !== null) {
                             const task = document.createElement("span");
                             task.className = "tabs-task";
@@ -289,7 +295,10 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                             if (marker === " " || marker.toLowerCase() === "x") {
                                 task.innerHTML = `<svg><use xlink:href="#${marker === " " ? "iconUncheck" : "iconCheck"}"></use></svg>`;
                             } else {
-                                task.textContent = marker;
+                                task.innerHTML = '<svg><use xlink:href="#iconUncheck"></use></svg>';
+                                const character = document.createElement("span");
+                                character.textContent = marker;
+                                task.appendChild(character);
                                 task.classList.add("tabs-task--custom");
                             }
                             ["click", "dblclick", "contextmenu", "keydown"].forEach(type => task.addEventListener(type, event => {

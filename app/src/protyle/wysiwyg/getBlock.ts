@@ -206,6 +206,9 @@ export const getContenteditableElement = (element: Element, target?: Node): Elem
     let blockElement = element;
     if (!blockElement.getAttribute("data-node-id")) {
         blockElement = element.querySelector("[data-node-id]");
+        if (blockElement?.classList.contains("tabs")) {
+            return getContenteditableElement(blockElement, target);
+        }
     }
     if (!blockElement) {
         const tempBlockElement = hasClosestBlock(element);

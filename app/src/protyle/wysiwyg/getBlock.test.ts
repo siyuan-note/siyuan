@@ -3,6 +3,7 @@ import * as assert from "node:assert/strict";
 
 let getEmbedChildOperationContext: typeof import("./getBlock").getEmbedChildOperationContext;
 let getEmbedGutterOperationContext: typeof import("./getBlock").getEmbedGutterOperationContext;
+let getContenteditableElement: typeof import("./getBlock").getContenteditableElement;
 let isNotEditBlock: typeof import("./getBlock").isNotEditBlock;
 
 before(async () => {
@@ -10,7 +11,8 @@ before(async () => {
         SIYUAN_VERSION: "test",
         NODE_ENV: "test",
     });
-    ({getEmbedChildOperationContext, getEmbedGutterOperationContext, isNotEditBlock} = await import("./getBlock"));
+    ({getContenteditableElement, getEmbedChildOperationContext, getEmbedGutterOperationContext, isNotEditBlock} =
+        await import("./getBlock"));
 });
 
 class TestElement {
@@ -51,12 +53,25 @@ class TestElement {
         return this.attributes.has(name);
     }
 
+    get firstElementChild() {
+        return this.children[0] || null;
+    }
+
+    querySelector(selector: string) {
+        if (selector === ":scope > .tab-item-content > [data-node-id]") {
+            return this.children.find(child => child.classes.has("tab-item-content"))?.children
+                .find(child => child.hasAttribute("data-node-id")) || null;
+        }
+        return this.querySelectorAll(selector)[0] || null;
+    }
+
     querySelectorAll(selector: string) {
         const nodeID = /^\[data-node-id="(.+)"\]$/.exec(selector)?.[1];
         const matches: TestElement[] = [];
         const visit = (element: TestElement) => {
             element.children.forEach(child => {
-                if (nodeID && child.getAttribute("data-node-id") === nodeID) {
+                if ((selector === "[data-node-id]" && child.hasAttribute("data-node-id")) ||
+                    (nodeID && child.getAttribute("data-node-id") === nodeID)) {
                     matches.push(child);
                 }
                 visit(child);
@@ -122,5 +137,33 @@ describe("isNotEditBlock", () => {
 
         assert.equal(isNotEditBlock(customBlock as unknown as Element), true);
         assert.equal(isNotEditBlock(paragraph as unknown as Element), false);
+    });
+});
+
+describe("getContenteditableElement", () => {
+    it("uses the active item when a tab block is the first document block", () => {
+        const editor = new TestElement().addClass("protyle-wysiwyg");
+        const tabs = new TestElement().addClass("tabs")
+            .setAttribute("data-node-id", "tabs")
+            .setAttribute("data-type", "NodeTabs")
+            .setAttribute("tabs-active-id", "second");
+        const createItem = (id: string, hidden: boolean) => {
+            const item = new TestElement().addClass("tab-item")
+                .setAttribute("data-node-id", id)
+                .setAttribute("data-type", "NodeTabItem")
+                .setAttribute("data-tabs-hidden", String(hidden));
+            const content = new TestElement().addClass("tab-item-content");
+            const paragraph = new TestElement()
+                .setAttribute("data-node-id", `${id}-paragraph`)
+                .setAttribute("data-type", "NodeParagraph");
+            const editable = new TestElement();
+            item.append(content.append(paragraph.append(editable)));
+            return {item, editable};
+        };
+        const first = createItem("first", true);
+        const second = createItem("second", false);
+        editor.append(tabs.append(first.item, second.item));
+
+        assert.equal(getContenteditableElement(editor as unknown as Element), second.editable as unknown as Element);
     });
 });

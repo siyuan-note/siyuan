@@ -195,7 +195,8 @@ export class Menu {
     }
 
     private canDragSheet(target: HTMLElement) {
-        if (target.closest("input, textarea, select, [contenteditable=\"true\"]")) {
+        // 文件选择框覆盖上传菜单项，允许从该区域开始下拉关闭菜单。
+        if (target.closest("input:not([type=\"file\"]), textarea, select, [contenteditable=\"true\"]")) {
             return false;
         }
         if (target.closest(".b3-menu__title")) {

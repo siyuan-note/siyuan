@@ -101,6 +101,8 @@ module.exports = async () => {
                 mode + "/" + key + " expected " + expected.dataset.nodeId + " got " +
                 editor.querySelector("." + className)?.dataset.nodeId);
             assert.equal(custom.querySelector("." + className), null);
+            assert.equal(editor.querySelectorAll(".protyle-wysiwyg--navigation").length,
+                expected === custom ? 1 : 0);
         }
         cases++;
     }

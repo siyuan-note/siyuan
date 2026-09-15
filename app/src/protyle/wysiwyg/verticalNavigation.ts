@@ -92,6 +92,7 @@ export const prepareVerticalNavigation = (editorElement: HTMLElement, event: Key
 };
 
 const focusAtomicRegion = (editorElement: HTMLElement, element: HTMLElement, direction: TVerticalDirection) => {
+    let atomic = true;
     if (element.classList.contains("custom-block")) {
         editorElement.focus({preventScroll: true});
         const range = document.createRange();
@@ -104,11 +105,17 @@ const focusAtomicRegion = (editorElement: HTMLElement, element: HTMLElement, dir
         range.setStart(element, 0);
         range.collapse(true);
         focusByRange(range);
-    } else if (!focusBlock(element, undefined, direction === "down")) {
-        return false;
+    } else {
+        const range = focusBlock(element, undefined, direction === "down");
+        if (!range) {
+            return false;
+        }
+        atomic = !getContenteditableElement(element)?.contains(range.startContainer);
     }
     clearAtomicFocus(editorElement);
-    element.classList.add(VERTICAL_NAVIGATION_ATOMIC_CLASS);
+    if (atomic) {
+        element.classList.add(VERTICAL_NAVIGATION_ATOMIC_CLASS);
+    }
     return true;
 };
 

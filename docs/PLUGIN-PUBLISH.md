@@ -15,7 +15,7 @@ Data authorization is accessed through the upload icon button beside the plugin 
 | Action | Provided by | Interface and behavior |
 | --- | --- | --- |
 | Enable the publishing service | SiYuan | Enable the service in settings; downloaded plugin cards then show the per-plugin **Publish service** switch and **Plugin published data** button |
-| Allow plugin publishing | SiYuan | The card's **Publish service** switch controls whether the plugin can be published; the switch is disabled when the author prohibits publishing |
+| Allow plugin publishing | SiYuan | The card's **Publish service** switch controls whether the plugin can be published; when the author prohibits publishing, the switch is disabled and the data authorization icon button is hidden |
 | Grant or revoke data access | SiYuan | The **Plugin published data** dialog shows the package name, declared fields, and grant or revocation information, with **Cancel** and **Confirm** buttons |
 | Generate or update public data | Plugin | The plugin provides an action or documented automatic updates in the administrator environment; SiYuan has no shared generate-snapshot button |
 | Display public content and read status | Plugin | The plugin displays content and handles missing authorization, missing snapshots, and read failures; SiYuan returns corresponding API errors rather than rendering a shared plugin content area |

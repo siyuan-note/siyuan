@@ -823,12 +823,12 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
                     const hasSetting = plugin ? hasPluginSetting(plugin) : false;
                     const showPublishSwitch = bazaarType === "plugins" && window.siyuan.config.publish.enable;
                     const publishEnabled = isBazaarPluginEnabledInPublish(bazaarItem);
-                    const publishSwitchHTML = showPublishSwitch ? `<label data-type="plugin-publish-enable-label" class="config-bazaar__publish-switch" title="${escapeAttr(bazaarItem.disabledInPublish ? window.siyuan.languages.pluginDisabledInPublishTip : window.siyuan.languages.publishService)}">
+                    const publishSwitchHTML = showPublishSwitch ? `<span class="config-bazaar__publish-controls"><label data-type="plugin-publish-enable-label" class="config-bazaar__publish-switch ariaLabel" data-position="north" aria-label="${escapeAttr(bazaarItem.disabledInPublish ? window.siyuan.languages.pluginDisabledInPublishTip : window.siyuan.languages.publishService)}">
                 <input data-type="plugin-publish-enable" data-position="north" class="b3-switch fn__flex-center" type="checkbox"${publishEnabled ? " checked" : ""}${bazaarItem.disabledInPublish ? " disabled" : ""}>
                 <span class="fn__space--small"></span>
                 <span class="fn__flex-center ft__on-surface">${window.siyuan.languages.publishService}</span>
             </label>
-            <button type="button" data-type="plugin-publish-data" class="block__icon block__icon--show config-bazaar__publish-data ariaLabel" data-position="north" aria-label="${escapeAttr(window.siyuan.languages.pluginPublishDataTip)}"><svg aria-hidden="true"><use xlink:href="#iconUpload"></use></svg></button>` : "";
+            ${bazaarItem.disabledInPublish ? "" : `<button type="button" data-type="plugin-publish-data" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${escapeAttr(window.siyuan.languages.pluginPublishDataTip)}"><svg aria-hidden="true"><use xlink:href="#iconUpload"></use></svg></button>`}</span>` : "";
                     const available = bazaar._getUpdatedItem(bazaarType, bazaarItem.name)?.available;
                     const ratingKey = getRatingKey(bazaarType, bazaarItem.name);
                     return `<div data-name="${escapeAttr(bazaarItem.name)}" data-package-type="${bazaarType}" data-package-source="downloaded" class="b3-card${bazaarItem.current ? " b3-card--current" : ""}">

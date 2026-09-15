@@ -382,7 +382,10 @@ if (response.code === 0 && response.data) {
   ```
 
     * `notebook`: ノートブックID
-    * `path`: ドキュメントパス、/で始まり/で階層を区切る（このpathはデータベースのhpathフィールドに対応）
+    * `path`: ドキュメントパス、`/` で始まり `/` で階層を区切る（データベースの `hpath` フィールドに対応）
+        * `/` は階層の区切り文字であり、ドキュメントタイトル内のスラッシュを表すことはできない。存在しない親ドキュメントは自動的に作成される
+        * 例えば、`/Notes/Programming in C/C++` は、`Notes` の下にある `Programming in C` の下に、タイトルが `C++` のドキュメントを作成する
+        * インポート処理では、各タイトルを処理してからパスを組み立てること。例えば、ASCII の `/` を全角の `／`（U+FF0F）に置き換えると、`/Notes/Programming in C／C++` は `Notes` の下にタイトルが `Programming in C／C++` のドキュメントを作成する。この置換はタイトルの文字列を変更する
     * `markdown`: GFM Markdownコンテンツ
 * 戻り値
 

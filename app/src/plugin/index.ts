@@ -1,6 +1,8 @@
 import {sendGlobalShortcut} from "../boot/globalEvent/globalShortcut";
 import type {App} from "../index";
 import {EventBus} from "./EventBus";
+import type {subMenu} from "../menus/Menu";
+import {setTopBarContextMenu} from "./topBarContextMenu";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
 import {isMobile, isWindow} from "../util/functions";
@@ -237,6 +239,7 @@ export class Plugin {
         title: string,
         position?: "right" | "left",
         element?: HTMLElement,
+        contextMenu?: (menu: subMenu) => void,
         callback?: (evt: MouseEvent) => void
     }) {
         if (isPluginDisposed(this)) {
@@ -272,6 +275,7 @@ export class Plugin {
                     replacement.setAttribute(name, value);
                 }
             });
+            setTopBarContextMenu(iconElement);
             iconElement.replaceWith(replacement);
             this.topBarIcons[this.topBarIcons.indexOf(iconElement)] = replacement;
             iconElement = replacement;
@@ -292,6 +296,11 @@ export class Plugin {
             }
         }
         const previousLocation = iconElement.getAttribute("data-location");
+        setTopBarContextMenu(iconElement, options.contextMenu ? (menu) => {
+            if (!isPluginDisposed(this)) {
+                options.contextMenu(menu);
+            }
+        } : undefined);
         if (options.element) {
             this.customTopBarElements.add(iconElement);
             iconElement.setAttribute("data-topbar-custom", "true");
@@ -347,6 +356,7 @@ export class Plugin {
         if (index === -1) {
             return;
         }
+        setTopBarContextMenu(this.topBarIcons[index]);
         this.topBarIcons[index].remove();
         this.topBarIcons.splice(index, 1);
         /// #if !MOBILE

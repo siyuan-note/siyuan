@@ -1,9 +1,9 @@
 import {Constants} from "../constants";
-import {MenuItem} from "./Menu";
+import {MenuItem, subMenu} from "./Menu";
 import {buildEntryVisibilityMenuItems, buildEntryVisibilityToggleItem} from "../config/entryVisibility/menu";
 import {TOP_BAR_ROOT_PATH} from "../config/entryVisibility/catalog";
 import {refreshTopBarEntryCatalog} from "../config/entryVisibility/runtime";
-import {emitOpenMenu} from "../plugin/EventBus";
+import {fillTopBarContextMenu} from "../plugin/topBarContextMenu";
 
 export const initTopBarMenu = (target?: Element) => {
     const menu = window.siyuan.menus.menu;
@@ -11,11 +11,11 @@ export const initTopBarMenu = (target?: Element) => {
     menu.element.setAttribute("data-name", Constants.MENU_BAR_ENTRY);
     refreshTopBarEntryCatalog();
     const key = target?.getAttribute("data-topbar-entry") || null;
-    const pluginItems = emitOpenMenu({
-        type: "open-menu-topbar",
-        detail: {element: target || null, entryPath: key ? `${TOP_BAR_ROOT_PATH}.${key}` : null},
-        appendToMenu: false,
-    });
+    const pluginMenu = new subMenu();
+    if (target) {
+        fillTopBarContextMenu(target, pluginMenu);
+    }
+    const pluginItems = pluginMenu.menus;
     let hasPluginItem = false;
     let separator: IMenu | undefined;
     pluginItems.forEach((item) => {

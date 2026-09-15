@@ -11,7 +11,7 @@ const source = ts.transpileModule(readFileSync(resolve(process.cwd(), "src/menus
 
 const open = (pluginItems: IMenu[], target?: Element) => {
     const items: IMenu[] = [];
-    let detail: {element: Element | null; entryPath: string | null};
+    let calledTarget: Element | undefined;
     const menu = {
         remove: () => { items.length = 0; },
         element: {setAttribute: (): void => undefined},
@@ -21,47 +21,50 @@ const open = (pluginItems: IMenu[], target?: Element) => {
         Constants: {MENU_BAR_ENTRY: "barEntry"},
         TOP_BAR_ROOT_PATH: "topBar",
         MenuItem: class {constructor(public element: IMenu) {}},
+        subMenu: class {public menus: IMenu[] = [];},
         refreshTopBarEntryCatalog: (): void => undefined,
         buildEntryVisibilityToggleItem: () => ({id: "hide"}),
         buildEntryVisibilityMenuItems: () => [{id: "visible"}, {id: "hidden", checked: false}],
-        emitOpenMenu: (options: {type: string; appendToMenu: boolean; detail: typeof detail}) => {
-            assert.equal(options.type, "open-menu-topbar");
-            assert.equal(options.appendToMenu, false);
-            detail = options.detail;
-            return pluginItems;
+        fillTopBarContextMenu: (element: Element, menu: {menus: IMenu[]}) => {
+            calledTarget = element;
+            menu.menus.push(...pluginItems);
         },
     };
     const exports: {initTopBarMenu?: (target?: Element) => unknown} = {};
     runInNewContext(source, {exports, require: () => dependencies, window: {siyuan: {menus: {menu}}}});
     exports.initTopBarMenu(target);
-    return {items, detail};
+    return {items, calledTarget};
 };
 
 test("top bar plugin actions precede visibility controls and retain target identity", () => {
     const target = {getAttribute: () => "plugin-test"} as unknown as Element;
-    const {items, detail} = open([{id: "action"}], target);
-    assert.equal(detail.element, target);
-    assert.equal(detail.entryPath, "topBar.plugin-test");
+    const {items, calledTarget} = open([{id: "action"}], target);
+    assert.equal(calledTarget, target);
     assert.deepEqual(items.map(item => item.type || item.id), [
         "action", "separator", "hide", "separator", "visible", "hidden",
     ]);
 });
 
-test("blank top bar supplies null context and normalizes plugin separators", () => {
+test("button menu normalizes plugin separators", () => {
     const separator: IMenu = {type: "separator"};
-    const {items, detail} = open([
+    const {items} = open([
         separator, {id: "first"}, separator, {id: "ignored", ignore: true}, separator,
         {id: "second"}, separator, separator,
-    ]);
-    assert.equal(detail.element, null);
-    assert.equal(detail.entryPath, null);
+    ], {getAttribute: () => "plugin-test"} as unknown as Element);
     assert.deepEqual(items.map(item => item.type || item.id), [
-        "first", "separator", "second", "separator", "visible", "hidden",
+        "first", "separator", "second", "separator", "hide", "separator", "visible", "hidden",
     ]);
 });
 
 test("empty and ignored plugin groups do not add separators", () => {
     for (const pluginItems of [[], [{type: "separator"}, {id: "ignored", ignore: true}] as IMenu[]]) {
-        assert.deepEqual(open(pluginItems).items.map(item => item.id), ["visible", "hidden"]);
+        assert.deepEqual(open(pluginItems, {getAttribute: (): null => null} as unknown as Element)
+            .items.map(item => item.id), ["visible", "hidden"]);
     }
+});
+
+test("blank top bar never invokes plugin callbacks", () => {
+    const {items, calledTarget} = open([{id: "action"}]);
+    assert.equal(calledTarget, undefined);
+    assert.deepEqual(items.map(item => item.id), ["visible", "hidden"]);
 });

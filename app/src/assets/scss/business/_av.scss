@@ -318,9 +318,17 @@
     }
   }
 
+  // 控件已为描边卡片，值容器不再叠加悬停底色
+  &__template-editor .custom-attr__avvalue:hover {
+    background-color: transparent;
+  }
+
   &__template-editor .custom-attr .block__icons {
     @media (max-width: 750px) {
       flex-wrap: wrap;
+      // 编辑器已有内边距，移动端不再叠加行内边距，避免内容过度内缩
+      padding-left: 0;
+      padding-right: 0;
     }
   }
 
@@ -330,11 +338,20 @@
     @media (max-width: 750px) {
       align-self: auto;
       flex: 1 1 100%;
+      margin-left: 0;
+      padding-left: 0;
       width: auto;
     }
 
     &:hover {
       background-color: transparent;
+    }
+  }
+
+  &__template-editor .custom-attr .custom-attr__avvalue {
+    @media (max-width: 750px) {
+      padding-left: 0;
+      padding-right: 0;
     }
   }
 
@@ -348,10 +365,14 @@
       box-shadow: none;
       outline: none;
 
-      &:hover,
-      &:focus {
+      &:hover {
         background-color: var(--b3-menu-background);
         box-shadow: none;
+      }
+
+      &:focus {
+        border-color: var(--b3-theme-primary-light);
+        box-shadow: 0 0 0 .6px var(--b3-theme-primary-lighter);
       }
     }
 

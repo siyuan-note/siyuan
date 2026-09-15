@@ -999,7 +999,8 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 			responseOutputTokens := 0
 			lastDraftCheckpoint := time.Now()
 			var reasoningSplitter reasoningTagSplitter
-			splitTaggedReasoning := thoughtSignatureState.TaggedSummariesAvailable()
+			splitTaggedReasoning := thoughtSignatureState.TaggedSummariesAvailable() ||
+				!util.IsOpenAIResponsesProtocol(protocol)
 			writeContent := func(token string) {
 				if token == "" {
 					return

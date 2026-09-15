@@ -38,6 +38,12 @@ func TestReasoningTagSplitter(t *testing.T) {
 			wantReasoning: "inside",
 		},
 		{
+			name:          "reasoning tag with surrounding content",
+			chunks:        []string{"before<reasoning>inside</reasoning>after"},
+			wantContent:   "beforeafter",
+			wantReasoning: "inside",
+		},
+		{
 			name:        "ordinary content",
 			chunks:      []string{"plain < text", " remains unchanged"},
 			wantContent: "plain < text remains unchanged",

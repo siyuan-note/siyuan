@@ -34,6 +34,7 @@ var reasoningOpeningTags = []struct {
 }{
 	{open: "<thought>", close: "</thought>"},
 	{open: "<think>", close: "</think>"},
+	{open: "<reasoning>", close: "</reasoning>"},
 }
 
 func (s *reasoningTagSplitter) Write(text string) []reasoningTagSegment {

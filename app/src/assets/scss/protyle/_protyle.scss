@@ -983,9 +983,29 @@
 }
 
 .table__cell-rich > .list[data-type="NodeList"],
-.table__cell-editor .protyle-wysiwyg > .list {
-  // 首层列表只抵消起始侧留白，末端保留在内容容器内，避免窄列裁掉文字和光标。
-  margin-inline: -8px 0;
+.table__cell-editor .protyle-wysiwyg > .list[data-type="NodeList"] {
+  // 首层列表按内容宽度整体对齐，内部保留左对齐，窄列中仍限制宽度以便换行。
+  margin-inline: var(--b3-table-cell-list-start, -8px) var(--b3-table-cell-list-end, 0);
+  width: fit-content;
+  max-width: calc(100% + var(--b3-table-cell-list-inset, 8px));
+  text-align: left;
+}
+
+.protyle-wysiwyg :is(td, th) {
+  // 普通左对齐抵消列表起始侧留白，居中和居右则使用单元格内容边界。
+  &[align="center"]:not([style*="text-align:"]),
+  &[style*="text-align: center"] {
+    --b3-table-cell-list-start: auto;
+    --b3-table-cell-list-end: auto;
+    --b3-table-cell-list-inset: 0px;
+  }
+
+  &[align="right"]:not([style*="text-align:"]),
+  &[style*="text-align: right"] {
+    --b3-table-cell-list-start: auto;
+    --b3-table-cell-list-end: 0;
+    --b3-table-cell-list-inset: 0px;
+  }
 }
 
 .table__cell-rich .li [data-table-cell-content],

@@ -410,6 +410,24 @@ var copyFile = contractHandler(apicontract.CopyFile, func(c *gin.Context, reques
 var getFile = contractHandler(apicontract.GetFile, func(c *gin.Context, request apicontract.FilePathRequest) apicontract.Response[apicontract.BinaryContent] {
 	ret := gulu.Ret.NewResult()
 	filePath := request.Path
+	if !model.IsAdminRoleContext(c) {
+		c.Header("Cache-Control", "private, no-store")
+		if file, handled, err := model.OpenPublishPackageFile(c, filePath); handled {
+			if err != nil {
+				return apicontract.Failure[apicontract.BinaryContent](http.StatusForbidden, http.StatusText(http.StatusForbidden))
+			}
+			defer file.Close()
+			data, readErr := io.ReadAll(file)
+			if readErr != nil {
+				return apicontract.Failure[apicontract.BinaryContent](http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			}
+			contentType := mime.TypeByExtension(filepath.Ext(filePath))
+			if contentType == "" {
+				contentType = mimetype.Detect(data).String()
+			}
+			return apicontract.SuccessBinary(contentType, data)
+		}
+	}
 
 	fileAbsPath, err := util.GetAbsPathInWorkspace(filePath)
 	if err != nil {

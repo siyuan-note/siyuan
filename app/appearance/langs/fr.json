@@ -1,4 +1,8 @@
 {
+	"pluginPublishData": "Données publiées du greffon",
+	"pluginPublishDataGrantTip": "Autoriser les visiteurs du service de publication à lire ces champs ? Ne publiez que du contenu destiné à être divulgué. Les données déjà publiées seront effacées",
+	"pluginPublishDataRevokeTip": "Révoquer l’accès et supprimer les données publiées de ce greffon",
+	"pluginPublishDataUnavailable": "Ce greffon n’a déclaré aucun champ de données publiable",
 	"newTabItem": "Créer un bloc d’onglet",
 	"encryptedNotebookFollowSystemLock": "Suivre le verrouillage de l’écran du système",
 	"encryptedNotebookFollowSystemLockDesc": "Verrouiller tous les carnets chiffrés déverrouillés lorsque le système se verrouille, indépendamment du délai d’inactivité ; ils restent verrouillés après le déverrouillage du système",

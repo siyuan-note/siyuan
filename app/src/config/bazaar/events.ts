@@ -1,4 +1,5 @@
 import {showMessage} from "../../dialog/message";
+import {openPluginPublishData} from "./pluginPublish";
 import {fetchPost} from "../../util/fetch";
 import {confirmDialog} from "../../dialog/confirmDialog";
 /// #if !BROWSER
@@ -332,6 +333,12 @@ const ACTION_HANDLERS = {
         return HANDLED_NATIVE;
     }) satisfies TBazaarActionHandler,
     "plugin-publish-enable-label": (() => HANDLED_NATIVE) satisfies TBazaarActionHandler,
+    "plugin-publish-data": ((context) => {
+        if (context.installedItem) {
+            void openPluginPublishData(context.installedItem.name);
+        }
+        return HANDLED;
+    }) satisfies TBazaarActionHandler,
     "plugin-publish-enable": ((context, target) => {
         const {controller, app, mount, installedItem} = context;
         if (!installedItem) {

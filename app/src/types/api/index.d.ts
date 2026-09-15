@@ -1396,6 +1396,10 @@ export type Petal = { "css": string; "disabledInPublish": boolean; "disallowInst
 
 export type PinnedDoc = { "childrenSortMode": number | null; "icon": string; "id": string; "name": string; "notebook": string; "path": string; "subFileCount": number; "unavailable": boolean; };
 
+export type PluginPublishInfo = { "fields": Array<string>; "granted": boolean; "resources": Array<string>; };
+
+export type PluginPublishRequestInput = { "packageName": string; };
+
 export type PluginRPCError = { "code": number; "data"?: JSONValue; "message": string; };
 
 export type PluginRPCFailure = { "error": PluginRPCError | null; "id": string | number | null; "jsonrpc": "2.0"; };
@@ -1574,6 +1578,8 @@ export type RollbackRepoSnapshotFileRequestInput = { "id": string; };
 
 export type SQLQueryRequestInput = { "mode"?: string | null; "stmt": string; };
 
+export type SavePluginPublishDataRequestInput = { "data": Record<string, null | string | number | boolean>; "packageName": string; };
+
 export type SaveTemplateRequestInput = { "databaseMode"?: string; "directory"?: string; "id": string; "name": string; "overwrite": boolean; };
 
 export type SearchAsset = { "hName": string; "path": string; "updated": number; };
@@ -1693,6 +1699,8 @@ export type SetNotebookIconRequestInput = { "icon": string; "notebook": string; 
 export type SetPetalEnabledRequestInput = { "app"?: string | null; "enabled": boolean; "packageName": string; };
 
 export type SetPetalPublishEnabledRequestInput = { "enabled": boolean; "packageName": string; };
+
+export type SetPluginPublishDataGrantRequestInput = { "enabled": boolean; "fields": Array<string>; "packageName": string; };
 
 export type SetPublishRequestInput = { "auth"?: SettingBasicAuthInput | null; "enable"?: boolean | null; "port"?: number | null; };
 
@@ -4307,9 +4315,24 @@ export interface APIPOSTRoutes {
         response: { "code": 0; "data": Array<SearchPath | null> | null; "msg": string; } | { "code": -1 | 1; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
+    "/api/petal/getPluginPublishInfo": {
+        request: PluginPublishRequestInput;
+        response: { "code": 0; "data": PluginPublishInfo; "msg": string; } | { "code": -1 | 400 | 403 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
     "/api/petal/loadPetals": {
         request: LoadPetalsRequestInput;
         response: { "code": 0; "data": Array<Petal | null> | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/petal/loadPluginPublishData": {
+        request: PluginPublishRequestInput;
+        response: { "code": 0; "data": Record<string, null | string | number | boolean>; "msg": string; } | { "code": -1 | 400 | 403 | 404 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/petal/savePluginPublishData": {
+        request: SavePluginPublishDataRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 400 | 403 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/petal/setPetalEnabled": {
@@ -4320,6 +4343,11 @@ export interface APIPOSTRoutes {
     "/api/petal/setPetalPublishEnabled": {
         request: SetPetalPublishEnabledRequestInput;
         response: { "code": 0; "data": Petal | null; "msg": string; } | { "code": -1; "data": { "closeTimeout": number; } | null; "msg": string; };
+        body: "json";
+    };
+    "/api/petal/setPluginPublishDataGrant": {
+        request: SetPluginPublishDataGrantRequestInput;
+        response: { "code": 0; "data": null; "msg": string; } | { "code": -1 | 400 | 403 | 500; "data": { "closeTimeout": number; } | null; "msg": string; };
         body: "json";
     };
     "/api/plugin/getLoadedPlugin": {

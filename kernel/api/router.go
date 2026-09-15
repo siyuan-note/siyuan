@@ -673,6 +673,10 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/petal/loadPetals", model.CheckAuth, loadPetals)
 	ginServer.Handle("POST", "/api/petal/setPetalEnabled", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setPetalEnabled)
 	ginServer.Handle("POST", "/api/petal/setPetalPublishEnabled", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setPetalPublishEnabled)
+	ginServer.Handle("POST", "/api/petal/getPluginPublishInfo", model.CheckAuth, model.CheckAdminRole, getPluginPublishInfo)
+	ginServer.Handle("POST", "/api/petal/setPluginPublishDataGrant", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setPluginPublishDataGrant)
+	ginServer.Handle("POST", "/api/petal/savePluginPublishData", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, savePluginPublishData)
+	ginServer.Handle("POST", "/api/petal/loadPluginPublishData", model.CheckAuth, loadPluginPublishData)
 
 	ginServer.Handle("GET", "/api/plugin/rpc", model.CheckAuth, getLoadedPluginRPC)
 	ginServer.Handle("GET", "/api/plugin/rpc/:name", model.CheckAuth, getLoadedPluginRPCByName)

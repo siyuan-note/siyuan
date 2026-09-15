@@ -165,7 +165,7 @@ jobs:
       - name: Test path fixtures with custom temporary directories
         # 测试失败只记录结果，不阻塞后续发布构建。
         continue-on-error: true
-        run: go test -tags "fts5 sqlcipher" ./internal/testutil ./util ./model ./server -run 'Test(PublicDataDir|IsSensitivePath|.*Obsidian|RegisterStaticFileHandlers|StaticFile|WidgetResponseCacheControl|TemplatesAndExportRequireAdministrator|SnippetPublishAccess|PluginPublishAccess)' -count=1
+        run: go test -tags "fts5 sqlcipher" ./internal/testutil ./util ./model ./server -run 'Test(PublicDataDir|IsSensitivePath|.*Obsidian|RegisterStaticFileHandlers|StaticFile|WidgetResponseCacheControl|TemplatesAndExportRequireAdministrator|SnippetPublishAccess|PluginPublish|PublishFile)' -count=1
         working-directory: kernel
         env:
           TMPDIR: /tmp

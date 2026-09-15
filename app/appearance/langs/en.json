@@ -1,4 +1,8 @@
 {
+	"pluginPublishData": "Plugin published data",
+	"pluginPublishDataGrantTip": "Allow publishing-service visitors to read these fields? Only publish content suitable for disclosure. Existing published data will be cleared",
+	"pluginPublishDataRevokeTip": "Revoke access and delete this plugin's published data",
+	"pluginPublishDataUnavailable": "This plugin has not declared any publishable data fields",
 	"newTabItem": "New tab item block",
 	"encryptedNotebookFollowSystemLock": "Follow system screen lock",
 	"encryptedNotebookFollowSystemLockDesc": "Lock all unlocked encrypted notebooks when the system locks, independently of the idle timeout; notebooks remain locked after the system unlocks",

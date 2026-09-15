@@ -827,7 +827,8 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
                 <input data-type="plugin-publish-enable" data-position="north" class="b3-switch fn__flex-center" type="checkbox"${publishEnabled ? " checked" : ""}${bazaarItem.disabledInPublish ? " disabled" : ""}>
                 <span class="fn__space--small"></span>
                 <span class="fn__flex-center ft__on-surface">${window.siyuan.languages.publishService}</span>
-            </label>` : "";
+            </label>
+            <button data-type="plugin-publish-data" class="b3-button b3-button--outline">${window.siyuan.languages.pluginPublishData}</button>` : "";
                     const available = bazaar._getUpdatedItem(bazaarType, bazaarItem.name)?.available;
                     const ratingKey = getRatingKey(bazaarType, bazaarItem.name);
                     return `<div data-name="${escapeAttr(bazaarItem.name)}" data-package-type="${bazaarType}" data-package-source="downloaded" class="b3-card${bazaarItem.current ? " b3-card--current" : ""}">

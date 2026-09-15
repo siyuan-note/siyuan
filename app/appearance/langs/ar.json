@@ -1,4 +1,8 @@
 {
+	"pluginPublishData": "بيانات الإضافة المنشورة",
+	"pluginPublishDataGrantTip": "هل تسمح لزوار خدمة النشر بقراءة هذه الحقول؟ انشر فقط المحتوى المناسب للإفصاح عنه. ستُحذف البيانات المنشورة الحالية",
+	"pluginPublishDataRevokeTip": "إلغاء الوصول وحذف البيانات المنشورة لهذه الإضافة",
+	"pluginPublishDataUnavailable": "لم تعلن هذه الإضافة عن أي حقول بيانات قابلة للنشر",
 	"newTabItem": "إنشاء كتلة عنصر تبويب",
 	"encryptedNotebookFollowSystemLock": "اتباع قفل شاشة النظام",
 	"encryptedNotebookFollowSystemLockDesc": "قفل جميع دفاتر الملاحظات المشفرة المفتوحة عند قفل النظام، بغض النظر عن مهلة الخمول؛ وتبقى مقفلة بعد فتح النظام",

@@ -2,6 +2,8 @@
 | **中文**
 | [日本語](API.ja.md)
 
+插件资源声明、数据授权与相关接口详见[插件发布](PLUGIN-PUBLISH.zh-CN.md)。
+
 * [规范](#规范)
     * [参数和返回值](#参数和返回值)
     * [TypeScript 类型契约](#typescript-类型契约)

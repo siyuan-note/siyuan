@@ -154,6 +154,8 @@ JSON SSE 接口通过 `SSEOptions` 和 `SSEEvent` 声明各事件名称及载荷
 
 资源引用查询和替换契约保留单资源请求，同时支持批量参数。批量结果按输入顺序返回每项状态、原因、引用和改动文件数；顶层计数对共享文件去重。空批次、重复源路径、链式和循环映射会被拒绝。独立映射可以在其他项失败时完成，共享文件写入失败归属所有受影响映射。扫描期间允许编辑，保存前校验工作区快照；取消和无变化重试保留源数据。`TestAssetRelink` 回归覆盖单资源兼容、批量校验、共享文档、数据库及 OCR 保存、历史和并发编辑，已包含在下方完整内核测试命令中。
 
+插件发布契约将仅管理员可用的授权、快照写入与已认证访问者的公开读取分离。公开数据仅包含声明的标量字段，授权和快照使用独立于同步插件私有存储的本地版本化文件。静态路由与文件接口共用插件状态和安全文件打开规则，发布加载响应排除内核代码。`TestAPIContractPluginPublish`、`TestPluginPublishContracts`、`TestPluginPublish*` 和 `TestPublishFile*` 覆盖实际响应、准入、范围变化、撤销、重装、损坏及路径边界，均包含在完整内核测试中。可运行 `go test -tags "fts5 sqlcipher" ./api ./model ./server ./util ./apicontract -run 'Test(APIContractPluginPublish|PluginPublish|PublishFile|RouteCoverage)' -count=1` 单独验证。路径测试的 CI 筛选也包含模型、静态路由与文件边界回归。接口说明和迁移示例见[插件发布](PLUGIN-PUBLISH.zh-CN.md)。
+
 在 `app/` 下运行：
 
 ```text

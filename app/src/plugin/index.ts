@@ -1,7 +1,7 @@
 import {sendGlobalShortcut} from "../boot/globalEvent/globalShortcut";
 import type {App} from "../index";
 import {EventBus} from "./EventBus";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {ContractFormData} from "../util/contractFormData";
 import {isMobile, isWindow} from "../util/functions";
 import {getAllEditor, getAllModels} from "../layout/getAll";
@@ -410,6 +410,27 @@ export class Plugin {
             return;
         }
         this.setting.open(this.displayName || this.name);
+    }
+
+    public async loadPublishData(): Promise<Record<string, string | number | boolean | null>> {
+        if (isPluginDisposed(this)) {
+            throw {code: 410, msg: "Plugin lifecycle has ended", data: null};
+        }
+        const response = await fetchSyncPost("/api/petal/loadPluginPublishData", {packageName: this.name}, undefined, false);
+        if (response.code !== 0 || !response.data) {
+            throw response;
+        }
+        return response.data;
+    }
+
+    public async savePublishData(data: Record<string, string | number | boolean | null>): Promise<void> {
+        if (isPluginDisposed(this)) {
+            throw {code: 410, msg: "Plugin lifecycle has ended", data: null};
+        }
+        const response = await fetchSyncPost("/api/petal/savePluginPublishData", {packageName: this.name, data}, undefined, false);
+        if (response.code !== 0) {
+            throw response;
+        }
     }
 
     public loadData(storageName: string): Promise<any> {

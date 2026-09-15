@@ -31,6 +31,11 @@ import (
 // data/.siyuan/publishAccess.json、笔记本目录下的 .siyuan 内部文件以及 temp 目录下的 siyuan.log 日志文件。
 func IsForbiddenAbsPath(abs string) bool {
 	fileNorm := NormalizeAndResolve(abs)
+	// 插件发布授权及快照只能通过专用接口读取，其他原始文件和静态资源入口不得暴露它们。
+	publishRoot := NormalizeAndResolve(filepath.Join(ConfDir, "plugin-publish"))
+	if fileNorm == publishRoot || strings.HasPrefix(fileNorm, publishRoot+string(filepath.Separator)) {
+		return true
+	}
 
 	// 禁止访问日志文件 siyuan.log：Timing 中间件可能把含 API token 的查询串写入日志（如慢查询告警），
 	// 日志被任意已认证用户读取即等于泄露管理员凭据，因此即使日志不再记录查询串也保持拦截

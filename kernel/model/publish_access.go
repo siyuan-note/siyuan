@@ -501,14 +501,14 @@ func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publi
 	if gulu.File.IsSubPath(util.DataDir, absPath) {
 		relPath, err := filepath.Rel(util.DataDir, absPath)
 		if err != nil {
-			return true
+			return false
 		}
 
 		relPath = strings.ReplaceAll(relPath, "\\", "/")
 
 		pathParts := strings.Split(relPath, "/")
 		if len(pathParts) <= 1 {
-			return true
+			return false
 		}
 
 		if assetPath, box, ok := AssetPathFromDataRelativePath(relPath); ok {

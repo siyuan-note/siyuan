@@ -1,4 +1,8 @@
 {
+	"pluginPublishData": "外掛程式發佈資料",
+	"pluginPublishDataGrantTip": "允許發佈服務訪客讀取下列欄位？請僅公開適合披露的內容，現有發佈資料將被清空",
+	"pluginPublishDataRevokeTip": "撤銷授權並刪除此外掛程式的發佈資料",
+	"pluginPublishDataUnavailable": "此外掛程式尚未宣告可公開的資料欄位",
 	"newTabItem": "新增頁籤項區塊",
 	"encryptedNotebookFollowSystemLock": "跟隨系統鎖定螢幕",
 	"encryptedNotebookFollowSystemLockDesc": "系統鎖定螢幕時鎖定所有已解鎖的加密筆記本，不受閒置自動鎖定時間影響；系統解鎖後仍需輸入主密碼",

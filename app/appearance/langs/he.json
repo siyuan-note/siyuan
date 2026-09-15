@@ -1,4 +1,8 @@
 {
+	"pluginPublishData": "הנתונים שפורסמו מהתוסף",
+	"pluginPublishDataGrantTip": "לאפשר למבקרים בשירות הפרסום לקרוא שדות אלה? יש לפרסם רק תוכן המתאים לחשיפה. הנתונים שכבר פורסמו יימחקו",
+	"pluginPublishDataRevokeTip": "ביטול הגישה ומחיקת הנתונים שפורסמו מתוסף זה",
+	"pluginPublishDataUnavailable": "תוסף זה לא הצהיר על שדות נתונים שניתן לפרסם",
 	"newTabItem": "יצירת בלוק פריט כרטיסייה",
 	"encryptedNotebookFollowSystemLock": "נעילה בהתאם לנעילת מסך המערכת",
 	"encryptedNotebookFollowSystemLockDesc": "נעילת כל המחברות המוצפנות הפתוחות בעת נעילת המערכת, ללא תלות בזמן חוסר הפעילות; המחברות נשארות נעולות לאחר ביטול נעילת המערכת",

@@ -1,4 +1,8 @@
 {
+	"pluginPublishData": "Opublikowane dane wtyczki",
+	"pluginPublishDataGrantTip": "Zezwolić odwiedzającym usługę publikowania na odczyt tych pól? Publikuj tylko treści odpowiednie do ujawnienia. Dotychczas opublikowane dane zostaną usunięte",
+	"pluginPublishDataRevokeTip": "Cofnij dostęp i usuń opublikowane dane tej wtyczki",
+	"pluginPublishDataUnavailable": "Ta wtyczka nie zadeklarowała pól danych do publikacji",
 	"newTabItem": "Utwórz blok elementu karty",
 	"encryptedNotebookFollowSystemLock": "Blokuj wraz z ekranem systemu",
 	"encryptedNotebookFollowSystemLockDesc": "Blokuj wszystkie odblokowane zaszyfrowane notatniki przy blokowaniu systemu, niezależnie od czasu bezczynności; pozostają zablokowane po odblokowaniu systemu",

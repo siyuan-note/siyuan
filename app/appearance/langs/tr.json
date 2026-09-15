@@ -1,4 +1,8 @@
 {
+	"pluginPublishData": "Eklentinin yayımlanan verileri",
+	"pluginPublishDataGrantTip": "Yayın hizmeti ziyaretçilerinin bu alanları okumasına izin verilsin mi? Yalnızca açıklanmaya uygun içerikleri yayımlayın. Mevcut yayımlanmış veriler silinecek",
+	"pluginPublishDataRevokeTip": "Erişimi iptal et ve bu eklentinin yayımlanan verilerini sil",
+	"pluginPublishDataUnavailable": "Bu eklenti yayımlanabilir veri alanları bildirmedi",
 	"newTabItem": "Yeni sekme öğesi bloğu oluştur",
 	"encryptedNotebookFollowSystemLock": "Sistem ekran kilidini takip et",
 	"encryptedNotebookFollowSystemLockDesc": "Sistem kilitlendiğinde boşta kalma süresinden bağımsız olarak kilidi açık tüm şifreli not defterlerini kilitle; sistemin kilidi açıldıktan sonra defterler kilitli kalır",

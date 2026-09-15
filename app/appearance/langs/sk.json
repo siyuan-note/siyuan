@@ -1,4 +1,8 @@
 {
+	"pluginPublishData": "Zverejnené údaje doplnku",
+	"pluginPublishDataGrantTip": "Povoliť návštevníkom publikačnej služby čítať tieto polia? Zverejňujte iba obsah vhodný na sprístupnenie. Doteraz zverejnené údaje sa vymažú",
+	"pluginPublishDataRevokeTip": "Odvolať prístup a odstrániť zverejnené údaje tohto doplnku",
+	"pluginPublishDataUnavailable": "Tento doplnok nedeklaroval žiadne dátové polia na zverejnenie",
 	"newTabItem": "Vytvoriť blok položky karty",
 	"encryptedNotebookFollowSystemLock": "Sledovať uzamknutie obrazovky systému",
 	"encryptedNotebookFollowSystemLockDesc": "Pri uzamknutí systému uzamknúť všetky odomknuté šifrované zápisníky bez ohľadu na čas nečinnosti; po odomknutí systému zostanú uzamknuté",

@@ -1,4 +1,8 @@
 {
+	"pluginPublishData": "Data plugin yang dipublikasikan",
+	"pluginPublishDataGrantTip": "Izinkan pengunjung layanan publikasi membaca kolom ini? Publikasikan hanya konten yang layak diungkapkan. Data publikasi yang ada akan dihapus",
+	"pluginPublishDataRevokeTip": "Cabut akses dan hapus data publikasi plugin ini",
+	"pluginPublishDataUnavailable": "Plugin ini belum mendeklarasikan kolom data yang dapat dipublikasikan",
 	"newTabItem": "Buat blok item tab",
 	"encryptedNotebookFollowSystemLock": "Ikuti penguncian layar sistem",
 	"encryptedNotebookFollowSystemLockDesc": "Kunci semua buku catatan terenkripsi yang terbuka saat sistem terkunci, terlepas dari batas waktu tidak aktif; buku catatan tetap terkunci setelah sistem dibuka",

@@ -1,4 +1,8 @@
 {
+	"pluginPublishData": "Dati pubblicati del componente aggiuntivo",
+	"pluginPublishDataGrantTip": "Consentire ai visitatori del servizio di pubblicazione di leggere questi campi? Pubblicare solo contenuti adatti alla divulgazione. I dati già pubblicati verranno cancellati",
+	"pluginPublishDataRevokeTip": "Revocare l’accesso ed eliminare i dati pubblicati di questo componente aggiuntivo",
+	"pluginPublishDataUnavailable": "Questo componente aggiuntivo non ha dichiarato campi dati pubblicabili",
 	"newTabItem": "Crea blocco elemento di scheda",
 	"encryptedNotebookFollowSystemLock": "Segui il blocco schermo del sistema",
 	"encryptedNotebookFollowSystemLockDesc": "Blocca tutti i quaderni crittografati sbloccati quando il sistema si blocca, indipendentemente dal tempo di inattività; restano bloccati dopo lo sblocco del sistema",

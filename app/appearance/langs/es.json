@@ -1,4 +1,8 @@
 {
+	"pluginPublishData": "Datos publicados del complemento",
+	"pluginPublishDataGrantTip": "¿Permitir que los visitantes del servicio de publicación lean estos campos? Publique solo contenido apto para divulgar. Se borrarán los datos publicados existentes",
+	"pluginPublishDataRevokeTip": "Revocar el acceso y eliminar los datos publicados de este complemento",
+	"pluginPublishDataUnavailable": "Este complemento no ha declarado campos de datos publicables",
 	"newTabItem": "Crear bloque de elemento de pestaña",
 	"encryptedNotebookFollowSystemLock": "Seguir el bloqueo de pantalla del sistema",
 	"encryptedNotebookFollowSystemLockDesc": "Bloquear todos los cuadernos cifrados desbloqueados al bloquear el sistema, independientemente del tiempo de inactividad; permanecen bloqueados al desbloquear el sistema",

@@ -1,4 +1,8 @@
 {
+	"pluginPublishData": "Dados publicados do plugin",
+	"pluginPublishDataGrantTip": "Permitir que visitantes do serviço de publicação leiam estes campos? Publique apenas conteúdo adequado para divulgação. Os dados já publicados serão apagados",
+	"pluginPublishDataRevokeTip": "Revogar o acesso e excluir os dados publicados deste plugin",
+	"pluginPublishDataUnavailable": "Este plugin não declarou campos de dados publicáveis",
 	"newTabItem": "Criar bloco de item de aba",
 	"encryptedNotebookFollowSystemLock": "Seguir o bloqueio de tela do sistema",
 	"encryptedNotebookFollowSystemLockDesc": "Bloquear todos os cadernos criptografados desbloqueados quando o sistema for bloqueado, independentemente do tempo de inatividade; eles permanecem bloqueados após desbloquear o sistema",

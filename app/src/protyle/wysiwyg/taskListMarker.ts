@@ -3,7 +3,8 @@ interface ITaskListMarker {
     marker: string;
 }
 
-export const nextTaskListMarker = (marker: string | null) => marker !== null && marker !== " " ? " " : "X";
+export const nextTaskListMarker = (marker: string | null) =>
+    marker === null || marker === " " || marker === "/" ? "X" : " ";
 
 export const nextTaskListStatus = (marker: string | null): string => {
     const states = [" ", "/", "X", "-"];

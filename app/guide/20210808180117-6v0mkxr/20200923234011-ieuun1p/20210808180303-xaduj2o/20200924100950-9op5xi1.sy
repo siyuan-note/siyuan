@@ -12248,7 +12248,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Switch between Done and To Do"
+									"Data": "Mark To Do and In Progress as Done; reset other states to To Do"
 								}
 							]
 						},

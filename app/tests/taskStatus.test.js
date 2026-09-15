@@ -307,7 +307,7 @@ const cases = async source => {
                 marker === "/" ? "none" : "line-through");
         }
         api.toggleTaskListItem(protyle, taskItem);
-        check.equal(taskItem.getAttribute("data-task"), marker === " " ? "X" : " ");
+        check.equal(taskItem.getAttribute("data-task"), marker === " " || marker === "/" ? "X" : " ");
     }
     const before = taskItem.outerHTML;
     for (const marker of ["ab", "[", "]"]) {

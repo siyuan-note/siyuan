@@ -14,10 +14,11 @@ describe("getTaskListMarker", () => {
             assert.equal(nextTaskListStatus(custom), " ");
         }
     });
-    it("keeps the binary click cycle for preset and custom states", () => {
+    it("completes todo and in-progress tasks and resets other states on click", () => {
         assert.equal(nextTaskListMarker(" "), "X");
+        assert.equal(nextTaskListMarker("/"), "X");
         assert.equal(nextTaskListMarker(null), "X");
-        for (const marker of ["X", "x", "/", "-", "?"]) {
+        for (const marker of ["X", "x", "-", "?"]) {
             assert.equal(nextTaskListMarker(marker), " ");
         }
     });

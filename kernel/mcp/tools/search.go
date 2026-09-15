@@ -38,7 +38,7 @@ var SearchTool = &Tool{
 			"type":     {Type: "string", Description: "Comma-separated block types to filter, e.g. 'document,heading,paragraph' (optional, fulltext/semantic only)"},
 			"subtype":  {Type: "string", Description: "Comma-separated block subtypes to filter, e.g. 'h1,list:o,listItem:t' (heading: h1-h6; list/listItem: o=ordered, u=unordered, t=task) (optional, fulltext/semantic only)"},
 			"ext":      {Type: "string", Description: "Comma-separated asset file extensions to filter, e.g. 'pdf,docx,xlsx' (optional, asset only)"},
-			"method":   {Type: "number", Description: "Search method: fulltext/asset 0=keyword 1=query-syntax 2=sql 3=regex (default 0)"},
+			"method":   {Type: "number", Description: "Search method: fulltext/asset 0=keyword 1=query-syntax 2=sql 3=regex (default 0). fulltext method=2 delegates query to the sql tool and returns SQL rows, with the same read-only checks and default 100-row limit. Use SQL LIMIT/OFFSET for pagination; page, pageSize, path, type, subtype, orderBy and groupBy are ignored. notebook only selects an encrypted notebook database (exactly one notebook required when encrypted); filter ordinary notebooks in SQL"},
 			"orderBy":  {Type: "number", Description: "Sort order — fulltext: 0=type 1=created-asc 2=created-desc 3=updated-asc 4=updated-desc 5=content 6=relevance-asc 7=relevance-desc; asset: 0=relevance-desc 1=relevance-asc 2=updated-asc 3=updated-desc (default 0)"},
 			"groupBy":  {Type: "number", Description: "Group by (fulltext only): 0=none 1=document (default 0)"},
 		},
@@ -129,6 +129,12 @@ func fulltextSearch(args map[string]any) (CallToolResult, error) {
 				IsError: true,
 			}, nil
 		}
+	}
+	if method == 2 {
+		// SQL 模式复用通用行查询，笔记本读锁覆盖校验和查询过程。
+		return sqlQuery(map[string]any{"stmt": query, "notebook": encryptedNotebook})
+	}
+	if encryptedNotebook != "" {
 		blocks, matchedCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlockInBox(
 			query, notebooks, paths, types, subtypes, method, orderBy, groupBy, page, pageSize, encryptedNotebook,
 		)

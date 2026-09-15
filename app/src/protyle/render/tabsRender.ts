@@ -431,6 +431,11 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                     }
                 });
                 tabs.setAttribute("data-tabs-ready", "true");
+                // 从容器读取主题设置的实际边框，吸顶标题沿用相同宽度及圆角。
+                const tabsStyle = getComputedStyle(tabs);
+                ["top-width", "right-width", "left-width", "top-left-radius", "top-right-radius"].forEach(property => {
+                    header.style.setProperty(`--tabs-border-${property}`, tabsStyle.getPropertyValue(`border-${property}`));
+                });
                 if (previousScroll) {
                     list.scrollLeft = previousScroll.left;
                     list.scrollTop = previousScroll.top;
@@ -466,7 +471,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
                         `${Math.max(0, rect.bottom - listRect.bottom) * scale}px ` +
                         `${Math.max(0, listRect.left - rect.left) * scale}px)`;
                 });
-                controller.resize.observe(tabs);
+                controller.resize.observe(tabs, {box: "border-box"});
                 if (!tabs.closest('.tab-item[data-tabs-hidden="true"]') && state.renderedActive !== state.active) {
                     state.renderedActive = state.active;
                     const button = list.querySelector<HTMLElement>('[aria-selected="true"]');
@@ -493,7 +498,7 @@ export const tabsRender = (element: Element, options: ITabsRenderOptions = {}) =
             let changed = false;
             entries.forEach(entry => {
                 const target = entry.target as HTMLElement;
-                const size = `${target.clientWidth}:${target.clientHeight}`;
+                const size = `${target.clientWidth}:${target.clientHeight}:${target.offsetWidth}:${target.offsetHeight}`;
                 if (sizes.get(target) !== size) {
                     sizes.set(target, size);
                     changed = true;

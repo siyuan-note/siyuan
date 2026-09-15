@@ -7,6 +7,12 @@
     border: 1px solid var(--b3-border-color);
     border-radius: var(--b3-border-radius-b);
 
+    &[data-node-id] {
+      padding: 0;
+      margin: 4px 0;
+      border-radius: var(--b3-border-radius-b);
+    }
+
     &.protyle-wysiwyg--select::after,
     &.protyle-wysiwyg--select-mode::after,
     &.protyle-wysiwyg--hl::after {
@@ -214,6 +220,47 @@
       display: flex;
     }
 
+    &[data-tabs-orientation="horizontal"] {
+      > .tabs-header {
+        margin-top: calc(-1 * var(--tabs-border-top-width, 1px));
+        margin-right: calc(-1 * var(--tabs-border-right-width, 1px));
+        margin-left: calc(-1 * var(--tabs-border-left-width, 1px));
+        border-width: inherit;
+        border-style: inherit;
+        border-color: transparent;
+        border-bottom-width: 1px;
+        border-bottom-style: solid;
+        border-bottom-color: var(--b3-theme-background-light);
+
+        &::before {
+          content: "";
+          position: absolute;
+          top: calc(-1 * var(--tabs-border-top-width, 1px));
+          right: calc(-1 * var(--tabs-border-right-width, 1px));
+          bottom: -1px;
+          left: calc(-1 * var(--tabs-border-left-width, 1px));
+          border-width: inherit;
+          border-style: inherit;
+          border-color: var(--b3-border-color);
+          border-bottom-width: 0;
+          border-radius: var(--tabs-border-top-left-radius, var(--b3-border-radius-b)) var(--tabs-border-top-right-radius, var(--b3-border-radius-b)) 0 0;
+          pointer-events: none;
+        }
+
+        &::after {
+          border-radius: max(0px, calc(var(--tabs-border-top-left-radius, var(--b3-border-radius-b)) - var(--tabs-border-top-width, 1px))) max(0px, calc(var(--tabs-border-top-right-radius, var(--b3-border-radius-b)) - var(--tabs-border-top-width, 1px))) 0 0;
+        }
+      }
+
+      > .tab-item {
+        margin: 0;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        border-bottom-left-radius: inherit;
+        border-bottom-right-radius: inherit;
+      }
+    }
+
     > .tab-item[data-tabs-hidden="true"] {
       display: none;
     }
@@ -250,6 +297,8 @@
         align-items: stretch;
         border-bottom: 0;
         border-right: 1px solid var(--b3-border-color);
+        border-top-left-radius: max(0px, calc(var(--b3-border-radius-b) - var(--tabs-border-left-width, 1px)));
+        border-bottom-left-radius: max(0px, calc(var(--b3-border-radius-b) - var(--tabs-border-left-width, 1px)));
 
         > .tabs-list {
           flex-direction: column;
@@ -266,6 +315,20 @@
         }
       }
     }
+  }
+}
+
+.protyle-wysiwyg {
+  .protyle-wysiwyg--select .tabs-header::after,
+  .protyle-wysiwyg--select-mode .tabs-header::after,
+  .protyle-wysiwyg--hl .tabs-header::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background-color: var(--b3-theme-primary-lightest);
+    border-radius: inherit;
+    pointer-events: none;
   }
 }
 

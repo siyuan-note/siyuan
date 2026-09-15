@@ -1,0 +1,331 @@
+{
+    "bottom": {
+        "data": [],
+        "pin": true
+    },
+    "hideDock": false,
+    "layout": {
+        "children": [
+            {
+                "children": [
+                    {
+                        "children": [
+                            {
+                                "children": [],
+                                "instance": "Wnd"
+                            },
+                            {
+                                "children": [],
+                                "instance": "Wnd",
+                                "resize": "tb"
+                            }
+                        ],
+                        "direction": "tb",
+                        "instance": "Layout",
+                        "size": "343px",
+                        "type": "left"
+                    },
+                    {
+                        "children": [
+                            {
+                                "children": [
+                                    {
+                                        "active": true,
+                                        "activeTime": "1789400000000",
+                                        "children": {
+                                            "action": "cb-get-scroll",
+                                            "blockId": "20260915000000-0000001",
+                                            "instance": "Editor",
+                                            "mode": "wysiwyg",
+                                            "notebookId": "20260915000000-0000002",
+                                            "rootId": "20260915000000-0000001"
+                                        },
+                                        "docIcon": "",
+                                        "instance": "Tab",
+                                        "pin": false,
+                                        "title": "Document"
+                                    }
+                                ],
+                                "height": "",
+                                "instance": "Wnd",
+                                "width": "50%"
+                            },
+                            {
+                                "children": [
+                                    {
+                                        "active": true,
+                                        "activeTime": "1789400000000",
+                                        "children": {
+                                            "config": {
+                                                "group": 0,
+                                                "hPath": "",
+                                                "hasReplace": false,
+                                                "idPath": [],
+                                                "k": "example",
+                                                "method": 0,
+                                                "page": 1,
+                                                "query": "example",
+                                                "r": "",
+                                                "removed": true,
+                                                "replaceTypes": {
+                                                    "aHref": true,
+                                                    "aText": true,
+                                                    "aTitle": true,
+                                                    "blockRef": true,
+                                                    "code": true,
+                                                    "codeBlock": true,
+                                                    "docTitle": true,
+                                                    "em": true,
+                                                    "fileAnnotationRef": true,
+                                                    "htmlBlock": true,
+                                                    "imgSrc": true,
+                                                    "imgText": true,
+                                                    "imgTitle": true,
+                                                    "inlineMath": true,
+                                                    "inlineMemo": true,
+                                                    "kbd": true,
+                                                    "mark": true,
+                                                    "mathBlock": true,
+                                                    "s": true,
+                                                    "strong": true,
+                                                    "sub": true,
+                                                    "sup": true,
+                                                    "tag": true,
+                                                    "text": true,
+                                                    "u": true
+                                                },
+                                                "sensitive": false,
+                                                "sort": 0,
+                                                "subTypes": {
+                                                    "h1": false,
+                                                    "h2": false,
+                                                    "h3": false,
+                                                    "h4": false,
+                                                    "h5": false,
+                                                    "h6": false,
+                                                    "o": false,
+                                                    "t": false,
+                                                    "u": false
+                                                },
+                                                "types": {
+                                                    "audioBlock": false,
+                                                    "blockquote": false,
+                                                    "callout": false,
+                                                    "codeBlock": true,
+                                                    "customBlock": true,
+                                                    "databaseBlock": true,
+                                                    "document": true,
+                                                    "embedBlock": false,
+                                                    "heading": true,
+                                                    "htmlBlock": true,
+                                                    "iframeBlock": false,
+                                                    "list": false,
+                                                    "listItem": false,
+                                                    "mathBlock": true,
+                                                    "paragraph": true,
+                                                    "superBlock": false,
+                                                    "table": true,
+                                                    "videoBlock": false,
+                                                    "widgetBlock": false
+                                                }
+                                            },
+                                            "instance": "Search"
+                                        },
+                                        "icon": "iconSearch",
+                                        "instance": "Tab",
+                                        "pin": false,
+                                        "title": "Search"
+                                    },
+                                    {
+                                        "activeTime": "1789400000000",
+                                        "children": {
+                                            "action": "cb-get-scroll",
+                                            "blockId": "20260915000000-0000003",
+                                            "instance": "Editor",
+                                            "mode": "wysiwyg",
+                                            "notebookId": "20260915000000-0000004",
+                                            "rootId": "20260915000000-0000003"
+                                        },
+                                        "docIcon": "1f389",
+                                        "instance": "Tab",
+                                        "pin": false,
+                                        "title": "Document"
+                                    }
+                                ],
+                                "height": "",
+                                "instance": "Wnd",
+                                "resize": "lr",
+                                "width": "50%"
+                            }
+                        ],
+                        "direction": "lr",
+                        "instance": "Layout",
+                        "resize": "lr",
+                        "size": "auto",
+                        "type": "center"
+                    },
+                    {
+                        "children": [
+                            {
+                                "children": [],
+                                "instance": "Wnd"
+                            },
+                            {
+                                "children": [],
+                                "instance": "Wnd",
+                                "resize": "tb"
+                            }
+                        ],
+                        "direction": "tb",
+                        "instance": "Layout",
+                        "resize": "lr",
+                        "size": "0px",
+                        "type": "right"
+                    }
+                ],
+                "direction": "lr",
+                "instance": "Layout",
+                "size": "auto",
+                "type": "normal"
+            },
+            {
+                "children": [
+                    {
+                        "children": [],
+                        "instance": "Wnd"
+                    },
+                    {
+                        "children": [],
+                        "instance": "Wnd",
+                        "resize": "lr"
+                    }
+                ],
+                "direction": "lr",
+                "instance": "Layout",
+                "resize": "tb",
+                "size": "0px",
+                "type": "bottom"
+            }
+        ],
+        "direction": "tb",
+        "instance": "Layout",
+        "type": "normal"
+    },
+    "left": {
+        "data": [
+            [
+                {
+                    "hotkeyLangId": "fileTree",
+                    "icon": "iconFiles",
+                    "show": true,
+                    "size": {
+                        "height": 0,
+                        "width": 343
+                    },
+                    "title": "文档",
+                    "type": "file"
+                },
+                {
+                    "hotkeyLangId": "outline",
+                    "icon": "iconOutline",
+                    "show": false,
+                    "size": {
+                        "height": 0,
+                        "width": 396
+                    },
+                    "title": "大纲",
+                    "type": "outline"
+                },
+                {
+                    "hotkeyLangId": "inbox",
+                    "icon": "iconInbox",
+                    "show": false,
+                    "size": {
+                        "height": 0,
+                        "width": 442
+                    },
+                    "title": "收集箱",
+                    "type": "inbox"
+                }
+            ],
+            [
+                {
+                    "hotkeyLangId": "tag",
+                    "icon": "iconTag",
+                    "show": true,
+                    "size": {
+                        "height": 140,
+                        "width": 343
+                    },
+                    "title": "标签",
+                    "type": "tag"
+                },
+                {
+                    "hotkeyLangId": "bookmark",
+                    "icon": "iconBookmark",
+                    "show": false,
+                    "size": {
+                        "height": 319,
+                        "width": 259
+                    },
+                    "title": "书签",
+                    "type": "bookmark"
+                }
+            ]
+        ],
+        "pin": true
+    },
+    "right": {
+        "data": [
+            [
+                {
+                    "hotkeyLangId": "agentChat",
+                    "icon": "iconSparkles",
+                    "show": false,
+                    "size": {
+                        "height": 0,
+                        "width": 454
+                    },
+                    "title": "智能体",
+                    "type": "agentChat"
+                },
+                {
+                    "hotkeyLangId": "graphView",
+                    "icon": "iconGraph",
+                    "show": false,
+                    "size": {
+                        "height": 0,
+                        "width": 331
+                    },
+                    "title": "关系图",
+                    "type": "graph"
+                }
+            ],
+            [
+                {
+                    "hotkeyLangId": "globalGraph",
+                    "icon": "iconGlobalGraph",
+                    "show": false,
+                    "size": {
+                        "height": 82,
+                        "width": 563
+                    },
+                    "title": "全局关系图",
+                    "type": "globalGraph"
+                },
+                {
+                    "hotkeyLangId": "backlinks",
+                    "icon": "iconLink",
+                    "show": false,
+                    "size": {
+                        "height": 691,
+                        "width": 563
+                    },
+                    "title": "反向链接",
+                    "type": "backlink"
+                }
+            ]
+        ],
+        "pin": true
+    }
+}

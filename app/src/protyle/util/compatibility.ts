@@ -834,6 +834,10 @@ export const getLocalStorage = (cb: () => void) => {
                 window.siyuan.storage[key] = defaultStorage[key];
             }
         });
+        // 只使用当前支持的缩放档位，确保窗口初始化能取得对应的按钮位置。
+        if (!Constants.SIZE_ZOOM.some(item => item.zoom === window.siyuan.storage[Constants.LOCAL_ZOOM])) {
+            window.siyuan.storage[Constants.LOCAL_ZOOM] = defaultStorage[Constants.LOCAL_ZOOM];
+        }
         window.siyuan.storage[Constants.LOCAL_SEARCHDATA].types = normalizeSearchTypes(window.siyuan.storage[Constants.LOCAL_SEARCHDATA].types);
         // 搜索数据添加 replaceTypes 兼容
         if (!window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes ||

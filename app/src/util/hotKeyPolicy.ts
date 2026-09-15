@@ -47,6 +47,9 @@ export const clearDisallowedKeymapItems = (
 ) => {
     let changed = false;
     Object.values(keymap || {}).forEach((item) => {
+        if (!item) {
+            return;
+        }
         const multi = item as IShortcutKeymap;
         if (multi.bindings?.version === 1) {
             const keys = getKeymapBindings(multi);

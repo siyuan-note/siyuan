@@ -1,8 +1,102 @@
 import * as assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import {join} from "node:path";
 import {test} from "node:test";
 import {systemConfigCollections} from "./systemConfig";
-import type {JSONValue} from "../types/api";
+import type {JSONValue, SystemAppConf} from "../types/api";
 import {getDefaultKeymapBindings, getKeymapBindings, mergeKeymapDefault, setKeymapBindings} from "../util/keymapBindings";
+
+const existingLayoutDefaults = [undefined, (): Config.IUiLayout => assert.fail("Existing layout must not be reset")];
+
+const searchLayout = (config: JSONValue) => {
+    const data: [] = [];
+    return {
+        left: {data},
+        layout: {
+            instance: "Layout",
+            children: [{
+                instance: "Wnd",
+                children: [{instance: "Tab", children: {instance: "Search", config}}],
+            }],
+        },
+    };
+};
+
+const assertLayoutPreserved = (uiLayout: SystemAppConf["uiLayout"]) => {
+    const before = structuredClone(uiLayout);
+    for (const defaultLayout of existingLayoutDefaults) {
+        const actual = systemConfigCollections({keymap: {}, uiLayout}, defaultLayout);
+        assert.equal(actual.uiLayout, uiLayout);
+        assert.deepEqual(actual.uiLayout, before);
+    }
+};
+
+const assertLayoutRejected = (uiLayout: SystemAppConf["uiLayout"]) => {
+    const before = structuredClone(uiLayout);
+    for (const defaultLayout of existingLayoutDefaults) {
+        assert.throws(() => systemConfigCollections({keymap: {}, uiLayout}, defaultLayout), /Invalid dock configuration/);
+        assert.deepEqual(uiLayout, before);
+    }
+};
+
+test("persisted split layout with legacy search subtypes loads without resetting", () => {
+    // 保留议题中的完整布局结构，文档标识、标题、搜索词和激活时间均已脱敏。
+    // https://github.com/siyuan-note/siyuan/issues/19527#issuecomment-5673357561
+    const uiLayout: SystemAppConf["uiLayout"] = JSON.parse(readFileSync(join(__dirname, "testdata/system-config-legacy-search-layout.json"), "utf8"));
+    assertLayoutPreserved(uiLayout);
+});
+
+test("legacy search subtype selections remain unchanged and do not become grouped filters", () => {
+    for (const selected of [false, true]) {
+        const subTypes = {h1: selected, h2: selected, h3: selected, h4: selected, h5: selected, h6: selected,
+            o: selected, u: selected, t: selected};
+        assertLayoutPreserved(searchLayout({subTypes}));
+    }
+});
+
+test("grouped search subtypes coexist with legacy keys and unknown extension data", () => {
+    const groups = {heading: {h1: true, h2: false}, list: {o: true}, listItem: {t: true}};
+    assertLayoutPreserved(searchLayout({subTypes: groups}));
+    for (const extension of [null, false, 17, "extension", [true], {nested: [null, "data"]}]) {
+        assertLayoutPreserved(searchLayout({subTypes: {...groups, h1: false, o: false, future: extension}}));
+    }
+});
+
+test("search subtype validation preserves absent empty and nullable configurations", () => {
+    for (const config of [{}, {subTypes: null}, {subTypes: {}},
+        {subTypes: {heading: {}, list: null, listItem: {t: null}}}]) {
+        assertLayoutPreserved(searchLayout(config));
+    }
+});
+
+test("search subtype validation still rejects malformed known groups and selections", () => {
+    const invalidObjects: JSONValue[] = [false, 17, "invalid", []];
+    const invalidSelections: JSONValue[] = [1, "true", [], {}];
+    for (const subTypes of invalidObjects) {
+        assertLayoutRejected(searchLayout({subTypes}));
+    }
+    for (const [group, key] of [["heading", "h1"], ["list", "o"], ["listItem", "t"]]) {
+        for (const value of invalidObjects) {
+            assertLayoutRejected(searchLayout({subTypes: {h1: true, [group]: value}}));
+        }
+        for (const value of invalidSelections) {
+            assertLayoutRejected(searchLayout({subTypes: {h1: true, [group]: {[key]: value}}}));
+        }
+    }
+});
+
+test("legacy search subtypes do not bypass other search and layout validation", () => {
+    const subTypes = {h1: false, o: false};
+    for (const config of [{query: true}, {idPath: [1]}, {types: {heading: "true"}}, {replaceTypes: {text: 1}}]) {
+        assertLayoutRejected(searchLayout({...config, subTypes}));
+    }
+    const uiLayout = searchLayout({subTypes});
+    assertLayoutRejected({...uiLayout, hideDock: "false"});
+    assertLayoutRejected({...uiLayout, left: {data: [[{type: "file", show: "true"}]]}});
+    assertLayoutRejected({...uiLayout, layout: {...uiLayout.layout, children: [
+        ...uiLayout.layout.children, {instance: "Unexpected"},
+    ]}});
+});
 
 test("system configuration keeps layout and shortcut extension data", () => {
     const width: number = null;

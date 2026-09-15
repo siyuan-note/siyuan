@@ -1022,7 +1022,7 @@
 
 .agent-chat__question-option {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   padding: 6px 8px;
   border-radius: var(--b3-border-radius);
@@ -1035,7 +1035,15 @@
 
   input {
     flex-shrink: 0;
+    margin-top: 2px;
   }
+}
+
+.agent-chat__question-option-content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .agent-chat__question-option-label {

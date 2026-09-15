@@ -102,11 +102,12 @@ export const renderQuestionCardHTML = (rawQuestions: Array<Record<string, unknow
             const desc = (opt.description as string) || "";
             html += '<label class="agent-chat__question-option">' +
                 '<input type="' + inputType + '" name="' + inputName + '" value="' + escapeHtml(label) + '">' +
+                '<span class="agent-chat__question-option-content">' +
                 '<span class="agent-chat__question-option-label">' + escapeHtml(label) + "</span>";
             if (desc) {
                 html += '<span class="agent-chat__question-option-desc">' + escapeHtml(desc) + "</span>";
             }
-            html += "</label>";
+            html += "</span></label>";
         }
         if (custom) {
             html += '<input class="agent-chat__question-custom" placeholder="' + (L.agentQuestionCustom || "Type your own answer...") + '" data-qi="' + qi + '">';

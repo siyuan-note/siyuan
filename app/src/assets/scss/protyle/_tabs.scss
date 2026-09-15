@@ -328,9 +328,9 @@
 }
 
 .protyle-wysiwyg {
-  .protyle-wysiwyg--select .tabs-header::after,
-  .protyle-wysiwyg--select-mode .tabs-header::after,
-  .protyle-wysiwyg--hl .tabs-header::after {
+  .protyle-wysiwyg--select > .tabs-header::after,
+  .protyle-wysiwyg--select-mode > .tabs-header::after,
+  .protyle-wysiwyg--hl > .tabs-header::after {
     content: "";
     position: absolute;
     inset: 0;

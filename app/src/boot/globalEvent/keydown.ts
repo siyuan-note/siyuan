@@ -92,15 +92,23 @@ const EDITOR_FONT_SIZE_COMMANDS: Array<{
     {command: "resetEditorFontSize", action: "reset"},
 ];
 
-const selectReadonlyBlocksByRange = (range: Range) => {
+const getReadonlyBlockSelectionProtyle = (range: Range) => {
     const startElement = hasClosestBlock(range.startContainer);
     const endElement = hasClosestBlock(range.endContainer);
     if (!startElement || !endElement || startElement === endElement) {
-        return false;
+        return;
     }
     const protyle = getAllEditor().find(item => item.protyle.wysiwyg.element.contains(startElement) &&
         item.protyle.wysiwyg.element.contains(endElement))?.protyle;
     if (!protyle?.disabled) {
+        return;
+    }
+    return protyle;
+};
+
+const selectReadonlyBlocksByRange = (range: Range) => {
+    const protyle = getReadonlyBlockSelectionProtyle(range);
+    if (!protyle) {
         return false;
     }
     hideElements(["toolbar", "hint", "util", "select"], protyle);
@@ -1311,12 +1319,21 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
 
+    let readonlyBlockSelection: IProtyle;
+    if (event.key === "Escape" && !event.isComposing && !event.repeat) {
+        const selection = getSelection();
+        if (selection.rangeCount > 0) {
+            readonlyBlockSelection = getReadonlyBlockSelectionProtyle(selection.getRangeAt(0));
+        }
+    }
+
     // 当前焦点范围先处理快捷键，未命中再按固定顺序处理通用操作。
     // 按键目标为 body 时，优先使用活动面板，否则回退到活动窗口的当前页签。
     const shortcutTarget = event.target === document.body ?
         document.querySelector<HTMLElement>(".layout__tab--active") || getActiveTab()?.panelElement || document.body :
         event.target as HTMLElement;
-    if (!shortcutTarget.closest("input, textarea, .b3-menu, .av__panel, .av__mask")) {
+    // 只读正文无法获得焦点，跨块选区的 Esc 不应按上一次活动面板分派。
+    if (!readonlyBlockSelection && !shortcutTarget.closest("input, textarea, .b3-menu, .av__panel, .av__mask")) {
         if (shortcutTarget.closest(".protyle") && editKeydown(app, event)) {
             return;
         }

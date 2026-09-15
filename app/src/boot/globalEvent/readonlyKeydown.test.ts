@@ -223,6 +223,90 @@ test("body shortcuts follow the current document while preserving focused panel 
     assert.deepEqual(calls, ["first", "second", "files"]);
 });
 
+test("readonly cross-block Escape bypasses stale panel shortcut focus", () => {
+    const calls: string[] = [];
+    const body = {tagName: "BODY", closest: (): null => null};
+    const filePanel = {
+        closest: (selector: string) => selector.split(", ").some(value =>
+            [".layout__tab--active", ".sy__file"].includes(value)) ? filePanel : null,
+    };
+    const startContainer = {};
+    const endContainer = {};
+    const startBlock = {};
+    const endBlock = {};
+    const range = {startContainer, endContainer};
+    const protyle = {
+        disabled: true,
+        wysiwyg: {element: {contains: (element: unknown) => element === startBlock || element === endBlock}},
+    };
+    const selection = {rangeCount: 1, getRangeAt: () => range};
+    const globals = {
+        getSelection: () => selection,
+        hasClosestBlock: (element: unknown) => element === startContainer ? startBlock : endBlock,
+        getAllEditor: () => [{protyle}],
+        hideElements: () => calls.push("hide"),
+        selectBlocksByRange: () => calls.push("select"),
+    };
+    const getReadonlyBlockSelectionProtyle = loadFunction("src/boot/globalEvent/keydown.ts",
+        "getReadonlyBlockSelectionProtyle", globals);
+    const selectReadonlyBlocksByRange = loadFunction("src/boot/globalEvent/keydown.ts",
+        "selectReadonlyBlocksByRange", {...globals, getReadonlyBlockSelectionProtyle});
+    const dispatch = loadFunction("src/boot/globalEvent/keydown.ts", "windowKeyDown", {
+        ...globals,
+        getReadonlyBlockSelectionProtyle,
+        selectReadonlyBlocksByRange,
+        filterHotkey: () => false,
+        switchDialog: undefined,
+        searchKeydown: () => false,
+        isWindow: () => false,
+        bindMenuKeydown: () => false,
+        bindAVPanelKeydown: () => false,
+        document: {
+            body,
+            activeElement: null,
+            querySelector: (selector: string) => selector === ".layout__tab--active" ? filePanel : null,
+        },
+        getActiveTab: (): null => null,
+        editKeydown: () => false,
+        fileTreeKeydown: () => {
+            calls.push("file");
+            return true;
+        },
+        panelTreeKeydown: () => false,
+        EDITOR_FONT_SIZE_COMMANDS: [],
+        getKeymapBindings: (): string[] => [],
+        matchHotKey: () => false,
+        isNotCtrl: () => true,
+        hasClosestByClassName: (_element: unknown, className: string) => className === "protyle-content",
+        getAllDocks: (): unknown[] => [],
+        formatPainter: {deactivate: () => false},
+        cancelDrag: (): void => undefined,
+        window: {
+            siyuan: {
+                config: {readonly: false, keymap: {general: new Proxy({}, {get: () => ({})})}},
+                menus: {menu: {element: {classList: {contains: () => true}}}},
+                dialogs: [],
+                blockPanels: [],
+                backStack: [],
+            },
+        },
+    });
+    const event = {
+        ...keyboardEvent("Escape"),
+        target: body,
+        repeat: false,
+        isComposing: false,
+        keyCode: 27,
+        ctrlKey: false,
+        metaKey: false,
+        altKey: false,
+        shiftKey: false,
+    };
+    dispatch({}, event);
+    assert.deepEqual(calls, ["hide", "select"]);
+    assert.equal(event.defaultPrevented, true);
+});
+
 test("native command availability protects readonly content across command panel and shortcuts", () => {
     const matches = loadFunction("src/command/nativeCommands.ts", "matchesContext", {});
     for (const legacyId of ["move", "addToDatabase"]) {

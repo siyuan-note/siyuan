@@ -4,6 +4,8 @@
     padding: 0;
     margin: 4px 0;
     position: relative;
+    // 将嵌套页签的层级限制在当前块内，避免子页签吸顶栏覆盖父页签栏。
+    isolation: isolate;
     border: 1px solid var(--b3-border-color);
     border-radius: var(--b3-border-radius-b);
 

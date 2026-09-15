@@ -624,6 +624,12 @@ export class Menu {
         window.visualViewport?.addEventListener("scroll", this.updateTargetPosition);
     }
 
+    private startTrackingSheetViewport() {
+        this.stopTrackingTargetPosition();
+        window.addEventListener("resize", this.updateTargetPosition);
+        window.visualViewport?.addEventListener("resize", this.updateTargetPosition);
+    }
+
     private stopTrackingTargetPosition() {
         window.removeEventListener("resize", this.updateTargetPosition);
         window.visualViewport?.removeEventListener("resize", this.updateTargetPosition);
@@ -673,6 +679,10 @@ export class Menu {
         this.element.querySelectorAll(":scope > .b3-menu__items, .b3-menu__submenu > .b3-menu__items")
             .forEach(updateMenuItemGroupClasses);
         this.element.classList.add("b3-menu--fullscreen", "b3-menu--sheet");
+        if (this.element.classList.contains("b3-menu--fit")) {
+            // 输入法弹出后视口会异步收缩，持续跟踪视口才能按最终可用高度重新适配内容
+            this.startTrackingSheetViewport();
+        }
         this.element.style.transform = "translateY(100%)";
         this.showFullscreenScrim();
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();

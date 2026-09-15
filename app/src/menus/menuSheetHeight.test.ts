@@ -12,6 +12,8 @@ const compiled = transpileModule(declaration.getText(source), {
 }).outputText;
 
 const setup = (options: {fit: boolean, contentHeight: number, viewportHeight: number}) => {
+    const windowResizeListeners = new Set<() => void>();
+    const viewportResizeListeners = new Set<() => void>();
     const classes = new Set<string>(["b3-menu--sheet"]);
     if (options.fit) {
         classes.add("b3-menu--fit");
@@ -39,14 +41,37 @@ const setup = (options: {fit: boolean, contentHeight: number, viewportHeight: nu
         window: {
             innerHeight: options.viewportHeight,
             siyuan: {mobile: {size: {portrait: {height1: options.viewportHeight}}}},
+            addEventListener: (name: string, listener: () => void) => {
+                if (name === "resize") {
+                    windowResizeListeners.add(listener);
+                }
+            },
+            removeEventListener: (name: string, listener: () => void) => {
+                if (name === "resize") {
+                    windowResizeListeners.delete(listener);
+                }
+            },
+            visualViewport: {
+                addEventListener: (name: string, listener: () => void) => {
+                    if (name === "resize") {
+                        viewportResizeListeners.add(listener);
+                    }
+                },
+                removeEventListener: (name: string, listener: () => void) => {
+                    if (name === "resize") {
+                        viewportResizeListeners.delete(listener);
+                    }
+                },
+            },
         },
     });
     const menu = Object.create(module.exports.Menu.prototype) as Menu;
     Object.assign(menu, {
         element,
         updateSheetTitle: () => {},
+        updateTargetPosition: () => {},
     });
-    return {menu, element, itemsStyle};
+    return {menu, element, itemsStyle, windowResizeListeners, viewportResizeListeners};
 };
 
 describe("mobile menu sheet content fit", () => {
@@ -73,5 +98,20 @@ describe("mobile menu sheet content fit", () => {
         const {menu, element} = setup({fit: true, contentHeight: 0, viewportHeight: 2000});
         menu.resetPosition();
         assert.equal(element.style.height, "160px");
+    });
+
+    it("tracks asynchronous viewport changes while a fitted sheet is open", () => {
+        const {menu, windowResizeListeners, viewportResizeListeners} =
+            setup({fit: true, contentHeight: 272, viewportHeight: 2000});
+        const trackingMenu = menu as unknown as {
+            startTrackingSheetViewport: () => void,
+            stopTrackingTargetPosition: () => void,
+        };
+        trackingMenu.startTrackingSheetViewport();
+        assert.equal(windowResizeListeners.size, 1);
+        assert.equal(viewportResizeListeners.size, 1);
+        trackingMenu.stopTrackingTargetPosition();
+        assert.equal(windowResizeListeners.size, 0);
+        assert.equal(viewportResizeListeners.size, 0);
     });
 });

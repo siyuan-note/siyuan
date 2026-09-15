@@ -1616,15 +1616,24 @@ func isReasoningEffortUnsupportedError(err error) bool {
 	if apiErr.Param != nil {
 		param = strings.ToLower(strings.TrimSpace(*apiErr.Param))
 	}
-	if strings.Contains(param, "reasoning_effort") {
+	if containsReasoningEffortParameter(param) {
 		return true
 	}
 	message := strings.ToLower(apiErr.Message)
-	if !strings.Contains(message, "reasoning_effort") && !strings.Contains(message, "reasoning effort") {
+	if !containsReasoningEffortParameter(message) {
 		return false
 	}
 	for _, marker := range []string{"unsupported", "not support", "unknown", "unrecognized", "not allowed", "invalid"} {
 		if strings.Contains(message, marker) {
+			return true
+		}
+	}
+	return false
+}
+
+func containsReasoningEffortParameter(value string) bool {
+	for _, name := range []string{"reasoning_effort", "reasoning.effort", "reasoning effort"} {
+		if strings.Contains(value, name) {
 			return true
 		}
 	}

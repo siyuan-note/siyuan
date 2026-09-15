@@ -77,6 +77,44 @@ func TestGenerateTitleRetriesWithoutReasoningForLegacyEndpoint(t *testing.T) {
 	}
 }
 
+func TestGenerateTitleRetriesWithoutReasoningForResponsesEndpoint(t *testing.T) {
+	requests := make([]map[string]any, 0, 2)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/v1/responses" {
+			t.Errorf("unexpected Responses path: %s", r.URL.Path)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		var request map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+			t.Errorf("decode title request: %v", err)
+			return
+		}
+		requests = append(requests, request)
+		w.Header().Set("Content-Type", "application/json")
+		if len(requests) == 1 {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(`{"error":{"message":"reasoning.effort is unsupported","param":"reasoning.effort","type":"invalid_request_error"}}`))
+			return
+		}
+		_, _ = w.Write([]byte(`{"id":"resp_1","object":"response","status":"completed","model":"test-model","output":[{"id":"msg_1","type":"message","status":"completed","role":"assistant","content":[{"type":"output_text","text":"Responses Endpoint","annotations":[]}]}]}`))
+	}))
+	defer server.Close()
+
+	title := GenerateTitle(util.NewOpenAIClientWithModel("test", server.URL+"/v1", "test-model"), server.URL+"/v1",
+		util.OpenAIProtocolResponses, "test-model", "Investigate Responses endpoint", "en")
+	if title != "Responses Endpoint" || len(requests) != 2 {
+		t.Fatalf("title = %q, requests = %d", title, len(requests))
+	}
+	initialReasoning, ok := requests[0]["reasoning"].(map[string]any)
+	if !ok || initialReasoning["effort"] != "none" || requests[0]["max_output_tokens"] != float64(50) {
+		t.Fatalf("unexpected initial Responses request: %#v", requests[0])
+	}
+	if requests[1]["reasoning"] != nil || requests[1]["max_output_tokens"] != float64(512) {
+		t.Fatalf("unexpected retry Responses request: %#v", requests[1])
+	}
+}
+
 func TestGenerateTitleRetriesWhenReasoningExhaustsInitialBudget(t *testing.T) {
 	requests := make([]map[string]any, 0, 2)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

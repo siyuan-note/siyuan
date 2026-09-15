@@ -1,8 +1,19 @@
 import * as assert from "node:assert/strict";
 import {describe, it} from "node:test";
-import {getTaskListMarker, isTaskListMarker, nextTaskListMarker} from "./taskListMarker";
+import {getTaskListMarker, isTaskListMarker, nextTaskListMarker, nextTaskListStatus} from "./taskListMarker";
 
 describe("getTaskListMarker", () => {
+    it("cycles built-in statuses and returns custom statuses to todo", () => {
+        let marker = " ";
+        for (const expected of ["/", "X", "-", " ", "/"]) {
+            marker = nextTaskListStatus(marker);
+            assert.equal(marker, expected);
+        }
+        assert.equal(nextTaskListStatus("x"), "-");
+        for (const custom of ["?", "f", "s", "", null]) {
+            assert.equal(nextTaskListStatus(custom), " ");
+        }
+    });
     it("keeps the binary click cycle for preset and custom states", () => {
         assert.equal(nextTaskListMarker(" "), "X");
         assert.equal(nextTaskListMarker(null), "X");

@@ -5,6 +5,11 @@ interface ITaskListMarker {
 
 export const nextTaskListMarker = (marker: string | null) => marker !== null && marker !== " " ? " " : "X";
 
+export const nextTaskListStatus = (marker: string | null): string => {
+    const states = [" ", "/", "X", "-"];
+    return states[(states.indexOf(marker?.toUpperCase()) + 1) % states.length];
+};
+
 export const isTaskListMarker = (marker: string): boolean => marker.length === 1 &&
     getTaskListMarker(`[${marker}]`, false)?.marker === marker;
 

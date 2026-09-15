@@ -89,7 +89,7 @@ import {
     listIndent,
     listOutdent,
     prependListItem,
-    toggleTaskListItem
+    cycleTaskListItemStatus
 } from "./list";
 import {
     getAppendListContext,
@@ -2406,7 +2406,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (!taskItemElement) {
                 return;
             }
-            toggleTaskListItem(protyle, taskItemElement);
+            cycleTaskListItemStatus(protyle, taskItemElement);
             event.preventDefault();
             event.stopPropagation();
             return;

@@ -24,7 +24,7 @@ import {openInputDialog} from "../../dialog/inputDialog";
 import {showMessage} from "../../dialog/message";
 import {activateTrackedRangeInsertion, type ITrackedRangeInsertion} from "../util/trackedRange";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
-import {isTaskListMarker, nextTaskListMarker} from "./taskListMarker";
+import {isTaskListMarker, nextTaskListMarker, nextTaskListStatus} from "./taskListMarker";
 
 const getLastChildBlock = (element: Element) => {
     if (!element || !element.lastElementChild) {
@@ -150,6 +150,9 @@ export const setTaskListItemMarker = (protyle: IProtyle, taskItemElement: Elemen
 
 export const toggleTaskListItem = (protyle: IProtyle, taskItemElement: Element): void =>
     setTaskListItemMarker(protyle, taskItemElement, nextTaskListMarker(taskItemElement.getAttribute("data-task")));
+
+export const cycleTaskListItemStatus = (protyle: IProtyle, taskItemElement: Element): void =>
+    setTaskListItemMarker(protyle, taskItemElement, nextTaskListStatus(taskItemElement.getAttribute("data-task")));
 
 export const genListItemElement = (listItemElement: Element, offset = 0, wbr = false, startIndex?: number) => {
     const element = document.createElement("template");

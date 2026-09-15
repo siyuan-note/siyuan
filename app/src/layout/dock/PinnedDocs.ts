@@ -15,7 +15,7 @@ import {newFileInTree} from "../../util/newFile";
 import {isOnlyMeta} from "../../protyle/util/compatibility";
 import {FILE_TREE_CHILDREN_SORT_MODE, FILE_TREE_EFFECTIVE_SORT_MODE} from "../../util/fileTreeSort";
 import {setFileTreeVisibility} from "./fileTreeAnimation";
-import {setDragTipGhost} from "../../protyle/util/dragTip";
+import {hideDragTip, setDragTipGhost, showDragTip} from "../../protyle/util/dragTip";
 
 interface IPinnedDoc {
     id: string;
@@ -41,6 +41,7 @@ export class PinnedDocs {
     private touch: {id: string, x: number, y: number, timer: number, dragging: boolean, ghost?: HTMLElement};
     private suppressClick = false;
     private dragging = false;
+    private draggedRow: HTMLElement;
     private sourceEvents = new AbortController();
     private names = new Map<string, string>();
     private rootSnapshot: string;
@@ -108,7 +109,17 @@ export class PinnedDocs {
             event.dataTransfer.setData(Constants.SIYUAN_DROP_DOCUMENTS, JSON.stringify({ids: [row.dataset.nodeId]}));
             event.dataTransfer.setData(Constants.SIYUAN_DROP_FILE, row.dataset.nodeId);
             event.dataTransfer.effectAllowed = "copyMove";
+            if (!row.classList.contains("b3-list-item--focus")) {
+                this.clearSelection();
+                row.classList.add("b3-list-item--focus");
+            }
             this.setDragImage(row, event.dataTransfer);
+            this.draggedRow = row;
+            row.style.opacity = "0.38";
+            this.element.closest(".sy__file")?.classList.add("sy__file--disablehover");
+            window.siyuan.dragTitle = row.querySelector(".b3-list-item__text")?.textContent?.trim() || "";
+            window.siyuan.dragElement = document.createElement("div");
+            window.siyuan.dragElement.innerText = row.dataset.nodeId;
         });
         this.element.addEventListener("dragover", event => {
             if (window.siyuan.config.readonly || ![Constants.SIYUAN_DROP_DOCUMENTS, Constants.SIYUAN_DROP_FILE,
@@ -118,7 +129,7 @@ export class PinnedDocs {
             event.preventDefault();
             event.stopPropagation();
             this.previewDrop(event.clientX, event.clientY);
-            event.dataTransfer.dropEffect = this.dropTarget?.position.startsWith("pin") ? "copy" : "move";
+            event.dataTransfer.dropEffect = !this.dropTarget ? "none" : this.dropTarget.position.startsWith("pin") ? "copy" : "move";
         });
         this.element.addEventListener("drop", async event => {
             event.preventDefault();
@@ -138,6 +149,11 @@ export class PinnedDocs {
         this.element.addEventListener("dragend", () => {
             this.clearDrop();
             this.dragging = false;
+            if (this.draggedRow) { this.draggedRow.style.opacity = ""; }
+            this.draggedRow = undefined;
+            this.element.closest(".sy__file")?.classList.remove("sy__file--disablehover");
+            window.siyuan.dragElement = undefined;
+            window.siyuan.dragTitle = "";
             this.scheduleRefresh();
         });
         sourceTree.addEventListener("dragover", event => {
@@ -145,6 +161,7 @@ export class PinnedDocs {
             event.preventDefault();
             event.stopImmediatePropagation();
             this.previewDrop(event.clientX, event.clientY, true);
+            event.dataTransfer.dropEffect = this.dropTarget ? "move" : "none";
         }, {capture: true, signal: this.sourceEvents.signal});
         sourceTree.addEventListener("drop", event => {
             const id = event.dataTransfer.getData("application/siyuan-pinned-document");
@@ -452,7 +469,7 @@ export class PinnedDocs {
     private setDragImage(row: HTMLElement, dataTransfer: DataTransfer) {
         const ghost = document.createElement("ul");
         ghost.className = "b3-list b3-list--background";
-        ghost.style.cssText = "width:219px;position:fixed;top:-30px;pointer-events:none";
+        ghost.style.cssText = "width:219px;position:fixed;top:-30px";
         ghost.append(row.cloneNode(true));
         document.body.append(ghost);
         setDragTipGhost(ghost, 16, 16);
@@ -465,33 +482,44 @@ export class PinnedDocs {
     }
 
     public previewDrop(x: number, y: number, allowSource = false) {
-        this.clearDrop();
+        this.clearDrop(false);
+        const rejectDrop = () => { hideDragTip(); return false; };
         const target = document.elementFromPoint(x, y);
-        if (!target || window.siyuan.config.readonly) { return false; }
+        if (!target || window.siyuan.config.readonly) { return rejectDrop(); }
         const source = allowSource && this.sourceTree.contains(target);
-        if (!this.element.contains(target) && !source) { return false; }
+        if (!this.element.contains(target) && !source) { return rejectDrop(); }
         const row = target.closest<HTMLElement>(source ? "li[data-type]" : "[data-pin-row]");
-        if (source && (!row || row.closest("[data-encrypted=true]"))) { return false; }
+        if (source && (!row || row.closest("[data-encrypted=true]"))) { return rejectDrop(); }
         if (!row) {
             this.dropTarget = {id: "", position: "pin-before"};
             this.heading.classList.add("dragover");
         } else {
-            if (row.dataset.unavailable === "true") { return false; }
+            if (row.dataset.unavailable === "true") { return rejectDrop(); }
             const rect = row.getBoundingClientRect();
             const position = source && row.dataset.type === "navigation-root" ? "inside" :
                 getPinnedDropPosition(row.dataset.pinRoot === "true", (y - rect.top) / rect.height);
             const id = source && row.dataset.type === "navigation-root" ?
                 row.closest<HTMLElement>("ul[data-url]")?.dataset.url : row.dataset.nodeId;
-            if (!id) { return false; }
+            const draggedIDs = this.touch ? [this.touch.id] :
+                (window.siyuan.dragElement?.innerText || this.draggedRow?.dataset.nodeId || "").split(",");
+            if (!id || draggedIDs.includes(id)) { return rejectDrop(); }
             this.dropTarget = {id, position};
             row.classList.add(position === "inside" ? "dragover" : position.endsWith("before") ? "dragover__top" : "dragover__bottom");
         }
+        const name = row?.querySelector(".b3-list-item__text")?.textContent || "";
+        const position = this.dropTarget.position;
+        const action = position.startsWith("pin") ? window.siyuan.languages.pinDoc :
+            (position === "inside" ? window.siyuan.languages.dragTipMoveChild :
+                position === "before" ? window.siyuan.languages.dragTipMoveBefore : window.siyuan.languages.dragTipMoveAfter)
+                .replace("${x}", name);
+        showDragTip(window.siyuan.dragTitle || "", action, x, y);
         const scrollElement = source ? this.sourceTree : this.list;
         dragOverScroll({clientY: y} as MouseEvent, scrollElement.getBoundingClientRect(), scrollElement);
         return true;
     }
 
-    public clearDrop() {
+    public clearDrop(hideTip = true) {
+        if (hideTip) { hideDragTip(); }
         this.dropTarget = undefined;
         this.element.querySelectorAll(".dragover, .dragover__top, .dragover__bottom").forEach(row =>
             row.classList.remove("dragover", "dragover__top", "dragover__bottom"));
